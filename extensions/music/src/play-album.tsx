@@ -1,4 +1,9 @@
 import { Grid, List, Action, ActionPanel, Icon, closeMainWindow } from "@raycast/api";
+import { useState, useEffect } from "react";
+import * as music from "./util/scripts";
+import { Tracks } from "./tracks";
+import { Album } from "./util/models";
+import { MusicIcon } from "./util/utils";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -9,14 +14,8 @@ import {
   LayoutType,
   albumLayout,
 } from "./util/list-or-grid";
-import { play as playAlbum, shuffle as shuffleAlbum, show as showAlbum } from "./util/scripts/albums";
-import { useState, useEffect } from "react";
-import { Tracks } from "./tracks";
-import { Track, Album } from "./util/models";
-import { getAllTracks } from "./util/scripts/track";
-import { MusicIcon } from "./util/utils";
 
-export default function PlayLibraryAlbum() {
+export default function PlayAlbum() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -27,7 +26,7 @@ export default function PlayLibraryAlbum() {
 
   useEffect(() => {
     const getAlbums = async () => {
-      const tracks = await getAllTracks();
+      const tracks = await music.track.getAllTracks();
       const albums: Album[] = [];
       for (const track of tracks) {
         const id = `${track.album}-${track.albumArtist}`;
@@ -108,7 +107,7 @@ function Actions({ album }: { album: Album }) {
         title="Play Album"
         icon={Icon.Play}
         onAction={async () => {
-          await playAlbum(album);
+          await music.albums.play(album);
           await closeMainWindow();
         }}
       />
@@ -116,7 +115,7 @@ function Actions({ album }: { album: Album }) {
         title="Shuffle Album"
         icon={Icon.Shuffle}
         onAction={async () => {
-          await shuffleAlbum(album);
+          await music.albums.shuffle(album);
           await closeMainWindow();
         }}
       />
@@ -132,7 +131,7 @@ function Actions({ album }: { album: Album }) {
           icon={MusicIcon}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={async () => {
-            await showAlbum(album);
+            await music.albums.show(album);
             await closeMainWindow();
           }}
         />

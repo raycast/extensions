@@ -15,9 +15,9 @@ export interface Track {
   genre: string;
   artwork?: string;
   duration?: string;
-  state?: PlayerState;
   time?: string;
   playCount?: number;
+  inLibrary?: boolean; 
   loved?: boolean;
   rating?: number;
   year?: string;

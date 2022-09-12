@@ -115,15 +115,25 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     duration: "duration",
     time: "time",
     playCount: "played count",
+    inLibrary: "inLibrary",
+    rating: "rating",
     loved: "loved",
     year: "year",
-    rating: "rating",
   });
+
+  const matchingTracks = `(tracks of playlist "Library" whose name is name of current track as string and album is album of current track as string and artist is artist of current track as string)`;
 
   const response = await runAppleScript(`
     set output to ""
     tell application "Music"
-      tell current track to set output to output & ${outputQuery} & "\n"
+      set matchingTracks to ${matchingTracks}
+      set inLibrary to (count of matchingTracks) > 0
+      if inLibrary then
+        set myTrack to first track of ${matchingTracks}
+        tell myTrack to set output to output & ${outputQuery} & "\n"
+      else 
+        tell current track to set output to output & ${outputQuery} & "\n"
+      end if
     end tell
     return output
   `);
@@ -138,9 +148,10 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     duration: getAttribute(response, "duration"),
     time: getAttribute(response, "time"),
     playCount: parseInt(getAttribute(response, "playCount")),
+    inLibrary: getAttribute(response, "inLibrary") === "true",
+    rating: parseInt(getAttribute(response, "rating")) / 20,
     loved: getAttribute(response, "loved") === "true",
     year: getAttribute(response, "year"),
-    rating: parseInt(getAttribute(response, "rating")) / 20,
   };
 
   const artwork = await getTrackArtwork(track);

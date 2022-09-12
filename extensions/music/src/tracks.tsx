@@ -1,4 +1,11 @@
 import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, Icon } from "@raycast/api";
+import { useState } from "react";
+import { Track } from "./util/models";
+import { TrackDetail } from "./track-detail";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
+import * as music from "./util/scripts";
+import { MusicIcon } from "./util/utils";
 import {
   ListOrGrid,
   gridItemSize,
@@ -8,13 +15,6 @@ import {
   LayoutType,
   mainLayout,
 } from "./util/list-or-grid";
-import { useState } from "react";
-import { Track } from "./util/models";
-import { TrackDetail } from "./track-detail";
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
-import * as music from "./util/scripts";
-import { MusicIcon } from "./util/utils";
 
 interface TracksComponent {
   tracks: Track[];

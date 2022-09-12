@@ -1,4 +1,4 @@
-import { tellMusic, runScript } from "../apple-script";
+import { tellMusic } from "../apple-script";
 import { MusicState } from "../models";
 import { getAttribute } from "../utils";
 import { createQueryString } from "../apple-script";
@@ -23,6 +23,10 @@ export const setShuffle = (shuffle: boolean) => tellMusic(`set shuffle enabled t
 export const setRepeatMode = (mode: "one" | "all" | "off") => tellMusic(`set song repeat to ${mode}`);
 export const setVolume = (volume: number) => tellMusic(`set sound volume to ${volume}`);
 export const setRating = (rating: number) => tellMusic(`set rating of current track to ${rating}`);
+
+export const isPlaying = async (): Promise<boolean> => {
+  return (await runAppleScript(`tell application "Music" to get player state`)) === "playing";
+};
 
 export const getMusicState = async (): Promise<MusicState | undefined> => {
   const outputQuery = createQueryString({

@@ -1,8 +1,8 @@
 import { showHUD } from "@raycast/api";
-import * as music from "./util/scripts";
+import { dislike } from "./util/scripts/player-controls";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await handleTaskEitherError(music.player.dislike)();
+  await handleTaskEitherError(dislike)();
   await showHUD("Track Disliked");
 };

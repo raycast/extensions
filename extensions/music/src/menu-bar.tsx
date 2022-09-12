@@ -1,18 +1,17 @@
-import { MenuBarExtra, Icon, Color, Image, environment, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, Color, Image, environment, LaunchType, showHUD } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { handleTaskEitherError, trimTitle } from "./util/utils";
+import { handleTaskEitherError, trimTitle, MusicIcon, AppleMusicColor } from "./util/utils";
 import { getCurrentTrackArtwork } from "./util/artwork";
 import * as music from "./util/scripts";
 import { MusicState, Playlist } from "./util/models";
-import { getAllTracks } from "./util/scripts/track";
-import { getPlaylists, getPlaylistTracks } from "./util/scripts/playlists";
-import { MusicIcon, AppleMusicColor } from "./util/utils";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
 
 export default function MenuBar() {
   const refreshCache = async () => {
-    await getAllTracks(false);
-    const playlists = await getPlaylists(false);
-    const promises = playlists.map((playlist: Playlist) => getPlaylistTracks(playlist.id, false));
+    await music.track.getAllTracks(false);
+    const playlists = await music.playlists.getPlaylists(false);
+    const promises = playlists.map((playlist: Playlist) => music.playlists.getPlaylistTracks(playlist.id, false));
     await Promise.all(promises);
   };
 
@@ -24,11 +23,12 @@ export default function MenuBar() {
     const loadMusicState = async () => {
       if (environment.launchType === LaunchType.Background) {
         await refreshCache();
-      }
-      const state = await music.player.getMusicState();
-      setState(state);
-      if (state) {
-        setArtwork(await getCurrentTrackArtwork());
+      } else {
+        const state = await music.player.getMusicState();
+        setState(state);
+        if (state) {
+          setArtwork(await getCurrentTrackArtwork());
+        }
       }
       setIsLoading(false);
     };
@@ -152,9 +152,14 @@ export default function MenuBar() {
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
           <MenuBarExtra.Item
             key={i}
-            title={i.toString()}
+            title={`${i} ${i === state.rating ? "✓" : ""}`}
             onAction={async () => {
-              await handleTaskEitherError(music.player.setRating(i * 20))();
+              await pipe(
+                i * 20,
+                music.player.setRating,
+                TE.map(() => setState({ ...state, rating: i })),
+                TE.mapLeft(() => showHUD("Unable to Set Rating"))
+              )();
             }}
           />
         ))}

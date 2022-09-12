@@ -1,8 +1,8 @@
 import { showHUD } from "@raycast/api";
-import * as music from "./util/scripts";
+import { love } from "./util/scripts/player-controls";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await handleTaskEitherError(music.player.love)();
+  await handleTaskEitherError(love)();
   await showHUD("Track Loved");
 };

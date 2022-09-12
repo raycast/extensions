@@ -1,11 +1,11 @@
 import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { displayDuration, MusicIcon } from "./util/utils";
 import { PlaylistTracks } from "./playlist-tracks";
+import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { Playlist } from "./util/models";
-import * as music from "./util/scripts";
+import { MusicIcon } from "./util/utils";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -15,7 +15,6 @@ import {
   LayoutType,
   mainLayout,
 } from "./util/list-or-grid";
-import { getPlaylists } from "./util/scripts/playlists";
 
 enum PlaylistKind {
   ALL = "all",
@@ -45,7 +44,7 @@ export default function PlayPlaylist() {
 
   useEffect(() => {
     const loadPlaylists = async () => {
-      setPlaylists(await getPlaylists());
+      setPlaylists(await music.playlists.getPlaylists());
       setIsLoading(false);
     };
     loadPlaylists();

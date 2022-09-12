@@ -1,9 +1,9 @@
 import { List, Toast, showToast, Color, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getTrackDetails } from "./util/scripts/track";
+import { getTrackArtwork } from "./util/artwork";
 import { Track } from "./util/models";
 import json2md from "json2md";
-import { getTrackArtwork } from "./util/artwork";
 
 export const TrackDetail = (props: { track: Track }) => {
   const [track, setTrack] = useState<Track | undefined>(undefined);
@@ -59,6 +59,7 @@ export const DetailMetadata = (props: { track: Track; list?: boolean }) => {
           tintColor: track.loved ? Color.Red : Color.PrimaryText,
         }}
       />
+      {!props.list && <MetadataLabel title={"In Library"} text={track.inLibrary ? "Yes" : "No"} />}
       <MetadataLabel list={props.list} title="Album" text={track.album} />
       <MetadataLabel list={props.list} title="Artist" text={track.artist} />
       <MetadataLabel list={props.list} title="Genre" text={track.genre} />

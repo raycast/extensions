@@ -1,7 +1,6 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DetailMetadata } from "./track-detail";
-import { getCurrentTrackDetails } from "./util/scripts/track";
 import { handleTaskEitherError } from "./util/utils";
 import * as music from "./util/scripts";
 import { Track } from "./util/models";
@@ -14,7 +13,7 @@ export default function SetRating() {
   useEffect(() => {
     const getCurrentTrack = async () => {
       try {
-        const track = await getCurrentTrackDetails();
+        const track = await music.track.getCurrentTrackDetails();
         setTrack(track);
         const items = [];
         items.push({ h1: track.name });
