@@ -6,20 +6,32 @@ import CodespaceActions from "./actions/CodespaceActions";
 import { Codespaces } from "./types";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useFetch<Codespaces>("https://api.github.com/user/codespaces", {
-    headers: { Accept: "application/vnd.github+json", Authorization: `Bearer ${personalAccessToken}` },
-  });
+  const { data, isLoading, revalidate } = useFetch<Codespaces>(
+    "https://api.github.com/user/codespaces",
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${personalAccessToken}`,
+      },
+    }
+  );
 
   const handleRevalidate = revalidate;
 
   return (
     <List isLoading={isLoading}>
       {data?.codespaces
-        .sort((a, b) => new Date(b.last_used_at).getTime() - new Date(a.last_used_at).getTime())
+        .sort(
+          (a, b) =>
+            new Date(b.last_used_at).getTime() -
+            new Date(a.last_used_at).getTime()
+        )
         .map((codespace) => {
           const gitStatus = {
             icon: Icon.ArrowUp,
-            text: `${codespace.git_status.ahead}${codespace.git_status.has_uncommitted_changes ? "+" : ""}`,
+            text: `${codespace.git_status.ahead}${
+              codespace.git_status.has_uncommitted_changes ? "+" : ""
+            }`,
             tooltip: codespace.git_status.has_uncommitted_changes
               ? codespace.git_status.ahead
                 ? `You have ${codespace.git_status.ahead} unpushed commits as well as other uncommitted changes`
@@ -46,10 +58,15 @@ export default function Command() {
                   ),
                   () => Icon.Clock
                 )
-                .with(P.union("Available", "Created", "Starting", "Shutdown"), () =>
-                  getAvatarIcon(`${codespace.repository.name.toUpperCase()}`)
+                .with(
+                  P.union("Available", "Created", "Starting", "Shutdown"),
+                  () =>
+                    getAvatarIcon(`${codespace.repository.name.toUpperCase()}`)
                 )
-                .with(P.union("Unavailable", "Deleted", "Archived", "Failed"), () => Icon.XMarkCircle)
+                .with(
+                  P.union("Unavailable", "Deleted", "Archived", "Failed"),
+                  () => Icon.XMarkCircle
+                )
                 .exhaustive()}
               title={codespace.display_name || codespace.name}
               keywords={[
@@ -67,10 +84,17 @@ export default function Command() {
                 },
                 {
                   date: new Date(codespace.last_used_at),
-                  tooltip: `Last used at: ${new Date(codespace.last_used_at).toLocaleString()}`,
+                  tooltip: `Last used at: ${new Date(
+                    codespace.last_used_at
+                  ).toLocaleString()}`,
                 },
               ]}
-              actions={<CodespaceActions codespace={codespace} onRevalidate={handleRevalidate} />}
+              actions={
+                <CodespaceActions
+                  codespace={codespace}
+                  onRevalidate={handleRevalidate}
+                />
+              }
             />
           );
         })}

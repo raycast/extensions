@@ -16,7 +16,13 @@ const OpenVSCodeAction = ({ codespace }: { codespace: Codespace }) => (
   />
 );
 
-function CodespaceActions({ codespace, onRevalidate }: { codespace: Codespace; onRevalidate: () => void }) {
+function CodespaceActions({
+  codespace,
+  onRevalidate,
+}: {
+  codespace: Codespace;
+  onRevalidate: () => void;
+}) {
   const PreferredAction = preferredEditor
     ? preferredEditor === "vscode"
       ? OpenVSCodeAction
@@ -39,12 +45,19 @@ function CodespaceActions({ codespace, onRevalidate }: { codespace: Codespace; o
             <Action.Push
               title="Rename"
               icon={Icon.Pencil}
-              target={<Rename codespace={codespace} onRevalidate={onRevalidate} />}
+              target={
+                <Rename codespace={codespace} onRevalidate={onRevalidate} />
+              }
             />
             <Action.Push
               title="Change compute"
               icon={Icon.ComputerChip}
-              target={<ChangeCompute codespace={codespace} onRevalidate={onRevalidate} />}
+              target={
+                <ChangeCompute
+                  codespace={codespace}
+                  onRevalidate={onRevalidate}
+                />
+              }
             />
             <Action
               title="Delete"

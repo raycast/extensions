@@ -1,9 +1,22 @@
-import { Alert, confirmAlert, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Alert,
+  confirmAlert,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
 import fetch from "node-fetch";
 
-const handleDelete = async ({ codespace, onRevalidate }: { codespace: Codespace; onRevalidate: () => void }) => {
+const handleDelete = async ({
+  codespace,
+  onRevalidate,
+}: {
+  codespace: Codespace;
+  onRevalidate: () => void;
+}) => {
   if (
     await confirmAlert({
       title: `Are you sure you want to delete ${codespace.display_name}?`,

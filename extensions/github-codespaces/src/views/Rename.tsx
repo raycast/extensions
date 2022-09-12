@@ -1,9 +1,24 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
 import fetch from "node-fetch";
 
-const Rename = ({ codespace, onRevalidate }: { codespace: Codespace; onRevalidate: () => void }) => {
+const Rename = ({
+  codespace,
+  onRevalidate,
+}: {
+  codespace: Codespace;
+  onRevalidate: () => void;
+}) => {
   const { pop } = useNavigation();
   return (
     <Form
@@ -28,7 +43,10 @@ const Rename = ({ codespace, onRevalidate }: { codespace: Codespace; onRevalidat
                   }),
                 });
                 if (response.status !== 200) {
-                  const data = (await response.json()) as { message: string; documentation_url: string };
+                  const data = (await response.json()) as {
+                    message: string;
+                    documentation_url: string;
+                  };
                   toast.style = Toast.Style.Failure;
                   toast.title = data.message;
                   toast.primaryAction = {
