@@ -1,9 +1,9 @@
 import { Icon, List } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
-import { personalAccessToken } from "./preferences";
 import { match, P } from "ts-pattern";
-import CodespaceActions from "./actions/CodespaceActions";
+import { personalAccessToken } from "./preferences";
 import { Codespaces } from "./types";
+import CodespaceActions from "./actions/CodespaceActions";
 
 export default function Command() {
   const { data, isLoading, revalidate } = useFetch<Codespaces>(

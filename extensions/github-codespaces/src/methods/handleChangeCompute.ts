@@ -1,6 +1,6 @@
 import { personalAccessToken } from "../preferences";
-import fetch from "node-fetch";
 import { Codespace, Machine } from "../types";
+import { default as nodeFetch } from "node-fetch";
 
 const handleChangeCompute = async ({
   codespace,
@@ -9,7 +9,7 @@ const handleChangeCompute = async ({
   codespace: Codespace;
   machine: Machine;
 }) => {
-  return await fetch(`${codespace.url}`, {
+  return await nodeFetch(`${codespace.url}`, {
     method: "PATCH",
     headers: {
       Accept: "application/vnd.github+json",

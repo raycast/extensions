@@ -8,7 +8,7 @@ import {
 } from "@raycast/api";
 import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
-import fetch from "node-fetch";
+import { default as nodeFetch } from "node-fetch";
 
 const handleDelete = async ({
   codespace,
@@ -43,7 +43,7 @@ const handleDelete = async ({
       style: Toast.Style.Animated,
     });
     try {
-      const response = await fetch(`${codespace.url}`, {
+      const response = await nodeFetch(`${codespace.url}`, {
         method: "DELETE",
         headers: {
           Accept: "application/vnd.github+json",

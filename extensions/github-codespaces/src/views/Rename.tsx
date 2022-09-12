@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
-import fetch from "node-fetch";
+import { default as nodeFetch } from "node-fetch";
 
 const Rename = ({
   codespace,
@@ -32,7 +32,7 @@ const Rename = ({
                 style: Toast.Style.Animated,
               });
               try {
-                const response = await fetch(`${codespace.url}`, {
+                const response = await nodeFetch(`${codespace.url}`, {
                   method: "PATCH",
                   headers: {
                     Accept: "application/vnd.github+json",
