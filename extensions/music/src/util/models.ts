@@ -17,7 +17,7 @@ export interface Track {
   duration?: string;
   time?: string;
   playCount?: number;
-  inLibrary?: boolean; 
+  inLibrary?: boolean;
   loved?: boolean;
   rating?: number;
   year?: string;
