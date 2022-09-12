@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api"
 import { useState, useEffect, useCallback } from "react";
 import { JenkinsAPI, Jenkins, Job, hasSubJobs } from "./lib/api";
 
-export function SearchJob(props: { jenkins: Jenkins; jobs?: string[]; mode: string }) {
+export function SearchJob(props: { jenkins: Jenkins; jobs?: string[]; mode: string; navigationTitle: string }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -23,7 +23,7 @@ export function SearchJob(props: { jenkins: Jenkins; jobs?: string[]; mode: stri
         }
         setJobs(jobs);
       } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Search job failed", message: String(error) });
+        showToast({ style: Toast.Style.Failure, title: "Search failed", message: String(error) });
       } finally {
         setIsLoading(false);
       }
@@ -36,7 +36,13 @@ export function SearchJob(props: { jenkins: Jenkins; jobs?: string[]; mode: stri
   }, []);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search jobs..." throttle>
+    <List
+      navigationTitle={props.navigationTitle}
+      isLoading={isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder={props.mode === "normal" ? "Search jobs..." : "Search..."}
+      throttle
+    >
       <List.Section title="Results" subtitle={jobs.length + ""}>
         {jobs.map((job) => (
           <List.Item
@@ -56,6 +62,7 @@ export function SearchJob(props: { jenkins: Jenkins; jobs?: string[]; mode: stri
                           jenkins={props.jenkins}
                           jobs={[...(props.jobs ?? []), job.path ?? ""]}
                           mode={props.mode}
+                          navigationTitle={props.navigationTitle}
                         />
                       }
                     />

@@ -77,12 +77,12 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
             <Action.Push
               icon={Icon.BarCode}
               title="Manage jobs"
-              target={<SearchJob jenkins={props.jenkins} mode="normal" />}
+              target={<SearchJob jenkins={props.jenkins} mode="normal" navigationTitle="Manage Jobs" />}
             />
             <Action.Push
               icon={Icon.Filter}
               title="Global search"
-              target={<SearchJob jenkins={props.jenkins} mode="global" />}
+              target={<SearchJob jenkins={props.jenkins} mode="global" navigationTitle="Global Search" />}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
             />
             <Action.Push
