@@ -7,3 +7,6 @@
 - [ ] Clean up the interfaces
 - [ ] Add prefrences for config
 - [ ] Add timeout to api request
+- [ ] Improve ReadMe
+- [ ] Add description to effect
+- [ ] Migrate to openapi

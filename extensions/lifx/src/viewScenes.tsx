@@ -24,7 +24,6 @@ export default function viewScenes() {
     try {
       const isTokenValid = await checkApiKey();
       if (!isTokenValid) {
-        preferences.set("lifx_token", JSON.stringify({ valid: true }));
         await showToast({
           style: Toast.Style.Failure,
           title: "Invalid Token",

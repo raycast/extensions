@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Cache, List, Action, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, useCachedState } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Api, Lights } from "./lib/interfaces";
 import { getHueIcon, getKelvinIcon, getLightIcon, parseDate } from "./lib/colorAlgos";
@@ -9,9 +9,9 @@ const hexToHsl = require("hex-to-hsl");
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useState<Lights.Light[]>([]);
+  const [data, setData] = useCachedState<Lights.Light[]>("lights", []);
   const [sideBar, setSideBar] = useState<boolean>(false);
-  const cache = new Cache();
+
   const preferences = getPreferenceValues();
 
   const config = {
@@ -22,24 +22,27 @@ export default function Command() {
   };
 
   async function fetchLights() {
+    console.info(data);
     try {
-      if (!cache.has("lights")) {
-        const isTokenValid = await checkApiKey();
-        if (!isTokenValid) {
-          cache.set("lifx_token", JSON.stringify({ valid: true }));
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Invalid Token",
-            message: "Please check your token and try again",
-          });
-          setIsLoading(false);
-          return;
-        }
+      const isTokenValid = await checkApiKey();
+      if (!isTokenValid) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Token",
+          message: "Please check your token and try again",
+        });
+        setIsLoading(false);
+        return;
       }
-
-      const results = await FetchLights(config);
-      setData(results || []);
-      setIsLoading(false);
+      if (data.length === 0) {
+        const results = await FetchLights(config);
+        setData(results || []);
+        setIsLoading(false);
+        return;
+      } else {
+        setIsLoading(false);
+        return;
+      }
     } catch (error) {
       const toast = await showToast({
         style: Toast.Style.Failure,
@@ -101,7 +104,6 @@ export default function Command() {
       return obj;
     });
     setData(newState);
-    cache.set("lights", JSON.stringify(data));
   };
 
   async function setBrightness(id: string, brightness: number) {

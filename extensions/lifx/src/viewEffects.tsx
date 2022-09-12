@@ -1,4 +1,4 @@
-import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel } from "@raycast/api";
+import { Icon, Toast, showToast, getPreferenceValues, List, Action, ActionPanel, Cache } from "@raycast/api";
 import { Api } from "./lib/interfaces";
 import { checkApiKey, SetEffect } from "./lib/api";
 import { effects } from "./lib/constants";
@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 export default function viewScenes() {
   const preferences = getPreferenceValues();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const config = {
     headers: {
@@ -54,19 +55,22 @@ export default function viewScenes() {
   }
 
   async function checkKey() {
-    console.info("Checking Api Key");
-    setIsLoading(true);
-    const isTokenValid = await checkApiKey();
-    if (!isTokenValid) {
-      preferences.set("lifx_token", JSON.stringify({ valid: true }));
+    try {
+      console.info("Checking Api Key");
+      setIsLoading(true);
+      const isTokenValid = await checkApiKey();
+      if (!isTokenValid) {
+        throw new Error("Invalid Token");
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Invalid Token",
         message: "Please check your token and try again",
       });
-      setIsLoading(false);
-      return;
-    } else {
+      setIsEmpty(true);
       setIsLoading(false);
     }
   }
@@ -77,7 +81,7 @@ export default function viewScenes() {
 
   return (
     <List isLoading={isLoading}>
-      {effects.length === 0 ? (
+      {effects.length === 0 || isEmpty === true ? (
         <List.EmptyView
           key="empty"
           icon="lifx-icon-64.png"

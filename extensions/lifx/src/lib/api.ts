@@ -3,19 +3,13 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { Api, Lights } from "./interfaces";
 
 export async function FetchLights(config: AxiosRequestConfig) {
-  const cache = new Cache();
   try {
-    if (cache.has("lights")) {
-      return JSON.parse(cache.get("lights") || "");
-    }
     const result = await axios.get("https://api.lifx.com/v1/lights/all", config);
     const data: Lights.Light[] = result.data;
     if (data.length === 0) {
       throw new Error("No lights found");
     }
     if (data[0].connected === true) {
-      cache.set("lights", JSON.stringify(data));
-      console.info(data[0]);
       return data;
     } else {
       const potentialErrorData: Api.Error = result.data;
@@ -147,9 +141,25 @@ export async function SetEffect(
 
 export async function checkApiKey() {
   const prefernces = getPreferenceValues();
-  if (prefernces.lifx_token.length > 6) {
-    return true;
-  } else {
+  try {
+    const result = await axios.get("https://api.lifx.com/v1/color", {
+      headers: {
+        Authorization: `Bearer ${prefernces.lifx_token}`,
+      },
+    });
+    if (result.status === 401) {
+      throw new Error("Invalid API Key");
+    } else {
+      return true;
+    }
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      if (err.response?.status === 401) {
+        return false;
+      } else {
+        return true;
+      }
+    }
     return false;
   }
 }

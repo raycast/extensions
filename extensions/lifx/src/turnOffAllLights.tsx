@@ -1,5 +1,5 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
-import { SetLightState } from "./lib/api";
+import { SetLightState, checkApiKey } from "./lib/api";
 import { Api } from "./lib/interfaces";
 
 export default async function TurnOffAllLights() {
@@ -16,8 +16,13 @@ export default async function TurnOffAllLights() {
   };
 
   try {
+    const tokenValid = await checkApiKey();
+    if (!tokenValid) {
+      await showHUD("Invalid Token");
+      return;
+    }
     const response = await SetLightState("all", body, config);
-    await showHUD("Succses" + response?.results[0].status || "");
+    await showHUD("Succses");
   } catch (error) {
     console.info(error);
     if (error instanceof Error) {
