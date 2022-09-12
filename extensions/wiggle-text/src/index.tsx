@@ -46,7 +46,7 @@ export default function Command() {
         onBlur={(e) => {
           const val = e.target.value;
           if (val?.length === 0) setEmptyError("Please enter a text");
-          else dropError.height();
+          else dropError.empty();
         }}
       />
       <Form.TextField
