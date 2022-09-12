@@ -3,7 +3,19 @@ import axios, { AxiosRequestConfig } from "axios";
 
 const endpoint = "https://proud-hen-sunbonnet.cyclic.app/fpl_api/";
 const headers = {
-  Origin: "https://fantasy.premierleague.com",
+  authority: "users.premierleague.com",
+  "cache-control": "max-age=0",
+  "upgrade-insecure-requests": "1",
+  origin: "https://fantasy.premierleague.com/",
+  "content-type": "application/x-www-form-urlencoded",
+  "user-agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
+  "sec-fetch-site": "same-site",
+  "sec-fetch-mode": "navigate",
+  "sec-fetch-user": "?1",
+  "sec-fetch-dest": "document",
+  referer: "https://fantasy.premierleague.com/",
+  "accept-language": "en-US,en;q=0.9,he;q=0.8",
 };
 
 const showErrorToast = (error: any) => {
