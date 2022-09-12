@@ -5,6 +5,7 @@ import { getLogin } from "../integration/getLogin";
 import { isActionUserInitiated } from "../util";
 import { processPulls } from "../flows/processPulls";
 import { PullRequestShort } from "../types";
+import { Icon, MenuBarExtra } from "@raycast/api";
 
 const usePulls = () => {
   const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, hiddenPulls, visitPull, updatePulls } =
@@ -18,6 +19,7 @@ const usePulls = () => {
   const runPullIteration = () =>
     Promise.resolve()
       .then(() => console.debug("runPullIteration"))
+      .then(() => setIsRemotePullsLoading(true))
       .then(() =>
         Promise.all([
           getLogin(),
@@ -29,7 +31,8 @@ const usePulls = () => {
       .then(mergePulls)
       .then(({ login, pulls }) => processPulls(login, hiddenPulls, pulls))
       .then(updatePulls)
-      .finally(() => console.debug("runPullIteration: done"));
+      .finally(() => console.debug("runPullIteration: done"))
+      .finally(() => setIsRemotePullsLoading(false));
 
   useEffect(() => {
     // Run effect only after we load from store.
@@ -44,7 +47,6 @@ const usePulls = () => {
       .then(() => getLogin().then(setLogin))
       .then(() => (isActionUserInitiated() ? exitShortcut() : runPullIteration()))
       .catch(console.error)
-      .finally(() => setIsRemotePullsLoading(false))
       .finally(() => console.debug("usePulls: end"));
   }, [isPullStoreLoading]);
 
@@ -55,6 +57,17 @@ const usePulls = () => {
 
     updatedPulls,
     recentlyVisitedPulls,
+
+    Refresh: isPullStoreLoading
+      ? () => null
+      : () => (
+          <MenuBarExtra.Item
+            title="Force Refresh"
+            onAction={runPullIteration}
+            icon={Icon.RotateClockwise}
+            shortcut={{ key: "r", modifiers: ["cmd"] }}
+          />
+        ),
 
     visitPull,
   };
