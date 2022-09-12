@@ -10,7 +10,7 @@ import {
   useNavigation,
   Form,
 } from "@raycast/api";
-import { SearchJob } from "./search";
+import { Search } from "./search";
 import { Jenkins, JenkinsAPI } from "./lib/api";
 import { addJenkins, deleteJenkins, listJenkins } from "./lib/storage";
 import { useState, useCallback, useEffect } from "react";
@@ -76,49 +76,53 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
             <Action.OpenInBrowser title="Open in Browser" url={props.jenkins.url} />
             <Action.Push
               icon={Icon.BarCode}
-              title="Manage jobs"
-              target={<SearchJob jenkins={props.jenkins} mode="normal" navigationTitle="Manage Jobs" />}
+              title="Manage Jobs"
+              target={<Search jenkins={props.jenkins} mode="normal" navigationTitle="Manage Jobs" />}
             />
             <Action.Push
               icon={Icon.Filter}
-              title="Global search"
-              target={<SearchJob jenkins={props.jenkins} mode="global" navigationTitle="Global Search" />}
+              title="Global Search"
+              target={<Search jenkins={props.jenkins} mode="global" navigationTitle="Global Search" />}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
             />
             <Action.Push
               icon={Icon.Plus}
-              title="Add jenkins"
+              title="Add Jenkins"
               target={<AddJenkins setJenkinsList={props.setJenkinsList} />}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
             <Action.Push
               icon={Icon.Patch}
-              title="Update jenkins"
+              title="Update Jenkins"
               target={<AddJenkins jenkins={props.jenkins} setJenkinsList={props.setJenkinsList} />}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.SubmitForm
               icon={Icon.Warning}
-              title="Delete jenkins"
+              title="Delete Jenkins"
               onSubmit={async () => {
                 const options: Alert.Options = {
-                  title: "Delete jenkins?",
+                  title: "Delete the Jenkins?",
+                  message: "You will not be able to recover it",
                   primaryAction: {
-                    title: "Delete jenkins",
+                    title: "Delete Jenkins",
+                    style: Alert.ActionStyle.Destructive,
                     onAction: async () => {
-                      await deleteJenkins(props.jenkins.id);
-                      props.setJenkinsList((jenkinsList) => jenkinsList.filter((j) => j.id !== props.jenkins.id));
+                      try {
+                        await deleteJenkins(props.jenkins.id);
+                        props.setJenkinsList((jenkinsList) => jenkinsList.filter((j) => j.id !== props.jenkins.id));
+                      } catch (error) {
+                        showToast(Toast.Style.Failure, "Delete failed", String(error));
+                      }
                     },
                   },
                 };
-                if (await confirmAlert(options)) {
-                  await showToast(Toast.Style.Success, "Delete jenkins successfully");
-                }
+                await confirmAlert(options);
               }}
               shortcut={{ modifiers: ["cmd"], key: "delete" }}
             />
             <Action.CopyToClipboard
-              title="Copy jenkins url"
+              title="Copy URL"
               content={props.jenkins.url}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -149,7 +153,7 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
 
   return (
     <Form
-      navigationTitle={action + " jenkins"}
+      navigationTitle={action + " Jenkins"}
       actions={
         <ActionPanel>
           <Action.SubmitForm

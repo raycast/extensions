@@ -1,4 +1,4 @@
-import fetch, { Headers } from "node-fetch";
+import fetch, { Headers, RequestInfo, RequestInit } from "node-fetch";
 
 export interface Jenkins {
   id: string;
@@ -19,6 +19,7 @@ export interface Job {
   url: string;
   _class?: string;
   color?: string;
+  short_class?: string;
 }
 
 export interface Build {
@@ -42,9 +43,14 @@ interface InspectResponse {
   views?: View[];
 }
 
+export interface Suggestion {
+  name: string;
+  url: string;
+}
+
 export interface SearchResponse {
   _class: string;
-  suggestions: Job[];
+  suggestions: Suggestion[];
 }
 
 export class JenkinsAPI {
@@ -57,44 +63,46 @@ export class JenkinsAPI {
   public async inspect(jobs?: string[]): Promise<InspectResponse> {
     let api = this.jenkins.url;
     if (jobs?.length) {
-      api += "/" + jobs?.map((job) => `job/${job}`).join("/");
+      api += "/" + jobs?.map((job) => (job ? `job/${job}` : "")).join("/");
     }
     api += "/api/json";
-
-    let headers: Headers | undefined = undefined;
-    if (this.jenkins.token) {
-      headers = new Headers();
-      headers.append(
-        "Authorization",
-        "Basic " + Buffer.from(`${this.jenkins.username}:${this.jenkins.token}`).toString("base64")
-      );
-    }
-
-    const resp = await fetch(api, {
-      method: "GET",
-      headers: headers,
-    });
-    if (!resp.ok) {
-      if (resp.status === 403) {
-        return Promise.reject(new Error("Invalid username ot token"));
-      }
-      return Promise.reject(`${resp.status} ${await resp.text()}`);
-    }
-
+    const resp = await this.request(api);
     this.jenkins.version = resp.headers.get("X-Jenkins") ?? undefined;
-
     const result = (await resp.json()) as InspectResponse;
     result.jobs?.map((job) => {
-      const parts = job.url.split("/");
-      job.path = parts[parts.length - (job.url.endsWith("/") ? 2 : 1)];
+      const urlParts = job.url.split("/");
+      job.path = urlParts[urlParts.length - (job.url.endsWith("/") ? 2 : 1)];
+
+      if (job._class) {
+        const classParts = job._class.split(".");
+        job.short_class = classParts[classParts.length - 1];
+      }
       return job;
     });
     return result;
   }
 
-  public async search(q: string): Promise<SearchResponse> {
+  public async search(q: string): Promise<Suggestion[]> {
     const api = `${this.jenkins.url}/search/suggest?query=${q}`;
+    const resp = await this.request(api);
+    const result = (await resp.json()) as SearchResponse;
+    return result.suggestions.map((s) => {
+      s.url = `${this.jenkins.url}/search/?q=${encodeURIComponent(s.name)}`;
+      return s;
+    });
+  }
 
+  public async build(job: Job) {
+    const api = `${job.url}build`;
+    const resp = await this.request(api, {
+      method: "POST",
+    });
+    if (resp.status !== 201) {
+      return Promise.reject(new Error(`${resp.status} ${await resp.text()}`));
+    }
+  }
+
+  async request(url: RequestInfo, init?: RequestInit) {
     let headers: Headers | undefined = undefined;
     if (this.jenkins.token) {
       headers = new Headers();
@@ -103,24 +111,18 @@ export class JenkinsAPI {
         "Basic " + Buffer.from(`${this.jenkins.username}:${this.jenkins.token}`).toString("base64")
       );
     }
-
-    const resp = await fetch(api, {
+    const resp = await fetch(url, {
+      headers,
       method: "GET",
-      headers: headers,
+      ...init,
     });
     if (!resp.ok) {
       if (resp.status === 403) {
-        return Promise.reject(new Error("Invalid username ot token"));
+        return Promise.reject(new Error("Invalid username or token"));
       }
       return Promise.reject(`${resp.status} ${await resp.text()}`);
     }
-
-    const result = (await resp.json()) as SearchResponse;
-    result.suggestions = result.suggestions.map((job) => {
-      job.url = `${this.jenkins.url}/search/?q=${encodeURIComponent(job.name)}`;
-      return job;
-    });
-    return result;
+    return resp;
   }
 }
 
