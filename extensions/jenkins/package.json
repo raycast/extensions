@@ -19,7 +19,7 @@
     {
       "name": "jenkins",
       "title": "Manage Jenkins",
-      "description": "Manage jenkins and jobs.",
+      "description": "Manage jenkins and jobs",
       "mode": "view"
     }
   ],
