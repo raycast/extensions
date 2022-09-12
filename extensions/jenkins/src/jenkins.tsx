@@ -107,6 +107,7 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
                     title: "Delete jenkins",
                     onAction: async () => {
                       await deleteJenkins(props.jenkins.id);
+                      props.setJenkinsList((jenkinsList) => jenkinsList.filter((j) => j.id !== props.jenkins.id));
                     },
                   },
                 };
