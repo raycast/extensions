@@ -1,7 +1,7 @@
 # Raycast Currency Exchange extension
 
 ## Features
-* Support 161 currencies, see list: https://www.exchangerate-api.com/docs/supported-currencies *
+* Support 161 currencies, see list: https://www.exchangerate-api.com/docs/supported-currencies
 * Support calculate expression e.g `1+2/3*4`
 * Support find target currency by filter, format: `${expression} in ${filter key word}`
 * Support pin your favorite currencies
@@ -30,5 +30,3 @@ In some case, when you exactly know the currency code, it works fine, but it sti
 2. Some case, I want to always use a dedicate source currecy, not type it always.
 3. Some case, I want to focus on a few dedicated currecies, just type number, get result.
 Based on above reason, I created a new one.
-
-*Some country and region contains concern which will not be supported yet.

@@ -141,6 +141,7 @@ const currencyCode2Name: { [key: string]: string } = {
   TRY: "Turkish Lira",
   TTD: "Trinidad and Tobago Dollar",
   TVD: "Tuvaluan Dollar",
+  TWD: "New Taiwan Dollar",
   TZS: "Tanzanian Shilling",
   UAH: "Ukrainian Hryvnia",
   UGX: "Ugandan Shilling",
@@ -162,7 +163,7 @@ const currencyCode2Name: { [key: string]: string } = {
   ZWL: "Zimbabwean Dollar",
 };
 
-const currencyCode2Country: { [key: string]: string } = {
+const currencyCode2CountryAndRegion: { [key: string]: string } = {
   AED: "United Arab Emirates",
   AFN: "Afghanistan",
   ALL: "Albania",
@@ -304,6 +305,7 @@ const currencyCode2Country: { [key: string]: string } = {
   TRY: "Turkey",
   TTD: "Trinidad and Tobago",
   TVD: "Tuvalu",
+  TWD: "Taiwan",
   TZS: "Tanzania",
   UAH: "Ukraine",
   UGX: "Uganda",
@@ -325,4 +327,4 @@ const currencyCode2Country: { [key: string]: string } = {
   ZWL: "Zimbabwe",
 };
 
-export { currencyCode2Name, currencyCode2Country };
+export { currencyCode2Name, currencyCode2CountryAndRegion };
