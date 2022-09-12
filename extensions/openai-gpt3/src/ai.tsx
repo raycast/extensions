@@ -53,7 +53,7 @@ export default function Command() {
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [numTokens, setNumTokens] = useState<number | undefined>(0);
-  const [maxTokens, setMaxTokens ] = useState<number>(256);
+  const [maxTokens, setMaxTokens] = useState<number>(256);
   const [promptError, setPromptError] = useState<string | undefined>();
   const [temperatureError, setTemperatureError] = useState<string | undefined>();
   const [maxTokensError, setMaxTokensError] = useState<string | undefined>();
@@ -126,7 +126,11 @@ export default function Command() {
       if (request.isAxiosError(error) && error.response) {
         await showToast({ style: Toast.Style.Failure, title: "Error:", message: error.response.data.error.message });
       } else {
-        await showToast({ style: Toast.Style.Failure, title: "Error:", message: "Something went wrong but I am not sure what" });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error:",
+          message: "Something went wrong but I am not sure what",
+        });
       }
     }
     setIsLoading(false);
@@ -199,12 +203,7 @@ export default function Command() {
         defaultValue="0.7"
         error={temperatureError}
         onChange={(value: string) => {
-          if (
-            isNaN(Number(value)) ||
-            value.length == 0 ||
-            Number(value) < 0 ||
-            Number(value) > 1
-          ) {
+          if (isNaN(Number(value)) || value.length == 0 || Number(value) < 0 || Number(value) > 1) {
             setTemperatureError("Value should be a float between 0 and 1");
           } else {
             dropTemperatureErrorIfNeeded();
@@ -218,7 +217,7 @@ export default function Command() {
         defaultValue="256"
         error={maxTokensError}
         onChange={(value: string) => {
-          setMaxTokens(Number(value))
+          setMaxTokens(Number(value));
           if (
             isNaN(Number(value)) ||
             !Number.isInteger(Number(value)) ||
@@ -244,12 +243,7 @@ export default function Command() {
         defaultValue="1"
         error={topPError}
         onChange={(value: string) => {
-          if (
-            isNaN(Number(value)) ||
-            value.length == 0 ||
-            Number(value) < 0 ||
-            Number(value) > 1
-          ) {
+          if (isNaN(Number(value)) || value.length == 0 || Number(value) < 0 || Number(value) > 1) {
             setTopPError("Value should be a float between 0 and 1");
           } else {
             dropTopPErrorIfNeeded();
@@ -263,12 +257,7 @@ export default function Command() {
         defaultValue="0"
         error={frequencyPenaltyError}
         onChange={(value: string) => {
-          if (
-            isNaN(Number(value)) ||
-            value.length == 0 ||
-            Number(value) < -2 ||
-            Number(value) > 2
-          ) {
+          if (isNaN(Number(value)) || value.length == 0 || Number(value) < -2 || Number(value) > 2) {
             setFrequencyPenaltyError("Value should be a float between -2 and 2");
           } else {
             dropFrequencyPenaltyErrorIfNeeded();
@@ -282,12 +271,7 @@ export default function Command() {
         defaultValue="0"
         error={presencePenaltyError}
         onChange={(value: string) => {
-          if (
-            isNaN(Number(value)) ||
-            value.length == 0 ||
-            Number(value) < -2 ||
-            Number(value) > 2
-          ) {
+          if (isNaN(Number(value)) || value.length == 0 || Number(value) < -2 || Number(value) > 2) {
             setPresencePenaltyError("Value should be a float between -2 and 2");
           } else {
             dropPresencePenaltyErrorIfNeeded();
