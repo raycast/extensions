@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
-import { getUserLeagues } from '../api';
+import { useEffect, useState } from "react";
+import { getUserLeagues } from "../api";
 
 interface UserLeagues {
-        id: number;
-        name: string;
-        entry_rank: number;
+  id: number;
+  name: string;
+  entry_rank: number;
 }
 
 const useUserLeagues = (id: string) => {
-    const [userLeagues, setUserLeagues] = useState<UserLeagues[] | null>(null);
+  const [userLeagues, setUserLeagues] = useState<UserLeagues[] | null>(null);
 
-    useEffect(() => {
-        if (id) {
+  useEffect(() => {
+    if (id) {
       getUserLeagues(id).then((data) => setUserLeagues(data));
-        }
-    }, [id]);
+    }
+  }, [id]);
 
-    return userLeagues;
-}
+  return userLeagues;
+};
 
 export default useUserLeagues;
