@@ -53,6 +53,7 @@ export default function Command() {
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [numTokens, setNumTokens] = useState<number | undefined>(0);
+  const [maxTokens, setMaxTokens ] = useState<number>(256);
   const [promptError, setPromptError] = useState<string | undefined>();
   const [temperatureError, setTemperatureError] = useState<string | undefined>();
   const [maxTokensError, setMaxTokensError] = useState<string | undefined>();
@@ -123,9 +124,9 @@ export default function Command() {
       setNumTokens(completion.data.usage.total_tokens);
     } catch (error) {
       if (request.isAxiosError(error) && error.response) {
-        await showToast({ style: Toast.Style.Failure, title: "Error:", message: error.message });
+        await showToast({ style: Toast.Style.Failure, title: "Error:", message: error.response.data.error.message });
       } else {
-        await showToast({ style: Toast.Style.Failure, title: "Error:", message: "Something went wrong" });
+        await showToast({ style: Toast.Style.Failure, title: "Error:", message: "Something went wrong but I am not sure what" });
       }
     }
     setIsLoading(false);
@@ -168,11 +169,16 @@ export default function Command() {
         placeholder="Enter your prompt"
         value={textPrompt}
         error={promptError}
-        onChange={(value) => updatePromptAndTokens(value)}
+        onChange={(value) => {
+          updatePromptAndTokens(value);
+          if (Number(numTokens) + maxTokens > 4096) {
+            setPromptError("Sum of prompt tokens and maximum tokens should be less than 4097");
+          }
+        }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setPromptError("Prompt is required");
-          } else {
+          } else if (!promptError) {
             dropPromptErrorIfNeeded();
           }
         }}
@@ -192,13 +198,12 @@ export default function Command() {
         info={infoMessages.temperature}
         defaultValue="0.7"
         error={temperatureError}
-        onChange={dropTemperatureErrorIfNeeded}
-        onBlur={(event: formValues) => {
+        onChange={(value: string) => {
           if (
-            isNaN(Number(event.target.value)) ||
-            event.target.value?.length == 0 ||
-            Number(event.target.value) < 0 ||
-            Number(event.target.value) > 1
+            isNaN(Number(value)) ||
+            value.length == 0 ||
+            Number(value) < 0 ||
+            Number(value) > 1
           ) {
             setTemperatureError("Value should be a float between 0 and 1");
           } else {
@@ -212,18 +217,23 @@ export default function Command() {
         info={infoMessages.maxTokens}
         defaultValue="256"
         error={maxTokensError}
-        onChange={dropMaxTokensErrorIfNeeded}
-        onBlur={(event: formValues) => {
+        onChange={(value: string) => {
+          setMaxTokens(Number(value))
           if (
-            isNaN(Number(event.target.value)) ||
-            !Number.isInteger(Number(event.target.value)) ||
-            event.target.value?.length == 0 ||
-            Number(event.target.value) < 0 ||
-            Number(event.target.value) > 4096
+            isNaN(Number(value)) ||
+            !Number.isInteger(Number(value)) ||
+            value.length == 0 ||
+            Number(value) < 0 ||
+            Number(value) > 4096
           ) {
             setMaxTokensError("Value should be an integer between 0 and 4096");
+          } else if (Number(value) + Number(numTokens) > 4096) {
+            setMaxTokensError("Sum of prompt tokens and maximum tokens should be less than 4097");
           } else {
             dropMaxTokensErrorIfNeeded();
+            if (promptError && Number(value) + Number(numTokens) <= 4096) {
+              dropPromptErrorIfNeeded();
+            }
           }
         }}
       />
@@ -233,13 +243,12 @@ export default function Command() {
         info={infoMessages.topP}
         defaultValue="1"
         error={topPError}
-        onChange={dropTopPErrorIfNeeded}
-        onBlur={(event: formValues) => {
+        onChange={(value: string) => {
           if (
-            isNaN(Number(event.target.value)) ||
-            event.target.value?.length == 0 ||
-            Number(event.target.value) < 0 ||
-            Number(event.target.value) > 1
+            isNaN(Number(value)) ||
+            value.length == 0 ||
+            Number(value) < 0 ||
+            Number(value) > 1
           ) {
             setTopPError("Value should be a float between 0 and 1");
           } else {
@@ -253,13 +262,12 @@ export default function Command() {
         info={infoMessages.frequencyPenalty}
         defaultValue="0"
         error={frequencyPenaltyError}
-        onChange={dropFrequencyPenaltyErrorIfNeeded}
-        onBlur={(event: formValues) => {
+        onChange={(value: string) => {
           if (
-            isNaN(Number(event.target.value)) ||
-            event.target.value?.length == 0 ||
-            Number(event.target.value) < -2 ||
-            Number(event.target.value) > 2
+            isNaN(Number(value)) ||
+            value.length == 0 ||
+            Number(value) < -2 ||
+            Number(value) > 2
           ) {
             setFrequencyPenaltyError("Value should be a float between -2 and 2");
           } else {
@@ -273,13 +281,12 @@ export default function Command() {
         info={infoMessages.presencePenalty}
         defaultValue="0"
         error={presencePenaltyError}
-        onChange={dropPresencePenaltyErrorIfNeeded}
-        onBlur={(event: formValues) => {
+        onChange={(value: string) => {
           if (
-            isNaN(Number(event.target.value)) ||
-            event.target.value?.length == 0 ||
-            Number(event.target.value) < -2 ||
-            Number(event.target.value) > 2
+            isNaN(Number(value)) ||
+            value.length == 0 ||
+            Number(value) < -2 ||
+            Number(value) > 2
           ) {
             setPresencePenaltyError("Value should be a float between -2 and 2");
           } else {
