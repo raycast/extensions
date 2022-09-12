@@ -1,4 +1,4 @@
-import { tellMusic } from "../apple-script";
+import { runScript, tellMusic } from "../apple-script";
 import { MusicState } from "../models";
 import { getAttribute } from "../utils";
 import { createQueryString } from "../apple-script";
@@ -22,7 +22,12 @@ export const addToLibrary = tellMusic(`duplicate current track to source "Librar
 export const setShuffle = (shuffle: boolean) => tellMusic(`set shuffle enabled to ${shuffle}`);
 export const setRepeatMode = (mode: "one" | "all" | "off") => tellMusic(`set song repeat to ${mode}`);
 export const setVolume = (volume: number) => tellMusic(`set sound volume to ${volume}`);
-export const setRating = (rating: number) => tellMusic(`set rating of current track to ${rating}`);
+export const setRating = (rating: number) =>
+  runScript(`
+  tell application "Music" 
+    set matchingTrack to first track of (tracks of playlist "Library" whose name is name of current track as string and album is album of current track as string and artist is artist of current track as string)
+    set rating of matchingTrack to ${rating}
+  end tell`);
 
 export const isPlaying = async (): Promise<boolean> => {
   return (await runAppleScript(`tell application "Music" to get player state`)) === "playing";

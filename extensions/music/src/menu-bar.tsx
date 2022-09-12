@@ -127,7 +127,7 @@ export default function MenuBar() {
           onAction={async () => {
             setState({ ...state, added: true });
             await handleTaskEitherError(music.player.addToLibrary)();
-            await wait(3);
+            await wait(5);
             await refreshCache();
           }}
         />
@@ -144,7 +144,7 @@ export default function MenuBar() {
           />
         ))}
       </MenuBarExtra.Submenu>
-      <MenuBarExtra.Submenu title="Set Rating" icon={"../assets/star.svg"}>
+      <MenuBarExtra.Submenu title="Set Rating" icon={{ source: "../assets/star.svg", tintColor: Color.PrimaryText }}>
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
           <MenuBarExtra.Item
             key={i}
@@ -154,7 +154,7 @@ export default function MenuBar() {
                 i * 20,
                 music.player.setRating,
                 TE.map(() => setState({ ...state, rating: i })),
-                TE.mapLeft(() => showHUD("Unable to Set Rating"))
+                TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
               )();
             }}
           />

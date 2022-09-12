@@ -6,6 +6,6 @@ import { handleTaskEitherError } from "./util/utils";
 export default async () => {
   await handleTaskEitherError(addToLibrary)();
   await showHUD("Added to Library");
-  await wait(3);
+  await wait(5);
   await refreshCache();
 };

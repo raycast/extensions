@@ -1,4 +1,4 @@
-import { List, Detail, Action, ActionPanel, Icon, showHUD } from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Color, Toast, showToast, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { handleTaskEitherError, MusicIcon } from "./util/utils";
 import { DetailMetadata } from "./track-detail";
@@ -102,8 +102,11 @@ export default function CurrentTrack() {
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "a" }}
                 onAction={async () => {
+                  await showToast(Toast.Style.Animated, "Adding to Library");
                   await handleTaskEitherError(music.player.addToLibrary)();
+                  await wait(2);
                   setTrack({ ...track, inLibrary: true });
+                  await showToast(Toast.Style.Success, "Added to Library");
                   await wait(3);
                   await refreshCache();
                 }}
@@ -133,13 +136,16 @@ export default function CurrentTrack() {
                 <Action
                   key={rating}
                   title={`${rating} Star${rating === 1 ? "" : "s"}`}
-                  icon={track.rating === rating ? "../assets/star-filled.svg" : "../assets/star.svg"}
+                  icon={{
+                    source: track.rating === rating ? "../assets/star-filled.svg" : "../assets/star.svg",
+                    tintColor: Color.PrimaryText,
+                  }}
                   onAction={async () => {
                     await pipe(
                       rating * 20,
                       music.player.setRating,
                       TE.map(() => setTrack({ ...track, rating: rating })),
-                      TE.mapLeft(() => showHUD("Unable to Set Rating"))
+                      TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
                     )();
                   }}
                 />
