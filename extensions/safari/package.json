@@ -75,6 +75,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.0",
+    "@raycast/utils": "^1.1.0",
     "execa": "^5.1.1",
     "lodash": "^4.17.21",
     "osascript-tag": "^0.1.2",

@@ -1,3 +1,5 @@
+import { Icon } from "@raycast/api";
+
 export interface TimeInfo {
   abbreviation: string;
   client_ip: string;
@@ -26,6 +28,10 @@ export interface Timezone {
   utc_offset: string;
   date_time: string;
   unixtime: number;
+  alias?: string;
+  memo?: string;
+  memoIcon?: Icon;
+  tags?: string[];
 }
 
 export interface IPGeolocation {

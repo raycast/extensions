@@ -1,13 +1,12 @@
-import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
+
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
-import * as A from "fp-ts/ReadonlyNonEmptyArray";
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 enum PlaylistKind {
   ALL = "all",
@@ -37,11 +36,14 @@ export default function PlaySelected() {
     pipe(
       playlistKind,
       music.playlists.getPlaylists,
-      TE.mapLeft((_) => showToast(Toast.Style.Failure, "Could not get your playlists")),
+      TE.mapLeft((e) => {
+        console.error(e);
+        showToast(Toast.Style.Failure, "Could not get your playlists");
+      }),
       TE.map(
         flow(
           parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind.split(" ")[0])(data),
+          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
           setPlaylists
         )
       )
@@ -92,10 +94,10 @@ interface ActionsProps {
 function Actions({ playlist: { name, id }, pop }: ActionsProps) {
   const title = `Start Playlist "${name}"`;
 
-  const handleSubmit = async () => {
+  const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
       id,
-      music.playlists.playById,
+      music.playlists.playById(shuffle),
       TE.map(() => closeMainWindow()),
       TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this playlist"))
     )();
@@ -105,7 +107,8 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
 
   return (
     <ActionPanel title={title}>
-      <Action title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit(false)} />
+      <Action title={`Shuffle Playlist "${name}"`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

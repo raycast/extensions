@@ -1,8 +1,8 @@
-import { ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlab, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL, gitlab } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -133,12 +133,12 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
       icon={icon}
       title={job.name}
       subtitle={subtitle}
-      accessories={ensureCleanAccessories([{ text: status }])}
+      accessories={[{ text: status }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <GitLabOpenInBrowserAction
-              url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)}
+              url={getGitLabGQL().urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -165,7 +165,7 @@ export function JobList(props: {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   if (!stages) {
     return <List isLoading={isLoading} navigationTitle="Jobs" />;
@@ -225,7 +225,7 @@ export function useSearch(
 
       try {
         if (pipelineIID) {
-          const data = await gitlabgql.client.query({
+          const data = await getGitLabGQL().client.query({
             query: GET_PIPELINE_JOBS,
             variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
             fetchPolicy: "network-only",
@@ -305,7 +305,7 @@ interface Commit {
 export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
   const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Commit Details", error);
+    showErrorToast(error, "Could not fetch Commit Details");
   }
   if (isLoading || !commit) {
     return <List isLoading={isLoading} />;

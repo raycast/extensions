@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Form, getPreferenceValues, Icon } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ImageDetail } from "./components/image-detail";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { getRandomPlaceholderImageURL } from "./hooks/hooks";
 import { RandomImageConfig, randomImageConfigInit } from "./types/types";
 import { Preferences } from "./types/preferences";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { RevealImageAction } from "./components/reveal-image-action";
 
 export default function CreateShortcut() {
   const { primaryAction, autoRefresh } = getPreferenceValues<Preferences>();
@@ -27,21 +28,13 @@ export default function CreateShortcut() {
             setRefresh={setRefresh}
           />
           <ActionPanel.Section>
-            <Action.Push
-              icon={Icon.Window}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              title={"Show in Raycast"}
-              target={
-                <ImageDetail
-                  imageURL={imageURL}
-                  size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-                  primaryAction={primaryAction}
-                  autoRefresh={autoRefresh}
-                  setRefresh={setRefresh}
-                />
-              }
+            <RevealImageAction
+              imageURL={imageURL}
+              size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
+              primaryAction={primaryAction}
+              autoRefresh={autoRefresh}
+              setRefresh={setRefresh}
             />
-            <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={imageURL} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             {picsumConfig.staticRandom && (
@@ -118,10 +111,10 @@ export default function CreateShortcut() {
         }}
       />
       <Form.Checkbox
-        id={"Cache"}
-        label={"Cache"}
+        id={"No Cache"}
+        label={"No Cache"}
         value={picsumConfig.cache}
-        info={"Allow browser image cache"}
+        info={"Prevent the image from being cached"}
         onChange={(newValue) => {
           const _randomImageConfig = { ...picsumConfig };
           _randomImageConfig.cache = newValue;

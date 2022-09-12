@@ -1,11 +1,4 @@
-import {
-  getPreferenceValues,
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  Detail,
-} from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
@@ -84,13 +77,26 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
   const attr = props.attributes;
   const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
 
-  const subtitle =
-    attr !== undefined
-      ? "📨 " + attr.ApproximateNumberOfMessages + "  ✈️ " + attr.ApproximateNumberOfMessagesNotVisible
-      : "📨 ...  ✈️ ...️";
+  function getAccessories(): List.Item.Accessory[] {
+    const _acc: List.Item.Accessory[] = [];
+    _acc.push({
+      icon: "📨",
+      text: attr ? attr.ApproximateNumberOfMessages : "...",
+      tooltip: "Approximated Number of Messages",
+    });
+    _acc.push({
+      icon: "✈️",
+      text: attr ? attr.ApproximateNumberOfMessagesNotVisible : "...",
+      tooltip: "Approximated Number of Messages Not Visible",
+    });
+    _acc.push({
+      icon: "⏰",
+      text: attr ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...",
+      tooltip: "Creation Time",
+    });
 
-  const accessoryTitle =
-    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...";
+    return _acc;
+  }
 
   const path =
     "https://" +
@@ -105,15 +111,14 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
       id={queue}
       key={queue}
       title={displayName ?? ""}
-      subtitle={subtitle}
       icon="sqs-list-icon.png"
-      accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
-          <CopyToClipboardAction title="Copy Path" content={queue} />
+          <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
+          <Action.CopyToClipboard title="Copy Path" content={queue} />
         </ActionPanel>
       }
+      accessories={getAccessories()}
     />
   );
 }

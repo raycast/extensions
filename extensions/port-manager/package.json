@@ -2,7 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "port-manager",
   "title": "Port Manager",
-  "description": "Find, open and kill ports",
+  "description": "Find open ports and close them",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
   "icon": "command-icon.png",
   "author": "lucaschultz",
   "license": "MIT",
@@ -20,13 +25,13 @@
       "type": "checkbox",
       "required": false,
       "title": "Use Sudo",
-      "description": "See https://github.com/raycast/extensions/tree/main/extensions/port-manager#readme",
+      "description": "See raycast.com/lucaschultz/port-manager",
       "default": false,
       "label": "Run lsof and kill commands as sudo"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0"
+    "@raycast/api": "^1.35.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

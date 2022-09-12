@@ -6,6 +6,9 @@
   "description": "Manage Docker with Raycast",
   "icon": "docker-icon.png",
   "author": "priithaamer",
+  "contributors": [
+    "gebeto"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -28,6 +31,16 @@
       "subtitle": "Docker",
       "description": "List Installed Docker images",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "socketPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Socket path",
+      "description": "Path to Docker socket",
+      "placeholder": "/var/run/docker.sock"
     }
   ],
   "scripts": {

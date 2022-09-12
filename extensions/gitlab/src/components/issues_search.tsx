@@ -1,9 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Issue } from "../gitlabapi";
-import { daysInSeconds, getErrorMessage, hashRecord } from "../utils";
+import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
 import { IssueListItem, IssueScope, IssueState } from "./issues";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -29,7 +29,7 @@ export function SearchMyIssues(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch Issues", getErrorMessage(error));
+    showErrorToast(getErrorMessage(error), "Could not fetch Issues");
   }
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;

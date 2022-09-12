@@ -27,28 +27,34 @@
 
 ## Install
 
-To get started, install [Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
+To get started, [install Raycast](https://www.raycast.com/) and [install the Sourcegraph extension from the Raycast extensions store](https://www.raycast.com/bobheadxi/sourcegraph).
 
-Alternatively, you can [install this extension from source](./CONTRIBUTING.md).
+<a id="install-extension-button" title="Install Sourcegraph Raycast Extension" href="https://www.raycast.com/bobheadxi/sourcegraph#install">
+  <img style="height: 64px" src="https://assets.raycast.com/bobheadxi/sourcegraph/install_button@2x.png" height="64">
+</a>
+
+Alternatively, you can [install this extension from source](https://github.com/bobheadxi/raycast-sourcegraph/blob/main/CONTRIBUTING.md).
 
 <br />
 
 ## Setup
 
 This extension adds a [variety of commands](#commands) for interacting with [Sourcegraph](https://about.sourcegraph.com).
-Some configuration is required to use certain features, most notably the [variants of each command for Sourcegraph Self-Hosted](#sourcegraph-self-hosted), though you can get started with [Sourcegraph Cloud commands](#sourcegraph-cloud) without any additional setup.
+Some configuration is required to use certain features, most notably the [variants of each command for custom Sourcegraph Instances](#sourcegraph-instance), though you can get started with [Sourcegraph.com commands](#sourcegraphcom) without any additional setup.
 
-### Sourcegraph Cloud
+### Sourcegraph.com
 
-No setup is required to connect to [Sourcegraph Cloud](https://sourcegraph.com/search)!
-To search your private code, configure your own [search contexts](#search-contexts), create your own search notebooks, and more, [sign up for a Sourcegraph Cloud account](https://sourcegraph.com/sign-up)!
+No setup is required to connect to [Sourcegraph.com](https://sourcegraph.com/search) through the 'Sourcegraph.com' variants of this extensions's commands.
+To configure your own [search contexts](#search-contexts), create search notebooks, and more, [sign up for a Sourcegraph.com account](https://sourcegraph.com/sign-up)!
 
-Once you have an account, you can create an access token under the "Access tokens" tab in your user settings on [Sourcegraph Cloud](https://sourcegraph.com).
-Copy that access token to the "Sourcegraph Cloud: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
+Once you have an account, you can create an access token under the "Access tokens" tab in your user settings on [Sourcegraph.com](https://sourcegraph.com/user/settings).
+Copy that access token to the "Sourcegraph.com: Access token" field in the Sourcegraph Raycast extension preferences to authenticate your search queries.
 
-### Sourcegraph Self-Hosted
+To search your private code, please reach out [get a demo of the single-tenant solution](https://about.sourcegraph.com/demo) or [try out a self-hosted installation of Sourcegraph](https://about.sourcegraph.com/get-started/self-hosted).
 
-To start searching code on a [self-hosted Sourcegraph instance](https://docs.sourcegraph.com/admin/install), you can set up access to any Sourcegraph instance by configuring the "Sourcegraph Self-Hosted: Instance URL" and "Sourcegraph Self-Hosted: Access token" fields in the Sourcegraph Raycast extension preferences.
+### Sourcegraph Instance
+
+To start searching code on a custom Sourcegraph instance (e.g. [self-hosted](https://docs.sourcegraph.com/admin/install) or [managed](https://docs.sourcegraph.com/admin/deploy/managed)), you can set up access through the 'Sourcegraph Instance' variants of this extensions's commands by configuring the "Sourcegraph Instance: Instance URL" and "Sourcegraph Instance: Access token" fields in the Sourcegraph Raycast extension preferences.
 You can create an access token under the "Access tokens" tab in your user settings on your Sourcegraph instance.
 
 <br />
@@ -62,7 +68,7 @@ Get results as you type on [code search](https://about.sourcegraph.com/code-sear
 #### Search contexts
 
 [Search contexts](https://docs.sourcegraph.com/code_search/explanations/features#search-contexts) allow you to narrow down your search to code you care about.
-To get started, you can try the [public Sourcegraph Cloud contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph Cloud account or self-hosted Sourcegraph instance's "Contexts" page!
+To get started, you can try the [public Sourcegraph.com search contexts](https://sourcegraph.com/contexts), or configure your own in your Sourcegraph.com account or Sourcegraph instance's "Contexts" page!
 
 The Sourcegraph Raycast extension allows you to set a default context for your searches in the "Search Code" command preferences.
 
@@ -73,7 +79,7 @@ The Sourcegraph Raycast extension allows you to set a default context for your s
 Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
 Notebooks enable powerful live – and persistent – documentation, shareable with your organization or the world.
 
-To get started, you can try the [public Sourcegraph Cloud notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph Cloud account or self-hosted Sourcegraph instance!
+To get started, you can try the [public Sourcegraph.com notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph.com account or Sourcegraph instance!
 
 ![notebooks](metadata/3-notebook-view.png)
 
@@ -82,7 +88,7 @@ To get started, you can try the [public Sourcegraph Cloud notebooks](https://sou
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
 Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
-Batch changes is currently only supported on [Sourcegraph Self-Hosted](#sourcegraph-self-hosted).
+Batch changes is currently only supported on [Sourcegraph Instance](#sourcegraph-self-hosted).
 
 ![notebooks](metadata/4-batch-change-manage.png)
 

@@ -116,6 +116,18 @@ export class HomeAssistant {
     return await this.callService("cover", "stop_cover", { entity_id: entityID });
   }
 
+  async toggleFan(entityID: string): Promise<void> {
+    return await this.callService("fan", "toggle", { entity_id: entityID });
+  }
+
+  async turnOnFan(entityID: string): Promise<void> {
+    return await this.callService("fan", "turn_on", { entity_id: entityID });
+  }
+
+  async turnOffFan(entityID: string): Promise<void> {
+    return await this.callService("fan", "turn_off", { entity_id: entityID });
+  }
+
   async toggleLight(entityID: string): Promise<void> {
     return await this.callService("light", "toggle", { entity_id: entityID });
   }

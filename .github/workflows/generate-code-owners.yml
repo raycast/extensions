@@ -5,6 +5,7 @@ on:
     paths:
       - "extensions/**/package.json"
     branches: [main, master]
+  workflow_dispatch:
 
 jobs:
   update:

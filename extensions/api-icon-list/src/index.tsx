@@ -1,52 +1,47 @@
-import { ActionPanel, ActionPanelSection, Color, CopyToClipboardAction, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Grid } from "@raycast/api";
+import _ from "lodash";
 import { useState } from "react";
 
-function enumKeys<O extends Record<string, unknown>, K extends keyof O = keyof O>(obj: O): K[] {
-  return Object.keys(obj).filter((k) => Number.isNaN(+k)) as K[];
+function getColorName(color: Color) {
+  return Object.entries(Color).find(([, value]) => value === color)?.[0];
 }
 
 export default function Command() {
-  const [color, setColor] = useState<keyof typeof Color>("SecondaryText");
-  const actionPanelItems: Element[] = [];
-  for (const colorName of enumKeys(Color)) {
-    actionPanelItems.push(
-      <ActionPanel.Item
-        icon={{ source: Icon.Dot, tintColor: Color[colorName] }}
-        title={colorName}
-        key={colorName}
-        onAction={() => setColor(colorName)}
-      />
-    );
-  }
-  const items: Element[] = [];
-  for (const iconName of enumKeys(Icon)) {
-    items.push(
-      <List.Item
-        title={iconName}
-        icon={{ source: Icon[iconName], tintColor: Color[color] }}
-        id={iconName}
-        key={iconName}
-        actions={
-          <ActionPanel>
-            <ActionPanelSection title="Copy">
-              <CopyToClipboardAction title="Copy Icon Name" content={iconName} />
-              {color && (
-                <CopyToClipboardAction
-                  title="Copy JSON for Colored Icon"
-                  content={`{ source: Icon.${iconName}, tintColor: Color.${color}}`}
-                />
-              )}
-            </ActionPanelSection>
-            <ActionPanelSection title="Color">
-              <ActionPanel.Submenu icon={Icon.Dot} title="Change Color">
-                {actionPanelItems}
-              </ActionPanel.Submenu>
-            </ActionPanelSection>
-          </ActionPanel>
-        }
-      />
-    );
-  }
+  const [color, setColor] = useState(Color.PrimaryText);
 
-  return <List searchBarPlaceholder="Filter icons by name...">{items}</List>;
+  return (
+    <Grid
+      itemSize={Grid.ItemSize.Small}
+      inset={Grid.Inset.Large}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Change Color" value={color} onChange={(newColor) => setColor(newColor as Color)}>
+          {Object.entries(Color).map(([name, color]) => (
+            <Grid.Dropdown.Item
+              key={name}
+              title={_.startCase(name)}
+              value={color}
+              icon={{ source: Icon.Circle, tintColor: color }}
+            />
+          ))}
+        </Grid.Dropdown>
+      }
+    >
+      {Object.entries(Icon).map(([name, icon]) => (
+        <Grid.Item
+          key={name}
+          title={name}
+          content={{ source: icon, tintColor: color }}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy Icon" content={`Icon.${name}`} />
+              <Action.CopyToClipboard
+                title="Copy Colored Icon"
+                content={`{ source: Icon.${name}, tintColor: Color.${getColorName(color)}}`}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </Grid>
+  );
 }

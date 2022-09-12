@@ -9,6 +9,7 @@ import { Storage } from "./hooks/useColorStorage";
 import { FavoritesStorage } from "./hooks/useFavorites";
 
 import useTimeAgo from "./hooks/useTimeAgo";
+import ColorPickers from "./components/ColorPickers";
 
 export interface Services {
   renderer: RenderColor;
@@ -41,6 +42,8 @@ export default function Extension({
             subtitle="#000000, rbg(0, 0, 0), hsl(0, 0, 0), black"
           />
         )}
+
+        {renderer.state.colors?.length === 0 && !renderer.state.isLoading && <ColorPickers />}
 
         {renderer.state.colors?.map((color, index) => (
           <ColorListItem key={index} color={color} />

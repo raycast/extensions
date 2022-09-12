@@ -1,16 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Form,
-  List,
-  OpenInBrowserAction,
-  preferences,
-  PushAction,
-  showToast,
-  SubmitFormAction,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, List, getPreferenceValues, showToast, useNavigation, Toast } from "@raycast/api";
 import {
   addManhour,
   deleteManhour,
@@ -20,14 +8,14 @@ import {
   ManhourType,
   updateManhour,
 } from "./lib/api";
-import { Manhour, Task, User } from "./lib/type";
+import { Manhour, Preferences, Task, User } from "./lib/type";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { convertTaskURL, weekdays } from "./lib/util";
 import client from "./lib/client";
 
 async function getManhourUserUUID(): Promise<string> {
-  let manhourUser: string = preferences.manhourUser.value as string;
+  let manhourUser: string = getPreferenceValues<Preferences>().manhourUser as string;
   if (!manhourUser || manhourUser.length === 0) {
     // 如果工时管理 - 用户为空，则默认使用登录用户
     manhourUser = await client.getUserUUID();
@@ -128,7 +116,7 @@ export function AddOrUpdateManhour(props: { manhour?: Manhour; manhourTask?: Tas
       }
       actions={
         <ActionPanel>
-          <SubmitFormAction
+          <Action.SubmitForm
             title="Confirm"
             onSubmit={async (input: UpdateManhourFormValues) => {
               try {
@@ -138,9 +126,9 @@ export function AddOrUpdateManhour(props: { manhour?: Manhour; manhourTask?: Tas
                   // Add manhour
                   let manhourTaskUUID = props.manhourTask?.uuid;
                   if (!manhourTaskUUID) {
-                    manhourTaskUUID = preferences.manhourTaskUUID.value as string;
+                    manhourTaskUUID = getPreferenceValues<Preferences>().manhourTaskUUID as string;
                     if (!manhourTaskUUID) {
-                      showToast(ToastStyle.Failure, "Manhour Task is empty");
+                      showToast(Toast.Style.Failure, "Manhour Task is empty");
                       return;
                     }
                   }
@@ -162,7 +150,7 @@ export function AddOrUpdateManhour(props: { manhour?: Manhour; manhourTask?: Tas
                     description: input.description,
                   };
                   await addManhour(manhour);
-                  showToast(ToastStyle.Success, "Add manhour successfully", `${input.manhourType} ${hours}h`);
+                  showToast(Toast.Style.Success, "Add manhour successfully", `${input.manhourType} ${hours}h`);
                 } else {
                   manhour = Object.assign({}, props.manhour, {
                     startTime: Math.floor(input.startTime.getTime() / 1000),
@@ -170,12 +158,12 @@ export function AddOrUpdateManhour(props: { manhour?: Manhour; manhourTask?: Tas
                     description: input.description,
                   });
                   await updateManhour(manhour);
-                  showToast(ToastStyle.Success, "Modified");
+                  showToast(Toast.Style.Success, "Modified");
                 }
                 pop();
               } catch (err) {
                 showToast(
-                  ToastStyle.Failure,
+                  Toast.Style.Failure,
                   `${(props.manhour ? "Modify" : "Add") + " manhour failed"}`,
                   (err as Error).message
                 );
@@ -234,11 +222,12 @@ export function ManageManhour(props: ManageManhourProps) {
     (async () => {
       try {
         const userUUID = await getManhourUserUUID();
-        const manhourDays: number = preferences.manhourDays.value ? (preferences.manhourDays.value as number) : 7;
+        const pref = getPreferenceValues<Preferences>();
+        const manhourDays: number = pref.manhourDays ? +pref.manhourDays : 7;
         const startDate = moment().subtract(manhourDays, "d").format("YYYY-MM-DD");
         await refresh(userUUID, startDate, props.taskUUID);
       } catch (err) {
-        showToast(ToastStyle.Failure, "Query manhour failed", (err as Error).message);
+        showToast(Toast.Style.Failure, "Query manhour failed", (err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -248,11 +237,12 @@ export function ManageManhour(props: ManageManhourProps) {
   const onSearchTextChange = async (text: string) => {
     let startDate: string;
     if (text.length === 0) {
-      const manhourDays: number = preferences.manhourDays.value ? (preferences.manhourDays.value as number) : 7;
+      const pref = getPreferenceValues<Preferences>();
+      const manhourDays: number = pref.manhourDays ? (+pref.manhourDays as number) : 7;
       startDate = moment().subtract(manhourDays, "d").format(dateFormat);
     } else {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-        showToast(ToastStyle.Failure, `Invalid date format, should be ${dateFormat}`);
+        showToast(Toast.Style.Failure, `Invalid date format, should be ${dateFormat}`);
         return;
       }
       startDate = text;
@@ -264,7 +254,7 @@ export function ManageManhour(props: ManageManhourProps) {
       await refresh(userUUID, startDate, props.taskUUID);
       setLoading(false);
     } catch (err) {
-      showToast(ToastStyle.Failure, "Query manhour failed", (err as Error).message);
+      showToast(Toast.Style.Failure, "Query manhour failed", (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -288,26 +278,26 @@ export function ManageManhour(props: ManageManhourProps) {
               accessoryIcon={item.owner.avatar}
               actions={
                 <ActionPanel>
-                  <PushAction icon="✏️" title="Modify Manhour" target={<AddOrUpdateManhour manhour={item} />} />
-                  <PushAction icon="⌛️" title="Add Manhour" target={<AddOrUpdateManhour />} />
-                  <SubmitFormAction
+                  <Action.Push icon="✏️" title="Modify Manhour" target={<AddOrUpdateManhour manhour={item} />} />
+                  <Action.Push icon="⌛️" title="Add Manhour" target={<AddOrUpdateManhour />} />
+                  <Action.SubmitForm
                     icon="⚠️"
                     title="Delete Manhour"
                     onSubmit={async () => {
                       try {
                         if (!item.uuid) {
-                          showToast(ToastStyle.Failure, "Manhour uuid is empty");
+                          showToast(Toast.Style.Failure, "Manhour uuid is empty");
                           return;
                         }
                         await deleteManhour(item.uuid);
-                        showToast(ToastStyle.Success, "Delete manhour successfully");
+                        showToast(Toast.Style.Success, "Delete manhour successfully");
                       } catch (err) {
-                        showToast(ToastStyle.Failure, "Delete manhour failed", (err as Error).message);
+                        showToast(Toast.Style.Failure, "Delete manhour failed", (err as Error).message);
                       }
                     }}
                   />
-                  <OpenInBrowserAction url={item.task.url ? item.task.url : ""} />
-                  <CopyToClipboardAction title="Copy URL" content={item.task.url ? item.task.url : ""} />
+                  <Action.OpenInBrowser url={item.task.url ? item.task.url : ""} />
+                  <Action.CopyToClipboard title="Copy URL" content={item.task.url ? item.task.url : ""} />
                 </ActionPanel>
               }
             />

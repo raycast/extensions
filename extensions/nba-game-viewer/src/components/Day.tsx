@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { Day } from "../schedule.types";
+import { Day } from "../types/schedule.types";
 import GameComponent from "../components/Game";
 
 type PropTypes = {

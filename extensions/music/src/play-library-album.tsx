@@ -1,14 +1,16 @@
-import { ActionPanel, closeMainWindow, List, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 import { Album } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
+import { handleTaskEitherError } from "./util/utils";
 
 export default function PlayLibraryAlbum() {
   const [albums, setAlbums] = useState<readonly Album[] | null>(null);
@@ -33,10 +35,6 @@ export default function PlayLibraryAlbum() {
     loadAll();
   }, []);
 
-  useEffect(() => {
-    console.log(albums ?? []);
-  }, [albums]);
-
   const onSearch = async (next: string) => {
     setAlbums(null); // start loading
 
@@ -49,7 +47,7 @@ export default function PlayLibraryAlbum() {
     await pipe(
       next,
       S.trim,
-      music.track.search,
+      music.albums.search,
       TE.matchW(
         () => {
           showToast(Toast.Style.Failure, "Could not get albums");
@@ -90,12 +88,12 @@ export default function PlayLibraryAlbum() {
 function Actions({ name, pop }: { name: string; pop: () => void }) {
   const title = `Start Album "${name}"`;
 
-  const handleSubmit = async () => {
+  const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
       name,
-      music.albums.play,
+      music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this album"))
+      handleTaskEitherError
     )();
 
     pop();
@@ -103,7 +101,8 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
 
   return (
     <ActionPanel>
-      <ActionPanel.Item title={title} onAction={handleSubmit} />
+      <Action title={title} onAction={handleSubmit(false)} />
+      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

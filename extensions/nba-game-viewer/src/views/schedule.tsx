@@ -1,15 +1,13 @@
-import { useState, useEffect } from "react";
 import { List } from "@raycast/api";
-import { Day } from "../schedule.types";
 import useSchedule from "../hooks/useSchedule";
 import DayComponent from "../components/Day";
 
 const Schedue = () => {
-  const { schedule, loading } = useSchedule();
+  const { data, isLoading } = useSchedule();
 
   return (
-    <List isLoading={loading}>
-      {schedule.map((day: Day) => (
+    <List isLoading={isLoading}>
+      {data?.map((day) => (
         <DayComponent key={day.date} day={day} />
       ))}
     </List>

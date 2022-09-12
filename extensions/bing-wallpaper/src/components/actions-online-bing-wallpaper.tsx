@@ -2,15 +2,18 @@ import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
 import { downloadPicture, setWallpaper } from "../utils/common-utils";
 import { buildBingImageURL, buildCopyrightURL, getPictureName } from "../utils/bing-wallpaper-utils";
 import React from "react";
-import { BingImage } from "../types/types";
+import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
+import PreviewBingWallpaper from "../preview-bing-wallpaper";
 
 export function ActionsOnlineBingWallpaper(props: {
+  index: number;
   bingImage: BingImage;
-  bingImages: BingImage[];
+  onlineImages: BingImage[];
+  downloadedImages: DownloadedBingImage[];
   downloadSize: string;
 }) {
-  const { bingImage, downloadSize, bingImages } = props;
+  const { index, bingImage, downloadSize, onlineImages, downloadedImages } = props;
   return (
     <ActionPanel>
       <Action
@@ -25,10 +28,23 @@ export function ActionsOnlineBingWallpaper(props: {
       />
       <Action
         icon={Icon.Download}
-        title={"Download Picture"}
+        title={"Download Wallpaper"}
         onAction={async () => {
           await downloadPicture(downloadSize, bingImage);
         }}
+      />
+      <Action.Push
+        icon={Icon.Sidebar}
+        title={"Preview Wallpaper"}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        target={
+          <PreviewBingWallpaper
+            isOnline={true}
+            index={index}
+            onlineImages={onlineImages}
+            downloadedImage={downloadedImages}
+          />
+        }
       />
       <ActionPanel.Section>
         <Action
@@ -36,7 +52,7 @@ export function ActionsOnlineBingWallpaper(props: {
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
-            const randomImage = bingImages[Math.floor(Math.random() * bingImages.length)];
+            const randomImage = onlineImages[Math.floor(Math.random() * onlineImages.length)];
             setWallpaper(
               getPictureName(randomImage.url) + "-" + randomImage.startdate,
               buildBingImageURL(randomImage.url, "raw")
@@ -45,7 +61,7 @@ export function ActionsOnlineBingWallpaper(props: {
         />
         <Action
           icon={Icon.MagnifyingGlass}
-          title={"Search Picture"}
+          title={"Search Wallpaper"}
           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
           onAction={async () => {
             await open(buildCopyrightURL(bingImage.copyrightlink));

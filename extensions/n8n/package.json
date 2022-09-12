@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "n8n",
+  "title": "n8n",
+  "description": "Control n8n via Raycast.",
+  "icon": "n8n.png",
+  "author": "koinzhang",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-workflows",
+      "title": "Search Workflows",
+      "subtitle": "n8n",
+      "description": "Search and execute workflows.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberFilter",
+          "type": "checkbox",
+          "required": false,
+          "label": "Remember Filter Tag",
+          "description": "Remember filter tag.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "activate-all-workflows",
+      "title": "Activate All Workflows",
+      "subtitle": "n8n",
+      "description": "Set the active status to true for all the workflows.",
+      "mode": "no-view"
+    },
+    {
+      "name": "deactivate-all-workflows",
+      "title": "Deactivate All Workflows",
+      "subtitle": "n8n",
+      "description": "Set the active status to false for all the workflows.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "shell-env": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

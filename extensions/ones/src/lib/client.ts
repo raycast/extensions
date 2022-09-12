@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
-import { getLocalStorageItem, preferences, setLocalStorageItem } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { login } from "./api";
+import { Preferences } from "./type";
 
 export enum Product {
   PROJECT = "project",
@@ -64,51 +65,51 @@ export class Client {
 
   public async setEmail(email: string): Promise<void> {
     this.email = email;
-    await setLocalStorageItem(StorageKey.Email, email);
+    await LocalStorage.setItem(StorageKey.Email, email);
   }
 
   public async getEmail(): Promise<string> {
-    const email = await getLocalStorageItem(StorageKey.Email);
+    const email = await LocalStorage.getItem(StorageKey.Email);
     return Promise.resolve(email as string);
   }
 
   public async setPassword(password: string): Promise<void> {
     this.password = password;
-    await setLocalStorageItem(StorageKey.Password, password);
+    await LocalStorage.setItem(StorageKey.Password, password);
   }
 
   public async getPassword(): Promise<string> {
-    const password = await getLocalStorageItem(StorageKey.Password);
+    const password = await LocalStorage.getItem(StorageKey.Password);
     return Promise.resolve(password as string);
   }
 
   public async setToken(token: string): Promise<void> {
     this.token = token;
-    await setLocalStorageItem(StorageKey.Token, token);
+    await LocalStorage.setItem(StorageKey.Token, token);
   }
 
   public async getToken(): Promise<string> {
-    const token = await getLocalStorageItem(StorageKey.Token);
+    const token = await LocalStorage.getItem(StorageKey.Token);
     return Promise.resolve(token as string);
   }
 
   public async setUserUUID(userUUID: string): Promise<void> {
     this.userUUID = userUUID;
-    await setLocalStorageItem(StorageKey.UserUUID, userUUID);
+    await LocalStorage.setItem(StorageKey.UserUUID, userUUID);
   }
 
   public async getUserUUID(): Promise<string> {
-    const userUUID = await getLocalStorageItem(StorageKey.UserUUID);
+    const userUUID = await LocalStorage.getItem(StorageKey.UserUUID);
     return Promise.resolve(userUUID as string);
   }
 
   public async setTeamUUID(teamUUID: string): Promise<void> {
     this.teamUUID = teamUUID;
-    await setLocalStorageItem(StorageKey.TeamUUID, teamUUID);
+    await LocalStorage.setItem(StorageKey.TeamUUID, teamUUID);
   }
 
   public async getTeamUUID(): Promise<string> {
-    const teamUUID = await getLocalStorageItem(StorageKey.TeamUUID);
+    const teamUUID = await LocalStorage.getItem(StorageKey.TeamUUID);
     return Promise.resolve(teamUUID as string);
   }
 
@@ -117,8 +118,9 @@ export class Client {
       this.email = await this.getEmail();
       this.password = await this.getPassword();
       this.teamUUID = await this.getTeamUUID();
-      if (preferences.teamUUID.value) {
-        this.teamUUID = preferences.teamUUID.value as string;
+      const pref = getPreferenceValues<Preferences>();
+      if (!this.teamUUID) {
+        this.teamUUID = pref.teamUUID;
       }
       this.userUUID = await this.getUserUUID();
       this.token = await this.getToken();
@@ -126,18 +128,18 @@ export class Client {
         !this.teamUUID ||
         !this.userUUID ||
         !this.token ||
-        this.email !== preferences.email.value ||
-        this.password !== preferences.password.value
+        this.email !== pref.email ||
+        this.password !== pref.password
       ) {
-        await this.setEmail(preferences.email.value as string);
-        await this.setPassword(preferences.password.value as string);
+        await this.setEmail(pref.email);
+        await this.setPassword(pref.password);
         const result = await login({ email: this.email, password: this.password });
         await this.setToken(result.user.token);
         await this.setUserUUID(result.user.uuid);
         this.userUUID = result.user.uuid;
         if (result.teams.length === 1) {
           await this.setTeamUUID(result.teams[0].uuid);
-          preferences.teamUUID.value = result.teams[0].uuid;
+          pref.teamUUID = result.teams[0].uuid;
         }
       }
 
@@ -171,11 +173,11 @@ export class Client {
         }
         return Promise.reject(new Error(response.data));
       },
-      function (err) {
+      (err) => {
         return Promise.reject(err);
       }
     );
   }
 }
 
-export default new Client(preferences.url.value as string);
+export default new Client(getPreferenceValues<Preferences>().url);

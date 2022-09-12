@@ -133,7 +133,7 @@ function UploadListItem(props: {
     <List.Item
       title="Upload"
       subtitle={percentageToString(props.progress)}
-      icon={{ source: "download.png", tintColor: "#bf71ff" }}
+      icon={{ source: "upload.png", tintColor: "#bf71ff" }}
       actions={
         <ActionPanel>
           {props.summary}

@@ -8,8 +8,12 @@ import { ActionToAdvancedSearchOptions } from "./components/action-to-advanced-s
 import { ActionToPexels } from "./components/action-to-pexels";
 import { MavenEmptyView } from "./components/maven-empty-view";
 
-export default function SearchMavenCentralRepository() {
-  const [searchContent, setSearchContent] = useState<string>("");
+interface MavenCentralRepositorySearchProps {
+  repository: string;
+}
+export default function SearchMavenCentralRepository(props: { arguments: MavenCentralRepositorySearchProps }) {
+  const { repository } = props.arguments;
+  const [searchContent, setSearchContent] = useState<string>(repository);
   const { docs, loading } = searchMavenArtifact(searchContent.trim());
 
   const emptyViewTitle = () => {

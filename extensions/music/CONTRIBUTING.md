@@ -17,3 +17,7 @@ If you want to add a new script please follow the project structure.
 ### Conclusion
 Thanks for reading. I appreciate your interest, please make sure to tag me [@Rawnly](https://github.com/rawnly) in any issue or PR.
 If you have any questions / problem feel free to contact me on the Raycast Slack at **@fedevitaledev**
+
+
+### Useful Links
+-[Doug's Apple Scripts](http://dougscripts.com/itunes/) - An authority when it comes to iTunes/Music scripts.

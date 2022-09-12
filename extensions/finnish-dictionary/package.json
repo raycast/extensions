@@ -20,6 +20,14 @@
       "subtitle": "Define an english word to finnish",
       "description": "Define a finnish word to english",
       "mode": "view"
+    },
+    {
+      "name": "general-lookup",
+      "title": "Language to Language",
+      "subtitle": "Define a word to from any language",
+      "description": "Define a word from any language to any language",
+      "mode": "view",
+      "icon": "translation.png"
     }
   ],
   "categories": [

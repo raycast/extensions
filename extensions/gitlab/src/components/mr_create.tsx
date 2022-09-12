@@ -2,7 +2,7 @@ import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } f
 import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { getErrorMessage, projectIcon, stringToSlug, toFormValues } from "../utils";
+import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
 interface MRFormValues {
@@ -31,7 +31,7 @@ async function submit(values: MRFormValues) {
     await showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
     popToRoot();
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error", getErrorMessage(error));
+    await showErrorToast(getErrorMessage(error));
   }
 }
 
@@ -73,7 +73,7 @@ export function IssueMRCreateForm({
       showToast(Toast.Style.Success, "Merge Request created", "Merge Request creation successful");
       popToRoot();
     } catch (error) {
-      showToast(Toast.Style.Failure, "Cannot create Merge Request", (error instanceof Error && error.message) || "");
+      showErrorToast(getErrorMessage(error), "Cannot create Merge Request");
     }
   }
 
@@ -122,7 +122,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   const error = errorProjects || errorProjectInfo;
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot create Merge Request", error);
+    showErrorToast(error, "Cannot create Merge Request");
   }
 
   let project: Project | undefined;

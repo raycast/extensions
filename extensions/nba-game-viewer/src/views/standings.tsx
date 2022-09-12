@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
 import { List } from "@raycast/api";
-import { Team } from "../standings.types";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 
 const Standings = () => {
-  const { standings, loading } = useStandings();
+  const { data, isLoading } = useStandings();
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={isLoading}>
       <List.Section title="Eastern Conference">
-        {standings.eastern.map((team: Team) => {
+        {data?.eastern.map((team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
       </List.Section>
       <List.Section title="Western Conference">
-        {standings.western.map((team: Team) => {
+        {data?.western.map((team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
       </List.Section>

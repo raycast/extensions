@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { Game } from "../schedule.types";
-import generateAccessories from "../utils/generateAccessories";
+import { Game } from "../types/schedule.types";
+import generateGameAccessories from "../utils/generateGameAccessories";
 
 type PropTypes = {
   game: Game;
@@ -12,10 +12,10 @@ const GameComponent = ({ game }: PropTypes) => {
       key={game.id}
       title={game.shortName}
       icon={game.competitors[0].logo}
-      accessories={generateAccessories(game)}
+      accessories={generateGameAccessories(game)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={game.stream} title="View on ESPN" icon={Icon.Globe} />
+          <Action.OpenInBrowser url={game.stream} title="View Game Details on ESPN" icon={Icon.Globe} />
         </ActionPanel>
       }
     />

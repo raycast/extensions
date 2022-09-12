@@ -2,30 +2,54 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "life-progress",
   "title": "Life Progress",
-  "description": "View your life progress, get the word of the day",
+  "description": "View life progress and custom Countdown Date. See how much time is left.",
   "icon": "life-progress-icon.png",
   "author": "koinzhang",
   "categories": [
     "Fun"
   ],
   "license": "MIT",
+  "commands": [
+    {
+      "name": "life-progress",
+      "title": "Life Progress",
+      "description": "View life progress and custom Countdown Date. See how much time is left.",
+      "mode": "view"
+    }
+  ],
   "preferences": [
     {
       "name": "showDailyWord",
       "type": "checkbox",
-      "required": true,
-      "title": "UI Preference",
+      "required": false,
+      "title": "Advanced Preferences",
       "label": "Show Quote of the Day",
       "description": "Show quote of the day.",
       "default": true
     },
     {
-      "name": "timeLeftFirst",
+      "name": "showProgressBar",
       "type": "checkbox",
-      "required": true,
-      "label": "Time Left First",
-      "description": "Show Time Left first.",
+      "required": false,
+      "label": "Show Progress Bar",
+      "description": "Show life progress bar.",
       "default": true
+    },
+    {
+      "name": "countdownDateFirst",
+      "type": "checkbox",
+      "required": false,
+      "label": "Countdown Date First",
+      "description": "Show Countdown Date first.",
+      "default": true
+    },
+    {
+      "name": "birthdayEveryDay",
+      "type": "checkbox",
+      "required": false,
+      "label": "Birthday Every Day",
+      "description": "Birthday every day!!!",
+      "default": false
     },
     {
       "name": "birthday",
@@ -43,16 +67,36 @@
       "type": "dropdown",
       "data": [
         {
+          "title": "Sunday",
+          "value": "Sunday"
+        },
+        {
           "title": "Monday",
           "value": "Monday"
         },
         {
-          "title": "Sunday",
-          "value": "Sunday"
+          "title": "Tuesday",
+          "value": "Tuesday"
+        },
+        {
+          "title": "Wednesday",
+          "value": "Wednesday"
+        },
+        {
+          "title": "Thursday",
+          "value": "Thursday"
+        },
+        {
+          "title": "Friday",
+          "value": "Friday"
+        },
+        {
+          "title": "Saturday",
+          "value": "Saturday"
         }
       ],
       "required": true,
-      "default": "Monday"
+      "default": "Sunday"
     },
     {
       "name": "iconTheme",
@@ -81,25 +125,65 @@
           "value": "rainbow"
         }
       ],
-      "required": true,
-      "default": "random"
-    }
-  ],
-  "commands": [
+      "required": false,
+      "default": "simple"
+    },
     {
-      "name": "life-progress",
-      "title": "Life Progress",
-      "description": "View your life progress.",
-      "mode": "view"
+      "name": "progressSymbol",
+      "title": "Progress Bar Symbol",
+      "description": "Symbols for the composition of the progress bar.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "■",
+          "value": "■"
+        },
+        {
+          "title": "●",
+          "value": "●"
+        },
+        {
+          "title": "♥︎",
+          "value": "♥︎"
+        },
+        {
+          "title": "✿",
+          "value": "✿"
+        },
+        {
+          "title": "★",
+          "value": "★"
+        },
+        {
+          "title": "✪",
+          "value": "✪"
+        },
+        {
+          "title": "✔",
+          "value": "✔"
+        },
+        {
+          "title": "⚉",
+          "value": "⚉"
+        },
+        {
+          "title": "☀︎",
+          "value": "☀︎"
+        },
+        {
+          "title": "❄",
+          "value": "❄︎"
+        }
+      ],
+      "required": false,
+      "default": "■"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
+    "@raycast/api": "^1.37.0",
     "node-fetch": "^3.2.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

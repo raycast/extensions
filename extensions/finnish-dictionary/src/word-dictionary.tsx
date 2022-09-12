@@ -65,12 +65,11 @@ export default function WordDictionary(props: { from: string; to: string }) {
       searchBarPlaceholder="Search..."
       onSearchTextChange={search}
       isShowingDetail={(suggestions.length > 0 || recentSearches.length > 0) && !isLoading}
-      navigationTitle={`Define ${props.from} word in ${props.to}`}
     >
       {(searchQuery === "" || isLoading) && suggestions.length === 0 && recentSearches.length == 0 ? (
-        <List.EmptyView icon={Icon.Text} title="Type a word to define" />
+        <List.EmptyView icon={Icon.Text} title={`Type a ${props.from} word to define`} />
       ) : searchQuery === "" && recentSearches.length > 0 ? (
-        <List.Section title="Recently viewed">
+        <List.Section title={`Recently viewed ${props.from} words`}>
           {recentSearches.map((result, i) => (
             <List.Item
               id={result.title + i}
@@ -82,25 +81,27 @@ export default function WordDictionary(props: { from: string; to: string }) {
           ))}
         </List.Section>
       ) : (
-        suggestions.map((result) => (
-          <List.Item
-            id={result.title}
-            key={result.title}
-            title={result.title}
-            accessories={[{ icon: Icon.MagnifyingGlass }]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser key="openInBrowser" url={result.url} />
-                <Action.CopyToClipboard
-                  key="copyToClipboard"
-                  content={result.title}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-              </ActionPanel>
-            }
-            detail={<ResultDetail res={result} from={props.from} to={props.to} />}
-          />
-        ))
+        <List.Section title={`Definition of ${props.from} words in ${props.to}`}>
+          {suggestions.map((result) => (
+            <List.Item
+              id={result.title}
+              key={result.title}
+              title={result.title}
+              accessories={[{ icon: Icon.MagnifyingGlass }]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser key="openInBrowser" url={result.url} />
+                  <Action.CopyToClipboard
+                    key="copyToClipboard"
+                    content={result.title}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                </ActionPanel>
+              }
+              detail={<ResultDetail res={result} from={props.from} to={props.to} />}
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );

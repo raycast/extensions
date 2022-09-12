@@ -1,9 +1,9 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
-import { hashRecord } from "../utils";
+import { hashRecord, showErrorToast } from "../utils";
 import { EpicListItem } from "./epics";
 
 export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.Element {
@@ -27,7 +27,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
   );
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search epics", error);
+    showErrorToast(error, "Cannot search Epics");
   }
 
   return (

@@ -1,6 +1,6 @@
 import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
+import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
@@ -11,19 +11,23 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  // query describes an entire query to replace the existing query with, or a partial
-  // addition.
+  /**
+   * query describes an entire query to replace the existing query with, or a partial
+   * query to be appended to the current query.
+   */
   query?: { addition: string } | string;
 }
 
 export interface Alert {
   title: string;
   description?: string;
+  kind?: AlertKind;
 }
 
 export interface Progress {
   matchCount: number;
-  duration: string;
+  durationMs: number;
+  skipped: number;
 }
 
 export interface SearchHandlers {
@@ -33,7 +37,7 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
-export type PatternType = "literal" | "regexp" | "structural";
+export type PatternType = "literal" | "regexp" | "structural" | "lucky";
 
 export async function performSearch(
   abort: AbortSignal,
@@ -52,7 +56,7 @@ export async function performSearch(
     ["q", query],
     ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "1500"],
+    ["display", "200"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
   const stream = src.token
@@ -114,8 +118,7 @@ export async function performSearch(
           .filter((s) => s.count > 1)
           .map((f) => {
             return {
-              title: `Filter for '${f.label}'`,
-              description: `${f.count} matches`,
+              title: f.label,
               query: { addition: f.value },
             };
           }),
@@ -180,9 +183,15 @@ export async function performSearch(
         type: "progress",
         data: message.data ? JSON.parse(message.data) : {},
       };
+
+      const {
+        data: { matchCount, durationMs, skipped },
+      } = event;
+
       handlers.onProgress({
-        matchCount: event.data.matchCount,
-        duration: `${event.data.durationMs}ms`,
+        matchCount: matchCount,
+        durationMs: durationMs,
+        skipped: skipped?.length || 0,
       });
     });
 

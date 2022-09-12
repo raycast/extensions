@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typefully",
+  "title": "Typefully",
+  "description": "The Typefully extension to help you schedule tweets and reach your audience.",
+  "icon": "icon.png",
+  "author": "danielferguson",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-draft",
+      "title": "Create Draft Tweet",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
+      "description": "Draft a tweet with the Typefully platform, optionally schedule it for the next available slot.",
+      "mode": "view",
+      "keywords": [
+        "draft",
+        "schedule",
+        "twitter",
+        "tweet"
+      ]
+    },
+    {
+      "name": "view-scheduled",
+      "title": "View Scheduled Drafts",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
+      "description": "View drafts that have been recently scheduled.",
+      "mode": "view",
+      "keywords": [
+        "draft",
+        "recently",
+        "scheduled",
+        "twitter",
+        "tweet"
+      ]
+    },
+    {
+      "name": "view-posted",
+      "title": "View Recently Posted Drafts",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
+      "description": "View recently posted drafts.",
+      "mode": "view",
+      "keywords": [
+        "view",
+        "recently",
+        "scheduled",
+        "twitter",
+        "tweets"
+      ]
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Typefully",
+      "subtitle": "Typefully",
+      "icon": "icon.png",
+      "description": "Open the Typefully website",
+      "mode": "no-view",
+      "keywords": [
+        "open",
+        "dashboard"
+      ]
+    }
+  ],
+  "keywords": [
+    "Typefully",
+    "Twitter",
+    "Social Media"
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "description": "Your personal API token.",
+      "type": "password",
+      "required": true,
+      "title": "Typefully API Token",
+      "placeholder": "Your token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "dayjs": "^1.11.3",
+    "got": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

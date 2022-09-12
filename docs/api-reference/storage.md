@@ -4,7 +4,7 @@ The storage APIs can be used to store non-sensitive data that is persisted acros
 
 All commands in an extension have shared access to the stored data. Extensions can _not_ access the storage of other extensions.
 
-Values can be managed through functions such as [`LocalStorage.getItem`](storage.md#getitem), [`LocalStorage.setItem`](storage.md#setitem), or [`LocalStorage.removeItem`](storage.md#removeitem). A typical use case is storing user-related data, for example entered todos.
+Values can be managed through functions such as [`LocalStorage.getItem`](storage.md#localstorage.getitem), [`LocalStorage.setItem`](storage.md#localstorage.setitem), or [`LocalStorage.removeItem`](storage.md#localstorage.removeitem). A typical use case is storing user-related data, for example entered todos.
 
 {% hint style="info" %}
 The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/learn/writing-files-with-nodejs), e.g. to the extension's [support directory](environment.md#environment).
@@ -12,7 +12,92 @@ The API is not meant to store large amounts of data. For this, use [Node's built
 
 ## API Reference
 
-### allItems
+### LocalStorage.getItem
+
+Retrieve the stored value for the given key.
+
+#### Signature
+
+```typescript
+async function getItem(key: string): Promise<Value | undefined>;
+```
+
+#### Example
+
+```typescript
+import { LocalStorage } from "@raycast/api";
+
+export default async () => {
+  const item = await LocalStorage.getItem<string>("favorite-fruit");
+  console.log(item);
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="LocalStorage.getItem" />
+
+#### Return
+
+A Promise that resolves with the stored value for the given key. If the key does not exist, `undefined` is returned.
+
+### LocalStorage.setItem
+
+Stores a value for the given key.
+
+#### Signature
+
+```typescript
+async function setItem(key: string, value: Value): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { LocalStorage } from "@raycast/api";
+
+export default async () => {
+  await LocalStorage.setItem("favorite-fruit", "cherry");
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="LocalStorage.setItem" />
+
+#### Return
+
+A Promise that resolves when the value is stored.
+
+### LocalStorage.removeItem
+
+Removes the stored value for the given key.
+
+#### Signature
+
+```typescript
+async function removeItem(key: string): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { LocalStorage } from "@raycast/api";
+
+export default async () => {
+  await LocalStorage.removeItem("favorite-fruit");
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="LocalStorage.removeItem" />
+
+#### Return
+
+A Promise that resolves when the value is removed.
+
+### LocalStorage.allItems
 
 Retrieve all stored values in the local storage of an extension.
 
@@ -40,9 +125,9 @@ export default async () => {
 
 #### Return
 
-A Promise that resolves with an object containing all [Values](#values).
+A Promise that resolves with an object containing all [Values](#localstorage.values).
 
-### clear
+### LocalStorage.clear
 
 Removes all stored values of an extension.
 
@@ -66,101 +151,9 @@ export default async () => {
 
 A Promise that resolves when all values are removed.
 
-### getItem
-
-Retrieve the stored value for the given key.
-
-#### Signature
-
-```typescript
-async function getItem(key: string): Promise<Value | undefined>;
-```
-
-#### Example
-
-```typescript
-import { LocalStorage } from "@raycast/api";
-
-export default async () => {
-  const item = await LocalStorage.getItem<string>("favorite-fruit");
-  console.log(item);
-};
-```
-
-#### Parameters
-
-| Name | Type                | Required | Description                                |
-| :--- | :------------------ | :------- | :----------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to retrieve the value of. |
-
-#### Return
-
-A Promise that resolves with the stored value for the given key. If the key does not exist, `undefined` is returned.
-
-### removeItem
-
-Removes the stored value for the given key.
-
-#### Signature
-
-```typescript
-async function removeItem(key: string): Promise<void>;
-```
-
-#### Example
-
-```typescript
-import { LocalStorage } from "@raycast/api";
-
-export default async () => {
-  await LocalStorage.removeItem("favorite-fruit");
-};
-```
-
-#### Parameters
-
-| Name | Type                | Required | Description                              |
-| :--- | :------------------ | :------- | :--------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to remove the value of. |
-
-#### Return
-
-A Promise that resolves when the value is removed.
-
-### setItem
-
-Stores a value for the given key.
-
-#### Signature
-
-```typescript
-async function setItem(key: string, value: Value): Promise<void>;
-```
-
-#### Example
-
-```typescript
-import { LocalStorage } from "@raycast/api";
-
-export default async () => {
-  await LocalStorage.setItem("favorite-fruit", "cherry");
-};
-```
-
-#### Parameters
-
-| Name  | Type                         | Required | Description                                               |
-| :---- | :--------------------------- | :------- | :-------------------------------------------------------- |
-| key   | <code>string</code>          | Yes      | The key you want to create or update the value of.        |
-| value | <code>[Value](#value)</code> | Yes      | The value you want to create or update for the given key. |
-
-#### Return
-
-A Promise that resolves when the value is stored.
-
 ## Types
 
-### Values
+### LocalStorage.Values
 
 Values of local storage items.
 
@@ -172,7 +165,7 @@ For type-safe values, you can define your own interface. Use the keys of the loc
 | :------------ | :--------------- | :-------------------------------------- |
 | [key: string] | <code>any</code> | The local storage value of a given key. |
 
-### Value
+### LocalStorage.Value
 
 ```typescript
 Value: string | number | boolean;

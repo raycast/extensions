@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portuguese-primeira-liga",
+  "title": "Portuguese Primeira Liga",
+  "description": "View the latest Portuguese Primeira Liga standings.",
+  "icon": "icon.png",
+  "author": "danielsequeira",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "standings",
+      "title": "View Standings",
+      "subtitle": "Portuguese Primeira Liga",
+      "description": "View the latest Portuguese Primeira Liga standings.",
+      "mode": "view"
+    },
+    {
+      "name": "newspapers",
+      "title": "View Newspapers",
+      "subtitle": "Portuguese Primeira Liga",
+      "description": "View today's newspapers covers.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Football Data API Key",
+      "placeholder": "Enter your Football Data API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "@types/cheerio": "^0.22.31",
+    "axios": "^0.26.0",
+    "cheerio": "^1.0.0-rc.10",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.0.12",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

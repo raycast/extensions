@@ -19,3 +19,7 @@ Adds currently playing and copy URL commands.
 ## [Add Extension] - 2021-10-11
 
 Add Spotify Controls extension
+
+## [Add new command preferences] - 2022-06-14
+
+Add command preferences for enabling Next Track / Previous track HUD.

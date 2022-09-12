@@ -6,8 +6,8 @@
   "icon": "paste-icon.png",
   "author": "koinzhang",
   "categories": [
-    "System",
-    "Productivity"
+    "Productivity",
+    "System"
   ],
   "license": "MIT",
   "commands": [
@@ -19,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2"
+    "@raycast/api": "^1.35.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

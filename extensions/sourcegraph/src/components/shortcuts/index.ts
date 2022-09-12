@@ -6,4 +6,4 @@ export const tertiaryActionShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "s
 export const refreshShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "r" };
 export const copyShortcut: Keyboard.Shortcut = { modifiers: ["ctrl", "shift"], key: "c" };
 
-export const drilldownShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "s" };
+export const drilldownShortcut: Keyboard.Shortcut = { modifiers: [], key: "tab" };

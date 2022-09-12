@@ -103,10 +103,11 @@ type Result = {
 
 async function searchMDNByQuery(query: string): Promise<Result[]> {
   try {
-    const response = await axios.get<MDNResponse>(`https://developer.mozilla.org/api/v1/search/${locale}`, {
+    const response = await axios.get<MDNResponse>(`https://developer.mozilla.org/api/v1/search`, {
       params: {
         q: query,
         sort: "best",
+        locale: locale,
       },
     });
     return response.data.documents.map((document) => ({

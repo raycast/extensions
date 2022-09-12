@@ -20,6 +20,11 @@ module.exports = async ({ github, context, core, changedFiles }) => {
 
   const sender = context.payload.sender.login;
 
+  if (sender === "raycastbot") {
+    console.log("We don't notify people when raycastbot is doing its stuff (usually merging the PR)");
+    return;
+  }
+
   const opts = github.rest.issues.listForRepo.endpoint.merge({
     ...context.issue,
     creator: sender,

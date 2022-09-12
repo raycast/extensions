@@ -8,6 +8,8 @@ import { Keyboard } from "@raycast/api";
 import { isValidColorName } from "../validators";
 
 export default class KeywordColor extends Color<KEYWORD> {
+  public type = "Keyword";
+
   public static validator = isValidColorName;
 
   public static prepareValue = <KEYWORD>(value: string): KEYWORD => value as unknown as KEYWORD;

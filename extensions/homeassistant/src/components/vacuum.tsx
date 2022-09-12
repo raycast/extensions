@@ -62,7 +62,7 @@ export function VacuumStopAction(props: { state: State }): JSX.Element | null {
       title="Stop"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
     />
   );
 }

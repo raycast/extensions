@@ -47,32 +47,84 @@
       "name": "csl_style",
       "type": "dropdown",
       "required": false,
-      "default": "apa",
+      "default": "ieee",
       "title": "CSL Format",
       "description": "CSL format for generating references",
       "data": [
         {
-          "title": "American Psychological Association",
-          "value": "apa"
+          "title": "ACS Applied Materials and Interfaces",
+          "value": "acs-applied-materials-and-interfaces"
         },
         {
-          "title": "American Chemical Society",
+          "title": "Acta Botanica Croatica",
+          "value": "acta-botanica-croatica"
+        },
+        {
+          "title": "ACS: American Chemical Society",
           "value": "american-chemical-society"
         },
         {
-          "title": "American Medical Association",
+          "title": "American Journal of Sociology",
+          "value": "american-journal-of-sociology"
+        },
+        {
+          "title": "AMA: American Medical Association",
           "value": "american-medical-association"
+        },
+        {
+          "title": "American Meteorological Society",
+          "value": "american-meteorological-society"
+        },
+        {
+          "title": "APS: American Physical Society",
+          "value": "american-physics-society"
         },
         {
           "title": "American Political Science Association",
           "value": "american-political-science-association"
         },
         {
-          "title": "American Socialology Association",
+          "title": "APA: American Psychological Association",
+          "value": "apa"
+        },
+        {
+          "title": "American Sociological Association",
           "value": "american-sociological-association"
         },
         {
-          "title": "Elsevier Harvard",
+          "title": "Annual Reviews (author-date)",
+          "value": "annual-reviews-author-date"
+        },
+        {
+          "title": "Annual Reviews (alphabetical)",
+          "value": "annual-reviews-alphabetical"
+        },
+        {
+          "title": "Biostatistics",
+          "value": "biostatistics"
+        },
+        {
+          "title": "Chicago (author-date) Manual",
+          "value": "chicago-author-date"
+        },
+        {
+          "title": "Chicago (full note) Manual",
+          "value": "chicago-fullnote-bibliography"
+        },
+        {
+          "title": "Chicago (note) Manual",
+          "value": "chicago-note-bibliography"
+        },
+        {
+          "title": "Cite Them Right - Harvard",
+          "value": "harvard-cite-them-right"
+        },
+        {
+          "title": "Copernicus Publications",
+          "value": "copernicus-publications"
+        },
+        {
+          "title": "Elsevier - Harvard",
           "value": "elsevier-harvard"
         },
         {
@@ -80,8 +132,24 @@
           "value": "ieee"
         },
         {
+          "title": "Institute of Mathematical Statistics journals",
+          "value": "institute-of-mathematical-statistics"
+        },
+        {
+          "title": "Modern Humanities Research Association (note with bibliography)",
+          "value": "modern-humanities-research-association"
+        },
+        {
+          "title": "MLA: Modern Language Association",
+          "value": "modern-language-association"
+        },
+        {
           "title": "Nature",
           "value": "nature"
+        },
+        {
+          "title": "Radiology",
+          "value": "radiology"
         },
         {
           "title": "Vancouver",

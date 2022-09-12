@@ -1,24 +1,22 @@
 import fetch from "node-fetch";
 import { SearchType, Word } from "./types";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 export async function searchWords(wordToSearch: string, type: SearchType): Promise<Word[]> {
-  let url;
+  const searchParams = new URLSearchParams({
+    language: "en",
+    md: "d",
+    max: "25",
+    [type]: wordToSearch,
+  });
 
-  if (type == SearchType.SYNONYM) {
-    // More accurate for synonym
-    url = `https://api.datamuse.com/words?ml=${wordToSearch}&md=d&max=20`;
-  } else {
-    url = `https://api.datamuse.com/words?rel_${type}=${wordToSearch}&md=d&max=20`;
-  }
+  const url = new URL(`/words?${searchParams}`, "https://api.datamuse.com/words").toString();
 
   const response = await fetch(url, { method: "GET" });
-  //https://api.datamuse.com/words?md=d&max=20&ml=addition
-  console.log(url);
 
   if (!response.ok) {
     await showToast(
-      ToastStyle.Failure,
+      Toast.Style.Failure,
       "Couldn't get results",
       "Word Search wasn't able to get results for this word."
     );

@@ -28,9 +28,7 @@ export default async () => {
 
 #### Parameters
 
-| Name  | Type                | Required | Description                                  |
-| :---- | :------------------ | :------- | :------------------------------------------- |
-| title | <code>string</code> | Yes      | The title that will be displayed in the HUD. |
+<FunctionParametersTableFromJSDoc name="showHUD" />
 
 #### Return
 

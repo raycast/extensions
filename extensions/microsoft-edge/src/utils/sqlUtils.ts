@@ -23,10 +23,8 @@ const fsReadFile = util.promisify(fs.readFile);
 
 export const loadDataToLocalDb = async (sourceDbPath: string, destinationFileName: string): Promise<Database> => {
   const fileBuffer = await fsReadFile(sourceDbPath);
-  const SQL = await initSqlJs({
-    locateFile: () => path.join(environment.assetsPath, destinationFileName),
-  });
-
+  const wasmBinary = await fsReadFile(path.join(environment.assetsPath, destinationFileName));
+  const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileBuffer);
 };
 

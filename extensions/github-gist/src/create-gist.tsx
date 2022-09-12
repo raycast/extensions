@@ -10,9 +10,10 @@ import {
   octokit,
   updateGist,
 } from "./util/gist-utils";
-import { fetchItemInput, ItemSource } from "./util/input";
+import { fetchItemInput } from "./util/input";
 import { refreshNumber } from "./hooks/hooks";
 import { GistFileForm } from "./components/gist-file-form";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CreateGist(props: {
   gist: Gist | undefined;
@@ -56,11 +57,7 @@ export default function CreateGist(props: {
         setGistFiles(_gistFiles);
       } else {
         const inputItem = await fetchItemInput();
-        if (inputItem.source === ItemSource.NULL) {
-          await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
-        } else {
-          setGistFiles([...gistFiles, { filename: "", content: inputItem.content }]);
-        }
+        setGistFiles([...gistFiles, { filename: "", content: inputItem }]);
       }
       setIsLoading(false);
     }
@@ -76,24 +73,24 @@ export default function CreateGist(props: {
         <ActionPanel>
           <Action
             title={isEdit ? "Update Gist" : "Create Gist"}
-            icon={Icon.Upload}
+            icon={isEdit ? Icon.Pencil : Icon.Plus}
             onAction={async () => {
               try {
                 await showToast(Toast.Style.Animated, isEdit ? "Updating..." : "Creating...");
                 if (gistFiles.length == 0) {
-                  await showToast(Toast.Style.Failure, "No files in gist.");
+                  await showToast(Toast.Style.Failure, "No file in gist.");
                   return;
                 }
                 const _isNameValid = checkGistFileName(gistFiles);
                 if (!_isNameValid) {
-                  await showToast(Toast.Style.Failure, `Contents must have unique filenames.`);
+                  await showToast(Toast.Style.Failure, `Content must have unique filename.`);
                   return;
                 }
                 const _isContentValid = checkGistFileContent(gistFiles);
                 if (!_isContentValid.valid) {
                   await showToast(
                     Toast.Style.Failure,
-                    `Contents can't be empty.`,
+                    `Content cannot be empty.`,
                     `Check content of file${_isContentValid.contentIndex}.`
                   );
                 } else {
@@ -106,7 +103,7 @@ export default function CreateGist(props: {
                   if (response.status === 201 || response.status === 200) {
                     const options: Toast.Options = {
                       style: Toast.Style.Success,
-                      title: isEdit ? "Update gist success!" : "Create gist success!",
+                      title: isEdit ? "Update gist successfully!" : "Create gist successfully!",
                       message: "Click to copy gist link.",
                       primaryAction: {
                         title: "Copy gist link",
@@ -128,7 +125,7 @@ export default function CreateGist(props: {
                     await showToast(options);
                     setRefresh(refreshNumber());
                   } else {
-                    await showToast(Toast.Style.Success, isEdit ? "Update gist failure." : "Create gist failure.");
+                    await showToast(Toast.Style.Failure, isEdit ? "Failed to update gist." : "Failed to create gist.");
                   }
                 }
               } catch (e) {
@@ -144,7 +141,6 @@ export default function CreateGist(props: {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={async () => {
                 setGistFiles([...gistFiles, { filename: "", content: "" }]);
-                await showToast(Toast.Style.Success, "Add file success!");
               }}
             />
             <Action
@@ -155,10 +151,11 @@ export default function CreateGist(props: {
                 const _gistFiles = [...gistFiles];
                 _gistFiles.pop();
                 setGistFiles(_gistFiles);
-                await showToast(Toast.Style.Success, "Remove file success!");
               }}
             />
           </ActionPanel.Section>
+
+          <ActionOpenPreferences command={false} />
         </ActionPanel>
       }
     >
@@ -180,8 +177,8 @@ export default function CreateGist(props: {
             setIsPublic(newValue == "true");
           }}
         >
-          <Form.Dropdown.Item key={"secret"} title={"Secret"} value={"false"} />
-          <Form.Dropdown.Item key={"public"} title={"Public"} value={"true"} />
+          <Form.Dropdown.Item key={"secret"} icon={Icon.EyeSlash} title={"Secret"} value={"false"} />
+          <Form.Dropdown.Item key={"public"} icon={Icon.Eye} title={"Public"} value={"true"} />
         </Form.Dropdown>
       )}
       {gistFiles.map((gistFile, index, array) => {

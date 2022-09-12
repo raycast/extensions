@@ -5,9 +5,11 @@ export interface Word {
 }
 
 export enum SearchType {
-  SYNONYM = "syn",
-  ANTONYM = "ant",
-  RHYME = "rhy",
+  ADJECTIVE = "rel_jjb",
+  ANTONYM = "rel_ant",
+  MISSING_LETTERS = "sp",
+  RHYME = "rel_rhy",
+  SYNONYM = "ml",
 }
 
 export interface Definition {

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-workspace",
+  "title": "Google Workspace",
+  "description": "Access Google Drive files.",
+  "icon": "google-logo.png",
+  "owner": "raycast",
+  "access": "public",
+  "author": "thomaslombart",
+  "contributors": [
+    "mathieudutour"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-google-document",
+      "title": "Create Google Document",
+      "description": "Create a new Google document.",
+      "icon": "google-docs.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-google-spreadsheet",
+      "title": "Create Google Spreadsheet",
+      "description": "Create a new Google spreadsheet.",
+      "icon": "google-sheets.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-google-presentation",
+      "title": "Create Google Presentation",
+      "description": "Create a new Google presentation.",
+      "icon": "google-slides.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-google-form",
+      "title": "Create Google Form",
+      "description": "Create a new Google form.",
+      "icon": "google-forms.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "starred-google-drive-files",
+      "title": "Starred Google Drive Files",
+      "description": "List of your starred Google Drive files.",
+      "icon": "google-drive.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-google-drive-files",
+      "title": "Search Google Drive Files",
+      "description": "Search files in your Google Drive.",
+      "icon": "google-drive.png",
+      "mode": "view"
+    },
+    {
+      "name": "starred-google-drive-files-menubar",
+      "title": "Starred Google Drive Files",
+      "description": "List of your starred Google Drive files in the Menu Bar.",
+      "icon": "google-drive.png",
+      "mode": "menu-bar",
+      "interval": "15m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.0.7",
+    "date-fns": "^2.28.0",
+    "jwt-decode": "^3.1.2",
+    "node-fetch": "^3.2.6"
+  },
+  "devDependencies": {
+    "@types/jwt-decode": "^3.1.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

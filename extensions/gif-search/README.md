@@ -8,6 +8,14 @@ Find a bug? Want to see something new in this extension? Let me know by [submitt
 
 ## Preferences
 
+### Changing the Layout Style
+
+In Raycast 1.36.0, Raycast added support for extensions to use their new Grid layout style. The GIF search extension defaults to using the old List style by default, but you can change it to use the new Grid style in the preferences.
+
+![Layout Style](./media/layout.png)
+
+When using the Grid layout, you can also control the size of the individual Grid items. It defaults to "Medium", but provides options for "Small" and "Large" as well.
+
 ### Changing the Default Action
 
 You can change what the default action on a GIF is in order to customize what happens when you hit ENTER. This setting allows you to change the behavior to one of several options:
@@ -22,10 +30,6 @@ You can change what the default action on a GIF is in order to customize what ha
 1. Open in Browser: Opens the URL to the page the GIF is hosted on in your browser
 
 Whichever setting is chosen will be moved to the top of the list, making it the default action when you hit ENTER on the GIF list item.
-
-### Toggling the GIF Preview
-
-The extension shows a preview of the animated GIF on the right-hand side as you highlight a search result. If you want to disable this option, uncheck the "Show GIF Preview" preference. You can still view full GIF Details by choose the "View GIF Details" Action on any GIF whether the preview is enabled or not.
 
 ### Customizing the Number of Results
 

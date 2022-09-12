@@ -11,7 +11,7 @@ export const axiosGetIpTime = async (param: string) => {
     .then((axiosResponse) => {
       if (axiosResponse && typeof axiosResponse?.data?.error === "undefined") {
         const _timeInfo = axiosResponse.data as TimeInfo;
-        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).date_time;
+        _timeInfo.datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).dateTime;
         _timeInfo.utc_datetime = calculateTimeInfoByOffset(_timeInfo.unixtime, _timeInfo.utc_offset).utc_datetime;
         if (typeof _timeInfo === "undefined") return undefined;
         const _timeInfos: [string, string][] = [];

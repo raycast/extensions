@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 import { useState } from "react";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
-import { ensureCleanAccessories } from "../../utils";
+import { showErrorToast } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
@@ -63,7 +63,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     <List.Item
       title={title}
       subtitle={ref || commit}
-      accessories={ensureCleanAccessories([{ text: project?.name_with_namespace }])}
+      accessories={[{ text: project?.name_with_namespace }]}
       icon={icon}
       actions={
         <ActionPanel>
@@ -95,7 +95,7 @@ export function RecentCommitsList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch events", error);
+    showErrorToast(error, "Could not fetch Events");
   }
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
@@ -161,7 +161,7 @@ export function ProjectCommitList(props: { projectID: number; refName?: string }
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Could not fetch commits from project", error);
+    showErrorToast(error, "Could not fetch commits from Project");
   }
   return (
     <List isLoading={isLoading}>

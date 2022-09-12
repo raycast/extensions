@@ -1,21 +1,26 @@
-import { showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 
 import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault } from "./utils/interfaces";
-import { parseVaults } from "./utils/utils";
+import { useObsidianVaults } from "./utils/utils";
+import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command() {
-  const vaults = parseVaults();
-  if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <CreateNoteForm vaultPath={vault.path} />} />;
+  const { vaults, ready } = useObsidianVaults();
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  } else if (vaults.length > 1) {
+    return (
+      <VaultSelection vaults={vaults} target={(vault: Vault) => <CreateNoteForm vault={vault} showTitle={true} />} />
+    );
   } else if (vaults.length == 1) {
-    return <CreateNoteForm vaultPath={vaults[0].path} />;
+    return <CreateNoteForm vault={vaults[0]} showTitle={false} />;
   } else {
-    showToast({
-      title: "Path Error",
-      message: "Something went wrong with your vault path. There are no paths to select from.",
-      style: Toast.Style.Failure,
-    });
+    noVaultPathsToast();
   }
 }

@@ -1,8 +1,8 @@
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl } from "../utils";
+import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -98,7 +98,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
   );
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Project", error);
+    showErrorToast(error, "Cannot search Project");
   }
 
   return (

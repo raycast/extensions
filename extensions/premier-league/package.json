@@ -54,7 +54,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.36.0",
     "axios": "^0.26.0",
     "date-fns": "^2.28.0",
     "json2md": "^1.12.0",

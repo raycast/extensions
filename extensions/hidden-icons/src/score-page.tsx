@@ -1,12 +1,15 @@
-import { Detail, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getNumberCanvas } from "./utils/common-utils";
-import { HistoryScore } from "./utils/find-icons-utils";
+import { spawnSync } from "child_process";
+import { alertDialog } from "./hooks/hooks";
+import { HistoryScore } from "./types/types";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function ScorePage(props: { myScore: HistoryScore; historyScore: HistoryScore[] }) {
   const { mode, score } = props.myScore;
-  const historyScore = props.historyScore;
   const [scoreCanvas, setScoreCanvas] = useState<string>("");
+  const [historyScore, setHistoryScore] = useState<HistoryScore[]>(props.historyScore);
   const [breakRecord, setBreakRecord] = useState<boolean>(false);
 
   useEffect(() => {
@@ -14,14 +17,19 @@ export default function ScorePage(props: { myScore: HistoryScore; historyScore: 
       setScoreCanvas(getNumberCanvas("simple", score));
 
       const _newHistoryScore: HistoryScore[] = [];
+      let _breakRecord = false;
       historyScore.forEach((value: HistoryScore) => {
         if (value.mode == mode && value.score < score) {
           _newHistoryScore.push({ mode: mode, score: score });
-          setBreakRecord(true);
+          _breakRecord = true;
         } else {
           _newHistoryScore.push(value);
         }
       });
+      setBreakRecord(_breakRecord);
+      if (_breakRecord) {
+        spawnSync(`open raycast://confetti`, { shell: true });
+      }
       await LocalStorage.setItem("HistoryScore", JSON.stringify(_newHistoryScore));
     }
 
@@ -48,6 +56,30 @@ ${scoreCanvas}
             );
           })}
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title={"Clear History Score"}
+            onAction={() => {
+              alertDialog(
+                Icon.ExclamationMark,
+                "Clear History Score",
+                "Are you sure you want to clear history score?",
+                "Clear",
+                async () => {
+                  await LocalStorage.clear();
+                  const _historyScore: HistoryScore[] = [];
+                  historyScore.forEach((value) => {
+                    _historyScore.push({ mode: value.mode, score: 0 });
+                  });
+                  setHistoryScore(_historyScore);
+                }
+              ).then();
+            }}
+          />
+          <ActionOpenPreferences />
+        </ActionPanel>
       }
     />
   );

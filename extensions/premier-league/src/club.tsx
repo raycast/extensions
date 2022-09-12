@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
 import { useClubs, useSeasons } from "./hooks";
@@ -53,43 +53,40 @@ export default function Club() {
   const clubs = useClubs(selectedSeason);
 
   return (
-    <List
+    <Grid
       throttle
       isLoading={!clubs}
+      inset={Grid.Inset.Medium}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip="Filter by Season"
           value={selectedSeason}
           onChange={setSeason}
         >
-          <List.Dropdown.Section>
+          <Grid.Dropdown.Section>
             {seasons.map((season) => {
               return (
-                <List.Dropdown.Item
+                <Grid.Dropdown.Item
                   key={season.id}
                   value={season.id.toString()}
                   title={season.label}
                 />
               );
             })}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
       {clubs?.map((team) => {
         return (
-          <List.Item
+          <Grid.Item
             key={team.id}
             title={team.name}
-            subtitle={team.shortName}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.svg`,
+            subtitle={team.grounds[0].name}
+            content={{
+              source: `https://resources.premierleague.com/premierleague/badges/100/${team.altIds.opta}@x2.png`,
               fallback: "default.png",
             }}
-            accessories={[
-              { text: team.grounds[0].name },
-              { icon: "stadium.svg" },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -102,6 +99,6 @@ export default function Club() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

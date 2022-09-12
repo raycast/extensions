@@ -30,9 +30,7 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Alert.Options](#alert.options)</code> | Yes      | The options used to create the Alert. |
+<FunctionParametersTableFromJSDoc name="confirmAlert" />
 
 #### Return
 

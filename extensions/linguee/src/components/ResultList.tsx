@@ -1,11 +1,14 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { useState, useCallback } from "react";
-import useAxios from "axios-hooks";
+import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
+import { useState, useCallback, useEffect } from "react";
+import useAxios, { configure } from "axios-hooks";
 
+import { cache } from "../cache";
 import { ValidLanguagePairKey, validLanguagePairs } from "../constants";
 import { ResultItem } from "../types";
 import { parseDOMResult } from "../utils/parseDOMResult";
 import { parseHTML } from "../utils/parseHTML";
+
+configure({ cache });
 
 interface ResultListProps {
   languagePairKey: ValidLanguagePairKey;
@@ -39,10 +42,12 @@ export const ResultList = ({ languagePairKey }: ResultListProps): JSX.Element =>
     }
   }, []);
 
-  if (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load data from Linguee");
-  }
+  useEffect(() => {
+    if (error) {
+      console.error("Request error:", error);
+      showToast(Toast.Style.Failure, "Could not load data from Linguee");
+    }
+  }, [error]);
 
   return (
     <List
@@ -74,7 +79,7 @@ function ResultListItem({ item }: { item: ResultItem }): JSX.Element {
       icon="list-icon.png"
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://www.linguee.com${item.href}`} />
+          <Action.OpenInBrowser url={`https://www.linguee.com${item.href}`} />
         </ActionPanel>
       }
     />

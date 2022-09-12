@@ -47,7 +47,7 @@ ${item.DOI ? "**DOI:** [" + item.DOI + "](" + "https://doi.org/" + item.DOI + ")
 
 ${item.abstractNote ? "**Abstract:** " + item.abstractNote : ""}
 
-${item.tags.length > 0 ? "**Tagged With:** " + item.tags.join(", ") : ""}
+${item.tags ? "**Tagged With:** " + item.tags.join(", ") : ""}
 
 `;
 }

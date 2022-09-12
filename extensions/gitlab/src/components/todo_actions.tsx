@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, showToast, Toast } from "@raycast/api
 import { gitlab } from "../common";
 import { jsonDataToIssue, jsonDataToMergeRequest as jsonDataToMergeRequest, Todo } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { IssueDetail } from "./issues";
 import { MRDetail } from "./mr";
 
@@ -30,13 +30,13 @@ export function CloseTodoAction(props: { todo: Todo; finished?: () => void }): J
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to mark Todo as done", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to mark Todo as done");
     }
   }
   return (
     <ActionPanel.Item
       title="Mark as Done"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
       onAction={handleAction}
     />
@@ -52,7 +52,7 @@ export function CloseAllTodoAction(props: { finished?: () => void }): JSX.Elemen
         props.finished();
       }
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to Close All to do's", getErrorMessage(error));
+      showErrorToast(getErrorMessage(error), "Failed to Close All to do's");
     }
   }
   return (

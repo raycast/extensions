@@ -3,14 +3,14 @@ import _ from 'lodash';
 import { exec } from 'child_process';
 import { useEffect, useState } from 'react';
 import { promisify } from 'util';
-import { ListName, executeJxa, thingsNotRunningError } from './shared';
+import { ListName, executeJxa, thingsNotRunningError, preferences } from './shared';
 import ShowList from './show-list';
 
 const asyncExec = promisify(exec);
 
 const getTags = () =>
   executeJxa(`
-  const things = Application('Things');
+  const things = Application('${preferences.thingsAppIdentifier}');
   return things.tags().map(tag => tag.name());
 `);
 
