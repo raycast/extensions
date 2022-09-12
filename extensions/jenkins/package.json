@@ -11,7 +11,8 @@
   ],
   "keywords": [
     "jenkins",
-    "job"
+    "job",
+    "search"
   ],
   "license": "MIT",
   "commands": [

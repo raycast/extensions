@@ -4,12 +4,9 @@ Manage your jenkins.
 
 ## Features
 
-- Manage multi jenkins
-- Search jenkins jobs
-
-## Todo
-
-- [ ] Global search jenkins jobs
+- Manage jenkins
+- Manage jobs
+- Global search
 
 ## Author
 
@@ -17,4 +14,4 @@ K8sCat <k8scat@gmail.com>
 
 ## License
 
-MIT
+[MIT](./LICENSE)

@@ -19,9 +19,7 @@ export const deleteJenkins = async (id: string) => {
 };
 
 export const addJenkins = async (jenkins: Jenkins) => {
-  console.log(jenkins);
   let jenkinsList = await listJenkins();
-  console.log(jenkinsList);
   if (jenkins.id) {
     jenkinsList = jenkinsList.map((j) => {
       if (j.id === jenkins.id) {
