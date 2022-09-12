@@ -25,7 +25,7 @@ export default function checkBikeInstalled() {
 
     return (
       <List>
-        <List.EmptyView title="You need to install Bike in order to use this extension." icon="command-icon.png" />
+        <List.EmptyView title="You need to install Bike in order to use this extension." icon="no-view.png" />
       </List>
     );
   }
