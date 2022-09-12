@@ -389,13 +389,11 @@ function enrichExchangeData(
 }
 
 function getFlagEmoji(countryCode: string): string {
-  const { make_tw_happy } = getPreferenceValues();
   const codePoints = countryCode
     .toUpperCase()
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   let v = countryCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
-  v = countryCode === "TW" && !make_tw_happy ? "🇨🇳" : v;
   v = countryCode === "AN" ? "🇺🇳" : v;
   return v;
 }

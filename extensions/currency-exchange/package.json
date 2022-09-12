@@ -22,14 +22,6 @@
       "title": "API Key",
       "description": "You can get API Key at https://app.exchangerate-api.com/dashboard",
       "placeholder": "Exchange Rate API Key"
-    },
-    {
-      "name": "make_tw_happy",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "title": "Make Taiwan Happen",
-      "description": "Make Taiwan Happy"
     }
   ],
   "dependencies": {
