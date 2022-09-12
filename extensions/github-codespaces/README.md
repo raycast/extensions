@@ -1,6 +1,6 @@
 # GitHub Codespaces for Raycast
-Display, launch, and manage your GitHub Codespaces from Raycast
 
+Display, launch, and manage your codespaces from Raycast
 
 ## Setup
 
