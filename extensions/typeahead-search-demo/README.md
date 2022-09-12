@@ -1,1 +1,0 @@
-# typeahead-search-demo
