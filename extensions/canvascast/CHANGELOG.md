@@ -1,6 +1,6 @@
 # Canvascast Changelog
 
-## [Fix] - 2022-09-04
+## [Fix] - 2022-09-13
 
 - Fixed a bug with loading the download urls of the module items
 - Updated the icons to be higher resolution and svg format. 
