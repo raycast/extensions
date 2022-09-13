@@ -5,12 +5,12 @@ import BookmarksFolderDropdown from "src/components/BookmarksFolderDropdown";
 import { useState } from "react";
 
 export default function Command() {
-  const { folders, bookmarks } = useBookmarks();
+  const { folders, bookmarks, isLoading } = useBookmarks();
   const [folder, setFolder] = useState<string>("");
 
   return (
     <List
-      isLoading={!bookmarks}
+      isLoading={isLoading}
       searchBarPlaceholder="Search by title, domain name, or folder"
       searchBarAccessory={<BookmarksFolderDropdown folders={folders} onChange={setFolder} />}
     >
