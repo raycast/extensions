@@ -23,9 +23,9 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "placeholder": "PagerDuty API key",
-      "description": "Generate your API key on User Settings page. For more detail, see https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTUx-authentication"
+      "title": "User API Token",
+      "placeholder": "PagerDuty API token",
+      "description": "Generate your user API token (not account token) on User Settings page. For more detail, see https://support.pagerduty.com/docs/api-access-keys#section-generate-a-user-token-rest-api-key"
     }
   ],
   "dependencies": {
