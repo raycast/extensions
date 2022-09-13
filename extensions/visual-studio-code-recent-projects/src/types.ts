@@ -61,6 +61,6 @@ export interface RecentEntries {
   value: string;
 }
 
-export interface RecenEntry {
+export interface RecenEntryValue {
   entries: EntryLike[];
 }
