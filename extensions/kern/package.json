@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kern",
+  "title": "Kern",
+  "description": "Start a focus session and get notified once the time is over.",
+  "icon": "command-icon.png",
+  "author": "zeekrey",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "startSession",
+      "title": "Start Focus Session",
+      "subtitle": "Kern",
+      "description": "Start a new focus session.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Session Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stopSession",
+      "title": "Stop Focus Session",
+      "subtitle": "Kern",
+      "description": "Stop an existing focus session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "listSessions",
+      "title": "List Focus Sessions",
+      "subtitle": "Kern",
+      "description": "List all sessions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sessionDuration",
+      "description": "Duration of a focus session in minutes.",
+      "type": "textfield",
+      "required": true,
+      "title": "Session Duration",
+      "placeholder": "25",
+      "default": "25"
+    },
+    {
+      "name": "notificationSound",
+      "description": "The Sound that is played once a session is over.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Notification Sound",
+      "default": "Glass",
+      "data": [
+        {
+          "title": "Blow",
+          "value": "Blow"
+        },
+        {
+          "title": "Bottle",
+          "value": "Bottle"
+        },
+        {
+          "title": "Frog",
+          "value": "Frog"
+        },
+        {
+          "title": "Glass",
+          "value": "Glass"
+        },
+        {
+          "title": "Hero",
+          "value": "Hero"
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
