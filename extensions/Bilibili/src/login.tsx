@@ -1,6 +1,7 @@
-import { Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
 import { checkQRCode, gennerateQRCode } from "./utils";
+
+import { useState, useEffect } from "react";
+import { Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 
 function makeCookie(cookie: string[]) {
   let resCookie = "";

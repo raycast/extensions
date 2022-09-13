@@ -1,4 +1,5 @@
 import { video } from "./components";
+import { secondToDate } from "./utils";
 import { usePopularVideos } from "./hooks";
 
 import { Color, List, Icon, Cache } from "@raycast/api";
@@ -32,7 +33,7 @@ export default function Command() {
             name: item.owner.name,
             face: item.owner.face,
           },
-          item.duration,
+          secondToDate(item.duration),
           item.pubdate,
           {
             highlight: item.rcmd_reason.content,

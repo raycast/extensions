@@ -1,7 +1,7 @@
+import { video } from "./components";
 import { useDynamicFeed } from "./hooks";
 
 import { Color, List, Icon, Cache } from "@raycast/api";
-import { video } from "./components";
 
 export default function Command() {
   const cache = new Cache();

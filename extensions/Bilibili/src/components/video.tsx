@@ -7,7 +7,7 @@ export function video(
   cover: string,
   url: string,
   uploader: Bilibili.uploader,
-  duration: number | string,
+  duration: string,
   pubdate: number,
   stat: {
     highlight: string;

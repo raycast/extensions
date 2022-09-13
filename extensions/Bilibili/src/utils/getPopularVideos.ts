@@ -1,6 +1,7 @@
-import { Cache } from "@raycast/api";
 import got from "got";
 import { API } from "./api";
+
+import { Cache } from "@raycast/api";
 
 export async function getPopularVideos() {
   const cache = new Cache();
