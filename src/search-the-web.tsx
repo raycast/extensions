@@ -1,10 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { getFavicon, useFetch } from "@raycast/utils";
-import { Action, ActionPanel, Clipboard, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
 import AddSearchEngine from "./add-search-engine";
 import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
 import { getSavedSites } from "./saved-sites";
+
+interface Preferences {
+  prefillFromClipboard: boolean;
+}
 
 function suggestionsFromXml(xml: string): string[] {
   const suggestionMatches = xml.matchAll(/<suggestion data="(.*?)"\/>/g);
@@ -19,17 +23,22 @@ function suggestionsFromXml(xml: string): string[] {
 }
 
 export default function Command() {
-  const { push } = useNavigation();
   const [searchText, setSearchText] = useState("");
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      setSearchText(text ?? "");
-      // updateSuggestions(searchText);
-    });
+    if (getPreferenceValues<Preferences>().prefillFromClipboard) {
+      Clipboard.readText().then((text) => {
+        setSearchText(text ?? "");
+        // updateSuggestions(searchText);
+      });
+    }
   }, []);
 
   const [savedSites, setSavedSites] = useState(getSavedSites());
+  const [selectedSite, setSelectedSiteTitle] = useState<string | undefined>();
+
+  const urlToSite = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
   const { isLoading, data } = useFetch<string[] | string, void>(
     `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(searchText)}`,
@@ -61,17 +70,18 @@ export default function Command() {
     }
   );
 
-  const actions = (
-    <ActionPanel>
+  const defaultActions = (
+    <ActionPanel.Section title="Manage sites">
       <Action.Push
-        target={<AddSearchEngine {...{ savedSites, setSavedSites }} />}
+        target={<AddSearchEngine {...{ savedSites, setSavedSites, forceUpdate }} />}
         title="Add search engine..."
+        icon={Icon.Plus}
       ></Action.Push>
-      <Action title="Manage search engines..."></Action>
-    </ActionPanel>
+      <Action title="Manage search engines..." icon={Icon.Gear}></Action>
+    </ActionPanel.Section>
   );
 
-  console.log(savedSites);
+  const defaultActionPanel = <ActionPanel title="Title">{defaultActions}</ActionPanel>;
 
   const searchSuggestionsList = (
     <List
@@ -81,23 +91,38 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Search site">
-          {savedSites.items.map(({ title, url }) => (
-            <List.Dropdown.Item {...{ title, key: title, value: url, icon: getFavicon(url) }}></List.Dropdown.Item>
+        <List.Dropdown
+          tooltip="Search site"
+          storeValue={true}
+          onChange={(newUrl) => setSelectedSiteTitle(urlToSite[newUrl])}
+        >
+          {savedSites.items.map(({ title, url }, i) => (
+            <List.Dropdown.Item {...{ title, key: i, value: url, icon: getFavicon(url) }}></List.Dropdown.Item>
           ))}
         </List.Dropdown>
       }
-      actions={actions}
+      actions={<ActionPanel>{defaultActions}</ActionPanel>}
     >
       {typeof data === "string" ? (
         <List.Item
           key={data}
           title={`Error: Could not load search suggestions, but you can still search for the above text.`}
           accessories={[{ text: `${data}`, icon: Icon.Warning }]}
-          actions={actions}
+          actions={defaultActionPanel}
         ></List.Item>
       ) : (
-        (data ?? []).map((item) => <List.Item key={item} title={item} actions={actions} />)
+        (data ?? []).map((item) => (
+          <List.Item
+            key={item}
+            title={item}
+            actions={
+              <ActionPanel>
+                <Action title={`Search on ${selectedSite}`} icon={Icon.MagnifyingGlass}></Action>
+                {defaultActions}
+              </ActionPanel>
+            }
+          />
+        ))
       )}
     </List>
   );

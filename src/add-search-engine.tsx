@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { URL } from "node:url";
-import { useFetch, useForm } from "@raycast/utils";
-import { SavedSite, SavedSites, writeSavedSites, getExistingTitles } from "./saved-sites";
+import { useForm } from "@raycast/utils";
+import { SavedSite, SavedSites, writeSavedSites, getExistingTitlesAndUrls } from "./saved-sites";
 import SearchSuggestions from "./search-the-web";
 
 const collator = new Intl.Collator(undefined, { sensitivity: "accent" });
@@ -25,7 +25,7 @@ function getTitleErrorMessage(title: string, existingTitles: string[]) {
 }
 
 // https://stackoverflow.com/a/43467144
-function getUrlErrorMessage(url: string) {
+function getUrlErrorMessage(url: string, existingUrls: string[]) {
   if (url.length === 0) {
     return "URL template may not be empty";
   }
@@ -40,21 +40,27 @@ function getUrlErrorMessage(url: string) {
     return 'Invalid URL (did you forget the "https://"?)';
   }
 
+  if (existingUrls.some((existing) => collator.compare(url, existing) === 0)) {
+    return "A saved search with this URL already exists";
+  }
+
   return undefined;
 }
 
 export default function Command({
   savedSites,
   setSavedSites,
+  forceUpdate,
 }: {
   savedSites: SavedSites;
   setSavedSites: (_: SavedSites) => void;
+  forceUpdate?: () => void;
 }) {
   const { pop, push } = useNavigation();
   const isInitialView = savedSites.items.length === 0;
 
-  const existingTitles = useMemo(() => {
-    return getExistingTitles(savedSites);
+  const existingTitlesAndUrls = useMemo(() => {
+    return getExistingTitlesAndUrls(savedSites);
   }, [savedSites]);
   // const [existingTitles, setExistingTitles] = useState(getExistingTitles(savedSites));
 
@@ -63,6 +69,8 @@ export default function Command({
       const { title } = data;
       savedSites.items.push(data);
       savedSites.items.sort((ss1, ss2) => collator.compare(ss1.title, ss2.title));
+
+      console.log("saved", savedSites);
 
       writeSavedSites(savedSites);
       setSavedSites(savedSites);
@@ -75,11 +83,13 @@ export default function Command({
       pop();
       if (isInitialView) {
         push(<SearchSuggestions />);
+      } else if (forceUpdate) {
+        forceUpdate();
       }
     },
     validation: {
-      title: (title) => getTitleErrorMessage(title ?? "", existingTitles),
-      url: (url) => getUrlErrorMessage(url ?? ""),
+      title: (title) => getTitleErrorMessage(title ?? "", existingTitlesAndUrls.titles),
+      url: (url) => getUrlErrorMessage(url ?? "", existingTitlesAndUrls.urls),
     },
   });
 

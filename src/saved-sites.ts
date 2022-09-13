@@ -26,6 +26,12 @@ export function writeSavedSites(savedSites: SavedSites) {
   return writeFileSync(SAVED_SITES_FILEPATH, JSON.stringify(savedSites));
 }
 
-export function getExistingTitles(savedSites: SavedSites) {
-  return savedSites.items.map((item) => item.title);
+export function getExistingTitlesAndUrls(savedSites: SavedSites) {
+  const titles = [] as string[];
+  const urls = [] as string[];
+  for (const { title, url } of savedSites.items) {
+    titles.push(title);
+    urls.push(url);
+  }
+  return { titles, urls };
 }

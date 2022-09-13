@@ -15,8 +15,17 @@
       "name": "search-the-web",
       "title": "Search the web",
       "subtitle": "Search any site on the web",
-      "description": "First it asks for a search query, then it lets you search the query on any site.",
+      "description": "Select the site to search from the dropdown, enter your search term, and choose from the list of search suggestions. Allows adding custom search engines.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "prefill-from-clipboard",
+      "label": "Prefill search from clipboard",
+      "type": "checkbox",
+      "required": false,
+      "description": "Whether to pre-fill the search field with the text on the clipboard (if any)"
     }
   ],
   "dependencies": {
