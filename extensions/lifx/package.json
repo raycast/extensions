@@ -55,7 +55,7 @@
       "title": "LIFX Token",
       "description": "Your LIFX token",
       "type": "textfield",
-      "default": "23141342344273647",
+      "placeholder": "23141342344273647",
       "required": true
     },
     {
