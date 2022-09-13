@@ -84,7 +84,10 @@ export default function Command() {
           <Grid.Dropdown.Item
             value={data.categories[0].name}
             title="All Categories"
-            icon={{ source: `symbols/images/${data.categories[0].symbol}.png`, tintColor: Color.PrimaryText }}
+            icon={{
+              source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${data.categories[0].symbol}.png`,
+              tintColor: Color.PrimaryText,
+            }}
           />
           <Grid.Dropdown.Section>
             {data.categories.slice(1).map((category, index) => (
@@ -92,7 +95,10 @@ export default function Command() {
                 key={index}
                 value={category.name}
                 title={category.title}
-                icon={{ source: `symbols/images/${category.symbol}.png`, tintColor: Color.PrimaryText }}
+                icon={{
+                  source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${category.symbol}.png`,
+                  tintColor: Color.PrimaryText,
+                }}
               />
             ))}
           </Grid.Dropdown.Section>
@@ -133,7 +139,10 @@ const Symbol = (props: SymbolProps) => {
   return (
     <Grid.Item
       title={showName ? symbol.name : undefined}
-      content={{ source: `symbols/images/${symbol.name}.png`, tintColor: Color.PrimaryText }}
+      content={{
+        source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${symbol.name}.png`,
+        tintColor: Color.PrimaryText,
+      }}
       keywords={symbol.searchTerms.concat([symbol.name])}
       actions={<SymbolActions {...props} />}
     />
