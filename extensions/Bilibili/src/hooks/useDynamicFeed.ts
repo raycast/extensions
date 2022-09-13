@@ -15,7 +15,6 @@ export function useDynamicFeed() {
         setDynamicVideoFeed(res);
         setIsLoading(false);
       } catch (error) {
-        console.log(error);
         showToast(Toast.Style.Failure, "Get dynamic video feed failed");
       }
     })();

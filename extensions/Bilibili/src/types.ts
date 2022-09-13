@@ -79,7 +79,7 @@ declare global {
       message: string;
       ttl: number;
       data: {
-        list: popularVideo[];
+        list: video[];
         no_more: boolean;
       };
     }
@@ -90,8 +90,10 @@ declare global {
       face: string;
     };
 
-    export type popularVideo = {
+    export type video = {
+      uri: string;
       aid: number;
+      bvid: string;
       pic: string;
       title: string;
       pubdate: number;
@@ -101,7 +103,7 @@ declare global {
       stat: {
         danmaku: number;
         view: number;
-        coin: number;
+        coin?: number;
         like: number;
       };
       rcmd_reason: {
@@ -109,5 +111,14 @@ declare global {
       };
       short_link: string;
     };
+
+    export interface rcmdVideosResponse {
+      code: number;
+      data: {
+        item: video[];
+      };
+      message: string;
+      ttl: number;
+    }
   }
 }

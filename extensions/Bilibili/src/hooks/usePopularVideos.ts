@@ -4,7 +4,7 @@ import { showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 export function usePopularVideos() {
-  const [popularVideos, setPopularVideos] = useState<Bilibili.popularVideo[]>([]);
+  const [popularVideos, setPopularVideos] = useState<Bilibili.video[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +15,6 @@ export function usePopularVideos() {
         setPopularVideos(res);
         setIsLoading(false);
       } catch (error) {
-        console.log(error);
         showToast(Toast.Style.Failure, "Get popular videos failed");
       }
     })();

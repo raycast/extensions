@@ -24,6 +24,12 @@
       "mode": "view"
     },
     {
+      "name": "rcmdVideos",
+      "title": "Recommend videos",
+      "description": "Show recommend videos",
+      "mode": "view"
+    },
+    {
       "name": "login",
       "title": "Login Bilibili",
       "description": "Show QRCode to login Bilibili",

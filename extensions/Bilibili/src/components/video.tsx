@@ -10,9 +10,9 @@ export function video(
   duration: string,
   pubdate: number,
   stat: {
-    highlight: string;
-    view: number | string;
-    danmaku: number | string;
+    highlight?: string;
+    view?: number | string;
+    danmaku?: number | string;
     like?: number;
     coin?: number;
   }
@@ -38,11 +38,18 @@ export function video(
               <List.Item.Detail.Metadata.Label title="Time" text={new Date(pubdate * 1000).toLocaleString()} />
               <List.Item.Detail.Metadata.TagList title="Stat">
                 {stat.highlight && <List.Item.Detail.Metadata.TagList.Item text={stat.highlight} color={"#FB7299"} />}
-                <List.Item.Detail.Metadata.TagList.Item text={`Play: ${stat.view}`} color={Color.Green} />
+                {stat.view && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Play: ${stat.view}`} color={Color.Green} />
+                )}
                 {stat.coin && (
                   <List.Item.Detail.Metadata.TagList.Item text={`Coin: ${stat.coin}`} color={Color.Orange} />
                 )}
-                <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${stat.danmaku}`} color={Color.Blue} />
+                {stat.view && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${stat.view}`} color={Color.Brown} />
+                )}
+                {stat.danmaku && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${stat.danmaku}`} color={Color.Blue} />
+                )}
               </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>
           }
