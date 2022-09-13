@@ -1,6 +1,7 @@
-import { List, Detail, Action, ActionPanel, Icon, Color, Toast, showToast, showHUD } from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Toast, showToast, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { handleTaskEitherError, MusicIcon } from "./util/utils";
+import { handleTaskEitherError, Icons } from "./util/utils";
+import { refreshCache, wait } from "./util/cache";
 import { DetailMetadata } from "./track-detail";
 import PlayTrack from "./play-track";
 import PlayAlbum from "./play-album";
@@ -10,7 +11,6 @@ import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import json2md from "json2md";
-import { refreshCache, wait } from "./util/cache";
 
 export default function CurrentTrack() {
   const [track, setTrack] = useState<Track | undefined>(undefined);
@@ -47,17 +47,17 @@ export default function CurrentTrack() {
     <List
       actions={
         <ActionPanel>
-          <Action.Push title="Play Track" icon={Icon.Music} target={<PlayTrack />} />
-          <Action.Push title="Play Album" icon={Icon.Music} target={<PlayAlbum />} />
+          <Action.Push title="Play Track" icon={Icon.Play} target={<PlayTrack />} />
+          <Action.Push title="Play Album" icon={Icons.Album} target={<PlayAlbum />} />
           <Action.Push
             title="Play Playlist"
-            icon={Icon.Music}
+            icon={Icons.Playlist}
             shortcut={{ modifiers: ["cmd"], key: "p" }}
             target={<PlayPlaylist />}
           />
           <Action
             title="Show Apple Music"
-            icon={MusicIcon}
+            icon={Icons.Music}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={async () => {
               await handleTaskEitherError(music.player.activate)();
@@ -90,7 +90,7 @@ export default function CurrentTrack() {
             />
             <Action
               title="Show Track"
-              icon={MusicIcon}
+              icon={Icons.Music}
               onAction={async () => {
                 await handleTaskEitherError(music.player.revealTrack)();
                 await handleTaskEitherError(music.player.activate)();
@@ -102,13 +102,16 @@ export default function CurrentTrack() {
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "a" }}
                 onAction={async () => {
-                  await showToast(Toast.Style.Animated, "Adding to Library");
-                  await handleTaskEitherError(music.player.addToLibrary)();
-                  await wait(2);
-                  setTrack({ ...track, inLibrary: true });
-                  await showToast(Toast.Style.Success, "Added to Library");
-                  await wait(3);
-                  await refreshCache();
+                  await pipe(
+                    music.player.addToLibrary,
+                    TE.map(async () => {
+                      showToast(Toast.Style.Success, "Added to Library");
+                      setTrack({ ...track, inLibrary: true });
+                      await wait(5);
+                      await refreshCache();
+                    }),
+                    TE.mapLeft(() => showToast(Toast.Style.Failure, "Failed to Add to Library"))
+                  )();
                 }}
               />
             )}
@@ -136,10 +139,7 @@ export default function CurrentTrack() {
                 <Action
                   key={rating}
                   title={`${rating} Star${rating === 1 ? "" : "s"}`}
-                  icon={{
-                    source: track.rating === rating ? "../assets/star-filled.svg" : "../assets/star.svg",
-                    tintColor: Color.PrimaryText,
-                  }}
+                  icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
                   onAction={async () => {
                     await pipe(
                       rating * 20,

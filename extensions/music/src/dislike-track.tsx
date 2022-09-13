@@ -1,8 +1,12 @@
 import { showHUD } from "@raycast/api";
 import { dislike } from "./util/scripts/player-controls";
-import { handleTaskEitherError } from "./util/utils";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
 
 export default async () => {
-  await handleTaskEitherError(dislike)();
-  await showHUD("Track Disliked");
+  await pipe(
+    dislike,
+    TE.map(() => showHUD("Track Disliked")),
+    TE.mapLeft(() => showHUD("Failed to Dislike Track"))
+  )();
 };

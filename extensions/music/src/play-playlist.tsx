@@ -5,7 +5,7 @@ import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { Playlist } from "./util/models";
-import { MusicIcon } from "./util/utils";
+import { Icons } from "./util/utils";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -142,7 +142,7 @@ function Actions({ playlist: { id }, pop }: ActionsProps) {
         />
         <Action
           title="Show in Apple Music"
-          icon={MusicIcon}
+          icon={Icons.Music}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={showPlaylist}
         />

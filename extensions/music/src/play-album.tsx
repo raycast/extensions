@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import * as music from "./util/scripts";
 import { Tracks } from "./tracks";
 import { Album } from "./util/models";
-import { MusicIcon } from "./util/utils";
+import { Icons } from "./util/utils";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -128,7 +128,7 @@ function Actions({ album }: { album: Album }) {
         />
         <Action
           title="Show in Apple Music"
-          icon={MusicIcon}
+          icon={Icons.Music}
           shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
           onAction={async () => {
             await music.albums.show(album);

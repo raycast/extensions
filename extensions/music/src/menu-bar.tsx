@@ -1,6 +1,6 @@
 import { MenuBarExtra, Icon, Color, Image, environment, LaunchType, showHUD } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { handleTaskEitherError, trimTitle, MusicIcon, AppleMusicColor } from "./util/utils";
+import { handleTaskEitherError, trimTitle, AppleMusicColor, Icons } from "./util/utils";
 import { getCurrentTrackArtwork } from "./util/artwork";
 import { refreshCache, wait } from "./util/cache";
 import * as music from "./util/scripts";
@@ -36,7 +36,7 @@ export default function MenuBar() {
 
   if (isLoading || state === undefined) {
     return (
-      <MenuBarExtra isLoading={isLoading} icon={MusicIcon} tooltip="Apple Music">
+      <MenuBarExtra isLoading={isLoading} icon={Icons.Music} tooltip="Apple Music">
         <MenuBarExtra.Item
           title="Show Apple Music"
           onAction={async () => {
@@ -48,7 +48,7 @@ export default function MenuBar() {
   }
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={MusicIcon} tooltip="Apple Music">
+    <MenuBarExtra isLoading={isLoading} icon={Icons.Music} tooltip="Apple Music">
       <MenuBarExtra.Item title={"Current Track"} />
       {
         <MenuBarExtra.Item
@@ -71,10 +71,7 @@ export default function MenuBar() {
       />
       <MenuBarExtra.Item
         title="Repeat Mode"
-        icon={{
-          source: state.repeat === "one" ? "../assets/repeat-one.png" : "../assets/repeat.png",
-          tintColor: state.repeat === "off" ? Color.PrimaryText : AppleMusicColor,
-        }}
+        icon={state.repeat === "one" ? Icons.Repeat.One : state.repeat === "all" ? Icons.Repeat.All : Icons.Repeat.Off}
         onAction={async () => {
           const nextState = state.repeat === "off" ? "all" : state.repeat === "all" ? "one" : "off";
           setState({ ...state, repeat: nextState });
@@ -125,10 +122,16 @@ export default function MenuBar() {
           title={"Add to Library"}
           icon={Icon.Plus}
           onAction={async () => {
-            setState({ ...state, added: true });
-            await handleTaskEitherError(music.player.addToLibrary)();
-            await wait(5);
-            await refreshCache();
+            await pipe(
+              music.player.addToLibrary,
+              TE.map(async () => {
+                showHUD("Added to Library");
+                setState({ ...state, added: true });
+                await wait(5);
+                await refreshCache();
+              }),
+              TE.mapLeft(() => showHUD("Failed to Add to Library"))
+            )();
           }}
         />
       )}
@@ -144,7 +147,7 @@ export default function MenuBar() {
           />
         ))}
       </MenuBarExtra.Submenu>
-      <MenuBarExtra.Submenu title="Set Rating" icon={{ source: "../assets/star.svg", tintColor: Color.PrimaryText }}>
+      <MenuBarExtra.Submenu title="Set Rating" icon={Icons.Star}>
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
           <MenuBarExtra.Item
             key={i}

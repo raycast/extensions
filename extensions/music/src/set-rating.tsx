@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, showToast, Toast, Icon, Color } from "@rayca
 import { useEffect, useState } from "react";
 import { DetailMetadata } from "./track-detail";
 import * as music from "./util/scripts";
-import { handleTaskEitherError } from "./util/utils";
+import { Icons } from "./util/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { refreshCache, wait } from "./util/cache";
@@ -46,15 +46,12 @@ export default function SetRating() {
             <List.Item
               key={rating}
               title={`${rating} Star${rating === 1 ? "" : "s"}`}
-              icon={{
-                source: track.rating === rating ? "../assets/star-filled.svg" : "../assets/star.svg",
-                tintColor: Color.PrimaryText,
-              }}
+              icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
               actions={
                 <ActionPanel>
                   <Action
                     title="Set Rating"
-                    icon={{ source: "../assets/star.svg", tintColor: Color.PrimaryText }}
+                    icon={Icons.Star}
                     onAction={async () => {
                       await pipe(
                         rating * 20,
@@ -80,13 +77,16 @@ export default function SetRating() {
                     title="Add to Library"
                     icon={Icon.Plus}
                     onAction={async () => {
-                      await showToast(Toast.Style.Animated, "Adding to Library");
-                      await handleTaskEitherError(music.player.addToLibrary)();
-                      await wait(2);
-                      setTrack({ ...track, inLibrary: true });
-                      await showToast(Toast.Style.Success, "Added to Library");
-                      await wait(3);
-                      await refreshCache();
+                      await pipe(
+                        music.player.addToLibrary,
+                        TE.map(async () => {
+                          showToast(Toast.Style.Success, "Added to Library");
+                          setTrack({ ...track, inLibrary: true });
+                          await wait(5);
+                          await refreshCache();
+                        }),
+                        TE.mapLeft(() => showToast(Toast.Style.Failure, "Failed to Add to Library"))
+                      )();
                     }}
                   />
                 }

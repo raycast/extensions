@@ -1,5 +1,19 @@
 # Apple Music Changelog
 
+## [Grid View / Menu Bar]
+
+- Added grid view with album artwork using Last FM API
+- Added new menu bar command to control Apple Music
+- Using cache with background refresh on the menu bar command
+
+## [Update] - 2022-07-27
+- Improved error reporting
+- New README and screenshots
+
+## [Update] - 2022-07-15
+
+Squashed a few bugs in "Play Library Album"
+
 ## [Shuffle Playlist/Album] - 2022-06-01
 
 - Ability to shuffle an album
