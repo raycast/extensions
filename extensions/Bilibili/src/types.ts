@@ -103,7 +103,7 @@ declare global {
       stat: {
         danmaku: number;
         view: number;
-        coin?: number;
+        coin: number;
         like: number;
       };
       rcmd_reason: {

@@ -1,5 +1,5 @@
 import { video } from "./components";
-import { secondToDate } from "./utils";
+import { formatNumber, secondToDate } from "./utils";
 import { usePopularVideos } from "./hooks";
 
 import { Color, List, Icon, Cache } from "@raycast/api";
@@ -37,10 +37,10 @@ export default function Command() {
           item.pubdate,
           {
             highlight: item.rcmd_reason.content,
-            view: item.stat.view,
-            danmaku: item.stat.danmaku,
-            coin: item.stat.coin,
-            like: item.stat.like,
+            view: formatNumber(item.stat.view),
+            danmaku: formatNumber(item.stat.danmaku),
+            coin: formatNumber(item.stat.coin),
+            like: formatNumber(item.stat.like),
           }
         )
       )}

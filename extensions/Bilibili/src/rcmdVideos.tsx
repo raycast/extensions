@@ -1,5 +1,5 @@
 import { video } from "./components";
-import { secondToDate } from "./utils";
+import { formatNumber, secondToDate } from "./utils";
 import { useRcmdVideos } from "./hooks";
 
 import { useState } from "react";
@@ -50,10 +50,10 @@ export default function Command() {
           item.pubdate,
           {
             highlight: item.rcmd_reason?.content || undefined,
-            view: item.stat?.view || undefined,
-            danmaku: item.stat?.danmaku || undefined,
-            coin: item.stat?.coin || undefined,
-            like: item.stat?.like || undefined,
+            view: item.stat?.view ? formatNumber(item.stat.view) : undefined,
+            danmaku: item.stat?.danmaku ? formatNumber(item.stat.danmaku) : undefined,
+            coin: item.stat?.coin ? formatNumber(item.stat.coin) : undefined,
+            like: item.stat?.like ? formatNumber(item.stat.like) : undefined,
           }
         )
       )}

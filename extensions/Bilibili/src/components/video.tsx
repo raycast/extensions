@@ -11,10 +11,10 @@ export function video(
   pubdate: number,
   stat: {
     highlight?: string;
-    view?: number | string;
-    danmaku?: number | string;
-    like?: number;
-    coin?: number;
+    view?: string;
+    danmaku?: string;
+    like?: string;
+    coin?: string;
   }
 ) {
   return (
