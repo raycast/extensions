@@ -26,7 +26,7 @@ export default function Command() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action title="Reload" onAction={revalidate} />
+          <Action title="Reload" icon={Icon.Repeat} onAction={revalidate} />
         </ActionPanel>
       }
       searchBarAccessory={
