@@ -9,8 +9,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Multipass",
-      "description": "Manage Multipass VMs",
+      "title": "Manage VMs",
+      "subtitle": "Multipass",
+      "description": "Manage Multipass VMs directly from within Raycast",
       "mode": "view"
     }
   ],
