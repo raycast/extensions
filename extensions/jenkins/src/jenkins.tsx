@@ -26,8 +26,8 @@ export default function Command() {
         const jenkinsList = await listJenkins();
         const results = jenkinsList.filter((j) => j.name.toLowerCase().includes(searchText.toLowerCase()));
         setJenkinsList(results);
-      } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Search failed", message: String(error) });
+      } catch (err) {
+        showToast({ style: Toast.Style.Failure, title: "Search Failed", message: String(err) });
       } finally {
         setIsLoading(false);
       }
@@ -77,12 +77,12 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
             <Action.Push
               icon={Icon.BarCode}
               title="Manage Jobs"
-              target={<Search jenkins={props.jenkins} mode="normal" navigationTitle="Manage Jobs" />}
+              target={<Search jenkins={props.jenkins} navigationTitle="Manage Jobs" />}
             />
             <Action.Push
               icon={Icon.Filter}
               title="Global Search"
-              target={<Search jenkins={props.jenkins} mode="global" navigationTitle="Global Search" />}
+              target={<Search jenkins={props.jenkins} navigationTitle="Global Search" isGlobalSearch={true} />}
               shortcut={{ modifiers: ["cmd"], key: "g" }}
             />
             <Action.Push
@@ -111,8 +111,8 @@ function JenkinsItem(props: { jenkins: Jenkins; setJenkinsList: (f: (v: Jenkins[
                       try {
                         await deleteJenkins(props.jenkins.id);
                         props.setJenkinsList((jenkinsList) => jenkinsList.filter((j) => j.id !== props.jenkins.id));
-                      } catch (error) {
-                        showToast(Toast.Style.Failure, "Delete failed", String(error));
+                      } catch (err) {
+                        showToast(Toast.Style.Failure, "Delete failed", String(err));
                       }
                     },
                   },
@@ -184,7 +184,7 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
                 });
                 pop();
               } catch (err) {
-                showToast(Toast.Style.Failure, action + " jenkins failed", String(err));
+                showToast(Toast.Style.Failure, `${action} Jenkins Failed`, String(err));
               }
             }}
           />

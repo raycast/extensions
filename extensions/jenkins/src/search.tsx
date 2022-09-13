@@ -1,13 +1,13 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, Alert, confirmAlert } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import { JenkinsAPI, Jenkins, Job, hasSubJobs, Suggestion, View, Build } from "./lib/api";
+import { JenkinsAPI, Jenkins, Job, hasSubJobs, Suggestion, Build } from "./lib/api";
 
 interface SearchProps {
   jenkins: Jenkins;
   jobs?: string[];
-  mode: string;
   navigationTitle: string;
   suggestions?: string[];
+  isGlobalSearch?: boolean;
 }
 
 export function Search(props: SearchProps) {
@@ -24,16 +24,16 @@ export function Search(props: SearchProps) {
       setIsLoading(true);
       try {
         const jenkinsAPI = new JenkinsAPI(props.jenkins);
-        if (props.mode === "normal") {
-          const resp = await jenkinsAPI.inspect(props.jobs);
-          setJobs(resp.jobs?.filter((job) => job.name.toLowerCase().includes(text.toLowerCase())) ?? []);
-        } else {
+        if (props.isGlobalSearch) {
           if (text !== "") {
             setSuggestions(await jenkinsAPI.search(text));
           }
+        } else {
+          const resp = await jenkinsAPI.inspect(props.jobs);
+          setJobs(resp.jobs?.filter((job) => job.name.toLowerCase().includes(text.toLowerCase())) ?? []);
         }
-      } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Search failed", message: String(error) });
+      } catch (err) {
+        showToast({ style: Toast.Style.Failure, title: "Search Failed", message: String(err) });
       } finally {
         setIsLoading(false);
       }
@@ -45,107 +45,13 @@ export function Search(props: SearchProps) {
     search("");
   }, []);
 
-  if (props.mode === "normal") {
+  if (props.isGlobalSearch) {
     return (
       <List
         navigationTitle={props.navigationTitle}
         isLoading={isLoading}
         onSearchTextChange={search}
-        searchBarPlaceholder={props.mode === "normal" ? "Search jobs..." : "Search..."}
-        throttle
-      >
-        <List.Section title="Results" subtitle={jobs.length + ""}>
-          {jobs.map((job) => (
-            <List.Item
-              key={job.url}
-              title={job.name}
-              subtitle={job.short_class}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.OpenInBrowser title="Open in Browser" url={job.url} />
-                    {!hasSubJobs(job) ? (
-                      <Action.Push
-                        icon={Icon.Box}
-                        title="Builds"
-                        target={
-                          <Build
-                            jenkins={props.jenkins}
-                            jobs={props.jobs ? [...props.jobs, job.path ?? ""] : [job.path ?? ""]}
-                          />
-                        }
-                      />
-                    ) : (
-                      <></>
-                    )}
-                    {hasSubJobs(job) ? (
-                      <Action.Push
-                        icon={Icon.Folder}
-                        title="Sub Jobs"
-                        target={
-                          <Search
-                            jenkins={props.jenkins}
-                            jobs={[...(props.jobs ?? []), job.path ?? ""]}
-                            mode={props.mode}
-                            navigationTitle={`${props.navigationTitle} - ${job.name}`}
-                          />
-                        }
-                      />
-                    ) : (
-                      <Action.SubmitForm
-                        icon={Icon.Forward}
-                        title="Build Job"
-                        shortcut={{ modifiers: ["cmd"], key: "b" }}
-                        onSubmit={async () => {
-                          const options: Alert.Options = {
-                            title: "Build the Job",
-                            message: "Try to build job without parameters",
-                            primaryAction: {
-                              title: "Build Job",
-                              onAction: async () => {
-                                try {
-                                  const jenkinsAPI = new JenkinsAPI(props.jenkins);
-                                  await jenkinsAPI.build(job);
-                                  showToast(Toast.Style.Success, "Job Build Created");
-                                } catch (error) {
-                                  showToast(Toast.Style.Failure, "Build Job Failed", String(error));
-                                }
-                              },
-                            },
-                          };
-                          await confirmAlert(options);
-                        }}
-                      />
-                    )}
-                    <Action.SubmitForm
-                      title="Refresh"
-                      icon={Icon.ArrowClockwise}
-                      onSubmit={async () => {
-                        await search(searchText);
-                      }}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    />
-                    <Action.CopyToClipboard
-                      icon={Icon.CopyClipboard}
-                      title="Copy URL"
-                      content={job.url}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      </List>
-    );
-  } else {
-    return (
-      <List
-        navigationTitle={props.navigationTitle}
-        isLoading={isLoading}
-        onSearchTextChange={search}
-        searchBarPlaceholder={"Search..."}
+        searchBarPlaceholder="Search..."
         throttle
       >
         <List.Section title="Results" subtitle={suggestions.length + ""}>
@@ -180,6 +86,100 @@ export function Search(props: SearchProps) {
       </List>
     );
   }
+
+  return (
+    <List
+      navigationTitle={props.navigationTitle}
+      isLoading={isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search jobs..."
+      throttle
+    >
+      <List.Section title="Results" subtitle={jobs.length + ""}>
+        {jobs.map((job) => (
+          <List.Item
+            key={job.url}
+            title={job.name}
+            subtitle={job.shortClass}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser title="Open in Browser" url={job.url} />
+                  {!hasSubJobs(job) ? (
+                    <Action.Push
+                      icon={Icon.Box}
+                      title="Builds"
+                      target={
+                        <Build
+                          jenkins={props.jenkins}
+                          jobs={props.jobs ? [...props.jobs, job.path ?? ""] : [job.path ?? ""]}
+                        />
+                      }
+                    />
+                  ) : (
+                    <></>
+                  )}
+                  {hasSubJobs(job) ? (
+                    <Action.Push
+                      icon={Icon.Folder}
+                      title="Sub Jobs"
+                      target={
+                        <Search
+                          jenkins={props.jenkins}
+                          jobs={[...(props.jobs ?? []), job.path ?? ""]}
+                          isGlobalSearch={props.isGlobalSearch}
+                          navigationTitle={`${props.navigationTitle} - ${job.name}`}
+                        />
+                      }
+                    />
+                  ) : (
+                    <Action.SubmitForm
+                      icon={Icon.Forward}
+                      title="Build Job"
+                      shortcut={{ modifiers: ["cmd"], key: "b" }}
+                      onSubmit={async () => {
+                        const options: Alert.Options = {
+                          title: "Build the Job",
+                          message: "Build the job without parameters",
+                          primaryAction: {
+                            title: "Build Job",
+                            onAction: async () => {
+                              try {
+                                const jenkinsAPI = new JenkinsAPI(props.jenkins);
+                                await jenkinsAPI.build(job);
+                                showToast(Toast.Style.Success, "Job Build Created");
+                              } catch (err) {
+                                showToast(Toast.Style.Failure, "Build Job Failed", String(err));
+                              }
+                            },
+                          },
+                        };
+                        await confirmAlert(options);
+                      }}
+                    />
+                  )}
+                  <Action.SubmitForm
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onSubmit={async () => {
+                      await search(searchText);
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.CopyClipboard}
+                    title="Copy URL"
+                    content={job.url}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
 }
 
 interface BuildProps {
@@ -202,8 +202,8 @@ function Build(props: BuildProps) {
         const jenkinsAPI = new JenkinsAPI(props.jenkins);
         const resp = await jenkinsAPI.inspect(props.jobs);
         setBuilds(resp.builds?.filter((build) => build.number.toString().includes(text)) ?? []);
-      } catch (error) {
-        showToast({ style: Toast.Style.Failure, title: "Search failed", message: String(error) });
+      } catch (err) {
+        showToast({ style: Toast.Style.Failure, title: "Search Failed", message: String(err) });
       } finally {
         setIsLoading(false);
       }

@@ -19,7 +19,7 @@ export interface Job {
   url: string;
   _class?: string;
   color?: string;
-  short_class?: string;
+  shortClass?: string;
 }
 
 export interface Build {
@@ -75,7 +75,7 @@ export class JenkinsAPI {
 
       if (job._class) {
         const classParts = job._class.split(".");
-        job.short_class = classParts[classParts.length - 1];
+        job.shortClass = classParts[classParts.length - 1];
       }
       return job;
     });
