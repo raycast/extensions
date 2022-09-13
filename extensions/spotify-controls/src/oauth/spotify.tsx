@@ -14,7 +14,7 @@ const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.App,
   providerName: "Spotify",
   providerIcon: "icon.png",
-  description: "Connect your Spotify account\n(Raycast Extension Demo)"
+  description: "Connect your Spotify account\n(Raycast Extension Demo)",
 });
 
 // Authorization
@@ -35,7 +35,7 @@ export async function authorize(): Promise<void> {
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.spotify.com/authorize",
     clientId: clientId,
-    scope: scope
+    scope: scope,
   });
 
   const { authorizationCode } = await client.authorize(authRequest);
@@ -84,7 +84,7 @@ export const spotifyOauth = {
   refreshTokens,
   client,
   fetchDevices,
-  transferPlayback
+  transferPlayback,
 };
 
 // API
@@ -103,8 +103,8 @@ export async function fetchDevices(): Promise<DevicesItem[]> {
   const response = await fetch("https://api.spotify.com/v1/me/player/devices", {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`
-    }
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
   });
   if (!response.ok) {
     console.error("fetch items error:", await response.text());
@@ -120,9 +120,9 @@ export async function transferPlayback(deviceId: string): Promise<void> {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
     },
-    body: JSON.stringify({ device_ids: [deviceId] })
+    body: JSON.stringify({ device_ids: [deviceId] }),
   });
   if (!response.ok) {
     console.error("fetch items error:", await response.text());

@@ -41,7 +41,7 @@ export default function ChangeDevice() {
                   : device.type.toLowerCase() === "tablet"
                   ? Icon.Window
                   : Icon.SpeakerOn,
-              tintColor: device.is_active ? Color.Green : undefined
+              tintColor: device.is_active ? Color.Green : undefined,
             }}
             title={device.name}
             actions={
@@ -51,7 +51,7 @@ export default function ChangeDevice() {
                   onAction={async () => {
                     const toast = await showToast({
                       style: Toast.Style.Animated,
-                      title: "Moving devices ..."
+                      title: "Moving devices ...",
                     });
                     try {
                       await spotifyOauth.transferPlayback(device.id);
