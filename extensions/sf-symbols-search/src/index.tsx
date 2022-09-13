@@ -10,14 +10,14 @@ export interface Preferences {
   showName: boolean;
 }
 
-export interface Symbol {
+export type Symbol = {
   name: string;
   symbol: string;
   categories: string[];
   searchTerms: string[];
 }
 
-export interface Category {
+export type Category = {
   name: string;
   title: string;
   symbol: string;
@@ -39,13 +39,15 @@ try {
 }
 
 function getDataPath() {
-  var fileName = "data";
+  let fileName = "data";
 
   try {
     if (execSync("ls /Applications | grep 'SF Symbols beta.app'").length > 0) {
       fileName += "_beta";
     }
-  } catch {}
+  } catch (error) {
+    console.error(error); 
+  }
 
   return `${environment.assetsPath}/symbols/${fileName}.json`;
 }
