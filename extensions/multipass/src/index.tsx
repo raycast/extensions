@@ -1,6 +1,5 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-
 import mp from "multipass-control";
 
 function iconForState(state: string) {
@@ -41,36 +40,61 @@ interface MultipassImage {
 
 export default function Command() {
   const [images, setImages] = useState<Array<MultipassImage>>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let running = true;
     async function fetchImages() {
       while (running) {
-        const { list } = await mp.localImages();
-        setImages(list);
+        try {
+          const { list } = await mp.localImages();
+          setImages(list);
+        } catch (e) {
+          await showToast(Toast.Style.Failure, "Error", "Failed to fetch images");
+          running = false;
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
     fetchImages();
     return () => {
       running = false;
+      setIsLoading(false);
     };
   }, []);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {images.map((image) => (
         <List.Item
           key={image.name}
           title={`${iconForState(image.state)}  ${image.name}`}
           actions={
             <ActionPanel>
-              <Action
-                title="Start or stop"
-                onAction={() => {
-                  primaryAction(image.name, image.state);
-                }}
-              />
-              <Action title="Suspend" onAction={() => secondaryAction(image.name, image.state)} />
+              {["Suspended", "Stopped"] && (
+                <Action
+                  title="Start Instance"
+                  icon={Icon.Play}
+                  onAction={() => {
+                    primaryAction(image.name, image.state);
+                  }}
+                />
+              )}
+
+              {image.state == "Running" && (
+                <Action
+                  title="Stop Instance"
+                  icon={Icon.Stop}
+                  onAction={() => {
+                    primaryAction(image.name, image.state);
+                  }}
+                />
+              )}
+
+              {image.state == "Running" && (
+                <Action title="Suspend" icon={Icon.Power} onAction={() => secondaryAction(image.name, image.state)} />
+              )}
             </ActionPanel>
           }
         ></List.Item>
