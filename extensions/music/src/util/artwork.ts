@@ -1,7 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Track } from "./models";
-import ResizeImg from "resize-img";
+import resizeImg from "resize-image-buffer";
 import fetch from "node-fetch";
 
 const preferences = getPreferenceValues();
@@ -36,7 +36,7 @@ export const parseImageStream = async (data: string, size?: Size): Promise<strin
       return "";
     }
     if (size) {
-      image = await ResizeImg(image, size);
+      image = await resizeImg(image, size);
     }
     const bufferType = imageType === ImageType.JPEG ? "image/jpeg" : "image/png";
     return `data:${bufferType};base64,${image.toString("base64")}`;
