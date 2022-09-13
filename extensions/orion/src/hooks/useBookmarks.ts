@@ -7,7 +7,7 @@ import { unique } from "../utils";
 import { join } from "path";
 import { showToast, Toast } from "@raycast/api";
 
-const FAVORITES_PATH = join(homedir(), "/Library/Application Support/Orion/Defaults/favourrites.plist");
+const FAVORITES_PATH = join(homedir(), "/Library/Application Support/Orion/Defaults/favourites.plist");
 
 const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
