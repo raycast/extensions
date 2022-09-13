@@ -25,7 +25,7 @@
     },
     {
       "name": "rcmdVideos",
-      "title": "Recommend videos",
+      "title": "Recommend Videos",
       "description": "Show recommend videos",
       "mode": "view"
     },
