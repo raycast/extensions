@@ -1,11 +1,11 @@
 import { video } from "./components";
+import { checkLogin } from "./utils";
 import { useDynamicFeed } from "./hooks";
 
-import { Color, List, Icon, Cache } from "@raycast/api";
+import { Color, List, Icon } from "@raycast/api";
 
 export default function Command() {
-  const cache = new Cache();
-  if (!cache.has("cookie"))
+  if (!checkLogin())
     return (
       <List>
         <List.EmptyView

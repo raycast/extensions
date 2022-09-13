@@ -4,7 +4,7 @@ import { API } from "./api";
 
 export async function getRcmd(idx: number) {
   const cache = new Cache();
-  const cookie = JSON.parse(cache.get("cookie") || "{}");
+  const cookie = cache.get("cookie") || "{}";
 
   const fetch_row = idx * 4;
   const fresh_idx_1h = idx;

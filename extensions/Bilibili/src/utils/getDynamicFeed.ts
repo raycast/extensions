@@ -5,7 +5,7 @@ import { Cache } from "@raycast/api";
 
 export async function getDynamicFeed() {
   const cache = new Cache();
-  const cookie = JSON.parse(cache.get("cookie") || "{}");
+  const cookie = cache.get("cookie") || "{}";
 
   const res: Bilibili.dynamicFeedAllResponse = await got(API.dynamicFeedAll(1, -480), {
     headers: {

@@ -5,7 +5,7 @@ import { Cache } from "@raycast/api";
 
 export async function getPopularVideos() {
   const cache = new Cache();
-  const cookie = JSON.parse(cache.get("cookie") || "{}");
+  const cookie = cache.get("cookie") || "{}";
 
   const res: Bilibili.popularVideosResponse = await got(API.popularVideos(1, 25), {
     headers: {

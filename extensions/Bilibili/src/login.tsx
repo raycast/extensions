@@ -1,4 +1,4 @@
-import { checkQRCode, gennerateQRCode } from "./utils";
+import { checkQRCode, gennerateQRCode, checkLogin } from "./utils";
 
 import { useState, useEffect } from "react";
 import { Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
@@ -15,7 +15,7 @@ function makeCookie(cookie: string[]) {
 export default function Command() {
   const cache = new Cache();
   const [qrcode, setQrcode] = useState("");
-  const [isLogin, setIsLogin] = useState(cache.has("cookie"));
+  const [isLogin, setIsLogin] = useState(checkLogin());
 
   useEffect(() => {
     (async () => {
@@ -35,7 +35,9 @@ export default function Command() {
           }
           if (res.data.code !== 0 || !cookie) return;
 
-          cache.set("cookie", JSON.stringify(makeCookie(cookie)));
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          cache.set("expires", cookie[0].match(/Expires=(.*?);/)![1]);
+          cache.set("cookie", makeCookie(cookie));
           setIsLogin(true);
           clearInterval(interval);
         }, 1000);

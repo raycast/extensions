@@ -1,9 +1,8 @@
-import { API } from "./api";
+import { Cache } from "@raycast/api";
 
-import got from "got";
+export function checkLogin() {
+  const cache = new Cache();
+  const today = new Date().getTime();
 
-export async function checkQRCode(qrcodeKey: string) {
-  const res = await got(`${API.checkQRCodeStatus()}?qrcode_key=${qrcodeKey}`);
-
-  return { res: JSON.parse(res.body), cookie: res.headers["set-cookie"] };
+  return cache.has("cookie") && new Date(cache.get("expires") || today).getTime() > today;
 }
