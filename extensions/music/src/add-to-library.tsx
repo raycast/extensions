@@ -1,8 +1,9 @@
 import { showHUD } from "@raycast/api";
-import { addToLibrary } from "./util/scripts/player-controls";
-import { refreshCache, wait } from "./util/cache";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+
+import { refreshCache, wait } from "./util/cache";
+import { addToLibrary } from "./util/scripts/player-controls";
 
 export default async () => {
   await pipe(

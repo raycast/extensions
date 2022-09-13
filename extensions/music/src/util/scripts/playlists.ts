@@ -1,12 +1,15 @@
-import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { general } from ".";
-import { tell, runScript, createQueryString } from "../apple-script";
+import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
-import { getAttribute } from "../utils";
-import { getTrackArtwork, parseImageStream } from "../artwork";
+
+import { tell, runScript, createQueryString } from "../apple-script";
+import { parseImageStream } from "../artwork";
 import { queryCache, setCache } from "../cache";
 import { Track, Playlist } from "../models";
+import { getAttribute } from "../utils";
+import { getTrackArtwork } from "./track";
+
+import { general } from ".";
 
 export const getPlaylists = async (useCache = true): Promise<Playlist[]> => {
   if (useCache) {

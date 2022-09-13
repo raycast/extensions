@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+
 import * as music from "./scripts";
 
 const cache = new Cache();

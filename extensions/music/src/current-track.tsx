@@ -1,16 +1,17 @@
 import { List, Detail, Action, ActionPanel, Icon, Toast, showToast, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { handleTaskEitherError, Icons } from "./util/utils";
-import { refreshCache, wait } from "./util/cache";
-import { DetailMetadata } from "./track-detail";
-import PlayTrack from "./play-track";
-import PlayAlbum from "./play-album";
-import PlayPlaylist from "./play-playlist";
-import { Track } from "./util/models";
-import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import json2md from "json2md";
+import { useEffect, useState } from "react";
+
+import PlayAlbum from "./play-album";
+import PlayPlaylist from "./play-playlist";
+import PlayTrack from "./play-track";
+import { DetailMetadata } from "./track-detail";
+import { refreshCache, wait } from "./util/cache";
+import { Track } from "./util/models";
+import * as music from "./util/scripts";
+import { handleTaskEitherError, Icons } from "./util/utils";
 
 export default function CurrentTrack() {
   const [track, setTrack] = useState<Track | undefined>(undefined);

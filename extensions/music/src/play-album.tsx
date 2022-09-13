@@ -1,9 +1,7 @@
 import { Grid, List, Action, ActionPanel, Icon, closeMainWindow } from "@raycast/api";
 import { useState, useEffect } from "react";
-import * as music from "./util/scripts";
+
 import { Tracks } from "./tracks";
-import { Album } from "./util/models";
-import { Icons } from "./util/utils";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -14,6 +12,9 @@ import {
   LayoutType,
   albumLayout,
 } from "./util/list-or-grid";
+import { Album } from "./util/models";
+import * as music from "./util/scripts";
+import { Icons } from "./util/utils";
 
 export default function PlayAlbum() {
   const [albums, setAlbums] = useState<Album[]>([]);

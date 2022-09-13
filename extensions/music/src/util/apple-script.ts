@@ -1,9 +1,11 @@
+import { URLSearchParams } from "url";
+
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { runAppleScript } from "run-applescript";
+
 import { logScript } from "./logger";
-import { URLSearchParams } from "url";
 
 export const runScript = (command: string) => TE.tryCatch(() => pipe(command, logScript, runAppleScript), E.toError);
 export const tell = (application: string, command: string) =>

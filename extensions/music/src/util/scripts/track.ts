@@ -1,9 +1,10 @@
-import { createQueryString, runScript, tell } from "../apple-script";
 import { runAppleScript } from "run-applescript";
-import { getAttribute } from "../utils";
+
+import { createQueryString, runScript, tell } from "../apple-script";
+import { parseImageStream, getAlbumArtwork } from "../artwork";
 import { queryCache, setCache } from "../cache";
-import { getCurrentTrackArtwork, getTrackArtwork } from "../artwork";
 import { Track } from "../models";
+import { getAttribute } from "../utils";
 
 export const getAllTracks = async (useCache = true): Promise<Track[]> => {
   if (useCache) {
@@ -74,6 +75,10 @@ export const playOnRepeat = (id: string) =>
     tell application "System Events" to key code 36
   end tell`);
 
+export const getTrackArtwork = async (track: Track): Promise<string> => {
+  return (await getAlbumArtwork(track.albumArtist, track.album)) || "../assets/no-track.png";
+};
+
 export const getTrackDetails = async (track: Track): Promise<Track> => {
   const outputQuery = createQueryString({
     duration: "duration",
@@ -102,6 +107,11 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
     year: getAttribute(response, "year"),
     rating: parseInt(getAttribute(response, "rating")) / 20,
   };
+};
+
+export const getCurrentTrackArtwork = async (size?: number) => {
+  const response = await runAppleScript(`tell application "Music" to get data of artworks of current track`);
+  return parseImageStream(response, size ? { width: size, height: size } : undefined);
 };
 
 export const getCurrentTrackDetails = async (): Promise<Track> => {

@@ -1,11 +1,9 @@
 import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, useNavigation, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { PlaylistTracks } from "./playlist-tracks";
-import * as music from "./util/scripts";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { Playlist } from "./util/models";
-import { Icons } from "./util/utils";
+import { useEffect, useState } from "react";
+
+import { PlaylistTracks } from "./playlist-tracks";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -15,6 +13,9 @@ import {
   LayoutType,
   mainLayout,
 } from "./util/list-or-grid";
+import { Playlist } from "./util/models";
+import * as music from "./util/scripts";
+import { Icons } from "./util/utils";
 
 enum PlaylistKind {
   ALL = "all",

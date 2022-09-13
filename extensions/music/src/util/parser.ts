@@ -1,6 +1,7 @@
-import * as S from "fp-ts/string";
-import * as A from "fp-ts/ReadonlyArray";
 import { flow, pipe } from "fp-ts/function";
+import * as A from "fp-ts/ReadonlyArray";
+import * as S from "fp-ts/string";
+
 import { parseQueryString } from "./apple-script";
 
 // use to parse run-applescript return (string)

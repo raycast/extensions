@@ -1,8 +1,9 @@
+import { runAppleScript } from "run-applescript";
+
 import { runScript, tellMusic } from "../apple-script";
+import { createQueryString } from "../apple-script";
 import { MusicState } from "../models";
 import { getAttribute } from "../utils";
-import { createQueryString } from "../apple-script";
-import { runAppleScript } from "run-applescript";
 
 export const activate = tellMusic("activate");
 export const revealTrack = tellMusic("reveal current track");

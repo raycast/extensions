@@ -1,12 +1,12 @@
 import { MenuBarExtra, Icon, Color, Image, environment, LaunchType, showHUD } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { handleTaskEitherError, trimTitle, AppleMusicColor, Icons } from "./util/utils";
-import { getCurrentTrackArtwork } from "./util/artwork";
-import { refreshCache, wait } from "./util/cache";
-import * as music from "./util/scripts";
-import { MusicState } from "./util/models";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+import { useState, useEffect } from "react";
+
+import { refreshCache, wait } from "./util/cache";
+import { MusicState } from "./util/models";
+import * as music from "./util/scripts";
+import { handleTaskEitherError, trimTitle, AppleMusicColor, Icons } from "./util/utils";
 
 export default function MenuBar() {
   const [state, setState] = useState<MusicState | undefined>(undefined);
@@ -21,7 +21,7 @@ export default function MenuBar() {
         const state = await music.player.getMusicState();
         setState(state);
         if (state) {
-          setArtwork(await getCurrentTrackArtwork());
+          setArtwork(await music.track.getCurrentTrackArtwork());
         }
       }
       setIsLoading(false);

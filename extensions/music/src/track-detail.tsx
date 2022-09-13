@@ -1,10 +1,10 @@
 import { List, Toast, showToast, Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getTrackDetails } from "./util/scripts/track";
-import { getTrackArtwork } from "./util/artwork";
-import { Track } from "./util/models";
-import { Icons } from "./util/utils";
 import json2md from "json2md";
+import { useEffect, useState } from "react";
+
+import { Track } from "./util/models";
+import { getTrackDetails, getTrackArtwork } from "./util/scripts/track";
+import { Icons } from "./util/utils";
 
 export const TrackDetail = (props: { track: Track }) => {
   const [track, setTrack] = useState<Track | undefined>(undefined);

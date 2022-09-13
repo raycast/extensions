@@ -1,7 +1,8 @@
 import { showHUD } from "@raycast/api";
-import { dislike } from "./util/scripts/player-controls";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+
+import { dislike } from "./util/scripts/player-controls";
 
 export default async () => {
   await pipe(

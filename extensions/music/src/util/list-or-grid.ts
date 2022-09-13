@@ -1,4 +1,5 @@
 import { List, Grid, getPreferenceValues } from "@raycast/api";
+
 import { Preferences } from "./models";
 
 export enum LayoutType {

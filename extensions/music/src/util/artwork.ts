@@ -1,8 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { Track } from "./models";
-import resizeImg from "resize-image-buffer";
 import fetch from "node-fetch";
+import resizeImg from "resize-image-buffer";
+import { runAppleScript } from "run-applescript";
 
 const preferences = getPreferenceValues();
 const api = preferences.apiKey;
@@ -18,14 +17,10 @@ enum ImageType {
   PNG = "tdta",
 }
 
-const imageTypeFromString = (imageType: string): ImageType => {
-  return imageType === "JPEG" ? ImageType.JPEG : imageType === "tdta" ? ImageType.PNG : ImageType.NONE;
-};
-
 export const parseImageStream = async (data: string, size?: Size): Promise<string> => {
-  const imageType = imageTypeFromString(data.slice(6, 10));
+  const imageType = data.slice(6, 10) as ImageType;
   if (imageType === ImageType.NONE) {
-    console.warn("Unsupported Image Type: " + imageType);
+    console.warn("Unsupported Image Type: " + data.slice(6, 10));
     return "";
   }
   try {
@@ -44,11 +39,6 @@ export const parseImageStream = async (data: string, size?: Size): Promise<strin
     console.error(error);
     return "";
   }
-};
-
-export const getCurrentTrackArtwork = async (size?: number) => {
-  const response = await runAppleScript(`tell application "Music" to get data of artworks of current track`);
-  return parseImageStream(response, size ? { width: size, height: size } : undefined);
 };
 
 const artworks = new Cache();
@@ -90,8 +80,4 @@ export const getArtworkOnFallback = async (id: string, size?: number) => {
     return trackImage
   `);
   return await parseImageStream(data, size ? { width: size, height: size } : undefined);
-};
-
-export const getTrackArtwork = async (track: Track): Promise<string> => {
-  return (await getAlbumArtwork(track.albumArtist, track.album)) || "../assets/no-track.png";
 };

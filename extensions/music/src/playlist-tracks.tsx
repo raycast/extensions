@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { getPlaylistTracks } from "./util/scripts/playlists";
+
+import { Tracks } from "./tracks";
 import { playlistLayout } from "./util/list-or-grid";
 import { Track } from "./util/models";
-import { Tracks } from "./tracks";
+import { getPlaylistTracks } from "./util/scripts/playlists";
 
 export const PlaylistTracks = (props: { id: string }) => {
   const [tracks, setTracks] = useState<Track[]>([]);

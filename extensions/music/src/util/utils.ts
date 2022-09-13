@@ -2,6 +2,7 @@ import { showToast, showHUD, Toast, Clipboard, open, Color } from "@raycast/api"
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+
 import { ScriptError } from "./models";
 
 export const handleError = (error: Error) =>

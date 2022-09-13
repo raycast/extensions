@@ -1,13 +1,14 @@
-import { Action, ActionPanel, List, showToast, Toast, Icon, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { DetailMetadata } from "./track-detail";
-import * as music from "./util/scripts";
-import { Icons } from "./util/utils";
+import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
+import json2md from "json2md";
+import { useEffect, useState } from "react";
+
+import { DetailMetadata } from "./track-detail";
 import { refreshCache, wait } from "./util/cache";
 import { Track } from "./util/models";
-import json2md from "json2md";
+import * as music from "./util/scripts";
+import { Icons } from "./util/utils";
 
 export default function SetRating() {
   const [track, setTrack] = useState<Track | undefined>();

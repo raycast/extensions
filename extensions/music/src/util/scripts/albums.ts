@@ -1,4 +1,5 @@
 import { runAppleScript } from "run-applescript";
+
 import { Album } from "../models";
 
 export const show = async (album: Album) => {
@@ -27,6 +28,7 @@ export const shuffle = async (album: Album) => {
   const random = Math.floor(Math.random() * parseInt(numTracks)) + 1;
   await runAppleScript(`
     tell application "Music" 
+	  set song repeat to all
 	  set shuffle enabled to true
 	  reveal track ${random} of (every track of playlist 1 whose album is "${album.name}" and artist is "${album.artist}")
 	  activate
