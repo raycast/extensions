@@ -10,21 +10,21 @@ export interface Preferences {
   showName: boolean;
 }
 
-export type Symbol = {
+export type sfsymbol = {
   name: string;
   symbol: string;
   categories: string[];
   searchTerms: string[];
-}
+};
 
-export type Category = {
+export type category = {
   name: string;
   title: string;
   symbol: string;
-}
+};
 
 export interface SymbolProps {
-  symbol: Symbol;
+  symbol: sfsymbol;
   refresh: () => void;
   pinned?: boolean;
   recent?: boolean;
@@ -46,7 +46,7 @@ function getDataPath() {
       fileName += "_beta";
     }
   } catch (error) {
-    console.error(error); 
+    console.error(error);
   }
 
   return `${environment.assetsPath}/symbols/${fileName}.json`;
@@ -54,8 +54,8 @@ function getDataPath() {
 
 export default function Command() {
   const data: {
-    symbols: Symbol[];
-    categories: Category[];
+    symbols: sfsymbol[];
+    categories: category[];
   } = JSON.parse(readFileSync(getDataPath(), { encoding: "utf8" }));
 
   const [pinned, setPinned] = useState(getPinnedSymbols());
@@ -79,7 +79,7 @@ export default function Command() {
       itemSize={gridItemSize}
       searchBarAccessory={
         <Grid.Dropdown
-          tooltip="Select SF Symbol Category"
+          tooltip="Select SF sfsymbol category"
           storeValue={true}
           onChange={(newValue) => setCategory(newValue)}
         >
@@ -112,22 +112,22 @@ export default function Command() {
           <Grid.Section title="Pinned Symbols">
             {pinned
               .filter((s) => category === "all" || s.categories.includes(category))
-              .map((symbol: Symbol, index: number) => (
-                <Symbol key={index} symbol={symbol} refresh={refresh} pinned />
+              .map((symbol: sfsymbol, index: number) => (
+                <SFSymbol key={index} symbol={symbol} refresh={refresh} pinned />
               ))}
           </Grid.Section>
           <Grid.Section title="Recent Symbols">
             {recent
               .filter((s) => category === "all" || s.categories.includes(category))
-              .map((symbol: Symbol, index: number) => (
-                <Symbol key={index} symbol={symbol} refresh={refresh} recent />
+              .map((symbol: sfsymbol, index: number) => (
+                <SFSymbol key={index} symbol={symbol} refresh={refresh} recent />
               ))}
           </Grid.Section>
           <Grid.Section title={recent.length + pinned.length > 0 ? "All Symbols" : undefined}>
             {data.symbols
               .filter((s) => category === "all" || s.categories.includes(category))
-              .map((symbol: Symbol, index: number) => (
-                <Symbol key={index} symbol={symbol} refresh={refresh} />
+              .map((symbol: sfsymbol, index: number) => (
+                <SFSymbol key={index} symbol={symbol} refresh={refresh} />
               ))}
           </Grid.Section>
         </React.Fragment>
@@ -136,7 +136,7 @@ export default function Command() {
   );
 }
 
-const Symbol = (props: SymbolProps) => {
+const SFSymbol = (props: SymbolProps) => {
   const { symbol } = props;
   return (
     <Grid.Item
@@ -158,7 +158,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     paste: (
       <Action.Paste
         key="paste"
-        title="Paste Symbol"
+        title="Paste sfsymbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
         onPaste={() => {
@@ -170,7 +170,7 @@ const SymbolActions = (props: SymbolProps): JSX.Element => {
     copy: (
       <Action.CopyToClipboard
         key="copy"
-        title="Copy Symbol"
+        title="Copy sfsymbol"
         content={symbol}
         shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
         onCopy={() => {

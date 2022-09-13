@@ -1,26 +1,26 @@
 import { Action, ActionPanel, Cache, Icon, Color, showToast, Toast } from "@raycast/api";
-import { Symbol, SymbolProps } from "./index";
+import { sfsymbol, SymbolProps } from "./index";
 import React from "react";
 
 const storage = new Cache();
 
-export const getPinnedSymbols = (): Symbol[] => {
+export const getPinnedSymbols = (): sfsymbol[] => {
   const data = storage.get("pinned");
   return data ? JSON.parse(data) : [];
 };
 
-export const getRecentSymbols = (): Symbol[] => {
+export const getRecentSymbols = (): sfsymbol[] => {
   const data = storage.get("recent");
   return data ? JSON.parse(data).slice(0, 16) : [];
 };
 
-const addPinnedSymbol = (symbol: Symbol) => {
+const addPinnedSymbol = (symbol: sfsymbol) => {
   removeRecentSymbol(symbol);
   const pinnedSymbols = getPinnedSymbols();
   storage.set("pinned", JSON.stringify([symbol, ...pinnedSymbols.filter((s) => s.name !== symbol.name)]));
 };
 
-export const addRecentSymbol = (symbol: Symbol) => {
+export const addRecentSymbol = (symbol: sfsymbol) => {
   const pinnedSymbols = getPinnedSymbols();
   if (!pinnedSymbols.find((s) => s.name === symbol.name)) {
     const recentSymbols = getRecentSymbols();
@@ -28,12 +28,12 @@ export const addRecentSymbol = (symbol: Symbol) => {
   }
 };
 
-const removePinnedSymbol = (symbol: Symbol) => {
+const removePinnedSymbol = (symbol: sfsymbol) => {
   const pinnedSymbols = getPinnedSymbols();
   storage.set("pinned", JSON.stringify(pinnedSymbols.filter((s) => s.name !== symbol.name)));
 };
 
-const removeRecentSymbol = (symbol: Symbol) => {
+const removeRecentSymbol = (symbol: sfsymbol) => {
   const recentSymbols = getRecentSymbols();
   storage.set("recent", JSON.stringify(recentSymbols.filter((s) => s.name !== symbol.name)));
 };
@@ -52,13 +52,13 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
       {props.pinned ? (
         <React.Fragment>
           <Action
-            title="Remove Pinned Symbol"
+            title="Remove Pinned sfsymbol"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             icon={Icon.PinDisabled}
             onAction={async () => {
               removePinnedSymbol(props.symbol);
               props.refresh();
-              await showToast(Toast.Style.Success, "Removed Pinned Symbol");
+              await showToast(Toast.Style.Success, "Removed Pinned sfsymbol");
             }}
           />
           <Action
@@ -74,26 +74,26 @@ export const SaveActions = (props: SymbolProps): JSX.Element => {
         </React.Fragment>
       ) : (
         <Action
-          title="Pin Symbol"
+          title="Pin sfsymbol"
           icon={Icon.Pin}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onAction={async () => {
             addPinnedSymbol(props.symbol);
             props.refresh();
-            await showToast(Toast.Style.Success, "Symbol Pinned");
+            await showToast(Toast.Style.Success, "sfsymbol Pinned");
           }}
         />
       )}
       {props.recent && (
         <React.Fragment>
           <Action
-            title="Remove Recent Symbol"
+            title="Remove Recent sfsymbol"
             icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={async () => {
               removeRecentSymbol(props.symbol);
               props.refresh();
-              await showToast(Toast.Style.Success, "Removed Recent Symbol");
+              await showToast(Toast.Style.Success, "Removed Recent sfsymbol");
             }}
           />
           <Action
