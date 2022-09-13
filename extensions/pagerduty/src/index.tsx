@@ -27,6 +27,46 @@ interface ListIncidentsResponse {
   incidents: IncidentItem[];
 }
 
+interface GetMeResponse {
+  user: { email: string };
+}
+
+interface GetMeError {
+  error: string;
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isGetMeError(e: any): e is GetMeError {
+  return e !== null && typeof e.error === "string";
+}
+
+interface ErrorResponse {
+  error: { message: string; code: number; errors: string[] };
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isErrorResponse(e: any): e is ErrorResponse {
+  return (
+    e !== null &&
+    e !== null &&
+    e.error === "object" &&
+    typeof e.error.message === "string" &&
+    typeof e.error.code === "number" &&
+    typeof e.error.errors === "object"
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildErrorMessage(error: any): string {
+  if (axios.isAxiosError(error) && isErrorResponse(error.response?.data)) {
+    const response = error.response?.data as ErrorResponse;
+    return `${response.error.message} reason: ${response.error.errors?.join(", ")}`;
+  } else if (axios.isAxiosError(error) && isGetMeError(error.response?.data)) {
+    return (error.response?.data as GetMeError).error;
+  } else {
+    console.log(error);
+    return "Failed to update incident.";
+  }
+}
+
 type IncidentStatus = "triggered" | "acknowledged" | "resolved";
 
 interface IncidentItem {
@@ -186,29 +226,34 @@ function UpdateIncidentStatusAction(props: {
   ) {
     showToast(Toast.Style.Animated, "Updating...");
 
-    const requestBody = note
-      ? {
-          type: "incident",
-          status: newStatus,
-          note: note,
-        }
-      : {
-          type: "incident",
-          status: newStatus,
-        };
-
     try {
-      const { data: response } = await pagerDutyClient.put<UpdateIncidentResponse>(`/incidents/${item.id}`, {
-        incident: requestBody,
-      });
+      const { data: me } = await pagerDutyClient.get<GetMeResponse>("/users/me");
+      if (note) {
+        await pagerDutyClient.post(
+          `/incidents/${item.id}/notes`,
+          { note: { content: note } },
+          { headers: { from: me.user.email } }
+        );
+      }
+      const { data: updated } = await pagerDutyClient.put<UpdateIncidentResponse>(
+        `/incidents/${item.id}`,
+        {
+          incident: {
+            type: "incident",
+            status: newStatus,
+          },
+        },
+        { headers: { from: me.user.email } }
+      );
+
       showToast(
         Toast.Style.Success,
-        `Incident #${response.incident.incident_number} has been ${response.incident.status}.`
+        `Incident #${updated.incident.incident_number} has been ${updated.incident.status}.`
       );
-      props.onUpdate(item.id, response.incident.status);
+      props.onUpdate(item.id, updated.incident.status);
     } catch (error) {
-      console.log(error);
-      showToast(Toast.Style.Failure, error instanceof Error ? error.message : "Failed to update incident.");
+      const message = buildErrorMessage(error);
+      showToast(Toast.Style.Failure, message);
     }
   }
 
