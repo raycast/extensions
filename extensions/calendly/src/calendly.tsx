@@ -1,63 +1,36 @@
+import { useEffect } from "react";
 import {
   List,
   ActionPanel,
   Icon,
   Toast,
   showHUD,
-  Detail,
   showToast,
   getPreferenceValues,
   Action,
   Clipboard,
   Image,
-  LocalStorage,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
 import {
   Preferences,
   CalendlyEventType,
-  CalendlyUser,
   createSingleUseLink,
-  getUserFromCache as getUser,
-  getEventTypesFromCache as getEventTypes,
-  refreshData,
+  useEventTypes,
+  useCurrentUser,
+  authorize,
 } from "./services/calendly";
-import moment from "moment";
-
-const tokenURL = "https://calendly.com/integrations/api_webhooks";
-
-const error = `
-  # ⚠️ Calendly Access Token Error ⚠️
-
-  Your Calendly Personal Access Token is not valid. Go into Raycast preferences to change it.
-
-  ---
-
-  To get your personal access token go to [${tokenURL}](${tokenURL}) and click "Generate New Token". Give your token a name like "*raycast*" and then Create Token. The token will only be shown to you once. Copy that token into your Raycast preferences.
-`;
 
 export default function Calendly() {
-  const [items, setItems] = useState<CalendlyEventType[] | undefined>(undefined);
-  const [showError, setShowError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
+  // const [showError, setShowError] = useState(false);
+  const { user, error } = useCurrentUser();
   const { defaultAction }: Preferences = getPreferenceValues();
+  const { eventTypes: items, isLoading, revalidate } = useEventTypes();
 
-  async function init() {
-    const updated_ts = await LocalStorage.getItem("updated_ts");
-    console.log("init running...", { updated_ts });
-    if (updated_ts === undefined || moment(updated_ts.toString()).isBefore(moment().subtract(24, "hours"))) {
-      // either no cache, or cache is 24+ hours old
-      console.log("refreshing data");
-      await refreshData();
-    }
-    const user = await getUser();
-    setUser(user);
-    const eventTypes = await getEventTypes();
-    setItems(eventTypes);
-
-    setIsLoading(false);
-  }
+  useEffect(() => {
+    (async () => {
+      await authorize();
+    })();
+  }, []);
 
   function RefreshAction() {
     return (
@@ -67,42 +40,14 @@ export default function Calendly() {
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={async () => {
           const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
-          await toast.show();
-          setIsLoading(true);
-          await refreshData();
-          await init();
+          revalidate();
           await toast.hide();
         }}
       />
     );
   }
 
-  useEffect(() => {
-    init()
-      .then()
-      .catch((error) => {
-        if (error.response.status === 401) {
-          setShowError(true);
-        } else {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Sorry, something went wrong",
-          });
-        }
-      });
-  }, []);
-
-  if (showError)
-    return (
-      <Detail
-        markdown={error}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser url={tokenURL} title="Open Calendly Integrations Page" />
-          </ActionPanel>
-        }
-      />
-    );
+  console.log({ error });
 
   return (
     <List isLoading={isLoading}>

@@ -56,3 +56,11 @@ export enum VSCodeBuild {
 export interface Preferences {
   build: VSCodeBuild;
 }
+
+export interface RecentEntries {
+  value: string;
+}
+
+export interface RecenEntry {
+  entries: EntryLike[];
+}

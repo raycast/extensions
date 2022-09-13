@@ -1,5 +1,9 @@
 # iTranslate Changelog
 
+## [Add New Translation Service Providers] - {PR MERGE DATE}
+
+- Add Microsoft Azure option
+
 ## [Translation History & TTS] - 2022-09-02
 
 - Add new command `Translation History`. Support record translation history
