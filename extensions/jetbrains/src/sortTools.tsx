@@ -90,7 +90,7 @@ export function SortTools({
                 />
                 {pop && (
                   <Action
-                    icon={Icon.XmarkCircle}
+                    icon={Icon.XMarkCircle}
                     title="Cancel"
                     shortcut={{ modifiers: ["ctrl"], key: "c" }}
                     onAction={pop}
@@ -122,7 +122,7 @@ export function SortTools({
   );
 }
 
-export default function SortToolsCommand() {
+export default function SortToolsCommand(): JSX.Element {
   const [tools, setTools] = useState<AppHistory[]>();
   const [{ sortOrder, screenshotMode }, prefActions] = usePreferences({ sortOrder: "", screenshotMode: false });
   useEffect(() => {

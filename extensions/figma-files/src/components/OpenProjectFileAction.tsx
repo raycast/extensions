@@ -1,26 +1,21 @@
-import { Application, getApplications, OpenAction, OpenInBrowserAction } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { Action } from "@raycast/api";
+import { useCallback } from "react";
+import { useFigmaApp } from "../hooks/useFigmaApp";
 
 import type { File } from "../types";
 
 export function OpenProjectFileAction(props: { file: File; onVisit: (file: File) => void }) {
-  const [desktopApp, setDesktopApp] = useState<Application>();
-
-  useEffect(() => {
-    getApplications()
-      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-      .then(setDesktopApp);
-  }, []);
+  const desktopApp = useCallback(() => useFigmaApp(), []);
 
   return desktopApp ? (
-    <OpenAction
+    <Action.Open
       icon="command-icon.png"
       title="Open in Figma"
       target={`figma://file/${props.file.key}`}
-      application={desktopApp}
+      application={desktopApp()}
       onOpen={() => props.onVisit(props.file)}
     />
   ) : (
-    <OpenInBrowserAction url={`https://figma.com/file/${props.file.key}`} onOpen={() => props.onVisit(props.file)} />
+    <Action.OpenInBrowser url={`https://figma.com/file/${props.file.key}`} onOpen={() => props.onVisit(props.file)} />
   );
 }

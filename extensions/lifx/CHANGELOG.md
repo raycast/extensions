@@ -1,5 +1,10 @@
 # LIFX Changelog
 
+## [Version 1.2.6] - 2022-08-30
+- Added a guide on how to generate a token
+- Updated screenshots
+- Reversed Changelog to show latest changes first
+
 ## [Version 1.2.5] - 2022-08-30
 - Added 64x64 icon for empty screen
 - Fixed some cache issues
@@ -14,15 +19,6 @@
 - Removed some effects
 - Fixed some bugs
 - Added a color icon for lights
-
-## [Version 1.2] - 2022-08-20
-- Added `Set Scene` command
-- Added `Manage Lights` command
-- Added `Turn On All Lights` command
-- Added `Turn Off All Lights` command
-- Added huge improvements to `Manage Lights` command
-- Fixed some bugs
-- Rewrote the api handling and error handling
 
 ## [Initial Version] - 2022-08-12
 - Added `toggle light`command

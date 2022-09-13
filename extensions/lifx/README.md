@@ -24,4 +24,3 @@ Forexample "Raycast"
 Copy your token and paste in the extension configuration
 
 ![Image](readme-assets/Step-5.png)
-
