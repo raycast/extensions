@@ -4,22 +4,40 @@ import { Action, ActionPanel, Clipboard, Detail, getPreferenceValues, Icon, List
 import AddSearchEngine from "./add-search-engine";
 import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
-import { getSavedSites } from "./saved-sites";
+import { getSavedSites, SavedSite, SEARCH_TEMPLATE } from "./saved-sites";
+import { v4 as uuidv4 } from "uuid";
+import { collator } from "./utils";
 
 interface Preferences {
   prefillFromClipboard: boolean;
 }
 
-function suggestionsFromXml(xml: string): string[] {
+function suggestionsFromXml(xml: string, searchString: string): string[] {
   const suggestionMatches = xml.matchAll(/<suggestion data="(.*?)"\/>/g);
   const suggestions: string[] = [];
 
   for (const match of suggestionMatches) {
     const suggestion = match[1]; // capture group 1
-    suggestions.push(htmlDecode(suggestion));
+    if (collator.compare(suggestion, searchString) !== 0) {
+      suggestions.push(htmlDecode(suggestion));
+    }
   }
 
+  suggestions.unshift(searchString);
+
   return suggestions;
+}
+
+function fillTemplate(templateUrl: string, query: string) {
+  // We need to handle the case where query contains SEARCH_TEMPLATE
+  // To do this, we replace SEARCH_TEMPLATE with a random string that probably doesn't
+  // exist anywhere universe, replace that with the query string, then replace it back
+  // with SEARCH_TEMPLATE
+  const placeholderTemplate = uuidv4();
+  const templateUrlWithPlaceholder = templateUrl.replace(SEARCH_TEMPLATE, placeholderTemplate);
+  const placeholderUrl = templateUrlWithPlaceholder.replace(placeholderTemplate, encodeURIComponent(query));
+  const url = placeholderUrl.replace(placeholderTemplate, SEARCH_TEMPLATE);
+  return url;
 }
 
 export default function Command() {
@@ -36,9 +54,9 @@ export default function Command() {
   }, []);
 
   const [savedSites, setSavedSites] = useState(getSavedSites());
-  const [selectedSite, setSelectedSiteTitle] = useState<string | undefined>();
+  const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
 
-  const urlToSite = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
+  const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
   const { isLoading, data } = useFetch<string[] | string, void>(
     `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(searchText)}`,
@@ -63,7 +81,7 @@ export default function Command() {
         }
 
         const xml = await response.text();
-        const suggestions = suggestionsFromXml(xml);
+        const suggestions = suggestionsFromXml(xml, query);
 
         return suggestions;
       },
@@ -71,17 +89,30 @@ export default function Command() {
   );
 
   const defaultActions = (
-    <ActionPanel.Section title="Manage sites">
+    <ActionPanel.Section title="Manage search engines and websites">
       <Action.Push
         target={<AddSearchEngine {...{ savedSites, setSavedSites, forceUpdate }} />}
-        title="Add search engine..."
+        title="Add new site..."
         icon={Icon.Plus}
       ></Action.Push>
-      <Action title="Manage search engines..." icon={Icon.Gear}></Action>
+      <Action title="Manage sites..." icon={Icon.Gear}></Action>
     </ActionPanel.Section>
   );
 
-  const defaultActionPanel = <ActionPanel title="Title">{defaultActions}</ActionPanel>;
+  const defaultActionPanel = <ActionPanel>{defaultActions}</ActionPanel>;
+  const searchActionPanel = (
+    <ActionPanel>
+      <Action.OpenInBrowser
+        title={`Search on ${selectedSite?.title}`}
+        url={fillTemplate(selectedSite?.url, searchText)}
+      ></Action.OpenInBrowser>
+      {defaultActions}
+    </ActionPanel>
+  );
+
+  const defaultUrl = savedSites.items.find(
+    ({ title }) => collator.compare(title, savedSites.defaultSiteTitle ?? "") === 0
+  )?.url;
 
   const searchSuggestionsList = (
     <List
@@ -93,8 +124,8 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Search site"
-          storeValue={true}
-          onChange={(newUrl) => setSelectedSiteTitle(urlToSite[newUrl])}
+          defaultValue={defaultUrl}
+          onChange={(newUrl) => setSelectedSite({ title: urlsToSites[newUrl], url: newUrl })}
         >
           {savedSites.items.map(({ title, url }, i) => (
             <List.Dropdown.Item {...{ title, key: i, value: url, icon: getFavicon(url) }}></List.Dropdown.Item>
@@ -108,21 +139,10 @@ export default function Command() {
           key={data}
           title={`Error: Could not load search suggestions, but you can still search for the above text.`}
           accessories={[{ text: `${data}`, icon: Icon.Warning }]}
-          actions={defaultActionPanel}
+          actions={searchActionPanel}
         ></List.Item>
       ) : (
-        (data ?? []).map((item) => (
-          <List.Item
-            key={item}
-            title={item}
-            actions={
-              <ActionPanel>
-                <Action title={`Search on ${selectedSite}`} icon={Icon.MagnifyingGlass}></Action>
-                {defaultActions}
-              </ActionPanel>
-            }
-          />
-        ))
+        (data ?? []).map((item) => <List.Item key={item} title={item} actions={searchActionPanel} />)
       )}
     </List>
   );

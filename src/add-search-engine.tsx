@@ -2,10 +2,11 @@ import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@ray
 import { useMemo } from "react";
 import { URL } from "node:url";
 import { useForm } from "@raycast/utils";
-import { SavedSite, SavedSites, writeSavedSites, getExistingTitlesAndUrls } from "./saved-sites";
+import { SEARCH_TEMPLATE, SavedSite, SavedSites, writeSavedSites, getExistingTitlesAndUrls } from "./saved-sites";
 import SearchSuggestions from "./search-the-web";
+import { collator } from "./utils";
 
-const collator = new Intl.Collator(undefined, { sensitivity: "accent" });
+type FormData = SavedSite & { isDefault: boolean };
 
 function getTitleErrorMessage(title: string, existingTitles: string[]) {
   if (title.length === 0) {
@@ -18,7 +19,7 @@ function getTitleErrorMessage(title: string, existingTitles: string[]) {
   }
 
   if (existingTitles.some((existing) => collator.compare(title, existing) === 0)) {
-    return "A saved search with this title already exists";
+    return "A site with this title has already been saved";
   }
 
   return undefined;
@@ -30,8 +31,8 @@ function getUrlErrorMessage(url: string, existingUrls: string[]) {
     return "URL template may not be empty";
   }
 
-  if (!url.includes("{}")) {
-    return 'URL template is missing the template string "{}"';
+  if (!url.includes(SEARCH_TEMPLATE)) {
+    return `URL template is missing the template string "${SEARCH_TEMPLATE}"`;
   }
 
   try {
@@ -41,7 +42,7 @@ function getUrlErrorMessage(url: string, existingUrls: string[]) {
   }
 
   if (existingUrls.some((existing) => collator.compare(url, existing) === 0)) {
-    return "A saved search with this URL already exists";
+    return "A site with this template URL has already been saved";
   }
 
   return undefined;
@@ -64,13 +65,14 @@ export default function Command({
   }, [savedSites]);
   // const [existingTitles, setExistingTitles] = useState(getExistingTitles(savedSites));
 
-  const { handleSubmit, itemProps } = useForm<SavedSite>({
-    onSubmit(data: { title: string; url: string }) {
-      const { title } = data;
-      savedSites.items.push(data);
+  const { handleSubmit, itemProps } = useForm<FormData>({
+    onSubmit({ title, url, isDefault }) {
+      savedSites.items.push({ title, url });
       savedSites.items.sort((ss1, ss2) => collator.compare(ss1.title, ss2.title));
 
-      console.log("saved", savedSites);
+      if (isDefault) {
+        savedSites.defaultSiteTitle = title;
+      }
 
       writeSavedSites(savedSites);
       setSavedSites(savedSites);
@@ -118,14 +120,21 @@ export default function Command({
         placeholder="URL Template"
         info={[
           "The URL template to use for searching this site. " +
-            'Since this is a URL template, write "{}" where your search text should go; the "{}" will be replaced with your (URL-encoded) search text. ' +
+            `Since this is a URL template, write "${SEARCH_TEMPLATE}" where your search text should go; the "${SEARCH_TEMPLATE}" will be replaced with your (URL-encoded) search text. ` +
             "Examples:",
-          "- https://www.google.com/search?q={}",
-          "- https://duckduckgo.com/?q={}",
-          "- https://en.wikipedia.org/wiki/{}",
+          `- https://www.google.com/search?q=${SEARCH_TEMPLATE}`,
+          `- https://duckduckgo.com/?q=${SEARCH_TEMPLATE}`,
+          `- https://en.wikipedia.org/wiki/${SEARCH_TEMPLATE}`,
         ].join("\n")}
         {...itemProps.url}
       ></Form.TextField>
+      <Form.Checkbox
+        key="default"
+        title="Default?"
+        label="Make this the default site for searches"
+        info="This will override any previously assigned default"
+        {...itemProps.isDefault}
+      ></Form.Checkbox>
     </Form>
   );
 }

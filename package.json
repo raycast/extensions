@@ -33,10 +33,12 @@
     "@raycast/utils": "^1.4.0",
     "he": "^1.2.0",
     "node-fetch": "^3.2.10",
+    "uuid": "^9.0.0",
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
