@@ -19,6 +19,9 @@ const enclosingFolderName = (result: SpotlightSearchResult) => {
 };
 
 const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
+  popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
+
   runAppleScriptSync(`
     set result to (POSIX file "${result.path}") as alias
     tell application "Finder"
@@ -26,9 +29,6 @@ const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
       activate
     end tell
   `);
-
-  popToRoot({ clearSearchBar: true });
-  closeMainWindow({ clearRootSearch: true });
 };
 
 const copyFolderToClipboard = (result: SpotlightSearchResult) => {
