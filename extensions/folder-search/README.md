@@ -4,7 +4,7 @@ Search for folders on your Mac
 
 ## Plugins
 
-You can add your own custom plugins to Folder Search. These appear as actions, under the sub-heading 'Plugins' within Folder Search.
+You can add your own custom `ActionScript` plugins to Folder Search. These appear as actions, under the sub-heading 'Plugins' within Folder Search.
 
 The steps are as follows:
 
