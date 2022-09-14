@@ -16,19 +16,16 @@ export default function Command() {
           <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />
         ))}
       </List.Section>
-
       <List.Section title="Folders">
         {data?.filter(isFolderEntry).map((entry) => (
           <LocalListItem key={entry.folderUri} uri={entry.folderUri} />
         ))}
       </List.Section>
-
       <List.Section title="Remotes Folders">
         {data?.filter(isRemoteEntry).map((entry) => (
           <RemoteListItem key={entry.folderUri} entry={entry} />
         ))}
       </List.Section>
-
       <List.Section title="Files">
         {data?.filter(isFileEntry).map((entry) => (
           <LocalListItem key={entry.fileUri} uri={entry.fileUri} />
