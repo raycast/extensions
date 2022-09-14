@@ -6,6 +6,7 @@ import {
   Clipboard,
   closeMainWindow,
   getPreferenceValues,
+  Icon,
   Keyboard,
   List,
   showHUD,
@@ -66,12 +67,17 @@ export default function ColorPickers() {
       icon={{ source: "dropper.png" }}
       actions={
         <ActionPanel>
-          <Action title={`Pick in ${defaultFormat}`} onAction={() => openColorPicker(defaultFormat)} />
+          <Action
+            title={`Pick in ${defaultFormat}`}
+            icon={Icon.Brush}
+            onAction={() => openColorPicker(defaultFormat)}
+          />
           <ActionPanel.Section key="pickers">
             {orderedPickFormats.map((type, index) => (
               <Action
                 key={index}
                 title={`Pick in ${type}`}
+                icon={Icon.Brush}
                 shortcut={shortcuts[index]}
                 onAction={() => openColorPicker(type)}
               />

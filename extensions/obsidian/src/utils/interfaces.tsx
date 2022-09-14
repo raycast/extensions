@@ -1,11 +1,12 @@
 import { Image } from "@raycast/api";
 
-export interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
+//--------------------------------------------------------------------------------
+// All interfaces for all commands should be defined here.
+//--------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------
+// Preference interfaces
+//--------------------------------------------------------------------------------
 
 export interface GlobalPreferences {
   vaultPath: string;
@@ -47,6 +48,10 @@ export interface SearchMediaPreferences extends GlobalPreferences {
   excludedFolders: string;
 }
 
+//--------------------------------------------------------------------------------
+// Other interfaces
+//--------------------------------------------------------------------------------
+
 export interface Vault {
   name: string;
   key: string;
@@ -60,6 +65,17 @@ export interface Note {
   content: string;
 }
 
+export interface CodeBlock {
+  language: string;
+  code: string;
+}
+
+export interface FormValue {
+  path: string;
+  name: string;
+  content: string;
+  tags: string[];
+}
 interface ObsidianVaultJSON {
   path: string;
   ts: number;
