@@ -30,6 +30,12 @@
       "mode": "view"
     },
     {
+      "name": "popularSeries",
+      "title": "Weekly Popular Series",
+      "description": "Show weekly popular series",
+      "mode": "view"
+    },
+    {
       "name": "login",
       "title": "Login Bilibili",
       "description": "Show QRCode to login Bilibili",

@@ -5,3 +5,5 @@ export * from "./checkLogin";
 export * from "./checkQRCode";
 export * from "./gennerateQRCode";
 export * from "./getPopularVideos";
+export * from "./getPopularSeriesList";
+export * from "./getPopularSeriesVideos";

@@ -120,5 +120,30 @@ declare global {
       message: string;
       ttl: number;
     }
+
+    export interface popularSeriesListResponse {
+      code: number;
+      data: {
+        list: popularSeries[];
+      };
+      message: string;
+      ttl: number;
+    }
+
+    export type popularSeries = {
+      name: string;
+      number: number;
+      status: number;
+      subject: string;
+    };
+
+    export interface popularSeriesVideosResponse {
+      code: number;
+      message: string;
+      data: {
+        list: video[];
+      };
+      ttl: number;
+    }
   }
 }
