@@ -8,12 +8,11 @@
 ## Features
 
 - Support for quick search of emoji packs
-- Support click to copy to clipboard
 - Support enter key to copy to clipboard
 - Support toggle image sources
 
 ## Author
 
-[ 🇨🇳 ] **Leo** (gaoyang)
+[ 🇨🇳 ] **gaoyang**
 
 - [GitHub](https://www.github.com/gaoyang)
