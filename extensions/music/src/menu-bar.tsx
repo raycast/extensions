@@ -88,13 +88,6 @@ export default function MenuBar() {
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title="Restart Track"
-        icon={Icon.ArrowCounterClockwise}
-        onAction={async () => {
-          await handleTaskEitherError(music.player.restart)();
-        }}
-      />
-      <MenuBarExtra.Item
         title="Next Track"
         icon={Icon.Forward}
         onAction={async () => {
@@ -108,15 +101,14 @@ export default function MenuBar() {
           await handleTaskEitherError(music.player.previous)();
         }}
       />
-      <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title={state.loved ? "Unlove Track" : "Love Track"}
-        icon={state.loved ? Icon.HeartDisabled : Icon.Heart}
+        title="Restart Track"
+        icon={Icon.ArrowCounterClockwise}
         onAction={async () => {
-          setState({ ...state, loved: !state.loved });
-          await handleTaskEitherError(music.player.toggleLove)();
+          await handleTaskEitherError(music.player.restart)();
         }}
       />
+      <MenuBarExtra.Separator />
       {!state.added && (
         <MenuBarExtra.Item
           title={"Add to Library"}
@@ -135,18 +127,14 @@ export default function MenuBar() {
           }}
         />
       )}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerOn}>
-        {Array.from({ length: 5 }, (_, i) => i).map((i) => (
-          <MenuBarExtra.Item
-            key={i}
-            title={`${i * 25}`}
-            onAction={async () => {
-              await handleTaskEitherError(music.player.setVolume(i * 25))();
-            }}
-          />
-        ))}
-      </MenuBarExtra.Submenu>
+      <MenuBarExtra.Item
+        title={state.loved ? "Unlove Track" : "Love Track"}
+        icon={state.loved ? Icon.HeartDisabled : Icon.Heart}
+        onAction={async () => {
+          setState({ ...state, loved: !state.loved });
+          await handleTaskEitherError(music.player.toggleLove)();
+        }}
+      />
       <MenuBarExtra.Submenu title="Set Rating" icon={Icons.Star}>
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
           <MenuBarExtra.Item
@@ -159,6 +147,18 @@ export default function MenuBar() {
                 TE.map(() => setState({ ...state, rating: i })),
                 TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
               )();
+            }}
+          />
+        ))}
+      </MenuBarExtra.Submenu>
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Submenu title="Set Volume" icon={Icon.SpeakerOn}>
+        {Array.from({ length: 5 }, (_, i) => i).map((i) => (
+          <MenuBarExtra.Item
+            key={i}
+            title={`${i * 25}`}
+            onAction={async () => {
+              await handleTaskEitherError(music.player.setVolume(i * 25))();
             }}
           />
         ))}
