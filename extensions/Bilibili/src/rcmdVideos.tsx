@@ -26,7 +26,7 @@ export default function Command() {
 
   return (
     <List
-      // enableFiltering={false}
+      enableFiltering={false}
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
@@ -49,10 +49,10 @@ export default function Command() {
           item.pubdate,
           {
             highlight: item.rcmd_reason?.content || undefined,
-            view: item.stat?.view ? formatNumber(item.stat.view) : undefined,
-            danmaku: item.stat?.danmaku ? formatNumber(item.stat.danmaku) : undefined,
-            coin: item.stat?.coin ? formatNumber(item.stat.coin) : undefined,
-            like: item.stat?.like ? formatNumber(item.stat.like) : undefined,
+            view: formatNumber(item.stat?.view),
+            danmaku: formatNumber(item.stat?.danmaku),
+            coin: formatNumber(item.stat?.coin),
+            like: formatNumber(item.stat?.like),
           }
         )
       )}

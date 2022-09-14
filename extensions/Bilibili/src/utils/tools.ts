@@ -10,6 +10,6 @@ export function secondToDate(second: number) {
   return `${h ? String(h).padStart(2, "0") + ":" : ""}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-export function formatNumber(number: number) {
-  return number > 9999 ? (number / 10000).toFixed(1) + "万" : String(number);
+export function formatNumber(number: number | undefined) {
+  return number ? (number > 9999 ? (number / 10000).toFixed(1) + "万" : String(number)) : "";
 }

@@ -101,10 +101,10 @@ declare global {
       duration: number;
       owner: uploader;
       stat: {
-        danmaku: number;
-        view: number;
-        coin: number;
-        like: number;
+        danmaku?: number;
+        view?: number;
+        coin?: number;
+        like?: number;
       };
       rcmd_reason: {
         content: string;
