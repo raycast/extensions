@@ -16,6 +16,14 @@
 			"title": "Open Codespace",
 			"description": "Display and manage your recent codespaces",
 			"mode": "view"
+		},
+		{
+			"name": "active-codespaces",
+			"title": "Active Codespaces",
+			"subtitle": "GitHub Codespaces",
+			"description": "See your active codespaces at a glance",
+			"mode": "menu-bar",
+			"interval": "1m"
 		}
 	],
 	"preferences": [
