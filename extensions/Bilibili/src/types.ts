@@ -3,7 +3,6 @@ export {};
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Bilibili {
-    // response
     export interface gennerateQRCodeResponse {
       code: number;
       data: {

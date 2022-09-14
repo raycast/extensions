@@ -29,7 +29,7 @@ export default function Command() {
           subtitle={item.subject}
           actions={
             <ActionPanel>
-              <Action onAction={() => push(<PopularSeriesVideos number={item.number} />)} title={"View Detail"} />
+              <Action onAction={() => push(<PopularSeriesVideos number={item.number} />)} title={"View Details"} />
             </ActionPanel>
           }
         />
