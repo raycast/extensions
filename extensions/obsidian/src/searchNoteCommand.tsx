@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 
 import { useObsidianVaults } from "./utils/utils";
-import { NoteListObsidian } from "./components/NoteListObsidian";
+import { NoteListObsidian } from "./components/NoteList/NoteListObsidian";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault, SearchArguments } from "./utils/interfaces";
 import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";

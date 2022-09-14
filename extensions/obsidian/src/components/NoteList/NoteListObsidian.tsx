@@ -2,13 +2,12 @@ import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import fs from "fs";
 
-import { useNotes } from "../utils/cache";
-import { Note, Vault, SearchNotePreferences, SearchArguments } from "../utils/interfaces";
+import { useNotes } from "../../utils/cache";
+import { Note, Vault, SearchNotePreferences, SearchArguments } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
-import { filterNotes } from "../utils/search";
-import { MAX_RENDERED_NOTES, NoteAction } from "../utils/constants";
-import { NoteActions, OpenNoteActions } from "../utils/actions";
-import { tagsForNotes } from "../utils/yaml";
+import { filterNotes } from "../../utils/search";
+import { MAX_RENDERED_NOTES, NoteAction } from "../../utils/constants";
+import { NoteActions, OpenNoteActions } from "../../utils/actions";
 
 export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; searchArguments: SearchArguments }) {
   const { searchContent } = getPreferenceValues<SearchNotePreferences>();
@@ -43,8 +42,6 @@ export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; sear
     fetch();
   }, []);
 
-  const tags = tagsForNotes(allNotes);
-
   return (
     <NoteList
       title={showTitle ? "Search Note in " + vault.name : ""}
@@ -52,9 +49,8 @@ export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; sear
       allNotes={allNotes}
       setNotes={setNotes}
       vault={vault}
-      onSearchChange={setInput}
       onDelete={onDelete}
-      tags={tags}
+      onSearchChange={setInput}
       searchArguments={searchArguments}
       action={(note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => {
         return (

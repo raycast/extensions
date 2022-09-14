@@ -1,8 +1,8 @@
-import { List, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel } from "@raycast/api";
 import React, { useState } from "react";
 import fs from "fs";
 
-import { Note, Vault, SearchNotePreferences, SearchArguments } from "../utils/interfaces";
+import { Note, Vault, SearchNotePreferences } from "../../utils/interfaces";
 import {
   readingTime,
   wordCount,
@@ -11,19 +11,19 @@ import {
   fileSizeFor,
   getNoteFileContent,
   filterContent,
-} from "../utils/utils";
-import { isNotePinned } from "../utils/pinNoteUtils";
-import { NoteAction } from "../utils/constants";
-import { deleteNoteFromCache, renewCache, updateNoteInCache } from "../utils/cache";
-import { tagsForNotes } from "../utils/yaml";
+} from "../../utils/utils";
+import { isNotePinned } from "../../utils/pinNoteUtils";
+import { NoteAction } from "../../utils/constants";
+import { deleteNoteFromCache, renewCache, updateNoteInCache } from "../../utils/cache";
+import { tagsForNotes, yamlPropertyForString } from "../../utils/yaml";
 
 export function NoteListItem(props: {
   note: Note;
   vault: Vault;
   key: string;
   pref: SearchNotePreferences;
-  onDelete: (note: Note) => void;
   action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
+  onDelete?: (note: Note, vault: Vault) => void;
 }) {
   const { note, vault, pref, onDelete, action } = props;
   const [content, setContent] = useState(note.content);
@@ -52,7 +52,9 @@ export function NoteListItem(props: {
         setPinned(!pinned);
         break;
       case NoteAction.Delete:
-        onDelete(note);
+        if (onDelete) {
+          onDelete(note, vault);
+        }
         deleteNoteFromCache(vault, note);
         break;
       case NoteAction.Edit:
@@ -64,6 +66,29 @@ export function NoteListItem(props: {
         reloadContent();
         reloadTags();
         updateNoteInCache(vault, note);
+    }
+  }
+
+  function TagList() {
+    if (note.tags.length > 0) {
+      return (
+        <List.Item.Detail.Metadata.TagList title="Tags">
+          {note.tags.map((tag) => (
+            <List.Item.Detail.Metadata.TagList.Item key={tag} text={tag} />
+          ))}
+        </List.Item.Detail.Metadata.TagList>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  function Link() {
+    const url = yamlPropertyForString(note.content, "url");
+    if (url) {
+      return <List.Item.Detail.Metadata.Link target={url} text="View" title="URL" />;
+    } else {
+      return null;
     }
   }
 
@@ -83,6 +108,8 @@ export function NoteListItem(props: {
                   title="Reading Time"
                   text={readingTime(content).toString() + " min read"}
                 />
+                <TagList />
+                <Link />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Creation Date"
@@ -107,81 +134,4 @@ export function NoteListItem(props: {
       }
     />
   ) : null;
-}
-
-export function NoteList(props: {
-  notes: Note[] | undefined;
-  allNotes?: Note[];
-  setNotes?: (notes: Note[]) => void;
-  tags?: string[];
-  isLoading?: boolean;
-  title?: string;
-  vault: Vault;
-  searchArguments: SearchArguments;
-  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
-  onSearchChange: (search: string) => void;
-  onDelete: (note: Note) => void;
-}) {
-  const { notes, allNotes, vault, isLoading, title, tags, searchArguments, action, onSearchChange, onDelete } = props;
-  const pref = getPreferenceValues<SearchNotePreferences>();
-  const { showDetail } = pref;
-
-  let isNotesUndefined = notes === undefined;
-
-  if (notes !== undefined) {
-    isNotesUndefined = notes.length == 0;
-  }
-
-  if (isLoading !== undefined) {
-    isNotesUndefined = isLoading;
-  }
-
-  function DropDownList() {
-    if (props.setNotes && allNotes && tags) {
-      return (
-        <List.Dropdown
-          tooltip="Search For"
-          defaultValue={
-            searchArguments.tagArgument.startsWith("#")
-              ? searchArguments.tagArgument
-              : "#" + searchArguments.tagArgument
-          }
-          onChange={(value) => {
-            if (value != "all") {
-              if (props.setNotes) {
-                props.setNotes(allNotes.filter((note) => note.tags.includes(value)));
-              }
-            } else {
-              if (props.setNotes) {
-                props.setNotes(allNotes);
-              }
-            }
-          }}
-        >
-          <List.Dropdown.Item title="All" value="all" />
-          <List.Dropdown.Section title="Tags" />
-          {tags.map((tag) => (
-            <List.Dropdown.Item title={tag} value={tag} key={tag} />
-          ))}
-        </List.Dropdown>
-      );
-    } else {
-      return <React.Fragment />;
-    }
-  }
-
-  return (
-    <List
-      isLoading={isNotesUndefined}
-      isShowingDetail={showDetail}
-      onSearchTextChange={onSearchChange}
-      navigationTitle={title}
-      searchText={searchArguments.searchArgument}
-      searchBarAccessory={<DropDownList />}
-    >
-      {notes?.map((note) => (
-        <NoteListItem note={note} vault={vault} key={note.path} pref={pref} onDelete={onDelete} action={action} />
-      ))}
-    </List>
-  );
 }
