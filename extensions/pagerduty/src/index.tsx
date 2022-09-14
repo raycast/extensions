@@ -260,6 +260,7 @@ function UpdateIncidentStatusAction(props: {
   const resolveAction = (
     <Action.Push
       key={props.item.id}
+      icon={Icon.Checkmark}
       title={"Resolve Incident"}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
       target={<ResolveIcidentForm onSubmit={(note) => onUpdateIncidentStatus(props.item, "resolved", note)} />}
@@ -269,6 +270,7 @@ function UpdateIncidentStatusAction(props: {
   const acknowledgeAction = (
     <Action
       title={"Acknowledge Incident"}
+      icon={Icon.Clock}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onAction={() => onUpdateIncidentStatus(props.item, "acknowledged")}
     />
