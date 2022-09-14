@@ -11,15 +11,20 @@ The steps are as follows:
 * Configure the Folder Search extension via Raycast
     * Ensure the `Plugins Enabled` option is checked
     * Populate `Plugins Folder (Absolute Path)` with a valid **absolute** path to where you plugins reside
-        * e.g: /Users/GastroGeek/Documents/FolderSearchPlugins
+        * e.g: `/Users/GastroGeek/Documents/FolderSearchPlugins`
 
 * Create one or more plugins with the following schema (they are just `.js` files):
 
+### e.g. Plugin Path
+
 ```
-/Users/GastroGeek/Documents/FolderSearchPlugins
+/Users/GastroGeek/Documents/FolderSearchPlugins/open-alt.js
 ```
 
+### e.g. Plugin file contents (open-alt.js)
+
 ```js
+// note the export name!
 exports.FolderSearchPlugin = {
   // the title of the action as shown
   // in the Actions Menu in Raycast.
