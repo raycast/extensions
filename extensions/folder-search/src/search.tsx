@@ -9,23 +9,35 @@ import {
   List,
   LocalStorage,
   Toast,
+  closeMainWindow,
   environment,
   popToRoot,
   showToast,
 } from "@raycast/api";
+
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 
+import { runAppleScript } from "run-applescript";
+
 import { searchSpotlight } from "./search-spotlight";
-import { SpotlightSearchResult } from "./types";
+import { FolderSearchPlugin, SpotlightSearchResult } from "./types";
 
 import {
+  loadPlugins,
   folderName,
   enclosingFolderName,
   showFolderInfoInFinder,
   copyFolderToClipboard,
   maybeMoveResultToTrash,
 } from "./utils";
+
+// allow string indexing on Icons
+interface IconDictionary {
+  [id: string]: Icon;
+}
+
+const IconDictionaried: IconDictionary = Icon as IconDictionary;
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -35,12 +47,38 @@ export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(true);
   const [results, setResults] = useState<SpotlightSearchResult[]>([]);
 
+  const [plugins, setPlugins] = useState<FolderSearchPlugin[]>([]);
+
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
   const [canExecute, setCanExecute] = useState<boolean>(false);
 
+  const [hasCheckedPlugins, setHasCheckedPlugins] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
 
   const abortable = useRef<AbortController>();
+
+  // check plugins
+  usePromise(
+    async () => {
+      const plugins = await loadPlugins();
+      setPlugins(plugins);
+    },
+    [],
+    {
+      onData() {
+        setHasCheckedPlugins(true);
+      },
+      onError() {
+        showToast({
+          title: "An Error Occured",
+          message: "Could not read plugins",
+          style: Toast.Style.Failure,
+        });
+
+        setHasCheckedPlugins(true);
+      },
+    }
+  );
 
   // check prefs
   usePromise(
@@ -106,7 +144,7 @@ export default function Command() {
 
         setIsQuerying(false);
       },
-      execute: hasCheckedPreferences && canExecute && !!searchText,
+      execute: hasCheckedPlugins && hasCheckedPreferences && canExecute && !!searchText,
       abortable,
     }
   );
@@ -114,7 +152,7 @@ export default function Command() {
   // save preferences
   useEffect(() => {
     (async () => {
-      if (!hasCheckedPreferences) {
+      if (!(hasCheckedPlugins && hasCheckedPreferences)) {
         return;
       }
 
@@ -273,6 +311,21 @@ export default function Command() {
                     onAction={() => maybeMoveResultToTrash(result, () => removeResultFromPinnedResults(result))}
                   />
                 </ActionPanel.Section>
+                <ActionPanel.Section title="Plugins">
+                  {plugins.map((plugin: FolderSearchPlugin, pluginIndex) => (
+                    <Action
+                      key={pluginIndex}
+                      title={plugin.title}
+                      icon={IconDictionaried[plugin.icon]}
+                      shortcut={{ ...plugin.shortcut }}
+                      onAction={() => {
+                        popToRoot({ clearSearchBar: true });
+                        closeMainWindow({ clearRootSearch: true });
+                        runAppleScript(plugin.appleScript(result));
+                      }}
+                    />
+                  ))}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -281,7 +334,7 @@ export default function Command() {
     );
   };
 
-  return !hasCheckedPreferences ? (
+  return !(hasCheckedPlugins && hasCheckedPreferences) ? (
     // prevent flicker due to details pref being async
     <Form />
   ) : (
@@ -293,7 +346,7 @@ export default function Command() {
       isShowingDetail={isShowingDetail}
       selectedItemId={selectedItemId}
       searchBarAccessory={
-        hasCheckedPreferences ? (
+        hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
             <List.Dropdown.Item title="This Mac" value=""></List.Dropdown.Item>
             <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir}></List.Dropdown.Item>

@@ -30,6 +30,22 @@
       "type": "textfield",
       "required": false,
       "default": "250"
+    },
+    {
+      "name": "pluginsEnabled",
+      "title": "Plugins Enabled",
+      "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "pluginsFolder",
+      "title": "Plugins Folder (Absolute Path)",
+      "description": "The Folder in which your plugins, for Folder Search, are stored",
+      "type": "textfield",
+      "required": false,
+      "default": ""
     }
   ],
   "dependencies": {
@@ -37,7 +53,8 @@
     "@raycast/utils": "^1.3.3",
     "binary-split": "^1.0.5",
     "run-applescript": "^6.0.0",
-    "through2-map": "^3.0.0"
+    "through2-map": "^3.0.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
