@@ -46,6 +46,7 @@ export default function Command() {
 							open(`vscode://github.codespaces/connect?name=${codespace.name}&windowId=_blank`);
 						}
 					}}
+					tooltip={`Launch in ${preferredEditor === "web" ? "web editor" : "VS Code"}`}
 				/>
 			))}
 			<MenuBarExtra.Item title="Recent" />
@@ -66,6 +67,7 @@ export default function Command() {
 							open(`vscode://github.codespaces/connect?name=${codespace.name}&windowId=_blank`);
 						}
 					}}
+					tooltip={`Launch in ${preferredEditor === "web" ? "web editor" : "VS Code"}`}
 				/>
 			))}
 		</MenuBarExtra>
