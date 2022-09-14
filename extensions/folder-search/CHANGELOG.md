@@ -1,5 +1,11 @@
 # Folder Search Changelog
 
+## [New Features] - 2022-09-14
+
+- **added** Create Quicklink action
+- **added** Open With action
+- **added** Show Info in Finder action
+
 ## [New Feature] - 2022-09-09
 
 - **added** Ability to 'Pin' folders

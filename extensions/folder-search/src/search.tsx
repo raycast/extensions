@@ -19,7 +19,13 @@ import { useEffect, useRef, useState } from "react";
 import { searchSpotlight } from "./search-spotlight";
 import { SpotlightSearchResult } from "./types";
 
-import { folderName, enclosingFolderName, maybeMoveResultToTrash, copyFolderToClipboard } from "./utils";
+import {
+  folderName,
+  enclosingFolderName,
+  showFolderInfoInFinder,
+  copyFolderToClipboard,
+  maybeMoveResultToTrash,
+} from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -208,6 +214,18 @@ export default function Command() {
                   path={result.path}
                   onShow={() => popToRoot({ clearSearchBar: true })}
                 />
+                <Action.OpenWith
+                  title="Open With..."
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  path={result.path}
+                  onOpen={() => popToRoot({ clearSearchBar: true })}
+                />
+                <Action
+                  title="Show Info in Finder"
+                  icon={Icon.Finder}
+                  shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  onAction={() => showFolderInfoInFinder(result)}
+                />
                 <Action
                   title="Toggle Details"
                   icon={Icon.Sidebar}
@@ -236,6 +254,14 @@ export default function Command() {
                     title="Copy Path"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                     content={result.path}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action.CreateQuicklink
+                    title="Create Quicklink"
+                    icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    quicklink={{ link: result.path, name: folderName(result) }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

@@ -1,4 +1,4 @@
-import { Alert, Icon, confirmAlert, trash, showToast } from "@raycast/api";
+import { Alert, Icon, closeMainWindow, confirmAlert, trash, showToast, popToRoot } from "@raycast/api";
 
 import { runAppleScriptSync } from "run-applescript";
 
@@ -16,6 +16,19 @@ const enclosingFolderName = (result: SpotlightSearchResult) => {
   return [...result.path.split("/")]
     .filter((_, pathPartIndex) => pathPartIndex < [...result.path.split("/")].length - 1)
     .join("/");
+};
+
+const showFolderInfoInFinder = (result: SpotlightSearchResult) => {
+  runAppleScriptSync(`
+    set result to (POSIX file "${result.path}") as alias
+    tell application "Finder"
+      open information window of result
+      activate
+    end tell
+  `);
+
+  popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
 };
 
 const copyFolderToClipboard = (result: SpotlightSearchResult) => {
@@ -41,4 +54,11 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTr
   await confirmAlert(options);
 };
 
-export { safeSearchScope, folderName, enclosingFolderName, copyFolderToClipboard, maybeMoveResultToTrash };
+export {
+  safeSearchScope,
+  folderName,
+  enclosingFolderName,
+  showFolderInfoInFinder,
+  copyFolderToClipboard,
+  maybeMoveResultToTrash,
+};
