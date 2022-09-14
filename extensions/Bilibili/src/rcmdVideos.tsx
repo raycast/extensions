@@ -1,4 +1,4 @@
-import { video } from "./components";
+import { Video } from "./components";
 import { useRcmdVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
@@ -35,27 +35,27 @@ export default function Command() {
         if (countList.length % 20 === 0) setIdx(idx + 1);
       }}
     >
-      {rcmdVideos?.map((item) =>
-        video(
-          item.title,
-          item.pic,
-          item.uri,
-          {
+      {rcmdVideos?.map((item) => (
+        <Video
+          title={item.title}
+          cover={item.pic}
+          url={item.uri}
+          uploader={{
             mid: item.owner.mid,
             name: item.owner.name,
             face: item.owner.face,
-          },
-          secondToDate(item.duration),
-          item.pubdate,
-          {
+          }}
+          duration={secondToDate(item.duration)}
+          pubdate={item.pubdate}
+          stat={{
             highlight: item.rcmd_reason?.content || undefined,
             view: formatNumber(item.stat?.view),
             danmaku: formatNumber(item.stat?.danmaku),
             coin: formatNumber(item.stat?.coin),
             like: formatNumber(item.stat?.like),
-          }
-        )
-      )}
+          }}
+        />
+      ))}
     </List>
   );
 }

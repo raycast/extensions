@@ -1,23 +1,12 @@
-import { video } from "./components";
+import { NoLoginView, Video } from "./components";
 import { usePopularVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
 import { useState } from "react";
-import { Color, List, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 
 export default function Command() {
-  if (!checkLogin())
-    return (
-      <List>
-        <List.EmptyView
-          icon={{
-            source: Icon.ExclamationMark,
-            tintColor: Color.Red,
-          }}
-          title="Please use Login Bilibili command to login first."
-        />
-      </List>
-    );
+  if (!checkLogin()) return <NoLoginView />;
 
   const [pn, setPn] = useState(1);
   const countList: string[] = [];
@@ -35,27 +24,27 @@ export default function Command() {
         if (countList.length % 20 === 0) setPn(pn + 1);
       }}
     >
-      {popularVideos?.map((item) =>
-        video(
-          item.title,
-          item.pic,
-          item.short_link,
-          {
+      {popularVideos?.map((item) => (
+        <Video
+          title={item.title}
+          cover={item.pic}
+          url={item.short_link}
+          uploader={{
             mid: item.owner.mid,
             name: item.owner.name,
             face: item.owner.face,
-          },
-          secondToDate(item.duration),
-          item.pubdate,
-          {
+          }}
+          duration={secondToDate(item.duration)}
+          pubdate={item.pubdate}
+          stat={{
             highlight: item.rcmd_reason.content,
             view: formatNumber(item.stat.view),
             danmaku: formatNumber(item.stat.danmaku),
             coin: formatNumber(item.stat.coin),
             like: formatNumber(item.stat.like),
-          }
-        )
-      )}
+          }}
+        />
+      ))}
     </List>
   );
 }

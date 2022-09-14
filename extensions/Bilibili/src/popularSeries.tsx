@@ -1,4 +1,4 @@
-import { video } from "./components";
+import { Video } from "./components";
 import { usePopularSeriesList, usePopularSeriesVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
@@ -43,27 +43,27 @@ function PopularSeriesVideos(props: { number: number }) {
 
   return (
     <List enableFiltering={false} isLoading={isLoading} isShowingDetail={true}>
-      {popularSeriesVideos?.map((item) =>
-        video(
-          item.title,
-          item.pic,
-          item.short_link,
-          {
+      {popularSeriesVideos?.map((item) => (
+        <Video
+          title={item.title}
+          cover={item.pic}
+          url={item.short_link}
+          uploader={{
             mid: item.owner.mid,
             name: item.owner.name,
             face: item.owner.face,
-          },
-          secondToDate(item.duration),
-          item.pubdate,
-          {
+          }}
+          duration={secondToDate(item.duration)}
+          pubdate={item.pubdate}
+          stat={{
             highlight: item.rcmd_reason.content,
             view: formatNumber(item.stat.view),
             danmaku: formatNumber(item.stat.danmaku),
             coin: formatNumber(item.stat.coin),
             like: formatNumber(item.stat.like),
-          }
-        )
-      )}
+          }}
+        />
+      ))}
     </List>
   );
 }

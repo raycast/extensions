@@ -2,53 +2,55 @@ import { formatUrl } from "../utils";
 
 import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 
-export function video(
-  title: string,
-  cover: string,
-  url: string,
-  uploader: Bilibili.uploader,
-  duration: string,
-  pubdate: number,
+export function Video(props: {
+  title: string;
+  cover: string;
+  url: string;
+  uploader: Bilibili.uploader;
+  duration: string;
+  pubdate: number;
   stat: {
     highlight?: string;
     view?: string;
     danmaku?: string;
     like?: string;
     coin?: string;
-  }
-) {
+  };
+}) {
   return (
     <List.Item
-      title={title}
+      title={props.title}
       detail={
         <List.Item.Detail
-          markdown={`![Cover](${formatUrl(cover)})`}
+          markdown={`![Cover](${formatUrl(props.cover)})`}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title={title} />
+              <List.Item.Detail.Metadata.Label title={props.title} />
               <List.Item.Detail.Metadata.Label
                 title="Uploader"
-                text={uploader.name}
+                text={props.uploader.name}
                 icon={{
-                  source: formatUrl(uploader.face),
+                  source: formatUrl(props.uploader.face),
                   mask: Image.Mask.Circle,
                 }}
               />
-              <List.Item.Detail.Metadata.Label title="Duration" text={String(duration)} />
-              <List.Item.Detail.Metadata.Label title="Time" text={new Date(pubdate * 1000).toLocaleString()} />
+              <List.Item.Detail.Metadata.Label title="Duration" text={String(props.duration)} />
+              <List.Item.Detail.Metadata.Label title="Time" text={new Date(props.pubdate * 1000).toLocaleString()} />
               <List.Item.Detail.Metadata.TagList title="Stat">
-                {stat.highlight && <List.Item.Detail.Metadata.TagList.Item text={stat.highlight} color={"#FB7299"} />}
-                {stat.view && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Play: ${stat.view}`} color={Color.Green} />
+                {props.stat.highlight && (
+                  <List.Item.Detail.Metadata.TagList.Item text={props.stat.highlight} color={"#FB7299"} />
                 )}
-                {stat.coin && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Coin: ${stat.coin}`} color={Color.Orange} />
+                {props.stat.view && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Play: ${props.stat.view}`} color={Color.Green} />
                 )}
-                {stat.view && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${stat.view}`} color={Color.Brown} />
+                {props.stat.coin && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />
                 )}
-                {stat.danmaku && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${stat.danmaku}`} color={Color.Blue} />
+                {props.stat.view && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Brown} />
+                )}
+                {props.stat.danmaku && (
+                  <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${props.stat.danmaku}`} color={Color.Blue} />
                 )}
               </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>
@@ -57,10 +59,10 @@ export function video(
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Video" url={formatUrl(url)} />
+          <Action.OpenInBrowser title="Open Video" url={formatUrl(props.url)} />
           <Action.OpenInBrowser
-            title={`Open ${uploader.name} Dynamic`}
-            url={`https://space.bilibili.com/${uploader.mid}/dynamic`}
+            title={`Open ${props.uploader.name} Dynamic`}
+            url={`https://space.bilibili.com/${props.uploader.mid}/dynamic`}
           />
         </ActionPanel>
       }
