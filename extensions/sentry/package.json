@@ -22,7 +22,7 @@
     {
       "name": "token",
       "title": "Auth Token",
-      "type": "textfield",
+      "type": "password",
       "description": "Auth Token to communicate with Sentry",
       "required": true
     }
