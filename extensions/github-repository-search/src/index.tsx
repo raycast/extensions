@@ -1,8 +1,8 @@
-import { ActionPanel, Color, Detail, environment, Icon, List, showToast, Action, Toast } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, List, Action } from "@raycast/api";
 import { useState } from "react";
 import { Release, Repository, UserDataResponse } from "./types";
 import { useDebounce } from "use-debounce";
-import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
+import { useHistory } from "./history";
 import { getAccessories, getIcon, getSubtitle } from "./utils";
 import { OpenInWebIDEAction } from "./website";
 import { preferences } from "./preferences";
@@ -17,13 +17,9 @@ export default function Command() {
   );
   const { data: userData } = useUserData();
 
-  const {
-    repositories: visitedRepositories,
-    visitRepository,
-    isLoading: isLoadingVisitedRepositories,
-  } = useVisitedRepositories();
+  const { data: history, visitRepository } = useHistory();
 
-  const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
+  const isLoading = searchText !== debouncedSearchText || isLoadingRepositories;
 
   return (
     <List
@@ -31,11 +27,8 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<FilterDropdown viewer={userData?.viewer} onFilterChange={setSearchFilter} />}
     >
-      <List.Section
-        title="Visited Repositories"
-        subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
-      >
-        {visitedRepositories
+      <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
+        {history
           ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
           .filter((r) =>
             // Filter on dropdown selection value
@@ -173,35 +166,8 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
-      <DevelopmentActionSection />
     </ActionPanel>
   );
-}
-
-function DevelopmentActionSection() {
-  async function handleClearVisitedRepositories() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Clearing visted repositories",
-    });
-
-    try {
-      await clearVisitedRepositories();
-      toast.style = Toast.Style.Success;
-      toast.title = "Cleared visited repositories";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed clearing visited repositories";
-      toast.message = error instanceof Error ? error.message : undefined;
-      console.error("Failed clearing visited repositories", error);
-    }
-  }
-
-  return environment.isDevelopment ? (
-    <ActionPanel.Section title="Development">
-      <Action icon={Icon.Trash} title="Clear Visited Repositories" onAction={handleClearVisitedRepositories} />
-    </ActionPanel.Section>
-  ) : null;
 }
 
 function ReleaseView(props: { repository: Repository }) {
