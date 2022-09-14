@@ -1,10 +1,10 @@
 import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues } from "@raycast/api";
 import React, { useState, useEffect } from "react";
-import { readFileSync } from "node:fs";
-import { execSync } from "child_process";
 import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from "./storage";
+import { readFileSync } from "node:fs";
 
 export interface Preferences {
+  version: "beta" | "stable";
   primaryAction: "copySymbol" | "pasteSymbol" | "copyName" | "pasteName";
   gridItemSize: Grid.ItemSize;
   showName: boolean;
@@ -30,26 +30,14 @@ export interface SymbolProps {
   recent?: boolean;
 }
 
-const { primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
-
-try {
-  execSync("ls /Applications | grep 'SF Symbols beta.app'");
-} catch (err) {
-  console.log(err);
-}
+const { version, primaryAction, gridItemSize, showName }: Preferences = getPreferenceValues();
 
 function getDataPath() {
-  let fileName = "data";
+  return `${environment.assetsPath}/symbols/data${version === "beta" ? "_beta" : ""}.json`;
+}
 
-  try {
-    if (execSync("ls /Applications | grep 'SF Symbols beta.app'").length > 0) {
-      fileName += "_beta";
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return `${environment.assetsPath}/symbols/${fileName}.json`;
+function getImageURL(name: string) {
+  return `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${name}.png`;
 }
 
 export default function Command() {
@@ -87,7 +75,7 @@ export default function Command() {
             value={data.categories[0].name}
             title="All Categories"
             icon={{
-              source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${data.categories[0].symbol}.png`,
+              source: getImageURL(data.categories[0].symbol),
               tintColor: Color.PrimaryText,
             }}
           />
@@ -98,7 +86,7 @@ export default function Command() {
                 value={category.name}
                 title={category.title}
                 icon={{
-                  source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${category.symbol}.png`,
+                  source: getImageURL(category.symbol),
                   tintColor: Color.PrimaryText,
                 }}
               />
@@ -142,7 +130,7 @@ const SFSymbol = (props: SymbolProps) => {
     <Grid.Item
       title={showName ? symbol.name : undefined}
       content={{
-        source: `https://raw.githubusercontent.com/yugtesh/sf-symbols/main/images/${symbol.name}.png`,
+        source: getImageURL(symbol.name),
         tintColor: Color.PrimaryText,
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
