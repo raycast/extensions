@@ -23,7 +23,7 @@
 			"subtitle": "GitHub Codespaces",
 			"description": "See your active codespaces at a glance",
 			"mode": "menu-bar",
-			"interval": "1m"
+			"interval": "5m"
 		}
 	],
 	"preferences": [
