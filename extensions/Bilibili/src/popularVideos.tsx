@@ -2,6 +2,7 @@ import { video } from "./components";
 import { usePopularVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
+import { useState } from "react";
 import { Color, List, Icon } from "@raycast/api";
 
 export default function Command() {
@@ -18,10 +19,22 @@ export default function Command() {
       </List>
     );
 
-  const { popularVideos, isLoading } = usePopularVideos();
+  const [pn, setPn] = useState(1);
+  const countList: string[] = [];
+
+  const { popularVideos, isLoading } = usePopularVideos(pn);
 
   return (
-    <List enableFiltering={false} isLoading={isLoading} isShowingDetail={true}>
+    <List
+      enableFiltering={false}
+      isLoading={isLoading}
+      isShowingDetail={true}
+      onSelectionChange={(id) => {
+        if (!countList.includes(id || "")) countList.push(id || "");
+
+        if (countList.length % 20 === 0) setPn(pn + 1);
+      }}
+    >
       {popularVideos?.map((item) =>
         video(
           item.title,

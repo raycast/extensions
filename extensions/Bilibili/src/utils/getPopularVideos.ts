@@ -3,11 +3,11 @@ import { API } from "./api";
 
 import { Cache } from "@raycast/api";
 
-export async function getPopularVideos() {
+export async function getPopularVideos(pn: number) {
   const cache = new Cache();
   const cookie = cache.get("cookie") || "{}";
 
-  const res: Bilibili.popularVideosResponse = await got(API.popularVideos(1, 25), {
+  const res: Bilibili.popularVideosResponse = await got(API.popularVideos(pn, 20), {
     headers: {
       cookie,
     },
