@@ -1,12 +1,13 @@
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect } from "react";
 import { getFavicon, useFetch } from "@raycast/utils";
-import { Action, ActionPanel, Clipboard, Detail, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
-import AddSearchEngine from "./add-search-engine";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
+import EditSearchEngine from "./edit-search-engine";
 import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
-import { getSavedSites, SavedSite, SEARCH_TEMPLATE } from "./saved-sites";
+import { getSavedSites, SavedSite, SEARCH_TEMPLATE, SavedSitesState } from "./saved-sites";
 import { v4 as uuidv4 } from "uuid";
-import { collator } from "./utils";
+import { strEq } from "./utils";
+import ManageSavedSites from "./manage-saved-sites";
 
 interface Preferences {
   prefillFromClipboard: boolean;
@@ -18,7 +19,7 @@ function suggestionsFromXml(xml: string, searchString: string): string[] {
 
   for (const match of suggestionMatches) {
     const suggestion = match[1]; // capture group 1
-    if (collator.compare(suggestion, searchString) !== 0) {
+    if (!strEq(suggestion, searchString)) {
       suggestions.push(htmlDecode(suggestion));
     }
   }
@@ -29,10 +30,10 @@ function suggestionsFromXml(xml: string, searchString: string): string[] {
 }
 
 function fillTemplate(templateUrl: string, query: string) {
-  // We need to handle the case where query contains SEARCH_TEMPLATE
-  // To do this, we replace SEARCH_TEMPLATE with a random string that probably doesn't
-  // exist anywhere universe, replace that with the query string, then replace it back
-  // with SEARCH_TEMPLATE
+  // We need to handle the case where query contains SEARCH_TEMPLATE To do this, we
+  // replace SEARCH_TEMPLATE with a random string that probably doesn't exist anywhere
+  // in the universe, replace that with the query string, then replace it back with
+  // SEARCH_TEMPLATE
   const placeholderTemplate = uuidv4();
   const templateUrlWithPlaceholder = templateUrl.replace(SEARCH_TEMPLATE, placeholderTemplate);
   const placeholderUrl = templateUrlWithPlaceholder.replace(placeholderTemplate, encodeURIComponent(query));
@@ -40,9 +41,28 @@ function fillTemplate(templateUrl: string, query: string) {
   return url;
 }
 
-export default function Command() {
+function DefaultActions(props: { savedSitesState: SavedSitesState }) {
+  const { savedSitesState } = props;
+
+  return (
+    <ActionPanel.Section title="Manage search engines and websites">
+      <Action.Push
+        target={<EditSearchEngine {...{ savedSitesState }} operation="add" />}
+        title="Add new site..."
+        icon={Icon.Plus}
+      ></Action.Push>
+      <Action.Push
+        target={<ManageSavedSites {...{ savedSitesState }} />}
+        title="Manage sites..."
+        icon={Icon.Gear}
+      ></Action.Push>
+    </ActionPanel.Section>
+  );
+}
+
+export default function () {
   const [searchText, setSearchText] = useState("");
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  // const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
     if (getPreferenceValues<Preferences>().prefillFromClipboard) {
@@ -53,7 +73,9 @@ export default function Command() {
     }
   }, []);
 
-  const [savedSites, setSavedSites] = useState(getSavedSites());
+  const savedSitesState = useState(getSavedSites());
+  const [savedSites] = savedSitesState;
+
   const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
 
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
@@ -88,33 +110,21 @@ export default function Command() {
     }
   );
 
-  const defaultActions = (
-    <ActionPanel.Section title="Manage search engines and websites">
-      <Action.Push
-        target={<AddSearchEngine {...{ savedSites, setSavedSites, forceUpdate }} />}
-        title="Add new site..."
-        icon={Icon.Plus}
-      ></Action.Push>
-      <Action title="Manage sites..." icon={Icon.Gear}></Action>
-    </ActionPanel.Section>
-  );
-
-  const defaultActionPanel = <ActionPanel>{defaultActions}</ActionPanel>;
   const searchActionPanel = (
     <ActionPanel>
       <Action.OpenInBrowser
         title={`Search on ${selectedSite?.title}`}
         url={fillTemplate(selectedSite?.url, searchText)}
       ></Action.OpenInBrowser>
-      {defaultActions}
+      <DefaultActions {...{ savedSitesState }} />
     </ActionPanel>
   );
 
-  const defaultUrl = savedSites.items.find(
-    ({ title }) => collator.compare(title, savedSites.defaultSiteTitle ?? "") === 0
-  )?.url;
+  const defaultUrl = savedSites.items.find(({ title }) => strEq(title, savedSites.defaultSiteTitle ?? ""))?.url;
 
-  const searchSuggestionsList = (
+  return savedSites.items.length === 0 ? (
+    <EditSearchEngine {...{ savedSitesState, operation: "add" }} />
+  ) : (
     <List
       enableFiltering={false}
       isLoading={isLoading}
@@ -132,7 +142,11 @@ export default function Command() {
           ))}
         </List.Dropdown>
       }
-      actions={<ActionPanel>{defaultActions}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          <DefaultActions {...{ savedSitesState }} />
+        </ActionPanel>
+      }
     >
       {typeof data === "string" ? (
         <List.Item
@@ -146,10 +160,4 @@ export default function Command() {
       )}
     </List>
   );
-
-  if (savedSites.items.length === 0) {
-    return <AddSearchEngine {...{ savedSites, setSavedSites }} />;
-  }
-
-  return searchSuggestionsList;
 }

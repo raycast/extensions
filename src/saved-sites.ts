@@ -14,6 +14,8 @@ export interface SavedSites {
   defaultSiteTitle?: string;
 }
 
+export type SavedSitesState = [SavedSites, (_: SavedSites) => void];
+
 const SAVED_SITES_FILEPATH = path.join(environment.supportPath, "saved_searches.json");
 
 export function getSavedSites() {
@@ -25,8 +27,14 @@ export function getSavedSites() {
   }
 }
 
-export function writeSavedSites(savedSites: SavedSites) {
+function writeSavedSitesToDisk(savedSites: SavedSites) {
   return writeFileSync(SAVED_SITES_FILEPATH, JSON.stringify(savedSites));
+}
+
+export function persistSavedSites(savedSitesState: SavedSitesState) {
+  const [savedSites, setSavedSites] = savedSitesState;
+  setSavedSites({ ...savedSites });
+  writeSavedSitesToDisk(savedSites);
 }
 
 export function getExistingTitlesAndUrls(savedSites: SavedSites) {
