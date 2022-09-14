@@ -1,23 +1,38 @@
-import {Action, ActionPanel, Form, Icon} from "@raycast/api"
+import {Action, ActionPanel, Form, Icon, showToast, Toast} from "@raycast/api"
+import {createTask} from "api/helpers"
 import {TaskStatus} from "api/types"
 import {labelForTaskColumn} from "helpers/focustask"
-import {useState} from "react"
+import {FC, useState} from "react"
 import {ListPicker} from "./list-picker"
 
 const STATUSES: TaskStatus[] = ["current", "next", "icebox"]
 
-export const CreateForm = () => {
+export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
   const isLoading = false
 
-  const [title, setTitle] = useState("")
+  const [title, setTitle] = useState(initialTitle ?? "")
   const [note, setNote] = useState("")
   const [status, setStatus] = useState<TaskStatus>("current")
-  const [listId, setListId] = useState<string>()
+  const [checklistId, setChecklistId] = useState<string>()
 
-  console.log("rendering the create form")
+  const submit = async () => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating task",
+      message: "This should only take a moment",
+    })
 
-  const submit = () => {
-    //
+    const response = await createTask({title, note, status, checklistId})
+
+    if ("id" in response) {
+      toast.style = Toast.Style.Success
+      toast.title = "Success"
+      toast.message = "Task created"
+    } else {
+      toast.style = Toast.Style.Success
+      toast.title = "Failure"
+      toast.message = "Failed to create a task"
+    }
   }
 
   return (
@@ -67,7 +82,7 @@ export const CreateForm = () => {
         ))}
       </Form.Dropdown>
 
-      <ListPicker value={listId} onChange={setListId} />
+      <ListPicker value={checklistId} onChange={setChecklistId} />
     </Form>
   )
 }

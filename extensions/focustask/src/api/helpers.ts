@@ -1,6 +1,12 @@
 import {getPreferenceValues} from "@raycast/api"
 import fetch from "node-fetch"
-import {ChecklistResponse, CreateTaskResponse, TasksResponse} from "./types"
+import {
+  ChecklistResponse,
+  CreateTaskResponse,
+  TasksResponse,
+  TaskStatus,
+} from "./types"
+import {pickBy} from "lodash"
 
 export const getApiRoot = () => {
   return "http://localhost:3000"
@@ -13,7 +19,12 @@ export const getTasks = async () => {
   return response
 }
 
-export const createTask = (data: {title: string}) => {
+export const createTask = (data: {
+  title: string
+  note: string
+  status: TaskStatus
+  checklistId: string | undefined
+}) => {
   return fetchJson<CreateTaskResponse>({
     path: "tasks/create",
     method: "post",
@@ -32,9 +43,10 @@ const fetchJson = async <T>({
 }: {
   path: string
   method?: "get" | "post"
-  data?: Record<string, string>
+  data?: Record<string, string | undefined>
 }): Promise<T | {error: string}> => {
   const url = `${getApiRoot()}/api/${path}`
+  data = data ? pickBy(data, (value) => value !== undefined) : undefined
 
   try {
     const result = await fetch(url, {

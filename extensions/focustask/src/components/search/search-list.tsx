@@ -1,13 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api"
-import {createTask} from "api/helpers"
+import {Action, ActionPanel, Icon, List, useNavigation} from "@raycast/api"
+import {CreateForm} from "components/create/create-form"
 import {labelForTaskColumn, orderForTaskColumn} from "helpers/focustask"
 import {groupBy, mapValues, sortBy} from "lodash"
 import {useState} from "react"
@@ -16,6 +8,8 @@ import {ChecklistListItem} from "./checklist-list-item"
 import {TaskListItem} from "./task-list-item"
 
 export const SearchList = () => {
+  const navigation = useNavigation()
+
   const {isLoading, tasks, error, revalidate} = useFetchTasks()
   const {lists} = useFetchLists()
 
@@ -47,26 +41,7 @@ export const SearchList = () => {
   const placeholder = "Search for tasks and lists, or create a new task."
 
   const handleCreate = async () => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating task",
-      message: "This should only take a moment",
-    })
-
-    const response = await createTask({title: search})
-
-    if ("id" in response) {
-      toast.style = Toast.Style.Success
-      toast.title = "Success"
-      toast.message = "Task created"
-    } else {
-      toast.style = Toast.Style.Success
-      toast.title = "Failure"
-      toast.message = "Failed to create a task"
-    }
-
-    revalidate()
-    setSearch("")
+    navigation.push(<CreateForm initialTitle={search} />)
   }
 
   return (
