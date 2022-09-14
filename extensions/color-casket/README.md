@@ -1,18 +1,18 @@
 <p align="center">
-  <img width="200" height="200" src="./assets/command-icon.png">
+  <img width="200" height="200" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/color-casket/assets/command-icon.png">
 </p>
 
 [![Support Me](https://raw.githubusercontent.com/slavarazum/slavarazum/main/support-banner.png)](https://github.com/sponsors/qruto)
 
 # Color Casket
 
-![Preview Screenshot](./metadata/screenshot-1.png)
+![Preview Screenshot](https://raw.githubusercontent.com/raycast/extensions/main/extensions/color-casket/metadata/screenshot-1.png)
 
 Handy color utilities in your pocket.
 
 Now with **Color Picker**!
 
-<img width="50" height="50" src="./assets/picker-icon.png">
+<img width="50" height="50" src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/color-casket/assets/picker-icon.png">
 
 ---
 
