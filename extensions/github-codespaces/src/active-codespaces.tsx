@@ -24,7 +24,7 @@ export default function Command() {
 	return (
 		<MenuBarExtra
 			isLoading={isLoading}
-			icon="github@dark.png"
+			icon={{ source: { light: "github.png", dark: "github@dark.png" } }}
 			title={activeCodespaces.length ? `${activeCodespaces.length} active` : undefined}
 			tooltip="Active Codespaces"
 		>
