@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-09-12
+
+- Introduce new command "Dislike Current Song"
+- Added dislike action for menu bar
+
 ## [Feature] - 2022-08-08
 
 - Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Now Playing Menu Bar")

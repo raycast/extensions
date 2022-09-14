@@ -60,6 +60,38 @@ export async function likeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> |
     return { error: e };
   }
 }
+export async function dislikeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> | undefined> {
+  const isInstalled = await isSpotifyInstalled();
+
+  if (!isInstalled) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "You don't have Spotify Installed",
+      message: "Liking songs that're playing on a different device is not supported yet",
+    });
+    return undefined;
+  }
+
+  await authorizeIfNeeded();
+  try {
+    const track = await getTrack();
+    if (track && track.id) {
+      const trackId = track.id.replace("spotify:track:", "");
+      try {
+        const response = await spotifyApi.removeFromMySavedTracks([trackId]);
+        if (response) {
+          return { result: track };
+        }
+      } catch (e: any) {
+        return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+      }
+    } else {
+      return { error: "Playing song hasn't been found" };
+    }
+  } catch (e: any) {
+    return { error: e };
+  }
+}
 
 export function getArtistAlbums(artistId: string | undefined): Response<SpotifyApi.ArtistsAlbumsResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistsAlbumsResponse>>({ isLoading: false });
