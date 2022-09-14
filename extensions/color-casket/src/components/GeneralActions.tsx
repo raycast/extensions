@@ -10,7 +10,7 @@ export default function GeneralActions({ history }: { history: Storage }) {
         icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
         onAction={() => history.clear()}
       />
-      <Action.OpenInBrowser title="Support" icon={{ source: "heart.png" }} url="https://ko-fi.com/slavarazum" />
+      <Action.OpenInBrowser title="Support" icon={{ source: "heart.png" }} url="https://github.com/sponsors/qruto" />
     </ActionPanel.Section>
   );
 }
