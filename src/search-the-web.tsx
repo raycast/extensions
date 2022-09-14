@@ -48,7 +48,7 @@ function DefaultActions(props: SavedSitesState) {
     <ActionPanel.Section title="Manage search engines and websites">
       <Action.Push
         target={<ManageSavedSites savedSites={savedSites} setSavedSites={setSavedSites} />}
-        title="Manage sites..."
+        title="Manage sites"
         icon={Icon.Gear}
       ></Action.Push>
     </ActionPanel.Section>

@@ -54,7 +54,7 @@ export type SavedSitesDispatch = React.Dispatch<SavedSitesAction>;
 
 export type SavedSitesEditingKind = { type: "edit"; index: number } | { type: "add" };
 export type SavedSitesAction =
-  | (({ type: "edit"; index: number } | { type: "add" }) & {
+  | (({ type: "edit"; index: number; oldIsDefault: boolean } | { type: "add" }) & {
       newTitle: string;
       newUrl: string;
       newIsDefault: boolean;
@@ -66,8 +66,20 @@ function sortItemsInPlace(items: SavedSite[]) {
   items.sort(({ title: title1 }, { title: title2 }) => strCmp(title1, title2));
 }
 
-function editSavedSiteAtIndex(savedSites: SavedSites, index: number, { title, url, isDefault }: FormData): SavedSites {
-  const defaultSiteTitle = isDefault ? title : savedSites.defaultSiteTitle;
+function editSavedSiteAtIndex(
+  savedSites: SavedSites,
+  index: number,
+  { title, url, wasOldDefault, isNewDefault }: SavedSite & { wasOldDefault: boolean; isNewDefault: boolean }
+): SavedSites {
+  const defaultSiteTitle = (() => {
+    if (isNewDefault) {
+      return title;
+    } else if (wasOldDefault) {
+      return undefined;
+    } else {
+      return savedSites.defaultSiteTitle;
+    }
+  })();
 
   const newItems = savedSites.items.map((item, i) => (i === index ? { title, url } : item));
   sortItemsInPlace(newItems);
@@ -105,8 +117,13 @@ function savedSitesReducer(savedSites: SavedSites, action: SavedSitesAction) {
       break;
     }
     case "edit": {
-      const { newTitle: title, newUrl: url, newIsDefault: isDefault, index } = action;
-      savedSites = editSavedSiteAtIndex(savedSites, index, { title, url, isDefault });
+      const { newTitle: title, newUrl: url, oldIsDefault, newIsDefault, index } = action;
+      savedSites = editSavedSiteAtIndex(savedSites, index, {
+        title,
+        url,
+        wasOldDefault: oldIsDefault,
+        isNewDefault: newIsDefault,
+      });
       break;
     }
     case "noop": {

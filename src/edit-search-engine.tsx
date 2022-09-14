@@ -85,7 +85,10 @@ export function EditSavedSites(
     onSubmit({ title, url, isDefault }) {
       const newSavedSiteData = { newTitle: title, newUrl: url, newIsDefault: isDefault };
       if (isEditingExistingSite) {
-        updateSavedSites({ savedSites, setSavedSites }, { type: "edit", index: operation.index, ...newSavedSiteData });
+        updateSavedSites(
+          { savedSites, setSavedSites },
+          { type: "edit", index: operation.index, ...newSavedSiteData, oldIsDefault: initialIsDefault ?? false }
+        );
         // savedSitesDispatch({ type: "edit", index: operation.index, ...newSavedSiteData });
       } else {
         updateSavedSites({ savedSites, setSavedSites }, { type: "add", ...newSavedSiteData });
@@ -101,17 +104,6 @@ export function EditSavedSites(
       if (isInitialView) {
         push(<SearchSuggestions />);
       }
-
-      // console.log({ renderForcer });
-      //
-      // if (renderForcer) {
-      //   console.log("forcing");
-
-      //   renderForcer();
-      //   push(<SearchSuggestions />);
-      //   pop();
-      //   renderForcer();
-      // }
     },
     initialValues: {
       title: initialTitle,
