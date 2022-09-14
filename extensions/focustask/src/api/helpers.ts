@@ -3,13 +3,14 @@ import fetch from "node-fetch"
 import {ChecklistResponse, CreateTaskResponse, TasksResponse} from "./types"
 
 export const getApiRoot = () => {
-  return "https://focustask.app"
+  return "http://localhost:3000"
 }
 
 const preferences = getPreferenceValues()
 
-export const getTasks = () => {
-  return fetchJson<TasksResponse>({path: "tasks"})
+export const getTasks = async () => {
+  const response = await fetchJson<TasksResponse>({path: "tasks"})
+  return response
 }
 
 export const createTask = (data: {title: string}) => {

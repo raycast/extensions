@@ -16,7 +16,7 @@ import {ChecklistListItem} from "./checklist-list-item"
 import {TaskListItem} from "./task-list-item"
 
 export const SearchList = () => {
-  const {isLoading, tasks, error} = useFetchTasks()
+  const {isLoading, tasks, error, revalidate} = useFetchTasks()
   const {lists} = useFetchLists()
 
   const [search, setSearch] = useState("")
@@ -47,7 +47,7 @@ export const SearchList = () => {
   const placeholder = "Search for tasks and lists, or create a new task."
 
   const handleCreate = async () => {
-    await showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating task",
       message: "This should only take a moment",
@@ -56,10 +56,17 @@ export const SearchList = () => {
     const response = await createTask({title: search})
 
     if ("id" in response) {
-      showHUD("Task created")
+      toast.style = Toast.Style.Success
+      toast.title = "Success"
+      toast.message = "Task created"
     } else {
-      showHUD("Failed to create a task")
+      toast.style = Toast.Style.Success
+      toast.title = "Failure"
+      toast.message = "Failed to create a task"
     }
+
+    revalidate()
+    setSearch("")
   }
 
   return (

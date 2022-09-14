@@ -17,6 +17,7 @@ export const TaskListItem: FC<{task: Task; lists: Checklist[]}> = ({
   return (
     <List.Item
       title={formatTitle(task)}
+      subtitle={task.note ?? undefined}
       keywords={[]}
       accessories={[
         {

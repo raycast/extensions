@@ -12,10 +12,13 @@ export interface Task {
   visibleInDefaultFrame: boolean
 }
 
+export type TaskStatus = "current" | "next" | "icebox"
+
 export interface Checklist {
   id: string
   title: string
   weight: number
+  isDefault: boolean
   color: string | null
   colorClassName: string | null
   icon: string | null

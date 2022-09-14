@@ -24,6 +24,13 @@
       "subtitle": "FocusTask",
       "description": "Find anything in FocusTask",
       "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create",
+      "subtitle": "FocusTask",
+      "description": "Create a task in FocusTask",
+      "mode": "view"
     }
   ],
   "preferences": [
