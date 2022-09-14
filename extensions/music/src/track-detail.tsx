@@ -58,7 +58,11 @@ export const DetailMetadata = (props: { track: Track; list?: boolean }) => {
       <MetadataLabel list={props.list} title="Artist" text={track.artist} />
       <MetadataLabel list={props.list} title="Genre" text={track.genre} />
       <MetadataLabel list={props.list} title="Duration" text={track.time} />
-      <MetadataLabel list={props.list} title="Play Count" text={track.playCount ? track.playCount.toString() : "0"} />
+      <MetadataLabel
+        list={props.list}
+        title="Play Count"
+        text={track.playedCount ? track.playedCount.toString() : "0"}
+      />
       <MetadataLabel list={props.list} title="Rating" text={`${track.rating} Star${track.rating === 1 ? "" : "s"}`} />
       <MetadataLabel list={props.list} title="Year" text={track.year} />
     </Metadata>

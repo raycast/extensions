@@ -19,6 +19,13 @@
   },
   "preferences": [
     {
+      "name": "apiKey",
+      "title": "Last FM API Key",
+      "type": "textfield",
+      "required": false,
+      "description": "Last FM API Key is required to fetch album art."
+    },
+    {
       "name": "layoutType",
       "type": "dropdown",
       "title": "Main View Layout",
@@ -55,11 +62,22 @@
       ]
     },
     {
-      "name": "apiKey",
-      "title": "Last FM API Key",
-      "type": "textfield",
+      "name": "trackDropdown",
+      "title": "Track Dropdown",
+      "type": "dropdown",
       "required": false,
-      "description": "Last FM API Key is required to fetch album art."
+      "description": "Option for the dropdown menu for tracks.",
+      "default": "sort", 
+      "data": [
+        {
+          "value": "sort",
+          "title": "Sort Tracks By"
+        },
+        {
+          "value": "genre",
+          "title": "Filter By Genre"
+        }
+      ]
     }
   ],
   "commands": [

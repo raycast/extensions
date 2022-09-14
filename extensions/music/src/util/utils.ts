@@ -62,6 +62,10 @@ export const trimTitle = (title: string) => {
   return title;
 };
 
+export const constructDate = (date: string): Date => {
+  return new Date(date.replaceAll(",", "").replaceAll("at", ""));
+};
+
 export const AppleMusicColor = "#fb556d";
 export const Icons = {
   Music: {

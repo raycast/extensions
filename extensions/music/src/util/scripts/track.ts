@@ -4,7 +4,7 @@ import { createQueryString, runScript, tell } from "../apple-script";
 import { parseImageStream, getAlbumArtwork } from "../artwork";
 import { queryCache, setCache } from "../cache";
 import { Track } from "../models";
-import { getAttribute } from "../utils";
+import { constructDate, getAttribute } from "../utils";
 
 export const getAllTracks = async (useCache = true): Promise<Track[]> => {
   if (useCache) {
@@ -21,6 +21,8 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
     album: "album",
     albumArtist: "album artist",
     genre: "genre",
+    dateAdded: "date added",
+    playedCount: "played count",
   });
 
   const response = await runAppleScript(`
@@ -44,6 +46,8 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
       album: getAttribute(line, "album"),
       albumArtist: getAttribute(line, "albumArtist"),
       genre: getAttribute(line, "genre"),
+      dateAdded: constructDate(getAttribute(line, "dateAdded")).getTime(),
+      playedCount: parseInt(getAttribute(line, "playedCount")),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -83,7 +87,7 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
   const outputQuery = createQueryString({
     duration: "duration",
     time: "time",
-    playCount: "played count",
+    playedCount: "played count",
     loved: "loved",
     year: "year",
     rating: "rating",
@@ -102,7 +106,7 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
     ...track,
     duration: getAttribute(response, "duration"),
     time: getAttribute(response, "time"),
-    playCount: parseInt(getAttribute(response, "playCount")),
+    playedCount: parseInt(getAttribute(response, "playedCount")),
     loved: getAttribute(response, "loved") === "true",
     year: getAttribute(response, "year"),
     rating: parseInt(getAttribute(response, "rating")) / 20,
@@ -124,10 +128,11 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     genre: "genre",
     duration: "duration",
     time: "time",
-    playCount: "played count",
+    playedCount: "played count",
     inLibrary: "inLibrary",
     rating: "rating",
     loved: "loved",
+    dateAdded: "date added",
     year: "year",
   });
 
@@ -157,10 +162,11 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     genre: getAttribute(response, "genre"),
     duration: getAttribute(response, "duration"),
     time: getAttribute(response, "time"),
-    playCount: parseInt(getAttribute(response, "playCount")),
+    playedCount: parseInt(getAttribute(response, "playedCount")),
     inLibrary: getAttribute(response, "inLibrary") === "true",
     rating: parseInt(getAttribute(response, "rating")) / 20,
     loved: getAttribute(response, "loved") === "true",
+    dateAdded: constructDate(getAttribute(response, "dateAdded")).getTime(),
     year: getAttribute(response, "year"),
   };
 

@@ -5,8 +5,8 @@ import { runAppleScript } from "run-applescript";
 import { tell, runScript, createQueryString } from "../apple-script";
 import { parseImageStream } from "../artwork";
 import { queryCache, setCache } from "../cache";
-import { Track, Playlist } from "../models";
-import { getAttribute } from "../utils";
+import { Track, Playlist, PlaylistKind } from "../models";
+import { constructDate, getAttribute } from "../utils";
 import { getTrackArtwork } from "./track";
 
 import { general } from ".";
@@ -50,7 +50,7 @@ export const getPlaylists = async (useCache = true): Promise<Playlist[]> => {
       count: getAttribute(line, "count"),
       time: getAttribute(line, "time"),
       description: getAttribute(line, "description"),
-      kind: getAttribute(line, "kind"),
+      kind: getAttribute(line, "kind") as PlaylistKind,
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
     .filter((playlist) => playlist.name !== "Library" && playlist.name !== "Music");
@@ -91,6 +91,8 @@ export const getPlaylistTracks = async (id: string, useCache = true): Promise<Tr
     album: "album",
     albumArtist: "album artist",
     genre: "genre",
+    dateAdded: "date added",
+    playedCount: "played count",
   });
 
   const response = await runAppleScript(`
@@ -114,6 +116,8 @@ export const getPlaylistTracks = async (id: string, useCache = true): Promise<Tr
       album: getAttribute(line, "album"),
       albumArtist: getAttribute(line, "albumArtist"),
       genre: getAttribute(line, "genre"),
+      dateAdded: constructDate(getAttribute(line, "dateAdded")).getTime(),
+      playedCount: parseInt(getAttribute(line, "playedCount")),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 

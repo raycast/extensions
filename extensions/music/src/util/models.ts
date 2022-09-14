@@ -13,10 +13,11 @@ export interface Track {
   album: string;
   albumArtist: string;
   genre: string;
+  dateAdded: number;
+  playedCount: number;
   artwork?: string;
   duration?: string;
   time?: string;
-  playCount?: number;
   inLibrary?: boolean;
   loved?: boolean;
   rating?: number;
@@ -25,8 +26,9 @@ export interface Track {
 
 export enum PlaylistKind {
   ALL = "all",
-  USER = "user",
-  SUBSCRIPTION = "subscription",
+  USER = "user playlist",
+  LIBRARY = "library playlist",
+  SUBSCRIPTION = "subscription playlist",
 }
 
 export interface Playlist {
@@ -35,7 +37,7 @@ export interface Playlist {
   duration: string;
   count: string;
   time: string;
-  kind: string | `${PlaylistKind} playlist`;
+  kind: PlaylistKind;
   artwork?: string;
   tracks?: Track[];
 }
@@ -60,11 +62,18 @@ export interface MusicState {
   rating: number;
 }
 
+export enum TrackDropdownOption {
+  SortBy = "sort",
+  Genre = "genre",
+}
+
 export interface Preferences {
-  layoutType: "list" | "grid";
+  apiKey: string;
   gridItemSize: Grid.ItemSize;
+  layoutType: "list" | "grid";
   albumTracksLayout: "list" | "grid";
   playlistTracksLayout: "list" | "grid";
+  trackDropdown: TrackDropdownOption;
 }
 
 export interface ScriptError extends Error {

@@ -13,16 +13,9 @@ import {
   LayoutType,
   mainLayout,
 } from "./util/list-or-grid";
-import { Playlist } from "./util/models";
+import { Playlist, PlaylistKind } from "./util/models";
 import * as music from "./util/scripts";
 import { Icons } from "./util/utils";
-
-enum PlaylistKind {
-  ALL = "all",
-  USER = "user playlist",
-  LIBRARY = "library playlist",
-  SUBSCRIPTION = "subscription playlist",
-}
 
 const kindToString = (kind: PlaylistKind) => {
   switch (kind) {

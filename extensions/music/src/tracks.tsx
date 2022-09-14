@@ -1,4 +1,15 @@
-import { Grid, List, Action, ActionPanel, closeMainWindow, showToast, Toast, Icon } from "@raycast/api";
+import {
+  Grid,
+  List,
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  showToast,
+  Toast,
+  Icon,
+  Cache,
+  getPreferenceValues,
+} from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useState } from "react";
@@ -13,7 +24,7 @@ import {
   LayoutType,
   mainLayout,
 } from "./util/list-or-grid";
-import { Track } from "./util/models";
+import { Preferences, Track, TrackDropdownOption } from "./util/models";
 import * as music from "./util/scripts";
 import { Icons } from "./util/utils";
 
@@ -24,20 +35,34 @@ interface TracksComponent {
   dropdown: boolean;
 }
 
+const SortOptions = {
+  Default: "Artist",
+  DateAdded: "Date Added",
+  PlayedCount: "Played Count",
+  Album: "Album",
+  Title: "Title",
+};
+
+const sortCache = new Cache();
+
 export const Tracks = (props: TracksComponent): JSX.Element => {
   const layout = props.overrideLayout || mainLayout;
+  const { trackDropdown }: Preferences = getPreferenceValues();
 
   const [search, setSearch] = useState<string>("");
   const setSearchTerm = (term: string) => setSearch(term.toLowerCase().trim());
 
   const [genre, setGenre] = useState<string>("all");
+  const [sort, setSort] = useState<string>(
+    trackDropdown === TrackDropdownOption.SortBy ? sortCache.get("sort") || SortOptions.Default : SortOptions.Default
+  );
 
   const [showTrackDetail, setShowTrackDetail] = useState<boolean>(true);
   const toggleTrackDetail = () => setShowTrackDetail(!showTrackDetail);
 
   return (
     <ListOrGrid
-      isLoading={props.isLoading}
+      isLoading={props.isLoading || sort === undefined}
       searchBarPlaceholder={props.dropdown ? "Search a track by title, album, or artist" : "Search a track by title"}
       onSearchTextChange={setSearchTerm}
       itemSize={gridItemSize}
@@ -45,16 +70,32 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
       layoutType={layout}
       searchBarAccessory={
         props.dropdown ? (
-          <ListOrGridDropdown tooltip="Genres" onChange={setGenre} layoutType={layout}>
-            <ListOrGridDropdownItem value="all" title="All Genres" layoutType={layout} />
-            <ListOrGridDropdownSection>
-              {Array.from(new Set(props.tracks.map((track) => track.genre)))
-                .sort((a, b) => a.localeCompare(b))
-                .map((genre: string, index: number) => (
-                  <ListOrGridDropdownItem key={index} title={genre} value={genre} layoutType={layout} />
-                ))}
-            </ListOrGridDropdownSection>
-          </ListOrGridDropdown>
+          trackDropdown === TrackDropdownOption.SortBy ? (
+            <ListOrGridDropdown
+              tooltip="Sort By"
+              defaultValue={sort}
+              layoutType={layout}
+              onChange={(value: string) => {
+                setSort(value);
+                sortCache.set("sort", value);
+              }}
+            >
+              {Object.entries(SortOptions).map(([key, item]: [string, string]) => (
+                <ListOrGridDropdownItem key={key} value={key} title={item} layoutType={layout} />
+              ))}
+            </ListOrGridDropdown>
+          ) : (
+            <ListOrGridDropdown tooltip="Genres" onChange={setGenre} layoutType={layout}>
+              <ListOrGridDropdownItem value="all" title="All Genres" layoutType={layout} />
+              <ListOrGridDropdownSection>
+                {Array.from(new Set(props.tracks.map((track) => track.genre)))
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((genre: string, index: number) => (
+                    <ListOrGridDropdownItem key={index} title={genre} value={genre} layoutType={layout} />
+                  ))}
+              </ListOrGridDropdownSection>
+            </ListOrGridDropdown>
+          )
         ) : undefined
       }
     >
@@ -67,10 +108,31 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
             track.artist.toLowerCase().includes(search)
           );
         })
-        .sort(
-          (a: Track, b: Track) =>
-            a.artist.localeCompare(b.artist) || a.album.localeCompare(b.album) || a.name.localeCompare(b.name)
-        )
+        .sort((a: Track, b: Track) => {
+          switch (sort) {
+            case "DateAdded":
+              return (
+                b.dateAdded - a.dateAdded ||
+                a.artist.localeCompare(b.artist) ||
+                a.album.localeCompare(b.album) ||
+                a.name.localeCompare(b.name)
+              );
+            case "PlayedCount":
+              return (
+                b.playedCount - a.playedCount ||
+                a.artist.localeCompare(b.artist) ||
+                a.album.localeCompare(b.album) ||
+                a.name.localeCompare(b.name)
+              );
+            case "Album":
+              return a.album.localeCompare(b.album) || a.name.localeCompare(b.name);
+            case "Title":
+              return a.name.localeCompare(b.name);
+            case "Artist":
+            default:
+              return a.artist.localeCompare(b.artist) || a.album.localeCompare(b.album) || a.name.localeCompare(b.name);
+          }
+        })
         .map((track) =>
           layout === LayoutType.Grid ? (
             <Grid.Item
