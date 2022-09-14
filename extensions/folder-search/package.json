@@ -35,6 +35,7 @@
       "name": "pluginsEnabled",
       "title": "Plugins Enabled",
       "description": "Enables support for custom 'AppleScript' plugins in Folder Search. See README",
+      "label": "Enabled",
       "type": "checkbox",
       "required": false,
       "default": false
