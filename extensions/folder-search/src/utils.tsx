@@ -54,7 +54,10 @@ const loadPlugins = async () => {
 
   const files = await fs.promises.readdir(pluginsFolder);
 
-  for (const file of files) {
+  // we only want .js/plugin files (not .DS_Store etc)
+  const jsFiles = files.filter((file) => file.endsWith(".js"));
+
+  for (const file of jsFiles) {
     console.debug("Attempting to load plugin:", path.join(pluginsFolder, file));
     try {
       // load and validate
@@ -71,6 +74,10 @@ const loadPlugins = async () => {
   }
 
   console.debug("Invalid plugin files: ", invalidPluginFiles);
+
+  if (invalidPluginFiles.length) {
+    throw new Error("Invalid plugins found");
+  }
 
   return validPlugins;
 };
