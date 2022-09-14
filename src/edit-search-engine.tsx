@@ -4,15 +4,14 @@ import { URL } from "node:url";
 import { useForm } from "@raycast/utils";
 import {
   SEARCH_TEMPLATE,
-  SavedSite,
   getExistingTitlesAndUrls,
-  persistSavedSites,
+  SavedSitesEditingKind,
+  FormData,
   SavedSitesState,
+  updateSavedSites,
 } from "./saved-sites";
 import SearchSuggestions from "./search-the-web";
-import { strCmp, strEq } from "./utils";
-
-type FormData = SavedSite & { isDefault: boolean };
+import { strEq } from "./utils";
 
 function getTitleErrorMessage(
   title: string,
@@ -57,18 +56,24 @@ function getUrlErrorMessage(url: string, { existingUrls, initialUrl }: { existin
   return undefined;
 }
 
-export default function (
-  props: {
-    savedSitesState: SavedSitesState;
-    isDefault?: boolean;
-    operation: { mode: "edit"; index: number } | "add";
-  } & Partial<SavedSite>
+export function EditSavedSites(
+  props: SavedSitesState &
+    Partial<FormData> & {
+      operation: SavedSitesEditingKind;
+    }
 ) {
-  const { savedSitesState, title: initialTitle, url: initialUrl, isDefault: initialIsDefault, operation } = props;
-  const { pop, push } = useNavigation();
+  const {
+    savedSites,
+    setSavedSites,
+    title: initialTitle,
+    url: initialUrl,
+    isDefault: initialIsDefault,
+    operation,
+  } = props;
 
-  const [savedSites] = savedSitesState;
-  const isEditingExistingSite = operation !== "add" && operation.mode === "edit";
+  const { push, pop } = useNavigation();
+
+  const isEditingExistingSite = operation.type === "edit";
   const isInitialView = savedSites.items.length === 0;
 
   const existingTitlesAndUrls = useMemo(() => {
@@ -78,33 +83,35 @@ export default function (
 
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit({ title, url, isDefault }) {
-      pop();
-      if (isInitialView) {
-        push(<SearchSuggestions />);
-      }
-
-      console.log({ isEditingExistingSite, title, url, isDefault });
-
+      const newSavedSiteData = { newTitle: title, newUrl: url, newIsDefault: isDefault };
       if (isEditingExistingSite) {
-        Object.assign(savedSites.items[operation.index], { title, url });
+        updateSavedSites({ savedSites, setSavedSites }, { type: "edit", index: operation.index, ...newSavedSiteData });
+        // savedSitesDispatch({ type: "edit", index: operation.index, ...newSavedSiteData });
       } else {
-        savedSites.items.push({ title, url });
+        updateSavedSites({ savedSites, setSavedSites }, { type: "add", ...newSavedSiteData });
       }
-
-      savedSites.items.sort(({ title: title1 }, { title: title2 }) => strCmp(title1, title2));
-
-      if (isDefault) {
-        savedSites.defaultSiteTitle = title;
-      }
-
-      console.log("edited", savedSites);
-      persistSavedSites(savedSitesState);
 
       const successMessage = isEditingExistingSite ? `Edited site "${title}"` : `Added site "${title}"`;
       showToast({
         style: Toast.Style.Success,
         title: successMessage,
       });
+
+      pop();
+      if (isInitialView) {
+        push(<SearchSuggestions />);
+      }
+
+      // console.log({ renderForcer });
+      //
+      // if (renderForcer) {
+      //   console.log("forcing");
+
+      //   renderForcer();
+      //   push(<SearchSuggestions />);
+      //   pop();
+      //   renderForcer();
+      // }
     },
     initialValues: {
       title: initialTitle,
@@ -145,9 +152,8 @@ export default function (
                     title: "Delete",
                     style: Alert.ActionStyle.Destructive,
                     onAction() {
+                      updateSavedSites({ savedSites, setSavedSites }, { type: "delete", index: operation.index });
                       pop();
-                      savedSites.items.splice(operation.index, 1);
-                      persistSavedSites(savedSitesState);
                     },
                   },
                   dismissAction: {

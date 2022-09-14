@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
-import EditSearchEngine from "./edit-search-engine";
+import { EditSavedSites } from "./edit-search-engine";
 import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
-import { getSavedSites, SavedSite, SEARCH_TEMPLATE, SavedSitesState } from "./saved-sites";
+import { getSavedSitesFromDisk, SavedSite, SavedSitesState, SEARCH_TEMPLATE } from "./saved-sites";
+import { ManageSavedSites } from "./manage-saved-sites";
 import { v4 as uuidv4 } from "uuid";
 import { strEq } from "./utils";
-import ManageSavedSites from "./manage-saved-sites";
 
 interface Preferences {
   prefillFromClipboard: boolean;
@@ -29,7 +29,7 @@ function suggestionsFromXml(xml: string, searchString: string): string[] {
   return suggestions;
 }
 
-function fillTemplate(templateUrl: string, query: string) {
+function fillTemplateUrl(templateUrl: string, query: string) {
   // We need to handle the case where query contains SEARCH_TEMPLATE To do this, we
   // replace SEARCH_TEMPLATE with a random string that probably doesn't exist anywhere
   // in the universe, replace that with the query string, then replace it back with
@@ -41,18 +41,13 @@ function fillTemplate(templateUrl: string, query: string) {
   return url;
 }
 
-function DefaultActions(props: { savedSitesState: SavedSitesState }) {
-  const { savedSitesState } = props;
+function DefaultActions(props: SavedSitesState) {
+  const { savedSites, setSavedSites } = props;
 
   return (
     <ActionPanel.Section title="Manage search engines and websites">
       <Action.Push
-        target={<EditSearchEngine {...{ savedSitesState }} operation="add" />}
-        title="Add new site..."
-        icon={Icon.Plus}
-      ></Action.Push>
-      <Action.Push
-        target={<ManageSavedSites {...{ savedSitesState }} />}
+        target={<ManageSavedSites savedSites={savedSites} setSavedSites={setSavedSites} />}
         title="Manage sites..."
         icon={Icon.Gear}
       ></Action.Push>
@@ -62,21 +57,21 @@ function DefaultActions(props: { savedSitesState: SavedSitesState }) {
 
 export default function () {
   const [searchText, setSearchText] = useState("");
-  // const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
     if (getPreferenceValues<Preferences>().prefillFromClipboard) {
       Clipboard.readText().then((text) => {
         setSearchText(text ?? "");
-        // updateSuggestions(searchText);
       });
     }
   }, []);
 
-  const savedSitesState = useState(getSavedSites());
-  const [savedSites] = savedSitesState;
-
+  const [savedSites, setSavedSites] = useState(getSavedSitesFromDisk());
   const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
+
+  useEffect(() => {
+    console.log("updated", savedSites);
+  }, [savedSites]);
 
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
@@ -113,17 +108,17 @@ export default function () {
   const searchActionPanel = (
     <ActionPanel>
       <Action.OpenInBrowser
-        title={`Search on ${selectedSite?.title}`}
-        url={fillTemplate(selectedSite?.url, searchText)}
+        title={`Search on ${selectedSite.title}`}
+        url={fillTemplateUrl(selectedSite.url, searchText)}
       ></Action.OpenInBrowser>
-      <DefaultActions {...{ savedSitesState }} />
+      <DefaultActions savedSites={savedSites} setSavedSites={setSavedSites} />
     </ActionPanel>
   );
 
   const defaultUrl = savedSites.items.find(({ title }) => strEq(title, savedSites.defaultSiteTitle ?? ""))?.url;
 
   return savedSites.items.length === 0 ? (
-    <EditSearchEngine {...{ savedSitesState, operation: "add" }} />
+    <EditSavedSites savedSites={savedSites} setSavedSites={setSavedSites} operation={{ type: "add" }} />
   ) : (
     <List
       enableFiltering={false}
@@ -138,13 +133,13 @@ export default function () {
           onChange={(newUrl) => setSelectedSite({ title: urlsToSites[newUrl], url: newUrl })}
         >
           {savedSites.items.map(({ title, url }, i) => (
-            <List.Dropdown.Item {...{ title, key: i, value: url, icon: getFavicon(url) }}></List.Dropdown.Item>
+            <List.Dropdown.Item {...{ title, key: i, value: url, icon: getFavicon(url) }} />
           ))}
         </List.Dropdown>
       }
       actions={
         <ActionPanel>
-          <DefaultActions {...{ savedSitesState }} />
+          <DefaultActions savedSites={savedSites} setSavedSites={setSavedSites} />
         </ActionPanel>
       }
     >
