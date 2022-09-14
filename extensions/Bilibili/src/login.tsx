@@ -1,7 +1,7 @@
 import { checkQRCode, gennerateQRCode, checkLogin } from "./utils";
 
 import { useState, useEffect } from "react";
-import { Cache, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, Color, Detail, Icon, List, popToRoot, showToast, Toast } from "@raycast/api";
 
 function makeCookie(cookie: string[]) {
   let resCookie = "";
@@ -53,13 +53,20 @@ export default function Command() {
 ![qrcode_login](${qrcode})`;
 
   return isLogin ? (
-    <List>
+    <List
+      actions={
+        <ActionPanel>
+          <Action title="Back To Root" onAction={() => popToRoot({ clearSearchBar: true })} />
+        </ActionPanel>
+      }
+    >
       <List.EmptyView
         icon={{
-          source: Icon.Globe,
+          source: Icon.Check,
           tintColor: Color.Blue,
         }}
         title="You have already logged in."
+        description="Hit <ENTER> back to root and enjoy! 😉"
       />
     </List>
   ) : (
