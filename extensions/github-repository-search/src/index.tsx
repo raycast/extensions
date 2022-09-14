@@ -2,13 +2,11 @@ import { ActionPanel, Color, Detail, environment, Icon, List, showToast, Action,
 import { useState } from "react";
 import { Release, Repository, UserDataResponse } from "./types";
 import { useDebounce } from "use-debounce";
-import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessories, getIcon, getSubtitle } from "./utils";
-import { useRepositoryReleases } from "./useRepositoryReleases";
 import { OpenInWebIDEAction } from "./website";
-import { useUserData } from "./useGithubUser";
 import { preferences } from "./preferences";
+import { useReleases, useRepositories, useUserData } from "./github";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -207,7 +205,7 @@ function DevelopmentActionSection() {
 }
 
 function ReleaseView(props: { repository: Repository }) {
-  const { data, isLoading } = useRepositoryReleases(props.repository);
+  const { data, isLoading } = useReleases(props.repository);
 
   return (
     <List isLoading={isLoading}>
