@@ -13,8 +13,11 @@ function ProjectDropdownItem(props: { project: Project }) {
   );
 }
 
-export function ProjectDropdown(props: { onProjectChange: (project: Project) => void }) {
-  const { data } = useProjects();
+export function ProjectDropdown(props: {
+  onProjectChange: (project?: Project) => void;
+  onError: (error: Error) => void;
+}) {
+  const { data, error } = useProjects();
 
   function handleProjectChange(projectSlug: string) {
     const project = data?.find((p) => p.slug === projectSlug);
@@ -23,6 +26,10 @@ export function ProjectDropdown(props: { onProjectChange: (project: Project) => 
     } else {
       console.error("Could not find project", projectSlug);
     }
+  }
+
+  if (error) {
+    props.onError(error);
   }
 
   return (

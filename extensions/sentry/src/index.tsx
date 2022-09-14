@@ -4,16 +4,22 @@ import { IssueListItem } from "./IssueListItem";
 import { useIssues } from "./sentry";
 import { Project } from "./types";
 import { ProjectDropdown } from "./ProjectDropdown";
+import { UnauthorizedError } from "./UnauthorizedError";
 
 export default function Command() {
   const [project, setProject] = useState<Project>();
-  const { data, isLoading, mutate } = useIssues(project);
+  const [projectError, setProjectError] = useState<Error>();
+  const { data, error, isLoading, mutate } = useIssues(project);
+
+  if (projectError || (error && error instanceof Error && error.message.includes("Unauthorized"))) {
+    return <UnauthorizedError />;
+  }
 
   return (
     <List
-      isLoading={project === undefined || isLoading}
+      isLoading={project === null || isLoading}
       searchBarPlaceholder="Filter issues by title or assignee"
-      searchBarAccessory={<ProjectDropdown onProjectChange={setProject} />}
+      searchBarAccessory={<ProjectDropdown onProjectChange={setProject} onError={setProjectError} />}
     >
       {data?.map((issue) => (
         <IssueListItem key={issue.id} issue={issue} organization={project?.organization} mutateList={mutate} />
