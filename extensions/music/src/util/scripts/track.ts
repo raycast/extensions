@@ -23,6 +23,7 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
     genre: "genre",
     dateAdded: "date added",
     playedCount: "played count",
+    duration: "duration",
   });
 
   const response = await runAppleScript(`
@@ -48,6 +49,7 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
       genre: getAttribute(line, "genre"),
       dateAdded: constructDate(getAttribute(line, "dateAdded")).getTime(),
       playedCount: parseInt(getAttribute(line, "playedCount")),
+      duration: parseFloat(getAttribute(line, "duration")),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -85,9 +87,7 @@ export const getTrackArtwork = async (track: Track): Promise<string> => {
 
 export const getTrackDetails = async (track: Track): Promise<Track> => {
   const outputQuery = createQueryString({
-    duration: "duration",
     time: "time",
-    playedCount: "played count",
     loved: "loved",
     year: "year",
     rating: "rating",
@@ -104,9 +104,7 @@ export const getTrackDetails = async (track: Track): Promise<Track> => {
 
   return {
     ...track,
-    duration: getAttribute(response, "duration"),
     time: getAttribute(response, "time"),
-    playedCount: parseInt(getAttribute(response, "playedCount")),
     loved: getAttribute(response, "loved") === "true",
     year: getAttribute(response, "year"),
     rating: parseInt(getAttribute(response, "rating")) / 20,
@@ -160,7 +158,7 @@ export const getCurrentTrackDetails = async (): Promise<Track> => {
     album: getAttribute(response, "album"),
     albumArtist: getAttribute(response, "albumArtist"),
     genre: getAttribute(response, "genre"),
-    duration: getAttribute(response, "duration"),
+    duration: parseFloat(getAttribute(response, "duration")),
     time: getAttribute(response, "time"),
     playedCount: parseInt(getAttribute(response, "playedCount")),
     inLibrary: getAttribute(response, "inLibrary") === "true",

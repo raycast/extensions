@@ -39,6 +39,7 @@ const SortOptions = {
   Default: "Artist",
   DateAdded: "Date Added",
   PlayedCount: "Played Count",
+  PlayedDuration: "Played Duration",
   Album: "Album",
   Title: "Title",
 };
@@ -124,6 +125,8 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
                 a.album.localeCompare(b.album) ||
                 a.name.localeCompare(b.name)
               );
+            case "PlayedDuration":
+              return b.playedCount * b.duration - a.playedCount * a.duration;
             case "Album":
               return a.album.localeCompare(b.album) || a.name.localeCompare(b.name);
             case "Title":

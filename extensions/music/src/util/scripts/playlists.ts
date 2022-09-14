@@ -93,6 +93,7 @@ export const getPlaylistTracks = async (id: string, useCache = true): Promise<Tr
     genre: "genre",
     dateAdded: "date added",
     playedCount: "played count",
+    duration: "duration",
   });
 
   const response = await runAppleScript(`
@@ -118,6 +119,7 @@ export const getPlaylistTracks = async (id: string, useCache = true): Promise<Tr
       genre: getAttribute(line, "genre"),
       dateAdded: constructDate(getAttribute(line, "dateAdded")).getTime(),
       playedCount: parseInt(getAttribute(line, "playedCount")),
+      duration: parseFloat(getAttribute(line, "duration")),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
