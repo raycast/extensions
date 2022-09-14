@@ -75,13 +75,3 @@ export interface Preferences {
   playlistTracksLayout: "list" | "grid";
   trackDropdown: TrackDropdownOption;
 }
-
-export interface ScriptError extends Error {
-  shortMessage: string;
-  command: string;
-  failed: boolean;
-}
-
-export const ScriptError = {
-  is: (error: Error): error is ScriptError => "shortMessaage" in error,
-};

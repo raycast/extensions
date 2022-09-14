@@ -1,6 +1,6 @@
-import { restart } from "./util/scripts/player-controls";
+import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await handleTaskEitherError(restart)();
+  await handleTaskEitherError(music.player.restart)();
 };

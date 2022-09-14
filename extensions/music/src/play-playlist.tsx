@@ -14,8 +14,8 @@ import {
   mainLayout,
 } from "./util/list-or-grid";
 import { Playlist, PlaylistKind } from "./util/models";
+import { Icons } from "./util/presets";
 import * as music from "./util/scripts";
-import { Icons } from "./util/utils";
 
 const kindToString = (kind: PlaylistKind) => {
   switch (kind) {

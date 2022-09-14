@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Tracks } from "./tracks";
 import { playlistLayout } from "./util/list-or-grid";
 import { Track } from "./util/models";
-import { getPlaylistTracks } from "./util/scripts/playlists";
+import * as music from "./util/scripts";
 
 export const PlaylistTracks = (props: { id: string }) => {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -11,7 +11,7 @@ export const PlaylistTracks = (props: { id: string }) => {
 
   useEffect(() => {
     const getTracks = async () => {
-      setTracks(await getPlaylistTracks(props.id));
+      setTracks(await music.playlists.getPlaylistTracks(props.id));
       setIsLoading(false);
     };
     getTracks();

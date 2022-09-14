@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { Tracks } from "./tracks";
 import { Track } from "./util/models";
-import { getAllTracks } from "./util/scripts/track";
+import * as music from "./util/scripts";
 
 export default function PlayTrack() {
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -10,7 +10,7 @@ export default function PlayTrack() {
 
   useEffect(() => {
     const getTracks = async () => {
-      setTracks(await getAllTracks());
+      setTracks(await music.track.getAllTracks());
       setIsLoading(false);
     };
     getTracks();

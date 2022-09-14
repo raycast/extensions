@@ -25,8 +25,8 @@ import {
   mainLayout,
 } from "./util/list-or-grid";
 import { Preferences, Track, TrackDropdownOption } from "./util/models";
+import { Icons } from "./util/presets";
 import * as music from "./util/scripts";
-import { Icons } from "./util/utils";
 
 interface TracksComponent {
   tracks: Track[];

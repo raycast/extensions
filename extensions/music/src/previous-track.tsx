@@ -1,6 +1,6 @@
-import { previous } from "./util/scripts/player-controls";
+import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
-  await handleTaskEitherError(previous)();
+  await handleTaskEitherError(music.player.previous)();
 };

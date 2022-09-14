@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 
 import { refreshCache, wait } from "./util/cache";
 import { MusicState } from "./util/models";
+import { Icons, AppleMusicColor } from "./util/presets";
 import * as music from "./util/scripts";
-import { handleTaskEitherError, trimTitle, AppleMusicColor, Icons } from "./util/utils";
+import { handleTaskEitherError, trimTitle } from "./util/utils";
 
 export default function MenuBar() {
   const [state, setState] = useState<MusicState | undefined>(undefined);

@@ -10,8 +10,9 @@ import PlayTrack from "./play-track";
 import { DetailMetadata } from "./track-detail";
 import { refreshCache, wait } from "./util/cache";
 import { Track } from "./util/models";
+import { Icons } from "./util/presets";
 import * as music from "./util/scripts";
-import { handleTaskEitherError, Icons } from "./util/utils";
+import { handleTaskEitherError } from "./util/utils";
 
 export default function CurrentTrack() {
   const [track, setTrack] = useState<Track | undefined>(undefined);

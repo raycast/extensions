@@ -3,8 +3,8 @@ import json2md from "json2md";
 import { useEffect, useState } from "react";
 
 import { Track } from "./util/models";
-import { getTrackDetails, getTrackArtwork } from "./util/scripts/track";
-import { Icons } from "./util/utils";
+import { Icons } from "./util/presets";
+import * as music from "./util/scripts";
 
 export const TrackDetail = (props: { track: Track }) => {
   const [track, setTrack] = useState<Track | undefined>(undefined);
@@ -13,8 +13,8 @@ export const TrackDetail = (props: { track: Track }) => {
   useEffect(() => {
     const getTrack = async () => {
       try {
-        const track = await getTrackDetails(props.track);
-        const artwork = await getTrackArtwork(track);
+        const track = await music.track.getTrackDetails(props.track);
+        const artwork = await music.track.getTrackArtwork(track);
         setTrack({ ...track, artwork });
         const items = [];
         items.push({ h1: track.name });

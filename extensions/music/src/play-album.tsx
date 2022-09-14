@@ -13,8 +13,8 @@ import {
   albumLayout,
 } from "./util/list-or-grid";
 import { Album } from "./util/models";
+import { Icons } from "./util/presets";
 import * as music from "./util/scripts";
-import { Icons } from "./util/utils";
 
 export default function PlayAlbum() {
   const [albums, setAlbums] = useState<Album[]>([]);

@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { DetailMetadata } from "./track-detail";
 import { refreshCache, wait } from "./util/cache";
 import { Track } from "./util/models";
+import { Icons } from "./util/presets";
 import * as music from "./util/scripts";
-import { Icons } from "./util/utils";
 
 export default function SetRating() {
   const [track, setTrack] = useState<Track | undefined>();
