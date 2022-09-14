@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "View PagerDuty Incidents",
+      "title": "View Incidents",
+      "subtitle": "PagerDuty",
       "description": "Explore and Update Recent Incidents",
       "mode": "view"
     }
