@@ -11,6 +11,7 @@
 - Added support for In progress status when using the new status property.
 - Better integration with notion fetching todos created directly from there without date and name.
 - Change authorize command to `cmd + shift + A`.
+- New menu bar command to interact with your todos and background fetching
 
 ## [0.0.2] - 2022-07-15
 
