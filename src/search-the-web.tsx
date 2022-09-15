@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
-import { EditSavedSites } from "./edit-search-engine";
 import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
-import { getSavedSitesFromDisk, SavedSite, SavedSitesState, SEARCH_TEMPLATE } from "./saved-sites";
+import {
+  getDefaultSavedSites,
+  getSavedSitesFromDisk,
+  SavedSite,
+  SavedSitesState,
+  SEARCH_TEMPLATE,
+  updateSavedSites,
+} from "./saved-sites";
 import { ManageSavedSites } from "./manage-saved-sites";
 import { v4 as uuidv4 } from "uuid";
 import { strEq } from "./utils";
@@ -30,6 +36,10 @@ function suggestionsFromXml(xml: string, searchString: string): string[] {
 }
 
 function fillTemplateUrl(templateUrl: string, query: string) {
+  if (templateUrl !== "" && !templateUrl.includes(SEARCH_TEMPLATE)) {
+    throw new Error(`Invalid URL template "${templateUrl}": missing template string "${SEARCH_TEMPLATE}"`);
+  }
+
   // We need to handle the case where query contains SEARCH_TEMPLATE To do this, we
   // replace SEARCH_TEMPLATE with a random string that probably doesn't exist anywhere
   // in the universe, replace that with the query string, then replace it back with
@@ -50,6 +60,7 @@ function DefaultActions(props: SavedSitesState) {
         target={<ManageSavedSites savedSites={savedSites} setSavedSites={setSavedSites} />}
         title="Manage sites"
         icon={Icon.Gear}
+        shortcut={{ key: "return", modifiers: ["cmd"] }}
       ></Action.Push>
     </ActionPanel.Section>
   );
@@ -67,11 +78,12 @@ export default function () {
   }, []);
 
   const [savedSites, setSavedSites] = useState(getSavedSitesFromDisk());
-  const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
+  if (savedSites.items.length === 0) {
+    updateSavedSites({ savedSites: getDefaultSavedSites(), setSavedSites });
+  }
+  const defaultUrl = savedSites.items.find(({ title }) => strEq(title, savedSites.defaultSiteTitle ?? ""))?.url;
 
-  useEffect(() => {
-    console.log("updated", savedSites);
-  }, [savedSites]);
+  const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
 
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
@@ -115,11 +127,7 @@ export default function () {
     </ActionPanel>
   );
 
-  const defaultUrl = savedSites.items.find(({ title }) => strEq(title, savedSites.defaultSiteTitle ?? ""))?.url;
-
-  return savedSites.items.length === 0 ? (
-    <EditSavedSites savedSites={savedSites} setSavedSites={setSavedSites} operation={{ type: "add" }} />
-  ) : (
+  return (
     <List
       enableFiltering={false}
       isLoading={isLoading}

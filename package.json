@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-any-site",
   "title": "Search Any Site",
-  "description": "1. Lists Google searchsuggestions when entering your search query\n2. Lets you search the query on any site you choose",
+  "description": "A \"universal search engine\". Run this extension in Raycast, enter your search term, choose your search engine, and press enter to search in your browser. Supports adding custom search engines and websites.",
   "icon": "command-icon.png",
   "author": "bert",
   "categories": [
@@ -15,7 +15,7 @@
       "name": "search-the-web",
       "title": "Search the web",
       "subtitle": "Search any site on the web",
-      "description": "Select the site to search from the dropdown, enter your search term, and choose from the list of search suggestions. Allows adding custom search engines.",
+      "description": "Select the site-to-search from the dropdown, enter your search term, and choose from the list of search suggestions. Use the \"Manage sites\" action to add or edit saved sites.",
       "mode": "view"
     }
   ],

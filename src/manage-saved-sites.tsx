@@ -3,6 +3,7 @@ import { EditSavedSites } from "./edit-search-engine";
 import { SavedSites, SavedSitesState } from "./saved-sites";
 import { strEq } from "./utils";
 import { useState } from "react";
+import { getFavicon } from "@raycast/utils";
 
 export function ManageSavedSites(props: SavedSitesState) {
   const { savedSites: initialSavedSites, setSavedSites: setInitialSavedSites } = props;
@@ -33,6 +34,7 @@ export function ManageSavedSites(props: SavedSitesState) {
             subtitle={url}
             id={title}
             key={`${title}~!~${url}`}
+            icon={getFavicon(url)}
             accessories={isDefaultSite ? [{ icon: Icon.Star, text: "Default site" }] : undefined}
             actions={
               <ActionPanel>

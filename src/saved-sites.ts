@@ -1,7 +1,6 @@
 import { environment } from "@raycast/api";
 import path from "node:path";
 import { readFileSync, writeFileSync } from "fs";
-import React from "react";
 import { strCmp, strEq } from "./utils";
 
 export const SEARCH_TEMPLATE = "{}";
@@ -50,8 +49,6 @@ export function getExistingTitlesAndUrls(savedSites: SavedSites) {
   return { titles, urls };
 }
 
-export type SavedSitesDispatch = React.Dispatch<SavedSitesAction>;
-
 export type SavedSitesEditingKind = { type: "edit"; index: number } | { type: "add" };
 export type SavedSitesAction =
   | (({ type: "edit"; index: number; oldIsDefault: boolean } | { type: "add" }) & {
@@ -59,8 +56,7 @@ export type SavedSitesAction =
       newUrl: string;
       newIsDefault: boolean;
     })
-  | { type: "delete"; index: number }
-  | { type: "noop" };
+  | { type: "delete"; index: number };
 
 function sortItemsInPlace(items: SavedSite[]) {
   items.sort(({ title: title1 }, { title: title2 }) => strCmp(title1, title2));
@@ -126,9 +122,6 @@ function savedSitesReducer(savedSites: SavedSites, action: SavedSitesAction) {
       });
       break;
     }
-    case "noop": {
-      break;
-    }
   }
 
   savedSites = { ...savedSites };
@@ -138,10 +131,30 @@ function savedSitesReducer(savedSites: SavedSites, action: SavedSitesAction) {
 
 export function updateSavedSites(
   { savedSites: oldSavedSites, setSavedSites }: SavedSitesState,
-  action: SavedSitesAction
+  action?: SavedSitesAction
 ) {
-  const savedSites = savedSitesReducer(oldSavedSites, action);
+  const savedSites = action !== undefined ? savedSitesReducer(oldSavedSites, action) : { ...oldSavedSites };
   writeSavedSitesToDisk(savedSites);
   setSavedSites(savedSites);
+  return savedSites;
+}
+
+export function getDefaultSavedSites(): SavedSites {
+  const savedSites: SavedSites = {
+    items: [
+      { title: "Bing", url: "https://www.bing.com/search?q={}" },
+      { title: "DuckDuckGo", url: "https://duckduckgo.com/?q={}" },
+      { title: "GitHub", url: "https://github.com/search?q={}" },
+      { title: "Google", url: "https://www.google.com/search?q={}" },
+      { title: "StackOverflow", url: "https://stackoverflow.com/search?q={}" },
+      { title: "Twitter", url: "https://twitter.com/search?q={}" },
+      { title: "Wikipedia (en)", url: "https://en.wikipedia.org/wiki/{}" },
+      { title: "YouTube", url: "https://www.youtube.com/results?search_query={}" },
+    ],
+    defaultSiteTitle: "Google",
+  };
+
+  sortItemsInPlace(savedSites.items);
+
   return savedSites;
 }
