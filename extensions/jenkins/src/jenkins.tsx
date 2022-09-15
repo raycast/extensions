@@ -18,12 +18,15 @@ import { useState, useCallback, useEffect } from "react";
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [jenkinsList, setJenkinsList] = useState<Jenkins[]>([]);
+  const [hasJenkins, setHasJenkins] = useState<boolean>(false);
 
   const search = useCallback(
     async function search(searchText: string) {
       setIsLoading(true);
       try {
         const jenkinsList = await listJenkins();
+        setJenkinsList(jenkinsList);
+        setHasJenkins(jenkinsList.length > 0);
         const results = jenkinsList.filter((j) => j.name.toLowerCase().includes(searchText.toLowerCase()));
         setJenkinsList(results);
       } catch (err) {
@@ -42,8 +45,8 @@ export default function Command() {
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Jenkins..." throttle>
       <List.EmptyView
-        title="No Jenkins Added"
-        description="Please add a Jenkins server to get started."
+        title={hasJenkins ? "No Results" : "No Jenkins Added"}
+        description={hasJenkins ? "Try a different search." : "Add a Jenkins to get started."}
         icon="iconnv.png"
         actions={
           <ActionPanel>
