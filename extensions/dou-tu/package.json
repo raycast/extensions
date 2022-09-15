@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dou-tu",
-  "title": "dou tu",
-  "description": "An extension for easy retrieval of web emoji images while chatting.(上班时间斗个图🌟)",
+  "title": "Dou Tu",
+  "description": "An extension for easy retrieval of web emoji images while chatting.",
   "icon": "icon.png",
   "author": "gaoyang",
   "categories": [
@@ -13,9 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "dou tu",
-      "subtitle": "doutu",
-      "description": "An extension for easy retrieval of web emoji images while chatting.(上班时间斗个图🌟)",
+      "title": "Dou Tu",
+      "description": "An extension for easy retrieval of web emoji images while chatting.",
       "mode": "view"
     }
   ],
