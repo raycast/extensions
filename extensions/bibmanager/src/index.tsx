@@ -50,7 +50,7 @@ export default function Command() {
       onSearchTextChange={(text) => setState((previous) => ({ ...previous, searchText: text }))}
     >
       {filteredList?.map((item, index) => (
-        <ListBibmItem key={index} item={item} />
+        <ListBibmItem key={index} item={item} items={state.items} setState={setState} />
       ))}
     </List>
   );

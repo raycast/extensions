@@ -39,6 +39,7 @@ export interface moduleitem {
   type: string;
   url: string;
   passcode?: string;
+  content_id?: string;
   download?: string;
 }
 

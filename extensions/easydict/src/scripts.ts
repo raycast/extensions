@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-07-31 15:50
+ * @lastEditTime: 2022-09-03 00:28
  * @fileName: scripts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,58 +11,38 @@
 import { showToast, Toast } from "@raycast/api";
 import { exec, execFile } from "child_process";
 import querystring from "node:querystring";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanguage";
-import { QueryWordInfo, RequestErrorInfo, TranslationType } from "./types";
-import { getLanguageItemFromYoudaoId } from "./utils";
+import { LanguageDetectType, LanguageDetectTypeResult } from "./detectLanauge/types";
+import { QueryWordInfo } from "./dictionary/youdao/types";
+import { getAppleLanguageId, getYoudaoLanguageIdFromAppleId } from "./language/languages";
+import { AbortObject, RequestErrorInfo, TranslationType } from "./types";
+
+const execTimeout = 10000; // 10s
 
 /**
- * run LanguageDetect shortcuts with the given text, return promise
+ * Run apple Translate shortcuts with the given QueryWordInfo. Cost time: ~0.5s.
  *
- * * NOTE: Apple language detect support more languages than apple translate!
+ * * Since this is an experimental feature, may be sucked in long time, so we set a max time to cancel it.
  */
-export function appleLanguageDetect(text: string): Promise<LanguageDetectTypeResult> {
-  console.log(`start apple language detect: ${text}`);
-  const startTime = new Date().getTime();
-  const appleScript = getShortcutsScript("Easydict-LanguageDetect-V1.2.0", text);
-  return new Promise((resolve, reject) => {
-    // * NOTE: osascript -e param only support single quote 'xxx'
-    exec(`osascript -e '${appleScript}'`, (error, stdout) => {
-      if (error) {
-        console.error(`Apple detect error: ${error}`);
-        const errorInfo: RequestErrorInfo = {
-          type: LanguageDetectType.Apple,
-          message: error.message,
-          code: error.code?.toString(),
-        };
-        reject(errorInfo);
-      }
+export function appleTranslate(
+  queryTextInfo: QueryWordInfo,
+  abortObject: AbortObject | undefined,
+  timeout = execTimeout
+): Promise<string | undefined> {
+  console.log(`---> start Apple translate`);
 
-      const detectTypeResult: LanguageDetectTypeResult = {
-        type: LanguageDetectType.Apple,
-        youdaoLanguageId: stdout.trim(), // NOTE: need trim()
-        confirmed: false,
-      };
-      resolve(detectTypeResult);
-      const endTime = new Date().getTime();
-      console.warn(`apple detect: ${detectTypeResult.youdaoLanguageId}, cost: ${endTime - startTime} ms`);
-    });
-  });
-}
-
-/**
- * Run apple Translate shortcuts with the given QueryWordInfo, return promise
- */
-export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | undefined> {
+  const { word, fromLanguage, toLanguage } = queryTextInfo;
   const startTime = new Date().getTime();
-  const appleFromLanguageId = getLanguageItemFromYoudaoId(queryTextInfo.fromLanguage).appleLanguageId;
-  const appleToLanguageId = getLanguageItemFromYoudaoId(queryTextInfo.toLanguage).appleLanguageId;
+  const appleFromLanguageId = getAppleLanguageId(fromLanguage);
+  const appleToLanguageId = getAppleLanguageId(toLanguage);
+  const type = TranslationType.Apple;
+
   if (!appleFromLanguageId || !appleToLanguageId) {
-    console.warn(`apple translate language not support: ${queryTextInfo.fromLanguage} -> ${queryTextInfo.toLanguage}`);
+    console.warn(`apple translate language not support: ${fromLanguage} -> ${toLanguage}`);
     return Promise.resolve(undefined);
   }
 
   const map = new Map([
-    ["text", queryTextInfo.word],
+    ["text", word],
     ["from", appleFromLanguageId], // * NOTE: if no from language, it will auto detect
     ["to", appleToLanguageId],
   ]);
@@ -75,9 +55,8 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
    */
   if (appleFromLanguageId === "auto") {
     map.delete("from"); // means use apple language auto detect
-    console.log(
-      `Apple translate currently not support translate language: ${appleFromLanguageId} -> ${appleToLanguageId}`
-    );
+    console.warn(`Apple translate currently not support auto detect this language: ${word}`);
+    return Promise.resolve(undefined);
   }
 
   const object = Object.fromEntries(map.entries());
@@ -86,32 +65,121 @@ export function appleTranslate(queryTextInfo: QueryWordInfo): Promise<string | u
    *  It seems that this method cannot handle special characters.: you're so beautiful, my "unfair" girl
    */
   const queryString = querystring.stringify(object);
-  // console.warn(`queryString: ${queryString}`); // text=girl&from=en_US&to=zh_CN
+  // console.log(`queryString: ${queryString}`); // text=girl&from=en_US&to=zh_CN
 
   const appleScript = getShortcutsScript("Easydict-Translate-V1.2.0", queryString);
   return new Promise((resolve, reject) => {
     const command = `osascript -e '${appleScript}'`;
-    exec(command, (error, stdout, stderr) => {
+
+    const childProcess = exec(command, (error, stdout, stderr) => {
       if (error) {
-        // console.error(`error: ${JSON.stringify(error, null, 4)}`);
-        // console.error(`apple stderr: ${stderr}`);
+        if (error.killed) {
+          // error: { "killed": true, "code": null, "signal": "SIGTERM" }
+          console.warn(`---> apple translate canceled`);
+          // console.log(`error: ${JSON.stringify(error, null, 4)}`)
+          return reject(undefined);
+        }
+
+        console.error(`apple error: ${JSON.stringify(error, null, 4)}`);
         console.warn(`Apple translate error: ${command}`);
         const errorInfo: RequestErrorInfo = {
-          type: TranslationType.Apple,
+          type: type,
           message: stderr,
         };
-        reject(errorInfo);
+        return reject(errorInfo);
       }
 
       const translateText = stdout.trim();
       console.warn(`Apple translate: ${translateText}, cost: ${new Date().getTime() - startTime} ms`);
       resolve(translateText);
     });
+
+    if (abortObject) {
+      abortObject.childProcess = childProcess;
+    }
+
+    // If timeout, kill exec child process.
+    setTimeout(() => {
+      // console.log(`---> apple translate timeout: ${JSON.stringify(childProcess, null, 4)}`);
+      if (childProcess.killed || childProcess.exitCode === 0) {
+        console.warn(`---> apple translate already finished`);
+        return reject(undefined);
+      }
+
+      childProcess.kill();
+      console.error(`apple translate timeout, kill exec child process: ${JSON.stringify(childProcess, null, 4)}`);
+      const errorInfo: RequestErrorInfo = {
+        type: type,
+        message: `timeout of ${timeout} exceeded`,
+      };
+      reject(errorInfo);
+    }, timeout);
   });
 }
 
 /**
- * get shortcuts script template string according to shortcut name and input
+ * run LanguageDetect shortcuts with the given text. Cost time: ~0.4s
+ *
+ * * NOTE: Apple language detect support more languages than apple translate!
+ */
+export function appleLanguageDetect(text: string, timeout = execTimeout): Promise<LanguageDetectTypeResult> {
+  console.log(`start apple language detect: ${text}`);
+  const startTime = new Date().getTime();
+  const appleScript = getShortcutsScript("Easydict-LanguageDetect-V1.2.0", text);
+  const type = LanguageDetectType.Apple;
+
+  return new Promise((resolve, reject) => {
+    // * NOTE: osascript -e param only support single quote 'xxx'
+    const childProcess = exec(`osascript -e '${appleScript}'`, (error, stdout) => {
+      if (error) {
+        if (error.killed) {
+          // error: { "killed": true, "signal": "SIGTERM" }
+          console.warn(`---> apple detect language canceled`);
+          return reject(undefined);
+        }
+
+        console.error(`Apple detect error: ${error}`);
+        const errorInfo: RequestErrorInfo = {
+          type: type,
+          message: error.message,
+          code: error.code?.toString(),
+        };
+        return reject(errorInfo);
+      }
+
+      // * maybe have line break, so trim it.
+      const appleLanguageId = stdout.trim(); // will be "" when detect language is not support, eg. ꯅꯨꯄꯤꯃꯆꯥ
+      console.warn(`apple detect language: ${appleLanguageId}, cost: ${new Date().getTime() - startTime} ms`);
+      const youdaoLanguageId = getYoudaoLanguageIdFromAppleId(appleLanguageId);
+      const detectTypeResult: LanguageDetectTypeResult = {
+        type: type,
+        sourceLanguageId: appleLanguageId,
+        youdaoLanguageId: youdaoLanguageId,
+        confirmed: false,
+      };
+      console.warn(`final apple detect language: ${appleLanguageId}, youdaoId: ${youdaoLanguageId}`);
+      resolve(detectTypeResult);
+    });
+
+    setTimeout(() => {
+      if (childProcess.killed || childProcess.exitCode === 0) {
+        console.warn(`---> apple detect language already finished`);
+        return reject(undefined);
+      }
+
+      childProcess.kill();
+      console.error(`apple detect language timeout, kill exec child process: ${JSON.stringify(childProcess, null, 4)}`);
+      const errorInfo: RequestErrorInfo = {
+        type: type,
+        message: `timeout of ${timeout} exceeded`,
+      };
+      reject(errorInfo);
+    }, timeout);
+  });
+}
+
+/**
+ * Get shortcuts script template string according to shortcut name and input.
  *
  * * NOTE: To run a shortcut in the background, without opening the Shortcuts app, tell 'Shortcuts Events' instead of 'Shortcuts'.
  */
@@ -126,11 +194,14 @@ function getShortcutsScript(shortcutName: string, input: string): string {
           run the shortcut named "${shortcutName}" with input "${escapedInput}"
         end tell
       `;
+  // console.log(`apple script: ${appleScriptContent}`);
   return appleScriptContent;
 }
 
 /**
- * open Eudic App with queryText
+ * Open Eudic App with queryText.
+ *
+ * eudic://dict/good
  */
 export const openInEudic = (queryText: string) => {
   const url = `eudic://dict/${queryText}`;

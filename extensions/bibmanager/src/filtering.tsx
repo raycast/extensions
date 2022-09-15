@@ -56,6 +56,10 @@ export function filterFct(items: Item[], searchText: string) {
         name: "authors_tag",
         weight: 4,
       },
+      {
+        name: "keywords",
+        weight: 4,
+      },
     ],
   };
 

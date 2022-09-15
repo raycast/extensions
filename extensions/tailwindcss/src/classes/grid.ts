@@ -10,7 +10,7 @@ export default (Tailwind: TailwindConfig) => {
   });
   // grid-template-columns
   columns.forEach((n) => {
-    Tailwind[Titles.GridTemplateColumns][`grid-col-${n}`] = {
+    Tailwind[Titles.GridTemplateColumns][`grid-cols-${n}`] = {
       value: `grid-template-columns: repeat(${n}, minmax(0, 1fr))`,
       description: "",
     };

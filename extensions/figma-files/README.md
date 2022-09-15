@@ -1,10 +1,10 @@
 # Figma file search
 
-![screenshot](./assets/screenshot.png)
+![screenshot](./metadata/figma-files-raycast-extension-1.png)
 
 ## Setup
 
-Currently, this extension only works with team accounts. To local your team ID, visit Figma.com and click the team name you wish to use. In the URL copy the ID that comes BETWEEN the word `/team/` and BEFORE your actual team name.
+Currently, this extension only works with team accounts. Drafts are not supported due to a Figma API limitation. To locate your team ID, visit Figma.com and click the team name you wish to use. In the URL, copy the ID that comes BETWEEN the word `/team/` and BEFORE your actual team name.
 
 > Example https://www.figma.com/files/team/12345678987654321/NameOfTeam...
 

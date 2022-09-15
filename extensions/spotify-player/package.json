@@ -108,6 +108,13 @@
       "title": "Like Current Song",
       "description": "Likes currently playing song",
       "mode": "no-view"
+    },
+    {
+      "name": "dislikeCurrentSong",
+      "subtitle": "Spotify",
+      "title": "Dislike Current Song",
+      "description": "Dislikes currently playing song",
+      "mode": "no-view"
     }
   ],
   "preferences": [

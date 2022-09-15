@@ -38,20 +38,12 @@
   ],
   "preferences": [
     {
-      "name": "email",
-      "type": "textfield",
-      "required": true,
-      "title": "Email",
-      "description": "Cloudflare account email",
-      "placeholder": "Your email"
-    },
-    {
-      "name": "key",
+      "name": "token",
       "type": "password",
       "required": true,
-      "title": "API Key",
-      "description": "Global API Key",
-      "placeholder": "Your key"
+      "title": "API Token",
+      "description": "API token",
+      "placeholder": "Your token"
     }
   ],
   "dependencies": {

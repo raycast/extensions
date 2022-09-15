@@ -4,6 +4,11 @@ export enum QueryTypes {
   starred = "starred",
 }
 
+export enum ScopeTypes {
+  user = "user",
+  allDrives = "allDrives",
+}
+
 export type File = {
   id: string;
   name: string;
@@ -18,7 +23,7 @@ export type File = {
   };
 };
 
-function getParams(queryType: QueryTypes, queryText = "") {
+function getParams(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
   const params = new URLSearchParams();
 
   const escapedText = queryText.replace(/[\\']/g, "\\$&");
@@ -38,6 +43,12 @@ function getParams(queryType: QueryTypes, queryText = "") {
     "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash))"
   );
 
+  if (scope === ScopeTypes.allDrives) {
+    params.append("corpora", "allDrives");
+    params.append("supportsAllDrives", "true");
+    params.append("includeItemsFromAllDrives", "true");
+  }
+
   if (queryType === QueryTypes.fileName || queryType === QueryTypes.starred) {
     params.append("orderBy", "recency desc");
   }
@@ -45,10 +56,10 @@ function getParams(queryType: QueryTypes, queryText = "") {
   return params.toString();
 }
 
-export function getFilesURL(queryType: QueryTypes, queryText = "") {
-  return `https://www.googleapis.com/drive/v3/files?${getParams(queryType, queryText)}`;
+export function getFilesURL(queryType: QueryTypes, scope: ScopeTypes, queryText = "") {
+  return `https://www.googleapis.com/drive/v3/files?${getParams(queryType, scope, queryText)}`;
 }
 
 export function getStarredFilesURL() {
-  return getFilesURL(QueryTypes.starred);
+  return getFilesURL(QueryTypes.starred, ScopeTypes.allDrives);
 }
