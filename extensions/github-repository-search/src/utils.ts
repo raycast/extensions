@@ -26,3 +26,39 @@ export function getAccessories(repository: Repository) {
 
   return accessories;
 }
+
+export const WEB_IDES = [
+  {
+    title: "GitHub Dev",
+    baseUrl: "https://github.dev/",
+  },
+  {
+    title: "VSCode Dev",
+    baseUrl: "https://vscode.dev/github/",
+  },
+  {
+    title: "CodeSandbox",
+    baseUrl: `https://codesandbox.io/s/github/`,
+  },
+  {
+    title: "Repl.it",
+    baseUrl: `https://repl.it/github/`,
+  },
+  {
+    title: "Gitpod",
+    baseUrl: `https://gitpod.io/#https://github.com/`,
+  },
+  {
+    title: "Glitch",
+    baseUrl: "https://glitch.com/edit/#!/import/github/",
+  },
+  {
+    title: "Sourcegraph",
+    baseUrl: `https://sourcegraph.com/github.com/`,
+  },
+  {
+    title: "VSCode Remote Repositories",
+    baseUrl: "vscode://GitHub.remotehub/open?url=https://github.com/",
+    icon: "vscode-action-icon.png",
+  },
+];
