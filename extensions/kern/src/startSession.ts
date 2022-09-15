@@ -1,17 +1,11 @@
 import { showHUD, getPreferenceValues, environment } from "@raycast/api";
-import {
-  showOsNotificiation,
-  sessionFinished,
-  handleError,
-  log,
-} from "./utilities";
+import { showOsNotificiation, sessionFinished, handleError, log } from "./utilities";
 import type { Preferences, SessionArguments } from "./types";
 import { addSession, getSession, updateSession } from "./store";
 
 const startSession = async (props: { arguments: SessionArguments }) => {
   const { name, duration: customDuration } = props.arguments;
-  const { sessionDuration: defaultDuration, notificationSound } =
-    getPreferenceValues<Preferences>();
+  const { sessionDuration: defaultDuration, notificationSound } = getPreferenceValues<Preferences>();
 
   /** Generate data needed for a session. */
   const startTime = Date.now();

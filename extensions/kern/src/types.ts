@@ -13,11 +13,5 @@ export type SessionArguments = {
 
 export type Preferences = {
   sessionDuration: string;
-  notificationSound:
-    | "Blow"
-    | "Bottle"
-    | "Frog"
-    | "Glass"
-    | "Hero"
-    | "Submarine";
+  notificationSound: "Blow" | "Bottle" | "Frog" | "Glass" | "Hero" | "Submarine";
 };
