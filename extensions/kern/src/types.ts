@@ -8,9 +8,16 @@ export type Session = {
 
 export type SessionArguments = {
   name?: string;
+  duration?: string;
 };
 
 export type Preferences = {
   sessionDuration: string;
-  notificationSound: "Blow" | "Bottle" | "Frog" | "Glass" | "Hero" | "Submarine";
+  notificationSound:
+    | "Blow"
+    | "Bottle"
+    | "Frog"
+    | "Glass"
+    | "Hero"
+    | "Submarine";
 };

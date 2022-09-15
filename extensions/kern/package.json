@@ -23,6 +23,12 @@
           "placeholder": "Session Name",
           "type": "text",
           "required": false
+        },
+        {
+          "name": "duration",
+          "placeholder": "Session Duration (min)",
+          "type": "text",
+          "required": false
         }
       ]
     },
