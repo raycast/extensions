@@ -48,6 +48,13 @@
       ]
     },
     {
+      "name": "pages-new-from-clipboard",
+      "title": "New Pages Document From Clipboard",
+      "description": "Creates a new Pages document from the clipboard text content.",
+      "mode": "view",
+      "icon": "pages-icon.png"
+    },
+    {
       "name": "numbers-minimize",
       "title": "Minimize Numbers",
       "description": "Minimizes all Numbers windows.",
