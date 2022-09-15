@@ -11,52 +11,110 @@ import {
   Toast,
 } from "@raycast/api";
 import { useState } from "react";
-import { Repository } from "./types";
+import { Repository, UserDataResponse } from "./types";
 import { useDebounce } from "use-debounce";
 import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
 import { useRepositoryReleases } from "./useRepositoryReleases";
 import { OpenInWebIDEAction } from "./website";
+import { useUserData } from "./useGithubUser";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
+  const [searchFilter, setSearchFilter] = useState<string>("");
   const [debouncedSearchText] = useDebounce(searchText, 200);
-  const { data, error, isLoading: isLoadingRepositories } = useRepositories(debouncedSearchText);
+  const {
+    data: repositories,
+    error: searchRepositoriesError,
+    isLoading: isLoadingRepositories,
+  } = useRepositories(debouncedSearchText, searchFilter);
+  const { data: userData, error: fetchUserDataError, isLoading: isLoadingUserData } = useUserData();
+
   const {
     repositories: visitedRepositories,
     visitRepository,
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
-  if (error) {
+  if (searchRepositoriesError) {
     showToast({
       style: Toast.Style.Failure,
       title: "Failed searching repositories",
-      message: error instanceof Error ? error.message : String(error),
+      message:
+        searchRepositoriesError instanceof Error ? searchRepositoriesError.message : String(searchRepositoriesError),
+    });
+  }
+  if (fetchUserDataError) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed fetching user and organizations",
+      message: fetchUserDataError instanceof Error ? fetchUserDataError.message : String(fetchUserDataError),
     });
   }
 
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={<FilterDropdown userData={userData} onFilterChange={setSearchFilter} />}
+    >
       <List.Section
         title="Visited Repositories"
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
       >
         {visitedRepositories
-          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+          ?.filter(
+            (r) =>
+              r.nameWithOwner.includes(searchText ?? "") &&
+              r.nameWithOwner.match(
+                // Converting query filter string to regexp:
+                `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}\/.*`
+              )
+          )
           .map((repository) => (
             <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
           ))}
       </List.Section>
-      <List.Section title="Found Repositories" subtitle={data ? String(data.repositoryCount) : undefined}>
-        {data?.nodes?.map((repository) => (
+      <List.Section
+        title="Found Repositories"
+        subtitle={repositories ? String(repositories.repositoryCount) : undefined}
+      >
+        {repositories?.nodes?.map((repository) => (
           <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
         ))}
       </List.Section>
     </List>
+  );
+}
+
+function FilterDropdown({
+  userData,
+  onFilterChange,
+}: {
+  userData: UserDataResponse["viewer"] | undefined;
+  onFilterChange: (filter: string) => void;
+}) {
+  return (
+    <List.Dropdown tooltip="Filter Repositories" storeValue={true} onChange={onFilterChange}>
+      <List.Dropdown.Item title={"All Repositories"} value={""} />
+      {userData && (
+        <List.Dropdown.Item
+          title={"My Repositories"}
+          value={`user:${userData.login} ${userData.organizations.nodes.map((org) => `org:${org.login}`).join(" ")}`}
+        />
+      )}
+      {userData && (
+        <List.Dropdown.Section>
+          <List.Dropdown.Item title={userData.login} value={`user:${userData.login}`} />
+          {userData.organizations.nodes.map((org) => (
+            <List.Dropdown.Item key={org.login} title={org.login} value={`org:${org.login}`} />
+          ))}
+        </List.Dropdown.Section>
+      )}
+    </List.Dropdown>
   );
 }
 
@@ -95,7 +153,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           onOpen={() => props.onVisit(props.repository)}
         />
         {props.repository.hasIssuesEnabled && (
@@ -121,7 +179,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
             url={`${props.repository.url}/projects`}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "p" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}

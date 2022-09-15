@@ -26,6 +26,17 @@ export interface SearchRepositoriesResponse {
   };
 }
 
+export interface UserDataResponse {
+  viewer: {
+    login: string;
+    organizations: {
+      nodes: Array<{
+        login: string;
+      }>;
+    };
+  };
+}
+
 export interface Release {
   id: string;
   description: string;
