@@ -40,22 +40,22 @@ export default function Command() {
   }, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search Jenkins..."
-      throttle
-      actions={
-        <ActionPanel>
-          <Action.Push
-            icon={Icon.Plus}
-            title="Add Jenkins"
-            target={<AddJenkins setJenkinsList={setJenkinsList} />}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
-        </ActionPanel>
-      }
-    >
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Jenkins..." throttle>
+      <List.EmptyView
+        title="No Jenkins Added"
+        description="Please add a Jenkins server to get started."
+        icon="iconnv.png"
+        actions={
+          <ActionPanel>
+            <Action.Push
+              icon={Icon.Plus}
+              title="Add Jenkins"
+              target={<AddJenkins setJenkinsList={setJenkinsList} />}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+            />
+          </ActionPanel>
+        }
+      />
       <List.Section title="Results" subtitle={jenkinsList.length + ""}>
         {jenkinsList.map((jenkins) => (
           <JenkinsItem key={jenkins.name} jenkins={jenkins} setJenkinsList={setJenkinsList} />
@@ -158,6 +158,7 @@ function AddJenkins(props: { jenkins?: Jenkins; setJenkinsList: (f: (v: Jenkins[
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.PlusCircle}
             title="Confirm"
             onSubmit={async (input: Jenkins) => {
               try {
