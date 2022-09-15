@@ -4,4 +4,4 @@
 
 - Swtiched to Grid View
 - Filter symbols by category
-- Copy SVG Code
+- Switch between Stable and Beta Release
