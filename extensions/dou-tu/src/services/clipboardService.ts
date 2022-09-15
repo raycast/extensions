@@ -25,6 +25,6 @@ export default {
     await fs.writeFileSync(filePath, new Uint8Array(data), "binary");
     proc.exec(`osascript -e 'set the clipboard to (read (POSIX file "${filePath}") as JPEG picture)'`);
     toast.hide();
-    showHUD("Already copied to clipboard.(Command + V)");
+    showHUD("✅ Copied to clipboard");
   },
 };
