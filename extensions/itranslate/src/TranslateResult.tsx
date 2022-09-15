@@ -81,7 +81,7 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate?:
       icon={{ source: `${props.transRes.serviceProvider}.png` }}
       title={props.transRes.res || ""}
       detail={<TranslateResultDetail />}
-      accessories={[{ text: props.transRes.code === TransAPIErrCode.Loading ? "loading..." : `${duration} ms` }]}
+      accessories={[{ text: props.transRes.code === TransAPIErrCode.Loading ? "loading..." : "" }]}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard content={props.transRes.res} />
