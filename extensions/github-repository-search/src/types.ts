@@ -29,10 +29,12 @@ export interface SearchRepositoriesResponse {
 export interface UserDataResponse {
   viewer: {
     login: string;
+    avatarUrl?: string;
     organizations: {
-      nodes: Array<{
+      nodes: {
         login: string;
-      }>;
+        avatarUrl?: string;
+      }[];
     };
   };
 }

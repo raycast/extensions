@@ -1,6 +1,6 @@
-import { ActionPanel, Color, Detail, Icon, List, Action } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, List, Action, Image } from "@raycast/api";
 import { useState } from "react";
-import { Release, Repository, UserDataResponse } from "./types";
+import { Release, Repository } from "./types";
 import { useDebounce } from "use-debounce";
 import { useHistory } from "./history";
 import { getAccessories, getIcon, getSubtitle } from "./utils";
@@ -10,36 +10,24 @@ import { useReleases, useRepositories, useUserData } from "./github";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const [searchFilter, setSearchFilter] = useState<string>("");
+  const [searchFilter, setSearchFilter] = useState<string | null>(null);
+
   const [debouncedSearchText] = useDebounce(searchText, 200);
-  const { data: repositories, isLoading: isLoadingRepositories } = useRepositories(
+  const { data: history, visitRepository } = useHistory(searchText, searchFilter);
+  const { data: repositories, isLoading } = useRepositories(
     `${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`
   );
-  const { data: userData } = useUserData();
-
-  const { data: history, visitRepository } = useHistory();
-
-  const isLoading = searchText !== debouncedSearchText || isLoadingRepositories;
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={searchText !== debouncedSearchText || isLoading}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={<FilterDropdown viewer={userData?.viewer} onFilterChange={setSearchFilter} />}
+      searchBarAccessory={<FilterDropdown onFilterChange={setSearchFilter} />}
     >
       <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
-        {history
-          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
-          .filter((r) =>
-            // Filter on dropdown selection value
-            r.nameWithOwner.match(
-              // Converting query filter string to regexp:
-              `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`
-            )
-          )
-          .map((repository) => (
-            <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
-          ))}
+        {history.map((repository) => (
+          <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
+        ))}
       </List.Section>
       <List.Section
         title="Found Repositories"
@@ -53,32 +41,45 @@ export default function Command() {
   );
 }
 
-function FilterDropdown({
-  viewer,
-  onFilterChange,
-}: {
-  viewer?: UserDataResponse["viewer"];
-  onFilterChange: (filter: string) => void;
-}) {
-  return viewer ? (
-    <List.Dropdown tooltip="Filter Repositories" onChange={onFilterChange} storeValue>
-      <List.Dropdown.Item title={"All Repositories"} value={""} />
-      {viewer && (
-        <List.Dropdown.Item
-          title={"My Repositories"}
-          value={`user:${viewer.login} ${viewer.organizations.nodes.map((org) => `org:${org.login}`).join(" ")}`}
-        />
-      )}
-      {viewer && (
-        <List.Dropdown.Section>
-          <List.Dropdown.Item title={viewer.login} value={`user:${viewer.login}`} />
-          {viewer.organizations.nodes.map((org) => (
-            <List.Dropdown.Item key={org.login} title={org.login} value={`org:${org.login}`} />
-          ))}
-        </List.Dropdown.Section>
-      )}
+function FilterDropdown(props: { onFilterChange: (filter: string) => void }) {
+  const { data, error } = useUserData();
+
+  if (error) {
+    return null;
+  }
+
+  return (
+    <List.Dropdown tooltip="Filter Repositories" onChange={props.onFilterChange} storeValue>
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title={"All Repositories"} value={""} />
+        {data && (
+          <List.Dropdown.Item
+            title={"My Repositories"}
+            value={`user:${data.viewer.login} ${data.viewer.organizations.nodes
+              .map((org) => `org:${org.login}`)
+              .join(" ")}`}
+          />
+        )}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section>
+        {data && (
+          <List.Dropdown.Item
+            icon={{ source: data.viewer.avatarUrl ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
+            title={data.viewer.login}
+            value={`user:${data.viewer.login}`}
+          />
+        )}
+        {data?.viewer.organizations.nodes.map((org) => (
+          <List.Dropdown.Item
+            icon={{ source: org.avatarUrl ?? Icon.PersonCircle, mask: Image.Mask.Circle }}
+            key={org.login}
+            title={org.login}
+            value={`org:${org.login}`}
+          />
+        ))}
+      </List.Dropdown.Section>
     </List.Dropdown>
-  ) : null;
+  );
 }
 
 function RepositoryListItem(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
@@ -145,7 +146,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             icon={Icon.List}
             title="Browse Releases"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            target={<ReleaseView repository={props.repository} />}
+            target={<Releases repository={props.repository} />}
           />
         )}
       </ActionPanel.Section>
@@ -170,7 +171,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
   );
 }
 
-function ReleaseView(props: { repository: Repository }) {
+function Releases(props: { repository: Repository }) {
   const { data, isLoading } = useReleases(props.repository);
 
   return (

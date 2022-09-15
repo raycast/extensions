@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { Octokit } from "octokit";
 import { preferences } from "./preferences";
@@ -10,9 +11,11 @@ async function fetchUserData() {
     query UserData {
       viewer {
         login
+        avatarUrl(size: 64)
         organizations(first: 100) {
           nodes {
             login
+            avatarUrl(size: 64)
           }
         }
       }
@@ -85,7 +88,17 @@ async function fetchRepositories(searchQuery: string | undefined) {
   );
 }
 export function useUserData() {
-  return useCachedPromise(fetchUserData);
+  return useCachedPromise(fetchUserData, [], {
+    async onError(error) {
+      if (error.message.includes("Your token has not been granted the required scopes to execute this query")) {
+        // Handled in the filter dropdown
+        return;
+      } else {
+        await showToast({ style: Toast.Style.Failure, title: `Error fetching user data`, message: error.message });
+        console.error(error);
+      }
+    },
+  });
 }
 
 export function useReleases(repository: Repository) {

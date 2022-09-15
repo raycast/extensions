@@ -17,7 +17,7 @@ async function loadVisitedRepositories() {
   }
 }
 
-export function useHistory() {
+export function useHistory(searchText: string | undefined, searchFilter: string | null) {
   const [history, setHistory] = useCachedState<Repository[]>("history", []);
   const [migratedHistory, setMigratedHistory] = useCachedState<boolean>("migratedHistory", false);
 
@@ -38,5 +38,12 @@ export function useHistory() {
     setHistory(nextRepositories);
   }
 
-  return { data: history, visitRepository };
+  // Converting query filter string to regexp:
+  const repositoryFilter = `${searchFilter?.replaceAll(/org:|user:/g, "").replaceAll(" ", "|")}/.*`;
+
+  const data = history
+    .filter((r) => r.nameWithOwner.includes(searchText ?? ""))
+    .filter((r) => r.nameWithOwner.match(repositoryFilter));
+
+  return { data, visitRepository };
 }
