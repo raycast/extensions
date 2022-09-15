@@ -1,13 +1,14 @@
 import { List, getPreferenceValues, Icon, ActionPanel, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import { MyPreferences, Task, TimeBlock } from './types';
-import { authenticate, findTasks, getCurrentTimeBlock, punchIn, punchOut } from './api';
+import { MyPreferences, Task, TimeBlock, User } from './types';
+import { authenticate, findTasks, getCurrentTimeBlock, getCurrentUser, punchIn, punchOut } from './api';
 import { groupTasksByProject } from './utils';
 
 export default function Command() {
   const [idToken, setIdToken] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [currentUser, setCurrentUser] = useState<User>();
   const [timeBlock, setTimeBlock] = useState<TimeBlock>();
   const preferences = getPreferenceValues<MyPreferences>();
 
@@ -16,9 +17,11 @@ export default function Command() {
     setIsLoading(true);
 
     authenticate(preferences)
-      .then(({ id_token }) => {
-        setIdToken(id_token);
+      .then((result) => {
+        setIdToken(result.id_token);
+        return getCurrentUser(result.id_token);
       })
+      .then((user) => setCurrentUser(user))
       .catch((e) => console.log(e))
       .finally(() => setIsLoading(false));
   }, []);
@@ -28,7 +31,7 @@ export default function Command() {
     if (idToken) {
       setIsLoading(true);
 
-      Promise.all([findTasks({ today: true }, idToken), getCurrentTimeBlock(idToken)])
+      Promise.all([findTasks({ today: true, userId: String(currentUser?.id) }, idToken), getCurrentTimeBlock(idToken)])
         .then(([tasks, timeblock]) => {
           setTasks(tasks as Task[]);
           setTimeBlock(timeblock);
@@ -42,7 +45,7 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="My Tasks"
+      navigationTitle="My Tasks (today)"
       searchBarPlaceholder="Filter my tasks by name and tags"
       isLoading={isLoading}
       throttle={true}

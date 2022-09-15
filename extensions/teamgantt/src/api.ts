@@ -1,8 +1,8 @@
 import got from 'got';
 import { URL } from 'url';
-import { Comment, MyPreferences, Task, TimeBlock } from './types';
+import { Comment, MyPreferences, Task, TimeBlock, User } from './types';
 
-export const authenticate = async (preferences: MyPreferences): Promise<{ id_token: string }> => {
+export const authenticate = async (preferences: MyPreferences): Promise<{ id_token: string; access_token: string }> => {
   const authorization = Buffer.from(`${preferences.clientId}:${preferences.clientSecret}`).toString('base64');
 
   return got
@@ -19,8 +19,15 @@ export const authenticate = async (preferences: MyPreferences): Promise<{ id_tok
     .json();
 };
 
+export const getCurrentUser = (idToken?: string): Promise<User> => {
+  if (!idToken) {
+    throw new Error('not authenticated');
+  }
+  return got('https://api.teamgantt.com/v1/current_user', { headers: { Authorization: `Bearer ${idToken}` } }).json();
+};
+
 export const findTasks = async (
-  { q, today, showCompleted }: { q?: string; today?: boolean; showCompleted?: boolean } = {},
+  { q, today, showCompleted, userId }: { q?: string; today?: boolean; showCompleted?: boolean; userId?: string } = {},
   idToken?: string
 ) => {
   if (!idToken) {
@@ -39,6 +46,10 @@ export const findTasks = async (
 
   if (!showCompleted) {
     url.searchParams.set('hide_completed', 'true');
+  }
+
+  if (userId) {
+    url.searchParams.set('user_resource_ids', userId);
   }
 
   return got(url.toString(), { headers: { Authorization: `Bearer ${idToken}` } }).json();
