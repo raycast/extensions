@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "search-any-site",
-  "title": "Search Any Site",
-  "description": "A \"universal search engine\". Run this extension in Raycast, enter your search term, choose your search engine, and press enter to search in your browser. Supports adding custom search engines and websites.",
+  "name": "any-website-search",
+  "title": "Universal Website Search",
+  "description": "Search any site on the web",
   "icon": "command-icon.png",
   "author": "bert",
   "categories": [
@@ -12,10 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-the-web",
-      "title": "Search the web",
-      "subtitle": "Search any site on the web",
-      "description": "Select the site-to-search from the dropdown, enter your search term, and choose from the list of search suggestions. Use the \"Manage sites\" action to add or edit saved sites.",
+      "name": "search-any-site",
+      "title": "Search Websites",
+      "description": "Select the site-to-search from the dropdown, enter your search term, and choose from the list of search suggestions. Use the \"Manage sites\" action to add, edit, or delete saved sites.",
       "mode": "view"
     }
   ],
