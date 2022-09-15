@@ -61,7 +61,7 @@ export function ManageSavedSites(props: SavedSitesState) {
                   icon={Icon.Plus}
                 />
                 <Action
-                  title="Delete site"
+                  title={`Delete "${title}"`}
                   onAction={() => showDeletionModal({ savedSites, setSavedSites, title, index: i })}
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
