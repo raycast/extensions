@@ -19,7 +19,6 @@ import { WhatHaveIDoneAction } from './what-have-i-done-action'
 
 type EmptyListProps = {
   notionDbUrl: string
-  getInitialData: () => void
 }
 
 const dark = 'empty-dark.gif'
@@ -61,7 +60,7 @@ async function getCoin(): Promise<string> {
   return coin
 }
 
-export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
+export function EmptyList({ notionDbUrl }: EmptyListProps) {
   const [coin, setCoin] = useState('')
   const databaseName = useMemo(() => getPreferenceValues().database_name, [])
 
@@ -91,7 +90,7 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
               url={templateUrl}
               shortcut={{ modifiers: ['cmd'], key: 'e' }}
             />
-            <ReauthorizeAction getInitialData={getInitialData} />
+            <ReauthorizeAction />
           </ActionPanel>
         }
       />
@@ -106,6 +105,7 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
       actions={
         <ActionPanel>
           <WhatHaveIDoneAction />
+          <OpenNotionAction notionDbUrl={notionDbUrl} />
           <ReauthorizeAction />
           <Action
             title="Open Extension Preferences"
@@ -113,7 +113,6 @@ export function EmptyList({ notionDbUrl, getInitialData }: EmptyListProps) {
             onAction={openCommandPreferences}
             shortcut={{ modifiers: ['cmd'], key: ',' }}
           />
-          <OpenNotionAction notionDbUrl={notionDbUrl} />
         </ActionPanel>
       }
     />

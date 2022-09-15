@@ -6,29 +6,35 @@ import {
   List,
   openCommandPreferences,
 } from '@raycast/api'
-import { useTodos } from '@/hooks/use-todos'
-import { EmptyList } from '@/components/empty-list'
+import { useTodoList } from '@/features/todo-list/hooks/use-todo-list'
+import { EmptyList } from '@/features/todo-list/components/empty-list'
 import { CompleteTodoAction } from '@/components/complete-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
-import { WhatHaveIDoneAction } from '@/components/what-have-i-done-action'
-import { OpenNotionAction } from '@/components/open-notion-action'
+import { WhatHaveIDoneAction } from '@/features/todo-list/components/what-have-i-done-action'
+import { OpenNotionAction } from '@/features/todo-list/components/open-notion-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
-import { TransparentEmpty } from '@/components/transparent-empty'
+import { TransparentEmpty } from '@/features/todo-list/components/transparent-empty'
+import { useState } from 'react'
 import { Todo } from '@/types/todo'
+import { DateReminder } from './components/date-reminder'
+import { getProgressIcon } from '@raycast/utils'
+import { InProgressAction } from '@/features/todo-list/components/in-progress-action'
 
-export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
+export function TodoList() {
   const {
     todos,
     data,
     tags,
     notionDbUrl,
+    hasStatusProperty,
     searchText,
     setSearchText,
     loading,
     handleCreate,
     handleComplete,
+    handleInProgress,
     handleSetTag,
     handleSetDate,
     handleDelete,
@@ -36,8 +42,19 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
     handleMoveDown,
     setFilter,
     filter,
-    getInitialData,
-  } = useTodos()
+  } = useTodoList()
+
+  const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null)
+
+  if (todoToEdit) {
+    return (
+      <DateReminder
+        taskToEdit={todoToEdit}
+        setTaskToEdit={setTodoToEdit}
+        handleSetDate={handleSetDate}
+      />
+    )
+  }
 
   return (
     <List
@@ -52,7 +69,7 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
           onChange={setFilter}
         >
           <List.Dropdown.Item title="All" value={'all'} />
-          {tags.map((tag) => (
+          {tags?.map((tag) => (
             <List.Dropdown.Item
               key={tag.id}
               icon={{
@@ -88,10 +105,15 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
         />
       ) : null}
       {todos.length > 0
-        ? todos.map((todo, index) => (
+        ? todos?.map((todo, index) => (
             <List.Item
               key={todo.id}
-              icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
+              icon={{
+                source: {
+                  light: getProgressIcon(todo.inProgress ? 0.5 : 0, '#E0A905'),
+                  dark: getProgressIcon(todo.inProgress ? 0.5 : 0, '#edc03c'),
+                },
+              }}
               title={todo.title}
               accessories={
                 todo.tag
@@ -112,13 +134,19 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
                   <RemindAction
                     todo={todo}
                     onSetDate={handleSetDate}
-                    selectTask={selectTask}
+                    selectTask={setTodoToEdit}
                   />
                   <SetLabelAction
                     todo={todo}
                     tags={tags}
                     onSetLabel={handleSetTag}
                   />
+                  {hasStatusProperty && (
+                    <InProgressAction
+                      todo={todo}
+                      inProgress={handleInProgress}
+                    />
+                  )}
                   <Action
                     icon={Icon.ChevronUp}
                     title={'Move Up'}
@@ -143,7 +171,7 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
                     ) : null}
                     <CopyToDoAction todo={todo} />
                     <Action.OpenInBrowser
-                      title="Open in Notion"
+                      title="Open In Notion"
                       icon={Icon.Window}
                       url={todo.url}
                       shortcut={{ modifiers: ['cmd'], key: 'o' }}
@@ -165,7 +193,7 @@ export function ToDoList({ selectTask }: { selectTask: (todo: Todo) => void }) {
           ))
         : null}
       {data && data.length === 0 ? (
-        <EmptyList notionDbUrl={notionDbUrl} getInitialData={getInitialData} />
+        <EmptyList notionDbUrl={notionDbUrl} />
       ) : (
         <TransparentEmpty />
       )}

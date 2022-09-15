@@ -1,72 +1,85 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
-import { isNotionClientError } from '@notionhq/client'
+import { getPreferenceValues } from '@raycast/api'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { storeTodos } from '@/services/storage'
+import { loadDoneProperty, storeTodos } from '@/services/storage'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
+import { checkColumnHeaders } from '../utils/check-column-headers'
 
-export async function getTodos(
-  databaseId: string,
-  localTodos: Todo[]
-): Promise<Todo[]> {
-  try {
-    const notionClient = await notion()
-    const preferences = getPreferenceValues()
-    const response = await notionClient.databases.query({
-      database_id: databaseId,
-      filter: {
-        and: [
-          {
-            property: preferences.property_done,
-            checkbox: {
-              equals: false,
-            },
-          },
-          {
-            or: [
-              {
-                property: preferences.property_date,
-                date: {
-                  before: new Date().toISOString(),
-                },
-              },
-            ],
-          },
-        ],
-      },
-      sorts: [
-        {
-          timestamp: 'created_time',
-          direction: 'ascending',
-        },
-      ],
-    })
-
-    const todos = response.results.map(mapPageToTodo)
-
-    const sortedTodos = todos
-      .map((todo: any) => {
-        const localTodoIndex = localTodos.findIndex((t) => t.id === todo.id)
-
-        if (localTodoIndex !== -1) {
-          todo.position = localTodoIndex
-        } else {
-          todo.position = 0
-        }
-
-        return todo
-      })
-      .sort((a, b) => a.position - b.position)
-
-    await storeTodos(sortedTodos)
-
-    return sortedTodos
-  } catch (err: unknown) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(Toast.Style.Failure, 'Error occurred')
-    }
+export async function getTodos({
+  databaseId,
+  localTodos,
+}: {
+  databaseId?: string
+  localTodos?: Todo[]
+}): Promise<Todo[]> {
+  if (!databaseId || !localTodos) {
     return []
   }
+
+  const notionClient = await notion()
+  const preferences = getPreferenceValues()
+  const status = await loadDoneProperty()
+
+  const donePropertyQuery =
+    status.type === 'checkbox'
+      ? { checkbox: { equals: false } }
+      : { status: { does_not_equal: status.doneName } }
+
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      and: [
+        {
+          property: preferences.property_done,
+          ...donePropertyQuery,
+        },
+        {
+          or: [
+            {
+              property: preferences.property_date,
+              date: {
+                before: new Date().toISOString(),
+              },
+            },
+            {
+              property: preferences.property_date,
+              date: {
+                is_empty: true,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    sorts: [
+      {
+        timestamp: 'created_time',
+        direction: 'ascending',
+      },
+    ],
+  })
+
+  checkColumnHeaders(response.results[0], preferences)
+
+  const todos = response.results.map((page) =>
+    mapPageToTodo(page, preferences, status.inProgressId)
+  )
+
+  const sortedTodos = todos
+    .map((todo: any) => {
+      const localTodoIndex = localTodos?.findIndex((t) => t.id === todo.id)
+
+      if (localTodoIndex !== -1) {
+        todo.position = localTodoIndex
+      } else {
+        todo.position = 0
+      }
+
+      return todo
+    })
+    .sort((a, b) => a.position - b.position)
+
+  await storeTodos(sortedTodos)
+
+  return sortedTodos
 }
