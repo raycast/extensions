@@ -9,14 +9,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TransAPIErrCode } from "./const";
-import {
-  checkPreferences,
-  fetchTransAPIs,
-  getLang,
-  getServiceProviderMap,
-  saveHistory,
-  translateWithRefineLang,
-} from "./itranslate.shared";
+import { checkService, fetchMultipleTransAPIs, getLang, getMultipleLangs, saveHistory } from "./itranslate.shared";
 import { TranslateError, TranslateNotSupport } from "./TranslateError";
 import { TranslateHistory } from "./TranslateHistory";
 import { TranslateResult } from "./TranslateResult";
@@ -25,8 +18,7 @@ let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
 export default function Command() {
   const preferences: IPreferences = getPreferenceValues<IPreferences>();
-  const langSecond: ILangItem = getLang(preferences.langSecond);
-  const check = checkPreferences();
+  const check = checkService(preferences.multipleServiceProvider, true);
   if (check) return check;
 
   const [inputState, updateInputState] = useState<string>("");
@@ -34,9 +26,10 @@ export default function Command() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
   const [isShowDetail, updateShowDetail] = useState<boolean>(false);
   const [transResultsState, updateTransResultsState] = useState<ITranslateRes[]>([]);
-  const [currentTargetLang, updateCurrentTargetLang] = useState<ILangItem>(getLang(preferences.langFirst));
+  const [multipleLangsState, updateMultipleLangsState] = useState<ILangItem[]>([]);
 
   useEffect(() => {
+    updateMultipleLangsState(getMultipleLangs());
     if (!preferences.selectedDefault) {
       return;
     }
@@ -45,7 +38,7 @@ export default function Command() {
 
   useEffect(() => {
     if (inputTempState.trim().length > 0) {
-      translate(currentTargetLang);
+      translate();
     } else {
       updateTransResultsState([]);
       updateShowDetail(false);
@@ -77,23 +70,18 @@ export default function Command() {
     return inputTempState.replace(/([a-z])([A-Z])/g, "$1_$2").replace(/([_])/g, " ");
   }
 
-  function translate(targetLang: ILangItem) {
+  function translate() {
     if (!inputTempState) return;
     const contentToTrans = parseSearchPre();
     updateLoadingState(true);
-
-    const transPromises: Promise<ITranslateRes>[] = fetchTransAPIs(contentToTrans, targetLang);
-    const promises: Promise<ITranslateRes>[] = [];
-    for (let index = 0; index < transPromises.length; index++) {
-      promises.push(translateWithRefineLang(transPromises[index], contentToTrans, langSecond));
-    }
+    const transPromises: Promise<ITranslateRes>[] = fetchMultipleTransAPIs(contentToTrans, multipleLangsState);
     const transResultsInit: ITranslateRes[] = [];
-    for (const provider of getServiceProviderMap().keys()) {
+    for (const lang of multipleLangsState) {
       transResultsInit.push({
-        serviceProvider: provider,
+        serviceProvider: preferences.multipleServiceProvider,
         code: TransAPIErrCode.Loading,
         from: getLang(""),
-        to: targetLang,
+        to: lang,
         res: "",
         start: new Date().getTime(),
         origin: contentToTrans,
@@ -101,15 +89,14 @@ export default function Command() {
     }
     updateTransResultsState(transResultsInit);
     updateShowDetail(true);
-    promises.forEach(async (promise) => {
+    transPromises.forEach(async (promise) => {
       const transResult = await promise;
       transResult.end = new Date().getTime();
-      updateCurrentTargetLang(transResult.to);
       updateTransResultsState((origins) => {
         let hasLoading = false;
         const transResultsNew = origins.map((origin) => {
           let toPush: ITranslateRes;
-          if (origin.serviceProvider === transResult.serviceProvider) {
+          if (origin.to === transResult.to) {
             transResult.start = origin.start;
             toPush = transResult;
           } else {
@@ -126,11 +113,12 @@ export default function Command() {
             const history: ITransHistory = {
               time: new Date().getTime(),
               from: transResultsNew[0].from.langId,
-              to: transResultsNew[0].to.langId,
               text: inputTempState,
-              transList: transResultsNew.map((tran) => {
+              isMultiple: true,
+              multipleServiceProvider: preferences.multipleServiceProvider,
+              toList: transResultsNew.map((tran) => {
                 return {
-                  serviceProvider: tran.serviceProvider,
+                  to: tran.to.langId,
                   res: tran.res,
                 };
               }),
@@ -195,19 +183,18 @@ export default function Command() {
       actions={ListActions()}
     >
       <List.EmptyView title="Type something to translate..." />
-      {transResultsState.length > 0 && (
-        <List.Section title={`${transResultsState[0].from.langTitle} -> ${transResultsState[0].to.langTitle}`}>
-          {transResultsState.map((transRes) => {
-            if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
-              return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
-            } else if (transRes.code === TransAPIErrCode.NotSupport) {
-              return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
-            } else {
-              return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
-            }
-          })}
-        </List.Section>
-      )}
+      {transResultsState.length > 0 &&
+        transResultsState.map((trans) => {
+          return (
+            <List.Section key={trans.to.langId} title={`-> ${trans.to.langTitle}`}>
+              {(trans.code === TransAPIErrCode.Fail || trans.code === TransAPIErrCode.Retry) && (
+                <TranslateError transRes={trans} />
+              )}
+              {trans.code === TransAPIErrCode.NotSupport && <TranslateNotSupport transRes={trans} />}
+              {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} />}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }

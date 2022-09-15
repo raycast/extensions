@@ -11,12 +11,13 @@
 
 ## What can you do with this extension?
 
-1. Translate words, or entire sentences.
+1. Translate words, or entire sentences into 36 languages
 2. Support translate selected text of the frontmost application
 3. Support custom translation service provider (Will support more in the future)
 4. Support save the translation results to Snippet
 5. Support record translation history
 6. Support TTS(TextToSpeech)
+7. Support translate into multiple languages at the same time
 
 ## How to get the AppId and AppKey?
 
