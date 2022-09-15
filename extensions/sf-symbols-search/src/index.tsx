@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Color, Grid, environment, getPreferenceValues, Icon } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import { SaveActions, getPinnedSymbols, getRecentSymbols, addRecentSymbol } from "./storage";
 import { readFileSync } from "node:fs";
@@ -76,6 +76,7 @@ export default function Command() {
             title="All Categories"
             icon={{
               source: getImageURL(data.categories[0].symbol),
+              fallback: Icon.Warning,
               tintColor: Color.PrimaryText,
             }}
           />
@@ -131,6 +132,7 @@ const SFSymbol = (props: SymbolProps) => {
       title={showName ? symbol.name : undefined}
       content={{
         source: getImageURL(symbol.name),
+        fallback: Icon.Warning,
         tintColor: Color.PrimaryText,
       }}
       keywords={symbol.searchTerms.concat([symbol.name])}
