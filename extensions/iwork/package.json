@@ -92,35 +92,35 @@
     },
     {
       "name": "keynote-new",
-      "title": "New Keynote",
+      "title": "New Keynote Slideshow",
       "description": "Creates a new Keynote slideshow with the default theme.",
       "mode": "view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-new-with-theme",
-      "title": "New Keynote With Theme",
+      "title": "New Keynote Slideshow With Theme",
       "description": "Creates a new Keynote slideshow with the selected theme.",
       "mode": "view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-start-slideshow",
-      "title": "Start Slideshow",
+      "title": "Start Keynote Slideshow",
       "description": "Starts the current Keynote slideshow.",
       "mode": "view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-stop-slideshow",
-      "title": "Stop Slideshow",
+      "title": "Stop Keynote Slideshow",
       "description": "Stops the current Keynote slideshow.",
       "mode": "view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-export",
-      "title": "Export Slideshow",
+      "title": "Export Keynote Slideshow",
       "description": "Exports the current slideshow in the selected format.",
       "mode": "view",
       "icon": "keynote-icon.png",
@@ -135,7 +135,7 @@
     },
     {
       "name": "keynote-new-from-selection",
-      "title": "Slideshow From Selected Images",
+      "title": "New Keynote Slideshow From Selected Images",
       "description": "Creates a new slideshow from the selected image files.",
       "mode": "view",
       "icon": "keynote-icon.png"
