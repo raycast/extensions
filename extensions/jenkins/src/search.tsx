@@ -92,7 +92,7 @@ export function Search(props: SearchProps) {
       navigationTitle={props.navigationTitle}
       isLoading={isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search jobs..."
+      searchBarPlaceholder="Search Jobs..."
       throttle
     >
       <List.Section title="Results" subtitle={jobs.length + ""}>
@@ -220,7 +220,7 @@ function Build(props: BuildProps) {
       isLoading={isLoading}
       navigationTitle={`Builds - ${props.jobs.join(" / ")}`}
       onSearchTextChange={search}
-      searchBarPlaceholder={"Search builds..."}
+      searchBarPlaceholder={"Search Builds..."}
       throttle
     >
       <List.Section title="Results" subtitle={builds.length + ""}>

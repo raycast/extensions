@@ -43,14 +43,15 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search jenkins..."
+      searchBarPlaceholder="Search Jenkins..."
       throttle
       actions={
         <ActionPanel>
           <Action.Push
-            icon={Icon.NewDocument}
-            title="Add jenkins"
+            icon={Icon.Plus}
+            title="Add Jenkins"
             target={<AddJenkins setJenkinsList={setJenkinsList} />}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
         </ActionPanel>
       }
