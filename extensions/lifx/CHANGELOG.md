@@ -1,6 +1,6 @@
 # LIFX Changelog
 
-## [Version 1.2.6] - 2022-08-30
+## [Version 1.2.6] - 2022-09-15
 - Added a guide on how to generate a token
 - Updated screenshots
 - Reversed Changelog to show latest changes first
