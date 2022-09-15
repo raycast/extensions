@@ -3,7 +3,7 @@
   "name": "any-website-search",
   "title": "Universal Website Search",
   "description": "Search any site on the web",
-  "icon": "command-icon.png",
+  "icon": "search-icon.png",
   "author": "bert",
   "categories": [
     "Productivity",
