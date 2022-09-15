@@ -158,14 +158,34 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <ActionPanel.Submenu title="Load an Example" icon={Icon.Book}>
-            <Action title="Grammatical Standard English" onAction={() => updatePromptAndTokens(example.grammatical)} />
-            <Action title="Summarize for a 2nd Grader" onAction={() => updatePromptAndTokens(example.summarize)} />
-            <Action title="Text to Command" onAction={() => updatePromptAndTokens(example.text2command)} />
-            <Action title="Q&A" onAction={() => updatePromptAndTokens(example.qa)} />
-            <Action title="Translation to Other Languages" onAction={() => updatePromptAndTokens(example.translate)} />
-            <Action title="Parse Unstructured Data" onAction={() => updatePromptAndTokens(example.parseUnstructured)} />
-            <Action title="Classification" onAction={() => updatePromptAndTokens(example.classify)} />
-            <Action title="Chat" onAction={() => updatePromptAndTokens(example.chat)} />
+            <Action
+              icon={Icon.Book}
+              title="Grammatical Standard English"
+              onAction={() => updatePromptAndTokens(example.grammatical)}
+            />
+            <Action
+              icon={Icon.Book}
+              title="Summarize for a 2nd Grader"
+              onAction={() => updatePromptAndTokens(example.summarize)}
+            />
+            <Action
+              icon={Icon.Book}
+              title="Text to Command"
+              onAction={() => updatePromptAndTokens(example.text2command)}
+            />
+            <Action icon={Icon.Book} title="Q&A" onAction={() => updatePromptAndTokens(example.qa)} />
+            <Action
+              icon={Icon.Book}
+              title="Translation to Other Languages"
+              onAction={() => updatePromptAndTokens(example.translate)}
+            />
+            <Action
+              icon={Icon.Book}
+              title="Parse Unstructured Data"
+              onAction={() => updatePromptAndTokens(example.parseUnstructured)}
+            />
+            <Action icon={Icon.Book} title="Classification" onAction={() => updatePromptAndTokens(example.classify)} />
+            <Action icon={Icon.Book} title="Chat" onAction={() => updatePromptAndTokens(example.chat)} />
           </ActionPanel.Submenu>
           <Action.OpenInBrowser title="Check Examples at OpenAI Website" url="https://beta.openai.com/examples" />
           <Action title="Change API Key" icon={Icon.Key} onAction={() => openCommandPreferences()} />
