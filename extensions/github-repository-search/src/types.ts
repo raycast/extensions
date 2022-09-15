@@ -54,3 +54,8 @@ export interface RepositoryReleasesResponse {
     };
   };
 }
+
+export interface Preferences {
+  token: string;
+  includeForks: boolean;
+}

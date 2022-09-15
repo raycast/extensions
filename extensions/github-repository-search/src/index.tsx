@@ -1,41 +1,23 @@
-import {
-  ActionPanel,
-  Color,
-  Detail,
-  environment,
-  Icon,
-  List,
-  showToast,
-  useNavigation,
-  Action,
-  Toast,
-  getPreferenceValues,
-} from "@raycast/api";
+import { ActionPanel, Color, Detail, environment, Icon, List, showToast, Action, Toast } from "@raycast/api";
 import { useState } from "react";
-import { Repository, UserDataResponse } from "./types";
+import { Release, Repository, UserDataResponse } from "./types";
 import { useDebounce } from "use-debounce";
 import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
-import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
+import { getAccessories, getIcon, getSubtitle } from "./utils";
 import { useRepositoryReleases } from "./useRepositoryReleases";
 import { OpenInWebIDEAction } from "./website";
 import { useUserData } from "./useGithubUser";
-
-const preferences: {
-  includeForks: boolean;
-} = getPreferenceValues();
+import { preferences } from "./preferences";
 
 export default function Command() {
-  console.log(preferences);
   const [searchText, setSearchText] = useState<string>();
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [debouncedSearchText] = useDebounce(searchText, 200);
-  const {
-    data: repositories,
-    error: searchRepositoriesError,
-    isLoading: isLoadingRepositories,
-  } = useRepositories(`${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`);
-  const { data: viewer, error: fetchUserDataError } = useUserData();
+  const { data: repositories, isLoading: isLoadingRepositories } = useRepositories(
+    `${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`
+  );
+  const { data: userData } = useUserData();
 
   const {
     repositories: visitedRepositories,
@@ -43,29 +25,13 @@ export default function Command() {
     isLoading: isLoadingVisitedRepositories,
   } = useVisitedRepositories();
 
-  if (searchRepositoriesError) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed searching repositories",
-      message:
-        searchRepositoriesError instanceof Error ? searchRepositoriesError.message : String(searchRepositoriesError),
-    });
-  }
-  if (fetchUserDataError) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed fetching user and organizations",
-      message: fetchUserDataError instanceof Error ? fetchUserDataError.message : String(fetchUserDataError),
-    });
-  }
-
   const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
 
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={<FilterDropdown viewer={viewer} onFilterChange={setSearchFilter} />}
+      searchBarAccessory={<FilterDropdown viewer={userData?.viewer} onFilterChange={setSearchFilter} />}
     >
       <List.Section
         title="Visited Repositories"
@@ -86,9 +52,9 @@ export default function Command() {
       </List.Section>
       <List.Section
         title="Found Repositories"
-        subtitle={repositories ? String(repositories.repositoryCount) : undefined}
+        subtitle={repositories ? String(repositories.search.repositoryCount) : undefined}
       >
-        {repositories?.nodes?.map((repository) => (
+        {repositories?.search.nodes?.map((repository) => (
           <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
         ))}
       </List.Section>
@@ -104,7 +70,7 @@ function FilterDropdown({
   onFilterChange: (filter: string) => void;
 }) {
   return viewer ? (
-    <List.Dropdown tooltip="Filter Repositories" storeValue={true} onChange={onFilterChange}>
+    <List.Dropdown tooltip="Filter Repositories" onChange={onFilterChange} storeValue>
       <List.Dropdown.Item title={"All Repositories"} value={""} />
       {viewer && (
         <List.Dropdown.Item
@@ -130,19 +96,13 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
       icon={getIcon(props.repository)}
       title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
+      accessories={getAccessories(props.repository)}
       actions={<Actions repository={props.repository} onVisit={props.onVisit} />}
-      accessories={[
-        {
-          text: getAccessoryTitle(props.repository),
-        },
-      ]}
     />
   );
 }
 
 function Actions(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
-  const { push } = useNavigation();
-
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
@@ -190,11 +150,11 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           />
         )}
         {props.repository.releases?.totalCount > 0 && (
-          <Action
+          <Action.Push
             icon={Icon.List}
             title="Browse Releases"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => push(<ReleaseView repository={props.repository} />)}
+            target={<ReleaseView repository={props.repository} />}
           />
         )}
       </ActionPanel.Section>
@@ -247,44 +207,24 @@ function DevelopmentActionSection() {
 }
 
 function ReleaseView(props: { repository: Repository }) {
-  const { releases, loading, error } = useRepositoryReleases(props.repository);
-
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed fetching repository releases",
-      message: error instanceof Error ? error.message : String(error),
-    });
-  }
+  const { data, isLoading } = useRepositoryReleases(props.repository);
 
   return (
-    <List isLoading={loading}>
-      {releases?.map((release) => {
-        const publishedAt = new Date(release.publishedAt);
-        const publishedAtString = `${publishedAt.toLocaleDateString()} ${publishedAt.toLocaleTimeString()}`;
-
+    <List isLoading={isLoading}>
+      {data?.repository.releases.nodes?.map((release) => {
         return (
           <List.Item
             key={release.id}
-            title={release.tagName}
-            subtitle={release.name || ""}
+            title={release.name}
+            subtitle={release.tagName}
             actions={
-              <ActionPanel title={`${props.repository.nameWithOwner}`}>
+              <ActionPanel title={release.tagName}>
                 {release.description && (
                   <Action.Push
+                    icon={Icon.Eye}
                     title="View Release Detail"
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    icon={Icon.Eye}
-                    target={
-                      <Detail
-                        markdown={release.description}
-                        actions={
-                          <ActionPanel title={`${props.repository.nameWithOwner}`}>
-                            <Action.OpenInBrowser url={release.url} />
-                          </ActionPanel>
-                        }
-                      />
-                    }
+                    target={<ReleaseDetail release={release} />}
                   />
                 )}
                 <Action.OpenInBrowser url={release.url} />
@@ -292,12 +232,26 @@ function ReleaseView(props: { repository: Repository }) {
             }
             accessories={[
               {
-                text: publishedAtString,
+                date: new Date(release.publishedAt),
+                tooltip: `Published at: ${new Date(release.publishedAt).toLocaleString()}`,
               },
             ]}
           />
         );
       })}
     </List>
+  );
+}
+
+function ReleaseDetail(props: { release: Release }) {
+  return (
+    <Detail
+      markdown={props.release.description}
+      actions={
+        <ActionPanel title={props.release.tagName}>
+          <Action.OpenInBrowser url={props.release.url} />
+        </ActionPanel>
+      }
+    />
   );
 }
