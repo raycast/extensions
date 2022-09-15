@@ -29,6 +29,42 @@ interface IPreferences {
   delayTransInterval: number;
   enableHistory: boolean;
   historyLimit: number;
+  multipleServiceProvider: TransServiceProviderTp;
+  "mulZh-CN": boolean;
+  mulEn: boolean;
+  mulEs: boolean;
+  mulHi: boolean;
+  mulFr: boolean;
+  mulRu: boolean;
+  mulPt: boolean;
+  mulId: boolean;
+  mulJa: boolean;
+  mulKo: boolean;
+  mulTh: boolean;
+  mulVi: boolean;
+  mulDe: boolean;
+  mulIt: boolean;
+  mulBg: boolean;
+  mulCs: boolean;
+  mulDa: boolean;
+  mulEl: boolean;
+  mulEt: boolean;
+  mulFi: boolean;
+  mulHu: boolean;
+  mulLt: boolean;
+  mulLv: boolean;
+  mulNl: boolean;
+  mulPl: boolean;
+  mulRo: boolean;
+  mulSk: boolean;
+  mulSl: boolean;
+  mulSv: boolean;
+  mulTr: boolean;
+  mulUk: boolean;
+  mulNo: boolean;
+  mulFa: boolean;
+  mulSr: boolean;
+  mulCy: boolean;
 }
 
 interface ILangItem {
@@ -162,13 +198,19 @@ interface IAliyunDetectLangResponse {
   DetectedLanguage: string;
 }
 
-interface TransHistory {
+interface ITransHistory {
   time: number;
   from: string;
-  to: string;
+  to?: string;
   text: string;
-  transList: {
+  transList?: {
     serviceProvider: TransServiceProviderTp;
+    res: string;
+  }[];
+  isMultiple?: boolean;
+  multipleServiceProvider?: TransServiceProviderTp;
+  toList?: {
+    to: string;
     res: string;
   }[];
 }
