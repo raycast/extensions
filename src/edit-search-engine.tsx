@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon, confirmAlert, Alert } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useMemo } from "react";
 import { URL } from "node:url";
 import { useForm } from "@raycast/utils";
@@ -10,8 +10,9 @@ import {
   SavedSitesState,
   updateSavedSites,
 } from "./saved-sites";
-import SearchSuggestions from "./search-the-web";
+import SearchSuggestions from "./search-any-site";
 import { strEq } from "./utils";
+import { showDeletionModal } from "./delete-modal";
 
 function getTitleErrorMessage(
   title: string,
@@ -135,28 +136,15 @@ export function EditSavedSites(
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ key: "x", modifiers: ["ctrl"] }}
-              onAction={() => {
-                const titleToDelete = itemProps.title.value ?? "";
-                confirmAlert({
-                  title: `Really delete "${titleToDelete}"?`,
-                  message: `This action cannot be undone.`,
-                  primaryAction: {
-                    title: "Delete",
-                    style: Alert.ActionStyle.Destructive,
-                    onAction() {
-                      updateSavedSites({ savedSites, setSavedSites }, { type: "delete", index: operation.index });
-                      pop();
-                    },
-                  },
-                  dismissAction: {
-                    title: "Cancel",
-                    style: Alert.ActionStyle.Cancel,
-                    onAction() {
-                      console.log("canceled");
-                    },
-                  },
-                });
-              }}
+              onAction={() =>
+                showDeletionModal({
+                  savedSites,
+                  setSavedSites,
+                  title: itemProps.title.value ?? "",
+                  index: operation.index,
+                  pop,
+                })
+              }
             />
           )}
         </ActionPanel>

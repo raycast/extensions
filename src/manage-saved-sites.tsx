@@ -4,6 +4,7 @@ import { SavedSites, SavedSitesState } from "./saved-sites";
 import { strEq } from "./utils";
 import { useState } from "react";
 import { getFavicon } from "@raycast/utils";
+import { showDeletionModal } from "./delete-modal";
 
 export function ManageSavedSites(props: SavedSitesState) {
   const { savedSites: initialSavedSites, setSavedSites: setInitialSavedSites } = props;
@@ -58,6 +59,13 @@ export function ManageSavedSites(props: SavedSitesState) {
                   }
                   title="Add new site"
                   icon={Icon.Plus}
+                />
+                <Action
+                  title="Delete site"
+                  onAction={() => showDeletionModal({ savedSites, setSavedSites, title, index: i })}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={{ key: "x", modifiers: ["ctrl"] }}
                 />
               </ActionPanel>
             }
