@@ -1,10 +1,10 @@
 # Jenkins
 
-Manage your jenkins.
+Manage your Jenkins.
 
 ## Features
 
-- Manage jenkins
+- Manage Jenkins
 - Manage jobs
 - Global search
 
