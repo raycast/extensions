@@ -10,7 +10,7 @@ import {TaskListItem} from "./task-list-item"
 export const SearchList = () => {
   const navigation = useNavigation()
 
-  const {isLoading, tasks, error, revalidate} = useFetchTasks()
+  const {isLoading, tasks, error} = useFetchTasks()
   const {lists} = useFetchLists()
 
   const [search, setSearch] = useState("")

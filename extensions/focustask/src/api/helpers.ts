@@ -9,7 +9,7 @@ import {
 import {pickBy} from "lodash"
 
 export const getApiRoot = () => {
-  return "http://localhost:3000"
+  return "https://focustask.app"
 }
 
 const preferences = getPreferenceValues()

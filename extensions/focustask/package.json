@@ -20,7 +20,7 @@
     },
     {
       "name": "search",
-      "title": "Search",
+      "title": "Search Tasks",
       "subtitle": "FocusTask",
       "description": "Find anything in FocusTask",
       "mode": "view"
@@ -36,7 +36,7 @@
   "preferences": [
     {
       "name": "key",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "API Key",
       "description": "Your API Key. Find it Settings.",
