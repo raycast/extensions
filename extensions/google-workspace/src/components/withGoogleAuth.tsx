@@ -23,7 +23,7 @@ export function withGoogleAuth(component: JSX.Element) {
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
-      console.error("`withLinearClient` is only supported in `view` and `menu-bar` mode");
+      console.error("`withGoogleAuth` is only supported in `view` and `menu-bar` mode");
       return null;
     }
   }

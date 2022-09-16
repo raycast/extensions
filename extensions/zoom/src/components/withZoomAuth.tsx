@@ -23,7 +23,7 @@ export function withZoomAuth(component: JSX.Element) {
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
-      console.error("`withLinearClient` is only supported in `view` and `menu-bar` mode");
+      console.error("`withZoomAuth` is only supported in `view` and `menu-bar` mode");
       return null;
     }
   }
