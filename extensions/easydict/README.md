@@ -44,7 +44,7 @@ Next:
 
 ### [Linguee Dictionary](https://www.linguee.com/)：English <--> Chinese
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
+![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
@@ -108,7 +108,7 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 #### Translation
 
-Currently we support 23 languages: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Currently we support 23 languages: Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 Details of the languages supported by each translation service are as follows:
 
@@ -184,9 +184,9 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 <p>
 
-Note that when this option is enabled, voice messages will be played automatically only if the content of the query is determined to be `good`, `look for`, `query`, etc. For other query contents, you can use the shortcut key `Cmd + S` to play audio.
+Note that when this option is started, the voice will be played only when the query is judged to be `is_Word` and in English, e.g. `good`, `look for`, etc. For other queries, the voice can be played with the shortcut `Cmd + S`.
 
-Play audio content: English words are preferred to be pronounced in an online youdao dictionary, while others are pronounced using Youdao Translation's TTS service. Long text playback uses the say shell command.
+The content of playing voice: English words are pronounced by the online Youdao dictionary first, and other words are pronounced by the TTS service of Youdao translation. For long text playback, use the say command.
 
 </p>
 

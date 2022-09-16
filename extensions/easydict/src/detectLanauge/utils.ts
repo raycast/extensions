@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-12 18:37
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-12 22:02
+ * @lastEditTime: 2022-09-12 10:34
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -20,14 +20,14 @@ export function isPreferredLanguage(languageId: string): boolean {
 /**
  * check if preferred languages contains English language
  */
-export function checkIfPreferredLanguagesContainedEnglish(): boolean {
+export function checkIfPreferredLanguagesContainEnglish(): boolean {
   return preferredLanguages.find((item) => item.youdaoId === "en") !== undefined;
 }
 
 /**
  * check if preferred languages contains Chinese language
  */
-export function checkIfPreferredLanguagesContainedChinese(): boolean {
+export function checkIfPreferredLanguagesContainChinese(): boolean {
   const lanuguageIdPrefix = "zh";
   return preferredLanguages.find((item) => item.youdaoId.startsWith(lanuguageIdPrefix)) !== undefined;
 }

@@ -23,7 +23,7 @@
 - [x] 开箱即用，便捷查找单词或翻译文本。
 - [x] 自动识别输入语言，自动查询目标偏好语言。
 - [x] 提供丰富的单词查询信息，包括基本翻译，包含该单词的考试类型，发音，多种词性和释义，形式和时态，网络翻译和网络短语。
-- [x] 支持划词查询，默认启用。
+- [x] 支持划词查询，默认启用。配合快捷键食用效果更佳。
 - [x] 支持打开 [欧路词典](https://www.eudic.net/v4/en/app/eudic) 快速查词（若电脑上有安装）。
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
@@ -45,7 +45,7 @@
 
 ### [Linguee 词典](https://www.linguee.com/)：英语 <--> 中文
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
+![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-1662904427.png)![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
@@ -185,9 +185,8 @@ npm install && npm run dev
 <details> <summary> 查询单词后自动播放单词发音，默认开启。 </summary>
 
 <p>
-注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 时才会自动播放语音，例如 `good`, `look for`, `查询` 等。 其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
+注意，当该选项开始时，仅当查询的内容被判定为 `is_Word` 且为英语时才会自动播放语音，例如 `good`, `look for` 等。 其他查询内容，可通过快捷键 `Cmd + S` 播放语音。
 播放语音的内容：英语单词优先采用在线的有道词典发音，其他则使用有道翻译的 TTS 服务。长文本播放使用 say 命令。
-
 </p>
 
 </details>
