@@ -45,6 +45,7 @@ function CodespaceActions({
             <Action.Push
               title="Rename"
               icon={Icon.Pencil}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               target={
                 <Rename codespace={codespace} onRevalidate={onRevalidate} />
               }
@@ -63,6 +64,7 @@ function CodespaceActions({
               title="Delete"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
               onAction={() => handleDelete({ codespace, onRevalidate })}
             />
           </ActionPanel.Section>
