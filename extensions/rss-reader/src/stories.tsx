@@ -173,6 +173,7 @@ export function StoriesList(props: { feeds?: Feed[] }) {
 function StoryDetail(props: { item: Story }) {
   return (
     <Detail
+      navigationTitle={props.item.title}
       markdown={NodeHtmlMarkdown.translate(props.item.content || "")}
       actions={
         <ActionPanel>
