@@ -8,9 +8,8 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
-import { default as nodeFetch } from "node-fetch";
+import handleRename from "../methods/handleRename";
 
 const Rename = ({
   codespace,
@@ -32,16 +31,7 @@ const Rename = ({
                 style: Toast.Style.Animated,
               });
               try {
-                const response = await nodeFetch(`${codespace.url}`, {
-                  method: "PATCH",
-                  headers: {
-                    Accept: "application/vnd.github+json",
-                    Authorization: `Bearer ${personalAccessToken}`,
-                  },
-                  body: JSON.stringify({
-                    display_name: name,
-                  }),
-                });
+                const response = await handleRename({ codespace, name });
                 if (response.status !== 200) {
                   const data = (await response.json()) as {
                     message: string;

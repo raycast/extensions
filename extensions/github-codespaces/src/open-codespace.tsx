@@ -73,8 +73,9 @@ export default function Command() {
                 `${codespace.repository.owner.login}/${codespace.repository.name}`,
                 codespace.name,
                 codespace.repository.name,
+                codespace.git_status.ref || "",
               ]}
-              subtitle={`${codespace.repository.owner.login}/${codespace.repository.name}`}
+              subtitle={`${codespace.repository.owner.login}/${codespace.repository.name} • ${codespace.git_status.ref}`}
               accessories={[
                 gitStatus,
                 {
