@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess } from "execa";
-import { execute } from 'node-osascript';
+const osascript = require('node-osascript');
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { DEFAULT_SERVER_URL } from "./const";
@@ -116,7 +116,7 @@ export class Bitwarden {
   }
 
   async copyPasteUsernamePassword(password: string, username?: string): Promise<void> {
-    execute(`
+    osascript.execute(`
       tell application "System Events"
       set textToType to username
       delay 0.2
