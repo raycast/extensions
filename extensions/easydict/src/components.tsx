@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-04 00:36
+ * @lastEditTime: 2022-09-11 17:47
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,12 +31,11 @@ import {
   ActionListPanelProps,
   DicionaryType,
   ListDisplayItem,
-  ListItemDisplayType,
   QueryType,
   TranslationType,
   WebQueryItem,
 } from "./types";
-import { checkIsLingueeListItemType, checkIsTranslationType, checkIsYoudaoDictionaryListItemType } from "./utils";
+import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
 /**
  * Get the list action panel item with ListItemActionPanelItem
@@ -212,7 +211,8 @@ function playSoundIcon(lightTintColor: string) {
 /**
  * Return the corresponding ImageLike based on the ListDisplayType
  */
-export function getListItemIcon(listDisplayType: ListItemDisplayType): Image.ImageLike {
+export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
+  const { displayType } = listItem;
   // console.log(`---> list type: ${listDisplayType}, typeof: ${typeof listDisplayType}`);
 
   let itemIcon: Image.ImageLike = {
@@ -220,18 +220,16 @@ export function getListItemIcon(listDisplayType: ListItemDisplayType): Image.Ima
     tintColor: Color.PrimaryText,
   };
 
-  if (checkIsYoudaoDictionaryListItemType(listDisplayType)) {
-    itemIcon = getYoudaoListItemIcon(listDisplayType as YoudaoDictionaryListItemType);
+  if (checkIsYoudaoDictionaryListItem(listItem)) {
+    itemIcon = getYoudaoListItemIcon(displayType as YoudaoDictionaryListItemType);
   }
 
-  if (checkIsTranslationType(listDisplayType as TranslationType)) {
-    // console.log(`---> TranslationType: ${listDisplayType}`);
-    itemIcon = getQueryTypeIcon(listDisplayType as TranslationType);
+  if (checkIsLingueeListItem(listItem)) {
+    itemIcon = getLingueeListItemIcon(displayType as LingueeListItemType);
   }
 
-  // LingueeDisplayType is string enum, so we need to check if it is in the enum
-  if (checkIsLingueeListItemType(listDisplayType)) {
-    itemIcon = getLingueeListItemIcon(listDisplayType as LingueeListItemType);
+  if (checkIsTranslationType(displayType as TranslationType)) {
+    itemIcon = getQueryTypeIcon(displayType as TranslationType);
   }
 
   // console.log(`---> end list type: ${listDisplayType}`);
@@ -320,9 +318,12 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
       dotColor = "#B15BFF";
       break;
     }
+    case YoudaoDictionaryListItemType.Wikipedia: {
+      dotColor = "#FF60AF";
+      break;
+    }
   }
 
-  // console.log(`---> dot color: ${dotColor}`);
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
     tintColor: dotColor,
