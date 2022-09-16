@@ -126,10 +126,6 @@ export function StoriesList(props: { feeds?: Feed[] }) {
       feeds = await getFeeds();
     }
 
-    if (feeds.length === 0) {
-      return { feeds: [], stories: [] };
-    }
-
     return { feeds, stories: await getStories(feeds) };
   }
   const { data, isLoading, revalidate } = usePromise(fetchStories, [props.feeds]);
@@ -142,7 +138,7 @@ export function StoriesList(props: { feeds?: Feed[] }) {
         data?.feeds.length && data.feeds.length > 1 ? (
           <List.Dropdown onChange={setFilter} tooltip="Subscription">
             <List.Dropdown.Section>
-              <List.Dropdown.Item icon={Icon.Globe} title="All Subscription" value="all" />
+              <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
             </List.Dropdown.Section>
             <List.Dropdown.Section>
               {data?.feeds.map((feed) => (
