@@ -6,7 +6,7 @@ import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { nanoid } from "nanoid";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import React from "react";
 
 const parser = new Parser({});
@@ -128,7 +128,7 @@ export function StoriesList(props: { feeds?: Feed[] }) {
 
     return { feeds, stories: await getStories(feeds) };
   }
-  const { data, isLoading, revalidate } = usePromise(fetchStories, [props.feeds]);
+  const { data, isLoading, revalidate } = useCachedPromise(fetchStories, [props.feeds]);
   const [filter, setFilter] = React.useState("all");
 
   return (
