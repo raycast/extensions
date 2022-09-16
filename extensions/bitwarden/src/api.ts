@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess } from "execa";
+import { execute } from 'node-osascript';
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { DEFAULT_SERVER_URL } from "./const";
@@ -112,6 +113,30 @@ export class Bitwarden {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
+  }
+
+  async copyPasteUsernamePassword(password: string, username?: string): Promise<void> {
+    execute(`
+      tell application "System Events"
+      set textToType to username
+      delay 0.2
+      repeat with char in (textToType)
+        keystroke char
+        delay 0.05
+      end repeat
+      keystroke tab
+      set textToType to passwordText
+      delay 0.2
+      repeat with char in (textToType)
+        keystroke char
+        delay 0.05
+      end repeat
+      delay 0.2
+      key code 36
+      end tell`,
+      { username: username, passwordText: password }, function (err: any, result: any, raw: any) {
+        if (err) return err
+      });
   }
 
   private async exec(

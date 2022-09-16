@@ -81,6 +81,12 @@ export function ItemList(props: { api: Bitwarden }) {
     }
   }
 
+  async function copyPasteUsernamePassword(username: string | undefined | null, password: string | undefined | null) {
+    const bitwardenApi = new Bitwarden();
+   closeMainWindow({ clearRootSearch: true})
+    if (password && username) bitwardenApi.copyPasteUsernamePassword(password, username);
+  }
+
   useEffect(() => {
     const token = session.token;
     if (!session.active) {
@@ -152,6 +158,7 @@ export function ItemList(props: { api: Bitwarden }) {
             logoutVault={logoutVault}
             syncItems={syncItems}
             copyTotp={copyTotp}
+            copyPasteUsernamePassword={copyPasteUsernamePassword}
           />
         ))}
       {state.isLoading ? (
@@ -195,8 +202,10 @@ function BitwardenItem(props: {
   lockVault: () => void;
   logoutVault: () => void;
   copyTotp: (id: string) => void;
+  copyPasteUsernamePassword: (username: string | undefined | null, password: string | undefined | null) => void;
+
 }) {
-  const { item, syncItems, lockVault, logoutVault, copyTotp } = props;
+  const { item, syncItems, lockVault, logoutVault, copyTotp, copyPasteUsernamePassword } = props;
   const { notes, identity, login, fields, card } = item;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
@@ -221,6 +230,13 @@ function BitwardenItem(props: {
           {login ? (
             <ActionPanel.Section>
               {login.password ? <PasswordActions password={login.password} /> : null}
+              {item.login?.password && item.login?.username ? (
+            <Action
+              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              title="Type in Username and password"
+              icon={Icon.Clipboard}
+              onAction={() => copyPasteUsernamePassword(item.login?.username, item.login?.password)}
+            />) : null }
               {login.totp ? (
                 <Action
                   shortcut={{ modifiers: ["cmd"], key: "t" }}

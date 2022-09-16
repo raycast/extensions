@@ -110,7 +110,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.37.0",
-    "execa": "^6.1.0"
+    "execa": "^6.1.0",
+    "node-osascript": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
