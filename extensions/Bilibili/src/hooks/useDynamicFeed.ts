@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
 
 export function useDynamicFeed() {
-  const [dynamicVideoFeed, setDynamicVideoFeed] = useState<Bilibili.dynamicVideoFeedAll>([]);
+  const [dynamicItems, setDynamicItems] = useState<Bilibili.dynamicItems>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -12,7 +12,7 @@ export function useDynamicFeed() {
       try {
         const res = await getDynamicFeed();
 
-        setDynamicVideoFeed(res);
+        setDynamicItems(res);
         setIsLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Get dynamic video feed failed");
@@ -20,5 +20,5 @@ export function useDynamicFeed() {
     })();
   }, []);
 
-  return { dynamicVideoFeed, isLoading };
+  return { dynamicItems, isLoading };
 }

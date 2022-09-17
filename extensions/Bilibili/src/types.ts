@@ -38,24 +38,26 @@ declare global {
     export interface dynamicFeedAllResponse {
       code: number;
       data: {
-        items: dynamicVideoFeedAll;
+        items: dynamicItems;
       };
       message: string;
       ttl: number;
     }
 
-    export type dynamicVideoFeedAll = dynmamicVideo[];
+    export type dynamicItems = (dynmamicVideo | dynamicPost)[];
+
+    export type dynamicModuleAuthor = {
+      face: string;
+      jump_url: string;
+      mid: number;
+      name: string;
+      pub_ts: number;
+    };
 
     export type dynmamicVideo = {
       id_str: string;
       modules: {
-        module_author: {
-          face: string;
-          jump_url: string;
-          mid: number;
-          name: string;
-          pub_ts: number;
-        };
+        module_author: dynamicModuleAuthor;
         module_dynamic: {
           type: string;
           major: {
@@ -77,6 +79,30 @@ declare global {
               title: string;
               type: number;
             };
+          };
+        };
+      };
+      type: string;
+    };
+
+    export type dynamicPost = {
+      id_str: string;
+      modules: {
+        module_author: dynamicModuleAuthor;
+        module_dynamic: {
+          desc: {
+            text: string;
+          };
+        };
+        module_stat: {
+          comment: {
+            count: number;
+          };
+          forward: {
+            count: number;
+          };
+          like: {
+            count: number;
           };
         };
       };

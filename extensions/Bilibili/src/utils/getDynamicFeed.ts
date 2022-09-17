@@ -15,9 +15,5 @@ export async function getDynamicFeed() {
 
   if (res.code !== 0) throw new Error(res.message);
 
-  const dynamicVideoFeed: Bilibili.dynamicVideoFeedAll = res.data.items.filter(
-    (item) => item.type === "DYNAMIC_TYPE_AV"
-  );
-
-  return dynamicVideoFeed;
+  return res.data.items;
 }

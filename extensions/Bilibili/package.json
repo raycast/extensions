@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "dynamicVideoFeed",
-      "title": "Show Dynamic Video Feed",
-      "description": "Show all dynamic video feed",
+      "name": "dynamicFeed",
+      "title": "Show Dynamic Feed",
+      "description": "Show all dynamic feed",
       "mode": "view"
     },
     {
