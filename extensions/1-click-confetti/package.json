@@ -9,6 +9,16 @@
     "Fun"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "confettiSound",
+      "description": "Play sound when confetti is fired",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Enable sound"
+    }
+  ],
   "commands": [
     {
       "name": "index",
