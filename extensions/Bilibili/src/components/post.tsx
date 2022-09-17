@@ -62,7 +62,7 @@ export function Post(props: {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Post" url={formatUrl(props.url)} />
+          <Action.OpenInBrowser title={`Open ${renderTypeText(props.type)}`} url={formatUrl(props.url)} />
           <Action.OpenInBrowser
             title={`Open ${props.uploader.name} Dynamic`}
             url={`https://space.bilibili.com/${props.uploader.mid}/dynamic`}
