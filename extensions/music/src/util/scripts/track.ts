@@ -75,12 +75,18 @@ export const revealTrack = (track: Track) =>
   end tell`);
 
 export const playOnRepeat = (track: Track) =>
-  runScript(`tell application "Music" 
+  runScript(`
+  tell application "System Events"
+    set activeApp to name of first application process whose frontmost is true
+  end tell
+  tell application "Music" 
     set song repeat to one
     reveal (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")
     activate
     tell application "System Events" to key code 36
-  end tell`);
+  end tell
+  tell application activeApp to activate
+  `);
 
 export const getTrackArtwork = async (track: Track): Promise<string> => {
   return (await getAlbumArtwork(track.albumArtist, track.album)) || "../assets/no-track.png";
