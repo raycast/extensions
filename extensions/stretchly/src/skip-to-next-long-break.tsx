@@ -6,6 +6,7 @@ const promiseExec = util.promisify(exec);
 
 export default async function main() {
   try {
+    await showHUD("Long Break");
     const { stdout, stderr } = await promiseExec("/Applications/Stretchly.app/Contents/MacOS/stretchly long");
     console.log("stdout:", stdout);
     console.log("stderr:", stderr);
