@@ -1,7 +1,7 @@
 import { getPopularSeriesVideos } from "../utils";
 
-import { showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { showToast, Toast } from "@raycast/api";
 
 export function usePopularSeriesVideos(number: number) {
   const [popularSeriesVideos, setPopularSeriesVideos] = useState<Bilibili.video[]>([]);

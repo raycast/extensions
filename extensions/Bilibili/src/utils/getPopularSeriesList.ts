@@ -1,5 +1,6 @@
-import got from "got";
 import { API } from "./api";
+
+import got from "got";
 
 export async function getPopularSeriesList() {
   const response: Bilibili.popularSeriesListResponse = await got(API.popularSeriesList()).json();

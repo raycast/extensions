@@ -1,9 +1,8 @@
-import { NoLoginView, Video } from "./components";
-import { checkLogin, formatUrl } from "./utils";
 import { useDynamicFeed } from "./hooks";
+import { checkLogin, formatUrl } from "./utils";
+import { NoLoginView, Video, Post } from "./components";
 
 import { List } from "@raycast/api";
-import { Post } from "./components/post";
 
 export default function Command() {
   if (!checkLogin()) return <NoLoginView />;

@@ -1,6 +1,6 @@
-import got from "got";
 import { API } from "./api";
 
+import got from "got";
 import { Cache } from "@raycast/api";
 
 export async function getPopularVideos(pn: number) {

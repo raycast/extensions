@@ -1,6 +1,7 @@
-import { Cache } from "@raycast/api";
-import got from "got";
 import { API } from "./api";
+
+import got from "got";
+import { Cache } from "@raycast/api";
 
 export async function logout() {
   const cache = new Cache();

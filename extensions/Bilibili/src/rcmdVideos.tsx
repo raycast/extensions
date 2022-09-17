@@ -1,5 +1,5 @@
-import { NoLoginView, Video } from "./components";
 import { useRcmdVideos } from "./hooks";
+import { NoLoginView, Video } from "./components";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
 import { useState } from "react";

@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { useLogin } from "./hooks";
 import { logout } from "./utils";
+import { useLogin } from "./hooks";
+
+import { Action, ActionPanel, Color, Detail, Icon, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 
 async function doLogout() {
   return await logout();

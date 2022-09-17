@@ -1,6 +1,6 @@
 import { NoLoginView, Video } from "./components";
-import { usePopularSeriesList, usePopularSeriesVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
+import { usePopularSeriesList, usePopularSeriesVideos } from "./hooks";
 
 import { List, ActionPanel, Action, useNavigation } from "@raycast/api";
 
