@@ -1,5 +1,4 @@
-import { ActionPanel, Grid, Icon } from "@raycast/api";
-import React from "react";
+import { ActionPanel, Grid } from "@raycast/api";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
 export function GridEmptyView(props: { title: string; command: boolean; extension: boolean }) {

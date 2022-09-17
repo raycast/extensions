@@ -83,6 +83,7 @@ export function ActionNewTemplateFileHere(props: {
           }}
         />
         <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={template.path} />
+        <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
       </ActionPanel.Section>
 
       <ActionOpenCommandPreferences />

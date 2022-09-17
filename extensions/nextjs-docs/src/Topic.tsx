@@ -1,7 +1,8 @@
-import { Detail, Action, ActionPanel, showToast, Toast } from "@raycast/api";
-import { TopicType } from "./types/GithubType";
-import YamlFront from "./yaml-front-matter";
+import { Detail } from "@raycast/api";
+import { loadFront } from "yaml-front-matter";
 import { useEffect, useState } from "react";
+
+import { TopicType } from "./types/GithubType";
 import { getPageFromCache, checkForUpdates } from "./services/NextjsPage";
 
 const TopicDetail = (props: { topic: TopicType }) => {
@@ -9,18 +10,16 @@ const TopicDetail = (props: { topic: TopicType }) => {
 
   useEffect(() => {
     async function getPageContent() {
-      const cached_data = await getPageFromCache(props.topic).catch((err) => {
-        console.log("Failed to fetch data!");
-      });
+      const cached_data = await getPageFromCache(props.topic);
 
       if (cached_data) {
-        const parsed = YamlFront.loadFront(cached_data);
+        const parsed = loadFront(cached_data);
         setMark(parsed.__content);
       }
 
       const updated_data = await checkForUpdates(props.topic);
       if (updated_data) {
-        const parsed = YamlFront.loadFront(updated_data);
+        const parsed = loadFront(updated_data);
         setMark(parsed.__content);
       }
     }

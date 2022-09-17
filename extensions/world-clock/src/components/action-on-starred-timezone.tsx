@@ -1,6 +1,6 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { TimeInfo, Timezone } from "../types/types";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { localStorageKey } from "../utils/costants";
 import { ActionToggleDetails } from "./action-toggle-details";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
@@ -22,7 +22,7 @@ export function ActionOnStarredTimezone(props: {
     <ActionPanel>
       <ActionTimeInfo timeInfo={timeInfo} />
       <Action
-        icon={Icon.Circle}
+        icon={Icon.StarDisabled}
         title={"Unstar Timezone"}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
         onAction={async () => {

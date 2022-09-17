@@ -11,7 +11,8 @@
   ],
   "contributors": [
     "FezVrasta",
-    "henrique"
+    "henrique",
+    "metakirby5"
   ],
   "license": "MIT",
   "commands": [
@@ -864,7 +865,7 @@
           "value": "th"
         },
         {
-          "title": "🇹🇭 Turkish",
+          "title": "🇹🇷 Turkish",
           "value": "tr"
         },
         {

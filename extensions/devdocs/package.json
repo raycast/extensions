@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "@raycast/utils": "^1.1.0",
     "fuse.js": "^6.4.6",
     "node-fetch": "^3.0.0",
     "open": "^8.2.1",

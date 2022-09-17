@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command: Query World Time
+
 ## [Add Grid layout] - 2022-06-22
 
 - Add Grid layout for Query World Time command

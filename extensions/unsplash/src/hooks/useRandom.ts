@@ -1,10 +1,11 @@
 import { getPreferenceValues, showHUD } from "@raycast/api";
+import { environment, LaunchType, LocalStorage } from "@raycast/api";
 import fetch from "node-fetch";
 
 // Functions
 import setWallpaper from "@/functions/setWallpaper";
 
-export const useRandom = async () => {
+export const useRandom = async (nowTime: number) => {
   const { accessKey, collections, includeDefaults } = getPreferenceValues();
 
   const customCollections = collections?.split(", ");
@@ -45,7 +46,16 @@ export const useRandom = async () => {
   const { urls, id } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;
-  await setWallpaper({ url: image, id: String(id), useHud: true });
+  const result = await setWallpaper({
+    url: image,
+    id: String(id),
+    useHud: true,
+    isBackground: environment.launchType === LaunchType.Background,
+  });
+
+  if (result) {
+    await LocalStorage.setItem("last-time", nowTime);
+  }
 };
 
 export default useRandom;

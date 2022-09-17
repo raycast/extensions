@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import React from "react";
 import { Preferences } from "./types/preferences";
 import { QueryWorldListLayout } from "./components/query-world-list-layout";
 import { QueryWorldGridLayout } from "./components/query-world-grid-layout";

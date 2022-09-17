@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, useNavigation } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { Timezone } from "./types/types";
 import { isEmpty } from "./utils/common-utils";
 import { icons, localStorageKey } from "./utils/costants";

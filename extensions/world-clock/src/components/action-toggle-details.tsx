@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, LocalStorage } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { localStorageKey } from "../utils/costants";
 
 export function ActionToggleDetails(props: { showDetail: boolean; setRefresh: Dispatch<SetStateAction<number>> }) {

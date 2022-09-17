@@ -1,3 +1,5 @@
+import { Image } from "@raycast/api";
+
 export const formatDate = (date: string): string => {
   const now = new Date();
   const d = new Date(date);
@@ -41,3 +43,23 @@ export const formatSize = (size: number): string => {
   }
   return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
 };
+
+export function mapFromToIcon(from: string | undefined):
+  | Image.ImageLike
+  | {
+      value: Image.ImageLike;
+      tooltip: string;
+    } {
+  switch (from) {
+    case "OFFICIAL":
+      return { value: { source: "official.png" }, tooltip: "Official" };
+    case "VERIFIED PUBLISHER":
+      return { value: { source: "verified.png" }, tooltip: "Verified Publisher" };
+    case "OPEN SOURCE":
+      return { value: { source: "oss.png" }, tooltip: "Open Source Program" };
+    case "COMMUNITY":
+      return { value: { source: "docker-icon.png" }, tooltip: "Community" };
+    default:
+      return { source: "docker-icon.png" };
+  }
+}

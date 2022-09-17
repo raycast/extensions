@@ -6,6 +6,26 @@
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "license": "MIT",
+  "preferences": [
+    {
+    "name": "terminal",
+    "type": "dropdown",
+    "required": false,
+    "title": "Decide which Terminal Application you want to use",
+    "description": "If iTerm is available, you can use iTerm instead of Terminal.",
+    "data": [{
+        "title": "Terminal",
+        "value": "Terminal"
+      },
+      {
+        "title": "iTerm",
+        "value": "iTerm"
+      }
+    ],
+    "default": "Terminal"
+    }
+
+  ],
   "commands": [
     {
       "name": "create",
@@ -41,6 +61,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

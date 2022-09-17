@@ -26,7 +26,7 @@ export function UpdateShowChangelog(props: { state: State }): JSX.Element | null
     <Action.Push
       title="Show Changelog"
       shortcut={{ modifiers: ["cmd"], key: "l" }}
-      icon={{ source: Icon.TextDocument, tintColor: Color.PrimaryText }}
+      icon={{ source: Icon.BlankDocument, tintColor: Color.PrimaryText }}
       target={<ChangelogDetail state={s} />}
     />
   );

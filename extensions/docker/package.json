@@ -33,6 +33,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "socketPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Socket path",
+      "description": "Path to Docker socket",
+      "placeholder": "/var/run/docker.sock"
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"

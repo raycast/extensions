@@ -1,69 +1,18 @@
-import { getSelectedText, Clipboard } from "@raycast/api";
-import { isEmpty } from "./utils";
+import { Clipboard, getSelectedText } from "@raycast/api";
 
-export enum ItemType {
-  TEXT = "Text",
-  URL = "URL",
-  EMAIL = "Email",
-  NULL = "",
-}
-
-export enum ItemSource {
-  SELECTED = "Selected",
-  CLIPBOARD = "Clipboard",
-  ENTER = "Enter",
-  NULL = "",
-}
-
-export class ItemInput {
-  content: string;
-  source: ItemSource;
-  type: ItemType;
-
-  constructor(content = "", source = ItemSource.NULL, type = ItemType.NULL) {
-    this.content = content;
-    this.source = source;
-    this.type = type;
-  }
-
-  setContent(content = "") {
-    this.content = content;
-    return this;
-  }
-  setSource(source: ItemSource = ItemSource.NULL) {
-    this.source = source;
-    return this;
-  }
-  setType(type: ItemType = ItemType.NULL) {
-    this.type = type;
-    return this;
-  }
-}
-
-const clipboard = async () => {
-  const content = await Clipboard.readText();
-  return typeof content == "undefined" ? "" : content;
+export const fetchItemInput = async () => {
+  return getSelectedText()
+    .then(async (text) => (!isEmpty(text) ? text : await getClipboardText()))
+    .catch(async () => await getClipboardText())
+    .then((item) => (!isEmpty(item) ? item : ""))
+    .catch(() => "" as string);
 };
 
-export const fetchItemInput = () => {
-  const itemInput = new ItemInput();
-  return getSelectedText()
-    .then(async (text) =>
-      !isEmpty(text)
-        ? itemInput.setContent(text).setSource(ItemSource.SELECTED).setType()
-        : itemInput
-            .setContent(String(await clipboard()))
-            .setSource(ItemSource.CLIPBOARD)
-            .setType()
-    )
-    .catch(async () =>
-      itemInput
-        .setContent(String(await clipboard()))
-        .setSource(ItemSource.CLIPBOARD)
-        .setType()
-    )
-    .then((item) =>
-      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType()
-    )
-    .catch(() => itemInput.setContent("").setSource(ItemSource.NULL).setType());
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
+const getClipboardText = async () => {
+  const content = await Clipboard.readText();
+  return typeof content == "undefined" ? "" : content;
 };

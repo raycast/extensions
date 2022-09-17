@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Fixes] - 2022-07-03
+
+- Fixed an issue where some characters will display as percentage encoded format.
+
 ## [Fixes] - 2022-05-25
 
 - Reverted back to using the VS Code SQLite DB to load recent projects.

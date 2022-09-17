@@ -1,5 +1,9 @@
 # Life Progress Changelog
 
+## [Add text field validation] - 2022-07-01
+
+- Add text field validation
+
 ## [Add Feature: Countdown Date] - 2022-06-01
 
 - Release of Life Progress version 2.0

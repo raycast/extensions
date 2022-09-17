@@ -1,5 +1,4 @@
 import { ActionPanel, List } from "@raycast/api";
-import React from "react";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
 export function ListEmptyView(props: { title: string; command: boolean; extension: boolean }) {

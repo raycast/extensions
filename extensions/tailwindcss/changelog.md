@@ -1,5 +1,13 @@
 # Tailwind CSS Changelog
 
+## [Fixed typo] - 2022-09-12
+
+- Renamed grid-col- to grid-cols
+ 
+## [Search Colors and Components command] - 2022-06-27
+- Add `Search Colors` command
+- Add `Search Components` command
+
 ## [Search Classes command & Chores] - 2022-06-10
 - Update to the latest version of Raycast
 - Remove unnecessary dependencies

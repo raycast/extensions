@@ -1,6 +1,5 @@
-import { Search } from "./search";
-import { SearchType } from "./lib/api";
+import SearchImages from "./components/SearchImages";
 
 export default function Command() {
-  return <Search searchType={SearchType.IMAGE} />;
+  return <SearchImages />;
 }

@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action } from "@raycast/api";
-import documentation from "./documentation";
+import documentation from "./documentation/tailwind-css";
 
 export default function SearchDocumentation() {
   return (

@@ -1,5 +1,9 @@
 # Bunch Changelog
 
+## [Text field validation] - 2022-07-04
+
+- Add text field validation
+
 ## [Support Bunch Beta] - 2022-06-24
 
 - Support Bunch Beta

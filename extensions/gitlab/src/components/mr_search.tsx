@@ -1,7 +1,8 @@
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
 import { MRScope, MRState, MRListItem } from "./mr";
@@ -34,12 +35,28 @@ export function SearchMyMergeRequests(): JSX.Element {
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
+
   const title = search ? "Search Results" : "Created Recently";
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+
   return (
-    <List isLoading={isLoading} searchText={search} onSearchTextChange={setSearch} throttle>
+    <List
+      isLoading={isLoading}
+      searchText={search}
+      onSearchTextChange={setSearch}
+      isShowingDetail={getListDetailsPreference()}
+      throttle
+    >
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
-          <MRListItem key={m.id} mr={m} refreshData={performRefetch} showCIStatus={true} />
+          <MRListItem
+            key={m.id}
+            mr={m}
+            refreshData={performRefetch}
+            showCIStatus={true}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
     </List>

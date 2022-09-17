@@ -1,4 +1,4 @@
-import { faviconUrl } from "../utils";
+import { getFavicon } from "@raycast/utils";
 
 export default class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
@@ -25,7 +25,7 @@ export default class Tab {
     return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
   }
 
-  braveFavicon(): string {
-    return faviconUrl(64, this.url);
+  braveFavicon() {
+    return getFavicon(this.url);
   }
 }

@@ -1,5 +1,5 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import fetch from "node-fetch";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import fetch, { Response } from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { File, ProjectFiles, TeamProjects } from "../types";
@@ -70,7 +70,7 @@ async function fetchTeamProjects(): Promise<TeamProjects> {
     return json;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load team");
+    showToast(Toast.Style.Failure, "Could not load team");
     return Promise.resolve({ name: "No team found", projects: [] });
   }
 }
@@ -92,7 +92,7 @@ async function fetchFiles(): Promise<ProjectFiles[]> {
       return { name: project.name, files: json.files as File[] };
     } catch (error) {
       console.error(error);
-      showToast(ToastStyle.Failure, "Could not load files");
+      showToast(Toast.Style.Failure, "Could not load files");
       return Promise.resolve([]);
     }
   });

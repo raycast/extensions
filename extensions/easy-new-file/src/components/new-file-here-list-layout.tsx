@@ -39,6 +39,7 @@ export function NewFileHereListLayout(props: {
                 icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
                 title={{ value: template.name, tooltip: template.name + "." + template.extension }}
                 subtitle={template.extension.toUpperCase()}
+                quickLook={{ path: template.path, name: template.name }}
                 actions={
                   <ActionNewTemplateFileHere
                     template={template}

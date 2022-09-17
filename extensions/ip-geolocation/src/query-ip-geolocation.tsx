@@ -7,9 +7,14 @@ import { isEmpty } from "./utils/common-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 import { Preferences } from "./types/preferences";
 
-export default function QueryIpGeolocation() {
+interface IpArgument {
+  ipAddress: string;
+}
+
+export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
+  const { ipAddress } = props.arguments;
   const { language } = getPreferenceValues<Preferences>();
-  const [searchContent, setSearchContent] = useState<string>("");
+  const [searchContent, setSearchContent] = useState<string>(ipAddress);
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
 
   const emptyViewTitle = () => {

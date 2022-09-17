@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
+import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -74,7 +74,7 @@ export function PipelineListItem(props: {
       title={pipeline.id.toString()}
       icon={icon}
       subtitle={pipeline.ref || ""}
-      accessories={ensureCleanAccessories([{ text: getStatusText(pipeline.status.toLowerCase()) }])}
+      accessories={[{ text: getStatusText(pipeline.status.toLowerCase()) }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

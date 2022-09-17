@@ -8,7 +8,10 @@
   "contributors": [
     "Codely"
   ],
-  "categories": ["Applications", "Web"],
+  "categories": [
+    "Applications",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -36,6 +39,7 @@
   "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "@raycast/utils": "^1.1.0",
     "react-async": "^10.0.1",
     "run-applescript": "^6.0.0",
     "sql.js": "^1.6.2"

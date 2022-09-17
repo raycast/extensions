@@ -32,6 +32,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
+    "@raycast/utils": "^1.1.0",
     "javascript-time-ago": "^2.3.9",
     "octokit": "^1.7.0",
     "use-debounce": "^7.0.0"

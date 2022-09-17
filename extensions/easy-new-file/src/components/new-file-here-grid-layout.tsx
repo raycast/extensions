@@ -41,6 +41,7 @@ export function NewFileHereGridLayout(props: {
                 tooltip: template.name + "." + template.extension,
               }}
               title={template.name}
+              quickLook={{ path: template.path, name: template.name }}
               actions={
                 <ActionNewTemplateFileHere
                   template={template}
