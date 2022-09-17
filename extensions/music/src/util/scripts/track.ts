@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 
-import { createQueryString, runScript, tell, tellMusic } from "../apple-script";
+import { createQueryString, runScript, tellMusic } from "../apple-script";
 import { parseImageStream, getAlbumArtwork } from "../artwork";
 import { queryCache, setCache } from "../cache";
 import { Track } from "../models";
