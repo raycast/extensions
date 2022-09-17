@@ -144,7 +144,7 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
               title={track.name}
               subtitle={track.artist}
               content={track.artwork || "../assets/no-track.png"}
-              actions={<Actions layout={layout} id={track.id ?? ""} />}
+              actions={<Actions layout={layout} track={track} />}
             />
           ) : (
             <List.Item
@@ -153,7 +153,7 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
               title={track.name}
               accessories={showTrackDetail ? null : [{ text: track.artist }]}
               icon={track.artwork || "../assets/no-track.png"}
-              actions={<Actions layout={layout} id={track.id ?? ""} toggle={toggleTrackDetail} />}
+              actions={<Actions layout={layout} track={track} toggle={toggleTrackDetail} />}
               detail={<TrackDetail track={track} />}
             />
           )
@@ -162,11 +162,11 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
   );
 };
 
-function Actions({ id, layout, toggle }: { id: string; layout: LayoutType; toggle?: () => void }) {
+function Actions({ track, layout, toggle }: { track: Track; layout: LayoutType; toggle?: () => void }) {
   const playTrack = async () => {
     await pipe(
-      id,
-      music.track.playById,
+      track,
+      music.track.play,
       TE.map(() => closeMainWindow()),
       TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this track"))
     )();
@@ -174,7 +174,7 @@ function Actions({ id, layout, toggle }: { id: string; layout: LayoutType; toggl
 
   const playOnRepeat = async () => {
     await pipe(
-      id,
+      track,
       music.track.playOnRepeat,
       TE.map(() => closeMainWindow()),
       TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this track"))
@@ -183,7 +183,7 @@ function Actions({ id, layout, toggle }: { id: string; layout: LayoutType; toggl
 
   const showTrack = async () => {
     await pipe(
-      id,
+      track,
       music.track.revealTrack,
       TE.map(() => closeMainWindow()),
       TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not find this track"))

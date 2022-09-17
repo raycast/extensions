@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 
-import { createQueryString, runScript, tell } from "../apple-script";
+import { createQueryString, runScript, tell, tellMusic } from "../apple-script";
 import { parseImageStream, getAlbumArtwork } from "../artwork";
 import { queryCache, setCache } from "../cache";
 import { Track } from "../models";
@@ -63,20 +63,21 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
   return tracks;
 };
 
-export const play = (track: string) => tell("Music", `play track "${track}" of playlist 1`);
-export const playById = (id: string) =>
-  runScript(`tell application "Music" to play (every track whose database ID is "${id}")`);
+export const play = (track: Track) =>
+  tellMusic(
+    `play (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")`
+  );
 
-export const revealTrack = (id: string) =>
+export const revealTrack = (track: Track) =>
   runScript(`tell application "Music" 
-    reveal (every track whose database ID is "${id}")
+    reveal (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")
     activate
   end tell`);
 
-export const playOnRepeat = (id: string) =>
+export const playOnRepeat = (track: Track) =>
   runScript(`tell application "Music" 
     set song repeat to one
-    reveal (every track whose database ID is "${id}")
+    reveal (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")
     activate
     tell application "System Events" to key code 36
   end tell`);
