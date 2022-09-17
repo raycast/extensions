@@ -64,7 +64,7 @@ function CodespaceActions({
               title="Delete"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
               onAction={() => handleDelete({ codespace, onRevalidate })}
             />
           </ActionPanel.Section>
