@@ -1,22 +1,11 @@
-import { Video } from "./components";
+import { NoLoginView, Video } from "./components";
 import { usePopularSeriesList, usePopularSeriesVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
-import { Color, List, Icon, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, useNavigation } from "@raycast/api";
 
 export default function Command() {
-  if (!checkLogin())
-    return (
-      <List>
-        <List.EmptyView
-          icon={{
-            source: Icon.ExclamationMark,
-            tintColor: Color.Red,
-          }}
-          title="Please use Login Bilibili command to login first."
-        />
-      </List>
-    );
+  if (!checkLogin()) return <NoLoginView />;
 
   const { push } = useNavigation();
   const { popularSeriesList, isLoading } = usePopularSeriesList();

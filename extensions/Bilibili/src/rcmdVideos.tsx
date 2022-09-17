@@ -1,23 +1,12 @@
-import { Video } from "./components";
+import { NoLoginView, Video } from "./components";
 import { useRcmdVideos } from "./hooks";
 import { checkLogin, formatNumber, secondToDate } from "./utils";
 
 import { useState } from "react";
-import { Color, List, Icon } from "@raycast/api";
+import { List } from "@raycast/api";
 
 export default function Command() {
-  if (!checkLogin())
-    return (
-      <List>
-        <List.EmptyView
-          icon={{
-            source: Icon.ExclamationMark,
-            tintColor: Color.Red,
-          }}
-          title="Please use Login Bilibili command to login first."
-        />
-      </List>
-    );
+  if (!checkLogin()) return <NoLoginView />;
 
   const [idx, setIdx] = useState(1);
   const countList: string[] = [];
