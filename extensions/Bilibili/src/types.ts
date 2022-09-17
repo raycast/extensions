@@ -25,6 +25,16 @@ declare global {
       };
     }
 
+    export interface logoutResponse {
+      code: number;
+      status: boolean;
+      ts: number;
+      message: string;
+      data: {
+        redirect: string;
+      };
+    }
+
     export interface dynamicFeedAllResponse {
       code: number;
       data: {
