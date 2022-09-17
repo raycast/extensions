@@ -1,5 +1,5 @@
 import { NoLoginView, Video } from "./components";
-import { checkLogin } from "./utils";
+import { checkLogin, formatUrl } from "./utils";
 import { useDynamicFeed } from "./hooks";
 
 import { List } from "@raycast/api";
@@ -15,8 +15,6 @@ export default function Command() {
       {dynamicItems?.map((item) => {
         switch (item.type) {
           case "DYNAMIC_TYPE_AV":
-            item = item as Bilibili.dynmamicVideo;
-
             return (
               <Video
                 title={item.modules.module_dynamic.major.archive.title}
@@ -39,8 +37,6 @@ export default function Command() {
           case "DYNAMIC_TYPE_FORWARD":
           case "DYNAMIC_TYPE_WORD":
           case "DYNAMIC_TYPE_DRAW":
-            item = item as Bilibili.dynamicPost;
-
             return (
               <Post
                 desc={item.modules.module_dynamic.desc.text}
@@ -56,6 +52,51 @@ export default function Command() {
                   forward: item.modules.module_stat.forward.count,
                   like: item.modules.module_stat.like.count,
                 }}
+                type={item.type}
+              />
+            );
+          case "DYNAMIC_TYPE_MUSIC":
+            return (
+              <Post
+                title={item.modules.module_dynamic.major.music.title}
+                desc={item.modules.module_dynamic.desc.text}
+                pubdate={item.modules.module_author.pub_ts}
+                url={formatUrl(item.modules.module_dynamic.major.music.jump_url)}
+                uploader={{
+                  mid: item.modules.module_author.mid,
+                  name: item.modules.module_author.name,
+                  face: item.modules.module_author.face,
+                }}
+                stat={{
+                  comment: item.modules.module_stat.comment.count,
+                  forward: item.modules.module_stat.forward.count,
+                  like: item.modules.module_stat.like.count,
+                }}
+                type={item.type}
+              />
+            );
+          case "DYNAMIC_TYPE_LIVE_RCMD":
+            // eslint-disable-next-line no-case-declarations
+            const liveDate = JSON.parse(item.modules.module_dynamic.major.live_rcmd.content);
+
+            return (
+              <Post
+                title={liveDate.live_play_info.title}
+                desc={liveDate.live_play_info.title}
+                pubdate={item.modules.module_author.pub_ts}
+                url={formatUrl(liveDate.live_play_info.link)}
+                cover={formatUrl(liveDate.live_play_info.cover)}
+                uploader={{
+                  mid: item.modules.module_author.mid,
+                  name: item.modules.module_author.name,
+                  face: item.modules.module_author.face,
+                }}
+                stat={{
+                  comment: item.modules.module_stat.comment.count,
+                  forward: item.modules.module_stat.forward.count,
+                  like: item.modules.module_stat.like.count,
+                }}
+                type={item.type}
               />
             );
         }

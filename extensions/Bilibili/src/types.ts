@@ -44,7 +44,7 @@ declare global {
       ttl: number;
     }
 
-    export type dynamicItems = (dynmamicVideo | dynamicPost)[];
+    export type dynamicItems = (dynmamicVideo | dynamicPost | dynamicMusic | dynamicLive)[];
 
     export type dynamicModuleAuthor = {
       face: string;
@@ -54,7 +54,19 @@ declare global {
       pub_ts: number;
     };
 
-    export type dynmamicVideo = {
+    export type dynamicModuleStat = {
+      comment: {
+        count: number;
+      };
+      forward: {
+        count: number;
+      };
+      like: {
+        count: number;
+      };
+    };
+
+    export interface dynmamicVideo {
       id_str: string;
       modules: {
         module_author: dynamicModuleAuthor;
@@ -82,10 +94,10 @@ declare global {
           };
         };
       };
-      type: string;
-    };
+      type: "DYNAMIC_TYPE_AV";
+    }
 
-    export type dynamicPost = {
+    export interface dynamicPost {
       id_str: string;
       modules: {
         module_author: dynamicModuleAuthor;
@@ -94,20 +106,48 @@ declare global {
             text: string;
           };
         };
-        module_stat: {
-          comment: {
-            count: number;
+        module_stat: dynamicModuleStat;
+      };
+      type: "DYNAMIC_TYPE_DRAW" | "DYNAMIC_TYPE_WORD" | "DYNAMIC_TYPE_FORWARD";
+    }
+
+    export interface dynamicMusic {
+      id_str: string;
+      modules: {
+        module_author: dynamicModuleAuthor;
+        module_dynamic: {
+          major: {
+            music: {
+              cover: string;
+              id: number;
+              jump_url: string;
+              title: string;
+            };
           };
-          forward: {
-            count: number;
-          };
-          like: {
-            count: number;
+          desc: {
+            text: string;
           };
         };
+        module_stat: dynamicModuleStat;
       };
-      type: string;
-    };
+      type: "DYNAMIC_TYPE_MUSIC";
+    }
+
+    export interface dynamicLive {
+      id_str: string;
+      modules: {
+        module_author: dynamicModuleAuthor;
+        module_dynamic: {
+          major: {
+            live_rcmd: {
+              content: string;
+            };
+          };
+        };
+        module_stat: dynamicModuleStat;
+      };
+      type: "DYNAMIC_TYPE_LIVE_RCMD";
+    }
 
     export interface popularVideosResponse {
       code: number;
