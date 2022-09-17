@@ -4,7 +4,7 @@ import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
-import Preferences from "./interfaces/preferences";
+import { Preferences } from "./interfaces/preferences";
 
 dayjs.extend(relativeTime);
 
