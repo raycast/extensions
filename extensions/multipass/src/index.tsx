@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import mp from "multipass-control";
 
 function iconForState(state: string) {
@@ -72,7 +72,7 @@ export default function Command() {
           title={`${iconForState(image.state)}  ${image.name}`}
           actions={
             <ActionPanel>
-              {["Suspended", "Stopped"] && (
+              {["Suspended", "Stopped"].includes(image.state) && (
                 <Action
                   title="Start Instance"
                   icon={Icon.Play}
@@ -83,17 +83,16 @@ export default function Command() {
               )}
 
               {image.state == "Running" && (
-                <Action
-                  title="Stop Instance"
-                  icon={Icon.Stop}
-                  onAction={() => {
-                    primaryAction(image.name, image.state);
-                  }}
-                />
-              )}
-
-              {image.state == "Running" && (
-                <Action title="Suspend" icon={Icon.Power} onAction={() => secondaryAction(image.name, image.state)} />
+                <Fragment>
+                  <Action
+                    title="Stop Instance"
+                    icon={Icon.Stop}
+                    onAction={() => {
+                      primaryAction(image.name, image.state);
+                    }}
+                  />
+                  <Action title="Suspend" icon={Icon.Power} onAction={() => secondaryAction(image.name, image.state)} />
+                </Fragment>
               )}
             </ActionPanel>
           }
