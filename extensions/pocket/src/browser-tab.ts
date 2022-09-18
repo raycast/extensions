@@ -1,8 +1,9 @@
-import { Clipboard, open, Toast } from "@raycast/api";
+import { Toast, getPreferenceValues, Application, Clipboard, open } from "@raycast/api";
 import { createBookmark } from "./utils/api";
+import { getCurrentTab, isSupportedBrowser } from "./utils/browser";
 import { HTTPError } from "got";
 
-const urlRegex = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?/gi;
+const preferences = getPreferenceValues<{ browserApp?: Application }>();
 
 export default async function () {
   const toast = new Toast({
@@ -12,14 +13,22 @@ export default async function () {
 
   toast.show();
 
-  const url = await Clipboard.readText();
-  if (!url || !urlRegex.test(url)) {
+  if (!preferences.browserApp) {
     toast.style = Toast.Style.Failure;
-    toast.title = "Clipboard text is a URL";
-    toast.message = url;
+    toast.title = "Browser app is not set";
+    toast.message = "Configure a browser in the extension preferences";
     return;
   }
 
+  const browser = preferences.browserApp.bundleId;
+  if (!isSupportedBrowser(browser)) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Browser app not supported";
+    toast.message = `Cannot get the URL from ${preferences.browserApp.name}`;
+    return;
+  }
+
+  const url = await getCurrentTab(browser);
   toast.message = url;
 
   try {

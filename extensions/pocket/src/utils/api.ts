@@ -1,12 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import got from "got";
 import { Bookmark, ReadState } from "./types";
+import { uniq } from "lodash";
 
 const preferences = getPreferenceValues();
 const consumerKey = preferences.consumerKey;
 const accessToken = preferences.accessToken;
 
-const api = got.extend({
+export const api = got.extend({
   prefixUrl: "https://getpocket.com",
 });
 
@@ -16,8 +17,10 @@ interface RawBookmark {
   resolved_url: string;
   given_title: string;
   given_url: string;
+  status: "0" | "1" | "2";
   is_article: "0" | "1";
   has_video: "0" | "1" | "2";
+  has_image: "0" | "1" | "2";
   favorite: "0" | "1";
   tags?: Record<string, unknown>;
   authors?: Record<string, { name?: string }>;
@@ -32,6 +35,8 @@ interface SendActionRequest {
 interface FetchBookmarksRequest {
   state?: ReadState;
   count?: number;
+  tag?: number;
+  search?: string;
 }
 
 interface FetchBookmarksResponse {
@@ -48,7 +53,8 @@ function formatBookmark(bookmark: RawBookmark): Bookmark {
     title: bookmark.resolved_title || bookmark.given_title,
     originalUrl: bookmark.resolved_url || bookmark.given_url,
     pocketUrl: `https://getpocket.com/read/${bookmark.item_id}`,
-    type: bookmark.is_article === "0" ? "video" : "article",
+    archived: bookmark.status === "1",
+    type: bookmark.has_image === "2" ? "image" : bookmark.is_article === "0" ? "video" : "article",
     favorite: bookmark.favorite === "1",
     tags: bookmark.tags ? Object.keys(bookmark.tags) : [],
     author: bookmark.authors ? Object.values(bookmark.authors)[0]?.name : "",
@@ -65,7 +71,11 @@ export async function createBookmark({ url }: CreateBookmarkRequest) {
     },
   });
   const result = JSON.parse(response.body);
-  return formatBookmark(result.item);
+  return {
+    title: result.item.title,
+    url: result.item.resolved_url,
+    pocketUrl: `https://getpocket.com/read/${result.item.item_id}`,
+  };
 }
 
 export async function sendAction({ id, action }: SendActionRequest) {
@@ -84,18 +94,34 @@ export async function sendAction({ id, action }: SendActionRequest) {
   });
 }
 
-export async function fetchBookmarks({ state, count }: FetchBookmarksRequest): Promise<Array<Bookmark>> {
+export async function fetchBookmarks({ state, tag, search, count }: FetchBookmarksRequest): Promise<Array<Bookmark>> {
   const response = await api.post("v3/get", {
     json: {
       consumer_key: consumerKey,
       access_token: accessToken,
       detailType: "complete",
       sort: "newest",
-      count,
+      count: count ?? 50,
+      tag,
       state,
+      search,
     },
   });
   const result = JSON.parse(response.body) as FetchBookmarksResponse;
   const bookmarks: Array<Bookmark> = Object.values(result.list).map(formatBookmark);
   return bookmarks.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+}
+
+export async function fetchTags() {
+  const response = await api.post("v3/get", {
+    json: {
+      consumer_key: consumerKey,
+      access_token: accessToken,
+      detailType: "complete",
+    },
+  });
+  const bookmarks: Array<Bookmark> = Object.values(JSON.parse(response.body).list);
+  const tags = bookmarks.flatMap((bookmark) => (bookmark.tags ? Object.keys(bookmark.tags) : []));
+  console.log(uniq(tags));
+  return uniq(tags);
 }

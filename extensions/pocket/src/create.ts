@@ -4,7 +4,11 @@ import { HTTPError } from "got";
 
 const urlRegex = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?/gi;
 
-export default async function () {
+interface CreateArguments {
+  url: string;
+}
+
+export default async function (props: { arguments: CreateArguments }) {
   const toast = new Toast({
     title: "Creating bookmark",
     style: Toast.Style.Animated,
@@ -12,7 +16,7 @@ export default async function () {
 
   toast.show();
 
-  const url = await Clipboard.readText();
+  const url = props.arguments.url;
   if (!url || !urlRegex.test(url)) {
     toast.style = Toast.Style.Failure;
     toast.title = "Clipboard text is a URL";
