@@ -3,6 +3,7 @@ import { fetchBookmarks, fetchTags, sendAction } from "./api";
 import { ReadState } from "./types";
 import { showToast, Toast } from "@raycast/api";
 import { HTTPError } from "got";
+import { capitalize } from "lodash";
 
 interface UseBookmarksOptions {
   state: ReadState;
@@ -11,10 +12,10 @@ interface UseBookmarksOptions {
   tag?: string;
 }
 
-export function useBookmarks({ state, tag, search, count }: UseBookmarksOptions) {
+export function useBookmarks({ state, tag: selectedTag, search, count }: UseBookmarksOptions) {
   const { data, isLoading, mutate, revalidate } = useCachedPromise(
     async (url, options) => fetchBookmarks(options),
-    ["v3/get", { state, tag, count, search }],
+    ["v3/get", { state, tag: selectedTag, count, search }],
     {
       initialData: [],
       keepPreviousData: true,
@@ -102,6 +103,42 @@ export function useBookmarks({ state, tag, search, count }: UseBookmarksOptions)
     toast.message = bookmark?.title;
   }
 
+  async function addTag(id: string, tag: string) {
+    const toast = new Toast({
+      title: "Tagging bookmark",
+      message: capitalize(tag),
+      style: Toast.Style.Animated,
+    });
+    toast.show();
+    await mutate(sendAction({ id, action: "tags_add", tags: tag }), {
+      optimisticUpdate: (bookmarks) => {
+        return bookmarks.map((b) => (b.id === id ? { ...b, tags: [...b.tags, tag] } : b));
+      },
+    });
+    toast.title = "Tag added correctly";
+    toast.style = Toast.Style.Success;
+  }
+
+  async function removeTag(id: string, tag: string) {
+    const toast = new Toast({
+      title: "Removing tag",
+      message: capitalize(tag),
+      style: Toast.Style.Animated,
+    });
+    toast.show();
+    await mutate(sendAction({ id, action: "tags_remove", tags: tag }), {
+      optimisticUpdate: (bookmarks) => {
+        if (selectedTag === tag) {
+          return bookmarks.filter((b) => b.id !== id);
+        } else {
+          return bookmarks.map((b) => (b.id === id ? { ...b, tags: b.tags.filter((t) => t !== tag) } : b));
+        }
+      },
+    });
+    toast.title = "Tag removed correctly";
+    toast.style = Toast.Style.Success;
+  }
+
   return {
     bookmarks: data || [],
     loading: isLoading,
@@ -110,6 +147,8 @@ export function useBookmarks({ state, tag, search, count }: UseBookmarksOptions)
     deleteBookmark,
     archiveBookmark,
     reAddBookmark,
+    addTag,
+    removeTag,
   };
 }
 

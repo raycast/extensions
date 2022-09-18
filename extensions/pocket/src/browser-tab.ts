@@ -33,9 +33,10 @@ export default async function () {
 
   try {
     const bookmark = await createBookmark({ url });
+    console.log(bookmark);
     toast.style = Toast.Style.Success;
     toast.title = "Bookmark created";
-    toast.message = bookmark.url;
+    toast.message = bookmark.title ?? bookmark.url;
     toast.primaryAction = {
       title: "Open in Pocket",
       shortcut: { modifiers: ["cmd", "shift"], key: "o" },

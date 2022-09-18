@@ -30,6 +30,8 @@ interface RawBookmark {
 interface SendActionRequest {
   id: string;
   action: string;
+
+  [key: string]: string;
 }
 
 interface FetchBookmarksRequest {
@@ -44,6 +46,8 @@ interface FetchBookmarksResponse {
 }
 
 interface CreateBookmarkRequest {
+  title?: string;
+  tags?: string[];
   url: string;
 }
 
@@ -62,12 +66,14 @@ function formatBookmark(bookmark: RawBookmark): Bookmark {
   };
 }
 
-export async function createBookmark({ url }: CreateBookmarkRequest) {
+export async function createBookmark({ url, title, tags = [] }: CreateBookmarkRequest) {
   const response = await api.post("v3/add", {
     json: {
       consumer_key: consumerKey,
       access_token: accessToken,
       url: encodeURI(url),
+      title,
+      tags: tags.join(","),
     },
   });
   const result = JSON.parse(response.body);
@@ -78,13 +84,14 @@ export async function createBookmark({ url }: CreateBookmarkRequest) {
   };
 }
 
-export async function sendAction({ id, action }: SendActionRequest) {
+export async function sendAction({ id, action, ...other }: SendActionRequest) {
   await api.post("v3/send", {
     json: {
       consumer_key: consumerKey,
       access_token: accessToken,
       actions: [
         {
+          ...other,
           action,
           item_id: id,
           time: Math.floor(new Date().getTime() / 1000),
@@ -122,6 +129,5 @@ export async function fetchTags() {
   });
   const bookmarks: Array<Bookmark> = Object.values(JSON.parse(response.body).list);
   const tags = bookmarks.flatMap((bookmark) => (bookmark.tags ? Object.keys(bookmark.tags) : []));
-  console.log(uniq(tags));
   return uniq(tags);
 }

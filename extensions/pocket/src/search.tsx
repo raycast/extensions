@@ -2,8 +2,8 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, getPreferenceValues, I
 import { useBookmarks, useTags } from "./utils/hooks";
 import { useState } from "react";
 import { ReadState } from "./utils/types";
+import { capitalize, remove } from "lodash";
 import ActionStyle = Alert.ActionStyle;
-import { capitalize } from "lodash";
 
 const preferences = getPreferenceValues();
 
@@ -16,12 +16,21 @@ export default function Search(props: { arguments: SearchArguments }) {
   const [tag, setTag] = useState<string>();
   const [search, setSearch] = useState(props.arguments.title);
   const tags = useTags();
-  const { bookmarks, loading, toggleFavorite, refreshBookmarks, reAddBookmark, archiveBookmark, deleteBookmark } =
-    useBookmarks({
-      search,
-      tag,
-      state: readState,
-    });
+  const {
+    bookmarks,
+    addTag,
+    removeTag,
+    loading,
+    toggleFavorite,
+    refreshBookmarks,
+    reAddBookmark,
+    archiveBookmark,
+    deleteBookmark,
+  } = useBookmarks({
+    search,
+    tag,
+    state: readState,
+  });
 
   return (
     <List
@@ -106,7 +115,8 @@ export default function Search(props: { arguments: SearchArguments }) {
                 />
                 <Action
                   title="Delete Bookmark"
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  style={Action.Style.Destructive}
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   onAction={() => {
                     return confirmAlert({
@@ -161,6 +171,30 @@ export default function Search(props: { arguments: SearchArguments }) {
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={() => refreshBookmarks()}
                 />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <ActionPanel.Submenu icon={Icon.Tag} title="Add Tag">
+                  {tags
+                    .filter((tag) => !bookmark.tags.includes(tag))
+                    .map((tag) => (
+                      <Action
+                        key={tag}
+                        title={capitalize(tag)}
+                        icon={Icon.Tag}
+                        onAction={() => addTag(bookmark.id, tag)}
+                      />
+                    ))}
+                </ActionPanel.Submenu>
+                <ActionPanel.Submenu icon={Icon.Tag} title="Remove Tag">
+                  {bookmark.tags.map((tag) => (
+                    <Action
+                      key={tag}
+                      title={capitalize(tag)}
+                      icon={Icon.Tag}
+                      onAction={() => removeTag(bookmark.id, tag)}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
               </ActionPanel.Section>
             </ActionPanel>
           }
