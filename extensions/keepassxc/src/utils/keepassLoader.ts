@@ -1,4 +1,4 @@
-import { copyTextToClipboard, pasteText, getPreferenceValues, showHUD, clearClipboard } from "@raycast/api";
+import { copyTextToClipboard, pasteText, getPreferenceValues, showHUD, clearClipboard, Clipboard } from "@raycast/api";
 import path from "path";
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import child_process from "child_process";
@@ -45,7 +45,14 @@ const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
     .map((f: string) => f.trim())
-    .filter((f: string) => f !== undefined && !f.startsWith("/回收站") && !f.startsWith("/Trash") && !f.startsWith("/Deprecated") && f.length > 0)
+    .filter(
+      (f: string) =>
+        f !== undefined &&
+        !f.startsWith("/回收站") &&
+        !f.startsWith("/Trash") &&
+        !f.startsWith("/Deprecated") &&
+        f.length > 0
+    )
     .sort();
 };
 /**
@@ -74,7 +81,9 @@ const loadEntries = () =>
   );
 
 const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
-  if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
+  if (data.toString().indexOf("no TOTP set up")) {
+    return showHUD("No OTP setup");
+  } else if (data.toString().indexOf("Enter password to unlock") != -1 || data.toString().trim().length == 0) {
     return;
   }
   reject(new Error(data.toString()));
@@ -116,7 +125,7 @@ const getUsername = (entry: string) =>
     });
   });
 
-  const getOTP = (entry: string) =>
+const getOTP = (entry: string) =>
   new Promise<string>((resolve, reject) => {
     const cli = spawn(`${keepassxcCli}`, ["show", "-t", `${database}`, `${entry}`]);
     cli.stdin.write(`${dbPassword}\n`);
@@ -136,8 +145,9 @@ const getUsername = (entry: string) =>
 
 const copyAndPastePassword = async (entry: string) => {
   console.log("copy and password of entry:", entry);
-  return copyPassword(entry).then((password) => {
-    return pasteText(password).then(() => password);
+  return getPassword(entry).then((password) => {
+    // return pasteText(password).then(() => password);
+    return Clipboard.paste(password).then(() => password);
   });
 };
 
@@ -148,39 +158,48 @@ const copyPassword = async (entry: string) =>
   });
 
 const copyAndPasteUsername = async (entry: string) => {
-  return copyUsername(entry).then((username) => {
-    return pasteText(username).then(() => username);
+  return getUsername(entry).then((username) => {
+    return Clipboard.paste(username).then(() => username);
   });
 };
 
 const copyUsername = async (entry: string) =>
   getOTP(entry).then((username) => {
     showHUD("Username has been Copied to Clipboard");
-    return copyTextToClipboard(username).then(() => username);
+    return Clipboard.copy(username).then(() => username);
   });
 
-  const copyOTP = async (entry: string) =>
+const copyOTP = async (entry: string) =>
   getOTP(entry).then((otp) => {
     showHUD("OTP has been Copied to Clipboard");
     return protectedCopy(otp).then(() => otp);
   });
 
-  export async function protectedCopy(concealString: string) {
-    // await closeMainWindow();
-    const script = `
+export async function protectedCopy(concealString: string) {
+  // await closeMainWindow();
+  const script = `
       use framework "Foundation"
       set type to current application's NSPasteboardTypeString
       set pb to current application's NSPasteboard's generalPasteboard()
       pb's clearContents()
       pb's setString:"" forType:"org.nspasteboard.ConcealedType"
       pb's setString:"${concealString}" forType:type
-    `
-    try {
-      await runAppleScript(script);
-    } catch {
-      // Applescript failed to conceal what is being placed in the pasteboard
-      await showHUD("Protect copy failed...");
-    }
+    `;
+  try {
+    await runAppleScript(script);
+  } catch {
+    // Applescript failed to conceal what is being placed in the pasteboard
+    await showHUD("Protect copy failed...");
   }
-  
-export { loadEntries, copyAndPastePassword, getPassword, copyPassword, copyUsername, copyAndPasteUsername, getOTP, copyOTP };
+}
+
+export {
+  loadEntries,
+  copyAndPastePassword,
+  getPassword,
+  copyPassword,
+  copyUsername,
+  copyAndPasteUsername,
+  getOTP,
+  copyOTP,
+};
