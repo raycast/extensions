@@ -9,7 +9,6 @@ Search is powered by this public repo: https://github.com/KevinBatdorf/steam-api
 Source repo: https://github.com/KevinBatdorf/steam-raycast
 
 Notes:
-
 - While rare, you may hit the Steam API rate limit. If that's the case, just wait a few moments and try again.
 - Sometimes the Steam API sends a random language. There doesn't seem to be any logic to this. Just press escape and try again.
 - Sometimes games are removed from Steam yet still show in the API. To avoid extra network costs, the extension will just provide feedback that the game no longer exists.
