@@ -9,7 +9,7 @@ export default function Command() {
   if (!checkLogin()) return <NoLoginView />;
 
   const [pn, setPn] = useState(1);
-  const countList: string[] = [];
+  const [countSet, setCountSet] = useState(new Set<string | undefined>([]));
 
   const { popularVideos, isLoading } = usePopularVideos(pn);
 
@@ -19,9 +19,9 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
-        if (!countList.includes(id || "")) countList.push(id || "");
+        setCountSet(countSet.add(id));
 
-        if (countList.length % 20 === 0) setPn(pn + 1);
+        if (countSet.size % 20 === 0) setPn(pn + 1);
       }}
     >
       {popularVideos?.map((item) => (

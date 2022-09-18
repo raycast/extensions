@@ -1,4 +1,4 @@
-import { getDynamicFeed } from "../utils/getDynamicFeed";
+import { getDynamicFeed } from "../utils";
 
 import { useEffect, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
