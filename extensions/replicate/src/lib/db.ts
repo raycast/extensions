@@ -49,8 +49,8 @@ export const populateDbFromApi = async (db: Database, cursor: string | undefined
     const { id, urls, input, output, status } = prediction;
     if (status !== "succeeded") continue;
 
-    //   Output might have multiple urls
-    for (const [index, url] of output.entries()) {
+    //   Output might have multiple images
+    for (const [index, src] of output.entries()) {
       const theId = `${id}-${index}`;
       const select = db.prepare(`SELECT * FROM Prediction WHERE id =:id`);
       const res = select.getAsObject({ ":id": theId });
@@ -60,7 +60,7 @@ export const populateDbFromApi = async (db: Database, cursor: string | undefined
       }
       db.run("INSERT INTO Prediction (id, src, url, prompt) VALUES (?, ?, ?, ?)", [
         theId,
-        url,
+        src,
         urls?.get,
         input?.prompt ?? null,
       ]);
