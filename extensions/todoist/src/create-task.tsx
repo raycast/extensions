@@ -1,18 +1,35 @@
 import { useState, useRef } from "react";
 import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
-import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import useSWR, { mutate } from "swr";
+import { AddTaskArgs, getColor, Task } from "@doist/todoist-api-typescript";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers";
-import { SWRKeys } from "./types";
 import TaskDetail from "./components/TaskDetail";
 
-export default function CreateTask({ fromProjectId }: { fromProjectId?: number }) {
-  const { push } = useNavigation();
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+type CreateTaskProps = {
+  fromProjectId?: number;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+};
+
+export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskProps) {
+  const { push, pop } = useNavigation();
+
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+  const {
+    data: sections,
+    isLoading: isLoadingSections,
+    error: getSectionsError,
+  } = useCachedPromise(() => todoist.getSections());
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
 
   if (getProjectsError) {
     handleError({ error: getProjectsError, title: "Unable to get projects" });
@@ -25,8 +42,6 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
   if (getLabelsError) {
     handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
-
-  const isLoading = !projects || !labels;
 
   const lowestPriority = priorities[priorities.length - 1];
 
@@ -103,8 +118,9 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
         onAction: () => open(url),
       };
 
-      if (fromProjectId) {
-        mutate(SWRKeys.tasks);
+      if (fromProjectId && mutateTasks) {
+        mutateTasks();
+        pop();
       }
 
       clear();
@@ -118,7 +134,7 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoadingProjects || isLoadingSections || isLoadingLabels}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
@@ -165,8 +181,13 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
 
       {projects && projects.length > 0 ? (
         <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
-          {projects.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+          {projects.map(({ id, name, color, inboxProject }) => (
+            <Form.Dropdown.Item
+              key={id}
+              value={String(id)}
+              icon={inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(color).value }}
+              title={name}
+            />
           ))}
         </Form.Dropdown>
       ) : null}
@@ -175,15 +196,20 @@ export default function CreateTask({ fromProjectId }: { fromProjectId?: number }
         <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
           <Form.Dropdown.Item value="" title="No section" />
           {projectSections.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+            <Form.Dropdown.Item key={id} value={String(id)} title={name} />
           ))}
         </Form.Dropdown>
       ) : null}
 
       {labels && labels.length > 0 ? (
         <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
-          {labels.map(({ id, name }) => (
-            <Form.TagPicker.Item value={String(id)} title={name} key={id} />
+          {labels.map(({ id, name, color }) => (
+            <Form.TagPicker.Item
+              key={id}
+              value={String(id)}
+              title={name}
+              icon={{ source: Icon.Tag, tintColor: getColor(color).value }}
+            />
           ))}
         </Form.TagPicker>
       ) : null}

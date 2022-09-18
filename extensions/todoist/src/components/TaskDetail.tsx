@@ -1,30 +1,41 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
-import useSWR from "swr";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { displayDueDate } from "../helpers";
 import { priorities } from "../constants";
-import { SWRKeys } from "../types";
 import { todoist, handleError } from "../api";
 import TaskCommentForm from "./TaskCommentForm";
 import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
   taskId: Task["id"];
+  mutateTasks?: MutatePromise<Task[] | undefined>;
 }
 
-export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
-  const { data: task, error: getTaskError } = useSWR([SWRKeys.task, taskId], () => todoist.getTask(taskId));
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
-  const { data: comments, error: getCommentsError } = useSWR(
-    () => (task?.id ? SWRKeys.comments : null),
-    () => {
-      if (task?.id) {
-        return todoist.getComments({ taskId: task?.id });
-      }
-    }
-  );
+export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JSX.Element {
+  const {
+    data: task,
+    isLoading: isLoadingTask,
+    error: getTaskError,
+    mutate: mutateTaskDetail,
+  } = useCachedPromise((taskId) => todoist.getTask(taskId), [taskId]);
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
+  const {
+    data: comments,
+    isLoading: isLoadingComments,
+    error: getCommentsError,
+    mutate: mutateComments,
+  } = useCachedPromise((taskId) => todoist.getComments({ taskId }), [task?.id], { execute: !!task?.id });
 
   if (getTaskError) {
     handleError({ error: getTaskError, title: "Unable to get task detail" });
@@ -62,7 +73,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
 
   return (
     <Detail
-      isLoading={!task && !getTaskError}
+      isLoading={isLoadingTask || isLoadingProjects || isLoadingLabels || isLoadingComments}
       {...(task
         ? {
             markdown: `# ${task?.content}\n\n${task?.description}`,
@@ -107,9 +118,18 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
             ),
             actions: (
               <ActionPanel>
-                <TaskActions task={task} fromDetail={true} />
+                <TaskActions
+                  task={task}
+                  fromDetail={true}
+                  mutateTasks={mutateTasks}
+                  mutateTaskDetail={mutateTaskDetail}
+                />
 
-                <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
+                <Action.Push
+                  title="Add New Comment"
+                  icon={Icon.Plus}
+                  target={<TaskCommentForm task={task} mutateComments={mutateComments} />}
+                />
               </ActionPanel>
             ),
           }

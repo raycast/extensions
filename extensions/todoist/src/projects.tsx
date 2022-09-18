@@ -1,13 +1,12 @@
 import { getColor, Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
-import useSWR, { mutate } from "swr";
+import { useCachedPromise } from "@raycast/utils";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
-import { SWRKeys } from "./types";
 
 export default function Projects() {
-  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data, error, isLoading, mutate } = useCachedPromise(() => todoist.getProjects());
 
   if (error) {
     handleError({ error, title: "Unable to get projects" });
@@ -27,7 +26,8 @@ export default function Projects() {
         style: Toast.Style.Success,
         title: project.favorite ? "Removed from favorites" : "Added to favorites",
       });
-      mutate(SWRKeys.projects);
+
+      mutate();
     } catch (error) {
       console.log(error);
       handleError({
@@ -50,16 +50,15 @@ export default function Projects() {
       try {
         await todoist.deleteProject(id);
         await showToast({ style: Toast.Style.Success, title: "Project deleted" });
-        mutate(SWRKeys.projects);
+        mutate();
       } catch (error) {
         handleError({ error, title: "Unable to delete project" });
       }
-      mutate(SWRKeys.projects);
     }
   }
 
   return (
-    <List searchBarPlaceholder="Filter projects by name..." isLoading={!data && !error}>
+    <List searchBarPlaceholder="Filter projects by name..." isLoading={isLoading}>
       {projects.map((project) => (
         <List.Item
           key={project.id}
@@ -76,7 +75,7 @@ export default function Projects() {
                     title="Edit Project"
                     icon={Icon.Pencil}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<ProjectForm project={project} />}
+                    target={<ProjectForm project={project} mutate={mutate} />}
                   />
 
                   <Action

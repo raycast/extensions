@@ -1,8 +1,7 @@
 import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, Color } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import { mutate } from "swr";
-import { SWRKeys } from "../types";
 import { getAPIDate, getToday } from "../helpers";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
@@ -19,10 +18,31 @@ const schedules = [
 interface TaskActionsProps {
   task: Task;
   fromDetail?: boolean;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+  mutateTaskDetail?: MutatePromise<Task | undefined>;
 }
 
-export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX.Element {
+export default function TaskActions({
+  task,
+  fromDetail,
+  mutateTasks,
+  mutateTaskDetail,
+}: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
+
+  async function mutate({ withPop = false } = {}) {
+    if (mutateTasks) {
+      await mutateTasks();
+    }
+
+    if (mutateTaskDetail) {
+      await mutateTaskDetail();
+    }
+
+    if (fromDetail && withPop) {
+      pop();
+    }
+  }
 
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
@@ -30,12 +50,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
     try {
       await todoist.closeTask(task.id);
       await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
-      mutate(SWRKeys.tasks);
-
-      if (fromDetail) {
-        mutate([SWRKeys.task, task.id]);
-        pop();
-      }
+      mutate({ withPop: true });
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
     }
@@ -47,11 +62,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
     try {
       await todoist.updateTask(task.id, payload);
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
-      mutate(SWRKeys.tasks);
-
-      if (fromDetail) {
-        mutate([SWRKeys.task, task.id]);
-      }
+      mutate();
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
     }
@@ -71,12 +82,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
         await todoist.deleteTask(task.id);
         await showToast({ style: Toast.Style.Success, title: "Task deleted" });
 
-        mutate(SWRKeys.tasks);
-
-        if (fromDetail) {
-          mutate([SWRKeys.task, task.id]);
-          pop();
-        }
+        mutate({ withPop: true });
       } catch (error) {
         handleError({ error, title: "Unable to delete task" });
       }
@@ -92,7 +98,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
           title="Edit Task"
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
-          target={<TaskEdit task={task} />}
+          target={<TaskEdit task={task} mutateTasks={mutateTasks} mutateTaskDetail={mutateTaskDetail} />}
         />
 
         <Action

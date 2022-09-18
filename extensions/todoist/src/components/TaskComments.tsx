@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { Comment, Task } from "@doist/todoist-api-typescript";
+import { useCachedPromise } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
-import useSWR, { mutate } from "swr";
 import TaskCommentForm from "./TaskCommentForm";
 import { todoist, handleError } from "../api";
-import { SWRKeys } from "../types";
 import removeMarkdown from "remove-markdown";
 
 interface TaskCommentsProps {
@@ -12,18 +11,21 @@ interface TaskCommentsProps {
 }
 
 export default function TaskComments({ task }: TaskCommentsProps) {
-  const { data: comments, error: getCommentsError } = useSWR(SWRKeys.comments, () =>
-    todoist.getComments({ taskId: task.id })
-  );
+  const {
+    data,
+    isLoading,
+    error,
+    mutate: mutateComments,
+  } = useCachedPromise((taskId) => todoist.getComments({ taskId }), [task.id]);
 
-  if (getCommentsError) {
-    handleError({ error: getCommentsError, title: "Unable to get comments" });
+  if (error) {
+    handleError({ error, title: "Unable to get comments" });
   }
 
   async function deleteComment(comment: Comment) {
     if (
       await confirmAlert({
-        title: "Delete Project",
+        title: "Delete Comment",
         message: "Are you sure you want to delete this comment?",
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
@@ -32,8 +34,8 @@ export default function TaskComments({ task }: TaskCommentsProps) {
 
       try {
         await todoist.deleteComment(comment.id);
+        mutateComments();
         await showToast({ style: Toast.Style.Success, title: "Comment deleted" });
-        mutate(SWRKeys.comments);
       } catch (error) {
         handleError({ error, title: "Unable to delete comment" });
       }
@@ -41,8 +43,8 @@ export default function TaskComments({ task }: TaskCommentsProps) {
   }
 
   return (
-    <List isShowingDetail isLoading={!comments && !getCommentsError}>
-      {comments?.map((comment, index) => (
+    <List isShowingDetail isLoading={isLoading}>
+      {data?.map((comment, index) => (
         <List.Item
           key={comment.id}
           keywords={removeMarkdown(comment.content).split(" ")}
@@ -54,10 +56,14 @@ export default function TaskComments({ task }: TaskCommentsProps) {
               <Action.Push
                 title="Edit Comment"
                 icon={Icon.Pencil}
-                target={<TaskCommentForm task={task} comment={comment} />}
+                target={<TaskCommentForm task={task} comment={comment} mutateComments={mutateComments} />}
               />
 
-              <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
+              <Action.Push
+                title="Add New Comment"
+                icon={Icon.Plus}
+                target={<TaskCommentForm task={task} mutateComments={mutateComments} />}
+              />
 
               <Action
                 title="Delete Comment"

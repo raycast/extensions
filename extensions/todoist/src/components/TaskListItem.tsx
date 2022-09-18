@@ -1,4 +1,5 @@
 import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
@@ -13,9 +14,10 @@ interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
   projects?: Project[];
+  mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
+export default function TaskListItem({ task, mode, projects, mutateTasks }: TaskListItemProps): JSX.Element {
   const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[]; accessories: List.Item.Accessory[] } =
     { keywords: [], accessories: [] };
 
@@ -71,9 +73,13 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<TaskDetail taskId={task.id} />} icon={Icon.Sidebar} />
+          <Action.Push
+            title="Show Details"
+            target={<TaskDetail taskId={task.id} mutateTasks={mutateTasks} />}
+            icon={Icon.Sidebar}
+          />
 
-          <TaskActions task={task} />
+          <TaskActions task={task} mutateTasks={mutateTasks} />
 
           {mode === ViewMode.project ? (
             <Action.Push

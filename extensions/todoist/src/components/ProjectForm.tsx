@@ -1,15 +1,15 @@
 import { useState, useRef } from "react";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { AddProjectArgs, colors, Project } from "@doist/todoist-api-typescript";
-import useSWR, { mutate } from "swr";
-import { SWRKeys } from "../types";
 import { handleError, todoist } from "../api";
 
 interface ProjectFormProps {
   project?: Project;
+  mutate?: MutatePromise<Project[] | undefined>;
 }
 
-export default function ProjectForm({ project }: ProjectFormProps) {
+export default function ProjectForm({ project, mutate }: ProjectFormProps) {
   const { pop } = useNavigation();
 
   const [name, setName] = useState(project ? project.name : "");
@@ -20,7 +20,7 @@ export default function ProjectForm({ project }: ProjectFormProps) {
   const titleField = useRef<Form.TextField>(null);
   const isCreatingProject = !project;
 
-  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data, error, isLoading } = useCachedPromise(() => todoist.getProjects());
 
   if (error) {
     handleError({ error, title: "Unable to get projects" });
@@ -56,7 +56,9 @@ export default function ProjectForm({ project }: ProjectFormProps) {
     try {
       await todoist.updateProject(project.id, body);
       await showToast({ style: Toast.Style.Success, title: "Project updated" });
-      mutate(SWRKeys.projects);
+      if (mutate) {
+        mutate();
+      }
       pop();
     } catch (error) {
       handleError({ error, title: "Unable to create project" });
@@ -109,7 +111,7 @@ export default function ProjectForm({ project }: ProjectFormProps) {
           />
         </ActionPanel>
       }
-      isLoading={!data && !error}
+      isLoading={isLoading}
     >
       <Form.TextField
         id="name"
