@@ -7,6 +7,6 @@ Removed screenshot duplication in README
 
 Fixed path of the used images in README
 
-## [Added Steam] - 2022-05-30
+## [Added Steam] - 2022-06-18
 
 Initial version code
