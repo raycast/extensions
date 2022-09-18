@@ -41,19 +41,28 @@ export const validateUserConfigGraphPath = () => {
   return validateFolderPath(getUserConfiguredGraphPath());
 };
 
-const parseJournalFileNameFromLogseqConfig = () => {
+const parseLogseqConfig = () => {
   const logseqConfigPath = path.join(getUserConfiguredGraphPath(), "/logseq/config.edn");
   return (
     fs.promises
       .readFile(logseqConfigPath, { encoding: "utf8" })
       .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((v: any) => ({
-        fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
-        journalsDirectory: v["journals-directory"] || "journals",
-        dateFormat: (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase(),
-      }))
   );
+};
+
+export const getPreferredFormat = () => {
+  return parseLogseqConfig()
+    .then((v: any) => v["preferred-format"])
+};
+
+const parseJournalFileNameFromLogseqConfig = () => {
+  return parseLogseqConfig()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .then((v: any) => ({
+      fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
+      journalsDirectory: v["journals-directory"] || "journals",
+      dateFormat: (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase(),
+    }));
 };
 
 const buildJournalPath = (graphPath: string) => {
