@@ -102,7 +102,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string): Promise<SearchResult[]> {
-  const fileType = await getPreferredFormat().then(fileFormat => `.${fileFormat}`)
+  const fileType = await getPreferredFormat().then((fileFormat) => `.${fileFormat}`);
   const finalSearchResults: SearchResult[] = [];
   await getFilesInDir(getUserConfiguredGraphPath() + "/pages").then((result) => {
     if (getPreferenceValues().smartSearch == true && searchText.length > 0) {
