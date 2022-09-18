@@ -61,23 +61,23 @@ export default function Command() {
                 title="Paste"
                 icon={Icon.TextDocument}
                 onAction={() => {
-                  copyAndPastePassword(entry).then(() => closeMainWindow());
+                  copyAndPastePassword(entry).then(() => closeMainWindow().catch(errorHandler));
                 }}
               />
               <ActionPanel.Item
                 title="Copy Password"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                 onAction={() => {
-                  copyPassword(entry).then(() => closeMainWindow());
+                  copyPassword(entry).then(() => closeMainWindow().catch(errorHandler));
                 }}
               />
               <ActionPanel.Item
                 title="Copy Username"
                 icon={Icon.Clipboard}
-                shortcut={{ modifiers: ["cmd"], key: "b" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 onAction={() => {
-                  copyUsername(entry).then(() => closeMainWindow());
+                  copyUsername(entry).then(() => closeMainWindow().catch(errorHandler));
                 }}
               />
               <ActionPanel.Item
@@ -86,7 +86,7 @@ export default function Command() {
                 shortcut={{ modifiers: ["control", "cmd"], key: "c" }}
                 onAction={() => {
                   // copyOTP(entry).then(() => closeMainWindow());
-                  copyOTP(entry).then(() => closeMainWindow());
+                  copyOTP(entry).then(() => closeMainWindow().catch(errorHandler));
                 }}
               />
             </ActionPanel>
@@ -95,22 +95,4 @@ export default function Command() {
       ))}
     </List>
   );
-}
-
-export async function protectedCopy(concealString: string) {
-  // await closeMainWindow();
-  const script = `
-    use framework "Foundation"
-    set type to current application's NSPasteboardTypeString
-	  set pb to current application's NSPasteboard's generalPasteboard()
-    pb's clearContents()
-	  pb's setString:"" forType:"org.nspasteboard.ConcealedType"
-    pb's setString:"${concealString}" forType:type
-  `
-  try {
-    await runAppleScript(script);
-  } catch {
-    // Applescript failed to conceal what is being placed in the pasteboard
-    await showHUD("Protect copy failed...");
-  }
 }
