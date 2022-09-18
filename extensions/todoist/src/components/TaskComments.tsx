@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
 import { Comment, Task } from "@doist/todoist-api-typescript";
 import { formatDistanceToNow } from "date-fns";
 import useSWR, { mutate } from "swr";
@@ -21,7 +21,13 @@ export default function TaskComments({ task }: TaskCommentsProps) {
   }
 
   async function deleteComment(comment: Comment) {
-    if (await confirmAlert({ title: "Are you sure you want to delete this comment?" })) {
+    if (
+      await confirmAlert({
+        title: "Delete Project",
+        message: "Are you sure you want to delete this comment?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
       await showToast({ style: Toast.Style.Animated, title: "Deleting comment" });
 
       try {

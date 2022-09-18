@@ -38,7 +38,13 @@ export default function Projects() {
   }
 
   async function deleteProject(id: number) {
-    if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
+    if (
+      await confirmAlert({
+        title: "Delete Project",
+        message: "Are you sure you want to delete this project?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
       await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
       try {
@@ -83,6 +89,7 @@ export default function Projects() {
                   <Action
                     title="Delete Project"
                     icon={Icon.Trash}
+                    style={Action.Style.Destructive}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => deleteProject(project.id)}
                   />

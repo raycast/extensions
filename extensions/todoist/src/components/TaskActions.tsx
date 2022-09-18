@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation } from "@raycast/api";
+import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, Color } from "@raycast/api";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
@@ -58,7 +58,13 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
   }
 
   async function deleteTask(task: Task) {
-    if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
+    if (
+      await confirmAlert({
+        title: "Delete Task",
+        message: "Are you sure you want to delete this task?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
       await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
 
       try {
@@ -130,6 +136,7 @@ export default function TaskActions({ task, fromDetail }: TaskActionsProps): JSX
           id="deleteTask"
           title="Delete Task"
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={() => deleteTask(task)}
         />
