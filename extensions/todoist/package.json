@@ -15,7 +15,35 @@
       "title": "Today Tasks",
       "subtitle": "Todoist",
       "description": "See your Todoist tasks due today.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "todayGroupBy",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Project",
+              "value": "project"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Label",
+              "value": "label"
+            }
+          ],
+          "default": "default",
+          "required": false,
+          "title": "Today's Group By Options",
+          "description": "Indicates how you want to group your tasks in the Today view."
+        }
+      ]
     },
     {
       "name": "upcoming",
@@ -43,7 +71,35 @@
       "title": "Search Projects",
       "subtitle": "Todoist",
       "description": "See your Todoist projects and tasks by project.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "projectGroupBy",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Date",
+              "value": "date"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Label",
+              "value": "label"
+            }
+          ],
+          "default": "default",
+          "required": false,
+          "title": "Project's Group By Options",
+          "description": "Indicates how you want to group your tasks in the Project view."
+        }
+      ]
     },
     {
       "name": "create-project",
@@ -61,58 +117,6 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
-    },
-    {
-      "name": "todayGroupBy",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Default",
-          "value": "default"
-        },
-        {
-          "title": "Project",
-          "value": "project"
-        },
-        {
-          "title": "Priority",
-          "value": "priority"
-        },
-        {
-          "title": "Label",
-          "value": "label"
-        }
-      ],
-      "default": "default",
-      "required": false,
-      "title": "Today's Group By Options",
-      "description": "Indicates how you want to group your tasks in the Today view."
-    },
-    {
-      "name": "projectGroupBy",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Default",
-          "value": "default"
-        },
-        {
-          "title": "Date",
-          "value": "date"
-        },
-        {
-          "title": "Priority",
-          "value": "priority"
-        },
-        {
-          "title": "Label",
-          "value": "label"
-        }
-      ],
-      "default": "default",
-      "required": false,
-      "title": "Project's Group By Options",
-      "description": "Indicates how you want to group your tasks in the Project view."
     }
   ],
   "dependencies": {
