@@ -21,7 +21,6 @@ To run the dev build, you can:
 3. In Raycast, add the repo via "Add script directory" option on the Extensions
    tab (look for the +)
 4. Open an issue here if you get stuck and I'll try to help.
-5.
 
 ## Features
 
