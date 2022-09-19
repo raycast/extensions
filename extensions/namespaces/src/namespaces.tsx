@@ -109,7 +109,7 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
               key={icon}
               title={icon}
               value={icon}
-              icon={{ source: utils.iconMap[icon], tintColor: "#fff" }}
+              icon={{ source: utils.iconMap[icon], tintColor: { light: "#000", dark: "#fff" } }}
             />
           );
         })}
