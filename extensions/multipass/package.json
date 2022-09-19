@@ -3,7 +3,7 @@
   "name": "multipass",
   "title": "Multipass",
   "description": "Manage multipass instances",
-  "icon": "command-icon.png",
+  "icon": "multipass-icon.png",
   "author": "davibe",
   "license": "MIT",
   "commands": [
