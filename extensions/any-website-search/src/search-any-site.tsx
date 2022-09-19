@@ -17,6 +17,7 @@ import { strEq } from "./utils";
 
 interface Preferences {
   prefillFromClipboard: boolean;
+  interpretDdgBangs: boolean;
 }
 
 function suggestionsFromXml(xml: string, searchString: string): string[] {
@@ -49,6 +50,30 @@ function fillTemplateUrl(templateUrl: string, query: string) {
   const placeholderUrl = templateUrlWithPlaceholder.replace(placeholderTemplate, encodeURIComponent(query));
   const url = placeholderUrl.replace(placeholderTemplate, SEARCH_TEMPLATE);
   return url;
+}
+
+function maybeStripBangFromQuery(templateUrl: string, query: string) {
+  let url;
+  try {
+    url = new URL(templateUrl);
+  } catch {
+    return query;
+  }
+
+  const domain = url.hostname;
+
+  const isDdg = domain.toLowerCase().split(/\./g).includes("duckduckgo");
+  if (!isDdg) {
+    return query;
+  }
+
+  const matchResult = query.match(/^!\w+\s*(.*)$/);
+  if (matchResult === null) {
+    return query;
+  }
+
+  const [, newQuery] = matchResult;
+  return newQuery;
 }
 
 function DefaultActions(props: SavedSitesState) {
@@ -88,7 +113,11 @@ export default function () {
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
   const { isLoading, data } = useFetch<string[] | string, void>(
-    `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(searchText)}`,
+    `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(
+      getPreferenceValues<Preferences>().interpretDdgBangs
+        ? maybeStripBangFromQuery(selectedSite.url, searchText)
+        : searchText
+    )}`,
     {
       headers: {
         "User-Agent":

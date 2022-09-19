@@ -20,11 +20,20 @@
   ],
   "preferences": [
     {
-      "name": "prefill-from-clipboard",
+      "name": "prefillFromClipboard",
       "label": "Prefill search from clipboard",
       "type": "checkbox",
+      "default": false,
       "required": false,
       "description": "Whether to pre-fill the search field with the text on the clipboard (if any)"
+    },
+    {
+      "name": "interpretDdgBangs",
+      "label": "Strip DuckDuckGo's \"bangs\" for search suggestions",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "If enabled, if the selected search site's URL looks like it's DuckDuckGo and the query starts with a \"bang\" (https://duckduckgo.com/bang), then the bang will be removed when fetching search suggestions. This setting only affects the text used for search *suggestions*, and only by removing the leading \"bang\"; the site you select will always be searched for the exact query you entered."
     }
   ],
   "dependencies": {
