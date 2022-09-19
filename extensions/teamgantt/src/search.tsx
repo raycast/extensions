@@ -1,4 +1,4 @@
-import { List, getPreferenceValues, Icon, ActionPanel, Action, useNavigation } from '@raycast/api';
+import { List, getPreferenceValues, Icon, ActionPanel, Action, useNavigation, showToast, Toast } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { MyPreferences, Task } from './types';
 import { authenticate, findTasks, punchIn } from './api';
@@ -22,7 +22,10 @@ export default function Command() {
       .then(({ id_token }) => {
         setIdToken(id_token);
       })
-      .catch((e) => console.log(e))
+      .catch((e) => {
+        console.log('Failed authenticating', e);
+        showToast({ title: 'Failed to authenticate', message: e.message ?? e.toString(), style: Toast.Style.Failure });
+      })
       .finally(() => setIsLoading(false));
   }, []);
 
