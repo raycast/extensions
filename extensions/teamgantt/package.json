@@ -46,7 +46,7 @@
       "type": "textfield",
       "required": true,
       "title": "Username/Email",
-      "description": "TeammGantt Username/Email",
+      "description": "TeamGantt Username/Email",
       "placeholder": "me@mydomain.com"
     },
     {
