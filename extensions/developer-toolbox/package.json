@@ -1,0 +1,53 @@
+{
+  "name": "dev-toolbox",
+  "title": "Developer Toolbox",
+  "description": "A collection of utils commonly used in daily development.",
+  "icon": "command-icon.png",
+  "author": "dytes",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Developer Toolbox",
+      "description": "A collection of utils commonly used in daily development.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "date-fns": "^2.29.3",
+    "jsonwebtoken": "^8.5.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.8",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.4.0",
+    "@types/jsonwebtoken": "^8.5.8",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.9.1",
+    "@typescript-eslint/parser": "^5.9.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jest": "^25.3.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "eslint-plugin-react": "^7.28.0",
+    "jest": "^27.4.7",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o out",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "jest"
+  }
+}
