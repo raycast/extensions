@@ -187,7 +187,7 @@ const generateConfigurableSpace = () => {
     keyCode: undefined,
     modifiers: [],
     color: colors.white,
-    icon: "",
+    icon: "AppWindow",
     confetti: false,
     configured: false,
   };

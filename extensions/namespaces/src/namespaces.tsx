@@ -103,7 +103,6 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
         defaultValue={props.space.modifiers.includes("command down")}
       />
       <Form.Dropdown id="icon" title="Icon" defaultValue={props.space.icon}>
-        <Form.Dropdown.Item title="None" value="" />
         {Object.keys(utils.iconMap).map((icon) => {
           return (
             <Form.Dropdown.Item
@@ -247,11 +246,7 @@ export default function Command() {
                 .join("")} + KeyCode: ${space.keyCode}`,
             },
           ]}
-          icon={
-            space.icon
-              ? { source: utils.iconMap[space.icon], tintColor: space.color }
-              : { source: Icon.CircleFilled, tintColor: space.color }
-          }
+          icon={{ source: utils.iconMap[space.icon], tintColor: space.color }}
           actions={
             <ActionPanel>
               <ActionPanel.Section title="NameSpaces">
