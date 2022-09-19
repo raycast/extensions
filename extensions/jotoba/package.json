@@ -27,8 +27,7 @@
     "commands": [
         {
             "name": "index",
-            "title": "Jotoba",
-            "subtitle": "Search Jotoba",
+            "title": "Search Jotoba",
             "description": "Search Jotoba.de for words and kanji.",
             "mode": "view",
             "arguments": [
