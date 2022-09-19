@@ -17,7 +17,7 @@ export function InProgressAction({
           dark: getProgressIcon(0.5, '#ffffff'),
         },
       }}
-      title={'Set In Progress'}
+      title={'Set in Progress'}
       onAction={() => inProgress(todo)}
       shortcut={{ modifiers: ['cmd'], key: 's' }}
     />

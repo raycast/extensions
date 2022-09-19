@@ -5,7 +5,7 @@ export async function notion() {
   const token = (await oauthClient.getTokens())?.accessToken
 
   if (!token) {
-    throw new Error('Unauthorized, please Sign in to Notion')
+    throw new Error('Unauthorized, please sign in to Notion')
   }
 
   return new Client({

@@ -14,7 +14,7 @@ export function DoneWork() {
 
   const handleCopyDoneWork = async () => {
     await Clipboard.copy(markdown)
-    showToast(Toast.Style.Success, 'Copied to clipboardl')
+    showToast(Toast.Style.Success, 'Copied to clipboard')
   }
 
   return (
@@ -24,7 +24,7 @@ export function DoneWork() {
       actions={
         <ActionPanel>
           <Action
-            title="Copy To Clipboard"
+            title="Copy to Clipboard"
             onAction={handleCopyDoneWork}
             icon={Icon.Clipboard}
           />

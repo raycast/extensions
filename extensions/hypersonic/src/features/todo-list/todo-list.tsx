@@ -171,7 +171,7 @@ export function TodoList() {
                     ) : null}
                     <CopyToDoAction todo={todo} />
                     <Action.OpenInBrowser
-                      title="Open In Notion"
+                      title="Open in Notion"
                       icon={Icon.Window}
                       url={todo.url}
                       shortcut={{ modifiers: ['cmd'], key: 'o' }}

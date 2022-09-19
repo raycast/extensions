@@ -1,5 +1,5 @@
 import { Todo } from '@/types/todo'
-import { Action, ActionPanel, Form } from '@raycast/api'
+import { Action, ActionPanel, Form, Icon } from '@raycast/api'
 
 export function DateReminder({
   taskToEdit,
@@ -15,12 +15,13 @@ export function DateReminder({
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.Calendar}
             title="Set Reminder"
             onSubmit={(values) => {
               handleSetDate(
                 taskToEdit,
                 values.date.toISOString(),
-                values.date?.toLocaleDateString('en-En') || 'No Date'
+                values.date?.toLocaleDateString('en-US') || 'No Date'
               ).then(() => setTaskToEdit(null))
             }}
           />
