@@ -2,7 +2,12 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { Filter, Task } from "../types";
 import TaskForm from "./TaskForm";
 
-export default function EmptyView(props: { listId: string; tasks: Task[]; filter: Filter; searchText: string }) {
+export default function EmptyView(props: {
+  listId: string;
+  tasks: Task[];
+  filter: Filter;
+  searchText: string;
+}) {
   if (props.tasks.length > 0) {
     return (
       <List.EmptyView
@@ -14,7 +19,9 @@ export default function EmptyView(props: { listId: string; tasks: Task[]; filter
             <Action.Push
               title="Create Task"
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<TaskForm listId={props.listId} title={props.searchText} />}
+              target={
+                <TaskForm listId={props.listId} title={props.searchText} />
+              }
             />
           </ActionPanel>
         }
@@ -33,14 +40,22 @@ export default function EmptyView(props: { listId: string; tasks: Task[]; filter
               <Action.Push
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<TaskForm listId={props.listId} title={props.searchText} />}
+                target={
+                  <TaskForm listId={props.listId} title={props.searchText} />
+                }
               />
             </ActionPanel>
           }
         />
       );
     case Filter.Completed:
-      return <List.EmptyView icon="😢" title="No Tasks Completed" description="No tasks complete." />;
+      return (
+        <List.EmptyView
+          icon="😢"
+          title="No Tasks Completed"
+          description="No tasks complete."
+        />
+      );
 
     case Filter.All:
     default:
@@ -54,7 +69,9 @@ export default function EmptyView(props: { listId: string; tasks: Task[]; filter
               <Action.Push
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<TaskForm listId={props.listId} title={props.searchText} />}
+                target={
+                  <TaskForm listId={props.listId} title={props.searchText} />
+                }
               />
             </ActionPanel>
           }

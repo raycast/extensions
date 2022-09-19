@@ -34,7 +34,10 @@ export async function authorize(): Promise<void> {
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 
-async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
+async function fetchTokens(
+  authRequest: OAuth.AuthorizationRequest,
+  authCode: string
+): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("code", authCode);
@@ -42,7 +45,10 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   params.append("grant_type", "authorization_code");
   params.append("redirect_uri", authRequest.redirectURI);
 
-  const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", body: params });
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    body: params,
+  });
   if (!response.ok) {
     console.error("fetch tokens error:", await response.text());
     throw new Error(response.statusText);
@@ -50,13 +56,18 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
   return (await response.json()) as OAuth.TokenResponse;
 }
 
-async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
+async function refreshTokens(
+  refreshToken: string
+): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 
-  const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", body: params });
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    body: params,
+  });
   if (!response.ok) {
     console.error("refresh tokens error:", await response.text());
     throw new Error(response.statusText);

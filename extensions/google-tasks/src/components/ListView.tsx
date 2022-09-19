@@ -27,7 +27,11 @@ export default function ListView(props: { listId: string }) {
       try {
         await google.authorize();
         const fetchedList = await fetchList(props.listId);
-        setState((previous) => ({ ...previous, tasks: fetchedList, isLoading: false }));
+        setState((previous) => ({
+          ...previous,
+          tasks: fetchedList,
+          isLoading: false,
+        }));
       } catch (error) {
         console.error(error);
         setState((previous) => ({ ...previous, tasks: [], isLoading: false }));
@@ -43,10 +47,18 @@ export default function ListView(props: { listId: string }) {
           setState((previous) => ({ ...previous, isLoading: true }));
           await toggleTask(props.listId, taskToToggle);
           const refreshedList = await fetchList(props.listId);
-          setState((previous) => ({ ...previous, tasks: refreshedList, isLoading: false }));
+          setState((previous) => ({
+            ...previous,
+            tasks: refreshedList,
+            isLoading: false,
+          }));
         } catch (error) {
           console.error(error);
-          setState((previous) => ({ ...previous, tasks: [], isLoading: false }));
+          setState((previous) => ({
+            ...previous,
+            tasks: [],
+            isLoading: false,
+          }));
           showToast({ style: Toast.Style.Failure, title: String(error) });
         }
       })();
@@ -60,10 +72,18 @@ export default function ListView(props: { listId: string }) {
           setState((previous) => ({ ...previous, isLoading: true }));
           await deleteTask(props.listId, taskToDelete.id);
           const refreshedList = await fetchList(props.listId);
-          setState((previous) => ({ ...previous, tasks: refreshedList, isLoading: false }));
+          setState((previous) => ({
+            ...previous,
+            tasks: refreshedList,
+            isLoading: false,
+          }));
         } catch (error) {
           console.error(error);
-          setState((previous) => ({ ...previous, tasks: [], isLoading: false }));
+          setState((previous) => ({
+            ...previous,
+            tasks: [],
+            isLoading: false,
+          }));
           showToast({ style: Toast.Style.Failure, title: String(error) });
         }
       })();
@@ -90,7 +110,12 @@ export default function ListView(props: { listId: string }) {
         <List.Dropdown
           tooltip="Filter Tasks..."
           value={state.filter}
-          onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as Filter }))}
+          onChange={(newValue) =>
+            setState((previous) => ({
+              ...previous,
+              filter: newValue as Filter,
+            }))
+          }
         >
           <List.Dropdown.Item title="All" value={Filter.All} />
           <List.Dropdown.Item title="Open" value={Filter.Open} />
@@ -113,7 +138,12 @@ export default function ListView(props: { listId: string }) {
           />
         );
       })}
-      <EmptyView listId={props.listId} tasks={state.tasks} filter={state.filter} searchText={state.searchText} />
+      <EmptyView
+        listId={props.listId}
+        tasks={state.tasks}
+        filter={state.filter}
+        searchText={state.searchText}
+      />
     </List>
   );
 }

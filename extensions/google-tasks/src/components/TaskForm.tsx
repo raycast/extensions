@@ -1,4 +1,12 @@
-import { Detail, Toast, showToast, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import {
+  Detail,
+  Toast,
+  showToast,
+  Form,
+  ActionPanel,
+  Action,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
 import { createTask, fetchLists } from "../api/endpoints";
@@ -25,7 +33,11 @@ export default function TaskForm(props: { listId?: string; title?: string }) {
 
   const handleSubmit = useCallback(
     (values: { title: string; notes: string; due: string; listId: string }) => {
-      createTask(values.listId, { title: values.title, notes: values.notes, due: values.due });
+      createTask(values.listId, {
+        title: values.title,
+        notes: values.notes,
+        due: values.due,
+      });
       pop();
     },
     [createTask, pop]
@@ -48,7 +60,13 @@ export default function TaskForm(props: { listId?: string; title?: string }) {
       <Form.DatePicker id="due" title="Due Date" />
       <Form.Dropdown id="listId" title="Task List" defaultValue={props.listId}>
         {lists.map((list) => {
-          return <Form.Dropdown.Item value={list.id} title={list.title} key={list.id} />;
+          return (
+            <Form.Dropdown.Item
+              value={list.id}
+              title={list.title}
+              key={list.id}
+            />
+          );
         })}
       </Form.Dropdown>
     </Form>
