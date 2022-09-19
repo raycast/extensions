@@ -10,7 +10,7 @@
     {
       "name": "search",
       "title": "Search Tasks",
-      "subtitle": "Find tasks by a handful of fields like title and note",
+      "subtitle": "TeamGantt",
       "description": "Performs a search which returns a number of tasks that match",
       "mode": "view"
     },
