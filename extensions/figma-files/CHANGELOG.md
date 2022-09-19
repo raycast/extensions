@@ -1,5 +1,9 @@
 # Figma Files Changelog
 
+## [Fix] 2022-09-19
+
+Fixed a bug where it always tried to open files in the desktop app, even though Figma was not installed.
+
 ## [Grid thumbnails and menubar app] - 2022-09-12
 
 - Replaces List with Grid to see larger thumbnails.
