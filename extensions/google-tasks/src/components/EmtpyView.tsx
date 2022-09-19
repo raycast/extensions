@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { Filter, Task } from "../types";
-import TaskForm from "./TaskForm";
+import CreateTaskForm from "./CreateTaskForm";
 
 export default function EmptyView(props: {
   listId: string;
@@ -20,7 +20,10 @@ export default function EmptyView(props: {
               title="Create Task"
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={
-                <TaskForm listId={props.listId} title={props.searchText} />
+                <CreateTaskForm
+                  listId={props.listId}
+                  title={props.searchText}
+                />
               }
             />
           </ActionPanel>
@@ -41,7 +44,10 @@ export default function EmptyView(props: {
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={
-                  <TaskForm listId={props.listId} title={props.searchText} />
+                  <CreateTaskForm
+                    listId={props.listId}
+                    title={props.searchText}
+                  />
                 }
               />
             </ActionPanel>
@@ -70,7 +76,10 @@ export default function EmptyView(props: {
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 target={
-                  <TaskForm listId={props.listId} title={props.searchText} />
+                  <CreateTaskForm
+                    listId={props.listId}
+                    title={props.searchText}
+                  />
                 }
               />
             </ActionPanel>

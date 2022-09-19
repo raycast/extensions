@@ -1,5 +1,5 @@
-import TaskForm from "./components/TaskForm";
+import CreateTaskForm from "./components/CreateTaskForm";
 
 export default function Command() {
-  return <TaskForm />;
+  return <CreateTaskForm />;
 }

@@ -94,6 +94,26 @@ export async function createTask(
     throw new Error(response.statusText);
   }
 }
+export async function editTask(
+  tasklist: string,
+  task: TaskForm
+): Promise<void> {
+  const response = await fetch(
+    `https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks`,
+    {
+      method: "POST",
+      body: JSON.stringify(task),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+      },
+    }
+  );
+  if (!response.ok) {
+    console.error("fetch items error:", await response.text());
+    throw new Error(response.statusText);
+  }
+}
 
 export async function toggleTask(tasklist: string, task: Task): Promise<void> {
   const payload: { status: string } = { status: "" };

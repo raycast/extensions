@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Task } from "../types";
 import { getChildren, getIcon } from "../utils";
-import TaskForm from "./TaskForm";
+import CreateTaskForm from "./CreateTaskForm";
+import EditTaskForm from "./EditTaskForm";
 
 export default function TaskItem(props: {
   listId: string;
@@ -59,7 +60,21 @@ export default function TaskItem(props: {
           <Action.Push
             title="Create Task"
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<TaskForm listId={props.listId} />}
+            target={<CreateTaskForm listId={props.listId} />}
+          />
+          <Action.Push
+            title="Edit Task"
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            target={
+              <EditTaskForm
+                listId={props.listId}
+                task={{
+                  title: props.task.title,
+                  notes: props.task.notes,
+                  due: props.task.due,
+                }}
+              />
+            }
           />
         </ActionPanel>
       }

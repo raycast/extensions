@@ -17,7 +17,7 @@ export interface Task {
 
 export interface TaskForm {
   title: string;
-  notes: string;
+  notes?: string;
   due?: string;
 }
 

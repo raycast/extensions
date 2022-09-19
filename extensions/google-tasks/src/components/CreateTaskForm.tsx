@@ -11,7 +11,10 @@ import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
 import { createTask, fetchLists } from "../api/endpoints";
 
-export default function TaskForm(props: { listId?: string; title?: string }) {
+export default function CreateTaskForm(props: {
+  listId?: string;
+  title?: string;
+}) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
   const { pop } = useNavigation();
