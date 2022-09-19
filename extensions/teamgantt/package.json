@@ -28,7 +28,7 @@
       "type": "textfield",
       "required": true,
       "title": "ClientID",
-      "description": "TeammGantt ClientID",
+      "description": "TeamGantt ClientID",
       "link": "https://app.teamgantt.com/admin/app-clients",
       "placeholder": "abc"
     },
