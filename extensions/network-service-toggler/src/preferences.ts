@@ -7,6 +7,7 @@ export const getPreferences = (): Preferences => {
 		refreshInterval: string
 		showNetworkDetails: boolean
 		toggleDelay: string
+		useSudo: boolean
 	}>()
 
 	return {
@@ -14,5 +15,6 @@ export const getPreferences = (): Preferences => {
 		refreshInterval: parseFloat(prefs.refreshInterval),
 		showNetworkDetails: prefs.showNetworkDetails,
 		toggleDelay: parseFloat(prefs.toggleDelay),
+		useSudo: prefs.useSudo,
 	}
 }

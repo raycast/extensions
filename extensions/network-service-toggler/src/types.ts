@@ -10,6 +10,7 @@ export type Preferences = {
 	refreshInterval: number
 	showNetworkDetails: boolean
 	toggleDelay: number
+	useSudo: boolean
 }
 
 export enum ChangeState {

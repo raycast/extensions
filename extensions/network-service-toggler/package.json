@@ -16,7 +16,8 @@
 	],
 	"dependencies": {
 		"@raycast/api": "^1.39.3",
-		"lodash.isequal": "^4.5.0"
+		"lodash.isequal": "^4.5.0",
+		"sudo-prompt": "^9.2.1"
 	},
 	"description": "List and toggle system network services (such as Ethernet, Wi-Fi) in macOS",
 	"devDependencies": {
@@ -34,6 +35,15 @@
 	"license": "MIT",
 	"name": "network-service-toggler",
 	"preferences": [
+		{
+			"default": false,
+			"description": "On some versions of macOS, turning network services on or off requires admin permissions. You should leave this turned off if toggling network services works for you without it.",
+			"label": "Request Admin Password when toggling Network",
+			"name": "useSudo",
+			"required": false,
+			"title": "Use Sudo",
+			"type": "checkbox"
+		},
 		{
 			"default": "",
 			"description": "Comma-separated list of network services to hide in the network list",
