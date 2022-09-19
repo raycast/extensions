@@ -15,14 +15,14 @@
       "name": "pages-minimize",
       "title": "Minimize Pages",
       "description": "Minimizes all Pages windows.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "pages-icon.png"
     },
     {
       "name": "pages-new",
       "title": "New Pages Document",
       "description": "Creates a new blank document in Pages.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "pages-icon.png"
     },
     {
@@ -51,21 +51,28 @@
       "name": "pages-new-from-clipboard",
       "title": "New Pages Document From Clipboard",
       "description": "Creates a new Pages document from the clipboard text content.",
-      "mode": "view",
+      "mode": "no-view",
+      "icon": "pages-icon.png"
+    },
+    {
+      "name": "pages-open-in-pages",
+      "title": "Open Selection In Pages",
+      "description": "Opens the selected file(s) in Pages.",
+      "mode": "no-view",
       "icon": "pages-icon.png"
     },
     {
       "name": "numbers-minimize",
       "title": "Minimize Numbers",
       "description": "Minimizes all Numbers windows.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "numbers-icon.png"
     },
     {
       "name": "numbers-new",
       "title": "New Numbers Spreadsheet",
       "description": "Creates a new blank spreadsheet in Numbers.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "numbers-icon.png"
     },
     {
@@ -91,17 +98,24 @@
       ]
     },
     {
+      "name": "numbers-open-in-numbers",
+      "title": "Open Selection In Numbers",
+      "description": "Opens the selected file(s) in Numbers.",
+      "mode": "no-view",
+      "icon": "numbers-icon.png"
+    },
+    {
       "name": "keynote-minimize",
       "title": "Minimize Keynote",
       "description": "Minimizes all Keynote windows.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-new",
       "title": "New Keynote Slideshow",
       "description": "Creates a new Keynote slideshow with the default theme.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "keynote-icon.png"
     },
     {
@@ -115,14 +129,14 @@
       "name": "keynote-start-slideshow",
       "title": "Start Keynote Slideshow",
       "description": "Starts the current Keynote slideshow.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "keynote-icon.png"
     },
     {
       "name": "keynote-stop-slideshow",
       "title": "Stop Keynote Slideshow",
       "description": "Stops the current Keynote slideshow.",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "keynote-icon.png"
     },
     {
@@ -144,7 +158,14 @@
       "name": "keynote-new-from-selection",
       "title": "New Keynote Slideshow From Selected Images",
       "description": "Creates a new slideshow from the selected image files.",
-      "mode": "view",
+      "mode": "no-view",
+      "icon": "keynote-icon.png"
+    },
+    {
+      "name": "keynote-open-in-keynote",
+      "title": "Open Selection In Keynote",
+      "description": "Opens the selected file(s) in Keynote.",
+      "mode": "no-view",
       "icon": "keynote-icon.png"
     }
   ],

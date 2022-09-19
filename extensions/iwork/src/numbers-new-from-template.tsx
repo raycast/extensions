@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { showHUD, closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
+import { showHUD, ActionPanel, List, Action, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkNumbersInstalled } from "./index";
 
 export default function Main() {
   const [templates, setTemplates] = useState<string[]>([] as string[]);
-  const errorAlert = checkNumbersInstalled();
+
+  // Check for Numbers app
+  Promise.resolve(checkNumbersInstalled()).then((installed) => {
+    if (!installed) {
+      popToRoot();
+    }
+  });
 
   useEffect(() => {
     Promise.resolve(runAppleScript('tell application "Numbers" to return name of every template')).then(
@@ -14,8 +20,6 @@ export default function Main() {
       }
     );
   }, []);
-
-  if (errorAlert !== undefined) return errorAlert;
 
   if (!templates?.length) {
     return <List isLoading={!templates?.length} searchBarPlaceholder="Search templates..."></List>;

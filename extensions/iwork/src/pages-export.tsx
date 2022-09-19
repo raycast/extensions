@@ -9,11 +9,12 @@ interface ExportArguments {
 export default function Main(props: { arguments: ExportArguments }) {
   const { filepath } = props.arguments;
 
-  // Check for Keynote app
-  const error_alert = checkPagesInstalled();
-  if (error_alert !== undefined) {
-    return error_alert;
-  }
+  // Check for Pages app
+  Promise.resolve(checkPagesInstalled()).then((installed) => {
+    if (!installed) {
+      popToRoot();
+    }
+  });
 
   // Check whether there is an active document
   Promise.resolve(

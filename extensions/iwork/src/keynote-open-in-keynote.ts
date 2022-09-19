@@ -1,21 +1,13 @@
-import { useState } from "react";
-import { popToRoot, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkKeynoteInstalled } from "./index";
 
-export default function Main() {
-  const [ranScript, setRanScript] = useState<boolean>(false);
-
+export default async function Main() {
   // Check for Keynote app
-  const error_alert = checkKeynoteInstalled();
-  if (error_alert !== undefined) {
-    return error_alert;
-  } else if (!ranScript) {
-    setRanScript(true);
+  const installed = await checkKeynoteInstalled();
 
-    // Create slideshow
-    Promise.resolve(
-      runAppleScript(`tell application "Finder"
+  if (installed) {
+    // Open slideshow
+    await runAppleScript(`tell application "Finder"
         set fileList to {}
         set selectedFiles to selection as alias list
         repeat with theFile in selectedFiles
@@ -27,9 +19,6 @@ export default function Main() {
         repeat with theFile in fileList
             open theFile
         end repeat
-    end tell`)
-    );
-    popToRoot();
-    closeMainWindow();
+    end tell`);
   }
 }

@@ -9,63 +9,65 @@ interface ExportArguments {
 export default function Main(props: { arguments: ExportArguments }) {
   const { filepath } = props.arguments;
 
-  // Check for Keynote app
-  const error_alert = checkNumbersInstalled();
-  if (error_alert !== undefined) {
-    return error_alert;
-  }
-
-  // Check whether there is an active document
-  Promise.resolve(
-    runAppleScript(`try
-    tell application "Numbers" to get document 1
-  end try`)
-  ).then((document) => {
-    if (!document) {
-      showHUD(`No active spreadsheet to export!`);
-      Promise.resolve(popToRoot());
+  // Check for Numbers app
+  Promise.resolve(checkNumbersInstalled()).then((installed) => {
+    if (!installed) {
+      popToRoot();
+      return;
     }
+
+    // Check whether there is an active document
+    Promise.resolve(
+      runAppleScript(`try
+      tell application "Numbers" to get document 1
+    end try`)
+    ).then((document) => {
+      if (!document) {
+        showHUD(`No active spreadsheet to export!`);
+        popToRoot();
+      }
+    });
+
+    return (
+      <List searchBarPlaceholder="Search formats...">
+        <List.Item
+          title="PDF"
+          actions={
+            <ActionPanel>
+              <Action title="PDF" onAction={() => exportPDF(filepath)} />
+            </ActionPanel>
+          }
+        />
+
+        <List.Item
+          title="Excel"
+          actions={
+            <ActionPanel>
+              <Action title="Microsoft Excel" onAction={() => exportExcel(filepath)} />
+            </ActionPanel>
+          }
+        />
+
+        <List.Item
+          title="CSV"
+          actions={
+            <ActionPanel>
+              <Action title="CSV" onAction={() => exportCSV(filepath)} />
+            </ActionPanel>
+          }
+        />
+
+        <List.Item
+          title="Numbers 09"
+          actions={
+            <ActionPanel>
+              <Action title="Numbers 09" onAction={() => exportNumbers09(filepath)} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   });
-
-  return (
-    <List searchBarPlaceholder="Search formats...">
-      <List.Item
-        title="PDF"
-        actions={
-          <ActionPanel>
-            <Action title="PDF" onAction={() => exportPDF(filepath)} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        title="Excel"
-        actions={
-          <ActionPanel>
-            <Action title="Microsoft Excel" onAction={() => exportExcel(filepath)} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        title="CSV"
-        actions={
-          <ActionPanel>
-            <Action title="CSV" onAction={() => exportCSV(filepath)} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        title="Numbers 09"
-        actions={
-          <ActionPanel>
-            <Action title="Numbers 09" onAction={() => exportNumbers09(filepath)} />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
 }
 
 function exportPDF(filepath: string) {

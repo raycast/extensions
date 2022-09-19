@@ -1,25 +1,24 @@
-import { useState } from "react";
-import { showHUD, popToRoot } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkKeynoteInstalled } from "./index";
 
-export default function Main() {
-  const [ranScript, setRanScript] = useState<boolean>(false);
-
+export default async function Main() {
   // Check for Keynote app
-  const error_alert = checkKeynoteInstalled();
-  if (error_alert !== undefined) {
-    return error_alert;
-  } else if (!ranScript) {
-    setRanScript(true);
-
-    // Stop the current slideshow
+  const installed = await checkKeynoteInstalled();
+  if (installed) {
     showHUD(`Stopping new Keynote...`);
-    Promise.resolve(
-      runAppleScript(`tell application "Keynote"
+
+    // Stops the current slideshow
+    const error = await runAppleScript(`tell application "Keynote"
+        try
           stop slideshow
-      end tell`)
-    );
-    Promise.resolve(popToRoot());
+        on error
+          return 1
+        end try
+      end tell`);
+
+    if (error) {
+      showHUD("No slideshow to stop!");
+    }
   }
 }

@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
-import { showHUD, closeMainWindow, ActionPanel, List, Action } from "@raycast/api";
+import { showHUD, ActionPanel, List, Action, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkKeynoteInstalled } from "./index";
 
 export default function Main() {
   const [themes, setThemes] = useState<string[]>([] as string[]);
-  const errorAlert = checkKeynoteInstalled();
+
+  // Check for Keynote app
+  Promise.resolve(checkKeynoteInstalled()).then((installed) => {
+    if (!installed) {
+      popToRoot();
+    }
+  });
 
   useEffect(() => {
     Promise.resolve(runAppleScript('tell application "Keynote" to return name of every theme')).then((themesString) => {
       setThemes(themesString.split(", "));
     });
   }, []);
-
-  if (errorAlert !== undefined) return errorAlert;
 
   if (!themes?.length) {
     return <List isLoading={!themes?.length} searchBarPlaceholder="Search themes..."></List>;

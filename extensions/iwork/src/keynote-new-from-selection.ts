@@ -1,28 +1,19 @@
-import { useState } from "react";
-import { showHUD, popToRoot } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { checkKeynoteInstalled } from "./index";
 
-export default function Main() {
-  const [ranScript, setRanScript] = useState<boolean>(false);
-
+export default async function Main() {
   // Check for Keynote app
-  const error_alert = checkKeynoteInstalled();
-  if (error_alert !== undefined) {
-    return error_alert;
-  } else if (!ranScript) {
-    setRanScript(true);
-
+  const installed = await checkKeynoteInstalled();
+  if (installed) {
     // Create slideshow
-    Promise.resolve(
-      runAppleScript(`tell application "Finder"
+    await runAppleScript(`tell application "Finder"
         set fileList to {}
         set selectedFiles to selection as alias list
         repeat with theFile in selectedFiles
             set fileKind to the kind of theFile
             
             if "Image" is in fileKind then
-                set theURL to URL of theFile
                 set end of fileList to theFile
             end if
         end repeat
@@ -48,9 +39,7 @@ export default function Main() {
             end tell
         end repeat
         activate
-    end tell`)
-    );
+    end tell`);
     showHUD(`Creating slideshow from selected images...`);
-    popToRoot();
   }
 }

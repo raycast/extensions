@@ -15,6 +15,8 @@ This extensions lets you control Pages, Numbers, and Keynote with Raycast.
     - Creates a new document from the text content of the clipboard
 - _Export Pages Document_
     - Exports the current document to the path specified as an argument, in the user-selected format
+- _Open Selection In Pages_
+    - Opens the selected file(s) in Pages. Displays an error alert if the file cannot be opened with Pages.
 
 **For Numbers:**
 - _Minimize Numbers_
@@ -25,6 +27,8 @@ This extensions lets you control Pages, Numbers, and Keynote with Raycast.
     - Creates a new spreadsheet using the user-selected template
 - _Export Numbers Spreadsheet_
     - Exports the current spreadsheet to the path specified as an argument, in the user-selected format
+- _Open Selection In Numbers_
+    - Opens the selected file(s) in Numbers. Displays an error alert if the file cannot be opened with Numbers.
 
 **For Keynote:**
 - _Minimize Keynote_
@@ -41,3 +45,5 @@ This extensions lets you control Pages, Numbers, and Keynote with Raycast.
     - Exports the current slideshow to the path specified as an argument, in the user-specified format 
 - _New Keynote Slideshow From Selected Images_
     - Creates a new slideshow from the selected image files
+- _Open Selection In Keynote_
+    - Opens the selected file(s) in Keynote. Displays an error alert if the file cannot be opened with Keynote.
