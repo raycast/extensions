@@ -9,18 +9,18 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { LANG_LIST, TransAPIErrCode } from "./const";
-import { say } from "./itranslate.shared";
+import { LANG_LIST, TransAPIErrCode } from "../common/const";
+import { say } from "../common/itranslate.shared";
 import { TranslateHistory } from "./TranslateHistory";
+import { Action$ } from "raycast-toolkit";
 
 const preferences: IPreferences = getPreferenceValues();
 
-export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate?: (lang: ILangItem) => void }) {
-  let duration = 0;
-  if (props.transRes.end && props.transRes.start) {
-    duration = props.transRes.end - props.transRes.start;
-  }
-
+export function TranslateResult(props: {
+  transRes: ITranslateRes;
+  onLangUpdate?: (lang: ILangItem) => void;
+  onImgOCR?: (path?: string) => void;
+}) {
   function TranslateResultDetail() {
     if (props.transRes.targetExplains && props.transRes.derivatives) {
       return (
@@ -84,6 +84,27 @@ export function TranslateResult(props: { transRes: ITranslateRes; onLangUpdate?:
       accessories={[{ text: props.transRes.code === TransAPIErrCode.Loading ? "loading..." : "" }]}
       actions={
         <ActionPanel>
+          {props.onImgOCR && (
+            <ActionPanel.Section>
+              <Action
+                icon={Icon.Maximize}
+                title="Capture to Translate"
+                onAction={() => {
+                  props.onImgOCR && props.onImgOCR();
+                }}
+              />
+              <Action$.SelectFile
+                title="Select Image to Translate"
+                icon={Icon.Finder}
+                onSelect={(filePath) => {
+                  if (!filePath) {
+                    return;
+                  }
+                  props.onImgOCR && props.onImgOCR(filePath);
+                }}
+              />
+            </ActionPanel.Section>
+          )}
           <Action.CopyToClipboard content={props.transRes.res} />
           {props.transRes.isWord && (
             <Action.CreateSnippet

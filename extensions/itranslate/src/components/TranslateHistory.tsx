@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { TRANS_SERVICES_NAMES } from "./const";
-import { clearAllHistory, getHistories, getLang, say } from "./itranslate.shared";
+import { TRANS_SERVICES_NAMES } from "../common/const";
+import { clearAllHistory, getHistories, getLang, say } from "../common/itranslate.shared";
 import { useEffect, useState } from "react";
 
 export function TranslateHistory() {

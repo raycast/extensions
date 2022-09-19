@@ -235,6 +235,7 @@ export enum GoogleFreeAPITLD {
 }
 
 export const HistoriesCacheKey = "$HistoriesCacheKey$";
+export const BaiduOCRTokenCacheKey = "$BaiduOCRTokenCacheKey$";
 
 export const TRANS_SERVICES_NAMES = new Map<TransServiceProviderTp, string>([
   [TransServiceProviderTp.Google, "Google(Free)"],
@@ -281,3 +282,38 @@ export const TRANS_SERVICES_NOT_SUPPORT_LANGS = new Map<TransServiceProviderTp, 
   ],
   [TransServiceProviderTp.Aliyun, ["uk", "sr"]],
 ]);
+
+export const TempOCRImgName = "temp_itranslate_ocr_img.png";
+
+export enum OCRServiceProviderTp {
+  Space = "spaceOCR",
+  Google = "googleOCR",
+  MicrosoftAzure = "microsoftAzureOCR",
+  Youdao = "youdaoOCR",
+  Baidu = "baiduOCR",
+  Tencent = "tencentOCR",
+}
+
+export const OCR_SERVICES_AUTH_NAMES = new Map<OCRServiceProviderTp, string[]>([
+  [OCRServiceProviderTp.Google, ["Google Could Vision API Key"]],
+  [
+    OCRServiceProviderTp.MicrosoftAzure,
+    ["Microsoft Azure Computer Vision Resource Name", "Microsoft Azure Cognitive Service API Key"],
+  ],
+  [OCRServiceProviderTp.Youdao, ["Youdao OCR App ID", "Youdao OCR App Secret"]],
+  [OCRServiceProviderTp.Baidu, ["Baidu OCR API Key", "Baidu OCR Secret Key"]],
+  [OCRServiceProviderTp.Tencent, ["Tencent OCR Secret ID", "Tencent OCR Secret Key"]],
+]);
+
+export const OCR_SERVICES_NAMES = new Map<OCRServiceProviderTp, string>([
+  [OCRServiceProviderTp.Space, "OCRSpace"],
+  [OCRServiceProviderTp.Google, "Google Could Vision"],
+  [OCRServiceProviderTp.MicrosoftAzure, "Microsoft Azure Computer Vision"],
+  [OCRServiceProviderTp.Youdao, "Youdao OCR"],
+  [OCRServiceProviderTp.Baidu, "Baidu OCR"],
+  [OCRServiceProviderTp.Tencent, "Tencent OCR"],
+]);
+
+export const OCR_SUPPORT_IMG_TYPE = [".png", ".jpg", ".jpeg"];
+
+export const BUILD_IN_SPACE_OCR_API_KEY = "K87289516088957"; // Please be kind to it, please!
