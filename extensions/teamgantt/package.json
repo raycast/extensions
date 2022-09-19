@@ -37,7 +37,7 @@
       "type": "password",
       "required": true,
       "title": "ClientSecret",
-      "description": "TeammGantt ClientSecret",
+      "description": "TeamGantt ClientSecret",
       "link": "https://app.teamgantt.com/admin/app-clients",
       "placeholder": "123"
     },
