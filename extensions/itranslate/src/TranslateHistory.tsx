@@ -5,13 +5,97 @@ import { useEffect, useState } from "react";
 
 export function TranslateHistory() {
   const [isLoadingState, updateLoadingState] = useState<boolean>(false);
-  const [historiesState, updateHistoriesState] = useState<TransHistory[]>([]);
+  const [historiesState, updateHistoriesState] = useState<ITransHistory[]>([]);
 
   useEffect(() => {
     updateLoadingState(true);
     updateHistoriesState(getHistories());
     updateLoadingState(false);
   }, []);
+
+  function ListAccessories(history: ITransHistory) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const accessories: any[] = [{ date: new Date(history.time) }];
+    if (history.isMultiple) {
+      accessories.unshift({
+        icon: { source: Icon.Ellipsis, tintColor: Color.Orange },
+        tooltip: "Translated into multiple languages",
+      });
+    }
+    return accessories;
+  }
+
+  function HistoryMetadata(history: ITransHistory) {
+    if (history.isMultiple) {
+      return (
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label
+            title=""
+            text={TRANS_SERVICES_NAMES.get(history.multipleServiceProvider)}
+            icon={{ source: `${history.multipleServiceProvider}.png` }}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          {(history.toList || []).map((tran) => {
+            return (
+              <List.Item.Detail.Metadata.Label
+                key={tran.to}
+                title={`-> ${getLang(tran.to).langTitle}`}
+                text={tran.res}
+              />
+            );
+          })}
+        </List.Item.Detail.Metadata>
+      );
+    } else {
+      return (
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label
+            title=""
+            text={`${getLang(history.from).langTitle} -> ${getLang(history.to || "").langTitle}`}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          {(history.transList || []).map((tran) => {
+            return (
+              <List.Item.Detail.Metadata.Label
+                key={tran.serviceProvider}
+                title={TRANS_SERVICES_NAMES.get(tran.serviceProvider) || ""}
+                text={tran.res}
+              />
+            );
+          })}
+        </List.Item.Detail.Metadata>
+      );
+    }
+  }
+
+  function CopyResSubmenu(props: { history: ITransHistory }) {
+    if (props.history.isMultiple) {
+      return (
+        <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy Result to Clipboard">
+          {(props.history.toList || []).map((tran) => {
+            return (
+              <Action.CopyToClipboard key={tran.to} title={`-> ${getLang(tran.to).langTitle}`} content={tran.res} />
+            );
+          })}
+        </ActionPanel.Submenu>
+      );
+    } else {
+      return (
+        <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy Result to Clipboard">
+          {(props.history.transList || []).map((tran) => {
+            return (
+              <Action.CopyToClipboard
+                key={tran.serviceProvider}
+                icon={{ source: `${tran.serviceProvider}.png` }}
+                title={TRANS_SERVICES_NAMES.get(tran.serviceProvider)}
+                content={tran.res}
+              />
+            );
+          })}
+        </ActionPanel.Submenu>
+      );
+    }
+  }
 
   return (
     <List isLoading={isLoadingState} isShowingDetail={historiesState.length !== 0}>
@@ -20,44 +104,12 @@ export function TranslateHistory() {
         return (
           <List.Item
             key={history.time}
-            title={history.text}
-            accessories={[{ date: new Date(history.time) }]}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title=""
-                      text={`${getLang(history.from).langTitle} -> ${getLang(history.to).langTitle}`}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    {history.transList.map((tran) => {
-                      return (
-                        <List.Item.Detail.Metadata.Label
-                          key={tran.serviceProvider}
-                          title={TRANS_SERVICES_NAMES.get(tran.serviceProvider) || ""}
-                          text={tran.res}
-                        />
-                      );
-                    })}
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            title={history.text || ""}
+            accessories={ListAccessories(history)}
+            detail={<List.Item.Detail metadata={HistoryMetadata(history)} />}
             actions={
               <ActionPanel>
-                <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy Result to Clipboard">
-                  {history.transList.map((tran) => {
-                    return (
-                      <Action.CopyToClipboard
-                        key={tran.serviceProvider}
-                        icon={{ source: `${tran.serviceProvider}.png` }}
-                        title={TRANS_SERVICES_NAMES.get(tran.serviceProvider)}
-                        content={tran.res}
-                      />
-                    );
-                  })}
-                </ActionPanel.Submenu>
+                <CopyResSubmenu history={history} />
                 <Action.CopyToClipboard title="Copy Source to Clipboard" content={history.text} />
                 <Action
                   title="Play Source Sound"

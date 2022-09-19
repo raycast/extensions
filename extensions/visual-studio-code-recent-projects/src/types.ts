@@ -58,9 +58,5 @@ export interface Preferences {
 }
 
 export interface RecentEntries {
-  value: string;
-}
-
-export interface RecenEntry {
-  entries: EntryLike[];
+  entries: string;
 }

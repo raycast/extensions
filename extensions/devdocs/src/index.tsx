@@ -1,84 +1,13 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  environment,
-  Icon,
-  ImageLike,
-  List,
-  OpenInBrowserAction,
-  popToRoot,
-  PushAction,
-  showHUD,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { existsSync, mkdirSync } from "fs";
-import { readFile, writeFile } from "fs/promises";
 import Fuse from "fuse.js";
-import fetch from "node-fetch";
-import open from "open";
-import { resolve } from "path";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { Doc, Entry } from "./types";
-import { useVisitedDocs } from "./useVisitedDocs";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import { Doc, Entry, Index } from "./types";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
 if (!existsSync(environment.supportPath)) {
   mkdirSync(environment.supportPath, { recursive: true });
-}
-
-interface FetchResult<T> {
-  data?: T;
-  isLoading: boolean;
-}
-
-export function useFetchWithCache<T>(url: string, cacheFilename: string): FetchResult<T> {
-  const cachePath = resolve(environment.supportPath, cacheFilename);
-  const [state, setState] = useState<{ data?: T; isLoading: boolean }>({ isLoading: true });
-
-  useEffect(() => {
-    async function fetchWithCache() {
-      // Load from Cache
-      if (existsSync(cachePath)) {
-        const text = await readFile(cachePath).then((buffer) => buffer.toString());
-        await setState({ data: JSON.parse(text.toString()), isLoading: true });
-      }
-
-      // Refresh Cache
-      try {
-        const data = await fetch(url).then((res) => res.json());
-        await setState({ data: data as T, isLoading: false });
-        await writeFile(cachePath, JSON.stringify(data));
-      } catch (error) {
-        console.error(error);
-        showToast(ToastStyle.Failure, "Could not refresh cache!", "Please Check your connexion");
-      }
-    }
-    fetchWithCache();
-  }, [url]);
-
-  return state;
-}
-
-export default function DocList(): JSX.Element {
-  const { data, isLoading } = useFetchWithCache<Doc[]>(`${DEVDOCS_BASE_URL}/docs/docs.json`, "index.json");
-  const { docs: visitedDocs, visitDoc } = useVisitedDocs();
-
-  return (
-    <List isLoading={(!data && !data) || isLoading}>
-      <List.Section title="Last Visited">
-        {visitedDocs?.map((doc) => (
-          <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
-        ))}
-      </List.Section>
-      <List.Section title="All">
-        {data?.map((doc) => (
-          <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
-        ))}
-      </List.Section>
-    </List>
-  );
 }
 
 function useFuse<U>(
@@ -96,98 +25,83 @@ function useFuse<U>(
   return [results.map((result) => result.item), setQuery];
 }
 
-function EntryList(props: { doc: Doc; icon: ImageLike }) {
-  const { doc, icon } = props;
-  const { data, isLoading } = useFetchWithCache<{ entries: Entry[] }>(
-    `${DEVDOCS_BASE_URL}/docs/${doc.slug}/index.json`,
-    `${doc.slug}.json`
+export default function EntryList(): JSX.Element {
+  const { data: docs, isLoading: docLoading } = useFetch<Record<string, Doc>>(`${DEVDOCS_BASE_URL}/docs/docs.json`, {
+    parseResponse: async (response) => {
+      const payload = (await response.json()) as Doc[];
+      return Object.fromEntries(payload.map((doc) => [doc.slug, doc]));
+    },
+  });
+
+  const [selectedDoc, setSelectedDoc] = useState<Doc | undefined>();
+
+  const { data: index, isLoading: entriesLoading } = useFetch<Index>(
+    `${DEVDOCS_BASE_URL}/docs/${selectedDoc?.slug}/index.json`,
+    { execute: typeof selectedDoc !== "undefined" }
   );
-  const [results, setQuery] = useFuse(data?.entries, { keys: ["name", "type"] }, 500);
+  const [results, setQuery] = useFuse(index?.entries, { keys: ["name", "type"] }, 500);
 
   return (
     <List
-      isLoading={isLoading}
+      searchBarAccessory={
+        docs && (
+          <List.Dropdown
+            tooltip="Documentation"
+            onChange={(slug) => setSelectedDoc(docs[slug])}
+            storeValue
+            defaultValue="react"
+          >
+            {Object.entries(docs).map(([key, doc]) => (
+              <List.Dropdown.Item
+                icon={doc.links?.home ? getFavicon(doc.links.home, { fallback: Icon.Book }) : Icon.Book}
+                key={key}
+                title={doc.version ? `${doc.name} ${doc.version}` : doc.name}
+                value={key}
+              />
+            ))}
+          </List.Dropdown>
+        )
+      }
+      isLoading={docLoading || entriesLoading}
       onSearchTextChange={(text) => {
         setQuery(text);
       }}
     >
-      {results.map((entry) => (
-        <EntryItem entry={entry} icon={icon} key={entry.name + entry.path + entry.type} doc={doc} />
-      ))}
+      {selectedDoc &&
+        results.map((entry) => (
+          <EntryItem entry={entry} key={entry.name + entry.path + entry.type} doc={selectedDoc} />
+        ))}
     </List>
   );
 }
 
-function EntryItem(props: { entry: Entry; doc: Doc; icon: ImageLike }) {
-  const { entry, doc, icon } = props;
+function EntryItem(props: { entry: Entry; doc: Doc }) {
+  const { entry, doc } = props;
+  const homeIcon = doc.links?.home ? getFavicon(doc.links?.home, { fallback: Icon.Book }) : Icon.Book;
+  const CodeIcon = doc.links?.code ? getFavicon(doc.links?.code, { fallback: Icon.Code }) : Icon.Code;
   return (
     <List.Item
       title={entry.name}
-      icon={icon}
+      icon={doc.links?.home ? getFavicon(doc.links.home, { fallback: Icon.Dot }) : Icon.Dot}
       key={entry.name + entry.path}
       accessoryTitle={entry.type}
       keywords={[entry.type].concat(entry.name.split("."))}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} onOpen={() => popToRoot()} />
-          <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} onOpen={() => popToRoot()} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function OpenInDevdocsAction(props: { url: string; onOpen?: () => void }) {
-  return (
-    <ActionPanelItem
-      title="Open in Devdocs"
-      icon="devdocs.png"
-      onAction={async () => {
-        const { exitCode } = await open(props.url, { app: { name: "DevDocs" }, wait: true });
-        if (exitCode !== 0) {
-          await open("https://github.com/dteoh/devdocs-macos");
-          showHUD("Devdocs app is not installed!");
-        }
-
-        if (props.onOpen) {
-          props.onOpen();
-        }
-      }}
-    />
-  );
-}
-
-function DocItem(props: { doc: Doc; onVisit: () => void }) {
-  const { doc, onVisit } = props;
-  const { name, slug, links, version, release } = doc;
-  const icon = links?.home ? getFavicon(links.home, { fallback: Icon.Globe }) : Icon.Dot;
-  return (
-    <List.Item
-      key={slug}
-      title={name}
-      icon={icon}
-      subtitle={version}
-      keywords={[release]}
-      accessoryTitle={release}
-      actions={
-        <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
-              title="Browse Entries"
-              icon={Icon.ArrowRight}
-              target={<EntryList doc={doc} icon={icon} />}
-              onPush={onVisit}
+            <Action.OpenInBrowser url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} />
+            <Action.Open
+              icon="devdocs.png"
+              title="Open in DevDocs"
+              target={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`}
+              application="DevDocs"
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} onOpen={() => popToRoot()} />
-            <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${slug}`} onOpen={() => popToRoot()} />
-            {links?.home ? (
-              <OpenInBrowserAction title="Open Project Homepage" url={links.home} onOpen={() => popToRoot()} />
-            ) : null}
-            {links?.code ? (
-              <OpenInBrowserAction title="Open Code Repository" url={links.code} onOpen={() => popToRoot()} />
-            ) : null}
+            {doc.links?.home && <Action.OpenInBrowser icon={homeIcon} title="Open Project Home" url={doc.links.home} />}
+            {doc.links?.code && (
+              <Action.OpenInBrowser icon={CodeIcon} title="Open Project Repository" url={doc.links.code} />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -1,10 +1,11 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Image } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Media, MediaSearchArguments, SearchMediaPreferences, Vault } from "../utils/interfaces";
-import { OpenPathInObsidianAction, ShowPathInFinderAction } from "../utils/actions";
+import { OpenPathInObsidianAction, ShowMentioningNotesAction, ShowPathInFinderAction } from "../utils/actions";
 import { getListOfExtensions, useMedia } from "../utils/utils";
 import { IMAGE_SIZE_MAPPING } from "../utils/constants";
+import { filterMedia } from "../utils/search";
 
 export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArguments }) {
   const { vault, searchArguments } = props;
@@ -23,12 +24,16 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
   const extensions = getListOfExtensions(allMedia);
   const { imageSize } = getPreferenceValues<SearchMediaPreferences>();
 
+  const [input, setInput] = useState<string>(searchArguments.searchArgument || "");
+  const list = useMemo(() => filterMedia(mediaList, input, vault), [mediaList, input]);
+
   return (
     <Grid
       inset={Grid.Inset.Small}
       itemSize={IMAGE_SIZE_MAPPING.get(imageSize)}
       isLoading={mediaList.length == 0 && !ready}
       searchText={searchArguments.searchArgument}
+      onSearchTextChange={setInput}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Filter by type"
@@ -48,7 +53,7 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
         </Grid.Dropdown>
       }
     >
-      {mediaList.map((m) => {
+      {list.map((m) => {
         return (
           <Grid.Item
             title={m.title}
@@ -60,6 +65,7 @@ export function MediaGrid(props: { vault: Vault; searchArguments: MediaSearchArg
                 <Action.ToggleQuickLook />
                 <OpenPathInObsidianAction path={m.path} />
                 <ShowPathInFinderAction path={m.path} />
+                <ShowMentioningNotesAction vault={vault} str={m.title} />
               </ActionPanel>
             }
           />
