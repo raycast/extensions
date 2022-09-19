@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "adhan-time",
-  "title": "Adhan time",
+  "title": "Adhan Time",
   "description": "This extension helps you to search prayer time for the user location",
   "icon": "command-icon.png",
   "author": "mzaien",
@@ -14,7 +14,7 @@
     {
       "name": "adhan",
       "title": "View Prayer Time",
-      "description": "helps you to view adhan time for your own preferences",
+      "description": "View adhan prayer times directly from your menubar",
       "mode": "menu-bar",
       "interval": "24h"
     }
