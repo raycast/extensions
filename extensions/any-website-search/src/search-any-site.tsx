@@ -188,7 +188,9 @@ export default function () {
           actions={searchActionPanel}
         ></List.Item>
       ) : (
-        (data ?? []).map((item) => <List.Item key={item} title={item} actions={searchActionPanel} />)
+        (data ?? []).map((item, i) => (
+          <List.Item key={i === 0 ? `${i}` : item} title={item} actions={searchActionPanel} />
+        ))
       )}
     </List>
   );
