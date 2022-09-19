@@ -1,17 +1,15 @@
 import { Form, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { useCallback } from "react";
 import { editTask } from "../api/endpoints";
-import { TaskForm } from "../types";
+import { Task } from "../types";
 
-export default function EditTaskForm(props: {
-  listId: string;
-  task: TaskForm;
-}) {
+export default function EditTaskForm(props: { listId: string; task: Task }) {
   const { pop } = useNavigation();
 
   const handleSubmit = useCallback(
     (values: { title: string; notes: string; due: string }) => {
       editTask(props.listId, {
+        ...props.task,
         title: values.title,
         notes: values.notes,
         due: values.due,

@@ -65,16 +65,7 @@ export default function TaskItem(props: {
           <Action.Push
             title="Edit Task"
             shortcut={{ modifiers: ["cmd"], key: "i" }}
-            target={
-              <EditTaskForm
-                listId={props.listId}
-                task={{
-                  title: props.task.title,
-                  notes: props.task.notes,
-                  due: props.task.due,
-                }}
-              />
-            }
+            target={<EditTaskForm listId={props.listId} task={props.task} />}
           />
         </ActionPanel>
       }

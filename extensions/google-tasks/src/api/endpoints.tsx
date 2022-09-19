@@ -94,14 +94,11 @@ export async function createTask(
     throw new Error(response.statusText);
   }
 }
-export async function editTask(
-  tasklist: string,
-  task: TaskForm
-): Promise<void> {
+export async function editTask(tasklist: string, task: Task): Promise<void> {
   const response = await fetch(
-    `https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks`,
+    `https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${task.id}`,
     {
-      method: "POST",
+      method: "PATCH",
       body: JSON.stringify(task),
       headers: {
         "Content-Type": "application/json",
