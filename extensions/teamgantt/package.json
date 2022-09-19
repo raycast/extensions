@@ -54,7 +54,7 @@
       "type": "password",
       "required": true,
       "title": "Password",
-      "description": "TeammGantt Password",
+      "description": "TeamGantt Password",
       "placeholder": "********"
     }
   ],
