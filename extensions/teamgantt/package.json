@@ -17,7 +17,7 @@
     {
       "name": "my-tasks",
       "title": "My Tasks",
-      "subtitle": "Show all of your active tasks",
+      "subtitle": "TeamGantt",
       "description": "Return all tasks you are assigned to that have not been completed yet",
       "mode": "view"
     }
