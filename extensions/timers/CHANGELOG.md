@@ -1,8 +1,9 @@
 # Timers Changelog
 
-## [Support new Raycast features and add Stopwatch support] - 2022-09-10
+## [Support new Raycast features and add Stopwatch support] - 2022-09-19
 
 - Added MenuBarExtra support (thanks to @marcjulianschwarz)
+- Show name + approximate time of timer nearest to completion in MenuBarExtra
 - Added inline argument support for the Start Custom Timer command
 - Improve form validation in Start Custom Timer command
 - Add stopwatch support (Start Stopwatch and Manage Stopwatches commands)

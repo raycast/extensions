@@ -14,7 +14,13 @@ export default function Command() {
   }, []);
 
   return (
-    <MenuBarExtra icon={Icon.Clock} isLoading={isLoading}>
+    <MenuBarExtra
+      icon={Icon.Clock}
+      isLoading={isLoading}
+      title={
+        timers != undefined && timers?.length > 0 ? `${timers[0].name}: ~${formatTime(timers[0].timeLeft)}` : undefined
+      }
+    >
       <MenuBarExtra.Item title="Click running timer to stop" />
       {timers?.map((timer) => (
         <MenuBarExtra.Item

@@ -99,7 +99,8 @@
       "name": "timersMenuBar",
       "title": "Timers Menu Bar",
       "description": "View, start, or stop existing countdown timers from the Menu Bar.",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "startStopwatch",
@@ -192,6 +193,15 @@
       "title": "Timer Alert Type",
       "description": "Whether or not to play the timer alert sound continuously until dismissed.",
       "label": "Ring Continuously",
+      "default": false
+    },
+    {
+      "name": "copyOnSwStop",
+      "type": "checkbox",
+      "required": true,
+      "title": "Copy on Stopwatch Stop",
+      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
+      "label": "Copy elapsed time",
       "default": false
     }
   ],

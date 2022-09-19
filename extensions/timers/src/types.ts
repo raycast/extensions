@@ -28,6 +28,7 @@ export interface CustomTimer {
 export interface Preferences {
   selectedSound: string;
   ringContinuously: boolean;
+  copyOnSwStop: boolean;
 }
 
 export interface CTInlineArgs {

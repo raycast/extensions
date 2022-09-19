@@ -1,5 +1,6 @@
-import { environment } from "@raycast/api";
+import { Clipboard, environment, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
+import { formatTime } from "../formatUtils";
 import { getStopwatches, startStopwatch, stopStopwatch } from "../stopwatchUtils";
 import { Stopwatch } from "../types";
 
@@ -19,6 +20,10 @@ export default function useStopwatches() {
   };
 
   const handleStopSW = (stopwatch: Stopwatch) => {
+    const prefs = getPreferenceValues();
+    if (prefs.copyOnSwStop) {
+      Clipboard.copy(formatTime(stopwatch.timeElapsed));
+    }
     setStopwatches(stopwatches?.filter((s: Stopwatch) => s.originalFile !== stopwatch.originalFile));
     stopStopwatch(`${environment.supportPath}/${stopwatch.originalFile}`);
     refreshSWes();
