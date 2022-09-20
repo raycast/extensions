@@ -31,9 +31,9 @@ const initialState = {
 
 export const UNAUTHORIZED_TOKEN = 'UNAUTHORIZED_TOKEN'
 
-export const TokenContext = createContext<Context>(initialState as Context)
+export const AuthContext = createContext<Context>(initialState as Context)
 
-export const TokenProvider: FC = ({ children }) => {
+export const AuthProvider: FC = ({ children }) => {
   const [state, dispatch] = useReducer(tokenReducer, initialState)
 
   const setToken = useCallback(
@@ -43,6 +43,7 @@ export const TokenProvider: FC = ({ children }) => {
 
   const getToken = async () => {
     const accessToken = (await oauthClient.getTokens())?.accessToken
+
     if (accessToken) {
       setToken(accessToken)
     } else {
@@ -61,7 +62,7 @@ export const TokenProvider: FC = ({ children }) => {
     }),
     [state]
   )
-  return <TokenContext.Provider value={value}>{children}</TokenContext.Provider>
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 function tokenReducer(state: State, action: Action) {

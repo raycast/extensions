@@ -1,10 +1,10 @@
-import { AuthorizationAction } from '@/components/authorization-action'
+import { AuthorizationAction } from './components/authorization-action'
 import { CompleteTodoAction } from '@/components/complete-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
-import { useOnboarding } from '@/hooks/use-onboarding'
+import { useOnboarding } from './hooks/use-onboarding'
 import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 
 export function Onboarding() {
