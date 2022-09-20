@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Form, open, Toast, Clipboard } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { format } from "date-fns";
-import { useRef } from "react";
 import { createScheduledMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
 
@@ -18,7 +17,7 @@ type MeetingFormProps = {
 };
 
 export default function MeetingForm({ enableDrafts = false, draftValues }: MeetingFormProps) {
-  const { handleSubmit, itemProps } = useForm<MeetingFormValues>({
+  const { handleSubmit, itemProps, focus, reset } = useForm<MeetingFormValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Scheduling meeting" });
       await toast.show();
@@ -56,9 +55,14 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
           },
         };
 
-        // TODO: reset the values
+        reset({
+          start_time: undefined,
+          duration: "",
+          topic: "",
+          agenda: "",
+        });
 
-        startTimeRef.current?.focus();
+        focus("start_time");
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to schedule meeting";
@@ -81,8 +85,6 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
     },
   });
 
-  const startTimeRef = useRef<Form.DatePicker>(null);
-
   return (
     <Form
       enableDrafts={enableDrafts}
@@ -92,7 +94,7 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
         </ActionPanel>
       }
     >
-      <Form.DatePicker title="Start Time" ref={startTimeRef} {...itemProps.start_time} />
+      <Form.DatePicker title="Start Time" {...itemProps.start_time} />
 
       <Form.Separator />
 
