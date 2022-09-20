@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
 import { decode as htmlDecode } from "he";
@@ -57,23 +57,23 @@ function maybeStripBangFromQuery(templateUrl: string, query: string) {
   try {
     url = new URL(templateUrl);
   } catch {
-    return query;
+    return { bang: null, query };
   }
 
   const domain = url.hostname;
 
   const isDdg = domain.toLowerCase().split(/\./g).includes("duckduckgo");
   if (!isDdg) {
-    return query;
+    return { bang: null, query };
   }
 
-  const matchResult = query.match(/^!\w+\s*(.*)$/);
+  const matchResult = query.match(/^(!\w+)\s*(.*)$/);
   if (matchResult === null) {
-    return query;
+    return { bang: null, query };
   }
 
-  const [, newQuery] = matchResult;
-  return newQuery;
+  const [, bang, newQuery] = matchResult;
+  return { bang, query: newQuery };
 }
 
 function DefaultActions(props: SavedSitesState) {
@@ -109,15 +109,24 @@ export default function () {
   const defaultUrl = savedSites.items.find(({ title }) => strEq(title, savedSites.defaultSiteTitle ?? ""))?.url;
 
   const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
+  const [selectedSuggestion, setSelectedSuggestion] = useState("");
+  const [currentBang, searchSuggestionQueryText] = useMemo(() => {
+    const { bang, query } = getPreferenceValues<Preferences>().interpretDdgBangs
+      ? maybeStripBangFromQuery(selectedSite.url, searchText)
+      : { bang: null, query: searchText };
+
+    return [bang, query];
+  }, [searchText, selectedSite]);
+
+  const textToSearch = useMemo(() => {
+    const bang = currentBang ?? "";
+    return `${bang} ${selectedSuggestion}`.trim();
+  }, [selectedSuggestion, currentBang, selectedSite]);
 
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
   const { isLoading, data } = useFetch<string[] | string, void>(
-    `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(
-      getPreferenceValues<Preferences>().interpretDdgBangs
-        ? maybeStripBangFromQuery(selectedSite.url, searchText)
-        : searchText
-    )}`,
+    `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(searchSuggestionQueryText)}`,
     {
       headers: {
         "User-Agent":
@@ -150,7 +159,7 @@ export default function () {
     <ActionPanel>
       <Action.OpenInBrowser
         title={`Search on ${selectedSite.title}`}
-        url={fillTemplateUrl(selectedSite.url, searchText)}
+        url={fillTemplateUrl(selectedSite.url, textToSearch)}
       ></Action.OpenInBrowser>
       <DefaultActions savedSites={savedSites} setSavedSites={setSavedSites} />
     </ActionPanel>
@@ -163,6 +172,10 @@ export default function () {
       throttle={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      onSelectionChange={(id) => {
+        console.log(id);
+        setSelectedSuggestion(id ?? "");
+      }}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Search site"
@@ -189,7 +202,7 @@ export default function () {
         ></List.Item>
       ) : (
         (data ?? []).map((item, i) => (
-          <List.Item key={i === 0 ? `${i}` : item} title={item} actions={searchActionPanel} />
+          <List.Item key={i === 0 ? `${i}` : item} id={item} title={item} actions={searchActionPanel} />
         ))
       )}
     </List>
