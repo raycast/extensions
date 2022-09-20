@@ -1,5 +1,9 @@
 # Short.io Changelog
 
+## [Add Menu Bar command] - {PR_MERGE_DATE}
+
+- Add Menu Bar command: Search Links
+
 ## [Add text field validation] - 2022-07-04
 
 - Add text field validation

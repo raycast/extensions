@@ -26,7 +26,7 @@
 - [x] Support to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
-- [x] Support to sort translation results manually.
+- [x] Support to sort query results manually.
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
@@ -44,7 +44,7 @@ Next:
 
 ### [Linguee Dictionary](https://www.linguee.com/)：English <--> Chinese
 
-![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
+![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
@@ -103,12 +103,12 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 #### Dictionary
 
-- Youdao: Chinese (Simplified), Chinese (Traditional), English.
-- Linguee: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+- Youdao: Support 5 langauges, (Chinese), English, French, Japanese, Korean.
+- Linguee: Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Translation
 
-Currently we support 23 languages: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Currently we support 23 languages: Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 Details of the languages supported by each translation service are as follows:
 
@@ -184,9 +184,9 @@ In order to better match the automatic selected text feature, it is a good idea 
 
 <p>
 
-Note that when this option is enabled, voice messages will be played automatically only if the content of the query is determined to be `good`, `look for`, `query`, etc. For other query contents, you can use the shortcut key `Cmd + S` to play audio.
+Note that when this option is started, the voice will be played only when the query is judged to be `is_Word` and in English, e.g. `good`, `look for`, etc. For other queries, the voice can be played with the shortcut `Cmd + S`.
 
-Play audio content: English words are preferred to be pronounced in an online youdao dictionary, while others are pronounced using Youdao Translation's TTS service. Long text playback uses the say shell command.
+The content of playing voice: English words are pronounced by the online Youdao dictionary first, and other words are pronounced by the TTS service of Youdao translation. For long text playback, use the say command.
 
 </p>
 
@@ -198,23 +198,24 @@ Use `Cmd + S` to play the pronunciation of words manually.
 
 ### Select Target Language
 
-<details><summary> Specify the target language. This option is turned on by default. </summary>
+<details><summary> Specify the target language. This option is turned off by default. </summary>
 
 <p>
 
-By default, the extension will automatically select the preferred languages as the target translation language, but sometimes if you want to manually specify a supported language as the target language, you can temporarily select another target language in the action panel.
+By default, the extension will automatically select the preferred language as the target translation language. However, sometimes if you want to manually specify a language as the target language, you can turn on this option in the preferences and then you can temporarily select another target language in the action panel.
 
 </p>
 
 </details>
 
-### Sort Translation Manually
+### Sort Query Results Manually
 
-<details> <summary> You can sort the translation results by your preference, default is DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
+<details> <summary> You can sort query results by your preference, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun. </summary>
 
 <p>
 
-Name case are insensitive, use comma to separate. Example: `deepl,google,apple,baidu,tencent,youdao,caiyun`. You can also specify a part of the sort, for example: `apple,tencent`，the actual sort is: `apple,tencent,deepl,google,baidu,youdao,caiyun`.
+Name case are insensitive, use comma to separate. Example: `youdao dictionary, linguee dictionary, deepl, google, apple, baidu, tencent, youdao, caiyun`.
+You can also specify a part of the sort, for example: `youdao dictionary, apple, tencent`，the actual sort is: `youdao dictionary, apple, tencent, linguee dictionary, deepl, google, baidu, youdao, caiyun`.
 
 > Note: This sort is the overall sort, if a translation service is not enabled, the sort will be automatically ignored.
 

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 16:09
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 10:29
+ * @lastEditTime: 2022-09-02 23:51
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -15,7 +15,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
 import { userAgent } from "../consts";
-import { checkIfPreferredLanguagesContainedChinese } from "../detectLanauge/utils";
+import { checkIfPreferredLanguagesContainChinese } from "../detectLanauge/utils";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getGoogleLanguageId, getYoudaoLanguageIdFromGoogleId } from "../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
@@ -68,14 +68,13 @@ async function googleRPCTranslate(
         resolve(result);
       })
       .catch((error) => {
-        // console.error(`error message: ${error.message}`);
-
         // * got use a different error meassage from axios.
         if (error.message.includes("The operation was aborted")) {
           console.log(`---> google rpc aborted`);
-          return;
+          return reject(undefined);
         }
 
+        console.error(`google rpc error message: ${error.message}`);
         console.error(`googleRPCTranslate error: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(TranslationType.Google, error);
         reject(errorInfo);
@@ -119,10 +118,9 @@ export async function googleLanguageDetect(
         resolve(languagedDetectResult);
       })
       .catch((error) => {
-        // * got use a different error meassage from axios.
-        if (error.message.includes("The operation was aborted")) {
+        if (!error) {
           console.log(`---> google detect aborted`);
-          return;
+          return reject(undefined);
         }
 
         console.error(`googleLanguageDetect error: ${JSON.stringify(error)}`);
@@ -185,7 +183,7 @@ export async function googleWebTranslate(
       .catch((error) => {
         if (error.message === "canceled") {
           console.log(`---> google cancelled`);
-          return;
+          return reject(undefined);
         }
         console.error(`google web error: ${error}`);
 
@@ -204,9 +202,9 @@ export async function googleWebTranslate(
  */
 async function getTld(): Promise<string> {
   let tld = "com"; // cn,com
-  if (checkIfPreferredLanguagesContainedChinese() || (await checkIfIpInChina())) {
+  if (checkIfPreferredLanguagesContainChinese() || (await checkIfIpInChina())) {
     tld = "cn";
-    console.log(`---> China, or Chinese: ${checkIfPreferredLanguagesContainedChinese()}`);
+    console.log(`---> China, or Chinese: ${checkIfPreferredLanguagesContainChinese()}`);
   }
   console.log(`---> google tld: ${tld}`);
   return tld;

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 17:00
+ * @lastEditTime: 2022-09-02 23:25
  * @fileName: caiyun.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -71,7 +71,7 @@ export function requestCaiyunTextTranslate(queryWordInfo: QueryWordInfo): Promis
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
           console.log(`---> caiyun canceled`);
-          return;
+          return reject(undefined);
         }
 
         console.error(`---> Caiyun translate error: ${error}`);

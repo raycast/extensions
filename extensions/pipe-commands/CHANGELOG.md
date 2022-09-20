@@ -1,5 +1,11 @@
 # Pipe Commands Changelog
 
+## [Added new pipe commands] - 2022-09-19
+
+Adding two new pipe command scripts:
+- Reverse lines
+- Convert newlines to spaces
+
 ## [Improve Documentation] - 2022-08-15
 
 ### Fixed

@@ -8,17 +8,34 @@ import {
   List,
   Icon,
 } from "@raycast/api";
-import { LANG_LIST, TRANS_SERVICES_AUTH_NAMES } from "./const";
-
-const icon = { source: Icon.XMarkCircle, tintColor: Color.Red };
+import { LANG_LIST, TransServiceProviderTp, TRANS_SERVICES_AUTH_NAMES, TRANS_SERVICES_NAMES } from "./const";
 
 export function TranslateError(props: { transRes: ITranslateRes }) {
+  const icon = { source: Icon.XMarkCircle, tintColor: Color.Red };
   return (
     <List.Item
       icon={{ source: `${props.transRes.serviceProvider}.png` }}
       title="Opps!!"
       accessories={[{ icon }]}
       detail={<List.Item.Detail markdown={`Sorry! We have some problems...`} />}
+    />
+  );
+}
+
+export function TranslateNotSupport(props: { transRes: ITranslateRes }) {
+  const icon = { source: Icon.Warning, tintColor: Color.SecondaryText };
+  return (
+    <List.Item
+      icon={{ source: `${props.transRes.serviceProvider}.png` }}
+      title="Not support~~"
+      accessories={[{ icon }]}
+      detail={
+        <List.Item.Detail
+          markdown={`Sorry! ${TRANS_SERVICES_NAMES.get(props.transRes.serviceProvider)} does not support ${
+            props.transRes.to.langTitle
+          } yet...`}
+        />
+      }
     />
   );
 }
@@ -55,18 +72,20 @@ export function LanguageConflict() {
   );
 }
 
-export function ServiceProviderMiss() {
-  const preferences: IPreferences = getPreferenceValues<IPreferences>();
-  const defaultServiceProvider = preferences.defaultServiceProvider;
-  const auth_names = TRANS_SERVICES_AUTH_NAMES.get(defaultServiceProvider);
+export function ServiceProviderMiss(props: { service: TransServiceProviderTp; disabled?: boolean }) {
+  const auth_names = TRANS_SERVICES_AUTH_NAMES.get(props.service);
   const markdown = `
   # Welcome to use iTranslate 🎉🎉🎉 \n
   iTranslate is a translation extension that can customize translation service providers and support multiple languages\n
-  Now we support this translation service providers: [Google](https://translate.google.cn)、[Deepl](https://www.deepl.com/pro-api?cta=header-pro-api)、[Youdao](https://ai.youdao.com)、[Baidu](https://fanyi-api.baidu.com)、[Tencent](https://fanyi.qq.com/translateapi)\n
+  Now we support this translation service providers: [Google(Free)](https://translate.google.cn),[Google Could Translation](https://cloud.google.com/translate),[Deepl](https://www.deepl.com/pro-api?cta=header-pro-api),[Microsoft Azure](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/quickstart-translator?tabs=csharp),[Youdao](https://ai.youdao.com),[Baidu](https://fanyi-api.baidu.com),[Tencent](https://fanyi.qq.com/translateapi),[Aliyun](https://www.alibabacloud.com/product/machine-translation)\n
   ## Before using the extension, follow these steps:
-  1. ⚙️ Please enter \`↵\` to open iTranslate Preferences
-  2. Config ${auth_names?.map((n) => `**${n}**`).join(" and ")} in the right area of the preferences window
-  > ⚠️ The default translation service provider you selected is *${defaultServiceProvider}*\n
+  1. Please enter \`↵\` to open iTranslate Preferences ⚙️
+  ${
+    props.disabled
+      ? `2. Enable *${TRANS_SERVICES_NAMES.get(props.service)}* in the right area of the preferences window`
+      : `2. Config ${auth_names?.map((n) => `**${n}**`).join(" and ")} in the right area of the preferences window`
+  }
+  > ⚠️ The default translation service provider you selected is *${TRANS_SERVICES_NAMES.get(props.service)}*\n
   # 🍻 Enjoy it !
   `;
   return (

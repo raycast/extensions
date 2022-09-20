@@ -334,3 +334,12 @@ export const languageItemList: LanguageItem[] = [
     emoji: "🇨🇿",
   },
 ];
+
+/**
+ * Chinese language item.
+ */
+export const chineseLanguageItem = languageItemList[1];
+/**
+ * English language item.
+ */
+export const englishLanguageItem = languageItemList[3];

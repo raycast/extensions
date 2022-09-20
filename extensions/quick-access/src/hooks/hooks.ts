@@ -10,7 +10,7 @@ import {
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
 import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
-import { copyFileByPath } from "../utils/applescript-utils";
+import { copyFileByPath, getOpenFinderWindowPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
 import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
 import { Preferences } from "../types/preferences";
@@ -39,8 +39,9 @@ export const getIsShowDetail = (refreshDetail: number) => {
 };
 
 //get local directory with files
-export const localDirectoryWithFiles = (refresh: number) => {
-  const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
+export const localDirectoryWithFiles = (refresh: number, showOpenFolders: boolean) => {
+  const [pinnedDirectoryWithFiles, setPinnedDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
+  const [openDirectoryWithFiles, setOpenDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [allFilesNumber, setAllFilesNumber] = useState<number>(-1);
   const [loading, setLoading] = useState<boolean>(true);
   const { fileShowNumber, sortBy } = getPreferenceValues<Preferences>();
@@ -76,8 +77,33 @@ export const localDirectoryWithFiles = (refresh: number) => {
       });
       _allFilesNumber = _allFilesNumber + files.length;
     });
+
+    //get file in open folder
+
+    const _openDirectoryContent: DirectoryWithFileInfo[] = [];
+    if (showOpenFolders) {
+      const openFolders = await getOpenFinderWindowPath();
+
+      openFolders.forEach((openFolder) => {
+        const isExist = validDirectory.some((localFolder) => {
+          return localFolder.path == openFolder.path;
+        });
+        if (isExist) return;
+        const files =
+          _fileShowNumber === -1
+            ? getDirectoryFiles(openFolder.path + "/")
+            : getDirectoryFiles(openFolder.path + "/").slice(0, _fileShowNumber);
+        _openDirectoryContent.push({
+          directory: openFolder,
+          files: files,
+        });
+        _allFilesNumber = _allFilesNumber + files.length;
+      });
+    }
+
     setAllFilesNumber(_allFilesNumber);
-    setDirectoryWithFiles(_pinnedDirectoryContent);
+    setPinnedDirectoryWithFiles(_pinnedDirectoryContent);
+    setOpenDirectoryWithFiles(_openDirectoryContent);
     setLoading(false);
 
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
@@ -88,7 +114,9 @@ export const localDirectoryWithFiles = (refresh: number) => {
   }, [fetchData]);
 
   return {
-    directoryWithFiles: directoryWithFiles,
+    directoryWithFiles: [...pinnedDirectoryWithFiles, ...openDirectoryWithFiles],
+    pinnedDirectoryWithFiles: pinnedDirectoryWithFiles,
+    openDirectoryWithFiles: openDirectoryWithFiles,
     allFilesNumber: allFilesNumber,
     loading: loading,
   };

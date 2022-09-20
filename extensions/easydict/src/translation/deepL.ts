@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-19 23:13
+ * @lastEditTime: 2022-09-02 23:26
  * @fileName: deepL.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -25,7 +25,7 @@ const deepLAuthStoredKey = "deepLAuthStoredKey";
  *
  * https://www.deepl.com/zh/docs-api/translating-text
  */
-export async function requestDeepLTextTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
+export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start rquest DeepL`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   const sourceLang = getDeepLLanguageId(fromLanguage);
@@ -78,7 +78,7 @@ export async function requestDeepLTextTranslate(queryWordInfo: QueryWordInfo): P
       .catch((error: AxiosError) => {
         if (error.message === "canceled") {
           console.log(`---> deepL canceled`);
-          return;
+          return reject(undefined);
         }
 
         console.error("deepL error: ", error);
@@ -91,7 +91,7 @@ export async function requestDeepLTextTranslate(queryWordInfo: QueryWordInfo): P
           errorInfo.message = "Quota exceeded"; // Quota exceeded. The character limit has been reached.
           if (wildEncryptedDeepLKeys.length) {
             getAndStoreDeepLKey(wildEncryptedDeepLKeys).then(() => {
-              requestDeepLTextTranslate(queryWordInfo);
+              requestDeepLTranslate(queryWordInfo);
               return;
             });
           }
@@ -100,7 +100,7 @@ export async function requestDeepLTextTranslate(queryWordInfo: QueryWordInfo): P
           errorInfo.message = "Authorization failed"; // Authorization failed. Please supply a valid auth_key parameter.
         }
 
-        console.error("deepL error info: ", errorInfo);
+        console.error("deepL error info: ", errorInfo); // message: 'timeout of 15000ms exceeded'
         reject(errorInfo);
       });
   });
