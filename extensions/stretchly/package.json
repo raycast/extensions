@@ -14,12 +14,14 @@
     {
       "name": "skip-to-next-mini-break",
       "title": "Skip to Next Mini Break",
+      "subtitle": "Stretchly",
       "description": "Skip to Next Mini Break",
       "mode": "no-view"
     },
     {
       "name": "skip-to-next-long-break",
       "title": "Skip to Next Long Break",
+      "subtitle": "Stretchly",
       "description": "Skip to Next Mini Break",
       "mode": "no-view"
     }
