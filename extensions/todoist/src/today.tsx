@@ -1,11 +1,12 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
 import { todoist, handleError } from "./api";
 import { SectionWithTasks, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
+import View from "./components/View";
 
-export default function Today() {
+function Today() {
   const {
     data: tasks,
     isLoading: isLoadingTasks,
@@ -79,5 +80,13 @@ export default function Today() {
       projects={projects}
       mutateTasks={mutateTasks}
     />
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Today />
+    </View>
   );
 }

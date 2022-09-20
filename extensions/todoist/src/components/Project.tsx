@@ -4,7 +4,7 @@ import { partition } from "lodash";
 import TaskList from "./TaskList";
 import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist } from "../api";
-import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
 import CreateTask from "../create-task";
 
 interface ProjectProps {

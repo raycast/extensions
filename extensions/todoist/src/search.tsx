@@ -5,8 +5,9 @@ import { handleError, todoist } from "./api";
 import { ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
 import { getColor } from "@doist/todoist-api-typescript";
+import View from "./components/View";
 
-export default function Search() {
+function Search() {
   const {
     data: tasks,
     isLoading: isLoadingTasks,
@@ -75,5 +76,13 @@ export default function Search() {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Search />
+    </View>
   );
 }

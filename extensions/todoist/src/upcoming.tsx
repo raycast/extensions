@@ -1,9 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import TaskList from "./components/TaskList";
-import { getSectionsWithDueDates } from "./helpers";
+import { getSectionsWithDueDates } from "./helpers/sections";
 import { handleError, todoist } from "./api";
+import View from "./components/View";
 
-export default function Upcoming() {
+function Upcoming() {
   const {
     data: tasks,
     isLoading: isLoadingTasks,
@@ -34,5 +35,13 @@ export default function Upcoming() {
       projects={projects}
       mutateTasks={mutateTasks}
     />
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Upcoming />
+    </View>
   );
 }

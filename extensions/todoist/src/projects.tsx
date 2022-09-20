@@ -4,8 +4,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";
+import View from "./components/View";
+import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 
-export default function Projects() {
+function Projects() {
   const { data, error, isLoading, mutate } = useCachedPromise(() => todoist.getProjects());
 
   if (error) {
@@ -29,7 +31,6 @@ export default function Projects() {
 
       mutate();
     } catch (error) {
-      console.log(error);
       handleError({
         error,
         title: project.favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
@@ -67,7 +68,22 @@ export default function Projects() {
           {...(project.favorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
+              <Action.Push icon={Icon.BlankDocument} title="Show Details" target={<Project projectId={project.id} />} />
+
+              {isTodoistInstalled ? (
+                <Action.Open
+                  title="Open Project in Todoist"
+                  target={`todoist://project?id=${project.id}`}
+                  icon="todoist.png"
+                  application="Todoist"
+                />
+              ) : (
+                <Action.OpenInBrowser
+                  title="Open Task in Browser"
+                  url={project.url}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+              )}
 
               {!project.inboxProject ? (
                 <ActionPanel.Section>
@@ -96,12 +112,16 @@ export default function Projects() {
               ) : null}
 
               <ActionPanel.Section>
-                <Action.OpenInBrowser url={project.url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
-
                 <Action.CopyToClipboard
                   title="Copy Project URL"
                   content={project.url}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                />
+
+                <Action.CopyToClipboard
+                  title="Copy Project Title"
+                  content={project.name}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -109,5 +129,13 @@ export default function Projects() {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Projects />
+    </View>
   );
 }

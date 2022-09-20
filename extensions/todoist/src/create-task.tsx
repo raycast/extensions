@@ -4,7 +4,7 @@ import { AddTaskArgs, getColor, Task } from "@doist/todoist-api-typescript";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
-import { getAPIDate } from "./helpers";
+import { getAPIDate } from "./helpers/dates";
 import TaskDetail from "./components/TaskDetail";
 
 type CreateTaskProps = {

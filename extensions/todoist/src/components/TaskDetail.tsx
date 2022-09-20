@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers";
+import { displayDueDate } from "../helpers/dates";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskCommentForm from "./TaskCommentForm";

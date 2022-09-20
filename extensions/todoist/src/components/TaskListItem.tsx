@@ -3,7 +3,7 @@ import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
-import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
 import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 

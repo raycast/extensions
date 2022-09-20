@@ -2,11 +2,12 @@ import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigatio
 import { MutatePromise } from "@raycast/utils";
 import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import { getAPIDate, getToday } from "../helpers";
+import { getAPIDate, getToday } from "../helpers/dates";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
 import TaskComments from "./TaskComments";
+import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -91,7 +92,16 @@ export default function TaskActions({
 
   return (
     <>
-      <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+      {isTodoistInstalled ? (
+        <Action.Open
+          title="Open Task in Todoist"
+          target={`todoist://task?id=${task.id}`}
+          icon="todoist.png"
+          application="Todoist"
+        />
+      ) : (
+        <Action.OpenInBrowser title="Open Task in Browser" url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+      )}
 
       <ActionPanel.Section>
         <Action.Push
