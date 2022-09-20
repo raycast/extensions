@@ -31,4 +31,30 @@
 
 ### Prefill search from clipboard
 
+_Default: disabled_
+
 If enabled, the search query will initially be set to the text on your clipboard.
+
+### Strip DuckDuckGo's "Bangs" When Fetching Search Suggestions
+
+_Default: enabled_
+
+DuckDuckGo supports "[bangs](https://duckduckgo.com/bang)", text-based shortcuts for
+searching various sites on the web. For instance, when using DuckDuckGo, `!w macOS` will
+not search DuckDuckGo for `!w macOS`, but will instead search Wikipedia for "macOS";
+`!w` is DuckDuckGo's "bang" shortcut for Wikipedia.
+
+Bangs can interfere with search suggestions. If you enter `!w macOS`, you probably want
+suggestions for `macOS`, not `!w macOS`. Therefore, if all of the following hold:
+
+1. This setting is enabled (which it is, by default)
+1. The selected search site is DuckDuckGo
+1. The first word of the search query looks like a bang (i.e., it begins with an exclamation point)
+
+then only the portion of the query without the bang will be used  when fetching search
+suggestions. (This is probably what you want, which is why the setting is enabled by
+default.)
+
+This setting does not affect what happens when you press enter to search the text you
+enter will always be searched verbatim on the site of your choosing. This setting only
+affects the text used when fetching search suggestions.
