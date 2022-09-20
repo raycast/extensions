@@ -50,7 +50,6 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="Tasks"
       searchBarPlaceholder="Search all tasks by name, notes, etc.."
       isLoading={isLoading}
       onSearchTextChange={onSearch}

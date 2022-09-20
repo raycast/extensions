@@ -49,12 +49,7 @@ export default function Command() {
   const projectNames = Object.keys(grouped).sort((a, b) => (a > b ? 1 : -1));
 
   return (
-    <List
-      navigationTitle="My Tasks (today)"
-      searchBarPlaceholder="Filter my tasks by name and tags"
-      isLoading={isLoading}
-      throttle={true}
-    >
+    <List searchBarPlaceholder="Filter my tasks by name and tags" isLoading={isLoading} throttle={true}>
       {projectNames.map((projectName, sectionIndex) => (
         <List.Section key={`section:${sectionIndex}`} title={projectName}>
           {grouped[projectName]?.map((task, index) => {
@@ -72,7 +67,7 @@ export default function Command() {
                 accessoryTitle={keywords.join(', ')}
                 accessoryIcon={task.is_starred ? Icon.Star : undefined}
                 actions={
-                  <ActionPanel title={`'${task.name}' actions`}>
+                  <ActionPanel title="Actions">
                     <ActionPanel.Section title="Selected Task">
                       <Action
                         title="View Details"
@@ -88,10 +83,11 @@ export default function Command() {
                     <ActionPanel.Section title="TimeSheets">
                       <Action
                         title="Punch Out"
+                        icon={Icon.Alarm}
                         onAction={() => timeBlock && punchOut(timeBlock.id, undefined, idToken)}
                       />
 
-                      <Action title="Punch In" onAction={() => punchIn(task.id, idToken)} />
+                      <Action title="Punch In" icon={Icon.Alarm} onAction={() => punchIn(task.id, idToken)} />
                       {isPunchedIn && (
                         <Action.OpenInBrowser url={`https://app.teamgantt.com/my-tasks/edit/${task.id}`} />
                       )}
