@@ -168,7 +168,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 
 ```tsx
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useExec } from "@raycast/utils";
 
 const Demo = () => {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);

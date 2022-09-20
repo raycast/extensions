@@ -329,23 +329,6 @@
       "default": false
     },
     {
-      "title": "Dictionary Services",
-      "type": "checkbox",
-      "name": "enableYoudaoDictionary",
-      "label": "Youdao Dictionary",
-      "required": false,
-      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "name": "enableLingueeDictionary",
-      "label": "Linguee Dictionary",
-      "required": false,
-      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
-      "default": true
-    },
-    {
       "title": "Apple System Features",
       "name": "enableAppleTranslate",
       "type": "checkbox",
@@ -361,6 +344,23 @@
       "required": false,
       "description": "An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
       "default": false
+    },
+    {
+      "title": "Dictionary Services",
+      "type": "checkbox",
+      "name": "enableYoudaoDictionary",
+      "label": "Youdao Dictionary",
+      "required": false,
+      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "name": "enableLingueeDictionary",
+      "label": "Linguee Dictionary",
+      "required": false,
+      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
+      "default": true
     },
     {
       "title": "Translation Services",
