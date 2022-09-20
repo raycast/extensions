@@ -1,24 +1,20 @@
 import { getPreferenceValues } from '@raycast/api'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { loadDoneProperty, storeTodos } from '@/services/storage'
+import { loadDoneProperty, loadTodos, storeTodos } from '@/services/storage'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 import { checkColumnHeaders } from '../utils/check-column-headers'
 
-export async function getTodos({
-  databaseId,
-  localTodos,
-}: {
-  databaseId?: string
-  localTodos?: Todo[]
-}): Promise<Todo[]> {
-  if (!databaseId || !localTodos) {
-    return []
-  }
-
+export async function getTodos(databaseId: string): Promise<Todo[]> {
   const notionClient = await notion()
   const preferences = getPreferenceValues()
   const status = await loadDoneProperty()
+
+  if (!status?.type) {
+    throw new Error(
+      'Status or checkbox property not found, please check your preferences'
+    )
+  }
 
   const donePropertyQuery =
     status.type === 'checkbox'
@@ -64,6 +60,8 @@ export async function getTodos({
   const todos = response.results.map((page) =>
     mapPageToTodo(page, preferences, status.inProgressId)
   )
+
+  const localTodos = await loadTodos()
 
   const sortedTodos = todos
     .map((todo: any) => {

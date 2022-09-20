@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  getPreferenceValues,
   Icon,
   List,
   openCommandPreferences,
@@ -16,11 +17,13 @@ import { WhatHaveIDoneAction } from '@/features/todo-list/components/what-have-i
 import { OpenNotionAction } from '@/features/todo-list/components/open-notion-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
 import { TransparentEmpty } from '@/features/todo-list/components/transparent-empty'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Todo } from '@/types/todo'
 import { DateReminder } from './components/date-reminder'
 import { getProgressIcon } from '@raycast/utils'
 import { InProgressAction } from '@/features/todo-list/components/in-progress-action'
+import { ReauthorizeAction } from './components/reauthorize-action'
+import { templateUrl } from '@/constants/template-url'
 
 export function TodoList() {
   const {
@@ -32,6 +35,7 @@ export function TodoList() {
     searchText,
     setSearchText,
     loading,
+    dbError,
     handleCreate,
     handleComplete,
     handleInProgress,
@@ -45,6 +49,28 @@ export function TodoList() {
   } = useTodoList()
 
   const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null)
+  const databaseName = useMemo(() => getPreferenceValues().database_name, [])
+
+  if (dbError) {
+    return (
+      <List>
+        <List.EmptyView
+          title={`We couldn't find ${databaseName} database.`}
+          description="Make sure to duplicate the template (↵) and grant permission (⌘ + ↵)"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="View Link"
+                icon={Icon.Link}
+                url={templateUrl}
+              />
+              <ReauthorizeAction />
+            </ActionPanel>
+          }
+        />
+      </List>
+    )
+  }
 
   if (todoToEdit) {
     return (
@@ -181,6 +207,7 @@ export function TodoList() {
                   <ActionPanel.Section>
                     <WhatHaveIDoneAction />
                   </ActionPanel.Section>
+                  <ReauthorizeAction />
                   <Action
                     title="Open Extension Preferences"
                     icon={Icon.Gear}

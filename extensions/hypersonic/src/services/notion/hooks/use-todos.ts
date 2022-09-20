@@ -1,28 +1,17 @@
-import { getDatabase } from '@/services/notion/operations/get-database'
 import { getTodos } from '@/services/notion/operations/get-todos'
-import { loadDatabase, loadTodos } from '@/services/storage'
 import { useCachedPromise } from '@raycast/utils'
 
-export function useTodos() {
+export function useTodos(databaseId: string, loadingDb: boolean) {
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    async () => {
-      const database = await loadDatabase()
-      const localTodos = await loadTodos()
-      let databaseId = database.databaseId
-
-      if (!databaseId) {
-        const data = await getDatabase()
-        databaseId = data.databaseId
-      }
-
-      const data = await getTodos({ databaseId, localTodos })
-
-      return data
+    async (databaseId: string) => {
+      const todos = await getTodos(databaseId)
+      return todos
     },
-    [],
+    [databaseId],
     {
       initialData: [],
       keepPreviousData: true,
+      execute: !loadingDb && !!databaseId,
     }
   )
 

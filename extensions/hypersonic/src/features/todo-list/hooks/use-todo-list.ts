@@ -14,8 +14,11 @@ import { useDatabase } from '@/services/notion/hooks/use-database'
 import { inProgressTodo } from '@/services/notion/operations/in-progress-todo'
 
 export function useTodoList() {
-  const { database } = useDatabase()
-  const { todos, isLoading, mutate } = useTodos()
+  const { database, isLoading: isLoadingDb, error: dbError } = useDatabase()
+  const { todos, isLoading, mutate } = useTodos(
+    database.databaseId,
+    isLoadingDb
+  )
 
   const [searchText, setSearchText] = useState<string>('')
   const [filter, setFilter] = useState('all')
@@ -215,6 +218,7 @@ export function useTodoList() {
     filter,
     setFilter,
     loading: isLoading,
+    dbError: dbError,
     handleCreate,
     handleComplete,
     handleInProgress,

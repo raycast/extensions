@@ -1,3 +1,4 @@
+import { useLocalDatabase } from '@/services/notion/hooks/use-local-database'
 import { useTodos } from '@/services/notion/hooks/use-todos'
 import { completeTodo } from '@/services/notion/operations/complete-todo'
 import { storeHasDoneToday } from '@/services/storage'
@@ -6,7 +7,11 @@ import { MenuBarExtra } from '@raycast/api'
 import { getProgressIcon } from '@raycast/utils'
 
 export function MenuBar() {
-  const { todos, error, isLoading, mutate } = useTodos()
+  const { database, isLoading: isLoadingDb } = useLocalDatabase()
+  const { todos, error, isLoading, mutate } = useTodos(
+    database.databaseId,
+    isLoadingDb
+  )
 
   const handleComplete = async (todo: Todo) => {
     await mutate(completeTodo(todo.id), {
@@ -37,19 +42,21 @@ export function MenuBar() {
         <MenuBarExtra.Item title="No Todos" />
       ) : null}
 
-      {todos?.map((todo) => (
-        <MenuBarExtra.Item
-          onAction={() => handleComplete(todo)}
-          key={todo.id}
-          icon={{
-            source: {
-              light: getProgressIcon(todo.inProgress ? 0.5 : 0, '#E0A905'),
-              dark: getProgressIcon(todo.inProgress ? 0.5 : 0, '#edc03c'),
-            },
-          }}
-          title={todo.title}
-        />
-      ))}
+      {!error
+        ? todos?.map((todo) => (
+            <MenuBarExtra.Item
+              onAction={() => handleComplete(todo)}
+              key={todo.id}
+              icon={{
+                source: {
+                  light: getProgressIcon(todo.inProgress ? 0.5 : 0, '#E0A905'),
+                  dark: getProgressIcon(todo.inProgress ? 0.5 : 0, '#edc03c'),
+                },
+              }}
+              title={todo.title}
+            />
+          ))
+        : null}
     </MenuBarExtra>
   )
 }

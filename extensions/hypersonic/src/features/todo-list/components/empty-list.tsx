@@ -1,4 +1,3 @@
-import { templateUrl } from '@/constants/template-url'
 import {
   loadHasDoneToday,
   loadTodayCoin,
@@ -7,12 +6,11 @@ import {
 import {
   Action,
   ActionPanel,
-  getPreferenceValues,
   Icon,
   List,
   openCommandPreferences,
 } from '@raycast/api'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { OpenNotionAction } from './open-notion-action'
 import { ReauthorizeAction } from './reauthorize-action'
 import { WhatHaveIDoneAction } from './what-have-i-done-action'
@@ -62,7 +60,6 @@ async function getCoin(): Promise<string> {
 
 export function EmptyList({ notionDbUrl }: EmptyListProps) {
   const [coin, setCoin] = useState('')
-  const databaseName = useMemo(() => getPreferenceValues().database_name, [])
 
   const handleStart = async () => {
     const someDone = await loadHasDoneToday()
@@ -76,26 +73,6 @@ export function EmptyList({ notionDbUrl }: EmptyListProps) {
   useEffect(() => {
     handleStart()
   }, [])
-
-  if (!notionDbUrl) {
-    return (
-      <List.EmptyView
-        title={`We couldn't find ${databaseName} database.`}
-        description="Make sure to duplicate the template (⌘ + U) and grant permission (⌘ + S)"
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser
-              title="View Link"
-              icon={Icon.Link}
-              url={templateUrl}
-              shortcut={{ modifiers: ['cmd'], key: 'e' }}
-            />
-            <ReauthorizeAction />
-          </ActionPanel>
-        }
-      />
-    )
-  }
 
   return (
     <List.EmptyView

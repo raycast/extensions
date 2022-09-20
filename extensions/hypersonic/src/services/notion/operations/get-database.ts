@@ -22,6 +22,12 @@ export async function getDatabase(): Promise<{
 
   const database: any = databases.results[0]
 
+  if (!database?.id) {
+    throw new Error(
+      'Database not found, please check your database name in preferences'
+    )
+  }
+
   // Get database id and url
   const databaseId = database.id
   const databaseUrl = database.url
