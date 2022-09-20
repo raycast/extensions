@@ -1,5 +1,5 @@
 # Stretchly Changelog
 
-## [Added Stretchly] - 2022-09-17
+## [Added Stretchly] - 2022-09-20
 
-- add command to call stretchly mini and long break
+- Added command to call stretchly mini and long break
