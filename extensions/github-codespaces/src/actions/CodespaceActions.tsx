@@ -4,6 +4,7 @@ import { Codespace } from "../types";
 import handleDelete from "../methods/handleDelete";
 import ChangeCompute from "../views/ChangeCompute";
 import Rename from "../views/Rename";
+import { handleStop } from "../methods/handleStop";
 
 const OpenWebEditorAction = ({ codespace }: { codespace: Codespace }) => (
   <Action.OpenInBrowser title="Open on web" url={codespace.web_url} />
@@ -42,6 +43,13 @@ function CodespaceActions({
       {!codespace.pending_operation && (
         <>
           <ActionPanel.Section title="Update">
+            {codespace.state === "Available" && (
+              <Action
+                title="Stop"
+                icon={Icon.Stop}
+                onAction={() => handleStop({ codespace }).finally(onRevalidate)}
+              />
+            )}
             <Action.Push
               title="Rename"
               icon={Icon.Pencil}
@@ -65,7 +73,7 @@ function CodespaceActions({
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-              onAction={() => handleDelete({ codespace, onRevalidate })}
+              onAction={() => handleDelete({ codespace }).finally(onRevalidate)}
             />
           </ActionPanel.Section>
         </>

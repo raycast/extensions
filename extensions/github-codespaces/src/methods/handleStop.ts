@@ -3,27 +3,18 @@ import { Codespace } from "../types";
 import { default as nodeFetch } from "node-fetch";
 import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 
-const handleRename = async ({
-  codespace,
-  name,
-}: {
-  codespace: Codespace;
-  name: string;
-}) => {
+export const handleStop = async ({ codespace }: { codespace: Codespace }) => {
   const toast = await showToast({
-    title: `Renaming to ${name}...`,
+    title: `Stopping ${codespace.display_name || "codespace"}...`,
     style: Toast.Style.Animated,
   });
   try {
-    const response = await nodeFetch(`${codespace.url}`, {
-      method: "PATCH",
+    const response = await nodeFetch(`${codespace.stop_url}`, {
+      method: "POST",
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${personalAccessToken}`,
       },
-      body: JSON.stringify({
-        display_name: name,
-      }),
     });
     if (response.status !== 200) {
       const data = (await response.json()) as {
@@ -40,7 +31,7 @@ const handleRename = async ({
       };
     } else {
       await toast.hide();
-      await showHUD("Name successfully changed");
+      await showHUD("Codespace stopped");
     }
   } catch (error) {
     console.log(error);
@@ -48,4 +39,3 @@ const handleRename = async ({
     toast.title = "Failed to change name";
   }
 };
-export default handleRename;

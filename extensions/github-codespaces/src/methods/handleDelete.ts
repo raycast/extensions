@@ -10,13 +10,7 @@ import { personalAccessToken } from "../preferences";
 import { Codespace } from "../types";
 import { default as nodeFetch } from "node-fetch";
 
-const handleDelete = async ({
-  codespace,
-  onRevalidate,
-}: {
-  codespace: Codespace;
-  onRevalidate: () => void;
-}) => {
+const handleDelete = async ({ codespace }: { codespace: Codespace }) => {
   if (
     await confirmAlert({
       title: `Are you sure you want to delete ${codespace.display_name}?`,
@@ -52,7 +46,6 @@ const handleDelete = async ({
       });
       await response.json();
       await toast.hide();
-      onRevalidate();
       await showHUD("Successfully deleted");
     } catch (error) {
       console.log(error);

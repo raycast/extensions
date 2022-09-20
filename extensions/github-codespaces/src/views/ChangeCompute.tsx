@@ -1,17 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Icon,
-  List,
-  showHUD,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { personalAccessToken } from "../preferences";
-import { Codespace, Machine, Machines } from "../types";
+import { Codespace, Machines } from "../types";
 import handleChangeCompute from "../methods/handleChangeCompute";
 
 const ChangeCompute = ({
@@ -31,40 +21,6 @@ const ChangeCompute = ({
       },
     }
   );
-
-  const onAction = async (machine: Machine) => {
-    const toast = await showToast({
-      title: `Changing compute to ${machine.display_name}...`,
-      style: Toast.Style.Animated,
-    });
-    try {
-      const response = await handleChangeCompute({ codespace, machine });
-      if (response.status !== 200) {
-        const data = (await response.json()) as {
-          message: string;
-          documentation_url: string;
-        };
-        toast.style = Toast.Style.Failure;
-        toast.title = data.message;
-        toast.primaryAction = {
-          title: "Copy link to docs",
-          onAction: () => {
-            Clipboard.copy(data.documentation_url);
-          },
-        };
-      } else {
-        await toast.hide();
-        pop();
-        onRevalidate();
-        await showHUD("Request sent. Compute change may take a few minutes.");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.style = Toast.Style.Failure;
-      toast.title =
-        typeof error === "string" ? error : "Failed to change compute";
-    }
-  };
 
   return (
     <List isLoading={isLoading}>
@@ -87,7 +43,15 @@ const ChangeCompute = ({
             }
             actions={
               <ActionPanel>
-                <Action title="Select" onAction={() => onAction(machine)} />
+                <Action
+                  title="Select"
+                  onAction={() =>
+                    handleChangeCompute({ codespace, machine }).finally(() => {
+                      pop();
+                      onRevalidate();
+                    })
+                  }
+                />
               </ActionPanel>
             }
           />
