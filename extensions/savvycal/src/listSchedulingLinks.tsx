@@ -29,8 +29,7 @@ export default function listSchedulingLinks() {
     <List
       enableFiltering={true}
       isLoading={isLoading}
-      navigationTitle="List Savvycal links"
-      searchBarPlaceholder="Filter by link title"
+      searchBarPlaceholder="Filter by link title..."
     >
       {data?.entries
         ? data.entries.map((link: SchedulingLink) => (
