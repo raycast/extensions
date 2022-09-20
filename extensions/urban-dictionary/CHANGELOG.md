@@ -1,3 +1,3 @@
 # Urban Dictionary Changelog
 
-## [Initial Version] - 2022-09-17
+## [Initial Version] - 2022-09-20
