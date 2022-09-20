@@ -1,18 +1,18 @@
-import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, Icon, Color } from "@raycast/api";
 import { useEffect, useState, Fragment } from "react";
 import mp from "multipass-control";
 
 function iconForState(state: string) {
   if (state == "Running") {
-    return "🟢";
+    return { source: Icon.CircleFilled, tintColor: Color.Green };
   }
   if (state == "Stopped") {
-    return "⚫️";
+    return { source: Icon.CircleFilled, tintColor: Color.Red };
   }
   if (state == "Suspended") {
-    return "⚪️";
+    return { source: Icon.CircleFilled, tintColor: Color.Yellow };
   }
-  return "🟡";
+  return { source: Icon.CircleFilled, tintColor: Color.Purple };
 }
 
 async function primaryAction(name: string, state: string) {
@@ -39,7 +39,7 @@ interface MultipassImage {
 }
 
 export default function Command() {
-  const [images, setImages] = useState<Array<MultipassImage>>([]);
+  let [images, setImages] = useState<Array<MultipassImage>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -64,12 +64,22 @@ export default function Command() {
     };
   }, []);
 
+  console.log(images);
+
+  images = [
+    { state: "Running", name: "Raycast dev VM" },
+    { state: "Stopped", name: "Raycast test VM" },
+    { state: "Suspended", name: "Raycast stage VM" },
+  ];
+
   return (
     <List isLoading={isLoading}>
       {images.map((image) => (
         <List.Item
           key={image.name}
-          title={`${iconForState(image.state)}  ${image.name}`}
+          subtitle={image.state}
+          icon={iconForState(image.state)}
+          title={image.name}
           actions={
             <ActionPanel>
               {["Suspended", "Stopped"].includes(image.state) && (
