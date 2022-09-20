@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-12 11:13
+ * @lastEditTime: 2022-09-19 17:09
  * @fileName: baidu.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,12 +11,13 @@
 import axios, { AxiosError } from "axios";
 import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
-import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
+import { DetectedLanguageModel, LanguageDetectType } from "../detectLanauge/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getBaiduLanguageId, getYoudaoLanguageIdFromBaiduId, isValidLanguageId } from "../language/languages";
 import { KeyStore } from "../preferences";
 import { BaiduTranslateResult, QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
 import { getTypeErrorInfo, md5 } from "../utils";
+import { autoDetectLanguageItem, englishLanguageItem } from "./../language/consts";
 import { BaiduWebLanguageDetect } from "./../types";
 
 /**
@@ -25,7 +26,7 @@ import { BaiduWebLanguageDetect } from "./../types";
  * 百度翻译API https://fanyi-api.baidu.com/doc/21
  */
 export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
-  console.log(`---> start request Baidu`);
+  console.log(`---> start request Baidu translate`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   const salt = Math.round(new Date().getTime() / 1000);
   const baiduAppId = KeyStore.baiduAppId;
@@ -55,8 +56,9 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
         // console.log(`---> baiduResult: ${JSON.stringify(baiduResult, null, 4)}`);
         if (baiduResult.trans_result) {
           const translations = baiduResult.trans_result.map((item) => item.dst);
-          console.warn(`Baidu translate: ${translations}`);
-          console.log(`from Language: ${baiduResult.from}, cost: ${response.headers[requestCostTime]} ms`);
+          console.warn(
+            `Baidu translate: ${translations}, ${baiduResult.from}, cost: ${response.headers[requestCostTime]} ms`
+          );
           const result: QueryTypeResult = {
             type: type,
             result: baiduResult,
@@ -94,68 +96,71 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
  * Although Baidu provides a dedicated language recognition interface, the number of supported languages is too small, so we directly use Baidu Translate's automatic language recognition instead.
  *
  * 百度语种识别API https://fanyi-api.baidu.com/doc/24
+ *
+ * Incorrect examples: const -> glg ??
  */
-export async function baiduLanguageDetect(text: string): Promise<LanguageDetectTypeResult> {
+export async function baiduLanguageDetect(text: string): Promise<DetectedLanguageModel> {
   console.log(`---> start request Baidu language detect`);
 
   const queryWordInfo: QueryWordInfo = {
-    fromLanguage: "auto",
-    toLanguage: "zh",
+    fromLanguage: autoDetectLanguageItem.baiduId,
+    toLanguage: englishLanguageItem.baiduId,
     word: text,
   };
 
   const type = LanguageDetectType.Baidu;
 
-  try {
-    const baiduTypeResult = await requestBaiduTextTranslate(queryWordInfo);
-    const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
-    const baiduLanaugeId = baiduResult.from || "";
-    const youdaoLanguageId = getYoudaoLanguageIdFromBaiduId(baiduLanaugeId);
-    console.warn(`---> Baidu language detect languageId: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
+  return new Promise((resolve, reject) => {
+    requestBaiduTextTranslate(queryWordInfo)
+      .then((baiduTypeResult) => {
+        const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
+        const baiduLanaugeId = baiduResult.from || "";
+        const youdaoLanguageId = getYoudaoLanguageIdFromBaiduId(baiduLanaugeId);
+        console.warn(`---> Baidu language detect languageId: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
 
-    /**
-     * Generally speaking, Baidu language auto-detection is more accurate than Tencent language recognition.
-     * Baidu language recognition is inaccurate in very few cases, such as "ragazza", it should be Italian, but Baidu auto detect is en.
-     * In this case, trans_result's src === dst.
-     *
-     * * The Baidu results seem to have changed recently...
-     * {
-            "src": "ragazza",
-            "dst": "拉加扎"
+        /**
+       * Generally speaking, Baidu language auto-detection is more accurate than Tencent language recognition.
+       * Baidu language recognition is inaccurate in very few cases, such as "ragazza", it should be Italian, but Baidu auto detect is en.
+       * In this case, trans_result's src === dst.
+       *
+       * * The Baidu results seem to have changed recently...
+       * {
+              "src": "ragazza",
+              "dst": "拉加扎"
+          }
+       */
+        let confirmed = false;
+        const transResult = baiduResult.trans_result;
+        if (transResult?.length) {
+          const firstTransResult = transResult[0];
+          confirmed = firstTransResult.dst !== firstTransResult.src;
         }
-     */
-    let confirmed = false;
-    const transResult = baiduResult.trans_result;
-    if (transResult?.length) {
-      const firstTransResult = transResult[0];
-      confirmed = firstTransResult.dst !== firstTransResult.src;
-    }
-    const detectedLanguageResult: LanguageDetectTypeResult = {
-      type: type,
-      sourceLanguageId: baiduLanaugeId,
-      youdaoLanguageId: youdaoLanguageId,
-      confirmed: confirmed,
-      result: baiduResult,
-    };
-    return Promise.resolve(detectedLanguageResult);
-  } catch (error) {
-    const errorInfo = error as RequestErrorInfo | undefined;
-    if (errorInfo) {
-      console.error(`---> Baidu language detect error: ${JSON.stringify(error)}`);
-      errorInfo.type = type; // * Note: need to set language detect type.
-    }
-    return Promise.reject(errorInfo);
-  }
+        const detectedLanguageResult: DetectedLanguageModel = {
+          type: type,
+          sourceLanguageId: baiduLanaugeId,
+          youdaoLanguageId: youdaoLanguageId,
+          confirmed: confirmed,
+          result: baiduResult,
+        };
+        resolve(detectedLanguageResult);
+      })
+      .catch((error) => {
+        const errorInfo = error as RequestErrorInfo | undefined;
+        if (errorInfo) {
+          console.error(`---> Baidu language detect error: ${JSON.stringify(error)}`);
+          errorInfo.type = type; // * Note: need to set language detect type.
+        }
+        reject(errorInfo);
+      });
+  });
 }
 
 /**
  * Baidu web language detect, unofficial API. Cost time: ~0.3s
  */
-export async function baiduWebLanguageDetect(text: string): Promise<LanguageDetectTypeResult> {
+export async function baiduWebLanguageDetect(text: string): Promise<DetectedLanguageModel> {
   console.log(`---> start web Baidu language detect`);
   const type = LanguageDetectType.Baidu;
-
-  baiduLanguageDetect(text);
 
   return new Promise((resolve, reject) => {
     const url = "https://fanyi.baidu.com/langdetect";
@@ -164,7 +169,7 @@ export async function baiduWebLanguageDetect(text: string): Promise<LanguageDete
       .post(url, querystring.stringify(params))
       .then((response) => {
         console.log(`---> web Baidu language detect response: ${JSON.stringify(response.data)}`);
-        console.log(`---> Baidu cost: ${response.headers[requestCostTime]} ms`);
+        console.warn(`---> Baidu detect cost: ${response.headers[requestCostTime]} ms`);
 
         const baiduWebLanguageDetect = response.data as BaiduWebLanguageDetect;
         if (baiduWebLanguageDetect.error === 0) {
@@ -172,7 +177,7 @@ export async function baiduWebLanguageDetect(text: string): Promise<LanguageDete
           const youdaoLanguageId = getYoudaoLanguageIdFromBaiduId(baiduLanaugeId);
           const isConfirmed = isValidLanguageId(youdaoLanguageId);
 
-          const detectedLanguageResult: LanguageDetectTypeResult = {
+          const detectedLanguageResult: DetectedLanguageModel = {
             type: type,
             sourceLanguageId: baiduLanaugeId,
             youdaoLanguageId: youdaoLanguageId,
@@ -181,13 +186,18 @@ export async function baiduWebLanguageDetect(text: string): Promise<LanguageDete
           };
           resolve(detectedLanguageResult);
         } else {
-          console.error(`web Baidu language detect error: ${JSON.stringify(baiduWebLanguageDetect)}`);
+          console.error(`web Baidu detect error: ${JSON.stringify(baiduWebLanguageDetect)}`);
 
           const errorInfo = getBaiduWebLanguageDetectErrorInfo(baiduWebLanguageDetect);
           reject(errorInfo);
         }
       })
       .catch((error) => {
+        if (error.message === "canceled") {
+          console.log(`---> baidu detect canceled`);
+          return reject(undefined);
+        }
+
         console.error(`---> web Baidu language detect error: ${error}`);
 
         const errorInfo = getTypeErrorInfo(type, error);

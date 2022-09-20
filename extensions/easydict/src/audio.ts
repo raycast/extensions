@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-04 10:17
+ * @lastEditTime: 2022-09-17 18:35
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,15 +10,19 @@
 
 import { environment } from "@raycast/api";
 import axios from "axios";
-import { exec, execFile } from "child_process";
+import { exec, ExecException, execFile } from "child_process";
 import fs from "fs";
 import { languageItemList } from "./language/consts";
 import { trimTextLength } from "./utils";
 import playerImport = require("play-sound");
-const audioPlayer = playerImport({});
+
+console.log(`enter audio.ts`);
 
 const audioDirPath = `${environment.supportPath}/audio`;
 // console.log(`audio path: ${audioDirPath}`);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let audioPlayer: any; // Play
 
 /**
   use play-sound to play local audio file, use say command when audio not exist. if error, use say command to play.
@@ -28,13 +32,26 @@ export function playWordAudio(word: string, fromLanguage: string, useSayCommand 
   if (!fs.existsSync(audioPath)) {
     console.log(`word audio file not found: ${word}`);
     if (useSayCommand) {
-      return sayTruncateCommand(word, fromLanguage);
+      sayTruncateCommand(word, fromLanguage);
     }
+    return;
   }
+
   console.log(`play local file audio: ${word}`);
 
-  return audioPlayer.play(audioPath, (err) => {
+  if (!audioPlayer) {
+    audioPlayer = playerImport({});
+    console.log(`not exist, new a audioPlayer`);
+  }
+
+  // const audioPlayer = playerImport({});
+  audioPlayer.play(audioPath, (err: ExecException) => {
     if (err) {
+      if (err.killed) {
+        console.log("audio has been killed");
+        return;
+      }
+
       // afplay play the word 'set' throw error: Fail: AudioFileOpenURL failed ???
       console.error(`play word audio error: ${err}`);
       console.log(`audioPath: ${encodeURI(audioPath)}`);

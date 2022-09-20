@@ -11,7 +11,7 @@
 import { francAll } from "franc";
 import { languageItemList } from "../language/consts";
 import { getLanguageItemFromFrancId, getLanguageItemFromYoudaoId } from "../language/languages";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./types";
+import { DetectedLanguageModel, LanguageDetectType } from "./types";
 import { isPreferredLanguage } from "./utils";
 
 /**
@@ -25,7 +25,7 @@ import { isPreferredLanguage } from "./utils";
  * @reutn confirmed: Only mark confirmed = true when > confirmedConfidence && is preferred language.
  * @return detectedLanguageId: The first language id when language is confirmed. If not confirmed, it will be detectedLanguageArray[0].
  */
-export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): LanguageDetectTypeResult {
+export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): DetectedLanguageModel {
   const startTime = new Date().getTime();
   console.log(`start franc detect: ${text}`);
   let detectedLanguageId = "auto"; // 'und', language code that stands for undetermined.
@@ -65,7 +65,7 @@ export function francLangaugeDetect(text: string, confirmedConfidence = 0.8): La
     [detectedLanguageId] = detectedYoudaoLanguageArray[0];
   }
 
-  const detectTypeResult: LanguageDetectTypeResult = {
+  const detectTypeResult: DetectedLanguageModel = {
     type: LanguageDetectType.Franc,
     sourceLanguageId: getLanguageItemFromYoudaoId(detectedLanguageId).francId,
     youdaoLanguageId: detectedLanguageId,
