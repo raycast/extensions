@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1-click-confetti",
   "title": "1-Click Confetti",
-  "description": "Confetti Gun with 1 click.",
+  "description": "Confetti Gun with just 1 click.",
   "icon": "icon-confetti.png",
   "author": "peduarte",
   "categories": [
@@ -23,8 +23,7 @@
     {
       "name": "index",
       "title": "Confetti in Menu Bar",
-      "subtitle": "🎉🎉🎉",
-      "description": "Confetti Gun with 1 click.",
+      "description": "Confetti Gun with just 1 click.",
       "mode": "menu-bar"
     }
   ],
