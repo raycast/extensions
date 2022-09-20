@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Form, Icon, open, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { useRef } from "react";
 
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
@@ -28,13 +27,11 @@ export type CreateProjectValues = {
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
   const { linearClient } = getLinearClient();
 
-  const teamsField = useRef<Form.TextField>(null);
-
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
   const { milestones, isLoadingMilestones } = useMilestones();
 
-  const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
+  const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
       await toast.show();
@@ -66,9 +63,17 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             },
           };
 
-          // TODO: reset the values
-
-          teamsField.current?.focus();
+          reset({
+            teamIds: [],
+            name: "",
+            description: "",
+            leadId: "",
+            memberIds: [],
+            milestoneId: "",
+            startDate: undefined,
+            targetDate: undefined,
+          });
+          focus("teamIds");
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -103,7 +108,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
         </ActionPanel>
       }
     >
-      <Form.TagPicker title="Team(s)" ref={teamsField} placeholder="Add team" {...itemProps.teamIds}>
+      <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
           <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
         ))}

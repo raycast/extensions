@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
@@ -56,9 +56,8 @@ export type CreateIssueValues = {
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
   const { signature } = getPreferenceValues<{ signature: boolean }>();
-  const titleField = useRef<Form.TextField>(null);
 
-  const { handleSubmit, itemProps, values, setValue } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values, setValue, focus, reset } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
       await toast.show();
@@ -109,9 +108,16 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             onAction: () => Clipboard.copy(issue.identifier),
           };
 
-          // TODO: reset values
+          reset({
+            title: "",
+            description: "",
+            estimate: "",
+            labelIds: [],
+            dueDate: undefined,
+            parentId: "",
+          });
 
-          titleField.current?.focus();
+          focus("title");
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -196,7 +202,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </>
       ) : null}
 
-      <Form.TextField title="Title" placeholder="Issue title" ref={titleField} autoFocus {...itemProps.title} />
+      <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
 
       <Form.TextArea
         title="Description"
