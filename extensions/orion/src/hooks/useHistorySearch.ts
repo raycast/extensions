@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { join } from "path";
 import { HistoryItem } from "../types";
-import useSql from "./useSql";
+import { useSQL } from "@raycast/utils";
 
 const HISTORY_DB = join(homedir(), "/Library/Application Support/Orion/Defaults/history");
 const LIMIT = 100;
@@ -30,7 +30,7 @@ const getHistoryQuery = (searchText?: string) => {
 
 const useHistorySearch = (searchText?: string) => {
   const query = getHistoryQuery(searchText);
-  return useSql<HistoryItem>(HISTORY_DB, query);
+  return useSQL<HistoryItem>(HISTORY_DB, query);
 };
 
 export default useHistorySearch;
