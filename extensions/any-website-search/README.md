@@ -29,6 +29,15 @@
 
 ## Preferences
 
+### Search Suggestions
+
+_Default: DuckDuckGo_
+
+While entering a query, suggestions can be shown for your query, the same as you'd see
+in a search engine in your browser. This setting controls search engine to get
+suggestions from: DuckDuckGo (the default), Google, or "None" if you don't want any
+search suggestions.
+
 ### Prefill search from clipboard
 
 _Default: disabled_
@@ -41,20 +50,25 @@ _Default: enabled_
 
 DuckDuckGo supports "[bangs](https://duckduckgo.com/bang)", text-based shortcuts for
 searching various sites on the web. For instance, when using DuckDuckGo, `!w macOS` will
-not search DuckDuckGo for `!w macOS`, but will instead search Wikipedia for "macOS";
+not search DuckDuckGo for "!w macOS", but will instead search Wikipedia for "macOS";
 `!w` is DuckDuckGo's "bang" shortcut for Wikipedia.
 
-Bangs can interfere with search suggestions. If you enter `!w macOS`, you probably want
-suggestions for `macOS`, not `!w macOS`. Therefore, if all of the following hold:
+Depending on which site you're getting search suggestions from, bangs can interfere with
+those suggestions. Therefore, if all of the following hold:
 
-1. This setting is enabled (which it is, by default)
-1. The selected search site is DuckDuckGo
-1. The first word of the search query looks like a bang (i.e., it begins with an exclamation point)
+1. This setting is enabled
+2. The selected search site is DuckDuckGo
+3. The first word of the search query looks like a bang (i.e., it begins with an exclamation point)
 
-then only the portion of the query without the bang will be used  when fetching search
-suggestions. (This is probably what you want, which is why the setting is enabled by
-default.)
+then only the portion of the query without the bang will be used when fetching search
+suggestions.
 
-This setting does not affect what happens when you press enter to search the text you
+When getting search suggestions from DuckDuckGo, you might want this setting disabled
+because DuckDuckGo _does_ understand bangs and can offer suggestions accordingly. When
+using another search suggestion provider, which doesn't understand bangs, you probably
+want this setting to be enabled because the bangs will be treated as part of the query
+and will lead to worse search suggestions.
+
+This setting does not affect what happens when you press enter to search; the text you
 enter will always be searched verbatim on the site of your choosing. This setting only
 affects the text used when fetching search suggestions.
