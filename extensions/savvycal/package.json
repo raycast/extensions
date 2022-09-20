@@ -24,7 +24,7 @@
   "preferences": [
     {
       "name": "SavvycalToken",
-      "title": "Savvycal Personal Access Token",
+      "title": "Personal Access Token",
       "description": "Add your Savvycal Personal Access Token",
       "type": "password",
       "default": "",
