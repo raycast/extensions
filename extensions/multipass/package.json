@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multipass",
   "title": "Multipass",
-  "description": "Manage multipass instances",
+  "description": "Manage Multipass instances",
   "icon": "multipass-icon.png",
   "author": "davibe",
   "contributors": [
