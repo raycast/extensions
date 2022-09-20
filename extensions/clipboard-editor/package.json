@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipboard-editor",
   "title": "Clipboard Editor",
-  "description": "Edit you clipboard text.",
+  "description": "Edit your clipboard text",
   "icon": "icon.png",
   "author": "pomdtr",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "edit-clipboard-text",
       "title": "Edit Clipboard Content",
-      "description": "Edit you clipboard text.",
+      "description": "Edit your clipboard text",
       "mode": "view"
     }
   ],
