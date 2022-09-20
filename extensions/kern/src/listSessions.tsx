@@ -58,7 +58,7 @@ const Command = () => {
   return (
     <List isLoading={isLoading}>
       {sessionRecords?.length === 0 ? (
-        <List.EmptyView title="No records"></List.EmptyView>
+        <List.EmptyView title="Start you first session to see it here"></List.EmptyView>
       ) : (
         Object.entries(groupByDate(sessionRecords)).map(([date, _sessionRecords]) => (
           <List.Section title={date} key={date}>

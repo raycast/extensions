@@ -20,7 +20,7 @@ export const getSessions = async (): Promise<{ data?: Session[]; error?: unknown
   const storedSessionRecords = await LocalStorage.getItem<string>(STORAGEKEY);
 
   if (!storedSessionRecords) {
-    return { error: "LocalStorage is empty!" };
+    return { data: [] };
   }
 
   try {
