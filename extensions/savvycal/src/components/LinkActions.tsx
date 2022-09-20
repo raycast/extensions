@@ -27,7 +27,10 @@ async function toggleLink(link_id: string) {
   );
 
   if (!response.ok) {
-    throw Error(`Failed to toggle the link: ${await response.json()}`);
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to toggle the link";
+    toast.message = "Check that you have an active plan";
+    return;
   }
 
   const { state } = (await response.json()) as SchedulingLink;
@@ -38,7 +41,7 @@ async function toggleLink(link_id: string) {
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = `Failed to toggle the link ${err}`;
-    throw Error(`Failed to toggle the link: ${err}`);
+    return;
   }
 }
 
