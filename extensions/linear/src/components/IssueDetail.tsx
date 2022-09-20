@@ -15,6 +15,7 @@ import { getUserIcon } from "../helpers/users";
 import IssueActions from "./IssueActions";
 import { format } from "date-fns";
 import { getDueDateIcon } from "../helpers/dates";
+import { getProjectIcon } from "../helpers/projects";
 
 type IssueDetailProps = {
   issue: IssueResult;
@@ -101,14 +102,7 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                 <Detail.Metadata.Label
                   title="Project"
                   text={issue.project ? issue.project.name : "No Project"}
-                  icon={
-                    issue.project
-                      ? {
-                          source: issue.project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-                          tintColor: issue.project.color,
-                        }
-                      : { source: { light: "light/no-project.svg", dark: "dark/no-project.svg" } }
-                  }
+                  icon={getProjectIcon(issue.project)}
                 />
 
                 <Detail.Metadata.Label
