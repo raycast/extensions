@@ -15,13 +15,13 @@ export default function Main(props: { arguments: ExportArguments }) {
       popToRoot();
       return;
     }
-  })
+  });
 
   // Check whether there is an active document
   Promise.resolve(
     runAppleScript(`try
-    tell application "Numbers" to get document 1
-  end try`)
+      tell application "Numbers" to get document 1
+    end try`)
   ).then((document) => {
     if (!document) {
       showHUD(`No active spreadsheet to export!`);

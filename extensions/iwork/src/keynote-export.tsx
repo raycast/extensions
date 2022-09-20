@@ -13,15 +13,14 @@ export default function Main(props: { arguments: ExportArguments }) {
   Promise.resolve(checkKeynoteInstalled()).then((installed) => {
     if (!installed) {
       popToRoot();
-      return;
     }
-  })
+  });
 
   // Check whether there is an active document
   Promise.resolve(
     runAppleScript(`try
-    tell application "Keynote" to get document 1
-  end try`)
+      tell application "Keynote" to get document 1
+    end try`)
   ).then((document) => {
     if (!document) {
       showHUD(`No active slideshow to export!`);
