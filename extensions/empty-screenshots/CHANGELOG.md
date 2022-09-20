@@ -1,5 +1,5 @@
 # Empty Screenshot Folder Changelog
 
-## [Initial Version] - 2022-08-17
+## [Initial Version] - 2022-09-20
 
 Added inital code
