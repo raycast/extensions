@@ -1,27 +1,29 @@
-import { ActionPanel, List, showToast, Icon, Color, Action, LocalStorage, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {
+  ActionPanel,
+  List,
+  showToast,
+  Icon,
+  Color,
+  Action,
+  LocalStorage,
+  Toast,
+  Image,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
 
 export interface Feed {
   url: string;
   title: string;
-  icon: string;
+  link?: string;
+  icon: Image.ImageLike;
 }
 
 function FeedsList() {
-  const [feeds, setFeeds] = useState<Feed[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchFeeds() {
-    setLoading(true);
-    setFeeds(await getFeeds());
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    fetchFeeds();
-  }, []);
+  const { isLoading, revalidate, data: feeds = [] } = usePromise(getFeeds);
 
   const removeFeed = async (index: number) => {
     const removedFeed = feeds.at(index) as Feed;
@@ -29,12 +31,12 @@ function FeedsList() {
     feedItems.splice(index, 1);
 
     await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
-    setFeeds(feedItems);
     await showToast({
       style: Toast.Style.Success,
       title: "Unsubscribed from the feed!",
       message: removedFeed.title,
     });
+    revalidate();
   };
 
   const moveFeed = (index: number, change: number) => {
@@ -43,18 +45,18 @@ function FeedsList() {
     }
     const feedItems = [...feeds] as Feed[];
     [feedItems[index], feedItems[index + change]] = [feedItems[index + change], feedItems[index]];
-    setFeeds(feedItems);
+    revalidate();
   };
 
   return (
     <List
-      isLoading={loading}
       searchBarPlaceholder="Search feeds..."
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.Push
             title="Add Feed"
-            target={<AddFeedForm callback={setFeeds} />}
+            target={<AddFeedForm />}
             icon={{ source: Icon.Plus, tintColor: Color.Green }}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
@@ -66,25 +68,34 @@ function FeedsList() {
           key={item.url}
           title={item.title}
           icon={item.icon}
+          accessories={[{ text: item.link }]}
           actions={
             <ActionPanel>
               <ActionPanel.Section title={item.title}>
-                <Action.Push
-                  title="Open Feed"
-                  target={<StoriesList feeds={[item]} />}
-                  icon={{ source: Icon.BlankDocument, tintColor: Color.Green }}
-                />
+                <Action.Push title="View Stories" target={<StoriesList feeds={[item]} />} icon={Icon.AppWindowList} />
+                {item.link && <Action.OpenInBrowser url={item.link} />}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.Push
                   title="Add Feed"
-                  target={<AddFeedForm callback={setFeeds} />}
-                  icon={{ source: Icon.Plus, tintColor: Color.Green }}
+                  target={<AddFeedForm />}
+                  icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
                 <Action
                   title="Remove Feed"
-                  onAction={() => removeFeed(index)}
+                  onAction={async () => {
+                    confirmAlert({
+                      title: "Delete Feed?",
+                      message: `Warning: This operation cannot be undone.`,
+                      icon: Icon.Trash,
+                      primaryAction: {
+                        title: "Delete",
+                        onAction: () => removeFeed(index),
+                        style: Alert.ActionStyle.Destructive,
+                      },
+                    });
+                  }}
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 />

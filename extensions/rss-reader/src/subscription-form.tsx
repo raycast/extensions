@@ -2,12 +2,31 @@ import { ActionPanel, Form, showToast, Icon, Color, useNavigation, Action, Local
 import { useState } from "react";
 import { Feed, getFeeds } from "./feeds";
 import Parser from "rss-parser";
+import { getFavicon } from "@raycast/utils";
+import { StoriesList } from "./stories";
 
 const parser = new Parser({});
 
-function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
+const getFeedItem = async (feedURL: string): Promise<Feed> => {
+  const feed = await parser.parseURL(feedURL);
+  const feedIcon = () => {
+    if (feed.image?.url) {
+      return feed.image.url;
+    } else {
+      return getFavicon(feedURL, { fallback: Icon.BlankDocument });
+    }
+  };
+  return {
+    url: feedURL,
+    link: feed.link,
+    title: feed.title || "No Title",
+    icon: feedIcon(),
+  };
+};
+
+function AddFeedForm() {
   const [value, setValue] = useState("");
-  const { pop } = useNavigation();
+  const navigation = useNavigation();
 
   const addFeed = async (values: { feedURL: string }) => {
     try {
@@ -16,12 +35,7 @@ function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
         style: Toast.Style.Animated,
         title: "Subscribing...",
       });
-      const feed = await parser.parseURL(values.feedURL);
-      const feedItem = {
-        url: values.feedURL,
-        title: feed.title || "No Title",
-        icon: feed.image?.url || Icon.BlankDocument,
-      };
+      const feedItem = await getFeedItem(values.feedURL);
 
       const feedItems = await getFeeds();
       if (feedItems?.some((item) => item.url === feedItem.url)) {
@@ -40,10 +54,7 @@ function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
         title: "Subscribed!",
         message: feedItem.title,
       });
-      if (props?.callback) {
-        props.callback(feedItems);
-        pop();
-      }
+      navigation.push(<StoriesList feeds={[feedItem]} />);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
