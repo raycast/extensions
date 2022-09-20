@@ -15,77 +15,77 @@ export default function Main(props: { arguments: ExportArguments }) {
       popToRoot();
       return;
     }
+  })
 
-    // Check whether there is an active document
-    Promise.resolve(
-      runAppleScript(`try
-      tell application "Keynote" to get document 1
-    end try`)
-    ).then((document) => {
-      if (!document) {
-        showHUD(`No active slideshow to export!`);
-        popToRoot();
-      }
-    });
-
-    return (
-      <List searchBarPlaceholder="Search formats...">
-        <List.Item
-          title="PDF"
-          actions={
-            <ActionPanel>
-              <Action title="PDF" onAction={() => exportPDF(filepath)} />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title="PowerPoint"
-          actions={
-            <ActionPanel>
-              <Action title="Microsoft PowerPoint" onAction={() => exportPowerPoint(filepath)} />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title="HTML"
-          actions={
-            <ActionPanel>
-              <Action title="HTML" onAction={() => exportHTML(filepath)} />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title="Movie"
-          actions={
-            <ActionPanel>
-              <Action title="QuickTime Movie" onAction={() => exportMovie(filepath)} />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title="Images"
-          actions={
-            <ActionPanel>
-              <Action title="Slide Images" onAction={() => exportImages(filepath)} />
-            </ActionPanel>
-          }
-        />
-
-        <List.Item
-          title="Keynote 09"
-          actions={
-            <ActionPanel>
-              <Action title="Keynote 09" onAction={() => exportKeynote09(filepath)} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+  // Check whether there is an active document
+  Promise.resolve(
+    runAppleScript(`try
+    tell application "Keynote" to get document 1
+  end try`)
+  ).then((document) => {
+    if (!document) {
+      showHUD(`No active slideshow to export!`);
+      popToRoot();
+    }
   });
+
+  return (
+    <List searchBarPlaceholder="Search formats...">
+      <List.Item
+        title="PDF"
+        actions={
+          <ActionPanel>
+            <Action title="PDF" onAction={() => exportPDF(filepath)} />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="PowerPoint"
+        actions={
+          <ActionPanel>
+            <Action title="Microsoft PowerPoint" onAction={() => exportPowerPoint(filepath)} />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="HTML"
+        actions={
+          <ActionPanel>
+            <Action title="HTML" onAction={() => exportHTML(filepath)} />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="Movie"
+        actions={
+          <ActionPanel>
+            <Action title="QuickTime Movie" onAction={() => exportMovie(filepath)} />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="Images"
+        actions={
+          <ActionPanel>
+            <Action title="Slide Images" onAction={() => exportImages(filepath)} />
+          </ActionPanel>
+        }
+      />
+
+      <List.Item
+        title="Keynote 09"
+        actions={
+          <ActionPanel>
+            <Action title="Keynote 09" onAction={() => exportKeynote09(filepath)} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
 }
 
 function exportPDF(filepath: string) {

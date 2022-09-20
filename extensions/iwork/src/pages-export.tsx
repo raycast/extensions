@@ -118,6 +118,11 @@ function exportWord(filepath: string) {
 }
 
 function exportFormattedText(filepath: string) {
+  // Ensure complete filename
+  if (!filepath.endsWith(".rtf")) {
+    filepath = filepath + ".rtf";
+  }
+
   showHUD(`Exporting document as formatted text...`);
   runAppleScript(`tell application "Pages"
     set theDoc to document 1
