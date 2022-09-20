@@ -1,20 +1,21 @@
+import { loadDoneProperty } from '@/services/storage'
 import { TodoPage } from '@/types/todo-page'
 import { getPreferenceValues } from '@raycast/api'
 import { notion } from '../client'
 import { mapPageToTodo } from '../utils/map-page-to-todo'
 
-export async function updateTodoTag(
-  pageId: string,
-  labelId: string | null
-): Promise<any> {
+export async function inProgressTodo(pageId: string): Promise<any> {
   const notionClient = await notion()
   const preferences = getPreferenceValues()
+  const status = await loadDoneProperty()
 
   const page = await notionClient.pages.update({
     page_id: pageId,
     properties: {
-      [preferences.property_label]: {
-        select: labelId ? { id: labelId } : null,
+      [preferences.property_done]: {
+        status: {
+          id: status.inProgressId,
+        },
       },
     },
   })

@@ -1,9 +1,9 @@
 import { reauthorize } from '@/services/notion/oauth/reauthorize'
 import { Action, Icon } from '@raycast/api'
 
-export function ReauthorizeAction({ getInitialData }: any) {
+export function ReauthorizeAction() {
   const handleAuthorize = () => {
-    reauthorize().then(() => getInitialData())
+    reauthorize()
   }
 
   return (
@@ -11,7 +11,7 @@ export function ReauthorizeAction({ getInitialData }: any) {
       icon={Icon.Person}
       title={'Authorize'}
       onAction={handleAuthorize}
-      shortcut={{ modifiers: ['cmd'], key: 's' }}
+      shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
     />
   )
 }

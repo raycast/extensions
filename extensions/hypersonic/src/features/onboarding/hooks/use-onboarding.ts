@@ -12,6 +12,7 @@ const ONBOARDING_DATA: Todo[] = [
     tag: null,
     url: '',
     contentUrl: '',
+    inProgress: false,
   },
   {
     id: '2',
@@ -20,6 +21,7 @@ const ONBOARDING_DATA: Todo[] = [
     tag: null,
     url: '',
     contentUrl: '',
+    inProgress: false,
   },
   {
     id: '3',
@@ -28,22 +30,25 @@ const ONBOARDING_DATA: Todo[] = [
     tag: null,
     url: '',
     contentUrl: '',
+    inProgress: false,
   },
   {
     id: '4',
-    title: '🔗 Press ⌘ + U and duplicate Hypersonic template to your workspace',
+    title: '🔗 Press ⌘ + E and duplicate Hypersonic template to your workspace',
     isCompleted: false,
     tag: null,
     url: '',
     contentUrl: templateUrl,
+    inProgress: false,
   },
   {
     id: '5',
-    title: '👤️ Press ⌘ + S and Log into your Notion account',
+    title: '👤️ Press ⌘ + ⇧ + A and Log into your Notion account',
     isCompleted: false,
     tag: null,
     url: '',
     contentUrl: '',
+    inProgress: false,
   },
 ]
 
@@ -55,7 +60,6 @@ const TAGS: Tag[] = [
 export const useOnboarding = () => {
   const [data, setData] = useState<Todo[]>(ONBOARDING_DATA)
   const [todos, setTodos] = useState<Todo[]>(ONBOARDING_DATA)
-  const [tags, setTags] = useState<Tag[]>(TAGS)
   const [searchText, setSearchText] = useState<string>('')
 
   const handleComplete = useCallback(
@@ -74,6 +78,7 @@ export const useOnboarding = () => {
       tag: null,
       url: '',
       contentUrl: '',
+      inProgress: false,
     }
 
     setData([optimisticTodo, ...data])
@@ -145,7 +150,7 @@ export const useOnboarding = () => {
   return {
     todos,
     data,
-    tags,
+    tags: TAGS,
     searchText,
     setSearchText,
     handleCreate,
