@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "deutscherWetterdienst",
+  "name": "deutscherwetterdienst",
   "title": "Deutscher Wetterdienst",
   "description": "Shows current rain radar by the Deutscher Wetter Dienst",
   "icon": "command-icon.png",
