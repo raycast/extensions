@@ -27,7 +27,7 @@ export default function Command(props: { arguments: Arguments }) {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search urban dictionary..."
+      searchBarPlaceholder="Search Urban Dictionary..."
       throttle
       searchText={props.arguments.query}
     >
