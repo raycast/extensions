@@ -1,6 +1,5 @@
 import { LocalStorage } from '@raycast/api'
 import { Todo } from '@/types/todo'
-import { Tag } from '@/types/tag'
 
 export const loadDatabase = async (): Promise<{
   databaseUrl: string
@@ -19,13 +18,22 @@ export const storeDatabase = (database: {
   return LocalStorage.setItem('NOTION_DATABASE', JSON.stringify(database))
 }
 
-export const loadTags = async (): Promise<Tag[]> => {
-  const tags: string | undefined = await LocalStorage.getItem('NOTION_TAGS')
-  return JSON.parse(tags || '[]')
+export const storeDoneProperty = (data: {
+  doneName: string
+  inProgressId: string
+  type: string
+}) => {
+  return LocalStorage.setItem('DONE_PROPERTY', JSON.stringify(data))
 }
 
-export const storeTags = (tags: any[]) => {
-  return LocalStorage.setItem('NOTION_TAGS', JSON.stringify(tags))
+export const loadDoneProperty = async (): Promise<{
+  doneName: string
+  inProgressId: string
+  type: string
+}> => {
+  const data: string | undefined = await LocalStorage.getItem('DONE_PROPERTY')
+
+  return JSON.parse(data || '{}')
 }
 
 export const loadTodos = async () => {
