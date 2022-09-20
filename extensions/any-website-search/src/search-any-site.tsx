@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { getFavicon, Response, useFetch } from "@raycast/utils";
 import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List } from "@raycast/api";
-import { decode as htmlDecode } from "he";
 import { URL, URLSearchParams } from "node:url";
 import {
   getDefaultSavedSites,
@@ -14,26 +13,12 @@ import {
 import { ManageSavedSites } from "./manage-saved-sites";
 import { v4 as uuidv4 } from "uuid";
 import { strEq } from "./utils";
+import { parseSuggestionsFromDuckDuckGo, parseSuggestionsFromGoogle } from "./search-suggestions";
 
 interface Preferences {
   prefillFromClipboard: boolean;
   interpretDdgBangs: boolean;
-}
-
-function suggestionsFromXml(xml: string, searchString: string): string[] {
-  const suggestionMatches = xml.matchAll(/<suggestion data="(.*?)"\/>/g);
-  const suggestions: string[] = [];
-
-  for (const match of suggestionMatches) {
-    const suggestion = match[1]; // capture group 1
-    if (!strEq(suggestion, searchString)) {
-      suggestions.push(htmlDecode(suggestion));
-    }
-  }
-
-  suggestions.unshift(searchString);
-
-  return suggestions;
+  searchSuggestionsProvider: "__NONE__" | "ddg" | "google";
 }
 
 function fillTemplateUrl(templateUrl: string, query: string) {
@@ -92,10 +77,12 @@ function DefaultActions(props: SavedSitesState) {
 }
 
 export default function () {
+  const { prefillFromClipboard, interpretDdgBangs, searchSuggestionsProvider } = getPreferenceValues<Preferences>();
+
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if (getPreferenceValues<Preferences>().prefillFromClipboard) {
+    if (prefillFromClipboard) {
       Clipboard.readText().then((text) => {
         setSearchText(text ?? "");
       });
@@ -111,7 +98,7 @@ export default function () {
   const [selectedSite, setSelectedSite] = useState<SavedSite>({ title: "", url: "" });
   const [selectedSuggestion, setSelectedSuggestion] = useState("");
   const [currentBang, searchSuggestionQueryText] = useMemo(() => {
-    const { bang, query } = getPreferenceValues<Preferences>().interpretDdgBangs
+    const { bang, query } = interpretDdgBangs
       ? maybeStripBangFromQuery(selectedSite.url, searchText)
       : { bang: null, query: searchText };
 
@@ -125,35 +112,62 @@ export default function () {
 
   const urlsToSites = Object.fromEntries(savedSites.items.map(({ title, url }) => [url, title]));
 
-  const { isLoading, data } = useFetch<string[] | string, void>(
-    `https://google.com/complete/search?output=toolbar&q=${encodeURIComponent(searchSuggestionQueryText)}`,
-    {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
-      },
-      execute: true,
-      // to make sure the screen isn't flickering when the searchText changes
-      keepPreviousData: true,
-      parseResponse: async (response) => {
-        const url = new URL(response.url);
-        const queryParams = new URLSearchParams(url.search);
-        const query = queryParams.get("q") ?? "";
-        if (query === "") {
-          return [];
-        }
-
-        if (!(200 <= response.status && response.status < 300)) {
-          return `${response.status}: ${response.statusText}`;
-        }
-
-        const xml = await response.text();
-        const suggestions = suggestionsFromXml(xml, query);
-
-        return suggestions;
-      },
+  let suggestionsData: null | {
+    urlCtor: (_: string) => string;
+    responseParser: (_: Response, _searchString: string) => Promise<string[]>;
+  };
+  switch (searchSuggestionsProvider) {
+    case "__NONE__": {
+      suggestionsData = null;
+      break;
     }
-  );
+    case "ddg": {
+      suggestionsData = {
+        urlCtor: (q: string) => `https://duckduckgo.com/ac/?q=${q}&type=list`,
+        responseParser: parseSuggestionsFromDuckDuckGo,
+      };
+      break;
+    }
+    case "google": {
+      suggestionsData = {
+        urlCtor: (q: string) => `https://google.com/complete/search?output=toolbar&q=${q}`,
+        responseParser: parseSuggestionsFromGoogle,
+      };
+      break;
+    }
+    default: {
+      throw new Error(`invalid search suggestions provider ${searchSuggestionsProvider}`);
+    }
+  }
+
+  const { isLoading, data } =
+    suggestionsData === null
+      ? { isLoading: false, data: searchText.length === 0 ? [] : [searchText] }
+      : useFetch<string[] | string, void>(suggestionsData.urlCtor(encodeURIComponent(searchSuggestionQueryText)), {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15",
+          },
+          execute: true,
+          // to make sure the screen isn't flickering when the searchText changes
+          keepPreviousData: true,
+          parseResponse: async (response) => {
+            const url = new URL(response.url);
+            const queryParams = new URLSearchParams(url.search);
+            const query = queryParams.get("q") ?? "";
+            if (query === "") {
+              return [];
+            }
+
+            if (!(200 <= response.status && response.status < 300)) {
+              return `${response.status}: ${response.statusText}`;
+            }
+
+            const suggestions = (await suggestionsData?.responseParser(response, query)) ?? [];
+
+            return suggestions;
+          },
+        });
 
   const searchActionPanel = (
     <ActionPanel>
@@ -172,10 +186,7 @@ export default function () {
       throttle={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      onSelectionChange={(id) => {
-        console.log(id);
-        setSelectedSuggestion(id ?? "");
-      }}
+      onSelectionChange={(id) => setSelectedSuggestion(id ?? "")}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Search site"
