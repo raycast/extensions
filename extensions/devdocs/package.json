@@ -17,15 +17,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "@raycast/utils": "^1.1.0",
-    "fuse.js": "^6.4.6",
-    "node-fetch": "^3.0.0",
-    "open": "^8.2.1",
-    "swr": "^1.0.1"
+    "@raycast/utils": "^1.4.0",
+    "fuse.js": "^6.4.6"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",

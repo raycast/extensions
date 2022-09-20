@@ -15,7 +15,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
 import { userAgent } from "../consts";
-import { checkIfPreferredLanguagesContainedChinese } from "../detectLanauge/utils";
+import { checkIfPreferredLanguagesContainChinese } from "../detectLanauge/utils";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getGoogleLanguageId, getYoudaoLanguageIdFromGoogleId } from "../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
@@ -202,9 +202,9 @@ export async function googleWebTranslate(
  */
 async function getTld(): Promise<string> {
   let tld = "com"; // cn,com
-  if (checkIfPreferredLanguagesContainedChinese() || (await checkIfIpInChina())) {
+  if (checkIfPreferredLanguagesContainChinese() || (await checkIfIpInChina())) {
     tld = "cn";
-    console.log(`---> China, or Chinese: ${checkIfPreferredLanguagesContainedChinese()}`);
+    console.log(`---> China, or Chinese: ${checkIfPreferredLanguagesContainChinese()}`);
   }
   console.log(`---> google tld: ${tld}`);
   return tld;

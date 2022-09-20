@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Support emojis for projects] - 2022-09-20
+
+- Add support for emojis in projects
+
 ## [Various improvements] - 2022-08-11
 
 - Add "Add Comment" action from the issue list
