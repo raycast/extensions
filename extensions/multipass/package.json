@@ -5,6 +5,9 @@
   "description": "Manage multipass instances",
   "icon": "multipass-icon.png",
   "author": "davibe",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
