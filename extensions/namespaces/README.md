@@ -4,7 +4,7 @@ Name your macOS Spaces
 
 ## Notes
 
-This is **not** a full-blown system-level-integrated solution for managing Spaces in macOS. It simply provides a way to include Spaces into your Raycast workflows by giving them a user-friendly name and a color. Making switching between them a little more fun.
+This is **not** a full-blown system-level-integrated solution for managing Spaces in macOS. It simply provides a way to include *existing* Spaces into your Raycast workflows by giving them a user-friendly name and a color. Making switching between them a little more fun.
 
 ## Usage/Configuration Tip
 
