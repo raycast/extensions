@@ -39,7 +39,7 @@ interface MultipassImage {
 }
 
 export default function Command() {
-  let [images, setImages] = useState<Array<MultipassImage>>([]);
+  const [images, setImages] = useState<Array<MultipassImage>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -63,14 +63,6 @@ export default function Command() {
       setIsLoading(false);
     };
   }, []);
-
-  console.log(images);
-
-  images = [
-    { state: "Running", name: "Raycast dev VM" },
-    { state: "Stopped", name: "Raycast test VM" },
-    { state: "Suspended", name: "Raycast stage VM" },
-  ];
 
   return (
     <List isLoading={isLoading}>
