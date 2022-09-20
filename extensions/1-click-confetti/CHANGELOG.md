@@ -1,3 +1,3 @@
 # Confetti  Changelog
 
-## [Initial Version] - 2022-09-16
+## [Initial Version] - 2022-09-20
