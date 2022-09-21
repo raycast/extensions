@@ -4,6 +4,7 @@ import * as google from "../api/oauth";
 import {
   createTask,
   deleteTask,
+  editTask,
   fetchList,
   toggleTask,
 } from "../api/endpoints";
@@ -51,6 +52,31 @@ export default function ListView(props: { listId: string }) {
         try {
           setState((previous) => ({ ...previous, isLoading: true }));
           await createTask(props.listId, taskToCreate);
+          const refreshedList = await fetchList(props.listId);
+          setState((previous) => ({
+            ...previous,
+            tasks: refreshedList,
+            isLoading: false,
+          }));
+        } catch (error) {
+          console.error(error);
+          setState((previous) => ({
+            ...previous,
+            tasks: [],
+            isLoading: false,
+          }));
+          showToast({ style: Toast.Style.Failure, title: String(error) });
+        }
+      })();
+    },
+    [state.tasks, setState]
+  );
+  const handleEdit = useCallback(
+    (listId: string, taskToEdit: Task) => {
+      (async () => {
+        try {
+          setState((previous) => ({ ...previous, isLoading: true }));
+          await editTask(props.listId, taskToEdit);
           const refreshedList = await fetchList(props.listId);
           setState((previous) => ({
             ...previous,
@@ -168,6 +194,7 @@ export default function ListView(props: { listId: string }) {
             onToggle={() => handleToggle(task)}
             onDelete={() => handleDelete(task)}
             onCreate={handleCreate}
+            onEdit={handleEdit}
           />
         );
       })}

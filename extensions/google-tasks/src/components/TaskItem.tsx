@@ -11,6 +11,7 @@ export default function TaskItem(props: {
   onToggle: () => void;
   onDelete: () => void;
   onCreate: (listId: string, task: TaskForm) => void;
+  onEdit: (listId: string, task: Task) => void;
 }) {
   return (
     <List.Item
@@ -68,7 +69,13 @@ export default function TaskItem(props: {
           <Action.Push
             title="Edit Task"
             shortcut={{ modifiers: ["cmd"], key: "i" }}
-            target={<EditTaskForm listId={props.listId} task={props.task} />}
+            target={
+              <EditTaskForm
+                listId={props.listId}
+                task={props.task}
+                onEdit={props.onEdit}
+              />
+            }
           />
         </ActionPanel>
       }
