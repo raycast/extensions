@@ -72,7 +72,7 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
     validation: {
       start_time: FormValidation.Required,
       duration: (value) => {
-        if (isNaN(parseInt(value ?? ""))) {
+        if (value && isNaN(parseInt(value ?? ""))) {
           return "The duration must be a number";
         }
       },
