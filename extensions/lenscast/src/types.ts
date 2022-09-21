@@ -9,7 +9,6 @@ export enum PublicationMainFocus {
 }
 
 export type Media = {
-  __typename?: "Media";
   altTag?: string;
   cover?: string;
   url: string;
