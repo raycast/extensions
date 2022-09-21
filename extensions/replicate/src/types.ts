@@ -11,7 +11,7 @@ export type Prediction = {
   };
   input: { prompt?: string } & Record<string, any>;
   status: "starting" | "processing" | "succeeded" | "failed" | "cancelled";
-  output: string[];
+  output: string[] | string;
   metrics: {
     predict_time: number;
   };

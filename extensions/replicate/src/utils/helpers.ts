@@ -5,6 +5,7 @@ import fs from "fs";
 import { getPreferenceValues, openCommandPreferences, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { PREDICTIONS_URL } from "../constants";
+import isImage from "is-image";
 
 export const buildPredictionsList = (data?: Prediction[]) => {
   if (!data) return undefined;
@@ -13,8 +14,17 @@ export const buildPredictionsList = (data?: Prediction[]) => {
   // iterate over the URLs and if more than one is returned, clone it back in
   data
     ?.filter(succeeded)
-    ?.filter(filterIsUrl)
+    ?.filter(isUrl)
+    ?.filter(isAnImage)
     ?.forEach((prediction) => {
+      if (!Array.isArray(prediction.output)) {
+        predictions.push({
+          ...prediction,
+          output: [prediction.output],
+          id: `${prediction.id}`,
+        });
+        return;
+      }
       prediction?.output?.forEach((url, index) => {
         predictions.push({
           ...prediction,
@@ -27,8 +37,14 @@ export const buildPredictionsList = (data?: Prediction[]) => {
 };
 
 export const succeeded = (prediction: Prediction) => prediction.status === "succeeded";
-export const filterIsUrl = (prediction: Prediction) => {
+export const isAnImage = ({ output }: Prediction) =>
+  typeof output === "string" ? isImage(output) : output?.every((url: string) => isImage(url));
+export const isUrl = (prediction: Prediction) => {
   try {
+    if (!Array.isArray(prediction.output)) {
+      new URL(prediction.output);
+      return true;
+    }
     prediction?.output.forEach((url) => new URL(url));
     return true;
   } catch (e) {
