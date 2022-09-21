@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:56
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-16 23:50
+ * @lastEditTime: 2022-09-19 17:52
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -19,6 +19,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "auto", // "auto" means this API support auto detect language.
     youdaoId: "auto",
+    bingId: "auto-detect",
     appleDetectChineseTitle: "自动识别",
     appleId: "auto",
     francId: "und", // 'und', means undetermined
@@ -32,6 +33,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "zh-CN",
     youdaoId: "zh-CHS",
+    bingId: "zh-Hans",
     appleId: "zh_CN",
     appleDetectChineseTitle: "简体中文",
     deepLSourceId: "ZH",
@@ -45,21 +47,9 @@ export const languageItemList: LanguageItem[] = [
     emoji: "🇨🇳",
   },
   {
-    googleId: "zh-TW",
-    youdaoId: "zh-CHT",
-    appleId: "zh-TW",
-    appleDetectChineseTitle: "繁体中文",
-    francId: "cmn",
-    aliyunId: "zh-tw",
-    tencentId: "zh-TW",
-    baiduId: "cht",
-    englishName: "Chinese-Traditional",
-    voiceList: ["Ting-Ting"],
-    emoji: "🇭🇰",
-  },
-  {
     googleId: "en",
     youdaoId: "en",
+    bingId: "en",
     appleId: "en_US",
     appleDetectChineseTitle: "英语",
     deepLSourceId: "EN",
@@ -74,8 +64,23 @@ export const languageItemList: LanguageItem[] = [
     emoji: "🇺🇸",
   },
   {
+    googleId: "zh-TW",
+    youdaoId: "zh-CHT",
+    bingId: "zh-Hant",
+    appleId: "zh_TW",
+    appleDetectChineseTitle: "繁体中文",
+    francId: "cmn",
+    aliyunId: "zh-tw",
+    tencentId: "zh-TW",
+    baiduId: "cht",
+    englishName: "Chinese-Traditional",
+    voiceList: ["Ting-Ting"],
+    emoji: "🇭🇰",
+  },
+  {
     googleId: "ja",
     youdaoId: "ja",
+    bingId: "ja",
     appleId: "ja_JP",
     appleDetectChineseTitle: "日语",
     deepLSourceId: "JA",
@@ -92,6 +97,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "ko",
     youdaoId: "ko",
+    bingId: "ko",
     appleId: "ko_KR",
     appleDetectChineseTitle: "韩语",
     francId: "kor",
@@ -106,6 +112,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "fr",
     youdaoId: "fr",
+    bingId: "fr",
     appleId: "fr_FR",
     appleDetectChineseTitle: "法语",
     deepLSourceId: "FR",
@@ -120,6 +127,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "es",
     youdaoId: "es",
+    bingId: "es",
     appleId: "es_ES",
     appleDetectChineseTitle: "西班牙语",
     deepLSourceId: "ES",
@@ -134,6 +142,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "pt",
     youdaoId: "pt",
+    bingId: "pt",
     appleId: "pt_BR",
     appleDetectChineseTitle: "葡萄牙语",
     deepLSourceId: "PT",
@@ -149,6 +158,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "it",
     youdaoId: "it",
+    bingId: "it",
     appleId: "it_IT",
     appleDetectChineseTitle: "意大利语",
     deepLSourceId: "IT",
@@ -163,6 +173,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "de",
     youdaoId: "de",
+    bingId: "de",
     appleId: "de_DE",
     appleDetectChineseTitle: "德语",
     deepLSourceId: "DE",
@@ -177,6 +188,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "ru",
     youdaoId: "ru",
+    bingId: "ru",
     appleId: "ru_RU",
     appleDetectChineseTitle: "俄语",
     deepLSourceId: "RU",
@@ -191,6 +203,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "ar",
     youdaoId: "ar",
+    bingId: "ar",
     appleId: "ar_AE",
     appleDetectChineseTitle: "阿拉伯语",
     francId: "arb",
@@ -204,6 +217,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "sv",
     youdaoId: "sv",
+    bingId: "sv",
     appleDetectChineseTitle: "瑞典语",
     deepLSourceId: "SV",
     francId: "swe",
@@ -216,6 +230,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "ro",
     youdaoId: "ro",
+    bingId: "ro",
     appleDetectChineseTitle: "罗马尼亚语",
     deepLSourceId: "RO",
     francId: "ron",
@@ -228,6 +243,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "th",
     youdaoId: "th",
+    bingId: "th",
     appleDetectChineseTitle: "泰语",
     francId: "tha",
     aliyunId: "th",
@@ -240,6 +256,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "sk",
     youdaoId: "sk",
+    bingId: "sk",
     appleDetectChineseTitle: "斯洛伐克语",
     deepLSourceId: "SK",
     francId: "slk",
@@ -252,6 +269,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "nl",
     youdaoId: "nl",
+    bingId: "nl",
     appleDetectChineseTitle: "荷兰语",
     deepLSourceId: "NL",
     francId: "nld",
@@ -264,6 +282,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "hu",
     youdaoId: "hu",
+    bingId: "hu",
     appleDetectChineseTitle: "匈牙利语",
     deepLSourceId: "HU",
     francId: "hun",
@@ -276,6 +295,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "el",
     youdaoId: "el",
+    bingId: "el",
     appleDetectChineseTitle: "希腊语",
     deepLSourceId: "EL",
     francId: "ell",
@@ -288,6 +308,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "da",
     youdaoId: "da",
+    bingId: "da",
     appleDetectChineseTitle: "丹麦语",
     deepLSourceId: "DA",
     francId: "dan",
@@ -300,6 +321,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "fi",
     youdaoId: "fi",
+    bingId: "fi",
     appleDetectChineseTitle: "芬兰语",
     deepLSourceId: "FI",
     francId: "fin",
@@ -312,6 +334,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "pl",
     youdaoId: "pl",
+    bingId: "pl",
     appleDetectChineseTitle: "波兰语",
     deepLSourceId: "PL",
     francId: "pol",
@@ -324,6 +347,7 @@ export const languageItemList: LanguageItem[] = [
   {
     googleId: "cs",
     youdaoId: "cs",
+    bingId: "cs",
     appleDetectChineseTitle: "捷克语",
     deepLSourceId: "CS",
     francId: "ces",
@@ -336,10 +360,16 @@ export const languageItemList: LanguageItem[] = [
 ];
 
 /**
- * Chinese language item.
+ * Auto detect language item.
  */
+export const autoDetectLanguageItem = languageItemList[0];
+
+/**
+ * Chinese-Simplified language item.
+ */
+
 export const chineseLanguageItem = languageItemList[1];
 /**
  * English language item.
  */
-export const englishLanguageItem = languageItemList[3];
+export const englishLanguageItem = languageItemList[2];

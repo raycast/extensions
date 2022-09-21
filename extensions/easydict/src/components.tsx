@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:47
+ * @lastEditTime: 2022-09-19 01:03
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -213,7 +213,7 @@ function playSoundIcon(lightTintColor: string) {
  */
 export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
   const { displayType } = listItem;
-  // console.log(`---> list type: ${listDisplayType}, typeof: ${typeof listDisplayType}`);
+  // console.log(`---> get list type: ${displayType}`);
 
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
@@ -222,17 +222,11 @@ export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
 
   if (checkIsYoudaoDictionaryListItem(listItem)) {
     itemIcon = getYoudaoListItemIcon(displayType as YoudaoDictionaryListItemType);
-  }
-
-  if (checkIsLingueeListItem(listItem)) {
+  } else if (checkIsLingueeListItem(listItem)) {
     itemIcon = getLingueeListItemIcon(displayType as LingueeListItemType);
-  }
-
-  if (checkIsTranslationType(displayType as TranslationType)) {
+  } else if (checkIsTranslationType(displayType as TranslationType)) {
     itemIcon = getQueryTypeIcon(displayType as TranslationType);
   }
-
-  // console.log(`---> end list type: ${listDisplayType}`);
 
   return itemIcon;
 }

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:55
+ * @lastEditTime: 2022-09-14 22:37
  * @fileName: tencent.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,7 +12,7 @@ import axios from "axios";
 import crypto, { BinaryToTextEncoding } from "crypto";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
 import { requestCostTime } from "../axiosConfig";
-import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
+import { DetectedLanguageModel, LanguageDetectType } from "../detectLanauge/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getTencentLanguageId, getYoudaoLanguageIdFromTencentId } from "../language/languages";
 import { KeyStore } from "../preferences";
@@ -167,13 +167,13 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
             // code: error.Code,
             message: error.Message,
           };
-          reject(errorInfo);
-          return;
+          return reject(errorInfo);
         }
 
         const translations = tencentResult.TargetText.split("\n");
-        console.warn(`---> Tencent translations: ${translations}`);
-        console.log(`fromLang: ${tencentResult.Source} cost: ${response.headers[requestCostTime]}`);
+        console.warn(
+          `---> Tencent translations: ${translations}, ${tencentResult.Source} cost: ${response.headers[requestCostTime]}`
+        );
         const typeResult: QueryTypeResult = {
           type: type,
           result: tencentResult,
@@ -208,6 +208,7 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
  */
 export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start sdk request Tencent translate`);
+
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   const from = getTencentLanguageId(fromLanguage);
   const to = getTencentLanguageId(toLanguage);
@@ -262,7 +263,9 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
  *
  * Todo: use axios to rewrite.
  */
-export async function tencentLanguageDetect(text: string): Promise<LanguageDetectTypeResult> {
+export function tencentLanguageDetect(text: string): Promise<DetectedLanguageModel> {
+  console.log(`---> start sdk request Tencent language detect`);
+
   const params = {
     Text: text,
     ProjectId: projectId,
@@ -270,31 +273,32 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
   const startTime = new Date().getTime();
   const type = LanguageDetectType.Tencent;
 
-  try {
-    const response = await client.LanguageDetect(params);
-    const endTime = new Date().getTime();
-    const tencentLanguageId = response.Lang || "";
-    const youdaoLanguageId = getYoudaoLanguageIdFromTencentId(tencentLanguageId);
-    console.warn(
-      `tencent detect language id: ${tencentLanguageId}, youdaoId: ${youdaoLanguageId}, cost time: ${
-        endTime - startTime
-      } ms`
-    );
-    const typeResult: LanguageDetectTypeResult = {
-      type: type,
-      sourceLanguageId: tencentLanguageId,
-      youdaoLanguageId: youdaoLanguageId,
-      confirmed: false,
-    };
-    return Promise.resolve(typeResult);
-  } catch (err) {
-    const error = err as { code: string; message: string };
-    console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
-    const errorInfo: RequestErrorInfo = {
-      type: type,
-      code: error.code,
-      message: error.message,
-    };
-    return Promise.reject(errorInfo);
-  }
+  return new Promise((resolve, reject) => {
+    client
+      .LanguageDetect(params)
+      .then((response) => {
+        const endTime = new Date().getTime();
+        const tencentLanguageId = response.Lang || "";
+        const youdaoLanguageId = getYoudaoLanguageIdFromTencentId(tencentLanguageId);
+        console.warn(`tencent detect language: ${tencentLanguageId}, youdaoId: ${youdaoLanguageId}`);
+        console.log(`tencent cost time: ${endTime - startTime} ms`);
+        const typeResult: DetectedLanguageModel = {
+          type: type,
+          sourceLanguageId: tencentLanguageId,
+          youdaoLanguageId: youdaoLanguageId,
+          confirmed: false,
+        };
+        resolve(typeResult);
+      })
+      .catch((err) => {
+        const error = err as { code: string; message: string };
+        console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
+        const errorInfo: RequestErrorInfo = {
+          type: type,
+          code: error.code,
+          message: error.message,
+        };
+        reject(errorInfo);
+      });
+  });
 }

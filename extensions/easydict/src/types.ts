@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 23:44
+ * @lastEditTime: 2022-09-19 01:30
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -22,6 +22,7 @@ import {
   YoudaoWebTranslateResult,
 } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
+import { BingTranslateResult } from "./translation/microsoft/types";
 
 export interface ActionListPanelProps {
   displayItem: ListDisplayItem;
@@ -38,6 +39,7 @@ export enum TranslationType {
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
   Google = "Google Translate",
+  Bing = "Bing Translate",
 }
 
 export enum DicionaryType {
@@ -62,6 +64,7 @@ export interface QueryTypeResult {
 export type QueryResponse =
   | YoudaoDictionaryFormatResult
   | YoudaoWebTranslateResult
+  | BingTranslateResult
   | BaiduTranslateResult
   | BaiduWebLanguageDetect
   | TencentTranslateResult
