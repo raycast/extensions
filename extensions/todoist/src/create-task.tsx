@@ -5,7 +5,9 @@ import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers/dates";
+import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
 
 type CreateTaskProps = {
   fromProjectId?: number;
@@ -113,9 +115,11 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
       };
 
       toast.secondaryAction = {
-        title: "Open in Browser",
-        shortcut: { modifiers: ["cmd"], key: "o" },
-        onAction: () => open(url),
+        title: `Open Task ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        onAction: async () => {
+          open(isTodoistInstalled ? `todoist://task?id=${id}` : url);
+        },
       };
 
       if (fromProjectId && mutateTasks) {
@@ -133,86 +137,88 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
   const projectSections = sections?.filter((section) => String(section.projectId) === projectId);
 
   return (
-    <Form
-      isLoading={isLoadingProjects || isLoadingSections || isLoadingLabels}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="content"
-        title="Title"
-        placeholder="Buy fruits"
-        value={content}
-        onChange={setContent}
-        ref={titleField}
-      />
+    <View>
+      <Form
+        isLoading={isLoadingProjects || isLoadingSections || isLoadingLabels}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
+          </ActionPanel>
+        }
+      >
+        <Form.TextField
+          id="content"
+          title="Title"
+          placeholder="Buy fruits"
+          value={content}
+          onChange={setContent}
+          ref={titleField}
+        />
 
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Apples, pears, and **strawberries**"
-        value={description}
-        onChange={setDescription}
-      />
+        <Form.TextArea
+          id="description"
+          title="Description"
+          placeholder="Apples, pears, and **strawberries**"
+          value={description}
+          onChange={setDescription}
+        />
 
-      <Form.Separator />
+        <Form.Separator />
 
-      <Form.DatePicker
-        id="due_date"
-        title="Due date"
-        value={dueDate}
-        onChange={setDueDate}
-        type={Form.DatePicker.Type.Date}
-      />
+        <Form.DatePicker
+          id="due_date"
+          title="Due date"
+          value={dueDate}
+          onChange={setDueDate}
+          type={Form.DatePicker.Type.Date}
+        />
 
-      <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
-        {priorities.map(({ value, name, color, icon }) => (
-          <Form.Dropdown.Item
-            value={String(value)}
-            title={name}
-            key={value}
-            icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
-          />
-        ))}
-      </Form.Dropdown>
-
-      {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
-          {projects.map(({ id, name, color, inboxProject }) => (
+        <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
+          {priorities.map(({ value, name, color, icon }) => (
             <Form.Dropdown.Item
-              key={id}
-              value={String(id)}
-              icon={inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(color).value }}
+              value={String(value)}
               title={name}
+              key={value}
+              icon={{ source: icon ? icon : Icon.Dot, tintColor: color }}
             />
           ))}
         </Form.Dropdown>
-      ) : null}
 
-      {projectSections && projectSections.length > 0 ? (
-        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
-          <Form.Dropdown.Item value="" title="No section" />
-          {projectSections.map(({ id, name }) => (
-            <Form.Dropdown.Item key={id} value={String(id)} title={name} />
-          ))}
-        </Form.Dropdown>
-      ) : null}
+        {projects && projects.length > 0 ? (
+          <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
+            {projects.map(({ id, name, color, inboxProject }) => (
+              <Form.Dropdown.Item
+                key={id}
+                value={String(id)}
+                icon={inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(color).value }}
+                title={name}
+              />
+            ))}
+          </Form.Dropdown>
+        ) : null}
 
-      {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
-          {labels.map(({ id, name, color }) => (
-            <Form.TagPicker.Item
-              key={id}
-              value={String(id)}
-              title={name}
-              icon={{ source: Icon.Tag, tintColor: getColor(color).value }}
-            />
-          ))}
-        </Form.TagPicker>
-      ) : null}
-    </Form>
+        {projectSections && projectSections.length > 0 ? (
+          <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
+            <Form.Dropdown.Item value="" title="No section" />
+            {projectSections.map(({ id, name }) => (
+              <Form.Dropdown.Item key={id} value={String(id)} title={name} />
+            ))}
+          </Form.Dropdown>
+        ) : null}
+
+        {labels && labels.length > 0 ? (
+          <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
+            {labels.map(({ id, name, color }) => (
+              <Form.TagPicker.Item
+                key={id}
+                value={String(id)}
+                title={name}
+                icon={{ source: Icon.Tag, tintColor: getColor(color).value }}
+              />
+            ))}
+          </Form.TagPicker>
+        ) : null}
+      </Form>
+    </View>
   );
 }

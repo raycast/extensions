@@ -67,6 +67,41 @@
       "mode": "view"
     },
     {
+      "name": "create-task-in-inbox",
+      "title": "Create Task in Inbox",
+      "description": "Create a new task in your Todoist inbox.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        },
+        {
+          "name": "date",
+          "placeholder": "Human date",
+          "type": "text"
+        }
+      ]
+    },
+    {
       "name": "projects",
       "title": "Search Projects",
       "subtitle": "Todoist",
