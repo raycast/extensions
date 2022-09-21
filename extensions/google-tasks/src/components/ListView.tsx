@@ -1,8 +1,13 @@
 import { List, Toast, showToast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
-import { deleteTask, fetchList, toggleTask } from "../api/endpoints";
-import { Filter, Task } from "../types";
+import {
+  createTask,
+  deleteTask,
+  fetchList,
+  toggleTask,
+} from "../api/endpoints";
+import { Filter, Task, TaskForm } from "../types";
 import TaskItem from "./TaskItem";
 import EmptyView from "./EmtpyView";
 import { isCompleted } from "../utils";
@@ -40,6 +45,32 @@ export default function ListView(props: { listId: string }) {
     })();
   }, [google]);
 
+  const handleCreate = useCallback(
+    (listId: string, taskToCreate: TaskForm) => {
+      (async () => {
+        try {
+          setState((previous) => ({ ...previous, isLoading: true }));
+          await createTask(props.listId, taskToCreate);
+          const refreshedList = await fetchList(props.listId);
+          setState((previous) => ({
+            ...previous,
+            tasks: refreshedList,
+            isLoading: false,
+          }));
+        } catch (error) {
+          console.error(error);
+          setState((previous) => ({
+            ...previous,
+            tasks: [],
+            isLoading: false,
+          }));
+          showToast({ style: Toast.Style.Failure, title: String(error) });
+        }
+      })();
+    },
+    [state.tasks, setState]
+  );
+
   const handleToggle = useCallback(
     (taskToToggle: Task) => {
       (async () => {
@@ -65,6 +96,7 @@ export default function ListView(props: { listId: string }) {
     },
     [state.tasks, setState]
   );
+
   const handleDelete = useCallback(
     (taskToDelete: Task) => {
       (async () => {
@@ -135,6 +167,7 @@ export default function ListView(props: { listId: string }) {
             task={task}
             onToggle={() => handleToggle(task)}
             onDelete={() => handleDelete(task)}
+            onCreate={handleCreate}
           />
         );
       })}

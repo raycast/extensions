@@ -10,10 +10,12 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
 import { createTask, fetchLists } from "../api/endpoints";
+import { TaskForm } from "../types";
 
 export default function CreateTaskForm(props: {
   listId?: string;
   title?: string;
+  onCreate: (listId: string, task: TaskForm) => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
@@ -36,7 +38,7 @@ export default function CreateTaskForm(props: {
 
   const handleSubmit = useCallback(
     (values: { title: string; notes: string; due: string; listId: string }) => {
-      createTask(values.listId, {
+      props.onCreate(values.listId, {
         title: values.title,
         notes: values.notes,
         due: values.due,
