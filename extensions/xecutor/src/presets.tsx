@@ -57,6 +57,7 @@ const CreateOrEditPresetName = (props: { name?: string; onCreateOrEditPresetName
         title="Name"
         defaultValue={props.name}
         placeholder="My New Preset"
+        autoFocus={true}
         error={error}
         onChange={(value) => handleNameError(value)}
         onBlur={(event) => handleNameError(event.target.value as string)}
