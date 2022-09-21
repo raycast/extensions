@@ -1,46 +1,36 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { DocumentationProduct } from "./types";
-import { fetchDocumentationProducts } from "./documentationProducts";
-import { useFetchWithCache } from "./useFetchWithCache";
-
-const FAILURE_MESSAGE = `
-# Google Cloud Platform Product Not Retrieved 😞
-
-The request to retrieve the available products through the 
-[Google Cloud Platform products API](https://www.googleapis.com/discovery/v1/apis) failed. 
-Check your internet connection and retry!
-`;
+import { ActionPanel, List, showToast, Action, Toast, Clipboard } from "@raycast/api";
+import { DiscoveryAPI, DocumentationProduct } from "./types";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
   return <DocumentationProductsList />;
 }
 
 export function DocumentationProductsList() {
-  const { data, error, isLoading, failureMessage } = useFetchWithCache("documentation", fetchDocumentationProducts);
-
-  if (error) {
-    showToast(
-      ToastStyle.Failure,
-      "Could not fetch available products from GCP, check your Internet Connection!",
-      error.message
-    );
-  }
-
-  if (failureMessage) {
-    return <Detail markdown={FAILURE_MESSAGE} />;
-  }
+  const { data: products, isLoading } = useFetch<DocumentationProduct[]>(
+    "https://www.googleapis.com/discovery/v1/apis",
+    {
+      parseResponse: async (res) => {
+        const data = (await res.json()) as DiscoveryAPI;
+        return data.items.filter((item) => item.preferred);
+      },
+      onError: (error) => {
+        showToast({
+          title: "Could not fetch available products from GCP.",
+          message: "Please check your Internet Connection!",
+          style: Toast.Style.Failure,
+          primaryAction: {
+            title: "Copy Error",
+            onAction: () => Clipboard.copy(error.message),
+          },
+        });
+      },
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search products by name...">
-      {data?.map((product) => (
+      {products?.map((product) => (
         <DocumentationProductListItem key={product.id} product={product} />
       ))}
     </List>
@@ -54,8 +44,8 @@ function DocumentationProductListItem(props: { product: DocumentationProduct }) 
       icon="command-icon.png"
       actions={
         <ActionPanel title={props.product.title}>
-          <OpenInBrowserAction title="Open Documentation" url={props.product.documentationLink} />
-          <CopyToClipboardAction title="Copy Documentation URL" content={props.product.documentationLink} />
+          <Action.OpenInBrowser title="Open Documentation" url={props.product.documentationLink} />
+          <Action.CopyToClipboard title="Copy Documentation URL" content={props.product.documentationLink} />
         </ActionPanel>
       }
     />
