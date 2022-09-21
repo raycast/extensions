@@ -176,6 +176,7 @@ export default function ListView(props: { listId: string }) {
         tasks={state.tasks}
         filter={state.filter}
         searchText={state.searchText}
+        onCreate={handleCreate}
       />
     </List>
   );

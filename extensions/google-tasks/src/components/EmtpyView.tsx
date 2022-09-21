@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { Filter, Task } from "../types";
+import { Filter, Task, TaskForm } from "../types";
 import CreateTaskForm from "./CreateTaskForm";
 
 export default function EmptyView(props: {
@@ -7,6 +7,7 @@ export default function EmptyView(props: {
   tasks: Task[];
   filter: Filter;
   searchText: string;
+  onCreate: (listId: string, task: TaskForm) => void;
 }) {
   if (props.tasks.length > 0) {
     return (
@@ -23,6 +24,7 @@ export default function EmptyView(props: {
                 <CreateTaskForm
                   listId={props.listId}
                   title={props.searchText}
+                  onCreate={props.onCreate}
                 />
               }
             />
@@ -47,6 +49,7 @@ export default function EmptyView(props: {
                   <CreateTaskForm
                     listId={props.listId}
                     title={props.searchText}
+                    onCreate={props.onCreate}
                   />
                 }
               />
@@ -79,6 +82,7 @@ export default function EmptyView(props: {
                   <CreateTaskForm
                     listId={props.listId}
                     title={props.searchText}
+                    onCreate={props.onCreate}
                   />
                 }
               />
