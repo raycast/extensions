@@ -1,39 +1,53 @@
 import {Action, ActionPanel, Form, Icon, showToast, Toast} from "@raycast/api"
+import {FormValidation, useForm} from "@raycast/utils"
 import {createTask} from "api/helpers"
 import {TaskStatus} from "api/types"
 import {labelForTaskColumn} from "helpers/focustask"
-import {FC, useState} from "react"
+import {FC} from "react"
 import {ListPicker} from "./list-picker"
 
 const STATUSES: TaskStatus[] = ["current", "next", "icebox"]
 
+interface CreateFormValues {
+  title: string
+  note: string
+  status: string
+  checklistId: string | undefined
+}
+
 export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
   const isLoading = false
 
-  const [title, setTitle] = useState(initialTitle ?? "")
-  const [note, setNote] = useState("")
-  const [status, setStatus] = useState<TaskStatus>("current")
-  const [checklistId, setChecklistId] = useState<string>()
+  const {handleSubmit, itemProps} = useForm<CreateFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating task",
+        message: "This should only take a moment",
+      })
 
-  const submit = async () => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating task",
-      message: "This should only take a moment",
-    })
+      const {title, note, status, checklistId} = values
+      const response = await createTask({
+        title,
+        note,
+        status: status as TaskStatus,
+        checklistId,
+      })
 
-    const response = await createTask({title, note, status, checklistId})
-
-    if ("id" in response) {
-      toast.style = Toast.Style.Success
-      toast.title = "Success"
-      toast.message = "Task created"
-    } else {
-      toast.style = Toast.Style.Success
-      toast.title = "Failure"
-      toast.message = "Failed to create a task"
-    }
-  }
+      if ("id" in response) {
+        toast.style = Toast.Style.Success
+        toast.title = "Success"
+        toast.message = "Task created"
+      } else {
+        toast.style = Toast.Style.Success
+        toast.title = "Failure"
+        toast.message = "Failed to create a task"
+      }
+    },
+    validation: {
+      title: FormValidation.Required,
+    },
+  })
 
   return (
     <Form
@@ -42,36 +56,27 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
         <ActionPanel>
           <Action.SubmitForm
             title="Create Task"
-            onSubmit={submit}
+            onSubmit={handleSubmit}
             icon={Icon.Plus}
           />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="content"
         title="Title"
         placeholder="Enter the task title"
-        value={title}
-        onChange={setTitle}
+        {...itemProps.title}
       />
 
       <Form.TextArea
-        id="note"
         title="Note"
         placeholder="Enter the note"
-        value={note}
-        onChange={setNote}
+        {...itemProps.note}
       />
 
       <Form.Separator />
 
-      <Form.Dropdown
-        id="status"
-        title="Status"
-        value={status}
-        onChange={(value) => setStatus(value as TaskStatus)}
-      >
+      <Form.Dropdown title="Status" {...itemProps.status}>
         {STATUSES.map((status) => (
           <Form.Dropdown.Item
             value={status}
@@ -82,7 +87,7 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
         ))}
       </Form.Dropdown>
 
-      <ListPicker value={checklistId} onChange={setChecklistId} />
+      <ListPicker {...itemProps.checklistId} />
     </Form>
   )
 }
