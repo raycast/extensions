@@ -367,10 +367,14 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="None" />
                   )}
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Apps" />
-                  {preset.apps.map((app) => (
-                    <List.Item.Detail.Metadata.Label title={app.name} icon={{ fileIcon: app.path }} />
-                  ))}
+                  <List.Item.Detail.Metadata.Label title="Applications" />
+                  {preset.apps.length ? (
+                    preset.apps.map((app) => (
+                      <List.Item.Detail.Metadata.Label title={app.name} icon={{ fileIcon: app.path }} />
+                    ))
+                  ) : (
+                    <List.Item.Detail.Metadata.Label title="None" />
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
