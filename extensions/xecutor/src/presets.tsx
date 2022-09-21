@@ -192,6 +192,32 @@ const CreateOrEditPreset = (props: {
     );
   };
 
+  const ListItem = (app: Application) => {
+    return (
+      <List.Item
+        key={app.bundleId}
+        title={app.name}
+        icon={{ fileIcon: app.path }}
+        accessories={[{ icon: appIsSelected(app) ? Icon.Checkmark : undefined }]}
+        actions={
+          <ActionPanel>
+            <Action
+              title={`${appIsSelected(app) ? "Deselect" : "Select"} Application`}
+              onAction={() => toggleApp(app)}
+            />
+            <Action
+              title="Continue..."
+              onAction={() => {
+                clearSearchBar();
+                maybeContinue();
+              }}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
   return (
     <List isLoading={!hasSetApps} navigationTitle="Create Preset: (1/2)">
       <List.Section title="Special">
@@ -213,30 +239,11 @@ const CreateOrEditPreset = (props: {
           }
         />
       </List.Section>
-      <List.Section title="Applications">
-        {apps.map((app) => (
-          <List.Item
-            key={app.bundleId}
-            title={app.name}
-            icon={{ fileIcon: app.path }}
-            accessories={[{ icon: appIsSelected(app) ? Icon.Checkmark : undefined }]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`${appIsSelected(app) ? "Deselect" : "Select"} Application`}
-                  onAction={() => toggleApp(app)}
-                />
-                <Action
-                  title="Continue..."
-                  onAction={() => {
-                    clearSearchBar();
-                    maybeContinue();
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+      <List.Section title="Selected Applications">{selectedApps.map((app) => ListItem(app))}</List.Section>
+      <List.Section title="All Applications">
+        {apps
+          .filter((app) => !selectedApps.map((selectedApp) => selectedApp.bundleId).includes(app.bundleId))
+          .map((app) => ListItem(app))}
       </List.Section>
     </List>
   );
@@ -340,12 +347,10 @@ export default function Command() {
         <List.Item
           key={preset.id}
           title={preset.name}
-          subtitle={`${preset.apps.length.toString()} ${countPluralizer(
-            preset.apps,
-            "App",
-            "Apps"
-          )}, ${preset.urls.length.toString()} ${countPluralizer(preset.urls, "URL", "URLs")}`}
-          accessories={[...preset.apps.map((app) => ({ icon: { fileIcon: app.path } }))]}
+          accessories={[
+            { icon: Icon.Window, text: `x${preset.apps.length}` },
+            { icon: Icon.Link, text: `x${preset.urls.length}` },
+          ]}
           actions={
             <ActionPanel>
               <Action
