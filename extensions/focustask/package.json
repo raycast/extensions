@@ -5,6 +5,9 @@
   "description": "Manage and search for tasks in FocusTask",
   "icon": "focustask.png",
   "author": "vojto",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity"

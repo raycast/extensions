@@ -46,6 +46,13 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
         toast.style = Toast.Style.Success
         toast.title = "Success"
         toast.message = "Task created"
+        toast.primaryAction = {
+          title: "Open Task",
+          onAction: (toast) => {
+            open(response.url)
+            toast.hide()
+          },
+        }
       } else {
         toast.style = Toast.Style.Success
         toast.title = "Failure"
