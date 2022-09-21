@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-05 23:23
+ * @lastEditTime: 2022-09-19 01:24
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -18,7 +18,7 @@ import {
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { myPreferences } from "../preferences";
+import { KeyStore, myPreferences } from "../preferences";
 import { DicionaryType, QueryResult, QueryTypeResult, TranslationItem, TranslationType } from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, checkIsWord } from "../utils";
 
@@ -55,6 +55,7 @@ export function getSortOrder(): string[] {
 
     TranslationType.DeepL,
     TranslationType.Google,
+    TranslationType.Bing,
     TranslationType.Apple,
     TranslationType.Baidu,
     TranslationType.Tencent,
@@ -257,4 +258,14 @@ export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
   const enableYoudaoDictionary = myPreferences.enableYoudaoDictionary && isValidYoudaoDictionaryLanguageQuery && isWord;
   console.log(`---> enable Youdao Dictionary: ${enableYoudaoDictionary}`);
   return enableYoudaoDictionary;
+}
+
+/**
+ * Check if enable Youdao API translation.
+ */
+export function hasYoudaoAPI() {
+  if (KeyStore.youdaoAppId) {
+    return true;
+  }
+  return false;
 }

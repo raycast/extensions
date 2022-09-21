@@ -45,8 +45,6 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
     // * avoid linguee's anti-spider, otherwise it will reponse very slowly or even error.
     const headers: AxiosRequestHeaders = {
       "User-Agent": userAgent,
-      // accept: "*/*",
-      // connection: "keep-alive",
       // withCredentials: true,
     };
     const config: AxiosRequestConfig = {

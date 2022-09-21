@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 23:42
+ * @lastEditTime: 2022-09-17 22:22
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -142,7 +142,8 @@ export function getEnabledDictionaryServices(): DicionaryType[] {
  * Show error toast according to errorInfo.
  */
 export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
-  if (!errorInfo) {
+  if (!errorInfo?.type) {
+    console.warn("showErrorToast, errorInfo type is undefined");
     return;
   }
 
@@ -150,7 +151,7 @@ export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
   const type = errorInfo.type.toString();
   showToast({
     style: Toast.Style.Failure,
-    title: `${type} Error: ${errorInfo.code || ""}`,
+    title: `${type} Error` + `${errorInfo.code ? `: ${errorInfo.code}` : ""}`,
     message: errorInfo.message,
   });
 }

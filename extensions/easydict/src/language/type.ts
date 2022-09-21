@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-14 11:50
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-15 22:53
+ * @lastEditTime: 2022-09-18 23:16
  * @fileName: type.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,6 +11,7 @@
 export interface LanguageItem {
   googleId: string; // ISO 639-1 codes, https://developers.google.com/admin-sdk/directory/v1/languages
   youdaoId: string;
+  bingId: string; // bing language code, https://learn.microsoft.com/zh-cn/azure/cognitive-services/translator/language-support
   appleDetectChineseTitle: string; // such as 中文，英语. ⚠️ Apple detect more languages than apple translate.
   appleId?: string; // used to translate, Apple translate support 12 languages?
   deepLSourceId?: string; // deepL source language id

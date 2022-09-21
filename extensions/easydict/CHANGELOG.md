@@ -1,5 +1,25 @@
 # `Easydict` Changelog
 
+## [v2.3.0] - 2022-09-20
+
+### ✨ New
+
+- Added support for [Bing Translator](https://www.bing.com/translator).
+- Added Bing language detection.
+
+![Bing-1663603058](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Bing-1663603058.png)
+
+### 💎 Improvements
+
+- Improved startup speed, flying feeling~
+- Improved the speed and accuracy of language detection.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
+---
+
 ## [v2.2.0] - 2022-09-12
 
 ### ✨ New
@@ -12,8 +32,6 @@
 - Fixed the problem that the Web Youdao translation may show an error toast.
 
 ![Swift-1662903813](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Swift-1662903813.png)
-
----
 
 ## [v2.1.0] - 2022-09-03
 

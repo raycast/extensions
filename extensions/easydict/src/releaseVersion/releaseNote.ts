@@ -2,35 +2,47 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 22:36
+ * @lastEditTime: 2022-09-20 11:15
  * @fileName: releaseNote.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 export const releaseNote = `
-## [v2.2.0] - 2022-09-12
+## [v2.3.0] - 2022-09-20
 
 ### ✨ 新功能
 
-- 添加有道词典维基百科释义。
-- 添加 Linguee 单词音标和收录考试类型。
+- 添加 [Bing 翻译](https://www.bing.com/translator)。
+- 添加 Bing 语种识别。
 
-![Swift-1662903813](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Swift-1662903813.png)
+![Bing-1663603058](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Bing-1663603058.png)
+
+
+### 💎 优化
+
+- 优化了启动速度，飞一般的感觉～
+- 优化了语种识别的速度和准确度。
 
 ### 🐞 修复
 
-- 修复了 Web 有道翻译可能会出现错误 toast 的问题。
+- 修复了一些已知问题。
+
+#### 🍃 _如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧(^-^)_
 
 ---
 
-
 ### ✨ New
 
-- Added Youdao Dictionary Wikipedia definition.
-- Added Linguee word phonetic and exam type.
+- Added support for [Bing Translator](https://www.bing.com/translator).
+- Added Bing language detection.
+
+### 💎 Improvements
+
+- Improved startup speed, flying feeling~
+- Improved the speed and accuracy of language detection.
 
 ### 🐞 Fixes
 
-- Fixed the problem that the Web Youdao translation may show an error toast.
+- Fixed some known issues.
 `;

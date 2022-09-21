@@ -14,7 +14,7 @@
 
 ## Easydict（易词典）
 
-`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.cn)，[百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
+`Easydict` 是一个简洁易用的 Raycast 词典扩展，可轻松优雅地查找单词或翻译文本，特别针对英语和中文单词进行了优化。开箱即用，能自动识别输入文本语言，目前支持 [Linguee](https://www.linguee.com/) 和[有道词典](https://www.youdao.com/)查询，支持 🍎**苹果系统翻译**，[DeepL](https://www.deepl.com/translator)，[谷歌](https://translate.google.cn)，[Bing](https://www.bing.com/translator), [百度](https://fanyi.baidu.com/)，[腾讯](https://fanyi.qq.com/)，[有道](https://fanyi.youdao.com/)和[彩云翻译](https://fanyi.caiyunapp.com/#/)。
 
 ![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
@@ -31,15 +31,15 @@
 - [x] 支持使系统代理。
 - [x] 支持 Linguee 和有道词典查询。
 - [x] 支持 MacOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
-- [x] 支持 DeepL，谷歌，百度，腾讯，有道和彩云翻译。
+- [x] 支持 DeepL，谷歌，Bing，百度，腾讯，有道和彩云翻译。
 - [x] 支持 23 种语言。
 
 下一步：
 
-- [ ] 支持 Google 词典、金山词霸等。
+- [ ] 开发桌面版本 Electron App（学习中）。
 - [ ] 支持查看历史记录。
 
-**_如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧～_**
+**_如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)_**
 
 ---
 
@@ -63,9 +63,9 @@
 
 ### 文本翻译
 
-![easydict-5](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1660916386.png)
+![easydict-5-1663604001](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-5-1663604001.png)
 
-![easydict-6](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1660916492.png)
+![easydict-6-1663604086](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1663604086.png)
 
 ## 安装
 
@@ -102,6 +102,7 @@ npm install && npm run dev
 - 百度语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 - 苹果 🍎 语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 - 谷歌语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+- Bing 语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 
 #### 词典
 
@@ -114,31 +115,31 @@ npm install && npm run dev
 
 各项翻译服务支持的语言详情如下：
 
-| 语言         | 有道翻译 | DeepL | Google 翻译 | 🍎 系统翻译 | 百度翻译 | 腾讯翻译 | 彩云小译 |
-| :----------- | :------: | :---: | :---------: | :---------: | :------: | :------: | :------: |
-| 中文（简体） |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ✅    |
-| 中文（繁体） |    ✅    |  ⚠️   |     ✅      |     ⚠️      |    ✅    |    ✅    |    ⚠️    |
-| 英语         |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ✅    |
-| 日语         |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ✅    |
-| 韩语         |    ✅    |  ❌   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 法语         |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 西班牙语     |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 葡萄牙语     |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 意大利语     |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 德语         |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 俄语         |    ✅    |  ✅   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 阿拉伯语     |    ✅    |  ❌   |     ✅      |     ✅      |    ✅    |    ✅    |    ❌    |
-| 瑞典语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 罗马尼亚语   |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 泰语         |    ✅    |  ❌   |     ✅      |     ❌      |    ✅    |    ✅    |    ❌    |
-| 斯洛伐克语   |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 荷兰语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 匈牙利语     |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 希腊语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 丹麦语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 芬兰语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 波兰语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
-| 捷克语       |    ✅    |  ✅   |     ✅      |     ❌      |    ✅    |    ❌    |    ❌    |
+| 语言         | 有道翻译 | DeepL | Google 翻译 | Bing 翻译 | 🍎 系统翻译 | 百度翻译 | 腾讯翻译 | 彩云小译 |
+| :----------- | :------: | :---: | :---------: | :-------: | :---------: | :------: | :------: | :------: |
+| 中文（简体） |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ✅    |
+| 中文（繁体） |    ✅    |  ⚠️   |     ✅      |    ✅     |     ⚠️      |    ✅    |    ✅    |    ⚠️    |
+| 英语         |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ✅    |
+| 日语         |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ✅    |
+| 韩语         |    ✅    |  ❌   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 法语         |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 西班牙语     |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 葡萄牙语     |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 意大利语     |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 德语         |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 俄语         |    ✅    |  ✅   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 阿拉伯语     |    ✅    |  ❌   |     ✅      |    ✅     |     ✅      |    ✅    |    ✅    |    ❌    |
+| 瑞典语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 罗马尼亚语   |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 泰语         |    ✅    |  ❌   |     ✅      |    ✅     |     ❌      |    ✅    |    ✅    |    ❌    |
+| 斯洛伐克语   |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 荷兰语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 匈牙利语     |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 希腊语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 丹麦语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 芬兰语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 波兰语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
+| 捷克语       |    ✅    |  ✅   |     ✅      |    ✅     |     ❌      |    ✅    |    ❌    |    ❌    |
 
 > 注意：⚠️ 表示不支持将源语言翻译为繁体中文，如 DeepL。若输入繁体中文进行翻译，将被视为简体中文。
 
@@ -209,12 +210,12 @@ npm install && npm run dev
 
 ### 手动排序查询结果
 
-<details> <summary> 你可以按照自己的偏好对查询结果显示进行排序，默认是 Youao Dictionary, Linguee dictionary, DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun。 </summary>
+<details> <summary> 你可以按照自己的偏好对查询结果显示进行排序，默认是 Youao Dictionary, Linguee dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Youdao, Caiyun。 </summary>
 
 <p>
 
-大小写不敏感，使用逗号分隔开。例如：`youdao dictionary, linguee dictionary, deepl, google, apple, baidu, tencent, youdao, caiyun`。
-也可仅指定部分排序，如：`youdao dictionary, apple, tencent`，此时程序实际排序是：`youdao dictionary, apple, tencent, linguee dictionary, deepl, google, baidu, youdao, caiyun`。
+大小写不敏感，使用逗号分隔开。例如：`youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, youdao, caiyun`。
+也可仅指定部分排序，如：`youdao dictionary, apple, tencent`，此时程序实际排序是：`youdao dictionary, apple, tencent, linguee dictionary, deepl, google, bing, baidu, youdao, caiyun`。
 
 > 注意：以上排序是总体排序，若某项翻译服务未开启，排序会自动忽略。
 
@@ -228,7 +229,7 @@ npm install && npm run dev
 
 ### 支持系统代理
 
-开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。（此功能是为了对抗 IP 封锁，因为某些服务如 Linguee 对 IP 有频率限制）
+开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。 此功能是为了对抗 IP 封锁（某些服务如 Linguee 对 IP 有频率限制），**但开启后会使请求响应速度变慢，因此请仅在有需要时启用。**
 
 ### 翻译服务
 
