@@ -34,7 +34,7 @@ export default function TaskItem(props: {
                 title={
                   props.task.due === undefined
                     ? ""
-                    : new Date(props.task.due).toLocaleString()
+                    : new Date(props.task.due).toLocaleDateString()
                 }
                 icon={Icon.Calendar}
               />
