@@ -63,8 +63,11 @@ export function ItemList(props: { api: Bitwarden }) {
 
   async function loadItems(sessionToken: string) {
     try {
-      const folders = await bitwardenApi.listFolders(sessionToken);
-      const items = await bitwardenApi.listItems(sessionToken);
+      const [folders, items] = await Promise.all([
+        bitwardenApi.listFolders(sessionToken),
+        bitwardenApi.listItems(sessionToken),
+      ]);
+
       setState((previous) => ({ ...previous, isLoading: false, items, folders }));
     } catch (error) {
       setState((previous) => ({ ...previous, isLocked: true }));
@@ -162,7 +165,7 @@ export function ItemList(props: { api: Bitwarden }) {
           );
         })}
       {state.isLoading ? (
-        <List.EmptyView icon={Icon.TwoArrowsClockwise} title="Loading..." description="Please wait." />
+        <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
       ) : (
         <List.EmptyView
           icon={{ source: "bitwarden-64.png" }}
@@ -190,7 +193,7 @@ function getIcon(item: Item) {
   if (fetchFavicons && iconUri) return faviconUrl(iconUri);
   return {
     1: Icon.Globe,
-    2: Icon.TextDocument,
+    2: Icon.BlankDocument,
     3: Icon.List,
     4: Icon.Person,
   }[item.type];
@@ -293,7 +296,8 @@ function BitwardenItem(props: {
 
 function getAccessories(item: Item, folder: Folder | undefined) {
   const accessories = [];
-  if (folder) {
+
+  if (folder?.id) {
     accessories.push({
       icon: { source: Icon.Folder, tintColor: Color.SecondaryText },
       tooltip: "Folder",
@@ -330,7 +334,7 @@ function VaultActions(props: { syncItems: () => void; lockVault: () => void; log
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         onAction={props.lockVault}
       />
-      <Action title="Logout" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
+      <Action title="Logout" icon={Icon.XMarkCircle} onAction={props.logoutVault} />
     </Fragment>
   );
 }
