@@ -30,7 +30,7 @@
           "type": "checkbox",
           "required": false,
           "default": false,
-          "title": "Uppercase Letters",
+          "title": "Options",
           "label": "Uppercase Letters",
           "description": "Should letters be uppercased?"
         }
