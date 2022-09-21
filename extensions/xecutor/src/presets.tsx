@@ -362,15 +362,15 @@ export default function Command() {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="URLs" />
                   {preset.urls.length ? (
-                    preset.urls.map((url) => <List.Item.Detail.Metadata.Label title={url} />)
+                    preset.urls.map((url, urlIndex) => <List.Item.Detail.Metadata.Label key={urlIndex} title={url} />)
                   ) : (
                     <List.Item.Detail.Metadata.Label title="None" />
                   )}
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Applications" />
                   {preset.apps.length ? (
-                    preset.apps.map((app) => (
-                      <List.Item.Detail.Metadata.Label title={app.name} icon={{ fileIcon: app.path }} />
+                    preset.apps.map((app, appIndex) => (
+                      <List.Item.Detail.Metadata.Label key={appIndex} title={app.name} icon={{ fileIcon: app.path }} />
                     ))
                   ) : (
                     <List.Item.Detail.Metadata.Label title="None" />
