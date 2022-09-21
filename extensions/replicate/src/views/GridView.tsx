@@ -29,19 +29,19 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
 
   useLayoutEffect(() => {
     fetch(PREDICTIONS_URL, { headers })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
           showAuthError("Communication Error", response.statusText);
           throw new Error(`Communication Error: ${response.statusText}`);
         }
-        return response.json();
+        return await response.json();
       })
       .then((response) => {
         const data = response as PredictionResponse;
         setData(buildPredictionsList(data.results));
       })
       .catch((error) => setError(error.message));
-  });
+  }, []);
 
   if (error) {
     return (
@@ -53,6 +53,22 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
           actions={
             <ActionPanel>
               <Action icon={Icon.Gear} title="Update token" onAction={openCommandPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+  if (predictions && predictions.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={{ source: "🚀" }}
+          title="No Predictions found"
+          description="Create one now at replicate.com"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser icon={Icon.Globe} url="https://replicate.com/" />
             </ActionPanel>
           }
         />

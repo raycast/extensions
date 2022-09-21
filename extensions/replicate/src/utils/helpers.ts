@@ -8,6 +8,7 @@ import { PREDICTIONS_URL } from "../constants";
 
 export const buildPredictionsList = (data?: Prediction[]) => {
   if (!data) return undefined;
+  if (!data.length) return [];
   const predictions: Prediction[] = [];
   // iterate over the URLs and if more than one is returned, clone it back in
   data
