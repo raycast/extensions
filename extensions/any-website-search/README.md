@@ -1,3 +1,9 @@
+<!-- markdownlint-configure-file
+{ // NOTE: trailing commas not allowed!
+  "MD033": { "allowed_elements": ["kbd"] }
+}
+-->
+
 # Search Any Site
 
 ## How to search
@@ -31,6 +37,7 @@
 
 ### Search Suggestions
 
+<!-- markdownlint-disable-next-line MD036 -->
 _Default: DuckDuckGo_
 
 While entering a query, suggestions can be shown for your query, the same as you'd see
@@ -40,12 +47,14 @@ search suggestions.
 
 ### Prefill search from clipboard
 
+<!-- markdownlint-disable-next-line MD036 -->
 _Default: disabled_
 
 If enabled, the search query will initially be set to the text on your clipboard.
 
 ### Strip DuckDuckGo's "Bangs" When Fetching Search Suggestions
 
+<!-- markdownlint-disable-next-line MD036 -->
 _Default: enabled_
 
 DuckDuckGo supports "[bangs](https://duckduckgo.com/bang)", text-based shortcuts for
