@@ -189,7 +189,7 @@ export default function ListView(props: { listId: string }) {
         return (
           <TaskItem
             listId={props.listId}
-            tasks={filterTasks()}
+            tasks={state.tasks}
             task={task}
             onToggle={() => handleToggle(task)}
             onDelete={() => handleDelete(task)}
