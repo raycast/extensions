@@ -6,6 +6,15 @@
   "icon": "namespaces.png",
   "author": "GastroGeek",
   "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "macos",
+    "spaces"
+  ],
   "commands": [
     {
       "name": "namespaces",
