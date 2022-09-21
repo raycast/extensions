@@ -6,6 +6,7 @@ import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./lib/apollo";
 import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 import { PUBLICATIONS } from "./lib/fetchPublications";
+import { MediaSet, Post, ProfileData, PublicationMainFocus } from "./types";
 
 export default function Command() {
   return (
@@ -28,7 +29,7 @@ function Main() {
       searchText={searchTerm}
       onSearchTextChange={(term) => setSearchTerm(term)}
     >
-      {profileSuggestions?.search?.items.map((result: any) => {
+      {profileSuggestions?.search?.items.map((result: ProfileData) => {
         const avatar = normalizeUrl(result.picture?.original?.url);
         return (
           <List.Item
@@ -54,27 +55,6 @@ function Main() {
   );
 }
 
-type ProfileData = {
-  profileId: string;
-  bio: string;
-  name: string;
-  handle: string;
-  picture: {
-    original: {
-      url: string;
-    };
-  };
-  stats: {
-    totalFollowers: string;
-    totalFollowing: string;
-    totalPosts: string;
-    totalComments: string;
-    totalMirrors: string;
-    totalPublications: string;
-    totalCollects: string;
-  };
-};
-
 function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) {
   const { data: publications, loading: publicationsLoading } = useQuery(PUBLICATIONS, {
     variables: { profileId },
@@ -83,6 +63,15 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
   const posts = publications?.publications.items || [];
 
   const avatar = normalizeUrl(picture?.original?.url);
+
+  const getAppUrl = (post: Post) => {
+    switch (post.metadata.mainContentFocus) {
+      case PublicationMainFocus.Video:
+        return `https://lenstube.xyz/watch/${post.id}`;
+      default:
+        return `https://lenster.xyz/posts/${post.id}`;
+    }
+  };
 
   return (
     <List isShowingDetail enableFiltering={false} searchBarPlaceholder={handle}>
@@ -113,16 +102,16 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
       </List.Section>
       {posts.length > 0 && (
         <List.Section title="Recent Posts">
-          {posts.map((post: any) => {
+          {posts.map((post: Post) => {
             const hasMedia = post.metadata?.media?.length > 0;
 
             return (
               <List.Item
                 key={post.id}
-                title={post.metadata.content.substring(0, 50)}
+                title={post.metadata.content?.substring(0, 50) ?? ""}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title="Open on Lenser" url={`https://lenster.xyz/posts/${post.id}`} />
+                    <Action.OpenInBrowser title="Open Post" url={getAppUrl(post)} />
                   </ActionPanel>
                 }
                 detail={
@@ -133,8 +122,8 @@ ${post.metadata.content}
 ${
   hasMedia
     ? post.metadata.media
-        .filter((media) => media.original.mimeType.includes("image"))
-        .map((media: any) => `<img src="${normalizeUrl(media.original.url)}" />`)
+        .filter((media: MediaSet) => media.original.mimeType?.includes("image"))
+        .map((media: MediaSet) => `<img src="${normalizeUrl(media.original.url)}" />`)
         .join("")
     : ""
 }
