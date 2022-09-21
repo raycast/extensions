@@ -347,6 +347,7 @@ export default function Command() {
         <List.Item
           key={preset.id}
           title={preset.name}
+          icon={{ source: { light: "xecutor.png", dark: "xecutor@dark.png" } }}
           accessories={[
             { icon: Icon.Window, text: `x${preset.apps.length}` },
             { icon: Icon.Link, text: `x${preset.urls.length}` },
