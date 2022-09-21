@@ -253,6 +253,8 @@ export default function Command() {
   const [appPresets, setAppPresets] = useState<Preset[]>([]);
   const [hasLoadedPresets, setHasLoadedPresets] = useState(false);
 
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+
   const { pop } = useNavigation();
 
   useEffect(() => {
@@ -332,6 +334,7 @@ export default function Command() {
   return (
     <List
       isLoading={!hasLoadedPresets}
+      isShowingDetail={isShowingDetail}
       actions={
         <ActionPanel>
           <Action.Push
@@ -349,9 +352,28 @@ export default function Command() {
           title={preset.name}
           icon={{ source: { light: "xecutor.png", dark: "xecutor@dark.png" } }}
           accessories={[
-            { icon: Icon.Window, text: `x${preset.apps.length}` },
             { icon: Icon.Link, text: `x${preset.urls.length}` },
+            { icon: Icon.Window, text: `x${preset.apps.length}` },
           ]}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="URLs" />
+                  {preset.urls.length ? (
+                    preset.urls.map((url) => <List.Item.Detail.Metadata.Label title={url} />)
+                  ) : (
+                    <List.Item.Detail.Metadata.Label title="None" />
+                  )}
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label title="Apps" />
+                  {preset.apps.map((app) => (
+                    <List.Item.Detail.Metadata.Label title={app.name} icon={{ fileIcon: app.path }} />
+                  ))}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
               <Action
@@ -376,6 +398,12 @@ export default function Command() {
                     onCreateOrEditPreset={handleOnCreateOrEditPreset}
                   />
                 }
+              />
+              <Action
+                title="Toggle Details"
+                icon={Icon.AppWindowSidebarRight}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
               <Action.Push
                 title="Create Preset"
