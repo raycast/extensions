@@ -117,6 +117,7 @@ export const PUBLICATIONS = gql`
     name
     description
     content
+    mainContentFocus
     media {
       original {
         ...MediaFields

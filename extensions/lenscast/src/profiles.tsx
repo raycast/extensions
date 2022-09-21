@@ -6,6 +6,7 @@ import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./lib/apollo";
 import { PROFILE_SUGGESTIONS } from "./lib/fetchProfileSuggestions";
 import { PUBLICATIONS } from "./lib/fetchPublications";
+import { MediaSet, PublicationMainFocus } from "./types";
 
 export default function Command() {
   return (
@@ -84,6 +85,15 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
 
   const avatar = normalizeUrl(picture?.original?.url);
 
+  const getAppUrl = (post: any) => {
+    switch (post.metadata.mainContentFocus) {
+      case PublicationMainFocus.Video:
+        return `https://lenstube.xyz/watch/${post.id}`;
+      default:
+        return `https://lenster.xyz/posts/${post.id}`;
+    }
+  };
+
   return (
     <List isShowingDetail enableFiltering={false} searchBarPlaceholder={handle}>
       <List.Section title="Profile">
@@ -122,7 +132,7 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
                 title={post.metadata.content.substring(0, 50)}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title="Open on Lenser" url={`https://lenster.xyz/posts/${post.id}`} />
+                    <Action.OpenInBrowser title="Open Post" url={getAppUrl(post)} />
                   </ActionPanel>
                 }
                 detail={
@@ -133,8 +143,8 @@ ${post.metadata.content}
 ${
   hasMedia
     ? post.metadata.media
-        .filter((media) => media.original.mimeType.includes("image"))
-        .map((media: any) => `<img src="${normalizeUrl(media.original.url)}" />`)
+        .filter((media: MediaSet) => media.original.mimeType?.includes("image"))
+        .map((media: MediaSet) => `<img src="${normalizeUrl(media.original.url)}" />`)
         .join("")
     : ""
 }
