@@ -9,6 +9,16 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "hideIcon",
+      "description": "Hide icon from the menu bar",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Hide icon"
+    }
+  ],
   "commands": [
     {
       "name": "eth-menu-bar",
