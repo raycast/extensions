@@ -1,4 +1,12 @@
-import {Action, ActionPanel, Form, Icon, showToast, Toast} from "@raycast/api"
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api"
 import {FormValidation, useForm} from "@raycast/utils"
 import {createTask} from "api/helpers"
 import {TaskStatus} from "api/types"
@@ -43,6 +51,8 @@ export const CreateForm: FC<{initialTitle?: string}> = ({initialTitle}) => {
         toast.title = "Failure"
         toast.message = "Failed to create a task"
       }
+
+      popToRoot()
     },
     validation: {
       title: FormValidation.Required,
