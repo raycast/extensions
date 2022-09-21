@@ -41,7 +41,7 @@
 _Default: DuckDuckGo_
 
 While entering a query, suggestions can be shown for your query, the same as you'd see
-in a search engine in your browser. This setting controls search engine to get
+in a search engine in your browser. This setting controls the search engine to get
 suggestions from: DuckDuckGo (the default), Google, or "None" if you don't want any
 search suggestions.
 
@@ -75,9 +75,9 @@ suggestions.
 When getting search suggestions from DuckDuckGo, you might want this setting disabled
 because DuckDuckGo _does_ understand bangs and can offer suggestions accordingly. When
 using another search suggestion provider, which doesn't understand bangs, you probably
-want this setting to be enabled because the bangs will be treated as part of the query
-and will lead to worse search suggestions.
+want this setting to be enabled because otherwise the bangs will be treated as part of
+the query and will lead to worse search suggestions.
 
-This setting does not affect what happens when you press enter to search; the text you
-enter will always be searched verbatim on the site of your choosing. This setting only
+This setting does not affect what happens when you press enter to search; your query
+text will always be searched verbatim on the site of your choosing. This setting only
 affects the text used when fetching search suggestions.
