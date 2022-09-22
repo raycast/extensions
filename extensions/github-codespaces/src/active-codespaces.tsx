@@ -67,11 +67,11 @@ export default function Command() {
         title={activeCodespaces.length ? "Active" : "No active codespaces"}
       />
       {activeCodespaces.map((codespace) => (
-        <CommandItem codespace={codespace} />
+        <CommandItem key={codespace.id} codespace={codespace} />
       ))}
       <MenuBarExtra.Item title="Recent" />
       {recentCodespaces.map((codespace) => (
-        <CommandItem codespace={codespace} />
+        <CommandItem key={codespace.id} codespace={codespace} />
       ))}
     </MenuBarExtra>
   );
