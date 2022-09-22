@@ -5,6 +5,9 @@
   "description": "Creates a beautiful image of your code snippet",
   "icon": "command-icon.png",
   "author": "Mokkapps",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -18,7 +21,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3"
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
