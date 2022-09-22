@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create image of your code",
+      "title": "Create Image From Code",
       "description": "Redirects to Codesnap.dev where you can further edit the image",
       "mode": "view"
     }
