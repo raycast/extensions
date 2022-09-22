@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action } from "@raycast/api";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { AddTaskArgs, getColor, Task } from "@doist/todoist-api-typescript";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
 import { handleError, todoist } from "./api";
@@ -7,11 +7,6 @@ import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 import TaskDetail from "./components/TaskDetail";
 import View from "./components/View";
-
-type CreateTaskProps = {
-  fromProjectId?: number;
-  mutateTasks?: MutatePromise<Task[] | undefined>;
-};
 
 type CreateTaskValues = {
   content: string;
@@ -23,7 +18,13 @@ type CreateTaskValues = {
   labelIds: string[];
 };
 
-export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskProps) {
+type CreateTaskProps = {
+  fromProjectId?: number;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+  draftValues?: CreateTaskValues;
+};
+
+export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: CreateTaskProps) {
   const { push, pop } = useNavigation();
 
   const {
@@ -55,16 +56,6 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
   }
 
   const lowestPriority = priorities[priorities.length - 1];
-
-  const initialValues = {
-    content: "",
-    description: "",
-    dueDate: undefined,
-    priority: String(lowestPriority.value),
-    projectId: fromProjectId ? String(fromProjectId) : "",
-    sectionId: "",
-    labelIds: [],
-  };
 
   const { handleSubmit, itemProps, values, focus, reset } = useForm<CreateTaskValues>({
     async onSubmit(values) {
@@ -117,14 +108,34 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
           pop();
         }
 
-        reset(initialValues);
+        reset({
+          content: "",
+          description: "",
+          dueDate: undefined,
+          priority: String(lowestPriority.value),
+          projectId: "",
+          sectionId: "",
+          labelIds: [],
+        });
 
         focus("content");
       } catch (error) {
         handleError({ error, title: "Unable to create task" });
       }
     },
-    initialValues,
+    initialValues: {
+      content: draftValues?.content,
+      description: draftValues?.description,
+      dueDate: draftValues?.dueDate,
+      priority: draftValues?.priority || String(lowestPriority.value),
+      projectId: draftValues?.projectId
+        ? String(draftValues?.projectId)
+        : "" || fromProjectId
+        ? String(fromProjectId)
+        : "",
+      sectionId: draftValues?.sectionId ? String(draftValues?.sectionId) : "",
+      labelIds: draftValues?.labelIds,
+    },
     validation: {
       content: FormValidation.Required,
     },
@@ -141,6 +152,7 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
             <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.Plus} />
           </ActionPanel>
         }
+        enableDrafts
       >
         <Form.TextField {...itemProps.content} title="Title" placeholder="Buy fruits" />
 
@@ -168,6 +180,8 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
 
         {projects && projects.length > 0 ? (
           <Form.Dropdown {...itemProps.projectId} title="Project">
+            <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
+
             {projects.map(({ id, name, color, inboxProject }) => (
               <Form.Dropdown.Item
                 key={id}
@@ -181,9 +195,19 @@ export default function CreateTask({ fromProjectId, mutateTasks }: CreateTaskPro
 
         {projectSections && projectSections.length > 0 ? (
           <Form.Dropdown {...itemProps.sectionId} title="Section">
-            <Form.Dropdown.Item value="" title="No section" />
+            <Form.Dropdown.Item
+              value=""
+              title="No section"
+              icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+            />
+
             {projectSections.map(({ id, name }) => (
-              <Form.Dropdown.Item key={id} value={String(id)} title={name} />
+              <Form.Dropdown.Item
+                key={id}
+                value={String(id)}
+                title={name}
+                icon={{ source: "section.svg", tintColor: Color.PrimaryText }}
+              />
             ))}
           </Form.Dropdown>
         ) : null}
