@@ -27,12 +27,7 @@ export default function Command() {
   const handleSortByChange = setCriteria;
 
   if (!data?.codespaces) {
-    return (
-      <List
-        searchBarAccessory={<SortBy onSortByChange={handleSortByChange} />}
-        isLoading={true}
-      ></List>
-    );
+    return <List />;
   }
 
   const ListByCriteria = {

@@ -1,10 +1,28 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { Icon, MenuBarExtra } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { personalAccessToken, preferredEditor } from "./preferences";
-import { Codespaces } from "./types";
+import { clientNames, Codespace, Codespaces } from "./types";
+import { launchEditor } from "./utils/launchEditor";
+
+const CommandItem = ({ codespace }: { codespace: Codespace }) => {
+  return (
+    <MenuBarExtra.Item
+      key={codespace.id}
+      icon={{
+        source: Icon.Dot,
+        tintColor: "green",
+      }}
+      title={`${codespace.display_name || codespace.name} • ${
+        codespace.repository.owner.login
+      }/${codespace.repository.name}`}
+      onAction={() => launchEditor({ codespace })}
+      tooltip={`Launch in ${clientNames[preferredEditor]}`}
+    />
+  );
+};
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useFetch<Codespaces>(
+  const { data, isLoading } = useFetch<Codespaces>(
     "https://api.github.com/user/codespaces",
     {
       headers: {
@@ -49,53 +67,11 @@ export default function Command() {
         title={activeCodespaces.length ? "Active" : "No active codespaces"}
       />
       {activeCodespaces.map((codespace) => (
-        <MenuBarExtra.Item
-          key={codespace.id}
-          icon={{
-            source: Icon.Dot,
-            tintColor: "green",
-          }}
-          title={`${codespace.display_name || codespace.name} • ${
-            codespace.repository.owner.login
-          }/${codespace.repository.name}`}
-          onAction={() => {
-            if (preferredEditor === "web") {
-              open(codespace.web_url);
-            } else {
-              open(
-                `vscode://github.codespaces/connect?name=${codespace.name}&windowId=_blank`
-              );
-            }
-          }}
-          tooltip={`Launch in ${
-            preferredEditor === "web" ? "web editor" : "VS Code"
-          }`}
-        />
+        <CommandItem codespace={codespace} />
       ))}
       <MenuBarExtra.Item title="Recent" />
       {recentCodespaces.map((codespace) => (
-        <MenuBarExtra.Item
-          key={codespace.id}
-          title={`${codespace.display_name || codespace.name} • ${
-            codespace.repository.owner.login
-          }/${codespace.repository.name}`}
-          icon={{
-            source: Icon.Dot,
-            tintColor: "grey",
-          }}
-          onAction={() => {
-            if (preferredEditor === "web") {
-              open(codespace.web_url);
-            } else {
-              open(
-                `vscode://github.codespaces/connect?name=${codespace.name}&windowId=_blank`
-              );
-            }
-          }}
-          tooltip={`Launch in ${
-            preferredEditor === "web" ? "web editor" : "VS Code"
-          }`}
-        />
+        <CommandItem codespace={codespace} />
       ))}
     </MenuBarExtra>
   );

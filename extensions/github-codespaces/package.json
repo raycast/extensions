@@ -50,6 +50,13 @@
 				}
 			],
 			"required": false
+		},
+		{
+			"name": "useInsiders",
+			"label": "Prefer Insiders",
+			"description": "Launch the Insiders version of VS Code",
+			"type": "checkbox",
+			"required": false
 		}
 	],
 	"dependencies": {
