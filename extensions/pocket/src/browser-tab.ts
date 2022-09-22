@@ -33,7 +33,6 @@ export default async function () {
 
   try {
     const bookmark = await createBookmark({ url });
-    console.log(bookmark);
     toast.style = Toast.Style.Success;
     toast.title = "Bookmark created";
     toast.message = bookmark.title ?? bookmark.url;

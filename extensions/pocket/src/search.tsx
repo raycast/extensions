@@ -2,7 +2,7 @@ import { Action, ActionPanel, Alert, Color, confirmAlert, getPreferenceValues, I
 import { useBookmarks, useTags } from "./utils/hooks";
 import { useState } from "react";
 import { ReadState } from "./utils/types";
-import { capitalize, remove } from "lodash";
+import { capitalize } from "lodash";
 import ActionStyle = Alert.ActionStyle;
 
 const preferences = getPreferenceValues();
@@ -49,8 +49,8 @@ export default function Search(props: { arguments: SearchArguments }) {
               setReadState(ReadState.All);
               setTag(filter);
             } else {
+              setReadState(filter as ReadState);
               setTag(undefined);
-              setReadState(readState as ReadState);
             }
           }}
         >

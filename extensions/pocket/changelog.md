@@ -9,6 +9,7 @@
 - Rename `Random Bookmark`, `Latest Bookmark` and `Save Clipboard` commands
 - Add confirmation modal on bookmark delete
 - Add Pocket tags filter to `Search Bookmarks` command
+- Add `Copy as Markdown URL` option in `Search Bookmarks`
 
 ## [Filters & Commands] - 2022-03-19
 - Add `All`, `Unread` and `Archived` filters for the `Search Bookmarks` command

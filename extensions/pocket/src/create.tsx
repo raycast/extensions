@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, open, popToRoot, Toast } from "@raycast/api";
 import { createBookmark } from "./utils/api";
-import { HTTPError } from "got";
 import { capitalize } from "lodash";
 import { useTags } from "./utils/hooks";
 import { useEffect } from "react";
-import { FormValidation, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import isUrl from "is-url";
 
 interface CreateBookmarkValues {
@@ -28,7 +27,6 @@ export default function Create() {
       const bookmark = await createBookmark(values);
       toast.style = Toast.Style.Success;
       toast.title = "Bookmark created";
-      console.log(bookmark);
       toast.message = bookmark.title ?? bookmark.url;
       toast.primaryAction = {
         title: "Open in Pocket",
