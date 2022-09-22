@@ -64,7 +64,7 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
 
   const avatar = normalizeUrl(picture?.original?.url);
 
-  const getAppUrl = (post: Post) => {
+  const getPostUrl = (post: Post) => {
     switch (post.metadata.mainContentFocus) {
       case PublicationMainFocus.Video:
         return `https://lenstube.xyz/watch/${post.id}`;
@@ -78,9 +78,14 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
       <List.Section title="Profile">
         <List.Item
           title={handle}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open Profile" url={`https://lenster.xyz/u/${handle}`} />
+            </ActionPanel>
+          }
           detail={
             <List.Item.Detail
-              markdown={`<img src="${avatar}" width="180" height="180" />`}
+              markdown={avatar && `<img src="${avatar}" width="180" height="180" />`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="ID" text={profileId} />
@@ -111,7 +116,7 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
                 title={post.metadata.content?.substring(0, 50) ?? ""}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title="Open Post" url={getAppUrl(post)} />
+                    <Action.OpenInBrowser title="Open Post" url={getPostUrl(post)} />
                   </ActionPanel>
                 }
                 detail={
