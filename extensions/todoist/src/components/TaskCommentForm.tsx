@@ -7,10 +7,11 @@ import { MutatePromise } from "@raycast/utils";
 interface TaskCommentFormProps {
   comment?: Comment;
   task: Task;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
   mutateComments?: MutatePromise<Comment[] | undefined>;
 }
 
-export default function TaskEdit({ comment, task, mutateComments }: TaskCommentFormProps) {
+export default function TaskEdit({ comment, task, mutateComments, mutateTasks }: TaskCommentFormProps) {
   const { pop } = useNavigation();
 
   const [content, setContent] = useState(comment ? comment.content : "");
@@ -27,6 +28,10 @@ export default function TaskEdit({ comment, task, mutateComments }: TaskCommentF
 
       if (mutateComments) {
         mutateComments();
+      }
+
+      if (mutateTasks) {
+        mutateTasks();
       }
 
       pop();

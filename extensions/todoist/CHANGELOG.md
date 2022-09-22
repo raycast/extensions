@@ -13,6 +13,7 @@
 - Add validations to "Create Task" and "Create Form"
 - Add draft values to "Create Task" command
 - Add tooltips to task accessories
+- Add "add new comment" action on task list
 
 ## [New tasks from projects and task actions in detail] - 2022-05-13
 

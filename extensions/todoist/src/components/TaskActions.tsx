@@ -1,12 +1,13 @@
 import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { addDays } from "date-fns";
-import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { getAPIDate, getToday } from "../helpers/dates";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
 import TaskComments from "./TaskComments";
+import TaskCommentForm from "./TaskCommentForm";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 
 const schedules = [
@@ -21,6 +22,7 @@ interface TaskActionsProps {
   fromDetail?: boolean;
   mutateTasks?: MutatePromise<Task[] | undefined>;
   mutateTaskDetail?: MutatePromise<Task | undefined>;
+  mutateComments?: MutatePromise<Comment[] | undefined>;
 }
 
 export default function TaskActions({
@@ -28,6 +30,7 @@ export default function TaskActions({
   fromDetail,
   mutateTasks,
   mutateTaskDetail,
+  mutateComments,
 }: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
 
@@ -147,6 +150,13 @@ export default function TaskActions({
             />
           ))}
         </ActionPanel.Submenu>
+
+        <Action.Push
+          title="Add New Comment"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<TaskCommentForm task={task} mutateComments={mutateComments} mutateTasks={mutateTasks} />}
+        />
 
         <Action
           id="deleteTask"

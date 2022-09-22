@@ -1,11 +1,10 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { displayDueDate } from "../helpers/dates";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
-import TaskCommentForm from "./TaskCommentForm";
 import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
@@ -123,12 +122,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                   fromDetail={true}
                   mutateTasks={mutateTasks}
                   mutateTaskDetail={mutateTaskDetail}
-                />
-
-                <Action.Push
-                  title="Add New Comment"
-                  icon={Icon.Plus}
-                  target={<TaskCommentForm task={task} mutateComments={mutateComments} />}
+                  mutateComments={mutateComments}
                 />
               </ActionPanel>
             ),
