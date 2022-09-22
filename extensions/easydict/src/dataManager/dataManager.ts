@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 21:09
+ * @lastEditTime: 2022-09-19 23:25
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,28 +11,28 @@
 import { environment } from "@raycast/api";
 import axios from "axios";
 import { detectLanguage } from "../detectLanauge/detect";
-import { LanguageDetectTypeResult } from "../detectLanauge/types";
+import { DetectedLanguageModel } from "../detectLanauge/types";
 import { rquestLingueeDictionary } from "../dictionary/linguee/linguee";
 import { formatLingueeDisplaySections } from "../dictionary/linguee/parse";
 import { updateYoudaoDictionaryDisplay } from "../dictionary/youdao/formatData";
 import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
 import {
   playYoudaoWordAudioAfterDownloading,
-  requestYoudaoApiDictionaryTranslate,
+  requestYoudaoAPITranslate,
   requestYoudaoWebDictionary,
   requestYoudaoWebTranslate,
 } from "../dictionary/youdao/youdao";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoId } from "../language/languages";
 import { LanguageItem } from "../language/type";
-import { KeyStore, myPreferences } from "../preferences";
+import { myPreferences } from "../preferences";
 import { appleTranslate } from "../scripts";
 import { requestBaiduTextTranslate } from "../translation/baidu";
 import { requestCaiyunTextTranslate } from "../translation/caiyun";
 import { requestDeepLTranslate } from "../translation/deepL";
 import { requestGoogleTranslate } from "../translation/google";
+import { requestWebBingTranslate } from "../translation/microsoft/bing";
 import { requestTencentTranslate } from "../translation/tencent";
 import {
-  AbortObject,
   DicionaryType,
   DisplaySection,
   ListAccessoryItem,
@@ -48,6 +48,7 @@ import {
   checkIfEnableYoudaoDictionary,
   checkIfShowTranslationDetail,
   getFromToLanguageTitle,
+  hasYoudaoAPI,
   sortedQueryResults,
   updateTranslationMarkdown,
 } from "./utils";
@@ -76,7 +77,7 @@ export class DataManager {
   };
 
   queryResults: QueryResult[] = [];
-  queryWordInfo = {} as QueryWordInfo; // later will must assign value
+  queryWordInfo = {} as QueryWordInfo; // later will must assign value.
 
   /**
    * when has new input text, need to cancel previous request.
@@ -94,9 +95,11 @@ export class DataManager {
   hasPlayedAudio = false;
   enableYoudaoDictionary = true;
 
-  abortObject: AbortObject = {};
+  // abortObject: AbortObject = {};
+  abortController?: AbortController;
 
   delayQueryTimer?: NodeJS.Timeout;
+  delayAppleTranslateTimer?: NodeJS.Timeout;
   /**
    * Delay the time to call the query API. Since API has frequency limit.
    *
@@ -117,7 +120,7 @@ export class DataManager {
    * Delay the time to call the query API. Since API has frequency limit.
    */
   public delayQueryText(text: string, toLanguage: string, isDelay: boolean) {
-    console.log(`---> delay query text: ${text}`);
+    console.log(`---> query text: ${text}, isDelay: ${isDelay}`);
     const delayTime = isDelay ? this.delayRequestTime : 0;
     this.delayQueryTimer = setTimeout(() => {
       this.queryText(text, toLanguage);
@@ -150,11 +153,16 @@ export class DataManager {
     }
 
     // We need to pass a abort signal, becase google translate is used "got" to request, not axios.
-    this.queryGoogleTranslate(queryWordInfo, this.abortObject.abortController?.signal);
-    this.queryAppleTranslate(queryWordInfo, this.abortObject);
+    this.queryGoogleTranslate(queryWordInfo, this.abortController);
+    this.queryBingTranslate(queryWordInfo);
     this.queryBaiduTranslate(queryWordInfo);
     this.queryTencentTranslate(queryWordInfo);
     this.queryCaiyunTranslate(queryWordInfo);
+
+    // Put Apple translate at the end, because exec Apple Script will block thread, ~0.4s.
+    this.delayAppleTranslateTimer = setTimeout(() => {
+      this.queryAppleTranslate(queryWordInfo, this.abortController);
+    }, 1500);
 
     // If no query, stop loading.
     if (this.queryRecordList.length === 0) {
@@ -181,6 +189,11 @@ export class DataManager {
 
     this.queryResults = [];
     this.updateListDisplaySections([]);
+
+    // clear delay Apple translate.
+    if (this.delayAppleTranslateTimer) {
+      clearTimeout(this.delayAppleTranslateTimer);
+    }
   }
 
   /**
@@ -188,6 +201,8 @@ export class DataManager {
    * 2. Update display sections.
    */
   private updateQueryResultAndSections(queryResult: QueryResult) {
+    console.log(`update query sections: ${queryResult.type}`);
+
     this.updateQueryResult(queryResult);
     this.updateDataDisplaySections();
   }
@@ -237,9 +252,10 @@ export class DataManager {
 
     // Todo: need to optimize. Enable to cancel language detect.
     // Todo: record all detect result, maybe can use it as translation result.
-    detectLanguage(text, (detectedLanguageResult) => {
+
+    detectLanguage(text).then((detectedLanguage) => {
       console.log(
-        `---> final confirmed: ${detectedLanguageResult.confirmed}, type: ${detectedLanguageResult.type}, detectLanguage: ${detectedLanguageResult.youdaoLanguageId}`
+        `---> final confirmed: ${detectedLanguage.confirmed}, type: ${detectedLanguage.type}, detectLanguage: ${detectedLanguage.youdaoLanguageId}`
       );
 
       // * It takes time to detect the language, in the meantime, user may have cancelled the query.
@@ -249,14 +265,14 @@ export class DataManager {
         return;
       }
 
-      this.queryTextWithDetectedLanguage(text, toLanguage, detectedLanguageResult);
+      this.queryTextWithDetectedLanguage(text, toLanguage, detectedLanguage);
     });
   }
 
   /**
    * Query text with with detected language
    */
-  private queryTextWithDetectedLanguage(text: string, toLanguage: string, detectedLanguage: LanguageDetectTypeResult) {
+  private queryTextWithDetectedLanguage(text: string, toLanguage: string, detectedLanguage: DetectedLanguageModel) {
     const fromYoudaoLanguageId = detectedLanguage.youdaoLanguageId;
     console.log("queryTextWithFromLanguageId:", fromYoudaoLanguageId);
     this.updateCurrentFromLanguageItem(getLanguageItemFromYoudaoId(fromYoudaoLanguageId));
@@ -283,13 +299,15 @@ export class DataManager {
    * Rest properyies before each query.
    */
   private resetProperties() {
+    console.log(`resetProperties`);
+
     this.hasPlayedAudio = false;
     this.isLastQuery = true;
     this.shouldClearQuery = false;
     this.queryRecordList = [];
 
     const abortController = new AbortController();
-    this.abortObject.abortController = abortController;
+    this.abortController = abortController;
     axios.defaults.signal = abortController.signal;
   }
 
@@ -382,20 +400,14 @@ export class DataManager {
       const type = queryType ?? DicionaryType.Youdao;
       this.addQueryToRecordList(type);
 
-      // If user has Youdao API key, use official API, otherwise use web API.
-      const youdaoDictionayFnPtr = KeyStore.youdaoAppId
-        ? requestYoudaoApiDictionaryTranslate
-        : requestYoudaoWebDictionary;
-      const requestFunctionList = [youdaoDictionayFnPtr];
-      if (youdaoDictionayFnPtr === requestYoudaoWebDictionary) {
-        requestFunctionList.push(requestYoudaoWebTranslate);
-      }
-      const requests = requestFunctionList.map((request) => request(queryWordInfo, type));
+      const enableYoudaoAPI = hasYoudaoAPI();
 
-      Promise.all(requests)
-        .then(([youdaoDictionaryResult, youdaoWebTranslateResult]) => {
-          console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 2)}`);
-          console.log(`---> youdaoWebTranslateResult: ${JSON.stringify(youdaoWebTranslateResult, null, 2)}`);
+      // If user has Youdao API key, use official API, otherwise use web API.
+      const youdaoDictionayFnPtr = enableYoudaoAPI ? requestYoudaoAPITranslate : requestYoudaoWebDictionary;
+
+      youdaoDictionayFnPtr(queryWordInfo, type)
+        .then((youdaoDictionaryResult) => {
+          // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 2)}`);
 
           const formatYoudaoResult = youdaoDictionaryResult.result as YoudaoDictionaryFormatResult | undefined;
           const youdaoDisplaySections = updateYoudaoDictionaryDisplay(formatYoudaoResult);
@@ -409,17 +421,13 @@ export class DataManager {
             displaySections: youdaoDisplaySections,
           };
 
-          if (youdaoWebTranslateResult) {
-            const translatedText = youdaoWebTranslateResult.translations.join(", ");
-            this.updateDictionaryTranslation(youdaoDictResult, translatedText);
-          }
-
           this.updateQueryResultAndSections(youdaoDictResult);
-          this.downloadAndPlayWordAudio(youdaoDictionaryResult);
 
-          // if enabled Youdao translate, directly use Youdao dictionary translate result as Youdao translation.
-          if (myPreferences.enableYoudaoTranslate) {
+          // if enabled Youdao translate, directly use Youdao API dictionary translate result as Youdao translation.
+          if (myPreferences.enableYoudaoTranslate && enableYoudaoAPI) {
             const translationType = TranslationType.Youdao;
+
+            const youdaoWebTranslateResult = JSON.parse(JSON.stringify(youdaoDictionaryResult));
             youdaoWebTranslateResult.type = translationType;
             const youdaoTranslationResult: QueryResult = {
               type: translationType,
@@ -427,6 +435,19 @@ export class DataManager {
             };
             this.updateTranslationDisplay(youdaoTranslationResult);
           }
+
+          if (!enableYoudaoAPI) {
+            // Try to update Youdao dictionary translate result, if Youdao translation has finished.
+            console.log("---> Try to update Youdao dictionary translate with Youdao translate");
+
+            const youdaoTranslationResult = this.getQueryResult(TranslationType.Youdao);
+            if (youdaoTranslationResult) {
+              this.updateYoudaoDictionaryTranslation(youdaoTranslationResult.sourceResult.translations);
+            }
+          }
+
+          // * Note: play audio will block thread, so we need to do it in the end.
+          this.downloadAndPlayWordAudio(youdaoDictionaryResult);
         })
         .catch((error) => {
           showErrorToast(error);
@@ -440,12 +461,12 @@ export class DataManager {
   /**
    * Query google translate.
    */
-  private queryGoogleTranslate(queryWordInfo: QueryWordInfo, signal: AbortSignal | undefined) {
+  private queryGoogleTranslate(queryWordInfo: QueryWordInfo, abortController?: AbortController) {
     if (myPreferences.enableGoogleTranslate) {
       const type = TranslationType.Google;
       this.addQueryToRecordList(type);
 
-      requestGoogleTranslate(queryWordInfo, signal)
+      requestGoogleTranslate(queryWordInfo, abortController?.signal)
         .then((googleTypeResult) => {
           const queryResult: QueryResult = {
             type: type,
@@ -463,14 +484,38 @@ export class DataManager {
   }
 
   /**
+   * Query Bing translate.
+   */
+  private queryBingTranslate(queryWordInfo: QueryWordInfo) {
+    if (myPreferences.enableBingTranslate) {
+      const type = TranslationType.Bing;
+      this.addQueryToRecordList(type);
+
+      requestWebBingTranslate(queryWordInfo)
+        .then((bingTypeResult) => {
+          const queryResult: QueryResult = {
+            type: type,
+            sourceResult: bingTypeResult,
+          };
+          this.updateTranslationDisplay(queryResult);
+        })
+        .catch((error) => {
+          showErrorToast(error);
+        })
+        .finally(() => {
+          this.removeQueryFromRecordList(type);
+        });
+    }
+  }
+  /**
    * Query apple translate.
    */
-  private queryAppleTranslate(queryWordInfo: QueryWordInfo, abortObject: AbortObject | undefined) {
+  private queryAppleTranslate(queryWordInfo: QueryWordInfo, abortController?: AbortController) {
     if (myPreferences.enableAppleTranslate) {
       const type = TranslationType.Apple;
       this.addQueryToRecordList(type);
 
-      appleTranslate(queryWordInfo, abortObject)
+      appleTranslate(queryWordInfo, abortController)
         .then((translatedText) => {
           if (translatedText) {
             // * Note: apple translateText contains redundant blank line, we need to remove it.
@@ -552,24 +597,31 @@ export class DataManager {
   /**
    * Query Youdao translate.
    *
-   * * If has enabled Youdao dictionary, it will directly update Youdao translation after querying Youdao dictionary.
+   * * If has enabled Youdao API dictionary, it will directly update Youdao translation after querying Youdao dictionary.
+   * * If use Youdao web dictionary, need to update Youdao dictionary translation.
    */
   private queryYoudaoTranslate(queryWordInfo: QueryWordInfo) {
-    if (myPreferences.enableYoudaoTranslate && !this.enableYoudaoDictionary) {
+    const enableYoudaoAPI = hasYoudaoAPI();
+    if (
+      (myPreferences.enableYoudaoTranslate && !myPreferences.enableYoudaoDictionary) ||
+      (myPreferences.enableYoudaoDictionary && !enableYoudaoAPI)
+    ) {
       const type = TranslationType.Youdao;
       this.addQueryToRecordList(type);
 
-      // * If user has Youdao API key, use official API, otherwise use web API.
-      const youdaoTranslateFnPtr = KeyStore.youdaoAppId
-        ? requestYoudaoApiDictionaryTranslate
-        : requestYoudaoWebTranslate;
+      const youdaoTranslateFnPtr = enableYoudaoAPI ? requestYoudaoAPITranslate : requestYoudaoWebTranslate;
       youdaoTranslateFnPtr(queryWordInfo, type)
         .then((youdaoTypeResult) => {
           youdaoTypeResult.type = type;
           const queryResult: QueryResult = {
             type: type,
             sourceResult: youdaoTypeResult,
+            hideDisplay: !myPreferences.enableYoudaoTranslate, // * when use Youdao translation as dictionary translate, hide it.
           };
+
+          // Update Youdao dictionary translation.
+          this.updateYoudaoDictionaryTranslation(youdaoTypeResult.translations);
+          // Update Youdao translation.
           this.updateTranslationDisplay(queryResult);
         })
         .catch((error) => {
@@ -621,8 +673,26 @@ export class DataManager {
     this.queryRecordList = this.queryRecordList.filter((queryType) => queryType !== type);
     // console.log(`queryRecordList: ${this.queryRecordList}`);
 
-    const isLoadingState = this.queryRecordList.length > 0;
-    this.updateLoadingState(isLoadingState);
+    const showingLoadingState = this.queryRecordList.length > 0;
+    this.updateLoadingState(showingLoadingState);
+
+    if (!showingLoadingState) {
+      console.log("All queries finished.");
+      this.abortController = undefined;
+    }
+  }
+
+  /**
+   * Remove all query from queryRecordList, and update loading status.
+   */
+  private cancelAndRemoveAllQueries() {
+    console.log(`cancel, and remove all query list`);
+
+    this.queryRecordList = [];
+    this.updateLoadingState(false);
+
+    this.abortController?.abort();
+    this.abortController = undefined;
   }
 
   /**
@@ -714,8 +784,10 @@ export class DataManager {
    *
    * * Only dictionaryDisplaySections length > 1, enable update
    */
-  private updateDictionaryTranslation(dictionaryQueryResult: QueryResult, translatedText: string) {
+  private updateDictionaryTranslation(dictionaryQueryResult: QueryResult, translations: string[]) {
+    const translatedText = translations.join(", ");
     console.log(`---> try updateDictionaryTranslation: ${translatedText}`);
+
     const dictionaryDisplaySections = dictionaryQueryResult.displaySections;
     if (dictionaryDisplaySections?.length) {
       if (dictionaryDisplaySections.length < 2) {
@@ -726,6 +798,18 @@ export class DataManager {
       firstDictionaryDisplayItem.title = translatedText;
       firstDictionaryDisplayItem.copyText = translatedText;
       console.log(`---> update dictionary translation: ${translatedText}`);
+    }
+  }
+
+  /**
+   * Try to update Youdao dictionary translation, if exist.
+   */
+  private updateYoudaoDictionaryTranslation(translations: string[]) {
+    console.log(`---> try updateYoudaoDictionaryTranslation: ${translations}`);
+
+    const youdaoDictionaryResult = this.getQueryResult(DicionaryType.Youdao);
+    if (youdaoDictionaryResult) {
+      this.updateDictionaryTranslation(youdaoDictionaryResult, translations);
     }
   }
 
@@ -772,14 +856,20 @@ export class DataManager {
    * if is dictionary, and enable automatic play audio and query is word, then download audio and play it.
    */
   private downloadAndPlayWordAudio(queryTypeResult: QueryTypeResult) {
+    console.log(`---> downloadAndPlayWordAudio: ${queryTypeResult.type}`);
     const wordInfo = queryTypeResult.wordInfo;
+    // console.log(`---> wordInfo: ${JSON.stringify(wordInfo, null, 4)}`);
     const isDictionaryType = checkIsDictionaryType(queryTypeResult.type);
     const isEnglishLanguage = wordInfo.fromLanguage === englishLanguageItem.youdaoId;
     const enableAutomaticDownloadAudio =
       myPreferences.enableAutomaticPlayWordAudio && wordInfo.isWord && isEnglishLanguage;
     if (isDictionaryType && enableAutomaticDownloadAudio && this.isLastQuery && !this.hasPlayedAudio) {
-      playYoudaoWordAudioAfterDownloading(wordInfo);
-      this.hasPlayedAudio = true;
+      // Some Youdao web word audio is not accurate, so if not found word audio url from Youdao dictionary, then directly use say command.
+      setTimeout(() => {
+        // To avoid blocking UI, delay playing audio.
+        playYoudaoWordAudioAfterDownloading(wordInfo);
+        this.hasPlayedAudio = true;
+      }, 50);
     }
   }
 
@@ -801,7 +891,6 @@ export class DataManager {
     // console.warn(`---> cancel current query`);
     // console.log(`childProcess: ${JSON.stringify(this.abortObject.childProcess, null, 2)}`);
 
-    this.abortObject.abortController?.abort();
-    this.abortObject.childProcess?.kill();
+    this.cancelAndRemoveAllQueries();
   }
 }

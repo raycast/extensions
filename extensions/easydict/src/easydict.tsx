@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:10
+ * @lastEditTime: 2022-09-18 17:07
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -87,11 +87,26 @@ export default function () {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    if (myPreferences.enableAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
-    }
+    console.log(`setup when extension is activated.`);
+    const startTime = Date.now();
 
-    configAxiosProxy();
+    // In this case, must wait for the proxy to be configured before request.
+    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
+      Promise.all([getSelectedText(), configAxiosProxy()])
+        .then(([selectedText]) => {
+          console.log(`after config proxy, getSelectedText: ${selectedText}`);
+          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+          updateInputTextAndQueryText(trimTextLength(selectedText), false);
+        })
+        .catch((error) => {
+          console.log(`set up, config proxy error: ${error}`);
+          tryQuerySelecedtText();
+        });
+    } else if (myPreferences.enableAutomaticQuerySelectedText) {
+      tryQuerySelecedtText();
+    } else if (myPreferences.enableSystemProxy) {
+      configAxiosProxy();
+    }
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);

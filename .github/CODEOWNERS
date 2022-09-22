@@ -1,5 +1,6 @@
 # This file is generated. Do not modify directly.
 
+/extensions/1-click-confetti                         @peduarte
 /extensions/1loc                                     @kud @sxn
 /extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer
 /extensions/8ball                                    @Gitsack
@@ -85,6 +86,7 @@
 /extensions/cleanshotx                               @Aayush9029
 /extensions/clear-clipboard                          @d3caf
 /extensions/clickup                                  @Ali-Parandeh
+/extensions/clipboard-editor                         @pomdtr
 /extensions/clockify                                 @ismamz @sxn
 /extensions/cloudflare                               @Destiner @niklaswa
 /extensions/coda-bookmarks-search                    @allienx
@@ -172,6 +174,7 @@
 /extensions/envato                                   @Slllava
 /extensions/envoyer                                  @thijsdewitt
 /extensions/esa-search                               @kawamataryo
+/extensions/ethereum-gas-tracker                     @vinch
 /extensions/ethereum-price                           @peduarte
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
@@ -190,6 +193,7 @@
 /extensions/flutter-documentation-search             @MattisBrizard
 /extensions/flutter-pub-dev-search                   @prasadsunny1
 /extensions/flypy-code-query                         @absir1949
+/extensions/focustask                                @vojto @pernielsentikaer
 /extensions/folder-search                            @GastroGeek
 /extensions/fork-repositories                        @sxn
 /extensions/format-graphql                           @tngranados
@@ -373,6 +377,7 @@
 /extensions/oss-browser                              @404J
 /extensions/pagerduty                                @horimislime
 /extensions/parabol                                  @BartoszJarocki @BartoszJarocki
+/extensions/parallels-virtual-machines               @danpalmer
 /extensions/parcel-tracker                           @jjhok
 /extensions/parrot-translate                         @Haojen
 /extensions/party-parrot                             @thomaspaulmann
@@ -435,6 +440,7 @@
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
+/extensions/replicate                                @KevinBatdorf
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
@@ -489,6 +495,7 @@
 /extensions/statamic-docs                            @andrebreia
 /extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
+/extensions/stretchly                                @skyran1278
 /extensions/stripe                                   @pradeepb28 @farisaziz12
 /extensions/supabase-docs                            @Isaiah-Hamilton
 /extensions/supernotes                               @acnebs
@@ -505,6 +512,7 @@
 /extensions/tailwindcss                              @vimtor @macbookandrew
 /extensions/tapo-smart-devices                       @timrogers
 /extensions/taskplane                                @albingroen
+/extensions/teamgantt                                @knownasilya
 /extensions/teamup-rooms                             @drewwatkins11
 /extensions/temporary-email                          @natterstefan
 /extensions/terminalfinder                           @yedongze
@@ -513,7 +521,7 @@
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
 /extensions/tim                                      @tmwrnr
-/extensions/timers                                   @ThatNerdSquared @GastroGeek
+/extensions/timers                                   @ThatNerdSquared @marcjulianschwarz @GastroGeek @pernielsentikaer
 /extensions/timeular                                 @kudrykv
 /extensions/tinyfaces-nft                            @peduarte
 /extensions/tinypng                                  @kawamataryo
@@ -548,6 +556,7 @@
 /extensions/unogs                                    @mohitkyadav
 /extensions/unsplash                                 @eggsy @kkange
 /extensions/upcoming-holidays                        @rodrigouroz
+/extensions/urban-dictionary                         @Sheraff
 /extensions/url-tools                                @joshauh46
 /extensions/uuid-generator                           @jmaeso @GastroGeek
 /extensions/v2ex                                     @mopig

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-28 00:35
+ * @lastEditTime: 2022-09-18 23:30
  * @fileName: languages.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,6 +24,25 @@ export function getLanguageItemFromYoudaoId(youdaoLanguageId: string): LanguageI
     }
   }
   return languageItemList[0];
+}
+
+/**
+ * Get Bing language id from youdao language id.
+ */
+export function getBingLanguageId(youdaoLanguageId: string): string {
+  const languageItem = getLanguageItemFromYoudaoId(youdaoLanguageId);
+  return languageItem.bingId;
+}
+/**
+ * Get youdao language id from Bing language id.
+ */
+export function getYoudaoLanguageIdFromBingId(bingLanguageId: string): string {
+  const bingLanguageItem = languageItemList.find((langItem) => langItem.bingId === bingLanguageId);
+  if (bingLanguageItem) {
+    return bingLanguageItem.youdaoId;
+  }
+
+  return languageItemList[0].youdaoId;
 }
 
 /**
