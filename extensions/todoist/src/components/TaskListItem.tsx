@@ -47,15 +47,24 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
   }
 
   if (isRecurring(task)) {
-    additionalListItemProps.accessories.push({ icon: Icon.ArrowClockwise });
+    additionalListItemProps.accessories.push({
+      icon: Icon.ArrowClockwise,
+      tooltip: "Recurring task",
+    });
   }
 
   if (task.labelIds.length > 0) {
-    additionalListItemProps.accessories.push({ icon: { source: "tag.svg", tintColor: Color.SecondaryText } });
+    additionalListItemProps.accessories.push({
+      icon: { source: "tag.svg", tintColor: Color.SecondaryText },
+      tooltip: `${task.labelIds.length} label${task.labelIds.length === 1 ? "" : "s"}`,
+    });
   }
 
   if (task.commentCount > 0) {
-    additionalListItemProps.accessories.push({ icon: Icon.Bubble });
+    additionalListItemProps.accessories.push({
+      icon: Icon.Bubble,
+      tooltip: `${task.commentCount} comment${task.commentCount === 1 ? "" : "s"}`,
+    });
   }
 
   const priority = priorities.find((p) => p.value === task.priority);
@@ -63,7 +72,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
   if (priority) {
     const icon = priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority.color };
     additionalListItemProps.keywords.push(priority.searchKeyword);
-    additionalListItemProps.icon = icon;
+    additionalListItemProps.icon = { value: icon, tooltip: priority.name };
   }
 
   return (

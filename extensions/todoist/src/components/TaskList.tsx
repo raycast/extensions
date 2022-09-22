@@ -24,15 +24,17 @@ function TaskList({ isLoading, sections, mode = ViewMode.date, projects, mutateT
 
         return (
           <List.Section title={section.name} subtitle={subtitle} key={index}>
-            {section.tasks.map((task) => (
-              <TaskListItem
-                key={task.id}
-                task={task}
-                mode={mode}
-                mutateTasks={mutateTasks}
-                {...(projects ? { projects } : {})}
-              />
-            ))}
+            {section.tasks.map((task) => {
+              return (
+                <TaskListItem
+                  key={task.id}
+                  task={task}
+                  mode={mode}
+                  mutateTasks={mutateTasks}
+                  {...(projects ? { projects } : {})}
+                />
+              );
+            })}
           </List.Section>
         );
       })}

@@ -10,7 +10,8 @@ function Upcoming() {
     isLoading: isLoadingTasks,
     error: tasksError,
     mutate: mutateTasks,
-  } = useCachedPromise(() => todoist.getTasks({ filter: "view all" }));
+  } = useCachedPromise(() => todoist.getTasks({ filter: "all" }));
+
   const {
     data: projects,
     isLoading: isLoadingProjects,

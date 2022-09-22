@@ -167,7 +167,9 @@ export default function TaskActions({
             shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           />
         ) : null}
+      </ActionPanel.Section>
 
+      <ActionPanel.Section>
         <Action.CopyToClipboard
           title="Copy Task URL"
           content={task.url}
