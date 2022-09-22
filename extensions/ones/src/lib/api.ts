@@ -11,7 +11,7 @@ import {
   Task,
   User,
 } from "./type";
-import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import moment from "moment";
 import axios from "axios";
 
@@ -192,12 +192,11 @@ export async function search(product: Product, q: string, types: SearchType[], s
   const params = {
     q,
     limit: 200,
-    start: start ? start : 0,
+    start: start ?? 0,
     types: types.join(","),
   };
   try {
     const resp = await client.get(product, "search", params);
-    showToast(Toast.Style.Success, `Took ${resp.took_time}ms`);
     return Promise.resolve(resp as SearchResult);
   } catch (err) {
     return Promise.reject(new Error(`search failed: ${(err as Error).message}`));
@@ -205,7 +204,7 @@ export async function search(product: Product, q: string, types: SearchType[], s
 }
 
 interface ListManhoursParams {
-  userUUID: string;
+  userUUID?: string;
   startDate: string;
   endDate?: string;
   taskUUID?: string;
@@ -214,11 +213,12 @@ interface ListManhoursParams {
 export async function listManhours(params: ListManhoursParams): Promise<Manhour[]> {
   params.endDate = params.endDate ? params.endDate : moment().format("YYYY-MM-DD");
   const queryTask = params.taskUUID ? `uuid_equal: "${params.taskUUID}"` : "";
+  const queryUser = params.userUUID ? `owner_equal: "${params.userUUID}"` : "";
   const query = `
   {
     manhours (
       filter: {
-        owner_equal: "${params.userUUID}"
+        ${queryUser}
         startTime_range: {
             gte: "${params.startDate}"
             lte: "${params.endDate}"
@@ -279,6 +279,7 @@ export async function listUsersByName(name: string): Promise<User[]> {
 }
 
 export async function addManhour(manhour: Manhour): Promise<void> {
+  console.log(manhour);
   const query = `
   mutation AddManhour {
     addManhour (
