@@ -1,4 +1,4 @@
-import { MenuBarExtra, open } from "@raycast/api";
+import { getPreferenceValues, MenuBarExtra, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Response = {
@@ -8,14 +8,16 @@ type Response = {
 };
 
 export default function Command() {
+  const { hideIcon, hideUnit } = getPreferenceValues();
+
   const { data, isLoading } = useFetch<Response>("https://api.0x3.studio/gas");
 
-  const title = data && `${data.average} Gwei`;
+  const title = data && `${data.average}${hideUnit ? "" : " Gwei"}`;
 
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      icon={{ source: { light: "icon-dark.png", dark: "icon-light.png" } }}
+      icon={hideIcon ? undefined : { source: { light: "icon-dark.png", dark: "icon-light.png" } }}
       title={title}
     >
       {data && (
