@@ -26,7 +26,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
       const project = projects.find((project) => project.id === task.projectId);
 
       if (project) {
-        additionalListItemProps.accessories.push({ text: project.name });
+        additionalListItemProps.accessories.push({ text: project.name, tooltip: `Project: ${project.name}` });
         additionalListItemProps.keywords.push(project.name);
       }
     }
@@ -34,15 +34,19 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
 
   if (mode === ViewMode.project || mode === ViewMode.search) {
     if (task.due?.date) {
-      additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+      const text = displayDueDate(task.due.date);
+      additionalListItemProps.accessories.push({ text, tooltip: `Due date: ${text}` });
     }
   }
 
   if (isExactTimeTask(task)) {
     const time = task.due?.datetime as string;
+    const text = format(new Date(time), "HH:mm");
+
     additionalListItemProps.accessories.push({
       icon: Icon.Clock,
-      text: format(new Date(time), "HH:mm"),
+      text,
+      tooltip: `Due time: ${text}`,
     });
   }
 
