@@ -188,6 +188,7 @@ export default function ListView(props: { listId: string }) {
       {filterTasks().map((task) => {
         return (
           <TaskItem
+            key={task.id}
             listId={props.listId}
             tasks={state.tasks}
             task={task}
