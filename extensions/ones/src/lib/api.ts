@@ -279,7 +279,6 @@ export async function listUsersByName(name: string): Promise<User[]> {
 }
 
 export async function addManhour(manhour: Manhour): Promise<void> {
-  console.log(manhour);
   const query = `
   mutation AddManhour {
     addManhour (
