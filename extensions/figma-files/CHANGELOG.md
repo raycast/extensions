@@ -1,8 +1,10 @@
 # Figma Files Changelog
 
-## [Fix] 2022-09-19
+## [Fixes] 2022-09-19
 
-Fixed a bug where it always tried to open files in the desktop app, even though Figma was not installed.
+- Fixed a bug where it always tried to open files in the desktop app, even though Figma was not installed.
+- Fixed a endless loop causing the CPU to spike
+- Fixed a bug if data could not be fetched
 
 ## [Grid thumbnails and menubar app] - 2022-09-12
 
