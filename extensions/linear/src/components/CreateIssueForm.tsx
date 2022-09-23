@@ -57,6 +57,9 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
   const { signature } = getPreferenceValues<{ signature: boolean }>();
 
+  const { teams, isLoadingTeams } = useTeams();
+  const hasMoreThanOneTeam = teams && teams.length > 1;
+
   const { handleSubmit, itemProps, values, setValue, focus, reset } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
@@ -73,7 +76,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       try {
         const payload: CreateIssuePayload = {
-          teamId: values.teamId,
+          teamId: hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id || values.teamId,
           title: values.title,
           description: payloadDescription,
           stateId: values.stateId,
@@ -126,7 +129,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       }
     },
     validation: {
-      teamId: FormValidation.Required,
+      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
       title: FormValidation.Required,
       stateId: FormValidation.Required,
       priority: FormValidation.Required,
@@ -147,7 +150,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     },
   });
 
-  const { teams, isLoadingTeams } = useTeams();
   const { states } = useStates(values.teamId);
   const { labels } = useLabels(values.teamId);
   const { cycles } = useCycles(values.teamId);
@@ -172,7 +174,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const orderedStates = getOrderedStates(states || []);
 
-  const hasMoreThanOneTeam = teams && teams.length > 1;
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
   const hasUsers = props.users && props.users.length > 0;
