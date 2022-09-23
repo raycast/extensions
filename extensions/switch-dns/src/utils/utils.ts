@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import { getCachedEnv } from "./shell-utils";
-import { DNS_LIST } from "../config";
+import { DEFAULT_DNS } from "../config";
 
 export const exec = async (cmd: string) => {
   const env = await getCachedEnv();
@@ -34,7 +34,7 @@ export const getCurrentDNS = async () => {
 
   const out = await exec(`networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
   if (!out) {
-    return DNS_LIST.slice(-1)[0].dns;
+    return DEFAULT_DNS.slice(-1)[0].dns;
   }
   return out.split("\n").join(",");
 };

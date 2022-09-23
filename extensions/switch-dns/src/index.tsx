@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, List, showHUD, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import DNS_LIST from "./config";
+import DEFAULT_DNS from "./config";
 import { DNSItem } from "./types/types";
 import { switchDNS, getCurrentDNS } from "./utils/utils";
 
@@ -31,7 +31,7 @@ export default function Command() {
 
   return (
     <List isLoading={loading}>
-      {DNS_LIST.map((item) => (
+      {DEFAULT_DNS.map((item) => (
         <List.Item
           key={item.title}
           icon={item.dns === currentDNS ? { source: Icon.CheckCircle, tintColor: "#52C41A" } : "list-icon.png"}
