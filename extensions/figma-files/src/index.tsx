@@ -25,7 +25,7 @@ export default function Command() {
 
   if (hasError) {
     return <ErrorView />;
-  } 
+  }
 
   function handleDropdownChange(value: string) {
     if (projectFiles && !isLoadingProjectFiles) {
