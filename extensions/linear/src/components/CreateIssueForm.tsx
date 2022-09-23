@@ -39,7 +39,7 @@ type CreateIssueFormProps = {
 };
 
 export type CreateIssueValues = {
-  teamId: string;
+  teamId?: string;
   title: string;
   description: string;
   stateId: string;
@@ -60,7 +60,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
-  const { handleSubmit, itemProps, values, setValue, focus, reset } = useForm<CreateIssueValues>({
+  const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
       await toast.show();
@@ -74,9 +74,17 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         payloadDescription += "Created via [Raycast](https://www.raycast.com)";
       }
 
+      const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
+
+      if (!teamId) {
+        // that should never happen
+        setValidationError("teamId", "The team is required.");
+        return false;
+      }
+
       try {
         const payload: CreateIssuePayload = {
-          teamId: hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id || values.teamId,
+          teamId,
           title: values.title,
           description: payloadDescription,
           stateId: values.stateId,
