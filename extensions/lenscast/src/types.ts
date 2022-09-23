@@ -38,6 +38,7 @@ export type ProfileData = {
     totalPublications: string;
     totalCollects: string;
   };
+  metadata: string;
 };
 
 export type MetadataOutput = {

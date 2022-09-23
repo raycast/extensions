@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, Image, List } from "@raycast/api";
-import { PROFILE_QUERY } from "./lib/fetchProfile";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useQuery } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client";
 import { apolloClient } from "./lib/apollo";
@@ -23,12 +22,18 @@ function Main() {
     variables: { query: searchTerm },
   });
 
+  let title;
+  if (!searchTerm) title = "Search for a Lens Profile";
+  if (profileSuggestions?.search.items.length === 0) title = "No Profiles Found";
+  if (profileSuggestionsLoading) title = "Searching for Lens Profiles...";
+
   return (
     <List
       isLoading={profileSuggestionsLoading}
       searchText={searchTerm}
       onSearchTextChange={(term) => setSearchTerm(term)}
     >
+      <List.EmptyView icon={{ source: "list-icon.png" }} title={title} />
       {profileSuggestions?.search?.items.map((result: ProfileData) => {
         const avatar = normalizeUrl(result.picture?.original?.url);
         return (
@@ -40,12 +45,14 @@ function Main() {
               <ActionPanel>
                 <Action.Push
                   title="Show profile"
+                  icon={Icon.Sidebar}
                   target={
                     <ApolloProvider client={apolloClient}>
                       <Profile {...result} />
                     </ApolloProvider>
                   }
                 />
+                <Action.OpenInBrowser url={`https://lenster.xyz/u/${result.handle}`} />
               </ActionPanel>
             }
           />
@@ -56,12 +63,9 @@ function Main() {
 }
 
 function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) {
-  const { data: publications, loading: publicationsLoading } = useQuery(PUBLICATIONS, {
-    variables: { profileId },
-  });
+  const { data: publications } = useQuery(PUBLICATIONS, { variables: { profileId } });
 
   const posts = publications?.publications.items || [];
-
   const avatar = normalizeUrl(picture?.original?.url);
 
   const getPostUrl = (post: Post) => {
@@ -80,7 +84,9 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
           title={handle}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Profile" url={`https://lenster.xyz/u/${handle}`} />
+              <Action.OpenInBrowser url={`https://lenster.xyz/u/${handle}`} />
+              <Action.CopyToClipboard title="Copy Profile ID" content={profileId} />
+              <Action.CopyToClipboard title="Copy Lens Handle" content={handle} />
             </ActionPanel>
           }
           detail={
@@ -109,14 +115,15 @@ function Profile({ profileId, bio, name, handle, picture, stats }: ProfileData) 
         <List.Section title="Recent Posts">
           {posts.map((post: Post) => {
             const hasMedia = post.metadata?.media?.length > 0;
-
             return (
               <List.Item
                 key={post.id}
                 title={post.metadata.content?.substring(0, 50) ?? ""}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser title="Open Post" url={getPostUrl(post)} />
+                    <Action.OpenInBrowser url={getPostUrl(post)} />
+                    <Action.OpenInBrowser title="Arweave Metadata" url={post.profile.metadata} />
+                    <Action.CopyToClipboard title="Copy Post ID" content={post.id} />
                   </ActionPanel>
                 }
                 detail={

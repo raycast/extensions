@@ -3,7 +3,7 @@
   "name": "lenscast",
   "title": "Lenscast",
   "description": "Web3 Social Raycast Extension bult with Lens Protocol",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "peduarte",
   "categories": [
     "Web"
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "profiles",
-      "title": "profiles",
-      "subtitle": "search profiles",
-      "description": "Search for profiles",
+      "title": "Lenscast",
+      "subtitle": "Web3 Social",
+      "description": "Search for social profiles on the Lens Protocol.",
       "mode": "view"
     }
   ],
