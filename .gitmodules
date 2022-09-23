@@ -1,0 +1,3 @@
+[submodule "extensions/chinese-numbers"]
+	path = extensions/chinese-numbers
+	url = git@github.com:Jax0rz/chinese-numbers.git
