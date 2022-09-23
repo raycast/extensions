@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
+    "is-ip": "^5.0.0",
     "shell-env": "^4.0.1"
   },
   "devDependencies": {

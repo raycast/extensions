@@ -3,3 +3,9 @@ export interface DNSItem {
   dns: string;
   accessory: string;
 }
+
+export interface FormValue {
+  title: string;
+  dns: string;
+  description: string;
+}
