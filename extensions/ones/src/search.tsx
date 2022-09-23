@@ -29,69 +29,79 @@ export function Search(props: Props) {
   const [searchText, setSearchText] = useState<string>("");
 
   const onSearchTextChange = useCallback(
-    async (text: string) => {
-      if (text.length === 0) {
-        return;
-      }
-      setLoading(true);
-      try {
-        const result: SearchResult = await search(props.product, text, props.searchType);
-        const userUUIDs: string[] = [];
-        const taskUUIDs: string[] = [];
-        const spaceUUIDs: string[] = [];
-        const projectUUIDs: string[] = [];
-        result.datas.project = result.datas.project?.map((project) => {
-          project.url = convertProjectURL(project.fields.uuid);
-          userUUIDs.push(project.fields.owner);
-          return project;
-        });
-        result.datas.task = result.datas.task?.map((task) => {
-          task.url = convertTaskURL(task.fields.uuid);
-          userUUIDs.push(task.fields.assign);
-          taskUUIDs.push(task.fields.uuid);
-          projectUUIDs.push(task.fields.project_uuid);
-          return task;
-        });
-        result.datas.space = result.datas.space?.map((space) => {
-          space.url = convertSpaceURL(space.fields.uuid);
-          return space;
-        });
-        result.datas.page = result.datas.page?.map((page) => {
-          page.url = convertPageURL(page.fields.page_uuid);
-          userUUIDs.push(page.fields.owner_uuid);
-          spaceUUIDs.push(page.fields.space_uuid);
-          return page;
-        });
-        result.datas.resource = result.datas.resource?.map((resource: SearchItem) => {
-          userUUIDs.push(resource.fields.owner_uuid);
-          projectUUIDs.push(resource.fields.project_uuid);
-          resource.url = convertResourceURL(resource.fields.uuid);
-          return resource;
-        });
+    (text: string) => {
+      const abortCtrl = new AbortController();
+      const fn = async () => {
+        if (text.length === 0) {
+          return;
+        }
+        setLoading(true);
+        try {
+          const result: SearchResult = await search({
+            product: props.product,
+            query: text,
+            types: props.searchType,
+            signal: abortCtrl.signal,
+          });
+          const userUUIDs: string[] = [];
+          const taskUUIDs: string[] = [];
+          const spaceUUIDs: string[] = [];
+          const projectUUIDs: string[] = [];
+          result.datas.project = result.datas.project?.map((project) => {
+            project.url = convertProjectURL(project.fields.uuid);
+            userUUIDs.push(project.fields.owner);
+            return project;
+          });
+          result.datas.task = result.datas.task?.map((task) => {
+            task.url = convertTaskURL(task.fields.uuid);
+            userUUIDs.push(task.fields.assign);
+            taskUUIDs.push(task.fields.uuid);
+            projectUUIDs.push(task.fields.project_uuid);
+            return task;
+          });
+          result.datas.space = result.datas.space?.map((space) => {
+            space.url = convertSpaceURL(space.fields.uuid);
+            return space;
+          });
+          result.datas.page = result.datas.page?.map((page) => {
+            page.url = convertPageURL(page.fields.page_uuid);
+            userUUIDs.push(page.fields.owner_uuid);
+            spaceUUIDs.push(page.fields.space_uuid);
+            return page;
+          });
+          result.datas.resource = result.datas.resource?.map((resource: SearchItem) => {
+            userUUIDs.push(resource.fields.owner_uuid);
+            projectUUIDs.push(resource.fields.project_uuid);
+            resource.url = convertResourceURL(resource.fields.uuid);
+            return resource;
+          });
 
-        if (userUUIDs.length > 0) {
-          const users = await mapUsers(userUUIDs);
-          setUsers(users);
+          if (userUUIDs.length > 0) {
+            const users = await mapUsers(userUUIDs, abortCtrl.signal);
+            setUsers(users);
+          }
+          if (taskUUIDs.length > 0) {
+            const tasks = await mapTasks(taskUUIDs, abortCtrl.signal);
+            setTasks(tasks);
+          }
+          if (spaceUUIDs.length > 0) {
+            const spaces = await mapSpaces(spaceUUIDs, abortCtrl.signal);
+            setSpaces(spaces);
+          }
+          if (projectUUIDs.length > 0) {
+            const projects = await mapProjects(projectUUIDs, abortCtrl.signal);
+            setProjects(projects);
+          }
+          setSearchResult(result);
+          setSearchText(text);
+        } catch (err) {
+          showToast(Toast.Style.Failure, "Search failed", (err as Error).message);
+        } finally {
+          setLoading(false);
         }
-        if (taskUUIDs.length > 0) {
-          const tasks = await mapTasks(taskUUIDs);
-          setTasks(tasks);
-        }
-        if (spaceUUIDs.length > 0) {
-          const spaces = await mapSpaces(spaceUUIDs);
-          setSpaces(spaces);
-        }
-        if (projectUUIDs.length > 0) {
-          const projects = await mapProjects(projectUUIDs);
-          setProjects(projects);
-        }
-        setSearchResult(result);
-        setSearchText(text);
-      } catch (err) {
-        showToast(Toast.Style.Failure, "Search failed", (err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+      };
+      fn();
+      return () => abortCtrl.abort();
     },
     [setSearchResult, setLoading, setUsers, setTasks, setSpaces, setProjects, setSearchText]
   );

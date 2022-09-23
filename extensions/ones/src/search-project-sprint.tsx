@@ -44,6 +44,7 @@ export function SearchSprints() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={item.url ?? ""} />
+              <Action.CopyToClipboard title="Copy URL" content={item.url ?? ""} />
               <Action.SubmitForm
                 title="Refresh"
                 onSubmit={async () => {
@@ -51,11 +52,6 @@ export function SearchSprints() {
                 }}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 icon={Icon.ArrowClockwise}
-              />
-              <Action.CopyToClipboard
-                title="Copy URL"
-                content={item.url ?? ""}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
             </ActionPanel>
           }

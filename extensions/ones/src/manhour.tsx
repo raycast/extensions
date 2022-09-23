@@ -19,7 +19,6 @@ import {
   MANHOUR_BASE,
   ManhourType,
   updateManhour,
-  search,
 } from "./lib/api";
 import { Manhour, Preferences, Task, User } from "./lib/type";
 import { useCallback, useEffect, useState } from "react";
@@ -27,13 +26,13 @@ import moment from "moment";
 import { convertTaskURL, weekdays } from "./lib/util";
 import client from "./lib/client";
 
-async function getManhourUserUUID(): Promise<string> {
+async function getManhourUserUUID(signal?: AbortSignal): Promise<string> {
   let manhourUser: string = getPreferenceValues<Preferences>().manhourUser as string;
   if (!manhourUser || manhourUser.length === 0) {
     // 如果工时管理 - 用户为空，则默认使用登录用户
     manhourUser = await client.getUserUUID();
     if (!manhourUser) {
-      await client.initHttpClient();
+      await client.initHttpClient(signal);
       manhourUser = await client.getUserUUID();
     }
     return Promise.resolve(manhourUser);
@@ -41,7 +40,7 @@ async function getManhourUserUUID(): Promise<string> {
   if (/^[a-zA-Z0-9]{8}$/.test(manhourUser)) {
     return Promise.resolve(manhourUser);
   }
-  const users: User[] = await listUsersByName(manhourUser);
+  const users = await listUsersByName(manhourUser, signal);
   if (users.length === 0) {
     return Promise.reject(new Error(`user not found: ${manhourUser}`));
   }
@@ -58,7 +57,7 @@ type Result = {
 
 const dateFormat = "YYYY-MM-DD";
 
-async function convertResult(result: Manhour[]): Promise<Result> {
+function convertResult(result: Manhour[]): Result {
   const manhoursMap: { [key: string]: Manhour[] } = {};
   const manhourDates: string[] = [];
   const weekdaysMap: { [key: string]: string } = {};
@@ -102,13 +101,13 @@ async function convertResult(result: Manhour[]): Promise<Result> {
   manhourDates.sort((a, b) => {
     return moment(b).valueOf() - moment(a).valueOf();
   });
-  return Promise.resolve({
+  return {
     manhoursMap,
     manhourDates,
     weekdaysMap,
     manhourRecordedSums,
     manhourEstimatedSums,
-  });
+  };
 }
 
 interface UpdateManhourFormValues {
@@ -125,6 +124,64 @@ interface AddOrUpdateManhourProps {
 
 export function AddOrUpdateManhour(props: AddOrUpdateManhourProps) {
   const { pop } = useNavigation();
+
+  const submit = useCallback((input: UpdateManhourFormValues) => {
+    const abortCtrl = new AbortController();
+    const fn = async () => {
+      try {
+        const hours: number = parseFloat(input.hours);
+        let manhour: Manhour;
+        if (!props.manhour) {
+          // Add manhour
+          let manhourTaskUUID = props.task?.uuid;
+          if (!manhourTaskUUID) {
+            manhourTaskUUID = getPreferenceValues<Preferences>().manhourTaskUUID as string;
+            if (!manhourTaskUUID) {
+              showToast(Toast.Style.Failure, "Manhour Task is empty");
+              return;
+            }
+          }
+          let manhourUserUUID = await client.getUserUUID();
+          if (!manhourUserUUID) {
+            await client.initHttpClient(abortCtrl.signal);
+            manhourUserUUID = await client.getUserUUID();
+          }
+          manhour = {
+            task: {
+              uuid: manhourTaskUUID,
+            },
+            owner: {
+              uuid: manhourUserUUID,
+            },
+            type: input.manhourType as ManhourType,
+            startTime: Math.floor(input.startTime.getTime() / 1000),
+            hours: hours * MANHOUR_BASE,
+            description: input.description,
+          };
+          await addManhour(manhour, abortCtrl.signal);
+          showToast(Toast.Style.Success, "Add manhour successfully", `${input.manhourType} ${hours}h`);
+        } else {
+          manhour = Object.assign({}, props.manhour, {
+            startTime: Math.floor(input.startTime.getTime() / 1000),
+            hours: Math.floor(hours * MANHOUR_BASE),
+            description: input.description,
+          });
+          await updateManhour(manhour, abortCtrl.signal);
+          showToast(Toast.Style.Success, "Modified");
+        }
+        pop();
+      } catch (err) {
+        showToast(
+          Toast.Style.Failure,
+          `${(props.manhour ? "Modify" : "Add") + " manhour failed"}`,
+          (err as Error).message
+        );
+      }
+    };
+    fn();
+    return () => abortCtrl.abort();
+  }, []);
+
   return (
     <Form
       navigationTitle={
@@ -136,56 +193,8 @@ export function AddOrUpdateManhour(props: AddOrUpdateManhourProps) {
         <ActionPanel>
           <Action.SubmitForm
             title="Confirm"
-            onSubmit={async (input: UpdateManhourFormValues) => {
-              try {
-                const hours: number = parseFloat(input.hours);
-                let manhour: Manhour;
-                if (!props.manhour) {
-                  // Add manhour
-                  let manhourTaskUUID = props.task?.uuid;
-                  if (!manhourTaskUUID) {
-                    manhourTaskUUID = getPreferenceValues<Preferences>().manhourTaskUUID as string;
-                    if (!manhourTaskUUID) {
-                      showToast(Toast.Style.Failure, "Manhour Task is empty");
-                      return;
-                    }
-                  }
-                  let manhourUserUUID = await client.getUserUUID();
-                  if (!manhourUserUUID) {
-                    await client.initHttpClient();
-                    manhourUserUUID = await client.getUserUUID();
-                  }
-                  manhour = {
-                    task: {
-                      uuid: manhourTaskUUID,
-                    },
-                    owner: {
-                      uuid: manhourUserUUID,
-                    },
-                    type: input.manhourType as ManhourType,
-                    startTime: Math.floor(input.startTime.getTime() / 1000),
-                    hours: hours * MANHOUR_BASE,
-                    description: input.description,
-                  };
-                  await addManhour(manhour);
-                  showToast(Toast.Style.Success, "Add manhour successfully", `${input.manhourType} ${hours}h`);
-                } else {
-                  manhour = Object.assign({}, props.manhour, {
-                    startTime: Math.floor(input.startTime.getTime() / 1000),
-                    hours: Math.floor(hours * MANHOUR_BASE),
-                    description: input.description,
-                  });
-                  await updateManhour(manhour);
-                  showToast(Toast.Style.Success, "Modified");
-                }
-                pop();
-              } catch (err) {
-                showToast(
-                  Toast.Style.Failure,
-                  `${(props.manhour ? "Modify" : "Add") + " manhour failed"}`,
-                  (err as Error).message
-                );
-              }
+            onSubmit={(input: UpdateManhourFormValues) => {
+              submit(input);
             }}
           />
         </ActionPanel>
@@ -225,47 +234,71 @@ export function ManageManhour(props: ManageManhourProps) {
   const [searchText, setSearchText] = useState<string>("");
 
   const search = useCallback(
-    async (text: string) => {
-      let startDate: string;
-      if (text.length === 0) {
-        const pref = getPreferenceValues<Preferences>();
-        const manhourDays: number = pref.manhourDays ? (+pref.manhourDays as number) : 7;
-        startDate = moment().subtract(manhourDays, "d").format(dateFormat);
-      } else {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-          showToast(Toast.Style.Failure, `Invalid date format, should be ${dateFormat}`);
-          return;
-        }
-        startDate = text;
-      }
-
-      setLoading(true);
-      try {
-        let userUUID: string | undefined;
-        if (!props.showOthersManhour) {
-          userUUID = await getManhourUserUUID();
+    (text: string) => {
+      const abortCtrl = new AbortController();
+      const fn = async () => {
+        let startDate: string;
+        if (text.length === 0) {
+          const pref = getPreferenceValues<Preferences>();
+          const manhourDays: number = pref.manhourDays ? (+pref.manhourDays as number) : 7;
+          startDate = moment().subtract(manhourDays, "d").format(dateFormat);
+        } else {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+            showToast(Toast.Style.Failure, `Invalid date format, should be ${dateFormat}`);
+            return;
+          }
+          startDate = text;
         }
 
-        const manhours = await listManhours({ userUUID, startDate, taskUUID: props.task?.uuid });
-        const result = await convertResult(manhours);
-        setManhoursMap(result.manhoursMap);
-        setWeekdaysMap(result.weekdaysMap);
-        setManhourRecordedSums(result.manhourRecordedSums);
-        setManhourEstimatedSums(result.manhourEstimatedSums);
-        setManhourDates(result.manhourDates);
+        setLoading(true);
+        try {
+          let userUUID: string | undefined;
+          if (!props.showOthersManhour) {
+            userUUID = await getManhourUserUUID(abortCtrl.signal);
+          }
 
-        setSearchText(text);
-      } catch (err) {
-        showToast(Toast.Style.Failure, "Search failed", (err as Error).message);
-      } finally {
-        setLoading(false);
-      }
+          const manhours = await listManhours({ userUUID, startDate, taskUUID: props.task?.uuid }, abortCtrl.signal);
+          const result = convertResult(manhours);
+          setManhoursMap(result.manhoursMap);
+          setWeekdaysMap(result.weekdaysMap);
+          setManhourRecordedSums(result.manhourRecordedSums);
+          setManhourEstimatedSums(result.manhourEstimatedSums);
+          setManhourDates(result.manhourDates);
+
+          setSearchText(text);
+        } catch (err) {
+          showToast(Toast.Style.Failure, "Search failed", (err as Error).message);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fn();
+      return () => abortCtrl.abort();
     },
     [setManhoursMap, setWeekdaysMap, setManhourRecordedSums, setManhourEstimatedSums, setManhourDates, setSearchText]
   );
 
   useEffect(() => {
     search("");
+  }, []);
+
+  const onDelete = useCallback((uuid: string | undefined) => {
+    const abortCtrl = new AbortController();
+    const fn = async () => {
+      try {
+        if (!uuid) {
+          showToast(Toast.Style.Failure, "Manhour uuid is empty");
+          return;
+        }
+        await deleteManhour(uuid);
+        showToast(Toast.Style.Success, "Delete manhour successfully");
+        search(searchText);
+      } catch (err) {
+        showToast(Toast.Style.Failure, "Delete manhour failed", (err as Error).message);
+      }
+    };
+    fn();
+    return () => abortCtrl.abort();
   }, []);
 
   return (
@@ -319,18 +352,8 @@ export function ManageManhour(props: ManageManhourProps) {
                         primaryAction: {
                           title: "Delete Manhour",
                           style: Alert.ActionStyle.Destructive,
-                          onAction: async () => {
-                            try {
-                              if (!item.uuid) {
-                                showToast(Toast.Style.Failure, "Manhour uuid is empty");
-                                return;
-                              }
-                              await deleteManhour(item.uuid);
-                              showToast(Toast.Style.Success, "Delete manhour successfully");
-                              await search(searchText);
-                            } catch (err) {
-                              showToast(Toast.Style.Failure, "Delete manhour failed", (err as Error).message);
-                            }
+                          onAction: () => {
+                            onDelete(item.uuid);
                           },
                         },
                       };
@@ -346,8 +369,8 @@ export function ManageManhour(props: ManageManhourProps) {
                   />
                   <Action.SubmitForm
                     title="Refresh"
-                    onSubmit={async () => {
-                      await search(searchText);
+                    onSubmit={() => {
+                      search(searchText);
                     }}
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
