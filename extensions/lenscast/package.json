@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lenscast",
   "title": "Lenscast",
-  "description": "Web3 Social Raycast Extension bult with Lens Protocol",
+  "description": "Web3 Social Raycast Extension built with Lens Protocol",
   "icon": "icon.png",
   "author": "peduarte",
   "categories": [
