@@ -1,5 +1,9 @@
 # Jetbrains Changelog
 
+## [Update] - 2022-09-24
+
+- Bugfixes for open when closed
+
 ## [Better open when closed, MenuBarExtra and more] - 2022-09-11
 
 - Added workaround for environment variable issues when opening a closed Application
