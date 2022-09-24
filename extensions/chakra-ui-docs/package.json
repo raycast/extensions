@@ -8,12 +8,44 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Browse Components",
+      "name": "get-started",
+      "title": "Get Started",
       "subtitle": "Chakra UI",
-      "description": "Show all Chakra UI Components",
-      "mode": "view",
-      "icon": "chakra.png"
+      "keywords": [
+        "get started"
+      ],
+      "description": "Get Started with Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "styled-system",
+      "title": "Search Styled System",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "styled system"
+      ],
+      "description": "Styled System of Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "components",
+      "title": "Search Components",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "components"
+      ],
+      "description": "Components of Chakra UI",
+      "mode": "view"
+    },
+    {
+      "name": "hooks",
+      "title": "Search Hooks",
+      "subtitle": "Chakra UI",
+      "keywords": [
+        "hooks"
+      ],
+      "description": "Hooks of Chakra UI",
+      "mode": "view"
     }
   ],
   "dependencies": {
