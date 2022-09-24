@@ -23,4 +23,4 @@ Thanks to the [nzh](https://github.com/cnwhy/nzh) library.
 
 ## License
 
-[MIT](https://github.com/Jax0rz/chinese-capitalizated/blob/main/LICENSE)
+MIT
