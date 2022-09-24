@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Form, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Form, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import * as transformers from "./transformers";
 import { unique } from "./lib/utils";

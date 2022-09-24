@@ -1,5 +1,5 @@
 import { Form } from "@raycast/api";
-import { JSONWasm } from "../lib/json-wasm";
+import { JSONWasm } from "json-wasm";
 
 export const TransformJSONtoTypescript = {
   from: "JSON",

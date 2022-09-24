@@ -1,4 +1,4 @@
-import { JSONWasm } from "../lib/json-wasm";
+import { JSONWasm } from "json-wasm";
 
 export const TransformJSONtoJSONSchema = {
   from: "JSON",
