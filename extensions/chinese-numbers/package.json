@@ -2,10 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chinese-numbers",
   "title": "Chinese Numbers",
-  "description": "Convert Arabic numbers to Chinese numbers",
+  "description": "Chinese Numbers is a Raycast Extension to Convert Arabic numbers to Chinese numbers.",
   "icon": "chinese-numbers.png",
   "author": "Jax0rz",
-  "owner": "jax0rz",
   "categories": [
     "Productivity"
   ],
@@ -15,7 +14,7 @@
       "name": "index",
       "title": "Chinese Numbers",
       "subtitle": "Chinese Numbers",
-      "description": "Convert Arabic numbers to Chinese numbers",
+      "description": "Chinese Numbers is a Raycast Extension to Convert Arabic numbers to Chinese numbers.",
       "mode": "view"
     }
   ],
@@ -24,7 +23,7 @@
     "nzh": "^1.0.8"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

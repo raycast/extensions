@@ -1,31 +1,27 @@
-import { Action, ActionPanel, List } from "@raycast/api"
-import { useState } from "react"
-import Nzh from "nzh"
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useState } from "react";
+import Nzh from "nzh";
 
-const nzhcn = Nzh.cn
-const toChineseLowercase = (text: number) => nzhcn.encodeS(text)
-const toChineseCapitalizated = (text: number) => nzhcn.encodeB(text)
-const toScientificCountingMethod = (text: number) => nzhcn.encodeS(text)
-const toChineseCapitalizatedAmount = (text: number) => nzhcn.toMoney(text)
+const nzhcn = Nzh.cn;
+const toChineseLowercase = (text: number) => nzhcn.encodeS(text);
+const toChineseCapitalizated = (text: number) => nzhcn.encodeB(text);
+const toScientificCountingMethod = (text: number) => nzhcn.encodeS(text);
+const toChineseCapitalizatedAmount = (text: number) => nzhcn.toMoney(text);
 
 export default function Command() {
-  const [ChineseLowercase, setChineseLowercase] =
-    useState<string>("中文小写...")
-  const [ChineseCapitalizated, setChineseCapitalizated] =
-    useState<string>("中文大写...")
-  const [ScientificCountingMethod, setScientificCountingMethod] =
-    useState<string>("科学记数法字符串...")
-  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] =
-    useState<string>("中文金额...")
+  const [ChineseLowercase, setChineseLowercase] = useState<string>("中文小写...");
+  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("中文大写...");
+  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("科学记数法字符串...");
+  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("中文金额...");
   const handleOnTextChange = (value: string) => {
-    const input = Number(value)
+    const input = Number(value);
     if (!isNaN(input)) {
-      setChineseLowercase(toChineseLowercase(input))
-      setChineseCapitalizated(toChineseCapitalizated(input))
-      setScientificCountingMethod(toScientificCountingMethod(input))
-      setChineseCapitalizatedAmount(toChineseCapitalizatedAmount(input))
+      setChineseLowercase(toChineseLowercase(input));
+      setChineseCapitalizated(toChineseCapitalizated(input));
+      setScientificCountingMethod(toScientificCountingMethod(input));
+      setChineseCapitalizatedAmount(toChineseCapitalizatedAmount(input));
     }
-  }
+  };
 
   return (
     <List
@@ -39,10 +35,7 @@ export default function Command() {
           title={ChineseLowercase}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard
-                title="Copy to clipboard"
-                content={ChineseLowercase}
-              />
+              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseLowercase} />
             </ActionPanel>
           }
         />
@@ -52,10 +45,7 @@ export default function Command() {
           title={ChineseCapitalizated}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard
-                title="Copy to clipboard"
-                content={ChineseCapitalizated}
-              />
+              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseCapitalizated} />
             </ActionPanel>
           }
         />
@@ -65,10 +55,7 @@ export default function Command() {
           title={ScientificCountingMethod}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard
-                title="Copy to clipboard"
-                content={ScientificCountingMethod}
-              />
+              <Action.CopyToClipboard title="Copy to clipboard" content={ScientificCountingMethod} />
             </ActionPanel>
           }
         />
@@ -78,14 +65,11 @@ export default function Command() {
           title={ChineseCapitalizatedAmount}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard
-                title="Copy to clipboard"
-                content={ChineseCapitalizatedAmount}
-              />
+              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseCapitalizatedAmount} />
             </ActionPanel>
           }
         />
       </List.Section>
     </List>
-  )
+  );
 }
