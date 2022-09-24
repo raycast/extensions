@@ -35,7 +35,7 @@ export default function CharacterActionPanel({
         {character.metadata?.uri && (
           <Action
             title="Show IPFS Metadata"
-            onAction={() => push(<IpfsDetail ipfsLink={character.metadata?.uri!} />)}
+            onAction={() => push(<IpfsDetail ipfsLink={character.metadata?.uri} />)}
             icon={Icon.Document}
           />
         )}

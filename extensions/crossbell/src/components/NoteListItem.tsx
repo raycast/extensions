@@ -8,7 +8,7 @@ import NoteActionPanel from "./NoteActionPanel";
 export default function NoteListItem({ note }: { note: NoteEntity }) {
   const { title, content, createdAt } = extractNoteInfo(note);
 
-  const { data: character } = useCharacter(note.characterId);
+  const { data: character } = useCharacter(note?.characterId);
 
   const { avatar, username, handle } = extractCharacterInfo(character);
 

@@ -23,7 +23,7 @@ export default function NoteActionPanel({
         {note.metadata?.uri && (
           <Action
             title="Show IPFS Metadata"
-            onAction={() => push(<IpfsDetail ipfsLink={note.metadata?.uri!} />)}
+            onAction={() => push(<IpfsDetail ipfsLink={note.metadata?.uri} />)}
             icon={Icon.Document}
           />
         )}

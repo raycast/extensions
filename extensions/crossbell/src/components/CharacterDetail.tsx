@@ -25,7 +25,7 @@ ${bio ?? ""}
 
   return (
     <Detail
-      isLoading={!Boolean(character)}
+      isLoading={!character}
       markdown={markdown}
       navigationTitle={username ?? handle}
       metadata={

@@ -11,10 +11,10 @@ import { useNote } from "../apis/note";
 export default function NoteDetail({ note }: { note: NoteEntity }) {
   const { title, tags, sources, createdAt, updatedAt, publishedAt } = extractNoteInfo(note);
 
-  const { data: character, isLoading: isLoadingCharacter } = useCharacter(note.characterId);
-  const { handle, username, avatar, bio } = extractCharacterInfo(character);
+  const { data: character } = useCharacter(note.characterId);
+  const { handle, username, avatar } = extractCharacterInfo(character);
 
-  const { data: toNote, isLoading: isLoadingToNote } = useNote(note.toCharacterId, note.toNoteId);
+  const { data: toNote } = useNote(note.toCharacterId, note.toNoteId);
 
   const composeNoteMarkdown = useCallback(
     (note: NoteEntity, toNote?: NoteEntity) => {

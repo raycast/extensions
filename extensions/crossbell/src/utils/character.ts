@@ -5,7 +5,9 @@ export function extractCharacterInfo(character?: CharacterEntity) {
   const username = `${character?.metadata?.content?.name ?? character?.handle}`;
   const bio = character?.metadata?.content?.bio ?? "";
   const handle = character?.handle ?? "";
-  const avatar = ipfsLinkToHttpLink(character?.metadata?.content?.avatars?.[0]) ?? getDefaultAvatar(character?.handle);
+  const avatar = character?.metadata?.content?.avatars?.[0]
+    ? ipfsLinkToHttpLink(character?.metadata?.content?.avatars?.[0])
+    : getDefaultAvatar(character?.handle);
 
   return {
     username,
@@ -51,7 +53,7 @@ function stringToInteger(
   } = {}
 ) {
   let total = 0;
-  for (var i = 0; i !== string.length; i++) {
+  for (let i = 0; i !== string.length; i++) {
     if (total >= Number.MAX_SAFE_INTEGER) break;
     total += string.charCodeAt(i);
   }

@@ -7,9 +7,9 @@ export default function Command() {
 
   return (
     <List isLoading={isLoadingFeed}>
-      {feeds?.list.map((feed) => (
-        <NoteListItem key={`${feed.transactionHash}-${feed.logIndex}`} note={feed.note!} />
-      ))}
+      {feeds?.list.map(
+        (feed) => feed.note && <NoteListItem key={`${feed.transactionHash}-${feed.logIndex}`} note={feed.note} />
+      )}
     </List>
   );
 }

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useIpfsContent } from "../apis";
 import { ipfsLinkToHttpLink } from "../utils/ipfs";
 
-export default function IpfsDetail({ ipfsLink }: { ipfsLink: string }) {
+export default function IpfsDetail({ ipfsLink }: { ipfsLink?: string }) {
   const [text, setText] = useState<string>();
   const { data, isLoading } = useIpfsContent(ipfsLink);
 
@@ -29,16 +29,20 @@ ${isLoading ? "Loading..." : text}
       navigationTitle={ipfsLink}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy IPFS URI"
-            content={ipfsLink}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-          <Action.CopyToClipboard
-            title="Copy IPFS URI in HTTP Gateway"
-            content={ipfsLinkToHttpLink(ipfsLink)!}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
-          />
+          {ipfsLink && (
+            <Action.CopyToClipboard
+              title="Copy IPFS URI"
+              content={ipfsLink}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
+          )}
+          {ipfsLink && (
+            <Action.CopyToClipboard
+              title="Copy IPFS URI in HTTP Gateway"
+              content={ipfsLinkToHttpLink(ipfsLink)}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
+            />
+          )}
           {data && (
             <Action.CopyToClipboard
               title="Copy IPFS Content"
