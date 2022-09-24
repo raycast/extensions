@@ -1,3 +1,3 @@
 # Chinese Numbers Changelog
 
-## [Initial Version] - 2022-09-20
+## [Initial Version] - 2022-09-24

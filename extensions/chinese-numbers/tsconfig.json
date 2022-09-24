@@ -13,8 +13,5 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true
-  },
-  "rules": {
-    "semicolon": false
   }
 }
