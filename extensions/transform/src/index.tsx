@@ -42,7 +42,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy output" onSubmit={copyOutput} />
+          <Action.SubmitForm title="Copy Output" onSubmit={copyOutput} />
         </ActionPanel>
       }
     >
@@ -52,7 +52,6 @@ export default function Command() {
           <Form.Dropdown.Item value={name} title={name} key={name} />
         ))}
       </Form.Dropdown>
-      <Form.Separator />
       <Form.Dropdown id="to" title="To" value={to} onChange={setTo} storeValue>
         {toNames.map((name) => (
           <Form.Dropdown.Item value={name} title={name} key={name} />
