@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 21:46
+ * @lastEditTime: 2022-09-25 16:57
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -28,10 +28,10 @@ export class Easydict {
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.3.0";
-  buildNumber = 11;
-  versionDate = "2022-09-20";
-  isNeedPrompt = true;
+  version = "2.3.1";
+  buildNumber = 12;
+  versionDate = "2022-09-25";
+  isNeedPrompt = false;
   hasPrompted = false; // always default false, only show once, then should be set to true.
   releaseMarkdown = releaseNote;
 

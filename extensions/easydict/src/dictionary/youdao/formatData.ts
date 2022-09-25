@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-14 23:34
+ * @lastEditTime: 2022-09-21 23:44
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -297,8 +297,7 @@ export function hasYoudaoDictionaryEntries(formatResult: YoudaoDictionaryFormatR
 export function formateYoudaoWebDictionaryModel(
   model: YoudaoWebDictionaryModel
 ): YoudaoDictionaryFormatResult | undefined {
-  // if has no web translation, means no dictionary entries.
-  if (!model.web_trans?.["web-translation"]?.length) {
+  if (!model.ec && !model.ce && !model.web_trans?.["web-translation"]?.length) {
     console.log("No Youdao dictionary entries.");
     return;
   }
@@ -463,8 +462,8 @@ export function formateYoudaoWebDictionaryModel(
  * Get Youdao from to language.
  */
 export function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
-  let from = chineseLanguageItem.youdaoId;
-  let to = chineseLanguageItem.youdaoId;
+  let from = chineseLanguageItem.youdaoLangCode;
+  let to = chineseLanguageItem.youdaoLangCode;
   const guessLanguage = model.meta.guessLanguage;
   if (guessLanguage === "zh") {
     to = model.le;

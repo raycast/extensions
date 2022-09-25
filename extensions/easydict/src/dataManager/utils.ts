@@ -187,7 +187,7 @@ export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = fal
   const fromLanguageItem = getLanguageItemFromYoudaoId(from);
   const toLanguageItem = getLanguageItemFromYoudaoId(to);
   const fromToEmoji = `${fromLanguageItem.emoji} --> ${toLanguageItem.emoji}`;
-  const fromToLanguageNameAndEmoji = `${fromLanguageItem.englishName}${fromLanguageItem.emoji} --> ${toLanguageItem.englishName}${toLanguageItem.emoji}`;
+  const fromToLanguageNameAndEmoji = `${fromLanguageItem.langEnglishName}${fromLanguageItem.emoji} --> ${toLanguageItem.langEnglishName}${toLanguageItem.emoji}`;
   return onlyEmoji ? fromToEmoji : fromToLanguageNameAndEmoji;
 }
 

@@ -1,5 +1,17 @@
 # `Easydict` Changelog
 
+## [v2.3.1] - 2022-09-25
+
+### 💎 Improvements
+
+- Improved icon display.
+
+### 🐞 Fixes
+
+- Fixed a bug that caused extension to crash when getting the Youdao web cookie failed.
+- Fixed a bug that caused web Youdao dictionary to not display the definition.
+-
+
 ## [v2.3.0] - 2022-09-20
 
 ### ✨ New
@@ -17,8 +29,6 @@
 ### 🐞 Fixes
 
 - Fixed some known issues.
-
----
 
 ## [v2.2.0] - 2022-09-12
 

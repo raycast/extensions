@@ -9,20 +9,20 @@
  */
 
 export interface LanguageItem {
-  googleId: string; // ISO 639-1 codes, https://developers.google.com/admin-sdk/directory/v1/languages
-  youdaoId: string;
-  bingId: string; // bing language code, https://learn.microsoft.com/zh-cn/azure/cognitive-services/translator/language-support
+  googleLangCode: string; // ISO 639-1 codes, https://developers.google.com/admin-sdk/directory/v1/languages
+  youdaoLangCode: string;
+  bingLangCode: string; // bing language code, https://learn.microsoft.com/zh-cn/azure/cognitive-services/translator/language-support
   appleDetectChineseTitle: string; // such as 中文，英语. ⚠️ Apple detect more languages than apple translate.
-  appleId?: string; // used to translate, Apple translate support 12 languages?
+  appleLangCode?: string; // used to translate, Apple translate support 12 languages?
   deepLSourceId?: string; // deepL source language id
   deepLTargetId?: string; // most are same as source language, some are different, such as "EN-GB" "EN-US" and so on. ⚠️ "EN" = "EN-US"
-  francId: string; // the languages represented by ISO 639-3
-  aliyunId: string;
+  francLangCode: string; // the languages represented by ISO 639-3
+  aliyunLangCode: string;
   tencentDetectId?: string; // tencent detect language id, [Japanese is "jp", Korean is "kr"] different from tencentLanguageId
-  tencentId?: string;
-  baiduId: string;
-  caiyunId?: string;
-  englishName: string; // eg "English". When system language is English, Apple detect language is equal to languageTitle.
+  tencentLangCode?: string;
+  baiduLangCode: string;
+  caiyunLangCode?: string;
+  langEnglishName: string; // eg "English". When system language is English, Apple detect language is equal to languageTitle.
   voiceList?: string[]; // eg. ["Ting-Ting"] for Chinese-Simplified.
   emoji: string; // eg. 🇨🇳
 }

@@ -379,7 +379,7 @@
       "label": "DeepL Translate",
       "required": false,
       "description": "Turn on/off DeepL Translate",
-      "default": true
+      "default": false
     },
     {
       "name": "enableGoogleTranslate",
@@ -403,7 +403,7 @@
       "label": "Baidu Translate",
       "required": false,
       "description": "Turn on/off Baidu Translate",
-      "default": true
+      "default": false
     },
     {
       "name": "enableTencentTranslate",
