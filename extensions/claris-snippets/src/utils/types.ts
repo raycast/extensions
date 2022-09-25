@@ -19,6 +19,7 @@ export const ZSnippet = z.object({
   locId: z.string().default("default"),
 });
 export type Snippet = z.infer<typeof ZSnippet>;
+export type SnippetWithPath = Snippet & { path: string };
 
 export type Location = {
   id: string;

@@ -10,6 +10,7 @@ import {
   showHUD,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { deleteSnippetFile, loadAllSnippets } from "./utils/snippets";
 import { Location, snippetTypesMap } from "./utils/types";
@@ -17,6 +18,8 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
 import { useState } from "react";
+import EditSnippet from "./components/edit-snippet";
+import { uniqBy } from "lodash";
 
 export default function Command() {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -26,6 +29,7 @@ export default function Command() {
     revalidate,
   } = useCachedPromise(async () => loadAllSnippets(locations), [], { initialData: [] });
   const [pathFilter, setPathFilter] = useState<"all" | "default" | Location>("all");
+  const { pop } = useNavigation();
 
   function CreateSnippetAction() {
     return (
@@ -38,12 +42,14 @@ export default function Command() {
     );
   }
 
-  const filteredSnippets =
+  const filteredSnippets = uniqBy(
     pathFilter === "all"
       ? snippets
       : pathFilter === "default"
       ? snippets.filter((snippet) => snippet.locId === "default")
-      : snippets.filter((snippet) => snippet.locId === pathFilter.id);
+      : snippets.filter((snippet) => snippet.locId === pathFilter.id),
+    "id"
+  );
 
   return (
     <List
@@ -106,9 +112,11 @@ ${snippet.snippet}`}
                       }
                     />
                     <List.Item.Detail.Metadata.TagList title="Keywords">
-                      {snippet.tags.map((tag) => (
-                        <List.Item.Detail.Metadata.TagList.Item text={tag} />
-                      ))}
+                      {snippet.tags
+                        .filter((s) => s !== "")
+                        .map((tag) => (
+                          <List.Item.Detail.Metadata.TagList.Item text={tag} />
+                        ))}
                     </List.Item.Detail.Metadata.TagList>
                   </List.Item.Detail.Metadata>
                 }
@@ -145,13 +153,32 @@ ${snippet.snippet}`}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Edit Snippet" icon={Icon.Pencil} shortcut={{ key: "e", modifiers: ["cmd"] }} />
+                  <Action.Push
+                    title="Edit Snippet"
+                    icon={Icon.Pencil}
+                    shortcut={{ key: "e", modifiers: ["cmd"] }}
+                    target={
+                      <EditSnippet
+                        onSubmit={() => {
+                          revalidate();
+                          pop();
+                        }}
+                        snippet={snippet}
+                      />
+                    }
+                  />
                   <CreateSnippetAction />
-                  <Action
+                  <Action.ShowInFinder
+                    path={snippet.path}
+                    title="Reveal in Finder"
+                    icon={Icon.Finder}
+                    shortcut={{ key: "r", modifiers: ["cmd", "opt"] }}
+                  />
+                  {/* <Action
                     title="Export Snippet"
                     icon={Icon.Upload}
                     shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
-                  />
+                  /> */}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action

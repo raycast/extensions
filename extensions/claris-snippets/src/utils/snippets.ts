@@ -3,7 +3,7 @@ import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync
 import { join } from "path";
 import { date } from "zod";
 import { FMObjectsToXML } from "./FmClipTools";
-import { Location, Snippet, ZSnippet } from "./types";
+import { Location, Snippet, SnippetWithPath, ZSnippet } from "./types";
 
 function ensureDirSync(path: PathLike) {
   if (!existsSync(path)) mkdirSync(path);
@@ -28,8 +28,8 @@ export async function getFromClipboard(): Promise<string | null> {
   return null;
 }
 
-export function loadAllSnippets(locations?: Location[]): Snippet[] {
-  const allSnippets: Snippet[] = [];
+export function loadAllSnippets(locations?: Location[]): SnippetWithPath[] {
+  const allSnippets: SnippetWithPath[] = [];
   locations?.forEach((location) => {
     allSnippets.push(...loadSnippets(location));
   });
@@ -37,8 +37,8 @@ export function loadAllSnippets(locations?: Location[]): Snippet[] {
   allSnippets.push(...loadSnippets());
   return allSnippets;
 }
-export function loadSnippets(location?: Location): Snippet[] {
-  const snippets: Snippet[] = [];
+export function loadSnippets(location?: Location): SnippetWithPath[] {
+  const snippets: SnippetWithPath[] = [];
   const path = location?.path ?? getDefaultPath();
   if (!existsSync(path)) {
     // fail silently if folder doesn't exist
@@ -47,11 +47,12 @@ export function loadSnippets(location?: Location): Snippet[] {
   }
   const files = readdirSync(path);
   files.forEach((file) => {
-    const data = readFileSync(join(path, file), "utf8").toString();
+    const thePath = join(path, file);
+    const data = readFileSync(thePath, "utf8").toString();
     try {
       const snippet = ZSnippet.safeParse(JSON.parse(data));
       if (snippet.success) {
-        snippets.push(snippet.data);
+        snippets.push({ ...snippet.data, path: thePath, locId: location?.id ?? "default" });
       }
     } catch {
       return;

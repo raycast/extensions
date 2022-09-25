@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, MenuBarExtra, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";

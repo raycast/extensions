@@ -25,8 +25,10 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
 
   async function saveSnippet(values: FormValues) {
     const toast = await showToast({ title: "Saving snippet...", style: Toast.Style.Animated });
-    const id = values.id ?? uuidv4();
+    const id = snippet.id ?? uuidv4();
     const foundLocation = locations.find((l) => l.id === values.locId);
+
+    console.log({ id, foundLocation, values });
 
     const success = await saveSnippetFile(
       {
@@ -38,7 +40,8 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       foundLocation
     );
     if (success) {
-      toast.message = "Snippet saved";
+      toast.title = "Snippet saved!";
+      toast.message = "";
       toast.style = Toast.Style.Success;
       onSubmit();
     } else {
