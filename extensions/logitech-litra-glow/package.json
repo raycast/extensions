@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logitech-litra-glow",
+  "title": "Logitech Litra Glow",
+  "description": "Manage your Logitech Litra Glow light from Raycast",
+  "icon": "command-icon.png",
+  "author": "timrogers",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "turn-on",
+      "title": "Turn On",
+      "description": "Turn your Logitech Litra Glow on",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-off",
+      "title": "Turn Off",
+      "description": "Turn your Logitech Litra Glow off",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "litra-glow": "^1.1.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.24.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "prebuild": "npm run copy-binary",
+    "predev": "npm run copy-binary",
+    "copy-binary": "cp ./node_modules/node-hid/build/Release/HID.node ./assets"
+  }
+}

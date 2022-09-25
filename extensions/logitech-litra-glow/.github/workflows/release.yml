@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: timrogers/publish-raycast-extension@v1.0.1
+        with:
+          raycast_extensions_fork_full_name: timrogers/extensions
+          github_access_token: ${{ secrets.gh_access_token }}
+          github_username: timrogers
+          extension_name: logitech-litra-glow
