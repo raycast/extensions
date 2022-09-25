@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { detectType, FMObjectsToXML } from "../utils/FmClipTools";
+import { detectType } from "../utils/FmClipTools";
 import { v4 as uuidv4 } from "uuid";
-import { getFromClipboard, saveSnippetFile } from "../utils/snippets";
+import { getDefaultPath, getFromClipboard, saveSnippetFile } from "../utils/snippets";
 import { Snippet, SnippetType, snippetTypesMap } from "../utils/types";
 import { useLocations } from "../utils/use-locations";
 import { useState } from "react";
+import { rmSync } from "fs";
 
 type EditSnippetProps = {
   snippet: Partial<Snippet> & Required<Pick<Snippet, "snippet">>;
@@ -28,8 +29,6 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
     const id = snippet.id ?? uuidv4();
     const foundLocation = locations.find((l) => l.id === values.locId);
 
-    console.log({ id, foundLocation, values });
-
     const success = await saveSnippetFile(
       {
         ...values,
@@ -40,6 +39,14 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       foundLocation
     );
     if (success) {
+      if (snippet.locId && values.locId !== snippet.locId) {
+        // location changed, need to move the file instead of just updating the snippet
+        console.log(`Snippet Location moved from ${snippet.locId} to ${values.locId}`);
+        const foundOldLocation = locations.find((l) => l.id === snippet.locId);
+        const oldPath = foundOldLocation?.path ?? getDefaultPath();
+        rmSync(`${oldPath}/${id}.json`);
+      }
+
       toast.title = "Snippet saved!";
       toast.message = "";
       toast.style = Toast.Style.Success;

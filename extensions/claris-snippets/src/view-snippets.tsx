@@ -167,7 +167,24 @@ ${snippet.snippet}`}
                       />
                     }
                   />
+                  <Action.Push
+                    title="Duplicate Snippet"
+                    shortcut={{ key: "d", modifiers: ["cmd"] }}
+                    icon={Icon.Link}
+                    target={
+                      <EditSnippet
+                        onSubmit={() => {
+                          revalidate();
+                          pop();
+                        }}
+                        snippet={{ ...snippet, id: undefined }}
+                      />
+                    }
+                  />
                   <CreateSnippetAction />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  {locations.length > 0 && <Action title="Move Snippet" icon={Icon.Folder} />}
                   <Action.ShowInFinder
                     path={snippet.path}
                     title="Reveal in Finder"

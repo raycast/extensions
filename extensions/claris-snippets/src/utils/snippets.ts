@@ -1,7 +1,6 @@
 import { environment, showToast, Toast } from "@raycast/api";
 import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
 import { join } from "path";
-import { date } from "zod";
 import { FMObjectsToXML } from "./FmClipTools";
 import { Location, Snippet, SnippetWithPath, ZSnippet } from "./types";
 
@@ -74,7 +73,6 @@ export async function saveSnippetFile(data: Snippet, location?: Location): Promi
   return false;
 }
 
-export async function deleteSnippetFile(snippet: Snippet) {
-  const path = getDefaultPath();
-  rmSync(join(path, `${snippet.id}.json`));
+export async function deleteSnippetFile(snippet: SnippetWithPath) {
+  rmSync(snippet.path);
 }
