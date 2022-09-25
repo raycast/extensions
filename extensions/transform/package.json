@@ -38,6 +38,8 @@
     "json-wasm": "github:Idered/json-wasm",
     "markdown-it": "13.0.1",
     "node-html-markdown": "1.2.0",
+    "postcss": "^8.4.16",
+    "postcss-js": "^4.0.0",
     "pug": "3.0.2",
     "strings-to-regex": "1.3.0",
     "text-encoding-utf-8": "^1.0.2"
