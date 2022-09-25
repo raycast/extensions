@@ -6,10 +6,10 @@ export interface Preferences {
   token?: string;
   topicDetailStyle: string;
 }
-export enum TopicDetailStyle {
-  "V2EX" = "1",
-  "Raycast" = "2",
-}
+// export enum TopicDetailStyle {
+//   "V2EX" = "1",
+//   "Raycast" = "2",
+// }
 const getProxy = () => {
   const { hostname, port } = getPreferenceValues<Preferences>();
   if (hostname && port) {

@@ -27,24 +27,6 @@
   ],
   "preferences": [
     {
-      "required": true,
-      "name": "topicDetailStyle",
-      "description": "Show the detailed content style of the topic",
-      "type": "dropdown",
-      "title": "Topic Detail Style",
-      "data": [
-        {
-          "title": "V2EX",
-          "value": "1"
-        },
-        {
-          "title": "Raycast",
-          "value": "2"
-        }
-      ],
-      "default": "1"
-    },
-    {
       "required": false,
       "name": "hostname",
       "description": "Used to access V2EX through proxy",

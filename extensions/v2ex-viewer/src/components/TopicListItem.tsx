@@ -29,7 +29,8 @@ const TopicListItem = (props: TopicListItemProps) => {
       icon={member.avatar_mini}
       title={topic.title}
       subtitle={!isShowingDetail ? node.title : undefined}
-      accessories={!isShowingDetail ? accessories : undefined}
+      // accessories={!isShowingDetail ? accessories : undefined}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <Action

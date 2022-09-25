@@ -1,7 +1,7 @@
 import { Topic, Reply } from "../api/types";
 import { getUnixFromNow } from "./time";
 
-const SEPARATOR = `\n\n------\n\n`;
+const SEPARATOR = `\n\n---\n\n`;
 const LINE_BREAK = `\n\n`;
 
 const Code = (content: string) => `\`${content}\``;
@@ -17,20 +17,21 @@ const OP = (isOP: boolean) => {
   return isOP ? ` ${Code("OP")} ` : "";
 };
 
-const getTopicMarkdownContent = (topic: Topic, replies: Reply[], includeHeader = true) => {
+const getTopicMarkdownContent = (topic: Topic, replies: Reply[]) => {
   const topicTitle = `${Heading(1, topic.title)}`;
   const topicMember = `${Code(topic.node.title)} · ${Bold(
     Link(topic.member.username, topic.member.url)
-  )} · ${getUnixFromNow(topic.created)}`;
+  )} · ${getUnixFromNow(topic.created)} · ${topic.replies > 0 ? `${topic.replies} 条回复` : "目前尚无回复"}`;
   const header = `${topicTitle}${LINE_BREAK}${topicMember}`;
 
   const topicContent = `${topic.content}`;
 
-  const repliesContent = replies
-    .map((reply) => getReplyMarkdownContent(reply, topic.member.id === reply.member.id))
-    .join(LINE_BREAK);
+  const repliesContent =
+    topic.replies !== 0 && replies.length === 0
+      ? Code("回复加载中")
+      : replies.map((reply) => getReplyMarkdownContent(reply, topic.member.id === reply.member.id)).join(LINE_BREAK);
 
-  return (includeHeader ? [header, topicContent, repliesContent] : [topicContent, repliesContent]).join(SEPARATOR);
+  return [header, topicContent, repliesContent].filter(Boolean).join(SEPARATOR);
 };
 
 const getReplyMarkdownContent = (reply: Reply, isOP = false) => {
