@@ -31,6 +31,7 @@
     "gofmt.js": "0.0.2",
     "html-minifier": "4.0.0",
     "html2pug": "github:lh4111/html2pug",
+    "htmltojsx": "^0.3.0",
     "json_typegen_wasm": "0.7.0",
     "json-to-go": "github:Idered/json-to-go",
     "json-to-jsdoc": "github:Idered/json-to-jsdoc",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@types/html-minifier": "^4.0.2",
+    "@types/htmltojsx": "^0.0.30",
     "@types/iarna__toml": "^2.0.2",
     "@types/markdown-it": "^12.2.3",
     "@types/pug": "^2.0.6",
