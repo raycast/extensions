@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, Form, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useEffect, useState } from "react";
 import * as transformers from "./transformers";
 import { unique } from "./lib/utils";
@@ -22,15 +22,14 @@ export default function Command() {
   const activePair = transformationPairs.find((pair) => pair.to === to && pair.from === from);
 
   useEffect(() => {
-    if (activePair) {
-      (async () => {
-        try {
-          setOutput(await activePair.transform(input, options));
-        } catch (err) {
-          setOutput("Invalid input");
-        }
-      })();
-    }
+    if (!activePair) return;
+    (async () => {
+      try {
+        setOutput(await activePair.transform(input, options));
+      } catch (err) {
+        setOutput("Invalid input");
+      }
+    })();
   }, [input, from, to, activePair, options]);
 
   return (
