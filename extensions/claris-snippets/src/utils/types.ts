@@ -1,11 +1,28 @@
 import { z } from "zod";
 
-export const ZSnippetType = z.enum(["unknown", "script", "scriptSteps", "layoutObjectList"]);
+export const ZSnippetType = z.enum([
+  "unknown",
+  "script",
+  "scriptSteps",
+  "layout",
+  "group",
+  "field",
+  "customFunction",
+  "baseTable",
+  "valueList",
+  "layoutObjectList",
+]);
 export type SnippetType = z.infer<typeof ZSnippetType>;
 export const snippetTypesMap: Record<SnippetType, string> = {
   script: "Script",
   scriptSteps: "Script Step(s)",
   layoutObjectList: "Layout Object(s)",
+  layout: "Layout",
+  group: "Group",
+  baseTable: "Base Table",
+  field: "Field",
+  customFunction: "Custom Function",
+  valueList: "Value List",
   unknown: "Unknown",
 };
 

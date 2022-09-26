@@ -1,5 +1,4 @@
-import { Alert, environment, showHUD } from "@raycast/api";
-import { readFileSync } from "fs";
+import { environment } from "@raycast/api";
 import { join } from "path";
 import { execSync } from "child_process";
 import { SnippetType } from "./types";
@@ -20,5 +19,12 @@ export function detectType(snippet: string): SnippetType {
   if (snippet.includes("<Script")) return "script";
   if (snippet.includes("<Step")) return "scriptSteps";
   if (snippet.includes('<fmxmlsnippet type="LayoutObjectList')) return "layoutObjectList";
+  // TODO: detect these types
+  if (snippet.includes("<Step")) return "baseTable";
+  if (snippet.includes("<Step")) return "customFunction";
+  if (snippet.includes("<Step")) return "field";
+  if (snippet.includes("<Step")) return "group";
+  if (snippet.includes("<Step")) return "layout";
+  if (snippet.includes("<Step")) return "valueList";
   return "unknown";
 }
