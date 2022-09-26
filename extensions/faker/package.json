@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "faker",
+  "title": "Faker",
+  "description": "Generate massive amounts of fake data using Faker",
+  "icon": "faker.png",
+  "author": "GastroGeek",
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "data",
+    "development",
+    "fake",
+    "faker.js",
+    "random",
+    "testing"
+  ],
+  "commands": [
+    {
+      "name": "generate",
+      "title": "Generate Fake Data",
+      "description": "Generate massive amounts of fake data using Faker",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@faker-js/faker": "^7.5.0",
+    "@raycast/api": "^1.39.3",
+    "lodash.xor": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/lodash.xor": "^4.5.7",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
