@@ -5,6 +5,9 @@
   "description": "Provide quick links to the Chakra UI component documentation.",
   "icon": "chakra.png",
   "author": "pgvr",
+  "contributors": [
+    "Ansub"
+  ],
   "license": "MIT",
   "commands": [
     {
