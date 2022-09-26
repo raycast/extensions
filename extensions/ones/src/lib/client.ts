@@ -33,31 +33,31 @@ export class Client {
     this.baseAPI = `${url}/project/api`;
   }
 
-  public async get(product: Product, url: string, params?: any): Promise<any> {
+  public async get(product: Product, url: string, params?: any, signal?: AbortSignal): Promise<any> {
     try {
       if (!this.httpClient) {
-        await this.initHttpClient();
+        await this.initHttpClient(signal);
         if (!this.httpClient) {
           return Promise.reject(new Error("http client not initialized"));
         }
       }
       url = `${this.baseAPI}/${product}/team/${this.teamUUID}/${url}`;
-      return this.httpClient?.get(url, { params });
+      return this.httpClient?.get(url, { params, signal });
     } catch (err) {
       return Promise.reject(err);
     }
   }
 
-  public async post(product: Product, url: string, data?: { [key: string]: any }): Promise<any> {
+  public async post(product: Product, url: string, data?: { [key: string]: any }, signal?: AbortSignal): Promise<any> {
     try {
       if (!this.httpClient) {
-        await this.initHttpClient();
+        await this.initHttpClient(signal);
         if (!this.httpClient) {
           return Promise.reject(new Error("http client not initialized"));
         }
       }
       url = `${this.baseAPI}/${product}/team/${this.teamUUID}/${url}`;
-      return this.httpClient.post(url, data);
+      return this.httpClient.post(url, data, { signal });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -113,7 +113,7 @@ export class Client {
     return Promise.resolve(teamUUID as string);
   }
 
-  public async initHttpClient(): Promise<any> {
+  public async initHttpClient(signal?: AbortSignal): Promise<any> {
     try {
       this.email = await this.getEmail();
       this.password = await this.getPassword();
@@ -133,7 +133,7 @@ export class Client {
       ) {
         await this.setEmail(pref.email);
         await this.setPassword(pref.password);
-        const result = await login({ email: this.email, password: this.password });
+        const result = await login({ email: this.email, password: this.password }, signal);
         await this.setToken(result.user.token);
         await this.setUserUUID(result.user.uuid);
         this.userUUID = result.user.uuid;
