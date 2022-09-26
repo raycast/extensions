@@ -65,8 +65,11 @@ export async function saveSnippetFile(data: Snippet, location?: Location): Promi
   if (parseResult.success) {
     const snippet = parseResult.data;
     const path = location?.path ?? getDefaultPath();
-    snippet.locId = location?.id ?? "default"; //ensure locId is set and matches the location passed in
-    writeFileSync(join(path, `${snippet.id}.json`), JSON.stringify(snippet));
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { locId, ...rest } = snippet; // don't save locId to file
+
+    writeFileSync(join(path, `${snippet.id}.json`), JSON.stringify(rest));
     return true;
   }
   console.error(parseResult.error);
