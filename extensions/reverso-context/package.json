@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "context",
-      "title": "Translate with the context",
+      "title": "Translate Word",
       "subtitle": "Reverso Context",
       "description": "Shows translation with usage examples via Reverso Context",
       "mode": "view"
