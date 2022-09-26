@@ -1,13 +1,20 @@
-import { showHUD, ActionPanel, List, Action, popToRoot } from "@raycast/api";
+import { showHUD, ActionPanel, List, Action, popToRoot, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { checkPagesInstalled } from "./index";
+import { checkPagesInstalled, resolveExportPath } from "./index";
 
 interface ExportArguments {
-  filepath: string;
+  filename: string;
 }
 
+interface Preferences {
+  exportDir: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+
 export default function Main(props: { arguments: ExportArguments }) {
-  const { filepath } = props.arguments;
+  const { filename } = props.arguments;
+  const filepath = resolveExportPath(preferences.exportDir, filename);
 
   // Check for Pages app
   Promise.resolve(checkPagesInstalled()).then((installed) => {

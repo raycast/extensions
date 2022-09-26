@@ -1,4 +1,5 @@
 import { getApplications, open, showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
 
 export async function checkPagesInstalled() {
   const apps = await getApplications();
@@ -53,4 +54,16 @@ export async function checkKeynoteInstalled() {
     return false;
   }
   return true;
+}
+
+export function resolveExportPath(exportDir: string, filename: string): string {
+  // Resolves paths beginning with ~ to absolute paths
+  const filepath = exportDir + (exportDir.endsWith("/") ? "" : "/") + filename;
+
+  if (filepath.startsWith("~")) {
+    const homeDir = execSync("cd ~ && pwd").toString().replace("\n", "");
+    return homeDir + filepath.substring(1);
+  }
+
+  return filepath;
 }
