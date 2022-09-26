@@ -19,11 +19,6 @@ export default function Command() {
   const possibleTransformations = transformationPairs.filter((pair) => pair.from === from);
   const fromNames = unique(transformationPairs.map((pair) => pair.from));
   const toNames = unique(possibleTransformations.map((pair) => pair.to));
-  const copyOutput = async () => {
-    await showHUD("Copied to Clipboard");
-    await Clipboard.copy(output);
-    await closeMainWindow();
-  };
   const activePair = transformationPairs.find((pair) => pair.to === to && pair.from === from);
 
   useEffect(() => {
@@ -42,7 +37,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Copy Output" onSubmit={copyOutput} />
+          <Action.CopyToClipboard content={output} />
         </ActionPanel>
       }
     >
