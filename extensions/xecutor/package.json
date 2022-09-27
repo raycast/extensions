@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xecutor",
   "title": "Xecutor",
-  "description": "Create presets to launch multiple macOS applications at one time",
+  "description": "Create presets to launch multiple macOS applications and/or urls from within Raycast",
   "icon": "xecutor.png",
   "author": "GastroGeek",
   "license": "MIT",
@@ -20,7 +20,7 @@
     {
       "name": "presets",
       "title": "Manage Presets",
-      "description": "Create presets to launch multiple macOS applications at one time",
+      "description": "Create presets to launch multiple macOS applications and/or urls from within Raycast",
       "mode": "view"
     }
   ],
