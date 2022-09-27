@@ -1,4 +1,4 @@
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import { iconForMachineState, isUsable, Machine } from "./machine";
 import { FC } from "react";
 import {
@@ -18,6 +18,7 @@ export const MachineActionPanel: FC<{ machine: Machine }> = ({ machine }) => {
         {isUsable(machine) && machine.state !== "restarting" && (
           <Action
             title="Toggle Start/Stop"
+            icon={Icon.Power}
             onAction={toggleMachine(machine)}
             shortcut={{ modifiers: [], key: "enter" }}
           />
