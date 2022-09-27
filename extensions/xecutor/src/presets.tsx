@@ -48,7 +48,7 @@ const CreateOrEditPresetName = (props: { name?: string; onCreateOrEditPresetName
       navigationTitle="Create Preset: (2/2)"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Preset" onSubmit={handleOnCreateOrEditPresetName} />
+          <Action.SubmitForm title="Save Preset" icon={Icon.SaveDocument} onSubmit={handleOnCreateOrEditPresetName} />
         </ActionPanel>
       }
     >
@@ -174,7 +174,7 @@ const CreateOrEditPreset = (props: {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Save URL Set" onSubmit={validateURLSet} />
+            <Action.SubmitForm title="Save URL Set" icon={Icon.SaveDocument} onSubmit={validateURLSet} />
             <ActionPanel.Section title="URLs">
               <Action
                 title="Add URL"
@@ -204,10 +204,12 @@ const CreateOrEditPreset = (props: {
           <ActionPanel>
             <Action
               title={`${appIsSelected(app) ? "Deselect" : "Select"} Application`}
+              icon={appIsSelected(app) ? Icon.Circle : Icon.CircleProgress100}
               onAction={() => toggleApp(app)}
             />
             <Action
               title="Continue..."
+              icon={Icon.ArrowRightCircleFilled}
               onAction={() => {
                 clearSearchBar();
                 maybeContinue();
@@ -228,9 +230,10 @@ const CreateOrEditPreset = (props: {
           accessories={[{ icon: selectedURLs.length ? Icon.Checkmark : undefined }]}
           actions={
             <ActionPanel>
-              <Action.Push title="Configure URL Set" target={<ConfigureURLSet urls={selectedURLs} />} />
+              <Action.Push title="Configure URL Set" icon={Icon.Cog} target={<ConfigureURLSet urls={selectedURLs} />} />
               <Action
                 title="Continue..."
+                icon={Icon.ArrowRightCircleFilled}
                 onAction={() => {
                   clearSearchBar();
                   maybeContinue();
