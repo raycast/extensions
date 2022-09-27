@@ -1,0 +1,238 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ossinsight",
+  "title": "OSS Insight",
+  "description": "OSS Insight extension for Raycast",
+  "icon": "icon.png",
+  "author": "k8scat",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Trending Repos",
+      "description": "Search GitHub Trending Repos",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "title": "Language",
+      "description": "Program Language",
+      "required": false,
+      "name": "language",
+      "type": "dropdown",
+      "default": "All",
+      "data": [
+        {
+          "title": "All",
+          "value": "All"
+        },
+        {
+          "title": "JavaScript",
+          "value": "JavaScript"
+        },
+        {
+          "title": "Java",
+          "value": "Java"
+        },
+        {
+          "title": "Python",
+          "value": "Python"
+        },
+        {
+          "title": "PHP",
+          "value": "PHP"
+        },
+        {
+          "title": "C++",
+          "value": "C++"
+        },
+        {
+          "title": "C#",
+          "value": "C#"
+        },
+        {
+          "title": "typescript",
+          "value": "typescript"
+        },
+        {
+          "title": "Shell",
+          "value": "Shell"
+        },
+        {
+          "title": "C",
+          "value": "C"
+        },
+        {
+          "title": "Ruby",
+          "value": "Ruby"
+        },
+        {
+          "title": "Rust",
+          "value": "Rust"
+        },
+        {
+          "title": "Go",
+          "value": "Go"
+        },
+        {
+          "title": "Kotlin",
+          "value": "Kotlin"
+        },
+        {
+          "title": "HCL",
+          "value": "HCL"
+        },
+        {
+          "title": "PowerShell",
+          "value": "PowerShell"
+        },
+        {
+          "title": "CMake",
+          "value": "CMake"
+        },
+        {
+          "title": "Groovy",
+          "value": "Groovy"
+        },
+        {
+          "title": "PLpgSQL",
+          "value": "PLpgSQL"
+        },
+        {
+          "title": "TSQL",
+          "value": "TSQL"
+        },
+        {
+          "title": "Dart",
+          "value": "Dart"
+        },
+        {
+          "title": "Swift",
+          "value": "Swift"
+        },
+        {
+          "title": "HTML",
+          "value": "HTML"
+        },
+        {
+          "title": "CSS",
+          "value": "CSS"
+        },
+        {
+          "title": "Elixir",
+          "value": "Elixir"
+        },
+        {
+          "title": "Haskell",
+          "value": "Haskell"
+        },
+        {
+          "title": "Solidity",
+          "value": "Solidity"
+        },
+        {
+          "title": "Assembly",
+          "value": "Assembly"
+        },
+        {
+          "title": "R",
+          "value": "R"
+        },
+        {
+          "title": "Scala",
+          "value": "Scala"
+        },
+        {
+          "title": "Julia",
+          "value": "Julia"
+        },
+        {
+          "title": "Lua",
+          "value": "Lua"
+        },
+        {
+          "title": "Clojure",
+          "value": "Clojure"
+        },
+        {
+          "title": "Erlang",
+          "value": "Erlang"
+        },
+        {
+          "title": "Common Lisp",
+          "value": "Common Lisp"
+        },
+        {
+          "title": "Emacs Lisp",
+          "value": "Emacs Lisp"
+        },
+        {
+          "title": "OCaml",
+          "value": "OCaml"
+        },
+        {
+          "title": "MATLAB",
+          "value": "MATLAB"
+        },
+        {
+          "title": "Objective-C",
+          "value": "Objective-C"
+        },
+        {
+          "title": "Perl",
+          "value": "Perl"
+        },
+        {
+          "title": "Fortran",
+          "value": "Fortran"
+        }
+      ]
+    },
+    {
+      "title": "Period",
+      "description": "Query Period",
+      "required": false,
+      "name": "period",
+      "type": "dropdown",
+      "default": "past_24_hours",
+      "data": [
+        {
+          "title": "past_24_hours",
+          "value": "past_24_hours"
+        },
+        {
+          "title": "past_week",
+          "value": "past_week"
+        },
+        {
+          "title": "past_month",
+          "value": "past_month"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
