@@ -14,21 +14,18 @@
     {
       "name": "lookup-reference",
       "title": "Look Up Bible Reference by Name",
-      "subtitle": "Jump to a particular Bible verse or chapter",
       "description": "Allows you to quickly jump to a particular Bible chapter, verse, or range of verses just by typing the name of that Bible reference",
       "mode": "view"
     },
     {
       "name": "search-bible",
       "title": "Search the Bible by Phrase",
-      "subtitle": "Search for Bible verses containing a word or phrase",
       "description": "Allows you to find Bible verses related to a particular phrase or topic",
       "mode": "view"
     },
     {
       "name": "set-preferences",
       "title": "Set Bible Preferences",
-      "subtitle": "Set your preferred language, version, and more used for Bible searches",
       "description": "Allows you to set your preferred language, version, and more used for Bible searches",
       "mode": "view"
     }
