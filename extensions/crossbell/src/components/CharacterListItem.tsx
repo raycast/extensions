@@ -11,7 +11,7 @@ export default function CharacterListItem({ character }: { character: CharacterE
       title={username}
       subtitle={bio}
       accessories={[{ text: `@${handle}` }]}
-      icon={{ source: avatar }}
+      icon={{ source: avatar ? avatar : "no-view.png", fallback: "no-view.png" }}
       actions={<CharacterActionPanel character={character} enableShowDetail />}
     />
   );
