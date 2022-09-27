@@ -66,7 +66,7 @@ export default function Command() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action
-                  title="Show full example and translation"
+                  title="Show Full Example And Translation"
                   icon={Icon.Text}
                   onAction={() => setIsShowingDetail(!isShowingDetail)}
                 />
