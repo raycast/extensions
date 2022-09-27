@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Machines",
-      "description": "Control Machines",
+      "title": "Control Machines",
+      "description": "Control Your Paperspace Machines",
       "subtitle": "Paperspace",
       "mode": "view",
       "preferences": [
