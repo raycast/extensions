@@ -22,7 +22,16 @@
       "title": "Home Feed",
       "subtitle": "Crossbell",
       "description": "Browse your home feed on Crossbell",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "characterHandle",
+          "title": "Character Handle",
+          "description": "Your character handle on Crossbell (without @)",
+          "type": "textfield",
+          "required": true
+        }
+      ]
     },
     {
       "name": "latest",
@@ -30,15 +39,6 @@
       "subtitle": "Crossbell",
       "description": "Browse what's new on Crossbell",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "characterHandle",
-      "title": "Character Handle",
-      "description": "Your character handle on Crossbell (without @)",
-      "type": "textfield",
-      "required": false
     }
   ],
   "dependencies": {

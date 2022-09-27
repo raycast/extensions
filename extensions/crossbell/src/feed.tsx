@@ -9,29 +9,20 @@ export default function Command() {
   const { data: character, isLoading: isLoadingCharacter } = useCharacterByHandle(characterHandle);
   const { data: feeds, isLoading: isLoadingFeed } = useFeed(character?.characterId);
 
-  if (!characterHandle) {
-    return (
-      <Detail
-        markdown={`Your character handle is required. Please (press Enter to) update it in extension preferences and try again.`}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
   if (!isLoadingCharacter && !character) {
     return (
-      <Detail
-        markdown={`Character not found. Did you configure the extension with your correct handle?`}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
+      <List>
+        <List.EmptyView
+          icon="no-view.png"
+          title="Character not found"
+          description="Did you configure the extension with your correct handle?"
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
     );
   }
 
