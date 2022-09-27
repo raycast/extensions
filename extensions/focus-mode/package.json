@@ -13,8 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Change Focus",
-      "subtitle": "Select a focus mode",
+      "title": "Change Focus Mode",
       "description": "Change your focus mode using Raycast",
       "mode": "view"
     }
