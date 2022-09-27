@@ -14,8 +14,8 @@ quickly and easily. You can:
 
 [raycast]: https://www.raycast.com/
 
-![Filter Bible Reference](screenshot-filter.png)
-![Search the Bible by Phrase](screenshot-search.png)
+![Filter Bible Reference](./media/screenshot-filter.png)
+![Search the Bible by Phrase](./media/screenshot-search.png)
 
 ## Commands
 
