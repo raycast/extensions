@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { preferences } from "./utils/preferences";
 import { format_currency } from "./utils/numbers";
-import { Category, Transaction } from "./utils/types";
+import { Transaction } from "./utils/types";
 import { fetchTransactions } from "./data-providers/transactions-provider";
 import { DetailView } from "./transaction-details";
 import { EditTransactionCommand } from "./transaction-edit-form";
@@ -11,7 +11,7 @@ import { fetchCategories } from "./data-providers/categories-provider";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, transactions, revalidate } = fetchTransactions(searchText);
-  const { categories } = fetchCategories();
+  fetchCategories();
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
@@ -30,28 +30,28 @@ export default function Command() {
               },
             },
           ]}
-          actions={getActions(transaction, categories, revalidate)}
+          actions={getActions(transaction, revalidate)}
         />
       ))}
     </List>
   );
 }
 
-function getActions(transaction: Transaction, categories: Category[], refresh: () => void) {
+function getActions(transaction: Transaction, refresh: () => void) {
   return (
     <ActionPanel title="Actions">
       <Action.Push
         shortcut={{ key: "enter", modifiers: [] }}
         title="Show Details"
         icon={Icon.Eye}
-        target={<DetailView transaction={transaction} categories={categories} refresh={refresh} />}
+        target={<DetailView transaction={transaction} refresh={refresh} />}
       />
 
       <Action.Push
         shortcut={{ key: "enter", modifiers: ["cmd"] }}
         title="Edit"
         icon={Icon.Pencil}
-        target={<EditTransactionCommand transaction={transaction} categories={categories} refresh={refresh} />}
+        target={<EditTransactionCommand transaction={transaction} refresh={refresh} />}
       />
 
       <Action.OpenInBrowser
