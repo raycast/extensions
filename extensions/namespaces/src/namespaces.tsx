@@ -62,6 +62,7 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
         <ActionPanel>
           <Action.SubmitForm
             title="Save Space"
+            icon={Icon.SaveDocument}
             onSubmit={(spaceFormValues: SpaceFormValues) => validateSpace(spaceFormValues, props.space)}
           />
         </ActionPanel>
