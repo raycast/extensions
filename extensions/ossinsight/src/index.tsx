@@ -52,11 +52,11 @@ function SearchListItem({ searchResult, index }: { searchResult: Repository; ind
           <ActionPanel.Section title="Command">
             <Action.CopyToClipboard
               title="Copy SSH Clone Command"
-              content={`git clone git@github.com:${searchResult.repo_name}`}
+              content={`git clone git@github.com:${searchResult.repo_name}.git`}
             />
             <Action.CopyToClipboard
               title="Copy HTTP Clone Command"
-              content={`git clone https://github.com/${searchResult.repo_name}`}
+              content={`git clone https://github.com/${searchResult.repo_name}.git`}
             />
           </ActionPanel.Section>
         </ActionPanel>
