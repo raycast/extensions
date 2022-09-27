@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-20 01:31
+ * @lastEditTime: 2022-09-22 18:31
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -115,12 +115,12 @@ function raceDetectTextLanguage(
   });
 }
 
-function handleDetectedLanguage(detectedLanguage: DetectedLanguageModel): Promise<DetectedLanguageModel | undefined> {
-  console.log(`handleDetectedLanguageTypeResult: ${JSON.stringify(detectedLanguage, null, 4)}`);
+function handleDetectedLanguage(detectedLang: DetectedLanguageModel): Promise<DetectedLanguageModel | undefined> {
+  console.log(`handleDetectedLanguageTypeResult: ${JSON.stringify(detectedLang, null, 4)}`);
 
   // Record it in the apiDetectedLanguage.
-  apiDetectedLanguageList.push(detectedLanguage);
-  const detectedLanguageId = detectedLanguage.youdaoLanguageId;
+  apiDetectedLanguageList.push(detectedLang);
+  const detectedLangId = detectedLang.youdaoLanguageId;
 
   /**
    * 1. Preferred to use Google language detect, mark it as confirmed.
@@ -128,56 +128,50 @@ function handleDetectedLanguage(detectedLanguage: DetectedLanguageModel): Promis
    * Generally speaking, Google language detect is the most accurate, but it is too slow, it takes more than 1s.
    * So we have to try to use other types of language detection first.
    */
-  if (detectedLanguage.type === LanguageDetectType.Google && detectedLanguage.sourceLanguageId.length > 0) {
-    console.warn(`use Google detect language: ${detectedLanguage.sourceLanguageId}`);
-    detectedLanguage.confirmed = true;
-    return Promise.resolve(detectedLanguage);
+  if (detectedLang.type === LanguageDetectType.Google && detectedLang.sourceLanguageId.length > 0) {
+    console.warn(`use Google detect language: ${detectedLang.sourceLanguageId}`);
+    detectedLang.confirmed = true;
+    return Promise.resolve(detectedLang);
   }
 
-  // 2. If enabled speed first, and Baidu detect language is confirmed, use it.
-  const baiduType = LanguageDetectType.Baidu;
-  if (myPreferences.enableLanguageDetectionSpeedFirst) {
-    if (detectedLanguage.type === baiduType && detectedLanguage.confirmed && isPreferredLanguage(detectedLanguageId)) {
-      console.warn(`---> Speed First, Baidu detected preferred and confirmed language`);
-      console.warn(`detected language: ${JSON.stringify(detectedLanguage, null, 4)}`);
-      return Promise.resolve(detectedLanguage);
-    }
-  }
-
-  // 3. Iterate API detected language List, check if has detected > `two` identical valid language.
+  // 2. Iterate API detected language List, check if has detected >= `two` identical valid language.
   const detectedIdenticalLanguages: DetectedLanguageModel[] = [];
-  const detectedTypes: LanguageDetectType[] = [];
+  const detectedTypes: string[] = [];
   for (const lang of apiDetectedLanguageList) {
-    // Must be valid language.
-    if (lang.youdaoLanguageId === detectedLanguageId && isValidLanguageId(detectedLanguageId)) {
+    // Detected language must be valid language.
+    if (lang.youdaoLanguageId === detectedLangId && isValidLanguageId(detectedLangId)) {
       detectedIdenticalLanguages.push(lang);
-      detectedTypes.push(lang.type);
+      detectedTypes.push(lang.type.toString().split(" ")[0]);
     }
-    console.log(`detected Identical Languages: ${detectedTypes}`);
+    console.log(`detectedTypes: ${detectedTypes}`);
 
-    // If API detected two `preferred` language, try use it.
+    // If enabled speed first, and API detected two `preferred` language, tryto  use it.
     if (detectedIdenticalLanguages.length === 2) {
+      const baiduType = LanguageDetectType.Baidu;
       const bingType = LanguageDetectType.Bing;
-      const containBingDetect = detectedLanguage.type === bingType || apiDetectedListContainsType(bingType);
-      const confirmedBingDetect = containBingDetect && myPreferences.enableLanguageDetectionSpeedFirst;
-
-      if (confirmedBingDetect && isPreferredLanguage(detectedLanguageId)) {
-        detectedLanguage.confirmed = true;
+      const containBingDetect = detectedLang.type === bingType || apiDetectedListContainsType(bingType);
+      const containBaiduDetect = detectedLang.type === baiduType || apiDetectedListContainsType(baiduType);
+      if (
+        (containBingDetect || containBaiduDetect) &&
+        isPreferredLanguage(detectedLangId) &&
+        myPreferences.enableLanguageDetectionSpeedFirst
+      ) {
+        detectedLang.confirmed = true;
         console.warn(`---> API detected 'two' identical preferred language: ${detectedTypes}`);
-        console.warn(`detected language: ${JSON.stringify(detectedLanguage, null, 4)}`);
-        return Promise.resolve(detectedLanguage);
+        console.warn(`detected language: ${JSON.stringify(detectedLang, null, 4)}`);
+        return Promise.resolve(detectedLang);
       }
     }
 
     if (detectedIdenticalLanguages.length >= 3) {
-      detectedLanguage.confirmed = true;
+      detectedLang.confirmed = true;
       console.warn(`---> API detected 'three' or more identical language`);
-      console.warn(`detected language: ${JSON.stringify(detectedLanguage, null, 4)}`);
-      return Promise.resolve(detectedLanguage);
+      console.warn(`detected language: ${JSON.stringify(detectedLang, null, 4)}`);
+      return Promise.resolve(detectedLang);
     }
   }
 
-  console.log(`type: '${detectedLanguage.type}' detected language is not confirmed, ${detectedLanguageId}`);
+  console.log(`type: '${detectedLang.type}' detected '${detectedLangId}' is not confirmed, continue next detect`);
 
   return Promise.resolve(undefined);
 }

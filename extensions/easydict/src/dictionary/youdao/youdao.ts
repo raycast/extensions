@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-17 18:44
+ * @lastEditTime: 2022-09-23 22:08
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -20,6 +20,7 @@ import { userAgent, YoudaoErrorCode } from "../../consts";
 import { KeyStore } from "../../preferences";
 import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
+import { myPreferences } from "./../../preferences";
 import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
@@ -33,20 +34,22 @@ export const maxTextLengthOfDownloadYoudaoTTSAudio = 40;
 
 const youdaoTranslatURL = "https://fanyi.youdao.com";
 
-const youdaoCookieStoredKey = "youdaoCookie";
+const youdaoCookieKey = "youdaoCookie";
 
 let youdaoCookie: string | undefined; // "OUTFOX_SEARCH_USER_ID=362474716@10.108.162.139; Domain=.youdao.com; Expires=Sat, 17-Aug-2052 15:39:50 GMT";
 
 // * Cookie will be expired after 1 day, so we need to update it every time we start.
-getYoudaoWebCookie();
+if (myPreferences.enableYoudaoDictionary || myPreferences.enableYoudaoTranslate) {
+  getYoudaoWebCookie();
+}
 
 /**
  * Get youdao cookie from youdao web, and store it in local storage.
  */
-function getYoudaoWebCookie(): Promise<string> {
+function getYoudaoWebCookie(): Promise<string | undefined> {
   console.log("start getYoudaoWebCookie");
 
-  LocalStorage.getItem<string>(youdaoCookieStoredKey).then((cookie) => {
+  LocalStorage.getItem<string>(youdaoCookieKey).then((cookie) => {
     if (cookie) {
       youdaoCookie = cookie;
       // console.log(`---> get youdaoCookie from local storage: ${youdaoCookie}`);
@@ -58,15 +61,22 @@ function getYoudaoWebCookie(): Promise<string> {
   };
 
   return new Promise((resolve) => {
-    axios.get(youdaoTranslatURL, { headers }).then((response) => {
-      if (response.headers["set-cookie"]) {
-        youdaoCookie = response.headers["set-cookie"]?.join(";");
-        resolve(youdaoCookie);
-        LocalStorage.setItem(youdaoCookieStoredKey, youdaoCookie);
-        console.log(`get web youdaoCookie: ${youdaoCookie}`);
-        console.log(`get youdaoCookie cost time: ${response.headers[requestCostTime]} ms`);
-      }
-    });
+    axios
+      .get(youdaoTranslatURL, { headers })
+      .then((response) => {
+        if (response.headers["set-cookie"]) {
+          youdaoCookie = response.headers["set-cookie"]?.join(";");
+          resolve(youdaoCookie);
+          LocalStorage.setItem(youdaoCookieKey, youdaoCookie);
+          console.log(`get web youdaoCookie: ${youdaoCookie}`);
+          console.log(`get youdaoCookie cost time: ${response.headers[requestCostTime]} ms`);
+        }
+      })
+      .catch((error) => {
+        console.error(`get youdaoCookie error: ${error}`);
+        LocalStorage.removeItem(youdaoCookieKey);
+        resolve(undefined);
+      });
   });
 }
 
@@ -254,13 +264,24 @@ export async function requestYoudaoWebTranslate(
   queryType?: QueryType
 ): Promise<QueryTypeResult> {
   console.log(`---> start requestYoudaoWebTranslate: ${queryWordInfo.word}`);
+  const { fromLanguage, toLanguage, word } = queryWordInfo;
 
   const type = queryType ?? TranslationType.Youdao;
   const isValidLanguage = isValidYoudaoWebTranslateLanguage(queryWordInfo);
-  if (!isValidLanguage) {
-    console.warn(
-      `---> invalid Youdao web translate language: ${queryWordInfo.fromLanguage} --> ${queryWordInfo.toLanguage}`
-    );
+
+  if (!youdaoCookie) {
+    console.log(`no stored Youdao cookie`);
+    youdaoCookie = await getYoudaoWebCookie();
+  }
+  // console.log(`youdaoCookie: ${youdaoCookie}`);
+
+  if (!isValidLanguage || !youdaoCookie) {
+    if (!youdaoCookie) {
+      console.error(`---> Youdao web translate error: no cookie`);
+    }
+    if (!isValidLanguage) {
+      console.warn(`---> invalid Youdao web translate language: ${fromLanguage} --> ${toLanguage}`);
+    }
     const undefinedResult: QueryTypeResult = {
       type: type,
       result: undefined,
@@ -269,8 +290,6 @@ export async function requestYoudaoWebTranslate(
     };
     return Promise.resolve(undefinedResult);
   }
-
-  const { fromLanguage, toLanguage, word } = queryWordInfo;
 
   const timestamp = new Date().getTime();
   const lts = timestamp.toString(); // 1661435375537
@@ -295,12 +314,6 @@ export async function requestYoudaoWebTranslate(
     action: "FY_BY_REALTlME",
   };
   // console.log(`---> youdao web translate params: ${util.inspect(data, { depth: null })}`);
-
-  if (!youdaoCookie) {
-    console.log(`no stored Youdao cookie`);
-    youdaoCookie = await getYoudaoWebCookie();
-  }
-  // console.log(`youdaoCookie: ${youdaoCookie}`);
 
   const headers = {
     "User-Agent": userAgent,

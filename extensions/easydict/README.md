@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/eudic-icon.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easily look up words or translate text. </p>
 <p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
@@ -13,7 +13,7 @@
 
 ## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
 
-`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.cn), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Youdao](https://fanyi.youdao.com/), and [Caiyun translation](https://fanyi.caiyunapp.com/#/).
+`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.cn), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
 ![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1660916219.png)
 
@@ -76,7 +76,7 @@ Next:
           <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
 </a>
 
-### Manual Installation
+### Manually Install
 
 ```bash
 git clone https://github.com/tisfeng/Raycast-Easydict.git && cd Raycast-Easydict
@@ -96,20 +96,39 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 #### Language Detection
 
-- Tencent: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, Russian, German.
-- Baidu: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-- 🍎Apple: Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-- Google: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-- Bing: Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+##### Tencent Detect
+
+Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, Russian, German.
+
+##### Baidu Detect
+
+Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+##### 🍎Apple Detect
+
+Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+##### Google Detect
+
+Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+
+##### Bing Detect
+
+Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Dictionary
 
-- Youdao: Support 5 langauges, (Chinese), English, French, Japanese, Korean.
-- Linguee: Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+##### Youdao Dictionary
+
+Support 5 langauges, (Chinese), English, French, Japanese, Korean.
+
+##### Linguee Dictionary
+
+Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
 
 #### Translation
 
-Currently we support 23 languages: Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+Currently we support 23 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.**
 
 Details of the languages supported by each translation service are as follows:
 
@@ -173,7 +192,7 @@ For example, if you input a sentence arbitrarily, it will be translated into the
 
 <p>
 
-In order to better match the automatic selected text feature, it is a good idea to set a hotkey for `Easydict`, such as `Shift` + `Cmd ` + `E`, so that after selected the text, you can directly query words through the hotkey, which is very smooth and elegant.
+In order to better match the automatic selected text feature, it is a good idea to set a hotkey for `Easydict`, such as `Cmd` + `E`, so that after selected the text, you can directly query words through the hotkey, which is very smooth and elegant.
 
 </p>
 
@@ -232,28 +251,30 @@ You can also specify a part of the sort, for example: `youdao dictionary, apple,
 
 When this feature is turned on, `Easydict` will try to get the Mac system agent, and if successful, all subsequent network requests will be sent through the system agent. It is disabled by default. This feature is intended to counter IP blocking (some services such as Linguee have frequency restrictions on IPs), **but it can slow down the response time to requests, so please enable it only when needed. **
 
+> Special Note ⚠️: Please don't turn on `Use System Proxy` while using the developer tools with MitM, otherwise some service requests will report certificate errors, for example: https://github.com/tisfeng/Raycast-Easydict/issues/18 .
+
 ### Translation Services
 
 For easy to use, we provide some built-in translation APIs appid and appkey, but these Services have request frequency limits. If many people use them at the same time, it is likely to slow down or even stop. Therefore, for a better use experience, you'd better apply for a dedicated appid and appkey, and then replace the built-in services on the Preferences page.
 
 Don't worry, these translation services have free quotas. Generally speaking, personal use is enough.
 
-The following application tutorial is from [`Bob`](https://v0.bobtranslate.com/#/general/advance/service). Follow the tutorial and you should be able to complete the application soon.
+The following application tutorial is from [`Bob`](https://bobtranslate.com/guide/advance/service.html). Follow the tutorial and you should be able to complete the application soon.
 
-- [Youdao Translate](https://v0.bobtranslate.com/#/service/translate/youdao)： Select `text translation` and `speech synthesis`. (You will receive ¥50 experience fund)
-- [Baidu Translate](https://v0.bobtranslate.com/#/service/translate/baidu)
+- [Youdao Translate](https://bobtranslate.com/service/translate/youdao.html)： Select `text translation` and `speech synthesis`. (You will receive ¥50 experience fund)
+- [Baidu Translate](https://bobtranslate.com/service/translate/baidu.html)
 
-- [Tencent Translate](https://v0.bobtranslate.com/#/service/translate/tencent)
+- [Tencent Translate](https://bobtranslate.com/service/translate/tencent.html)
 
-- [Caiyun Translate](https://v0.bobtranslate.com/#/service/translate/caiyun)
+- [Caiyun Translate](https://bobtranslate.com/service/translate/caiyun.html)
 
 - [DeepL](https://www.deepl.com/translator)
 
-![image-20220620111449687](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620111449687.png)
+![image-20220922161329309](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220922161329309-1663834409.png)
 
 ## Friendly Recommendation
 
-[`Bob`](https://v0.bobtranslate.com/#/) is a MacOS **translation** and **OCR** application. Bob is probably the best translation application on the MacOS platform, and it's free!
+[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application. Bob is probably the best translation application on the MacOS platform, and it's free!
 
 > Update: Bob is now available on the Mac App Store, welcome to support: [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
 
