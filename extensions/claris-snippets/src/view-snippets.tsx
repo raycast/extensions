@@ -184,7 +184,6 @@ ${snippet.snippet}`}
                   <CreateSnippetAction />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  {locations.length > 0 && <Action title="Move Snippet" icon={Icon.Folder} />}
                   <Action.ShowInFinder
                     path={snippet.path}
                     title="Reveal in Finder"
