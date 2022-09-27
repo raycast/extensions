@@ -365,7 +365,9 @@ export default function Command() {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="URLs" />
                   {preset.urls.length ? (
-                    preset.urls.map((url, urlIndex) => <List.Item.Detail.Metadata.Label key={urlIndex} title={url} />)
+                    preset.urls.map((url, urlIndex) => (
+                      <List.Item.Detail.Metadata.Link key={urlIndex} text={""} target={url} title={url} />
+                    ))
                   ) : (
                     <List.Item.Detail.Metadata.Label title="None" />
                   )}
