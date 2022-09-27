@@ -22,17 +22,25 @@ import { v4 as uuid } from "uuid";
 import xorby from "lodash.xorby";
 import { URL } from "url";
 
-import { Preset, PresetNameFormValues } from "./types";
+import { Preset, PresetFormValues } from "./types";
 
-const CreateOrEditPresetName = (props: { name?: string; onCreateOrEditPresetName: (name: string) => void }) => {
+const StringIndexableIcon = Icon as { [index: string]: string };
+const StringIndexableColor = Color as { [index: string]: string };
+
+const CreateOrEditPresetName = (props: {
+  name?: string;
+  icon: string | undefined;
+  color: string | undefined;
+  onCreateOrEditPresetName: (name: string, icon: string, color: string) => void;
+}) => {
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const handleOnCreateOrEditPresetName = (values: PresetNameFormValues) => {
+  const handleOnCreateOrEditPresetName = (values: PresetFormValues) => {
     if (values.name === "") {
       return setError("Name is required");
     }
 
-    props.onCreateOrEditPresetName(values.name);
+    props.onCreateOrEditPresetName(values.name, values.icon, values.color);
   };
 
   const handleNameError = (value: string) => {
@@ -62,6 +70,21 @@ const CreateOrEditPresetName = (props: { name?: string; onCreateOrEditPresetName
         onChange={(value) => handleNameError(value)}
         onBlur={(event) => handleNameError(event.target.value as string)}
       />
+      <Form.Dropdown id="icon" title="Icon" defaultValue={props.icon || "CircleFilled"}>
+        {Object.keys(Icon).map((icon) => (
+          <Form.Dropdown.Item key={icon} title={icon} value={icon} icon={StringIndexableIcon[icon]} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown id="color" title="Color" defaultValue={props.color || "Orange"}>
+        {Object.keys(Color).map((color) => (
+          <Form.Dropdown.Item
+            key={color}
+            title={color}
+            value={color}
+            icon={{ source: Icon.CircleFilled, tintColor: StringIndexableColor[color] }}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 };
@@ -113,10 +136,12 @@ const CreateOrEditPreset = (props: {
     setSelectedApps((selectedApps) => xorby(selectedApps, [app], "bundleId"));
   };
 
-  const handleOnCreateOrEditPresetName = (name: string) => {
+  const handleOnCreateOrEditPresetName = (name: string, icon: string, color: string) => {
     props.onCreateOrEditPreset({
       ...props.preset,
       name,
+      icon,
+      color,
       apps: selectedApps,
       urls: selectedURLs,
       new: !props.editing,
@@ -132,7 +157,12 @@ const CreateOrEditPreset = (props: {
   const maybeContinue = () => {
     if (selectedApps.length || selectedURLs.length) {
       push(
-        <CreateOrEditPresetName name={props.preset?.name} onCreateOrEditPresetName={handleOnCreateOrEditPresetName} />
+        <CreateOrEditPresetName
+          name={props.preset?.name}
+          icon={props.preset?.icon}
+          color={props.preset?.color}
+          onCreateOrEditPresetName={handleOnCreateOrEditPresetName}
+        />
       );
     } else {
       showToast({ title: "At least 1 Application or URL Set required", style: Toast.Style.Failure });
@@ -295,13 +325,20 @@ export default function Command() {
     if (preset.new) {
       setAppPresets((appPresets) => [
         ...appPresets,
-        { id: uuid(), name: preset.name, apps: preset.apps, urls: preset.urls },
+        { id: uuid(), name: preset.name, icon: preset.icon, color: preset.color, apps: preset.apps, urls: preset.urls },
       ]);
     } else {
       setAppPresets((appPresets) =>
         appPresets.map((appPreset) => {
           return appPreset.id === preset.id
-            ? { id: preset.id, name: preset.name, apps: preset.apps, urls: preset.urls }
+            ? {
+                id: preset.id,
+                name: preset.name,
+                icon: preset.icon,
+                color: preset.color,
+                apps: preset.apps,
+                urls: preset.urls,
+              }
             : appPreset;
         })
       );
@@ -354,7 +391,7 @@ export default function Command() {
         <List.Item
           key={preset.id}
           title={preset.name}
-          icon={{ source: { light: "xecutor.png", dark: "xecutor@dark.png" } }}
+          icon={{ source: StringIndexableIcon[preset.icon], tintColor: StringIndexableColor[preset.color] }}
           accessories={[
             { icon: Icon.Link, text: `x${preset.urls.length}` },
             { icon: Icon.Window, text: `x${preset.apps.length}` },
