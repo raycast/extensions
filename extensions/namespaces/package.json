@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "namespaces",
   "title": "NameSpaces",
-  "description": "Name your macOS Spaces",
+  "description": "Create named aliases for your macOS Spaces and easily switch between them from within Raycast",
   "icon": "namespaces.png",
   "author": "GastroGeek",
   "license": "MIT",
@@ -19,7 +19,7 @@
     {
       "name": "namespaces",
       "title": "Spaces",
-      "description": "Name your macOS Spaces",
+      "description": "Create named aliases for your macOS Spaces and easily switch between them from within Raycast",
       "mode": "view"
     }
   ],
