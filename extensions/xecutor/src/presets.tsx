@@ -153,7 +153,7 @@ const CreateOrEditPreset = (props: {
     }, []);
 
     const validateURLSet = (values: object) => {
-      const urls = Object.values(values);
+      const urls = Object.values(values).filter((url) => url !== "");
 
       try {
         urls.forEach((url: string) => {
