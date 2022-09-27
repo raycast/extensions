@@ -15,7 +15,7 @@
       "name": "index",
       "title": "Machines",
       "description": "Control Machines",
-      "subtitle: "Paperspace",
+      "subtitle": "Paperspace",
       "mode": "view",
       "preferences": [
         {
