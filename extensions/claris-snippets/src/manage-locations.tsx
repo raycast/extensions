@@ -1,13 +1,14 @@
-import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, MenuBarExtra, useNavigation } from "@raycast/api";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
 import type { Location } from "./utils/types";
 import { getDefaultPath, loadSnippets } from "./utils/snippets";
+import { useLocations } from "./utils/use-locations";
 
 export default function Command() {
-  const [locations, setLocations] = useCachedState<Location[]>("locations", []);
+  const [locations, setLocations] = useLocations();
   const { push, pop } = useNavigation();
 
   function DeleteLocationAction({ id, onDelete }: { id: string; onDelete?: () => void }) {
