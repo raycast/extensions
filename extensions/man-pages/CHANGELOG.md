@@ -1,3 +1,3 @@
 # Man Pages Changelog
 
-## [Initial Version] - 2022-09-15
+## [Initial Version] - 2022-09-27
