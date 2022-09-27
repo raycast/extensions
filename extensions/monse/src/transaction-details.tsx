@@ -5,8 +5,8 @@ import { preferences } from "./utils/preferences";
 import { useState } from "react";
 import { EditTransactionCommand } from "./transaction-edit-form";
 
-export function DetailView(props: { transaction: Transaction; categories: Category[]; refresh: () => void }) {
-  const { transaction, categories, refresh } = props;
+export function DetailView(props: { transaction: Transaction; refresh: () => void }) {
+  const { transaction, refresh } = props;
   const [notes, setNotes] = useState<string>(transaction.notes ?? "");
   const [category, setCategory] = useState<Category>(transaction.category!);
 
@@ -42,7 +42,6 @@ ${notes || ""}`}
             target={
               <EditTransactionCommand
                 transaction={transaction}
-                categories={categories}
                 refresh={(t) => {
                   setCategory(() => t.category);
                   setNotes(() => t.notes ?? "");
