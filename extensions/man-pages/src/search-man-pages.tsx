@@ -47,6 +47,7 @@ export default function Main(props: { arguments: ExportArguments }) {
 
   return (
     <List searchBarPlaceholder={`Search ${pages.length} man pages...`} enableFiltering={true}>
+      <List.EmptyView icon={{ source: "no-view.png" }} title="No Results" />
       {listItems}
     </List>
   );

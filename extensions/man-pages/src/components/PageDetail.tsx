@@ -16,15 +16,13 @@ export const PageDetail = ({ command, commandDetails }: { command: string; comma
   // Display sections and provide quick actions
   return (
     <Detail
-      navigationTitle={title}
       markdown={`${text}`}
       isLoading={!commandDetails}
       actions={
-        <ActionPanel title="#1 in raycast/extensions">
-          <Action.CopyToClipboard title="Copy entry to clipboard" content={text} />
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Entry to Clipboard" content={text} />
           <Action title="Open in Terminal" icon={Icon.Terminal} onAction={() => openInTerminal(command)} />
-          {/* <Action title="Pop" onAction={pop} /> */}
-          <Action.OpenInBrowser url={`https://manpages.org/${command}`} title="View in Browser" />
+          <Action.OpenInBrowser url={`https://manpages.org/${command}`} />
           <Action
             title="View as PDF in Preview"
             icon={Icon.Document}
