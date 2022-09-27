@@ -3,15 +3,17 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { useState } from "react";
 import axios from "axios";
 import { preferences } from "./utils/preferences";
+import { fetchCategories } from "./data-providers/categories-provider";
 
 export function EditTransactionCommand(props: {
   transaction: Transaction;
-  categories: Category[];
   refresh: (t: Transaction) => void;
 }): JSX.Element {
   const [category, setCategory] = useState<string>();
   const [note, setNote] = useState<string>();
   const { pop } = useNavigation();
+  const [categories, setCategories] = useState<Category[]>([]);
+  fetchCategories().then((c) => setCategories(c));
 
   const submit = function (id: number, data: { note: string; category: number }) {
     const postData = { notes: data.note, category_id: data.category };
@@ -27,7 +29,7 @@ export function EditTransactionCommand(props: {
         });
 
         props.transaction.notes = postData.notes;
-        props.transaction.category = props.categories.find((c) => c.id === data.category)!;
+        props.transaction.category = categories.find((c) => c.id === data.category)!;
         props.refresh(props.transaction);
 
         pop();
@@ -43,6 +45,7 @@ export function EditTransactionCommand(props: {
 
   return (
     <Form
+      isLoading={categories.length === 0}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -60,7 +63,7 @@ export function EditTransactionCommand(props: {
         defaultValue={props.transaction.category.id.toString()}
         onChange={setCategory}
       >
-        {props.categories.map((category) => {
+        {categories.map((category) => {
           return <Form.Dropdown.Item key={category.id} value={category.id.toString()} title={category.name} />;
         })}
       </Form.Dropdown>
