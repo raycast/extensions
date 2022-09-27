@@ -140,18 +140,18 @@ export function ListActionPanel(props: ActionListPanelProps) {
         <ActionPanel.Section title="Target Language">
           {languageItemList.map((selectedLanguageItem) => {
             // hide auto language
-            const isAutoLanguage = selectedLanguageItem.youdaoId === "auto";
+            const isAutoLanguage = selectedLanguageItem.youdaoLangCode === "auto";
             // hide current detected language
-            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoId === queryWordInfo.fromLanguage;
-            const isSameWithTargetLanguage = selectedLanguageItem.youdaoId === queryWordInfo.toLanguage;
+            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoLangCode === queryWordInfo.fromLanguage;
+            const isSameWithTargetLanguage = selectedLanguageItem.youdaoLangCode === queryWordInfo.toLanguage;
             if (isAutoLanguage || isSameWithDetectedLanguage) {
               return null;
             }
 
             return (
               <Action
-                key={selectedLanguageItem.youdaoId}
-                title={selectedLanguageItem.englishName}
+                key={selectedLanguageItem.youdaoLangCode}
+                title={selectedLanguageItem.langEnglishName}
                 onAction={() => props.onLanguageUpdate(selectedLanguageItem)}
                 icon={isSameWithTargetLanguage ? Icon.ArrowRight : { source: selectedLanguageItem.emoji }}
               />
@@ -422,7 +422,7 @@ function WebQueryAction(props: { webQueryItem?: WebQueryItem }) {
 }
 
 export function checkIfPreferredLanguagesConflict() {
-  if (preferredLanguage1.youdaoId === preferredLanguage2.youdaoId) {
+  if (preferredLanguage1.youdaoLangCode === preferredLanguage2.youdaoLangCode) {
     console.log("referredLanguage1 and referredLanguage2 are the same language");
     return (
       <List searchBarPlaceholder="Error">

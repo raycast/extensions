@@ -19,6 +19,8 @@ import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
+console.log(`enter easydict.tsx`);
+
 const dataManager = new DataManager();
 
 export default function () {
@@ -133,20 +135,20 @@ export default function () {
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
     console.log(
-      `selected language: ${selectedLanguageItem.youdaoId}, current target language: ${userSelectedTargetLanguageItem.youdaoId}`
+      `selected language: ${selectedLanguageItem.youdaoLangCode}, current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`
     );
-    if (selectedLanguageItem.youdaoId === userSelectedTargetLanguageItem.youdaoId) {
+    if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
 
-    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoId}`);
+    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoLangCode}`);
     setAutoSelectedTargetLanguageItem(selectedLanguageItem);
     setUserSelectedTargetLanguageItem(selectedLanguageItem);
 
     const queryWordInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: currentFromLanguageItem.youdaoId,
-      toLanguage: selectedLanguageItem.youdaoId,
+      fromLanguage: currentFromLanguageItem.youdaoLangCode,
+      toLanguage: selectedLanguageItem.youdaoLangCode,
     };
 
     // Clean up previous query results immediately before new query.
@@ -174,7 +176,7 @@ export default function () {
     // Only different input text, then clear old results before new input text query.
     if (trimText !== searchText) {
       dataManager.clearQueryResult();
-      const toLanguage = userSelectedTargetLanguageItem.youdaoId;
+      const toLanguage = userSelectedTargetLanguageItem.youdaoLangCode;
       dataManager.delayQueryText(trimText, toLanguage, isDelay);
     }
   }
