@@ -18,13 +18,12 @@ export function XMLToFMObjects() {
 export function detectType(snippet: string): SnippetType {
   if (snippet.includes("<Script")) return "script";
   if (snippet.includes("<Step")) return "scriptSteps";
+  if (snippet.includes("<Layout")) return "layout";
+  if (snippet.includes("<GroupButtonObj")) return "group";
   if (snippet.includes('<fmxmlsnippet type="LayoutObjectList')) return "layoutObjectList";
-  // TODO: detect these types
-  if (snippet.includes("<Step")) return "baseTable";
-  if (snippet.includes("<Step")) return "customFunction";
-  if (snippet.includes("<Step")) return "field";
-  if (snippet.includes("<Step")) return "group";
-  if (snippet.includes("<Step")) return "layout";
-  if (snippet.includes("<Step")) return "valueList";
+  if (snippet.includes("<BaseTable")) return "baseTable";
+  if (snippet.includes("<CustomFunction")) return "customFunction";
+  if (snippet.includes("<Field")) return "field";
+  if (snippet.includes("<ValueList")) return "valueList";
   return "unknown";
 }
