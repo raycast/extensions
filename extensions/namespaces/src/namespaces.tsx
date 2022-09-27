@@ -69,6 +69,8 @@ const ConfigureSpace = (props: { space: Space; onSpaceConfigured: (space: Space)
       }
     >
       <Form.TextField id="name" title="Name" defaultValue={props.space.name} />
+      <Form.Separator />
+      <Form.Description text="Navigate to Keyboard Shortcuts => Mission Control to see/configure the current shortcut keys assigned to your Spaces." />
       <Form.TextField
         id="keyCode"
         title="KeyCode"
