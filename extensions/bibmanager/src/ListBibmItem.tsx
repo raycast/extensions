@@ -130,6 +130,14 @@ function getItemDetail(item: Item) {
             title="Publication Date"
             text={`${item.year && item.month ? getMonth(item.month) + " " + item.year.toString() : ""}`}
           />
+          {item.keywords.length > 0 && <List.Item.Detail.Metadata.Separator />}
+          {item.keywords.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Keywords">
+              {item.keywords.map((kw, uid) => (
+                <List.Item.Detail.Metadata.TagList.Item key={uid} text={kw} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
         </List.Item.Detail.Metadata>
       }
     />

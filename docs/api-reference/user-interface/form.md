@@ -103,7 +103,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 
 {% hint style="info" %}
 
-- Drafts for forms nested in navigation is not supported yet. In this case you will see a warning about it.
+- Drafts for forms nested in navigation are not supported yet. In this case, you will see a warning about it.
 - Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
 - Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
 - If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
@@ -171,9 +171,9 @@ interface TodoValues {
 export default function Command(props: { draftValues?: TodoValues }) {
   const { draftValues } = props;
 
-  const [title, setTitle] = useState<string | undefined>(draftValues?.title);
-  const [description, setDescription] = useState<string | undefined>(draftValues?.description);
-  const [dueDate, setDueDate] = useState<Date | undefined>(draftValues?.dueDate);
+  const [title, setTitle] = useState<string>(draftValues?.title || "");
+  const [description, setDescription] = useState<string>(draftValues?.description || "");
+  const [dueDate, setDueDate] = useState<Date>(draftValues?.dueDate || "");
 
   function handleSubmit(values: TodoValues) {
     console.log("onSubmit", values);
@@ -253,7 +253,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [name, setName] = useState<string>();
+  const [name, setName] = useState<string>("");
 
   return (
     <Form
@@ -321,7 +321,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [password, setPassword] = useState<string>();
+  const [password, setPassword] = useState<string>("");
 
   return (
     <Form
@@ -392,7 +392,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [description, setDescription] = useState<string>();
+  const [description, setDescription] = useState<string>("");
 
   return (
     <Form
@@ -528,7 +528,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | null>(null);
 
   return (
     <Form
@@ -934,7 +934,7 @@ For type-safe form values, you can define your own interface. Use the ID's of th
 #### Example
 
 ```typescript
-import { Form } from "@raycast/api";
+import { Form, Action, ActionPanel } from "@raycast/api";
 
 interface Values {
   todo: string;

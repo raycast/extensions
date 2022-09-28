@@ -13,7 +13,7 @@ import {
   updateCommandMetadata,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
+import { dislikeCurrentlyPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import { isSpotifyInstalled } from "./utils";
 import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
@@ -170,6 +170,21 @@ export default function NowPlayingMenuBar() {
                   if (response?.result) {
                     const title = `${response.result.artist} – ${response.result.name}`;
                     showHUD(`💚 ${title}`);
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+            />
+            <MenuBarExtra.Item
+              icon={Icon.HeartDisabled}
+              title="Dislike"
+              onAction={async () => {
+                try {
+                  const response = await dislikeCurrentlyPlayingTrack();
+                  if (response?.result) {
+                    const title = `${response.result.artist} – ${response.result.name}`;
+                    showHUD(`💔 ${title}`);
                   }
                 } catch (err) {
                   console.error(err);

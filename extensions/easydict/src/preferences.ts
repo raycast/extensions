@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 10:14
+ * @lastEditTime: 2022-09-19 16:47
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,9 +24,10 @@ export interface MyPreferences {
   enableAutomaticQuerySelectedText: boolean;
   enableAutomaticPlayWordAudio: boolean;
   enableSelectTargetLanguage: boolean;
-  translationOrder: string;
+  servicesOrder: string;
   enableOpenInEudic: boolean;
   enableSystemProxy: boolean;
+  enableLanguageDetectionSpeedFirst: boolean;
 
   enableYoudaoDictionary: boolean;
   enableYoudaoTranslate: boolean;
@@ -40,6 +41,8 @@ export interface MyPreferences {
   deepLAuthKey: string;
 
   enableGoogleTranslate: boolean;
+
+  enableBingTranslate: boolean;
 
   enableBaiduTranslate: boolean;
   baiduAppId: string;

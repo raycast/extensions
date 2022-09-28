@@ -230,6 +230,44 @@
           "value": "200"
         }
       ]
+    },
+    {
+      "name": "stickBookmark",
+      "type": "checkbox",
+      "required": false,
+      "label": "Stick Bookmarks on Top in Root",
+      "description": "Stick bookmarks on top of list in root path",
+      "default": true
+    },
+    {
+      "name": "copyUrlAfterUpload",
+      "type": "checkbox",
+      "required": false,
+      "label": "Copy Url After Upload",
+      "description": "Copy file url to clipboard after upload",
+      "default": true
+    },
+    {
+      "name": "renameFileAs",
+      "type": "dropdown",
+      "required": false,
+      "title": "Rename Uploaded File as",
+      "description": "When a file is uploaded, you can specify how the file is to be named",
+      "default": "originalName",
+      "data": [
+        {
+          "title": "Original Name",
+          "value": "originalName"
+        },
+        {
+          "title": "MD5 of File Content",
+          "value": "md5OfContent"
+        },
+        {
+          "title": "Named with Date Suffix",
+          "value": "namedWithDate"
+        }
+      ]
     }
   ],
   "keywords": [

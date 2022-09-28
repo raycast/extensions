@@ -65,12 +65,12 @@ export const removePinnedModuleItem = async (key: number, id: string): Promise<v
 
 export const isTopPinnedModuleItem = async (key: number, id: string): Promise<boolean> => {
   const pinned = await getPinnedModuleItems(key);
-  return pinned[0].id === id;
+  return pinned.length > 0 && pinned[0].id === id;
 };
 
 export const isBottomPinnedModuleItem = async (key: number, id: string): Promise<boolean> => {
   const pinned = await getPinnedModuleItems(key);
-  return pinned[pinned.length - 1].id === id;
+  return pinned.length > 0 && pinned[pinned.length - 1].id === id;
 };
 
 export const moveUpPinnedModuleItem = async (key: number, id: string | undefined) => {

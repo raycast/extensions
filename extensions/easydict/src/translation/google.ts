@@ -2,35 +2,34 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 16:09
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-23 10:29
+ * @lastEditTime: 2022-09-20 10:46
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
+import { LocalStorage } from "@raycast/api";
 import googleTranslateApi from "@vitalets/google-translate-api";
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import querystring from "node:querystring";
-import { requestCostTime } from "../axiosConfig";
-import { userAgent } from "../consts";
-import { checkIfPreferredLanguagesContainedChinese } from "../detectLanauge/utils";
+import { checkIfIpInChina } from "../checkIP";
+import { isChineseIPKey, userAgent } from "../consts";
+import { checkIfPreferredLanguagesContainChinese } from "../detectLanauge/utils";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getGoogleLanguageId, getYoudaoLanguageIdFromGoogleId } from "../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
 import { getTypeErrorInfo } from "../utils";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./../detectLanauge/types";
+import { DetectedLanguageModel, LanguageDetectType } from "./../detectLanauge/types";
+import { autoDetectLanguageItem, englishLanguageItem } from "./../language/consts";
 import { GoogleTranslateResult } from "./../types";
 
 export async function requestGoogleTranslate(
   queryWordInfo: QueryWordInfo,
-  signal: AbortSignal | undefined
+  signal?: AbortSignal
 ): Promise<QueryTypeResult> {
   console.log(`---> start request Google`);
-  const tld = await getTld();
-  queryWordInfo.tld = tld;
-
   // googleRPCTranslate(queryWordInfo, signal);
   return googleWebTranslate(queryWordInfo, signal);
 }
@@ -40,15 +39,17 @@ export async function requestGoogleTranslate(
  *
  * * Google RPC cost more time than web translate. almost 1s > 0.4s.
  */
-async function googleRPCTranslate(
-  queryWordInfo: QueryWordInfo,
-  signal: AbortSignal | undefined
-): Promise<QueryTypeResult> {
+async function googleRPCTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSignal): Promise<QueryTypeResult> {
+  console.log(`start google RPC translate`);
+
   const { word, fromLanguage, toLanguage } = queryWordInfo;
   const fromLanguageId = getGoogleLanguageId(fromLanguage);
   const toLanguageId = getGoogleLanguageId(toLanguage);
-  const tld = queryWordInfo.tld ?? (await getTld());
+
+  const isChina = await checkIsChina();
+  const tld = isChina ? "cn" : "com";
   queryWordInfo.tld = tld;
+  console.log(`google RPC tld: ${tld}`);
 
   const proxy = process.env.PROXY || undefined;
   const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : undefined;
@@ -68,14 +69,14 @@ async function googleRPCTranslate(
         resolve(result);
       })
       .catch((error) => {
-        // console.error(`error message: ${error.message}`);
-
         // * got use a different error meassage from axios.
         if (error.message.includes("The operation was aborted")) {
           console.log(`---> google rpc aborted`);
-          return;
+          return reject(undefined);
         }
 
+        checkIfIpInChina();
+        console.error(`google rpc error message: ${error.message}`);
         console.error(`googleRPCTranslate error: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(TranslationType.Google, error);
         reject(errorInfo);
@@ -86,16 +87,14 @@ async function googleRPCTranslate(
 /**
  * Google language detect. Actually, it uses google RPC translate api to detect language.
  */
-export async function googleLanguageDetect(
-  text: string,
-  signal: AbortSignal | undefined
-): Promise<LanguageDetectTypeResult> {
-  console.log(`---> start Google language detect: ${text}`);
+export function googleLanguageDetect(text: string, signal = axios.defaults.signal): Promise<DetectedLanguageModel> {
+  console.log(`---> start Google detect: ${text}`);
+
   const startTime = new Date().getTime();
   const queryWordInfo: QueryWordInfo = {
     word: text,
-    fromLanguage: "auto",
-    toLanguage: "en",
+    fromLanguage: autoDetectLanguageItem.googleLangCode,
+    toLanguage: englishLanguageItem.googleLangCode,
   };
 
   return new Promise((resolve, reject) => {
@@ -104,12 +103,10 @@ export async function googleLanguageDetect(
         const googleResult = googleTypeResult.result as GoogleTranslateResult;
         const googleLanguageId = googleResult.from.language.iso;
         const youdaoLanguageId = getYoudaoLanguageIdFromGoogleId(googleLanguageId);
-        console.warn(
-          `---> Google detect language: ${googleLanguageId}, youdaoId: ${youdaoLanguageId}, cost ${
-            new Date().getTime() - startTime
-          } ms`
-        );
-        const languagedDetectResult: LanguageDetectTypeResult = {
+        console.warn(`---> Google detect language: ${googleLanguageId}, youdaoId: ${youdaoLanguageId}`);
+        console.log(`google detect cost time: ${new Date().getTime() - startTime} ms`);
+
+        const languagedDetectResult: DetectedLanguageModel = {
           type: LanguageDetectType.Google,
           sourceLanguageId: googleLanguageId,
           youdaoLanguageId: youdaoLanguageId,
@@ -119,10 +116,9 @@ export async function googleLanguageDetect(
         resolve(languagedDetectResult);
       })
       .catch((error) => {
-        // * got use a different error meassage from axios.
-        if (error.message.includes("The operation was aborted")) {
+        if (!error) {
           console.log(`---> google detect aborted`);
-          return;
+          return reject(undefined);
         }
 
         console.error(`googleLanguageDetect error: ${JSON.stringify(error)}`);
@@ -142,10 +138,9 @@ export async function googleLanguageDetect(
  * From https://github.com/roojay520/bobplugin-google-translate/blob/master/src/google-translate-mobile.ts
  * Another wild google translate api: http://translate.google.com/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=auto&tl=zh_TW&q=good
  */
-export async function googleWebTranslate(
-  queryWordInfo: QueryWordInfo,
-  signal: AbortSignal | undefined
-): Promise<QueryTypeResult> {
+export async function googleWebTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSignal): Promise<QueryTypeResult> {
+  console.log(`start google web translate`);
+
   const fromLanguageId = getGoogleLanguageId(queryWordInfo.fromLanguage);
   const toLanguageId = getGoogleLanguageId(queryWordInfo.toLanguage);
   const data = {
@@ -154,14 +149,19 @@ export async function googleWebTranslate(
     hl: toLanguageId, // hope language? web ui language
     q: queryWordInfo.word, // query word
   };
-  const tld = queryWordInfo.tld ?? (await getTld());
-  queryWordInfo.tld = tld;
+
+  let tld = queryWordInfo.tld;
+  if (!tld) {
+    const isChina = await checkIsChina();
+    tld = isChina ? "cn" : "com";
+    queryWordInfo.tld = tld;
+  }
 
   const headers = {
     "User-Agent": userAgent,
   };
   const url = `https://translate.google.${tld}/m?${querystring.stringify(data)}`;
-  console.log(`---> google url: ${url}`); // https://translate.google.cn/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
+  console.log(`---> google web url: ${url}`); // https://translate.google.cn/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
 
   return new Promise<QueryTypeResult>((resolve, reject) => {
     axios
@@ -184,8 +184,8 @@ export async function googleWebTranslate(
       })
       .catch((error) => {
         if (error.message === "canceled") {
-          console.log(`---> google cancelled`);
-          return;
+          console.log(`---> google web translate cancelled`);
+          return reject(undefined);
         }
         console.error(`google web error: ${error}`);
 
@@ -200,74 +200,26 @@ export async function googleWebTranslate(
 }
 
 /**
- * Get tld. if user has preferred Chinese language or ip in China, use cn, else use com.
+ * Check is China: has Chinese preferred language, or Chinese IP.
  */
-async function getTld(): Promise<string> {
-  let tld = "com"; // cn,com
-  if (checkIfPreferredLanguagesContainedChinese() || (await checkIfIpInChina())) {
-    tld = "cn";
-    console.log(`---> China, or Chinese: ${checkIfPreferredLanguagesContainedChinese()}`);
-  }
-  console.log(`---> google tld: ${tld}`);
-  return tld;
-}
+export async function checkIsChina(): Promise<boolean> {
+  console.log(`check is China`);
 
-/**
- * Get current ip address.
- */
-export async function getCurrentIp(): Promise<string> {
-  const url = "http://icanhazip.com/"; // from https://blog.csdn.net/uikoo9/article/details/113820051
-  try {
-    const res = await axios.get(url);
-    const ip = res.data.trim();
-    console.warn(`---> current ip: ${ip}, cost ${res.headers["requestCostTime"]} ms`);
-    return Promise.resolve(ip);
-  } catch (error) {
-    console.error(`getCurrentIp error: ${error}`);
-    return Promise.reject(error);
-  }
-}
-
-/**
- *  Check if ip is in China.
- *
- *  Todo: should store ip in LocalStorage.
- */
-async function checkIfIpInChina(): Promise<boolean> {
-  try {
-    const ipInfo = await getCurrentIpInfo();
-    const country = ipInfo.country;
-    console.warn(`---> country: ${country}`);
-    return Promise.resolve(country === "CN");
-  } catch (error) {
-    console.error(`checkIfIpInChina error: ${error}`);
+  if (checkIfPreferredLanguagesContainChinese()) {
     return Promise.resolve(true);
   }
-}
 
-/**
- * Get current ip info.
- * 
- * curl https://ipinfo.io
-{
-  "ip": "120.240.53.42",
-  "city": "Zhanjiang",
-  "region": "Guangdong",
-  "country": "CN",
-  "loc": "21.2339,110.3875",
-  "org": "AS9808 China Mobile Communications Group Co., Ltd.",
-  "timezone": "Asia/Shanghai",
-  "readme": "https://ipinfo.io/missingauth"
-}
- */
-async function getCurrentIpInfo() {
-  try {
-    const url = "https://ipinfo.io";
-    const res = await axios.get(url);
-    console.warn(`---> ip info: ${JSON.stringify(res.data, null, 4)}, cost ${res.headers[requestCostTime]} ms`);
-    return Promise.resolve(res.data);
-  } catch (error) {
-    console.error(`getCurrentIp error: ${error}`);
-    return Promise.reject(error);
-  }
+  return new Promise((resolve) => {
+    LocalStorage.getItem<boolean>(isChineseIPKey).then((isChineseIP) => {
+      console.log(`checkIsChina: ${isChineseIP}`);
+
+      if (isChineseIP !== undefined) {
+        return resolve(isChineseIP);
+      }
+
+      checkIfIpInChina().then((isIpInChina) => {
+        resolve(isIpInChina);
+      });
+    });
+  });
 }

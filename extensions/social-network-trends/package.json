@@ -17,6 +17,14 @@
       "subtitle": "Social Network Trends",
       "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
       "mode": "view"
+    },
+    {
+      "name": "search-trends-of-social-network-menu-bar",
+      "title": "Search Trends",
+      "icon": "extension-icon/extension-icon-menu-bar.png",
+      "subtitle": "Social Network Trends",
+      "description": "Show trends on WeiBo, ZhiHu, and DouYin.",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -31,7 +39,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
+    "@raycast/api": "^1.39.2",
     "node-fetch": "^3.2.3"
   },
   "devDependencies": {

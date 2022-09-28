@@ -1,17 +1,19 @@
 import { ActionPanel, Detail, List, Action } from "@raycast/api";
-import { homedir } from "os";
-import { dirname } from "path";
+import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
+import { FORK_BUNDLE_ID, REPO_FILE_PATH } from "./constants";
 
-export const FORK_BUNDLE_ID = "com.DanPristupov.Fork";
-export const REPO_FILE_PATH = `${homedir()}/Library/Application Support/${FORK_BUNDLE_ID}/repositories.json`;
+const Command = () => {
+  const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
+  const [repos, isReposLoading] = useRepos(REPO_FILE_PATH);
+  const isLoading = isHasForkLoading || isReposLoading;
 
-const ForkNotFound = () => {
-  return (
-    <Detail
-      navigationTitle="Fork.app not found"
-      markdown={`
+  if (!isLoading && !hasFork) {
+    return (
+      <Detail
+        navigationTitle="Fork.app not found"
+        markdown={`
   # Fork.app not found 
 
   You need to have Fork to use this extension. You can download it [here](https://fork.dev/), or alternatively using
@@ -20,18 +22,8 @@ const ForkNotFound = () => {
   brew install --cask fork
   \`\`\`
       `}
-    />
-  );
-};
-
-const Command = () => {
-  const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
-  const [repos, isReposLoading] = useRepos(REPO_FILE_PATH);
-
-  const isLoading = isHasForkLoading || isReposLoading;
-
-  if (!isLoading && !hasFork) {
-    return <ForkNotFound />;
+      />
+    );
   }
 
   if (!isLoading && repos.length === 0) {
@@ -47,7 +39,6 @@ const Command = () => {
             <List.Item
               key={index}
               title={name}
-              accessoryTitle={dirname(tildify(path))}
               icon={{ fileIcon: path }}
               actions={
                 <ActionPanel>
@@ -58,6 +49,7 @@ const Command = () => {
                   </ActionPanel.Section>
                 </ActionPanel>
               }
+              accessories={[{ text: dirname(tildify(path)) }]}
             />
           );
         })}
