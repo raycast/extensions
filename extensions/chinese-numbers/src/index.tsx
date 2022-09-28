@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Nzh from "nzh";
 
 const nzhcn = Nzh.cn;
@@ -9,67 +9,75 @@ const toScientificCountingMethod = (text: number) => nzhcn.encodeS(text);
 const toChineseCapitalizatedAmount = (text: number) => nzhcn.toMoney(text);
 
 export default function Command() {
-  const [ChineseLowercase, setChineseLowercase] = useState<string>("Chinese lowercase...");
-  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("Chinese uppercase...");
-  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("Scientific notation...");
-  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("Chinese amount...");
+  const [ChineseLowercase, setChineseLowercase] = useState<string>("");
+  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("");
+  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("");
+  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("");
   const handleOnTextChange = (value: string) => {
-    const input = Number(value);
-    if (!isNaN(input)) {
-      setChineseLowercase(toChineseLowercase(input));
-      setChineseCapitalizated(toChineseCapitalizated(input));
-      setScientificCountingMethod(toScientificCountingMethod(input));
-      setChineseCapitalizatedAmount(toChineseCapitalizatedAmount(input));
+
+    if (value.length === 0) {
+      setChineseLowercase("");
+      setChineseCapitalizated("");
+      setScientificCountingMethod("");
+      setChineseCapitalizatedAmount("");
+    } else {
+      const input = Number(value);
+      if (!isNaN(input)) {
+        setChineseLowercase(toChineseLowercase(input));
+        setChineseCapitalizated(toChineseCapitalizated(input));
+        setScientificCountingMethod(toScientificCountingMethod(input));
+        setChineseCapitalizatedAmount(toChineseCapitalizatedAmount(input));
+      }
     }
   };
 
   return (
-    <List
-      onSearchTextChange={handleOnTextChange}
-      enableFiltering={false}
-      navigationTitle="Arabic to Chinese (upper case, lower case) numbers, amount"
-      searchBarPlaceholder="Input Numbers..."
-    >
-      <List.Section title="Arabic numbers to Chinese lowercase">
-        <List.Item
-          title={ChineseLowercase}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard content={ChineseLowercase} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title="Arabic numbers to Chinese uppercase">
-        <List.Item
-          title={ChineseCapitalizated}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard content={ChineseCapitalizated} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title="Scientific notation string">
-        <List.Item
-          title={ScientificCountingMethod}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard content={ScientificCountingMethod} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section title="Arabic numbers to Chinese amount">
-        <List.Item
-          title={ChineseCapitalizatedAmount}
-          actions={
-            <ActionPanel title="Copy">
-              <Action.CopyToClipboard content={ChineseCapitalizatedAmount} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+    <List onSearchTextChange={handleOnTextChange} enableFiltering={false} searchBarPlaceholder="Input numbers...">
+      <List.EmptyView title="Waiting" description="Input Numbers..." icon="no-view.png" />
+      {ChineseLowercase && (
+        <Fragment>
+          <List.Section title="Arabic numbers to Chinese lowercase">
+            <List.Item
+              title={ChineseLowercase}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={ChineseLowercase} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          <List.Section title="Arabic numbers to Chinese uppercase">
+            <List.Item
+              title={ChineseCapitalizated}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={ChineseCapitalizated} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          <List.Section title="Scientific notation string">
+            <List.Item
+              title={ScientificCountingMethod}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={ScientificCountingMethod} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          <List.Section title="Arabic numbers to Chinese amount">
+            <List.Item
+              title={ChineseCapitalizatedAmount}
+              actions={
+                <ActionPanel title="Copy">
+                  <Action.CopyToClipboard content={ChineseCapitalizatedAmount} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        </Fragment>
+      )}
     </List>
   );
 }
