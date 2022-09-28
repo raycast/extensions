@@ -1255,8 +1255,8 @@
       "type": "checkbox",
       "required": false,
       "label": "Close window when capture",
-      "description": "Close the main Raycast window when capture. ⚠️In two cases, it should be unchecked:\n• The value of 'POP to Root Search' in Raycast Preferences is 'Immediately'\n• This command is activated by Hotkey",
-      "default": true
+      "description": "Close the main Raycast window when capture. \n⚠️In two cases, it should be unchecked:\n• The value of 'POP to Root Search' in Raycast Preferences is 'Immediately'\n• This command is activated by Hotkey",
+      "default": false
     }
   ],
   "dependencies": {
