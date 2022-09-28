@@ -1,9 +1,9 @@
-import { ActionPanel, Action, Icon, List, confirmAlert, showHUD, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, confirmAlert, showHUD, popToRoot, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Edit from "./components/edit";
 import DEFAULT_DNS from "./config";
 import { DNSItem } from "./types/types";
-import { switchDNS, getCurrentDNS } from "./utils/utils";
+import { switchDNS, getCurrentDNS, useSudo } from "./utils/utils";
 import StorageUtils from "./utils/storage-utils";
 
 export default function Command() {
@@ -12,12 +12,18 @@ export default function Command() {
   const [customDNS, setCustomDNS] = useState<DNSItem[]>([]);
 
   const apply = async (item: DNSItem) => {
-    showHUD("DNS changing...");
-
     const { error, data } = await switchDNS(item.dns);
 
     if (error) {
-      showHUD(`Err: ${error}`);
+      if (useSudo) {
+        showHUD(`Failed: ${error}`);
+      } else {
+        showToast({
+          title: "Failed",
+          message: `Enable "Use Sudo" in the Extension Preferences and try again.`,
+          style: Toast.Style.Failure,
+        });
+      }
     } else {
       setCurrentDNS(item.dns);
       popToRoot({ clearSearchBar: false });

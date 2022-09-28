@@ -2,6 +2,7 @@ import util from "util";
 import { exec } from "child_process";
 import { getCachedEnv } from "./shell-utils";
 import { DEFAULT_DNS } from "../config";
+import { getPreferenceValues } from "@raycast/api";
 
 export const execCmd = async (cmd: string): Promise<{ error: string | null; data: string }> => {
   const execPromise = util.promisify(exec);
@@ -18,23 +19,42 @@ export const execCmd = async (cmd: string): Promise<{ error: string | null; data
   }
 };
 
+export const execCmdSudo = async (cmd: string): Promise<{ error: string | null; data: string }> => {
+  const sudo = await import("sudo-prompt");
+  const user = (await execCmd("/usr/bin/whoami")).data;
+
+  return new Promise((resolve) => {
+    const options = { name: "Raycast" };
+    process.env.USER = user;
+    sudo.exec(cmd, options, (error: Error, stdout: string, stderr: string) => {
+      resolve({
+        error: error ? error.message : stderr,
+        data: stdout,
+      });
+    });
+  });
+};
+
+export const useSudo = getPreferenceValues().sudo ?? false;
+const executor = useSudo ? execCmdSudo : execCmd;
+
 export const getCurrentDevice = async () => {
   // https://github.com/kodango/switchdns/blob/master/src/dns_ops.sh
-  const { error, data } = await execCmd(`netstat -rn | awk '/default/{print $NF}' | head -1`);
+  const { error, data } = await execCmd(`/usr/sbin/netstat -rn | awk '/default/{print $NF}' | head -1`);
 
   if (error) throw new Error(error);
-  return data;
+  return data.trim();
 };
 
 export const getCurrentNetworkService = async () => {
   const currentDevice = await getCurrentDevice();
 
   const { error, data } = await execCmd(
-    `networksetup -listnetworkserviceorder | grep -B 1 ${currentDevice} | awk -F'\\) ' '{print $2}' | head -1`
+    `/usr/sbin/networksetup -listnetworkserviceorder | grep -B 1 ${currentDevice} | awk -F'\\) ' '{print $2}' | head -1`
   );
 
   if (error) throw new Error(error);
-  return data;
+  return data.trim();
 };
 
 export const getCurrentDNS = async () => {
@@ -44,7 +64,7 @@ export const getCurrentDNS = async () => {
   }
 
   // Command return failed when DNS is not set(empty)
-  const { error, data } = await execCmd(`networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
+  const { error, data } = await execCmd(`/usr/sbin/networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
   return error ? DEFAULT_DNS.slice(-1)[0].dns : String(data).split("\n").join(",");
 };
 
@@ -52,9 +72,13 @@ export const getCurrentDNS = async () => {
 export const switchDNS = async (dns: string) => {
   const networkService = await getCurrentNetworkService();
   const targetDNS = dns.indexOf(",") > -1 ? dns.split(",").join(" ") : dns;
-  const cmd = `networksetup -setdnsservers "${networkService}" ${targetDNS}`;
+  const cmd = `/usr/sbin/networksetup -setdnsservers "${networkService}" ${targetDNS}`;
 
-  console.info(cmd);
-  const { error } = await execCmd(cmd);
+  const { error } = await executor(cmd);
+  if (error) {
+    console.info(`Failed: ${error}`);
+  } else {
+    console.info(cmd);
+  }
   return { error, data: dns };
 };
