@@ -14,7 +14,6 @@ export default function Command() {
   const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("");
   const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("");
   const handleOnTextChange = (value: string) => {
-
     if (value.length === 0) {
       setChineseLowercase("");
       setChineseCapitalizated("");
