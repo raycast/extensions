@@ -12,11 +12,27 @@
       "title": "Show Time",
       "description": "Shows current time in list of formats",
       "mode": "view"
+    },
+    {
+      "name": "now",
+      "title": "Now",
+      "description": "Paste a formatted date into current application.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "nowTimeFormat",
+      "type": "textfield",
+      "title": "Now Default Format",
+      "description": "Now default format.",
+      "default": "YYYY-MM-DD"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "dayjs": "^1.10.7"
+    "@raycast/api": "^1.34.1",
+    "dayjs": "^1.11.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -31,6 +47,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   }
 }

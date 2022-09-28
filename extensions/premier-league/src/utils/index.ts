@@ -1,6 +1,8 @@
 import { format, parse } from "date-fns";
 
-export const getFlagEmoji = (isoCode: string) => {
+export const getFlagEmoji = (isoCode?: string) => {
+  if (!isoCode) return "🏴";
+
   if (isoCode === "GB-ENG") {
     return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
   }

@@ -1,11 +1,12 @@
 import { Collection, createClient, ErrorResponse, Photo, Photos, Video } from "pexels";
 import React, { useCallback, useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
-import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../utils/types";
-import { commonPreferences, isEmpty } from "../utils/common-utils";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { CollectionMediasResponse, CollectionsResponse, SearchRequest } from "../types/types";
+import { isEmpty } from "../utils/common-utils";
+import { Preferences } from "../types/preferences";
 import Style = Toast.Style;
 
-const pexelsClient = createClient(commonPreferences().apikey);
+const pexelsClient = createClient(getPreferenceValues<Preferences>().apikey);
 
 export const searchPhotos = (searchRequest: SearchRequest) => {
   const { searchContent, page } = searchRequest;
@@ -98,7 +99,7 @@ const updatePexelsPhoto = async (
   }
 };
 
-export const getCollections = (collectionTag: string, page: number) => {
+export const getCollections = (collectionTag: string, page: number, perPage: number) => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [oldCollectionTag, setOldCollectionTag] = useState<string>(collectionTag);
   const [oldPage, setOldPage] = useState<number>(page);
@@ -121,19 +122,19 @@ export const getCollections = (collectionTag: string, page: number) => {
       let _featuredCollections;
       switch (collectionTag) {
         case "0": {
-          _featuredCollections = (await pexelsClient.collections.all({ page: page })) as
+          _featuredCollections = (await pexelsClient.collections.all({ page: page, per_page: perPage })) as
             | CollectionsResponse
             | ErrorResponse;
           break;
         }
         case "1": {
-          _featuredCollections = (await pexelsClient.collections.featured({ page: page })) as
+          _featuredCollections = (await pexelsClient.collections.featured({ page: page, per_page: perPage })) as
             | CollectionsResponse
             | ErrorResponse;
           break;
         }
         default: {
-          _featuredCollections = (await pexelsClient.collections.all({ page: page })) as
+          _featuredCollections = (await pexelsClient.collections.all({ page: page, per_page: perPage })) as
             | CollectionsResponse
             | ErrorResponse;
           break;

@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, Detail, Icon, Image } from "@raycast/api";
-import { useState, Fragment, useMemo } from "react";
+import React, { useState, Fragment, useMemo } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
@@ -61,7 +61,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
           <Fragment>
             <List.Item
               title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
-              icon={{ source: Icon.MagnifyingGlass }}
+              icon={{ source: Icon.Window }}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
@@ -192,7 +192,7 @@ function makeDrilldownAction(
   return (
     <Action
       title={name}
-      icon={Icon.Binoculars}
+      icon={Icon.MagnifyingGlass}
       key={nanoid()}
       shortcut={drilldownShortcut}
       onAction={() => {
@@ -216,6 +216,17 @@ function SearchResultItem({
   const queryURL = getQueryURL(src, searchText);
   const { match } = searchResult;
 
+  // Branches is a common property for setting a revision
+  let revisions: string[] | undefined;
+  let firstRevision: string | undefined;
+  if ("branches" in match && match.branches) {
+    // Only show interesting branches
+    if (match.branches.length === 1 && match.branches[0] !== "HEAD") {
+      revisions = match.branches;
+      firstRevision = match.branches[0];
+    }
+  }
+
   // Title to denote the result
   let title = "";
   // Subtitle to show context about the result
@@ -223,7 +234,12 @@ function SearchResultItem({
   // Icon to denote the type of the result
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   // Broader context about the result, usually just the repository.
-  const accessory: List.Item.Accessory = { text: match.repository, tooltip: match.repository };
+  const accessory: List.Item.Accessory = firstRevision
+    ? {
+        text: `${match.repository}@${firstRevision}`,
+        tooltip: `${match.repository}@${firstRevision}`,
+      }
+    : { text: match.repository, tooltip: match.repository };
 
   // Action to drill down on the search result.
   let drilldownAction: React.ReactElement | undefined;
@@ -235,6 +251,10 @@ function SearchResultItem({
   // subtitle, which can be long and helpful to present in the results list.
   let subtitleTooltip: string | undefined;
 
+  // A guesstimated threshold at which title + subtitle is long and likely to cause
+  // cutting-off of text
+  const combinedThreshold = 90;
+
   switch (match.type) {
     case "repo":
       if (match.fork) {
@@ -242,7 +262,7 @@ function SearchResultItem({
         matchTypeDetails.push("forked");
       }
       if (match.archived) {
-        icon.source = Icon.XmarkCircle;
+        icon.source = Icon.XMarkCircle;
         matchTypeDetails.push("archived");
       }
       // TODO color results of all matches based on repo privacy
@@ -252,6 +272,16 @@ function SearchResultItem({
       }
       title = match.repository;
       subtitle = match.description || "";
+      if (revisions) {
+        // On revision matches, render the branch match first and move the default
+        // subtitle to a hover item.
+        subtitleTooltip = subtitle;
+        subtitle = revisions.map((r) => `@${r}`).join(", ");
+      }
+      // Add repo name to popover if we are at risk of cutting it off
+      if (title.length > 30 && title.length + subtitle.length > combinedThreshold) {
+        matchDetails.push(match.repository);
+      }
       if (match.repoStars) {
         accessory.text = `${match.repoStars}`;
         accessory.icon = Icon.Star;
@@ -261,49 +291,53 @@ function SearchResultItem({
       }
       drilldownAction = makeDrilldownAction("Search Repository", setSearchText, {
         repo: match.repository,
+        revision: firstRevision,
       });
       break;
 
     case "commit":
-      icon.source = Icon.MemoryChip;
+      icon.source = Icon.SpeechBubbleActive;
       title = match.message;
       subtitle = DateTime.fromISO(match.authorDate).toRelative() || match.authorDate;
       subtitleTooltip = match.authorDate;
       matchDetails.push(`by ${match.authorName}`);
       drilldownAction = makeDrilldownAction("Search Revision of Repository", setSearchText, {
         repo: match.repository,
-        revision: match.oid,
+        revision: match.oid, // a commit is always a revision
       });
       break;
 
     case "path":
-      icon.source = Icon.TextDocument;
+      icon.source = Icon.Document;
       title = match.path;
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
 
     case "content":
-      icon.source = Icon.Text;
+      icon.source = Icon.Snippets;
       title = match.lineMatches.map((l) => l.line.trim()).join(" ... ");
       subtitle = match.path;
       matchDetails.push(count(match.lineMatches.length, "line match", "line matches"));
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
 
     case "symbol":
-      icon.source = Icon.Link;
+      icon.source = Icon.Code;
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
       matchDetails.push(count(match.symbols.length, "symbol match", "symbols matches"));
       drilldownAction = makeDrilldownAction("Search File", setSearchText, {
         repo: match.repository,
         file: match.path,
+        revision: firstRevision,
       });
       break;
   }
@@ -315,8 +349,18 @@ function SearchResultItem({
 
   return (
     <List.Item
-      title={{ value: title, tooltip: matchDetails.join(", ") }}
-      subtitle={{ value: subtitle, tooltip: subtitleTooltip || subtitle }}
+      title={{
+        value: title.slice(0, combinedThreshold),
+        tooltip: matchDetails.join(", "),
+      }}
+      subtitle={{
+        value: subtitle.slice(0, combinedThreshold),
+        // If no subtitle is present, let subtitle itself be hoverable if it is long
+        // using a guesstimated threshold
+        tooltip:
+          subtitleTooltip ||
+          (subtitle.length > 60 && title.length + subtitle.length > combinedThreshold ? subtitle : ""),
+      }}
       accessories={accessories}
       icon={{ value: icon, tooltip: sentenceCase(`${matchTypeDetails.join(", ")} ${match.type} match`) }}
       actions={
@@ -327,13 +371,13 @@ function SearchResultItem({
                 key={nanoid()}
                 title="View Result"
                 target={<ResultView src={src} searchResult={searchResult} icon={icon} />}
-                icon={{ source: Icon.MagnifyingGlass }}
+                icon={{ source: Icon.Maximize }}
               />
             ),
             extraActions: drilldownAction && [drilldownAction],
           })}
           <ActionPanel.Section key={nanoid()} title="Query Actions">
-            <Action.OpenInBrowser title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
+            <Action.OpenInBrowser title="Open Query in Browser" url={queryURL} shortcut={tertiaryActionShortcut} />
             <Action.CopyToClipboard title="Copy Link to Query" content={queryURL} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -516,7 +560,11 @@ function ResultView({
       navigationTitle={navigationTitle}
       markdown={`${markdownTitle}\n\n${markdownContent}`}
       actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
-      metadata={<Detail.Metadata>{metadata}</Detail.Metadata>}
+      metadata={
+        <Detail.Metadata>
+          <>{metadata}</>
+        </Detail.Metadata>
+      }
     ></Detail>
   );
 }
@@ -535,7 +583,7 @@ function SuggestionItem({
       title={suggestion.title}
       subtitle={suggestion.description || "Press 'Enter' to apply suggestion"}
       icon={{
-        source: suggestion.query ? Icon.Binoculars : Icon.ExclamationMark,
+        source: suggestion.query ? Icon.Filter : Icon.ExclamationMark,
         tintColor: suggestion.query ? ColorDefault : ColorEmphasis,
       }}
       actions={

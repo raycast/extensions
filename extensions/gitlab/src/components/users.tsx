@@ -90,3 +90,7 @@ export function useSearch(query: string | undefined): {
 
   return { users, error, isLoading };
 }
+
+export function userIcon(user: User): Image.ImageLike {
+  return { source: user.avatar_url, mask: Image.Mask.Circle };
+}

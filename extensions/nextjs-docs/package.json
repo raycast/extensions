@@ -5,7 +5,6 @@
   "description": "Efficiently search Next.js documentation",
   "icon": "command-icon.png",
   "author": "PrasadChinwal",
-  "contributors": ["vimtor"],
   "categories": [
     "Productivity",
     "Documentation",
@@ -14,17 +13,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-documentation",
-      "title": "Search Documentation",
-      "subtitle": "Next.js",
+      "name": "index",
+      "title": "Search Next.js Documentation",
       "description": "Search the Next.js documentation",
-      "mode": "view"
-    },
-    {
-      "name": "search-examples",
-      "title": "Search Examples",
-      "subtitle": "Next.js",
-      "description": "Search examples provided by Next.js",
       "mode": "view"
     }
   ],
@@ -35,6 +26,7 @@
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/yaml-front-matter": "^4.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

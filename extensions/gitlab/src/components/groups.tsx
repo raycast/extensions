@@ -1,7 +1,7 @@
 import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCache } from "../cache";
-import { gitlab, gitlabgql } from "../common";
+import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
 import { GitLabIcons, useImage } from "../icons";
 import { hashRecord, showErrorToast } from "../utils";
@@ -26,7 +26,7 @@ function groupIconUrl(group: any): string | undefined {
 }
 
 function webUrl(group: Group, partial: string) {
-  return gitlabgql.urlJoin(`groups/${group.full_path}/${partial}`);
+  return getGitLabGQL().urlJoin(`groups/${group.full_path}/${partial}`);
 }
 
 export function GroupListItem(props: { group: any }): JSX.Element {

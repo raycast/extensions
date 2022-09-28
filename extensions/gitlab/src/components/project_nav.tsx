@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
 import { Project } from "../gitlabapi";
-import { gitlabgql } from "../common";
 import { ReactNode } from "react";
 import { PipelineList } from "./pipelines";
 import { BranchList } from "./branch";
@@ -11,6 +10,7 @@ import { GitLabIcons } from "../icons";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { ProjectLabelList } from "./project_label";
 import { ProjectCommitList } from "./commits/list";
+import { getGitLabGQL } from "../common";
 
 export function ProjectNavMenuItem(props: {
   title: string;
@@ -51,7 +51,7 @@ export function ProjectNavMenuBrowserItem(props: {
 }
 
 function webUrl(project: Project, partial: string) {
-  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
+  return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
 export function ProjectNavMenusList(props: { project: Project }): JSX.Element {

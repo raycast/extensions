@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, useNavigation } from "@raycast/api";
-import React, { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { Timezone } from "./types/types";
 import { isEmpty } from "./utils/common-utils";
-import { icons, LOCALSTORAGE_KEY } from "./utils/costants";
+import { icons, localStorageKey } from "./utils/costants";
 
 export default function EditTimeZone(props: {
   index: number;
@@ -22,7 +22,7 @@ export default function EditTimeZone(props: {
             icon={Icon.Download}
             title={"Save Timezone"}
             onAction={async () => {
-              await LocalStorage.setItem(LOCALSTORAGE_KEY.STAR_TIMEZONE, JSON.stringify(starTimezones));
+              await LocalStorage.setItem(localStorageKey.STAR_TIMEZONE, JSON.stringify(starTimezones));
               setRefresh(Date.now());
               pop();
             }}

@@ -19,6 +19,46 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the image items.",
+          "required": true,
+          "title": "Image Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the image items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Image Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
           "name": "perPage",
           "type": "dropdown",
           "description": "Number of images loaded per page.",
@@ -107,7 +147,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.36.0",
     "fs-extra": "^10.1.0",
     "picsum-photos": "^3.0.10",
     "run-applescript": "^6.0.0",

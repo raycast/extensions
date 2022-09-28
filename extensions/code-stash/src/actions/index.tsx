@@ -1,3 +1,4 @@
 import useCopy from "./useCopy";
+import useExport from "./useExport";
 
-export { useCopy };
+export { useCopy, useExport };

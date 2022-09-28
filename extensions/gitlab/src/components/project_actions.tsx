@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, Keyboard, List, popToRoot } from "@raycast/api";
 import * as open from "open";
 import React from "react";
-import { getPrimaryActionPreference, gitlabgql, PrimaryAction } from "../common";
+import { getGitLabGQL, getPrimaryActionPreference, PrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage, showErrorToast } from "../utils";
@@ -196,7 +196,7 @@ export function OpenProjectMilestonesPushAction(props: { project: Project }): JS
 }
 
 function webUrl(project: Project, partial: string) {
-  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
+  return getGitLabGQL().urlJoin(`${project.fullPath}/${partial}`);
 }
 
 export function OpenProjectLabelsInBrowserAction(props: { project: Project }): JSX.Element {

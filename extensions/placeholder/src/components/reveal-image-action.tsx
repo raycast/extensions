@@ -22,8 +22,8 @@ export function RevealImageAction(props: {
     <>
       <Action.Push
         icon={Icon.Window}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
-        title={"Show in Raycast"}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        title={"Preview Placeholder"}
         target={
           <ImageDetail
             imageURL={imageURL}

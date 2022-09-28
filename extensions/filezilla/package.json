@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "filezilla",
+  "title": "FileZilla",
+  "description": "Connect to the FTP/SFTP server via FileZilla by just using your keyboard!",
+  "icon": "icon.png",
+  "author": "naqet",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-saved-servers",
+      "title": "List Saved Servers",
+      "description": "Opens FileZilla with chosen server connected.",
+      "mode": "view"
+    },
+    {
+      "name": "show-latest-connections",
+      "title": "Show Latest Connections",
+      "description": "Opens FileZilla with one of the last servers connected.",
+      "mode": "view"
+    },
+    {
+      "name": "open-site-manager",
+      "title": "Open Site Manager",
+      "description": "Opens site manager in FileZilla, where you can add, delete and edit saved servers.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "fast-xml-parser": "^4.0.9"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

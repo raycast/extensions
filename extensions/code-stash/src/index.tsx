@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { ActionPanel, Icon, List, LocalStorage, confirmAlert, Alert } from "@raycast/api";
 import { Language, CodeStash } from "./types";
-import { Preview, ViewAction, CreateAction, DeleteAction, EmptyView, CopyAction } from "./components";
-import { useCopy } from "./actions";
+import { Preview, ViewAction, CreateAction, DeleteAction, EmptyView, CopyAction, ExportAction } from "./components";
+import { useCopy, useExport } from "./actions";
 
 type State = {
   filter: Language;
@@ -22,7 +22,8 @@ export default function Command() {
     visibleCodeStashes: [],
   });
 
-  const { copy } = useCopy();
+  const { handleCopy } = useCopy();
+  const { handleExport } = useExport();
 
   useEffect(() => {
     (async () => {
@@ -126,9 +127,12 @@ export default function Command() {
             <ActionPanel>
               <ActionPanel.Section>
                 <ViewAction codeStash={codeStash} />
-                <CopyAction onCopy={() => copy(index, state.codeStashes)} />
+                <CopyAction onCopy={() => handleCopy(index, state.codeStashes)} />
                 <CreateAction onCreate={handleCreate} />
                 <DeleteAction onDelete={() => handleDelete(index)} />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <ExportAction onExport={() => handleExport(state.codeStashes)} />
               </ActionPanel.Section>
             </ActionPanel>
           }

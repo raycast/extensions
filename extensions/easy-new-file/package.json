@@ -20,6 +20,72 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the file items.",
+          "required": true,
+          "title": "File Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the file items. (Only works with Grid layout)",
+          "required": false,
+          "title": "File Item Size",
+          "default": "small",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "itemInset",
+          "type": "dropdown",
+          "description": "Set the inset of the file items. (Only works with Grid layout)",
+          "required": false,
+          "title": "File Item Inset",
+          "default": "md",
+          "data": [
+            {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
+              "title": "Small",
+              "value": "sm"
+            },
+            {
+              "title": "Medium",
+              "value": "md"
+            },
+            {
+              "title": "Large",
+              "value": "lg"
+            }
+          ]
+        },
+        {
           "name": "createdActions",
           "type": "dropdown",
           "required": false,
@@ -143,12 +209,24 @@
               "value": "html"
             },
             {
+              "title": "SVG",
+              "value": "svg"
+            },
+            {
               "title": "Apple",
               "value": "applescript"
             },
             {
+              "title": "Groovy",
+              "value": "groovy"
+            },
+            {
               "title": "Perl",
               "value": "pl"
+            },
+            {
+              "title": "PHP",
+              "value": "php"
             },
             {
               "title": "Python",
@@ -185,15 +263,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.1",
+    "@raycast/api": "^1.37.0",
     "fs-extra": "^10.1.0",
     "run-applescript": "^6.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

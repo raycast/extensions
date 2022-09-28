@@ -1,8 +1,8 @@
 import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
+import { getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -74,7 +74,7 @@ export function PipelineListItem(props: {
       title={pipeline.id.toString()}
       icon={icon}
       subtitle={pipeline.ref || ""}
-      accessories={ensureCleanAccessories([{ text: getStatusText(pipeline.status.toLowerCase()) }])}
+      accessories={[{ text: getStatusText(pipeline.status.toLowerCase()) }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -150,7 +150,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_PIPELINES,
           variables: { fullPath: projectFullPath },
           fetchPolicy: "network-only",
@@ -160,7 +160,7 @@ export function useSearch(
           iid: `${p.iid}`,
           status: p.status,
           active: p.active,
-          webUrl: `${gitlabgql.url}${p.path}`,
+          webUrl: `${getGitLabGQL().url}${p.path}`,
           ref: p.ref,
         }));
         if (!didUnmount) {

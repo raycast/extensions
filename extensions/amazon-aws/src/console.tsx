@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { readFileSync } from "fs";
 
@@ -36,7 +36,7 @@ export default function Command() {
           icon={service.icon.path}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://console.aws.amazon.com${service.arg}`} />
+              <Action.OpenInBrowser url={`https://console.aws.amazon.com${service.arg}`} />
             </ActionPanel>
           }
         />

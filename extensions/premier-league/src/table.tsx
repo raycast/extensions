@@ -1,7 +1,5 @@
 import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
-import json2md from "json2md";
-import { Entry } from "./types";
 import { useSeasons, useTables } from "./hooks";
 import { convertToLocalTime } from "./utils";
 
@@ -14,52 +12,6 @@ export default function GetTables() {
   const [showStats, setShowStats] = useState<boolean>(false);
 
   const tables = useTables(selectedSeason);
-
-  const club = (entry: Entry): json2md.DataObject => {
-    const { overall, team, ground, form, next, startingPosition } = entry;
-
-    const dataObject = [
-      { h1: team.name },
-      { p: ground.name ? `Stadium: ${ground.name}, **${ground.city}**` : "" },
-      { p: ground.capacity ? `Capacity: ${ground.capacity}` : "" },
-      { h2: "Stats" },
-      {
-        p: [
-          `Previous Position: ${startingPosition}`,
-          `Played: ${overall.played}`,
-          `Won: ${overall.won}`,
-          `Drawn: ${overall.drawn}`,
-          `Lost: ${overall.lost}`,
-          `Goals For: ${overall.goalsFor}`,
-          `Goals Against: ${overall.goalsAgainst}`,
-          `Goal Difference: ${overall.goalsDifference}`,
-        ],
-      },
-      { h2: "Recent Results" },
-      {
-        ul: form.reverse().map((m) => {
-          return `${m.teams[0].team.name} ${m.teams[0].score} - ${m.teams[1].score} ${m.teams[1].team.name}`;
-        }),
-      },
-    ];
-
-    if (next) {
-      const time = convertToLocalTime(next.kickoff.label);
-
-      dataObject.push(
-        { h2: "Next Fixture" },
-        {
-          p: [
-            `**${next.teams[0].team.name} - ${next.teams[1].team.name}**`,
-            `Time: ${time}`,
-            `Stadium: ${next.ground.name}, **${next.ground.city}**`,
-          ],
-        }
-      );
-    }
-
-    return dataObject;
-  };
 
   return (
     <List
@@ -95,6 +47,7 @@ export default function GetTables() {
                 team,
                 position,
                 ground,
+                form,
                 next,
                 startingPosition,
               } = entry;
@@ -116,46 +69,99 @@ export default function GetTables() {
                 };
               }
 
-              const props: Partial<List.Item.Props> = showStats
-                ? {
-                    accessories: [
-                      { text: overall.points.toString() },
-                      { icon },
-                    ],
-                    detail: (
-                      <List.Item.Detail markdown={json2md(club(entry))} />
-                    ),
-                  }
-                : {
-                    subtitle: team.club.abbr,
-                    accessories: [
-                      { text: `Played: ${overall.played}` },
-                      { text: `Points: ${overall.points}` },
-                    ],
-                  };
-
-              if (!showStats && next) {
-                const nextTeam =
-                  ground.id === next.ground.id ? next.teams[1] : next.teams[0];
-
-                props.accessories?.push({
-                  icon: {
-                    source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
-                    fallback: "default.png",
-                  },
-                  tooltip: `${next.teams[0].team.shortName} - ${next.teams[1].team.shortName}`,
-                });
-              }
-
               return (
                 <List.Item
                   key={position}
-                  title={`${position}. ${team.name}`}
+                  title={position.toString()}
+                  subtitle={team.name}
+                  keywords={[team.name, team.shortName, team.club.abbr]}
                   icon={{
-                    source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.svg`,
+                    source: `https://resources.premierleague.com/premierleague/badges/100/${team.altIds.opta}@x2.png`,
                     fallback: "default.png",
                   }}
-                  {...props}
+                  accessories={[{ text: overall.points.toString() }, { icon }]}
+                  detail={
+                    <List.Item.Detail
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label
+                            title="Stadium"
+                            text={ground.name}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Capacity"
+                            text={ground.capacity?.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Separator />
+
+                          <List.Item.Detail.Metadata.Label title="Stats" />
+                          {startingPosition && (
+                            <List.Item.Detail.Metadata.Label
+                              title="Previous Position"
+                              text={startingPosition.toString()}
+                            />
+                          )}
+                          <List.Item.Detail.Metadata.Label
+                            title="Played"
+                            text={overall.played.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Won"
+                            text={overall.won.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Drawn"
+                            text={overall.drawn.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Lost"
+                            text={overall.lost.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goals For"
+                            text={overall.goalsFor.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goals Against"
+                            text={overall.goalsAgainst.toString()}
+                          />
+                          <List.Item.Detail.Metadata.Label
+                            title="Goal Difference"
+                            text={overall.goalsDifference.toString()}
+                          />
+                          {form && (
+                            <>
+                              <List.Item.Detail.Metadata.Separator />
+                              <List.Item.Detail.Metadata.Label title="Recent Results" />
+                              {form.reverse().map((m) => {
+                                return (
+                                  <List.Item.Detail.Metadata.Label
+                                    key={m.id}
+                                    title={`${m.teams[0].team.name} - ${m.teams[1].team.name}`}
+                                    text={`${m.teams[0].score} - ${m.teams[1].score}`}
+                                  />
+                                );
+                              })}
+                            </>
+                          )}
+                          {next && (
+                            <>
+                              <List.Item.Detail.Metadata.Separator />
+                              <List.Item.Detail.Metadata.Label title="Next Fixture" />
+                              <List.Item.Detail.Metadata.Label
+                                title={`${next.teams[0].team.name} - ${next.teams[1].team.name}`}
+                                text={convertToLocalTime(next.kickoff.label)}
+                              />
+                              <List.Item.Detail.Metadata.Label
+                                title="Stadium"
+                                text={`${next.ground.name}, ${next.ground.city}`}
+                              />
+                            </>
+                          )}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                   actions={
                     <ActionPanel>
                       <Action

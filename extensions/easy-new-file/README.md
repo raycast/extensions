@@ -2,20 +2,6 @@
 
 Quickly create file in the current Finder window or on the desktop.
 
-**Preferences**
-
-- **New File Here**
-  - Actions after Creation
-  - Show File Template
-  - Show Document
-  - Show Code
-  - Show Script
-
-- **New File with Text**
-  - Actions after Creation
-  - File Type
-  - Save Directory
-
 **Build-in File Type**
 
 - Document: Plain Text, RFT, Markdown, Word, PowerPoint, Excel

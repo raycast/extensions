@@ -88,6 +88,12 @@ export class Bitwarden {
     return items.filter((item: Item) => !!item.name);
   }
 
+  async listFolders(sessionToken: string): Promise<Item[]> {
+    const { stdout } = await this.exec(["list", "folders", "--session", sessionToken]);
+    const folders = JSON.parse(stdout);
+    return folders;
+  }
+
   async getTotp(id: string, sessionToken: string): Promise<string> {
     // this could return something like "Not found." but checks for totp code are done before calling this function
     const { stdout } = await this.exec(["get", "totp", "--session", sessionToken, id]);

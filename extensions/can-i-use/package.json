@@ -5,6 +5,9 @@
   "description": "Can I Use provides up-to-date browser support for front-end web technologies on desktop and mobile web browsers.",
   "icon": "icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "kidonng"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
@@ -18,6 +21,38 @@
     }
   ],
   "preferences": [
+    {
+      "name": "showReleaseDate",
+      "description": "Show browser release date next to version number",
+      "label": "Show release date",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "showPartialSupport",
+      "description": "Show version number and release date (if enabled) for partial supported browsers",
+      "label": "Show partial support details",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "briefMode",
+      "description": "Abbreviate feature status and shorten description",
+      "label": "Brief Mode",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "defaultQuery",
+      "description": "Default Browserlist query when no project is configured",
+      "title": "Default Query",
+      "required": false,
+      "type": "textfield",
+      "default": "defaults"
+    },
     {
       "name": "path",
       "description": "Path to project configured with Browserlist",
@@ -36,17 +71,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
-    "browserslist": "^4.20.2",
+    "@raycast/api": "^1.38.1",
+    "browserslist": "^4.21.2",
     "caniuse-api": "^3.0.0",
-    "caniuse-lite": "^1.0.30001325"
+    "caniuse-lite": "^1.0.30001373"
   },
   "devDependencies": {
     "@types/browserslist": "^4.15.0",
     "@types/caniuse-api": "^3.0.2",
     "@types/caniuse-lite": "^1.0.1",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

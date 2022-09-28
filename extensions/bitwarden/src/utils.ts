@@ -3,7 +3,9 @@ import { Item, PasswordGeneratorOptions, Preferences } from "./types";
 import { ObjectEntries } from "./types/global";
 import { URL } from "url";
 
-Object.typedEntries = <T>(obj: T) => Object.entries(obj) as ObjectEntries<T>;
+Object.typedEntries = function <T>(obj: T) {
+  return Object.entries(obj) as ObjectEntries<T>;
+};
 
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";

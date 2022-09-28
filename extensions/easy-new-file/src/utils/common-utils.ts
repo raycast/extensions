@@ -3,6 +3,7 @@ import { getSelectedFinderItems } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
 import { buildFileName } from "../new-file-here";
+import { imgExt } from "./constants";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -82,27 +83,6 @@ export const getSelectedFile = async () => {
   }
 };
 
-export const imgExt = [
-  ".cr2",
-  ".cr3",
-  ".gif",
-  ".gif",
-  ".heic",
-  ".heif",
-  ".icns",
-  ".icon",
-  ".icons",
-  ".jpeg",
-  ".jpg",
-  ".jpg",
-  ".png",
-  ".raf",
-  ".raw",
-  ".svg",
-  ".tiff",
-  ".webp",
-];
-
 export const isImage = (ext: string) => {
   return imgExt.includes(ext);
 };
@@ -126,7 +106,7 @@ export async function createNewFileWithText(
 ) {
   isEmpty(fileName)
     ? (fileName = buildFileName(saveDirectory, "Untitled", fileExtension))
-    : (fileName = fileName + "." + fileExtension);
+    : (fileName = buildFileName(saveDirectory, fileName, fileExtension));
   const filePath = saveDirectory + fileName;
   fse.writeFileSync(filePath, fileContent);
   return { fileName: fileName, filePath: filePath };

@@ -1,5 +1,19 @@
 # World Clock Changelog
 
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command: Query World Time
+
+## [Add Grid layout] - 2022-06-22
+
+- Add Grid layout for Query World Time command
+- Add more time info, like how many hours ago, day or night
+
+## [Fix 24hour bug] - 2022-06-18
+
+- Fix 24hour bug
+- Add new action for Query World Time: Toggle Details
+
 ## [Add feature: adding aliases to time zones] - 2022-06-10
 
 - Add feature: you can set aliases for starred time zones now

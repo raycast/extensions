@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -56,7 +56,7 @@ export const useSearch = <T extends "collections" | "photos">(type: T) => {
         };
 
         if (errors?.length) {
-          showToast(ToastStyle.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
+          showToast(Toast.Style.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
         }
 
         setState((oldState) => ({
@@ -69,7 +69,7 @@ export const useSearch = <T extends "collections" | "photos">(type: T) => {
           return;
         }
 
-        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+        showToast(Toast.Style.Failure, "Could not perform search", String(error));
       }
     };
 
@@ -88,7 +88,7 @@ export const useSearch = <T extends "collections" | "photos">(type: T) => {
       },
     };
 
-    showToast(ToastStyle.Failure, "Something went wrong", String(error));
+    showToast(Toast.Style.Failure, "Something went wrong", String(error));
     return result;
   }
 };

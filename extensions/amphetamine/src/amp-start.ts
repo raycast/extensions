@@ -3,7 +3,16 @@ import { runAppleScript } from "run-applescript";
 
 import { AMPHETAMINE_DOWNLOAD_URL, checkIfAmphetamineInstalled } from "./utils";
 
-export default async function Command() {
+interface CommandArgs {
+  duration: number;
+  interval: "minutes" | "hours";
+}
+
+export default async function Command(args?: CommandArgs) {
+  const duration = args?.duration;
+  const interval = args?.interval;
+  const parsedInterval = duration === 1 ? interval?.substring(0, interval.length - 1) : interval;
+
   const toast = new Toast({
     title: "Starting a new session",
     style: Toast.Style.Animated,
@@ -24,7 +33,7 @@ export default async function Command() {
       onAction: async () => await open(AMPHETAMINE_DOWNLOAD_URL),
     };
     toast.style = Toast.Style.Failure;
-    return;
+    return false;
   }
 
   const isSessionActive = await runAppleScript(`
@@ -36,14 +45,17 @@ export default async function Command() {
   if (isSessionActive === "true") {
     toast.title = "A session is already running";
     toast.style = Toast.Style.Failure;
-    return;
+    return false;
   }
 
   await runAppleScript(`
     tell application "Amphetamine"
-        start new session
+        start new session ${
+          duration ? `with options {duration: ${duration}, interval: ${interval}, displaySleepAllowed: false}` : ""
+        }
     end tell
   `);
 
-  await showHUD("New default session started");
+  await showHUD(duration ? `New session started with ${duration} ${parsedInterval}` : "New default session started");
+  return true;
 }

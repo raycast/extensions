@@ -23,7 +23,46 @@
       "required": true,
       "title": "Domain",
       "placeholder": "canvas.instructure.com",
-      "description": "Domain for your canvas LMS. Do not include URL; just the domain."
+      "description": "Just the domain for your canvas LMS (Do not include the URL)"
+    },
+    {
+      "title": "Recent Module Items",
+      "name": "showRecent",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Recent Items",
+      "default": true,
+      "description": "Show the recently used module items"
+    },
+    {
+      "name": "numRecent",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number of Recent Items",
+      "default": "3",
+      "description": "Number of recently used module items shown",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        }
+      ]
     }
   ],
   "commands": [
@@ -31,14 +70,16 @@
       "name": "index",
       "title": "My Courses",
       "subtitle": "Canvas",
-      "description": "View the Canvas dashboard",
+      "description": "See the modules, assignments, and announcements for your courses.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@api-blueprints/pathmaker": "^1.0.0",
-    "@raycast/api": "^1.25.1",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.38.1",
+    "node-fetch": "^3.2.6",
+    "node-html-markdown": "^1.2.0",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

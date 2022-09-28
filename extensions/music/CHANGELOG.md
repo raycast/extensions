@@ -1,5 +1,13 @@
 # Apple Music Changelog
 
+## [Update] - 2022-07-27
+- Improved error reporting
+- New README and screenshots
+
+## [Update] - 2022-07-15
+
+Squashed a few bugs in "Play Library Album"
+
 ## [Shuffle Playlist/Album] - 2022-06-01
 
 - Ability to shuffle an album

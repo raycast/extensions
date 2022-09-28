@@ -2,7 +2,6 @@ import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { State } from "../haapi";
 import { useHAStates } from "../hooks";
-import { ensureCleanAccessories } from "../utils";
 
 export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
@@ -37,11 +36,11 @@ export function StatesAttributesList(): JSX.Element {
           <List.Item
             key={`${state.entity_id}_state`}
             title="state"
-            accessories={ensureCleanAccessories([
+            accessories={[
               {
                 text: `${state.state}`,
               },
-            ])}
+            ]}
           />
           {Object.entries(state.attributes).map(([k, v]) => (
             <List.Item
@@ -54,11 +53,11 @@ export function StatesAttributesList(): JSX.Element {
                   <Action.CopyToClipboard title="Copy Entity ID" content={`${state.entity_id}`} />
                 </ActionPanel>
               }
-              accessories={ensureCleanAccessories([
+              accessories={[
                 {
                   text: `${v}`,
                 },
-              ])}
+              ]}
             />
           ))}
         </List.Section>

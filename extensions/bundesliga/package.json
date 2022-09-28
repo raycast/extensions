@@ -33,7 +33,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.36.0",
     "axios": "^0.26.0",
     "cheerio": "^1.0.0-rc.10",
     "date-fns": "^2.28.0",

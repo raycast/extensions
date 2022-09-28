@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Clipboard, Color, Icon } from "@raycast/api";
+
 import { useContext, useState } from "react";
 
 import { AvailableColor } from "../colors/Color";
 import { Services } from "../Extension";
 
-import asyncEffect from "../utilities";
+import { asyncEffect } from "../utilities";
+import GeneralActions from "./GeneralActions";
 import ServicesContext from "./ServicesContext";
 
 export default function ColorActions({ color, storageMode }: { color: AvailableColor; storageMode: boolean }) {
@@ -25,7 +27,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   }
 
   const pasteAction = (
-    <ActionPanel.Section key={"paste-section"}>
+    <ActionPanel.Section key="paste-section">
       <Action.Paste content={color.stringValue()} icon={Icon.Document} />
       {!favorites.has(color) ? (
         <Action
@@ -47,7 +49,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   );
 
   const copyActions = (
-    <ActionPanel.Section key={"copy-section"}>
+    <ActionPanel.Section key="copy-section">
       {color.alternatives.map((altColor: AvailableColor, index: number) => (
         <Action.CopyToClipboard
           key={index}
@@ -66,15 +68,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
   return (
     <ActionPanel>
       {storageMode ? [pasteAction, copyActions] : [copyActions, pasteAction]}
-      <ActionPanel.Section>
-        <Action
-          title="Clear History"
-          shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
-          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-          onAction={() => history.clear()}
-        />
-        <Action.OpenInBrowser title="Support Me" icon={{ source: "heart.png" }} url="https://ko-fi.com/slavarazum" />
-      </ActionPanel.Section>
+      <GeneralActions history={history} />
     </ActionPanel>
   );
 }

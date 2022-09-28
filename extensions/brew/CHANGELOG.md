@@ -1,5 +1,24 @@
 # Brew Changelog
 
+
+## [Improvements] - 2022-08-17
+
+- Add a copy install command action
+- Add run install command in terminal action
+
+
+## [Bug Fix] - 2022-08-15
+
+- Fix error when loading "Show Outdated" command
+
+
+## [Improvements] - 2022-08-10
+
+- Add a "Custom Brew Path" preference for users with brew installed in a non-standard path
+- The extension will now prompt for user's login password if brew requires authorization when installed or uninstalling casks
+- Improved reporting of fetch errors
+- Add a search bar filter for the installable type (formula or cask).
+
 ## [Improvements] - 2022-06-06
 
 - Removed --dry-run flag when running the Upgrade command so the casks and formulas actually upgraded

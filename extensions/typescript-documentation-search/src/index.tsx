@@ -10,7 +10,7 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search npm packages..."
+      searchBarPlaceholder="Search TypeScript documentation..."
       throttle
     >
       <List.Section title="Results">

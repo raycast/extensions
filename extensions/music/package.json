@@ -136,6 +136,7 @@
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@rawnly/eslint-config-ts": "^0.0.2",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

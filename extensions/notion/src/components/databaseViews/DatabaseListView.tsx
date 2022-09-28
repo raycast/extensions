@@ -1,4 +1,3 @@
-import { List } from "@raycast/api";
 import { PageListItem } from "../PageListItem";
 import { DatabaseViewProps } from "./types";
 
@@ -15,7 +14,7 @@ export function DatabaseListView(props: DatabaseViewProps): JSX.Element {
   } = props;
 
   return (
-    <List.Section key="database-view-list" title="Recent">
+    <>
       {databasePages?.map((p) => (
         <PageListItem
           key={`database-${databaseId}-page-${p.id}`}
@@ -27,6 +26,6 @@ export function DatabaseListView(props: DatabaseViewProps): JSX.Element {
           onPageCreated={onPageCreated}
         />
       ))}
-    </List.Section>
+    </>
   );
 }

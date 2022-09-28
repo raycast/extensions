@@ -9,6 +9,7 @@ export interface Task {
   desc?: string;
   items?: ChecklistItem[];
   kind?: TaskKind;
+  tags: string[];
 }
 
 export interface ChecklistItem {
@@ -44,6 +45,28 @@ export const isChecklistModeTask = (task: Task) => {
   return hasItems(task);
 };
 
+const execIterable = (str: string, reg: RegExp, cb: (result: RegExpExecArray) => void) => {
+  let result = reg.exec(str);
+  while (result !== null) {
+    cb(result);
+    result = reg.exec(str);
+  }
+};
+
+const getFilePrettyContent = (content: string) => {
+  let newContent = content;
+  const execCallback = (result: RegExpExecArray) => {
+    const replace = result[0];
+    const type = result[1];
+    const fileType = /image/i.test(type) ? "Image" : "File";
+    newContent = newContent.replace(replace, ` [${fileType}] `);
+  };
+
+  execIterable(newContent, new RegExp(/!\[(.*?)\]\(.*\)/, "g"), execCallback);
+
+  return newContent;
+};
+
 export const getTaskDetailMarkdownContent = (task: Task) => {
   let content = "";
   if (isChecklistModeTask(task)) {
@@ -59,5 +82,5 @@ export const getTaskDetailMarkdownContent = (task: Task) => {
     content = (task.content || "").replace(/\n/g, "\n\n");
   }
   const title = `# ${task.title || ""}`;
-  return `${title}\n\n${content}`;
+  return `${title}\n\n${getFilePrettyContent(content)}`;
 };
