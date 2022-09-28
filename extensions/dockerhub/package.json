@@ -13,35 +13,35 @@
     {
       "name": "search-image",
       "title": "Search Images",
-      "subtitle": "Docker Hub".
+      "subtitle": "Docker Hub",
       "description": "Search images on Docker Hub",
       "mode": "view"
     },
     {
       "name": "search-repository",
       "title": "Search Repository",
-      "subtitle": "Docker Hub".
+      "subtitle": "Docker Hub",
       "description": "Search repositories on Docker Hub",
       "mode": "view"
     },
     {
       "name": "search-extension",
       "title": "Search Extensions",
-      "subtitle": "Docker Hub".
+      "subtitle": "Docker Hub",
       "description": "Search extensions on Docker Hub",
       "mode": "view"
     },
     {
       "name": "search-plugin",
       "title": "Search Plugins",
-      "subtitle": "Docker Hub".
+      "subtitle": "Docker Hub",
       "description": "Search plugins on Docker Hub",
       "mode": "view"
     },
     {
       "name": "manage-access-token",
       "title": "Manage Personal Access Token",
-      "subtitle": "Docker Hub".
+      "subtitle": "Docker Hub",
       "description": "Manage personal access tokens on Docker Hub",
       "mode": "view"
     }
