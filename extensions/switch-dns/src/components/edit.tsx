@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { isIP } from "is-ip";
 import { FormValue } from "../types/types";
 import StorageUtils from "../utils/storage-utils";
@@ -37,7 +37,7 @@ const Edit = (props: { afterPop?: () => void }) => {
     <Form
       actions={
         <ActionPanel title="Add Custom DNS">
-          <Action.SubmitForm title="Add" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Add" icon={Icon.Plus} onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

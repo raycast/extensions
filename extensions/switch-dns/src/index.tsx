@@ -25,9 +25,9 @@ export default function Command() {
         });
       }
     } else {
+      await showHUD("DNS changed to " + data);
       setCurrentDNS(item.dns);
       popToRoot({ clearSearchBar: false });
-      showHUD("DNS changed to " + data);
     }
   };
 
@@ -39,7 +39,7 @@ export default function Command() {
   };
 
   const del = async (item: DNSItem) => {
-    if (await confirmAlert({ title: `Delete DNS:${item.title}?` })) {
+    if (await confirmAlert({ title: `Delete DNS: ${item.title}?` })) {
       await StorageUtils.deleteDNS(item);
       await loadCustom();
     }
@@ -55,9 +55,10 @@ export default function Command() {
         accessories={[{ icon: Icon.Info, text: item.dns === currentDNS ? "Current DNS" : item.accessory }]}
         actions={
           <ActionPanel>
-            <Action title="Apply" onAction={() => apply(item)} />
+            <Action title="Apply" icon={Icon.Plug} onAction={() => apply(item)} />
             <Action.Push
               title="Add"
+              icon={Icon.Plus}
               target={
                 <Edit
                   afterPop={() => {
@@ -67,7 +68,12 @@ export default function Command() {
               }
             />
             {props.isCustom && (
-              <Action title="Delete" shortcut={{ modifiers: ["cmd"], key: "delete" }} onAction={() => del(item)} />
+              <Action
+                title="Delete"
+                icon={Icon.Minus}
+                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                onAction={() => del(item)}
+              />
             )}
           </ActionPanel>
         }
