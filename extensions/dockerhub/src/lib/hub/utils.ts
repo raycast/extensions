@@ -1,5 +1,9 @@
 import { Image } from "@raycast/api";
 
+export const generateRepoURL = (namespace: string, name: string): string => {
+  return `https://hub.docker.com/repository/docker/${namespace}/${name}`;
+};
+
 export const formatDate = (date: string): string => {
   const now = new Date();
   const d = new Date(date);
@@ -63,3 +67,8 @@ export function mapFromToIcon(from: string | undefined):
       return { source: "docker-icon.png" };
   }
 }
+
+export const parseParamsFromURL = (input: string) => {
+  const url = new URL(input);
+  const params = url.searchParams;
+};
