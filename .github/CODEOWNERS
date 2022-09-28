@@ -72,7 +72,7 @@
 /extensions/capture                                  @syhchen
 /extensions/capture-fullpage-of-website              @Coun1er
 /extensions/capture-raycast-metadata                 @koinzhang
-/extensions/chakra-ui-docs                           @pgvr
+/extensions/chakra-ui-docs                           @pgvr @Ansub
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/cheatsheets                              @Destiner
@@ -114,6 +114,7 @@
 /extensions/craftdocs                                @kudrykv @kudrykv
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
+/extensions/crossbell                                @Songkeys
 /extensions/css-calculations                         @teziovsky
 /extensions/css-gg                                   @astrit
 /extensions/cuid-generator                           @dgrcode
@@ -206,6 +207,7 @@
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
+/extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
 /extensions/github-menu-bar                          @fe9lix
@@ -321,6 +323,7 @@
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
 /extensions/mailsy                                   @BalliAsghar
+/extensions/man-pages                                @SKaplanOfficial
 /extensions/mantine                                  @EmilMalanczak
 /extensions/markdown-reference                       @codedbyjordan
 /extensions/markdown-this                            @aravindballa
@@ -340,6 +343,7 @@
 /extensions/must                                     @eggsy
 /extensions/myip                                     @kkange
 /extensions/n8n                                      @koinzhang
+/extensions/namespaces                               @GastroGeek
 /extensions/nanoid                                   @roelvan
 /extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/nature-remo                              @uetchy
@@ -375,8 +379,10 @@
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openweathermap                           @tonka3000
 /extensions/opsgenie                                 @ricoberger
+/extensions/orion                                    @Plonq
 /extensions/oss-browser                              @404J
 /extensions/pagerduty                                @horimislime
+/extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @BartoszJarocki @BartoszJarocki
 /extensions/parallels-virtual-machines               @danpalmer
 /extensions/parcel-tracker                           @jjhok
@@ -443,6 +449,7 @@
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
+/extensions/reverso-context                          @MrModest
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman @pernielsentikaer @pomdtr
@@ -535,6 +542,7 @@
 /extensions/toolbox                                  @kkange
 /extensions/toothpick                                @briankosw
 /extensions/tower                                    @tdwesten
+/extensions/transform                                @Idered
 /extensions/transmission                             @FezVrasta
 /extensions/transmit                                 @kennonb
 /extensions/trello                                   @ChrisChinchilla
@@ -559,7 +567,7 @@
 /extensions/upcoming-holidays                        @rodrigouroz
 /extensions/urban-dictionary                         @Sheraff
 /extensions/url-tools                                @joshauh46
-/extensions/uuid-generator                           @jmaeso @GastroGeek
+/extensions/uuid-generator                           @jmaeso @GastroGeek @pernielsentikaer
 /extensions/v2ex                                     @mopig
 /extensions/v2ex-viewer                              @daikaiyu
 /extensions/vault                                    @ricoberger
@@ -583,6 +591,7 @@
 /extensions/world-clock                              @koinzhang
 /extensions/wrike                                    @suarez-agu
 /extensions/xcode                                    @SvenTiigi @qeude
+/extensions/xecutor                                  @GastroGeek
 /extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/xqc                                      @Aayush9029
@@ -593,6 +602,7 @@
 /extensions/youtube                                  @tonka3000
 /extensions/youtube-companion                        @sasivarnan
 /extensions/youtube-music                            @danieldbird @AlexStrNik
+/extensions/youversion-suggest                       @caleb531
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zeplin-project-search                    @dorukgunes
 /extensions/zoom                                     @thomaslombart

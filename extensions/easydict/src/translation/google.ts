@@ -93,8 +93,8 @@ export function googleLanguageDetect(text: string, signal = axios.defaults.signa
   const startTime = new Date().getTime();
   const queryWordInfo: QueryWordInfo = {
     word: text,
-    fromLanguage: autoDetectLanguageItem.googleId,
-    toLanguage: englishLanguageItem.googleId,
+    fromLanguage: autoDetectLanguageItem.googleLangCode,
+    toLanguage: englishLanguageItem.googleLangCode,
   };
 
   return new Promise((resolve, reject) => {

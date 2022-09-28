@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 23:25
+ * @lastEditTime: 2022-09-20 21:45
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -52,6 +52,8 @@ import {
   sortedQueryResults,
   updateTranslationMarkdown,
 } from "./utils";
+
+console.log(`enter dataManager.ts`);
 
 /**
  * Data manager.
@@ -162,7 +164,7 @@ export class DataManager {
     // Put Apple translate at the end, because exec Apple Script will block thread, ~0.4s.
     this.delayAppleTranslateTimer = setTimeout(() => {
       this.queryAppleTranslate(queryWordInfo, this.abortController);
-    }, 1500);
+    }, 1000);
 
     // If no query, stop loading.
     if (this.queryRecordList.length === 0) {
@@ -283,7 +285,7 @@ export class DataManager {
     if (fromYoudaoLanguageId === targetLanguageId) {
       const targetLanguageItem = getAutoSelectedTargetLanguageItem(fromYoudaoLanguageId);
       this.updateAutoSelectedTargetLanguageItem(targetLanguageItem);
-      targetLanguageId = targetLanguageItem.youdaoId;
+      targetLanguageId = targetLanguageItem.youdaoLangCode;
       console.log("---> conflict, use autoSelectedTargetLanguage: ", targetLanguageId);
     }
 
@@ -860,7 +862,7 @@ export class DataManager {
     const wordInfo = queryTypeResult.wordInfo;
     // console.log(`---> wordInfo: ${JSON.stringify(wordInfo, null, 4)}`);
     const isDictionaryType = checkIsDictionaryType(queryTypeResult.type);
-    const isEnglishLanguage = wordInfo.fromLanguage === englishLanguageItem.youdaoId;
+    const isEnglishLanguage = wordInfo.fromLanguage === englishLanguageItem.youdaoLangCode;
     const enableAutomaticDownloadAudio =
       myPreferences.enableAutomaticPlayWordAudio && wordInfo.isWord && isEnglishLanguage;
     if (isDictionaryType && enableAutomaticDownloadAudio && this.isLastQuery && !this.hasPlayedAudio) {

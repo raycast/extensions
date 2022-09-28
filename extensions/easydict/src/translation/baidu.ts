@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 17:09
+ * @lastEditTime: 2022-09-22 18:22
  * @fileName: baidu.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -103,8 +103,8 @@ export async function baiduLanguageDetect(text: string): Promise<DetectedLanguag
   console.log(`---> start request Baidu language detect`);
 
   const queryWordInfo: QueryWordInfo = {
-    fromLanguage: autoDetectLanguageItem.baiduId,
-    toLanguage: englishLanguageItem.baiduId,
+    fromLanguage: autoDetectLanguageItem.baiduLangCode,
+    toLanguage: englishLanguageItem.baiduLangCode,
     word: text,
   };
 
@@ -116,7 +116,7 @@ export async function baiduLanguageDetect(text: string): Promise<DetectedLanguag
         const baiduResult = baiduTypeResult.result as BaiduTranslateResult;
         const baiduLanaugeId = baiduResult.from || "";
         const youdaoLanguageId = getYoudaoLanguageIdFromBaiduId(baiduLanaugeId);
-        console.warn(`---> Baidu language detect languageId: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
+        console.warn(`---> Baidu language detect: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
 
         /**
        * Generally speaking, Baidu language auto-detection is more accurate than Tencent language recognition.
@@ -168,14 +168,16 @@ export async function baiduWebLanguageDetect(text: string): Promise<DetectedLang
     axios
       .post(url, querystring.stringify(params))
       .then((response) => {
-        console.log(`---> web Baidu language detect response: ${JSON.stringify(response.data)}`);
-        console.warn(`---> Baidu detect cost: ${response.headers[requestCostTime]} ms`);
+        // console.log(`---> web Baidu language detect response: ${JSON.stringify(response.data)}`);
 
         const baiduWebLanguageDetect = response.data as BaiduWebLanguageDetect;
         if (baiduWebLanguageDetect.error === 0) {
           const baiduLanaugeId = baiduWebLanguageDetect.lan || "";
           const youdaoLanguageId = getYoudaoLanguageIdFromBaiduId(baiduLanaugeId);
           const isConfirmed = isValidLanguageId(youdaoLanguageId);
+
+          console.warn(`---> Baidu detect langu cost: ${response.headers[requestCostTime]} ms`);
+          console.warn(`---> Baidu language detect: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
 
           const detectedLanguageResult: DetectedLanguageModel = {
             type: type,

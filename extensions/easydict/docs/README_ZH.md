@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/eudic-icon.png" height="128">
+  <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easy to look up words or translate text</p>
 <p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
@@ -36,7 +36,7 @@
 
 下一步：
 
-- [ ] 开发桌面版本 Electron App（学习中）。
+- [ ] 开发桌面版 Electron App（构思中）。
 - [ ] 支持查看历史记录。
 
 **_如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)_**
@@ -83,7 +83,6 @@
 git clone https://github.com/tisfeng/Raycast-Easydict.git && cd Raycast-Easydict
 
 npm install && npm run dev
-
 ```
 
 ---
@@ -98,20 +97,39 @@ npm install && npm run dev
 
 #### 语言识别
 
-- 腾讯语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，俄语，德语。
-- 百度语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
-- 苹果 🍎 语种识别：中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
-- 谷歌语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
-- Bing 语种识别：简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+##### 腾讯语种识别
+
+中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，俄语，德语。
+
+##### 百度语种识别
+
+中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+
+##### 苹果 🍎 语种识别
+
+中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+
+##### 谷歌语种识别
+
+简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+
+##### Bing 语种识别
+
+简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 
 #### 词典
 
-- 有道词典：支持 5 种语言，（中文），英语，法语，日语，韩语。
-- Linguee：支持 19 种语言，（中文，日语，俄语），英语，法语，西班牙语，葡萄牙语，意大利语，德语，瑞典语，罗马尼亚语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+##### 有道词典
+
+支持 5 种语言，（中文），英语，法语，日语，韩语。
+
+##### Linguee 词典
+
+支持 19 种语言，（中文，日语，俄语），英语，法语，西班牙语，葡萄牙语，意大利语，德语，瑞典语，罗马尼亚语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
 
 #### 翻译
 
-当前支持 23 种翻译语言: 简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+当前支持 23 种翻译语言：**简体中文，繁体中文，英语，日语，韩语，法语，西班牙语，葡萄牙语，意大利语，德语，俄语，阿拉伯语，瑞典语，罗马尼亚语，泰语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。**
 
 各项翻译服务支持的语言详情如下：
 
@@ -175,7 +193,7 @@ npm install && npm run dev
 
 <p>
 
-为了更好地配合划词查询功能，建议为 `Easydict` 设置一个快捷键，例如 `Shift + Cmd + E`，这样在鼠标取词后，您可以直接通过快捷键唤醒 `Easydict` 查词，这将非常流畅和优雅。
+为了更好地配合划词查询功能，建议为 `Easydict` 设置一个快捷键，例如 `Cmd + E`，这样在鼠标取词后，您可以直接通过快捷键唤醒 `Easydict` 查词，这将非常流畅和优雅。
 
 </p>
 
@@ -231,29 +249,31 @@ npm install && npm run dev
 
 开启该功能后，`Easydict` 会尝试获取 Mac 系统代理，若成功，则后续的网络请求都会通过系统代理发送。默认关闭。 此功能是为了对抗 IP 封锁（某些服务如 Linguee 对 IP 有频率限制），**但开启后会使请求响应速度变慢，因此请仅在有需要时启用。**
 
+> 特别注意 ⚠️：请不要在使用抓包工具 MitM 的情况下开启 `Use System Proxy`，否则部分服务请求会报证书错误，例如 https://github.com/tisfeng/Raycast-Easydict/issues/18 。
+
 ### 翻译服务
 
 为了方便使用，我们提供了一些内置翻译服务的 appId 和 appKey，但这些服务本身是有请求频率限制的。如果许多人同时使用它们，它可能会变慢甚至停止。因此，为了获得更好的使用体验，您最好申请自己的 appId 和 appKey，替换内置的服务。
 
 别担心，这些翻译服务有免费配额。一般来说个人使用足够了。
 
-下列申请教程来自 [`Bob`](https://v0.bobtranslate.com/#/general/advance/service)， 跟随教程应该很快就能完成申请。
+下列申请教程来自 [`Bob`](https://bobtranslate.com/guide/advance/service.html)， 跟随教程应该很快就能完成申请。
 
-- [有道翻译](https://v0.bobtranslate.com/#/service/translate/youdao)：服务需勾选 `文本翻译` 和 `语音合成`。（注：有道向每个账户赠送 50 元体验金，目测可免费使用 1 年以上～）
+- [有道翻译](https://bobtranslate.com/service/translate/youdao.html)：服务需勾选 `文本翻译` 和 `语音合成`。（注：有道向每个账户赠送 50 元体验金，目测可免费使用 1 年以上～）
 
-- [百度翻译](https://v0.bobtranslate.com/#/service/translate/baidu)
+- [百度翻译](https://bobtranslate.com/service/translate/baidu.html)
 
-- [腾讯翻译](https://v0.bobtranslate.com/#/service/translate/tencent)
+- [腾讯翻译](https://bobtranslate.com/service/translate/tencent.html)
 
-- [彩云小译](https://v0.bobtranslate.com/#/service/translate/caiyun)
+- [彩云小译](https://bobtranslate.com/service/translate/caiyun.html)
 
 - [DeepL](https://www.deepl.com/translator)
 
-![image-20220620111449687](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620111449687.png)
+![image-20220922161329309](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220922161329309-1663834409.png)
 
 ## 友情推荐
 
-[`Bob`](https://v0.bobtranslate.com/#/) 是一款 macOS 平台 **翻译** 和 **OCR** 软件。 Bob 或许是 MacOS 平台上最好用的翻译应用，而且还免费！
+[`Bob`](https://bobtranslate.com/) 是一款 macOS 平台 **翻译** 和 **OCR** 软件。 Bob 或许是 MacOS 平台上最好用的翻译应用，而且还免费！
 
 > 更新：Bob 目前已上架 Mac App Store，欢迎尝试支持 [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
 
