@@ -121,7 +121,6 @@ This case should work the same as when Raycast is restarted.
 - make sure you set `isLoading` to false when your command finishes executing
 - avoid setting long titles in `MenuBarExtra`, `MenuBarExtra.Submenu` or `MenuBarExtra.Item`
 - don't put identical `MenuBarExtra.Item`s at the same level (direct children of `MenuBarExtra` or in the same `Submenu`) as their `onAction` handlers will not be executed correctly
-- don't rely on state updates triggered by `onAction` handlers as your command might not have time to execute & re-render
 
 ## API Reference
 
@@ -240,7 +239,7 @@ export default function Command() {
 | icon | An optional icon for this item. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item. | <code>string</code> | - |
-| onAction | An action handler called when the user clicks the item. | <code>() => void</code> | - |
+| onAction | An action handler called when the user clicks the item. | <code>(event: [MenuBarExtra.ActionEvent](menu-bar-commands.md#menubarextra.actionevent)) => void</code> | - |
 
 ### MenuBarExtra.Submenu
 
@@ -324,6 +323,34 @@ export default function Command() {
         <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
       ))}
     </MenuBarExtra>
+  );
+}
+```
+
+## Types
+
+### MenuBarExtra.ActionEvent
+
+An interface describing Action events in callbacks.
+
+#### Properties
+
+| Property | Description | Type |
+| :--- | :--- | :--- |
+| type<mark style="color:red;">*</mark> | A type of the action event | <code>"left-click"</code> or <code>"right-click"</code> |
+
+#### Example
+
+```typescript
+import { MenuBarExtra } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra>
+      <MenuBarExtra.Item
+        title="Log Action Event Type"
+        onAction={(event: MenuBarExtra.ActionEvent) => console.log("Action Event Type", event.type)} />
+    <MenuBarExtra>
   );
 }
 ```

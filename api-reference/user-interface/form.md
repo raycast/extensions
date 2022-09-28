@@ -105,7 +105,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 
 {% hint style="info" %}
 
-- Drafts for forms nested in navigation is not supported yet. In this case you will see a warning about it.
+- Drafts for forms nested in navigation are not supported yet. In this case, you will see a warning about it.
 - Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
 - Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
 - If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
@@ -173,9 +173,9 @@ interface TodoValues {
 export default function Command(props: { draftValues?: TodoValues }) {
   const { draftValues } = props;
 
-  const [title, setTitle] = useState<string | undefined>(draftValues?.title);
-  const [description, setDescription] = useState<string | undefined>(draftValues?.description);
-  const [dueDate, setDueDate] = useState<Date | undefined>(draftValues?.dueDate);
+  const [title, setTitle] = useState<string>(draftValues?.title || "");
+  const [description, setDescription] = useState<string>(draftValues?.description || "");
+  const [dueDate, setDueDate] = useState<Date>(draftValues?.dueDate || "");
 
   function handleSubmit(values: TodoValues) {
     console.log("onSubmit", values);
@@ -261,7 +261,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [name, setName] = useState<string>();
+  const [name, setName] = useState<string>("");
 
   return (
     <Form
@@ -342,7 +342,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [password, setPassword] = useState<string>();
+  const [password, setPassword] = useState<string>("");
 
   return (
     <Form
@@ -426,7 +426,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [description, setDescription] = useState<string>();
+  const [description, setDescription] = useState<string>("");
 
   return (
     <Form
@@ -589,7 +589,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | null>(null);
 
   return (
     <Form
@@ -621,9 +621,9 @@ export default function Command() {
 | title | The title displayed on the left side of the item. | <code>string</code> | - |
 | type | Indicates what types of date components can be picked | <code>[Form.DatePicker.Type](form.md#form.datepicker.type)</code> | - |
 | value | The current value of the item. | <code>Date</code> | - |
-| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;Date>) => void</code> | - |
-| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date) => void</code> | - |
-| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;Date>) => void</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: Date \| null) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;Date \| null>) => void</code> | - |
 
 #### Methods (Imperative API)
 
@@ -762,6 +762,7 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
 | value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
 
 ### Form.Dropdown.Section
 
@@ -1052,7 +1053,7 @@ For type-safe form values, you can define your own interface. Use the ID's of th
 #### Example
 
 ```typescript
-import { Form } from "@raycast/api";
+import { Form, Action, ActionPanel } from "@raycast/api";
 
 interface Values {
   todo: string;

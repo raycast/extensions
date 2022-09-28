@@ -240,7 +240,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). | <code>React.ReactNode</code> | - |
+| actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
 | children | Grid sections or items. If [Grid.Item](grid.md#grid.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | enableFiltering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter grid items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | inset | Indicates how much space there should be between a [Grid.Item](grid.md#grid.item)s' content and its borders. The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
@@ -346,6 +346,7 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
 | value<mark style="color:red;">*</mark> | Value of the dropdown item. Make sure to assign each unique value for each item. | <code>string</code> | - |
 | icon | An optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
+| keywords | An optional property used for providing additional indexable strings for search. When filtering the items in Raycast, the keywords will be searched in addition to the title. | <code>string[]</code> | The title of its section if any |
 
 ### Grid.Dropdown.Section
 
