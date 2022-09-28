@@ -1,29 +1,40 @@
-import { execSync } from "child_process";
+import util from "util";
+import { exec } from "child_process";
 import { getCachedEnv } from "./shell-utils";
 import { DEFAULT_DNS } from "../config";
 
-export const exec = async (cmd: string) => {
+export const execCmd = async (cmd: string): Promise<{ error: string | null; data: string }> => {
+  const execPromise = util.promisify(exec);
   const env = await getCachedEnv();
+
   try {
-    const output = execSync(cmd, env);
-    return String(output).trim();
+    const { stdout, stderr } = await execPromise(cmd, env);
+    return {
+      error: stderr,
+      data: String(stdout).trim(),
+    };
   } catch (err) {
-    console.error(err);
-    return "";
+    return { error: (err as Error).message, data: "" };
   }
 };
 
 export const getCurrentDevice = async () => {
   // https://github.com/kodango/switchdns/blob/master/src/dns_ops.sh
-  return await exec(`netstat -rn | awk '/default/{print $NF}' | head -1`);
+  const { error, data } = await execCmd(`netstat -rn | awk '/default/{print $NF}' | head -1`);
+
+  if (error) throw new Error(error);
+  return data;
 };
 
 export const getCurrentNetworkService = async () => {
   const currentDevice = await getCurrentDevice();
 
-  return await exec(
+  const { error, data } = await execCmd(
     `networksetup -listnetworkserviceorder | grep -B 1 ${currentDevice} | awk -F'\\) ' '{print $2}' | head -1`
   );
+
+  if (error) throw new Error(error);
+  return data;
 };
 
 export const getCurrentDNS = async () => {
@@ -32,11 +43,9 @@ export const getCurrentDNS = async () => {
     return "";
   }
 
-  const out = await exec(`networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
-  if (!out) {
-    return DEFAULT_DNS.slice(-1)[0].dns;
-  }
-  return out.split("\n").join(",");
+  // Command return failed when DNS is not set(empty)
+  const { error, data } = await execCmd(`networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
+  return error ? DEFAULT_DNS.slice(-1)[0].dns : String(data).split("\n").join(",");
 };
 
 // dns like: "223.5.5.5,223.6.6.6" | "8.8.8.8"
@@ -46,6 +55,6 @@ export const switchDNS = async (dns: string) => {
   const cmd = `networksetup -setdnsservers "${networkService}" ${targetDNS}`;
 
   console.info(cmd);
-  await exec(cmd);
-  return dns;
+  const { error } = await execCmd(cmd);
+  return { error, data: dns };
 };

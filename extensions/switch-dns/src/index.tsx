@@ -14,11 +14,15 @@ export default function Command() {
   const apply = async (item: DNSItem) => {
     showHUD("DNS changing...");
 
-    const dns = await switchDNS(item.dns);
+    const { error, data } = await switchDNS(item.dns);
 
-    setCurrentDNS(item.dns);
-    popToRoot({ clearSearchBar: false });
-    showHUD("DNS changed to " + dns);
+    if (error) {
+      showHUD(`Err: ${error}`);
+    } else {
+      setCurrentDNS(item.dns);
+      popToRoot({ clearSearchBar: false });
+      showHUD("DNS changed to " + data);
+    }
   };
 
   const loadCustom = async () => {
