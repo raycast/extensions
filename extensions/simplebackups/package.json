@@ -5,7 +5,6 @@
   "description": "View and manage your backups from SimpleBackups.com",
   "icon": "command-icon.png",
   "author": "islamessam",
-  "owner": "simplebackups",
   "categories": [
     "Developer Tools",
     "Productivity",
