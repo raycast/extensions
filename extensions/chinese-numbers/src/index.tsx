@@ -35,7 +35,7 @@ export default function Command() {
           title={ChineseLowercase}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseLowercase} />
+              <Action.CopyToClipboard content={ChineseLowercase} />
             </ActionPanel>
           }
         />
@@ -45,7 +45,7 @@ export default function Command() {
           title={ChineseCapitalizated}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseCapitalizated} />
+              <Action.CopyToClipboard content={ChineseCapitalizated} />
             </ActionPanel>
           }
         />
@@ -55,7 +55,7 @@ export default function Command() {
           title={ScientificCountingMethod}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy to clipboard" content={ScientificCountingMethod} />
+              <Action.CopyToClipboard content={ScientificCountingMethod} />
             </ActionPanel>
           }
         />
@@ -65,7 +65,7 @@ export default function Command() {
           title={ChineseCapitalizatedAmount}
           actions={
             <ActionPanel title="Copy">
-              <Action.CopyToClipboard title="Copy to clipboard" content={ChineseCapitalizatedAmount} />
+              <Action.CopyToClipboard content={ChineseCapitalizatedAmount} />
             </ActionPanel>
           }
         />
