@@ -17,11 +17,17 @@ const preferences: Preferences = getPreferenceValues();
 const api = getApi(preferences.token, preferences.domain);
 
 export const checkApi = async () => {
-  return await api["courses?state=available&enrollment_state=active"].get();
+  return await api.courses.searchParams({
+    state: 'available',
+    enrollment_state: 'active'
+  }).get();
 };
 
 export const getCourses = async (json: any): Promise<course[]> => {
-  const favorites = await api.users.self.favorites["courses?state=available&enrollment_state=active"].get();
+  const favorites = await api.users.self.favorites.courses.searchParams({
+    state: 'available',
+    enrollment_state: 'active'
+  }).get();
   const ids = favorites.map((favorite) => favorite.id);
   const courses: course[] = json
     .filter((item) => ids.includes(item.id))
@@ -32,7 +38,9 @@ export const getCourses = async (json: any): Promise<course[]> => {
       color: Colors[index % Colors.length],
     }));
   const promises = courses.map((course: course, i: number): assignment[] => {
-    return api.courses[course.id].assignments["?order_by=due_at"].get().then((json) => {
+    return api.courses[course.id].assignments.searchParams({
+      order_by: 'due_at'
+    }).get().then((json) => {
       return json
         .filter((assignment) => assignment.due_at && new Date(assignment.due_at).getTime() > Date.now())
         .map((assignment) => ({
@@ -71,7 +79,9 @@ export const getAnnouncements = async (courses: course[]): Promise<announcement[
 };
 
 export const getModules = async (course_id: number): Promise<modulesection[]> => {
-  const json = await api.courses[course_id].modules["?include=items"].get();
+  const json = await api.courses[course_id].modules.searchParams({
+    include: 'items'
+  }).get();
   const modules: modulesection[] = json.map((module) => {
     const items: moduleitem[] = module.items
       .filter((i) => i.type !== "SubHeader")
