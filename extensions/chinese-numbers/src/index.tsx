@@ -9,10 +9,10 @@ const toScientificCountingMethod = (text: number) => nzhcn.encodeS(text);
 const toChineseCapitalizatedAmount = (text: number) => nzhcn.toMoney(text);
 
 export default function Command() {
-  const [ChineseLowercase, setChineseLowercase] = useState<string>("中文小写...");
-  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("中文大写...");
-  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("科学记数法字符串...");
-  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("中文金额...");
+  const [ChineseLowercase, setChineseLowercase] = useState<string>("Arabic numbers to Chinese lowercase...");
+  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("Arabic numbers to Chinese uppercase...");
+  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("Scientific notation string...");
+  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("Arabic numbers to Chinese amount...");
   const handleOnTextChange = (value: string) => {
     const input = Number(value);
     if (!isNaN(input)) {
@@ -27,10 +27,10 @@ export default function Command() {
     <List
       onSearchTextChange={handleOnTextChange}
       enableFiltering={false}
-      navigationTitle="数字转中文（大写，小写）数字，金额"
+      navigationTitle="Arabic to Chinese (upper case, lower case) numbers, amount"
       searchBarPlaceholder="Input Numbers..."
     >
-      <List.Section title="转中文小写">
+      <List.Section title="Arabic numbers to Chinese lowercase">
         <List.Item
           title={ChineseLowercase}
           actions={
@@ -40,7 +40,7 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="转中文大写">
+      <List.Section title="Arabic numbers to Chinese uppercase">
         <List.Item
           title={ChineseCapitalizated}
           actions={
@@ -50,7 +50,7 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="科学记数法字符串">
+      <List.Section title="Scientific notation string">
         <List.Item
           title={ScientificCountingMethod}
           actions={
@@ -60,7 +60,7 @@ export default function Command() {
           }
         />
       </List.Section>
-      <List.Section title="转中文金额">
+      <List.Section title="Arabic numbers to Chinese amount">
         <List.Item
           title={ChineseCapitalizatedAmount}
           actions={
