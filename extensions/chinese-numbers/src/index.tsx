@@ -9,10 +9,10 @@ const toScientificCountingMethod = (text: number) => nzhcn.encodeS(text);
 const toChineseCapitalizatedAmount = (text: number) => nzhcn.toMoney(text);
 
 export default function Command() {
-  const [ChineseLowercase, setChineseLowercase] = useState<string>("Arabic numbers to Chinese lowercase...");
-  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("Arabic numbers to Chinese uppercase...");
-  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("Scientific notation string...");
-  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("Arabic numbers to Chinese amount...");
+  const [ChineseLowercase, setChineseLowercase] = useState<string>("Chinese lowercase...");
+  const [ChineseCapitalizated, setChineseCapitalizated] = useState<string>("Chinese uppercase...");
+  const [ScientificCountingMethod, setScientificCountingMethod] = useState<string>("Scientific notation...");
+  const [ChineseCapitalizatedAmount, setChineseCapitalizatedAmount] = useState<string>("Chinese amount...");
   const handleOnTextChange = (value: string) => {
     const input = Number(value);
     if (!isNaN(input)) {
