@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.40.0 - 2022-09-28
+
+### ✨ New
+
+- **Menu Bar Extras** can now be deactivated without disabling the menu bar command! To deactivate a menu bar command, run the `Disable Command` action from the command's Action Panel - or drag the menu bar extra out of the menu bar while holding down ⌘.
+- Commands with **Background Refresh** also now have a `Disable Command` action!
+- **Menu Bar Extras** now support both a primary and secondary action type (right click or control click).
+- **Dropdown**'s items can now specify `keywords` to match more search terms.
+- **Extension Diagnostics** command can now be used to help finding the cause behind any issues with extensions. It displays all `Loaded Commands`, commands with `Background Refresh` enabled and latest `Events` triggered.
+
+### 💎 Improvements
+
+- **Menu Bar Extra** action handlers will now either wait or force a render after finishing execution, to ensure any state updates performed in the action handler have had a chance to render.
+- **Menu Bar** commands now automatically refresh when their or their parent extension's preferences change.
+- **OAuth**: Path-based redirect URLs are now officially supported.
+- **OAuth**: ⚠️️ API methods for OAuth request creation now throw an error when used from a background command - you can check the launch type of a command to see whether authorization can be performed
+- **Types**: Node and React types have been added back as optional API peer dependencies and dev dependencies to the templates, so that VS Code autocompletion works.
+- **Templates**: Updated to include the utils package.
+- **DevX**: Added warnings when specifying a `value` without `onChange` or when changing a Form item from controlled to uncontrolled.
+- **DevX**: For starting development, the CLI does not depend on metadata attributes any more
+
+### 🐞 Fixes
+
+- **Forms**: The type of the `DatePicker`'s value is now `Date | null` (`null` happens when selecting `No Date`).
+  ⚠️ This might cause some TypeScript errors but it will now reflect what is really happening, preventing bugs at runtime.
+- Fixed an issue where `List.Item.Detail.Metadata` titles sometimes being cropped despite there being enough room.
+- **Menu Bar Extra** `Item` and `Submenu` icons now change based on the system's dark / light mode, not Raycast's.
+- **Forms**: Fixed a bug where the initial value for a controlled TextArea could not be deleted.
+- **Forms**: Fixed the info icon and message not coming back after clearing an error on form items.
+- **Forms**: Fixed updating the placeholder of the TagPicker item.
+- **Empty View**: Fix an issue where an Empty View's actions would be rendered even thought the Empty View isn't.
+- **OAuth**: Fixed a bug where multiple overlays could stack upon each other when OAuth was initiated from a menu bar or background launched command
+
 ## 1.39.2 - 2022-09-01
 
 ### ✨ New
@@ -19,13 +52,13 @@
 
 ### ✨ New
 
-- **List.Item.Detail.Metadata**: We’ve added support for new `Link` and `TagList` item types.
+- **List.Item.Detail.Metadata**: We've added support for new `Link` and `TagList` item types.
 - **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ _via_ `environment.commandMode`.
 
 ### 💎 Improvements
 
 - **CLI**: The ray CLI is now code-signed
-- **CLI**: We’ve updated esbuild to v0.14.52
+- **CLI**: We've updated esbuild to v0.14.52
 - **NPM size:** is now 0.5MB instead of 25MB _(binary files for ray CLI have been moved out of the NPM package)_
 
 ### 🐞 Fixes
@@ -33,8 +66,8 @@
 - **Navigation**: Top-level components can now dynamically return a different view type when used inside a navigation stack
 - **Background Refresh**: Fixed an edge case where commands would run into a timeout that prevented further refreshing
 - **Menu Bar Commands**: Fixed a bug where the error screen of menu bar commands would repeatedly be shown in the root search
-- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn’t work entirely
-- **Form:** `TextArea` placeholder now won’t highlight markdowns if it has `enabledMarkdown`
+- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn't work entirely
+- **Form:** `TextArea` placeholder now won't highlight markdowns if it has `enabledMarkdown`
 
 ## 1.38.3 - 2022-08-03
 
@@ -46,7 +79,7 @@
 ### 🐞 Fixes
 
 - **Menu Bar Commands**: Fixed issues around hot reloading, unloading, and inconsistent action handler behavior
-- **No-view Commands:** Fixed returning top-level props for commands that doesn’t have arguments or drafts
+- **No-view Commands:** Fixed returning top-level props for commands that doesn't have arguments or drafts
 
 ## 1.38.1 - 2022-07-21
 
