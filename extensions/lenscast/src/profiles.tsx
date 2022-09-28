@@ -40,7 +40,7 @@ function Main() {
           <List.Item
             key={result.profileId}
             title={result.handle}
-            icon={avatar ? { source: avatar, mask: Image.Mask.Circle } : "👤"}
+            icon={avatar ? { source: avatar, mask: Image.Mask.Circle, fallback: "👤" } : "👤"}
             actions={
               <ActionPanel>
                 <Action.Push
