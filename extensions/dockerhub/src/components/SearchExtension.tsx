@@ -4,7 +4,7 @@ import { Hub } from "../lib/hub/hub";
 import { ExtensionMetadata } from "../lib/hub/types";
 
 export default function SearchExtensions() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [extensions, setExtensions] = useState<ExtensionMetadata[]>([]);
 
   const search = useCallback(

@@ -7,7 +7,7 @@ import { mapFromToIcon } from "../lib/hub/utils";
 
 export default function Search(props: { searchType: SearchTypeEnum }) {
   const [images, setImages] = useState<Summary[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const search = useCallback((text: string) => {
     const abortCtrl = new AbortController();
