@@ -121,7 +121,6 @@ This case should work the same as when Raycast is restarted.
 - make sure you set `isLoading` to false when your command finishes executing
 - avoid setting long titles in `MenuBarExtra`, `MenuBarExtra.Submenu` or `MenuBarExtra.Item`
 - don't put identical `MenuBarExtra.Item`s at the same level (direct children of `MenuBarExtra` or in the same `Submenu`) as their `onAction` handlers will not be executed correctly
-- don't rely on state updates triggered by `onAction` handlers as your command might not have time to execute & re-render
 
 ## API Reference
 
@@ -308,6 +307,32 @@ export default function Command() {
         <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
       ))}
     </MenuBarExtra>
+  );
+}
+```
+
+## Types
+
+### MenuBarExtra.ActionEvent
+
+An interface describing Action events in callbacks.
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="MenuBarExtra.ActionEvent" />
+
+#### Example
+
+```typescript
+import { MenuBarExtra } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra>
+      <MenuBarExtra.Item
+        title="Log Action Event Type"
+        onAction={(event: MenuBarExtra.ActionEvent) => console.log("Action Event Type", event.type)} />
+    <MenuBarExtra>
   );
 }
 ```
