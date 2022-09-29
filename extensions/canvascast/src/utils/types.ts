@@ -11,11 +11,15 @@ export interface course {
 export interface assignment {
   name: string;
   id: number;
-  description: string;
-  date: string;
+  description: string | Function;
+  date: Date;
+  pretty_date: string;
   course: string;
   course_id: number;
   color: Color;
+  time?: Boolean;
+  submitted: Boolean;
+  filter?: string;
 }
 
 export interface announcement {
@@ -24,8 +28,11 @@ export interface announcement {
   color: string;
   course: string;
   id: number;
-  markdown: string;
-  date: string;
+  markdown: string | Function;
+  date: Date;
+  pretty_date: string;
+  time?: Boolean;
+  filter?: string;
 }
 
 export interface modulesection {
@@ -48,4 +55,34 @@ export interface Preferences {
   domain: string;
   showRecent: boolean;
   numRecent: string;
+}
+
+export interface plannernote {
+  id: number;
+  title: string;
+  type: string;
+  creation_date: Date | string;
+  due_date?: Date | string;
+  custom_type?: string;
+  custom_object?: assignment | announcement;
+  announcement?: announcement;
+  assignment?: assignment;
+  submission?: submission;
+}
+
+export interface datefeed {
+  date: Date;
+  pretty_date: string;
+  items: plannernote[];
+  today: Boolean;
+}
+
+export interface submission {
+  submitted: Boolean;
+  excused: Boolean;
+  graded: Boolean;
+  late: Boolean;
+  missing: Boolean;
+  needs_grading: Boolean;
+  with_feedback: Boolean;
 }
