@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-23 22:08
+ * @lastEditTime: 2022-09-28 17:50
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -17,9 +17,10 @@ import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
 import { userAgent, YoudaoErrorCode } from "../../consts";
-import { KeyStore } from "../../preferences";
+import { AppKeyStore } from "../../preferences";
 import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
+import { englishLanguageItem } from "./../../language/consts";
 import { myPreferences } from "./../../preferences";
 import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
@@ -102,8 +103,8 @@ export function requestYoudaoAPITranslate(
   }
   const timestamp = Math.round(new Date().getTime() / 1000);
   const salt = timestamp;
-  const youdaoAppId = KeyStore.youdaoAppId;
-  const sha256Content = youdaoAppId + truncate(word) + salt + timestamp + KeyStore.youdaoAppSecret;
+  const youdaoAppId = AppKeyStore.youdaoAppId;
+  const sha256Content = youdaoAppId + truncate(word) + salt + timestamp + AppKeyStore.youdaoAppSecret;
   const sign = CryptoJS.SHA256(sha256Content).toString();
   const url = youdaoAppId ? "https://openapi.youdao.com/api" : "https://aidemo.youdao.com/trans";
   const params = querystring.stringify({
@@ -137,7 +138,7 @@ export function requestYoudaoAPITranslate(
         const youdaoTypeResult: QueryTypeResult = {
           type: type,
           result: youdaoFormatResult,
-          wordInfo: youdaoFormatResult.queryWordInfo,
+          queryWordInfo: youdaoFormatResult.queryWordInfo,
           translations: youdaoFormatResult.translation.split("\n"),
         };
         console.warn(`---> Youdao translate cost: ${response.headers[requestCostTime]} ms`);
@@ -214,16 +215,12 @@ export function requestYoudaoWebDictionary(
 
         const youdaoWebModel = res.data as YoudaoWebDictionaryModel;
         const youdaoFormatResult = formateYoudaoWebDictionaryModel(youdaoWebModel);
-        const isValidResult = youdaoWebModel.input === queryWordInfo.word;
-        if (!isValidResult) {
-          console.warn(`---> invalid result : ${util.inspect(youdaoWebModel.meta, { depth: null })}`);
-        }
 
-        if (!youdaoFormatResult || !isValidResult) {
+        if (!youdaoFormatResult.queryWordInfo.hasDictionaryEntries) {
           const youdaoTypeResult: QueryTypeResult = {
             type: type,
             result: undefined,
-            wordInfo: queryWordInfo,
+            queryWordInfo: queryWordInfo,
             translations: [],
           };
           return resolve(youdaoTypeResult);
@@ -232,7 +229,7 @@ export function requestYoudaoWebDictionary(
         const youdaoTypeResult: QueryTypeResult = {
           type: type,
           result: youdaoFormatResult,
-          wordInfo: youdaoFormatResult.queryWordInfo,
+          queryWordInfo: youdaoFormatResult.queryWordInfo,
           translations: youdaoFormatResult.translation.split("\n"),
         };
         resolve(youdaoTypeResult);
@@ -285,7 +282,7 @@ export async function requestYoudaoWebTranslate(
     const undefinedResult: QueryTypeResult = {
       type: type,
       result: undefined,
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
       translations: [],
     };
     return Promise.resolve(undefinedResult);
@@ -333,7 +330,7 @@ export async function requestYoudaoWebTranslate(
           const youdaoTypeResult: QueryTypeResult = {
             type: type,
             result: youdaoWebResult,
-            wordInfo: queryWordInfo,
+            queryWordInfo: queryWordInfo,
             translations: translations,
           };
           resolve(youdaoTypeResult);
@@ -417,9 +414,11 @@ export function playYoudaoWordAudioAfterDownloading(queryWordInfo: QueryWordInfo
 /**
  * Download word audio file.
  *
- * If query text is a word (only English word?), download audio file from youdao web api, otherwise downloaded from youdao tts.
+ * If query text is a English word, download audio file from youdao web api, otherwise downloaded from youdao tts.
  *
- * * NOTE: If query text is too long(>40), don't download audio file, later derectly use say command to play.
+ * * NOTE: Audio 'Volcano' is different from 'volcano' in youdao web audio, so odd, so we use lower case word.
+ *
+ * * If query text is too long(>40), don't download audio file, later derectly use say command to play.
  */
 export function tryDownloadYoudaoAudio(
   queryWordInfo: QueryWordInfo,
@@ -428,7 +427,11 @@ export function tryDownloadYoudaoAudio(
   forceDownload = false
 ) {
   // For English word, Youdao web audio is better than Youdao tts, so we use Youdao web audio first.
-  if (enableYoudaoWebAudio && queryWordInfo.isWord && queryWordInfo.fromLanguage === "en") {
+  if (
+    enableYoudaoWebAudio &&
+    queryWordInfo.isWord &&
+    queryWordInfo.fromLanguage === englishLanguageItem.youdaoLangCode
+  ) {
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
   } else if (queryWordInfo.speechUrl) {
     downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
@@ -448,8 +451,9 @@ export function tryDownloadYoudaoAudio(
  * type: 1: uk, 2: us. ---> 0: us ?
  */
 export function downloadYoudaoEnglishWordAudio(word: string, callback?: () => void, forceDownload = false) {
-  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(word)}`;
-  console.log(`download youdao English word audio: ${word}`);
-  const audioPath = getWordAudioPath(word);
+  const lowerCaseWord = word.toLowerCase();
+  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(lowerCaseWord)}`;
+  console.log(`download youdao 'English' word audio: ${lowerCaseWord}`);
+  const audioPath = getWordAudioPath(lowerCaseWord);
   downloadAudio(url, audioPath, callback, forceDownload);
 }

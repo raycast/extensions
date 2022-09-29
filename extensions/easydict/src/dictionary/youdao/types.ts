@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-18 00:01
+ * @lastEditTime: 2022-09-27 16:46
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { DetectedLanguageModel } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanauge/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -51,7 +51,7 @@ export interface QueryWordInfo {
   toLanguage: string;
   isWord?: boolean; // * Dictionary Type should has value, show web url need this value.
   hasDictionaryEntries?: boolean; // it is true if the word has dictionary entries.
-  detectedLanguage?: DetectedLanguageModel;
+  detectedLangModel?: DetectedLangModel;
   phonetic?: string; // [ɡʊd]
   examTypes?: string[];
   audioPath?: string;

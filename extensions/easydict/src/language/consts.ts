@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:56
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-25 16:26
+ * @lastEditTime: 2022-09-29 09:29
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -19,8 +19,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "auto", // "auto" means this API support auto detect language.
     youdaoLangCode: "auto",
+    volcanoLangCode: "",
     bingLangCode: "auto-detect",
-    appleDetectChineseTitle: "自动识别",
+    appleDetectLangChineseName: "自动识别",
     appleLangCode: "auto",
     francLangCode: "und", // 'und', means undetermined
     aliyunLangCode: "auto",
@@ -33,9 +34,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "zh-CN",
     youdaoLangCode: "zh-CHS",
+    volcanoLangCode: "zh",
     bingLangCode: "zh-Hans",
     appleLangCode: "zh_CN",
-    appleDetectChineseTitle: "简体中文",
+    appleDetectLangChineseName: "简体中文",
     deepLSourceId: "ZH",
     francLangCode: "cmn",
     aliyunLangCode: "zh",
@@ -43,15 +45,16 @@ export const languageItemList: LanguageItem[] = [
     baiduLangCode: "zh",
     caiyunLangCode: "zh",
     langEnglishName: "Chinese-Simplified",
-    voiceList: ["Ting-Ting"],
+    voiceList: ["Ting-Ting"], // use { say -v '?'} to get voice list.
     emoji: "🇨🇳",
   },
   {
     googleLangCode: "en",
     youdaoLangCode: "en",
+    volcanoLangCode: "en",
     bingLangCode: "en",
     appleLangCode: "en_US",
-    appleDetectChineseTitle: "英语",
+    appleDetectLangChineseName: "英语",
     deepLSourceId: "EN",
     deepLTargetId: "EN-US", // "EN-GB" "EN-US"
     francLangCode: "eng",
@@ -60,15 +63,16 @@ export const languageItemList: LanguageItem[] = [
     baiduLangCode: "en",
     caiyunLangCode: "en",
     langEnglishName: "English",
-    voiceList: ["Alex", "Samantha"],
+    voiceList: ["Samantha", "Alex"], // * Note: 'Alex' is not built-in voice in macOS 13.0+, user need to download manually and cost 885M storage.
     emoji: "🇺🇸",
   },
   {
     googleLangCode: "zh-TW",
     youdaoLangCode: "zh-CHT",
+    volcanoLangCode: "zh-Hant",
     bingLangCode: "zh-Hant",
     appleLangCode: "zh_TW",
-    appleDetectChineseTitle: "繁体中文",
+    appleDetectLangChineseName: "繁体中文",
     francLangCode: "cmn",
     aliyunLangCode: "zh-tw",
     tencentLangCode: "zh-TW",
@@ -80,9 +84,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "ja",
     youdaoLangCode: "ja",
+    volcanoLangCode: "ja",
     bingLangCode: "ja",
     appleLangCode: "ja_JP",
-    appleDetectChineseTitle: "日语",
+    appleDetectLangChineseName: "日语",
     deepLSourceId: "JA",
     francLangCode: "jpn",
     aliyunLangCode: "ja",
@@ -97,9 +102,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "ko",
     youdaoLangCode: "ko",
+    volcanoLangCode: "ko",
     bingLangCode: "ko",
     appleLangCode: "ko_KR",
-    appleDetectChineseTitle: "韩语",
+    appleDetectLangChineseName: "韩语",
     francLangCode: "kor",
     aliyunLangCode: "ko",
     tencentDetectId: "kr",
@@ -112,9 +118,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "fr",
     youdaoLangCode: "fr",
+    volcanoLangCode: "fr",
     bingLangCode: "fr",
     appleLangCode: "fr_FR",
-    appleDetectChineseTitle: "法语",
+    appleDetectLangChineseName: "法语",
     deepLSourceId: "FR",
     francLangCode: "fra",
     aliyunLangCode: "fr",
@@ -127,9 +134,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "es",
     youdaoLangCode: "es",
+    volcanoLangCode: "es",
     bingLangCode: "es",
     appleLangCode: "es_ES",
-    appleDetectChineseTitle: "西班牙语",
+    appleDetectLangChineseName: "西班牙语",
     deepLSourceId: "ES",
     francLangCode: "spa",
     aliyunLangCode: "es",
@@ -142,9 +150,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "pt",
     youdaoLangCode: "pt",
+    volcanoLangCode: "pt",
     bingLangCode: "pt",
     appleLangCode: "pt_BR",
-    appleDetectChineseTitle: "葡萄牙语",
+    appleDetectLangChineseName: "葡萄牙语",
     deepLSourceId: "PT",
     deepLTargetId: "PT-PT", // "PT-PT" "PT-BR"
     francLangCode: "por",
@@ -158,9 +167,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "it",
     youdaoLangCode: "it",
+    volcanoLangCode: "it",
     bingLangCode: "it",
     appleLangCode: "it_IT",
-    appleDetectChineseTitle: "意大利语",
+    appleDetectLangChineseName: "意大利语",
     deepLSourceId: "IT",
     francLangCode: "ita",
     aliyunLangCode: "it",
@@ -173,9 +183,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "de",
     youdaoLangCode: "de",
+    volcanoLangCode: "de",
     bingLangCode: "de",
     appleLangCode: "de_DE",
-    appleDetectChineseTitle: "德语",
+    appleDetectLangChineseName: "德语",
     deepLSourceId: "DE",
     francLangCode: "deu",
     aliyunLangCode: "de",
@@ -188,9 +199,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "ru",
     youdaoLangCode: "ru",
+    volcanoLangCode: "ru",
     bingLangCode: "ru",
     appleLangCode: "ru_RU",
-    appleDetectChineseTitle: "俄语",
+    appleDetectLangChineseName: "俄语",
     deepLSourceId: "RU",
     francLangCode: "rus",
     aliyunLangCode: "ru",
@@ -203,9 +215,10 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "ar",
     youdaoLangCode: "ar",
+    volcanoLangCode: "ar",
     bingLangCode: "ar",
     appleLangCode: "ar_AE",
-    appleDetectChineseTitle: "阿拉伯语",
+    appleDetectLangChineseName: "阿拉伯语",
     francLangCode: "arb",
     aliyunLangCode: "ar",
     tencentLangCode: "ar",
@@ -217,8 +230,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "sv",
     youdaoLangCode: "sv",
+    volcanoLangCode: "sv",
     bingLangCode: "sv",
-    appleDetectChineseTitle: "瑞典语",
+    appleDetectLangChineseName: "瑞典语",
     deepLSourceId: "SV",
     francLangCode: "swe",
     aliyunLangCode: "sv",
@@ -230,8 +244,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "ro",
     youdaoLangCode: "ro",
+    volcanoLangCode: "ro",
     bingLangCode: "ro",
-    appleDetectChineseTitle: "罗马尼亚语",
+    appleDetectLangChineseName: "罗马尼亚语",
     deepLSourceId: "RO",
     francLangCode: "ron",
     aliyunLangCode: "ro",
@@ -243,8 +258,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "th",
     youdaoLangCode: "th",
+    volcanoLangCode: "th",
     bingLangCode: "th",
-    appleDetectChineseTitle: "泰语",
+    appleDetectLangChineseName: "泰语",
     francLangCode: "tha",
     aliyunLangCode: "th",
     tencentLangCode: "th",
@@ -256,8 +272,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "sk",
     youdaoLangCode: "sk",
+    volcanoLangCode: "sk",
     bingLangCode: "sk",
-    appleDetectChineseTitle: "斯洛伐克语",
+    appleDetectLangChineseName: "斯洛伐克语",
     deepLSourceId: "SK",
     francLangCode: "slk",
     aliyunLangCode: "sk",
@@ -269,8 +286,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "nl",
     youdaoLangCode: "nl",
+    volcanoLangCode: "nl",
     bingLangCode: "nl",
-    appleDetectChineseTitle: "荷兰语",
+    appleDetectLangChineseName: "荷兰语",
     deepLSourceId: "NL",
     francLangCode: "nld",
     aliyunLangCode: "nl",
@@ -282,8 +300,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "hu",
     youdaoLangCode: "hu",
+    volcanoLangCode: "hu",
     bingLangCode: "hu",
-    appleDetectChineseTitle: "匈牙利语",
+    appleDetectLangChineseName: "匈牙利语",
     deepLSourceId: "HU",
     francLangCode: "hun",
     aliyunLangCode: "hu",
@@ -295,8 +314,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "el",
     youdaoLangCode: "el",
+    volcanoLangCode: "el",
     bingLangCode: "el",
-    appleDetectChineseTitle: "希腊语",
+    appleDetectLangChineseName: "希腊语",
     deepLSourceId: "EL",
     francLangCode: "ell",
     aliyunLangCode: "el",
@@ -308,8 +328,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "da",
     youdaoLangCode: "da",
+    volcanoLangCode: "da",
     bingLangCode: "da",
-    appleDetectChineseTitle: "丹麦语",
+    appleDetectLangChineseName: "丹麦语",
     deepLSourceId: "DA",
     francLangCode: "dan",
     aliyunLangCode: "da",
@@ -321,8 +342,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "fi",
     youdaoLangCode: "fi",
+    volcanoLangCode: "fi",
     bingLangCode: "fi",
-    appleDetectChineseTitle: "芬兰语",
+    appleDetectLangChineseName: "芬兰语",
     deepLSourceId: "FI",
     francLangCode: "fin",
     aliyunLangCode: "fi",
@@ -334,8 +356,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "pl",
     youdaoLangCode: "pl",
+    volcanoLangCode: "pl",
     bingLangCode: "pl",
-    appleDetectChineseTitle: "波兰语",
+    appleDetectLangChineseName: "波兰语",
     deepLSourceId: "PL",
     francLangCode: "pol",
     aliyunLangCode: "pl",
@@ -347,8 +370,9 @@ export const languageItemList: LanguageItem[] = [
   {
     googleLangCode: "cs",
     youdaoLangCode: "cs",
+    volcanoLangCode: "cs",
     bingLangCode: "cs",
-    appleDetectChineseTitle: "捷克语",
+    appleDetectLangChineseName: "捷克语",
     deepLSourceId: "CS",
     francLangCode: "ces",
     aliyunLangCode: "cs",
