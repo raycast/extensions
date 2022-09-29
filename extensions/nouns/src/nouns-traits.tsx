@@ -44,32 +44,41 @@ export default function Command() {
     .slice(0, 3)
     .join(", ")
     .replace(/, ([^,]*)$/, " or $1");
+
   useEffect(() => {
     if (rawNounsData && searchTerm && category) {
-      // console.log("change");
-      // console.log(traits[category].length);
-      const searchTermByIndex = traits[category].findIndex((trait: Trait) => {
+      const strictMatchTrait = traits[category].find((trait) => {
         if (isNumeric(searchTerm)) {
           return trait.id === Number(searchTerm);
         }
 
         const label = trait.label.toLowerCase().replace(" ", "");
         const search = searchTerm.toLowerCase().replace(" ", "");
-        if (label === search) {
-          console.log("here");
-          return true;
-        }
-        // console.log("---");
-        // console.log(trait);
-        // console.log(label, search);
-        return label.includes(search);
+        return label === search;
       });
-      console.log(searchTermByIndex);
+
+      let searchTermIds: number[] = [];
+
+      if (strictMatchTrait) {
+        searchTermIds = [strictMatchTrait.id];
+      } else {
+        searchTermIds = traits[category]
+          .filter((trait) => {
+            const label = trait.label.toLowerCase().replace(" ", "");
+            const search = searchTerm.toLowerCase().replace(" ", "");
+            if (label === search) {
+              return true;
+            }
+            return label.includes(search);
+          })
+          .map((trait) => trait.id);
+      }
+
       const result = rawNounsData.noun_stats.filter((noun) => {
         if (category === "noun_id") {
           return noun[category] === Number(searchTerm);
         }
-        return noun[category] === searchTermByIndex;
+        return searchTermIds.some((id) => id === noun[category]);
       });
 
       setNounData(result);
@@ -82,10 +91,10 @@ export default function Command() {
     <Grid
       navigationTitle={`Showing ${nounData.length} Noun${nounData.length > 1 ? "s" : ""}`}
       isLoading={isLoading}
-      enableFiltering={false}
-      onSearchTextChange={setSearchTerm}
       searchBarPlaceholder={category === "noun_id" ? "Search for ID..." : `Eg: ${randomHints}`}
       searchText={searchTerm}
+      onSearchTextChange={setSearchTerm}
+      enableFiltering={false}
       throttle
       searchBarAccessory={
         <Grid.Dropdown
@@ -102,7 +111,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {nounData.map((noun, index) => (
+      {nounData.map((noun) => (
         <Grid.Item
           key={noun.noun_id}
           actions={
@@ -117,15 +126,9 @@ export default function Command() {
               <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
             </ActionPanel>
           }
-          title={`Noun #${noun.noun_id}`}
-          subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label}
+          title={traitCategories[category]}
+          subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`}
           content={`https://noun.pics/${noun.noun_id}`}
-          // keywords={[
-          //   noun.noun_id.toString(),
-          //   noun.background.toString(),
-          //   noun.body.toString(),
-          //   noun.accessory.toString(),
-          // ]}
         />
       ))}
     </Grid>
