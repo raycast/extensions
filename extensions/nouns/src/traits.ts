@@ -777,7 +777,7 @@ export const traits: Record<TraitCategories, Trait[]> = {
     },
     {
       filename: "sunset",
-      label: "Shirt - Sunset",
+      label: "Shirt - Sunrise",
       data: "0x0017141a0d0300012603000100012603000126010002000326020001260100032601000126",
       id: 95,
     },

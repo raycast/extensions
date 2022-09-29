@@ -22,25 +22,21 @@ export default function Command() {
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
   let nounData: NounStats[] = rawNounsData?.noun_stats || [];
+
   const isAll = category === "all";
-
-  const searchHints = traits[category].reduce((acc: string[], curr) => {
-    acc.push(curr.label);
-    return acc;
-  }, []);
-
+  const searchHints = traits[category].map((t) => t.label);
   const randomHints = useMemo(() => getRandomSearchHints(searchHints), [category]);
 
   let searchPlaceholder: string;
   if (isAll) {
-    searchPlaceholder = "Eg: Cool taco";
+    searchPlaceholder = "Eg: peahcy blue nigiri";
   } else if (category === "noun_id") {
     searchPlaceholder = "Eg: #209";
   } else {
     searchPlaceholder = `Eg: ${randomHints}`;
   }
 
-  if (category !== "all" && searchTerm && category) {
+  if (!isAll && searchTerm && category) {
     const strictMatchTrait = traits[category].find((trait) => {
       if (isNumeric(searchTerm)) {
         return trait.id === Number(searchTerm);
@@ -86,7 +82,6 @@ export default function Command() {
       searchBarPlaceholder={searchPlaceholder}
       searchText={isAll ? undefined : searchTerm}
       onSearchTextChange={isAll ? undefined : setSearchTerm}
-      enableFiltering={isAll ? true : false}
       throttle
       searchBarAccessory={
         <Grid.Dropdown
