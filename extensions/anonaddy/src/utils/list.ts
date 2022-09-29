@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { getApiKey } from "./key";
 import fetch from "node-fetch";
 export interface aliasObject {
@@ -30,6 +31,15 @@ export const listAllAliases = async () => {
         Accept: "application/json",
       },
     });
+
+    if (res.status === 401) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error listing",
+        message: "AnonAddy API credentials are invalid",
+      });
+      return [];
+    }
 
     const data = (await res.json()) as listResponse;
 

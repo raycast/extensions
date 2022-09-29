@@ -47,6 +47,7 @@ const ListAliases = () => {
         searchBarPlaceholder="Search emails and descriptions"
         navigationTitle="Search AnonAddy"
         onSearchTextChange={setSearchText}
+        isLoading={loading}
       >
         {filteredList.map((alias) => (
           <List.Item
@@ -118,7 +119,6 @@ const ListAliases = () => {
             }
           />
         ))}
-        {loading && <List.Item title="Loading..." icon={Icon.MagnifyingGlass} />}
       </List>
     </>
   );

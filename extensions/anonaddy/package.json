@@ -15,7 +15,7 @@
             "title": "Generate Alias",
             "subtitle": "AnonAddy",
             "description": "Generate a random AnonAddy alias",
-            "mode": "view"
+            "mode": "no-view"
         },
         {
             "name": "list-aliases",

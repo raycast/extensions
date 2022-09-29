@@ -1,6 +1,6 @@
 import { getApiKey } from "./key";
 import fetch from "node-fetch";
-import type { Response } from "node-fetch";
+import { showToast, Toast } from "@raycast/api";
 
 export const toggleAlias = async (id: string, newState: boolean) => {
   const headers = {
@@ -17,6 +17,16 @@ export const toggleAlias = async (id: string, newState: boolean) => {
       id,
     }),
   });
+
+  if (res.status === 401) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error creating",
+      message: "AnonAddy API credentials are invalid",
+    });
+
+    return false;
+  }
 
   return res.status === (newState ? 200 : 204);
 };

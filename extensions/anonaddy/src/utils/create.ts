@@ -1,5 +1,6 @@
 import { getApiKey } from "./key";
 import fetch from "node-fetch";
+import { showHUD } from "@raycast/api";
 
 interface creationResponse {
   data: {
@@ -21,6 +22,11 @@ export const createAlias = async () => {
       domain: "anonaddy.me",
     }),
   });
+
+  if (res.status === 401) {
+    showHUD("AnonAddy API credentials are invalid");
+    return {} as any;
+  }
 
   const data = (await res.json()) as creationResponse;
 
