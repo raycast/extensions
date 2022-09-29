@@ -22,6 +22,7 @@ export default function RequestDetails({ req }: { req: Values }) {
 
     setIsLoading(true);
     const newValue = { ...parsedValue, meta: { title, description } };
+    LocalStorage.removeItem(parsedValue.url);
     LocalStorage.setItem(`${parsedValue.method}-${parsedValue.url}`, JSON.stringify(newValue));
     setIsLoading(false);
     showToast({
