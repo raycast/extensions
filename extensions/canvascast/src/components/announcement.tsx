@@ -1,18 +1,21 @@
 import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } from "@raycast/api";
 import { announcement, Preferences } from "../utils/types";
-import { Icons } from "../utils/utils";
+import { Icons, convertHTMLToMD, getFormattedTime } from "../utils/utils";
 import { useState, useEffect } from "react";
+import { api } from '../utils/api';
 
 export const Announcement = (props: announcement) => {
   const preferences: Preferences = getPreferenceValues();
-  const [markdown, setMarkdown] = useState<string>("");
+
+  const [apiAnnouncement, setApiAnnouncement] = useState<any>({});
   useEffect(() => {
     async function load() {
-      if (props.markdown instanceof Promise) setMarkdown(await props.markdown);
-      else setMarkdown(props.markdown);
+      const apiAnnouncement = await api.courses[props.course_id].discussion_topics[props.id].get();
+      setApiAnnouncement(apiAnnouncement);
     }
     load();
   }, []);
+
 
   return (
     <List.Item
@@ -26,13 +29,25 @@ export const Announcement = (props: announcement) => {
             icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
             target={
               <Detail
-                markdown={markdown ?? ""}
+                markdown={(apiAnnouncement.message && apiAnnouncement.title) ? `# ${apiAnnouncement.title}\n\n${convertHTMLToMD(apiAnnouncement.message)}` : ""}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
                     />
                   </ActionPanel>
+                }
+                metadata={
+                  <Detail.Metadata>
+                    <Detail.Metadata.Label
+                      title="Posted"
+                      text={new Date(props.date).toDateString() + " at " + getFormattedTime(props.date)}
+                    />
+                    <Detail.Metadata.Separator />
+                    <Detail.Metadata.TagList title="Course">
+                      <Detail.Metadata.TagList.Item text={props.course} color={props.course_color ?? Color.PrimaryText} />
+                    </Detail.Metadata.TagList>
+                  </Detail.Metadata>
                 }
               />
             }

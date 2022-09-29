@@ -6,7 +6,8 @@ export const Colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color
 
 export const Icons = {
   Announcement: Icon.Megaphone,
-  Assignment: "../assets/assignment.png",
+  // Assignment: "../assets/assignment.png",
+  Assignment: Icon.Clipboard,
   Code: Icon.Code,
   Course: "../assets/books-stack.png",
   ExternalUrl: Icon.Link,
@@ -18,7 +19,12 @@ export const Icons = {
   Modules: Icon.BulletPoints,
   Page: "../assets/page.png",
   Passcode: Icon.LockUnlocked,
-  Quiz: "../assets/quiz.png",
+  // Quiz: "../assets/quiz.png",
+  Quiz: Icon.Rocket,
+  ToDo: Icon.Tray,
+  Completed: Icon.Checkmark,
+  Missing: Icon.Warning,
+  OpenGoogleCopyLink: Icon.SaveDocument
 };
 
 export enum Error {

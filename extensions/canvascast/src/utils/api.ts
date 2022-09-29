@@ -157,7 +157,7 @@ export const getModules = async (course_id: number): Promise<modulesection[]> =>
 export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
   const feed = await api.planner.items
     .searchParams({
-      per_page: 50,
+      per_page: 100,
       start_date: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(),
       end_date: new Date(new Date().setDate(new Date().getDate() + 20)).toISOString(),
     })
@@ -168,18 +168,12 @@ export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
       custom_object = undefined;
     if (item.plannable_type == "announcement" && courses.filter((course) => course.id == item.course_id)[0]) {
       custom_type = "announcement";
-      const message = async () => {
-        return `# ${item.plannable.title}\n\n${convertHTMLToMD(
-          (await api.courses[item.course_id].discussion_topics[item.plannable.id].get()).message
-        )}`;
-      };
       custom_object = {
         title: item.plannable.title,
         course_id: item.course_id,
         color: Colors[courses.indexOf(courses.filter((course) => course.id == item.course_id)[0]) % Colors.length],
         course: courses.filter((course) => course.id == item.course_id)[0].name,
         id: item.plannable.id,
-        markdown: message(),
         pretty_date: getFormattedTime(item.plannable.created_at),
         date: new Date(item.plannable.created_at),
         time: true,
@@ -187,12 +181,6 @@ export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
     }
     if (item.plannable_type == "assignment" && courses.filter((course) => course.id == item.course_id)[0]) {
       custom_type = "assignment";
-      const message = async () => {
-        return `# ${item.plannable.title}\n\n${convertHTMLToMD(
-          (await api.courses[item.course_id].assignments[item.plannable.id].get()).description
-        )}`;
-      };
-      console.log(item.plannable.submission);
       custom_object = {
         name: item.plannable.title ?? item.plannable.name,
         course_id: item.course_id,
@@ -200,8 +188,21 @@ export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
         course: courses.filter((course) => course.id == item.course_id)[0].name,
         id: item.plannable.id,
         date: item?.plannable?.due_at ? new Date(item.plannable.due_at) : undefined,
-        description: message(),
         pretty_date: "Due by " + getFormattedTime(item.plannable.due_at),
+        time: true,
+        submitted: item.plannable.has_submitted_submissions,
+      };
+    }
+    if (item.plannable_type == "quiz" && courses.filter((course) => course.id == item.course_id)[0]) {
+      custom_type = "quiz";
+      custom_object = {
+        name: item.plannable.title ?? item.plannable.name,
+        course_id: item.course_id,
+        color: Colors[courses.indexOf(courses.filter((course) => course.id == item.course_id)[0]) % Colors.length],
+        course: courses.filter((course) => course.id == item.course_id)[0].name,
+        id: item.plannable.id,
+        date: new Date(item.plannable.due_at ?? item.plannable_date),
+        pretty_date: "Due by " + getFormattedTime(item.plannable.due_at ?? item.plannable_date),
         time: true,
         submitted: item.plannable.has_submitted_submissions,
       };
@@ -212,11 +213,13 @@ export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
       type: item.plannable_type,
       creation_date: new Date(item.plannable.created_at),
       due_date: item?.plannable?.due_at ? new Date(item.plannable.due_at) : undefined,
+      plannable_date: item.plannable_date,
       custom_type,
       custom_object,
       submission: item.submissions,
       announcement: custom_type == "announcement" ? custom_object : undefined,
       assignment: custom_type == "assignment" ? custom_object : undefined,
+      quiz: custom_type == "quiz" ? custom_object : undefined,
     });
   }
   return items;
@@ -224,14 +227,14 @@ export const getFeed = async (courses: course[]): Promise<plannernote[]> => {
 
 export const getDatedFeed = async (courses: course[]): Promise<datefeed[]> => {
   const feed = await getFeed(courses);
-  const dates = [];
+  const dates = {};
   for (const item of feed) {
-    if (!dates[new Date(item.due_date ?? item.creation_date).toDateString()])
-      dates[new Date(item.due_date ?? item.creation_date).toDateString()] = {
-        date: item.due_date ?? item.creation_date,
+    if (!dates[new Date(item.due_date ?? item.plannable_date ?? item.creation_date).toDateString()])
+      dates[new Date(item.due_date ?? item.plannable_date ?? item.creation_date).toDateString()] = {
+        date: item.due_date ?? item.plannable_date ?? item.creation_date,
         items: [],
       };
-    dates[new Date(item.due_date ?? item.creation_date).toDateString()].items.push(item);
+    dates[new Date(item.due_date ?? item.plannable_date ?? item.creation_date).toDateString()].items.push(item);
   }
   const output = [];
   for (const date in dates) {

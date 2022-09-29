@@ -84,6 +84,7 @@
   "dependencies": {
     "@api-blueprints/pathmaker": "^1.2.0",
     "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.4.8",
     "node-fetch": "^3.2.6",
     "node-html-markdown": "^1.2.0",
     "open": "^8.4.0"

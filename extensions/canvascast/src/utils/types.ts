@@ -11,7 +11,7 @@ export interface course {
 export interface assignment {
   name: string;
   id: number;
-  description: string | Promise<string>;
+  description?: string | Promise<string>;
   date: Date;
   pretty_date: string;
   course: string;
@@ -20,6 +20,24 @@ export interface assignment {
   time?: boolean;
   submitted: boolean;
   filter?: string;
+  special_missing?: boolean;
+  course_color?: Color.ColorLike;
+}
+
+export interface quiz {
+  name: string;
+  id: number;
+  description?: string | Promise<string>;
+  date: Date;
+  pretty_date: string;
+  course: string;
+  course_id: number;
+  color: Color;
+  time?: boolean;
+  submitted: boolean;
+  filter?: string;
+  special_missing?: boolean;
+  course_color?: Color.ColorLike;
 }
 
 export interface announcement {
@@ -28,11 +46,12 @@ export interface announcement {
   color: string;
   course: string;
   id: number;
-  markdown: string | Promise<string>;
+  markdown?: string | Promise<string>;
   date: Date;
   pretty_date: string;
   time?: boolean;
   filter?: string;
+  course_color?: Color.ColorLike;
 }
 
 export interface modulesection {
@@ -67,7 +86,9 @@ export interface plannernote {
   custom_object?: assignment | announcement;
   announcement?: announcement;
   assignment?: assignment;
+  quiz?: quiz;
   submission?: submission;
+  plannable_date?: Date | string;
 }
 
 export interface datefeed {
