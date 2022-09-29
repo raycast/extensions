@@ -170,11 +170,11 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
 // Disabling because seems there is an issue with fuzzy search
 const getAllTraitLabels = ({ background, body, accessory, head, glasses }: NounStats) => {
   const keywords = [
-    traits.background[background] ? traits.background[background].label : "",
-    traits.body[body] ? traits.body[body].label : "",
-    traits.accessory[accessory] ? traits.accessory[accessory].label : "",
-    traits.head[head] ? traits.head[head].label : "",
-    traits.glasses[glasses] ? traits.glasses[glasses].label : "",
+    traits.background[background] ? "background: " + traits.background[background].label : "",
+    traits.body[body] ? "body: " + traits.body[body].label : "",
+    traits.accessory[accessory] ? "accessory: " + traits.accessory[accessory].label : "",
+    traits.head[head] ? "head: " + traits.head[head].label : "",
+    traits.glasses[glasses] ? "glasses: " + traits.glasses[glasses].label : "",
   ].join(" ");
   console.log([keywords]);
   return [keywords];
