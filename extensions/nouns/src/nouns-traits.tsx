@@ -1,9 +1,10 @@
+import { useState, useMemo } from "react";
 import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Data, NounStats, TraitCategories, traits } from "./traits";
 
 const traitCategories: Record<TraitCategories, string> = {
-  // all: "All",
+  all: "All",
   noun_id: "Noun ID",
   background: "Background",
   body: "Body",
@@ -18,22 +19,28 @@ export default function Command() {
     { keepPreviousData: true }
   );
 
-  const [searchTerm, setSearchTerm] = useCachedState("searchTerm", "");
-  const [category, setCategory] = useCachedState<TraitCategories>("category", "noun_id");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
   let nounData: NounStats[] = rawNounsData?.noun_stats || [];
+  const isAll = category === "all";
 
   const searchHints = traits[category].reduce((acc: string[], curr) => {
     acc.push(curr.label);
     return acc;
   }, []);
 
-  const randomHints = shuffleArray(searchHints)
-    .map((h) => `"${h}"`)
-    .slice(0, 3)
-    .join(", ")
-    .replace(/, ([^,]*)$/, " or $1");
+  const randomHints = useMemo(() => getRandomSearchHints(searchHints), [category]);
 
-  if (/*category !== "all" &&*/ searchTerm && category) {
+  let searchPlaceholder: string;
+  if (isAll) {
+    searchPlaceholder = "Eg: Cool taco";
+  } else if (category === "noun_id") {
+    searchPlaceholder = "Eg: #209";
+  } else {
+    searchPlaceholder = `Eg: ${randomHints}`;
+  }
+
+  if (category !== "all" && searchTerm && category) {
     const strictMatchTrait = traits[category].find((trait) => {
       if (isNumeric(searchTerm)) {
         return trait.id === Number(searchTerm);
@@ -73,15 +80,13 @@ export default function Command() {
 
   return (
     <Grid
-      navigationTitle={`Showing ${nounData.length} Noun${nounData.length > 1 ? "s" : ""}`}
+      itemSize={isAll ? Grid.ItemSize.Small : Grid.ItemSize.Medium}
+      navigationTitle={isAll ? undefined : `Showing ${nounData.length} Noun${nounData.length > 1 ? "s" : ""}`}
       isLoading={isLoading}
-      searchBarPlaceholder={category === "noun_id" ? "Search for ID..." : `Eg: ${randomHints}`}
-      // searchText={category === "all" ? undefined : searchTerm}
-      // onSearchTextChange={category === "all" ? undefined : setSearchTerm}
-      // enableFiltering={category === "all" ? true : false}
-      searchText={searchTerm}
-      onSearchTextChange={setSearchTerm}
-      enableFiltering={false}
+      searchBarPlaceholder={searchPlaceholder}
+      searchText={isAll ? undefined : searchTerm}
+      onSearchTextChange={isAll ? undefined : setSearchTerm}
+      enableFiltering={isAll ? true : false}
       throttle
       searchBarAccessory={
         <Grid.Dropdown
@@ -113,15 +118,15 @@ export default function Command() {
               <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
             </ActionPanel>
           }
-          // title={category === "all" ? `Noun #${noun.noun_id}` : traitCategories[category]}
-          // subtitle={
-          //   category === "all"
-          //     ? undefined
-          //     : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
-          // }
-          title={traitCategories[category]}
-          subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`}
-          // keywords={category === "all" ? getAllTraitLabels(noun) : []}
+          title={isAll ? `Noun #${noun.noun_id} - ${getAllTraitLabels(noun)}` : traitCategories[category]}
+          subtitle={
+            isAll
+              ? undefined
+              : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
+          }
+          // title={traitCategories[category]}
+          // subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`}
+          keywords={isAll ? getAllTraitLabels(noun) : []}
           content={`https://noun.pics/${noun.noun_id}`}
         />
       ))}
@@ -163,16 +168,25 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
 }
 
 // Disabling because seems there is an issue with fuzzy search
-// const getAllTraitLabels = ({ background, body, accessory, head, glasses }: NounStats) => {
-//   const keywords = [
-//     traits.background[background] ? traits.background[background].label : "",
-//     traits.body[body] ? traits.body[body].label : "",
-//     traits.accessory[accessory] ? traits.accessory[accessory].label : "",
-//     traits.head[head] ? traits.head[head].label : "",
-//     traits.glasses[glasses] ? traits.glasses[glasses].label : "",
-//   ];
-//   return keywords;
-// };
+const getAllTraitLabels = ({ background, body, accessory, head, glasses }: NounStats) => {
+  const keywords = [
+    traits.background[background] ? traits.background[background].label : "",
+    traits.body[body] ? traits.body[body].label : "",
+    traits.accessory[accessory] ? traits.accessory[accessory].label : "",
+    traits.head[head] ? traits.head[head].label : "",
+    traits.glasses[glasses] ? traits.glasses[glasses].label : "",
+  ].join(" ");
+  console.log([keywords]);
+  return [keywords];
+};
+
+function getRandomSearchHints(hints: string[]) {
+  return shuffleArray(hints)
+    .map((h) => `"${h}"`)
+    .slice(0, 3)
+    .join(", ")
+    .replace(/, ([^,]*)$/, " or $1");
+}
 
 function shuffleArray<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
