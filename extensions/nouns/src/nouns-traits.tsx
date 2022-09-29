@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
 import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { Data, NounStats, Trait, TraitCategories, traits } from "./traits";
+import { Data, NounStats, TraitCategories, traits } from "./traits";
 
 const traitCategories: Record<TraitCategories, string> = {
+  // all: "All",
   noun_id: "Noun ID",
   background: "Background",
   body: "Body",
@@ -12,18 +12,6 @@ const traitCategories: Record<TraitCategories, string> = {
   head: "Head",
 };
 
-function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function isNumeric(value: string) {
-  return /^-?\d+$/.test(value);
-}
-
 export default function Command() {
   const { data: rawNounsData, isLoading } = useFetch<Data>(
     "https://7tedfll1w4.execute-api.us-east-2.amazonaws.com/Prod/rarity-stats",
@@ -31,8 +19,8 @@ export default function Command() {
   );
 
   const [searchTerm, setSearchTerm] = useCachedState("searchTerm", "");
-  const [category, setCategory] = useCachedState<TraitCategories>("nounId", "noun_id");
-  const [nounData, setNounData] = useCachedState<NounStats[]>("nounData", rawNounsData?.noun_stats || []);
+  const [category, setCategory] = useCachedState<TraitCategories>("category", "noun_id");
+  let nounData: NounStats[] = rawNounsData?.noun_stats || [];
 
   const searchHints = traits[category].reduce((acc: string[], curr) => {
     acc.push(curr.label);
@@ -45,53 +33,52 @@ export default function Command() {
     .join(", ")
     .replace(/, ([^,]*)$/, " or $1");
 
-  useEffect(() => {
-    if (rawNounsData && searchTerm && category) {
-      const strictMatchTrait = traits[category].find((trait) => {
-        if (isNumeric(searchTerm)) {
-          return trait.id === Number(searchTerm);
-        }
-
-        const label = trait.label.toLowerCase().replace(" ", "");
-        const search = searchTerm.toLowerCase().replace(" ", "");
-        return label === search;
-      });
-
-      let searchTermIds: number[] = [];
-
-      if (strictMatchTrait) {
-        searchTermIds = [strictMatchTrait.id];
-      } else {
-        searchTermIds = traits[category]
-          .filter((trait) => {
-            const label = trait.label.toLowerCase().replace(" ", "");
-            const search = searchTerm.toLowerCase().replace(" ", "");
-            if (label === search) {
-              return true;
-            }
-            return label.includes(search);
-          })
-          .map((trait) => trait.id);
+  if (/*category !== "all" &&*/ searchTerm && category) {
+    const strictMatchTrait = traits[category].find((trait) => {
+      if (isNumeric(searchTerm)) {
+        return trait.id === Number(searchTerm);
       }
 
-      const result = rawNounsData.noun_stats.filter((noun) => {
-        if (category === "noun_id") {
-          return noun[category] === Number(searchTerm);
-        }
-        return searchTermIds.some((id) => id === noun[category]);
-      });
+      const label = trait.label.toLowerCase().replace(" ", "");
+      const search = searchTerm.toLowerCase().replace(" ", "");
+      return label === search;
+    });
 
-      setNounData(result);
+    let searchTermIds: number[] = [];
+
+    if (strictMatchTrait) {
+      searchTermIds = [strictMatchTrait.id];
     } else {
-      setNounData(rawNounsData?.noun_stats || []);
+      searchTermIds = traits[category]
+        .filter((trait) => {
+          const label = trait.label.toLowerCase().replace(" ", "");
+          const search = searchTerm.toLowerCase().replace(" ", "");
+          if (label === search) {
+            return true;
+          }
+          return label.includes(search);
+        })
+        .map((trait) => trait.id);
     }
-  }, [rawNounsData, category, searchTerm]);
+
+    const result = rawNounsData?.noun_stats.filter((noun) => {
+      if (category === "noun_id") {
+        return noun[category] === Number(searchTerm);
+      }
+      return searchTermIds.some((id) => id === noun[category]);
+    });
+
+    nounData = result || [];
+  }
 
   return (
     <Grid
       navigationTitle={`Showing ${nounData.length} Noun${nounData.length > 1 ? "s" : ""}`}
       isLoading={isLoading}
       searchBarPlaceholder={category === "noun_id" ? "Search for ID..." : `Eg: ${randomHints}`}
+      // searchText={category === "all" ? undefined : searchTerm}
+      // onSearchTextChange={category === "all" ? undefined : setSearchTerm}
+      // enableFiltering={category === "all" ? true : false}
       searchText={searchTerm}
       onSearchTextChange={setSearchTerm}
       enableFiltering={false}
@@ -126,8 +113,15 @@ export default function Command() {
               <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
             </ActionPanel>
           }
+          // title={category === "all" ? `Noun #${noun.noun_id}` : traitCategories[category]}
+          // subtitle={
+          //   category === "all"
+          //     ? undefined
+          //     : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
+          // }
           title={traitCategories[category]}
           subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`}
+          // keywords={category === "all" ? getAllTraitLabels(noun) : []}
           content={`https://noun.pics/${noun.noun_id}`}
         />
       ))}
@@ -166,4 +160,28 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
       }
     />
   );
+}
+
+// Disabling because seems there is an issue with fuzzy search
+// const getAllTraitLabels = ({ background, body, accessory, head, glasses }: NounStats) => {
+//   const keywords = [
+//     traits.background[background] ? traits.background[background].label : "",
+//     traits.body[body] ? traits.body[body].label : "",
+//     traits.accessory[accessory] ? traits.accessory[accessory].label : "",
+//     traits.head[head] ? traits.head[head].label : "",
+//     traits.glasses[glasses] ? traits.glasses[glasses].label : "",
+//   ];
+//   return keywords;
+// };
+
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function isNumeric(value: string) {
+  return /^-?\d+$/.test(value);
 }

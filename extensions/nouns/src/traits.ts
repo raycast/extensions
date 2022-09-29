@@ -6,6 +6,7 @@ const emptyTrait: Trait = {
 };
 
 export const traits: Record<TraitCategories, Trait[]> = {
+  // all: [emptyTrait],
   noun_id: [emptyTrait],
   background: [
     {
@@ -2571,6 +2572,7 @@ export type Trait = {
 };
 
 export type TraitCategories =
+  // | "all"
   | "noun_id"
   | keyof Pick<NounStats, "background">
   | keyof Pick<NounStats, "head">
@@ -2584,7 +2586,7 @@ export type Data = {
 };
 
 export type NounStats = {
-  all: never;
+  // all: never;
   background_freq_count: number;
   body_freq_count: number;
   accessory_freq_count: number;
