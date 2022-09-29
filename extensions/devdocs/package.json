@@ -17,7 +17,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "@raycast/utils": "^1.4.0",
+    "@raycast/utils": "^1.4.8",
     "fuse.js": "^6.4.6"
   },
   "devDependencies": {
