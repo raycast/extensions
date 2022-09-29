@@ -19,7 +19,7 @@ export default function Command() {
     { keepPreviousData: true }
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
   let nounData: NounStats[] = rawNounsData?.noun_stats || [];
   const isAll = category === "all";
