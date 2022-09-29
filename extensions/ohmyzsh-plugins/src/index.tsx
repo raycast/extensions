@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 
@@ -6,7 +6,13 @@ export default function Command() {
   const { state, search } = useSearch();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search plugins..." throttle>
+    <List
+      isShowingDetail
+      isLoading={state.isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search plugins..."
+      throttle
+    >
       {state.results.map((searchResult, index) => (
         <SearchListItem key={searchResult.name} searchResult={searchResult} index={index} />
       ))}
@@ -17,10 +23,11 @@ export default function Command() {
 function SearchListItem({ searchResult }: { searchResult: Plugin; index: number }) {
   return (
     <List.Item
+      key={searchResult.name}
       title={searchResult.name}
+      detail={<README plugin={searchResult} />}
       actions={
         <ActionPanel>
-          <Action.Push icon={Icon.Document} title="README" target={<README plugin={searchResult} />} />
           <Action.CopyToClipboard title="Copy Plugin Name" content={searchResult.name} />
           <Action.OpenInBrowser title="Open in Browser" url={searchResult.html_url} />
         </ActionPanel>
@@ -112,16 +119,5 @@ export function README({ plugin }: { plugin: Plugin }) {
     })();
   }, []);
 
-  return (
-    <Detail
-      navigationTitle={plugin.name}
-      isLoading={loading}
-      markdown={content}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={plugin.html_url} />
-        </ActionPanel>
-      }
-    />
-  );
+  return <List.Item.Detail isLoading={loading} markdown={content} />;
 }
