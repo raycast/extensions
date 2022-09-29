@@ -118,14 +118,12 @@ export default function Command() {
               <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
             </ActionPanel>
           }
-          title={isAll ? `Noun #${noun.noun_id} - ${getAllTraitLabels(noun)}` : traitCategories[category]}
+          title={isAll ? `Noun #${noun.noun_id} — ${getAllTraitLabels(noun)}` : traitCategories[category]}
           subtitle={
             isAll
               ? undefined
               : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
           }
-          // title={traitCategories[category]}
-          // subtitle={traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`}
           keywords={isAll ? getAllTraitLabels(noun) : []}
           content={`https://noun.pics/${noun.noun_id}`}
         />
@@ -143,6 +141,17 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
 
   return (
     <Detail
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Noun ID" content={noun_id} />
+          <Action.OpenInBrowser
+            title="View on OpenSea"
+            url={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun_id}`}
+          />
+          <Action.OpenInBrowser title="Open image as PNG" url={`https://noun.pics/${noun_id}`} />
+          <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun_id}.svg`} />
+        </ActionPanel>
+      }
       navigationTitle={`Detail for Noun #${noun_id}`}
       markdown={`<img src="https://noun.pics/${noun_id}"/>`}
       metadata={
