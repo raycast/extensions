@@ -1,6 +1,6 @@
 import { Icon, Color, LocalStorage } from "@raycast/api";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import { course } from './types';
+import { course } from "./types";
 
 export const Colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue, Color.Purple];
 
@@ -97,11 +97,11 @@ export const getFormattedDate = (date: string | Date | number) => {
 };
 
 export const getFormattedFriendlyDate = (date: string | Date | number) => {
-  return new Date(date).toLocaleDateString('en-us', { weekday: "long", month: "long", day: "numeric" });
+  return new Date(date).toLocaleDateString("en-us", { weekday: "long", month: "long", day: "numeric" });
 };
 
 export const getFormattedTime = (date: string | Date | number) => {
-  return new Date(date).toLocaleTimeString([], { timeStyle: 'short' });
+  return new Date(date).toLocaleTimeString([], { timeStyle: "short" });
 };
 
 export const convertHTMLToMD = (html: string) => {
@@ -112,7 +112,7 @@ export const convertHTMLToMD = (html: string) => {
 };
 
 export const getCourseColors = async (courses: course[]) => {
-  const ids = courses.map(course => course.id);
+  const ids = courses.map((course) => course.id);
   const colors = {};
 
   for (let i = 0; i < ids.length; i++) {
@@ -120,14 +120,14 @@ export const getCourseColors = async (courses: course[]) => {
   }
 
   try {
-  
-    const cache = JSON.parse(await LocalStorage.getItem('colors') as string);
+    const cache = JSON.parse((await LocalStorage.getItem("colors")) as string);
 
     for (const item in cache) {
       colors[item] = cache[item];
     }
-
-  } catch (err) {}
+  } catch (err) {
+    ("This block isn't empty anymore ESLint");
+  }
 
   return colors;
-}
+};

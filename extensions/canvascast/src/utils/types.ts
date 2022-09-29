@@ -11,14 +11,14 @@ export interface course {
 export interface assignment {
   name: string;
   id: number;
-  description: string | Function;
+  description: string | Promise<string>;
   date: Date;
   pretty_date: string;
   course: string;
   course_id: number;
   color: Color;
-  time?: Boolean;
-  submitted: Boolean;
+  time?: boolean;
+  submitted: boolean;
   filter?: string;
 }
 
@@ -28,10 +28,10 @@ export interface announcement {
   color: string;
   course: string;
   id: number;
-  markdown: string | Function;
+  markdown: string | Promise<string>;
   date: Date;
   pretty_date: string;
-  time?: Boolean;
+  time?: boolean;
   filter?: string;
 }
 
@@ -74,15 +74,15 @@ export interface datefeed {
   date: Date;
   pretty_date: string;
   items: plannernote[];
-  today: Boolean;
+  today: boolean;
 }
 
 export interface submission {
-  submitted: Boolean;
-  excused: Boolean;
-  graded: Boolean;
-  late: Boolean;
-  missing: Boolean;
-  needs_grading: Boolean;
-  with_feedback: Boolean;
+  submitted: boolean;
+  excused: boolean;
+  graded: boolean;
+  late: boolean;
+  missing: boolean;
+  needs_grading: boolean;
+  with_feedback: boolean;
 }
