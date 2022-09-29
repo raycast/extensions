@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Data, NounStats, TraitCategories, traits } from "./traits";
@@ -21,6 +21,11 @@ export default function Command() {
 
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
+
+  useEffect(() => {
+    setSearchTerm("");
+  }, [category]);
+
   let nounData: NounStats[] = rawNounsData?.noun_stats || [];
 
   const isAll = category === "all";
@@ -89,7 +94,6 @@ export default function Command() {
           defaultValue={category}
           onChange={(newValue) => {
             setCategory(newValue as TraitCategories);
-            setSearchTerm("");
           }}
         >
           {Object.entries(traitCategories).map((entry) => (
