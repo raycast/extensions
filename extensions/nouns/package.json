@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "nouns-traits",
-      "title": "Nouns Traits",
+      "title": "Nouns",
       "subtitle": "Search",
       "description": "Search Nouns Traits",
       "mode": "view"
