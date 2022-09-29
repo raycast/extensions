@@ -3,7 +3,7 @@ import { assignment, Preferences } from "../utils/types";
 import { Icons, convertHTMLToMD } from "../utils/utils";
 import { useEffect, useState } from "react";
 import { api } from "../utils/api";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 export const Assignment = (props: assignment) => {
   const preferences: Preferences = getPreferenceValues();
@@ -38,14 +38,15 @@ export const Assignment = (props: assignment) => {
                     <Action.OpenInBrowser
                       url={`https://${preferences.domain}/courses/${props.course_id}/assignments/${props.id}`}
                     />
-                    {apiAssignment.description?.match(/https:\/\/docs\.google\.com\/document\/d\/.*?\/copy/g)?.length && 
+                    {apiAssignment.description?.match(/https:\/\/docs\.google\.com\/document\/d\/.*?\/copy/g)
+                      ?.length && (
                       <Action.OpenInBrowser
                         title={`Copy Google Doc`}
                         icon={Icons.OpenGoogleCopyLink}
                         url={apiAssignment.description.match(/https:\/\/docs\.google\.com\/document\/d\/.*?\/copy/g)[0]}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
-                    }
+                    )}
                   </ActionPanel>
                 }
                 metadata={
@@ -61,9 +62,10 @@ export const Assignment = (props: assignment) => {
                         ) : (
                           <Detail.Metadata.TagList.Item text="Submitted" color={Color.Green} />
                         )
-                      ) : (new Date() > props.date && props.special_missing) ? (
+                      ) : new Date() > props.date && props.special_missing ? (
                         <Detail.Metadata.TagList.Item text="Missing" color={Color.Red} />
-                      ) : ( // (!apiAssignment?.submission?.submitted_at && new Date() > props.date)
+                      ) : (
+                        // (!apiAssignment?.submission?.submitted_at && new Date() > props.date)
                         <Detail.Metadata.TagList.Item text="No Submission" color={Color.SecondaryText} />
                       )}
                       {apiAssignment?.submission?.graded_at && (
@@ -86,7 +88,10 @@ export const Assignment = (props: assignment) => {
                     )}
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.TagList title="Course">
-                      <Detail.Metadata.TagList.Item text={props.course} color={props.course_color ?? Color.PrimaryText} />
+                      <Detail.Metadata.TagList.Item
+                        text={props.course}
+                        color={props.course_color ?? Color.PrimaryText}
+                      />
                     </Detail.Metadata.TagList>
                   </Detail.Metadata>
                 }
@@ -103,9 +108,11 @@ export const Assignment = (props: assignment) => {
           ? [
               {
                 text: props.pretty_date,
-                ...(apiAssignment?.submission?.submitted_at ? { icon: Icons.Completed, tooltip: "Submitted" } : (
-                  (props.special_missing) ? { icon: Icons.Missing, tooltip: "Missing" } : {}
-                )),
+                ...(apiAssignment?.submission?.submitted_at
+                  ? { icon: Icons.Completed, tooltip: "Submitted" }
+                  : props.special_missing
+                  ? { icon: Icons.Missing, tooltip: "Missing" }
+                  : {}),
               },
             ]
           : [{ text: props.pretty_date, icon: Icon.Calendar }]

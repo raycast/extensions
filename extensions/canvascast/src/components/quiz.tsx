@@ -49,21 +49,30 @@ export const Quiz = (props: quiz) => {
                       <Detail.Metadata.Label
                         title="Score"
                         text={
-                            apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible ? `${Math.round(apiSubmission?.quiz_submissions?.[0]?.kept_score * 100) / 100}/${apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible} point${apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible == 1 ? '' : 's'}` : `${Math.round(apiSubmission?.quiz_submissions?.[0]?.kept_score * 100) / 100} point${apiSubmission?.quiz_submissions?.[0]?.kept_score == 1 ? '' : 's'}`
+                          apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible
+                            ? `${Math.round(apiSubmission?.quiz_submissions?.[0]?.kept_score * 100) / 100}/${
+                                apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible
+                              } point${apiSubmission?.quiz_submissions?.[0]?.quiz_points_possible == 1 ? "" : "s"}`
+                            : `${Math.round(apiSubmission?.quiz_submissions?.[0]?.kept_score * 100) / 100} point${
+                                apiSubmission?.quiz_submissions?.[0]?.kept_score == 1 ? "" : "s"
+                              }`
                         }
                       />
                     )}
                     {!apiSubmission?.quiz_submissions?.[0] && apiAssignment.points_possible && (
                       <Detail.Metadata.Label
                         title="No Score Yet"
-                        text={
-                            `${apiAssignment.points_possible} possible point${apiAssignment.points_possible == 1 ? '' : 's'}`
-                        }
+                        text={`${apiAssignment.points_possible} possible point${
+                          apiAssignment.points_possible == 1 ? "" : "s"
+                        }`}
                       />
                     )}
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.TagList title="Course">
-                      <Detail.Metadata.TagList.Item text={props.course} color={props.course_color ?? Color.PrimaryText} />
+                      <Detail.Metadata.TagList.Item
+                        text={props.course}
+                        color={props.course_color ?? Color.PrimaryText}
+                      />
                     </Detail.Metadata.TagList>
                   </Detail.Metadata>
                 }
@@ -78,11 +87,13 @@ export const Quiz = (props: quiz) => {
       accessories={
         props?.time
           ? [
-            {
+              {
                 text: props.pretty_date,
-                ...(apiAssignment?.submission?.submitted_at ? { icon: Icons.Completed, tooltip: "Submitted" } : (
-                  (props.special_missing) ? { icon: Icons.Missing, tooltip: "Missing" } : {}
-                )),
+                ...(apiAssignment?.submission?.submitted_at
+                  ? { icon: Icons.Completed, tooltip: "Submitted" }
+                  : props.special_missing
+                  ? { icon: Icons.Missing, tooltip: "Missing" }
+                  : {}),
               },
             ]
           : [{ text: props.pretty_date, icon: Icon.Calendar }]

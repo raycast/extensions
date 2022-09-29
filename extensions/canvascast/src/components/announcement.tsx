@@ -2,7 +2,7 @@ import { List, Detail, Action, ActionPanel, Icon, Color, getPreferenceValues } f
 import { announcement, Preferences } from "../utils/types";
 import { Icons, convertHTMLToMD, getFormattedTime } from "../utils/utils";
 import { useState, useEffect } from "react";
-import { api } from '../utils/api';
+import { api } from "../utils/api";
 
 export const Announcement = (props: announcement) => {
   const preferences: Preferences = getPreferenceValues();
@@ -16,7 +16,6 @@ export const Announcement = (props: announcement) => {
     load();
   }, []);
 
-
   return (
     <List.Item
       title={props.title}
@@ -29,7 +28,11 @@ export const Announcement = (props: announcement) => {
             icon={{ source: Icons["Announcement"], tintColor: Color.PrimaryText }}
             target={
               <Detail
-                markdown={(apiAnnouncement.message && apiAnnouncement.title) ? `# ${apiAnnouncement.title}\n\n${convertHTMLToMD(apiAnnouncement.message)}` : ""}
+                markdown={
+                  apiAnnouncement.message && apiAnnouncement.title
+                    ? `# ${apiAnnouncement.title}\n\n${convertHTMLToMD(apiAnnouncement.message)}`
+                    : ""
+                }
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
@@ -45,7 +48,10 @@ export const Announcement = (props: announcement) => {
                     />
                     <Detail.Metadata.Separator />
                     <Detail.Metadata.TagList title="Course">
-                      <Detail.Metadata.TagList.Item text={props.course} color={props.course_color ?? Color.PrimaryText} />
+                      <Detail.Metadata.TagList.Item
+                        text={props.course}
+                        color={props.course_color ?? Color.PrimaryText}
+                      />
                     </Detail.Metadata.TagList>
                   </Detail.Metadata>
                 }

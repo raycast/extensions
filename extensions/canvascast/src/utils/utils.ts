@@ -24,7 +24,7 @@ export const Icons = {
   ToDo: Icon.Tray,
   Completed: Icon.Checkmark,
   Missing: Icon.Warning,
-  OpenGoogleCopyLink: Icon.SaveDocument
+  OpenGoogleCopyLink: Icon.SaveDocument,
 };
 
 export enum Error {
