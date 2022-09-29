@@ -2586,7 +2586,7 @@ export type Data = {
 };
 
 export type NounStats = {
-  all?: never;
+  all: never;
   background_freq_count: number;
   body_freq_count: number;
   accessory_freq_count: number;

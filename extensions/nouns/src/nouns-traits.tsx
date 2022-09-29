@@ -184,7 +184,7 @@ const getAllTraitLabels = ({ background, body, accessory, head, glasses }: NounS
     traits.head[head] ? "head: " + traits.head[head].label : "",
     traits.glasses[glasses] ? "glasses: " + traits.glasses[glasses].label : "",
   ].join(" ");
-  console.log([keywords]);
+
   return [keywords];
 };
 
