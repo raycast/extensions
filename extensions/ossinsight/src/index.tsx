@@ -1,6 +1,6 @@
 import { ActionPanel, Action, List, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
+import axios, { CanceledError } from "axios";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -85,6 +85,9 @@ function useSearch() {
           isLoading: false,
         }));
       } catch (err) {
+        if (err instanceof CanceledError) {
+          return;
+        }
         setState((oldState) => ({
           ...oldState,
           isLoading: false,
