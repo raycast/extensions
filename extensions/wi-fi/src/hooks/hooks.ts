@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import wifi, { WiFiNetwork } from "node-wifi";
-import { LocalStorage } from "@raycast/api";
+import { Cache } from "@raycast/api";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPassword } from "../types/types";
 import { getCurWifiStatus, uniqueWifiNetWork } from "../utils/common-utils";
@@ -19,24 +19,24 @@ export const getWifiList = (refresh: number) => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    const cache = new Cache();
 
     const _curWifi = await wifi.getCurrentConnections();
     setCurWifi(_curWifi);
-    const localStorageWifiPassword = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_PASSWORD);
-    const wifiPassword: WifiPassword[] =
-      typeof localStorageWifiPassword === "string" ? JSON.parse(localStorageWifiPassword) : [];
+    const wifiPasswordCache = cache.get(LocalStorageKey.WIFI_PASSWORD);
+    const wifiPassword: WifiPassword[] = typeof wifiPasswordCache === "string" ? JSON.parse(wifiPasswordCache) : [];
     setWifiPassword(wifiPassword);
 
-    const localStorageWifiCache = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_CACHE);
+    const wifiCache = cache.get(LocalStorageKey.WIFI_CACHE);
     let allWifiList: WiFiNetwork[];
-    typeof localStorageWifiCache === "string" ? JSON.parse(localStorageWifiCache) : [];
-    if (typeof localStorageWifiCache === "string") {
-      allWifiList = JSON.parse(localStorageWifiCache) as WiFiNetwork[];
+    typeof wifiCache === "string" ? JSON.parse(wifiCache) : [];
+    if (typeof wifiCache === "string") {
+      allWifiList = JSON.parse(wifiCache) as WiFiNetwork[];
     } else {
       const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
       allWifiList = uniqueWifiNetWork(_allWifiList);
       if (allWifiList.length > 0) {
-        await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
+        cache.set(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
       }
     }
 
@@ -76,7 +76,7 @@ export const getWifiList = (refresh: number) => {
     setPublicWifi(_allWifiList.filter((wifiItem) => wifiItem.security === "NONE"));
     setLoading(false);
     if (_allWifiList.length > 0) {
-      await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
+      cache.set(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
     }
   }, [refresh]);
 

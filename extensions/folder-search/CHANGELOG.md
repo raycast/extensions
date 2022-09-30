@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [New Features] - 2022-09-25
+
+- **added** Enable 'exact' matching via [term] search
+
 ## [New Features] - 2022-09-14
 
 - **added** Plugins support (see README for details)

@@ -81,8 +81,8 @@
     }
   ],
   "dependencies": {
-    "@octokit/core": "^3.6.0",
-    "@raycast/api": "^1.37.0"
+    "@octokit/core": "^4.0.5",
+    "@raycast/api": "^1.40.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

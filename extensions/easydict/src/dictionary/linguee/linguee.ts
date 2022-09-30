@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-24 17:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:13
+ * @lastEditTime: 2022-09-26 11:13
  * @fileName: linguee.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -36,7 +36,7 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
       type: DicionaryType.Linguee,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }

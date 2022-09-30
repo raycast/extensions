@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "man-pages",
+  "title": "Man Pages",
+  "description": "Search through the macOS man pages",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-man-pages",
+      "title": "Search Man Pages",
+      "description": "Search the list of available system-level man pages",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "command",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "random-man-page",
+      "title": "Random Man Page",
+      "description": "View the man page for a randomly selected terminal command.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "run-applescript": "^6.0.0",
+    "shell-env": "^4.0.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

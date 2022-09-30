@@ -1,5 +1,10 @@
 # Canvascast Changelog
 
+## [Update] - 2022-09-28
+
+- Added Canvas Feed command
+- Added assignment sidebar
+
 ## [Fix] - 2022-09-13
 
 - Fixed a bug with loading the download urls of the module items

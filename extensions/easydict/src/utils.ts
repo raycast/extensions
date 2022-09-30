@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-17 22:22
+ * @lastEditTime: 2022-09-26 18:18
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -256,4 +256,8 @@ export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
 
 export function md5(text: string): string {
   return CryptoJS.MD5(text).toString();
+}
+
+export function printObject(name: string, obj: unknown, space = 4) {
+  console.log(`${name}: ${JSON.stringify(obj, null, space)}`);
 }

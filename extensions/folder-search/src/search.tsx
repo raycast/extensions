@@ -119,7 +119,6 @@ export default function Command() {
     [
       searchText,
       searchScope,
-      "kind:folder", // hard-code
       abortable,
       (result: SpotlightSearchResult) => {
         setResults((results) => [result, ...results]);

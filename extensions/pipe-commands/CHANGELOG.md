@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Added new pipe commands] - 2022-09-26
+
+- Added new pipe command: convert newline to spaces
+
 ## [Added new pipe commands] - 2022-09-19
 
 Adding two new pipe command scripts:
