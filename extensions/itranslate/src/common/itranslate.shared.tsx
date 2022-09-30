@@ -1,18 +1,26 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 import {
   HistoriesCacheKey,
   LANG_LIST,
+  TempOCRImgName,
   TransAPIErrCode,
   TransServiceProviderTp,
+  OCRServiceProviderTp,
   TRANS_SERVICES_NOT_SUPPORT_LANGS,
+  BaiduOCRTokenCacheKey,
+  BUILD_IN_SPACE_OCR_API_KEY,
 } from "./const";
 import axios from "axios";
 import crypto from "crypto";
 import querystring from "node:querystring";
-import { LanguageConflict, ServiceProviderMiss } from "./TranslateError";
+import { LanguageConflict, OCRServiceProviderMiss, ServiceProviderMiss } from "../components/TranslateError";
 import translate from "@vitalets/google-translate-api";
 import Core from "@alicloud/pop-core";
 import { execSync } from "child_process";
+import os from "node:os";
+import path from "node:path";
+import fs from "node:fs";
+import FormData from "form-data";
 
 const apiFetchMap = new Map<
   TransServiceProviderTp,
@@ -915,4 +923,404 @@ function checkServiceNotSupportLang(
       res: "",
     };
   return undefined;
+}
+
+export async function capture(closeWindow: boolean): Promise<string> {
+  let capturePath = path.join(os.tmpdir(), TempOCRImgName);
+  closeWindow && showHUD("Capture the text you want to translate");
+  !closeWindow && showToast({ title: "Capture the text you want to translate" });
+  execSync(`/usr/sbin/screencapture -i  ${capturePath}`);
+  const now = new Date().getTime();
+  const stat = fs.statSync(capturePath);
+  if (Math.abs(now - stat.ctimeMs) > 3000) {
+    capturePath = "";
+  }
+  closeWindow && (await open("raycast://"));
+  return capturePath;
+}
+
+export async function getTextFromPic(picPath: string): Promise<string> {
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  const ocrApi = apiOCRMap.get(preferences.ocrServiceProvider);
+  if (!ocrApi) return "";
+  return await ocrApi(picPath, getOCRServiceProvider());
+}
+
+export function checkOCRPreferences() {
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  let checkCfg = true;
+  switch (preferences.ocrServiceProvider) {
+    case OCRServiceProviderTp.Google:
+      if (!preferences.googleOCRApiKey) checkCfg = false;
+      break;
+    case OCRServiceProviderTp.MicrosoftAzure:
+      if (!preferences.microsoftOCRResourceName || !preferences.microsoftOCRAccessKey) checkCfg = false;
+      break;
+    case OCRServiceProviderTp.Youdao:
+      if (!preferences.youdaoOCRAppId || !preferences.youdaoOCRAppKey) checkCfg = false;
+      break;
+    case OCRServiceProviderTp.Baidu:
+      if (!preferences.baiduOCRApiKey || !preferences.baiduOCRSecretKey) checkCfg = false;
+      break;
+    case OCRServiceProviderTp.Tencent:
+      if (!preferences.tencentOCRSecretId || !preferences.tencentOCRSecretKey) checkCfg = false;
+      break;
+  }
+  if (!checkCfg) {
+    return <OCRServiceProviderMiss service={preferences.ocrServiceProvider} />;
+  }
+  return null;
+}
+
+const apiOCRMap = new Map<OCRServiceProviderTp, (image: string, provider: IOCRServiceProvider) => Promise<string>>([
+  [OCRServiceProviderTp.Space, fetchSpaceOCR],
+  [OCRServiceProviderTp.Google, fetchGoogleOCR],
+  [OCRServiceProviderTp.MicrosoftAzure, fetchMicrosoftAzureOCR],
+  [OCRServiceProviderTp.Youdao, fetchYoudaoOCR],
+  [OCRServiceProviderTp.Baidu, fetchBaiduOCR],
+  [OCRServiceProviderTp.Tencent, fetchTencentOCR],
+]);
+
+export function getOCRServiceProvider(): IOCRServiceProvider {
+  const preferences: IPreferences = getPreferenceValues<IPreferences>();
+  let serviceProvider: IOCRServiceProvider = { appId: "", appKey: "", serviceProvider: OCRServiceProviderTp.Space };
+  switch (preferences.ocrServiceProvider) {
+    case OCRServiceProviderTp.Space:
+      serviceProvider = {
+        appId: "",
+        appKey: preferences.spaceOCRApiKey || BUILD_IN_SPACE_OCR_API_KEY,
+        serviceProvider: OCRServiceProviderTp.Space,
+      };
+      break;
+    case OCRServiceProviderTp.Google:
+      serviceProvider = {
+        appId: "",
+        appKey: preferences.googleOCRApiKey,
+        serviceProvider: OCRServiceProviderTp.Google,
+      };
+      break;
+    case OCRServiceProviderTp.MicrosoftAzure:
+      serviceProvider = {
+        appId: preferences.microsoftOCRResourceName,
+        appKey: preferences.microsoftOCRAccessKey,
+        serviceProvider: OCRServiceProviderTp.MicrosoftAzure,
+      };
+      break;
+    case OCRServiceProviderTp.Youdao:
+      serviceProvider = {
+        appId: preferences.youdaoOCRAppId,
+        appKey: preferences.youdaoOCRAppKey,
+        serviceProvider: OCRServiceProviderTp.Youdao,
+      };
+      break;
+    case OCRServiceProviderTp.Baidu:
+      serviceProvider = {
+        appId: preferences.baiduOCRApiKey,
+        appKey: preferences.baiduOCRSecretKey,
+        serviceProvider: OCRServiceProviderTp.Baidu,
+      };
+      break;
+    case OCRServiceProviderTp.Tencent:
+      serviceProvider = {
+        appId: preferences.tencentOCRSecretId,
+        appKey: preferences.tencentOCRSecretKey,
+        serviceProvider: OCRServiceProviderTp.Tencent,
+      };
+      break;
+  }
+  return serviceProvider;
+}
+
+function fetchSpaceOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(image));
+    axios({
+      url: "https://api.ocr.space/parse/image",
+      method: "POST",
+      headers: { apikey: provider.appKey, ...formData.getHeaders() },
+      data: formData,
+    })
+      .then((res) => {
+        const resDate: ISpaceOCRResult = res.data;
+        if (resDate.OCRExitCode != 1 || resDate.IsErroredOnProcessing) {
+          reject(resDate.ErrorMessage);
+        }
+        resolve(resDate.ParsedResults.map((item) => item.ParsedText).join("\n"));
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
+}
+
+function fetchGoogleOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const APP_KEY = provider.appKey;
+    axios({
+      url: "https://vision.googleapis.com/v1/images:annotate?key=" + APP_KEY,
+      method: "POST",
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      data: {
+        requests: [
+          {
+            image: {
+              content: fs.readFileSync(image).toString("base64"),
+            },
+            features: [
+              {
+                type: "TEXT_DETECTION",
+              },
+            ],
+          },
+        ],
+      },
+    })
+      .then((res) => {
+        const resDate: IGoogleOCRResult = res.data;
+        resolve(resDate.responses.map((item) => item.fullTextAnnotation.text).join("\n"));
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
+}
+
+function fetchMicrosoftAzureOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const RESOURCE_NAME = provider.appId;
+    const APP_KEY = provider.appKey;
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(image));
+    axios({
+      url: `https://${RESOURCE_NAME}.cognitiveservices.azure.com/vision/v3.2/ocr`,
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Ocp-Apim-Subscription-Key": APP_KEY,
+        ...formData.getHeaders(),
+      },
+      data: formData,
+    })
+      .then((res) => {
+        const resDate: IMicrosoftAzureOCRResult = res.data;
+        resolve(
+          resDate.regions
+            .map((region) => region.lines.map((line) => line.words.map((word) => word.text).join(" ")).join("\n"))
+            .join("\n")
+        );
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
+}
+
+async function fetchBaiduOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  const token = await fetchBaiduOCRToken(provider);
+  return new Promise<string>((resolve, reject) => {
+    axios({
+      url: "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=" + token,
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      data: querystring.stringify({
+        image: fs.readFileSync(image).toString("base64"),
+        language_type: "auto_detect",
+      }),
+    })
+      .then((res) => {
+        const resDate: IBaiduOCRResult = res.data;
+        if (resDate.error_code) {
+          reject(resDate.error_msg);
+        }
+        resolve(resDate.words_result.map((item) => item.words).join("\n"));
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
+}
+
+function fetchYoudaoOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    function truncate(q: string): string {
+      const len = q.length;
+      return len <= 20 ? q : q.substring(0, 10) + len + q.substring(len - 10, len);
+    }
+    const APP_ID = provider.appId;
+    const APP_KEY = provider.appKey;
+
+    const imgBase64 = fs.readFileSync(image).toString("base64");
+    const sha256 = crypto.createHash("sha256");
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const salt = timestamp;
+    const sha256Content = APP_ID + truncate(imgBase64) + salt + timestamp + APP_KEY;
+    const sign = sha256.update(sha256Content).digest("hex");
+    axios({
+      url: "https://openapi.youdao.com/ocrapi",
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      data: querystring.stringify({
+        img: imgBase64,
+        langType: "auto",
+        detectType: 10012,
+        imageType: 1,
+        appKey: APP_ID,
+        salt,
+        sign,
+        docType: "json",
+        signType: "v3",
+        curtime: timestamp,
+      }),
+    })
+      .then((res) => {
+        const resDate: IYoudaoOCRResult = res.data;
+        if (resDate.errorCode != "0") {
+          reject("");
+        }
+        resolve(resDate.Result.regions.map((region) => region.lines.map((line) => line.text).join("\n")).join("\n"));
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
+}
+
+function fetchBaiduOCRToken(provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve) => {
+    const token: IBaiduOCRAccessToken = JSON.parse(cache.get(BaiduOCRTokenCacheKey) || "{}");
+    if (token.access_token) {
+      if (new Date().getTime() < token.expires_at) {
+        resolve(token.access_token);
+      } else {
+        cache.remove(BaiduOCRTokenCacheKey);
+      }
+    }
+    const APP_ID = provider.appId;
+    const APP_KEY = provider.appKey;
+    axios
+      .post(
+        "https://aip.baidubce.com/oauth/2.0/token?" +
+          querystring.stringify({
+            grant_type: "client_credentials",
+            client_id: APP_ID,
+            client_secret: APP_KEY,
+          }),
+        {}
+      )
+      .then((res) => {
+        const resDate: IBaiduOCRAccessToken = res.data;
+        resDate.expires_at = new Date().getTime() + resDate.expires_in * 1000;
+        cache.set(BaiduOCRTokenCacheKey, JSON.stringify(resDate));
+        resolve(resDate.access_token);
+      })
+      .catch(() => {
+        resolve("");
+      });
+  });
+}
+
+function fetchTencentOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function sha256(message: string, secret = "", encoding?: any) {
+      const hmac = crypto.createHmac("sha256", secret);
+      return hmac.update(message).digest(encoding);
+    }
+
+    function getHash(message: string) {
+      const hash = crypto.createHash("sha256");
+      return hash.update(message).digest("hex");
+    }
+
+    function getDate(timestamp: number) {
+      const date = new Date(timestamp * 1000);
+      const year = date.getUTCFullYear();
+      const month = ("0" + (date.getUTCMonth() + 1)).slice(-2);
+      const day = ("0" + date.getUTCDate()).slice(-2);
+      return `${year}-${month}-${day}`;
+    }
+
+    const SECRET_ID = provider.appId;
+    const SECRET_KEY = provider.appKey;
+
+    const endpoint = "ocr.tencentcloudapi.com";
+    const service = "ocr";
+    const region = "ap-shanghai";
+    const action = "GeneralBasicOCR";
+    const version = "2018-11-19";
+    const timestamp = Math.trunc(new Date().getTime() / 1000);
+    const date = getDate(timestamp);
+
+    const signedHeaders = "content-type;host";
+
+    const payload = {
+      ImageBase64: fs.readFileSync(image).toString("base64"),
+      LanguageType: "auto",
+    };
+
+    const hashedRequestPayload = getHash(JSON.stringify(payload));
+    const httpRequestMethod = "POST";
+    const canonicalUri = "/";
+    const canonicalQueryString = "";
+    const canonicalHeaders = "content-type:application/json; charset=utf-8\n" + "host:" + endpoint + "\n";
+
+    const canonicalRequest =
+      httpRequestMethod +
+      "\n" +
+      canonicalUri +
+      "\n" +
+      canonicalQueryString +
+      "\n" +
+      canonicalHeaders +
+      "\n" +
+      signedHeaders +
+      "\n" +
+      hashedRequestPayload;
+
+    const algorithm = "TC3-HMAC-SHA256";
+    const hashedCanonicalRequest = getHash(canonicalRequest);
+    const credentialScope = date + "/" + service + "/" + "tc3_request";
+    const stringToSign = algorithm + "\n" + timestamp + "\n" + credentialScope + "\n" + hashedCanonicalRequest;
+
+    const kDate = sha256(date, "TC3" + SECRET_KEY);
+    const kService = sha256(service, kDate);
+    const kSigning = sha256("tc3_request", kService);
+    const signature = sha256(stringToSign, kSigning, "hex");
+
+    const authorization =
+      algorithm +
+      " " +
+      "Credential=" +
+      SECRET_ID +
+      "/" +
+      credentialScope +
+      ", " +
+      "SignedHeaders=" +
+      signedHeaders +
+      ", " +
+      "Signature=" +
+      signature;
+    axios
+      .post(`https://${endpoint}`, payload, {
+        headers: {
+          Authorization: authorization,
+          "Content-Type": "application/json; charset=utf-8",
+          Host: endpoint,
+          "X-TC-Action": action,
+          "X-TC-Timestamp": timestamp.toString(),
+          "X-TC-Version": version,
+          "X-TC-Region": region,
+        },
+      })
+      .then((res) => {
+        const resDate: ITencentOCRResult = res.data;
+        if (resDate.Response) {
+          resolve(resDate.Response.TextDetections.map((item) => item.DetectedText).join("\n"));
+        }
+      })
+      .catch(() => {
+        reject("OCR failed");
+      });
+  });
 }
