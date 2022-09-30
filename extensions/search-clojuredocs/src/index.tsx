@@ -1,29 +1,50 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { parseEDNString } from 'edn-data'
+import { parseEDNString } from "edn-data";
 
-function getDocList(data) {
-  const docList = [];
+interface DocInfo {
+  added: string;
+  ns: string;
+  name: string;
+  file: string;
+  type: string;
+  column: number;
+  "see-alsos": string[];
+  line: number;
+  examples: string[];
+  notes: string[];
+  arglists: string[];
+  doc: string;
+  "library-url": string;
+  href: string;
+}
+
+interface Doc {
+  docInfo: DocInfo;
+}
+
+function getDocList(data: Doc): DocInfo[] {
+  const docList: DocInfo[] = [];
   Object.entries(data).find(([, value]) => {
     docList.push(value);
-  })
+  });
   return docList;
 }
 
 export default function Command() {
-  const { isLoading, data, revalidate} = useFetch("https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn", {
-    // to make sure the screen isn't flickering when the searchText changes
-    keepPreviousData: true,
-    parseResponse: async (response) => getDocList(parseEDNString(await response.text(), { mapAs: 'object', keywordAs: 'string' }))
-  });
+  const { isLoading, data, revalidate } = useFetch(
+    "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
+    {
+      // to make sure the screen isn't flickering when the searchText changes
+      keepPreviousData: true,
+      parseResponse: async (response) =>
+        getDocList(parseEDNString(await response.text(), { mapAs: "object", keywordAs: "string" }) as Doc),
+    }
+  );
   // setList(getDocList(data));
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search ClojureDocs..."
-      throttle
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search ClojureDocs..." throttle>
       {(data || []).map((result) => (
         <SearchListItem key={result.ns + "/" + result.name} searchResult={result} />
       ))}
@@ -31,9 +52,8 @@ export default function Command() {
   );
 }
 
-const CljDetail = ({res}) => {
-  const mark = 
-  `
+const CljDetail = ({ res }: { res: DocInfo }) => {
+  const mark = `
    # ${res.ns}/${res.name}
 
    ~~~
@@ -44,21 +64,21 @@ const CljDetail = ({res}) => {
    ${res.doc ?? "No doc"}
    ~~~
    
-   ${res.examples == null? "" : "### " + res.examples.length + " Example(s)"}
+   ${res.examples == null ? "" : "### " + res.examples.length + " Example(s)"}
    ~~~
-   ${res.examples == null? "No examples" : res.examples?.join("\n~~~\n~~~\n")}
+   ${res.examples == null ? "No examples" : res.examples?.join("\n~~~\n~~~\n")}
    ~~~
-  `
+  `;
 
   return (
     <>
-      <Detail 
-        navigationTitle={res.ns + "/" + res.name} 
+      <Detail
+        navigationTitle={res.ns + "/" + res.name}
         markdown={mark}
         actions={
           <ActionPanel>
-          <Action.OpenInBrowser url={"https://clojuredocs.org" + res.href}/>
-        </ActionPanel>
+            <Action.OpenInBrowser url={"https://clojuredocs.org" + res.href} />
+          </ActionPanel>
         }
       />
     </>
