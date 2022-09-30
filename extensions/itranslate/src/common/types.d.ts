@@ -65,6 +65,19 @@ interface IPreferences {
   mulFa: boolean;
   mulSr: boolean;
   mulCy: boolean;
+  ocrServiceProvider: OCRServiceProviderTp;
+  spaceOCRApiKey: string;
+  googleOCRApiKey: string;
+  microsoftOCRResourceName: string;
+  microsoftOCRAccessKey: string;
+  youdaoOCRAppId: string;
+  youdaoOCRAppKey: string;
+  baiduOCRApiKey: string;
+  baiduOCRSecretKey: string;
+  tencentOCRSecretId: string;
+  tencentOCRSecretKey: string;
+  captureOnActivated: boolean;
+  closeOnCapture: boolean;
 }
 
 interface ILangItem {
@@ -86,8 +99,6 @@ interface ITranslateRes {
   to: ILangItem;
   origin: string;
   res: string;
-  start?: number;
-  end?: number;
   fromPhonetic?: string;
   targetExplains?: string[];
   derivatives?: DerivativeItem[];
@@ -212,5 +223,75 @@ interface ITransHistory {
   toList?: {
     to: string;
     res: string;
+  }[];
+}
+
+interface IOCRServiceProvider {
+  appId: string;
+  appKey: string;
+  serviceProvider: OCRServiceProviderTp;
+}
+
+interface IBaiduOCRAccessToken {
+  access_token: string;
+  expires_at: number;
+  expires_in: number;
+}
+
+interface IBaiduOCRResult {
+  error_code: number;
+  error_msg: string;
+  words_result_num: number;
+  words_result: {
+    words: string;
+  }[];
+}
+
+interface ISpaceOCRResult {
+  OCRExitCode: number;
+  IsErroredOnProcessing: boolean;
+  ErrorMessage: string;
+  ParsedResults: {
+    FileParseExitCode: number;
+    ParsedText: string;
+  }[];
+}
+
+interface ITencentOCRResult {
+  Response: ITencentOCRResponse;
+}
+
+interface ITencentOCRResponse {
+  TextDetections: {
+    DetectedText: string;
+  }[];
+}
+
+interface IYoudaoOCRResult {
+  errorCode: string;
+  Result: {
+    regions: {
+      lines: {
+        text: string;
+      }[];
+    }[];
+  };
+}
+
+interface IGoogleOCRResult {
+  responses: {
+    fullTextAnnotation: {
+      text: string;
+    };
+  }[];
+}
+
+interface IMicrosoftAzureOCRResult {
+  regions: {
+    lines: {
+      words: {
+        text: string;
+      }[];
+    }[];
   }[];
 }

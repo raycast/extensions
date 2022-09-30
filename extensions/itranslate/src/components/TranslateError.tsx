@@ -8,7 +8,15 @@ import {
   List,
   Icon,
 } from "@raycast/api";
-import { LANG_LIST, TransServiceProviderTp, TRANS_SERVICES_AUTH_NAMES, TRANS_SERVICES_NAMES } from "./const";
+import {
+  LANG_LIST,
+  OCRServiceProviderTp,
+  OCR_SERVICES_AUTH_NAMES,
+  OCR_SERVICES_NAMES,
+  TransServiceProviderTp,
+  TRANS_SERVICES_AUTH_NAMES,
+  TRANS_SERVICES_NAMES,
+} from "../common/const";
 
 export function TranslateError(props: { transRes: ITranslateRes }) {
   const icon = { source: Icon.XMarkCircle, tintColor: Color.Red };
@@ -87,6 +95,31 @@ export function ServiceProviderMiss(props: { service: TransServiceProviderTp; di
   }
   > ⚠️ The default translation service provider you selected is *${TRANS_SERVICES_NAMES.get(props.service)}*\n
   # 🍻 Enjoy it !
+  `;
+  return (
+    <Detail
+      markdown={markdown}
+      navigationTitle="Welcome to use iTranslate"
+      actions={
+        <ActionPanel>
+          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function OCRServiceProviderMiss(props: { service: OCRServiceProviderTp }) {
+  const auth_names = OCR_SERVICES_AUTH_NAMES.get(props.service);
+  const markdown = `
+  # Welcome to use Translate by OCR command 🎊🎊🎊 \n
+  Translate by OCR is one of the commands of iTranslate that can customize OCR service providers\n
+  Now we support this OCR service providers: [OCRSpace](https://ocr.space/OCRAPI),[Google Could](https://cloud.google.com/vision/docs/setup),[Microsoft Azure](https://learn.microsoft.com/en-us/azure/cognitive-services/computer-vision/overview),[Youdao](https://ai.youdao.com/doc.s#guide),[Baidu](https://cloud.baidu.com/doc/OCR/index.html),[Tencent](https://cloud.tencent.com/product/generalocr)\n
+  ## Before using the command, follow these steps:
+  1. Please enter \`↵\` to open iTranslate Preferences ⚙️
+  2. Config ${auth_names?.map((n) => `**${n}**`).join(" and ")} in the right area of the preferences window
+  > ⚠️ The OCR service provider you selected is *${OCR_SERVICES_NAMES.get(props.service)}*\n
+  # 🥂 Enjoy it !
   `;
   return (
     <Detail

@@ -1,4 +1,4 @@
-import { TranslateHistory } from "./TranslateHistory";
+import { TranslateHistory } from "./components/TranslateHistory";
 
 export default function Command() {
   return <TranslateHistory />;

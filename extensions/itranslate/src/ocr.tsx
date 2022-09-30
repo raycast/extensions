@@ -1,32 +1,40 @@
 import {
   List,
   getPreferenceValues,
-  getSelectedText,
   ActionPanel,
   Action,
   Icon,
   openCommandPreferences,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TransAPIErrCode } from "./common/const";
+import { OCR_SERVICES_NAMES, OCR_SUPPORT_IMG_TYPE, TransAPIErrCode } from "./common/const";
 import {
+  capture,
+  checkOCRPreferences,
   checkPreferences,
   fetchTransAPIs,
   getLang,
   getServiceProviderMap,
+  getTextFromPic,
   saveHistory,
   translateWithRefineLang,
 } from "./common/itranslate.shared";
 import { TranslateError, TranslateNotSupport } from "./components/TranslateError";
 import { TranslateHistory } from "./components/TranslateHistory";
 import { TranslateResult } from "./components/TranslateResult";
+import { Action$ } from "raycast-toolkit";
+import path from "node:path";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
 export default function Command() {
   const preferences: IPreferences = getPreferenceValues<IPreferences>();
   const langSecond: ILangItem = getLang(preferences.langSecond);
-  const check = checkPreferences();
+  let check = checkPreferences();
+  if (check) return check;
+  check = checkOCRPreferences();
   if (check) return check;
 
   const [inputState, updateInputState] = useState<string>("");
@@ -37,11 +45,57 @@ export default function Command() {
   const [currentTargetLang, updateCurrentTargetLang] = useState<ILangItem>(getLang(preferences.langFirst));
 
   useEffect(() => {
-    if (!preferences.selectedDefault) {
+    preferences.captureOnActivated && captureImg();
+  }, []);
+
+  async function captureImg() {
+    try {
+      const capturePath = await capture(preferences.closeOnCapture);
+      await imgPathTrigger(capturePath);
+    } catch (error) {
+      showToast({ title: "Capture failed", style: Toast.Style.Failure });
+    }
+  }
+
+  async function selectImg(imgPath: string) {
+    if (!OCR_SUPPORT_IMG_TYPE.includes(path.extname(imgPath))) {
+      showToast({
+        title: `${path.extname(imgPath).toUpperCase()} images are not supported`,
+        style: Toast.Style.Failure,
+      });
       return;
     }
-    transSelected();
-  }, []);
+    await imgPathTrigger(imgPath);
+  }
+
+  function onImgOCR(path?: string) {
+    if (path) {
+      selectImg(path);
+    } else {
+      captureImg();
+    }
+  }
+
+  async function imgPathTrigger(imgPath: string) {
+    try {
+      if (imgPath) {
+        showToast({
+          title: "Extracting text from image...",
+          message: `Powered by ${OCR_SERVICES_NAMES.get(preferences.ocrServiceProvider)}`,
+          style: Toast.Style.Animated,
+        });
+        const textFromImg = await getTextFromPic(imgPath);
+        const text = textFromImg.trim();
+        if (text.length > 0) {
+          updateInputState(text);
+          updateInputTempState(text);
+        }
+        showToast({ title: "Extract text from image successfully", style: Toast.Style.Success });
+      }
+    } catch (error) {
+      showToast({ title: "Failed to extract text from image", message: error as string, style: Toast.Style.Failure });
+    }
+  }
 
   useEffect(() => {
     if (inputTempState.trim().length > 0) {
@@ -51,18 +105,6 @@ export default function Command() {
       updateShowDetail(false);
     }
   }, [inputTempState]);
-
-  function transSelected() {
-    getSelectedText()
-      .then((selectedText) => {
-        const text = selectedText.trim();
-        if (text.length > 0) {
-          updateInputState(text);
-          updateInputTempState(text);
-        }
-      })
-      .catch((e) => e);
-  }
 
   function onInputChange(queryText: string) {
     updateLoadingState(false);
@@ -141,29 +183,19 @@ export default function Command() {
   }
 
   function ListActions() {
-    if (!preferences.selectedDefault) {
-      return (
-        <ActionPanel>
-          <Action icon={Icon.Text} title="Translate Selected Content" onAction={transSelected} />
-          {preferences.enableHistory && (
-            <Action.Push
-              icon={Icon.BulletPoints}
-              title="Open Translation Histories"
-              shortcut={{ modifiers: ["cmd"], key: "h" }}
-              target={<TranslateHistory />}
-            />
-          )}
-          <Action
-            icon={Icon.ComputerChip}
-            title="Open iTranslate Preferences"
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-            onAction={openCommandPreferences}
-          />
-        </ActionPanel>
-      );
-    }
     return (
       <ActionPanel>
+        <Action icon={Icon.Maximize} title="Capture to Translate" onAction={captureImg} />
+        <Action$.SelectFile
+          title="Select Image to Translate"
+          icon={Icon.Finder}
+          onSelect={(filePath) => {
+            if (!filePath) {
+              return;
+            }
+            selectImg(filePath);
+          }}
+        />
         {preferences.enableHistory && (
           <Action.Push
             icon={Icon.BulletPoints}
@@ -187,11 +219,10 @@ export default function Command() {
       isLoading={isLoadingState}
       isShowingDetail={isShowDetail}
       searchText={inputState}
-      searchBarPlaceholder={"Translate text"}
       onSearchTextChange={onInputChange}
       actions={ListActions()}
     >
-      <List.EmptyView title="Type something to translate..." />
+      <List.EmptyView title="Capture or select image to translate..." />
       {transResultsState.length > 0 && (
         <List.Section title={`${transResultsState[0].from.langTitle} -> ${transResultsState[0].to.langTitle}`}>
           {transResultsState.map((transRes) => {
@@ -200,7 +231,14 @@ export default function Command() {
             } else if (transRes.code === TransAPIErrCode.NotSupport) {
               return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
             } else {
-              return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
+              return (
+                <TranslateResult
+                  key={transRes.serviceProvider}
+                  transRes={transRes}
+                  onLangUpdate={translate}
+                  onImgOCR={onImgOCR}
+                />
+              );
             }
           })}
         </List.Section>
