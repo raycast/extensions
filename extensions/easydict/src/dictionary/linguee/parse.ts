@@ -2,14 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-08-01 10:44
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-02 11:39
+ * @lastEditTime: 2022-09-29 15:43
  * @fileName: parse.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { parse } from "node-html-parser";
-import { getLanguageItemFromDeepLSourceId, getLanguageTitle } from "../../language/languages";
+import { getLanguageEnglishName, getLanguageItemFromDeepLSourceCode } from "../../language/languages";
 import { DicionaryType, DisplaySection, ListDisplayItem, QueryTypeResult } from "../../types";
 import { checkIsWord } from "../../utils";
 import { QueryWordInfo } from "../youdao/types";
@@ -89,7 +89,6 @@ export function parseLingueeHTML(html: string): QueryTypeResult {
     word: queryWord?.textContent ?? "",
     fromLanguage: sourceLanguage ?? "",
     toLanguage: targetLanguage ?? "",
-    isWord: wordItems.length > 0,
     speechUrl: speakUrl,
   };
   const lingueeResult: LingueeDictionaryResult = {
@@ -105,12 +104,13 @@ export function parseLingueeHTML(html: string): QueryTypeResult {
   }
 
   queryWordInfo.hasDictionaryEntries = hasEntries;
+  queryWordInfo.isWord = hasEntries;
   const result = hasEntries ? lingueeResult : undefined;
   const lingueeTypeResult: QueryTypeResult = {
     type: DicionaryType.Linguee,
     result: result,
     translations: [],
-    wordInfo: queryWordInfo,
+    queryWordInfo: queryWordInfo,
   };
   return lingueeTypeResult;
 }
@@ -385,7 +385,7 @@ function getYoudaoLanguageId(language: string, rootElement: HTMLElement): string
   const sourceLang = textJavascript?.textContent?.split(`${language}:`)[1]?.split(",")[0];
   if (sourceLang) {
     const sourceLanguage = sourceLang.replace(/'/g, ""); // remove "'"
-    return getLanguageItemFromDeepLSourceId(sourceLanguage).youdaoLangCode;
+    return getLanguageItemFromDeepLSourceCode(sourceLanguage).youdaoLangCode;
   }
 }
 
@@ -397,11 +397,15 @@ export function getLingueeWebDictionaryURL(queryWordInfo: QueryWordInfo): string
   const validLanguagePair = getValidLingueeLanguagePair(fromLanguage, toLanguage);
   const isWord = checkIsWord(queryWordInfo); // Linguee is only used for `word` looking dictionary.
   if (!validLanguagePair || !isWord) {
-    console.log(`check linguee, not a valid language pair: ${validLanguagePair}, or not word: ${word}`);
+    if (!validLanguagePair) {
+      console.log(`check linguee, not a valid language pair: ${validLanguagePair}`);
+    } else {
+      console.log(`check linguee, not a word: ${word}`);
+    }
     return;
   }
 
-  const sourceLanguage = getLanguageTitle(fromLanguage).toLowerCase();
+  const sourceLanguage = getLanguageEnglishName(fromLanguage).toLowerCase();
   const lingueeUrl = `https://www.linguee.com/${validLanguagePair}/search?source=${sourceLanguage}&query=${encodeURIComponent(
     queryWordInfo.word
   )}`;
@@ -604,14 +608,16 @@ export function formatLingueeDisplaySections(lingueeTypeResult: QueryTypeResult)
 
   // 5. iterate wikipedia
   if (wikipedias) {
-    const sectionTitle = "Wikipedia:";
+    const sectionTitle = "Wikipedia";
     const displayItems = wikipedias.map((wikipedia) => {
       const displayType = LingueeListItemType.Wikipedia;
-      const title = `${wikipedia.title} ${wikipedia.explanation}`;
+      const title = `${wikipedia.title}`;
+      const subtitle = `${wikipedia.explanation}`;
+      const copyText = `${title} ${subtitle}`;
       const displayItem: ListDisplayItem = {
-        key: title,
-        title: title,
-        copyText: title,
+        key: copyText,
+        title: copyText,
+        copyText: copyText,
         queryWordInfo: queryWordInfo,
         displayType: displayType,
         queryType: lingueeType,
