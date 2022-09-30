@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Clipboard, closeMainWindow, confirmAlert, Icon, List, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  confirmAlert,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import { deleteAlias } from "./utils/delete";
@@ -6,11 +16,7 @@ import { aliasObject, listAllAliases } from "./utils/list";
 import { toggleAlias } from "./utils/toggle";
 
 const ListAliases = () => {
-  const [aliases, setAliases] = useState<aliasObject[]>([]);
-
   const [loading, setLoading] = useState(true);
-
-  const [searchText, setSearchText] = useState("");
   const [filteredList, filterList] = useState<aliasObject[]>([]);
 
   useEffect(() => {
@@ -20,40 +26,29 @@ const ListAliases = () => {
   const init = async () => {
     const allAliases = await listAllAliases();
 
-    setLoading(false);
-
-    setAliases(allAliases);
     filterList(allAliases);
+    setLoading(false);
   };
 
-  useEffect(() => {
-    if (loading) return;
-    if (!searchText) return filterList(aliases);
-    if (!aliases) return;
-
-    filterList(
-      aliases.filter(
-        (alias) =>
-          alias.email.toLowerCase().includes(searchText.toLowerCase()) ||
-          alias.description?.includes(searchText.toLowerCase())
-      )
-    );
-  }, [searchText]);
-
   return (
-    <>
-      <List
-        enableFiltering={false}
-        searchBarPlaceholder="Search emails and descriptions"
-        navigationTitle="Search AnonAddy"
-        onSearchTextChange={setSearchText}
-        isLoading={loading}
-      >
-        {filteredList.map((alias) => (
+    <List searchBarPlaceholder="Search emails and descriptions..." isLoading={loading}>
+      {filteredList.map((alias) => {
+        const description = alias.description || "";
+        const keywords = description.split(" ");
+        keywords.push(alias.email);
+
+        return (
           <List.Item
             key={alias.id}
             title={alias.email}
-            subtitle={alias.description || "-"}
+            subtitle={description}
+            keywords={keywords}
+            accessories={[
+              { tooltip: "Forwarded", text: `F: ${alias.emails_forwarded}` },
+              { tooltip: "Blocked", text: `B: ${alias.emails_blocked}` },
+              { tooltip: "Replied", text: `R: ${alias.emails_replied}` },
+              { tooltip: "Sent", text: `S: ${alias.emails_sent}` },
+            ]}
             icon={alias.active ? Icon.Envelope : Icon.LightBulbOff}
             actions={
               <ActionPanel>
@@ -73,9 +68,9 @@ const ListAliases = () => {
                       const success = await toggleAlias(alias.id, true);
 
                       if (success) {
-                        showHUD("Alias activated");
+                        showHUD("✅ Alias activated");
                       } else {
-                        showHUD("Error activating alias");
+                        showHUD("❌ Error activating alias");
                       }
                     }}
                     icon={Icon.Checkmark}
@@ -87,9 +82,10 @@ const ListAliases = () => {
                       const success = await toggleAlias(alias.id, false);
 
                       if (success) {
-                        showHUD("Alias deactivated");
+                        showHUD("✅ Alias deactivated");
+                        popToRoot();
                       } else {
-                        showHUD("Error deactivating alias");
+                        showHUD("❌ Error deactivating alias");
                       }
                     }}
                     icon={Icon.XMarkCircle}
@@ -97,6 +93,8 @@ const ListAliases = () => {
                 )}
                 <Action
                   title="Delete Alias"
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  icon={Icon.Trash}
                   onAction={async () => {
                     const choice = await confirmAlert({
                       title: "Delete alias?",
@@ -107,20 +105,20 @@ const ListAliases = () => {
                       const success = await deleteAlias(alias.id);
 
                       if (success) {
-                        showHUD("Alias deleted");
+                        showHUD("✅ Alias deleted");
+                        popToRoot();
                       } else {
-                        showHUD("Error deleting alias");
+                        showHUD("❌ Error deleting alias");
                       }
                     }
                   }}
-                  icon={Icon.Trash}
                 />
               </ActionPanel>
             }
           />
-        ))}
-      </List>
-    </>
+        );
+      })}
+    </List>
   );
 };
 
