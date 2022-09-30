@@ -384,6 +384,7 @@
 /extensions/opsgenie                                 @ricoberger
 /extensions/orion                                    @Plonq
 /extensions/oss-browser                              @404J
+/extensions/ossinsight                               @k8scat @pernielsentikaer
 /extensions/pagerduty                                @horimislime
 /extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @BartoszJarocki @BartoszJarocki
