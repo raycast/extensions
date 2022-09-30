@@ -40,7 +40,7 @@ export default function Requests() {
         result.filter((req) => {
           const parsedValue = JSON.parse(req.value);
           return (
-            req.key.includes(searchText) || parsedValue.meta.title.toLowerCase().includes(searchText.toLowerCase())
+            req.key.includes(searchText) || parsedValue?.meta?.title.toLowerCase().includes(searchText.toLowerCase())
           );
         })
       );
@@ -138,10 +138,10 @@ export default function Requests() {
         return (
           <List.Item
             key={req.key}
-            title={value.meta.title ? value.meta.title : `${value.url}`}
+            title={value?.meta?.title ? value?.meta?.title : `${value.url}`}
             accessories={[{ text: "Copy cURL", icon: Icon.CopyClipboard }]}
             icon={{ source: `${value.method}.svg` }}
-            subtitle={value.meta.description ? value.meta.description : ""}
+            subtitle={value?.meta?.description ? value?.meta?.description : ""}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard

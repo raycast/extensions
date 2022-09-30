@@ -6,8 +6,8 @@ export default function RequestDetails({ req }: { req: Values }) {
   const parsedValue = JSON.parse(req.value);
   const { push } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [title, setTitle] = useState<string>(parsedValue.meta.title || "");
-  const [description, setDescription] = useState<string>(parsedValue.meta.description || "");
+  const [title, setTitle] = useState<string>(parsedValue?.meta?.title || "");
+  const [description, setDescription] = useState<string>(parsedValue?.meta?.description || "");
 
   async function handleSubmit() {
     if (!title) {
