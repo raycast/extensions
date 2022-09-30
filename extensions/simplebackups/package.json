@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.1.0",
+    "@raycast/utils": "^1.4.8",
     "node-fetch": "^3.2.10",
     "swr": "^1.3.0"
   },
