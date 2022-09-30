@@ -1,108 +1,51 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
+import {Action, ActionPanel, List} from "@raycast/api";
+import {useEffect, useState} from "react";
 import axios from "axios";
+import {useFetch} from "@raycast/utils";
+
+const listPluginsURL = "https://api.github.com/repos/ohmyzsh/ohmyzsh/contents/plugins";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const {isLoading, data} = useFetch<Plugin[]>(listPluginsURL)
 
   return (
     <List
       isShowingDetail
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
+      isLoading={isLoading}
       searchBarPlaceholder="Search plugins..."
       throttle
     >
-      {state.results.map((searchResult, index) => (
-        <SearchListItem key={searchResult.name} searchResult={searchResult} index={index} />
+      {data?.map((searchResult) => (
+        <SearchListItem key={searchResult.name} searchResult={searchResult}/>
       ))}
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: Plugin; index: number }) {
+function SearchListItem({searchResult}: { searchResult: Plugin }) {
   return (
     <List.Item
       key={searchResult.name}
       title={searchResult.name}
-      detail={<README plugin={searchResult} />}
+      detail={<README plugin={searchResult}/>}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Plugin Name" content={searchResult.name} />
-          <Action.OpenInBrowser title="Open in Browser" url={searchResult.html_url} />
+          <Action.CopyToClipboard title="Copy Plugin Name" content={searchResult.name}/>
+          <Action.OpenInBrowser title="Open in Browser" url={searchResult.html_url}/>
         </ActionPanel>
       }
     />
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async function search(text: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await performSearch(text, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          results: results,
-          isLoading: false,
-        }));
-      } catch (err) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(err) });
-      }
-    },
-    [cancelRef, setState]
-  );
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-const listPluginsURL = "https://api.github.com/repos/ohmyzsh/ohmyzsh/contents/plugins";
-
 interface Plugin {
   name: string;
   html_url: string;
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<Plugin[]> {
-  const resp = await axios.get(listPluginsURL, {
-    signal,
-  });
-  const plugins = resp.data as Plugin[];
-  searchText = searchText.toLowerCase();
-  return plugins.filter((plugin) => plugin.name.toLowerCase().includes(searchText));
-}
-
-interface SearchState {
-  results: Plugin[];
-  isLoading: boolean;
-}
-
 const readmeURL = "https://api.github.com/repos/ohmyzsh/ohmyzsh/readme/plugins";
 
-export function README({ plugin }: { plugin: Plugin }) {
+export function README({plugin}: { plugin: Plugin }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [content, setContent] = useState<string>("");
 
@@ -119,5 +62,5 @@ export function README({ plugin }: { plugin: Plugin }) {
     })();
   }, []);
 
-  return <List.Item.Detail isLoading={loading} markdown={content} />;
+  return <List.Item.Detail isLoading={loading} markdown={content}/>;
 }
