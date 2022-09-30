@@ -5,6 +5,9 @@
   "description": "OSS Insight extension for Raycast",
   "icon": "icon.png",
   "author": "k8scat",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -14,6 +17,7 @@
     {
       "name": "index",
       "title": "Trending Repos",
+      "subtitle": "OSS Insight",
       "description": "Search GitHub Trending Repos",
       "mode": "view"
     }
@@ -202,15 +206,15 @@
       "default": "past_24_hours",
       "data": [
         {
-          "title": "past_24_hours",
+          "title": "Past 24 Hours",
           "value": "past_24_hours"
         },
         {
-          "title": "past_week",
+          "title": "Past Week",
           "value": "past_week"
         },
         {
-          "title": "past_month",
+          "title": "Past Month",
           "value": "past_month"
         }
       ]
@@ -218,7 +222,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "axios": "^0.27.2"
+    "@raycast/utils": "^1.4.8"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

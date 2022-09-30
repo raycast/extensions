@@ -1,18 +1,16 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
-import axios, { CanceledError } from "axios";
+import { ActionPanel, Action, List, Icon, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const pref = getPreferenceValues<Preferences>();
+
+  const { isLoading, data } = useFetch<SearchState>(
+    `https://api.ossinsight.io/q/trending-repos?language=${pref.language}&period=${pref.period}`
+  );
 
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search trending repos..."
-      throttle
-    >
-      {state.results.map((searchResult, index) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search trending repositories...">
+      {data?.data.map((searchResult, index) => (
         <SearchListItem key={searchResult.repo_id} searchResult={searchResult} index={index} />
       ))}
     </List>
@@ -47,7 +45,7 @@ function SearchListItem({ searchResult, index }: { searchResult: Repository; ind
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Analyze" url={`https://ossinsight.io/analyze/${searchResult.repo_name}`} />
-            <Action.OpenInBrowser title="Visit Repo" url={`https://github.com/${searchResult.repo_name}`} />
+            <Action.OpenInBrowser title="Visit Repository" url={`https://github.com/${searchResult.repo_name}`} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Command">
             <Action.CopyToClipboard
@@ -65,76 +63,13 @@ function SearchListItem({ searchResult, index }: { searchResult: Repository; ind
   );
 }
 
-function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
-
-  const search = useCallback(
-    async function search(text: string) {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      try {
-        const results = await performSearch(text, cancelRef.current.signal);
-        setState((oldState) => ({
-          ...oldState,
-          results: results,
-          isLoading: false,
-        }));
-      } catch (err) {
-        if (err instanceof CanceledError) {
-          return;
-        }
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false,
-        }));
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(err) });
-      }
-    },
-    [cancelRef, setState]
-  );
-
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
-  return {
-    state: state,
-    search: search,
-  };
-}
-
-const trendingReposURL = "https://api.ossinsight.io/q/trending-repos";
-
-async function performSearch(searchText: string, signal: AbortSignal): Promise<Repository[]> {
-  const pref = getPreferenceValues();
-  const params = {
-    language: pref.language,
-    period: pref.period,
-  };
-  const resp = await axios.get(trendingReposURL, {
-    params,
-    signal,
-  });
-  const { data } = resp.data as { data: Repository[] };
-  searchText = searchText.toLowerCase();
-  return data.filter(
-    (repo) =>
-      repo.repo_name.toLowerCase().includes(searchText) ||
-      (repo.description && repo.description.toLowerCase().includes(searchText))
-  );
+interface Preferences {
+  language: string;
+  period: string;
 }
 
 interface SearchState {
-  results: Repository[];
-  isLoading: boolean;
+  data: Repository[];
 }
 
 export interface Repository {
