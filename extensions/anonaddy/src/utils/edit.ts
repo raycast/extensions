@@ -17,7 +17,7 @@ export const editAlias = async (id: string, description: string | null = null) =
   });
 
   if (res.status === 401) {
-    showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: "Error editing",
       message: "AnonAddy API credentials are invalid",

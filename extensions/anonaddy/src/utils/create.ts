@@ -24,7 +24,7 @@ export const createAlias = async () => {
   });
 
   if (res.status === 401) {
-    showHUD("AnonAddy API credentials are invalid");
+    await showHUD("❌ AnonAddy API credentials are invalid");
     return {} as any;
   }
 

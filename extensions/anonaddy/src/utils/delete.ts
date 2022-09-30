@@ -14,7 +14,7 @@ export const deleteAlias = async (id: string) => {
   });
 
   if (res.status === 401) {
-    showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: "Error deleting",
       message: "AnonAddy API credentials are invalid",

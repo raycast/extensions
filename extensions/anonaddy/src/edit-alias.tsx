@@ -32,9 +32,9 @@ const EditAlias = () => {
                 const success = await editAlias(values.email, values.desc);
 
                 if (success) {
-                  showHUD("Alias edited");
+                  showHUD("✅ Alias edited");
                 } else {
-                  showHUD("Error editing alias");
+                  showHUD("❌ Error editing alias");
                 }
               }}
             />

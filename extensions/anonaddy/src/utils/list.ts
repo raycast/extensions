@@ -33,7 +33,7 @@ export const listAllAliases = async () => {
     });
 
     if (res.status === 401) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Error listing",
         message: "AnonAddy API credentials are invalid",
@@ -42,11 +42,8 @@ export const listAllAliases = async () => {
     }
 
     const data = (await res.json()) as listResponse;
-
     totalPages = Math.ceil(data.meta.total / 100);
-
     allAliases = allAliases.concat(data.data);
-
     pageNum++;
   }
 

@@ -19,7 +19,7 @@ export const toggleAlias = async (id: string, newState: boolean) => {
   });
 
   if (res.status === 401) {
-    showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: "Error creating",
       message: "AnonAddy API credentials are invalid",
