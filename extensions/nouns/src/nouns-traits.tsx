@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Data, NounStats, TraitCategories, traits } from "./traits";
 
@@ -107,7 +107,7 @@ export default function Command() {
           key={noun.noun_id}
           actions={
             <ActionPanel>
-              <Action.Push title="View Detail" target={<NounDetail {...noun} />} />
+              <Action.Push icon={Icon.Sidebar} title="View Detail" target={<NounDetail {...noun} />} />
               <Action.CopyToClipboard title="Copy Noun ID" content={noun.noun_id} />
               <Action.OpenInBrowser
                 title="View on OpenSea"
