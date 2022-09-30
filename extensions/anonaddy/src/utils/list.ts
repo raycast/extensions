@@ -6,6 +6,10 @@ export interface aliasObject {
   email: string;
   active: boolean;
   description: string | null;
+  emails_sent: number;
+  emails_blocked: number;
+  emails_forwarded: number;
+  emails_replied: number;
 }
 
 interface listResponse {
@@ -17,9 +21,7 @@ interface listResponse {
 
 export const listAllAliases = async () => {
   let pageNum = 1;
-
   let totalPages: number | undefined = undefined;
-
   let allAliases: aliasObject[] = [];
 
   while (totalPages === undefined || pageNum <= totalPages) {
@@ -33,7 +35,7 @@ export const listAllAliases = async () => {
     });
 
     if (res.status === 401) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Error listing",
         message: "AnonAddy API credentials are invalid",
@@ -42,11 +44,8 @@ export const listAllAliases = async () => {
     }
 
     const data = (await res.json()) as listResponse;
-
     totalPages = Math.ceil(data.meta.total / 100);
-
     allAliases = allAliases.concat(data.data);
-
     pageNum++;
   }
 
