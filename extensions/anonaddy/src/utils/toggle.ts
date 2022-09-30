@@ -1,5 +1,5 @@
 import { getApiKey } from "./key";
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 import { showToast, Toast } from "@raycast/api";
 
 export const toggleAlias = async (id: string, newState: boolean) => {
@@ -10,13 +10,22 @@ export const toggleAlias = async (id: string, newState: boolean) => {
     Accept: "application/json",
   };
 
-  const res = await fetch(`https://app.anonaddy.com/api/v1/active-aliases/${id}`, {
-    method: newState ? "POST" : "DELETE",
-    headers,
-    body: JSON.stringify({
-      id,
-    }),
-  });
+  let res: Response;
+
+  if (!newState) {
+    res = await fetch(`https://app.anonaddy.com/api/v1/active-aliases/${id}`, {
+      method: "DELETE",
+      headers,
+    });
+  } else {
+    res = await fetch(`https://app.anonaddy.com/api/v1/active-aliases`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        id,
+      }),
+    });
+  }
 
   if (res.status === 401) {
     showToast({
