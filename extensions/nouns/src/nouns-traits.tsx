@@ -107,14 +107,14 @@ export default function Command() {
           key={noun.noun_id}
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Sidebar} title="View Detail" target={<NounDetail {...noun} />} />
+              <Action.Push icon={Icon.Sidebar} title="View Noun Detail" target={<NounDetail {...noun} />} />
               <Action.CopyToClipboard title="Copy Noun ID" content={noun.noun_id} />
               <Action.OpenInBrowser
-                title="View on OpenSea"
+                title="Open on OpenSea"
                 url={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun.noun_id}`}
               />
-              <Action.OpenInBrowser title="Open image as PNG" url={`https://noun.pics/${noun.noun_id}`} />
-              <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
+              <Action.OpenInBrowser title="Open Noun PNG" url={`https://noun.pics/${noun.noun_id}`} />
+              <Action.OpenInBrowser title="Open Noun SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
             </ActionPanel>
           }
           title={isAll ? `Noun #${noun.noun_id} — ${getAllTraitLabels(noun)}` : traitCategories[category]}
@@ -144,11 +144,11 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Noun ID" content={noun_id} />
           <Action.OpenInBrowser
-            title="View on OpenSea"
+            title="Open on OpenSea"
             url={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun_id}`}
           />
-          <Action.OpenInBrowser title="Open image as PNG" url={`https://noun.pics/${noun_id}`} />
-          <Action.OpenInBrowser title="Open image as SVG" url={`https://noun.pics/${noun_id}.svg`} />
+          <Action.OpenInBrowser title="Open Noun PNG" url={`https://noun.pics/${noun_id}`} />
+          <Action.OpenInBrowser title="Open Noun SVG" url={`https://noun.pics/${noun_id}.svg`} />
         </ActionPanel>
       }
       navigationTitle={`Detail for Noun #${noun_id}`}
@@ -163,7 +163,7 @@ function NounDetail({ noun_id, background, body, accessory, head, glasses }: Nou
           <Detail.Metadata.Label title="Glasses" text={`${glassesLabel} (${glasses})`} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
-            title="View on..."
+            title="Open on..."
             text="OpenSea"
             target={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun_id}`}
           />
