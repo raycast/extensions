@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 22:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-20 10:44
+ * @lastEditTime: 2022-09-27 23:25
  * @fileName: checkIP.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,7 +12,6 @@ import { LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { requestCostTime } from "./axiosConfig";
 import { isChineseIPKey } from "./consts";
-import { checkIfPreferredLanguagesContainChinese } from "./detectLanauge/utils";
 import { myDecrypt } from "./preferences";
 
 /**
@@ -34,8 +33,7 @@ export function checkIfIpInChina(): Promise<boolean> {
       })
       .catch((error) => {
         console.error(`checkIfIpInChina error: ${error}`);
-        const isChina = checkIfPreferredLanguagesContainChinese();
-        resolve(isChina);
+        resolve(true);
       });
   });
 }

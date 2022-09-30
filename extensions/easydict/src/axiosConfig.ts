@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-25 16:12
+ * @lastEditTime: 2022-09-26 12:58
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,9 +10,12 @@
 
 import { environment, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
+import EventEmitter from "events";
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from "https-proxy-agent";
 import { getMacSystemProxy } from "mac-system-proxy";
 import { myPreferences } from "./preferences";
+
+EventEmitter.defaultMaxListeners = 15; // default is 10.
 
 /**
  * Calculate axios request cost time.

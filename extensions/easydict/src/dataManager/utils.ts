@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 01:24
+ * @lastEditTime: 2022-09-29 16:02
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,13 +14,21 @@ import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
 import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
 import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
 import {
-  getLanguageItemFromYoudaoId,
+  getLanguageItemFromYoudaoCode,
   maxLineLengthOfChineseTextDisplay,
   maxLineLengthOfEnglishTextDisplay,
 } from "../language/languages";
-import { KeyStore, myPreferences } from "../preferences";
-import { DicionaryType, QueryResult, QueryTypeResult, TranslationItem, TranslationType } from "../types";
+import { AppKeyStore, myPreferences } from "../preferences";
+import {
+  DicionaryType,
+  ListDisplayItem,
+  QueryResult,
+  QueryTypeResult,
+  TranslationItem,
+  TranslationType,
+} from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, checkIsWord } from "../utils";
+import { chineseLanguageItem, englishLanguageItem } from "./../language/consts";
 
 /**
  * Sort query results by designated order.
@@ -59,6 +67,7 @@ export function getSortOrder(): string[] {
     TranslationType.Apple,
     TranslationType.Baidu,
     TranslationType.Tencent,
+    TranslationType.Volcano,
     TranslationType.Youdao,
     TranslationType.Caiyun,
   ];
@@ -100,16 +109,18 @@ export function getSortOrder(): string[] {
 /**
  * Determine whether the title of the result exceeds the maximum value of one line.
  */
-export function isTranslationTooLong(translation: string, toLanguage: string): boolean {
-  const isChineseTextResult = toLanguage === "zh-CHS";
-  const isEnglishTextResult = toLanguage === "en";
+export function isTextOneLineTooLong(text: string, textLanguage: string): boolean {
+  const isChineseText = textLanguage === chineseLanguageItem.youdaoLangCode;
+  const isEnglishText = textLanguage === englishLanguageItem.youdaoLangCode;
+  // console.log(`check if text too long, ${textLanguage}, ${text.length}`);
+
   let isTooLong = false;
-  const textLength = translation.length;
-  if (isChineseTextResult) {
+  const textLength = text.length;
+  if (isChineseText) {
     if (textLength > maxLineLengthOfChineseTextDisplay) {
       isTooLong = true;
     }
-  } else if (isEnglishTextResult) {
+  } else if (isEnglishText) {
     if (textLength > maxLineLengthOfEnglishTextDisplay) {
       isTooLong = true;
     }
@@ -117,7 +128,7 @@ export function isTranslationTooLong(translation: string, toLanguage: string): b
     isTooLong = true;
   }
   if (isTooLong) {
-    console.log(`---> check is too long: ${isTooLong}, length: ${translation.length}`);
+    console.log(`---> check is too long: ${isTooLong}, ${textLanguage}, length: ${text.length}`);
   }
   return isTooLong;
 }
@@ -131,7 +142,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
   let isShowDetail = false;
   for (const queryResult of queryResults) {
     const sourceResult = queryResult.sourceResult;
-    const wordInfo = sourceResult.wordInfo;
+    const wordInfo = sourceResult.queryWordInfo;
     const isDictionaryType = checkIsDictionaryType(queryResult.type);
     if (isDictionaryType) {
       if (wordInfo.hasDictionaryEntries) {
@@ -141,7 +152,7 @@ export function checkIfShowTranslationDetail(queryResults: QueryResult[]): boole
     } else {
       // check if translation is too long
       const oneLineTranslation = sourceResult?.oneLineTranslation || "";
-      const isTooLong = isTranslationTooLong(oneLineTranslation, wordInfo.toLanguage);
+      const isTooLong = isTextOneLineTooLong(oneLineTranslation, wordInfo.toLanguage);
       if (isTooLong) {
         isShowDetail = true;
         break;
@@ -184,30 +195,60 @@ export function checkIfDictionaryHasEntries(dictionaryResult: QueryResult): bool
  * * Since language title is too long for detail page, so we use short emoji instead.  eg. zh-CHS --> en, return: 🇨🇳 --> 🇬🇧
  */
 export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = false) {
-  const fromLanguageItem = getLanguageItemFromYoudaoId(from);
-  const toLanguageItem = getLanguageItemFromYoudaoId(to);
+  const fromLanguageItem = getLanguageItemFromYoudaoCode(from);
+  const toLanguageItem = getLanguageItemFromYoudaoCode(to);
   const fromToEmoji = `${fromLanguageItem.emoji} --> ${toLanguageItem.emoji}`;
   const fromToLanguageNameAndEmoji = `${fromLanguageItem.langEnglishName}${fromLanguageItem.emoji} --> ${toLanguageItem.langEnglishName}${toLanguageItem.emoji}`;
   return onlyEmoji ? fromToEmoji : fromToLanguageNameAndEmoji;
 }
 
 /**
+ * Show more detail markdown.
+ */
+export function formateDetailMarkdown(displayItem: ListDisplayItem) {
+  const { queryType, title, subtitle } = displayItem;
+  const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
+
+  const type = queryType.toString();
+  const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
+  const fromToTitle = `${type}  (${fromToLang})`;
+
+  let queryWord = subtitle ? title : "";
+  let explanation = subtitle || title;
+
+  const isTranslationType = checkIsTranslationType(queryType);
+  if (isTranslationType) {
+    queryWord = word;
+    explanation = title;
+  }
+
+  const markdown = `
+  ## ${fromToTitle} 
+
+  ### ${queryWord}
+  ----
+  ${explanation}
+  `;
+  return markdown;
+}
+
+/**
  * Format translation to markdown.
  */
 export function formatTranslationToMarkdown(sourceResult: QueryTypeResult) {
-  const { type, translations, wordInfo } = sourceResult;
+  const { type, translations, queryWordInfo: wordInfo } = sourceResult;
   const oneLineTranslation = translations.join("\n");
   if (oneLineTranslation.trim().length === 0) {
     return "";
   }
 
-  const string = oneLineTranslation.replace(/\n/g, "\n\n");
+  const text = oneLineTranslation.replace(/\n/g, "\n\n");
   const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, true);
 
   const markdown = `
   ## ${type}   (${fromTo})
-  ---  
-  ${string}
+  ----  
+  ${text}
   `;
   return markdown;
 }
@@ -263,8 +304,8 @@ export function checkIfEnableYoudaoDictionary(queryWordInfo: QueryWordInfo) {
 /**
  * Check if enable Youdao API translation.
  */
-export function hasYoudaoAPI() {
-  if (KeyStore.youdaoAppId) {
+export function hasYoudaoAppKey() {
+  if (AppKeyStore.youdaoAppId && AppKeyStore.youdaoAppSecret) {
     return true;
   }
   return false;

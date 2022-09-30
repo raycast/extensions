@@ -2,13 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-08-12 18:37
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-12 10:34
+ * @lastEditTime: 2022-09-25 22:56
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { preferredLanguages } from "../preferences";
+import { englishLanguageItem } from "./../language/consts";
 
 /**
  * check if the language is preferred language
@@ -21,7 +22,7 @@ export function isPreferredLanguage(languageId: string): boolean {
  * check if preferred languages contains English language
  */
 export function checkIfPreferredLanguagesContainEnglish(): boolean {
-  return preferredLanguages.find((item) => item.youdaoLangCode === "en") !== undefined;
+  return preferredLanguages.find((item) => item.youdaoLangCode === englishLanguageItem.youdaoLangCode) !== undefined;
 }
 
 /**

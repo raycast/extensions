@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -32,16 +32,17 @@
     "youdao",
     "baidu",
     "tencent",
-    "caiyun",
-    "eudic"
+    "eudic",
+    "caiyun"
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
+    "@raycast/api": "^1.40.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.1.1",
     "execa": "^6.1.0",
+    "file-type": "^18.0.0",
     "franc": "^6.0.0",
     "https-proxy-agent": "^5.0.1",
     "mac-system-proxy": "^1.0.4",
@@ -323,14 +324,6 @@
       "default": true
     },
     {
-      "name": "enableSystemProxy",
-      "type": "checkbox",
-      "label": "Use System Proxy",
-      "required": false,
-      "description": "Note that it should only be enabled if needed, as it can slow down requests.",
-      "default": false
-    },
-    {
       "name": "enableSelectTargetLanguage",
       "type": "checkbox",
       "label": "Select Target Language",
@@ -339,12 +332,20 @@
       "default": false
     },
     {
+      "name": "enableSystemProxy",
+      "type": "checkbox",
+      "label": "Use System Proxy",
+      "required": false,
+      "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
+      "default": false
+    },
+    {
       "title": "Apple System Features",
       "name": "enableAppleTranslate",
       "type": "checkbox",
       "label": "Apple Translate",
       "required": false,
-      "description": "An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -352,7 +353,7 @@
       "type": "checkbox",
       "label": "Apple Language Detect",
       "required": false,
-      "description": "An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -403,7 +404,7 @@
       "label": "Baidu Translate",
       "required": false,
       "description": "Turn on/off Baidu Translate",
-      "default": false
+      "default": true
     },
     {
       "name": "enableTencentTranslate",
@@ -411,6 +412,14 @@
       "label": "Tencent Translate",
       "required": false,
       "description": "Turn on/off Tencent Translate",
+      "default": true
+    },
+    {
+      "name": "enableVolcanoTranslate",
+      "type": "checkbox",
+      "label": "Volcano Translate",
+      "required": false,
+      "description": "Turn on/off Volcano Translate",
       "default": true
     },
     {
@@ -434,9 +443,9 @@
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Youdao, Caiyun",
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
       "default": "",
-      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, youdao, caiyun"
+      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
     },
     {
       "title": "Youdao App ID",
@@ -492,6 +501,22 @@
       "type": "textfield",
       "required": false,
       "description": "Your Tencent SecretKey",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key ID",
+      "name": "volcanoAccessKeyId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key ID",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key Secret",
+      "name": "volcanoAccessKeySecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key Secret",
       "default": ""
     },
     {
