@@ -6,6 +6,10 @@ export interface aliasObject {
   email: string;
   active: boolean;
   description: string | null;
+  emails_sent: number;
+  emails_blocked: number;
+  emails_forwarded: number;
+  emails_replied: number;
 }
 
 interface listResponse {
@@ -17,9 +21,7 @@ interface listResponse {
 
 export const listAllAliases = async () => {
   let pageNum = 1;
-
   let totalPages: number | undefined = undefined;
-
   let allAliases: aliasObject[] = [];
 
   while (totalPages === undefined || pageNum <= totalPages) {
