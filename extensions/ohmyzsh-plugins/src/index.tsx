@@ -1,37 +1,32 @@
-import {Action, ActionPanel, List} from "@raycast/api";
-import {useEffect, useState} from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import {useFetch} from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 const listPluginsURL = "https://api.github.com/repos/ohmyzsh/ohmyzsh/contents/plugins";
 
 export default function Command() {
-  const {isLoading, data} = useFetch<Plugin[]>(listPluginsURL)
+  const { isLoading, data } = useFetch<Plugin[]>(listPluginsURL);
 
   return (
-    <List
-      isShowingDetail
-      isLoading={isLoading}
-      searchBarPlaceholder="Search plugins..."
-      throttle
-    >
+    <List isShowingDetail isLoading={isLoading} searchBarPlaceholder="Search plugins..." throttle>
       {data?.map((searchResult) => (
-        <SearchListItem key={searchResult.name} searchResult={searchResult}/>
+        <SearchListItem key={searchResult.name} searchResult={searchResult} />
       ))}
     </List>
   );
 }
 
-function SearchListItem({searchResult}: { searchResult: Plugin }) {
+function SearchListItem({ searchResult }: { searchResult: Plugin }) {
   return (
     <List.Item
       key={searchResult.name}
       title={searchResult.name}
-      detail={<README plugin={searchResult}/>}
+      detail={<README plugin={searchResult} />}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Plugin Name" content={searchResult.name}/>
-          <Action.OpenInBrowser title="Open in Browser" url={searchResult.html_url}/>
+          <Action.CopyToClipboard title="Copy Plugin Name" content={searchResult.name} />
+          <Action.OpenInBrowser title="Open in Browser" url={searchResult.html_url} />
         </ActionPanel>
       }
     />
@@ -45,7 +40,7 @@ interface Plugin {
 
 const readmeURL = "https://api.github.com/repos/ohmyzsh/ohmyzsh/readme/plugins";
 
-export function README({plugin}: { plugin: Plugin }) {
+export function README({ plugin }: { plugin: Plugin }) {
   const [loading, setLoading] = useState<boolean>(true);
   const [content, setContent] = useState<string>("");
 
@@ -62,5 +57,5 @@ export function README({plugin}: { plugin: Plugin }) {
     })();
   }, []);
 
-  return <List.Item.Detail isLoading={loading} markdown={content}/>;
+  return <List.Item.Detail isLoading={loading} markdown={content} />;
 }
