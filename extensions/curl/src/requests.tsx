@@ -144,35 +144,39 @@ export default function Requests() {
             subtitle={value?.meta?.description ? value?.meta?.description : ""}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy cURL"
-                  content={generateCurl({ url: req.key, payload: req.value })}
-                />
-                <Action
-                  title="Run"
-                  icon={Icon.Rocket}
-                  onAction={() => handleRunRequest({ url: req.key, payload: req.value })}
-                />
-                <Action.Push
-                  title="Add Metadata"
-                  target={<RequestDetails req={req} />}
-                  icon={Icon.AppWindowList}
-                  shortcut={{ modifiers: ["cmd"], key: "m" }}
-                />
-                <Action
-                  title="Delete From History"
-                  icon={Icon.Trash}
-                  onAction={() => handleDeleteItem(req.key)}
-                  shortcut={{ modifiers: ["cmd"], key: "delete" }}
-                  style={Action.Style.Destructive}
-                />
-                <Action
-                  title="Delete All History"
-                  icon={Icon.Trash}
-                  onAction={handleDeleteAll}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
-                  style={Action.Style.Destructive}
-                />
+                <ActionPanel.Section title="Actions">
+                  <Action.CopyToClipboard
+                    title="Copy cURL"
+                    content={generateCurl({ url: req.key, payload: req.value })}
+                  />
+                  <Action
+                    title="Run"
+                    icon={Icon.Rocket}
+                    onAction={() => handleRunRequest({ url: req.key, payload: req.value })}
+                  />
+                  <Action.Push
+                    title="Add Metadata"
+                    target={<RequestDetails req={req} />}
+                    icon={Icon.AppWindowList}
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Delete">
+                  <Action
+                    title="Delete From History"
+                    icon={Icon.Trash}
+                    onAction={() => handleDeleteItem(req.key)}
+                    shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                    style={Action.Style.Destructive}
+                  />
+                  <Action
+                    title="Delete All History"
+                    icon={Icon.Trash}
+                    onAction={handleDeleteAll}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
