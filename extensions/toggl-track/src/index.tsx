@@ -2,18 +2,10 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { AppContextProvider, useAppContext } from "./context";
 import RunningTimeEntry from "./components/RunningTimeEntry";
-import {
-  ActionPanel,
-  clearSearchBar,
-  Icon,
-  List,
-  Action,
-  showToast,
-  Toast
-} from "@raycast/api";
+import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
-import { storage } from "./storage";
+import { storage, refreshStorage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 
@@ -69,6 +61,14 @@ function ListView() {
                         </AppContextProvider>
                       }
                     />
+                    <ActionPanel.Section>
+                      <Action.SubmitForm
+                        title="Refresh"
+                        icon={{ source: Icon.RotateClockwise }}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onSubmit={refreshStorage}
+                      />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
@@ -90,6 +90,11 @@ function ListView() {
                           title="Resume Time Entry"
                           onSubmit={() => resumeTimeEntry(timeEntry)}
                           icon={{ source: Icon.Clock }}
+                        />
+                        <Action.SubmitForm
+                          title="Refresh"
+                          icon={{ source: Icon.RotateClockwise }}
+                          onSubmit={refreshStorage}
                         />
                       </ActionPanel>
                     }
