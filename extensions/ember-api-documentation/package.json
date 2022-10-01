@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ember-api-documentation",
   "title": "Ember.js API Documentation",
-  "description": "Utilities to work with Tailwind CSS",
+  "description": "Search Ember.js Api Documentation and open it in the browser",
   "icon": "command-icon.png",
   "author": "tdwesten",
   "categories": [
