@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ecr-tag-change",
+  "title": "AWS ECR",
+  "description": "Handle AWS ECR images",
+  "icon": "amazon-ecr.png",
+  "author": "abelkuruvilla",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-ecr-tag",
+      "title": "Add Tag to ECR Image",
+      "description": "Update the tag of ECR images inside your repositories",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
+    "aws": "0.0.3-2",
+    "aws-sdk": "^2.1227.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
