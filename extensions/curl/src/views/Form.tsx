@@ -30,11 +30,12 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
       url,
       method,
       headers: makeObject(headers),
-      ...(method !== "GET" && {
-        data: {
-          ...JSON.parse(body.replace("```\n\b\b", "")),
-        },
-      }),
+      ...(method !== "GET" &&
+        method !== "DELETE" && {
+          data: {
+            ...JSON.parse(body.replace("```\n\b\b", "")),
+          },
+        }),
     };
 
     axios({ ...payload })
@@ -45,16 +46,20 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
         const curlOptions = {
           method,
           headers: makeObject(headers),
-          ...(method !== "GET" && {
-            data: {
-              ...JSON.parse(body.replace("```\n\b\b", "")),
-            },
-          }),
+          ...(method !== "GET" &&
+            method !== "DELETE" && {
+              data: {
+                ...JSON.parse(body.replace("```\n\b\b", "")),
+              },
+            }),
         };
 
         const curl = curlString(url, curlOptions);
 
-        await LocalStorage.setItem(url, JSON.stringify(payload));
+        await LocalStorage.setItem(
+          `${method}-${url}`,
+          JSON.stringify({ ...payload, meta: { title: "", description: "" } })
+        );
         push(<ResultView result={result as never} curl={curl} />);
       })
       .catch((err) => {
@@ -155,10 +160,10 @@ export default function FormView({ push }: { push: (component: React.ReactNode) 
 
       {headers.length > 1 && <Form.Description title="" text="⌘⇧H Remove Last" />}
 
-      {method !== "GET" && (
+      {method !== "GET" && method !== "DELETE" && (
         <>
           <Form.Separator />
-          <Form.Description title="Body" text="JSON only" />
+          <Form.Description title="Body" text="Inline JSON only" />
           <Form.TextArea
             id="body"
             title=""

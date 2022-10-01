@@ -7,6 +7,7 @@ import pickColor from "./pickerHelper";
 export default async () => {
   const openColorPicker = async (type: ColorType) => {
     closeMainWindow();
+
     const color = await pickColor(type);
 
     if (color === null) {

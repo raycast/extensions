@@ -1,0 +1,13 @@
+- [x] Add check for api key
+- [x] Add search feature for lights and scenes
+- [x] Add api function for fetching lights
+- [x] Add color icon for hue param in sidebar
+- [x] Remove some effects
+- [x] Add checks for lights compatible with multicolor
+- [x] Clean up the interfaces
+- [ ] Add prefrences for config
+- [ ] Add timeout to api request
+- [x] Improve ReadMe
+- [ ] Add description to effect
+- [ ] Migrate to openapi
+- [ ] use OAuth

@@ -126,7 +126,7 @@ const currencyCode2Name: { [key: string]: string } = {
   SEK: "Swedish Krona",
   SGD: "Singapore Dollar",
   SHP: "Saint Helena Pound",
-  SLL: "Sierra Leonean Leone",
+  SLE: "Sierra Leonean Leone",
   SOS: "Somali Shilling",
   SRD: "Surinamese Dollar",
   SSP: "South Sudanese Pound",
@@ -163,7 +163,7 @@ const currencyCode2Name: { [key: string]: string } = {
   ZWL: "Zimbabwean Dollar",
 };
 
-const currencyCode2Country: { [key: string]: string } = {
+const currencyCode2CountryAndRegion: { [key: string]: string } = {
   AED: "United Arab Emirates",
   AFN: "Afghanistan",
   ALL: "Albania",
@@ -290,7 +290,7 @@ const currencyCode2Country: { [key: string]: string } = {
   SEK: "Sweden",
   SGD: "Singapore",
   SHP: "Saint Helena",
-  SLL: "Sierra Leone",
+  SLE: "Sierra Leone",
   SOS: "Somalia",
   SRD: "Suriname",
   SSP: "South Sudan",
@@ -327,4 +327,4 @@ const currencyCode2Country: { [key: string]: string } = {
   ZWL: "Zimbabwe",
 };
 
-export { currencyCode2Name, currencyCode2Country };
+export { currencyCode2Name, currencyCode2CountryAndRegion };

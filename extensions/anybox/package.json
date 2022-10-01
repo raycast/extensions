@@ -80,7 +80,7 @@
       "name": "pasteWithCollections",
       "title": "Save Clipboard With Collections",
       "subtitle": "Anybox",
-      "description": "Save clipboard Anybox with optional collections.",
+      "description": "Save clipboard to Anybox with optional collections.",
       "mode": "view"
     },
     {

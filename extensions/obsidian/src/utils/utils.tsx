@@ -26,10 +26,12 @@ import {
   QuickLookPreferences,
   MediaState,
   Media,
+  CodeBlock,
 } from "../utils/interfaces";
 
 import {
   BYTES_PER_KILOBYTE,
+  CODE_BLOCK_REGEX,
   DAY_NUMBER_TO_STRING,
   LATEX_INLINE_REGEX,
   LATEX_REGEX,
@@ -38,6 +40,16 @@ import {
 import { isNotePinned, unpinNote } from "./pinNoteUtils";
 import { useNotes } from "./cache";
 import { MediaLoader } from "./loader";
+
+export function getCodeBlocks(content: string): CodeBlock[] {
+  const codeBlockMatches = content.matchAll(CODE_BLOCK_REGEX);
+  const codeBlocks = [];
+  for (const codeBlockMatch of codeBlockMatches) {
+    const [, language, code] = codeBlockMatch;
+    codeBlocks.push({ language, code });
+  }
+  return codeBlocks;
+}
 
 export function filterContent(content: string) {
   const pref: QuickLookPreferences = getPreferenceValues();

@@ -2,257 +2,211 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-03 00:25
+ * @lastEditTime: 2022-09-27 23:22
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import axios from "axios";
-import { isValidLanguageId } from "../language/languages";
+import { isValidLangCode } from "../language/languages";
 import { myPreferences } from "../preferences";
 import { appleLanguageDetect } from "../scripts";
-import { baiduLanguageDetect } from "../translation/baidu";
-import { googleLanguageDetect } from "../translation/google";
-import { tencentLanguageDetect } from "../translation/tencent";
+import { baiduWebDetect } from "../translation/baidu/baiduAPI";
+import { googleDetect } from "../translation/google";
+import { bingDetect } from "../translation/microsoft/bing";
+import { hasTencentAppKey, tencentDetect } from "../translation/tencent";
+import { volcanoDetect } from "../translation/volcano/volcanoAPI";
+import { hasVolcanoAppKey } from "../translation/volcano/volcanoSign";
 import { RequestErrorInfo } from "../types";
-import { checkIsLanguageDetectType } from "../utils";
+import { autoDetectLanguageItem, chineseLanguageItem, englishLanguageItem } from "./../language/consts";
 import { francLangaugeDetect } from "./franc";
-import { LanguageDetectType, LanguageDetectTypeResult } from "./types";
+import { DetectedLangModel, LanguageDetectType } from "./types";
 import {
-  checkIfPreferredLanguagesContainedChinese,
-  checkIfPreferredLanguagesContainedEnglish,
+  checkIfPreferredLanguagesContainChinese,
+  checkIfPreferredLanguagesContainEnglish,
   isChinese,
   isEnglishOrNumber,
   isPreferredLanguage,
 } from "./utils";
 
 /**
- * * For a better user experience, a maximum of 2 seconds is set to request language detect API, and the local language check is used for timeout.
- *
- * If Apple language detection is enabled, both Apple language test and Tencent language test will be initiated, and which first-out result will be used.
- * If the language of the asynchronous check is the preferred language, use it directly. If not, continue to invoke local language detection.
- */
-const delayDetectLanguageTime = 2000;
-let isDetectedLanguage = false;
-let delayLocalDetectLanguageTimer: NodeJS.Timeout;
-
-/**
  * Record all API detected language, if has detected two identical language id, use it.
  */
-let apiDetectedLanguageList: LanguageDetectTypeResult[];
+let apiDetectedLanguageList: DetectedLangModel[];
 
 const defaultConfirmedConfidence = 0.8;
 
+let hasDetectFinished = false;
+
 /**
- * Detect language with the given text, callback with LanguageDetectTypeResult.
+ given text, callback with LanguageDetectTypeResult.
  *
  * Prioritize the API language detection, if over time, try to use local language detection.
  *
  * Todo: use class to rewrite.
  */
-export function detectLanguage(
-  text: string,
-  callback: (detectedLanguageResult: LanguageDetectTypeResult) => void
-): void {
+export function detectLanguage(text: string): Promise<DetectedLangModel> {
   console.log(`start detectLanguage`);
+
   const localDetectResult = getLocalTextLanguageDetectResult(text, defaultConfirmedConfidence);
   apiDetectedLanguageList = [];
 
-  // Start a delay timer to detect local language, use it only if API detect over time.
-  clearTimeout(delayLocalDetectLanguageTimer);
-  delayLocalDetectLanguageTimer = setTimeout(() => {
-    console.log(`API detect over time, try to use local detect language if preferred.`);
+  return new Promise((resolve) => {
+    // Covert text to lowercase, because Tencent LanguageDetect API is case sensitive, such as 'Section' is detected as 'fr' 😑
+    const lowerCaseText = text.toLowerCase();
+    console.log("api detect queryText:", text);
+    console.log("detect lowerCaseText:", lowerCaseText);
 
-    if (localDetectResult.confirmed) {
-      console.log("use local detect confirmed:", localDetectResult.type, localDetectResult.youdaoLanguageId);
-
-      isDetectedLanguage = true;
-      callback(localDetectResult);
-    }
-  }, delayDetectLanguageTime);
-
-  // Covert text to lowercase, because Tencent LanguageDetect API is case sensitive, such as 'Section' is detected as 'fr' 😑
-  const lowerCaseText = text.toLowerCase();
-  console.log("api detect queryText:", text);
-  console.log("detect lowerCaseText:", lowerCaseText);
-
-  // new a action map, key is LanguageDetectType, value is Promise<LanguageDetectTypeResult>
-  const detectActionMap = new Map<LanguageDetectType, Promise<LanguageDetectTypeResult>>();
-  detectActionMap.set(LanguageDetectType.Tencent, tencentLanguageDetect(lowerCaseText));
-  if (myPreferences.enableAppleLanguageDetect) {
-    detectActionMap.set(LanguageDetectType.Apple, appleLanguageDetect(lowerCaseText));
-  }
-  detectActionMap.set(LanguageDetectType.Baidu, baiduLanguageDetect(lowerCaseText));
-  detectActionMap.set(LanguageDetectType.Google, googleLanguageDetect(lowerCaseText, axios.defaults.signal));
-
-  // if local detect language is not confirmed, use API language detect
-  try {
-    raceDetectTextLanguage(detectActionMap, localDetectResult, (detectTypeResult) => {
-      const finalLanguageTypeResult = getFinalLanguageDetectResult(text, detectTypeResult, defaultConfirmedConfidence);
-      callback(finalLanguageTypeResult);
+    const detectActionList = getDetectAPIs().map((detect) => detect(lowerCaseText));
+    raceDetectLanguage(detectActionList).then((detectedLanguage) => {
+      if (!detectedLanguage) {
+        console.log(`use localDetectResult`);
+        resolve(localDetectResult);
+      } else {
+        const finalLanguageTypeResult = getFinalDetectedLanguage(text, detectedLanguage, defaultConfirmedConfidence);
+        resolve(finalLanguageTypeResult);
+      }
     });
-  } catch (error) {
-    // ? Never to enter here
-    // if API detect error, use local detect language
-    console.error(`detect language error: ${error}, callback localDetectResult`);
-    callback(localDetectResult);
-  }
+  });
 }
 
 /**
- * Promise race to detect language, if success, callback API detect language, else local detect language
- *
- * Todo: may be don't need to use promise race, callback is ok.
+ * Get detect API functions. If API is enabled, add it to detect function list. Add Google and Bing by default.
  */
-function raceDetectTextLanguage(
-  detectLanguageActionMap: Map<LanguageDetectType, Promise<LanguageDetectTypeResult>>,
-  localLanguageDetectTypeResult: LanguageDetectTypeResult,
-  callback: (detectTypeResult: LanguageDetectTypeResult) => void
-) {
-  console.log(`start raceDetectTextLanguage: ${[...detectLanguageActionMap.keys()]}`);
-  // console.log("race local detect language: ", localLanguageDetectTypeResult);
-  isDetectedLanguage = false;
-  const detectLanguageActionList = detectLanguageActionMap.values();
-  Promise.race(detectLanguageActionList)
-    .then((typeResult) => {
-      if (isDetectedLanguage) {
-        console.warn(`has detected language, promise race detect over time: ${JSON.stringify(typeResult, null, 4)}`);
-        return;
-      }
+function getDetectAPIs() {
+  const detectActionList = [];
+  detectActionList.push(bingDetect);
+  detectActionList.push(googleDetect);
 
-      isDetectedLanguage = true;
-      clearTimeout(delayLocalDetectLanguageTimer);
+  if (myPreferences.enableBaiduTranslate) {
+    detectActionList.push(baiduWebDetect);
+  }
 
-      handleDetectedLanguageTypeResult(typeResult, localLanguageDetectTypeResult, detectLanguageActionMap, callback);
-    })
-    .catch((error) => {
-      // If current API detect error, remove it from the detectActionMap, and try next detect API.
+  if (myPreferences.enableTencentTranslate && hasTencentAppKey()) {
+    detectActionList.push(tencentDetect);
+  }
+  if (myPreferences.enableVolcanoTranslate && hasVolcanoAppKey()) {
+    detectActionList.push(volcanoDetect);
+  }
 
-      const errorInfo = error as RequestErrorInfo | undefined;
-      if (!errorInfo) {
-        return callback(localLanguageDetectTypeResult);
-      }
+  // Apple detection is inaccurate, only use it when lacking detect API.
+  if (detectActionList.length < 3 && myPreferences.enableAppleLanguageDetect) {
+    // Since Apple detect may block the main thread, so we stop it for now and wait for a solution to be found later.
+    detectActionList.push(appleLanguageDetect);
+  }
 
-      console.error(`race detect language error: ${JSON.stringify(error, null, 4)}`); // error: {} ??
-
-      const errorType = errorInfo.type as LanguageDetectType;
-      if (checkIsLanguageDetectType(errorType)) {
-        const detectTypeResult: LanguageDetectTypeResult = {
-          type: errorType,
-          sourceLanguageId: "",
-          youdaoLanguageId: "",
-          confirmed: false,
-        };
-        handleDetectedLanguageTypeResult(
-          detectTypeResult,
-          localLanguageDetectTypeResult,
-          detectLanguageActionMap,
-          callback
-        );
-      }
-    });
+  return detectActionList;
 }
 
-function handleDetectedLanguageTypeResult(
-  apiDetectedLanguage: LanguageDetectTypeResult,
-  localDetectedLanguage: LanguageDetectTypeResult,
-  detectLanguageActionMap: Map<LanguageDetectType, Promise<LanguageDetectTypeResult>>,
-  callback: (detectTypeResult: LanguageDetectTypeResult) => void
-) {
-  console.log(`handleDetectedLanguageTypeResult: ${JSON.stringify(apiDetectedLanguage, null, 4)}`);
-
-  const detectedYoudaoLanguageId = apiDetectedLanguage.youdaoLanguageId;
-
-  /**
-   * 1. Preferred to use Google language detect, mark it as confirmed.
-   *
-   * Generally speaking, Google language detect is the most accurate, but it is too slow, it takes more than 1s.
-   * So we have to try to use other types of language detection first.
-   */
-  if (apiDetectedLanguage.type === LanguageDetectType.Google && apiDetectedLanguage.sourceLanguageId.length > 0) {
-    console.log(`use Google detect language: ${apiDetectedLanguage.sourceLanguageId}`);
-    apiDetectedLanguage.confirmed = true;
-    callback(apiDetectedLanguage);
-    return;
-  }
-
-  // 2. Try to use Baidu language detect, if it is confirmed and preferred language, use it.
-  if (apiDetectedLanguage.type === LanguageDetectType.Baidu) {
-    if (apiDetectedLanguage.confirmed && isPreferredLanguage(detectedYoudaoLanguageId)) {
-      console.log(`use Baidu language detect, confirmed and preferred language: ${detectedYoudaoLanguageId}`);
-      callback(apiDetectedLanguage);
-      return;
-    }
-  }
-
-  // 3. Iterate API detected language List, check if has detected `two` identical && `preferred` language id, if true, use it.
-  for (const language of apiDetectedLanguageList) {
-    if (language.youdaoLanguageId === detectedYoudaoLanguageId && isPreferredLanguage(detectedYoudaoLanguageId)) {
-      language.confirmed = true;
-      console.warn(`---> API: ${apiDetectedLanguage.type} && ${language.type}, detected identical preferred language`);
-      console.warn(`detected language: ${JSON.stringify(language, null, 4)}`);
-      callback(language); // use the first detected language type, the speed of response is important.
-      return;
-    }
-  }
-
-  // 4. Iterate API detected language List, check if has detected `three` identical language id, if true, use it.
-  let count = 1;
-  for (const language of apiDetectedLanguageList) {
-    if (language.youdaoLanguageId === detectedYoudaoLanguageId) {
-      count += 1;
-    }
-    if (count === 3) {
-      language.confirmed = true;
-      console.warn(`---> API detected three identical language`);
-      console.warn(`detected language: ${JSON.stringify(language, null, 4)}`);
-      callback(language); // use the first detected language type, the speed of response is important.
-      return;
-    }
-  }
-
-  // If this API detected language is not confirmed, record it in the apiDetectedLanguage.
-  apiDetectedLanguageList.push(apiDetectedLanguage);
-
-  /**
-   * 4. If this is the last one, and it's not confirmed, iterate API Detected Language List to compare with the Local Detect Language List.
-   * If matched, and the language is preferred, mark it as confirmed. else use it directly, but not confirmed.
-   */
-  if (detectLanguageActionMap.size === 1) {
-    console.log(`try compare API detected language list with local deteced list`);
-    console.log(`---> API detected language list: ${JSON.stringify(apiDetectedLanguageList, null, 4)}`);
-
-    const localDetectedLanguageArray = localDetectedLanguage.detectedLanguageArray;
-    // console.log(`---> local detected language list: ${JSON.stringify(detectedLocalLanguageArray, null, 4)}`);
-    if (localDetectedLanguageArray?.length) {
-      for (const [localLanguageId, confidence] of localDetectedLanguageArray) {
-        for (const apiLanguage of apiDetectedLanguageList) {
-          if (
-            apiLanguage.youdaoLanguageId === localLanguageId &&
-            isPreferredLanguage(localLanguageId) &&
-            confidence > 0
-          ) {
-            apiLanguage.confirmed = true;
-            console.warn(`API and Local detect identical preferred language: ${JSON.stringify(apiLanguage, null, 4)}`);
-            callback(apiLanguage);
-            return;
+/**
+ * Race to detect language, if success, callback API detect language, else local detect language
+ */
+function raceDetectLanguage(detectActionList: Promise<DetectedLangModel>[]): Promise<DetectedLangModel | undefined> {
+  hasDetectFinished = false;
+  let detectCount = 0;
+  return new Promise((resolve) => {
+    detectActionList.forEach((detectAction) => {
+      detectAction
+        .then((detectTypeResult) => {
+          handleDetectedLanguage(detectTypeResult).then((result) => {
+            if (result) {
+              resolve(result);
+              hasDetectFinished = true;
+            }
+          });
+        })
+        .catch((error) => {
+          // If current API detect error, continue try next API.
+          const errorInfo = error as RequestErrorInfo | undefined;
+          if (errorInfo) {
+            console.error(`race detect language error: ${JSON.stringify(error, null, 4)}`); // error: {} ??
+          } else {
+            console.log(`detect canceled`);
           }
+        })
+        .finally(() => {
+          detectCount += 1;
+          // If the last detection action is still not resolve, return undefined.
+          if (detectCount === detectActionList.length && hasDetectFinished === false) {
+            console.warn(`last detect action fail, return undefine`);
+            resolve(undefined);
+          }
+        });
+    });
+  });
+}
+
+function handleDetectedLanguage(detectedLang: DetectedLangModel): Promise<DetectedLangModel | undefined> {
+  return new Promise((resolve) => {
+    if (hasDetectFinished) {
+      console.log(`detect has finished, return undefined`);
+      return resolve(undefined);
+    }
+
+    console.log(`handleDetectedLanguageTypeResult: ${JSON.stringify(detectedLang, null, 4)}`);
+
+    // Record it in the apiDetectedLanguage.
+    apiDetectedLanguageList.push(detectedLang);
+    const detectedLangCode = detectedLang.youdaoLangCode;
+
+    /**
+     * 1. Preferred to use Google language detect, mark it as confirmed.
+     *
+     * Generally speaking, Google language detect is the most accurate, but it is too slow, it takes more than 1s.
+     * So we have to try to use other types of language detection first.
+     */
+    if (detectedLang.type === LanguageDetectType.Google && detectedLang.sourceLangCode.length > 0) {
+      console.warn(`use Google detect language: ${detectedLang.sourceLangCode}`);
+      detectedLang.confirmed = true;
+      return resolve(detectedLang);
+    }
+
+    // Detected language must be valid language.
+    if (!isValidLangCode(detectedLangCode)) {
+      return resolve(undefined);
+    }
+
+    // 2. Iterate API detected language List, check if has detected >= `two` identical valid language.
+    const detectedIdenticalLanguages: DetectedLangModel[] = [];
+    const detectedTypes: string[] = [];
+    for (const lang of apiDetectedLanguageList) {
+      if (lang.youdaoLangCode === detectedLangCode) {
+        detectedIdenticalLanguages.push(lang);
+        detectedTypes.push(lang.type.toString().split(" ")[0]);
+      }
+
+      // If enabled speed first, and API detected two `preferred` language, try to use it.
+      if (detectedIdenticalLanguages.length === 2) {
+        const baiduType = LanguageDetectType.Baidu;
+        const bingType = LanguageDetectType.Bing;
+        const volcanoType = LanguageDetectType.Volcano;
+        const containBingDetect = detectedLang.type === bingType || apiDetectedListContainsType(bingType);
+        const containBaiduDetect = detectedLang.type === baiduType || apiDetectedListContainsType(baiduType);
+        const containVolcanoDetect = detectedLang.type === volcanoType || apiDetectedListContainsType(volcanoType);
+        const confirmVolcanoDetect = containVolcanoDetect && detectedLang.confirmed;
+        if (
+          (containBingDetect || containBaiduDetect || confirmVolcanoDetect) &&
+          isPreferredLanguage(detectedLangCode) &&
+          myPreferences.enableLanguageDetectionSpeedFirst
+        ) {
+          detectedLang.confirmed = true;
+          console.warn(`---> Speed first, API detected 'two' identical 'preferred' language: ${detectedTypes}`);
+          console.warn(`detected language: ${JSON.stringify(detectedLang, null, 4)}`);
+          return resolve(detectedLang);
         }
+      }
+
+      if (detectedIdenticalLanguages.length >= 3) {
+        detectedLang.confirmed = true;
+        console.warn(`---> API detected 'three' identical language`);
+        console.warn(`detected language: ${JSON.stringify(detectedLang, null, 4)}`);
+        return resolve(detectedLang);
       }
     }
 
-    apiDetectedLanguage.confirmed = false;
-    console.log(`---> finally, the last API: ${apiDetectedLanguage.type}, not confirmed, but hava to callback use it.`);
-    callback(apiDetectedLanguage);
-    return;
-  }
-
-  // 5. If this API detected language is not confirmed, remove it from the detectActionMap, and try next detect API.
-  detectLanguageActionMap.delete(apiDetectedLanguage.type);
-  console.log(`---> remove unconfirmed detect action: ${apiDetectedLanguage.type}`);
-  console.log(`---> continue to detect next action`);
-  raceDetectTextLanguage(detectLanguageActionMap, localDetectedLanguage, callback);
+    console.log(`type: '${detectedLang.type}' detected '${detectedLangCode}' is not confirmed, continue next detect`);
+    return resolve(undefined);
+  });
 }
 
 /**
@@ -262,13 +216,13 @@ function handleDetectedLanguageTypeResult(
  *
  *  This function is used when high confidence franc detect language is not confirmed, and API detect language catch error.
  */
-function getFinalLanguageDetectResult(
+function getFinalDetectedLanguage(
   text: string,
-  detectedTypeResult: LanguageDetectTypeResult,
+  detectedTypeResult: DetectedLangModel,
   confirmedConfidence: number
-): LanguageDetectTypeResult {
+): DetectedLangModel {
   console.log(`start try get final detect language: ${JSON.stringify(detectedTypeResult, null, 4)}`);
-  if (detectedTypeResult.confirmed || isPreferredLanguage(detectedTypeResult.youdaoLanguageId)) {
+  if (detectedTypeResult.confirmed || isPreferredLanguage(detectedTypeResult.youdaoLangCode)) {
     return detectedTypeResult;
   }
   return getLocalTextLanguageDetectResult(text, confirmedConfidence);
@@ -291,7 +245,7 @@ function getLocalTextLanguageDetectResult(
   text: string,
   confirmedConfidence: number,
   lowConfidence = 0.2
-): LanguageDetectTypeResult {
+): DetectedLangModel {
   console.log(`start local detect language, confirmed confidence (>${confirmedConfidence})`);
 
   // if detect preferred language confidence > confirmedConfidence.
@@ -308,10 +262,10 @@ function getLocalTextLanguageDetectResult(
         console.log(
           `franc detect preferred but unconfirmed language: ${languageId}, confidence: ${confidence} (>${lowConfidence})`
         );
-        const lowConfidenceDetectTypeResult: LanguageDetectTypeResult = {
+        const lowConfidenceDetectTypeResult: DetectedLangModel = {
           type: francDetectResult.type,
-          sourceLanguageId: francDetectResult.sourceLanguageId,
-          youdaoLanguageId: languageId,
+          sourceLangCode: francDetectResult.sourceLangCode,
+          youdaoLangCode: languageId,
           confirmed: false,
           detectedLanguageArray: francDetectResult.detectedLanguageArray,
         };
@@ -321,25 +275,25 @@ function getLocalTextLanguageDetectResult(
   }
 
   // if franc detect language is valid, use it, such as 'fr', 'it'.
-  const youdaoLanguageId = francDetectResult.youdaoLanguageId;
-  if (isValidLanguageId(youdaoLanguageId)) {
-    console.log(`final use franc unconfirmed but valid detect: ${youdaoLanguageId}`);
+  const youdaoLangCode = francDetectResult.youdaoLangCode;
+  if (isValidLangCode(youdaoLangCode)) {
+    console.log(`final use franc unconfirmed but valid detect: ${youdaoLangCode}`);
     return francDetectResult;
   }
 
   // if simple detect is preferred language, use simple detect language('en', 'zh').
   const simpleDetectLangTypeResult = simpleDetectTextLanguage(text);
-  if (isPreferredLanguage(simpleDetectLangTypeResult.youdaoLanguageId)) {
+  if (isPreferredLanguage(simpleDetectLangTypeResult.youdaoLangCode)) {
     console.log(`use simple detect: ${JSON.stringify(simpleDetectLangTypeResult, null, 4)}`);
     return simpleDetectLangTypeResult;
   }
 
   // finally, use "auto" as fallback.
   console.log(`final use auto`);
-  const finalAutoLanguageTypeResult: LanguageDetectTypeResult = {
+  const finalAutoLanguageTypeResult: DetectedLangModel = {
     type: LanguageDetectType.Simple,
-    sourceLanguageId: "",
-    youdaoLanguageId: "auto",
+    sourceLangCode: "",
+    youdaoLangCode: "auto",
     confirmed: false,
   };
   return finalAutoLanguageTypeResult;
@@ -350,21 +304,25 @@ function getLocalTextLanguageDetectResult(
  *
  * * NOTE: simple detect language, always set confirmed = false.
  */
-export function simpleDetectTextLanguage(text: string): LanguageDetectTypeResult {
-  let fromYoudaoLanguageId = "auto";
-  const englishLanguageId = "en";
-  const chineseLanguageId = "zh-CHS";
-  if (isEnglishOrNumber(text) && checkIfPreferredLanguagesContainedEnglish()) {
-    fromYoudaoLanguageId = englishLanguageId;
-  } else if (isChinese(text) && checkIfPreferredLanguagesContainedChinese()) {
-    fromYoudaoLanguageId = chineseLanguageId;
+export function simpleDetectTextLanguage(text: string): DetectedLangModel {
+  let fromYoudaoLangCode = autoDetectLanguageItem.youdaoLangCode;
+  if (isEnglishOrNumber(text) && checkIfPreferredLanguagesContainEnglish()) {
+    fromYoudaoLangCode = englishLanguageItem.youdaoLangCode;
+  } else if (isChinese(text) && checkIfPreferredLanguagesContainChinese()) {
+    fromYoudaoLangCode = chineseLanguageItem.youdaoLangCode;
   }
-  console.log("simple detect language -->:", fromYoudaoLanguageId);
-  const detectTypeResult = {
+  console.log("simple detect language -->:", fromYoudaoLangCode);
+  const detectTypeResult: DetectedLangModel = {
     type: LanguageDetectType.Simple,
-    sourceLanguageId: fromYoudaoLanguageId,
-    youdaoLanguageId: fromYoudaoLanguageId,
+    sourceLangCode: fromYoudaoLangCode,
+    youdaoLangCode: fromYoudaoLangCode,
     confirmed: false,
   };
   return detectTypeResult;
+}
+
+function apiDetectedListContainsType(detectedLanguagetype: LanguageDetectType): boolean {
+  // console.log(`check if api detected list contains type: ${detectedLanguagetype}`);
+  const isContained = apiDetectedLanguageList.find((item) => item.type === detectedLanguagetype);
+  return isContained !== undefined;
 }
