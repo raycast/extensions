@@ -7,10 +7,9 @@ import {
   clearSearchBar,
   Icon,
   List,
-  PushAction,
+  Action,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
+  Toast
 } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
@@ -33,7 +32,7 @@ function ListView() {
   }, [] as TimeEntry[]);
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
-    await showToast(ToastStyle.Animated, "Starting timer...");
+    await showToast(Toast.Style.Animated, "Starting timer...");
     try {
       await toggl.createTimeEntry({
         projectId: timeEntry.pid,
@@ -42,10 +41,10 @@ function ListView() {
         billable: timeEntry.billable,
       });
       await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, "Time entry resumed");
+      await showToast(Toast.Style.Success, "Time entry resumed");
       await clearSearchBar({ forceScrollToTop: true });
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to resume time entry");
+      await showToast(Toast.Style.Failure, "Failed to resume time entry");
     }
   }
 
@@ -61,7 +60,7 @@ function ListView() {
                 icon={"command-icon.png"}
                 actions={
                   <ActionPanel>
-                    <PushAction
+                    <Action.Push
                       title="Create Time Entry"
                       icon={{ source: Icon.Clock }}
                       target={
@@ -87,7 +86,7 @@ function ListView() {
                     icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
                     actions={
                       <ActionPanel>
-                        <SubmitFormAction
+                        <Action.SubmitForm
                           title="Resume Time Entry"
                           onSubmit={() => resumeTimeEntry(timeEntry)}
                           icon={{ source: Icon.Clock }}
