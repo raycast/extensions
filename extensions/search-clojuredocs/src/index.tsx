@@ -72,12 +72,6 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
     "`No examples`" : 
     res.examples?.map((e) => "~~~\n" + e + "\n~~~").join("\n")}
 
-   ### See also
-
-   ${res["see-alsos"] == null ? 
-    "None" : 
-    res["see-alsos"]?.map((arg) => "`(" + res.name + " " + arg + ")`").join(" ")}
-
    ### ${res.notes == null ? "0" : res.notes.length} Note(s)
 
    ${res.notes == null ? 
@@ -96,10 +90,9 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
             <Detail.Metadata.Link title="Library" text={res.ns} target={res["library-url"]} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.TagList title="See also">
-              {(data || []).map((result) => (
-                <SearchListItem key={result.ns + "/" + result.name} searchResult={result} />
+              {(res["see-alsos"] || []).map((result) => (
+                <Detail.Metadata.TagList.Item text={result} color={"#A9A9A9"} />
               ))}
-              <Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
             </Detail.Metadata.TagList>
           </Detail.Metadata>
         }
