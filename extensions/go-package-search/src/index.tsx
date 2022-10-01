@@ -10,7 +10,7 @@ export default function Command() {
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Go packages..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.path} searchResult={searchResult} />
+          <SearchListItem key={searchResult.path ?? searchResult.url} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -21,7 +21,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       icon={searchResult.search ? Icon.MagnifyingGlass : "list-icon.png"}
-      key={searchResult.path}
       title={searchResult.name}
       subtitle={searchResult.description}
       accessories={[
@@ -142,7 +141,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
     const description = item.querySelector('[data-test-id="snippet-synopsis"]')?.text?.trim();
     const url = `https://pkg.go.dev/${path}`;
-    const standardLibrary = item.querySelector("span.go-Chip") != null;
+    const standardLibrary = !!item.querySelector("span.go-Chip");
 
     results.push({
       name,
