@@ -1,13 +1,4 @@
-import {
-  useNavigation,
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  clearSearchBar,
-} from "@raycast/api";
+import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
 import { Project } from "../toggl/types";
