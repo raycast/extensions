@@ -32,11 +32,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser url={searchResult.url} />
-            <Action.CopyToClipboard title="Copy Package Path" content={searchResult.path} />
-            <Action.CopyToClipboard title="Copy Download Command" content={`go get ${searchResult.path}`} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={searchResult.url} />
+          {searchResult.path ? (
+            <ActionPanel.Section title="Go">
+              <Action.CopyToClipboard title="Copy Package Path" content={searchResult.path} />
+              <Action.CopyToClipboard title="Copy Download Command" content={`go get ${searchResult.path}`} />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />
@@ -96,7 +98,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   const hasSearchText = searchText.length !== 0;
   const searchItem: SearchResult = {
     name: hasSearchText ? `Search ${searchText}` : "Open pkg.go.dev",
-    path: "",
     description: hasSearchText ? "on pkg.go.dev" : "",
     standardLibrary: false,
     search: true,
@@ -162,7 +163,7 @@ interface SearchState {
 
 interface SearchResult {
   name: string;
-  path: string;
+  path?: string;
   standardLibrary: boolean;
   search: boolean;
   description?: string;
