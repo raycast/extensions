@@ -32,7 +32,7 @@ function getDocList(data: Doc): DocInfo[] {
 }
 
 export default function Command() {
-  const { isLoading, data, revalidate } = useFetch(
+  const { isLoading, data } = useFetch(
     "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
     {
       // to make sure the screen isn't flickering when the searchText changes
@@ -44,7 +44,7 @@ export default function Command() {
   // setList(getDocList(data));
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search ClojureDocs..." throttle>
+    <List isLoading={isLoading} searchBarPlaceholder="Search..." throttle>
       {(data || []).map((result) => (
         <SearchListItem key={result.ns + "/" + result.name} searchResult={result} />
       ))}
@@ -58,9 +58,7 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
 
    ---
 
-   ${res.arglists.length == 0 ? 
-    "No args" : 
-    res.arglists?.map((arg) => "`(" + res.name + " " + arg + ")`").join(" ")}
+   ${res.arglists.length == 0 ? "No args" : res.arglists?.map((arg) => "`(" + res.name + " " + arg + ")`").join(" ")}
 
    ~~~
    ${res.doc ?? "No doc"}
@@ -68,15 +66,11 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
 
    ### ${res.examples == null ? "0" : res.examples.length} Examples
 
-   ${res.examples == null ? 
-    "`No examples`" : 
-    res.examples?.map((e) => "~~~\n" + e + "\n~~~").join("\n")}
+   ${res.examples == null ? "`No examples`" : res.examples?.map((e) => "~~~\n" + e + "\n~~~").join("\n")}
 
    ### ${res.notes == null ? "0" : res.notes.length} Note(s)
 
-   ${res.notes == null ? 
-    "`No notes`" : 
-    res.notes?.map((n) => "~~~\n" + n + "\n~~~").join("\n")}
+   ${res.notes == null ? "`No notes`" : res.notes?.map((n) => "~~~\n" + n + "\n~~~").join("\n")}
   `;
 
   return (
@@ -86,6 +80,7 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
         markdown={mark}
         metadata={
           <Detail.Metadata>
+            <Detail.Metadata.Label title="Type" text={res.type} />
             <Detail.Metadata.Label title="Available since" text={res.added} />
             <Detail.Metadata.Link title="Library" text={res.ns} target={res["library-url"]} />
             <Detail.Metadata.Separator />

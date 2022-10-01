@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-clojuredocs",
-  "title": "Search ClojureDocs",
-  "description": "Search ClojureDocs.",
+  "title": "Search ClojureDocs Site",
+  "description": "Search and browse clojuredocs.org site.",
   "icon": "clojure.png",
   "author": "danblancas",
   "categories": [
@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search ClojureDocs",
+      "title": "Looking For?",
       "subtitle": "clojuredocs.org",
-      "description": "Search the ClojureDocs.",
+      "description": "Search clojuredocs.org by var, namespace or documentation string.",
       "mode": "view",
       "icon": "clojure.png"
     }
