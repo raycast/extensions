@@ -144,7 +144,7 @@ export async function googleWebTranslate(queryWordInfo: QueryWordInfo, signal?: 
     "User-Agent": userAgent,
   };
   const url = `https://translate.google.com/m?${querystring.stringify(data)}`;
-  console.log(`---> google web url: ${url}`); // https://translate.google.cn/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
+  console.log(`---> google web url: ${url}`); // https://translate.google.com/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
 
   return new Promise((resolve, reject) => {
     axios

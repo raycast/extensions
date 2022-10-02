@@ -177,8 +177,6 @@ export function getSystemProxyURL(): Promise<string | undefined> {
 /**
  * Get proxy agent.
  *
- * * Since translate.google.cn is not available anymore, we have to try to use proxy by default.
- *
  * * Note: this function will block ~0.4s, so should call it at the right time.
  */
 export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
