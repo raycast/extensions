@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 22:15
+ * @lastEditTime: 2022-10-01 23:48
  * @fileName: tencent.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -274,7 +274,7 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
  * Todo: use axios to rewrite.
  */
 export function tencentDetect(text: string): Promise<DetectedLangModel> {
-  console.log(`---> start sdk request Tencent language detect`);
+  console.log(`---> start sdk request Tencent detect`);
 
   const params = {
     Text: text,

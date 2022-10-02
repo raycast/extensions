@@ -326,9 +326,9 @@
     {
       "name": "enableSelectTargetLanguage",
       "type": "checkbox",
-      "label": "Select Target Language",
+      "label": "Show Select Target Language",
       "required": false,
-      "description": "Select target language in action panel manually",
+      "description": "If you need to select target language manually, turn on it.",
       "default": false
     },
     {
@@ -379,16 +379,16 @@
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
-      "description": "Turn on/off DeepL Translate",
-      "default": false
+      "description": "Turn on/off DeepL Translate. Use system proxy automatically by default. App Key is required.",
+      "default": true
     },
     {
       "name": "enableGoogleTranslate",
       "type": "checkbox",
       "label": "Google Translate",
       "required": false,
-      "description": "Turn on/off Google Translate",
-      "default": true
+      "description": "⚠️ Use system proxy automatically by default. A proxy is required to use Google if you are in China.",
+      "default": false
     },
     {
       "name": "enableBingTranslate",
@@ -403,7 +403,7 @@
       "type": "checkbox",
       "label": "Baidu Translate",
       "required": false,
-      "description": "Turn on/off Baidu Translate",
+      "description": "Turn on/off Baidu Translate. App Key is required.",
       "default": true
     },
     {
@@ -411,7 +411,7 @@
       "type": "checkbox",
       "label": "Tencent Translate",
       "required": false,
-      "description": "Turn on/off Tencent Translate",
+      "description": "Turn on/off Tencent Translate. App Key is required.",
       "default": true
     },
     {
@@ -419,7 +419,7 @@
       "type": "checkbox",
       "label": "Volcano Translate",
       "required": false,
-      "description": "Turn on/off Volcano Translate",
+      "description": "Turn on/off Volcano Translate. App Key is required.",
       "default": true
     },
     {
@@ -435,7 +435,7 @@
       "type": "checkbox",
       "label": "Caiyun Translate",
       "required": false,
-      "description": "Turn on/off Caiyun Translate",
+      "description": "Turn on/off Caiyun Translate. App Key is required.",
       "default": false
     },
     {
@@ -446,22 +446,6 @@
       "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
       "default": "",
       "placeholder": "youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
-    },
-    {
-      "title": "Youdao App ID",
-      "name": "youdaoAppId",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App ID",
-      "default": ""
-    },
-    {
-      "title": "Youdao App Secret",
-      "name": "youdaoAppSecret",
-      "type": "textfield",
-      "required": false,
-      "description": "Your Youdao App Secret",
-      "default": ""
     },
     {
       "title": "DeepL Auth Key",
@@ -517,6 +501,22 @@
       "type": "textfield",
       "required": false,
       "description": "Your Volcano Access Key Secret",
+      "default": ""
+    },
+    {
+      "title": "Youdao App ID",
+      "name": "youdaoAppId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App ID",
+      "default": ""
+    },
+    {
+      "title": "Youdao App Secret",
+      "name": "youdaoAppSecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App Secret",
       "default": ""
     },
     {

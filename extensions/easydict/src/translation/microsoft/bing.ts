@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:43
+ * @lastEditTime: 2022-10-02 15:47
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -23,7 +23,7 @@ import { autoDetectLanguageItem, englishLanguageItem } from "./../../language/co
 import { RequestErrorInfo, TranslationType } from "./../../types";
 import { BingConfig, BingTranslateResult } from "./types";
 
-console.log(`enter microsoft.ts`);
+console.log(`enter bing.ts`);
 
 const bingConfigKey = "BingConfig";
 
@@ -104,7 +104,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
     axios(config)
       .then(function (response) {
         const responseData = response.data;
-        console.warn(`bing cost time: ${response.headers[requestCostTime]}`);
+        console.warn(`bing translate cost time: ${response.headers[requestCostTime]}`);
 
         // If bing translate response is empty, may be ip has been changed, bing tld is not correct, so check ip again, then request again.
         if (!responseData) {
@@ -158,7 +158,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
  * Bing language detect, use bing translate `audo-detect`.
  */
 export async function bingDetect(text: string): Promise<DetectedLangModel> {
-  console.log(`start bingLanguageDetect`);
+  console.log(`start bingDetect`);
 
   const queryWordInfo: QueryWordInfo = {
     word: text,
