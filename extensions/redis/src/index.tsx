@@ -98,7 +98,6 @@ interface Content {
 const contentURL = "https://api.github.com/repos/redis/redis-doc/contents";
 
 const CommandREADME = ({ command }: { command: RedisCommand }) => {
-  console.log(command);
   const url = `${contentURL}${command.url.slice(0, -1)}.md`;
   const { isLoading, data, revalidate } = useFetch<Content>(url);
   return (
