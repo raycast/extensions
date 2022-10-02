@@ -17,7 +17,7 @@
     }
   ],
   "contributors": [
-    "Steellow"
+    "kepakko"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
