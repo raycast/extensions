@@ -1,18 +1,8 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import urljoin from "url-join";
+import { useFetch } from "@raycast/utils";
 
 const { locale } = getPreferenceValues<{ locale: string }>();
 
@@ -20,7 +10,6 @@ export default function MDNSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { push } = useNavigation();
 
   useEffect(() => {
     async function fetch() {
@@ -45,24 +34,15 @@ export default function MDNSearchResultsList() {
     >
       {state.map((result, idx) => (
         <List.Item
-          id={idx.toString()}
           key={idx}
           title={result.title}
           icon="icon.png"
           subtitle={result.summary}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Show Details"
-                icon={Icon.Sidebar}
-                onAction={() => push(<Details {...result} />)}
-              />
-              <OpenInBrowserAction url={result.url} />
-              <CopyToClipboardAction
-                title="Copy URL"
-                content={result.url}
-                shortcut={{ modifiers: ["cmd"], key: "." }}
-              />
+              <Action.Push icon={Icon.Document} title="Read Document" target={<Details {...result} />} />
+              <Action.OpenInBrowser url={result.url} />
+              <Action.CopyToClipboard content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
             </ActionPanel>
           }
         />
@@ -71,34 +51,46 @@ export default function MDNSearchResultsList() {
   );
 }
 
-function Details(props: Result) {
-  const { title, summary, url } = props;
+interface Content {
+  content: string;
+  encoding: string;
+}
 
+const contentURL = "https://api.github.com/repos/mdn/content/contents";
+
+const Details = (props: Result) => {
+  const file = "/files" + props.mdn_url.toLowerCase().replace("/docs/", "/") + "/index.md";
+  const url = `${contentURL}${file}`;
+  const { isLoading, data, revalidate } = useFetch<Content>(url);
   return (
     <Detail
-      markdown={`# ${title}\n## Summary\n${summary}`}
+      navigationTitle={`Search Web Docs - ${props.title}`}
+      isLoading={isLoading}
+      markdown={Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString()}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={url} />
-          <CopyToClipboardAction title="Copy URL" content={url} />
+          <Action.OpenInBrowser title="Source on GitHub" url={`https://github.com/mdn/content/blob/main${file}`} />
+          <Action
+            icon={Icon.ArrowClockwise}
+            title="Reload"
+            onAction={() => revalidate()}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
         </ActionPanel>
       }
     />
   );
-}
+};
 
 type MDNResponse = {
-  documents: Array<{
-    title: string;
-    mdn_url: string;
-    summary: string;
-  }>;
+  documents: Array<Result>;
 };
 
 type Result = {
   title: string;
   url: string;
   summary: string;
+  mdn_url: string;
 };
 
 async function searchMDNByQuery(query: string): Promise<Result[]> {
@@ -110,14 +102,16 @@ async function searchMDNByQuery(query: string): Promise<Result[]> {
         locale: locale,
       },
     });
-    return response.data.documents.map((document) => ({
-      title: document.title,
-      summary: document.summary,
-      url: urljoin("https://developer.mozilla.org", document.mdn_url),
-    }));
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not load MDN results. ${error}`);
+    return response.data.documents.map((document) => {
+      document.url = urljoin("https://developer.mozilla.org", document.mdn_url);
+      return document;
+    });
+  } catch (err) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: `Could not load MDN results`,
+      message: String(err),
+    });
     return Promise.resolve([]);
   }
 }

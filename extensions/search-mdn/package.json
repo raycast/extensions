@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "krzysztofzuraw",
   "contributors": [
-    "OBQun"
+    "OBQun",
+    "k8scat"
   ],
   "license": "MIT",
   "commands": [
@@ -75,7 +76,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.4.8",
     "axios": "^0.23.0",
     "url-join": "4.0.1"
   },
@@ -93,7 +95,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "tsc": "tsc --project . --noEmit",
-    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
   }
 }
