@@ -102,6 +102,7 @@ const CommandREADME = ({ command }: { command: RedisCommand }) => {
   const { isLoading, data, revalidate } = useFetch<Content>(url);
   return (
     <Detail
+      navigationTitle={`Document - ${command.name}`}
       isLoading={isLoading}
       markdown={Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString()}
       actions={
