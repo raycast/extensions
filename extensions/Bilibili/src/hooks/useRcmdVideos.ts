@@ -12,7 +12,7 @@ export function useRcmdVideos(idx: number) {
       try {
         const res = await getRcmd(idx);
 
-        setRcmdVideos(rcmdVideos.concat(res));
+        setRcmdVideos(rcmdVideos.concat(res.filter((item) => item.uri)));
         setIsLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Get rcmd videos failed");

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-19 23:38
+ * @lastEditTime: 2022-09-27 16:40
  * @fileName: deepL.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -13,8 +13,8 @@ import axios, { AxiosError } from "axios";
 import querystring from "node:querystring";
 import { requestCostTime } from "../axiosConfig";
 import { QueryWordInfo } from "../dictionary/youdao/types";
-import { getDeepLLanguageId } from "../language/languages";
-import { KeyStore, myDecrypt, myEncrypt } from "../preferences";
+import { getDeepLLangCode } from "../language/languages";
+import { AppKeyStore, myDecrypt, myEncrypt } from "../preferences";
 import { DeepLTranslateResult, QueryTypeResult, TranslationType } from "../types";
 import { getTypeErrorInfo } from "../utils";
 
@@ -28,8 +28,8 @@ const deepLAuthStoredKey = "deepLAuthStoredKey";
 export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.log(`---> start rquest DeepL`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const sourceLang = getDeepLLanguageId(fromLanguage);
-  const targetLang = getDeepLLanguageId(toLanguage);
+  const sourceLang = getDeepLLangCode(fromLanguage);
+  const targetLang = getDeepLLangCode(toLanguage);
 
   // if language is not supported, return null
   if (!sourceLang || !targetLang) {
@@ -38,7 +38,7 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
       type: TranslationType.DeepL,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }
@@ -71,7 +71,7 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
           type: TranslationType.DeepL,
           result: deepLResult,
           translations: translatedText.split("\n"),
-          wordInfo: queryWordInfo,
+          queryWordInfo: queryWordInfo,
         };
         resolve(deepLTypeResult);
       })
@@ -135,7 +135,7 @@ const wildEncryptedDeepLKeys = [
 export function getDeepLAuthKey(): Promise<string> {
   console.log(`get deepL key`);
   return new Promise((resolve) => {
-    const userKey = KeyStore.userDeepLAuthKey;
+    const userKey = AppKeyStore.userDeepLAuthKey;
     if (userKey) {
       console.log(`---> user has deepL key`);
       return resolve(userKey);
@@ -143,7 +143,7 @@ export function getDeepLAuthKey(): Promise<string> {
 
     console.log(`---> get stored deepL key`);
 
-    const decryptedKey = myDecrypt(KeyStore.defaultEncryptedDeepLAuthKey);
+    const decryptedKey = myDecrypt(AppKeyStore.defaultEncryptedDeepLAuthKey);
     LocalStorage.getItem<string>(deepLAuthStoredKey).then((key) => {
       if (key) {
         console.log(`---> use stored deepL key`); // cost: 10 ms
@@ -214,7 +214,7 @@ export async function getAndStoreDeepLKey(encryptedKeys: string[]): Promise<stri
   }
 
   console.log(`---> no valid key, use defatul deepl key`);
-  const defaultDeepLAuthKey = myDecrypt(KeyStore.defaultEncryptedDeepLAuthKey);
+  const defaultDeepLAuthKey = myDecrypt(AppKeyStore.defaultEncryptedDeepLAuthKey);
   return Promise.resolve(defaultDeepLAuthKey);
 }
 
@@ -235,6 +235,6 @@ export async function getAndStoreValidDeepLKey(encryptedKeys: string[]): Promise
     }
   }
   console.log(`---> no valid key, use defatul deepl key`);
-  const defaultDeepLAuthKey = myDecrypt(KeyStore.defaultEncryptedDeepLAuthKey);
+  const defaultDeepLAuthKey = myDecrypt(AppKeyStore.defaultEncryptedDeepLAuthKey);
   return Promise.resolve(defaultDeepLAuthKey);
 }

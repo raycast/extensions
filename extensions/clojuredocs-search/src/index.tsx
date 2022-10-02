@@ -101,7 +101,7 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
   );
 };
 
-function SearchListItem({ searchResult }: { searchResult: any }) {
+function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
   return (
     <List.Item
       title={searchResult.ns + "/" + searchResult.name}

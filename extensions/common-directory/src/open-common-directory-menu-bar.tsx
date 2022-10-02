@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences, showInFinder } from "@raycast/api";
 import { LocalDirectoryKey } from "./types/directory-info";
 import React from "react";
 import { addDirectoryMenuBar } from "./utils/common-utils";
@@ -34,8 +34,12 @@ export default function OpenCommonDirectory() {
               icon={{ fileIcon: directory.path }}
               title={directory.name}
               tooltip={directory.path}
-              onAction={async () => {
-                await open(directory.path);
+              onAction={async (event: MenuBarExtra.ActionEvent) => {
+                if (event.type == "left-click") {
+                  await open(directory.path);
+                } else {
+                  await showInFinder(directory.path);
+                }
               }}
             />
           );
@@ -49,8 +53,12 @@ export default function OpenCommonDirectory() {
             icon={{ fileIcon: directory.path }}
             title={directory.name}
             tooltip={directory.path}
-            onAction={async () => {
-              await open(directory.path);
+            onAction={async (event: MenuBarExtra.ActionEvent) => {
+              if (event.type == "left-click") {
+                await open(directory.path);
+              } else {
+                await showInFinder(directory.path);
+              }
             }}
           />
         );
