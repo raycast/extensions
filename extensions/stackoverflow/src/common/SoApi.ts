@@ -70,6 +70,6 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
   const data = await response.json();
   assertArrayProp(data, "items");
   return data.items.map(parseResponse).sort(function (a, b) {
-    return b.answer_count - a.answer_count || b.view_count - a.view_count;
+    return b.view_count - a.view_count || b.answer_count - a.answer_count;
   });
 };

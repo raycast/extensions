@@ -16,6 +16,9 @@
       "mode": "view"
     }
   ],
+  "contributors": [
+    "Steellow"
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "he": "^1.2.0",
