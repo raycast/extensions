@@ -50,6 +50,14 @@ Next:
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
+### [Linguee 词典](https://www.linguee.com/)：English <--> French
+
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
+
+#### [good](https://www.linguee.com/english-french/search?query=good)
+
+![image-20220822163332948](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822163332948-1661157213.png)
+
 ### Show More Details（Shortcut `Cmd + M`）
 
 ![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
@@ -144,7 +152,7 @@ Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Po
 
 Currently, we support DeepL, Google, Bing, 🍎 Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation, total 9 translation services.
 
-Where Google and DeepL translations will use the system proxy by default. (DeepL works without a proxy, but sometimes requests time out)
+Google and DeepL translations will use the system proxy by default. (DeepL works without a proxy, but sometimes requests time out)
 
 > Note ⚠️: Since the Chinese version of Google Translate is currently unavailable, you can only use the international version, so you need to use a proxy to use Google Translate.
 

@@ -51,6 +51,14 @@
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
+### [Linguee 词典](https://www.linguee.com/)：英语 <--> 法语
+
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
+
+#### [good](https://www.linguee.com/english-french/search?query=good)
+
+![image-20220822163332948](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822163332948-1661157213.png)
+
 ### 查看更多（快捷键 `Cmd + M`）
 
 ![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
@@ -71,7 +79,7 @@
 
 > `Raycast` 是一款速度极快、完全可扩展的启动器。与 [Alfred](https://www.alfredapp.com/) 类似，但它完全免费！
 
-### Raycast 商店安装
+### 从 Raycast 商店安装
 
 <a title="Install Easy Dictionary Raycast Extension" href="https://www.raycast.com/isfeng/easydict#install">
           <img height="64" style="height: 64px" src="https://assets.raycast.com/isfeng/easydict/install_button@2x.png">
@@ -101,7 +109,7 @@ npm install && npm run dev
 
 目前支持百度，腾讯，火山，苹果和 Bing， 总计 5 家语种识别 API。其中苹果语种识别为 macOS 系统功能，但需要安装一个快捷指令才能使用。参考 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 
-为了保护用户隐私，默认只启用了 Bing 语种识别（不需要 App Key，也不会记录任何用户个人数据！），而其他语种识别 API 仅在对应的翻译功能开启时才启用。但注意，通常来说开启的语种识别 API 种类越多，识别文本的准确度会越高，响应速度也会越快。
+为保护用户隐私，默认只启用了 Bing 语种识别（不需要 App Key，也不会记录任何用户个人数据！），而其他语种识别 API 仅在对应的翻译功能开启时才启用。但注意，通常来说开启的语种识别 API 种类越多，识别文本的准确度会越高，响应速度也会越快。
 
 各家语种识别服务支持的语言详情如下：
 
