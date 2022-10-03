@@ -184,6 +184,10 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
         case "relation":
           databaseProperty.relation_id = property.relation.database_id;
           break;
+        case "status":
+          databaseProperty.options = property.status.options;
+          databaseProperty.groups = property.status.groups;
+          break;
       }
 
       databaseProperties.push(databaseProperty);

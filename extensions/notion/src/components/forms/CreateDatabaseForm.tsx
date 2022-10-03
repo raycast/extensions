@@ -291,7 +291,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
               );
             case "relation":
               if (!dp.relation_id) return null;
-
+              
               return (
                 <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
                   {relationsPages[dp.relation_id]?.map((rp: Page) => {
@@ -320,6 +320,35 @@ export function CreateDatabaseForm(props: { databaseId?: string; onPageCreated?:
                     );
                   })}
                 </Form.TagPicker>
+              );
+            case "status":
+              return (
+                <Form.Dropdown key={key} id={id} title={title}>
+                  {dp.groups?.map((group) => {
+                    if (!group.id) return null;
+                    return (
+                      <Form.Dropdown.Section title={group.name}>
+                        {dp.options
+                          ?.filter((opt) => group.option_ids?.includes(opt?.id || ""))
+                          .map((opt) => {
+                            if (!opt.id) return null;
+                            return (
+                              <Form.Dropdown.Item
+                                key={"option::" + opt.id}
+                                value={opt.id}
+                                title={opt.name ? opt.name : "Untitled"}
+                                icon={
+                                  opt.color
+                                    ? { source: Icon.Dot, tintColor: notionColorToTintColor(opt.color) }
+                                    : undefined
+                                }
+                              />
+                            );
+                          })}
+                      </Form.Dropdown.Section>
+                    );
+                  })}
+                </Form.Dropdown>
               );
             default:
               return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;

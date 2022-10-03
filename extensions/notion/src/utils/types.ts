@@ -31,10 +31,11 @@ export const supportedPropTypes = [
   "formula",
   "people",
   "relation",
+  "status",
 ];
 
 // all possible types:
-// "number" | "title" | "rich_text" | "url" | "email" | "phone_number" | "date" | "checkbox" | "select" | "formula" | "people" | "relation" | "multi_select" | "rollup" | "files" | "created_by" | "created_time" | "last_edited_by" | "last_edited_time"
+// "number" | "title" | "rich_text" | "url" | "email" | "phone_number" | "date" | "checkbox" | "select" | "formula" | "people" | "relation" | "multi_select" | "rollup" | "files" | "created_by" | "created_time" | "last_edited_by" | "last_edited_time" | "status"
 
 export interface DatabaseProperty {
   id: string;
@@ -51,10 +52,12 @@ export interface DatabaseProperty {
     | "formula"
     | "people"
     | "relation"
-    | "multi_select";
+    | "multi_select"
+    | "status";
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;
+  groups?: DatabasePropertyGroup[];
 }
 
 export interface DatabasePropertyOption {
@@ -62,6 +65,13 @@ export interface DatabasePropertyOption {
   name: string;
   color?: string;
   icon?: string;
+}
+
+export interface DatabasePropertyGroup {
+  id?: string;
+  name: string;
+  color?: string;
+  option_ids?: string[];
 }
 
 export interface Page {
