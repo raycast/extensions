@@ -1,5 +1,5 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
 
 type Currency = "USD" | "EUR" | "GBP" | "JPY" | "BRL";
 
@@ -13,14 +13,17 @@ const flagsByCurrency: Record<Currency, string> = {
 };
 
 export default function Command() {
+  const { hideIcon } = getPreferenceValues();
+
   const { data, isLoading } = useFetch<Record<Currency, string>>(
     `https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=${CURRENCIES.join()}`
   );
-  const shownCurrency: Currency = "USD";
-  const title = data && `ETH ${formatCurrency(shownCurrency, Number(data[shownCurrency]))}`;
+  const [shownCurrency, setShownCurrency] = useCachedState<Currency>("shown-currency", "USD");
+
+  const title = data && shownCurrency && `ETH ${formatCurrency(shownCurrency, Number(data[shownCurrency]))}`;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={Icon.Coins} title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={hideIcon ? undefined : Icon.Coins} title={title}>
       {data &&
         Object.entries(data)
           .filter(([key]) => key !== shownCurrency)
@@ -31,7 +34,7 @@ export default function Command() {
                 key={key}
                 title={`${formattedValue} (${key})`}
                 icon={flagsByCurrency[key as Currency]}
-                onAction={() => null}
+                onAction={() => setShownCurrency(key as Currency)}
               />
             );
           })}

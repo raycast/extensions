@@ -8,7 +8,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TransAPIErrCode } from "./const";
+import { TransAPIErrCode } from "./common/const";
 import {
   checkPreferences,
   fetchTransAPIs,
@@ -16,10 +16,10 @@ import {
   getServiceProviderMap,
   saveHistory,
   translateWithRefineLang,
-} from "./itranslate.shared";
-import { TranslateError, TranslateNotSupport } from "./TranslateError";
-import { TranslateHistory } from "./TranslateHistory";
-import { TranslateResult } from "./TranslateResult";
+} from "./common/itranslate.shared";
+import { TranslateError, TranslateNotSupport } from "./components/TranslateError";
+import { TranslateHistory } from "./components/TranslateHistory";
+import { TranslateResult } from "./components/TranslateResult";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
@@ -95,7 +95,6 @@ export default function Command() {
         from: getLang(""),
         to: targetLang,
         res: "",
-        start: new Date().getTime(),
         origin: contentToTrans,
       });
     }
@@ -103,14 +102,12 @@ export default function Command() {
     updateShowDetail(true);
     promises.forEach(async (promise) => {
       const transResult = await promise;
-      transResult.end = new Date().getTime();
       updateCurrentTargetLang(transResult.to);
       updateTransResultsState((origins) => {
         let hasLoading = false;
         const transResultsNew = origins.map((origin) => {
           let toPush: ITranslateRes;
           if (origin.serviceProvider === transResult.serviceProvider) {
-            transResult.start = origin.start;
             toPush = transResult;
           } else {
             toPush = origin;

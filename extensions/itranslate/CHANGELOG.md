@@ -1,5 +1,9 @@
 # iTranslate Changelog
 
+## [Translate By OCR] - 2022-09-22
+
+- Add new command `Translate by OCR`
+
 ## [Add New Command & Support More Languages] - 2022-09-12
 
 - Add new command `Translate to Multiple`: Translate into multiple languages at the same time

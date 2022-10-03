@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:58
+ * @lastEditTime: 2022-09-27 16:46
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LanguageDetectTypeResult } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanauge/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -51,12 +51,12 @@ export interface QueryWordInfo {
   toLanguage: string;
   isWord?: boolean; // * Dictionary Type should has value, show web url need this value.
   hasDictionaryEntries?: boolean; // it is true if the word has dictionary entries.
-  detectedLanguage?: LanguageDetectTypeResult;
+  detectedLangModel?: DetectedLangModel;
   phonetic?: string; // [ɡʊd]
   examTypes?: string[];
   audioPath?: string;
   speechUrl?: string; // word audio url. some language not have tts url, such as "ຂາດ"
-  tld?: string; // google tld
+  tld?: string; // google tld, isChina ? "cn" : "com"
 }
 
 export interface YoudaoTranslateResultBasicItem {

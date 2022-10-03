@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:10
+ * @lastEditTime: 2022-09-27 16:48
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -18,6 +18,8 @@ import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
+
+console.log(`enter easydict.tsx`);
 
 const dataManager = new DataManager();
 
@@ -87,11 +89,26 @@ export default function () {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    if (myPreferences.enableAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
-    }
+    console.log(`setup when extension is activated.`);
+    const startTime = Date.now();
 
-    configAxiosProxy();
+    // In this case, must wait for the proxy to be configured before request.
+    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
+      Promise.all([getSelectedText(), configAxiosProxy()])
+        .then(([selectedText]) => {
+          console.log(`after config proxy, getSelectedText: ${selectedText}`);
+          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+          updateInputTextAndQueryText(trimTextLength(selectedText), false);
+        })
+        .catch((error) => {
+          console.log(`set up, config proxy error: ${error}`);
+          tryQuerySelecedtText();
+        });
+    } else if (myPreferences.enableAutomaticQuerySelectedText) {
+      tryQuerySelecedtText();
+    } else if (myPreferences.enableSystemProxy) {
+      configAxiosProxy();
+    }
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
@@ -118,20 +135,20 @@ export default function () {
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
     console.log(
-      `selected language: ${selectedLanguageItem.youdaoId}, current target language: ${userSelectedTargetLanguageItem.youdaoId}`
+      `selected language: ${selectedLanguageItem.youdaoLangCode}, current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`
     );
-    if (selectedLanguageItem.youdaoId === userSelectedTargetLanguageItem.youdaoId) {
+    if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
 
-    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoId}`);
+    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoLangCode}`);
     setAutoSelectedTargetLanguageItem(selectedLanguageItem);
     setUserSelectedTargetLanguageItem(selectedLanguageItem);
 
     const queryWordInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: currentFromLanguageItem.youdaoId,
-      toLanguage: selectedLanguageItem.youdaoId,
+      fromLanguage: currentFromLanguageItem.youdaoLangCode,
+      toLanguage: selectedLanguageItem.youdaoLangCode,
     };
 
     // Clean up previous query results immediately before new query.
@@ -159,7 +176,7 @@ export default function () {
     // Only different input text, then clear old results before new input text query.
     if (trimText !== searchText) {
       dataManager.clearQueryResult();
-      const toLanguage = userSelectedTargetLanguageItem.youdaoId;
+      const toLanguage = userSelectedTargetLanguageItem.youdaoLangCode;
       dataManager.delayQueryText(trimText, toLanguage, isDelay);
     }
   }

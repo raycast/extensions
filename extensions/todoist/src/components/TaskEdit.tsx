@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { Task } from "@doist/todoist-api-typescript";
-import { mutate } from "swr";
 import { todoist, handleError } from "../api";
-import { SWRKeys } from "../types";
+import { MutatePromise } from "@raycast/utils";
 
 interface TaskEditProps {
   task: Task;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+  mutateTaskDetail?: MutatePromise<Task | undefined>;
 }
 
-export default function TaskEdit({ task }: TaskEditProps) {
+export default function TaskEdit({ task, mutateTasks, mutateTaskDetail }: TaskEditProps) {
   const { pop } = useNavigation();
 
   const [content, setContent] = useState(task.content);
@@ -21,9 +22,15 @@ export default function TaskEdit({ task }: TaskEditProps) {
     try {
       await todoist.updateTask(task.id, { content, description });
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
-      mutate(SWRKeys.tasks);
 
-      mutate([SWRKeys.task, task.id]);
+      if (mutateTasks) {
+        mutateTasks();
+      }
+
+      if (mutateTaskDetail) {
+        mutateTaskDetail();
+      }
+
       pop();
     } catch (error) {
       handleError({ error, title: "Unable to update task" });

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Apple, Baidu, Tencent, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -27,26 +27,29 @@
     "linguee",
     "deepl",
     "google",
+    "bing",
     "apple",
     "youdao",
     "baidu",
     "tencent",
-    "caiyun",
     "eudic",
-    "shortcuts"
+    "caiyun"
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0",
+    "@raycast/api": "^1.40.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.1.1",
+    "execa": "^6.1.0",
+    "file-type": "^18.0.0",
     "franc": "^6.0.0",
     "https-proxy-agent": "^5.0.1",
     "mac-system-proxy": "^1.0.4",
     "node-html-parser": "^5.3.3",
     "play-sound": "^1.1.5",
     "qs": "^6.11.0",
+    "run-applescript": "^6.0.0",
     "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
   },
   "devDependencies": {
@@ -88,7 +91,7 @@
       "name": "language1",
       "type": "dropdown",
       "required": true,
-      "default": "en",
+      "default": "zh-CHS",
       "description": "Your first language",
       "data": [
         {
@@ -190,7 +193,7 @@
       "name": "language2",
       "type": "dropdown",
       "required": true,
-      "default": "zh-CHS",
+      "default": "en",
       "description": "Your second language",
       "data": [
         {
@@ -301,7 +304,7 @@
       "type": "checkbox",
       "label": "Show Open In Eudic",
       "required": false,
-      "description": "Show Open In Eudic in action panel if Eudic is installed",
+      "description": "Show `Open In Eudic` in action panel if Eudic is installed",
       "default": true
     },
     {
@@ -309,16 +312,16 @@
       "type": "checkbox",
       "label": "Automatic Play Word Audio",
       "required": false,
-      "description": "Automatic play audio after looking up a word",
+      "description": "Automatic play audio after looking up a `English` word",
       "default": true
     },
     {
-      "name": "enableSystemProxy",
+      "name": "enableLanguageDetectionSpeedFirst",
       "type": "checkbox",
-      "label": "Use System Proxy",
+      "label": "Detect Language Speed First",
       "required": false,
-      "description": "Request through system proxy",
-      "default": false
+      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower.",
+      "default": true
     },
     {
       "name": "enableSelectTargetLanguage",
@@ -329,12 +332,20 @@
       "default": false
     },
     {
+      "name": "enableSystemProxy",
+      "type": "checkbox",
+      "label": "Use System Proxy",
+      "required": false,
+      "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
+      "default": false
+    },
+    {
       "title": "Apple System Features",
       "name": "enableAppleTranslate",
       "type": "checkbox",
       "label": "Apple Translate",
       "required": false,
-      "description": "An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -342,7 +353,7 @@
       "type": "checkbox",
       "label": "Apple Language Detect",
       "required": false,
-      "description": "An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -369,7 +380,7 @@
       "label": "DeepL Translate",
       "required": false,
       "description": "Turn on/off DeepL Translate",
-      "default": true
+      "default": false
     },
     {
       "name": "enableGoogleTranslate",
@@ -377,6 +388,14 @@
       "label": "Google Translate",
       "required": false,
       "description": "Turn on/off Google Translate",
+      "default": true
+    },
+    {
+      "name": "enableBingTranslate",
+      "type": "checkbox",
+      "label": "Bing Translate",
+      "required": false,
+      "description": "Turn on/off Bing Translate",
       "default": true
     },
     {
@@ -396,6 +415,14 @@
       "default": true
     },
     {
+      "name": "enableVolcanoTranslate",
+      "type": "checkbox",
+      "label": "Volcano Translate",
+      "required": false,
+      "description": "Turn on/off Volcano Translate",
+      "default": true
+    },
+    {
       "name": "enableYoudaoTranslate",
       "type": "checkbox",
       "label": "Youdao Translate",
@@ -412,13 +439,13 @@
       "default": false
     },
     {
-      "title": "Services Order",
+      "title": "Display Order",
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Apple, Baidu, Tencent, Youdao, Caiyun",
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
       "default": "",
-      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, apple, baidu, tencent, youdao, caiyun"
+      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
     },
     {
       "title": "Youdao App ID",
@@ -474,6 +501,22 @@
       "type": "textfield",
       "required": false,
       "description": "Your Tencent SecretKey",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key ID",
+      "name": "volcanoAccessKeyId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key ID",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key Secret",
+      "name": "volcanoAccessKeySecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key Secret",
       "default": ""
     },
     {

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:56
+ * @lastEditTime: 2022-09-25 23:23
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -127,8 +127,8 @@ export function updateYoudaoDictionaryDisplay(
   const explanationType = YoudaoDictionaryListItemType.Explanation;
   const explanationItems = formatResult.explanations?.map((explanation, i) => {
     const title = explanation.title;
-    const subtitle = explanation.subtitle;
-    const copyText = `${title} ${subtitle}`;
+    const subtitle = explanation.subtitle ? ` ${explanation.subtitle}` : "";
+    const copyText = `${title}${subtitle}`;
 
     const displayItem: ListDisplayItem = {
       displayType: explanationType,
@@ -284,8 +284,12 @@ export function hasYoudaoDictionaryEntries(formatResult: YoudaoDictionaryFormatR
   }
 
   return (
-    (formatResult.explanations || formatResult.forms || formatResult.webPhrases || formatResult.webTranslation) !==
-    undefined
+    (formatResult.explanations ||
+      formatResult.forms ||
+      formatResult.webPhrases ||
+      formatResult.webTranslation ||
+      formatResult.baike ||
+      formatResult.wikipedia) !== undefined
   );
 }
 
@@ -294,15 +298,7 @@ export function hasYoudaoDictionaryEntries(formatResult: YoudaoDictionaryFormatR
  *
  * Todo: support more dictionary, currently only support English <--> Chinese.
  */
-export function formateYoudaoWebDictionaryModel(
-  model: YoudaoWebDictionaryModel
-): YoudaoDictionaryFormatResult | undefined {
-  // if has no web translation, means no dictionary entries.
-  if (!model.web_trans?.["web-translation"]?.length) {
-    console.log("No Youdao dictionary entries.");
-    return;
-  }
-
+export function formateYoudaoWebDictionaryModel(model: YoudaoWebDictionaryModel): YoudaoDictionaryFormatResult {
   const [from, to] = getFromToLanguage(model);
   const input = model.input;
   let isWord = false;
@@ -377,11 +373,9 @@ export function formateYoudaoWebDictionaryModel(
   if (model.ec) {
     const wordItem = model.ec.word?.length ? model.ec.word[0] : undefined;
 
-    // word audio: https://dict.youdao.com/dictvoice?audio=good?type=0
+    // Word audio: https://dict.youdao.com/dictvoice?audio=good&type=2
     const usspeech = wordItem?.usspeech; // "good&type=2"
-    // type=2 audio seems not accurate, eg: neon, so we use type=0.
-    const queryString = `${input}&type=0`;
-    const audioUrl = usspeech ? `https://dict.youdao.com/dictvoice?audio=${queryString}` : undefined;
+    const audioUrl = usspeech ? `https://dict.youdao.com/dictvoice?audio=${usspeech}` : undefined;
 
     explanations.length = 0;
     const trs = wordItem?.trs;
@@ -455,6 +449,7 @@ export function formateYoudaoWebDictionaryModel(
     baike: baike,
     wikipedia: wikipediaDigest,
   };
+
   queryWordInfo.hasDictionaryEntries = hasYoudaoDictionaryEntries(formateResult);
   // console.log(`Youdao format result: ${JSON.stringify(formateResult, null, 2)}`);
 
@@ -465,8 +460,8 @@ export function formateYoudaoWebDictionaryModel(
  * Get Youdao from to language.
  */
 export function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
-  let from = chineseLanguageItem.youdaoId;
-  let to = chineseLanguageItem.youdaoId;
+  let from = chineseLanguageItem.youdaoLangCode;
+  let to = chineseLanguageItem.youdaoLangCode;
   const guessLanguage = model.meta.guessLanguage;
   if (guessLanguage === "zh") {
     to = model.le;

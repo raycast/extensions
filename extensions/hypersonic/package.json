@@ -5,7 +5,7 @@
   "description": "Fastest Notion to-do app ever",
   "icon": "icon.png",
   "author": "reboot.studio",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -19,6 +19,14 @@
       "subtitle": "Hypersonic",
       "description": "The fastest Notion to-do app for Raycast.",
       "mode": "view"
+    },
+    {
+      "name": "active-todos",
+      "title": "Active Todos",
+      "subtitle": "Hypersonic",
+      "description": "See your active Hypersonic todos",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -55,11 +63,11 @@
     {
       "name": "property_done",
       "type": "textfield",
-      "title": "Checkbox Property Name",
-      "label": "Checkbox Property Name",
-      "description": "The database name of the Checkbox Property",
-      "placeholder": "Done",
-      "default": "Done",
+      "title": "Status or Checkbox Property Name",
+      "label": "Status or Checkbox Property Name",
+      "description": "The database name of the Status or Checkbox Property",
+      "placeholder": "Status",
+      "default": "Status",
       "required": false
     },
     {
@@ -83,8 +91,9 @@
     }
   ],
   "dependencies": {
-    "@notionhq/client": "^1.0.4",
-    "@raycast/api": "^1.36.1",
+    "@notionhq/client": "2.2.0",
+    "@raycast/api": "1.39.2",
+    "@raycast/utils": "1.4.0",
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {

@@ -32,6 +32,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "focusCursorAtEnd",
+      "title": "Opening Notes",
+      "description": "Opens the note in edit mode, placing the cursor at the end of the note",
+      "type": "checkbox",
+      "default": true,
+      "label": "Focus cursor at end of the note",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
     "@types/commonmark": "^0.27.5",
