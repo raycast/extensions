@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, Icon, PushAction, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Icon, Action } from "@raycast/api";
 import type { QueryResultItem } from "./SoApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import { QuestionDetail } from "./questionDetail";
@@ -29,18 +29,18 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
               subtitle={item.subtitle}
               icon={item.icon !== "" ? item.icon : Icon.QuestionMark}
-              accessoryTitle={item.accessoryTitle}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={item.url} />
-                  <PushAction
+                  <Action.OpenInBrowser url={item.url} />
+                  <Action.Push
                     title="Read Question"
                     target={<QuestionDetail quid={item.id} url={item.url} title={item.title} />}
                     icon={Icon.Download}
                   />
-                  <CopyToClipboardAction title="Copy URL" content={item.url} />
+                  <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 </ActionPanel>
               }
+              accessories={[{ text: `${item.answer_count} Answers` }]}
             />
           ))}
         </List.Section>

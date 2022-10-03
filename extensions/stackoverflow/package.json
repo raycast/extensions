@@ -20,14 +20,12 @@
     "kepakko"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.40.1",
     "he": "^1.2.0",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
-    "@types/node": "^16.11.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

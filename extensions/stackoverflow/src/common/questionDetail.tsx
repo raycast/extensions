@@ -1,20 +1,28 @@
-import { ActionPanel, Detail, useNavigation, Icon, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, useNavigation, Icon, showToast, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import { assertStringProp, assertArrayProp } from "./typeUtils";
 
 export function QuestionDetail(props: { quid: string; url: string; title: string }) {
   const { markdown, error, isLoading } = getDetails(props.quid);
-  const { pop } = useNavigation();
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot search Pipelines",
+      message: error,
+    });
   }
   return (
-    <Detail isLoading={isLoading} navigationTitle={props.title} markdown={markdown}>
-      <ActionPanel title="Open">
-        <ActionPanel.Item title="Pop Back" icon={Icon.Binoculars} onAction={pop} />
-      </ActionPanel>
-    </Detail>
+    <Detail
+      isLoading={isLoading}
+      navigationTitle={props.title}
+      markdown={markdown}
+      actions={
+        <ActionPanel title="Open">
+          <Action.OpenInBrowser url={props.url} icon={Icon.Binoculars} />
+        </ActionPanel>
+      }
+    ></Detail>
   );
 }
 
