@@ -1,13 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { client } from "./oauth";
+import { getOAuthToken } from "../components/withAsanaAuth";
 
 async function getAxiosInstance() {
-  const tokenSet = await client.getTokens();
-
   return axios.create({
     baseURL: "https://app.asana.com/api/1.0",
     headers: {
-      Authorization: `Bearer ${tokenSet?.accessToken}`,
+      Authorization: `Bearer ${getOAuthToken()}`,
     },
   });
 }
