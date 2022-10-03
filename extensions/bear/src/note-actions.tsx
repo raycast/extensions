@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Color, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { HtmlRenderer, Parser } from "commonmark";
 import open from "open";
 import { Note } from "./bear-db";
