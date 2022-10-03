@@ -37,6 +37,7 @@ export default function MemeForm({id, title, boxCount}: Meme) {
             pop();
           });
         }).catch(error => {
+          console.log(error);
           showToast(Toast.Style.Failure, 'Something went wrong', error.message);
         }).finally(() =>{
           setIsLoading(false);    

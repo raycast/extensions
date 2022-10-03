@@ -84,8 +84,14 @@ export async function generateMeme({ id, boxes }: GenerateMemeInput): Promise<Ge
   try {
     const url = new URL("https://api.imgflip.com/caption_image");
     url.searchParams.set("template_id", id);
-    url.searchParams.set("username", preferences["username"] ?? DEFAULT_IMGFLIP_USERNAME);
-    url.searchParams.set("password", preferences["password"] ?? DEFAULT_IMGFLIP_PASSWORD);
+    url.searchParams.set(
+      "username",
+      preferences["username"].length ? preferences["username"] : DEFAULT_IMGFLIP_USERNAME
+    );
+    url.searchParams.set(
+      "password",
+      preferences["password"].length ? preferences["password"] : DEFAULT_IMGFLIP_PASSWORD
+    );
 
     boxes.forEach(({ text }, index) => {
       url.searchParams.set(`boxes[${index}][text]`, text);
