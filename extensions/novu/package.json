@@ -56,6 +56,12 @@
       "mode": "view"
     }
   ],
+  "categories": [
+    "Documentation",
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
     "@raycast/utils": "^1.4.8",
