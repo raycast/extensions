@@ -40,7 +40,7 @@
       "title": "Opening Notes",
       "description": "Opens the note in edit mode, placing the cursor at the end of the note",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "label": "Focus cursor at end of the note",
       "required": false
     }
