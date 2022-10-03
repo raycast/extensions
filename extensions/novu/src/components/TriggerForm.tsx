@@ -47,7 +47,7 @@ export default function TriggerForm() {
           <ActionPanel>
             <Action.SubmitForm onSubmit={handleSubmit} />
             <Action
-              title="Trigger Demo Notification"
+              title="Trigger Notification"
               onAction={() => {
                 if (recentTriggers[0]) {
                   triggerEvent(recentTriggers[0]);
