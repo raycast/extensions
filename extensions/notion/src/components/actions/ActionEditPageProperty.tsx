@@ -218,7 +218,44 @@ export function ActionEditPageProperty(props: {
         </ActionPanel.Submenu>
       );
     }
+    case "status": {
+      const value = pageProperty && "select" in pageProperty ? pageProperty.select?.id : null;
+      return (
+        <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
+          {databaseProperty.groups?.map((group) => {
+            if (!group.id) return null;
+            return (
+              <ActionPanel.Section title={group.name}>
+                {(options as DatabasePropertyOption[])
+                  ?.filter((opt) => group.option_ids?.includes(opt?.id || ""))
+                  .map((opt) => (
+                    <Action
+                      key={opt.id}
+                      icon={
+                        (opt.icon ? opt.icon : opt.id !== "_select_null_")
+                          ? {
+                              source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                              tintColor: notionColorToTintColor(opt.color),
+                            }
+                          : undefined
+                      }
+                      title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+                      onAction={() => {
+                        if (opt.id && opt.id !== "_select_null_") {
+                          setPageProperty({ [databaseProperty.id]: { select: { id: opt.id } } });
+                        } else {
+                          setPageProperty({ [databaseProperty.id]: { select: null } });
+                        }
+                      }}
+                    />
+                  ))}
+              </ActionPanel.Section>
+            );
+          })}
 
+        </ActionPanel.Submenu>
+      );
+    }
     default:
       return null;
   }
