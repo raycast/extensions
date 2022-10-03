@@ -1,6 +1,6 @@
-import axios from 'axios';
-import { IFormData } from '../interfaces/interfaces';
-import { showToast, Toast } from '@raycast/api';
+import axios from "axios";
+import { IFormData } from "../interfaces/interfaces";
+import { showToast, Toast } from "@raycast/api";
 
 export function triggerEvent(data: IFormData) {
   return axios
@@ -27,6 +27,6 @@ export function triggerEvent(data: IFormData) {
 export async function triggerSentToast() {
   await showToast({
     style: Toast.Style.Success,
-    title: 'Trigger sent',
+    title: "Trigger sent",
   });
 }

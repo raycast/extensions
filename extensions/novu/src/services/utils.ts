@@ -1,5 +1,5 @@
-import { closeMainWindow } from '@raycast/api';
-import { runAppleScript } from 'run-applescript';
+import { closeMainWindow } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
 
 export function isJsonString(str: string) {
   try {

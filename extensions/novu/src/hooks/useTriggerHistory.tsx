@@ -1,6 +1,6 @@
-import { Cache } from '@raycast/api';
-import { IFormData } from '../interfaces/interfaces';
-import { useEffect, useState } from 'react';
+import { Cache } from "@raycast/api";
+import { IFormData } from "../interfaces/interfaces";
+import { useEffect, useState } from "react";
 
 const TRIGGER_CACHE_LENGTH = 10;
 
@@ -44,11 +44,11 @@ export default function useTriggerHistory(): IAppHistoryReturn {
   const resTriggers = [...triggers].reverse();
 
   function cacheTriggers(triggers: IFormData[]): void {
-    cache.set('recentTriggerEvents', JSON.stringify(triggers));
+    cache.set("recentTriggerEvents", JSON.stringify(triggers));
   }
 
   function loadTriggers(): IFormData[] {
-    return JSON.parse(cache.get('recentTriggerEvents') ?? '[]') as IFormData[];
+    return JSON.parse(cache.get("recentTriggerEvents") ?? "[]") as IFormData[];
   }
   return {
     isLoading: loading,

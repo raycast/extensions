@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, Icon } from '@raycast/api';
-import useTriggerHistory from './hooks/useTriggerHistory';
-import { IFormData } from './interfaces/interfaces';
-import { triggerEvent } from './services/api';
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import useTriggerHistory from "./hooks/useTriggerHistory";
+import { IFormData } from "./interfaces/interfaces";
+import { triggerEvent } from "./services/api";
 
 export default function RecentTriggerEvent() {
   const { history: recentTriggers } = useTriggerHistory();

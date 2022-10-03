@@ -1,10 +1,10 @@
-import { Form, ActionPanel, Action, showToast, Toast } from '@raycast/api';
-import { useEffect } from 'react';
-import { IFormData } from '../interfaces/interfaces';
-import { triggerEvent } from '../services/api';
-import useTriggerHistory from '../hooks/useTriggerHistory';
-import { useForm, FormValidation } from '@raycast/utils';
-import { isJsonString } from '../services/utils';
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useEffect } from "react";
+import { IFormData } from "../interfaces/interfaces";
+import { triggerEvent } from "../services/api";
+import useTriggerHistory from "../hooks/useTriggerHistory";
+import { useForm, FormValidation } from "@raycast/utils";
+import { isJsonString } from "../services/utils";
 
 export default function TriggerForm() {
   const { history: recentTriggers, addTrigger, reload } = useTriggerHistory();
@@ -19,8 +19,8 @@ export default function TriggerForm() {
       subscriberId: FormValidation.Required,
       apiKey: FormValidation.Required,
       payload: (value) => {
-        if (!isJsonString(value ?? '')) {
-          return 'Payload should be a valid JSON string';
+        if (!isJsonString(value ?? "")) {
+          return "Payload should be a valid JSON string";
         }
       },
     },
@@ -33,11 +33,11 @@ export default function TriggerForm() {
   }
 
   useEffect(() => {
-    setValue('requestDomain', recentTriggers[0]?.requestDomain);
-    setValue('notificationIdentifier', recentTriggers[0]?.notificationIdentifier);
-    setValue('subscriberId', recentTriggers[0]?.subscriberId);
-    setValue('apiKey', recentTriggers[0]?.apiKey);
-    setValue('payload', recentTriggers[0]?.payload);
+    setValue("requestDomain", recentTriggers[0]?.requestDomain);
+    setValue("notificationIdentifier", recentTriggers[0]?.notificationIdentifier);
+    setValue("subscriberId", recentTriggers[0]?.subscriberId);
+    setValue("apiKey", recentTriggers[0]?.apiKey);
+    setValue("payload", recentTriggers[0]?.payload);
   }, [!!recentTriggers[0]]);
 
   return (
@@ -74,6 +74,6 @@ export default function TriggerForm() {
 export async function submitToast() {
   await showToast({
     style: Toast.Style.Success,
-    title: 'Form Submitted',
+    title: "Form Submitted",
   });
 }
