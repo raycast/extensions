@@ -15,31 +15,31 @@
     },
     {
       "name": "github",
-      "title": "Github Repo Page",
+      "title": "Open Github Repo Page",
       "description": "Open Github Repo Page",
       "mode": "no-view"
     },
     {
       "name": "documentation",
-      "title": "Documentation",
+      "title": "Open Documentation",
       "description": "Open Documentation",
       "mode": "no-view"
     },
     {
       "name": "api-reference",
-      "title": "API Reference",
+      "title": "Open API Reference",
       "description": "Opoen API Reference",
       "mode": "no-view"
     },
     {
       "name": "community-heroes",
-      "title": "Community Heroes",
+      "title": "Open Community Heroes",
       "description": "Open Community Heroes",
       "mode": "no-view"
     },
     {
       "name": "discord",
-      "title": "Discord Server",
+      "title": "Open Discord Server",
       "description": "Open Discord Server",
       "mode": "no-view"
     },
