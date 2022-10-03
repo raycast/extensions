@@ -39,7 +39,7 @@ type CreateIssueFormProps = {
 };
 
 export type CreateIssueValues = {
-  teamId?: string;
+  teamId: string;
   title: string;
   description: string;
   stateId: string;
