@@ -10,7 +10,7 @@ interface FormValues {
   [text: string]: string;
 }
 
-export default function MemeForm({id, title, boxCount}: Meme) {
+export default function MemeForm({ id, title, boxCount }: Meme) {
   const [textBoxError, setTextBoxError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
@@ -18,8 +18,8 @@ export default function MemeForm({id, title, boxCount}: Meme) {
   async function onSubmit(values: FormValues) {
     const boxes = boxesFromFormValues(values);
 
-    if (!boxes.some(box => !!box.text)) {
-      setTextBoxError('At least one text input has to be filled');
+    if (!boxes.some((box) => !!box.text)) {
+      setTextBoxError("At least one text input has to be filled");
       return;
     }
 
@@ -27,22 +27,25 @@ export default function MemeForm({id, title, boxCount}: Meme) {
       style: Toast.Style.Animated,
       title: "Generating...",
     }).then((toast) => {
-        setIsLoading(true);
+      setIsLoading(true);
 
-        generateMeme({id, boxes}).then(async (results) => {
+      generateMeme({ id, boxes })
+        .then(async (results) => {
           copyFileToClipboard(results.url, `${title}.jpg`).then((file) => {
             toast.hide();
             showHUD(`Meme "${file}" copied to clipboard`);
             closeMainWindow();
             pop();
           });
-        }).catch(error => {
+        })
+        .catch((error) => {
           console.log(error);
-          showToast(Toast.Style.Failure, 'Something went wrong', error.message);
-        }).finally(() =>{
-          setIsLoading(false);    
+          showToast(Toast.Style.Failure, "Something went wrong", error.message);
+        })
+        .finally(() => {
+          setIsLoading(false);
         });
-      });
+    });
   }
 
   return (
@@ -51,9 +54,7 @@ export default function MemeForm({id, title, boxCount}: Meme) {
       navigationTitle={`Generate meme "${title}"`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={onSubmit}
-          />
+          <Action.SubmitForm onSubmit={onSubmit} />
         </ActionPanel>
       }
     >
@@ -61,24 +62,19 @@ export default function MemeForm({id, title, boxCount}: Meme) {
         <Form.TextField
           key={`text_${index}`}
           id={`text[${index}]`}
-          title={`Text #${(index)}`}
+          title={`Text #${index}`}
           error={textBoxError}
           onChange={() => setTextBoxError(undefined)}
         />
       ))}
 
-      <Form.Checkbox
-        id="capitalize"
-        title="Capitalize text"
-        label=""
-        defaultValue={true}
-      />
+      <Form.Checkbox id="capitalize" title="Capitalize text" label="" defaultValue={true} />
     </Form>
   );
 }
 
 function boxesFromFormValues(values: FormValues): ImgflipCaptionImageBox[] {
-  const {capitalize} = values;
+  const { capitalize } = values;
 
   return Object.keys(values).reduce<ImgflipCaptionImageBox[]>((boxes, id) => {
     const matches = id.match(/text\[(.)\]/);

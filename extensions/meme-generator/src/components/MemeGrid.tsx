@@ -11,13 +11,16 @@ export default function MemeGrid() {
   const [allMemes, setAllMemes] = useState<Meme[]>();
 
   useEffect(() => {
-    getMemes().then((result) => {
-      setAllMemes(result.memes);
-    }).catch(error => {
-      console.error(error.message);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+    getMemes()
+      .then((result) => {
+        setAllMemes(result.memes);
+      })
+      .catch((error) => {
+        console.error(error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   return (
@@ -47,7 +50,7 @@ export default function MemeGrid() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.CheckCircle} title="Select template" target={<MemeForm {...meme} />} />
-                <Action.Push icon={Icon.Eye} title="Preview template" target={<MemePreview {...meme} />}  />
+                <Action.Push icon={Icon.Eye} title="Preview template" target={<MemePreview {...meme} />} />
               </ActionPanel>
             }
           />
