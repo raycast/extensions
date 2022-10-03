@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "novu",
+  "title": "Novu",
+  "description": "List all the useful sites, trigger notification, and more",
+  "icon": "novu-g-light.png",
+  "author": "djabarovgeorge",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cli-on-boarding",
+      "title": "Run CLI On-Boarding",
+      "description": "Run CLI On-boarding in Terminal",
+      "mode": "no-view"
+    },
+    {
+      "name": "github",
+      "title": "Github Repo Page",
+      "description": "Open Github Repo Page",
+      "mode": "no-view"
+    },
+    {
+      "name": "documentation",
+      "title": "Documentation",
+      "description": "Open Documentation",
+      "mode": "no-view"
+    },
+    {
+      "name": "api-reference",
+      "title": "API Reference",
+      "description": "Opoen API Reference",
+      "mode": "no-view"
+    },
+    {
+      "name": "community-heroes",
+      "title": "Community Heroes",
+      "description": "Open Community Heroes",
+      "mode": "no-view"
+    },
+    {
+      "name": "discord",
+      "title": "Discord Server",
+      "description": "Open Discord Server",
+      "mode": "no-view"
+    },
+    {
+      "name": "trigger-event",
+      "title": "Trigger Form",
+      "description": "Create trigger request in order to send triggers",
+      "mode": "view"
+    },
+    {
+      "name": "recent-trigger-event",
+      "title": "Recent Triggers",
+      "description": "Browser old triggers in order to reuse them",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.1",
+    "@raycast/utils": "^1.4.8",
+    "axios": "^0.27.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
