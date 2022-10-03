@@ -7,6 +7,7 @@ import {
   CopyToClipboardAction,
   showToast,
   ToastStyle,
+  getPreferenceValues,
 } from "@raycast/api";
 import { HtmlRenderer, Parser } from "commonmark";
 import open from "open";
@@ -44,18 +45,20 @@ function NotePreviewAction({ note }: { note: Note }) {
 }
 
 export default function NoteActions({ isNotePreview, note }: { isNotePreview: boolean; note: Note }) {
+  const { focusCursorAtEnd } = getPreferenceValues();
+  const edit = focusCursorAtEnd ? "yes" : "no";
   return (
     <ActionPanel>
       <ActionPanel.Section title="Open">
         <OpenAction
           title="Open in Bear"
-          target={`bear://x-callback-url/open-note?id=${note.id}&edit=yes`}
+          target={`bear://x-callback-url/open-note?id=${note.id}&edit=${edit}`}
           icon={Icon.Sidebar}
         />
         {note.encrypted ? null : (
           <OpenAction
             title="Open in New Bear Window"
-            target={`bear://x-callback-url/open-note?id=${note.id}&new_window=yes&edit=yes`}
+            target={`bear://x-callback-url/open-note?id=${note.id}&new_window=yes&edit=${edit}`}
             icon={Icon.Window}
           />
         )}
