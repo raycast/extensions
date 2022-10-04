@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "myanimelist-search",
-  "title": "Myanimelist search",
+  "title": "Myanimelist Search",
   "description": "Easily search and open animes on Myanimelist.",
   "icon": "mal.png",
   "author": "luknl",
