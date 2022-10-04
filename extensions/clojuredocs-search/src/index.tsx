@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { parseEDNString } from "edn-data";
 
@@ -109,9 +109,9 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       accessoryTitle={searchResult.type}
       actions={
         <ActionPanel>
-          <Action.Push title="Go to Detail..." target={<CljDetail res={searchResult} />} />
+          <Action.Push title="Go to Detail" icon={Icon.AppWindowSidebarRight} target={<CljDetail res={searchResult} />} />
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={"https://clojuredocs.org" + searchResult.href} />
+            <Action.OpenInBrowser url={"https://clojuredocs.org" + searchResult.href} />
           </ActionPanel.Section>
         </ActionPanel>
       }
