@@ -424,7 +424,7 @@
       "required": false,
       "title": "Google(Free) API TLD",
       "description": "Select top level domain of Google(Free) API",
-      "default": "cn",
+      "default": "com",
       "data": [
         {
           "title": "com",

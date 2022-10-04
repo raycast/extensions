@@ -1,5 +1,11 @@
 # iTranslate Changelog
 
+## [Optimize Experience] - 2022-09-30
+
+- Optimize the experience of using Commands `Translate by OCR` & `Translate to Multiple`
+- Set `com` is the default value of `Google(Free) API TLD`
+- `Google(Free)` request timeout is set to `2500` ms
+
 ## [Translate By OCR] - 2022-09-22
 
 - Add new command `Translate by OCR`
