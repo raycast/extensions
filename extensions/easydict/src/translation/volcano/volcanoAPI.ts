@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 20:05
+ * @lastEditTime: 2022-09-30 20:58
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -20,6 +20,8 @@ import { chineseLanguageItem, englishLanguageItem } from "./../../language/const
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "./../../types";
 import { VolcanoDetectResult, VolcanoTranslateResult } from "./types";
 import { genVolcanoSign } from "./volcanoSign";
+
+console.log(`enter volcanoAPI.ts`);
 
 /**
  * Volcengine Translate API.

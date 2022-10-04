@@ -1,5 +1,18 @@
 # `Easydict` Changelog
 
+## [v2.4.1] - 2022-10-02
+
+### 💎 Improvements
+
+- Improved language detection.
+- Improved DeepL translation experience, default to use system proxy (if have).
+
+### 🐞 Fixes
+
+- Fixed Google Translate error, default to use system proxy.
+
+> Note ⚠️: Due to the fact that the current Google Translate China version cannot be used, only the international version can be used, so you need to use a proxy to continue to use Google Translate.
+
 ## [v2.4.0] - 2022-09-29
 
 ### ✨ New

@@ -13,7 +13,7 @@
 
 ## What is Easydict? [【中文介绍】](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/README_ZH.md)
 
-`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.cn), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
+`Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
 ![easydict-1-1664438822](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1664438822-1664438852.png)
 
@@ -49,6 +49,14 @@ Next:
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
+
+### [Linguee 词典](https://www.linguee.com/)：English <--> French
+
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
+
+#### [good](https://www.linguee.com/english-french/search?query=good)
+
+![image-20220822163332948](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822163332948-1661157213.png)
 
 ### Show More Details（Shortcut `Cmd + M`）
 
@@ -94,31 +102,41 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 ### Supported Languages
 
+Currently we support 23 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.**
+
 #### Language Detection
 
-##### Tencent Detect
+Currently, we support 5 language detection APIs, including Baidu, Tencent, Volcano, Apple and Bing. Apple language detection is a macOS feature, but you need to install a shortcut to use it.
 
-Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, Russian, German.
+Considering user privacy, only Bing language detection is enabled by default (no App Key is required, and no user personal data is recorded!) Other language detection APIs are enabled only when the corresponding translation feature is enabled. Note, however, that in general, the more language detection APIs are enabled, the more accurate the text will be and the faster the response time will be.
 
-##### Baidu Detect
+Details of the languages supported by each language detection service are as follows:
 
-Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-
-##### Volcano Detect
-
-Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-
-##### 🍎Apple Detect
-
-Chinese, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-
-##### Google Detect
-
-Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
-
-##### Bing Detect
-
-Chinese (Simplified), Chinese (Traditional), English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.
+| 语言                   | Bing | 🍎 Apple | Baidu | Volcano | Tencent |
+| :--------------------- | :--: | :------: | :---: | :-----: | :-----: |
+| Chinese (Simplified)   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Chinese（Traditional） |  ✅  |    ❌    |  ❌   |   ✅    |   ❌    |
+| English                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Japanese               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Korean                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| French                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Spanish                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Portuguese             |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Italian                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| German                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Russian                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Arabic                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Swedish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Romanian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Thai                   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Slovak                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Dutch                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hungarian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Greek                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Danish                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Finnish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Polish                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Czech                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
 
 #### Dictionary
 
@@ -132,9 +150,13 @@ Support 19 langauges, (Chinese, Japanese, Russian), English, French, Spanish, Po
 
 #### Translation
 
-Currently we support 23 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.**
+Currently, we support DeepL, Google, Bing, 🍎 Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation, total 9 translation services.
 
-Details of the languages supported by each translation service are as follows:
+Google and DeepL translations will use the system proxy by default. (DeepL works without a proxy, but sometimes requests time out)
+
+> Note ⚠️: Since the Chinese version of Google Translate is currently unavailable, you can only use the international version, so you need to use a proxy to use Google Translate.
+
+Supported translation languages:
 
 | language               | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
 | :--------------------- | :----: | :---: | :----: | :--: | :------: | :---: | :-----: | :-----: | :----: |
@@ -170,11 +192,11 @@ The default preferred languages are simplified Chinese and English. You can chan
 
 Preference language has two main functions:
 
-<details><summary> First, it improves the accuracy of automatic recognition of input text language. </summary>
+<details><summary> First, it improves the accuracy of automatic detection of input text language. </summary>
 
 <p>
 
-Preference language will be given priority in order during automatic recognition. This is because some words may represent multiple languages at the same time, and the automatic recognition program cannot work as expected. In most cases, the automatic recognition of input text is very useful, except for very few special cases. For example, the English word `heel` will be automatically recognized into Dutch by Youdao translation, and then the translation results are not what we expect. At this time, if your `Easydict` preferred language contains English, it will be recognized into English first and translated correctly.
+Preference language will be given priority in order during automatic detection. This is because some words may represent multiple languages at the same time, and the automatic detection program cannot work as expected. In most cases, the automatic detection of input text is very useful, except for very few special cases. For example, the English word `heel` will be automatically recognized into Dutch by Youdao translation, and then the translation results are not what we expect. At this time, if your `Easydict` preferred language contains English, it will be recognized into English first and translated correctly.
 
 </p>
 
