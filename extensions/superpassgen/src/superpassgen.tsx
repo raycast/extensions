@@ -22,8 +22,8 @@ export default function Command() {
     try {
       const password = await generatePassword(masterPassword, domain)
       await (type === 'copy' ? Clipboard.copy : Clipboard.paste)(password)
-      await popToRoot()
       await closeMainWindow()
+      await popToRoot()
     } catch (error) {
       if (error instanceof Error) {
         await showToast({
@@ -40,11 +40,11 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action
-            title="Paste password"
+            title="Paste Password"
             onAction={() => onActionHandler('paste')}
           ></Action>
           <Action
-            title="Copy password"
+            title="Copy Password"
             onAction={() => onActionHandler('copy')}
           ></Action>
         </ActionPanel>
@@ -52,7 +52,7 @@ export default function Command() {
     >
       <Form.PasswordField
         id="password"
-        title="Master password"
+        title="Master Password"
         onChange={setMasterPassword}
       />
       <Form.TextField id="domain" title="Domain / URL" onChange={setDomain} />
