@@ -1,4 +1,5 @@
 name: Extensions Build & Publish
+run-name: "${{ github.event_name == 'push' && format('Publish: {0}', github.event.head_commit.message) || (github.event_name == 'pull_request' && format('Check: {0}', github.event.pull_request.title) || github.event_name == 'workflow_dispatch' && format('Manual: {0} {1}', inputs.command, inputs.paths) || format('Event: {0}', github.event_name) ) }}"
 
 on:
   workflow_dispatch:
