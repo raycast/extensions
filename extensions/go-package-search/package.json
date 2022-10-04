@@ -5,7 +5,9 @@
   "description": "Quickly search packages on https://pkg.go.dev",
   "icon": "command-icon.png",
   "author": "bstncartwright",
-  "contributors": ["k8scat"],
+  "contributors": [
+    "k8scat"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
