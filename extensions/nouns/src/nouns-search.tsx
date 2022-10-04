@@ -108,7 +108,6 @@ export default function Command() {
   return (
     <Grid
       itemSize={isAll ? Grid.ItemSize.Small : Grid.ItemSize.Medium}
-      navigationTitle={isAll ? undefined : `Showing ${nounData.length} Noun${nounData.length > 1 ? "s" : ""}`}
       isLoading={isLoading}
       searchBarPlaceholder={searchPlaceholder}
       searchText={isAll ? undefined : searchTerm}
