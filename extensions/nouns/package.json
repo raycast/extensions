@@ -11,10 +11,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "nouns-traits",
-      "title": "Nouns",
-      "subtitle": "Search",
-      "description": "Search Nouns Traits",
+      "name": "nouns-search",
+      "title": "Nouns Search",
+      "description": "Search Nouns by traits",
       "mode": "view"
     }
   ],
