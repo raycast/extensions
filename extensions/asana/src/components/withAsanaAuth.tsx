@@ -1,28 +1,40 @@
-import { Detail, OAuth } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { authorize, client } from "../api/oauth";
+import { Detail, environment, MenuBarExtra } from "@raycast/api";
+import { useMemo, useState } from "react";
+import { authorize } from "../api/oauth";
+
+let token: string | null = null;
 
 export default function withAsanaAuth(component: JSX.Element) {
-  const [tokenSet, setTokenSet] = useState<OAuth.TokenSet>();
+  const [x, forceRerender] = useState(0);
 
-  useEffect(() => {
-    async function authenticate() {
-      await authorize();
-      const tokenSet = await client.getTokens();
+  // we use a `useMemo` instead of `useEffect` to avoid a render
+  useMemo(() => {
+    (async function () {
+      token = await authorize();
 
-      if (tokenSet) {
-        setTokenSet(tokenSet);
-      } else {
-        throw Error("Failed to authenticate");
-      }
-    }
-
-    authenticate();
+      forceRerender(x + 1);
+    })();
   }, []);
 
-  if (!tokenSet) {
-    return <Detail isLoading />;
+  if (!token) {
+    if (environment.commandMode === "view") {
+      // Using the <List /> component makes the placeholder buggy
+      return <Detail isLoading />;
+    } else if (environment.commandMode === "menu-bar") {
+      return <MenuBarExtra isLoading />;
+    } else {
+      console.error("`withAsanaAuth` is only supported in `view` and `menu-bar` mode");
+      return null;
+    }
   }
 
   return component;
+}
+
+export function getOAuthToken(): string {
+  if (!token) {
+    throw new Error("getOAuthToken must be used when authenticated");
+  }
+
+  return token;
 }

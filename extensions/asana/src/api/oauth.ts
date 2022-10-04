@@ -11,13 +11,15 @@ export const client = new OAuth.PKCEClient({
   description: "Connect your Asana account",
 });
 
-export async function authorize(): Promise<void> {
+export async function authorize() {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      const tokens = await refreshTokens(tokenSet.refreshToken);
+      await client.setTokens(tokens);
+      return tokens.access_token;
     }
-    return;
+    return tokenSet.accessToken;
   }
 
   const authRequest = await client.authorizationRequest({
@@ -27,7 +29,10 @@ export async function authorize(): Promise<void> {
   });
 
   const { authorizationCode } = await client.authorize(authRequest);
-  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  const tokens = await fetchTokens(authRequest, authorizationCode);
+  await client.setTokens(tokens);
+
+  return tokens.access_token;
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
