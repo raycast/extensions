@@ -1,3 +1,3 @@
 # YubiKey Code Changelog
 
-## [Initial Version] - 2022-09-30
+## [Initial Version] - 2022-10-04
