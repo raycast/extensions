@@ -1,7 +1,6 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { chords, getNote } from "../libs/db";
 import { Note } from "../libs/note";
-import { ChordError } from "./ChordError";
 import ChordGrid from "./ChordGrid";
 
 type KeyListProps = {
@@ -28,7 +27,11 @@ export default function NoteList({ noteNames }: KeyListProps) {
               accessories={[{ text: `See chords for ${noteName}` }]}
               actions={
                 <ActionPanel>
-                  <Action.Push target={target} title="Open chord details" />
+                  <Action.Push
+                    target={target}
+                    icon={Icon.AppWindowGrid3x3}
+                    title="Open Chord Details"
+                  />
                 </ActionPanel>
               }
             />

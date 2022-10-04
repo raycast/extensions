@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { Chord } from "../libs/chord";
 import ChordDetails, { getChordImageUrl } from "./ChordDetails";
 import { Note } from "../libs/note";
@@ -29,7 +28,11 @@ export default function ChordGrid({ rootNote, chords }: ChordGridProps) {
         key={index}
         actions={
           <ActionPanel>
-            <Action.Push title="Open chord details" target={<ChordDetails chord={chordData} />} />
+            <Action.Push
+              title="Open Chord Details"
+              icon={Icon.AppWindowSidebarRight}
+              target={<ChordDetails chord={chordData} />}
+            />
           </ActionPanel>
         }
         content={chordImageData}
