@@ -6,13 +6,11 @@ import { keySimpleList } from "./libs/key";
 import { Chord } from "./libs/chord";
 import ChordGrid from "./components/ChordGrid";
 import { Note } from "./libs/note";
-import Loading from "./components/Loading";
 import { showToast, Toast } from "@raycast/api";
 
 export default function Command(props: { arguments: { rootNote: string } }) {
   const rawValue = props?.arguments?.rootNote;
-  //const [filterText, setFilterText] = useState<string | undefined>();
-  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [rootNote, setRootNote] = useState<Note | undefined>();
   const [singleKeyChords, setSingleKeyChords] = useState<Chord[]>([]);
 
@@ -31,7 +29,7 @@ export default function Command(props: { arguments: { rootNote: string } }) {
 
   useEffect(() => {
     onRootNoteChange(rawValue);
-    setMounted(true);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -48,15 +46,11 @@ export default function Command(props: { arguments: { rootNote: string } }) {
     }
   }, [rootNote]);
 
-  if (!mounted) {
-    return <Loading />;
-  }
-
   // Show chords from selected rootNote
   if (rootNote && singleKeyChords.length > 0) {
-    return <ChordGrid rootNote={rootNote} chords={singleKeyChords} />;
+    return <ChordGrid isLoading={loading} rootNote={rootNote} chords={singleKeyChords} />;
   }
 
   // If rootNote is not selected, show listing
-  return <NoteList noteNames={keySimpleList} />;
+  return <NoteList isLoading={loading} noteNames={keySimpleList} />;
 }

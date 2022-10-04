@@ -1,5 +1,5 @@
 import { Chord } from "./chord";
-import { Key, keySimpleList, OctaveKeyCount } from "./key";
+import { Key, keySimpleList, noteMap, OctaveKeyCount } from "./key";
 import { Note } from "./note";
 
 // prettier-ignore
@@ -166,9 +166,14 @@ function getChords() {
   return chords;
 }
 
+/**
+ * Try to find a note with given name
+ * Also maps certain notes to aliases like: A# -> Bb
+ */
 function getNote(noteName: string) {
-  const note = notes.find((note) => note.getChromaticName() === noteName);
-  return note;
+  const chromaticName =
+    noteMap.find((mapEntry) => mapEntry.aliases?.includes(noteName))?.name ?? noteName;
+  return notes.find((note) => note.getChromaticName() === chromaticName);
 }
 
 const chords = getChords();

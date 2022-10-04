@@ -23,7 +23,7 @@ export function getInversionsContent({
   options?: ChordKeyboardOptions;
 }) {
   const inversionsMd = trimLines(
-    chord.inversions.map((inversion, index) => {
+    chord.inversions.map((inversion, _index) => {
       const inversionName = inversion.fullName.length > 0 ? inversion.fullName : inversion.alias[0];
       return `
       ### Inversion: ${inversionName}

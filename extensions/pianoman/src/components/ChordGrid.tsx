@@ -7,14 +7,13 @@ import { ChordError } from "./ChordError";
 type ChordGridProps = {
   rootNote?: Note;
   chords: Chord[];
-  filterText?: string;
-  onFilterTextChange?: (newValue: string) => void;
+  isLoading?: boolean;
 };
 
 /**
  * Show the grid of chords from single key
  */
-export default function ChordGrid({ rootNote, chords }: ChordGridProps) {
+export default function ChordGrid({ rootNote, chords, isLoading = false }: ChordGridProps) {
   if (!rootNote) {
     return <ChordError />;
   }
@@ -44,9 +43,10 @@ export default function ChordGrid({ rootNote, chords }: ChordGridProps) {
 
   return (
     <Grid
+      isLoading={isLoading}
       enableFiltering={true}
       searchBarPlaceholder="Filter chords by names"
-      navigationTitle="Search chords"
+      navigationTitle="Search Chords"
       itemSize={Grid.ItemSize.Large}
     >
       <Grid.Section title={rootNote.getChromaticName()}>{gridItems}</Grid.Section>

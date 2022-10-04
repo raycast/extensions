@@ -1,4 +1,4 @@
-enum Key {
+export enum Key {
   "C" = 0,
   "C#" = 1,
   "Db" = 1,
@@ -32,12 +32,12 @@ enum Key {
   "G##" = 9,
 }
 
-enum bw {
+export enum bw {
   "white" = 0,
   "black" = 1,
 }
 
-const bwMap = [
+export const bwMap = [
   bw.white,
   bw.black,
   bw.white,
@@ -52,9 +52,9 @@ const bwMap = [
   bw.white,
 ];
 
-type KeyKey = keyof typeof Key;
+export type KeyKey = keyof typeof Key;
 
-const keySimpleList: KeyKey[] = [
+export const keySimpleList: KeyKey[] = [
   "C",
   "C#",
   "Db",
@@ -74,8 +74,24 @@ const keySimpleList: KeyKey[] = [
   "B",
 ];
 
-const chromaticName: string[] = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+export type NoteMap = {
+  name: string;
+  aliases?: string[];
+};
+export const noteMap: NoteMap[] = [
+  { name: "C" },
+  { name: "Db", aliases: ["C#"] },
+  { name: "D" },
+  { name: "Eb", aliases: ["D#"] },
+  { name: "E" },
+  { name: "F" },
+  { name: "F#" },
+  { name: "G" },
+  { name: "Ab", aliases: ["G#"] },
+  { name: "A" },
+  { name: "Bb", aliases: ["A#"] },
+  { name: "B" },
+];
 
-const OctaveKeyCount = 12;
-
-export { Key, keySimpleList, OctaveKeyCount, bw, bwMap, chromaticName };
+export const chromaticName: string[] = noteMap.map((entry) => entry.name);
+export const OctaveKeyCount = 12;

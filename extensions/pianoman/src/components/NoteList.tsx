@@ -5,14 +5,15 @@ import ChordGrid from "./ChordGrid";
 
 type KeyListProps = {
   noteNames: string[];
+  isLoading?: boolean;
 };
 
-export default function NoteList({ noteNames }: KeyListProps) {
+export default function NoteList({ noteNames, isLoading = false }: KeyListProps) {
   return (
-    <List>
+    <List isLoading={isLoading}>
       {noteNames
-        .filter((noteName, index) => {
-          // FIXME: Some notes missing
+        .filter((noteName, _index) => {
+          // FIXME: Some notes are missing
           return Boolean(getNote(noteName));
         })
         .map((noteName, index) => {
