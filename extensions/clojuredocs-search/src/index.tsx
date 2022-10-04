@@ -109,7 +109,11 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       accessoryTitle={searchResult.type}
       actions={
         <ActionPanel>
-          <Action.Push title="Go to Detail" icon={Icon.AppWindowSidebarRight} target={<CljDetail res={searchResult} />} />
+          <Action.Push
+            title="Go to Detail"
+            icon={Icon.AppWindowSidebarRight}
+            target={<CljDetail res={searchResult} />}
+          />
           <ActionPanel.Section>
             <Action.OpenInBrowser url={"https://clojuredocs.org" + searchResult.href} />
           </ActionPanel.Section>
