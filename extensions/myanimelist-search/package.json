@@ -3,7 +3,7 @@
   "name": "myanimelist-search",
   "title": "Myanimelist search",
   "description": "Easily search and open animes on Myanimelist.",
-  "icon": "mal.webp",
+  "icon": "mal.png",
   "author": "luknl",
   "categories": [
     "Web"
