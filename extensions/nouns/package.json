@@ -9,13 +9,28 @@
     "Web"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "menuBarNoun",
+      "label": "Menu Bar Noun",
+      "description": "Show Noun in Menu Bar",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
   "commands": [
     {
-      "name": "nouns-traits",
-      "title": "Nouns",
-      "subtitle": "Search",
-      "description": "Search Nouns Traits",
+      "name": "nouns-search",
+      "title": "Nouns Search",
+      "description": "Search Nouns by traits",
       "mode": "view"
+    },
+    {
+      "name": "nouns-menu",
+      "title": "Nouns in Menu Bar",
+      "description": "Display pinned Nouns in the Menu Bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
