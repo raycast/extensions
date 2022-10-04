@@ -97,7 +97,7 @@ export const getFilesInDir = async (dirPath: string) => {
 
 export const formatResult = (result: string) => {
   const title = result.split("/");
-  return title[title.length - 1];
+  return decodeURIComponent(title[title.length - 1]);
 };
 
 export const formatFilePath = (pageName: string) => {
