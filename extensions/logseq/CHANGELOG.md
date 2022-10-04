@@ -1,5 +1,9 @@
 # Logseq Changelog
 
+## [Update] - 2022-10-03
+
+Decoding “%2F” to “/” when the logseq page has a “hierarchy” section for better readability.
+
 ## [Support insert leading time and quick capture tag when using quick note] - 2022-07-27
 - Add support for insert leading time and quick capture tag when using quick note just like logseq on mobile.
 - Disabled by default, enable it in the extension settings.
