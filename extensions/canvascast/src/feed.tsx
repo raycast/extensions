@@ -48,7 +48,7 @@ export default function main() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Select filters" storeValue={true} defaultValue="all" onChange={setFilter}>
-          <List.Dropdown.Item title="All assignments" value="all" />
+          <List.Dropdown.Item title="All items" value="all" />
           <List.Dropdown.Section title="Status">
             <List.Dropdown.Item title="To-do" value="todo" icon={Icons.ToDo} />
             <List.Dropdown.Item title="Done" value="done" icon={Icons.Completed} />
