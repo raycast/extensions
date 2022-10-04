@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showHUD, popToRoot } from "@raycast/api";
 import { aliasObject, listAllAliases } from "./utils/list";
 import { useState, useEffect } from "react";
 import { editAlias } from "./utils/edit";
@@ -33,6 +33,7 @@ const EditAlias = () => {
 
                 if (success) {
                   showHUD("✅ Alias edited");
+                  popToRoot({ clearSearchBar: true });
                 } else {
                   showHUD("❌ Error editing alias");
                 }
