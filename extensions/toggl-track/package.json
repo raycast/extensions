@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "franzwilhelm",
   "license": "MIT",
-  "contributors": ["bkeys818"],
+  "contributors": [
+      "bkeys818"
+  ],
   "commands": [
     {
       "name": "index",
