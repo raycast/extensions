@@ -12,6 +12,14 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "upcoming-scheduled-posts",
+      "title": "Upcoming Scheduled Posts",
+      "subtitle": "Typefully",
+      "description": "See your upcoming scheduled posts at a glance",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
       "name": "create-draft",
       "title": "Create Draft Tweet",
       "subtitle": "Typefully",
@@ -84,7 +92,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.1",
     "dayjs": "^1.11.3",
     "got": "^12.1.0"
   },

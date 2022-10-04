@@ -1,5 +1,10 @@
 # Typefully Changelog
 
+## [Added Menu Bar Item] - 2022-10-04
+
+- Add menu bar scheduled post shortcuts
+- Tidied up TypeScript interface usage and imports
+
 ## [Added Commands] - 2022-06-27
 
 - Add ability to view scheduled drafts
