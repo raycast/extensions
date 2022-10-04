@@ -195,6 +195,7 @@ export default function Command() {
               )}
               {trans.code === TransAPIErrCode.NotSupport && <TranslateNotSupport transRes={trans} />}
               {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} />}
+              {trans.code === TransAPIErrCode.Loading && <TranslateResult transRes={trans} />}
             </List.Section>
           );
         })}
