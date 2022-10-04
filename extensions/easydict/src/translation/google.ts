@@ -2,21 +2,18 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 16:09
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-28 17:43
+ * @lastEditTime: 2022-10-02 09:36
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LocalStorage } from "@raycast/api";
 import googleTranslateApi from "@vitalets/google-translate-api";
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import querystring from "node:querystring";
-import { checkIfIpInChina } from "../checkIP";
-import { isChineseIPKey, userAgent } from "../consts";
-import { checkIfPreferredLanguagesContainChinese } from "../detectLanauge/utils";
+import { getProxyAgent, getSystemProxyURL, httpsAgent } from "../axiosConfig";
+import { userAgent } from "../consts";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getGoogleLangCode, getYoudaoLangCodeFromGoogleCode } from "../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
@@ -25,11 +22,11 @@ import { DetectedLangModel, LanguageDetectType } from "./../detectLanauge/types"
 import { autoDetectLanguageItem, englishLanguageItem } from "./../language/consts";
 import { GoogleTranslateResult } from "./../types";
 
-export async function requestGoogleTranslate(
-  queryWordInfo: QueryWordInfo,
-  signal?: AbortSignal
-): Promise<QueryTypeResult> {
+console.log(`enter google.ts`);
+
+export function requestGoogleTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSignal): Promise<QueryTypeResult> {
   console.log(`---> start request Google`);
+  // return googleRPCTranslate(queryWordInfo, signal);
   return googleWebTranslate(queryWordInfo, signal);
 }
 
@@ -45,18 +42,11 @@ async function googleRPCTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSi
   const fromLanguageId = getGoogleLangCode(fromLanguage);
   const toLanguageId = getGoogleLangCode(toLanguage);
 
-  const isChina = await checkIsChina();
-  const tld = isChina ? "cn" : "com";
-  queryWordInfo.tld = tld;
-  console.log(`google RPC tld: ${tld}`);
-
-  const proxy = process.env.PROXY || undefined;
-  const httpsAgent = proxy ? new HttpsProxyAgent(proxy) : undefined;
-  // console.warn(`---> proxy: ${proxy}, httpsAgent: ${JSON.stringify(httpsAgent, null, 4)}`);
-
+  // Since translate.google.cn is not available anymore, we try to use proxy by default.
+  const httpsAgent = await getProxyAgent();
   return new Promise((resolve, reject) => {
     const startTime = new Date().getTime();
-    googleTranslateApi(word, { from: fromLanguageId, to: toLanguageId, tld: tld }, { signal, agent: httpsAgent })
+    googleTranslateApi(word, { from: fromLanguageId, to: toLanguageId }, { signal, agent: httpsAgent })
       .then((res) => {
         console.warn(`---> Google RPC translate: ${res.text}, cost ${new Date().getTime() - startTime} ms`);
         const result: QueryTypeResult = {
@@ -79,7 +69,7 @@ async function googleRPCTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSi
         const errorInfo = getTypeErrorInfo(TranslationType.Google, error);
         reject(errorInfo);
 
-        checkIfIpInChina();
+        getSystemProxyURL();
       });
   });
 }
@@ -88,7 +78,7 @@ async function googleRPCTranslate(queryWordInfo: QueryWordInfo, signal?: AbortSi
  * Google language detect. Actually, it uses google RPC translate api to detect language.
  */
 export function googleDetect(text: string, signal = axios.defaults.signal): Promise<DetectedLangModel> {
-  console.log(`---> start Google detect: ${text}`);
+  console.warn(`---> start Google detect: ${text}`);
 
   const startTime = new Date().getTime();
   const queryWordInfo: QueryWordInfo = {
@@ -150,22 +140,15 @@ export async function googleWebTranslate(queryWordInfo: QueryWordInfo, signal?: 
     q: queryWordInfo.word, // query word
   };
 
-  let tld = queryWordInfo.tld;
-  if (!tld) {
-    const isChina = await checkIsChina();
-    tld = isChina ? "cn" : "com";
-    queryWordInfo.tld = tld;
-  }
-
   const headers = {
     "User-Agent": userAgent,
   };
-  const url = `https://translate.google.${tld}/m?${querystring.stringify(data)}`;
-  console.log(`---> google web url: ${url}`); // https://translate.google.cn/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
+  const url = `https://translate.google.com/m?${querystring.stringify(data)}`;
+  console.log(`---> google web url: ${url}`); // https://translate.google.com/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
 
-  return new Promise<QueryTypeResult>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     axios
-      .get(url, { headers, signal })
+      .get(url, { headers, signal, httpsAgent })
       .then((res: AxiosResponse) => {
         const hmlt = res.data;
         const $ = cheerio.load(hmlt);
@@ -196,32 +179,7 @@ export async function googleWebTranslate(queryWordInfo: QueryWordInfo, signal?: 
 
         reject(errorInfo);
 
-        checkIfIpInChina();
+        // getSystemProxyURL();
       });
-  });
-}
-
-/**
- * Check is China: has Chinese preferred language, or Chinese IP.
- */
-export async function checkIsChina(): Promise<boolean> {
-  console.log(`check is China`);
-
-  if (checkIfPreferredLanguagesContainChinese()) {
-    return Promise.resolve(true);
-  }
-
-  return new Promise((resolve) => {
-    LocalStorage.getItem<boolean>(isChineseIPKey).then((isChineseIP) => {
-      console.log(`checkIsChina: ${isChineseIP}`);
-
-      if (isChineseIP !== undefined) {
-        return resolve(isChineseIP);
-      }
-
-      checkIfIpInChina().then((isIpInChina) => {
-        resolve(isIpInChina);
-      });
-    });
   });
 }

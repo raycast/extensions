@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:38
+ * @lastEditTime: 2022-09-29 23:37
  * @fileName: scripts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -92,7 +92,7 @@ export function appleTranslate(
           // console.log(`error: ${JSON.stringify(error, null, 4)}`)
           reject(undefined);
         } else {
-          console.error(`apple error: ${JSON.stringify(error, null, 4)}`);
+          console.error(`apple translate error: ${JSON.stringify(error, null, 4)}`);
           console.warn(`Apple translate error: ${appleScript}`);
           const errorInfo: RequestErrorInfo = {
             type: type,

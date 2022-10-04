@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:48
+ * @lastEditTime: 2022-10-02 15:52
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { getSelectedText, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { configAxiosProxy } from "./axiosConfig";
+import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
 import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
@@ -101,11 +101,17 @@ export default function () {
           updateInputTextAndQueryText(trimTextLength(selectedText), false);
         })
         .catch((error) => {
-          console.log(`set up, config proxy error: ${error}`);
-          tryQuerySelecedtText();
+          console.error(`set up, config proxy error: ${error}`);
+          querySelecedtText().then(() => {
+            console.log(`after query selected text`);
+            delayGetSystemProxy();
+          });
         });
     } else if (myPreferences.enableAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
+      querySelecedtText().then(() => {
+        console.log(`after query selected text`);
+        delayGetSystemProxy();
+      });
     } else if (myPreferences.enableSystemProxy) {
       configAxiosProxy();
     }
@@ -118,14 +124,20 @@ export default function () {
   /**
    * Try to detect the selected text, if detect success, then query the selected text.
    */
-  function tryQuerySelecedtText() {
-    getSelectedText()
-      .then((selectedText) => {
-        selectedText = trimTextLength(selectedText);
-        console.log(`getSelectedText: ${selectedText}`); // cost about 20 ms
-        updateInputTextAndQueryText(selectedText, false);
-      })
-      .catch((e) => e);
+  function querySelecedtText(): Promise<void> {
+    return new Promise((resolve) => {
+      getSelectedText()
+        .then((selectedText) => {
+          selectedText = trimTextLength(selectedText);
+          console.warn(`getSelectedText: ${selectedText}`); // cost about 20 ms
+          updateInputTextAndQueryText(selectedText, false);
+          resolve();
+        })
+        .catch((e) => {
+          console.log(`getSelectedText error: ${e}`);
+          resolve();
+        });
+    });
   }
 
   /**
