@@ -1,5 +1,12 @@
 # Typefully Changelog
 
+## [Updated Menu Bar Command] - 2022-10-05
+
+- Added light and dark feather icons
+- Added quick links to the menu bar command
+- Added a scheduled posts count to the menu bar command
+- Fixed command bar rendering logic to allow internal caching mechanisms to work
+
 ## [Added Menu Bar Item] - 2022-10-04
 
 - Add menu bar scheduled post shortcuts

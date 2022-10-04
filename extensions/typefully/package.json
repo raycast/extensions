@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "upcoming-scheduled-posts",
-      "title": "Upcoming Scheduled Posts",
+      "name": "command-bar-menu",
+      "title": "Open Command Bar Menu",
       "subtitle": "Typefully",
-      "description": "See your upcoming scheduled posts at a glance",
+      "description": "See your upcoming scheduled posts at a glance, and quickly navigate to Typefully.",
       "mode": "menu-bar",
       "interval": "1m"
     },

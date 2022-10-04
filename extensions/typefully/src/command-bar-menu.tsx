@@ -51,10 +51,28 @@ export default function Command() {
   );
 
   return (
-    <MenuBarExtra icon="https://typefully.com/icon/favicon.ico" tooltip="Your Pull Requests">
+    <MenuBarExtra
+      icon={{
+        source: {
+          light: "black-feather.svg",
+          dark: "white-feather.svg",
+        },
+      }}
+      tooltip="Your Pull Requests"
+      title={data && data.length > 0 ? data.length.toString() : undefined}
+      isLoading={isLoading}
+    >
+      {/* Quick Links */}
+      <MenuBarExtra.Item title="Quick Links" />
+      <MenuBarExtra.Item title="Open Typefully" onAction={() => open("https://typefully.com")} />
+      <MenuBarExtra.Item title="Open Twitter" onAction={() => open("https://twitter.com")} />
+
+      <MenuBarExtra.Separator />
+
+      {/* Scheduled Posts */}
       <MenuBarExtra.Item title="Upcoming Scheduled Posts" />
-      {isLoading ? (
-        <MenuBarExtra.Item title="Loading..." />
+      {data && data.length == 0 ? (
+        <MenuBarExtra.Item title="No posts found. 😔" />
       ) : (
         (data || []).map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
       )}
