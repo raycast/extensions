@@ -1,6 +1,6 @@
 import { MultiDocsetSearch } from "./views";
-import { DashArgumentes } from "./types";
+import { DashArguments } from "./types";
 
-export default function Command(props: { arguments: DashArgumentes }) {
+export default function Command(props: { arguments?: DashArguments }) {
   return <MultiDocsetSearch arguments={props.arguments} />;
 }
