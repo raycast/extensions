@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Action, ActionPanel, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Data, NounStats, TraitCategories, traits } from "./traits";
-import { getNounsFromStorage, removeNounFromStorage, setNounToStorage } from "./storage";
+import { getNounsFromStorage, Noun, removeNounFromStorage, setNounToStorage } from "./storage";
 
 const traitCategories: Record<TraitCategories, string> = {
   all: "All",
@@ -22,7 +22,7 @@ export default function Command() {
 
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
-  const [pinnedNouns, setPinnedNouns] = useCachedState<string[]>("pinned-nouns", []);
+  const [pinnedNouns, setPinnedNouns] = useCachedState<Noun[]>("pinned-nouns", []);
 
   useEffect(() => {
     (async () => {
@@ -88,11 +88,9 @@ export default function Command() {
     nounData = result || [];
   }
 
-  // async function pinNoun(id) {}
-
   const children = nounData.map((noun) => {
     const nounId = String(noun.noun_id);
-    const isPinned = pinnedNouns.includes(String(noun.noun_id));
+    const isPinned = pinnedNouns.some((n) => n.id === nounId);
     return (
       <Grid.Item
         key={noun.noun_id}
@@ -102,7 +100,7 @@ export default function Command() {
             <Action.CopyToClipboard title="Copy Noun ID" content={noun.noun_id} />
             <Action
               title={isPinned ? "Remove from Menu Bar" : "Add to Menu Bar"}
-              icon={Icon.Pin}
+              icon={isPinned ? Icon.Minus : Icon.Plus}
               onAction={async () => {
                 let updatedNouns;
                 if (isPinned) {

@@ -11,12 +11,13 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "menuBarNoun",
-      "label": "Menu Bar Noun",
-      "description": "Show Noun in Menu Bar",
+      "name": "enableMenuBar",
+      "title": "Menu Bar",
+      "label": "Enable Menu Bar",
+      "description": "Select Nouns to pin in the Menu Bar.",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": false
     }
   ],
   "commands": [
