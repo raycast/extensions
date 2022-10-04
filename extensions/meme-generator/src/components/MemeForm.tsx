@@ -62,7 +62,7 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
         <Form.TextField
           key={`text_${index}`}
           id={`text[${index}]`}
-          title={`Text #${index}`}
+          title={`Text #${index + 1}`}
           error={textBoxError}
           onChange={() => setTextBoxError(undefined)}
         />
