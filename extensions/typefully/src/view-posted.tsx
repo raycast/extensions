@@ -3,12 +3,7 @@ import { useEffect, useState } from "react";
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
-<<<<<<< HEAD
 import { Preferences } from "./interfaces/preferences";
-=======
-import Preferences from "./interfaces/preferences";
->>>>>>> ebaf30cc (:bug: added missing files... 😅)
 
 dayjs.extend(relativeTime);
 

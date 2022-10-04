@@ -3,27 +3,11 @@ import { useEffect, useState } from "react";
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-<<<<<<< HEAD
 import { Draft } from "./interfaces/draft";
-
 import { Preferences } from "./interfaces/preferences";
 
 dayjs.extend(relativeTime);
 
-=======
-
-import Preferences from "./interfaces/preferences";
-
-dayjs.extend(relativeTime);
-
-interface Draft {
-  id: number;
-  text_first_tweet: string;
-  num_tweets: number;
-  scheduled_date: Date;
-}
-
->>>>>>> ebaf30cc (:bug: added missing files... 😅)
 interface State {
   drafts?: Draft[];
   error?: Error;
