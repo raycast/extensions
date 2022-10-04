@@ -40,8 +40,8 @@
       "icon": "pages-icon.png",
       "arguments": [
         {
-          "name": "filepath",
-          "placeholder": "filepath",
+          "name": "filename",
+          "placeholder": "file name",
           "type": "text",
           "required": true
         }
@@ -90,8 +90,8 @@
       "icon": "numbers-icon.png",
       "arguments": [
         {
-          "name": "filepath",
-          "placeholder": "filepath",
+          "name": "filename",
+          "placeholder": "file name",
           "type": "text",
           "required": true
         }
@@ -147,8 +147,8 @@
       "icon": "keynote-icon.png",
       "arguments": [
         {
-          "name": "filepath",
-          "placeholder": "filepath",
+          "name": "filename",
+          "placeholder": "file name",
           "type": "text",
           "required": true
         }
@@ -167,6 +167,16 @@
       "description": "Opens the selected file(s) in Keynote.",
       "mode": "no-view",
       "icon": "keynote-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "exportDir",
+      "type": "textfield",
+      "title": "iWork Export Location",
+      "description": "The directory that exported iWork documents will appear in.",
+      "default": "~/Documents",
+      "required": true
     }
   ],
   "dependencies": {
