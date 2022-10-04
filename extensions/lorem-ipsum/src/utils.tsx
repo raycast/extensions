@@ -2,9 +2,9 @@ import { closeMainWindow, Clipboard, showHUD } from "@raycast/api";
 import { LoremIpsum } from "lorem-ipsum";
 
 // don't want to cause a heap error, so cap it 😱
-const LOREM_IPSUM_MAX_NUMBER = 10000;
+const LOREM_IPSUM_MAX_NUMBER = 1000;
 
-const generator = new LoremIpsum({
+const loremIpsumOptions = {
   sentencesPerParagraph: {
     max: 8,
     min: 4,
@@ -13,14 +13,23 @@ const generator = new LoremIpsum({
     max: 16,
     min: 4,
   },
-});
+};
+
+const generator = new LoremIpsum(loremIpsumOptions);
 
 // generator.generateWords(1);
 // generator.generateParagraphs(7);
 
 export const generateParagraphs = (count: number) => {
   return Array.from(Array(count))
-    .map(() => generator.generateSentences(6))
+    .map(() =>
+      generator.generateSentences(
+        Math.floor(
+          Math.random() *
+            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1)
+        ) + loremIpsumOptions.sentencesPerParagraph.min
+      )
+    )
     .join("\r\n\r\n"); // newline + seperator line
 };
 
