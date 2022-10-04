@@ -65,6 +65,16 @@ export default function Command() {
 
   function AddLocationAction() {
     return (
+      <Action.Push
+        title="Add Location"
+        shortcut={{ key: "n", modifiers: ["cmd"] }}
+        icon={Icon.NewFolder}
+        target={<EditLocationForm location={{}} />}
+      />
+    );
+    // remove the applescript filepicker since it doesn't work with pop to root search set to immediately
+    // https://raycastcommunity.slack.com/archives/C01AC2X0GMN/p1664542350911429?thread_ts=1653409347.925799&cid=C01AC2X0GMN
+    return (
       <SelectFolder
         title="Add Location"
         prompt="Select a folder to add"
