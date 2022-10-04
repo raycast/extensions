@@ -40,7 +40,7 @@ export default function Command() {
   const isLoading = workspaces.length === 0 && error === null;
 
   return (
-    <List isLoading={isLoading} navigationTitle="Your workspaces" searchBarPlaceholder="Type to filter">
+    <List isLoading={isLoading} searchBarPlaceholder="Type to filter">
       {workspaces.map((workspace, idx) => {
         const sharedAccessory = workspace.shared
           ? { icon: Icon.Globe, text: "Shared" }
