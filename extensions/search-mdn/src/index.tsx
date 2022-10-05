@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import urljoin from "url-join";
 import { useFetch } from "@raycast/utils";
 
-const { locale } = getPreferenceValues<{ locale: string }>();
+// const { locale } = getPreferenceValues<{ locale: string }>();
+// const isEnglish = locale.toLowerCase() === "en-us";
 
 export default function MDNSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [locale, setLocale] = useState<string>("en-us");
 
   useEffect(() => {
     async function fetch() {
@@ -18,12 +20,12 @@ export default function MDNSearchResultsList() {
         return;
       }
       setIsLoading(true);
-      const results = await searchMDNByQuery(query);
+      const results = await searchMDNByQuery(query, locale);
       setState(results);
       setIsLoading(false);
     }
     fetch();
-  }, [query]);
+  }, [query, locale]);
 
   return (
     <List
@@ -31,6 +33,19 @@ export default function MDNSearchResultsList() {
       searchBarPlaceholder="Type to search MDN..."
       onSearchTextChange={(text) => setQuery(text)}
       throttle
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Locale"
+          storeValue={true}
+          onChange={(newValue) => {
+            setLocale(newValue);
+          }}
+        >
+          {locales.map((loc) => (
+            <List.Dropdown.Item key={loc.value} title={loc.title} value={loc.value} keywords={[loc.title, loc.value]} />
+          ))}
+        </List.Dropdown>
+      }
     >
       {state.map((result, idx) => (
         <List.Item
@@ -40,7 +55,11 @@ export default function MDNSearchResultsList() {
           subtitle={result.summary}
           actions={
             <ActionPanel>
-              <Action.Push icon={Icon.Document} title="Read Document" target={<Details {...result} />} />
+              <Action.Push
+                icon={Icon.Document}
+                title="Read Document"
+                target={<Details result={result} locale={locale} />}
+              />
               <Action.OpenInBrowser url={result.url} />
               <Action.CopyToClipboard content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
             </ActionPanel>
@@ -51,25 +70,90 @@ export default function MDNSearchResultsList() {
   );
 }
 
+const locales = [
+  {
+    value: "de",
+    title: "Deutsch",
+  },
+  {
+    value: "en-US",
+    title: "English (US)",
+  },
+  {
+    value: "es",
+    title: "Español",
+  },
+  {
+    value: "fr",
+    title: "Français",
+  },
+  {
+    value: "ja",
+    title: "日本語",
+  },
+  {
+    value: "ko",
+    title: "한국어",
+  },
+  {
+    value: "pl",
+    title: "Polski",
+  },
+  {
+    value: "pt-BR",
+    title: "Português (do Brasil)",
+  },
+  {
+    value: "ru",
+    title: "Русский",
+  },
+  {
+    value: "zn-CN",
+    title: "中文(简体)",
+  },
+  {
+    value: "zh-TW",
+    title: "正體中文 (繁體)",
+  },
+];
+
 interface Content {
   content: string;
   encoding: string;
 }
 
-const contentURL = "https://api.github.com/repos/mdn/content/contents";
+const contentApiURL = "https://api.github.com/repos/mdn/content/contents";
+const translatedContentApiURL = "https://api.github.com/repos/mdn/translated-content/contents";
 
-const Details = (props: Result) => {
-  const file = "/files" + props.mdn_url.toLowerCase().replace("/docs/", "/") + "/index.md";
-  const url = `${contentURL}${file}`;
+const contentBlobURL = "https://github.com/mdn/content/blob/main";
+const translatedContentBlobURL = "https://github.com/mdn/translated-content/blob/main";
+
+const Details = (props: { result: Result; locale: string }) => {
+  const file = "/files" + props.result.mdn_url.toLowerCase().replace("/docs/", "/") + "/index.md";
+  const isEn = props.locale === "en-US";
+  const url = `${isEn ? contentApiURL : translatedContentApiURL}${file}`;
+
   const { isLoading, data, revalidate } = useFetch<Content>(url);
+  let content = Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString();
+
+  // Remove markdown metadata on the top
+  const sepIdx = content.indexOf("\n---\n", 3);
+  if (sepIdx !== -1) {
+    content = content.slice(sepIdx + 4, -1);
+  }
+
   return (
     <Detail
-      navigationTitle={`Search Web Docs - ${props.title}`}
+      navigationTitle={`Search Web Docs - ${props.result.title}`}
       isLoading={isLoading}
-      markdown={Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString()}
+      markdown={content}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Source on GitHub" url={`https://github.com/mdn/content/blob/main${file}`} />
+          <Action.OpenInBrowser url={props.result.url} />
+          <Action.OpenInBrowser
+            title="Source on GitHub"
+            url={`${isEn ? contentBlobURL : translatedContentBlobURL}${file}`}
+          />
           <Action
             icon={Icon.ArrowClockwise}
             title="Reload"
@@ -93,16 +177,16 @@ type Result = {
   mdn_url: string;
 };
 
-async function searchMDNByQuery(query: string): Promise<Result[]> {
+async function searchMDNByQuery(query: string, locale: string): Promise<Result[]> {
   try {
-    const response = await axios.get<MDNResponse>(`https://developer.mozilla.org/api/v1/search`, {
-      params: {
-        q: query,
-        sort: "best",
-        locale: locale,
-      },
-    });
-    return response.data.documents.map((document) => {
+    const api = "https://developer.mozilla.org/api/v1/search";
+    const params = {
+      q: query,
+      sort: "best",
+      locale: locale,
+    };
+    const resp = await axios.get<MDNResponse>(api, { params });
+    return resp.data.documents.map((document) => {
       document.url = urljoin("https://developer.mozilla.org", document.mdn_url);
       return document;
     });
