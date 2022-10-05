@@ -1,11 +1,8 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import urljoin from "url-join";
 import { useFetch } from "@raycast/utils";
-
-// const { locale } = getPreferenceValues<{ locale: string }>();
-// const isEnglish = locale.toLowerCase() === "en-us";
 
 export default function MDNSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
