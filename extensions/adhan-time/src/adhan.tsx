@@ -21,7 +21,8 @@ export interface Data {
 export default function Command() {
   const userPreference: Preferences = getPreferenceValues();
   const { isLoading, data } = useFetch<Data>(
-    `https://api.aladhan.com/v1/timingsByCity?city=${userPreference.city}&country=${userPreference.country}&method=${userPreference.calculation_methods}`
+    `https://api.aladhan.com/v1/timingsByCity?city=${userPreference.city}&country=${userPreference.country}&method=${userPreference.calculation_methods}`,
+    { keepPreviousData: true }
   );
   const cache = new Cache();
   cache.set("timings", JSON.stringify(data));
