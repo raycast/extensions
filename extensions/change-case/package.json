@@ -221,7 +221,7 @@
       "type": "checkbox",
       "title": "",
       "description": "Enable the \"SPonGE CasE\" Transformation",
-      "label": "SponGE CaSE",
+      "label": "Sponge Case",
       "default": true,
       "required": false
     }
