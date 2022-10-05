@@ -36,7 +36,7 @@ type CaseType =
   | "Title Case"
   | "Upper Case"
   | "Upper First"
-  | "SPonGE CasE";
+  | "Sponge Case";
 
 async function runShellScript(command: string) {
   const { stdout } = await execa(command, {
