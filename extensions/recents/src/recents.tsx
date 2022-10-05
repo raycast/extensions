@@ -1,12 +1,13 @@
 import { homedir } from "os";
+import { basename } from "path";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import mdfind from "mdfind";
 import moment from "moment";
 
-import { copyRecentToClipboard } from "./utils";
+import { copyRecentToClipboard, showInfoInFinder, maybeMoveResultToTrash } from "./utils";
 
 import { Scope, ScopeDictionary, SpotlightResult } from "./types";
 
@@ -143,26 +144,70 @@ export default function Command(props: { scope?: string | undefined }) {
           key={recentIndex}
           icon={{ fileIcon: recent.kMDItemPath }}
           title={recent.kMDItemDisplayName}
+          quickLook={{ path: recent.kMDItemPath, name: recent.kMDItemDisplayName }}
           actions={
             <ActionPanel>
               <Action.Open
                 title={`Open ${recent.kMDItemKind}`}
                 icon={{ fileIcon: recent.kMDItemPath }}
                 target={recent.kMDItemPath}
+                onOpen={() => popToRoot({ clearSearchBar: true })}
               />
-              <Action.ShowInFinder icon={Icon.Finder} title="Show In Finder" path={recent.kMDItemPath} />
-              <Action.CopyToClipboard
-                icon={Icon.Clipboard}
-                title="Copy Path To Clipboard"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                content={recent.kMDItemPath}
+              <Action.ShowInFinder
+                icon={Icon.Finder}
+                title="Show In Finder"
+                path={recent.kMDItemPath}
+                onShow={() => popToRoot({ clearSearchBar: true })}
               />
-              <Action.CopyToClipboard
-                title={`Copy ${recent.kMDItemKind}`}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                content={``}
-                onCopy={() => copyRecentToClipboard(recent)}
+              <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
+              <Action.OpenWith
+                title="Open With..."
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                path={recent.kMDItemPath}
+                onOpen={() => popToRoot({ clearSearchBar: true })}
               />
+              <Action
+                title="Show Info in Finder"
+                icon={Icon.Finder}
+                shortcut={{ modifiers: ["cmd"], key: "i" }}
+                onAction={() => showInfoInFinder(recent)}
+              />
+              <ActionPanel.Section>
+                <Action.CopyToClipboard
+                  title={`Copy ${recent.kMDItemKind}`}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  content={``}
+                  onCopy={() => copyRecentToClipboard(recent)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                  content={basename(recent.kMDItemPath)}
+                />
+                <Action.CopyToClipboard
+                  icon={Icon.Clipboard}
+                  title="Copy Path"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  content={recent.kMDItemPath}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.CreateQuicklink
+                  title="Create Quicklink"
+                  icon={Icon.Link}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  quicklink={{ link: recent.kMDItemPath, name: basename(recent.kMDItemPath) }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
+                  title="Move to Trash"
+                  style={Action.Style.Destructive}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => maybeMoveResultToTrash(recent)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
           accessories={[
