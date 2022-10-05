@@ -126,7 +126,7 @@ export default function Command(props: { scope?: string | undefined }) {
       isLoading={loading}
       searchBarAccessory={
         hasFilters && kinds.length ? (
-          <List.Dropdown tooltip="Type" onChange={setFilter} value={filter}>
+          <List.Dropdown tooltip="Kind" onChange={setFilter} value={filter}>
             <List.Dropdown.Item title={`All (${recents.length})`} value={""} />
             {kinds.map((kind, kindIndex) => (
               <List.Dropdown.Item
