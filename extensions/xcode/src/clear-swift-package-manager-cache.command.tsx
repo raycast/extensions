@@ -9,7 +9,7 @@ export default async () => {
     title: "Clear Swift Package Manager cache",
     message: "Are you sure you want to clear the Swift Package Manager cache?",
     primaryAction: {
-      title: "Delete",
+      title: "Clear",
       style: ActionStyle.Destructive,
     },
   };

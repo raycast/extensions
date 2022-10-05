@@ -9,7 +9,7 @@ export default async () => {
     title: "Clear derived data",
     message: "Are you sure you want to clear the derived data directory?",
     primaryAction: {
-      title: "Delete",
+      title: "Clear",
       style: ActionStyle.Destructive,
     },
   };
