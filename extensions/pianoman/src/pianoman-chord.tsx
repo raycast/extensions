@@ -8,49 +8,44 @@ import ChordGrid from "./components/ChordGrid";
 import { Note } from "./libs/note";
 import { showToast, Toast } from "@raycast/api";
 
-export default function Command(props: { arguments: { rootNote: string } }) {
+export default function Command(props: { arguments?: { rootNote: string } }) {
   const rawValue = props?.arguments?.rootNote;
-  const [loading, setLoading] = useState(true);
-  const [rootNote, setRootNote] = useState<Note | undefined>();
-  const [singleKeyChords, setSingleKeyChords] = useState<Chord[]>([]);
 
-  const onRootNoteChange = useCallback((rawRootNoteName: string) => {
-    const rootNoteName = findRootNoteByName(rawRootNoteName);
+  const rootNote = useMemo<Note | undefined>(() => {
+    const rootNoteName = findRootNoteByName(rawValue);
+
     if (rootNoteName) {
-      setRootNote(getNote(rootNoteName));
-    } else if (rawRootNoteName) {
+      return getNote(rootNoteName);
+    }
+    if (rawValue) {
       showToast({
         style: Toast.Style.Failure,
         title: "No such note or chord",
         message: "Showing note listing instead",
       });
     }
-  }, []);
+  }, [rawValue]);
 
-  useEffect(() => {
-    onRootNoteChange(rawValue);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
+  const singleKeyChords = useMemo<Chord[]>(() => {
     if (!rootNote) {
-      return;
+      return [];
     }
 
     // Find chords for single key/note
     const chordDataItems = chords[rootNote.getChromaticName()] as Chord[] | undefined;
     if (chordDataItems && chordDataItems?.length > 0) {
-      setSingleKeyChords(chordDataItems);
-    } else {
-      console.error("Failed to find chords by", rootNote.toString());
+      return chordDataItems;
     }
-  }, [rootNote]);
+
+    console.error("Failed to find chords by", rootNote.toString());
+    return []
+  }, [rootNote])
 
   // Show chords from selected rootNote
   if (rootNote && singleKeyChords.length > 0) {
-    return <ChordGrid isLoading={loading} rootNote={rootNote} chords={singleKeyChords} />;
+    return <ChordGrid rootNote={rootNote} chords={singleKeyChords} />;
   }
 
   // If rootNote is not selected, show listing
-  return <NoteList isLoading={loading} noteNames={keySimpleList} />;
+  return <NoteList noteNames={keySimpleList} />;
 }
