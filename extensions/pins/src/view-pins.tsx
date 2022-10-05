@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Icon, open, Form, List, useNavigation, Action, ActionPanel, showToast, confirmAlert } from "@raycast/api";
+import {
+  Icon,
+  open,
+  Form,
+  List,
+  useNavigation,
+  Action,
+  ActionPanel,
+  showToast,
+  confirmAlert,
+  clearSearchBar,
+} from "@raycast/api";
 import { iconMap, setStorage, getStorage, usePins } from "./utils";
 import { StorageKey } from "./constants";
 import { Pin, Group } from "./types";
@@ -46,7 +57,7 @@ const modifyPin = async (
 
   setPins(newData);
   await setStorage(StorageKey.LOCAL_PINS, newData);
-  await showToast({ title: `Updated pin for "${name}"` });
+  await showToast({ title: `Updated pin!` });
   pop();
 };
 
@@ -130,7 +141,7 @@ const deletePin = async (pin: Pin, setPins: (pins: Pin[]) => void) => {
 
     setPins(filteredPins);
     await setStorage(StorageKey.LOCAL_PINS, filteredPins);
-    await showToast({ title: `Removed pin for ${pin.name}` });
+    await showToast({ title: `Removed pin!` });
   }
 };
 
@@ -165,9 +176,9 @@ export default function Command() {
       <List navigationTitle="View Pins" searchBarPlaceholder="Search website pins...">
         {(pins as Pin[]).map((pin, index) => (
           <List.Item
-            title={pin.name}
+            title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
             subtitle={pin.group != "None" ? pin.group : ""}
-            key={pin.name}
+            key={pin.id}
             icon={
               pin.icon in iconMap
                 ? iconMap[pin.icon]
@@ -186,15 +197,30 @@ export default function Command() {
                 />
 
                 {index > 0 ? (
-                  <Action title="Move Up" onAction={() => movePinUp(index, setPins as (pins: Pin[]) => void)} />
+                  <Action
+                    title="Move Up"
+                    onAction={() => {
+                      movePinUp(index, setPins as (pins: Pin[]) => void);
+                      clearSearchBar();
+                    }}
+                  />
                 ) : null}
                 {index < pins.length - 1 ? (
-                  <Action title="Move Down" onAction={() => movePinDown(index, setPins as (pins: Pin[]) => void)} />
+                  <Action
+                    title="Move Down"
+                    onAction={() => {
+                      movePinDown(index, setPins as (pins: Pin[]) => void);
+                      clearSearchBar();
+                    }}
+                  />
                 ) : null}
 
                 <Action
                   title="Delete Pin"
-                  onAction={() => deletePin(pin, setPins as (pins: Pin[]) => void)}
+                  onAction={() => {
+                    deletePin(pin, setPins as (pins: Pin[]) => void);
+                    clearSearchBar();
+                  }}
                   style={Action.Style.Destructive}
                 />
               </ActionPanel>

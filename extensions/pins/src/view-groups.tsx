@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Icon, Form, List, useNavigation, Action, ActionPanel, showToast, confirmAlert } from "@raycast/api";
+import {
+  Icon,
+  Form,
+  List,
+  useNavigation,
+  Action,
+  ActionPanel,
+  showToast,
+  confirmAlert,
+  clearSearchBar,
+} from "@raycast/api";
 import { iconMap, setStorage, getStorage, useGroups } from "./utils";
 import { StorageKey } from "./constants";
 import { Pin, Group } from "./types";
@@ -40,7 +50,7 @@ const modifyGroup = async (
   setGroups(newGroups);
   await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
   await setStorage(StorageKey.LOCAL_PINS, newPins);
-  await showToast({ title: `Updated "${name}" pin group` });
+  await showToast({ title: `Updated pin group!` });
   pop();
 };
 
@@ -116,7 +126,7 @@ const deleteGroup = async (group: Group, setGroups: (groups: Group[]) => void) =
     setGroups(filteredGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, filteredGroups);
     await setStorage(StorageKey.LOCAL_PINS, updatedPins);
-    await showToast({ title: `Removed pin group ${group.name}` });
+    await showToast({ title: `Removed pin group!` });
   }
 };
 
@@ -149,7 +159,10 @@ export default function Command() {
                 />
                 <Action
                   title="Delete Group"
-                  onAction={() => deleteGroup(group, setGroups as (groups: Group[]) => void)}
+                  onAction={() => {
+                    deleteGroup(group, setGroups as (groups: Group[]) => void);
+                    clearSearchBar();
+                  }}
                   style={Action.Style.Destructive}
                 />
               </ActionPanel>

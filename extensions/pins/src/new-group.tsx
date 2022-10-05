@@ -4,6 +4,7 @@ import { iconMap, setStorage, getStorage } from "./utils";
 import { StorageKey } from "./constants";
 
 const createNewGroup = async (name: string, icon: string) => {
+  // Creates a new group; updates local storage
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
 
   const newID = (await getStorage(StorageKey.NEXT_GROUP_ID))[0];
@@ -19,6 +20,15 @@ const createNewGroup = async (name: string, icon: string) => {
   await setStorage(StorageKey.LOCAL_GROUPS, newData);
   await showToast({ title: `Added pin group "${name}"` });
   popToRoot();
+};
+
+const checkNameField = (name: string, setNameError: (error: string | undefined) => void) => {
+  // Checks for non-empty (non-spaces-only) name
+  if (name.trim().length == 0) {
+    setNameError("Name cannot be empty!");
+  } else {
+    setNameError(undefined);
+  }
 };
 
 const NewGroupForm = () => {
@@ -40,14 +50,8 @@ const NewGroupForm = () => {
         title="Group Name"
         placeholder="Enter the group name"
         error={nameError}
-        onChange={() => (nameError !== undefined ? setNameError(undefined) : null)}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("Name cannot be empty!");
-          } else if (nameError !== undefined) {
-            setNameError(undefined);
-          }
-        }}
+        onChange={(value) => checkNameField(value, setNameError)}
+        onBlur={(event) => checkNameField(event.target.value as string, setNameError)}
       />
 
       <Form.Dropdown id="iconField" title="Group Icon" defaultValue="BulletPoints">

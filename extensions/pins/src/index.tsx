@@ -87,7 +87,7 @@ export default function Command() {
         {"None" in pinGroups
           ? pinGroups["None"].map((pin: Pin) => (
               <MenuBarExtra.Item
-                key={pin.name}
+                key={pin.id}
                 icon={
                   pin.icon in iconMap
                     ? iconMap[pin.icon]
@@ -97,7 +97,7 @@ export default function Command() {
                     ? { fileIcon: pin.url }
                     : getFavicon(pin.url)
                 }
-                title={pin.name}
+                title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
                 onAction={() => open(pin.url)}
               />
             ))
@@ -110,7 +110,7 @@ export default function Command() {
           <MenuBarExtra.Submenu title={key} key={key} icon={getGroupIcon(key, groups as Group[])}>
             {usedGroups[key].map((pin) => (
               <MenuBarExtra.Item
-                key={pin.name}
+                key={pin.id}
                 icon={
                   pin.icon in iconMap
                     ? iconMap[pin.icon]
@@ -120,7 +120,7 @@ export default function Command() {
                     ? { fileIcon: pin.url }
                     : getFavicon(pin.url)
                 }
-                title={pin.name}
+                title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
                 onAction={() => open(pin.url)}
               />
             ))}
