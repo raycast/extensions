@@ -2,7 +2,7 @@
 
 ## [Update] - 2022-10-05
 
-Added SPonGE CasE
+Added Sponge Case
 
 ## [Update] - 2022-08-10
 
