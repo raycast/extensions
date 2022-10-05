@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useMemo } from "react";
 import { chords, getNote } from "./libs/db";
 import { findNoteByName as findRootNoteByName } from "./libs/helper";
 import NoteList from "./components/NoteList";
