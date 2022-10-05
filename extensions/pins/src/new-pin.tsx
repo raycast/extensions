@@ -32,6 +32,7 @@ const useGetGroups = () => {
       const allGroups = [...groups];
       allGroups.push({
         name: "None",
+        id: -1,
         icon: "Minus",
       });
       setGroups(allGroups);
@@ -83,7 +84,12 @@ const NewPinForm = () => {
       <Form.Dropdown id="iconField" title="Pin Icon" defaultValue="None">
         {iconList.map((icon) => {
           return (
-            <Form.Dropdown.Item key={icon} title={icon} value={icon} icon={icon in iconMap ? iconMap[icon] : icon} />
+            <Form.Dropdown.Item
+              key={icon}
+              title={icon}
+              value={icon}
+              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+            />
           );
         })}
       </Form.Dropdown>

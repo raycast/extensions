@@ -4,6 +4,14 @@ import { setStorage, getStorage } from "./utils";
 import { StorageKey } from "./constants";
 import { Pin, Group } from "./types";
 
+const reassignIDs = (newItems: { id: number }[]) => {
+  let currentID = 0;
+  newItems.forEach((item: { id: number }) => {
+    item.id = currentID;
+    currentID++;
+  });
+};
+
 const mergeRemovingDuplicates = (
   dataItems: { name: string; id: number }[],
   oldItems: { name: string; id: number }[]
@@ -23,13 +31,7 @@ const mergeRemovingDuplicates = (
     }
   });
 
-  // Reassign item IDs
-  let currentID = 0;
-  newItems.forEach((item: { id: number }) => {
-    item.id = currentID;
-    currentID++;
-  });
-
+  reassignIDs(newItems);
   return newItems;
 };
 
@@ -39,11 +41,13 @@ const importData = async (data: { groups: Group[]; pins: Pin[] }, importMethod: 
     // Update groups
     const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
     const newGroups = oldGroups.concat(data.groups);
+    reassignIDs(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Update pins
     const oldPins = await getStorage(StorageKey.LOCAL_PINS);
     const newPins = oldPins.concat(data.pins);
+    reassignIDs(newPins);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
     showToast({ title: "Merged Pin data!" });
   } else if (importMethod == "Merge2") {
@@ -52,12 +56,14 @@ const importData = async (data: { groups: Group[]; pins: Pin[] }, importMethod: 
     const dataGroups = data.groups;
     const oldGroups = await getStorage(StorageKey.LOCAL_GROUPS);
     const newGroups = mergeRemovingDuplicates(dataGroups, oldGroups);
+    reassignIDs(newGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, newGroups);
 
     // Remove pin duplicates
     const dataPins = data.pins;
     const oldPins = await getStorage(StorageKey.LOCAL_PINS);
     const newPins = mergeRemovingDuplicates(dataPins, oldPins);
+    reassignIDs(newPins);
     await setStorage(StorageKey.LOCAL_PINS, newPins);
 
     showToast({ title: "Updated Pin data!" });

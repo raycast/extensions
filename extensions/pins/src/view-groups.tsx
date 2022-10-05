@@ -23,13 +23,16 @@ const modifyGroup = async (
 ) => {
   const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
 
-  const newGroups = storedGroups.filter((oldGroup: Group) => {
-    return oldGroup.id != group.id;
-  });
-  newGroups.push({
-    name: name,
-    icon: icon,
-    id: group.id,
+  const newGroups = storedGroups.map((oldGroup: Group) => {
+    if (oldGroup.id == group.id) {
+      return {
+        name: name,
+        icon: icon,
+        id: group.id,
+      };
+    } else {
+      return oldGroup;
+    }
   });
 
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
@@ -108,9 +111,14 @@ const deleteGroup = async (group: Group, setGroups: (groups: Group[]) => void) =
       return oldGroup.id != group.id;
     });
 
+    const isDuplicate =
+      filteredGroups.filter((oldGroup: Group) => {
+        return oldGroup.name == group.name;
+      }).length != 0;
+
     const storedPins = await getStorage(StorageKey.LOCAL_PINS);
     const updatedPins = storedPins.map((pin: Pin) => {
-      if (pin.group == group.name) {
+      if (pin.group == group.name && !isDuplicate) {
         return {
           name: pin.name,
           url: pin.url,
@@ -147,7 +155,7 @@ export default function Command() {
         {(groups as Group[]).map((group) => (
           <List.Item
             title={group.name}
-            key={group.name}
+            key={group.id}
             icon={group.icon in iconMap ? iconMap[group.icon] : ""}
             actions={
               <ActionPanel>

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "categories": [
-    "Productivity", "Web"
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -74,7 +75,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.40.1",
-    "@raycast/utils": "^1.3.1",
+    "@raycast/utils": "^1.4.8",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

@@ -105,7 +105,7 @@ export default function Command() {
 
         <MenuBarExtra.Separator />
 
-        {preferences.showCategories ? <MenuBarExtra.Item title="Groups" /> : null}
+        {preferences.showCategories && groups?.length ? <MenuBarExtra.Item title="Groups" /> : null}
         {Object.keys(usedGroups).map((key) => (
           <MenuBarExtra.Submenu title={key} key={key} icon={getGroupIcon(key, groups as Group[])}>
             {usedGroups[key].map((pin) => (
@@ -128,7 +128,7 @@ export default function Command() {
             <MenuBarExtra.Separator />
             {preferences.showOpenAll ? (
               <MenuBarExtra.Item
-                title="Open all"
+                title="Open All"
                 onAction={() => usedGroups[key].forEach((pin: Pin) => open(pin.url))}
               />
             ) : null}
@@ -143,5 +143,11 @@ export default function Command() {
     );
   }
 
-  return <MenuBarExtra icon={Icon.Pin} isLoading={isLoading} />;
+  return (
+    <MenuBarExtra icon={pinIcon} isLoading={isLoading}>
+      <MenuBarExtra.Item title="No pins yet!" />
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item title="Preferences..." onAction={() => openExtensionPreferences()} />
+    </MenuBarExtra>
+  );
 }

@@ -24,6 +24,7 @@ const useGetGroups = () => {
       const allGroups = [...groups];
       allGroups.push({
         name: "None",
+        id: -1,
         icon: "Minus",
       });
       setGroups(allGroups);
@@ -44,15 +45,18 @@ const modifyPin = async (
 ) => {
   const storedPins = await getStorage(StorageKey.LOCAL_PINS);
 
-  const newData = storedPins.filter((oldPin: Pin) => {
-    return oldPin.id != pin.id;
-  });
-  newData.push({
-    name: name,
-    url: url,
-    icon: icon,
-    group: group,
-    id: pin.id,
+  const newData = storedPins.map((oldPin: Pin) => {
+    if (oldPin.id == pin.id) {
+      return {
+        name: name,
+        url: url,
+        icon: icon,
+        group: group,
+        id: pin.id,
+      };
+    } else {
+      return oldPin;
+    }
   });
 
   setPins(newData);
@@ -67,9 +71,6 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
   const [urlError, setUrlError] = useState<string | undefined>();
   const groups = useGetGroups();
   const { pop } = useNavigation();
-
-  // setStorage(StorageKey.LOCAL_GROUPS, [])
-  // setStorage(StorageKey.LOCAL_PINS, [])
 
   const iconList = Object.keys(Icon);
   iconList.unshift("Favicon / File Icon");
@@ -113,7 +114,12 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
       <Form.Dropdown id="iconField" title="Pin Icon" defaultValue={pin.icon}>
         {iconList.map((icon) => {
           return (
-            <Form.Dropdown.Item key={icon} title={icon} value={icon} icon={icon in iconMap ? iconMap[icon] : icon} />
+            <Form.Dropdown.Item
+              key={icon}
+              title={icon}
+              value={icon}
+              icon={icon in iconMap ? iconMap[icon] : iconMap["Minus"]}
+            />
           );
         })}
       </Form.Dropdown>
@@ -122,7 +128,7 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
         <Form.Dropdown id="groupField" title="Pin Group" defaultValue={pin.group}>
           {groups.map((group) => {
             return (
-              <Form.Dropdown.Item key={group.name} title={group.name} value={group.name} icon={iconMap[group.icon]} />
+              <Form.Dropdown.Item key={group.id} title={group.name} value={group.name} icon={iconMap[group.icon]} />
             );
           })}
         </Form.Dropdown>
