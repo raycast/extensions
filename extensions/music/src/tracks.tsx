@@ -71,7 +71,6 @@ export const Tracks = (props: TracksComponent): JSX.Element => {
               defaultValue={sort}
               layoutType={layout}
               onChange={(value: string) => {
-                console.log(value);
                 setSort(value as SortOption);
                 sortCache.set("sort", value);
               }}
