@@ -12,12 +12,37 @@
       "title": "Recents",
       "description": "Show Recently used files and folders in Raycast",
       "mode": "view"
+    },
+    {
+      "name": "recentApplications",
+      "title": "Recent Applications",
+      "description": "Show Recently used applications in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentDocuments",
+      "title": "Recent Documents",
+      "description": "Show Recently used documents in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentDownloads",
+      "title": "Recent Downloads",
+      "description": "Show Recently used downloads in Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "recentFolders",
+      "title": "Recent Folders",
+      "description": "Show Recently used folders in Raycast",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.40.1",
     "mdfind": "^1.0.0",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "16.10.3",

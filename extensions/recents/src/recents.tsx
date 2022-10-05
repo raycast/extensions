@@ -1,17 +1,52 @@
+import { homedir } from "os";
+
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import mdfind from "mdfind";
 import moment from "moment";
-import { homedir } from "os";
 
-import { SpotlightResult } from "./types";
+import { copyRecentToClipboard } from "./utils";
 
-const getRecents = async (callback: (result: SpotlightResult) => void): Promise<boolean> => {
+import { Scope, ScopeDictionary, SpotlightResult } from "./types";
+
+const queryScopes = {
+  default: {
+    query: `kMDItemLastUsedDate = "*"`,
+    directories: [`${homedir()}`],
+    filters: true,
+  },
+  applications: {
+    query: 'kMDItemKind == Application && kMDItemLastUsedDate = "*"',
+    directories: [`${homedir()}/Applications`, "/Applications", "/System/Applications"],
+  },
+  documents: {
+    query: 'kMDItemLastUsedDate = "*"',
+    directories: [`${homedir()}/Documents`],
+    filters: true,
+  },
+  downloads: {
+    query: 'kMDItemLastUsedDate = "*"',
+    directories: [`${homedir()}/Downloads`],
+    filters: true,
+  },
+  folders: {
+    query: 'kMDItemKind == Folder && kMDItemLastUsedDate = "*"',
+    directories: [`${homedir()}`],
+  },
+} as ScopeDictionary;
+
+const getRecents = async (scope: string | undefined, callback: (result: SpotlightResult) => void): Promise<boolean> => {
   return await new Promise((resolve) => {
+    let queryParts: Scope = queryScopes["default"];
+
+    if (scope) {
+      queryParts = queryScopes[scope];
+    }
+
     const query = mdfind({
-      query: `kMDItemLastUsedDate = "*"`,
-      directories: [`${homedir()}`],
+      query: queryParts.query,
+      directories: queryParts.directories,
       attributes: ["kMDItemDisplayName", "kMDItemKind", "kMDItemLastUsedDate"],
     });
 
@@ -25,7 +60,7 @@ const getRecents = async (callback: (result: SpotlightResult) => void): Promise<
   });
 };
 
-export default function Command() {
+export default function Command(props: { scope?: string | undefined }) {
   const [loading, setLoading] = useState(true);
 
   const [recents, setRecents] = useState<SpotlightResult[]>([]);
@@ -34,11 +69,17 @@ export default function Command() {
   const [filter, setFilter] = useState<string>("");
   const [filtered, setFiltered] = useState<SpotlightResult[]>([]);
 
+  const [hasFilters, setHasFilters] = useState<boolean | undefined>(true);
+
   useEffect(() => {
     (async () => {
-      await getRecents((result) => {
+      await getRecents(props.scope, (result) => {
         setRecents((recents) => [...recents, result]);
       });
+
+      if (props.scope) {
+        setHasFilters(queryScopes[props.scope].filters);
+      }
 
       setLoading(false);
     })();
@@ -83,7 +124,7 @@ export default function Command() {
     <List
       isLoading={loading}
       searchBarAccessory={
-        kinds.length ? (
+        hasFilters && kinds.length ? (
           <List.Dropdown tooltip="Type" onChange={setFilter} value={filter}>
             <List.Dropdown.Item title={`All (${recents.length})`} value={""} />
             {kinds.map((kind, kindIndex) => (
@@ -102,22 +143,33 @@ export default function Command() {
           key={recentIndex}
           icon={{ fileIcon: recent.kMDItemPath }}
           title={recent.kMDItemDisplayName}
-          subtitle={`Last Used: ${moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD hh:mm:ss +0000").format(
-            "DD/MM/YYYY"
-          )}`}
           actions={
             <ActionPanel>
+              <Action.Open
+                title={`Open ${recent.kMDItemKind}`}
+                icon={{ fileIcon: recent.kMDItemPath }}
+                target={recent.kMDItemPath}
+              />
               <Action.ShowInFinder icon={Icon.Finder} title="Show In Finder" path={recent.kMDItemPath} />
               <Action.CopyToClipboard
                 icon={Icon.Clipboard}
                 title="Copy Path To Clipboard"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                 content={recent.kMDItemPath}
+              />
+              <Action.CopyToClipboard
+                title={`Copy ${recent.kMDItemKind}`}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                content={``}
+                onCopy={() => copyRecentToClipboard(recent)}
               />
             </ActionPanel>
           }
           accessories={[
             {
-              text: recent.kMDItemKind,
+              text: `Last Used: ${moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD hh:mm:ss +0000").format(
+                "DD/MM/YYYY"
+              )}`,
             },
           ]}
         />
