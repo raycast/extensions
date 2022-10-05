@@ -217,7 +217,7 @@
       "required": false
     },
     {
-      "name": "SPonGECasE",
+      "name": "SpongeCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the \"SPonGE CasE\" Transformation",
