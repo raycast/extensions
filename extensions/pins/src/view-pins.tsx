@@ -104,6 +104,8 @@ const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
+          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
+            setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
           }
@@ -173,13 +175,9 @@ export default function Command() {
   const [pins, setPins] = usePins();
   const { push } = useNavigation();
 
-  if (!pins) {
-    <List isLoading={true} />;
-  }
-
-  if (pins?.length) {
+  if (pins) {
     return (
-      <List navigationTitle="View Pins" searchBarPlaceholder="Search website pins...">
+      <List navigationTitle="View Pins" searchBarPlaceholder="Search pins...">
         {(pins as Pin[]).map((pin, index) => (
           <List.Item
             title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
@@ -237,5 +235,5 @@ export default function Command() {
     );
   }
 
-  return <List isLoading={false} />;
+  return <List isLoading={true} />;
 }

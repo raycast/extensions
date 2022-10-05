@@ -75,6 +75,8 @@ const NewPinForm = () => {
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
             setUrlError("URL cannot be empty!");
+          } else if (!event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
+            setUrlError("Please enter a valid URL or path!");
           } else if (urlError !== undefined) {
             setUrlError(undefined);
           }

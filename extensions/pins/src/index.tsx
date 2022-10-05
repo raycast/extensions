@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, open, openExtensionPreferences, getPreferenceValues } from "@raycast/api";
+import { Icon, MenuBarExtra, open, openExtensionPreferences, getPreferenceValues, showToast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { setStorage, getStorage, iconMap, useGroups, copyPinData } from "./utils";
 import { StorageKey } from "./constants";
@@ -121,7 +121,17 @@ export default function Command() {
                     : getFavicon(pin.url)
                 }
                 title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
-                onAction={() => open(pin.url)}
+                onAction={() => {
+                  try {
+                    open(pin.url);
+                  } catch {
+                    showToast({
+                      title:
+                        "Failed to open " +
+                        (pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)),
+                    });
+                  }
+                }}
               />
             ))}
 

@@ -142,14 +142,10 @@ export default function Command() {
   const [groups, setGroups] = useGroups();
   const { push } = useNavigation();
 
-  if (!groups) {
-    <List isLoading={true} />;
-  }
-
   const iconList = Object.keys(Icon);
   iconList.unshift("None");
 
-  if (groups?.length) {
+  if (groups) {
     return (
       <List navigationTitle="View Pin Groups" searchBarPlaceholder="Search groups...">
         {(groups as Group[]).map((group) => (
@@ -181,5 +177,5 @@ export default function Command() {
     );
   }
 
-  return <List isLoading={false} />;
+  return <List isLoading={true} />;
 }
