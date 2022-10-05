@@ -14,31 +14,32 @@ const flagsByCurrency: Record<Currency, string> = {
 };
 
 export default function Command() {
-  const { hideIcon } = getPreferenceValues();
+  const { compactMode } = getPreferenceValues();
 
   const { data, isLoading } = useFetch<Record<Currency, string>>(
     `https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=${CURRENCIES.join()}`
   );
   const [shownCurrency, setShownCurrency] = useCachedState<Currency>("shown-currency", "USD");
 
-  const title = data && shownCurrency && `ETH ${formatCurrency(shownCurrency, Number(data[shownCurrency]))}`;
+  const title =
+    data &&
+    shownCurrency &&
+    `${compactMode ? `Ξ` : `ETH`} ${formatCurrency(shownCurrency, Number(data[shownCurrency]), compactMode)}`;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={hideIcon ? undefined : Icon.Coins} title={title}>
+    <MenuBarExtra isLoading={isLoading} icon={compactMode ? undefined : Icon.Coins} title={title}>
       {data &&
-        Object.entries(data)
-          .filter(([key]) => key !== shownCurrency)
-          .map(([key, value]) => {
-            const formattedValue = formatCurrency(key, Number(value));
-            return (
-              <MenuBarExtra.Item
-                key={key}
-                title={`${formattedValue} (${key})`}
-                icon={flagsByCurrency[key as Currency]}
-                onAction={() => setShownCurrency(key as Currency)}
-              />
-            );
-          })}
+        Object.entries(data).map(([key, value]) => {
+          const formattedValue = formatCurrency(key, Number(value));
+          return (
+            <MenuBarExtra.Item
+              key={key}
+              title={`${formattedValue} (${key})`}
+              icon={flagsByCurrency[key as Currency]}
+              onAction={key === shownCurrency ? undefined : () => setShownCurrency(key as Currency)}
+            />
+          );
+        })}
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title="Open with..." />
       <MenuBarExtra.Item title="Etherscan" onAction={() => open("https://etherscan.io/chart/etherprice")} />
@@ -48,9 +49,11 @@ export default function Command() {
   );
 }
 
-const formatCurrency = (currency: string, value: number) => {
-  return value.toLocaleString("en-US", {
+const formatCurrency = (currency: string, value: number, compactMode?: boolean) => {
+  return Intl.NumberFormat("en-US", {
     style: "currency",
+    notation: compactMode ? "compact" : "standard",
     currency,
-  });
+    maximumFractionDigits: compactMode ? 2 : 0,
+  }).format(value);
 };
