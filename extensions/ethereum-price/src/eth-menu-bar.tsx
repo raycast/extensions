@@ -1,15 +1,16 @@
 import { getPreferenceValues, Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 
-type Currency = "USD" | "EUR" | "GBP" | "JPY" | "BRL";
+type Currency = "USD" | "EUR" | "GBP" | "JPY" | "BRL" | "INR";
 
-const CURRENCIES: Currency[] = ["USD", "EUR", "GBP", "JPY", "BRL"];
+const CURRENCIES: Currency[] = ["USD", "EUR", "GBP", "JPY", "BRL", "INR"];
 const flagsByCurrency: Record<Currency, string> = {
   USD: "🇺🇸",
   EUR: "🇪🇺",
   GBP: "🇬🇧",
   JPY: "🇯🇵",
   BRL: "🇧🇷",
+  INR: "🇮🇳",
 };
 
 export default function Command() {

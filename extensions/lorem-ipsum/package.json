@@ -6,20 +6,53 @@
   "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
   "license": "MIT",
+  "contributors": [
+    "GastroGeek"
+  ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "generator",
+    "paragraphs",
+    "sentences",
+    "text",
+    "lorem",
+    "ipsum"
+  ],
   "commands": [
     {
-      "name": "paragraph",
-      "title": "Generate Paragraph",
+      "name": "paragraphs",
+      "title": "Generate Paragraphs",
       "subtitle": "Lorem Ipsum",
-      "description": "Generate a random paragraph and copy it to the clipboard",
-      "mode": "no-view"
+      "description": "Generate random paragraphs and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfLoremIpsumsToGenerate",
+          "type": "text",
+          "required": false,
+          "placeholder": "1"
+        }
+      ]
     },
     {
-      "name": "sentence",
-      "title": "Generate Sentence",
+      "name": "sentences",
+      "title": "Generate Sentences",
       "subtitle": "Lorem Ipsum",
-      "description": "Generate a random sentence and copy it to the clipboard",
-      "mode": "no-view"
+      "description": "Generate random sentences and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfLoremIpsumsToGenerate",
+          "type": "text",
+          "required": false,
+          "placeholder": "1"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -42,19 +75,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "lorem-ipsum": "^2.0.4",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.39.3",
+    "lorem-ipsum": "^2.0.8",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/node": "^18.7.21",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.26.0",
+    "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
