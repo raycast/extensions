@@ -69,12 +69,12 @@ export default function MDNSearchResultsList() {
 
 const locales = [
   {
-    value: "de",
-    title: "Deutsch",
-  },
-  {
     value: "en-US",
     title: "English (US)",
+  },
+  {
+    value: "de",
+    title: "Deutsch",
   },
   {
     value: "es",
