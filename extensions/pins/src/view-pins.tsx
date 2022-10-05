@@ -1,0 +1,209 @@
+import { useEffect, useState } from "react";
+import { Icon, open, Form, List, useNavigation, Action, ActionPanel, showToast, confirmAlert } from "@raycast/api";
+import { iconMap, setStorage, getStorage, usePins } from "./utils";
+import { StorageKey } from "./constants";
+import { Pin, Group } from "./types";
+import { getFavicon } from "@raycast/utils";
+
+const useGetGroups = () => {
+  const [groups, setGroups] = useState<Group[]>([]);
+
+  useEffect(() => {
+    Promise.resolve(getStorage(StorageKey.LOCAL_GROUPS)).then((groups) => {
+      const allGroups = [...groups];
+      allGroups.push({
+        name: "None",
+        icon: "Minus",
+      });
+      setGroups(allGroups);
+    });
+  }, []);
+
+  return groups;
+};
+
+const modifyPin = async (
+  pin: Pin,
+  name: string,
+  url: string,
+  icon: string,
+  group: string,
+  pop: () => void,
+  setPins: (pins: Pin[]) => void
+) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+
+  const newData = storedPins.filter((oldPin: Pin) => {
+    return oldPin.id != pin.id;
+  });
+  newData.push({
+    name: name,
+    url: url,
+    icon: icon,
+    group: group,
+    id: pin.id,
+  });
+
+  setPins(newData);
+  await setStorage(StorageKey.LOCAL_PINS, newData);
+  await showToast({ title: `Updated pin for "${name}"` });
+  pop();
+};
+
+const EditPinView = (props: { pin: Pin; setPins: (pins: Pin[]) => void }) => {
+  const pin = props.pin;
+  const setPins = props.setPins;
+  const [urlError, setUrlError] = useState<string | undefined>();
+  const groups = useGetGroups();
+  const { pop } = useNavigation();
+
+  // setStorage(StorageKey.LOCAL_GROUPS, [])
+  // setStorage(StorageKey.LOCAL_PINS, [])
+
+  const iconList = Object.keys(Icon);
+  iconList.unshift("Favicon / File Icon");
+  iconList.unshift("None");
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={(values) =>
+              modifyPin(pin, values.nameField, values.urlField, values.iconField, values.groupField, pop, setPins)
+            }
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="nameField"
+        title="Pin Name"
+        placeholder="Enter pin name, e.g. Google, or leave blank to use URL"
+        defaultValue={pin.name}
+      />
+
+      <Form.TextField
+        id="urlField"
+        title="Pin URL"
+        placeholder="Enter the filepath or URL to pin"
+        error={urlError}
+        onChange={() => (urlError !== undefined ? setUrlError(undefined) : null)}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setUrlError("URL cannot be empty!");
+          } else if (urlError !== undefined) {
+            setUrlError(undefined);
+          }
+        }}
+        defaultValue={pin.url}
+      />
+
+      <Form.Dropdown id="iconField" title="Pin Icon" defaultValue={pin.icon}>
+        {iconList.map((icon) => {
+          return (
+            <Form.Dropdown.Item key={icon} title={icon} value={icon} icon={icon in iconMap ? iconMap[icon] : icon} />
+          );
+        })}
+      </Form.Dropdown>
+
+      {groups.length > 0 ? (
+        <Form.Dropdown id="groupField" title="Pin Group" defaultValue={pin.group}>
+          {groups.map((group) => {
+            return (
+              <Form.Dropdown.Item key={group.name} title={group.name} value={group.name} icon={iconMap[group.icon]} />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+    </Form>
+  );
+};
+
+const deletePin = async (pin: Pin, setPins: (pins: Pin[]) => void) => {
+  if (await confirmAlert({ title: "Are you sure?" })) {
+    const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+
+    const filteredPins = storedPins.filter((oldPin: Pin) => {
+      return oldPin.id != pin.id;
+    });
+
+    setPins(filteredPins);
+    await setStorage(StorageKey.LOCAL_PINS, filteredPins);
+    await showToast({ title: `Removed pin for ${pin.name}` });
+  }
+};
+
+const movePinUp = async (index: number, setPins: (pins: Pin[]) => void) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  if (storedPins.length > index) {
+    [storedPins[index - 1], storedPins[index]] = [storedPins[index], storedPins[index - 1]];
+    setPins(storedPins);
+    await setStorage(StorageKey.LOCAL_PINS, storedPins);
+  }
+};
+
+const movePinDown = async (index: number, setPins: (pins: Pin[]) => void) => {
+  const storedPins = await getStorage(StorageKey.LOCAL_PINS);
+  if (storedPins.length > index + 1) {
+    [storedPins[index], storedPins[index + 1]] = [storedPins[index + 1], storedPins[index]];
+    setPins(storedPins);
+    await setStorage(StorageKey.LOCAL_PINS, storedPins);
+  }
+};
+
+export default function Command() {
+  const [pins, setPins] = usePins();
+  const { push } = useNavigation();
+
+  if (!pins) {
+    <List isLoading={true} />;
+  }
+
+  if (pins?.length) {
+    return (
+      <List navigationTitle="View Pins" searchBarPlaceholder="Search website pins...">
+        {(pins as Pin[]).map((pin, index) => (
+          <List.Item
+            title={pin.name}
+            subtitle={pin.group != "None" ? pin.group : ""}
+            key={pin.name}
+            icon={
+              pin.icon in iconMap
+                ? iconMap[pin.icon]
+                : pin.icon == "None"
+                ? ""
+                : pin.url.startsWith("/")
+                ? { fileIcon: pin.url }
+                : getFavicon(pin.url)
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Open" onAction={() => open(pin.url)} />
+                <Action
+                  title="Edit"
+                  onAction={() => push(<EditPinView pin={pin} setPins={setPins as (pins: Pin[]) => void} />)}
+                />
+
+                {index > 0 ? (
+                  <Action title="Move Up" onAction={() => movePinUp(index, setPins as (pins: Pin[]) => void)} />
+                ) : null}
+                {index < pins.length - 1 ? (
+                  <Action title="Move Down" onAction={() => movePinDown(index, setPins as (pins: Pin[]) => void)} />
+                ) : null}
+
+                <Action
+                  title="Delete Pin"
+                  onAction={() => deletePin(pin, setPins as (pins: Pin[]) => void)}
+                  style={Action.Style.Destructive}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  }
+
+  return <List isLoading={false} />;
+}
