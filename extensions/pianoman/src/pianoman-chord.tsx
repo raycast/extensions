@@ -38,8 +38,8 @@ export default function Command(props: { arguments?: { rootNote: string } }) {
     }
 
     console.error("Failed to find chords by", rootNote.toString());
-    return []
-  }, [rootNote])
+    return [];
+  }, [rootNote]);
 
   // Show chords from selected rootNote
   if (rootNote && singleKeyChords.length > 0) {
