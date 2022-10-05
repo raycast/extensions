@@ -67,7 +67,7 @@
       "type": "dropdown",
       "required": false,
       "description": "Option for the dropdown menu for tracks.",
-      "default": "sort", 
+      "default": "sort",
       "data": [
         {
           "value": "sort",
@@ -198,7 +198,14 @@
       "name": "add-to-library",
       "title": "Add to Library",
       "subtitle": "Apple Music",
-      "description": "Add a track to your library.",
+      "description": "Add current track to your library.",
+      "mode": "no-view"
+    },
+    {
+      "name": "delete-from-library",
+      "title": "Delete From Library",
+      "subtitle": "Apple Music",
+      "description": "Delete current track from your library.",
       "mode": "no-view"
     },
     {
@@ -224,7 +231,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.40.3",
     "fp-ts": "^2.12.1",
     "json2md": "^1.12.0",
     "node-fetch": "^3.2.10",

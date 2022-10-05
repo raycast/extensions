@@ -30,6 +30,19 @@ export const setRating = (rating: number) =>
     set rating of matchingTrack to ${rating}
   end tell`);
 
+export const deleteFromLibrary = runScript(`
+  tell application "Music"
+    reveal first track of (tracks of playlist "Library" whose name is name of current track as string and album is album of current track as string and artist is artist of current track as string)
+    activate
+    stop
+    tell application "System Events"
+      key code 51
+      key code 36
+      key code 48
+      key code 126
+    end tell
+  end tell`);
+
 export const isPlaying = async (): Promise<boolean> => {
   return (await runAppleScript(`tell application "Music" to get player state`)) === "playing";
 };

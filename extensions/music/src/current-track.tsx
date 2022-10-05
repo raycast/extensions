@@ -1,8 +1,8 @@
-import { List, Detail, Action, ActionPanel, Icon, Toast, showToast, showHUD } from "@raycast/api";
+import { List, Detail, Action, ActionPanel, Icon, Toast, showToast, showHUD, Color } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import json2md from "json2md";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import PlayAlbum from "./play-album";
 import PlayPlaylist from "./play-playlist";
@@ -136,23 +136,43 @@ export default function CurrentTrack() {
                 setTrack({ ...track, rating: 0 });
               }}
             />
-            <ActionPanel.Submenu title="Set Rating" icon={Icon.Star} shortcut={{ modifiers: ["cmd"], key: "r" }}>
-              {Array.from({ length: 6 }, (_, i) => i).map((rating) => (
+            {track.inLibrary && (
+              <React.Fragment>
+                <ActionPanel.Submenu title="Set Rating" icon={Icon.Star} shortcut={{ modifiers: ["cmd"], key: "r" }}>
+                  {Array.from({ length: 6 }, (_, i) => i).map((rating) => (
+                    <Action
+                      key={rating}
+                      title={`${rating} Star${rating === 1 ? "" : "s"}`}
+                      icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
+                      onAction={async () => {
+                        await pipe(
+                          rating * 20,
+                          music.player.setRating,
+                          TE.map(() => setTrack({ ...track, rating: rating })),
+                          TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
+                        )();
+                      }}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
                 <Action
-                  key={rating}
-                  title={`${rating} Star${rating === 1 ? "" : "s"}`}
-                  icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
+                  title="Delete from Library"
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={async () => {
                     await pipe(
-                      rating * 20,
-                      music.player.setRating,
-                      TE.map(() => setTrack({ ...track, rating: rating })),
-                      TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
+                      music.player.deleteFromLibrary,
+                      TE.map(async () => {
+                        showHUD("Deleted from Library");
+                        await wait(5);
+                        await refreshCache();
+                      }),
+                      TE.mapLeft(() => showHUD("Failed to Delete from Library"))
                     )();
                   }}
                 />
-              ))}
-            </ActionPanel.Submenu>
+              </React.Fragment>
+            )}
           </ActionPanel>
         )
       }

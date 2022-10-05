@@ -34,7 +34,7 @@ export const getPlaylists = async (useCache = true): Promise<Playlist[]> => {
         set allPlaylists to every playlist
         repeat with aPlaylist in allPlaylists
           tell aPlaylist to set output to output & ${outputQuery} 
-          set output to output & "$breakkind=" & class of aPlaylist & "\n" 
+          set output to output & "$break" & "kind=" & class of aPlaylist & "\n" 
         end repeat
       end tell
       return output

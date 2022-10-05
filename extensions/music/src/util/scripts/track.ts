@@ -63,30 +63,42 @@ export const getAllTracks = async (useCache = true): Promise<Track[]> => {
   return tracks;
 };
 
-export const play = (track: Track) =>
-  tellMusic(
-    `play (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")`
-  );
+export const play = (track: Track) => {
+  const name = track.name.replaceAll(`"`, `\\"`);
+  const album = track.album.replaceAll(`"`, `\\"`);
+  const artist = track.artist.replaceAll(`"`, `\\"`);
+  return tellMusic(`play (every track whose name is "${name}" and album is "${album}" and artist is "${artist}")`);
+};
 
-export const revealTrack = (track: Track) =>
-  runScript(`tell application "Music" 
-    reveal (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")
+export const revealTrack = (track: Track) => {
+  const name = track.name.replaceAll(`"`, `\\"`);
+  const album = track.album.replaceAll(`"`, `\\"`);
+  const artist = track.artist.replaceAll(`"`, `\\"`);
+  return runScript(`tell application "Music" 
+    reveal (every track whose name is "${name}" and album is "${album}" and artist is "${artist}")
     activate
   end tell`);
+};
 
-export const playOnRepeat = (track: Track) =>
-  runScript(`
+export const playOnRepeat = (track: Track) => {
+  const name = track.name.replaceAll(`"`, `\\"`);
+  const album = track.album.replaceAll(`"`, `\\"`);
+  const artist = track.artist.replaceAll(`"`, `\\"`);
+  return runScript(`
   tell application "System Events"
     set activeApp to name of first application process whose frontmost is true
   end tell
   tell application "Music" 
     set song repeat to one
-    reveal (every track whose name is "${track.name}" and album is "${track.album}" and artist is "${track.artist}")
+    reveal (every track whose name is "${name}" and album is "${album}" and artist is "${artist}")
     activate
     tell application "System Events" to key code 36
   end tell
-  tell application activeApp to activate
+  if activeApp is not "Electron" then
+    tell application activeApp to activate
+	end if
   `);
+};
 
 export const getTrackArtwork = async (track: Track): Promise<string> => {
   return (await getAlbumArtwork(track.albumArtist, track.album)) || "../assets/no-track.png";
