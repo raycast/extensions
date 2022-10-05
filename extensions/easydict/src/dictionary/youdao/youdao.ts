@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-04 10:01
+ * @lastEditTime: 2022-09-11 17:45
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -18,7 +18,7 @@ import { requestCostTime } from "../../axiosConfig";
 import { userAgent, YoudaoErrorCode } from "../../consts";
 import { KeyStore } from "../../preferences";
 import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
-import { getTypeErrorInfo } from "../../utils";
+import { getTypeErrorInfo, md5 } from "../../utils";
 import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
@@ -97,9 +97,6 @@ export function requestYoudaoApiDictionaryTranslate(
           return;
         }
 
-        // use Youdao dictionary check if query text is a word.
-        queryWordInfo.isWord = youdaoResult.isWord;
-
         const youdaoTypeResult: QueryTypeResult = {
           type: type,
           result: youdaoFormatResult,
@@ -140,7 +137,7 @@ export function requestYoudaoWebDictionary(
   const type = queryType ?? DicionaryType.Youdao;
 
   // * Note: "fanyi" only works when responese dicts has only one item ["meta"]
-  const dicts = [["web_trans", "ec", "ce", "baike"]];
+  const dicts = [["web_trans", "ec", "ce", "baike", "wikipedia_digest"]];
 
   // English --> Chinese
   // ["web_trans","video_sents", "simple", "phrs",  "syno", "collins", "word_video",  "discriminate", "ec", "ee", "blng_sents_part", "individual", "collins_primary", "rel_word", "auth_sents_part", "media_sents_part", "expand_ec", "etym", "special","baike", "meta", "senior", "webster","oxford", "oxfordAdvance", "oxfordAdvanceHtml"]
@@ -166,10 +163,10 @@ export function requestYoudaoWebDictionary(
   };
 
   const queryString = qs.stringify(params);
-  console.log(`---> youdao web dict queryString: ${queryString}`);
+  // console.log(`---> youdao web dict queryString: ${queryString}`);
 
   const dictUrl = `https://dict.youdao.com/jsonapi?${queryString}`;
-  console.log(`dictUrl: ${dictUrl}`);
+  // console.log(`dictUrl: ${dictUrl}`);
 
   return new Promise((resolve, reject) => {
     axios
@@ -194,9 +191,6 @@ export function requestYoudaoWebDictionary(
           };
           return resolve(youdaoTypeResult);
         }
-
-        // use Youdao dictionary check if query text is a word.
-        queryWordInfo.isWord = youdaoFormatResult.queryWordInfo.isWord;
 
         const youdaoTypeResult: QueryTypeResult = {
           type: type,
@@ -253,9 +247,9 @@ export function requestYoudaoWebTranslate(
 
   const timestamp = new Date().getTime();
   const lts = timestamp.toString(); // 1661435375537
-  const salt = timestamp.toString() + Math.round(Math.random() * 10); // 16614353755371
-  const bv = CryptoJS.MD5(userAgent).toString();
-  const sign = CryptoJS.MD5("fanyideskweb" + word + salt + "Ygy_4c=r#e#4EX^NUGUc5").toString();
+  const salt = lts + Math.round(Math.random() * 10); // 16614353755371
+  const bv = md5(userAgent);
+  const sign = md5("fanyideskweb" + word + salt + "Ygy_4c=r#e#4EX^NUGUc5");
 
   const url = `${youdaoTranslatURL}/translate_o?smartresult=dict&smartresult=rule`;
   const data = {
@@ -285,7 +279,7 @@ export function requestYoudaoWebTranslate(
     axios
       .post(url, querystring.stringify(data), { headers })
       .then((response) => {
-        // console.log(`---> youdao web translate res: ${util.inspect(response.data, { depth: null })}`);
+        console.log(`---> youdao web translate res: ${util.inspect(response.data, { depth: null })}`);
         const youdaoWebResult = response.data as YoudaoWebTranslateResult;
         if (youdaoWebResult.errorCode === 0) {
           const translations = youdaoWebResult.translateResult.map((items) => items.map((item) => item.tgt).join(" "));
@@ -298,9 +292,10 @@ export function requestYoudaoWebTranslate(
           };
           resolve(youdaoTypeResult);
         } else {
+          console.error(`---> youdao web translate error: ${util.inspect(youdaoWebResult, { depth: null })}`);
           const errorInfo: RequestErrorInfo = {
             type: type,
-            code: youdaoWebResult.errorCode.toString(),
+            code: youdaoWebResult.errorCode?.toString(),
             message: "",
           };
           reject(errorInfo);
@@ -312,7 +307,7 @@ export function requestYoudaoWebTranslate(
           return reject(undefined);
         }
 
-        console.log(`---> youdao translate error: ${error}`);
+        console.log(`---> youdao web translate error: ${JSON.stringify(error, null, 2)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });

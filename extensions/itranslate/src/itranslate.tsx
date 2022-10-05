@@ -17,7 +17,7 @@ import {
   saveHistory,
   translateWithRefineLang,
 } from "./itranslate.shared";
-import { TranslateError } from "./TranslateError";
+import { TranslateError, TranslateNotSupport } from "./TranslateError";
 import { TranslateHistory } from "./TranslateHistory";
 import { TranslateResult } from "./TranslateResult";
 
@@ -123,7 +123,7 @@ export default function Command() {
         if (!hasLoading) {
           updateLoadingState(false);
           if (preferences.enableHistory) {
-            const history: TransHistory = {
+            const history: ITransHistory = {
               time: new Date().getTime(),
               from: transResultsNew[0].from.langId,
               to: transResultsNew[0].to.langId,
@@ -200,6 +200,8 @@ export default function Command() {
           {transResultsState.map((transRes) => {
             if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
               return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
+            } else if (transRes.code === TransAPIErrCode.NotSupport) {
+              return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
             } else {
               return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
             }

@@ -1,4 +1,5 @@
 import { Icon, Color } from "@raycast/api";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 
 export const Colors = [Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue, Color.Purple];
 
@@ -10,9 +11,9 @@ export const Icons = {
   ExternalUrl: Icon.Link,
   File: Icon.Document,
   Home: Icon.House,
-  HomePage: "../assets/home-page.png",
-  InvalidAPIKey: "../assets/invalid-api-key.png",
-  InvalidDomain: "../assets/invalid-domain.png",
+  HomePage: "../assets/home-page.svg",
+  InvalidAPIKey: "../assets/invalid-api-key.svg",
+  InvalidDomain: "../assets/invalid-domain.svg",
   Modules: Icon.BulletPoints,
   Page: "../assets/page.png",
   Passcode: Icon.LockUnlocked,
@@ -88,4 +89,15 @@ export const formatModuleItemTitle = (title: string) => {
 
 export const formatModuleItemPasscode = (passcode: string) => {
   return passcode.match(/Passcode: \S{9,10}/g)?.[0].substring(10);
+};
+
+export const getFormattedDate = (date: string) => {
+  return new Date(date).toString().split(" ").slice(0, 4).join(" ");
+};
+
+export const convertHTMLToMD = (html: string) => {
+  if (html) {
+    html = NodeHtmlMarkdown.translate(html);
+  }
+  return html;
 };

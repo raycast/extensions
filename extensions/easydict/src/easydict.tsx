@@ -186,7 +186,7 @@ export default function () {
                 <List.Item
                   key={item.key}
                   icon={{
-                    value: getListItemIcon(item.displayType),
+                    value: getListItemIcon(item),
                     tooltip: item.tooltip || "",
                   }}
                   title={item.title}
