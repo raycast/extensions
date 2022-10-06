@@ -14,8 +14,20 @@ export default () => {
         <ActionPanel>
           <Action.SubmitForm
             title="Run"
-            onSubmit={(values) => {
-              push(<RunCommand args={values.args} redisURL={redisURL} />);
+            onSubmit={(values: { args: string }) => {
+              const args = values.args
+                .split("\n")
+                .map((arg) => arg.trim())
+                .filter((arg) => arg.length > 0);
+              if (args.length === 0) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Empty command",
+                });
+                return;
+              }
+
+              push(<RunCommand args={args} redisURL={redisURL} />);
             }}
           />
         </ActionPanel>
@@ -56,32 +68,18 @@ const generateRedisURL = () => {
   return url;
 };
 
-const RunCommand = (props: { redisURL: string; args: string }) => {
+const RunCommand = (props: { redisURL: string; args: string[] }) => {
   const [result, setResult] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-  const [args, setArgs] = useState<string>("");
 
-  const run = useCallback(
-    async (text: string) => {
+  useEffect(() => {
+    (async () => {
       const client = createClient({ url: props.redisURL });
-      await client.connect();
-
       try {
         setLoading(true);
+        await client.connect();
 
-        const args = text
-          .split("\n")
-          .map((arg) => arg.trim())
-          .filter((arg) => arg.length > 0);
-        if (args.length === 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Empty command",
-          });
-          return;
-        }
-        setArgs(args.join(" "));
-        const res = await client.sendCommand(args);
+        const res = await client.sendCommand(props.args);
         setResult(res?.toString() ?? "");
       } catch (err) {
         showToast({
@@ -91,19 +89,17 @@ const RunCommand = (props: { redisURL: string; args: string }) => {
         });
       } finally {
         setLoading(false);
-        client.disconnect();
+        if (client.isReady) {
+          client.disconnect();
+        }
       }
-    },
-    [setResult, setLoading]
-  );
-
-  useEffect(() => {
-    (async () => {
-      await run(props.args);
     })();
   }, []);
 
   return (
-    <Detail isLoading={loading} markdown={"Command:\n```\n" + args + "\n```\n" + "Result:\n```\n" + result + "\n```"} />
+    <Detail
+      isLoading={loading}
+      markdown={"Command:\n```\n" + props.args.join(" ") + "\n```\n" + "Result:\n```\n" + result + "\n```"}
+    />
   );
 };
