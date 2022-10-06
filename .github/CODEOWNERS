@@ -453,6 +453,7 @@
 /extensions/rebrandly                                @grikomsn
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
+/extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
 /extensions/refresh-wifi                             @natterstefan
 /extensions/regex-tester                             @allenan
