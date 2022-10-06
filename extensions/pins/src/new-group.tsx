@@ -41,7 +41,10 @@ const NewGroupForm = () => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={(values) => createNewGroup(values.nameField, values.iconField)} />
+          <Action.SubmitForm
+            icon={Icon.ChevronRight}
+            onSubmit={(values) => createNewGroup(values.nameField, values.iconField)}
+          />
         </ActionPanel>
       }
     >

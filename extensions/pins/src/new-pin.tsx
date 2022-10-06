@@ -55,6 +55,7 @@ const NewPinForm = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.ChevronRight}
             onSubmit={(values) => createNewPin(values.nameField, values.urlField, values.iconField, values.groupField)}
           />
         </ActionPanel>

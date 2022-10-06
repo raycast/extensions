@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, popToRoot, Icon } from "@raycast/api";
 import { setStorage, getStorage } from "./utils";
 import { StorageKey } from "./constants";
 import { Pin, Group } from "./types";
@@ -108,6 +108,7 @@ const ImportDataForm = () => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.ChevronRight}
             onSubmit={(values) => {
               const data = JSON.parse(values.jsonStringField);
               Promise.resolve(importData(data, values.importMethodField));

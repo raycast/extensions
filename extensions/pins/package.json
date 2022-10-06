@@ -5,6 +5,9 @@
   "description": "Create pins for paths and URLs and display them in the menu bar",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"

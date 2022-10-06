@@ -71,6 +71,7 @@ const EditGroupView = (props: { group: Group; setGroups: (groups: Group[]) => vo
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.ChevronRight}
             onSubmit={(values) => modifyGroup(group, values.nameField, values.iconField, pop, setGroups)}
           />
         </ActionPanel>
@@ -145,37 +146,36 @@ export default function Command() {
   const iconList = Object.keys(Icon);
   iconList.unshift("None");
 
-  if (groups) {
-    return (
-      <List navigationTitle="View Pin Groups" searchBarPlaceholder="Search groups...">
-        {(groups as Group[]).map((group) => (
-          <List.Item
-            title={group.name}
-            key={group.id}
-            icon={group.icon in iconMap ? iconMap[group.icon] : ""}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Edit"
-                  onAction={() =>
-                    push(<EditGroupView group={group} setGroups={setGroups as (groups: Group[]) => void} />)
-                  }
-                />
-                <Action
-                  title="Delete Group"
-                  onAction={() => {
-                    deleteGroup(group, setGroups as (groups: Group[]) => void);
-                    clearSearchBar();
-                  }}
-                  style={Action.Style.Destructive}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    );
-  }
-
-  return <List isLoading={true} />;
+  return (
+    <List isLoading={groups === undefined} searchBarPlaceholder="Search groups...">
+      <List.EmptyView title="No Groups Found" icon="no-view.png" />
+      {((groups as Group[]) || []).map((group) => (
+        <List.Item
+          title={group.name}
+          key={group.id}
+          icon={group.icon in iconMap ? iconMap[group.icon] : ""}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Edit"
+                icon={Icon.Pencil}
+                onAction={() =>
+                  push(<EditGroupView group={group} setGroups={setGroups as (groups: Group[]) => void} />)
+                }
+              />
+              <Action
+                title="Delete Group"
+                icon={Icon.Trash}
+                onAction={() => {
+                  deleteGroup(group, setGroups as (groups: Group[]) => void);
+                  clearSearchBar();
+                }}
+                style={Action.Style.Destructive}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
 }
