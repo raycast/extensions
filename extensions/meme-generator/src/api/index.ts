@@ -80,18 +80,11 @@ interface GenerateMemeResult {
 
 export async function generateMeme({ id, boxes }: GenerateMemeInput): Promise<GenerateMemeResult> {
   const preferences = getPreferenceValues<PreferenceValues>();
-
   try {
     const url = new URL("https://api.imgflip.com/caption_image");
     url.searchParams.set("template_id", id);
-    url.searchParams.set(
-      "username",
-      preferences["username"].length ? preferences["username"] : DEFAULT_IMGFLIP_USERNAME
-    );
-    url.searchParams.set(
-      "password",
-      preferences["password"].length ? preferences["password"] : DEFAULT_IMGFLIP_PASSWORD
-    );
+    url.searchParams.set("username", preferences.username || DEFAULT_IMGFLIP_USERNAME);
+    url.searchParams.set("password", preferences.password || DEFAULT_IMGFLIP_PASSWORD);
 
     boxes.forEach(({ text }, index) => {
       url.searchParams.set(`boxes[${index}][text]`, text);
@@ -113,7 +106,7 @@ export async function generateMeme({ id, boxes }: GenerateMemeInput): Promise<Ge
       success: true,
       url: data.data.url,
     };
-  } catch {
+  } catch (err) {
     throw {
       success: false,
       message: "An unexpected network error occurred.",
