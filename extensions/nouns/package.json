@@ -31,7 +31,27 @@
       "name": "nouns-menu",
       "title": "Nouns in Menu Bar",
       "description": "Display pinned Nouns in the Menu Bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "iconShape",
+          "title": "Icon Shape",
+          "description": "Choose the shape of the icon",
+          "required": false,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Circle",
+              "value": "circle"
+            },
+            {
+              "title": "Rounded Square",
+              "value": "rounded"
+            }
+          ],
+          "default": "circle"
+        }
+      ]
     }
   ],
   "dependencies": {
