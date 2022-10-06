@@ -106,7 +106,7 @@ export async function generateMeme({ id, boxes }: GenerateMemeInput): Promise<Ge
       success: true,
       url: data.data.url,
     };
-  } catch (err) {
+  } catch {
     throw {
       success: false,
       message: "An unexpected network error occurred.",
