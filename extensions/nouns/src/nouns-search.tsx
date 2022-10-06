@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { Data, NounStats, TraitCategories, traits } from "./traits";
+import { getNounsFromStorage, Noun, removeNounFromStorage, setNounToStorage } from "./storage";
 
 const traitCategories: Record<TraitCategories, string> = {
   all: "All",
@@ -21,6 +22,14 @@ export default function Command() {
 
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
   const [category, setCategory] = useCachedState<TraitCategories>("category", "all");
+  const [pinnedNouns, setPinnedNouns] = useCachedState<Noun[]>("pinned-nouns", []);
+
+  useEffect(() => {
+    (async () => {
+      const pinnedNounsStorage = await getNounsFromStorage();
+      setPinnedNouns(pinnedNounsStorage);
+    })();
+  }, []);
 
   useEffect(() => {
     setSearchTerm("");
@@ -79,31 +88,50 @@ export default function Command() {
     nounData = result || [];
   }
 
-  const children = nounData.map((noun) => (
-    <Grid.Item
-      key={noun.noun_id}
-      actions={
-        <ActionPanel>
-          <Action.Push icon={Icon.Sidebar} title="View Noun Detail" target={<NounDetail {...noun} />} />
-          <Action.CopyToClipboard title="Copy Noun ID" content={noun.noun_id} />
-          <Action.OpenInBrowser
-            title="Open on OpenSea"
-            url={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun.noun_id}`}
-          />
-          <Action.OpenInBrowser title="Open Noun PNG" url={`https://noun.pics/${noun.noun_id}`} />
-          <Action.OpenInBrowser title="Open Noun SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
-        </ActionPanel>
-      }
-      title={isAll ? `Noun #${noun.noun_id} — ${getAllTraitLabels(noun)}` : traitCategories[category]}
-      subtitle={
-        isAll
-          ? undefined
-          : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
-      }
-      keywords={isAll ? getAllTraitLabels(noun) : []}
-      content={`https://noun.pics/${noun.noun_id}`}
-    />
-  ));
+  const children = nounData.map((noun) => {
+    const nounId = String(noun.noun_id);
+    const isPinned = pinnedNouns.some((n) => n.id === nounId);
+    return (
+      <Grid.Item
+        key={noun.noun_id}
+        actions={
+          <ActionPanel>
+            <Action.Push icon={Icon.Sidebar} title="View Noun Detail" target={<NounDetail {...noun} />} />
+            <Action.CopyToClipboard title="Copy Noun ID" content={noun.noun_id} />
+            <Action
+              title={isPinned ? "Remove from Menu Bar" : "Add to Menu Bar"}
+              icon={isPinned ? Icon.Minus : Icon.Plus}
+              onAction={async () => {
+                let updatedNouns;
+                if (isPinned) {
+                  updatedNouns = await removeNounFromStorage(nounId);
+                  showToast({ style: Toast.Style.Success, title: `Noun #${nounId} added to the Menu Bar!` });
+                } else {
+                  updatedNouns = await setNounToStorage(nounId);
+                  showToast({ style: Toast.Style.Success, title: `Noun #${nounId} removed to the Menu Bar!` });
+                }
+                setPinnedNouns(updatedNouns);
+              }}
+            />
+            <Action.OpenInBrowser
+              title="Open on OpenSea"
+              url={`https://opensea.io/assets/ethereum/0x9c8ff314c9bc7f6e59a9d9225fb22946427edc03/${noun.noun_id}`}
+            />
+            <Action.OpenInBrowser title="Open Noun PNG" url={`https://noun.pics/${noun.noun_id}`} />
+            <Action.OpenInBrowser title="Open Noun SVG" url={`https://noun.pics/${noun.noun_id}.svg`} />
+          </ActionPanel>
+        }
+        title={isAll ? `Noun #${noun.noun_id} — ${getAllTraitLabels(noun)}` : traitCategories[category]}
+        subtitle={
+          isAll
+            ? undefined
+            : traits[category].filter((trait) => trait.id === noun[category])[0]?.label || `#${noun.noun_id}`
+        }
+        keywords={isAll ? getAllTraitLabels(noun) : []}
+        content={`https://noun.pics/${noun.noun_id}`}
+      />
+    );
+  });
 
   return (
     <Grid
