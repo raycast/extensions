@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast } from "@raycast/api";
 import _ from "lodash";
-import { play, startPlaySimilar } from "../spotify/client";
+import { addTrackToQueue, play, startPlaySimilar } from "../spotify/client";
 import { msToHMS, trackTitle } from "../utils";
 
 export default function TrackListItem(props: {
@@ -41,6 +41,20 @@ export default function TrackListItem(props: {
               onAction={() => {
                 startPlaySimilar({ seed_tracks: track.id });
               }}
+            />
+          )}
+          {spotifyInstalled && track.uri && (
+            <Action
+              title="Add To Queue"
+              icon={Icon.Plus}
+              onAction={() => {
+                addTrackToQueue(track.uri).then((response) => {
+                  if (!response.error) {
+                    showToast({ title: "Added song to queue", message: title });
+                  }
+                });
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "q" }}
             />
           )}
           <Action.OpenInBrowser
