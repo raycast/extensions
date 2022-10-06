@@ -178,63 +178,64 @@ export default function Command() {
   return (
     <List isLoading={pins === undefined} searchBarPlaceholder="Search pins...">
       <List.EmptyView title="No Pins Found" icon="no-view.png" />
-      {((pins as Pin[]) || []).map((pin, index) => (
-        <List.Item
-          title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
-          subtitle={pin.group != "None" ? pin.group : ""}
-          key={pin.id}
-          icon={
-            pin.icon in iconMap
-              ? iconMap[pin.icon]
-              : pin.icon == "None"
-              ? ""
-              : pin.url.startsWith("/")
-              ? { fileIcon: pin.url }
-              : getFavicon(pin.url)
-          }
-          actions={
-            <ActionPanel>
-              <Action title="Open" icon={Icon.ChevronRight} onAction={() => open(pin.url)} />
-              <Action
-                title="Edit"
-                icon={Icon.Pencil}
-                onAction={() => push(<EditPinView pin={pin} setPins={setPins as (pins: Pin[]) => void} />)}
-              />
-
-              {index > 0 ? (
+      {pins &&
+        (pins as Pin[]).map((pin, index) => (
+          <List.Item
+            title={pin.name || (pin.url.length > 20 ? pin.url.substring(0, 19) + "..." : pin.url)}
+            subtitle={pin.group != "None" ? pin.group : ""}
+            key={pin.id}
+            icon={
+              pin.icon in iconMap
+                ? iconMap[pin.icon]
+                : pin.icon == "None"
+                ? ""
+                : pin.url.startsWith("/")
+                ? { fileIcon: pin.url }
+                : getFavicon(pin.url)
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Open" icon={Icon.ChevronRight} onAction={() => open(pin.url)} />
                 <Action
-                  title="Move Up"
-                  icon={Icon.ArrowUp}
+                  title="Edit"
+                  icon={Icon.Pencil}
+                  onAction={() => push(<EditPinView pin={pin} setPins={setPins as (pins: Pin[]) => void} />)}
+                />
+
+                {index > 0 ? (
+                  <Action
+                    title="Move Up"
+                    icon={Icon.ArrowUp}
+                    onAction={() => {
+                      movePinUp(index, setPins as (pins: Pin[]) => void);
+                      clearSearchBar();
+                    }}
+                  />
+                ) : null}
+                {index < pins.length - 1 ? (
+                  <Action
+                    title="Move Down"
+                    icon={Icon.ArrowDown}
+                    onAction={() => {
+                      movePinDown(index, setPins as (pins: Pin[]) => void);
+                      clearSearchBar();
+                    }}
+                  />
+                ) : null}
+
+                <Action
+                  title="Delete Pin"
+                  icon={Icon.Trash}
                   onAction={() => {
-                    movePinUp(index, setPins as (pins: Pin[]) => void);
+                    deletePin(pin, setPins as (pins: Pin[]) => void);
                     clearSearchBar();
                   }}
+                  style={Action.Style.Destructive}
                 />
-              ) : null}
-              {index < pins.length - 1 ? (
-                <Action
-                  title="Move Down"
-                  icon={Icon.ArrowDown}
-                  onAction={() => {
-                    movePinDown(index, setPins as (pins: Pin[]) => void);
-                    clearSearchBar();
-                  }}
-                />
-              ) : null}
-
-              <Action
-                title="Delete Pin"
-                icon={Icon.Trash}
-                onAction={() => {
-                  deletePin(pin, setPins as (pins: Pin[]) => void);
-                  clearSearchBar();
-                }}
-                style={Action.Style.Destructive}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }
