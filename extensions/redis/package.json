@@ -23,46 +23,46 @@
       "title": "Run Command",
       "subtitle": "Redis",
       "description": "Run Redis Command",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "host",
-      "type": "textfield",
-      "required": false,
-      "title": "Host",
-      "description": "Redis Host",
-      "default": "localhost"
-    },
-    {
-      "name": "port",
-      "type": "textfield",
-      "required": false,
-      "title": "Port",
-      "description": "Redis Port",
-      "default": "6379"
-    },
-    {
-      "name": "database",
-      "type": "textfield",
-      "required": false,
-      "title": "Database",
-      "description": "Redis Database"
-    },
-    {
-      "name": "username",
-      "type": "textfield",
-      "required": false,
-      "title": "Username",
-      "description": "Redis Username"
-    },
-    {
-      "name": "password",
-      "type": "textfield",
-      "required": false,
-      "title": "Password",
-      "description": "Redis Password"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "host",
+          "type": "textfield",
+          "required": false,
+          "title": "Host",
+          "description": "Redis Host",
+          "default": "localhost"
+        },
+        {
+          "name": "port",
+          "type": "textfield",
+          "required": false,
+          "title": "Port",
+          "description": "Redis Port",
+          "default": "6379"
+        },
+        {
+          "name": "database",
+          "type": "textfield",
+          "required": false,
+          "title": "Database",
+          "description": "Redis Database"
+        },
+        {
+          "name": "username",
+          "type": "textfield",
+          "required": false,
+          "title": "Username",
+          "description": "Redis Username"
+        },
+        {
+          "name": "password",
+          "type": "textfield",
+          "required": false,
+          "title": "Password",
+          "description": "Redis Password"
+        }
+      ]
     }
   ],
   "dependencies": {
