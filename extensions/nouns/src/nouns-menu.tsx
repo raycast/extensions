@@ -8,11 +8,11 @@ const iconShapes = {
 };
 
 export default function Command() {
-  const { enableMenuBar, iconShape } = getPreferenceValues();
+  const { iconShape } = getPreferenceValues();
   const [pinnedNouns, setPinnedNouns] = useCachedState<Noun[]>("pinned-nouns", []);
   const activeNoun = pinnedNouns.filter((noun) => noun.active)[0];
 
-  return enableMenuBar ? (
+  return (
     <MenuBarExtra
       isLoading={false}
       icon={{
@@ -43,5 +43,5 @@ export default function Command() {
         );
       })}
     </MenuBarExtra>
-  ) : null;
+  );
 }
