@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  getPreferenceValues,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+} from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "redis";
 
@@ -14,6 +24,7 @@ export default () => {
         <ActionPanel>
           <Action.SubmitForm
             title="Run"
+            icon={Icon.Cloud}
             onSubmit={(values: { args: string }) => {
               const args = values.args
                 .split("\n")
