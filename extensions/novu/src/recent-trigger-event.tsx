@@ -4,10 +4,10 @@ import { IFormData } from "./interfaces/interfaces";
 import { triggerEvent } from "./services/api";
 
 export default function RecentTriggerEvent() {
-  const { history: recentTriggers } = useTriggerHistory();
+  const { history: recentTriggers, isLoading } = useTriggerHistory();
 
   return (
-    <List isShowingDetail>
+    <List isShowingDetail isLoading={isLoading}>
       {recentTriggers.map((trigger, key) => (
         <TriggerItem key={key} triggerPayload={trigger} />
       ))}
