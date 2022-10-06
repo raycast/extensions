@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "express-vpn",
+  "title": "ExpressVPN",
+  "description": "Shows ExpressVPN connection status and lets you connect and disconnect to/from VPN locations.",
+  "icon": "express-vpn-icon.png",
+  "author": "@Kimcha",
+  "categories": [
+    "Applications",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect",
+      "description": "Shows express VPN connection status and lets you connect to VPN locations.",
+      "mode": "view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "description": "Disconnects ExpressVPN.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.1",
+    "extract-zip": "^2.0.1",
+    "lodash": "^4.17.21",
+    "node-downloader-helper": "^2.1.4",
+    "sha256-file": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.186",
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@types/sha256-file": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
