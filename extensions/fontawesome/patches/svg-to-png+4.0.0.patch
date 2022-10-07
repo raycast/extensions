@@ -1,0 +1,57 @@
+diff --git a/node_modules/svg-to-png/lib/phantomscript.js b/node_modules/svg-to-png/lib/phantomscript.js
+index 005a51c..6ba11e0 100644
+--- a/node_modules/svg-to-png/lib/phantomscript.js
++++ b/node_modules/svg-to-png/lib/phantomscript.js
+@@ -47,12 +47,14 @@ phantom args sent from grunticon.js:
+ 		inputFiles: JSON.parse(system.args[1]),
+ 		dest: system.args[2],
+ 		defaultWidth: system.args[3],
+-		defaultHeight: system.args[4]
++		defaultHeight: system.args[4],
++		color: system.args[5]
+ 	} : {
+ 		inputFiles: JSON.parse(phantom.args[0]),
+ 		dest: phantom.args[1],
+ 		defaultWidth: phantom.args[2],
+-		defaultHeight: phantom.args[3]
++		defaultHeight: phantom.args[3],
++		color: phantom.args[4]
+ 	};
+ 
+ 	if( !options.dest.match( fs.separator + '$' ) ){
+diff --git a/node_modules/svg-to-png/lib/processor.js b/node_modules/svg-to-png/lib/processor.js
+index a9fcde0..ab2a82f 100644
+--- a/node_modules/svg-to-png/lib/processor.js
++++ b/node_modules/svg-to-png/lib/processor.js
+@@ -69,6 +69,7 @@
+ 			page.open( gFile.uri, function( status ){
+ 				if( status === "success" ){
+ 					// create tmp file
++					page.content = page.content.replace(/\<path/g, '<path fill="' + o.color  + '"')
+ 					page.render( o.dest + pngName );
+ 					var pngimgstring = page.renderBase64( "png" );
+ 					resolve( pngimgstring );
+diff --git a/node_modules/svg-to-png/lib/svg-to-png.js b/node_modules/svg-to-png/lib/svg-to-png.js
+index b58e4c1..24504c2 100644
+--- a/node_modules/svg-to-png/lib/svg-to-png.js
++++ b/node_modules/svg-to-png/lib/svg-to-png.js
+@@ -36,7 +36,8 @@
+ 					JSON.stringify(files),
+ 					outputDir,
+ 					opts.defaultWidth,
+-					opts.defaultHeight
++					opts.defaultHeight,
++					opts.color
+ 				],
+ 
+ 				function(err, stdout, stderr){
+@@ -70,7 +71,8 @@
+ 					JSON.stringify(files),
+ 					tempDir,
+ 					opts.defaultWidth,
+-					opts.defaultHeight
++					opts.defaultHeight,
++					opts.color
+ 				],
+ 
+ 				function(err, stdout, stderr){
