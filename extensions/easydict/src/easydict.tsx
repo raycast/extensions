@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:10
+ * @lastEditTime: 2022-10-02 15:52
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { getSelectedText, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { configAxiosProxy } from "./axiosConfig";
+import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
 import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
@@ -18,6 +18,8 @@ import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
+
+console.log(`enter easydict.tsx`);
 
 const dataManager = new DataManager();
 
@@ -87,11 +89,32 @@ export default function () {
    * Do something setup when the extension is activated. Only run once.
    */
   function setup() {
-    if (myPreferences.enableAutomaticQuerySelectedText) {
-      tryQuerySelecedtText();
-    }
+    console.log(`setup when extension is activated.`);
+    const startTime = Date.now();
 
-    configAxiosProxy();
+    // In this case, must wait for the proxy to be configured before request.
+    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
+      Promise.all([getSelectedText(), configAxiosProxy()])
+        .then(([selectedText]) => {
+          console.log(`after config proxy, getSelectedText: ${selectedText}`);
+          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+          updateInputTextAndQueryText(trimTextLength(selectedText), false);
+        })
+        .catch((error) => {
+          console.error(`set up, config proxy error: ${error}`);
+          querySelecedtText().then(() => {
+            console.log(`after query selected text`);
+            delayGetSystemProxy();
+          });
+        });
+    } else if (myPreferences.enableAutomaticQuerySelectedText) {
+      querySelecedtText().then(() => {
+        console.log(`after query selected text`);
+        delayGetSystemProxy();
+      });
+    } else if (myPreferences.enableSystemProxy) {
+      configAxiosProxy();
+    }
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
@@ -101,14 +124,20 @@ export default function () {
   /**
    * Try to detect the selected text, if detect success, then query the selected text.
    */
-  function tryQuerySelecedtText() {
-    getSelectedText()
-      .then((selectedText) => {
-        selectedText = trimTextLength(selectedText);
-        console.log(`getSelectedText: ${selectedText}`); // cost about 20 ms
-        updateInputTextAndQueryText(selectedText, false);
-      })
-      .catch((e) => e);
+  function querySelecedtText(): Promise<void> {
+    return new Promise((resolve) => {
+      getSelectedText()
+        .then((selectedText) => {
+          selectedText = trimTextLength(selectedText);
+          console.warn(`getSelectedText: ${selectedText}`); // cost about 20 ms
+          updateInputTextAndQueryText(selectedText, false);
+          resolve();
+        })
+        .catch((e) => {
+          console.log(`getSelectedText error: ${e}`);
+          resolve();
+        });
+    });
   }
 
   /**
@@ -118,20 +147,20 @@ export default function () {
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
     console.log(
-      `selected language: ${selectedLanguageItem.youdaoId}, current target language: ${userSelectedTargetLanguageItem.youdaoId}`
+      `selected language: ${selectedLanguageItem.youdaoLangCode}, current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`
     );
-    if (selectedLanguageItem.youdaoId === userSelectedTargetLanguageItem.youdaoId) {
+    if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
 
-    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoId}`);
+    console.log(`updateSelectedTargetLanguageItem: ${selectedLanguageItem.youdaoLangCode}`);
     setAutoSelectedTargetLanguageItem(selectedLanguageItem);
     setUserSelectedTargetLanguageItem(selectedLanguageItem);
 
     const queryWordInfo: QueryWordInfo = {
       word: searchText,
-      fromLanguage: currentFromLanguageItem.youdaoId,
-      toLanguage: selectedLanguageItem.youdaoId,
+      fromLanguage: currentFromLanguageItem.youdaoLangCode,
+      toLanguage: selectedLanguageItem.youdaoLangCode,
     };
 
     // Clean up previous query results immediately before new query.
@@ -159,7 +188,7 @@ export default function () {
     // Only different input text, then clear old results before new input text query.
     if (trimText !== searchText) {
       dataManager.clearQueryResult();
-      const toLanguage = userSelectedTargetLanguageItem.youdaoId;
+      const toLanguage = userSelectedTargetLanguageItem.youdaoLangCode;
       dataManager.delayQueryText(trimText, toLanguage, isDelay);
     }
   }
@@ -186,7 +215,7 @@ export default function () {
                 <List.Item
                   key={item.key}
                   icon={{
-                    value: getListItemIcon(item.displayType),
+                    value: getListItemIcon(item),
                     tooltip: item.tooltip || "",
                   }}
                   title={item.title}

@@ -4,9 +4,10 @@
 - [x] Add color icon for hue param in sidebar
 - [x] Remove some effects
 - [x] Add checks for lights compatible with multicolor
-- [ ] Clean up the interfaces
+- [x] Clean up the interfaces
 - [ ] Add prefrences for config
 - [ ] Add timeout to api request
-- [ ] Improve ReadMe
+- [x] Improve ReadMe
 - [ ] Add description to effect
 - [ ] Migrate to openapi
+- [ ] use OAuth

@@ -39,6 +39,7 @@ export function useProjectFiles() {
         if ((error as Response)?.status >= 400) {
           setState((oldState) => ({
             ...oldState,
+            projectFiles: [],
             isLoading: false,
             hasError: true,
           }));

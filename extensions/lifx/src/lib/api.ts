@@ -1,6 +1,7 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { Api, Lights } from "./interfaces";
+const keyCache = new Cache();
 
 export async function FetchLights(config: AxiosRequestConfig) {
   try {
@@ -142,6 +143,16 @@ export async function SetEffect(
 export async function checkApiKey() {
   const prefernces = getPreferenceValues();
   try {
+    if (keyCache.has("token")) {
+      const result = JSON.parse(keyCache.get("token") || "false");
+      if (result.isValid === true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      console.info("Token not cached");
+    }
     const result = await axios.get("https://api.lifx.com/v1/color", {
       headers: {
         Authorization: `Bearer ${prefernces.lifx_token}`,
@@ -150,6 +161,7 @@ export async function checkApiKey() {
     if (result.status === 401) {
       throw new Error("Invalid API Key");
     } else {
+      keyCache.set("token", JSON.stringify({ isValid: true }));
       return true;
     }
   } catch (err) {
@@ -157,6 +169,7 @@ export async function checkApiKey() {
       if (err.response?.status === 401) {
         return false;
       } else {
+        keyCache.set("token", JSON.stringify({ isValid: true }));
         return true;
       }
     }
@@ -164,7 +177,7 @@ export async function checkApiKey() {
   }
 }
 
-function handleCommonError(err: any) {
+function handleCommonError(err: unknown) {
   if (err instanceof AxiosError) {
     console.info(err.response?.data.error);
     throw new Error(err.response?.data.error || "Unknown error");

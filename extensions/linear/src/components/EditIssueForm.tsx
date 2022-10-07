@@ -18,7 +18,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
 import { getCycleOptions } from "../helpers/cycles";
-import { projectStatusText } from "../helpers/projects";
+import { getProjectIcon, projectStatusText } from "../helpers/projects";
 import { getTeamIcon } from "../helpers/teams";
 
 import useIssueDetail from "../hooks/useIssueDetail";
@@ -313,10 +313,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
                 title={`${project.name} (${projectStatusText[project.state]})`}
                 value={project.id}
                 key={project.id}
-                icon={{
-                  source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-                  tintColor: project.color,
-                }}
+                icon={getProjectIcon(project)}
               />
             );
           })}

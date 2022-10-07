@@ -45,7 +45,7 @@
           "type": "dropdown",
           "description": "Set the primary action in Search Pinned Folders command.",
           "required": false,
-          "title": "Primary action",
+          "title": "Primary Action",
           "default": "Copy",
           "data": [
             {
@@ -134,20 +134,16 @@
           "type": "dropdown",
           "description": "Set the primary action in Search Pinned Folders command.",
           "required": true,
-          "title": "Primary action",
-          "default": "Open",
+          "title": "Primary Action (Left Click)",
+          "default": "Copy",
           "data": [
-            {
-              "title": "Open",
-              "value": "Open"
-            },
             {
               "title": "Copy",
               "value": "Copy"
             },
             {
-              "title": "Show",
-              "value": "Show"
+              "title": "Open",
+              "value": "Open"
             }
           ]
         }
@@ -163,7 +159,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
+    "@raycast/api": "^1.40.1",
     "file-url": "^4.0.0",
     "fs-extra": "^10.1.0",
     "run-applescript": "^6.0.0"

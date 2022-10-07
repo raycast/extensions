@@ -1,6 +1,6 @@
-export function getTitleUrl(title: string): string | null {
+export function getTitleUrl(title: string | undefined): string | null {
   const urlRegex = /(https?:\/\/[^\s]+)/g
-  const urlMatch = urlRegex.exec(title)
+  const urlMatch = urlRegex.exec(title || 'Untitled')
   if (urlMatch) {
     return urlMatch[0]
   }

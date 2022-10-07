@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Confirmation Alerts] - 2022-10-05
+
+- Added confirmation alerts to "Clear Derived Data", "Clear Swift Package Manager Cache" and "Delete Unsupported Simulators" commands.
+
 ## [Search Swift Package Index] - 2022-09-02
 
 - Added "Search Swift Package Index" command to search the Swift Package Index and easily add a Swift Package to a Xcode Project.
