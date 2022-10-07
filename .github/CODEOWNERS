@@ -76,7 +76,7 @@
 /extensions/capture-fullpage-of-website              @Coun1er
 /extensions/capture-raycast-metadata                 @koinzhang
 /extensions/chakra-ui-docs                           @pgvr @Ansub
-/extensions/change-case                              @es183923
+/extensions/change-case                              @es183923 @pernielsentikaer
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/cheatsheets                              @Destiner
 /extensions/chess-com                                @joshfarrant
@@ -86,6 +86,7 @@
 /extensions/chuck-norris-facts                       @jorgecortesdev
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/citation-generator                       @AbhinavPalacharla
+/extensions/claris-snippets                          @eluce2
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
 /extensions/clear-clipboard                          @d3caf
@@ -325,7 +326,7 @@
 /extensions/liveblocks                               @andreaselia
 /extensions/lobsters                                 @dev99problems
 /extensions/logseq                                   @futantan @futantan
-/extensions/lorem-ipsum                              @AntonNiklasson
+/extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek
 /extensions/lucide-icons                             @gBasil
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
@@ -337,6 +338,7 @@
 /extensions/masscode-assistant                       @antonreshetov
 /extensions/material-icons                           @creasty
 /extensions/maven-central-repository                 @koinzhang
+/extensions/meme-generator                           @timoransky
 /extensions/mempool                                  @dillionverma
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/mlb-scores                               @jso8910
@@ -367,6 +369,7 @@
 /extensions/nos-news                                 @Joran-Dob
 /extensions/noteplan-3                               @shakedlokits @lukerandall
 /extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
+/extensions/nouns                                    @peduarte
 /extensions/nsis-reference                           @idleberg
 /extensions/nuget                                    @hexpl0it
 /extensions/numi                                     @AndresMorelos @pernielsentikaer
@@ -405,6 +408,7 @@
 /extensions/pexels                                   @koinzhang
 /extensions/php-docs                                 @comes @pernielsentikaer
 /extensions/phpmon                                   @nicoverbruggen
+/extensions/pianoman                                 @juhamust
 /extensions/pie-for-pihole                           @GLaDO8
 /extensions/pika                                     @rishimohan
 /extensions/pinboard                                 @fe9lix
@@ -448,8 +452,10 @@
 /extensions/readwise                                 @natterstefan
 /extensions/readymetrics                             @chadbutz
 /extensions/rebrandly                                @grikomsn
+/extensions/recents                                  @GastroGeek
 /extensions/recurly                                  @kudrykv
 /extensions/reddit-search                            @ewlcheng
+/extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
 /extensions/refresh-wifi                             @natterstefan
 /extensions/regex-tester                             @allenan

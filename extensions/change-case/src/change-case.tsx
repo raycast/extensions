@@ -35,7 +35,8 @@ type CaseType =
   | "Swap Case"
   | "Title Case"
   | "Upper Case"
-  | "Upper First";
+  | "Upper First"
+  | "Sponge Case";
 
 async function runShellScript(command: string) {
   const { stdout } = await execa(command, {
@@ -98,6 +99,7 @@ export default function changeChase() {
     { type: "Title Case", func: changeCase.titleCase },
     { type: "Upper Case", func: changeCase.upperCase },
     { type: "Upper First", func: changeCase.upperCaseFirst },
+    { type: "Sponge Case", func: changeCase.spongeCase },
   ];
 
   const [clipboard, setClipboard] = useState<string>("");
