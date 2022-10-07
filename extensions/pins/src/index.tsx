@@ -53,7 +53,7 @@ export default function Command() {
   const { pinGroups, isLoading } = usePinGroups();
   const [groups, setGroups] = useGroups();
   const preferences = getPreferenceValues<Preferences>();
-  const pinIcon = { source: "pin-icon.svg" };
+  const pinIcon = { source: { light: "pin-icon.svg", dark: "pin-icon@dark.svg" } };
 
   useEffect(() => {
     // Set initial values for the next pin/group IDs
