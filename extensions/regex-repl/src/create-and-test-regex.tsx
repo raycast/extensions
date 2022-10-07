@@ -43,10 +43,18 @@ export default function Command() {
   }, [pattern, flags, text]);
 
   const handleSubmit = (values: Values) => {
-    if (error) return;
-    if (!pattern) return showToast({ title: "Empty field", message: "Missing expression", style: Toast.Style.Failure });
-    if (!text) return showToast({ title: "Empty field", message: "Missing text", style: Toast.Style.Failure });
-    push(<Details {...values} />);
+    let submitAction: (() => void) | undefined;
+    if (error) {
+      submitAction = undefined;
+    } else if (!pattern) {
+      submitAction = () =>
+        showToast({ title: "Empty field", message: "Missing expression", style: Toast.Style.Failure });
+    } else if (!text) {
+      submitAction = () => showToast({ title: "Empty field", message: "Missing text", style: Toast.Style.Failure });
+    } else {
+      submitAction = () => push(<Details {...values} />);
+    }
+    submitAction?.();
   };
 
   return (
