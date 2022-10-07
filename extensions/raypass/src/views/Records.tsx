@@ -16,7 +16,7 @@ export const Records: FC = () => {
   const mdCodeTags = {
     document: "`Document`",
     Record: "`Password Record`",
-    code: "```ts\ninterface Record {\n  name: string;\n  username?: string;\n  email?: string;\n  password: string;\n  url?: string;\n  notes?: string;\n}\n```",
+    code: "```ts\ninterface Record {\n  name: string;\n  username?: string;\n  email?: string;\n  password: string;\n  secret?: string;\n  url?: string;\n  notes?: string;\n}\n```",
   };
 
   const md = `
@@ -67,6 +67,7 @@ export const Records: FC = () => {
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Records" />
                       <List.Item.Detail.Metadata.Label title="Copy Password" text="⌘P or Enter" />
+                      <List.Item.Detail.Metadata.Label title="Copy TOTP" text="⌘T or ⌘Enter" />
                       <List.Item.Detail.Metadata.Label title="Copy Username" text="⌘U" />
                       <List.Item.Detail.Metadata.Label title="Copy Email" text="⌘E" />
                       <List.Item.Detail.Metadata.Label title="Copy Record (JSON)" text="⌘J" />

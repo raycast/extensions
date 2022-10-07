@@ -18,6 +18,7 @@ export const NewRecordForm: FC<Props> = ({ revalidateRecords }) => {
     name: undefined,
     email: undefined,
     password: undefined,
+    secret: undefined,
     username: undefined,
     url: undefined,
     notes: undefined,
@@ -94,6 +95,15 @@ export const NewRecordForm: FC<Props> = ({ revalidateRecords }) => {
         error={errors.password}
         placeholder="My secret password!"
         onChange={(newValue) => handleValidation("password", newValue)}
+        onBlur={(e) => handleValidation(e.target.id, e.target.value)}
+      />
+      <Form.PasswordField
+        id="secret"
+        title="Secret"
+        info="Add an optional secret to generate TOTP codes"
+        error={errors.secret}
+        placeholder="My TOTP secret!"
+        onChange={(newValue) => handleValidation("secret", newValue)}
         onBlur={(e) => handleValidation(e.target.id, e.target.value)}
       />
       <Form.TextField

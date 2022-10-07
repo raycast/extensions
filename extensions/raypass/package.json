@@ -5,6 +5,9 @@
   "description": "Manage passwords through Raycast that just you and your laptop know.",
   "icon": "raypass-icon.png",
   "author": "paul-bokelman",
+  "contributors": [
+    "GastroGeek"
+  ],
   "categories": [
     "Security",
     "System",
@@ -30,12 +33,14 @@
     "@raycast/api": "^1.40.1",
     "@raycast/utils": "^1.4.8",
     "nanoid": "^4.0.0",
+    "totp-generator": "^0.0.13",
     "yup": "^0.32.11",
     "zustand": "^4.1.1"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
     "@types/react": "18.0.9",
+    "@types/totp-generator": "^0.0.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

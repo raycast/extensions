@@ -12,6 +12,7 @@ export * from "./record/NewRecord.action";
 export * from "./record/DeleteRecord.action";
 export * from "./record/EditRecord.action";
 export * from "./record/CopyRecordPassword.action";
+export * from "./record/CopyRecordTOTP.action";
 export * from "./record/CopyRecordUsername.action";
 export * from "./record/CopyRecordEmail.action";
 export * from "./record/OpenRecordURL.action";

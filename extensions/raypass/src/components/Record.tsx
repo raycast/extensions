@@ -3,6 +3,7 @@ import type { Record as RecordType, RevalidateRecords } from "../types";
 import { ActionPanel, Icon, List, Image } from "@raycast/api";
 import {
   CopyRecordPassword,
+  CopyRecordTOTP,
   CopyRecordUsername,
   CopyRecordEmail,
   CopyRecordJSON,
@@ -16,11 +17,13 @@ import {
   ShowDocument,
 } from "../actions";
 
+import totp from "totp-generator";
+
 interface Props extends RecordType {
   revalidateRecords: RevalidateRecords;
 }
 
-export const Record: FC<Props> = ({ id, name, url, username, password, email, notes, revalidateRecords }) => {
+export const Record: FC<Props> = ({ id, name, url, username, password, secret, email, notes, revalidateRecords }) => {
   const md = `
   ${url ? `## [${name}](${url})` : `## ${name}`}
   ${notes ? notes : ""}
@@ -43,6 +46,7 @@ export const Record: FC<Props> = ({ id, name, url, username, password, email, no
               <List.Item.Detail.Metadata.Label title={`Record ${id}`} />
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Password" text={password} />
+              {secret && <List.Item.Detail.Metadata.Label title="TOTP" text={totp(secret)} />}
               {username && <List.Item.Detail.Metadata.Label title="Username" text={username} />}
               {email && <List.Item.Detail.Metadata.Label title="Email" text={email} />}
               {url && <List.Item.Detail.Metadata.Label title="URL" text={url} />}
@@ -54,13 +58,14 @@ export const Record: FC<Props> = ({ id, name, url, username, password, email, no
         <ActionPanel>
           <ActionPanel.Section title={`Record ${id}`}>
             <CopyRecordPassword password={password} />
+            {secret && <CopyRecordTOTP secret={secret} />}
             {username && <CopyRecordUsername username={username} />}
             {email && <CopyRecordEmail email={email} />}
             {url && <OpenRecordURL url={url} />}
-            <CopyRecordJSON record={{ id, name, url, username, password, email, notes }} />
+            <CopyRecordJSON record={{ id, name, url, username, password, secret, email, notes }} />
             <EditRecordAction
               id={id}
-              record={{ name, username, password, email, notes, url }}
+              record={{ name, username, password, secret, email, notes, url }}
               revalidateRecords={revalidateRecords}
             />
             <DeleteRecordAction id={id} revalidateRecords={revalidateRecords} />

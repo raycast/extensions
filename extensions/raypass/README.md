@@ -3,7 +3,8 @@
    <h1 align="center">RayPass</h1>
    <sub>Manage passwords through <a href="https://raycast.com/">Raycast</a> that just you and your laptop know.</sub>
  </p>
-
+ 
+ https://user-images.githubusercontent.com/72945168/193752304-b2292fd1-c663-4ae6-baf5-3ef3f8c45998.mov
 
 ## Features
 
@@ -37,6 +38,7 @@ export interface Record {
   username?: string;
   email?: string;
   password: string;
+  secret: string;
   url?: string;
   notes?: string;
 }

@@ -68,6 +68,7 @@ export const EncryptedPasswordForm: FC<Props> = ({ documentName }) => {
         id="password"
         title="Password"
         placeholder="My secret password"
+        autoFocus
         error={errors.password}
         onChange={(newValue) => handleValidation("password", newValue)}
         onBlur={(e) => handleValidation(e.target.id, e.target.value)}
