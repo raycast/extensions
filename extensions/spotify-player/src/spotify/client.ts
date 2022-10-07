@@ -672,3 +672,18 @@ export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi
 
   return response;
 }
+
+export async function addTrackToQueue(trackUri: string): Promise<Response<SpotifyApi.AddToQueueResponse>> {
+  await authorizeIfNeeded();
+  try {
+    const response = (await spotifyApi
+      .addToQueue(trackUri)
+      .then((response: { body: any }) => response.body as SpotifyApi.AddToQueueResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.AddToQueueResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
+}

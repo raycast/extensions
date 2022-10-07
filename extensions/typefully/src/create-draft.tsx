@@ -1,8 +1,7 @@
 import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import got from "got";
-
-import Preferences from "./interfaces/preferences";
+import { Preferences } from "./interfaces/preferences";
 
 type Values = {
   content: string;
