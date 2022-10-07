@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useRetoolDocSearch } from "./utils";
 
 const BASE_URL = "https://docs.retool.com/";
+const ICON = "icon@dark.png";
 
 export default function Command() {
-  const [searchQuery, setSearchQuery] = useState<string>();
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const { isLoading, searchResults, error } = useRetoolDocSearch(searchQuery);
 
   if (error) {
@@ -23,9 +24,10 @@ export default function Command() {
         <List.Item
           key={result.objectID}
           title={result.title}
+          icon={ICON}
           subtitle={
             // remove all html tags from the description
-            result._snippetResult.excerpt.value.replace(/<[^>]*>/g, "") || result.title
+            result._snippetResult?.excerpt?.value?.replace(/<[^>]*>/g, "") || result?.title
           }
           actions={
             <ActionPanel title={`${result.title} - ${result.subdomain}`}>

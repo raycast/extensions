@@ -19,12 +19,13 @@ export const useRetoolDocSearch = (query: string | undefined) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const search = async (query: string | undefined) => {
+  const search = async (query = "") => {
     setIsLoading(true);
-    if (!query) {
-      setIsLoading(false);
-      return;
-    }
+    // removing this so we get some initial results
+    // if (!query) {
+    //   setIsLoading(false);
+    //   return;
+    // }
     return await algoliaIndex
       .search(query)
       .then((res) => {
