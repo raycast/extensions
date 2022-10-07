@@ -1,5 +1,6 @@
 import cp from "child_process";
-import os from "node:os";
+
+import { environment } from "@raycast/api";
 
 const copyToClipboard = (text: string) => {
   const proc = cp.spawn("pbcopy");
@@ -15,7 +16,7 @@ const isEncrypted = (name: string) => {
 };
 
 const getDocLocation = (name: string) => {
-  return `${os.homedir()}/.raypass/${name}`;
+  return `${environment.supportPath}/documents/${name}`;
 };
 
 export const misc = {

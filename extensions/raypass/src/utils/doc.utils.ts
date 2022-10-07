@@ -1,11 +1,11 @@
 import type { LocalDocumentReferences, NewDocumentData, Record } from "../types";
 import fs from "node:fs";
-import os from "node:os";
+import { environment } from "@raycast/api";
 import { local, c, misc } from ".";
 import { documentStore } from "../context";
 
-const root = os.homedir();
-const baseDir = `${root}/.raypass`;
+const root = environment.supportPath;
+const baseDir = `${root}/documents`;
 
 const documentDir = ({ name, encrypted }: { name: string; encrypted: boolean }) => {
   const fileName = encrypted ? `${name}.enc` : `${name}.json`;

@@ -2,8 +2,7 @@ import type { FC } from "react";
 import type { ValidationErrors } from "../utils";
 import type { NewDocumentData, RevalidateDocuments } from "../types";
 import { useState } from "react";
-import os from "node:os";
-import { Form, Action, ActionPanel, useNavigation, Icon, showToast, Toast } from "@raycast/api";
+import { Form, Action, ActionPanel, useNavigation, Icon, Toast, environment, showToast } from "@raycast/api";
 import { docs, validation } from "../utils";
 import {
   GeneratePasswordAction,
@@ -79,7 +78,7 @@ export const NewDocumentForm: FC<Props> = ({ revalidateDocuments }) => {
     >
       <Form.Description
         title="New Document"
-        text={`Create a new document to locally store your passwords. Files are stored in ${os.homedir()}/.raypass. You can encrypt your document with a password (will be required when accessing doc). If you choose not to encrypt your document, it will be stored in plain text.`}
+        text={`Create a new document to locally store your passwords. Files are stored in ${environment.supportPath}/data. You can encrypt your document with a password (will be required when accessing doc). If you choose not to encrypt your document, it will be stored in plain text.`}
       />
       <Form.TextField
         id="name"
