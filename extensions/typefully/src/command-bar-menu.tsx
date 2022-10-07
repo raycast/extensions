@@ -12,14 +12,23 @@ interface ScheduledPostItemProps {
   draft: Draft;
 }
 
+const sortAscByDateFn = (draftA: Draft, draftB: Draft): number => {
+  return new Date(draftA.scheduled_date).getTime() - new Date(draftB.scheduled_date).getTime();
+};
+
 const ScheduledPostItem = (props: ScheduledPostItemProps) => {
-  const maxTitleLength = 24;
+  const MAX_TITLE_LENGTH = 24;
+
   const timeUntilPost = dayjs().to(dayjs(props.draft.scheduled_date));
+  const title =
+    props.draft.text_first_tweet.length > 0
+      ? props.draft.text_first_tweet.slice(0, MAX_TITLE_LENGTH - timeUntilPost.length)
+      : "";
 
   return (
     <MenuBarExtra.Item
       key={props.draft.id}
-      title={`${props.draft.text_first_tweet.slice(0, maxTitleLength - timeUntilPost.length)}... (${timeUntilPost})`}
+      title={`${title}... (${timeUntilPost})`}
       onAction={() => open(`https://typefully.com/?d=${props.draft.id}`)}
     />
   );
@@ -71,10 +80,18 @@ export default function Command() {
 
       {/* Scheduled Posts */}
       <MenuBarExtra.Item title="Upcoming Scheduled Posts" />
-      {data && data.length == 0 ? (
+      {data === undefined || data.length === 0 ? (
         <MenuBarExtra.Item title="No posts found. 😔" />
       ) : (
-        (data || []).map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
+        data
+          .sort(sortAscByDateFn)
+          .slice(0, 5)
+          .map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
+      )}
+
+      {/* Optional extra, if there are > 5 posts */}
+      {data !== undefined && data.length > 5 && (
+        <MenuBarExtra.Item title="... more posts later" onAction={() => open(`https://typefully.com/`)} />
       )}
     </MenuBarExtra>
   );
