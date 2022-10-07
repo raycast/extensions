@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
+    "@raycast/api": "^1.40.1",
     "algoliasearch": "^4.14.2"
   },
   "devDependencies": {
