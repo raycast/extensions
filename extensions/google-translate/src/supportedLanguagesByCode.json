@@ -9,6 +9,7 @@
   "be": { "code": "be", "name": "Belarusian", "flag": "🇧🇾" },
   "bn": { "code": "bn", "name": "Bengali" },
   "bs": { "code": "bs", "name": "Bosnian", "flag": "🇧🇦" },
+  "pt-br": { "code": "pt-br", "name": "Brazilian Portuguese", "flag": "🇧🇷" },
   "bg": { "code": "bg", "name": "Bulgarian", "flag": "🇧🇬" },
   "ca": { "code": "ca", "name": "Catalan" },
   "ceb": { "code": "ceb", "name": "Cebuano" },

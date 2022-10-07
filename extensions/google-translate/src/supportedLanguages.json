@@ -9,6 +9,11 @@
   "Belarusian": { "code": "be", "name": "Belarusian", "flag": "🇧🇾" },
   "Bengali": { "code": "bn", "name": "Bengali" },
   "Bosnian": { "code": "bs", "name": "Bosnian", "flag": "🇧🇦" },
+  "Brazilian Portuguese": {
+    "code": "pt-br",
+    "name": "Brazilian Portuguese",
+    "flag": "🇧🇷"
+  },
   "Bulgarian": { "code": "bg", "name": "Bulgarian", "flag": "🇧🇬" },
   "Catalan": { "code": "ca", "name": "Catalan" },
   "Cebuano": { "code": "ceb", "name": "Cebuano" },
@@ -71,7 +76,11 @@
   "Maori": { "code": "mi", "name": "Maori", "flag": "🇳🇿" },
   "Marathi": { "code": "mr", "name": "Marathi" },
   "Mongolian": { "code": "mn", "name": "Mongolian", "flag": "🇲🇳" },
-  "Myanmar (Burmese)": { "code": "my", "name": "Myanmar (Burmese)", "flag": "🇲🇲" },
+  "Myanmar (Burmese)": {
+    "code": "my",
+    "name": "Myanmar (Burmese)",
+    "flag": "🇲🇲"
+  },
   "Nepali": { "code": "ne", "name": "Nepali", "flag": "🇳🇵" },
   "Norwegian": { "code": "no", "name": "Norwegian", "flag": "🇳🇴" },
   "Nyanja (Chichewa)": { "code": "ny", "name": "Nyanja (Chichewa)" },
