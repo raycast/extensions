@@ -16,7 +16,7 @@ export const useRetoolDocSearch = (query: string | undefined) => {
   }, [algoliaClient, INDEX]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>();
 
   const search = async (query = "") => {
