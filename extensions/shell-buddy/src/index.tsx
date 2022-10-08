@@ -10,6 +10,7 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { usePersistentState } from "raycast-toolkit";
+import { creditsUrl } from "./config";
 import { checkRemainingCredits, getKnownPrompts, convertPromptToCommand, addKnownPrompt, runInTerminal } from "./utils";
 import type { ShellBuddyArguments, CommandHistoryItem } from "./types";
 
@@ -103,7 +104,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
               onAction={() => convertPrompt(prompt)}
             />
           ) : (
-            <Action.OpenInBrowser title="Purchase more credits" url="https://jebraat.gumroad.com/l/shellbuddy" />
+            <Action.OpenInBrowser title="Purchase more credits" url={creditsUrl} />
           )}
           <Action
             title="Enter New License Key"
@@ -132,10 +133,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
                       onAction={() => convertPrompt(prompt)}
                     />
                   ) : (
-                    <Action.OpenInBrowser
-                      title="Purchase more credits"
-                      url="https://jebraat.gumroad.com/l/shellbuddy"
-                    />
+                    <Action.OpenInBrowser title="Purchase more credits" url={creditsUrl} />
                   )}
                 </ActionPanel.Section>
                 <ActionPanel.Section>

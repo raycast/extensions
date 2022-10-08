@@ -25,7 +25,7 @@ To prevent abuse and spam to the AI endpoint credits are needed to convert promp
 
 ### How it works
 
-The first time you open Shell Buddy you will be prompted to enter a license key. Each license key has a certain amounts
+The first time you open Shell Buddy you will be prompted to enter a license key. Each license key has a certain amount
 of credits attached to it. Credits work like this:
 
 - One prompt conversion costs one credit
@@ -39,7 +39,7 @@ of credits attached to it. Credits work like this:
 
 When your license runs out of credits the main Raycast action will open a link to purchase more credits.
 
-You can purchase more credits [here](https://jebraat.gumroad.com/l/shellbuddy).
+You can also purchase more credits [here](https://getshellbuddy.com/credits).
 
 Once you have purchased more credits, you can simply enter the new license key in the command preferences and are good
 to go.
