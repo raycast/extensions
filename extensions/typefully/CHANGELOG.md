@@ -1,5 +1,10 @@
 # Typefully Changelog
 
+## [Fix reported bugs and UX] - 2022-10-08
+
+- Changed draft textarea to clear upon submission
+- Fixed menu bar command bug calculating title length
+
 ## [Updated Menu Bar Command] - 2022-10-05
 
 - Added light and dark feather icons
