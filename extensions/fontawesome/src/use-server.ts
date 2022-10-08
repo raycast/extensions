@@ -3,6 +3,19 @@ import fp from 'find-free-port';
 import http from 'http';
 import fetch from 'node-fetch';
 
+/**
+ * This simple http server is used to serve the Font Awesome icons to the
+ * Raycast extension.
+ *
+ * We set this server up because:
+ *
+ * 1. The user might be in dark mode
+ * 2. In dark mode, the icons should be white
+ * 3. Font Awesome only serves them in black
+ *
+ * So this server proxies the requests to Font Awesome and if requested by the
+ * client, sets the SVGs fill color to white.
+ */
 export default function useServer() {
   const [port, setPort] = useState<number | null>(null);
 
