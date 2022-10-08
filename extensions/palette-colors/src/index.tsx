@@ -42,8 +42,12 @@ export default function Command() {
       inset={Grid.Inset.Large}
       isLoading={isLoading}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Emoji Category" storeValue={true} onChange={(newValue) => setType(newValue)}>
-          <Grid.Dropdown.Section title="Emoji Categories">
+        <Grid.Dropdown
+          tooltip="Select Color Scheme Variant"
+          storeValue={true}
+          onChange={(newValue) => setType(newValue)}
+        >
+          <Grid.Dropdown.Section title="Color Scheme Variants">
             <Grid.Dropdown.Item title="Mono" value="mono" />
             <Grid.Dropdown.Item title="Contrast" value="contrast" />
             <Grid.Dropdown.Item title="Tetrade" value="tetrade" />
