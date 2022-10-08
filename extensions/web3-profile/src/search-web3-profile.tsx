@@ -90,9 +90,10 @@ function ProfileDetail({ name }: { name: string }) {
     onSuccess: async (resolver) => {
       if (!resolver) return;
       const avatarText = await resolver.getText("avatar");
+
       // Ignore Avatars that use the Zora Contract
       // https://github.com/ensdomains/ens-avatar/issues/21
-      if (!avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")) {
+      if (avatarText && !avatarText.includes("0xabefbc9fd2f806065b4f3c237d4b59d9a97bcac7")) {
         setShouldFetchAvatar(true);
       }
     },

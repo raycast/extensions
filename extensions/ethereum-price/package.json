@@ -11,12 +11,12 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "hideIcon",
-      "description": "Hide icon from the menu bar",
+      "name": "compactMode",
+      "description": "Takes up less space. Hides icon, uses the Eth Symbol and truncates the price.",
       "type": "checkbox",
       "required": false,
-      "default": false,
-      "label": "Hide icon"
+      "default": true,
+      "label": "Compact mode"
     }
   ],
   "commands": [

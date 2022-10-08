@@ -4,8 +4,8 @@
 
 ### ✨ New
 
-- **Menu Bar Extras** can now be deactivated without disabling the menu bar command! To deactivate a menu bar command, run the `Disable Command` action from the command's Action Panel - or drag the menu bar extra out of the menu bar while holding down ⌘.
-- Commands with **Background Refresh** also now have a `Disable Command` action!
+- **Menu Bar Extras** can now be deactivated without disabling the menu bar command! To deactivate a menu bar command, run the `Deactivate Command` action from the command's Action Panel - or drag the menu bar extra out of the menu bar while holding down ⌘.
+- Commands with **Background Refresh** also now have a `Deactivate Command` action!
 - **Menu Bar Extras** now support both a primary and secondary action type (right click or control click).
 - **Dropdown**'s items can now specify `keywords` to match more search terms.
 - **Extension Diagnostics** command can now be used to help finding the cause behind any issues with extensions. It displays all `Loaded Commands`, commands with `Background Refresh` enabled and latest `Events` triggered.

@@ -28,9 +28,9 @@ export class Easydict {
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.4.0";
-  buildNumber = 13;
-  versionDate = "2022-09-29";
+  version = "2.4.1";
+  buildNumber = 14;
+  versionDate = "2022-10-02";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
   releaseMarkdown = releaseNote;
