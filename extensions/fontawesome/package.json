@@ -5,6 +5,9 @@
   "description": "Search Font Awesome icons",
   "icon": "command-icon.png",
   "author": "dutzi",
+  "contributors": [
+    "danielferguson"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
