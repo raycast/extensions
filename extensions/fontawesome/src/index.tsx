@@ -6,7 +6,7 @@ import { Icon, ApiResponse } from './types';
 
 const iconQuery = `
 query {
-  release(version: "6.2.0") {    
+  release(version: "6.2.0") {
     icons {
       id
       unicode
@@ -17,7 +17,7 @@ query {
             style
           }
       }
-    }    
+    }
   },
 }
 `;
