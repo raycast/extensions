@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Palette Colors",
-      "description": "Template for showing a static grid",
+      "description": "An utility to pick nice colors from a randomly generated palette",
       "mode": "view"
     }
   ],
