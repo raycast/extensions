@@ -1,67 +1,118 @@
-import { Action, ActionPanel, Grid, closeMainWindow, showHUD, Clipboard, environment } from '@raycast/api';
+import { Action, ActionPanel, Grid, showHUD, Clipboard } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import { capitalCase } from 'change-case';
-import icons from './icons.json';
-import { readFileSync } from 'fs';
+import { useFetch } from '@raycast/utils';
+import fetch from 'node-fetch';
+import { Icon, ApiResponse } from './types';
 
-function getFullFilename(folder: string, fullFilename: string, png: boolean) {
-  const containingFolder = png ? 'pngs' : `${environment.assetsPath}/svgs`;
-  const filename = fullFilename.slice(0, -3) + (png ? 'png' : 'svg');
-  return `${containingFolder}/${folder}/${filename}`;
+const iconQuery = `
+query {
+  release(version: "6.2.0") {    
+    icons {
+      id
+      unicode
+      label
+      unicode
+      familyStylesByLicense {
+          free {
+            style
+          }
+      }
+    }    
+  },
 }
+`;
+
+const getLibraryType = (icon: Icon): string => {
+  if (icon.familyStylesByLicense.free.length === 0) {
+    return 'solid';
+  }
+
+  if (icon.familyStylesByLicense.free[0].style === 'brands') {
+    return 'brands';
+  }
+
+  return 'solid';
+};
+
+const getSvgUrl = (icon: Icon): string => {
+  return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon)}/${icon.id}.svg`;
+};
 
 export default function Command() {
-  const [filter, setFilter] = useState('');
-  const [filteredList, filterList] = useState(icons);
+  const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
+    method: 'POST',
+    body: iconQuery,
+  });
+
+  const [icons, setIcons] = useState<Icon[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
-    const lcaseFilter = filter.toLowerCase();
-    filterList(
-      icons.map((group) => ({
-        folder: group.folder,
-        icons: group.icons.filter((icon) => icon.label.toLowerCase().includes(lcaseFilter)),
-      }))
-    );
-  }, [filter]);
+    // Once the icons have been fetched,
+    // set them to the icons array.
+    if (data !== undefined) {
+      setIcons(data.data.release.icons);
+    }
+  }, [data]);
 
-  async function copySVG(folder: string, filename: string) {
-    const svg = readFileSync(getFullFilename(folder, filename, false));
-    const svgWithCurrentColor = svg.toString().replace(/<path/g, '<path fill="currentColor"');
-    await Clipboard.copy(svgWithCurrentColor);
-    showHUD('SVG copied to clipboard!');
-    closeMainWindow();
-  }
+  useEffect(() => {
+    if (data === undefined || icons.length === 0) {
+      return;
+    }
+
+    const originalIconSet = data.data.release.icons;
+
+    // If the query is empty, reset the icons
+    if (searchQuery === '') {
+      setIcons(originalIconSet);
+      return;
+    }
+
+    // Filter icons based on the searchQuery
+    const filteredIcons = originalIconSet.filter((icon) =>
+      icon.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setIcons(filteredIcons);
+  }, [searchQuery]);
+
+  const copySvgToClipboard = async (icon: Icon) => {
+    // Fetch SVG from FontAwesome site
+    const response = await fetch(getSvgUrl(icon));
+    const svg = await response.text();
+
+    // Copy SVG to clipboard
+    await Clipboard.copy(svg);
+
+    // Notify the user
+    await showHUD('Copied SVG to clipboard!');
+  };
 
   return (
     <Grid
       itemSize={Grid.ItemSize.Small}
       inset={Grid.Inset.Large}
       enableFiltering={false}
-      onSearchTextChange={setFilter}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchQuery}
       navigationTitle="Search Font Awesome"
-      searchBarPlaceholder="Search Font Awesome icons"
+      searchBarPlaceholder="Search icons"
     >
-      {filteredList
-        .filter((group) => group.folder === 'regular')
-        .map((group) => (
-          <Grid.Section key={group.folder} title={capitalCase(group.folder)}>
-            {group.icons.map((icon) => (
-              <Grid.Item
-                key={icon.filename}
-                content={getFullFilename(group.folder, icon.filename, true)}
-                actions={
-                  <ActionPanel>
-                    <Action title="Copy SVG" onAction={() => copySVG(group.folder, icon.filename)} />
-                    <Action.OpenInBrowser
-                      title="Open In Browser"
-                      url={`https://fontawesome.com/icons/${icon.filename.slice(0, -4)}?s=solid&f=classic`}
-                    />
-                  </ActionPanel>
-                }
+      {icons.map((icon) => (
+        <Grid.Item
+          key={icon.id}
+          title={icon.label}
+          content={getSvgUrl(icon)}
+          actions={
+            <ActionPanel>
+              <Action title="Copy SVG" onAction={() => copySvgToClipboard(icon)} />
+              <Action.OpenInBrowser
+                title="Open In Browser"
+                url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}
               />
-            ))}
-          </Grid.Section>
-        ))}
+            </ActionPanel>
+          }
+        />
+      ))}
     </Grid>
   );
 }
