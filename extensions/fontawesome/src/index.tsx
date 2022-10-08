@@ -80,6 +80,8 @@ export default function Command() {
     const response = await fetch(getSvgUrl(icon));
     const svg = await response.text();
 
+    // Since v6, Font Awesome stopped setting the SVGs fill color to
+    // currentColor, this restores that behavior.
     const svgWithCurrentColor = svg.toString().replace(/<path/g, '<path fill="currentColor"');
 
     // Copy SVG to clipboard
