@@ -56,7 +56,7 @@ export default function Command() {
   }, [data]);
 
   useEffect(() => {
-    if (data === undefined || icons.length === 0) {
+    if (data === undefined || isLoading) {
       return;
     }
 
