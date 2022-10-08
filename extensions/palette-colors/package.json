@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Palette Colors",
-      "description": "An utility to pick nice colors from a randomly generated palette",
+      "description": "An extension to pick colors from a randomly generated palette",
       "mode": "view"
     }
   ],
