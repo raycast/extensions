@@ -29,7 +29,6 @@ const generateColors = (schemeType = "mono"): string[] => {
 };
 
 export default function Command() {
-  const [isLoading] = useState(false);
   const [type, setType] = useState("mono");
   const [colors, setColors] = useState(generateColors(type));
 
@@ -40,13 +39,8 @@ export default function Command() {
   return (
     <Grid
       inset={Grid.Inset.Large}
-      isLoading={isLoading}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select Color Scheme Variant"
-          storeValue={true}
-          onChange={(newValue) => setType(newValue)}
-        >
+        <Grid.Dropdown tooltip="Select Color Scheme Variant" storeValue onChange={(newValue) => setType(newValue)}>
           <Grid.Dropdown.Section title="Color Scheme Variants">
             <Grid.Dropdown.Item title="Mono" value="mono" />
             <Grid.Dropdown.Item title="Contrast" value="contrast" />
