@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Grid, showHUD, Clipboard } from '@raycast/api';
+import { Action, ActionPanel, Grid, showHUD, Clipboard, environment } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { useFetch } from '@raycast/utils';
 import fetch from 'node-fetch';
 import { Icon, ApiResponse } from './types';
+import useServer from './use-server';
 
 const iconQuery = `
 query {
@@ -34,11 +35,13 @@ const getLibraryType = (icon: Icon): string => {
   return 'solid';
 };
 
-const getSvgUrl = (icon: Icon): string => {
-  return `https://site-assets.fontawesome.com/releases/v6.2.0/svgs/${getLibraryType(icon)}/${icon.id}.svg`;
-};
-
 export default function Command() {
+  const port = useServer();
+
+  const getSvgUrl = (icon: Icon, isDark?: boolean): string => {
+    return `http://localhost:${port}/${getLibraryType(icon)}/${icon.id}.svg?dark=${isDark ? 'true' : 'false'}`;
+  };
+
   const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
     method: 'POST',
     body: iconQuery,
@@ -105,7 +108,7 @@ export default function Command() {
         <Grid.Item
           key={icon.id}
           title={icon.label}
-          content={getSvgUrl(icon)}
+          content={getSvgUrl(icon, environment.theme === 'dark')}
           actions={
             <ActionPanel>
               <Action title="Copy SVG" onAction={() => copySvgToClipboard(icon)} />
