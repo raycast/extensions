@@ -80,8 +80,10 @@ export default function Command() {
     const response = await fetch(getSvgUrl(icon));
     const svg = await response.text();
 
+    const svgWithCurrentColor = svg.toString().replace(/<path/g, '<path fill="currentColor"');
+
     // Copy SVG to clipboard
-    await Clipboard.copy(svg);
+    await Clipboard.copy(svgWithCurrentColor);
 
     // Notify the user
     await showHUD('Copied SVG to clipboard!');
