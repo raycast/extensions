@@ -1,5 +1,5 @@
 import { showHUD, showInFinder } from "@raycast/api";
-import { getDownloads  } from "./utils";
+import { getDownloads } from "./utils";
 
 export default async function main() {
   const downloads = getDownloads();
