@@ -24,9 +24,9 @@
       "mode": "no-view"
     },
     {
-      "name": "reveal-latest-download",
-      "title": "Reveal Latest Download",
-      "description": "Reveal the last downloaded file or folder in Finder",
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
       "mode": "no-view"
     }
   ],

@@ -1,7 +1,6 @@
 import { readdirSync, statSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { exec } from "child_process";
 
 export const downloadsDir = join(homedir(), "Downloads");
 
@@ -15,8 +14,4 @@ export function getDownloads() {
       return { file, path, lastModifiedAt };
     })
     .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
-}
-
-export function revealFile(path: string) {
-  exec(`open -R ${path}`);
 }
