@@ -84,7 +84,7 @@ export default function Command() {
       showHUD("Extract successfully 🎉");
       popToRoot();
     } catch (error) {
-      showHUD("Failed to extract...");
+      showHUD("❌ Failed to extract...");
     }
   }
 

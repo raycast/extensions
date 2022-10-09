@@ -89,7 +89,7 @@ export default function Command() {
       showHUD("Compress successfully 🎉");
       popToRoot();
     } catch (error) {
-      showHUD("Failed to compress...");
+      showHUD("❌ Failed to compress...");
     }
   }
 
