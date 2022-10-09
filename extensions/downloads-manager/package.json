@@ -33,9 +33,9 @@
       "mode": "no-view"
     },
     {
-      "name": "open-downloads",
-      "title": "Open Downloads Folder",
-      "description": "Opens the downloaded folder in Finder",
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
       "mode": "no-view"
     }
   ],
