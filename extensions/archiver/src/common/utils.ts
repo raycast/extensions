@@ -238,7 +238,7 @@ export function checkPwdOnExtract(file: string, format: ExtractFormat, password:
 
 export function processingAlert() {
   const options: Alert.Options = {
-    title: "Processing, please wait a minute",
+    title: "Processing, please wait a second",
     icon: { source: Icon.Repeat },
     primaryAction: {
       title: "OK",
