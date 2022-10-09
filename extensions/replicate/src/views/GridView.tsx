@@ -112,6 +112,11 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
               <ActionPanel>
                 <Action.Push icon={Icon.Sidebar} title="View" target={<Single prediction={prediction} />} />
                 <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
+                <Action.OpenInBrowser
+                  icon={Icon.Globe}
+                  title="Open on Replicate.com"
+                  url={`https://replicate.com/p/${id.split("-")[0]}`}
+                />
                 {input?.prompt && (
                   <Action.CopyToClipboard icon={Icon.Text} title="Copy Prompt" content={input.prompt?.trim()} />
                 )}

@@ -31,8 +31,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.1",
+    "@raycast/api": "^1.40.3",
+    "@raycast/utils": "^1.4.8",
     "is-image": "^3.1.0",
     "node-fetch": "^3.2.10",
     "run-applescript": "^6.0.0",
@@ -40,15 +40,15 @@
     "tempy": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~18.7.18",
-    "@types/react": "^18.0.20",
-    "@types/sql.js": "^1.4.3",
-    "@typescript-eslint/eslint-plugin": "^5.37.0",
-    "@typescript-eslint/parser": "^5.37.0",
-    "eslint": "^8.23.1",
+    "@types/node": "~18.8.3",
+    "@types/react": "^18.0.21",
+    "@types/sql.js": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "@typescript-eslint/parser": "^5.39.0",
+    "eslint": "^8.25.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.4"
   },
   "scripts": {
     "build": "ray build -e dist",
