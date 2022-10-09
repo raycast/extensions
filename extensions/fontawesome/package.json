@@ -21,6 +21,38 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "iconStyle",
+      "title": "Icon Style",
+      "description": "Which icon style to copy when running \"Copy SVG\"",
+      "default": "regular",
+      "required": false,
+      "data": [
+        {
+          "title": "Duotone",
+          "value": "duotone"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Solid",
+          "value": "solid"
+        },
+        {
+          "title": "Thin",
+          "value": "thin"
+        }
+      ],
+      "type": "dropdown"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.40.3",
     "@raycast/utils": "^1.4.8",

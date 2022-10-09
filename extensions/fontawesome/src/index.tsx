@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Grid, showHUD, Clipboard, environment } from '@raycast/api';
 import { useEffect, useState } from 'react';
+import { Action, ActionPanel, Clipboard, environment, getPreferenceValues, Grid, showHUD } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 import fetch from 'node-fetch';
-import { Icon, ApiResponse } from './types';
+import { ApiResponse, Icon, IconStyle, Preferences } from './types';
 import useServer from './use-server';
 
 const iconQuery = `
@@ -14,32 +14,47 @@ query {
       label
       unicode
       familyStylesByLicense {
-          free {
-            style
-          }
+        free {
+          style
+        }
       }
     }
   },
 }
 `;
 
-const getLibraryType = (icon: Icon): string => {
+const getLibraryType = (icon: Icon, iconStyle: IconStyle): string => {
   if (icon.familyStylesByLicense.free.length === 0) {
-    return 'solid';
+    return iconStyle;
   }
 
   if (icon.familyStylesByLicense.free[0].style === 'brands') {
     return 'brands';
   }
 
-  return 'solid';
+  return iconStyle;
 };
+
+function prettyPrintIconStyle(iconStyle: IconStyle) {
+  return {
+    brands: 'Brands',
+    duotone: 'Duotone',
+    light: 'Light',
+    regular: 'Regular',
+    'sharp-solid': 'Sharp Solid',
+    solid: 'Solid',
+    thin: 'Thin',
+  }[iconStyle];
+}
 
 export default function Command() {
   const port = useServer();
+  const { iconStyle } = getPreferenceValues<Preferences>();
 
-  const getSvgUrl = (icon: Icon, isDark?: boolean): string => {
-    return `http://localhost:${port}/${getLibraryType(icon)}/${icon.id}.svg?dark=${isDark ? 'true' : 'false'}`;
+  const getSvgUrl = (icon: Icon, iconStyle: IconStyle, isDark?: boolean): string => {
+    return `http://localhost:${port}/${getLibraryType(icon, iconStyle)}/${icon.id}.svg?dark=${
+      isDark ? 'true' : 'false'
+    }`;
   };
 
   const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
@@ -78,9 +93,9 @@ export default function Command() {
     setIcons(filteredIcons);
   }, [searchQuery]);
 
-  const copySvgToClipboard = async (icon: Icon) => {
+  const copySvgToClipboard = async (icon: Icon, iconStyle: IconStyle) => {
     // Fetch SVG from FontAwesome site
-    const response = await fetch(getSvgUrl(icon));
+    const response = await fetch(getSvgUrl(icon, iconStyle));
     const svg = await response.text();
 
     // Since v6, Font Awesome stopped setting the SVGs fill color to
@@ -108,10 +123,14 @@ export default function Command() {
         <Grid.Item
           key={icon.id}
           title={icon.label}
-          content={getSvgUrl(icon, environment.theme === 'dark')}
+          content={getSvgUrl(icon, 'regular', environment.theme === 'dark')}
           actions={
             <ActionPanel>
-              <Action title="Copy SVG" onAction={() => copySvgToClipboard(icon)} />
+              <Action
+                title={`Copy SVG (${prettyPrintIconStyle(iconStyle)})`}
+                icon="copy-clipboard-16"
+                onAction={() => copySvgToClipboard(icon, iconStyle)}
+              />
               <Action.OpenInBrowser
                 title="Open In Browser"
                 url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}

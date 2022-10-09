@@ -1,5 +1,7 @@
+export type IconStyle = 'brands' | 'duotone' | 'light' | 'regular' | 'sharp-solid' | 'solid' | 'thin';
+
 interface Style {
-  style: string;
+  style: IconStyle;
 }
 
 export interface Icon {
@@ -17,4 +19,8 @@ export interface ApiResponse {
       icons: Icon[];
     };
   };
+}
+
+export interface Preferences {
+  iconStyle: IconStyle;
 }
