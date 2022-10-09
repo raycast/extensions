@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import fetch, { RequestInit } from "node-fetch";
 import { ISensor, IStation, IData, IIndex, IStationResult } from "../types";
+import { useCachedPromise } from "@raycast/utils";
+import { showToast, Toast } from "@raycast/api";
 
 const URLS = {
   stations: "/station/findAll",
@@ -98,24 +100,25 @@ const getStationsData = async () => {
 };
 
 const useStations = (city = "") => {
-  const [stations, setStations] = useState<IStationResult[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      const res = await getStationsData();
-
-      setStations(res);
-      setLoading(false);
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      const response = await getStationsData();
+      return response;
+    },
+    [],
+    {
+      initialData: [],
+      keepPreviousData: true,
+      onError: async () => {
+        await showToast(Toast.Style.Failure, "Error", "Something went wrong.");
+      },
     }
-
-    fetchData();
-  }, []);
+  );
 
   if (city !== "") {
-    return { stations: stations.filter((station: IStationResult) => station.city.name === city), isLoading: loading };
+    return { stations: data?.filter((station: IStationResult) => station.city.name === city), isLoading: isLoading };
   }
 
-  return { stations, isLoading: loading };
+  return { stations: data, isLoading: isLoading };
 };
 export default useStations;

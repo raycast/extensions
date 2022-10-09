@@ -13,13 +13,15 @@ export default function Command() {
 
   const { stations, isLoading } = useStations(preferences.city);
   return (
-    <List navigationTitle={`Airsy - Stations from ${preferences.city}`} isLoading={isLoading} isShowingDetail>
-      {stations &&
-        stations.map((station: IStationResult) => {
-          return (
-            <List.Item key={station.id} title={station.stationName} detail={<StationDetails station={station} />} />
-          );
-        })}
+    <List isLoading={isLoading} isShowingDetail>
+      <List.Section title={`Stations from ${preferences.city}`} subtitle={stations?.length.toString()}>
+        {stations &&
+          stations.map((station: IStationResult) => {
+            return (
+              <List.Item key={station.id} title={station.stationName} detail={<StationDetails station={station} />} />
+            );
+          })}
+      </List.Section>
     </List>
   );
 }

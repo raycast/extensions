@@ -11,7 +11,7 @@ interface IProps {
 const StationAddress: FC<IProps> = ({ station }) => {
   const city = station.city.name;
 
-  const ad = station.city.addressName.split("/")[0];
+  const ad = station.city.addressName !== null ? station.city.addressName.split("/")[0] : "";
   const address = ad.replace(/ /g, "+");
   const link = `https://www.google.com/maps/place/${removeAccents(address)}+${removeAccents(city)}`;
 
@@ -19,7 +19,9 @@ const StationAddress: FC<IProps> = ({ station }) => {
     <>
       <List.Item.Detail.Metadata.Label title="Station address" />
       <List.Item.Detail.Metadata.Label title="City Name" text={station.city.name} />
-      <List.Item.Detail.Metadata.Label title="Address" text={station.city.addressName} />
+      {station.city.addressName !== null && (
+        <List.Item.Detail.Metadata.Label title="Address" text={station.city.addressName} />
+      )}
       <List.Item.Detail.Metadata.Link title={""} target={link} text={"Find in Google Maps"} />
       <List.Item.Detail.Metadata.Separator />
     </>
@@ -38,7 +40,6 @@ const StationDetails: FC<IProps> = ({ station }) => {
           <IndexDetails title="SO2" indexValue={station.index.so2} value={station.sensor.so2} />
           <IndexDetails title="NO2" indexValue={station.index.no2} value={station.sensor.no2} />
           <IndexDetails title="O3" indexValue={station.index.o3} value={station.sensor.o3} />
-          <IndexDetails title="C6H6" indexValue={station.index.c6h6} value={station.sensor.c6h6} />
         </List.Item.Detail.Metadata>
       }
     />

@@ -6,13 +6,15 @@ import { IStationResult } from "./types";
 export default function Command() {
   const { stations, isLoading } = useStations();
   return (
-    <List navigationTitle={`Airsy - AllStations`} isLoading={isLoading} isShowingDetail>
-      {stations &&
-        stations.map((station: IStationResult) => {
-          return (
-            <List.Item key={station.id} title={station.stationName} detail={<StationDetails station={station} />} />
-          );
-        })}
+    <List isLoading={isLoading} isShowingDetail>
+      <List.Section title={`All Stations`} subtitle={stations?.length.toString()}>
+        {stations &&
+          stations.map((station: IStationResult) => {
+            return (
+              <List.Item key={station.id} title={station.stationName} detail={<StationDetails station={station} />} />
+            );
+          })}
+      </List.Section>
     </List>
   );
 }
