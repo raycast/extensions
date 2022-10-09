@@ -22,6 +22,12 @@
       "title": "Open Latest Download",
       "description": "Opens the last downloaded file or folder",
       "mode": "no-view"
+    },
+    {
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
