@@ -1,8 +1,10 @@
 import { environment, showToast, Toast } from "@raycast/api";
-import { readdirSync, writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
+import { writeFileSync, readFileSync, rmSync, existsSync, mkdirSync, PathLike } from "fs";
 import { join } from "path";
 import { FMObjectsToXML } from "./FmClipTools";
 import { Location, Snippet, SnippetWithPath, ZSnippet } from "./types";
+import { getLocationPath } from "./use-locations";
+import readdirp from "readdirp";
 
 function ensureDirSync(path: PathLike) {
   if (!existsSync(path)) mkdirSync(path);
@@ -27,26 +29,45 @@ export async function getFromClipboard(): Promise<string | null> {
   return null;
 }
 
-export function loadAllSnippets(locations?: Location[]): SnippetWithPath[] {
+export async function loadAllSnippets(locations?: Location[]): Promise<SnippetWithPath[]> {
   const allSnippets: SnippetWithPath[] = [];
-  locations?.forEach((location) => {
-    allSnippets.push(...loadSnippets(location));
+  locations?.forEach(async (location) => {
+    allSnippets.push(...(await loadSnippets(location)));
   });
   // plus default location
-  allSnippets.push(...loadSnippets());
+  allSnippets.push(...(await loadSnippets()));
   return allSnippets;
 }
-export function loadSnippets(location?: Location): SnippetWithPath[] {
+export async function loadSnippets(location?: Location): Promise<SnippetWithPath[]> {
   const snippets: SnippetWithPath[] = [];
-  const path = location?.path ?? getDefaultPath();
+  const path = getLocationPath(location);
   if (!existsSync(path)) {
     // fail silently if folder doesn't exist
     console.error(`Snippets folder ${path} doesn't exist`);
     return [];
   }
-  const files = readdirSync(path);
+
+  // recursiveDir(path, (err, files) => {});
+
+  const files = await readdirp.promise(path, { fileFilter: ["*.json"], directoryFilter: ["!.git"] });
+
+  // files.on("data", (file) => {
+  //   const { fullPath } = file;
+  //   const data = readFileSync(fullPath, "utf8").toString();
+  //   try {
+  //     const snippet = ZSnippet.safeParse(JSON.parse(data));
+  //     if (snippet.success) {
+  //       snippets.push({ ...snippet.data, path: fullPath, locId: location?.id ?? "default" });
+  //     }
+  //   } catch {
+  //     return;
+  //   }
+  // });
+
+  // const files = readdirSync(path);
+  // console.log({ files });
   files.forEach((file) => {
-    const thePath = join(path, file);
+    const thePath = join(path, file.path);
     const data = readFileSync(thePath, "utf8").toString();
     try {
       const snippet = ZSnippet.safeParse(JSON.parse(data));

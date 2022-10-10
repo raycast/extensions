@@ -3,9 +3,12 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
+import { useState, useEffect } from "react";
 import type { Location } from "./utils/types";
 import { getDefaultPath, loadSnippets } from "./utils/snippets";
-import { useLocations } from "./utils/use-locations";
+import { getLocationPath, refreshGitLocation, useLocations } from "./utils/use-locations";
+
+type FormValues = Location & { locType: "local" | "git" };
 
 export default function Command() {
   const [locations, setLocations] = useLocations();
@@ -26,7 +29,7 @@ export default function Command() {
               primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
             })
           ) {
-            setLocations(locations.filter((l) => l.id !== id));
+            setLocations((locations) => locations.filter((l) => l.id !== id));
             if (onDelete) onDelete();
           }
         }}
@@ -35,13 +38,25 @@ export default function Command() {
   }
 
   function EditLocationForm({ location }: { location: Partial<Location> }) {
-    const { handleSubmit, itemProps } = useForm<Location>({
-      onSubmit: (data) => {
+    const { handleSubmit, itemProps, values, setValidationError } = useForm<FormValues>({
+      onSubmit: async (data) => {
         data.id = location.id ?? uuidv4();
+        data.git = Boolean(data.locType === "git");
+
+        if (data.git) {
+          try {
+            await refreshGitLocation(data);
+          } catch (e) {
+            console.error(e);
+            const msg = typeof e === "string" ? e : "Unknown error with git";
+            setValidationError("path", msg);
+            return;
+          }
+        }
 
         locations.findIndex((l) => l.id === data.id) === -1
-          ? setLocations([...locations, data])
-          : setLocations(locations.map((l) => (l.id === data.id ? data : l)));
+          ? setLocations((locations) => [...locations, data])
+          : setLocations((locations) => locations.map((l) => (l.id === data.id ? data : l)));
 
         pop();
       },
@@ -58,7 +73,17 @@ export default function Command() {
         }
       >
         <Form.TextField {...itemProps.name} title="Name" info="A friendly reference to this folder" />
-        <Form.TextField {...itemProps.path} title="Path" />
+        <Form.Dropdown {...(itemProps.locType as Form.ItemProps<string>)} title="Location Type">
+          <Form.Dropdown.Item value="local" title="My Computer" />
+          <Form.Dropdown.Item value="git" title="Git Repository" />
+        </Form.Dropdown>
+        <Form.TextField {...itemProps.path} title={values.locType === "local" ? "Path" : "Git URL"} />
+        {values.locType === "git" && (
+          <>
+            <Form.Description text="Any snippets found in this git repository will be available to you" />
+            <Form.Description text="The Git URL must be publically accessible or contain credentials in the URL." />
+          </>
+        )}
       </Form>
     );
   }
@@ -106,7 +131,7 @@ export default function Command() {
           title="My Computer"
           subtitle="default, cannot be changed"
           icon={Icon.StarCircle}
-          accessories={[countSnippets()]}
+          accessories={useCountSnippets()}
           actions={
             <ActionPanel>
               <RevealInFinderAction path={getDefaultPath()} />
@@ -121,7 +146,7 @@ export default function Command() {
               title={location.name}
               icon={Icon.Folder}
               subtitle={location.path}
-              accessories={[countSnippets(location)]}
+              accessories={useCountSnippets(location)}
               actions={
                 <ActionPanel>
                   <RevealInFinderAction path={location.path} />
@@ -154,13 +179,21 @@ export default function Command() {
   );
 }
 
-function countSnippets(location?: Location): List.Item.Accessory {
-  const path = location?.path ?? getDefaultPath();
+function useCountSnippets(location?: Location): List.Item.Accessory[] | null {
+  const [accessory, setAccessory] = useState<List.Item.Accessory[] | null>(null);
+  useEffect(() => {
+    countSnippets(location).then((item) => setAccessory([item]));
+  }, []);
+  return accessory;
+}
+
+async function countSnippets(location?: Location): Promise<List.Item.Accessory> {
+  const path = getLocationPath(location);
   const folderExists = existsSync(path);
   if (!folderExists) {
     return { icon: Icon.Warning, text: "Not Found" };
   }
 
-  const count = loadSnippets(location).length;
+  const count = (await loadSnippets(location)).length;
   return { text: `${count}`, icon: Icon.CheckCircle };
 }
