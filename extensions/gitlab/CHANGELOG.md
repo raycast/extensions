@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Update] - 2022-10-10
+
+- Add Open in Browser option in project navigation
+
 ## [Archive Indicator] - 2022-09-08
 
 - Add an archived status indicator.

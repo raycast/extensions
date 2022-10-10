@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycast/api";
 import { Project } from "../gitlabapi";
 import { ReactNode } from "react";
 import { PipelineList } from "./pipelines";
@@ -25,7 +25,12 @@ export function ProjectNavMenuItem(props: {
       icon={props.icon}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Menu" shortcut={props.shortcut} target={props.target} />
+          <Action.Push
+            title="Open Menu"
+            shortcut={props.shortcut}
+            icon={{ source: Icon.Receipt, tintColor: Color.PrimaryText }}
+            target={props.target}
+          />
           {props.url && <GitLabOpenInBrowserAction url={props.url} shortcut={props.shortcut} />}
         </ActionPanel>
       }
