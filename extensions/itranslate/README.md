@@ -37,3 +37,13 @@ You can click the link below to enter the official website to apply for the appl
 ## Thanks
 
 Inspired by [raycast-Parrot](https://github.com/Haojen/raycast-Parrot)
+
+---
+
+<p align="center">If you enjoy using iTranslate and/or want to support me to develop, you can buy me a coffee ☕!</p>
+
+<p align="center">
+  <a title="Buy Me A Coffee" href="https://www.buymeacoffee.com/J404">
+    <img height="64" style="height: 64px" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png">
+  </a>          
+</p>
