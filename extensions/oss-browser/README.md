@@ -3,12 +3,6 @@
 </h1>
 <p align="center">Manage Aliyun Object Storage Service</p>
 
-<p align="center">
-  <a title="Install OSS Browser Raycast Extension" href="https://www.raycast.com/JinShi/oss-browser#install">
-    <img height="64" style="height: 64px" src="https://assets.raycast.com/JinShi/oss-browser/install_button@2x.png">
-  </a>          
-</p>
-
 ## What can you do with this extension?
 
 1. Support browser, upload, download, preview, copy, delete and rename files
