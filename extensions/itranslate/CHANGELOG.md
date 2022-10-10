@@ -1,5 +1,9 @@
 # iTranslate Changelog
 
+## [Optimize UI] - 2022-10-11
+
+- Optimize translation result & list empty UI
+
 ## [Optimize Experience] - 2022-09-30
 
 - Optimize the experience of using Commands `Translate by OCR` & `Translate to Multiple`

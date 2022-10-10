@@ -13,6 +13,7 @@ import { LANG_LIST, TransAPIErrCode } from "../common/const";
 import { say } from "../common/itranslate.shared";
 import { TranslateHistory } from "./TranslateHistory";
 import { Action$ } from "raycast-toolkit";
+import escape from "markdown-escape";
 
 const preferences: IPreferences = getPreferenceValues();
 
@@ -20,40 +21,58 @@ export function TranslateResult(props: {
   transRes: ITranslateRes;
   onLangUpdate?: (lang: ILangItem) => void;
   onImgOCR?: (path?: string) => void;
+  fromMultiple?: boolean;
 }) {
   function TranslateResultDetail() {
-    if (props.transRes.targetExplains && props.transRes.derivatives) {
+    if (props.transRes.code === TransAPIErrCode.Success) {
+      const isMoreDetail = props.transRes.targetExplains && props.transRes.derivatives && props.transRes.isWord;
+      const langsInfo = props.fromMultiple ? "" : `${props.transRes.from.langTitle} -> ${props.transRes.to.langTitle}`;
+      const markdown = isMoreDetail
+        ? ""
+        : `${langsInfo}\n
+  ${props.fromMultiple ? "" : "----"}
+  **${escape(props.transRes.res)}**`;
       return (
         <List.Item.Detail
+          markdown={markdown}
           metadata={
-            <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title={props.transRes.phonetic || ""} text="Explains" />
-              {props.transRes.targetExplains?.map((explain) => {
-                return (
-                  <List.Item.Detail.Metadata.Label
-                    key={explain}
-                    title={explain}
-                    icon={{ source: Icon.Dot, tintColor: Color.Green }}
-                  />
-                );
-              })}
-              <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="" text="Derivatives" />
-              {props.transRes.derivatives?.map((derivative) => {
-                return (
-                  <List.Item.Detail.Metadata.Label
-                    key={derivative.key}
-                    title={`${derivative.key} -> ${derivative.value.join("; ")}`}
-                    icon={{ source: Icon.Dot, tintColor: Color.Blue }}
-                  />
-                );
-              })}
-            </List.Item.Detail.Metadata>
+            isMoreDetail ? (
+              <List.Item.Detail.Metadata>
+                {!props.fromMultiple && <List.Item.Detail.Metadata.Label title={langsInfo} />}
+                {!props.fromMultiple && <List.Item.Detail.Metadata.Separator />}
+                <List.Item.Detail.Metadata.Label title={props.transRes.phonetic || ""} text="Explains" />
+                {props.transRes.targetExplains?.map((explain) => {
+                  return (
+                    <List.Item.Detail.Metadata.Label
+                      key={explain}
+                      title={explain}
+                      icon={{ source: Icon.Dot, tintColor: Color.Green }}
+                    />
+                  );
+                })}
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="" text="Derivatives" />
+                {props.transRes.derivatives?.map((derivative) => {
+                  return (
+                    <List.Item.Detail.Metadata.Label
+                      key={derivative.key}
+                      title={`${derivative.key} -> ${derivative.value.join("; ")}`}
+                      icon={{ source: Icon.Dot, tintColor: Color.Blue }}
+                    />
+                  );
+                })}
+              </List.Item.Detail.Metadata>
+            ) : null
           }
         />
       );
     } else {
-      return <List.Item.Detail markdown={props.transRes.res} />;
+      const markdown = props.fromMultiple
+        ? ""
+        : `[detecting...] -> ${props.transRes.to.langTitle}\n
+  ---
+      `;
+      return <List.Item.Detail markdown={markdown}></List.Item.Detail>;
     }
   }
 

@@ -20,6 +20,7 @@ import {
 import { TranslateError, TranslateNotSupport } from "./components/TranslateError";
 import { TranslateHistory } from "./components/TranslateHistory";
 import { TranslateResult } from "./components/TranslateResult";
+import { environment } from "@raycast/api";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
@@ -191,20 +192,16 @@ export default function Command() {
       onSearchTextChange={onInputChange}
       actions={ListActions()}
     >
-      <List.EmptyView title="Type something to translate..." />
-      {transResultsState.length > 0 && (
-        <List.Section title={`${transResultsState[0].from.langTitle} -> ${transResultsState[0].to.langTitle}`}>
-          {transResultsState.map((transRes) => {
-            if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
-              return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
-            } else if (transRes.code === TransAPIErrCode.NotSupport) {
-              return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
-            } else {
-              return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
-            }
-          })}
-        </List.Section>
-      )}
+      <List.EmptyView title="Type something to translate..." icon={{ source: `no-view@${environment.theme}.png` }} />
+      {transResultsState.map((transRes) => {
+        if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
+          return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
+        } else if (transRes.code === TransAPIErrCode.NotSupport) {
+          return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
+        } else {
+          return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
+        }
+      })}
     </List>
   );
 }
