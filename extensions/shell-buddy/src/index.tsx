@@ -19,7 +19,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
   const [history, setHistory] = usePersistentState<CommandHistoryItem[]>("history", []);
   const [credits, setCredits] = usePersistentState<number>("credits", 1);
   const [prompt, setPrompt] = useState<string>(defaultPrompt ?? "");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const appendToHistory = (prompt: string, command: string) => {
     setHistory((prevState) => [...prevState, { prompt, command }]);
