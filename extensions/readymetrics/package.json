@@ -4,7 +4,6 @@
   "title": "Readymetrics",
   "description": "Lists upcoming and past check-ins in Readymetrics",
   "icon": "readymetrics-icon.png",
-  "owner": "raycast",
   "access": "public",
   "author": "cfeigenbutz",
   "categories": [
