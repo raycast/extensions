@@ -2,19 +2,19 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fetch from "node-fetch";
 import { baseUrl } from "./config";
-import type { CommandPreferences, ConversionResult, KnownPrompts } from "./types";
+import type { CommandPreferences, ConversionResult, CheckCreditsResult, KnownPrompts } from "./types";
 
 /**
  * Checks the remaining credits for the saved license via API call
  */
-export async function checkRemainingCredits(): Promise<number> {
+export async function checkRemainingCredits(): Promise<CheckCreditsResult> {
   try {
     const { license } = getPreferenceValues<CommandPreferences>();
-    const res = await fetch(`${baseUrl}/api/credits?l=${encodeURIComponent(license)}`);
-    const result = (await res.json()) as { remainingCredits: number };
-    return result?.remainingCredits ?? 0;
+    const res = await fetch(`${baseUrl}/api/credits?l=${encodeURIComponent(license.trim())}`);
+    const result = await res.json();
+    return result as CheckCreditsResult;
   } catch (e) {
-    return 0;
+    return { success: false, title: "Server error", remainingCredits: 0 };
   }
 }
 
@@ -25,7 +25,9 @@ export async function checkRemainingCredits(): Promise<number> {
 export async function convertPromptToCommand(prompt: string): Promise<ConversionResult> {
   const { license } = getPreferenceValues<CommandPreferences>();
   try {
-    const res = await fetch(`${baseUrl}/api/convert?p=${encodeURIComponent(prompt)}&l=${encodeURIComponent(license)}`);
+    const res = await fetch(
+      `${baseUrl}/api/convert?p=${encodeURIComponent(prompt)}&l=${encodeURIComponent(license.trim())}`
+    );
     const result = await res.json();
     return result as ConversionResult;
   } catch (e) {

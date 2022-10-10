@@ -19,6 +19,12 @@ export type ConversionResult = {
   remainingCredits?: number;
 };
 
+export type CheckCreditsResult = {
+  success: boolean;
+  title: string;
+  remainingCredits: number;
+};
+
 export type CommandPreferences = {
   license: string;
 };

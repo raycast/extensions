@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Convert Prompt",
-      "subtitle": "GPT-3",
+      "subtitle": "Shell Buddy",
       "description": "The command will convert a text prompt to a shell command",
       "mode": "view",
       "arguments": [

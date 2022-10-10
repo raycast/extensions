@@ -16,13 +16,18 @@ import type { ShellBuddyArguments, CommandHistoryItem } from "./types";
 
 export default function Command(props: { arguments: ShellBuddyArguments }) {
   const { prompt: defaultPrompt } = props.arguments;
-  const [history, setHistory] = usePersistentState<CommandHistoryItem[]>("history", []);
+  const [history, setHistory] = usePersistentState<CommandHistoryItem[] | undefined>("history", undefined);
   const [credits, setCredits] = usePersistentState<number>("credits", 1);
   const [prompt, setPrompt] = useState<string>(defaultPrompt ?? "");
   const [loading, setLoading] = useState<boolean>(false);
 
   const appendToHistory = (prompt: string, command: string) => {
-    setHistory((prevState) => [...prevState, { prompt, command }]);
+    setHistory((prevState) => {
+      if (prevState) {
+        return [...prevState, { prompt, command }];
+      }
+      return [{ prompt, command }];
+    });
   };
 
   const convertPrompt = async (prompt: string) => {
@@ -57,6 +62,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
     const { success, command, title, message, remainingCredits } = await convertPromptToCommand(prompt);
 
     if (success) {
+      setPrompt("");
       appendToHistory(prompt, command as string);
       setCredits(remainingCredits as number);
       await addKnownPrompt(lowerCasePrompt, command as string);
@@ -75,10 +81,18 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
     setLoading(false);
   };
 
-  const reverseHistory = useMemo<CommandHistoryItem[]>(() => [...history].reverse(), [history]);
+  const reverseHistory = useMemo<CommandHistoryItem[] | undefined>(
+    () => (history === undefined ? history : [...history].reverse()),
+    [history]
+  );
 
   useEffect(() => {
-    checkRemainingCredits().then((c) => setCredits(c));
+    checkRemainingCredits().then((c) => {
+      if (!c.success) {
+        showToast({ style: Toast.Style.Failure, title: c.title });
+      }
+      setCredits(c.remainingCredits);
+    });
   }, []);
 
   useEffect(() => {
@@ -117,7 +131,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
     >
       <List.Section title="Command History">
         {loading && <List.Item title="Hang on, converting your prompt ..." icon={Icon.Terminal} subtitle={prompt} />}
-        {reverseHistory.map((p, i) => (
+        {reverseHistory?.map((p, i) => (
           <List.Item
             title={p.command}
             icon={Icon.Terminal}
