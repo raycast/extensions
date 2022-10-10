@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { getDateForPageWithoutBrackets } from 'logseq-dateutils';
+import { getDateForPageWithoutBrackets } from "logseq-dateutils";
 import { parseEDNString } from "edn-data";
 import path from "path";
 import * as R from "ramda";
@@ -52,7 +52,7 @@ const parseJournalFileNameFromLogseqConfig = () => {
       .then((v: any) => ({
         fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
         journalsDirectory: v["journals-directory"] || "journals",
-        dateFormat: (v["journal/file-name-format"] || "yyyy_MM_dd"),
+        dateFormat: v["journal/file-name-format"] || "yyyy_MM_dd",
       }))
   );
 };
