@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Add language] - 2022-10-10
+
+Adds Brazilian Portuguese
+
 ## [Fix] - 2022-09-01
 
 🇹🇭 → 🇹🇷
