@@ -1,10 +1,10 @@
 <p align="center">
   <h1 align="center">Search Hex</h1>
   <h3 align="center">A Raycast extension for Elixir and Erlang programmers</h3>
-  <img src="assets/search-hex-1.png">
-  <img src="assets/search-hex-2.png">
-  <img src="assets/search-hex-3.png">
-  <img src="assets/search-hex-4.png">
+  <img src="./metadata/search-hex-1.png">
+  <img src="./metadata/search-hex-2.png">
+  <img src="./metadata/search-hex-3.png">
+  <img src="./metadata/search-hex-4.png">
 </p>
 
 This is a [Raycast](https://raycast.com/) extension that enables you to quickly
