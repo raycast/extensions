@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { matchSorter } from "match-sorter";
 import fontSizes from "./fontSizes";
 
@@ -59,9 +59,14 @@ export default function Command() {
             accessories={[{ text: item.weight }, { text: `${item.size}px` }]}
             actions={
               <ActionPanel>
-                <ActionPanel.Submenu title="Change Size">
+                <ActionPanel.Submenu icon={Icon.Text} title="Change Size">
                   {Object.keys(fontSizes).map((key) => (
-                    <Action key={key} title={key} onAction={() => setSize(key as keyof typeof fontSizes)} />
+                    <Action
+                      key={key}
+                      title={key}
+                      icon={Icon.Text}
+                      onAction={() => setSize(key as keyof typeof fontSizes)}
+                    />
                   ))}
                 </ActionPanel.Submenu>
               </ActionPanel>

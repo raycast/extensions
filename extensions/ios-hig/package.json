@@ -5,7 +5,6 @@
   "description": "Shows you the iOS HIG's info for quick reference",
   "icon": "icon.png",
   "author": "eliperkins",
-  "owner": "eliperkins",
   "categories": [
     "Developer Tools",
     "Design Tools"
