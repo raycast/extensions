@@ -1,5 +1,5 @@
 # Search Hex Changelog
 
-## [Added Search Hex] - 2022-10-07
+## [Added Search Hex] - 2022-10-10
 
 Initial version
