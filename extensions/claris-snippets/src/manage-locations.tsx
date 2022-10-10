@@ -3,7 +3,6 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
-import { useState, useEffect } from "react";
 import type { Location } from "./utils/types";
 import { getDefaultPath, loadSnippets } from "./utils/snippets";
 import { getLocationPath, refreshGitLocation, useLocations } from "./utils/use-locations";
@@ -131,7 +130,7 @@ export default function Command() {
           title="My Computer"
           subtitle="default, cannot be changed"
           icon={Icon.StarCircle}
-          accessories={useCountSnippets()}
+          accessories={[countSnippets()]}
           actions={
             <ActionPanel>
               <RevealInFinderAction path={getDefaultPath()} />
@@ -144,12 +143,12 @@ export default function Command() {
           return (
             <List.Item
               title={location.name}
-              icon={Icon.Folder}
+              icon={location.git ? Icon.Compass : Icon.Folder}
               subtitle={location.path}
-              accessories={useCountSnippets(location)}
+              accessories={[countSnippets(location)]}
               actions={
                 <ActionPanel>
-                  <RevealInFinderAction path={location.path} />
+                  <RevealInFinderAction path={getLocationPath(location)} />
                   <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}
@@ -179,21 +178,13 @@ export default function Command() {
   );
 }
 
-function useCountSnippets(location?: Location): List.Item.Accessory[] | null {
-  const [accessory, setAccessory] = useState<List.Item.Accessory[] | null>(null);
-  useEffect(() => {
-    countSnippets(location).then((item) => setAccessory([item]));
-  }, []);
-  return accessory;
-}
-
-async function countSnippets(location?: Location): Promise<List.Item.Accessory> {
+function countSnippets(location?: Location): List.Item.Accessory {
   const path = getLocationPath(location);
   const folderExists = existsSync(path);
   if (!folderExists) {
     return { icon: Icon.Warning, text: "Not Found" };
   }
 
-  const count = (await loadSnippets(location)).length;
+  const count = loadSnippets(location).length;
   return { text: `${count}`, icon: Icon.CheckCircle };
 }

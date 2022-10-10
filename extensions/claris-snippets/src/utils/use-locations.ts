@@ -5,9 +5,16 @@ import { environment } from "@raycast/api";
 import { join } from "path";
 import { existsSync } from "fs";
 import { getDefaultPath } from "./snippets";
+import { useEffect } from "react";
 
 export function useLocations() {
-  return useCachedState<Location[]>("locations", []);
+  const locationCache = useCachedState<Location[]>("locations", []);
+  const [locations] = locationCache;
+  useEffect(() => {
+    // refresh git-based locations when locations change
+    locations.forEach((loc) => loc.git && refreshGitLocation(loc));
+  }, [locations]);
+  return locationCache;
 }
 
 export function isGitInstalled() {
