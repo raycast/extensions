@@ -19,6 +19,15 @@
       "title": "iHosts",
       "description": "Manage your system hosts",
       "mode": "view",
+      "keywords": [
+        "ihosts",
+        "hosts",
+        "host",
+        "system hosts",
+        "manage hosts",
+        "host file",
+        "etc/hosts"
+      ],
       "preferences": [
         {
           "name": "exportLoc",
@@ -34,7 +43,18 @@
       "name": "switch",
       "title": "Switch Hosts Quickly",
       "description": "Switch hosts by menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "keywords": [
+        "switch",
+        "switch hosts",
+        "ihosts",
+        "hosts",
+        "host",
+        "system hosts",
+        "manage hosts",
+        "host file",
+        "etc/hosts"
+      ]
     }
   ],
   "keywords": [
