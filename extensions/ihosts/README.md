@@ -3,12 +3,6 @@
 </h1>
 <p align="center">Make hosts management more efficient and easier~</p>
 
-<p align="center">
-  <a title="Install iHosts Raycast Extension" href="https://www.raycast.com/JinShi/ihosts#install">
-    <img height="64" style="height: 64px" src="https://assets.raycast.com/JinShi/ihosts/install_button@2x.png">
-  </a>          
-</p>
-
 ## What can you do with this extension?
 
 1. Quickly enable or disable hosts
