@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-10-07
+
+- Implemented add track to queue, can be located in Search Tracks view
+
 ## [Feature] - 2022-09-12
 
 - Introduce new command "Dislike Current Song"
