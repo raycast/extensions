@@ -10,8 +10,8 @@ export default function SearchAnimeGrid() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useFetch<Result>(
     searchText
-      ? `https://api.jikan.moe/v4/anime?q=${searchText}&page=${page}&limit=20${shouldHideNSFW}`
-      : `https://api.jikan.moe/v4/seasons/now?page=${page}&limit=20`,
+      ? `https://api.jikan.moe/v4/anime?q=${searchText}&page=${page}${shouldHideNSFW}`
+      : `https://api.jikan.moe/v4/seasons/now?page=${page}`,
     { keepPreviousData: true }
   );
 

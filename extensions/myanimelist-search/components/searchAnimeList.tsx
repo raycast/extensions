@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Image, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Image, Icon, getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { useFetch } from "@raycast/utils";
 import type { Result } from "../src/types";
@@ -12,8 +12,8 @@ export default function SearchAnimeList() {
   const [showingDetail, setShowingDetail] = useState(showDetailDefault == "list-detailed");
   const { isLoading, data } = useFetch<Result>(
     searchText
-      ? `https://api.jikan.moe/v4/anime?q=${searchText}&page=${page}&limit=10${shouldHideNSFW}`
-      : `https://api.jikan.moe/v4/seasons/now?page=${page}&limit=9`,
+      ? `https://api.jikan.moe/v4/anime?q=${searchText}&page=${page}${shouldHideNSFW}`
+      : `https://api.jikan.moe/v4/seasons/now?page=${page}`,
     {
       // to make sure the screen isn't flickering when the searchText changes
       keepPreviousData: true,
@@ -94,7 +94,11 @@ export default function SearchAnimeList() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={anime.url} />
-                <Action title="Toggle Detailed view" onAction={() => setShowingDetail(!showingDetail)} />
+                <Action
+                  title="Toggle Detailed view"
+                  onAction={() => setShowingDetail(!showingDetail)}
+                  icon={Icon.AppWindowSidebarLeft}
+                />
               </ActionPanel>
             }
           />
