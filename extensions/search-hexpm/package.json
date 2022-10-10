@@ -5,7 +5,9 @@
   "description": "A Raycast extension that enables you to quickly look up package information from Hex",
   "icon": "command-icon.png",
   "author": "jordelver",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
