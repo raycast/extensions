@@ -8,16 +8,18 @@ import {
   openCommandPreferences,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { TransAPIErrCode } from "./const";
+import { TransAPIErrCode } from "./common/const";
 import {
   checkPreferences,
   fetchTransAPIs,
   getLang,
   getServiceProviderMap,
+  saveHistory,
   translateWithRefineLang,
-} from "./itranslate.shared";
-import { TranslateError } from "./TranslateError";
-import { TranslateResult } from "./TranslateResult";
+} from "./common/itranslate.shared";
+import { TranslateError, TranslateNotSupport } from "./components/TranslateError";
+import { TranslateHistory } from "./components/TranslateHistory";
+import { TranslateResult } from "./components/TranslateResult";
 
 let delayFetchTranslateAPITimer: NodeJS.Timeout;
 
@@ -93,7 +95,6 @@ export default function Command() {
         from: getLang(""),
         to: targetLang,
         res: "",
-        start: new Date().getTime(),
         origin: contentToTrans,
       });
     }
@@ -101,14 +102,12 @@ export default function Command() {
     updateShowDetail(true);
     promises.forEach(async (promise) => {
       const transResult = await promise;
-      transResult.end = new Date().getTime();
       updateCurrentTargetLang(transResult.to);
       updateTransResultsState((origins) => {
         let hasLoading = false;
         const transResultsNew = origins.map((origin) => {
           let toPush: ITranslateRes;
           if (origin.serviceProvider === transResult.serviceProvider) {
-            transResult.start = origin.start;
             toPush = transResult;
           } else {
             toPush = origin;
@@ -120,6 +119,21 @@ export default function Command() {
         });
         if (!hasLoading) {
           updateLoadingState(false);
+          if (preferences.enableHistory) {
+            const history: ITransHistory = {
+              time: new Date().getTime(),
+              from: transResultsNew[0].from.langId,
+              to: transResultsNew[0].to.langId,
+              text: inputTempState,
+              transList: transResultsNew.map((tran) => {
+                return {
+                  serviceProvider: tran.serviceProvider,
+                  res: tran.res,
+                };
+              }),
+            };
+            saveHistory(history, preferences.historyLimit);
+          }
         }
         return transResultsNew;
       });
@@ -131,13 +145,39 @@ export default function Command() {
       return (
         <ActionPanel>
           <Action icon={Icon.Text} title="Translate Selected Content" onAction={transSelected} />
-          <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+          {preferences.enableHistory && (
+            <Action.Push
+              icon={Icon.BulletPoints}
+              title="Open Translation Histories"
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              target={<TranslateHistory />}
+            />
+          )}
+          <Action
+            icon={Icon.ComputerChip}
+            title="Open iTranslate Preferences"
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            onAction={openCommandPreferences}
+          />
         </ActionPanel>
       );
     }
     return (
       <ActionPanel>
-        <Action icon={Icon.ComputerChip} title="Open iTranslate Preferences" onAction={openCommandPreferences} />
+        {preferences.enableHistory && (
+          <Action.Push
+            icon={Icon.BulletPoints}
+            title="Open Translation Histories"
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            target={<TranslateHistory />}
+          />
+        )}
+        <Action
+          icon={Icon.ComputerChip}
+          title="Open iTranslate Preferences"
+          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          onAction={openCommandPreferences}
+        />
       </ActionPanel>
     );
   }
@@ -157,6 +197,8 @@ export default function Command() {
           {transResultsState.map((transRes) => {
             if (transRes.code === TransAPIErrCode.Fail || transRes.code === TransAPIErrCode.Retry) {
               return <TranslateError key={transRes.serviceProvider} transRes={transRes} />;
+            } else if (transRes.code === TransAPIErrCode.NotSupport) {
+              return <TranslateNotSupport key={transRes.serviceProvider} transRes={transRes} />;
             } else {
               return <TranslateResult key={transRes.serviceProvider} transRes={transRes} onLangUpdate={translate} />;
             }

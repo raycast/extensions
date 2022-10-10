@@ -3,7 +3,7 @@ import { alertDialog, refreshNumber } from "../hooks/hooks";
 import { LocalStorageKey } from "../utils/constants";
 import React from "react";
 import { copyFileByPath } from "../utils/applescript-utils";
-import { upRank } from "../search-pinned-directories";
+import { upRank } from "../search-pinned-folders";
 import { isDirectory } from "../utils/common-utils";
 import { FolderPage } from "./folder-page";
 
@@ -12,18 +12,18 @@ export function ActionRemoveAllDirectories(props: { setRefresh: React.Dispatch<R
   return (
     <Action
       icon={Icon.ExclamationMark}
-      title={`Remove All Directory`}
+      title={`Unpin All Folders`}
       shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       onAction={async () => {
         await alertDialog(
           Icon.ExclamationMark,
-          "Remove All Directories",
-          "Are you sure you  want to remove all directories?",
-          "Remove All",
+          "Unpin All Folders",
+          "Are you sure you  want to unpin all folders?",
+          "Unpin All",
           async () => {
             await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify([]));
             setRefresh(refreshNumber);
-            await showToast(Toast.Style.Success, "Success!", `All directories are removed.`);
+            await showToast(Toast.Style.Success, "Success!", `All folders are unpinned.`);
           }
         );
       }}

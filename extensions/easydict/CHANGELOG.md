@@ -1,6 +1,121 @@
 # `Easydict` Changelog
 
-## [v1.4.1] - 2022-08-04
+## [v2.4.1] - 2022-10-02
+
+### 💎 Improvements
+
+- Improved language detection.
+- Improved DeepL translation experience, default to use system proxy (if have).
+
+### 🐞 Fixes
+
+- Fixed Google Translate error, default to use system proxy.
+
+> Note ⚠️: Due to the fact that the current Google Translate China version cannot be used, only the international version can be used, so you need to use a proxy to continue to use Google Translate.
+
+## [v2.4.0] - 2022-09-29
+
+### ✨ New
+
+- Added support for [Volcano Translate](https://translate.volcengine.com/translate) of ByteDance.
+- Added support for Volcano language detection.
+- Supported viewing more details in the subpage (shortcut key 'Cmd + M').
+
+![volcano-1664442567](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/volcano-1664442567.png)
+
+![detail-1664443083](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/detail-1664443083.png)
+
+![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
+
+![easydict-2-1664439977](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1664439977.png)
+
+### 💎 Improvements
+
+- Improved the speed and accuracy of language detection.
+- Privacy improvement: Except for Google and Bing language detection (no key required, no personal information will be recorded!), other language detection will only be enabled when the corresponding translation engine is turned on by the user.
+
+### 🐞 Fixes
+
+- Fixed the problem that the web Youdao word pronunciation may fail to play.
+- Fixed some compatibility issues with macOS 13.0 Ventura Beta.
+
+## [v2.3.1] - 2022-09-25
+
+### 💎 Improvements
+
+- Improved icon display.
+
+### 🐞 Fixes
+
+- Fixed a bug that caused extension to crash when getting the Youdao web cookie failed.
+- Fixed a bug that caused web Youdao dictionary to not display the definition.
+-
+
+## [v2.3.0] - 2022-09-20
+
+### ✨ New
+
+- Added support for [Bing Translator](https://www.bing.com/translator).
+- Added Bing language detection.
+
+![Bing-1663603058](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Bing-1663603058.png)
+
+### 💎 Improvements
+
+- Improved startup speed, flying feeling~
+- Improved the speed and accuracy of language detection.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
+## [v2.2.0] - 2022-09-12
+
+### ✨ New
+
+- Added Youdao Dictionary Wikipedia definition.
+- Added Linguee word phonetic and exam type.
+
+### 🐞 Fixes
+
+- Fixed the problem that the Web Youdao translation may show an error toast.
+
+![Swift-1662903813](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Swift-1662903813.png)
+
+## [v2.1.0] - 2022-09-03
+
+### ✨ New
+
+- Added experimental feature: new Youdao Dictionary and Youdao Translation APIs that can be used without AppKey.
+- New Chinese-English Youdao Dictionary, supporting displaying richer explanation.
+- Supported free sorting, you can adjust the dictionary or translation results display order arbitrarily.
+
+![优雅-1662172376](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/优雅-1662172376.png)
+
+## [v2.0.0] - 2022-08-20
+
+### ✨ New
+
+- Added support for Linguee dictionary, supporting 19 languages.
+- Added support for Google language detection and Baidu language detection.
+- Added support system proxy.
+- Added top show open current query web dictionary and translation action.
+- Added query word and show dictionary and translation at the same time.
+- Added show query language from-to, like English🇺🇸 --> Chinese-Simplified🇨🇳.
+
+![easydict-2](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1661158964.png)
+
+### 💎 Improvements
+
+- Refactored the project code structure.
+- Improved the accuracy of automatic language detection.
+- Used the new Youdao dictionary web page.
+
+### 🐞 Fixes
+
+- Fixed many known issues.
+
+## [v1.4.1] - 2022-08-01
 
 ### 💎 Improvements
 
@@ -52,7 +167,7 @@
 
 ### ✨ New
 
-- Added Apple 🍎 system translation. (Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/wiki/How-to-use--macOS-%F0%9F%8D%8E-system-translation-in-Easydict%3F))
+- Added Apple 🍎 system translation. (Please see [How to use macOS 🍎 system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md))
 - Added Apple 🍎 system language detection.
 - Added view recent version changelog feature.
 

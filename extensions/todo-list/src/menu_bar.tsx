@@ -11,7 +11,12 @@ export default function MenuBar() {
   const todoLength = Object.values(todoSections).reduce((acc, section) => acc + section.length, 0);
 
   return (
-    <MenuBarExtra icon="../assets/command-icon-menubar.png" tooltip="Your Todo List">
+    <MenuBarExtra
+      icon={{
+        source: { light: "command-icon-menubar-light.png", dark: "command-icon-menubar-dark.png" },
+      }}
+      tooltip="Your Todo List"
+    >
       {todoLength > 0 ? (
         <>
           <TodoList sectionKey="pinned" todos={todoSections["pinned"]} />

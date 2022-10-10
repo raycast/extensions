@@ -1,7 +1,11 @@
 # Change Case Changelog
 
- ## [Update] - 2022-08-10
+## [Update] - 2022-10-05
 
- - Updated Raycast API.
- - Fix typo.
- - Added a small preview to description.
+Added Sponge Case
+
+## [Update] - 2022-08-10
+
+- Updated Raycast API.
+- Fix typo.
+- Added a small preview to description.

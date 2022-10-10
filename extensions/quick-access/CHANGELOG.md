@@ -1,5 +1,15 @@
 # Quick Access Changelog
 
+## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+
+- Add new actions to menu bar commands: Copy or Open
+
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command
+- Modify Directory to Folder
+- Add the ability to show open folders
+
 ## [Add file preview] - 2022-06-30
 
 - Add file preview (CMD+Y)

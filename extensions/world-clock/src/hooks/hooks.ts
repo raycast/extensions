@@ -80,6 +80,59 @@ export const getAllTimezones = (refresh: number, timezone: string) => {
   return { starTimezones: starTimezones, timezones: timezones, loading: loading };
 };
 
+export const getStarTimezones = () => {
+  const [starTimezones, setStarTimezones] = useState<Timezone[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+
+    const _localStorage = await LocalStorage.getItem<string>(localStorageKey.TIMEZONE_CACHE);
+    const _timezoneCache = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as string[]);
+
+    if (_timezoneCache.length === 0) {
+      //init cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
+      })
+        .then(async (axiosResponse) => {
+          const _starTimezones = await getStarredTimezones();
+          setStarTimezones(_starTimezones);
+          setLoading(false);
+
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          showToast(Style.Failure, String(reason));
+          setLoading(false);
+        });
+    } else {
+      const _starTimezones = await getStarredTimezones();
+      setStarTimezones(_starTimezones);
+      setLoading(false);
+
+      //update cache
+      axios({
+        method: "GET",
+        url: TIMEZONE_BASE_URL,
+      })
+        .then(async (axiosResponse) => {
+          await LocalStorage.setItem(localStorageKey.TIMEZONE_CACHE, JSON.stringify(axiosResponse.data));
+        })
+        .catch((reason) => {
+          console.error(String(reason));
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return { starTimezones: starTimezones, loading: loading };
+};
+
 const buildStarTimezone = async (allTimezone: string[]) => {
   const _localStorage = await LocalStorage.getItem<string>(localStorageKey.STAR_TIMEZONE);
   const _starTimezones = typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as Timezone[]);

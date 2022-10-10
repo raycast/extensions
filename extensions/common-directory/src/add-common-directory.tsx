@@ -65,7 +65,7 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
           <ActionPanel.Section title="Fill Directory">
             <Action
               title={"Fetch Directory"}
-              icon={Icon.TwoArrowsClockwise}
+              icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
                 await fetchDirectoryPath(setPath);
@@ -158,7 +158,7 @@ async function addDirectory(
         const newItem = {
           id: _type + "_" + new Date().getTime(),
           alias: alias,
-          name: getDirectoryName(directoryPath),
+          name: parsedPath.base,
           path: parsedPath.dir + "/" + parsedPath.base,
           valid: true,
           type: _type,

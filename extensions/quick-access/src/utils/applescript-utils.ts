@@ -1,4 +1,7 @@
 import { runAppleScript } from "run-applescript";
+import { DirectoryInfo, DirectoryType } from "../types/types";
+import { isEmpty } from "./common-utils";
+import * as path from "path";
 
 const scriptCopyFile = (path: string) => {
   return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;
@@ -30,5 +33,45 @@ export const getFinderInsertLocation = async () => {
     return finderPath.slice(0, -1);
   } catch (e) {
     return "Finder Not running";
+  }
+};
+
+const scriptFinderWindowPath = `
+if application "Finder" is not running then
+    return "Not running"
+end if
+
+tell application "Finder"
+    set windowList to windows
+    set finderPath to {}
+    repeat with _window in windowList
+        set the end of finderPath to POSIX path of (folder of _window as alias)
+    end repeat
+    return finderPath
+end tell
+`;
+
+export const getOpenFinderWindowPath = async () => {
+  const finderPath: DirectoryInfo[] = [];
+  try {
+    const _finderPath = (await runAppleScript(scriptFinderWindowPath)).split(", ").map((value) => {
+      return value.charAt(value.length - 1) === "/" ? value.slice(0, -1) : value;
+    });
+
+    Array.from(new Set(_finderPath)).forEach((value) => {
+      if (isEmpty(value)) return;
+      finderPath.push({
+        id: value,
+        name: path.parse(value).base,
+        path: value,
+        type: DirectoryType.DIRECTORY,
+        valid: true,
+        rank: 1,
+        date: new Date().getTime(),
+      });
+    });
+    return finderPath;
+  } catch (e) {
+    return finderPath;
   }
 };

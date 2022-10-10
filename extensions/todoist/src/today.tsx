@@ -1,16 +1,28 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import useSWR from "swr";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
+import { useCachedPromise } from "@raycast/utils";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
 import { todoist, handleError } from "./api";
-import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
+import { SectionWithTasks, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
+import View from "./components/View";
 
-export default function Today() {
-  const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
-    todoist.getTasks({ filter: "today|overdue" })
-  );
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+function Today() {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    error: getTasksError,
+    mutate: mutateTasks,
+  } = useCachedPromise(() => todoist.getTasks({ filter: "today|overdue" }));
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
 
   const preferences = getPreferenceValues();
 
@@ -64,8 +76,17 @@ export default function Today() {
   ) : (
     <TaskList
       sections={sections}
-      isLoading={(!tasks && !getTasksError) || (!projects && !getProjectsError)}
+      isLoading={isLoadingTasks || isLoadingProjects || isLoadingLabels}
       projects={projects}
+      mutateTasks={mutateTasks}
     />
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Today />
+    </View>
   );
 }
