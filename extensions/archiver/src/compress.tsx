@@ -68,16 +68,8 @@ export default function Command() {
         return;
       }
       updateFilesState(await Promise.all(selectedFinderItems.map(async (item) => await getStat(item.path))));
-      await showToast({
-        title: "Get selected Finder items successfully",
-        style: Toast.Style.Success,
-      });
-    } catch (error) {
-      await showToast({
-        title: "Get selected Finder items failed",
-        style: Toast.Style.Failure,
-      });
-    }
+      // eslint-disable-next-line no-empty
+    } catch (error) {}
   }
 
   async function compressAction(files: string[], format: CompressFormat, password?: string) {
@@ -86,7 +78,7 @@ export default function Command() {
       const path = await compress(files, compressFormat, password);
       await setPerviousCompressFormat(compressFormat);
       await showInFinder(path);
-      showHUD("Compress successfully 🎉");
+      showHUD("🎉 Compress successfully");
       popToRoot();
     } catch (error) {
       showHUD("❌ Failed to compress...");

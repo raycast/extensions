@@ -58,15 +58,8 @@ export default function Command() {
       const file = await getStat(supports[0]);
       file.format = format;
       updateFileState(file);
-      await showToast({
-        title: "Get selected Finder item successfully",
-        style: Toast.Style.Success,
-      });
+      // eslint-disable-next-line no-empty
     } catch (error) {
-      await showToast({
-        title: "Get selected Finder item failed",
-        style: Toast.Style.Failure,
-      });
     } finally {
       updateLoadingState(false);
     }
@@ -81,7 +74,7 @@ export default function Command() {
       showToast({ title: "Extracting...", style: Toast.Style.Animated });
       const path = await extract(file, format, password);
       await showInFinder(path);
-      showHUD("Extract successfully 🎉");
+      showHUD("🎉 Extract successfully");
       popToRoot();
     } catch (error) {
       showHUD("❌ Failed to extract...");
@@ -189,12 +182,12 @@ export default function Command() {
     return (
       <Detail
         isLoading={isLoading}
-        markdown={isLoading ? "" : "# ➕Add file to extract"}
+        markdown={isLoading ? "" : "# ➕Select to extract"}
         navigationTitle="Extract Files"
         actions={
           <ActionPanel>
             <Action$.SelectFile
-              title="Add File to Extract"
+              title="Select to Extract"
               icon={Icon.Finder}
               onSelect={async (filePath) => {
                 if (!filePath) return;
