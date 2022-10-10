@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Search Hex",
+      "subtitle": "Erlang Package Manager",
       "description": "Search Hex for package information",
       "mode": "view"
     }
