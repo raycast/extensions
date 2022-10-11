@@ -21,6 +21,6 @@ export default async function main() {
 
   await runAppleScript(buildCopyToClipboardAppleScript(latestDownload!.path));
   toast.style = Toast.Style.Success;
-  toast.title = "Copying to clipboard";
+  toast.title = "Copied to clipboard";
   await popToRoot();
 }
