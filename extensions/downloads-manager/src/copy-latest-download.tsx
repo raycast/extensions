@@ -1,4 +1,4 @@
-import { popToRoot, showHUD } from "@raycast/api";
+import { popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { getLatestDownload } from "./utils";
 import { runAppleScript } from "run-applescript";
 
@@ -14,6 +14,13 @@ export default async function main() {
     await showHUD("No downloads found");
   }
 
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Copying to clipboard",
+  });
+
   await runAppleScript(buildCopyToClipboardAppleScript(latestDownload!.path));
+  toast.style = Toast.Style.Success;
+  toast.title = "Copying to clipboard";
   await popToRoot();
 }
