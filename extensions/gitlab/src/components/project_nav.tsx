@@ -28,7 +28,7 @@ export function ProjectNavMenuItem(props: {
           <Action.Push
             title="Open Menu"
             shortcut={props.shortcut}
-            icon={{ source: Icon.Receipt, tintColor: Color.PrimaryText }}
+            icon={{ source: Icon.AppWindowList, tintColor: Color.PrimaryText }}
             target={props.target}
           />
           {props.url && <GitLabOpenInBrowserAction url={props.url} shortcut={props.shortcut} />}
