@@ -8,5 +8,5 @@ export default async () => {
   const clipBoardText = await Clipboard.readText();
   const finalText = clipBoardText + appendSeparator + appendText;
   await Clipboard.copy(finalText);
-  await showHUD(`Clipboard: ${finalText}`);
+  await showHUD(`✅ Appended text to clipboard`);
 };
