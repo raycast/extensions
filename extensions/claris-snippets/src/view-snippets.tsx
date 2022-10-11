@@ -160,7 +160,7 @@ ${snippet.snippet}`}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  {locationMap[snippet.locId].git || (
+                  {locationMap[snippet.locId]?.git || (
                     <Action.Push
                       title="Edit Snippet"
                       icon={Icon.Pencil}
@@ -189,7 +189,7 @@ ${snippet.snippet}`}
                         snippet={{
                           ...snippet,
                           id: undefined,
-                          locId: locationMap[snippet.locId].git ? "default" : snippet.locId,
+                          locId: locationMap[snippet.locId]?.git ? "default" : snippet.locId,
                         }}
                       />
                     }
@@ -209,7 +209,7 @@ ${snippet.snippet}`}
                     shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
                   /> */}
                 </ActionPanel.Section>
-                {locationMap[snippet.locId].git || (
+                {locationMap[snippet.locId]?.git || (
                   <ActionPanel.Section>
                     <Action
                       title="Delete Snippet"
