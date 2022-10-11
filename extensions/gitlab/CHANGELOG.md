@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Update] - 2022-10-10
+## [Update] - 2022-10-11
 
 - Add Open in Browser option in project navigation
 
