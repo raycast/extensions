@@ -43,11 +43,15 @@
 
 ---
 
+### 有道-现代汉语词典
 
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
 
-### 有道词典
+![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
 
+#### [艾](https://youdao.com/result?word=%E8%89%BE&lang=en)
 
+![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
 
 ### [Linguee 词典](https://www.linguee.com/)：英语 <--> 中文
 
