@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ActionPanel, Action, Grid } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
 import { Theme, Color } from "@adobe/leonardo-contrast-colors";
 import ColorScheme from "color-scheme";
 import { Cache } from "@raycast/api";
@@ -82,7 +82,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={color} />
-              <Action title="Reload colors" onAction={() => setColors(generateColors(type))} />
+              <Action title="Reload Colors" icon={Icon.Repeat} onAction={() => setColors(generateColors(type))} />
             </ActionPanel>
           }
         />
