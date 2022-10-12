@@ -1,56 +1,40 @@
-import util from "util";
-import { exec } from "child_process";
+import { execSync, ExecSyncOptions } from "child_process";
 import { getCachedEnv } from "./shell-utils";
 import { DEFAULT_DNS } from "../config";
 import { getPreferenceValues } from "@raycast/api";
 
-export const execCmd = async (cmd: string): Promise<{ error: string | null; data: string }> => {
-  const execPromise = util.promisify(exec);
-  const env = await getCachedEnv();
-
+export const execCmd = async (cmd: string, env: ExecSyncOptions) => {
   try {
-    const { stdout, stderr } = await execPromise(cmd, env);
+    const stdout = execSync(cmd, env);
     return {
-      error: stderr,
       data: String(stdout).trim(),
+      error: "",
     };
   } catch (err) {
-    return { error: (err as Error).message, data: "" };
+    return {
+      data: "",
+      error: String(err),
+    };
   }
 };
 
-export const execCmdSudo = async (cmd: string): Promise<{ error: string | null; data: string }> => {
-  const sudo = await import("sudo-prompt");
-  const user = (await execCmd("/usr/bin/whoami")).data;
+const useSudo = getPreferenceValues().sudo ?? false;
+const adminPassword = getPreferenceValues().password ?? "";
 
-  return new Promise((resolve) => {
-    const options = { name: "Raycast" };
-    process.env.USER = user;
-    sudo.exec(cmd, options, (error: Error, stdout: string, stderr: string) => {
-      resolve({
-        error: error ? error.message : stderr,
-        data: stdout,
-      });
-    });
-  });
-};
-
-export const useSudo = getPreferenceValues().sudo ?? false;
-const executor = useSudo ? execCmdSudo : execCmd;
-
-export const getCurrentDevice = async () => {
+export const getCurrentDevice = async (env: ExecSyncOptions) => {
   // https://github.com/kodango/switchdns/blob/master/src/dns_ops.sh
-  const { error, data } = await execCmd(`/usr/sbin/netstat -rn | awk '/default/{print $NF}' | head -1`);
+  const { error, data } = await execCmd(`/usr/sbin/netstat -rn | awk '/default/{print $NF}' | head -1`, env);
 
   if (error) throw new Error(error);
   return data.trim();
 };
 
-export const getCurrentNetworkService = async () => {
-  const currentDevice = await getCurrentDevice();
+export const getCurrentNetworkService = async (env: ExecSyncOptions) => {
+  const currentDevice = await getCurrentDevice(env);
 
   const { error, data } = await execCmd(
-    `/usr/sbin/networksetup -listnetworkserviceorder | grep -B 1 ${currentDevice} | awk -F'\\) ' '{print $2}' | head -1`
+    `/usr/sbin/networksetup -listnetworkserviceorder | grep -B 1 ${currentDevice} | awk -F'\\) ' '{print $2}' | head -1`,
+    env
   );
 
   if (error) throw new Error(error);
@@ -58,27 +42,31 @@ export const getCurrentNetworkService = async () => {
 };
 
 export const getCurrentDNS = async () => {
-  const networkService = await getCurrentNetworkService();
+  const env = await getCachedEnv();
+  const networkService = await getCurrentNetworkService(env);
   if (!networkService) {
     return "";
   }
 
   // Command return failed when DNS is not set(empty)
-  const { error, data } = await execCmd(`/usr/sbin/networksetup -getdnsservers "${networkService}" | grep -v 'any'`);
+  const { error, data } = await execCmd(
+    `/usr/sbin/networksetup -getdnsservers "${networkService}" | grep -v 'any'`,
+    env
+  );
   return error ? DEFAULT_DNS.slice(-1)[0].dns : String(data).split("\n").join(",");
 };
 
 // dns like: "223.5.5.5,223.6.6.6" | "8.8.8.8"
 export const switchDNS = async (dns: string) => {
-  const networkService = await getCurrentNetworkService();
+  const env = await getCachedEnv();
+  const networkService = await getCurrentNetworkService(env);
   const targetDNS = dns.indexOf(",") > -1 ? dns.split(",").join(" ") : dns;
   const cmd = `/usr/sbin/networksetup -setdnsservers "${networkService}" ${targetDNS}`;
+  const { error } = await execCmd(useSudo ? `echo ${adminPassword} | sudo -S ${cmd}` : cmd, env);
+  const errMsg =
+    error.toLowerCase().replaceAll("\n", "").indexOf("try again") !== -1
+      ? 'Password Incorrect. Check "Admin Password" in Preference'
+      : String(error);
 
-  const { error } = await executor(cmd);
-  if (error) {
-    console.info(`Failed: ${error}`);
-  } else {
-    console.info(cmd);
-  }
-  return { error, data: dns };
+  return { error: errMsg || "", data: dns };
 };

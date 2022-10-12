@@ -24,6 +24,15 @@
       "description": "See https://github.com/GallenHu/extensions/blob/main/extensions/switch-dns/README.md",
       "default": false,
       "label": "Run Switch DNS commands as sudo"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Admin Password",
+      "description": "Required if \"Use Sudo\" checked",
+      "default": false,
+      "label": "Admin Password"
     }
   ],
   "dependencies": {

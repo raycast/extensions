@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Edit from "./components/edit";
 import DEFAULT_DNS from "./config";
 import { DNSItem } from "./types/types";
-import { switchDNS, getCurrentDNS, useSudo } from "./utils/utils";
+import { switchDNS, getCurrentDNS } from "./utils/utils";
 import StorageUtils from "./utils/storage-utils";
 
 export default function Command() {
@@ -11,24 +11,28 @@ export default function Command() {
   const [loading, setLoading] = useState(false);
   const [customDNS, setCustomDNS] = useState<DNSItem[]>([]);
 
-  const apply = async (item: DNSItem) => {
-    const { error, data } = await switchDNS(item.dns);
+  const apply = (item: DNSItem) => {
+    showToast({
+      title: "Applying",
+      message: "DNS Switching...",
+      style: Toast.Style.Animated,
+    });
 
-    if (error) {
-      if (useSudo) {
-        showHUD(`Failed: ${error}`);
-      } else {
+    setTimeout(async () => {
+      const { error, data } = await switchDNS(item.dns);
+
+      if (error) {
         showToast({
           title: "Failed",
-          message: `Enable "Use Sudo" in the Extension Preferences and try again.`,
+          message: error,
           style: Toast.Style.Failure,
         });
+      } else {
+        await showHUD("DNS changed to " + data);
+        setCurrentDNS(item.dns);
+        popToRoot({ clearSearchBar: false });
       }
-    } else {
-      await showHUD("DNS changed to " + data);
-      setCurrentDNS(item.dns);
-      popToRoot({ clearSearchBar: false });
-    }
+    }, 0);
   };
 
   const loadCustom = async () => {
@@ -95,8 +99,12 @@ export default function Command() {
     });
   }, []);
 
-  return (
-    <List isLoading={loading}>
+  return loading ? (
+    <List isLoading>
+      <List.Item icon={Icon.Repeat} title="Configure Loading..."></List.Item>
+    </List>
+  ) : (
+    <List>
       {customDNS.map((item) => (
         <ListItem key={item.title} isCustom data={item} />
       ))}
