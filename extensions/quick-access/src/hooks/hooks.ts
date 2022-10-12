@@ -9,7 +9,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { copyFileByPath, getOpenFinderWindowPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
 import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
