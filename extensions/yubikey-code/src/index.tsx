@@ -13,6 +13,8 @@ import {
   getPreferenceValues,
   showHUD,
 } from "@raycast/api";
+import { cpus } from "os";
+import { join as path_join } from "path";
 import { execFile, ExecFileException } from "child_process";
 import { useState, useEffect } from "react";
 
@@ -154,7 +156,7 @@ function executeCodeCommand(
   isLoadingCallback: (isLoading: boolean) => void = () => null,
   resultCallback: (result: string) => void = () => null
 ) {
-  execFile(preferences.ykmanPath, ["oath", "accounts", "code", key, "-s"], (error, stdout) => {
+  execFile(ykmanExecutable(), ["oath", "accounts", "code", key, "-s"], (error, stdout) => {
     if (error) {
       handleError(error, "Failed to get code", errorCallback, isLoadingCallback);
       return;
@@ -190,7 +192,7 @@ function getAccountList(): {
   const [result, setResult] = useState<Account[]>([]);
 
   useEffect(() => {
-    execFile(preferences.ykmanPath, ["oath", "accounts", "code"], (error, stdout) => {
+    execFile(ykmanExecutable(), ["oath", "accounts", "code"], (error, stdout) => {
       if (error) {
         handleError(error, "Failed to list accounts", setError, setIsLoading);
         return;
@@ -224,6 +226,15 @@ function getAccountList(): {
   }, []);
 
   return { result, isLoading, error };
+}
+
+function ykmanExecutable(): string {
+  if (preferences.ykmanPath && preferences.ykmanPath.length > 0) {
+    return preferences.ykmanPath;
+  } else {
+    const brewPrefix = cpus()[0].model.includes("Apple") ? "/opt/homebrew" : "/usr/local";
+    return path_join(brewPrefix, "bin/ykman");
+  }
 }
 
 function handleError(

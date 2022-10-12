@@ -23,8 +23,8 @@
     {
       "name": "ykmanPath",
       "type": "textfield",
-      "required": true,
-      "title": "Location of ykman",
+      "required": false,
+      "title": "Override location of ykman",
       "description": "Path to ykman CLI tool",
       "placeholder": "Path to ykman CLI tool"
     },
