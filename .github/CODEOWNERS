@@ -397,6 +397,7 @@
 /extensions/oss-browser                              @404J
 /extensions/ossinsight                               @k8scat @pernielsentikaer
 /extensions/pagerduty                                @horimislime
+/extensions/palette-colors                           @douglas-pires
 /extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @BartoszJarocki @BartoszJarocki
 /extensions/parallels-virtual-machines               @danpalmer
