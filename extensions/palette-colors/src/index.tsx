@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActionPanel, Action, Grid } from "@raycast/api";
-import { Theme, Color, BackgroundColor } from "@adobe/leonardo-contrast-colors";
+import { Theme, Color } from "@adobe/leonardo-contrast-colors";
 import ColorScheme from "color-scheme";
+import { Cache } from "@raycast/api";
+import { baseBackgroundColor, colorsKey, SchemeTypes, typeKey } from "./constants";
 
-const random = new BackgroundColor({
-  name: "random",
-  colorKeys: ["#cadada"],
-});
+const cache = new Cache();
 
 const generateColors = (schemeType = "mono"): string[] => {
   const scheme = new ColorScheme();
@@ -23,29 +22,52 @@ const generateColors = (schemeType = "mono"): string[] => {
     });
   });
 
-  const theme = new Theme({ colors, backgroundColor: random, lightness: 7 });
+  const theme = new Theme({ colors, backgroundColor: baseBackgroundColor, lightness: 7 });
 
   return Array.from(new Set<string>(theme.contrastColorValues)).sort();
 };
 
 export default function Command() {
-  const [type, setType] = useState("mono");
-  const [colors, setColors] = useState(generateColors(type));
+  const [type, setType] = useState(() => cache.get(typeKey) || SchemeTypes.Mono);
+  const [colors, setColors] = useState(() => {
+    const cachedColors = cache.get(colorsKey);
+
+    if (cachedColors) {
+      try {
+        return JSON.parse(cachedColors);
+      } catch (_error) {
+        // ignore and generate new colors
+      }
+    }
+
+    return generateColors(type);
+  });
+  const prevType = useRef<string>();
 
   useEffect(() => {
-    setColors(generateColors(type));
+    if (type && prevType.current !== type && cache.get(typeKey) !== type) {
+      const newColors = generateColors(type);
+
+      setColors(newColors);
+
+      cache.set(colorsKey, JSON.stringify(newColors));
+      cache.set(typeKey, type);
+    }
   }, [type]);
+
+  useEffect(() => {
+    cache.set(colorsKey, JSON.stringify(colors));
+  }, [colors]);
 
   return (
     <Grid
-      inset={Grid.Inset.Large}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Select Color Scheme Variant" storeValue onChange={(newValue) => setType(newValue)}>
           <Grid.Dropdown.Section title="Color Scheme Variants">
-            <Grid.Dropdown.Item title="Mono" value="mono" />
-            <Grid.Dropdown.Item title="Contrast" value="contrast" />
-            <Grid.Dropdown.Item title="Tetrade" value="tetrade" />
-            <Grid.Dropdown.Item title="Analogic" value="analogic" />
+            <Grid.Dropdown.Item title="Mono" value={SchemeTypes.Mono} />
+            <Grid.Dropdown.Item title="Contrast" value={SchemeTypes.Contrast} />
+            <Grid.Dropdown.Item title="Tetrade" value={SchemeTypes.Tetrade} />
+            <Grid.Dropdown.Item title="Analogic" value={SchemeTypes.Analogic} />
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
@@ -53,12 +75,14 @@ export default function Command() {
       {colors.map((color: string) => (
         <Grid.Item
           key={color}
+          title={color}
           content={{
             color,
           }}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={color} />
+              <Action title="Reload colors" onAction={() => setColors(generateColors(type))} />
             </ActionPanel>
           }
         />
