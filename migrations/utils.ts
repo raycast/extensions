@@ -3,10 +3,12 @@ import { JSCodeshift, Collection } from "jscodeshift";
 export function renameJSXProp(
   j: JSCodeshift,
   root: Collection<any>,
+  component: string,
   from: string,
   to: string
 ) {
   root
+    .find(j.JSXOpeningElement, { name: { name: "List" } })
     .find(j.JSXAttribute, { name: { type: "JSXIdentifier", name: from } })
     .forEach((p) => {
       if (p.node.type !== "JSXAttribute") {
