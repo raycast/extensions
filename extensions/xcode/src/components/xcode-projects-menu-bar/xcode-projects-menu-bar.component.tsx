@@ -7,24 +7,25 @@ import { XcodeProjectMenuBarService } from "../../services/xcode-project-menu-ba
  * Xcode Projects Menu Bar
  */
 export function XcodeProjectsMenuBar(): JSX.Element {
-  const xcodeProjects = usePromise(XcodeProjectMenuBarService.xcodeProjects);
+  const menuBarList = usePromise(XcodeProjectMenuBarService.list);
   return (
-    <MenuBarExtra
-      isLoading={xcodeProjects.isLoading}
-      icon="xcode-menu-bar-icon.png"
-      tooltip="Show Recent Xcode Projects"
-    >
+    <MenuBarExtra isLoading={menuBarList.isLoading} icon="xcode-menu-bar-icon.png" tooltip="Show Recent Xcode Projects">
+      {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Item title="Favorites" /> : null}
+      {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Separator /> : null}
+      {menuBarList.data?.favoriteXcodeProjects.map((xcodeProject) => {
+        return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
+      })}
       <MenuBarExtra.Item
         title={
-          xcodeProjects.isLoading
+          menuBarList.isLoading
             ? "Loading..."
-            : xcodeProjects.data?.length
-            ? "Recent Xcode Projects"
+            : menuBarList.data?.recentXcodeProjects.length
+            ? "Recents"
             : "No Recent Xcode Projects"
         }
       />
-      {xcodeProjects.data?.length ? <MenuBarExtra.Separator /> : null}
-      {xcodeProjects.data?.map((xcodeProject) => {
+      {menuBarList.data?.recentXcodeProjects.length ? <MenuBarExtra.Separator /> : null}
+      {menuBarList.data?.recentXcodeProjects.map((xcodeProject) => {
         return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
       })}
     </MenuBarExtra>
