@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "iMessage-2fa",
-  "title": "iMessage 2FA",
+  "name": "imessage-2fa",
+  "title": "IMessage 2FA",
   "description": "iMessage Two Factor Authentication Code",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "iMessage 2FA",
+      "title": "IMessage 2FA",
       "description": "iMessage Two Factor Authentication Code",
       "mode": "view"
     }
