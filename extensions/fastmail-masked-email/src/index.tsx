@@ -8,7 +8,7 @@ import {
   Toast,
   showHUD,
   closeMainWindow,
-  useNavigation,
+  Icon,
 } from "@raycast/api";
 import fetch from "node-fetch";
 
@@ -23,15 +23,12 @@ type Values = {
 export default () => {
   const preference = getPreferenceValues<Preferences>();
 
-  const { pop } = useNavigation();
-
   const handleSubmit = async (values: Values) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating masked email..." });
     try {
       const email = await create_masked_email(preference.api_token, values.description);
       Clipboard.copy(email);
       await toast.hide();
-      pop();
       await closeMainWindow({ clearRootSearch: true });
       await showHUD("🎉 Masked email address copied to clipboard");
     } catch (e) {
@@ -46,7 +43,7 @@ export default () => {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Masked Email" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Masked Email" icon={Icon.EyeDisabled} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
