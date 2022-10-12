@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "palette-colors",
   "title": "Palette Colors",
-  "description": "Pick nice colors",
+  "description": "Pick nice palette colors directly from Raycast",
   "icon": "command-icon.png",
   "author": "douglas-pires",
   "categories": [
@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.13",
+    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.16",
     "@raycast/api": "^1.40.3",
     "color-scheme": "^1.0.1"
   },
