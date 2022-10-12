@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fastmail-masked-email",
-  "title": "Masked Email",
+  "title": "Fastmail Masked Email",
   "description": "Create a masked email address with Fastmail.",
   "icon": "mask.png",
   "author": "LightQuantum",
