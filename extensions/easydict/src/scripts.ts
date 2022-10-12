@@ -166,7 +166,7 @@ export function appleLanguageDetect(
 }
 
 function abortCommand(type: RequestType, abortController?: AbortController): RequestErrorInfo | undefined {
-  console.log(`timeout, abortExecaCommand: ${type}, abortController: ${JSON.stringify(abortController, null, 2)}`);
+  console.log(`timeout, abortExecaCommand: ${type}, abortController: ${JSON.stringify(abortController, null, 4)}`);
 
   if (abortController) {
     abortController?.abort();

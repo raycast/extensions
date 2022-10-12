@@ -43,6 +43,12 @@
 
 ---
 
+
+
+### 有道词典
+
+
+
 ### [Linguee 词典](https://www.linguee.com/)：英语 <--> 中文
 
 ![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
@@ -148,6 +154,8 @@ npm install && npm run dev
 ##### Linguee 词典
 
 支持 19 种语言，（中文，日语，俄语），英语，法语，西班牙语，葡萄牙语，意大利语，德语，瑞典语，罗马尼亚语，斯洛伐克语，荷兰语，匈牙利语，希腊语，丹麦语，芬兰语，波兰语，捷克语。
+
+Linguee 默认支持系统代理。
 
 #### 翻译
 
@@ -277,6 +285,23 @@ npm install && npm run dev
 
 > 注意 ⚠️：请不要在使用抓包工具 MitM 的情况下开启 `Use System Proxy`，否则部分服务请求会报证书错误，例如 https://github.com/tisfeng/Raycast-Easydict/issues/18 。
 
+### PopClip 调用
+
+你需要先安装 [PopClip](https://pilotmoon.com/popclip/)，然后为 `Easydict`添加一个快捷键，如 `Cmd + E`，那么你就可以通过 `PopClip` 快速打开 `Easydict` 啦！
+
+使用方法：选中以下代码块，`PopClip` 会显示 "安装 Easydict"，点击它即可。
+
+```
+# popclip
+
+  name: Easydict
+  icon: search E
+  key combo: command E
+
+```
+
+> 参考: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+
 ### 翻译服务
 
 为了方便使用，我们提供了一些内置翻译服务的 appId 和 appKey，但这些服务本身是有请求频率限制的。如果许多人同时使用它们，它可能会变慢甚至停止。因此，为了获得更好的使用体验，您最好申请自己的 appId 和 appKey，替换内置的服务。
@@ -301,9 +326,7 @@ npm install && npm run dev
 
 ## 友情推荐
 
-[`Bob`](https://bobtranslate.com/) 是一款 macOS 平台 **翻译** 和 **OCR** 软件。 Bob 或许是 MacOS 平台上最好用的翻译应用，而且还免费！
-
-> 更新：Bob 目前已上架 Mac App Store，欢迎尝试支持 [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
+[`Bob`](https://bobtranslate.com/) 是一款 macOS 平台 **翻译** 和 **OCR** 软件。
 
 ![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
 

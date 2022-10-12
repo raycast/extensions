@@ -97,7 +97,7 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
           return reject(undefined);
         }
 
-        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
@@ -174,7 +174,7 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(undefined);
         }
 
-        console.log(`Volcano detect err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano detect err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });

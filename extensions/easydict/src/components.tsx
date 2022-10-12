@@ -2,14 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 19:49
+ * @lastEditTime: 2022-10-12 22:44
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, openCommandPreferences } from "@raycast/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import { sayTruncateCommand } from "./audio";
 import { getShowMoreDetailMarkdown } from "./dataManager/utils";
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
