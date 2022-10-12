@@ -19,7 +19,7 @@ export default function PlantListItem({ plant }: PlantListItemProps) {
       ]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Full Details" url={plant.link} />
+          <Action.OpenInBrowser title="Show Full Details" url={plant.link} />
         </ActionPanel>
       }
       detail={<PlantListItemDetail plant={plant} />}
