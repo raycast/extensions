@@ -20,7 +20,7 @@ export interface Data {
 }
 export default function Command() {
   const userPreference: Preferences = getPreferenceValues();
-  const { isLoading, data, error } = useFetch<Data>(
+  const { isLoading, data } = useFetch<Data>(
     `https://api.aladhan.com/v1/timingsByCity?city=${encodeURI(userPreference.city)}&country=${encodeURI(
       userPreference.country
     )}&method=${encodeURI(userPreference.calculation_methods)}`,
@@ -47,13 +47,15 @@ export default function Command() {
       <MenuBarExtra.Item title={`Asr: ${data?.data.timings.Asr}`} icon={Icon.Sun} />
       <MenuBarExtra.Item title={`Maghrib: ${data?.data.timings.Maghrib}`} icon={Icon.Moon} />
       <MenuBarExtra.Item title={`Isha: ${data?.data.timings.Isha}`} icon={Icon.Moon} />
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title="Change city or country"
-        onAction={() => {
-          openCommandPreferences();
-        }}
-      />
+
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Change city or country"
+          onAction={() => {
+            openCommandPreferences();
+          }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
