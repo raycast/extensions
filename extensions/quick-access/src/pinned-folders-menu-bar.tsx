@@ -125,7 +125,7 @@ function FolderMenuBarItem(props: { directory: DirectoryWithFileInfo; primaryAct
           />
           <MenuBarExtra.Item
             icon={Icon.Trash}
-            title={"Remove"}
+            title={"Delete"}
             onAction={async () => {
               await trash(fileValue.path);
             }}
