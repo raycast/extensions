@@ -300,11 +300,11 @@
       "default": true
     },
     {
-      "name": "enableOpenInEudic",
+      "name": "showCopyTextFirst",
       "type": "checkbox",
-      "label": "Show Open In Eudic",
+      "label": "Show Copy Text First",
       "required": false,
-      "description": "Show `Open In Eudic` in action panel if Eudic is installed",
+      "description": "If enabled, `Copy Text` action will be shown in the first, else will be shown `Open In Eudic`",
       "default": true
     },
     {

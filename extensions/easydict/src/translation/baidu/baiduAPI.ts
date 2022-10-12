@@ -291,7 +291,7 @@ export function requestBaiduWebTranslate(queryWordInfo: QueryWordInfo) {
 
   axios(config)
     .then(function (response) {
-      console.log(`---> request Baidu web success: ${JSON.stringify(response.data, null, 2)}`);
+      console.log(`---> request Baidu web success: ${JSON.stringify(response.data, null, 4)}`);
       console.log(`baidu web cost: ${response.headers[requestCostTime]}`);
     })
     .catch(function (error) {

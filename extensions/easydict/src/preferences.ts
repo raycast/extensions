@@ -25,7 +25,7 @@ export interface MyPreferences {
   enableAutomaticPlayWordAudio: boolean;
   enableSelectTargetLanguage: boolean;
   servicesOrder: string;
-  enableOpenInEudic: boolean;
+  showCopyTextFirst: boolean;
   enableSystemProxy: boolean;
   enableLanguageDetectionSpeedFirst: boolean;
 
