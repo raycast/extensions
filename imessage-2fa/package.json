@@ -4,7 +4,10 @@
   "title": "iMessage 2FA",
   "description": "iMessage Two Factor Authentication Code",
   "icon": "iMessage-icon.png",
-  "author": "yuerguang.cl@gmail.com",
+  "author": "yuercl",
+  "contributors": [
+    "yuerguang.cl@gmail.com"
+  ],
   "categories": [
     "Productivity"
   ],
