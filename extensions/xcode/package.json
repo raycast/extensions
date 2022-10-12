@@ -151,8 +151,8 @@
       "mode": "view"
     },
     {
-      "name": "xcode-releases.command",
-      "title": "Xcode Releases",
+      "name": "search-xcode-releases.command",
+      "title": "Search Xcode Releases",
       "subtitle": "Xcode",
       "description": "Search, download and view the latest Xcode Releases.",
       "mode": "view"
