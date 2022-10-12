@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.16",
+    "@adobe/leonardo-contrast-colors": "1.0.0-alpha.13",
     "@raycast/api": "^1.40.3",
     "color-scheme": "^1.0.1"
   },
