@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "append-clipboard",
   "title": "Append Clipboard",
-  "description": "Append text to your clipboard with different separators",
-  "icon": "append-clipboard.png",
+  "description": "Append or prepend selected text to your clipboard with different separators",
+  "icon": "extension-icon.png",
   "author": "koinzhang",
   "categories": [
     "Developer Tools",
@@ -14,7 +14,8 @@
     {
       "name": "append-text-to-clipboard",
       "title": "Append Text to Clipboard",
-      "description": "Append text to your clipboard with different separators",
+      "icon": "append-clipboard.png",
+      "description": "Append selected text to your clipboard with different separators",
       "mode": "no-view",
       "preferences": [
         {
@@ -23,6 +24,73 @@
           "required": true,
           "title": "Append Separator",
           "description": "Separator between text when appending text",
+          "default": "",
+          "data": [
+            {
+              "title": "No Separator",
+              "value": ""
+            },
+            {
+              "title": "⏎",
+              "value": "\n"
+            },
+            {
+              "title": "␣",
+              "value": " "
+            },
+            {
+              "title": ",",
+              "value": ","
+            },
+            {
+              "title": ".",
+              "value": "."
+            },
+            {
+              "title": ";",
+              "value": ";"
+            },
+            {
+              "title": ":",
+              "value": ":"
+            },
+            {
+              "title": "/",
+              "value": "/"
+            },
+            {
+              "title": "|",
+              "value": "|"
+            },
+            {
+              "title": "+",
+              "value": "+"
+            },
+            {
+              "title": "-",
+              "value": "-"
+            },
+            {
+              "title": "=",
+              "value": "="
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prepend-text-to-clipboard",
+      "title": "Prepend Text to Clipboard",
+      "icon": "prepend-clipboard.png",
+      "description": "Prepend selected text to your clipboard with different separators",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "appendSeparator",
+          "type": "dropdown",
+          "required": true,
+          "title": "Prepend Separator",
+          "description": "Separator between text when prepending text",
           "default": "",
           "data": [
             {
