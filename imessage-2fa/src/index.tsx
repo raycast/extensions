@@ -18,7 +18,7 @@ interface State {
 }
 
 const DB_PATH = homedir() + "/Library/Messages/chat.db";
-const lookBackMinutes = 60 * 24 * 7;
+const lookBackMinutes = 60 * 24;
 const sql = `select
   message.rowid,
   ifnull(handle.uncanonicalized_id, chat.chat_identifier) AS sender,
