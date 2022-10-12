@@ -1,6 +1,10 @@
 # Common Directory Changelog
 
-## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+## [Extension Optimization] - {PR_MERGE_DATE}
+
+- Some small optimizations
+
+## [Add actions to Menu Bar command] - 2022-09-28
 
 - Add new actions to menu bar commands: Open(Left click) and Show(Right click)
 
