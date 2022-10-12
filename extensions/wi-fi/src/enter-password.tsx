@@ -1,16 +1,16 @@
-import { Action, ActionPanel, Color, Form, LocalStorage, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Cache, Color, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import wifi, { WiFiNetwork } from "node-wifi";
-import Style = Toast.Style;
-import { WifiPassword } from "./types/types";
+import { WifiPasswordCache } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
+import Style = Toast.Style;
 
 export default function EnterPassword(props: {
-  wifiPassword: WifiPassword[];
+  wifiPasswordCaches: WifiPasswordCache[];
   wifiNetWork: WiFiNetwork;
   setRefresh: Dispatch<SetStateAction<number>>;
 }) {
-  const { wifiPassword, wifiNetWork, setRefresh } = props;
+  const { wifiPasswordCaches, wifiNetWork, setRefresh } = props;
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [password, setPassword] = useState<string>("");
 
@@ -20,11 +20,11 @@ export default function EnterPassword(props: {
       actions={
         <ActionPanel>
           <Action
-            icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: Icon.Wifi, tintColor: Color.PrimaryText }}
             title={"Connect Wi-Fi"}
             onAction={async () => {
               if (password.length == 0) {
-                setPasswordError("The field should't be empty!");
+                setPasswordError("The field can't be empty!");
                 return;
               }
               const toast = await showToast(Style.Animated, "Connecting...");
@@ -32,8 +32,9 @@ export default function EnterPassword(props: {
                 setRefresh(Date.now());
                 const curWifi = await wifi.getCurrentConnections();
                 if (curWifi[0].ssid === wifiNetWork.ssid) {
+                  const cache = new Cache();
                   let isCache = false;
-                  const newWifiWithPassword = wifiPassword.map((value) => {
+                  const newWifiWithPassword = wifiPasswordCaches.map((value) => {
                     if (value.ssid === wifiNetWork.ssid) {
                       isCache = true;
                       value.password = password;
@@ -43,7 +44,7 @@ export default function EnterPassword(props: {
                   if (!isCache) {
                     newWifiWithPassword.push({ ssid: wifiNetWork.ssid, password: password });
                   }
-                  await LocalStorage.setItem(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
+                  cache.set(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
                   await showHUD(`Connected to ${wifiNetWork.ssid} successfully`);
                   await toast.hide();
                   await popToRoot();
