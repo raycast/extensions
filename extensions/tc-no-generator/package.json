@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tc-no-generator",
+  "title": "TC NO Generator",
+  "description": "tc no üretip clipboarda kopyalar",
+  "icon": "cmd-icon.png",
+  "author": "denizyoldas",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tc-no-generate",
+      "title": "Generate Tc No",
+      "subtitle": "Tc No",
+      "description": "tc no üretip kopyalar",
+      "mode": "no-view"
+    },
+    {
+      "name": "last-tc",
+      "title": "Copy last Tc No",
+      "subtitle": "TC No",
+      "description": "son üretilen TcNo kopyalar",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.40.3"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
