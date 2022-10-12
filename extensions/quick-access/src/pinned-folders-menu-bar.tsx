@@ -22,16 +22,17 @@ export default function SearchPinnedFolders() {
       icon={{ source: { light: "pinned-folders-menu-bar.png", dark: "pinned-folders-menu-bar@dark.png" } }}
       isLoading={loading}
     >
-      {pinnedDirectoryWithFiles.length !== 0 && <MenuBarExtra.Item title={"Pinned Folder"} />}
-      {pinnedDirectoryWithFiles.map((directory) => (
-        <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
-      ))}
+      <MenuBarExtra.Section title={"Pinned Folder"}>
+        {pinnedDirectoryWithFiles.map((directory) => (
+          <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
+        ))}
+      </MenuBarExtra.Section>
       <MenuBarExtra.Separator />
-
-      {openDirectoryWithFiles.length !== 0 && <MenuBarExtra.Item title={"Open Folder"} />}
-      {openDirectoryWithFiles.map((directory) => (
-        <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
-      ))}
+      <MenuBarExtra.Section title={"Open Folder"}>
+        {openDirectoryWithFiles.map((directory) => (
+          <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
+        ))}
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item

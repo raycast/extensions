@@ -152,12 +152,7 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
         return value.files.length != 0;
       });
       if (noEmptyDirectoryContent.length > 0) {
-        const copyResult = await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
-        if (isEmpty(copyResult)) {
-          await showToast(Toast.Style.Success, `${noEmptyDirectoryContent[0].files[0].name} is copied to clipboard!`);
-        } else {
-          await showToast(Toast.Style.Failure, copyResult + ".");
-        }
+        await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
       }
       setIsCopy(true);
     }
