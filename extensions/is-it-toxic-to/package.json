@@ -15,7 +15,6 @@
     {
       "name": "index",
       "title": "Is It Toxic To?",
-      "subtitle": "IITT",
       "description": "Check if a plant is toxic to an animal",
       "mode": "view"
     }
