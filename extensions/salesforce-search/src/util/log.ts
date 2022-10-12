@@ -1,3 +1,3 @@
-import { environment } from "@raycast/api"
+import { environment } from "@raycast/api";
 
-export const log = environment.isDevelopment ? console.log : (message?: any, ...optionalParams: any[]) => {} // eslint-disable-line
+export const log: typeof console.log = environment.isDevelopment ? console.log : () => undefined;

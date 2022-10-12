@@ -1,7 +1,7 @@
 # Salesforce Search
 This extension allows you to search for accounts, contacts, opportunities, dashboards and reports and optionally additional (custom) objects in Salesforce and open them in the browser. 
 
-![Salesforce Search Screenshot](metadata/ext-1.png)
+![Salesforce Search Screenshot](metadata/salesforce-1.png)
 
 The extension provides these features:
 
@@ -18,7 +18,7 @@ The extension provides these features:
 ### Initial setup
 When you call the extension for the first time you need to provide two values:
 
-![Extension Basic Configuration](metadata/ext-setup.png)
+![Extension Basic Configuration](metadata/salesforce-setup.png)
 
 - **Domain:** The name of your Salesforce "my-domain". In `https://acme.my.salesforce.com/` the text `acme` is the "my-domain".
 - **Consumer Key:** You will receive this value from your Salesforce admin, who got it after creating the connected app.
@@ -28,7 +28,7 @@ When you call the extension for the first time you need to provide two values:
 
 After you've submitted the configuration fields, the OAuth authentication process will start. Confirm the request of the browser to open the Raycast app.
 
-![Extension Login](metadata/ext-login.png)
+![Extension Login](metadata/salesforce-login.png)
 
 ### Custom Record Types
 **Disclaimer:** This is some kind of a pro feature. You need to understand the data model in your Salesforce instance including relations. If you use the wrong syntax or specify non-existing stuff, the extension will fail hard with a cryptic error.
@@ -42,7 +42,7 @@ That being said: The extension allows you to configure further record types to s
 3. Select the **Salesforce Search** extension in the list
 4. Specify your **additional object types** using the syntax described below
 
-![Extension Configuration](metadata/ext-config.png)
+![Extension Configuration](img/salesfoce-config.png)
 
 #### Custom Object Type Syntax
 This is the syntax for specifying custom objects:
@@ -113,4 +113,4 @@ To enable your users to use the Salesforce Raycast extension, you need to create
 5. **Save** the new app
 6. Copy the **Consumer Key** shown after the app has been created and provide it to your users, who want to use the salesforce raycast extension. This key is _not_ confidential – you can distribute it to your users without worries.
 
-![App Creation Page](metadata/salesforce-admin.png)
+![App Creation Page](img/salesforce-admin.png)
