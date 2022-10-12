@@ -143,15 +143,16 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
+      <MenuBarExtra.Section title="New" />
       {newBookmarks.map((bookmark) => (
         <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
       ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived>
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
@@ -238,6 +239,7 @@ export default function Command() {
 | title<mark style="color:red;">*</mark> | The main title displayed for this item. | <code>string</code> | - |
 | icon | An optional icon for this item. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | A shortcut used to invoke this item when its parent menu is open. | <code>[Keyboard.Shortcut](keyboard.md#keyboard.shortcut)</code> | - |
+| subtitle | The subtitle displayed for this item in a slightly dimmed text color. | <code>string</code> | - |
 | tooltip | A tooltip to display when the cursor hovers the item. | <code>string</code> | - |
 | onAction | An action handler called when the user clicks the item. | <code>(event: [MenuBarExtra.ActionEvent](menu-bar-commands.md#menubarextra.actionevent)) => void</code> | - |
 
@@ -298,9 +300,9 @@ export default function Command() {
 | children | `MenuBarExtra.Item`s, `MenuBarExtra.Submenu`s, `MenuBarExtra.Separator` or a mix of either. | <code>React.ReactNode</code> | - |
 | icon | An optional icon for this submenu. | <code>[Image.ImageLike](user-interface/icons-and-images.md#image.imagelike)</code> | - |
 
-### MenuBarExtra.Separator
+### MenuBarExtra.Section
 
-An item that shows a separator line. Use it for grouping and visually separating menu items.
+An item to group related menu items. It has an optional title and a separator is added automatically between sections.
 
 #### Example
 
@@ -313,19 +315,27 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
-      {newBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      <MenuBarExtra.Section title="New">
+        {newBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived">
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
 ```
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| children | The item elements of the section. | <code>React.ReactNode</code> | - |
+| title | Title displayed above the section | <code>string</code> | - |
 
 ## Types
 

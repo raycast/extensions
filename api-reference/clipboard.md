@@ -8,12 +8,12 @@ The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytocli
 
 ### Clipboard.copy
 
-Copies text to the clipboard.
+Copies text or a file to the clipboard.
 
 #### Signature
 
 ```typescript
-async function copy(text: string): Promise<void>;
+async function copy(content: string | Content): Promise<void>;
 ```
 
 #### Example
@@ -22,7 +22,19 @@ async function copy(text: string): Promise<void>;
 import { Clipboard } from "@raycast/api";
 
 export default async () => {
+  // copy some text
   await Clipboard.copy("https://raycast.com");
+  
+  const textContent: Clipboard.Content = {
+    text: "https://raycast.com",
+  }
+  await Clipboard.copy(textContent);
+
+  // copy a file
+  const fileContent: Clipboard.Content = {
+    file: "/path/to/file.pdf",
+  }
+  await Clipboard.copy(fileContent);
 };
 ```
 
@@ -30,20 +42,20 @@ export default async () => {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| text<mark style="color:red;">*</mark> | The text to copy to the clipboard. | <code>string</code> |
+| content<mark style="color:red;">*</mark> | The content to copy to the clipboard. | <code>string</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
 
 #### Return
 
-A Promise that resolves when the text is copied to the clipboard.
+A Promise that resolves when the content is copied to the clipboard.
 
 ### Clipboard.paste
 
-Pastes text to the current selection of the frontmost application.
+Pastes text or a file to the current selection of the frontmost application.
 
 #### Signature
 
 ```typescript
-async function paste(text: string): Promise<void>;
+async function paste(content: string | Content): Promise<void>;
 ```
 
 #### Example
@@ -60,11 +72,11 @@ export default async () => {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| text<mark style="color:red;">*</mark> | The text to insert at the cursor. | <code>string</code> |
+| content<mark style="color:red;">*</mark> | The content to insert at the cursor. | <code>string</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
 
 #### Return
 
-A Promise that resolves when the text is pasted.
+A Promise that resolves when the content is pasted.
 
 ### Clipboard.clear
 
@@ -114,3 +126,19 @@ export default async () => {
 #### Return
 
 A promise that resolves when the clipboard content was read as plain text.
+
+## Types
+
+### Clipboard.Content
+
+Type of Content that is copied and pasted to and from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file: PathLike;
+    };
+```

@@ -276,7 +276,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
 | children | List sections or items. If [List.Item](list.md#list.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| enableFiltering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter list items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter list items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |

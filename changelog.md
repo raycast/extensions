@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.41.0 - 2022-10-12
+
+### New
+
+- **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
+
+![](.gitbook/assets/grid-styled-sections.png)
+    
+- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now *also* accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
+- **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+- **Menu Bar Extra:** added a new `Section` component, which can be used to better group related `Item`s and/or `Submenu`s. The component has an optional title for the section. At the same time, we are deprecating the `Separator` component.
+- **Menu Bar Extra**: The `Item` component now accepts an optional `subtitle` prop.
+- **Clipboard:** `Clipboard.copy()` and `Clipboard.paste()` methods now accept file paths as a parameter.
+
+### 💎 Improvements
+
+- Improved dark/light mode detection for **Menu Bar Extra** icons.
+- If a **Menu Bar Extra**’s `title` spans multiple lines**,** only the first one will be displayed.
+
+### 🐞 Fixes
+
+- Fixed certain error stack traces causing CPU spikes of the Node process.
+- Fixed an issue with **macOS Ventura Beta** where **Menu Bar Extra**s would sometimes become unresponsive.
+- Fixed the type of the List and Grid’s `onSelectionChange`. It always used to return `null` when no items were selected but the type was `string | undefined`. It is now properly `string | null`. Note that this might trigger some TypeScript error when you upgrade but it should help you fix some bugs.
+
 ## 1.40.0 - 2022-09-28
 
 ### ✨ New

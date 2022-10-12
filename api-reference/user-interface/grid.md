@@ -11,7 +11,7 @@ Because its API tries to stick as closely to [List](list.md#list)'s as possible,
 - renaming all [List.Item](list.md#list.item)s' h`icon` prop to `content`
 - removing all [List.Item](list.md#list.item)s' `accessories`, `accessoryIcon` and `accessoryTitle props; [Grid.Item](#grid.item) does not _currently_ support accessories
 - finally, replacing all usages of `List` with `Grid`.
-{% endhint %}
+  {% endhint %}
 
 ![](../../.gitbook/assets/grid.png)
 
@@ -43,7 +43,7 @@ export default function Command() {
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Medium}
+      columns={5}
       inset={Grid.Inset.Large}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
@@ -115,7 +115,7 @@ import { Grid } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Grid itemSize={Grid.ItemSize.Small} inset={Grid.Inset.Large}>
+    <Grid columns={8} inset={Grid.Inset.Large}>
       <Grid.Item content="🥳" />
       <Grid.Item content="🙈" />
     </Grid>
@@ -206,7 +206,7 @@ export default function CommandWithCustomEmptyView() {
 
 ### Grid
 
-Displays [Grid.Section](#grid.section) or [Grid.Item](#grid.item).
+Displays [Grid.Section](#grid.section)s or [Grid.Item](#grid.item)s.
 
 The grid uses built-in filtering by indexing the title & keywords of its items.
 
@@ -223,7 +223,7 @@ const items = [
 export default function Command() {
   return (
     <Grid
-      itemSize={Grid.ItemSize.Medium}
+      columns={5}
       inset={Grid.Inset.Large}
       navigationTitle="Search Emoji"
       searchBarPlaceholder="Search your favorite emoji"
@@ -241,11 +241,13 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
+| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | Grid sections or items. If [Grid.Item](grid.md#grid.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | 5 |
 | enableFiltering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter grid items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
 | inset | Indicates how much space there should be between a [Grid.Item](grid.md#grid.item)s' content and its borders. The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
-| itemSize | The number of items that should be displayed on a single row. | <code>[Grid.ItemSize](grid.md#grid.itemsize)</code> | [Grid.ItemSize.Medium](grid.md#grid.itemsize) |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
 | searchBarAccessory | [Grid.Dropdown](grid.md#grid.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[Grid.Dropdown.Props](grid.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search value..."` |
@@ -475,7 +477,14 @@ A group of related [Grid.Item](#grid.item).
 
 Sections are a great way to structure your grid. For example, you can group photos taken in the same place or in the same day. This way, the user can quickly access what is most relevant.
 
+Sections can specify their own `columns`, `fit`, `aspectRatio` and `inset` props, separate from what is defined on the main [Grid](#grid) component.
+
 #### Example
+
+![](../../.gitbook/assets/grid-styled-sections.png)
+
+{% tabs %}
+{% tab title="GridWithSection.tsx" %}
 
 ```typescript
 import { Grid } from "@raycast/api";
@@ -494,11 +503,46 @@ export default function Command() {
 }
 ```
 
+{% endtab %}
+{% tab title="GridWithStyledSection.tsx" %}
+
+```typescript
+import { Grid, Color } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Grid columns={6}>
+      <Grid.Section aspectRatio="2/3" title="Movies">
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+      </Grid.Section>
+      <Grid.Section columns={8} title="Colors">
+        {Object.entries(Color).map(([key, value]) => (
+          <Grid.Item key={key} content={{ color: value }} title={key} />
+        ))}
+      </Grid.Section>
+    </Grid>
+  );
+}
+```
+
+{% endtab %}
+
+{% endtabs %}
+
 #### Props
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
+| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | The [Grid.Item](grid.md#grid.item) elements of the section. | <code>React.ReactNode</code> | - |
+| columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | 5 |
+| fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
+| inset | Inset for the [Grid.Item](grid.md#grid.item) element content. Defaults to "none". | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
 | subtitle | An optional subtitle displayed next to the title of the section. | <code>string</code> | - |
 | title | Title displayed above the section. | <code>string</code> | - |
 
@@ -506,7 +550,7 @@ export default function Command() {
 
 ### Grid.Inset
 
-An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s `itemSize` prop.
+An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s or [Grid.Section](#grid.section)'s `columns` prop.
 
 #### Enumeration members
 
@@ -516,7 +560,7 @@ An enum representing the amount of space there should be between a Grid Item's c
 | Medium | Medium insets |
 | Large  | Large insets  |
 
-### Grid.ItemSize
+### Grid.ItemSize (deprecated)
 
 An enum representing the size of the Grid's child [Grid.Item](#grid.item)s.
 
@@ -527,3 +571,14 @@ An enum representing the size of the Grid's child [Grid.Item](#grid.item)s.
 | Small  | Fits 8 items per row. |
 | Medium | Fits 5 items per row. |
 | Large  | Fits 3 items per row. |
+
+### Grid.Fit
+
+An enum representing how [Grid.Item](#grid.item)'s content should be fit.
+
+#### Enumeration members
+
+| Name    | Description                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Contain | The content will be contained within the grid cell, with vertical/horizontal bars if its aspect ratio differs from the cell's.  |
+| Fill    | The content will be scaled proportionally so that it fill the entire cell; parts of the content could end up being cropped out. |
