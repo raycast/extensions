@@ -21,7 +21,7 @@ export default function CreateTaskForm(props: {
 }) {
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps, values, focus, setValue } = useForm<TaskFormValues>({
+  const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
     async onSubmit(values) {
       const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
       await toast.show();
@@ -76,9 +76,7 @@ export default function CreateTaskForm(props: {
           },
         };
 
-        setValue("name", "");
-        setValue("description", "");
-        setValue("due_date", undefined!);
+        reset({ name: "", description: "", due_date: null });
 
         focus("name");
       } catch (error) {
@@ -112,9 +110,8 @@ export default function CreateTaskForm(props: {
     });
 
     return selectedProjects
-      ?.map((project) => {
-        return project.custom_field_settings.map((setting) => setting.custom_field);
-      })
+      ?.filter((project) => project.custom_field_settings && project.custom_field_settings.length > 0)
+      ?.map((project) => project.custom_field_settings?.map((setting) => setting.custom_field))
       .flat();
   }, [values.projects]);
 
@@ -135,23 +132,18 @@ export default function CreateTaskForm(props: {
         })}
       </Form.Dropdown>
 
-      {allProjects && allProjects.length > 0 ? (
-        <Form.TagPicker title="Projects" placeholder="Select one or more projects" storeValue {...itemProps.projects}>
-          {allProjects.map((project) => {
-            return (
-              <Form.TagPicker.Item
-                key={project.gid}
-                icon={getProjectIcon(project)}
-                title={project.name}
-                value={project.gid}
-              />
-            );
-          })}
-        </Form.TagPicker>
-      ) : (
-        // Provide a dummy form element to prevent any flickering
-        <Form.TagPicker id="dummy-projects" title="Projects" />
-      )}
+      <Form.TagPicker title="Projects" placeholder="Select one or more projects" storeValue {...itemProps.projects}>
+        {allProjects?.map((project) => {
+          return (
+            <Form.TagPicker.Item
+              key={project.gid}
+              icon={getProjectIcon(project)}
+              title={project.name}
+              value={project.gid}
+            />
+          );
+        })}
+      </Form.TagPicker>
 
       <Form.Separator />
 
@@ -159,25 +151,20 @@ export default function CreateTaskForm(props: {
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
-      {users && users?.length > 0 ? (
-        <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
-          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+      <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
-          {users.map((user) => {
-            return (
-              <Form.Dropdown.Item
-                key={user.gid}
-                value={user.gid}
-                title={user.gid === me?.gid ? `${user.name} (me)` : user.name}
-                icon={getAvatarIcon(user.name)}
-              />
-            );
-          })}
-        </Form.Dropdown>
-      ) : (
-        // Provide a dummy form element to prevent any flickering
-        <Form.Dropdown id="dummy-assignee" title="Assignee" />
-      )}
+        {users?.map((user) => {
+          return (
+            <Form.Dropdown.Item
+              key={user.gid}
+              value={user.gid}
+              title={user.gid === me?.gid ? `${user.name} (me)` : user.name}
+              icon={getAvatarIcon(user.name)}
+            />
+          );
+        })}
+      </Form.Dropdown>
 
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />
 
