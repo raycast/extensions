@@ -49,7 +49,7 @@ const parseLogseqConfig = () => {
 };
 
 export const getPreferredFormat = () => {
-  return parseLogseqConfig().then((v: any) => v["preferred-format"]);
+  return parseLogseqConfig().then((v: any) => v["preferred-format"] || "md");
 };
 
 const parseJournalFileNameFromLogseqConfig = () => {
