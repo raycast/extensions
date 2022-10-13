@@ -1,25 +1,20 @@
-import { List, environment, ActionPanel, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
 import { homedir } from "os";
-import initSqlJs from "sql.js";
-import path from "path";
-import { readFileSync } from "fs";
+import { resolve } from "path";
 
 interface Message {
-  id: string;
+  guid: string;
   code: string;
   message_date: string;
   sender: string;
-  message: string;
-}
-interface State {
-  items?: Message[];
-  error?: Error;
+  text: string;
 }
 
-const DB_PATH = homedir() + "/Library/Messages/chat.db";
+const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 const lookBackMinutes = 60 * 24;
 const sql = `select
+  message.guid,
   message.rowid,
   ifnull(handle.uncanonicalized_id, chat.chat_identifier) AS sender,
   message.service,
@@ -118,39 +113,6 @@ const extractCode = (original: string) => {
   return code;
 };
 
-const fetchMessages = async (setState: React.Dispatch<React.SetStateAction<State>>) => {
-  try {
-    const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
-    const db = readFileSync(DB_PATH);
-    const database = new SQL.Database(db);
-    const statement = database.prepare(sql);
-
-    const results: Message[] = [];
-    while (statement.step()) {
-      const row = statement.getAsObject();
-      const code = extractCode(row.text as string);
-      if (code) {
-        results.push({
-          id: row.ROWID as string,
-          code,
-          message: row.text as string,
-          sender: row.sender as string,
-          message_date: row.message_date as string,
-        });
-      }
-    }
-
-    statement.free();
-
-    setState({ items: results });
-  } catch (error) {
-    console.log("error", error);
-    setState({
-      error: error instanceof Error ? error : new Error("Something went wrong"),
-    });
-  }
-};
-
 const rowWithCopyToClipboard = (item: string) => {
   return (
     <List.Item
@@ -166,38 +128,51 @@ const rowWithCopyToClipboard = (item: string) => {
 };
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
-
-  useEffect(() => {
-    fetchMessages(setState);
-  }, []);
+  const { isLoading, data } = useSQL<Message>(DB_PATH, sql);
+  const result = data
+    ?.map((row) => {
+      const code = extractCode(row.text as string);
+      if (code) {
+        return { ...row, code };
+      }
+    })
+    .filter((x) => !!x);
 
   return (
-    <List isLoading={!state.items && !state.error}>
-      {state.items
-        ?.filter((item) => !!item.code)
-        .map((item) => (
-          <List.Item
-            key={item.id}
-            icon="list-icon.png"
-            title={item.code ?? "No title"}
-            subtitle={item.message}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  target={
-                    <List>
-                      {[`${item.code}`, `${item.message}`, `${item.code}\t${item.message}`].map((x) =>
-                        rowWithCopyToClipboard(x)
-                      )}
-                    </List>
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+    <List isLoading={isLoading}>
+      {result?.length ? (
+        result
+          ?.filter((item) => !!item?.code)
+          .map((item) => (
+            <List.Item
+              key={item?.guid}
+              icon="list-icon.png"
+              title={item?.code ?? "No title"}
+              subtitle={item?.text}
+              accessories={[{ text: item?.sender }, { date: new Date(item?.message_date as string) }]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Show Details"
+                    target={
+                      <List>
+                        {[
+                          `${item?.code}`,
+                          `${item?.text}`,
+                          `${item?.code}\t${item?.text}`,
+                          `Time: ${item?.message_date}`,
+                          `From: ${item?.sender}`,
+                        ].map((x) => rowWithCopyToClipboard(x))}
+                      </List>
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+      ) : (
+        <List.EmptyView title="No two factor authentication codes in the last 24 hours" />
+      )}
     </List>
   );
 }

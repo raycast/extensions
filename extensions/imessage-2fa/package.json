@@ -19,12 +19,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.40.3",
-    "sql.js": "^1.6.2"
+    "@raycast/utils": "^1.4.8"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
     "@types/react": "18.0.9",
-    "@types/sql.js": "^1.4.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
