@@ -1,5 +1,27 @@
 # `Easydict` Changelog
 
+## [v2.5.0] - 2022-10-12
+
+✨ New
+
+- Added support for Youdao Modern Chinese Dictionary.
+
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
+
+![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+
+![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
+
+💎 Improvement
+
+- Improved the action list, changed the default return action to 'Copy Text'.
+- Changed Linguee to support system proxy by default.
+- Changed all lists to support 'Show More Details'.
+
+🐞 Fix
+
+- Fixed many known issues.
+
 ## [v2.4.1] - 2022-10-02
 
 ### 💎 Improvements

@@ -2,40 +2,53 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 17:56
+ * @lastEditTime: 2022-10-13 12:23
  * @fileName: releaseNote.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 export const releaseNote = `
-## [v2.4.1] - 2022-10-02
+## [v2.5.0] - 2022-10-12
 
-本次更新主要修复了 Google 翻译报错问题。
+本次更新主要支持了**现代汉语词典**，方便查询中文词语的拼音和释义了。
+
+### ✨ 新功能
+
+- 新增支持有道现代汉语词典。
+
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
+
+![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+
+![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
+
 
 ### 💎 优化
 
-- 优化了语种识别。
-- 优化了 DeepL 翻译体验，默认使用系统代理（若有的话）。
+- 优化了动作列表，现如果安装了 Eudic，会优先显示 'Open in Eudic' 动作，否则显示 'Copy Text' 动作。可以在设置中更改显示顺序。
+- 修改 Linguee 默认支持系统代理。
+- 修改所有列表都支持显示更多动作。
 
 ### 🐞 修复
 
-- 修复了 Google 翻译报错问题，默认使用系统代理。
-
-> 注意 ⚠️：由于目前 Google 翻译中国版无法使用，只能使用国际版，因此需要走代理才能使用 Google 翻译。
+- 修复了许多已知问题。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
 ---
 
-### 💎 Improvements
+✨ New
 
-- Improved language detection.
-- Improved DeepL translation experience, default to use system proxy (if have).
+- Added support for Youdao Modern Chinese Dictionary.
 
-### 🐞 Fixes
+💎  Improvement
 
-- Fixed Google Translate error, default to use system proxy.
+- Improved the action list, now if Eudic is installed, the 'Open in Eudic' action will be shown first, otherwise the 'Copy Text' action will be shown. You can change the display order in the settings.
+- Changed Linguee to support system proxy by default.
+- Changed all lists to support 'Show More Details'.
 
-> Note ⚠️: Due to the fact that the current Google Translate China version cannot be used, only the international version can be used, so you need to use a proxy to continue to use Google Translate.
+🐞 Fixes
+
+- Fixed many known issues.
 `;

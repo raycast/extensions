@@ -9,7 +9,7 @@
  */
 
 import { preferredLanguages } from "../preferences";
-import { englishLanguageItem } from "./../language/consts";
+import { englishLanguageItem } from "../language/consts";
 
 /**
  * check if the language is preferred language
