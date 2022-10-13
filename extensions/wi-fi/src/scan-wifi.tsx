@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Cache, Color, confirmAlert, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { getWifiList, getWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
@@ -75,8 +75,10 @@ export default function ScanWifi() {
                                   newWifiWithPasswordLis.push(w);
                                 }
                               });
-                              const cache = new Cache();
-                              cache.set(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPasswordLis));
+                              LocalStorage.setItem(
+                                LocalStorageKey.WIFI_PASSWORD,
+                                JSON.stringify(newWifiWithPasswordLis)
+                              );
                               setRefresh(Date.now());
                             },
                           },

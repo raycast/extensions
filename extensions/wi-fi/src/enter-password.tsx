@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Cache, Color, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  LocalStorage,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import wifi, { WiFiNetwork } from "node-wifi";
 import { WifiPasswordCache } from "./types/types";
@@ -32,7 +43,6 @@ export default function EnterPassword(props: {
                 setRefresh(Date.now());
                 const curWifi = await wifi.getCurrentConnections();
                 if (curWifi[0].ssid === wifiNetWork.ssid) {
-                  const cache = new Cache();
                   let isCache = false;
                   const newWifiWithPassword = wifiPasswordCaches.map((value) => {
                     if (value.ssid === wifiNetWork.ssid) {
@@ -44,7 +54,7 @@ export default function EnterPassword(props: {
                   if (!isCache) {
                     newWifiWithPassword.push({ ssid: wifiNetWork.ssid, password: password });
                   }
-                  cache.set(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
+                  await LocalStorage.setItem(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
                   await showHUD(`Connected to ${wifiNetWork.ssid} successfully`);
                   await toast.hide();
                   await popToRoot();
