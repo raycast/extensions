@@ -30,6 +30,15 @@
           "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
           "required": false,
           "default": true
+        },
+        {
+          "name": "autofocusTitle",
+          "type": "checkbox",
+          "title": "Autofocus",
+          "label": "Automatically focus title field",
+          "description": "When enabled, the title field will be automatically focused once the form is rendered.",
+          "required": false,
+          "default": true
         }
       ]
     },
@@ -135,7 +144,7 @@
   "dependencies": {
     "@linear/sdk": "^1.22.0",
     "@raycast/api": "^1.41.0",
-    "@raycast/utils": "^1.4.6",
+    "@raycast/utils": "^1.4.9",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",

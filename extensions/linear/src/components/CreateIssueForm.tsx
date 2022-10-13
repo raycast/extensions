@@ -47,7 +47,7 @@ export type CreateIssueValues = {
   assigneeId: string;
   labelIds: string[];
   estimate: string;
-  dueDate: Date;
+  dueDate: Date | null;
   cycleId: string;
   projectId: string;
   parentId: string;
@@ -55,7 +55,7 @@ export type CreateIssueValues = {
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature } = getPreferenceValues<{ signature: boolean }>();
+  const { signature, autofocusTitle } = getPreferenceValues<{ signature: boolean; autofocusTitle: boolean }>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
@@ -124,11 +124,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             description: "",
             estimate: "",
             labelIds: [],
-            dueDate: undefined,
+            dueDate: null,
             parentId: "",
           });
 
-          focus("title");
+          autofocusTitle ? focus("title") : focus("teamId");
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -211,7 +211,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </>
       ) : null}
 
-      <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
+      <Form.TextField
+        title="Title"
+        placeholder="Issue title"
+        {...(autofocusTitle ? { autoFocus: true } : {})}
+        {...itemProps.title}
+      />
 
       <Form.TextArea
         title="Description"
