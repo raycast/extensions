@@ -37,5 +37,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "title": "Search last days (Number)",
+      "name": "lookBackDays",
+      "type": "textfield",
+      "required": false,
+      "description": "For searching iMessage from N days ago and now",
+      "default": "1"
+    }
+  ]
 }

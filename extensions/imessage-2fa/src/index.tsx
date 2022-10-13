@@ -1,9 +1,8 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import { useSQL } from "@raycast/utils";
-import { homedir } from "os";
-import { resolve } from "path";
+import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
+import useMessageSearch from "./components/SearchMessage";
 
-interface Message {
+export interface Message {
   guid: string;
   code: string;
   message_date: string;
@@ -11,38 +10,11 @@ interface Message {
   text: string;
 }
 
-const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
-const lookBackMinutes = 60 * 24;
-const sql = `select
-  message.guid,
-  message.rowid,
-  ifnull(handle.uncanonicalized_id, chat.chat_identifier) AS sender,
-  message.service,
-  datetime(message.date / 1000000000 + 978307200, 'unixepoch', 'localtime') AS message_date,
-  message.text
-from message
-  left join chat_message_join on chat_message_join.message_id = message.ROWID
-  left join chat on chat.ROWID = chat_message_join.chat_id
-  left join handle on message.handle_id = handle.ROWID
-where
-  message.is_from_me = 0
-  and message.text is not null
-  and length(message.text) > 0
-  and (
-      message.text glob '*[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
-  )
-  and datetime(message.date / 1000000000 + strftime('%s', '2001-01-01'), 'unixepoch', 'localtime')
-          >= datetime('now', '-${lookBackMinutes} minutes', 'localtime')
-order by
-    message.date desc
-limit 100
-`;
+export interface Preferences {
+  lookBackDays?: string;
+}
+
+export type SearchType = "all" | "code";
 
 /**
  * try to extract iMessage 2FA Code, empty result if not found any code
@@ -113,65 +85,81 @@ const extractCode = (original: string) => {
   return code;
 };
 
-const rowWithCopyToClipboard = (item: string) => {
+const Actions = (props: { item: Message }) => {
+  const item = props.item;
   return (
-    <List.Item
-      key={item}
-      title={item}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard content={item} shortcut={{ modifiers: ["cmd"], key: "." }} />
-        </ActionPanel>
-      }
-    ></List.Item>
+    <ActionPanel title="Action">
+      <ActionPanel.Section>
+        <Action.CopyToClipboard content={item.code} title="Copy Code to Clipboard" />
+        <Action.CopyToClipboard content={item.text} title="Copy Content to Clipboard" />
+        <Action.CopyToClipboard content={item.code + "\t" + item.text} title="Copy Code & Content to Clipboard" />
+      </ActionPanel.Section>
+    </ActionPanel>
   );
 };
 
 export default function Command() {
-  const { isLoading, data } = useSQL<Message>(DB_PATH, sql);
-  const result = data
-    ?.map((row) => {
+  const [searchType, setSearchType] = useState("code" as SearchType);
+  const [searchText, setSearchText] = useState("");
+
+  const preferences = getPreferenceValues<Preferences>();
+  const lookBackDays = parseInt(preferences?.lookBackDays || "1") || 1;
+  const { isLoading, data, permissionView } = useMessageSearch({ searchText, searchType, lookBackDays });
+
+  if (permissionView) {
+    return permissionView;
+  }
+
+  const result = (data || [])
+    .map((row) => {
       const code = extractCode(row.text as string);
-      if (code) {
-        return { ...row, code };
-      }
+      return { ...row, code: code || "" };
     })
-    .filter((x) => !!x);
+    .filter((x) => !!x) as Message[];
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isShowingDetail={result?.length > 0}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter 2FA Code or Fetch All Messages"
+          onChange={(value) => setSearchType((value || "code") as SearchType)}
+        >
+          <List.Dropdown.Item title="2FA Code" value="code" />
+          <List.Dropdown.Item title="ALL" value="all" />
+        </List.Dropdown>
+      }
+    >
       {result?.length ? (
         result
-          ?.filter((item) => !!item?.code)
+          .filter((item) => (searchType === "code" ? !!item?.code : true))
           .map((item) => (
             <List.Item
               key={item?.guid}
-              icon="list-icon.png"
+              icon={Icon.Message}
               title={item?.code ?? "No title"}
               subtitle={item?.text}
-              accessories={[{ text: item?.sender }, { date: new Date(item?.message_date as string) }]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Details"
-                    target={
-                      <List>
-                        {[
-                          `${item?.code}`,
-                          `${item?.text}`,
-                          `${item?.code}\t${item?.text}`,
-                          `Time: ${item?.message_date}`,
-                          `From: ${item?.sender}`,
-                        ].map((x) => rowWithCopyToClipboard(x))}
-                      </List>
-                    }
-                  />
-                </ActionPanel>
+              actions={<Actions item={item} />}
+              detail={
+                <List.Item.Detail
+                  markdown={item.text}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="Detail" />
+                      <List.Item.Detail.Metadata.Label title="Code" text={item.code} />
+                      <List.Item.Detail.Metadata.Label title="From" text={item.sender} />
+                      <List.Item.Detail.Metadata.Label title="Date" text={item.message_date} />
+                      <List.Item.Detail.Metadata.Separator />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
               }
             />
           ))
       ) : (
-        <List.EmptyView title="No two factor authentication codes in the last 24 hours" />
+        <List.EmptyView title={`No two factor authentication codes in the last ${lookBackDays * 24} hours`} />
       )}
     </List>
   );
