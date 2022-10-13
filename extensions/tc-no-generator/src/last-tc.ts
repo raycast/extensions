@@ -1,6 +1,5 @@
-import { Clipboard, closeMainWindow, LocalStorage, showToast } from "@raycast/api";
+import { Clipboard, LocalStorage, showHUD, showToast } from "@raycast/api";
 import { generator } from "./lib/generator";
-import { setTimeout } from "timers/promises";
 
 export default async () => {
   let no = await LocalStorage.getItem("last-generate-tc");
@@ -12,11 +11,9 @@ export default async () => {
   await Clipboard.copy(no as string);
 
   await showToast({
-    title: "TC No",
+    title: "Turkish Identification Number",
     message: `Copied ${no} to clipboard`,
   });
 
-  await setTimeout(500);
-
-  await closeMainWindow({ clearRootSearch: true });
+  await showHUD("Copied to clipboard");
 };

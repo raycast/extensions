@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tc-no-generator",
-  "title": "TC NO Generator",
+  "title": "Turkish Identification Number Generator",
   "description": "tc no üretip clipboarda kopyalar",
   "icon": "cmd-icon.png",
   "author": "denizyoldas",
@@ -12,16 +12,16 @@
   "commands": [
     {
       "name": "tc-no-generate",
-      "title": "Generate Tc No",
-      "subtitle": "Tc No",
-      "description": "tc no üretip kopyalar",
+      "title": "Generate Id",
+      "subtitle": "Turkish Identification Number",
+      "description": "Generate Turkish Identification Number and copy to clipboard",
       "mode": "no-view"
     },
     {
       "name": "last-tc",
-      "title": "Copy last Tc No",
-      "subtitle": "TC No",
-      "description": "son üretilen TcNo kopyalar",
+      "title": "Copy last Id",
+      "subtitle": "Turkish Identification Number",
+      "description": "Copy last generate Turkish Identification Number to clipboard",
       "mode": "no-view"
     }
   ],
