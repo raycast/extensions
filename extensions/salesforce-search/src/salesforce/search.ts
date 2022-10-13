@@ -2,6 +2,7 @@ import { prefs } from "./preferences";
 import { filterDefined, mapToObject } from "../util/collections";
 import { bodyOf, failIfNotOk, get } from "./api";
 import { showError, throwError } from "../util/log";
+import { Response } from "node-fetch";
 
 export interface SfObject {
   category: "record" | "reporting";
@@ -23,7 +24,7 @@ export interface SfRecord {
 interface ObjectSpec {
   apiName: string;
   nameField: string;
-  subtitleField: string;
+  subtitleField?: string;
   dynamicMetadata: boolean;
 }
 
@@ -50,7 +51,6 @@ const reportingObjects: SfObject[] = [
     iconColor: "64c8be",
   },
 ];
-const faultyObjects: string[] = [];
 
 function parseObjectSpec(objectSpec: string, dynamicMetadata = true): ObjectSpec | undefined {
   const pattern = /^(?<apiName>[a-zA-Z_]+)(?:\((?<nameField>[a-zA-Z_.]+)(?: *, *(?<subtitleField>[a-zA-Z_.]+))?\))?$/;
@@ -96,39 +96,39 @@ export async function getObjects(): Promise<SfObject[]> {
     }[];
   }
 
-  const dynamicObjectNames = objectSpecs.filter((o) => o.dynamicMetadata).map((o) => o.apiName);
-  const objNames = dynamicObjectNames.join(",");
-  const response = await get(`/services/data/v54.0/ui-api/object-info/batch/${objNames}`);
-  failIfNotOk(response, "Fetching metadata");
-  const result = await bodyOf<Result>(response);
-
-  // find out failed objects
-  faultyObjects.length = 0;
-  result.results.forEach((r, n) => {
-    if (r.statusCode > 200) {
-      const objName = dynamicObjectNames[n];
-      faultyObjects.push(objName);
-      showError(`Cannot fetch metadata for object type '${objName}'`, "Ignoring in search");
+  const failForUnknownObjects = (results: Result["results"], objNames: string[]) => {
+    const failedIndex = results.findIndex((r) => r.statusCode > 200);
+    if (failedIndex >= 0) {
+      throwError(`Cannot fetch metadata for object type '${objNames[failedIndex]}'`);
     }
-  });
+  };
+  const objectsFromResult = (results: Result["results"]) => {
+    return results.map(
+      (r) =>
+        ({
+          category: "record",
+          apiName: r.result.apiName,
+          label: r.result.label,
+          labelPlural: r.result.labelPlural,
+          iconUrl: r.result.themeInfo.iconUrl,
+          iconColor: r.result.themeInfo.color,
+        } as SfObject)
+    );
+  };
 
-  // handle successful objects
-  const successfulObjects = result.results.filter((r) => r.statusCode === 200);
-  const dynamicObjects = successfulObjects.map(
-    (r) =>
-      ({
-        category: "record",
-        apiName: r.result.apiName,
-        label: r.result.label,
-        labelPlural: r.result.labelPlural,
-        iconUrl: r.result.themeInfo.iconUrl,
-        iconColor: r.result.themeInfo.color,
-      } as SfObject)
-  );
+  const objNames = objectSpecs.filter((o) => o.dynamicMetadata).map((o) => o.apiName);
+  const objNameList = objNames.join(",");
+  const response = await get(`/services/data/v54.0/ui-api/object-info/batch/${objNameList}`);
+  await failIfNotOk(response, "Fetching metadata");
+  const result = await bodyOf<Result>(response);
+  failForUnknownObjects(result.results, objNames);
+  const dynamicObjects = objectsFromResult(result.results);
   return [...dynamicObjects, ...reportingObjects];
 }
 
 export async function find(query: string, filterObjectName?: string): Promise<SfRecord[] | undefined> {
+  type FieldPathsByObject = { [p: string]: { nameField: string; subtitleField?: string } };
+
   interface Result {
     searchRecords: {
       attributes: {
@@ -138,37 +138,50 @@ export async function find(query: string, filterObjectName?: string): Promise<Sf
     }[];
   }
 
-  if (query.length < 3) return [];
-  const ignoreObjects = [...faultyObjects, ...(filterObjectName ? [filterObjectName] : [])];
-  const filteredObjectSpecs = objectSpecs.filter((os) => !ignoreObjects.includes(os.apiName));
-  const fieldPathByObject = mapToObject(
-    filteredObjectSpecs,
-    (item) => item.apiName,
-    (item) => ({ nameField: item.nameField, subtitleField: item.subtitleField })
-  );
-  const fieldSpec = (os: ObjectSpec) => {
+  const minQueryLength = 3;
+  const filterObjectSpecs = (specs: ObjectSpec[], filterName?: string) => {
+    return filterName ? specs.filter((s) => s.apiName === filterName) : specs;
+  };
+  const buildFieldPathsByObject = (specs: ObjectSpec[]) => {
+    return mapToObject(
+      specs,
+      (item) => item.apiName,
+      (item) => ({ nameField: item.nameField, subtitleField: item.subtitleField })
+    );
+  };
+  const buildFieldSpec = (os: ObjectSpec) => {
     const fields = ["id", os.nameField, os.subtitleField].filter((f) => f);
     return `${os.apiName}(${fields.join(", ")})`;
   };
-  const objFields = filteredObjectSpecs.map(fieldSpec).join(", ");
-  const q = `FIND {${sanitizeSoslQuery(query)}} IN ALL FIELDS RETURNING ${objFields} LIMIT 20`;
-  const response = await get("/services/data/v55.0/search/", { q });
-  if (response.status === 400 && (await response.text()).includes("INVALID_FIELD")) {
-    throwError("Specified custom field doesn't exist", "Fix you custom object syntax to search");
-  } else {
-    failIfNotOk(response, "Search");
+  const failOnError = async (response: Response) => {
+    if (response.status === 400 && (await response.text()).includes("INVALID_FIELD")) {
+      throwError("Specified custom field doesn't exist.", "Fix you custom object syntax!");
+    } else {
+      await failIfNotOk(response, "Search");
+    }
+  };
+  const buildObjects = async (response: Response, fieldPathsByObject: FieldPathsByObject) => {
     const result = await bodyOf<Result>(response);
     return result.searchRecords.map(
       (r) =>
         ({
           id: r.Id,
           objectApiName: r.attributes.type,
-          name: propAtPath(r, fieldPathByObject[r.attributes.type].nameField),
-          subtitle: propAtPath(r, fieldPathByObject[r.attributes.type].subtitleField),
+          name: propAtPath(r, fieldPathsByObject[r.attributes.type].nameField),
+          subtitle: propAtPath(r, fieldPathsByObject[r.attributes.type].subtitleField),
           url: `https://${prefs.domain}.lightning.force.com/lightning/r/${r.attributes.type}/${r.Id}/view`,
         } as SfRecord)
     );
-  }
+  };
+
+  if (query.length < minQueryLength) return [];
+  const filteredObjectSpecs = filterObjectSpecs(objectSpecs, filterObjectName);
+  const fieldPathsByObject = buildFieldPathsByObject(filteredObjectSpecs);
+  const objFieldList = filteredObjectSpecs.map(buildFieldSpec).join(", ");
+  const q = `FIND {${sanitizeSoslQuery(query)}} IN ALL FIELDS RETURNING ${objFieldList} LIMIT 20`;
+  const response = await get("/services/data/v55.0/search/", { q });
+  await failOnError(response);
+  return buildObjects(response, fieldPathsByObject);
 }
 
 function sanitizeSoslQuery(query: string): string {
@@ -183,7 +196,7 @@ function propAtPath(object: NestedStringMap, path?: string): string | NestedStri
   const reducer = (prev: NestedStringMap | string | undefined, prop: string) => {
     switch (typeof prev) {
       case "object":
-        return prev[prop];
+        return prev[prop] ?? undefined;
       default:
         return prev;
     }

@@ -26,7 +26,10 @@ export async function get(urlPath: string, params?: { [key: string]: string }): 
 
 export async function failIfNotOk(response: Response, requestName?: string) {
   if (response.status >= 400) {
-    log(`${response.status}: ${await response.text()}`);
+    try {
+      log(`${requestName ?? ""}${response.status}: ${await response.text()}`);
+      // eslint-disable-next-line no-empty
+    } catch {}
     throw Error(`${requestName ?? "Request"} failed with status code ${response.status}`);
   }
 }
