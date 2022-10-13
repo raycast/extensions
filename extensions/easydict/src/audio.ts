@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-22 16:22
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-28 21:53
+ * @lastEditTime: 2022-10-07 19:58
  * @fileName: audio.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -15,9 +15,9 @@ import { execa } from "execa";
 import { fileTypeFromFile } from "file-type";
 import fs from "fs";
 import path from "path";
+import playerImport from "play-sound";
 import { languageItemList } from "./language/consts";
 import { printObject, trimTextLength } from "./utils";
-import playerImport = require("play-sound");
 
 console.log(`enter audio.ts`);
 
@@ -166,14 +166,13 @@ export function getWordAudioPath(word: string) {
   if (!fs.existsSync(audioDirPath)) {
     fs.mkdirSync(audioDirPath);
   }
-  const lowerCaseWord = word.toLowerCase();
 
-  const m4aFile = `${audioDirPath}/${lowerCaseWord}.m4a`;
+  const m4aFile = `${audioDirPath}/${word}.m4a`;
   if (fs.existsSync(m4aFile)) {
     return m4aFile;
   }
 
-  const mp3File = `${audioDirPath}/${lowerCaseWord}.mp3`;
+  const mp3File = `${audioDirPath}/${word}.mp3`;
   return mp3File;
 }
 

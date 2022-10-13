@@ -42,6 +42,16 @@ Next:
 
 ---
 
+### Youdao Modern Chinese Dict
+
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
+
+![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+
+[艾](https://youdao.com/result?word=%E8%89%BE&lang=en)
+
+#### ![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
+
 ### [Linguee Dictionary](https://www.linguee.com/)：English <--> Chinese
 
 ![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
@@ -50,7 +60,7 @@ Next:
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
-### [Linguee 词典](https://www.linguee.com/)：English <--> French
+### [Linguee Dictionary](https://www.linguee.com/)：English <--> French
 
 ![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
 
@@ -112,7 +122,7 @@ Considering user privacy, only Bing language detection is enabled by default (no
 
 Details of the languages supported by each language detection service are as follows:
 
-| 语言                   | Bing | 🍎 Apple | Baidu | Volcano | Tencent |
+| Languages              | Bing | 🍎 Apple | Baidu | Volcano | Tencent |
 | :--------------------- | :--: | :------: | :---: | :-----: | :-----: |
 | Chinese (Simplified)   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
 | Chinese（Traditional） |  ✅  |    ❌    |  ❌   |   ✅    |   ❌    |
@@ -158,7 +168,7 @@ Google and DeepL translations will use the system proxy by default. (DeepL works
 
 Supported translation languages:
 
-| language               | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
+| Languages              | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
 | :--------------------- | :----: | :---: | :----: | :--: | :------: | :---: | :-----: | :-----: | :----: |
 | Chinese (Simplified)   |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
 | Chinese（Traditional） |   ✅   |  ⚠️   |   ✅   |  ✅  |    ⚠️    |  ✅   |   ✅    |   ✅    |   ⚠️   |
@@ -279,6 +289,21 @@ When this feature is turned on, `Easydict` will try to get the Mac system agent,
 
 > Note ⚠️: Please don't turn on `Use System Proxy` while using the developer tools with MitM, otherwise some service requests will report certificate errors, for example: https://github.com/tisfeng/Raycast-Easydict/issues/18 .
 
+### Use with PopClip
+
+You need to install [PopClip](https://pilotmoon.com/popclip/) first, then add a shortcut key for `Easydict`, such as `Cmd + E`, then you can open `Easydict` quickly with `PopClip`!
+
+Usage: Select the following code block, `PopClip` will show "Install Easydict", just click it.
+
+```
+  # popclip
+  name: Easydict
+  icon: search E
+  key combo: command E
+```
+
+> Ref: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+
 ### Translation Services
 
 For easy to use, we provide some built-in translation APIs appid and appkey, but these Services have request frequency limits. If many people use them at the same time, it is likely to slow down or even stop. Therefore, for a better use experience, you'd better apply for a dedicated appid and appkey, and then replace the built-in services on the Preferences page.
@@ -302,9 +327,7 @@ The following application tutorial is from [`Bob`](https://bobtranslate.com/guid
 
 ## Friendly Recommendation
 
-[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application. Bob is probably the best translation application on the MacOS platform, and it's free!
-
-> Update: Bob is now available on the Mac App Store, welcome to support: [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
+[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application.
 
 ![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
 

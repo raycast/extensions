@@ -10,14 +10,13 @@
 
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { checkIfPreferredLanguagesContainChinese } from "../../detectLanauge/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { LanguageDetectType } from "./../../detectLanauge/types";
-import { chineseLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { QueryTypeResult, RequestErrorInfo, TranslationType } from "./../../types";
 import { VolcanoDetectResult, VolcanoTranslateResult } from "./types";
 import { genVolcanoSign } from "./volcanoSign";
 
@@ -97,7 +96,7 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
           return reject(undefined);
         }
 
-        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
@@ -174,7 +173,7 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(undefined);
         }
 
-        console.log(`Volcano detect err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano detect err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
