@@ -145,7 +145,11 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             parentId: "",
           });
 
-          autofocusTitle ? focus("title") : focus("teamId");
+          if (autofocusTitle || !hasMoreThanOneTeam) {
+            return focus("title");
+          }
+
+          return focus("teamId");
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;

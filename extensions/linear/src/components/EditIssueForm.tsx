@@ -50,7 +50,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
       try {
         const payload: UpdateIssuePayload = {
-          teamId: values.teamId,
+          teamId: values.teamId || props.issue.team.id,
           title: values.title,
           description: values.description,
           stateId: values.stateId,
