@@ -43,6 +43,15 @@
           "title": "Visual Studio Code - Insiders"
         }
       ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
     }
   ],
   "dependencies": {
