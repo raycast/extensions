@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 import { log } from "../util/log";
 import { prefs } from "./preferences";
 import { salesfoceClient } from "./login";
@@ -9,7 +9,7 @@ function apiUrl(path: string, queryParams?: { [key: string]: string }): string {
   return url + (params.length > 0 ? `?${params}` : "");
 }
 
-export async function get<T>(urlPath: string, params?: { [key: string]: string }): Promise<T> {
+export async function get(urlPath: string, params?: { [key: string]: string }): Promise<Response> {
   const response = await fetch(apiUrl(urlPath, params), {
     method: "GET",
     headers: {
@@ -19,12 +19,18 @@ export async function get<T>(urlPath: string, params?: { [key: string]: string }
   if (response.status === 401) {
     await salesfoceClient.refreshToken();
     return get(urlPath, params);
-  }
-  if (response.status >= 400) {
-    log(response.status);
-    log(await response.text());
-    throw Error(`Request failed with status code ${response.status}`);
   } else {
-    return (await response.json()) as T;
+    return response;
   }
+}
+
+export async function failIfNotOk(response: Response, requestName?: string) {
+  if (response.status >= 400) {
+    log(`${response.status}: ${await response.text()}`);
+    throw Error(`${requestName ?? "Request"} failed with status code ${response.status}`);
+  }
+}
+
+export async function bodyOf<T>(response: Response): Promise<T> {
+  return (await response.json()) as T;
 }

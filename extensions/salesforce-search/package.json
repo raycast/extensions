@@ -39,7 +39,7 @@
       "type": "textfield",
       "name": "additionalObjects",
       "title": "Additional object types",
-      "placeholder": "CustObjA__c, CustObjB__c(title), …",
+      "placeholder": "CustObj__c(Title, Subtitle); …",
       "description": "Additional object types to search (see extension's documentation for exact syntax)",
       "required": false
     }

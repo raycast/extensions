@@ -31,7 +31,7 @@ After you've submitted the configuration fields, the OAuth authentication proces
 ![Extension Login](metadata/salesforce-login.png)
 
 ### Custom Record Types
-**Disclaimer:** This is some kind of a pro feature. You need to understand the data model in your Salesforce instance including relations. If you use the wrong syntax or specify non-existing stuff, the extension will fail hard with a cryptic error.
+**Disclaimer:** This is some kind of a pro feature. You need to understand the data model in your Salesforce instance including relations. If you use the wrong syntax or specify non-existing stuff, the extension will inform you and ignore the custom fields.
 
 **Disclaimer:** The extension uses [Salesforce's UI API](https://developer.salesforce.com/docs/atlas.en-us.uiapi.meta/uiapi) to get the labels, icon and icon color of custom objects. Unfortunately this API does not support all objects – you can only use supported objects.
 
@@ -48,7 +48,7 @@ That being said: The extension allows you to configure further record types to s
 This is the syntax for specifying custom objects:
 
 ```
-<ObjectName>[(<NameField>[, <SubtitleField>])][, …]
+<ObjectName>[(<NameField>[; <SubtitleField>])][, …]
 ```
 
 - **`ObjectName`:** The API-name of the salesforce object. Example: `CustomObject__c`
@@ -67,7 +67,7 @@ This is the field syntax:
 
   Example: `AccountId__r.Name` might show the name of the account related to a found record if it has such a relation.
 
-You can specify multiple types separated by comma.
+You can specify multiple types separated by semicolon.
 
 #### Example 1
 ```
@@ -83,7 +83,7 @@ Same like before, but will take the record's name from the record's `Title` fiel
 
 #### Example 3
 ```
-CustomObject__c, OtherObject__c(Title)
+CustomObject__c; OtherObject__c(Title)
 ```
 Combination of both examples: The extension will additionally search records of types `CustomObject__c` and `OtherObject__c`, using the `Name` field for the first type and the `Title` field for the second one. 
 

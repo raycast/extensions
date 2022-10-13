@@ -1,6 +1,7 @@
 import { prefs } from "./preferences";
-import { mapToObject } from "../util/collections";
-import { get } from "./api";
+import { filterDefined, mapToObject } from "../util/collections";
+import { bodyOf, failIfNotOk, get } from "./api";
+import { showError, throwError } from "../util/log";
 
 export interface SfObject {
   category: "record" | "reporting";
@@ -29,7 +30,7 @@ interface ObjectSpec {
 const objectSpecs = [
   ...parseObjectSpecs(["Account", "Contact(Name,Account.Name)", "Opportunity"]),
   ...parseObjectSpecs(["Dashboard(Title)", "Report"], false),
-  ...parseSemicolonSeparatedObjectSpecs(prefs.additionalObjects as string),
+  ...(prefs.additionalObjects ? parseSemicolonSeparatedObjectSpecs(prefs.additionalObjects) : []),
 ];
 const reportingObjects: SfObject[] = [
   {
@@ -49,23 +50,26 @@ const reportingObjects: SfObject[] = [
     iconColor: "64c8be",
   },
 ];
+const faultyObjects: string[] = [];
 
-function parseObjectSpec(objectSpec: string, dynamicMetadata = true): ObjectSpec {
+function parseObjectSpec(objectSpec: string, dynamicMetadata = true): ObjectSpec | undefined {
   const pattern = /^(?<apiName>[a-zA-Z_]+)(?:\((?<nameField>[a-zA-Z_.]+)(?: *, *(?<subtitleField>[a-zA-Z_.]+))?\))?$/;
   const match = pattern.exec(objectSpec);
   if (!match || !match.groups) {
-    throw Error(`Invalid object specification '${objectSpec}'. See documentation for details.`);
+    showError(`Ignored invalid object specification '${objectSpec}'`, "See documentation for exact syntax");
+    return undefined;
+  } else {
+    return {
+      apiName: match.groups.apiName,
+      nameField: match.groups.nameField ?? "Name",
+      subtitleField: match.groups.subtitleField,
+      dynamicMetadata,
+    };
   }
-  return {
-    apiName: match.groups.apiName,
-    nameField: match.groups.nameField ?? "Name",
-    subtitleField: match.groups.subtitleField,
-    dynamicMetadata,
-  };
 }
 
 function parseObjectSpecs(objectSpecs: string[], dynamicMetadata = true): ObjectSpec[] {
-  return objectSpecs.map((os) => parseObjectSpec(os, dynamicMetadata));
+  return filterDefined(objectSpecs.map((os) => parseObjectSpec(os, dynamicMetadata)));
 }
 
 function parseSemicolonSeparatedObjectSpecs(objectSpecs: string, dynamicMetadata = true): ObjectSpec[] {
@@ -79,6 +83,7 @@ function parseSemicolonSeparatedObjectSpecs(objectSpecs: string, dynamicMetadata
 export async function getObjects(): Promise<SfObject[]> {
   interface Result {
     results: {
+      statusCode: number;
       result: {
         apiName: string;
         label: string;
@@ -91,12 +96,25 @@ export async function getObjects(): Promise<SfObject[]> {
     }[];
   }
 
-  const objNames = objectSpecs
-    .filter((o) => o.dynamicMetadata)
-    .map((o) => o.apiName)
-    .join(",");
-  const result = await get<Result>(`/services/data/v54.0/ui-api/object-info/batch/${objNames}`);
-  const dynamicObjects = result.results.map(
+  const dynamicObjectNames = objectSpecs.filter((o) => o.dynamicMetadata).map((o) => o.apiName);
+  const objNames = dynamicObjectNames.join(",");
+  const response = await get(`/services/data/v54.0/ui-api/object-info/batch/${objNames}`);
+  failIfNotOk(response, "Fetching metadata");
+  const result = await bodyOf<Result>(response);
+
+  // find out failed objects
+  faultyObjects.length = 0;
+  result.results.forEach((r, n) => {
+    if (r.statusCode > 200) {
+      const objName = dynamicObjectNames[n];
+      faultyObjects.push(objName);
+      showError(`Cannot fetch metadata for object type '${objName}'`, "Ignoring in search");
+    }
+  });
+
+  // handle successful objects
+  const successfulObjects = result.results.filter((r) => r.statusCode === 200);
+  const dynamicObjects = successfulObjects.map(
     (r) =>
       ({
         category: "record",
@@ -110,7 +128,7 @@ export async function getObjects(): Promise<SfObject[]> {
   return [...dynamicObjects, ...reportingObjects];
 }
 
-export async function find(query: string, filterObjectName?: string): Promise<SfRecord[]> {
+export async function find(query: string, filterObjectName?: string): Promise<SfRecord[] | undefined> {
   interface Result {
     searchRecords: {
       attributes: {
@@ -121,9 +139,8 @@ export async function find(query: string, filterObjectName?: string): Promise<Sf
   }
 
   if (query.length < 3) return [];
-  const filteredObjectSpecs = filterObjectName
-    ? objectSpecs.filter((os) => os.apiName === filterObjectName)
-    : objectSpecs;
+  const ignoreObjects = [...faultyObjects, ...(filterObjectName ? [filterObjectName] : [])];
+  const filteredObjectSpecs = objectSpecs.filter((os) => !ignoreObjects.includes(os.apiName));
   const fieldPathByObject = mapToObject(
     filteredObjectSpecs,
     (item) => item.apiName,
@@ -135,17 +152,23 @@ export async function find(query: string, filterObjectName?: string): Promise<Sf
   };
   const objFields = filteredObjectSpecs.map(fieldSpec).join(", ");
   const q = `FIND {${sanitizeSoslQuery(query)}} IN ALL FIELDS RETURNING ${objFields} LIMIT 20`;
-  const records = await get<Result>("/services/data/v55.0/search/", { q });
-  return records.searchRecords.map(
-    (r) =>
-      ({
-        id: r.Id,
-        objectApiName: r.attributes.type,
-        name: propAtPath(r, fieldPathByObject[r.attributes.type].nameField),
-        subtitle: propAtPath(r, fieldPathByObject[r.attributes.type].subtitleField),
-        url: `https://${prefs.domain}.lightning.force.com/lightning/r/${r.attributes.type}/${r.Id}/view`,
-      } as SfRecord)
-  );
+  const response = await get("/services/data/v55.0/search/", { q });
+  if (response.status === 400 && (await response.text()).includes("INVALID_FIELD")) {
+    throwError("Specified custom field doesn't exist", "Fix you custom object syntax to search");
+  } else {
+    failIfNotOk(response, "Search");
+    const result = await bodyOf<Result>(response);
+    return result.searchRecords.map(
+      (r) =>
+        ({
+          id: r.Id,
+          objectApiName: r.attributes.type,
+          name: propAtPath(r, fieldPathByObject[r.attributes.type].nameField),
+          subtitle: propAtPath(r, fieldPathByObject[r.attributes.type].subtitleField),
+          url: `https://${prefs.domain}.lightning.force.com/lightning/r/${r.attributes.type}/${r.Id}/view`,
+        } as SfRecord)
+    );
+  }
 }
 
 function sanitizeSoslQuery(query: string): string {
