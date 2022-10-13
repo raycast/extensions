@@ -2,25 +2,24 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 16:09
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 09:36
+ * @lastEditTime: 2022-10-13 11:06
  * @fileName: google.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import googleTranslateApi from "@vitalets/google-translate-api";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import querystring from "node:querystring";
 import { getProxyAgent, getSystemProxyURL, httpsAgent } from "../axiosConfig";
 import { userAgent } from "../consts";
+import { DetectedLangModel, LanguageDetectType } from "../detectLanauge/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
+import { autoDetectLanguageItem, englishLanguageItem } from "../language/consts";
 import { getGoogleLangCode, getYoudaoLangCodeFromGoogleCode } from "../language/languages";
-import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
+import { GoogleTranslateResult, QueryTypeResult, RequestErrorInfo, TranslationType } from "../types";
 import { getTypeErrorInfo } from "../utils";
-import { DetectedLangModel, LanguageDetectType } from "./../detectLanauge/types";
-import { autoDetectLanguageItem, englishLanguageItem } from "./../language/consts";
-import { GoogleTranslateResult } from "./../types";
 
 console.log(`enter google.ts`);
 
@@ -146,9 +145,15 @@ export async function googleWebTranslate(queryWordInfo: QueryWordInfo, signal?: 
   const url = `https://translate.google.com/m?${querystring.stringify(data)}`;
   console.log(`---> google web url: ${url}`); // https://translate.google.com/m?sl=auto&tl=zh-CN&hl=zh-CN&q=good
 
+  const config: AxiosRequestConfig = {
+    headers,
+    signal,
+    httpsAgent,
+  };
+
   return new Promise((resolve, reject) => {
     axios
-      .get(url, { headers, signal, httpsAgent })
+      .get(url, config)
       .then((res: AxiosResponse) => {
         const hmlt = res.data;
         const $ = cheerio.load(hmlt);

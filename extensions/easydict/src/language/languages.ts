@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-30 19:15
+ * @lastEditTime: 2022-10-13 00:27
  * @fileName: languages.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,7 +10,7 @@
 
 import { francLangaugeDetect } from "../detectLanauge/franc";
 import { QueryWordInfo } from "../dictionary/youdao/types";
-import { preferredLanguages } from "./../preferences";
+import { preferredLanguages } from "../preferences";
 import { languageItemList } from "./consts";
 import { LanguageItem } from "./type";
 
