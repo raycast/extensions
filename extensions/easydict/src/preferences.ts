@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:36
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-29 00:15
+ * @lastEditTime: 2022-10-13 11:27
  * @fileName: preferences.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -25,9 +25,9 @@ export interface MyPreferences {
   enableAutomaticPlayWordAudio: boolean;
   enableSelectTargetLanguage: boolean;
   servicesOrder: string;
-  showCopyTextFirst: boolean;
+  showOpenInEudicFirst: boolean;
   enableSystemProxy: boolean;
-  enableLanguageDetectionSpeedFirst: boolean;
+  enableDetectLanguageSpeedFirst: boolean;
 
   enableYoudaoDictionary: boolean;
   enableYoudaoTranslate: boolean;

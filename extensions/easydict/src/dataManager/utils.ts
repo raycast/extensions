@@ -11,8 +11,9 @@
 import { hasLingueeDictionaryEntries } from "../dictionary/linguee/parse";
 import { LingueeDictionaryResult } from "../dictionary/linguee/types";
 import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
-import { YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "../dictionary/youdao/types";
 import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
+import { chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import {
   getLanguageItemFromYoudaoCode,
   maxLineLengthOfChineseTextDisplay,
@@ -34,8 +35,6 @@ import {
   checkIsWord,
   checkIsYoudaoDictionaryListItem,
 } from "../utils";
-import { QueryWordInfo, YoudaoDictionaryListItemType } from "./../dictionary/youdao/types";
-import { chineseLanguageItem, englishLanguageItem } from "./../language/consts";
 
 /**
  * Sort query results by designated order.

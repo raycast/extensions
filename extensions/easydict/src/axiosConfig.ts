@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 15:47
+ * @lastEditTime: 2022-10-13 11:05
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,7 @@
 import { environment, LocalStorage, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import EventEmitter from "events";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { HttpsProxyAgent } from "hpagent";
 import { getMacSystemProxy } from "mac-system-proxy";
 
 EventEmitter.defaultMaxListeners = 15; // default is 10.
@@ -108,7 +108,10 @@ export function configAxiosAgent(proxyURL: string | undefined): void {
     return;
   }
 
-  const httpsAgent = new HttpsProxyAgent(proxyURL);
+  const httpsAgent = new HttpsProxyAgent({
+    keepAlive: true,
+    proxy: proxyURL,
+  });
   axios.defaults.httpsAgent = httpsAgent;
 }
 
@@ -198,7 +201,11 @@ export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
         }
 
         console.log(`---> get system proxy url: ${systemProxyURL}`);
-        const agent = new HttpsProxyAgent(systemProxyURL);
+        const agent = new HttpsProxyAgent({
+          keepAlive: true,
+          proxy: systemProxyURL,
+        });
+
         httpsAgent = agent;
         resolve(agent);
       })

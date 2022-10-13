@@ -23,6 +23,7 @@ import {
   requestYoudaoWebDictionary,
   requestYoudaoWebTranslate,
 } from "../dictionary/youdao/youdao";
+import { englishLanguageItem } from "../language/consts";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoCode } from "../language/languages";
 import { LanguageItem } from "../language/type";
 import { myPreferences } from "../preferences";
@@ -45,7 +46,6 @@ import {
   TranslationType,
 } from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, showErrorToast } from "../utils";
-import { englishLanguageItem } from "./../language/consts";
 import {
   checkIfEnableYoudaoDictionary,
   checkIfShowTranslationDetail,

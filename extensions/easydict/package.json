@@ -44,7 +44,7 @@
     "execa": "^6.1.0",
     "file-type": "^18.0.0",
     "franc": "^6.0.0",
-    "https-proxy-agent": "^5.0.1",
+    "hpagent": "^1.1.0",
     "mac-system-proxy": "^1.0.4",
     "node-html-parser": "^5.3.3",
     "play-sound": "^1.1.5",
@@ -76,7 +76,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "lint-staged": "lint-staged",
-    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
+    "prepare": "husky install",
     "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
   },
   "lint-staged": {
@@ -294,33 +294,33 @@
       "title": "Switch Boxes",
       "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
-      "label": "Automatic Query Selected Text",
+      "label": "Query Selected Text Automatically",
       "required": false,
-      "description": "Automatic query selected text of the frontmost application",
+      "description": "Automatically query selected text from the frontmost application",
       "default": true
     },
     {
-      "name": "showCopyTextFirst",
+      "name": "showOpenInEudicFirst",
       "type": "checkbox",
-      "label": "Show Copy Text First",
+      "label": "Show Open in Eudic First",
       "required": false,
-      "description": "If enabled, `Copy Text` action will be shown in the first, else will be shown `Open In Eudic`",
+      "description": "If enabled and Eudic is installed, `Open in Eudic` action will be shown in the first, otherwise `Copy Text` will be shown.",
+      "default": true
+    },
+    {
+      "name": "enableDetectLanguageSpeedFirst",
+      "type": "checkbox",
+      "label": "Detect Language Speed First",
+      "required": false,
+      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower ⚠️ .",
       "default": true
     },
     {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
-      "label": "Automatic Play Word Audio",
+      "label": "Play Word Pronunciation Automatically",
       "required": false,
-      "description": "Automatic play audio after looking up a `English` word",
-      "default": true
-    },
-    {
-      "name": "enableLanguageDetectionSpeedFirst",
-      "type": "checkbox",
-      "label": "Detect Language Speed First",
-      "required": false,
-      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower.",
+      "description": "Automatically play word pronunciation after looking up a `English` word",
       "default": true
     },
     {
@@ -379,7 +379,7 @@
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
-      "description": "Turn on/off DeepL Translate. Use system proxy automatically by default. App Key is required.",
+      "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
       "default": true
     },
     {
@@ -387,7 +387,7 @@
       "type": "checkbox",
       "label": "Google Translate",
       "required": false,
-      "description": "⚠️ Use system proxy automatically by default. A proxy is required to use Google if you are in China.",
+      "description": "⚠️ Use system proxy by default. A proxy is required to use Google if you are in China.",
       "default": false
     },
     {

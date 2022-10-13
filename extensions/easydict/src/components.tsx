@@ -2,14 +2,14 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 22:44
+ * @lastEditTime: 2022-10-13 11:30
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, openCommandPreferences } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 import { sayTruncateCommand } from "./audio";
 import { getShowMoreDetailMarkdown } from "./dataManager/utils";
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
@@ -90,22 +90,19 @@ export function ListActionPanel(props: ActionListPanelProps) {
         {isShowingReleasePrompt && (
           <ReleaseNotesAction title="✨ New Version Released" onPush={onNewReleasePromptClick} />
         )}
-
-        {myPreferences.showCopyTextFirst && CopyTextAction({ copyText })}
-
-        {props.isInstalledEudic && (
+        {props.isInstalledEudic && myPreferences.showOpenInEudicFirst && (
           <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
         )}
-
-        {!myPreferences.showCopyTextFirst && CopyTextAction({ copyText })}
-
+        {CopyTextAction({ copyText })}
+        {props.isInstalledEudic && !myPreferences.showOpenInEudicFirst && (
+          <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
+        )}
         {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} enableShortcutKey={true} />}
         {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} enableShortcutKey={true} />}
         {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} enableShortcutKey={true} />}
         {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} enableShortcutKey={true} />}
         {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} enableShortcutKey={true} />}
         {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} enableShortcutKey={true} />}
-
         <Action.Push
           title="Show More Details"
           icon={Icon.Eye}

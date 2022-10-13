@@ -301,7 +301,6 @@ Linguee 默认支持系统代理。
   name: Easydict
   icon: search E
   key combo: command E
-
 ```
 
 > 参考: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples

@@ -10,14 +10,13 @@
 
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { checkIfPreferredLanguagesContainChinese } from "../../detectLanauge/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { LanguageDetectType } from "./../../detectLanauge/types";
-import { chineseLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { QueryTypeResult, RequestErrorInfo, TranslationType } from "./../../types";
 import { VolcanoDetectResult, VolcanoTranslateResult } from "./types";
 import { genVolcanoSign } from "./volcanoSign";
 
