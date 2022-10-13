@@ -3,7 +3,7 @@ import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues,
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
-import { getLastCreatedIssues } from "../api/getIssues";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
 
 import useLabels from "../hooks/useLabels";
@@ -53,9 +53,27 @@ export type CreateIssueValues = {
   parentId: string;
 };
 
+type Preferences = {
+  signature: boolean;
+  autofocusTitle: boolean;
+  copyToastAction: "key" | "url" | "title";
+};
+
+function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
+  if (copyToastAction === "url") {
+    return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
+  }
+
+  if (copyToastAction === "title") {
+    return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
+  }
+
+  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+}
+
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature, autofocusTitle } = getPreferenceValues<{ signature: boolean; autofocusTitle: boolean }>();
+  const { signature, autofocusTitle, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
@@ -114,9 +132,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           };
 
           toast.secondaryAction = {
-            title: "Copy Issue Key",
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-            onAction: () => Clipboard.copy(issue.identifier),
+            ...getCopyToastAction(copyToastAction, issue),
           };
 
           reset({

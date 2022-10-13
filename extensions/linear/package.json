@@ -39,6 +39,28 @@
           "description": "When enabled, the title field will be automatically focused once the form is rendered.",
           "required": false,
           "default": true
+        },
+        {
+          "name": "copyToastAction",
+          "title": "Toast Copy Action",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the copy action for the toast secondary action",
+          "default": "key",
+          "data": [
+            {
+              "title": "Copy Issue Key",
+              "value": "key"
+            },
+            {
+              "title": "Copy Issue URL",
+              "value": "url"
+            },
+            {
+              "title": "Copy Issue Title",
+              "value": "title"
+            }
+          ]
         }
       ]
     },
