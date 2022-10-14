@@ -5,7 +5,7 @@
   "description": "Homey Flows & Devices",
   "icon": "command-icon.png",
   "author": "DominicVonk",
-  "owner": "dominicvonk",
+  "owner": "DominicVonk",
   "access": "public",
   "categories": [
     "Productivity"
