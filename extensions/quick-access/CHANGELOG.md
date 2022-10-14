@@ -1,6 +1,11 @@
 # Quick Access Changelog
 
-## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+## [Add new actions] - 2022-10-14
+
+- Optimize Menubar command, add more actions
+- Add new action for Search Pinned Folder command: Paste File to the current selection of the frontmost application
+
+## [Add actions to Menu Bar command] - 2022-09-28
 
 - Add new actions to menu bar commands: Copy or Open
 

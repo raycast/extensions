@@ -1,4 +1,14 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  getPreferenceValues,
+  Icon,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  showHUD,
+  showInFinder,
+  trash,
+} from "@raycast/api";
 import React, { useState } from "react";
 import { isImage } from "./utils/common-utils";
 import { DirectoryWithFileInfo } from "./types/types";
@@ -22,16 +32,21 @@ export default function SearchPinnedFolders() {
       icon={{ source: { light: "pinned-folders-menu-bar.png", dark: "pinned-folders-menu-bar@dark.png" } }}
       isLoading={loading}
     >
-      {pinnedDirectoryWithFiles.length !== 0 && <MenuBarExtra.Item title={"Pinned Folder"} />}
-      {pinnedDirectoryWithFiles.map((directory) => (
-        <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
-      ))}
+      {pinnedDirectoryWithFiles.length !== 0 && (
+        <MenuBarExtra.Section title={"Pinned Folder"}>
+          {pinnedDirectoryWithFiles.map((directory) => (
+            <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
+          ))}
+        </MenuBarExtra.Section>
+      )}
       <MenuBarExtra.Separator />
-
-      {openDirectoryWithFiles.length !== 0 && <MenuBarExtra.Item title={"Open Folder"} />}
-      {openDirectoryWithFiles.map((directory) => (
-        <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
-      ))}
+      {openDirectoryWithFiles.length !== 0 && (
+        <MenuBarExtra.Section title={"Open Folder"}>
+          {openDirectoryWithFiles.map((directory) => (
+            <FolderMenuBarItem key={directory.directory.id} directory={directory} primaryAction={primaryAction} />
+          ))}
+        </MenuBarExtra.Section>
+      )}
 
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
@@ -65,34 +80,57 @@ function FolderMenuBarItem(props: { directory: DirectoryWithFileInfo; primaryAct
       icon={{ fileIcon: directory.directory.path }}
     >
       {directory.files.map((fileValue) => (
-        <MenuBarExtra.Item
+        <MenuBarExtra.Submenu
           key={fileValue.path}
           icon={isImage(parse(fileValue.path).ext) ? { source: fileValue.path } : { fileIcon: fileValue.path }}
           title={fileValue.name}
-          tooltip={fileValue.path}
-          onAction={async (event: MenuBarExtra.ActionEvent) => {
-            switch (primaryAction) {
-              case "Copy": {
-                if (event.type == "left-click") {
-                  await showHUD(`${fileValue.name} is copied to clipboard`);
-                  await copyFileByPath(fileValue.path);
-                } else {
-                  await open(fileValue.path);
-                }
-                break;
+        >
+          <MenuBarExtra.Item
+            icon={primaryAction === "Copy" ? Icon.CopyClipboard : Icon.Finder}
+            title={primaryAction === "Copy" ? "Copy" : "Open"}
+            onAction={async () => {
+              if (primaryAction === "Copy") {
+                await showHUD(`${fileValue.name} is copied to clipboard`);
+                await copyFileByPath(fileValue.path);
+              } else {
+                await open(fileValue.path);
               }
-              case "Open": {
-                if (event.type == "left-click") {
-                  await open(fileValue.path);
-                } else {
-                  await showHUD(`${fileValue.name} is copied to clipboard`);
-                  await copyFileByPath(fileValue.path);
-                }
-                break;
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={primaryAction === "Open" ? Icon.CopyClipboard : Icon.Finder}
+            title={primaryAction === "Open" ? "Copy" : "Open"}
+            onAction={async () => {
+              if (primaryAction === "Open") {
+                await showHUD(`${fileValue.name} is copied to clipboard`);
+                await copyFileByPath(fileValue.path);
+              } else {
+                await open(fileValue.path);
               }
-            }
-          }}
-        />
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={Icon.AppWindow}
+            title={"Paste"}
+            onAction={async () => {
+              await Clipboard.paste({ file: fileValue.path });
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={Icon.Desktop}
+            title={"Show"}
+            onAction={async () => {
+              await showInFinder(fileValue.path);
+            }}
+          />
+          <MenuBarExtra.Item
+            icon={Icon.Trash}
+            title={"Delete"}
+            onAction={async () => {
+              await trash(fileValue.path);
+            }}
+          />
+        </MenuBarExtra.Submenu>
       ))}
     </MenuBarExtra.Submenu>
   );
