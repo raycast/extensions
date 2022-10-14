@@ -24,7 +24,8 @@ export default function Command() {
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Large}
+      columns={3}
+      aspectRatio="3/2"
       isLoading={isLoading}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Filter" value={filter} onChange={setFilter}>
