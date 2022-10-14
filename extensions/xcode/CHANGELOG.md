@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Menu Bar Project Favorites] - 2022-10-13
+## [Menu Bar Project Favorites] - 2022-10-14
 
 - Added an option to show Xcode Project favorites in the menu bar. 
 
