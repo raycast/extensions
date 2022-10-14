@@ -15,8 +15,8 @@ export default function Command() {
     .filter((item) => statSync(item).isDirectory());
 
   return (
-    <Grid>
-      <Grid.Section title="Colors">
+    <Grid columns={3}>
+      <Grid.Section title="Colors" columns={6}>
         {colors.map((color) => (
           <ColorItem key={color.name} color={color} />
         ))}
