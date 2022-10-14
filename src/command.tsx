@@ -1,11 +1,16 @@
-import { Clipboard, List, ActionPanel, Action } from "@raycast/api";
-import { execFile } from "child_process";
+import { Clipboard, List, ActionPanel, Action, useNavigation, Detail } from "@raycast/api";
+import { execFile, ExecFileException } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { ESSE_ACTIONS } from "./esse-items";
 
 const CACHE: { [key: string]: string } = {};
 
-async function runEsseAsync(input: string, transformationId: string, callback: (_: string) => void) {
+async function runEsseAsync(
+	input: string,
+	transformationId: string,
+	setError: (_: ExecFileException) => void,
+	callback: (_: string) => void
+) {
 	const cached_value = CACHE[transformationId];
 	if (cached_value !== undefined) {
 		callback(cached_value);
@@ -19,7 +24,7 @@ async function runEsseAsync(input: string, transformationId: string, callback: (
 		(error, stdout, _stderr) => {
 			console.log(`ran esse with ${transformationId}`);
 			if (error) {
-				throw error;
+				setError(error);
 			}
 
 			CACHE[transformationId] = stdout;
@@ -55,6 +60,8 @@ export default function Command() {
 	const initialResult = { transformedText: textInfo.text, markdown: "Loading..." };
 	const [result, setResult] = useState(initialResult);
 
+	const [error, setError] = useState<ExecFileException | undefined>();
+
 	useEffect(() => {
 		function finish(result: Result) {
 			setResult(result);
@@ -72,7 +79,7 @@ export default function Command() {
 		} else if (!clipboardWasRead) {
 			finish(initialResult);
 		} else {
-			runEsseAsync(text, actionId, (transformedText) => {
+			runEsseAsync(text, actionId, setError, (transformedText) => {
 				const markdown = textToMarkdown(transformedText);
 				finish({ transformedText, markdown });
 			});
@@ -89,14 +96,23 @@ export default function Command() {
 	}, [textInfo.clipboardWasRead]);
 
 	const onSelectionChange = useCallback(
-		(actionId) => {
+		(actionId: string | null) => {
 			actionId = actionId ?? defaultActionId;
 			setActionId(actionId);
 		},
 		[actionId]
 	);
 
-	return (
+	return error !== undefined ? (
+		(() => {
+			const markdown = `# Error: Esse not installed
+
+To use this extension, you must first install the Esse app from its
+[GitHub repository](https://github.com/amebalabs/Esse). See the README for more info.`;
+
+			return <Detail markdown={markdown}></Detail>;
+		})()
+	) : (
 		<List navigationTitle="Esse" isShowingDetail {...{ isLoading, onSelectionChange }}>
 			{ESSE_ACTIONS.map(({ category, items }) => {
 				return (
