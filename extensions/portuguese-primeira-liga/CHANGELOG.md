@@ -2,7 +2,7 @@
 
 ## [New Additions] - 2022-10-14
 
-- Added View Top Scorers commands
+- Added View Top Scorers command
 - Small UX improvements
 
 ## [Improvements] - 2022-07-01
