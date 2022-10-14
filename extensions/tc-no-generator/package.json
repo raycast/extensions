@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tc-no-generator",
   "title": "Turkish Identification Number Generator",
-  "description": "tc no üretip clipboarda kopyalar",
+  "description": "Generate Turkish Identification Number and copy to clipboard",
   "icon": "cmd-icon.png",
   "author": "denizyoldas",
   "categories": [
