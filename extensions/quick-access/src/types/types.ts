@@ -31,6 +31,6 @@ export enum FileType {
   IMAGE = "Image",
 }
 export enum DirectoryType {
-  DIRECTORY = "Directory",
+  FOLDER = "Folder",
   FILE = "File",
 }

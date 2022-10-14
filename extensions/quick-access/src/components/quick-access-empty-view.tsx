@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import React, { Dispatch, SetStateAction } from "react";
-import { pinFolder } from "../pin-folder";
+import { pinFiles } from "../pin";
 import { refreshNumber } from "../hooks/hooks";
 import { ActionRemoveAllDirectories } from "./action-on-files";
 import { DirectoryWithFileInfo } from "../types/types";
@@ -20,10 +20,10 @@ export function QuickAccessEmptyView(props: {
       actions={
         <ActionPanel>
           <Action
-            title={"Pin Directory"}
+            title={"Pin"}
             icon={Icon.Pin}
             onAction={async () => {
-              await pinFolder(false);
+              await pinFiles(false);
               setRefresh(refreshNumber());
             }}
           />

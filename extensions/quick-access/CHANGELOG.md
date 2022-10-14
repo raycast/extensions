@@ -1,5 +1,11 @@
 # Quick Access Changelog
 
+## [New feature: Pin Files] - 2022-10-14
+
+- Add Pin Files feature: Now you can pin the file by **Pin** command
+- Update command name: Pin Folder -> **Pin**, Search Pinned Folder -> **Search Pins**
+- Update Menubar command, add more actions: Open, Show, Unpin pinned files or folders
+
 ## [Add new actions] - 2022-10-14
 
 - Optimize Menubar command, add more actions

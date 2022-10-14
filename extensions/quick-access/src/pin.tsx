@@ -1,14 +1,15 @@
-import { LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { checkDuplicatePath, fetchDirectoryPath, getLocalStorage, isDirectory, isEmpty } from "./utils/common-utils";
 import { DirectoryInfo, DirectoryType } from "./types/types";
 import { parse } from "path";
 import { LocalStorageKey } from "./utils/constants";
 
 export default async () => {
-  await pinFolder();
+  await closeMainWindow();
+  await pinFiles();
 };
 
-export const pinFolder = async (closeMainWindow = true) => {
+export const pinFiles = async (closeMainWindow = true) => {
   try {
     const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
     const localDirectory = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
@@ -18,12 +19,12 @@ export const pinFolder = async (closeMainWindow = true) => {
     const newDirectory: DirectoryInfo[] = [];
     directorPath.forEach((value, index) => {
       const parsedPath = parse(value);
-      if (!checkDuplicatePath(value, localDirectory) && isDirectory(value)) {
+      if (!checkDuplicatePath(value, localDirectory)) {
         newDirectory.push({
-          id: "directory_" + (timeStamp + index),
+          id: isDirectory(value) ? DirectoryType.FOLDER : DirectoryType.FILE + (timeStamp + index),
           name: parsedPath.base,
           path: value,
-          type: DirectoryType.DIRECTORY,
+          type: isDirectory(value) ? DirectoryType.FOLDER : DirectoryType.FILE,
           valid: true,
           rank: 1,
           date: timeStamp + index,
@@ -37,8 +38,8 @@ export const pinFolder = async (closeMainWindow = true) => {
     );
     if (newDirectory.length === 0) {
       closeMainWindow
-        ? await showHUD(`No folders are pinned`)
-        : await showToast(Toast.Style.Success, `No folders are pinned.`);
+        ? await showHUD(`Nothing is pinned`)
+        : await showToast(Toast.Style.Success, `Nothing are pinned.`);
       return;
     }
     const hudName = newDirectory[0].name + (newDirectory.length > 1 ? `, etc. are` : " is");

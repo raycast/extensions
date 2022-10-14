@@ -56,7 +56,7 @@ export const getOpenFinderWindowPath = async () => {
         id: value,
         name: path.parse(value).base,
         path: value,
-        type: DirectoryType.DIRECTORY,
+        type: DirectoryType.FOLDER,
         valid: true,
         rank: 1,
         date: new Date().getTime(),
