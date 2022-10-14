@@ -2,13 +2,13 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 23:21
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:58
+ * @lastEditTime: 2022-10-12 10:03
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { LanguageDetectTypeResult } from "../../detectLanauge/types";
+import { DetectedLangModel } from "../../detectLanauge/types";
 
 export interface YoudaoDictionaryFormatResult {
   queryWordInfo: QueryWordInfo;
@@ -19,11 +19,13 @@ export interface YoudaoDictionaryFormatResult {
   webPhrases?: KeyValueItem[];
   baike?: BaikeSummary;
   wikipedia?: BaikeSummary;
+  modernChineseDict?: ModernChineseDataList[];
 }
 
 export enum YoudaoDictionaryListItemType {
   Translation = "Translation",
   Explanation = "Explanation",
+  ModernChineseDict = "Modern Chinese Dict",
   Forms = "Forms and Tenses",
   WebTranslation = "Web Translation",
   WebPhrase = "Web Phrase",
@@ -51,12 +53,10 @@ export interface QueryWordInfo {
   toLanguage: string;
   isWord?: boolean; // * Dictionary Type should has value, show web url need this value.
   hasDictionaryEntries?: boolean; // it is true if the word has dictionary entries.
-  detectedLanguage?: LanguageDetectTypeResult;
+  detectedLangModel?: DetectedLangModel;
   phonetic?: string; // [ɡʊd]
   examTypes?: string[];
-  audioPath?: string;
   speechUrl?: string; // word audio url. some language not have tts url, such as "ຂາດ"
-  tld?: string; // google tld
 }
 
 export interface YoudaoTranslateResultBasicItem {
@@ -987,22 +987,25 @@ export interface Snippet {
 }
 
 export interface Newhh {
-  dataList?: NewhhDataList[];
+  dataList?: ModernChineseDataList[];
   source?: CeNewSource;
   word?: string;
 }
 
-export interface NewhhDataList {
+export interface ModernChineseDataList {
   pinyin?: string;
   sense?: Sense[];
-  word?: string;
+  word: string;
+  note?: string[];
+  seealso?: string;
 }
 
 export interface Sense {
   examples?: string[];
-  def?: string[];
+  def?: string[] | string; // 的
   cat?: string;
   style?: string;
+  subsense?: Sense[]; // 的
 }
 
 export interface Special {
