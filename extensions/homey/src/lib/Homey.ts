@@ -4,12 +4,12 @@ import { OAuth } from "@raycast/api";
 import express from 'express';
 import { Storage } from "./Storage";
 export class Homey {
-    //@ts-ignore
-    private user: AthomCloudAPI.User;
-    //@ts-ignore
-    private homey: HomeyAPI.Homey;
-    //@ts-ignore
-    private homeyApi: HomeyAPI;
+
+    private user: any//AthomCloudAPI.User;
+
+    private homey: any//HomeyAPI.Homey;
+
+    private homeyApi: any//HomeyAPI;
 
     getHomey () {
         return this.homey;
@@ -17,12 +17,12 @@ export class Homey {
     // port: 49153
     async auth () {
         if (!this.user) {
-            let token = null;
+            let token: string | null = null;
             const code = await LocalStorage.getItem<string>('_token') as string;
             let __token = undefined;
             if (code) {
 
-                //@ts-ignore
+
                 __token = new AthomCloudAPI.Token(JSON.parse(code));
             }
             // Create a Cloud API instance
@@ -31,7 +31,7 @@ export class Homey {
                 clientSecret: 'aa3095aa2585d909a17952c131c78a79fbf1f334',
                 redirectUrl: 'http://localhost:49153/oauth/callback',
 
-                //@ts-ignore
+
                 token: __token,
                 store: new Storage()
             });
@@ -64,7 +64,7 @@ export class Homey {
                     server.get('/oauth', async (req, res) => {
                         state = req.query.state;
 
-                        //@ts-ignore
+
                         res.redirect(cloudApi.getLoginUrl());
                     });
 
@@ -86,12 +86,12 @@ export class Homey {
             }
 
             if (token) {
-                //@ts-ignore
+
                 const _token = await cloudApi.authenticateWithAuthorizationCode({ code: token });
                 await LocalStorage.setItem('_token', JSON.stringify(_token));
             }
             // Get the logged in user
-            this.user = (await cloudApi.getAuthenticatedUser({ additionalScopes: '' })) as AthomCloudAPI.User;
+            this.user = (await cloudApi.getAuthenticatedUser({ additionalScopes: '' })) as any;
         }
     }
     async selectFirstHomey () {
@@ -100,7 +100,7 @@ export class Homey {
             this.homey = homey;
             // Create a session on this Homey
 
-            //@ts-ignore
+
             const homeyApi = await this.homey.authenticate();
 
             this.homeyApi = homeyApi;
@@ -109,7 +109,7 @@ export class Homey {
 
     async getFlowsWithFolders () {
         const directory: { [key: string]: { name: string, order: number, flows: any[], id: any } } = {}
-        //@ts-ignore
+
         const flowFolders = await this.homeyApi.flow.getFlowFolders();
         const folders: any = Object.values(flowFolders);
         directory['general'] = {
@@ -126,19 +126,19 @@ export class Homey {
                 flows: []
             };
         }
-        //@ts-ignore
+
         const todos = await this.homeyApi.flow.getFlows();
         const flows: any = Object.values(todos);
         for (const flow of flows) {
             directory[flow.folder || 'general'].flows.push(flow);
         }
-        //@ts-ignore
+
         const todos2 = await this.homeyApi.flow.getAdvancedFlows();
         const flows2: any = Object.values(todos2);
         for (const flow of flows2) {
-            //@ts-ignore
+
             flow.advanced = true;
-            //@ts-ignore
+
             directory[flow.folder || 'general'].flows.push(flow);
         }
         return Object.values(directory);
@@ -147,61 +147,61 @@ export class Homey {
     async getDevicesInGroups () {
         const directory: { [key: string]: { name: string, order: number, devices: any[], id: any } } = {};
 
-        //@ts-ignore
+
         const flowFolders = await this.homeyApi.zones.getZones();
-        const folders = Object.values(flowFolders);
+        const folders: any = Object.values(flowFolders);
         directory['general'] = {
-            //@ts-ignore
+
             id: 'general',
             name: 'general',
             order: 9999,
             devices: []
         };
         for (const folder of folders) {
-            //@ts-ignore
+
             directory[folder.id] = {
-                //@ts-ignore
+
                 id: folder.id,
-                //@ts-ignore
+                order: 0,
                 name: folder.name,
                 devices: []
             };
         }
-        //@ts-ignore
-        const todos = await this.homeyApi.devices.getDevices();
-        const flows = Object.values(todos);
-        for (const flow of flows) {
-            //@ts-ignore
-            directory[flow.zone || 'general'].devices.push(flow);
+
+        const devices = await this.homeyApi.devices.getDevices();
+        const deviceList: any = Object.values(devices);
+        for (const device of deviceList) {
+
+            directory[device.zone || 'general'].devices.push(device);
         }
         return Object.values(directory);
     }
 
     async triggerFlow (id: any, advanced = false) {
         if (advanced) {
-            //@ts-ignore
+
             await this.homeyApi.flow.triggerAdvancedFlow({ id });
         } else {
-            //@ts-ignore
+
             await this.homeyApi.flow.triggerFlow({ id: id });
         }
     }
 
     async toggleDevice (id: any) {
-        //@ts-ignore
+
         const capability = await this.homeyApi.devices.getDevice({ id: id });
         const value = capability.capabilitiesObj.onoff.value;
-        //@ts-ignore
+
         await this.homeyApi.devices.setCapabilityValue({ deviceId: id, capabilityId: 'onoff', value: !value });
     }
 
     async turnOnDevice (id: any) {
-        //@ts-ignore
+
         await this.homeyApi.devices.setCapabilityValue({ deviceId: id, capabilityId: 'onoff', value: true });
     }
 
     async turnOffDevice (id: any) {
-        //@ts-ignore
+
         await this.homeyApi.devices.setCapabilityValue({ deviceId: id, capabilityId: 'onoff', value: false });
     }
 
