@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "iMessage 2FA",
+      "title": "View 2FA",
+      "subtitle": "iMessage",
       "description": "View iMessage messages and Two Factor Authentication Code",
       "mode": "view"
     }
