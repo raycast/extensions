@@ -128,7 +128,7 @@ export default function Command() {
           onChange={(value) => setSearchType((value || "code") as SearchType)}
         >
           <List.Dropdown.Item title="2FA Code" value="code" />
-          <List.Dropdown.Item title="ALL" value="all" />
+          <List.Dropdown.Item title="All Messages" value="all" />
         </List.Dropdown>
       }
     >
