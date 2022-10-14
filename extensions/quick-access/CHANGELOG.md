@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [Add new actions] - {PR_MERGE_DATE}
+## [Add new actions] - 2022-10-14
 
 - Optimize Menubar command, add more actions
 - Add new action for Search Pinned Folder command: Paste File to the current selection of the frontmost application
