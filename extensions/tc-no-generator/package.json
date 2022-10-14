@@ -19,7 +19,7 @@
     },
     {
       "name": "last-tc",
-      "title": "Copy last Id",
+      "title": "Copy Last Id",
       "subtitle": "Turkish Identification Number",
       "description": "Copy last generate Turkish Identification Number to clipboard",
       "mode": "no-view"
