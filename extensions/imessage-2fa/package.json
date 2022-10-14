@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imessage-2fa",
-  "title": "IMessage 2FA",
-  "description": "iMessage Two Factor Authentication Code",
+  "title": "iMessage 2FA",
+  "description": "View iMessage messages and Two Factor Authentication Code",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "categories": [
@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "IMessage 2FA",
-      "description": "iMessage Two Factor Authentication Code",
+      "title": "iMessage 2FA",
+      "description": "View iMessage messages and Two Factor Authentication Code",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.40.3",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/utils": "^1.4.9"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
@@ -40,7 +40,7 @@
   },
   "preferences": [
     {
-      "title": "Search last days (Number)",
+      "title": "Search last days for 2FA",
       "name": "lookBackDays",
       "type": "textfield",
       "required": false,
