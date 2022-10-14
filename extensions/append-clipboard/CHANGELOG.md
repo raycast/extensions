@@ -1,6 +1,6 @@
 # Append Clipboard Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Fix bug] - 2022-10-14
 
 - Fix the bug that the clipboard is undefined
 
