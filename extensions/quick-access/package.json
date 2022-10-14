@@ -2,17 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-access",
   "title": "Quick Access",
-  "description": "Quick copy, open, show the latest files in pinned Finder folders.",
+  "description": "Quick copy, open, show the files pinned in Finder",
   "icon": "extension-icon.png",
   "author": "koinzhang",
   "license": "MIT",
   "commands": [
     {
-      "name": "search-pinned-folders",
-      "title": "Search Pinned Folders",
-      "icon": "access-folder.png",
+      "name": "search-pins",
+      "title": "Search Pins",
+      "icon": "search-pins.png",
       "subtitle": "Quick Access",
-      "description": "Quick copy, open, show the latest files in pinned Finder folders.",
+      "description": "Quick copy, open, show the files pinned in Finder",
       "mode": "view",
       "preferences": [
         {
@@ -29,7 +29,7 @@
           "type": "checkbox",
           "required": false,
           "label": "Auto Copy Latest File",
-          "description": "Automatically copy the latest files in the topmost folder. There will be some delay when copying files.",
+          "description": "Automatically copy the latest files in the topmost folder.",
           "default": false
         },
         {
@@ -113,11 +113,11 @@
       ]
     },
     {
-      "name": "pinned-folders-menu-bar",
-      "title": "Search Pinned Folders",
-      "icon": "access-folder-menu-bar.png",
+      "name": "search-pins-menu-bar",
+      "title": "Search Pins",
+      "icon": "search-pins-menu-bar.png",
       "subtitle": "Quick Access",
-      "description": "Quick copy, open, show the latest files in pinned Finder folders.",
+      "description": "Quick copy, open, show the files pinned in Finder from menu bar",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -134,7 +134,7 @@
           "type": "dropdown",
           "description": "Set the primary action in Search Pinned Folders command.",
           "required": true,
-          "title": "Primary Action (Left Click)",
+          "title": "Primary Action",
           "default": "Copy",
           "data": [
             {
@@ -150,11 +150,11 @@
       ]
     },
     {
-      "name": "pin-folder",
-      "title": "Pin Folder",
-      "icon": "pin-folder.png",
+      "name": "pin",
+      "title": "Pin",
+      "icon": "pin.png",
       "subtitle": "Quick Access",
-      "description": "Pin folders that can be accessed quickly. To use this command, you need to select folders or open a Finder window first.",
+      "description": "Pin files or folders that can be accessed quickly. To use this command, you need to select files/folders or open a Finder window first.",
       "mode": "no-view"
     }
   ],
