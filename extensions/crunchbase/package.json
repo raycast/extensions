@@ -13,15 +13,15 @@
   "commands": [
     {
       "name": "index",
-      "title": "Crunchbase",
-      "subtitle": "Search on Crunchbase companies",
+      "title": "Company Search",
+      "subtitle": "Crunchbase",
       "description": "Search on Crunchbase companies thanks the Meilisearch search engine.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.41.0",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/utils": "^1.4.9",
     "meilisearch": "^0.28.0"
   },
   "devDependencies": {
