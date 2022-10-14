@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [New feature: Pin Files] - {PR_MERGE_DATE}
+## [New feature: Pin Files] - 2022-10-14
 
 - Add Pin Files feature: Now you can pin the file by **Pin** command
 - Update command name: Pin Folder -> **Pin**, Search Pinned Folder -> **Search Pins**
