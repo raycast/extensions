@@ -8,9 +8,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-pinned-folders",
-      "title": "Search Pinned Folders",
-      "icon": "access-folder.png",
+      "name": "search-pins",
+      "title": "Search Pins",
+      "icon": "search-pins.png",
       "subtitle": "Quick Access",
       "description": "Quick copy, open, show the latest files in pinned Finder folders.",
       "mode": "view",
@@ -113,9 +113,9 @@
       ]
     },
     {
-      "name": "pinned-folders-menu-bar",
-      "title": "Search Pinned Folders",
-      "icon": "access-folder-menu-bar.png",
+      "name": "search-pins-menu-bar",
+      "title": "Search Pins",
+      "icon": "search-pins-menu-bar.png",
       "subtitle": "Quick Access",
       "description": "Quick copy, open, show the latest files in pinned Finder folders.",
       "mode": "menu-bar",
@@ -150,11 +150,11 @@
       ]
     },
     {
-      "name": "pin-folder",
-      "title": "Pin Folder",
-      "icon": "pin-folder.png",
+      "name": "pin",
+      "title": "Pin",
+      "icon": "pin.png",
       "subtitle": "Quick Access",
-      "description": "Pin folders that can be accessed quickly. To use this command, you need to select folders or open a Finder window first.",
+      "description": "Pin files or folders that can be accessed quickly. To use this command, you need to select files/folders or open a Finder window first.",
       "mode": "no-view"
     }
   ],
