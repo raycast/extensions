@@ -78,9 +78,7 @@ function RecordItem({ record, object }: { record: SfRecord; object?: SfObject })
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={record.url} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={record.url} />
         </ActionPanel>
       }
     />
