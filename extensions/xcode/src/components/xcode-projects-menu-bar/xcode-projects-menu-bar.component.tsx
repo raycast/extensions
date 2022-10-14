@@ -9,7 +9,11 @@ import { XcodeProjectMenuBarService } from "../../services/xcode-project-menu-ba
 export function XcodeProjectsMenuBar(): JSX.Element {
   const menuBarList = usePromise(XcodeProjectMenuBarService.list);
   return (
-    <MenuBarExtra isLoading={menuBarList.isLoading} icon="xcode-menu-bar-icon.png" tooltip="Show Recent Xcode Projects">
+    <MenuBarExtra
+      isLoading={menuBarList.isLoading}
+      icon={{ source: { light: "xcode-menu-bar-icon-black.png", dark: "xcode-menu-bar-icon-white.png" } }}
+      tooltip="Show Recent Xcode Projects"
+    >
       {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Item title="Favorites" /> : null}
       {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Separator /> : null}
       {menuBarList.data?.favoriteXcodeProjects.map((xcodeProject) => {
