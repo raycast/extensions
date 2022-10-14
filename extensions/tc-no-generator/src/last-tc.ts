@@ -9,11 +9,5 @@ export default async () => {
   }
 
   await Clipboard.copy(no as string);
-
-  await showToast({
-    title: "Turkish Identification Number",
-    message: `Copied ${no} to clipboard`,
-  });
-
-  await showHUD("Copied to clipboard");
+  await showHUD(`✅ Copied ${no} to clipboard`);
 };
