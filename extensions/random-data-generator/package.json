@@ -9,6 +9,9 @@
     "Data",
     "Developer Tools"
   ],
+  "keywords": [
+    "faker"
+  ],
   "commands": [
     {
       "name": "index",
