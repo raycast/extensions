@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { MeiliSearch } from "meilisearch";
 
@@ -48,7 +48,7 @@ export default function Command() {
       isShowingDetail={showingDetail}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
       searchBarPlaceholder="Search Crunchbase..."
-      // throttle
+      throttle
     >
       <List.Section
         title="Results"
@@ -65,7 +65,9 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser title="Open Crunchbase" url={searchResult.cb_url} />
+                  {searchResult.cb_url ? (
+                    <Action.OpenInBrowser title="Open Crunchbase" url={searchResult.cb_url} />
+                  ) : null}
                   {searchResult.homepage_url ? (
                     <Action.OpenInBrowser title="Open Website" url={searchResult.homepage_url} />
                   ) : null}
@@ -80,13 +82,13 @@ export default function Command() {
                   ) : null}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
+                  <Action title="Toggle Detail" icon={Icon.Sidebar} onAction={() => setShowingDetail(!showingDetail)} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
             detail={
               <List.Item.Detail
-                markdown={`<img src="${searchResult.logo_url}" alt="logo" height="200"/>`}
+                markdown={searchResult.logo_url ? `<img src="${searchResult.logo_url}" alt="logo" height="200"/>` : ""}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title={searchResult.short_description} />
@@ -101,6 +103,9 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Country Code" text={searchResult.country_code} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Social" />
+                    {searchResult.cb_url ? (
+                      <List.Item.Detail.Metadata.Link title="Crunchbase" target={searchResult.cb_url} text="Link" />
+                    ) : null}
                     {searchResult.facebook_url ? (
                       <List.Item.Detail.Metadata.Link title="Facebook" target={searchResult.facebook_url} text="Link" />
                     ) : null}
@@ -137,7 +142,7 @@ interface SearchResult {
   cb_url: string;
   domain: string;
   homepage_url: string;
-  logo_url: string;
+  logo_url?: string;
   facebook_url?: string;
   twitter_url?: string;
   linkedin_url?: string;
