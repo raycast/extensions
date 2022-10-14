@@ -114,24 +114,19 @@ LIMIT 400
 `;
 
 export async function loadDatabase(): Promise<BearDb> {
-  const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(BEAR_DB_PATH);
   return new BearDb(new SQL.Database(db));
 }
 
-/**
- * Get a nicely formatted string of tags from an array of tags
- *
- * @param tagStr - A `SqlVallue` containing the string of comma seperated tags
- * @returns
- */
 function formatTags(tags: string[]): string {
   if (tags.length === 0) {
     return "Not Tagged";
   }
   const formattedTags = [];
   for (const tag of tags) {
-    // Only format tag if tah is not subtag
+    // Only format tag if tag is not subtag
     if (tags.filter((t) => t.includes(tag)).length < 2) {
       // Format tags with spaces like Bear (two hashtags)
       formattedTags.push(tag.includes(" ") ? `#${tag}#` : `#${tag}`);

@@ -1,5 +1,5 @@
 # Spaces
 
-Spaces - It's time to declutter and reclaim your desktop on macOS.
+Spaces - Declutter and organize your workspace in 1-click.
 
-You need [this app](https://bit.ly/3RcBDOx) to make the extension work and it should be running on your macOS menu bar.
+You need [this app](https://bit.ly/3RcBDOx) to make the extension work and it should be running always on your macOS menu bar.

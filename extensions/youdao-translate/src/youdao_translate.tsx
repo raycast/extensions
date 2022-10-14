@@ -1,21 +1,18 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Icon,
-  Color,
-  Form,
-  List,
-  Detail,
+  Action,
   ActionPanel,
-  CopyToClipboardAction,
-  OpenInBrowserAction,
-  SubmitFormAction,
+  Color,
+  Detail,
+  Form,
   getPreferenceValues,
+  getSelectedText,
+  Icon,
+  List,
   useNavigation,
-  render,
 } from "@raycast/api";
 import fetch from "node-fetch";
 import crypto from "crypto";
-import qs from "querystring";
 
 interface translateResult {
   translation?: Array<string>;
@@ -45,13 +42,46 @@ function generateSign(content: string, salt: number, app_key: string, app_secret
   return cipher.slice(0, 32).toUpperCase();
 }
 
+function handleContent(content: string, handle_annotation: boolean) {
+  const annotations = ["///", "//!", "/*", "*/", "//"];
+  if (handle_annotation) {
+    for (const annotation of annotations) {
+      while (content.includes(annotation)) {
+        content = content.replace(annotation, "");
+      }
+    }
+  }
+
+  while (content.includes("\r")) {
+    content = content.replace("\r", "");
+  }
+
+  const contentList = content.split("\n");
+  for (const i in contentList) {
+    contentList[i] = contentList[i].trim();
+    if (contentList[i] == "") {
+      contentList[i] = "\n\n";
+    }
+  }
+  content = contentList.join(" ");
+  return content;
+}
+
 function translateAPI(content: string, from_language: string, to_language: string) {
-  const { app_key, app_secret } = getPreferenceValues();
-  const q = Buffer.from(content).toString();
+  const { app_key, app_secret, handle_annotation } = getPreferenceValues();
+  const q = Buffer.from(handleContent(content, handle_annotation)).toString();
   const salt = Date.now();
   const sign = generateSign(q, salt, app_key, app_secret);
-  const query = qs.stringify({ q: q, appKey: app_key, from: from_language, to: to_language, salt, sign });
-  return fetch(`https://openapi.youdao.com/api?${query}`, {
+  const url = new URL("https://openapi.youdao.com/api");
+  const params = new URLSearchParams();
+  params.append("q", q);
+  params.append("appKey", app_key);
+  params.append("from", from_language);
+  params.append("to", to_language);
+  params.append("salt", String(salt));
+  params.append("sign", sign);
+  url.search = params.toString();
+  return fetch(url.toString(), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -186,8 +216,8 @@ function TranslateResultActionPanel(props: { copy_content: string; url: string |
   const { copy_content, url } = props;
   return (
     <ActionPanel>
-      <CopyToClipboardAction content={copy_content} />
-      {url ? <OpenInBrowserAction url={url} /> : null}
+      <Action.CopyToClipboard content={copy_content} />
+      {url ? <Action.OpenInBrowser url={url} /> : null}
     </ActionPanel>
   );
 }
@@ -230,7 +260,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
   useEffect(() => {
     (async () => {
       const response = await translateAPI(content, from_language, to_language);
-      set_translate_result(await response.json());
+      set_translate_result((await response.json()) as translateResult);
     })();
   }, []);
 
@@ -312,7 +342,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
   } else {
     let result = "";
     translate_result.translation?.forEach((value) => {
-      result += `* ${value}`;
+      result += `${value}`;
     });
     return (
       <Detail
@@ -329,18 +359,29 @@ function Translate(props: { content: string | undefined; from_language: string; 
   }
 }
 
-function Main() {
+export default function Main() {
   const { push } = useNavigation();
+  const [select, set_select] = useState<string>();
+  useEffect(() => {
+    (async () => {
+      try {
+        const selected_text = await getSelectedText();
+        set_select(selected_text);
+      } catch (e) {
+        set_select("");
+      }
+    })();
+  }, []);
   return (
     <Form
       actions={
         <ActionPanel title="Translate">
-          <SubmitFormAction
+          <Action.SubmitForm
             title="Translate"
             onSubmit={(input: translateRequest) => {
               push(
                 <Translate
-                  content={input.content}
+                  content={input.content || select}
                   to_language={input.to_language}
                   from_language={input.from_language}
                 />
@@ -350,12 +391,10 @@ function Main() {
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Content" id="content" placeholder="Text to translate" />
+      <Form.TextArea title="Content" id="content" placeholder={select !== "" ? select : "Text to translate"} />
       <Form.Separator />
       <LanguageFormDDropdown id="from_language" title="From" />
       <LanguageFormDDropdown id="to_language" title="To" />
     </Form>
   );
 }
-
-render(<Main />);

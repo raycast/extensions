@@ -1,6 +1,6 @@
 import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch, LATEST_VERSION } from "./stream";
+import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
@@ -21,6 +21,7 @@ export interface Suggestion {
 export interface Alert {
   title: string;
   description?: string;
+  kind?: AlertKind;
 }
 
 export interface Progress {
@@ -36,7 +37,7 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
-export type PatternType = "literal" | "regexp" | "structural";
+export type PatternType = "literal" | "regexp" | "structural" | "lucky";
 
 export async function performSearch(
   abort: AbortSignal,
@@ -55,7 +56,7 @@ export async function performSearch(
     ["q", query],
     ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "1500"],
+    ["display", "200"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
   const stream = src.token
@@ -117,8 +118,7 @@ export async function performSearch(
           .filter((s) => s.count > 1)
           .map((f) => {
             return {
-              title: `Filter for '${f.label}'`,
-              description: `${f.count} matches`,
+              title: f.label,
               query: { addition: f.value },
             };
           }),

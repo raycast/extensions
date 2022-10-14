@@ -410,3 +410,11 @@ export default function Command() {
 #### Properties
 
 <InterfaceTableFromJSDoc name="Quicklink" />
+
+### Action.Style
+
+Defines the visual style of the Action.
+
+Use [Action.Style.Regular](#action.style) for displaying a regular actions.
+Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
+Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.

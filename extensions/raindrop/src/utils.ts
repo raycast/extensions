@@ -7,11 +7,6 @@ interface BookmarksResponse {
   items: Bookmark[];
 }
 
-export function faviconUrl(size: number, url: string): string {
-  const domain = new URL(url).hostname;
-  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-}
-
 export function useBookmarksSearch(query: string | undefined): {
   response?: BookmarksResponse;
   error?: string;

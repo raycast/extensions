@@ -23,6 +23,13 @@
       "subtitle": "OBS Control",
       "description": "Toggle Stream",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-virtual-cam",
+      "title": "Toggle Virtual Camera",
+      "subtitle": "OBS Control",
+      "description": "Toggle Virtual Camera",
+      "mode": "no-view"
     }
   ],
   "preferences": [

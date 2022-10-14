@@ -8,7 +8,7 @@
     Search npm
   </h1>
 
-Raycast extension to search for npm packages using [npms.io](https://npms.io)
+Raycast extension to search for npm packages
 
   <p>
     <a href="https://www.raycast.com/mrmartineau/search-npm">

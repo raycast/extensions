@@ -6,7 +6,8 @@
   "icon": "logo.png",
   "author": "mooxl",
   "contributors": [
-    "bibixx"
+    "bibixx",
+    "GastroGeek"
   ],
   "license": "MIT",
   "commands": [

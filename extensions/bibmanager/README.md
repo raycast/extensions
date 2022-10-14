@@ -13,4 +13,12 @@ In order for Raycast to find bibmanager, you need to provide the location of the
 4. Select the path and copy it
 5. Paste the path into the preference field for the python bin
 
-_Note: If this instruction wasn't clear, please let me know in [Slack Community](https://raycast.com/community) or feel free to create a PR with improved steps.
+## Searching
+
+This extension uses a fuzzy search that searches in bibkey, title, year, authors (any) and tags.
+
+- seperate searchstrings with a whitespace (e.g., to search 2022 in years and `Einstein` in authors, just do `Einstein 2022`)
+- Use a `+` to extend a searchstring (e.g., to search `How+drifting` in the title)
+- Use a `.` for tags (e.g., `.software` searches for the software tag)
+
+Note: If this instruction wasn't clear, please let me know in [Slack Community](https://raycast.com/community) or feel free to create a PR with improved steps.

@@ -7,4 +7,5 @@ export interface Todo {
   tag: Tag | null
   url: string
   contentUrl: string | null
+  inProgress: boolean
 }

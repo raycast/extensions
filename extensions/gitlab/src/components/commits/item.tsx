@@ -1,6 +1,6 @@
 import { Color, List, ActionPanel, Image } from "@raycast/api";
 import { GitLabIcons } from "../../icons";
-import { ensureCleanAccessories, toDateString } from "../../utils";
+import { toDateString } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { getCIJobStatusIcon } from "../jobs";
 import { Commit } from "./list";
@@ -19,7 +19,7 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
       key={commit.id}
       title={commit.title}
       icon={icon}
-      accessories={ensureCleanAccessories([{ text: toDateString(commit.created_at) }, { icon: statusIcon }])}
+      accessories={[{ text: toDateString(commit.created_at) }, { icon: statusIcon }]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={commit.web_url} />
