@@ -1,6 +1,6 @@
 # Quick Access Changelog
 
-## [Add new layout options] - {PR_MERGE_DATE}
+## [Add new layout options] - 2022-10-15
 
 - Add new layout options: List or Grid
 
