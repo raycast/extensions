@@ -7,18 +7,20 @@ import { Homey } from "./lib/Homey";
 export default function Command() {
   const [flows, setFlows] = useState<any[]>([]);
   const [homey, setHomey] = useState<Homey>(new Homey());
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchData = async () => {
       await homey.auth();
       await homey.selectFirstHomey();
       const flows = await homey.getFlowsWithFolders();
       setFlows(flows);
+      setLoading(false);
     };
     fetchData();
   }, [homey]);
 
   return (
-    <List>
+    <List isLoading={loading}>
       {flows
         .sort((a, b) => Math.sign(b.order - a.order))
         .map((folder) => (
@@ -40,6 +42,7 @@ export default function Command() {
                           {flow.triggerable && flow.enabled && (
                             <Action
                               title="Start Flow"
+                              icon={Icon.PlayFilled}
                               onAction={async () => {
                                 //  //@ts-ignore
                                 homey.triggerFlow(flow.id, flow?.advanced);

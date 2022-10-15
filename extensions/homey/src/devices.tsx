@@ -8,12 +8,13 @@ export default function Command() {
   const [devices, setDevices] = useState<any[]>([]);
   const [homey, setHomey] = useState<Homey>(new Homey());
   const [index, setIndex] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchData = async () => {
       await homey.auth();
       await homey.selectFirstHomey();
       const devices = await homey.getDevicesInGroups();
-
+      setLoading(false);
       setDevices(devices);
     };
 
@@ -30,9 +31,8 @@ export default function Command() {
     };
   }, [homey, index]);
 
-  console.log(devices);
   return (
-    <List>
+    <List isLoading={loading}>
       {devices
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((deviceGroup) => (
@@ -71,6 +71,7 @@ export default function Command() {
                           {device?.capabilitiesObj?.onoff && (
                             <>
                               <Action
+                                icon={device?.capabilitiesObj?.onoff?.value ? "toggle-off.svg" : "toggle-on.svg"}
                                 title="Toggle"
                                 onAction={async () => {
                                   await homey.toggleDevice(device.id);
@@ -91,6 +92,7 @@ export default function Command() {
                           {device?.capabilitiesObj?.onoff && (
                             <>
                               <Action
+                                icon={"toggle-on.svg"}
                                 title="On"
                                 onAction={async () => {
                                   await homey.turnOnDevice(device.id);
@@ -104,6 +106,7 @@ export default function Command() {
                               ></Action>
                               <Action
                                 title="Off"
+                                icon={"toggle-off.svg"}
                                 onAction={async () => {
                                   await homey.turnOffDevice(device.id);
                                   await showToast({
