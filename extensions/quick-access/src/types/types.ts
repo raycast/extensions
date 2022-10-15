@@ -30,7 +30,13 @@ export enum FileType {
   FILE = "File",
   IMAGE = "Image",
 }
+
 export enum DirectoryType {
   FOLDER = "Folder",
   FILE = "File",
+}
+
+export enum Layout {
+  GRID = "Grid",
+  LIST = "List",
 }

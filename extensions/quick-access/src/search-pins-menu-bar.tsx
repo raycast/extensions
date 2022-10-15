@@ -1,22 +1,18 @@
 import { getPreferenceValues, Icon, LocalStorage, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
-import React, { useState } from "react";
+import React from "react";
 import { directory2File, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
-import { DirectoryType, DirectoryWithFileInfo, FileType } from "./types/types";
+import { DirectoryType, DirectoryWithFileInfo } from "./types/types";
 import { parse } from "path";
 import { pinFiles } from "./pin";
-import { localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import { localDirectoryWithFiles } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { MenuBarActionsOnFile, MenuBarActionsOnFolder } from "./components/menu-bar-actions";
 import { LocalStorageKey } from "./utils/constants";
 
 export default function SearchPinnedFolders() {
   const { showOpenFolders, primaryAction } = getPreferenceValues<Preferences>();
-  const [refresh, setRefresh] = useState<number>(0);
 
-  const { pinnedDirectoryWithFiles, openDirectoryWithFiles, loading } = localDirectoryWithFiles(
-    refresh,
-    showOpenFolders
-  );
+  const { pinnedDirectoryWithFiles, openDirectoryWithFiles, loading } = localDirectoryWithFiles(0, showOpenFolders);
 
   return (
     <MenuBarExtra
@@ -64,7 +60,6 @@ export default function SearchPinnedFolders() {
         shortcut={{ modifiers: ["cmd"], key: "d" }}
         onAction={async () => {
           await pinFiles();
-          setRefresh(refreshNumber());
         }}
       />
       <MenuBarExtra.Separator />
@@ -91,7 +86,11 @@ function FolderMenuBarItem(props: {
     <MenuBarExtra.Submenu
       key={directory.directory.id + directoryIndex}
       title={directory.directory.name}
-      icon={{ fileIcon: directory.directory.path }}
+      icon={
+        isImage(parse(directory.directory.path).ext)
+          ? { source: directory.directory.path }
+          : { fileIcon: directory.directory.path }
+      }
     >
       {directory.directory.type === DirectoryType.FOLDER ? (
         <MenuBarActionsOnFolder directoryWithFileInfo={directory} />
@@ -108,7 +107,7 @@ function FolderMenuBarItem(props: {
           <MenuBarActionsOnFile primaryAction={primaryAction} fileValue={fileValue} />
         </MenuBarExtra.Submenu>
       ))}
-      {hasUnPin && (
+      {hasUnPin ? (
         <>
           <MenuBarExtra.Separator />
           <MenuBarExtra.Item
@@ -121,6 +120,18 @@ function FolderMenuBarItem(props: {
               await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(_localDirectory));
               // setRefresh(refreshNumber());
               await showHUD(`${directory.directory.name} is unpinned`);
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <MenuBarExtra.Separator />
+          <MenuBarExtra.Item
+            title={"Pin"}
+            icon={Icon.Pin}
+            onAction={async () => {
+              const folderPaths: string[] = [directory.directory.path];
+              await pinFiles(folderPaths);
             }}
           />
         </>

@@ -15,7 +15,7 @@ export function ActionOnPins(props: {
   file: FileInfo;
   showDetail: boolean;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
-  setRefreshDetail: React.Dispatch<React.SetStateAction<number>>;
+  setRefreshDetail: React.Dispatch<React.SetStateAction<number>> | undefined;
 }) {
   const { primaryAction, directoryIndex, directory, file, showDetail, setRefresh, setRefreshDetail } = props;
   return (
@@ -34,7 +34,7 @@ export function ActionOnPins(props: {
           title={`Pin`}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
           onAction={async () => {
-            await pinFiles(false);
+            await pinFiles([], false);
             setRefresh(refreshNumber());
           }}
         />
@@ -87,17 +87,19 @@ export function ActionOnPins(props: {
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section>
-        <Action
-          title={"Toggle Details"}
-          icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
-          onAction={async () => {
-            await LocalStorage.setItem("isShowDetail", !showDetail);
-            setRefreshDetail(Date.now);
-          }}
-        />
-      </ActionPanel.Section>
+      {typeof setRefreshDetail !== "undefined" && (
+        <ActionPanel.Section>
+          <Action
+            title={"Toggle Details"}
+            icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["shift", "ctrl"], key: "d" }}
+            onAction={async () => {
+              await LocalStorage.setItem("isShowDetail", !showDetail);
+              setRefreshDetail(Date.now);
+            }}
+          />
+        </ActionPanel.Section>
+      )}
 
       <ActionOpenCommandPreferences />
     </ActionPanel>

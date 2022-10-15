@@ -9,12 +9,12 @@ export default async () => {
   await pinFiles();
 };
 
-export const pinFiles = async (closeMainWindow = true) => {
+export const pinFiles = async (folderPaths: string[] = [], closeMainWindow = true) => {
   try {
     const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_PIN_DIRECTORY);
     const localDirectory = isEmpty(_localstorage) ? [] : JSON.parse(_localstorage);
 
-    const directorPath = await fetchDirectoryPath();
+    const directorPath = folderPaths.length === 0 ? await fetchDirectoryPath() : folderPaths;
     const timeStamp = new Date().getTime();
     const newDirectory: DirectoryInfo[] = [];
     directorPath.forEach((value, index) => {
