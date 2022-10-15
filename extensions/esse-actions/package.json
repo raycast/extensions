@@ -13,7 +13,7 @@
 	"commands": [
 		{
 			"name": "command",
-			"title": "Transform Text with Esse",
+			"title": "Transform Text With Esse",
 			"description": "Uses the Esse app, which must already be installed, to perform operations on the passed text",
 			"mode": "view"
 		}
