@@ -1,6 +1,6 @@
 # Bing Wallpaper Changelog
 
-## [Update grid layout] - {PR_MERGE_DATE}
+## [Update grid layout] - 2022-10-15
 
 - Update grid layout
 
