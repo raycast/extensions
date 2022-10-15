@@ -4,8 +4,10 @@ import { getFolderByPath } from "../hooks/hooks";
 import { FolderPageListEmptyView } from "./folder-page-list-empty-view";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import { ActionsOnFile } from "./action-on-files";
+import { isImage } from "../utils/common-utils";
+import { parse } from "path";
 
-export function FolderPage(props: { folderName: string; folderPath: string; primaryAction: string }) {
+export function FolderPageList(props: { folderName: string; folderPath: string; primaryAction: string }) {
   const { folderName, folderPath, primaryAction } = props;
   const [currentItem, setCurrentItem] = useState<string>("");
   const { folders, loading } = getFolderByPath(folderPath);
@@ -21,21 +23,22 @@ export function FolderPage(props: { folderName: string; folderPath: string; prim
     >
       <FolderPageListEmptyView path={folderPath} pop={pop} />
       {folders.map((value, index) => {
+        const filePath = folderPath + "/" + value.name;
         return (
           <List.Item
             id={value.name}
             key={index}
-            icon={{ fileIcon: folderPath + "/" + value.name }}
+            icon={isImage(parse(filePath).ext) ? { source: filePath } : { fileIcon: filePath }}
             title={value.name}
-            quickLook={{ path: folderPath + "/" + value.name, name: value.name }}
-            accessories={[currentItem === value.name ? { text: folderPath + "/" + value.name } : {}]}
+            quickLook={{ path: filePath, name: value.name }}
+            accessories={[currentItem === value.name ? { text: filePath } : {}]}
             actions={
               <ActionPanel>
                 <ActionsOnFile
                   isTopFolder={false}
                   primaryAction={primaryAction}
                   name={value.name}
-                  path={folderPath + "/" + value.name}
+                  path={filePath}
                   index={index}
                   setRefresh={() => {
                     return;

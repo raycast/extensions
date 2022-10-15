@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Grid } from "@raycast/api";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
-export function FolderPageListEmptyView(props: { path: string; pop: () => void }) {
+export function FolderPageGridEmptyView(props: { path: string; pop: () => void }) {
   const { path, pop } = props;
   return (
-    <List.EmptyView
+    <Grid.EmptyView
       icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
       title={"No folder"}
       actions={

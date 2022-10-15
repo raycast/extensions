@@ -21,15 +21,15 @@
           "description": "Set the layout of the pins items.",
           "required": true,
           "title": "Pins Layout",
-          "default": "List",
+          "default": "Grid",
           "data": [
-            {
-              "title": "List",
-              "value": "List"
-            },
             {
               "title": "Grid",
               "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
             }
           ]
         },
