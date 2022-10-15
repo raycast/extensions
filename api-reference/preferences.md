@@ -31,7 +31,7 @@ interface Preferences {
   bodyHeight?: string;
 }
 
-export default async () => {
+export default () => {
   const preferences = getPreferenceValues<Preferences>();
   console.log(preferences);
 };
