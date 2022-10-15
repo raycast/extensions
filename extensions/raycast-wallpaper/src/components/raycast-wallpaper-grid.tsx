@@ -12,7 +12,7 @@ export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpape
   return (
     <Grid
       isLoading={raycastWallpapers.length === 0}
-      columns={preferences.columns}
+      columns={parseInt(preferences.columns)}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search wallpapers"}
