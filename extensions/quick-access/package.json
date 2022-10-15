@@ -16,6 +16,92 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "layout",
+          "type": "dropdown",
+          "description": "Set the layout of the pins items.",
+          "required": true,
+          "title": "Pins Layout",
+          "default": "List",
+          "data": [
+            {
+              "title": "List",
+              "value": "List"
+            },
+            {
+              "title": "Grid",
+              "value": "Grid"
+            }
+          ]
+        },
+        {
+          "name": "columns",
+          "type": "dropdown",
+          "description": "Set the number of columns of the pins items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Pins Item Coloums",
+          "default": "8",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            }
+          ]
+        },
+        {
+          "name": "itemInset",
+          "type": "dropdown",
+          "description": "Set the inset of the file items. (Only works with Grid layout)",
+          "required": false,
+          "title": "File Item Inset",
+          "default": "sm",
+          "data": [
+            {
+              "title": "No Inset",
+              "value": ""
+            },
+            {
+              "title": "Small",
+              "value": "sm"
+            },
+            {
+              "title": "Medium",
+              "value": "md"
+            },
+            {
+              "title": "Large",
+              "value": "lg"
+            }
+          ]
+        },
+        {
           "name": "showOpenFolders",
           "type": "checkbox",
           "required": true,
