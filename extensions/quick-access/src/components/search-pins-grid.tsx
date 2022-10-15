@@ -22,8 +22,8 @@ export function SearchPinsGrid() {
 
   return (
     <Grid
-      columns={columns}
       isLoading={loading}
+      columns={parseInt(columns)}
       aspectRatio={"1"}
       inset={itemInset as Grid.Inset}
       fit={Grid.Fit.Contain}
