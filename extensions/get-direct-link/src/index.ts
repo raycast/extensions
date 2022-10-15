@@ -24,17 +24,21 @@ export default async function main() {
   function isDirectLink(_url: string, _ofHost: string) {
     let reg: RegExp;
     switch (_ofHost) {
-      case 'google':
+      case 'google': {
         reg = /^https?:\/\/drive\.google\.com\/uc\?id=[\d\w]+&export=download$/g;
         break;
-      case 'dropbox':
+      }
+      case 'dropbox': {
         reg = /^https?:\/\/dl\.dropboxusercontent\.com\/s\/[\d\w]+\/[^/\s]+$/g;
         break;
-      case 'imgur':
+      }
+      case 'imgur': {
         reg = /^https?:\/\/i\.imgur\.com\/[\d\w]+\.jpeg$/g;
         break;
-      default:
+      }
+      default: {
         return false;
+      }
     }
     if (_url.replace(reg, '') === '') {
       return true;
@@ -47,16 +51,19 @@ export default async function main() {
     let reg: RegExp;
     let isMatched = false;
     switch (true) {
-      case _url.startsWith('https://drive.google.com/open'):
+      case _url.startsWith('https://drive.google.com/open'): {
         reg = /(?<=^https?:\/\/drive\.google\.com\/open\?id=)[^&]+/g;
         isMatched = true
         break;
-      case _url.startsWith('https://drive.google.com/file/d/'):
+      }
+      case _url.startsWith('https://drive.google.com/file/d/'): {
         reg = /(?<=^https?:\/\/drive\.google\.com\/file\/d\/)[^/]+/g;
         isMatched = true;
         break;
-      default:
+      }
+      default: {
         return null;
+      }
     }
     if (isMatched) {
       const matches = _url.match(reg);
@@ -77,10 +84,11 @@ export default async function main() {
       const dotSplitted = file.split('.');
       let newFile = '';
       switch (dotSplitted.length) { // Check how many . in the file
-        case 1: // no file extension
+        case 1: {// no file extension
           newFile = dotSplitted[0] + "_" + id;
           break;
-        default: // more than 1 .
+        }
+        default: { // more than 1 .
           for (let i = 0; i < dotSplitted.length - 1; i++) {
             newFile += dotSplitted[i];
           }
@@ -90,6 +98,7 @@ export default async function main() {
           } else { // name doesnt contain id
             newFile += '_' + id + '.' + dotSplitted[dotSplitted.length - 1];
           }
+        }
       }
       return [id, newFile];
     } else {
@@ -107,7 +116,7 @@ export default async function main() {
     }
   }
   switch (clipboard) {
-    case findHostname('https://drive.google.com'): // Google Drive
+    case findHostname('https://drive.google.com'): { // Google Drive
       if (isDirectLink(clipboard!, 'google')) {
         await showHUD("It already is a direct link");
         break;
@@ -123,14 +132,16 @@ export default async function main() {
         await showHUD("🤷‍♂️ Error 101");
       }
       break;
+    }
     case findHostname('https://dl.dropboxusercontent.com'):
-    case findHostname('https://www.dl.dropboxusercontent.com'):
+    case findHostname('https://www.dl.dropboxusercontent.com'): {
       if (isDirectLink(clipboard!, 'dropbox')) {
         await showHUD("😂 It already is a direct link");
       }
       break;
+    }
     case findHostname('https://www.dropbox.com/s/'): // Dropbox
-    case findHostname('https://dropbox.com/s/'):
+    case findHostname('https://dropbox.com/s/'): {
 
       const [did, file] = dropboxParser(clipboard!)
 
@@ -141,12 +152,14 @@ export default async function main() {
         await showHUD("😭 It's not Dropbox's shareable URL");
       }
       break;
-    case findHostname('https://i.imgur.com'): // Imgur
+    }
+    case findHostname('https://i.imgur.com'): { // Imgur
       if (isDirectLink(clipboard!, 'imgur')) {
         await showHUD("😂 It already is a direct link");
       }
       break;
-    case findHostname('https://imgur.com'): // Imgur
+    }
+    case findHostname('https://imgur.com'): { // Imgur
       const ihead = 'https://i.imgur.com/';
       const itail = '.jpeg'
       const iid = getImgurId(clipboard!);
@@ -158,8 +171,10 @@ export default async function main() {
         await showHUD("🤷‍♂️ Error 102");
       }
       break;
-    default:
+    }
+    default: {
       await showHUD("😭 Can not find an URL");
       break;
+    }
   }
 }
