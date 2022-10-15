@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   closeMainWindow,
+  getPreferenceValues,
   Icon,
   LocalStorage,
   showHUD,
@@ -17,7 +18,10 @@ import React from "react";
 import { copyFileByPath } from "../utils/applescript-utils";
 import { upRank } from "../search-pins";
 import { isDirectory } from "../utils/common-utils";
-import { FolderPage } from "./folder-page";
+import { FolderPageList } from "./folder-page-list";
+import { Preferences } from "../types/preferences";
+import { Layout } from "../types/types";
+import { FolderPageGrid } from "./folder-page-grid";
 
 export function ActionRemoveAllDirectories(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const { setRefresh } = props;
@@ -52,6 +56,7 @@ export function ActionsOnFile(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const { pop } = useNavigation();
+  const { layout } = getPreferenceValues<Preferences>();
   const { isTopFolder, primaryAction, name, path, index, setRefresh } = props;
   return (
     <>
@@ -86,7 +91,13 @@ export function ActionsOnFile(props: {
           icon={Icon.ChevronDown}
           title={"Enter Folder"}
           shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-          target={<FolderPage folderName={name} folderPath={path} primaryAction={primaryAction} />}
+          target={
+            layout === Layout.LIST ? (
+              <FolderPageList folderName={name} folderPath={path} primaryAction={primaryAction} />
+            ) : (
+              <FolderPageGrid folderName={name} folderPath={path} primaryAction={primaryAction} />
+            )
+          }
         />
       )}
       <ActionPanel.Section>

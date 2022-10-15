@@ -15,7 +15,7 @@ export function QuickAccessEmptyView(props: {
   const { layout, title, description, setRefresh, directoryWithFiles } = props;
   return layout === "Grid" ? (
     <Grid.EmptyView
-      icon={{ source: { light: "empty-view-icon.svg", dark: "empty-view-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
       title={title}
       description={description}
       actions={
@@ -34,7 +34,7 @@ export function QuickAccessEmptyView(props: {
     />
   ) : (
     <List.EmptyView
-      icon={{ source: { light: "empty-view-icon.svg", dark: "empty-view-icon@dark.svg" } }}
+      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
       title={title}
       description={description}
       actions={

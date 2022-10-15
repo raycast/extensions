@@ -1,6 +1,6 @@
 export interface Preferences {
   layout: string;
-  columns: number;
+  columns: string;
   itemInset: string;
   showOpenFolders: boolean;
   autoCopyLatestFile: boolean;
