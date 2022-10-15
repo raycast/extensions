@@ -15,7 +15,7 @@ export function RaycastWallpaperGrid(props: { raycastWallpapers: RaycastWallpape
       columns={parseInt(preferences.columns)}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
-      searchBarPlaceholder={"Search wallpapers"}
+      searchBarPlaceholder={"Search wallpapers..."}
     >
       <RaycastWallpaperEmptyView layout={preferences.layout} />
       {raycastWallpapers.map((value, index) => {
