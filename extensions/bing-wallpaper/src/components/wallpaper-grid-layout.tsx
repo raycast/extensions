@@ -19,7 +19,9 @@ export function WallpaperGridLayout(props: {
   return (
     <Grid
       isLoading={isLoading}
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={preferences.columns}
+      aspectRatio={"16/9"}
+      fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search wallpapers"}
       searchBarAccessory={
         preferences.includeDownloadedWallpapers ? (
