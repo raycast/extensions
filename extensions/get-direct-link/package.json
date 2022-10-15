@@ -1,11 +1,10 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
-    "name": "directlink",
-    "title": "Convert a shareable URL to a direct link",
-    "description": "Convert a shareable URL to a direct link",
+    "name": "get-direct-link",
+    "title": "Get Direct Link",
+    "description": "Get a direct link from a shareable link of Dropbox, Google Drive, and Imgur service.",
     "icon": "command-icon.png",
-    "author": "roweelinor214",
-    "owner": "elten",
+    "author": "trungnghiatn",
     "categories": [
         "Productivity"
     ],
@@ -13,11 +12,11 @@
     "commands": [{
         "name": "index",
         "title": "Get Direct Link",
-        "description": "Template for running a script without any view",
+        "description": "Get a direct link from a shareable link of Dropbox, Google Drive, and Imgur service.",
         "mode": "no-view"
     }],
     "dependencies": {
-        "@raycast/api": "^1.41.0"
+        "@raycast/api": "^1.41.1"
     },
     "devDependencies": {
         "@types/node": "16.10.3",

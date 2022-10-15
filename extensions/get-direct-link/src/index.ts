@@ -1,11 +1,4 @@
-import {
-  showHUD,
-  Clipboard
-} from "@raycast/api";
-import {
-  type
-} from "os";
-
+import {  showHUD,  Clipboard} from "@raycast/api";
 
 export default async function main() {
   let clipboard = await Clipboard.readText();
