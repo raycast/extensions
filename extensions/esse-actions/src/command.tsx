@@ -1,4 +1,4 @@
-import { Clipboard, List, ActionPanel, Action, useNavigation, Detail } from "@raycast/api";
+import { Clipboard, List, ActionPanel, Action, Detail } from "@raycast/api";
 import { execFile, ExecFileException } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { ESSE_ACTIONS } from "./esse-items";
