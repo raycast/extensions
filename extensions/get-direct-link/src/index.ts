@@ -1,4 +1,7 @@
-import { showHUD, Clipboard } from "@raycast/api";
+import {
+  showHUD,
+  Clipboard
+} from "@raycast/api";
 
 export default async function main() {
   let clipboard = await Clipboard.readText();
@@ -84,7 +87,7 @@ export default async function main() {
       const dotSplitted = file.split('.');
       let newFile = '';
       switch (dotSplitted.length) { // Check how many . in the file
-        case 1: {// no file extension
+        case 1: { // no file extension
           newFile = dotSplitted[0] + "_" + id;
           break;
         }
