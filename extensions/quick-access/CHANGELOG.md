@@ -1,5 +1,9 @@
 # Quick Access Changelog
 
+## [Add new layout options] - 2022-10-15
+
+- Add new layout options: List or Grid
+
 ## [New feature: Pin Files] - 2022-10-14
 
 - Add Pin Files feature: Now you can pin the file by **Pin** command
