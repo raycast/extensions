@@ -3,12 +3,11 @@ import fetch from "node-fetch";
 
 interface Preferences {
   rapidAPIKey: string;
-  locale: string;
 }
 
 export default async function main() {
   const preferences = getPreferenceValues<Preferences>();
-  const url = "https://random-username-generate.p.rapidapi.com/?locale=" + preferences.locale + "&minAge=18&maxAge=50";
+  const url = "https://random-username-generate.p.rapidapi.com/?locale=en_US&minAge=18&maxAge=50";
   const options = {
     method: "GET",
     headers: {

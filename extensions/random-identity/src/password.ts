@@ -11,6 +11,7 @@ interface Preferences {
 export default async function main(props: { arguments?: PasswordLength }) {
   const preferences = getPreferenceValues<Preferences>();
   var length = parseInt(preferences.defaultPasswordLength);
+  console.log(length);
   const arg = props.arguments;
   if (arg?.length !== "") {
     length = parseInt(arg!.length);
