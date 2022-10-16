@@ -2,7 +2,15 @@ import { ActionPanel, List, Action, showToast, Toast, Icon, getPreferenceValues 
 import { useEffect, useState } from "react";
 import { LangCode, UsageExample } from "./domain";
 import { getUsageExamples } from "./reversoApi";
-import { buildDetails, clearTag, codeToLanguageDict, reversoBrowserQuery, toMdBold } from "./utils";
+import {
+  buildDetails,
+  clarifyLangPairDirection,
+  clearTag,
+  codeToLanguageDict,
+  prefsToLangPair,
+  reversoBrowserQuery,
+  toMdBold,
+} from "./utils";
 
 let count = 0;
 
@@ -26,11 +34,16 @@ export default function Command() {
     const preferences = getPreferenceValues<{
       langFrom: LangCode;
       langTo: LangCode;
+      correctLangPairDirection: boolean;
     }>();
 
-    showToast(Toast.Style.Animated, `[${preferences.langFrom} -> ${preferences.langTo}]`, "Loading...");
+    const langPair = preferences.correctLangPairDirection
+      ? clarifyLangPairDirection(text, prefsToLangPair(preferences))
+      : prefsToLangPair(preferences);
 
-    getUsageExamples(text, preferences.langFrom, preferences.langTo)
+    showToast(Toast.Style.Animated, `[${langPair.from} -> ${langPair.to}]`, "Loading...");
+
+    getUsageExamples(text, langPair.from, langPair.to)
       .then((examples) => {
         if (localCount !== count) {
           // If current request is not actual, ignore it.
@@ -44,7 +57,7 @@ export default function Command() {
       })
       .then(() => {
         setIsLoading(false);
-        showToast(Toast.Style.Success, `[${preferences.langFrom} -> ${preferences.langTo}]`, "Finished");
+        showToast(Toast.Style.Success, `[${langPair.from} -> ${langPair.to}]`, "Finished");
       });
   }, [text]);
 
