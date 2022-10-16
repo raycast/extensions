@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-imessages",
-  "title": "Search IMessages & find 2FA codes",
-  "description": "Search IMessages & find 2FA codes",
+  "title": "Search iMessages & find 2FA codes",
+  "description": "Let's you search your iMessages & find 2FA codes directly from Raycast",
   "icon": "icon.png",
   "author": "BalliAsghar",
   "categories": [
@@ -13,14 +13,14 @@
   "commands": [
     {
       "name": "messages",
-      "title": "Search Messages",
-      "description": "Search Messages & Find 2FA Codes",
+      "title": "Search iMessages",
+      "description": "Search iMessages & Find 2FA Codes",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.36.0",
-    "@raycast/utils": "^1.4.7"
+    "@raycast/utils": "^1.4.9"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
