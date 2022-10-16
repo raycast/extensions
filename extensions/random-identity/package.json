@@ -12,31 +12,31 @@
     "license": "MIT",
     "commands": [{
             "name": "username",
-            "title": "Random Username Generator",
+            "title": "Username Generator",
             "description": "Generate a new random username",
             "mode": "no-view"
         },
         {
             "name": "email",
-            "title": "Random @duck.com Generator",
+            "title": "@duck.com Generator",
             "description": "Generate a new random email",
             "mode": "no-view"
         },
         {
             "name": "address",
-            "title": "Random Adress Generator",
+            "title": "Adress Generator",
             "description": "Generate a new random email",
             "mode": "no-view"
         },
         {
             "name": "name",
-            "title": "Random Name Generator",
+            "title": "Name Generator",
             "description": "Generate a new random email",
             "mode": "no-view"
         },
         {
             "name": "password",
-            "title": "Random Password Generator",
+            "title": "Password Generator",
             "description": "Generate a new random password",
             "mode": "no-view",
             "arguments": [{
