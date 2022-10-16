@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "imessages-find-2fa-codes",
-  "title": "IMessages - Find 2FA Codes",
-  "description": "Find 2FA Codes in your recent IMessages.",
+  "name": "search-imessages",
+  "title": "Search IMessages & find 2FA codes",
+  "description": "Search IMessages & find 2FA codes",
   "icon": "icon.png",
   "author": "BalliAsghar",
   "categories": [
@@ -12,20 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "find-2fa-codes",
-      "title": "Find 2FA Codes",
-      "description": "Find 2FA Codes in your recent IMessages.",
+      "name": "messages",
+      "title": "Search Messages",
+      "description": "Search Messages & Find 2FA Codes",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "minutes",
-      "title": "How many minutes to look back?",
-      "description": "How many minutes to look back?",
-      "type": "textfield",
-      "required": false,
-      "default": "15"
     }
   ],
   "dependencies": {
