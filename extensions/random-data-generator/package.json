@@ -4,6 +4,10 @@
   "description": "Generate random data using Faker library",
   "icon": "random.png",
   "author": "loris",
+  "contributors": [
+    "loris",
+    "Calvein"
+  ],
   "license": "MIT",
   "categories": [
     "Data",
