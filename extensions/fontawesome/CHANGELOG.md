@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Initial Version] - 2022-10-08
+## [Initial Version] - 2022-10-16
 
 - Removed static icons files
 - Added iconography fetching from Font Awesome API
