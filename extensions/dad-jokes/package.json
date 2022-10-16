@@ -5,6 +5,9 @@
   "description": "Get a random dad joke",
   "icon": "icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "Abdulaziz-Aljadaan"
+  ],
   "categories": [
     "Fun"
   ],
