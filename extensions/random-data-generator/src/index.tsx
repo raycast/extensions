@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PasteAction,
-  getPreferenceValues,
-  allLocalStorageItems,
-  setLocalStorageItem,
-} from '@raycast/api';
+import { ActionPanel, Icon, List, getPreferenceValues, Action, LocalStorage } from '@raycast/api';
 import { faker } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
@@ -86,11 +76,11 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
       detail={<List.Item.Detail markdown={value} />}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction title="Copy to Clipboard" content={value} />
-          <PasteAction title="Paste in Active App" content={value} />
-          {isUrl(value) && <OpenInBrowserAction url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
+          <Action.CopyToClipboard title="Copy to Clipboard" content={value} />
+          <Action.Paste title="Paste in Active App" content={value} />
+          {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
           {pin && (
-            <ActionPanel.Item
+            <Action
               title="Pin Entry"
               icon={Icon.Pin}
               shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
@@ -98,14 +88,14 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             />
           )}
           {unpin && (
-            <ActionPanel.Item
+            <Action
               title="Unpin Entry"
-              icon={Icon.XmarkCircle}
+              icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ['shift', 'cmd'], key: 'p' }}
               onAction={() => unpin(item)}
             />
           )}
-          <ActionPanel.Item
+          <Action
             title="Refresh Value"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ['ctrl'], key: 'r' }}
@@ -123,7 +113,7 @@ export default function FakerList() {
   const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
 
   const fetchPinnedItems = useCallback(async () => {
-    const values: LocalStorageValues = await allLocalStorageItems();
+    const values: LocalStorageValues = await LocalStorage.allItems();
     const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
     const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
     setPinnedItems(pinnedItems);
@@ -139,7 +129,7 @@ export default function FakerList() {
       section,
       id,
     }));
-    setLocalStorageItem('pinnedItemIds', JSON.stringify(nextPinnedItemIds));
+    LocalStorage.setItem('pinnedItemIds', JSON.stringify(nextPinnedItemIds));
   };
 
   const pin = (item: Item) => {
