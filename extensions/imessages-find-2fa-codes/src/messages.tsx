@@ -90,7 +90,9 @@ const get2FACode = async (text: string) => {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const { isLoading, data, permissionView } = useSQL(IMESSAGE_DB, QUERY(searchText));
+  const { isLoading, data, permissionView } = useSQL(IMESSAGE_DB, QUERY(searchText), {
+    permissionPriming: "Please allow Raycast to access your Messages database",
+  });
 
   if (permissionView) return permissionView;
 
