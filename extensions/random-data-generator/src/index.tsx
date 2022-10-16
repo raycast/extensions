@@ -2,7 +2,7 @@ import { ActionPanel, Icon, List, Action, LocalStorage } from '@raycast/api';
 import { faker, UsableLocale } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type LocalStorageValues = {
   pinnedItemIds: string;
@@ -60,6 +60,9 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   const updateValue = async () => {
     setValue(item.getValue());
   };
+  useEffect(() => {
+    updateValue();
+  }, [item]);
 
   return (
     <List.Item
@@ -94,27 +97,55 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             shortcut={{ modifiers: ['ctrl'], key: 'r' }}
             onAction={updateValue}
           />
-          <Action.Push
-            icon={Icon.Map}
-            shortcut={{ modifiers: ['ctrl'], key: 'f' }}
-            title="Choose default language"
-            target={<Locales />}
-          />
         </ActionPanel>
       }
     />
   );
 }
 
-function FakerList() {
+function Locales(props: { onChange: () => void }) {
+  const { onChange } = props;
+
+  return (
+    <List.Dropdown
+      tooltip="Change Language"
+      value={faker.locale}
+      onChange={(newLocale) => {
+        faker.locale = newLocale;
+        LocalStorage.setItem('locale', newLocale);
+        onChange();
+      }}
+    >
+      {Object.entries(faker.locales).map(([localeKey, locale]) => {
+        if (!locale) return null;
+
+        return <List.Dropdown.Item key={localeKey} title={locale.title} value={localeKey} />;
+      })}
+    </List.Dropdown>
+  );
+}
+
+export default function FakerList() {
+  const [items, setItems] = useState<Item[]>([]);
+  const generateItems = useCallback(() => {
+    setItems(buildItems(''));
+  }, []);
+
   const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
   const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
   useEffect(() => {
     const init = async () => {
       const locale = (await LocalStorage.getItem('locale')) || 'en';
       faker.setLocale(locale as UsableLocale);
+      generateItems();
+    };
+    init();
+  }, [generateItems]);
 
-      const items = buildItems('');
+  useEffect(() => {
+    const fetchPinnedItems = async () => {
+      if (items.length === 0) return;
+
       const values: LocalStorageValues = await LocalStorage.allItems();
       const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
       const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
@@ -122,8 +153,8 @@ function FakerList() {
       setGroupedItems(_.groupBy(items, 'section'));
       setPinnedItems(pinnedItems);
     };
-    init();
-  }, []);
+    fetchPinnedItems();
+  }, [items]);
 
   const handlePinnedItemsChange = (nextPinnedItems: Item[]) => {
     setPinnedItems(nextPinnedItems);
@@ -147,8 +178,10 @@ function FakerList() {
     handlePinnedItemsChange(nextPinnedItems);
   };
 
+  const isLoading = Object.values(groupedItems).length === 0;
+
   return (
-    <List isShowingDetail>
+    <List isShowingDetail searchBarAccessory={isLoading ? null : <Locales onChange={generateItems} />}>
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (
@@ -165,42 +198,4 @@ function FakerList() {
       ))}
     </List>
   );
-}
-
-function Locales() {
-  return (
-    <List searchBarPlaceholder="Choose default language">
-      <List.Section title="Languages">
-        {Object.entries(faker.locales).map(([key, locale]) => {
-          if (!locale) return null;
-
-          return (
-            <List.Item
-              key={key}
-              icon={Icon.Dot}
-              title={locale.title}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.Push
-                      title="Choose language"
-                      target={<FakerList />}
-                      onPush={() => {
-                        faker.locale = key;
-                        LocalStorage.setItem('locale', key);
-                      }}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
-    </List>
-  );
-}
-
-export default function Command() {
-  return <FakerList />;
 }
