@@ -20,8 +20,8 @@ function isDuckEmail(_email: string | undefined) {
 
 export default async function main(props: { arguments?: Arguments }) {
   const arg = props.arguments;
-  var otherEmailSplitted: string[] | undefined;
-  var sourceEmail: string | undefined;
+  let otherEmailSplitted: string[] | undefined;
+  let sourceEmail: string | undefined;
   if (arg?.otherEmail === "") {
     sourceEmail = await Clipboard.readText();
   } else {

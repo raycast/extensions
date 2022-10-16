@@ -10,7 +10,7 @@ interface Preferences {
 
 export default async function main(props: { arguments?: PasswordLength }) {
   const preferences = getPreferenceValues<Preferences>();
-  var length = parseInt(preferences.defaultPasswordLength);
+  let length = parseInt(preferences.defaultPasswordLength);
   console.log(length);
   const arg = props.arguments;
   if (arg?.length !== "") {
@@ -30,22 +30,22 @@ export default async function main(props: { arguments?: PasswordLength }) {
   }
 
   function getBlock(_blockArr: string[]) {
-    var blockString = "";
-    for (var i = 0; i < _blockArr.length; i++) {
+    let blockString = "";
+    for (let i = 0; i < _blockArr.length; i++) {
       const j = Math.floor(Math.random() * (i + 1));
       [_blockArr[i], _blockArr[j]] = [_blockArr[j], _blockArr[i]];
     }
-    for (var k = 0; k < _blockArr.length; k++) {
+    for (let k = 0; k < _blockArr.length; k++) {
       blockString += _blockArr[k];
     }
     return blockString;
   }
 
   async function generatePassword(_length: number) {
-    var password = "";
-    var block: string[] = [];
-    var kk = 0;
-    for (var i = 0; i < _length; i++) {
+    let password = "";
+    let block: string[] = [];
+    let kk = 0;
+    for (let i = 0; i < _length; i++) {
       switch (true) {
         case kk == 0: {
           block.push(getToken(n));
