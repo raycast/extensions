@@ -1,3 +1,3 @@
 # Esse Actions Changelog
 
-## [Initial Version] - 2022-05-26
+## [Initial Version] - 2022-10-17
