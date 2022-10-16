@@ -57,6 +57,9 @@ const buildItems = (path: string) => {
 function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   const { item, pin, unpin } = props;
   const [value, setValue] = useState(item.value);
+  const updateValue = async () => {
+    setValue(item.getValue());
+  };
 
   return (
     <List.Item
@@ -66,8 +69,8 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
       detail={<List.Item.Detail markdown={value} />}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy to Clipboard" content={value} />
-          <Action.Paste title="Paste in Active App" content={value} />
+          <Action.CopyToClipboard title="Copy to Clipboard" content={value} onCopy={updateValue} />
+          <Action.Paste title="Paste in Active App" content={value} onPaste={updateValue} />
           {isUrl(value) && <Action.OpenInBrowser url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
           {pin && (
             <Action
@@ -89,9 +92,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
             title="Refresh Value"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ['ctrl'], key: 'r' }}
-            onAction={async () => {
-              setValue(item.getValue());
-            }}
+            onAction={updateValue}
           />
           <Action.Push
             icon={Icon.Map}
