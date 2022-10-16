@@ -181,7 +181,11 @@ export default function FakerList() {
   const isLoading = Object.values(groupedItems).length === 0;
 
   return (
-    <List isShowingDetail searchBarAccessory={isLoading ? null : <Locales onChange={generateItems} />}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarAccessory={isLoading ? null : <Locales onChange={generateItems} />}
+    >
       {pinnedItems.length > 0 && (
         <List.Section key="pinned" title="Pinned">
           {_.map(pinnedItems, (item) => (
