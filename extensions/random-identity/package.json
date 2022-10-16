@@ -1,0 +1,123 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "random-identity",
+    "title": "Random Identity",
+    "description": "Generate a new random identity",
+    "icon": "command-icon.png",
+    "author": "trungnghiatn",
+    "categories": [
+        "Productivity",
+        "Security"
+    ],
+    "license": "MIT",
+    "commands": [{
+            "name": "username",
+            "title": "Random Username Generator",
+            "description": "Generate a new random username",
+            "mode": "no-view"
+        },
+        {
+            "name": "email",
+            "title": "Random @duck.com Generator",
+            "description": "Generate a new random email",
+            "mode": "no-view"
+        },
+        {
+            "name": "address",
+            "title": "Random Adress Generator",
+            "description": "Generate a new random email",
+            "mode": "no-view"
+        },
+        {
+            "name": "name",
+            "title": "Random Name Generator",
+            "description": "Generate a new random email",
+            "mode": "no-view"
+        },
+        {
+            "name": "password",
+            "title": "Random Password Generator",
+            "description": "Generate a new random password",
+            "mode": "no-view",
+            "arguments": [{
+                "name": "length",
+                "placeholder": "How long it is",
+                "type": "text",
+                "required": false
+            }]
+        },
+        {
+            "name": "convertEmail",
+            "title": "To @duck.com Converter",
+            "description": "Convert other email to @duck.com format",
+            "mode": "no-view",
+            "arguments": [{
+                    "name": "otherEmail",
+                    "placeholder": "From this email",
+                    "type": "text",
+                    "required": false
+                },
+                {
+                    "name": "doesNeedNewEmail",
+                    "placeholder": "Need create a new address?",
+                    "type": "text",
+                    "required": false
+                }
+            ]
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.41.1",
+        "node-fetch": "^3.1.0"
+    },
+    "preferences": [{
+            "name": "rapidAPIKey",
+            "title": "Rapid API Key",
+            "description": "Get your Rapid API Token from https://rapidapi.com/mrsonj/api/random-username-generate",
+            "type": "password",
+            "required": true,
+            "default": ""
+        },
+        {
+            "name": "duckToken",
+            "title": "Duckduckgo Token",
+            "description": "Bearer xxxxxxxxx",
+            "type": "password",
+            "required": true,
+            "default": ""
+        },
+        {
+            "name": "defaultPasswordLength",
+            "title": "Default Password Length",
+            "description": "Choose your favourite length of the generated password",
+            "type": "textfield",
+            "required": false,
+            "default": "20"
+        },
+        {
+            "name": "defaultDuckEmail",
+            "title": "Default @duck.com Email",
+            "description": "Convert other email to your @duck mail",
+            "type": "textfield",
+            "required": true,
+            "default": ""
+        }
+    ],
+    "devDependencies": {
+        "@types/node": "16.10.3",
+        "@types/react": "18.0.9",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    }
+}
