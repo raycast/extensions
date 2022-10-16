@@ -15,6 +15,6 @@ export default function Command() {
     },
   });
 
-  let joke = !isLoading && data?.joke ? data.joke : "Loading...";
+  const joke = !isLoading && data?.joke ? data.joke : "Loading...";
   return <Detail isLoading={isLoading} markdown={joke} />;
 }
