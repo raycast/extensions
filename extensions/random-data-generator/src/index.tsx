@@ -1,15 +1,11 @@
-import { ActionPanel, Icon, List, getPreferenceValues, Action, LocalStorage } from '@raycast/api';
-import { faker } from '@faker-js/faker';
+import { ActionPanel, Icon, List, Action, LocalStorage } from '@raycast/api';
+import { faker, UsableLocale } from '@faker-js/faker';
 import _ from 'lodash';
 import isUrl from 'is-url';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type LocalStorageValues = {
   pinnedItemIds: string;
-};
-
-type Preferences = {
-  locale: string;
 };
 
 type Item = {
@@ -34,9 +30,6 @@ const blacklistPaths = [
   'random',
 ];
 
-const { locale }: Preferences = getPreferenceValues();
-faker.locale = locale;
-
 const buildItems = (path: string) => {
   return _.reduce(
     path ? _.get(faker, path) : faker,
@@ -60,9 +53,6 @@ const buildItems = (path: string) => {
     []
   );
 };
-
-const items = buildItems('');
-const groupedItems = _.groupBy(items, 'section');
 
 function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
   const { item, pin, unpin } = props;
@@ -103,25 +93,36 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
               setValue(item.getValue());
             }}
           />
+          <Action.Push
+            icon={Icon.Map}
+            shortcut={{ modifiers: ['ctrl'], key: 'f' }}
+            title="Choose default language"
+            target={<Locales />}
+          />
         </ActionPanel>
       }
     />
   );
 }
 
-export default function FakerList() {
+function FakerList() {
+  const [groupedItems, setGroupedItems] = useState<Record<string, Item[]>>({});
   const [pinnedItems, setPinnedItems] = useState<Item[]>([]);
-
-  const fetchPinnedItems = useCallback(async () => {
-    const values: LocalStorageValues = await LocalStorage.allItems();
-    const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
-    const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
-    setPinnedItems(pinnedItems);
-  }, []);
-
   useEffect(() => {
-    fetchPinnedItems();
-  }, [fetchPinnedItems]);
+    const init = async () => {
+      const locale = (await LocalStorage.getItem('locale')) || 'en';
+      faker.setLocale(locale as UsableLocale);
+
+      const items = buildItems('');
+      const values: LocalStorageValues = await LocalStorage.allItems();
+      const pinnedItemIds = JSON.parse(values.pinnedItemIds || '{}');
+      const pinnedItems = _.map(pinnedItemIds, (pinnedItemId) => _.find(items, pinnedItemId)) as Item[];
+
+      setGroupedItems(_.groupBy(items, 'section'));
+      setPinnedItems(pinnedItems);
+    };
+    init();
+  }, []);
 
   const handlePinnedItemsChange = (nextPinnedItems: Item[]) => {
     setPinnedItems(nextPinnedItems);
@@ -163,4 +164,42 @@ export default function FakerList() {
       ))}
     </List>
   );
+}
+
+function Locales() {
+  return (
+    <List searchBarPlaceholder="Choose default language">
+      <List.Section title="Languages">
+        {Object.entries(faker.locales).map(([key, locale]) => {
+          if (!locale) return null;
+
+          return (
+            <List.Item
+              key={key}
+              icon={Icon.Dot}
+              title={locale.title}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Choose language"
+                      target={<FakerList />}
+                      onPush={() => {
+                        faker.locale = key;
+                        LocalStorage.setItem('locale', key);
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+    </List>
+  );
+}
+
+export default function Command() {
+  return <FakerList />;
 }
