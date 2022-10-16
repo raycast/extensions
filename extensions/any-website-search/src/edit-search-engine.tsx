@@ -151,7 +151,7 @@ export function EditSavedSites(
       }
     >
       <Form.Description
-        title="Add new search"
+        title={isEditingExistingSite ? "Edit search" : "Add new search"}
         text="Specify the title and the URL template of the website you want to be able to search."
       />
       <Form.Separator></Form.Separator>

@@ -2,15 +2,16 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 17:47
+ * @lastEditTime: 2022-10-13 11:30
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { Action, ActionPanel, Color, Icon, Image, List, openCommandPreferences } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List, openCommandPreferences } from "@raycast/api";
 import { useState } from "react";
 import { sayTruncateCommand } from "./audio";
+import { getShowMoreDetailMarkdown } from "./dataManager/utils";
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
 import { LingueeListItemType } from "./dictionary/linguee/types";
 import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
@@ -27,6 +28,7 @@ import { myPreferences, preferredLanguage1, preferredLanguage2 } from "./prefere
 import ReleaseNotesPage from "./releaseVersion/releaseNotePage";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { openInEudic } from "./scripts";
+import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
   DicionaryType,
@@ -45,7 +47,16 @@ export function ListActionPanel(props: ActionListPanelProps) {
 
   const displayItem = props.displayItem;
   const queryWordInfo = displayItem.queryWordInfo;
-  console.log(`---> current list type: ${displayItem.queryType}, copyText: ${displayItem.copyText}`);
+  const { word, fromLanguage, toLanguage } = queryWordInfo;
+  const copyText = displayItem.copyText;
+
+  console.log(`---> current list type: ${displayItem.queryType}, ${displayItem.displayType}`);
+  console.log(`copyText: ${copyText}`);
+  console.log(`markdown: ${displayItem.detailsMarkdown}`);
+
+  const showMoreDetailMarkdown = getShowMoreDetailMarkdown(displayItem);
+
+  // Todo: need to optimize the code.
   const googleWebItem = getWebQueryItem(TranslationType.Google, queryWordInfo);
   const isShowingGoogleTop = displayItem.queryType === TranslationType.Google;
 
@@ -54,6 +65,9 @@ export function ListActionPanel(props: ActionListPanelProps) {
 
   const baiduWebItem = getWebQueryItem(TranslationType.Baidu, queryWordInfo);
   const isShowingBaiduTop = displayItem.queryType === TranslationType.Baidu;
+
+  const volcanoWebItem = getWebQueryItem(TranslationType.Volcano, queryWordInfo);
+  const isShowingVolcanoTop = displayItem.queryType === TranslationType.Volcano;
 
   const lingueeWebItem = getWebQueryItem(DicionaryType.Linguee, queryWordInfo);
   const isShowingLingueeTop = displayItem.queryType === DicionaryType.Linguee;
@@ -76,27 +90,24 @@ export function ListActionPanel(props: ActionListPanelProps) {
         {isShowingReleasePrompt && (
           <ReleaseNotesAction title="✨ New Version Released" onPush={onNewReleasePromptClick} />
         )}
-
-        {props.isInstalledEudic && (
-          <Action
-            icon={Icon.MagnifyingGlass}
-            title="Open In Eudic App"
-            onAction={() => openInEudic(queryWordInfo.word)}
-          />
+        {props.isInstalledEudic && myPreferences.showOpenInEudicFirst && (
+          <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
         )}
-
-        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
-        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
-        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
-        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
-        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
-
-        <Action.CopyToClipboard
-          onCopy={() => {
-            console.log("copy: ", displayItem.copyText);
-          }}
-          title={`Copy Text`}
-          content={displayItem.copyText || ""}
+        {CopyTextAction({ copyText })}
+        {props.isInstalledEudic && !myPreferences.showOpenInEudicFirst && (
+          <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
+        )}
+        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} enableShortcutKey={true} />}
+        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} enableShortcutKey={true} />}
+        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} enableShortcutKey={true} />}
+        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} enableShortcutKey={true} />}
+        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} enableShortcutKey={true} />}
+        {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} enableShortcutKey={true} />}
+        <Action.Push
+          title="Show More Details"
+          icon={Icon.Eye}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          target={<Detail markdown={showMoreDetailMarkdown} />}
         />
       </ActionPanel.Section>
 
@@ -108,6 +119,7 @@ export function ListActionPanel(props: ActionListPanelProps) {
         {!isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
         {!isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
         {!isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
+        {!isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} />}
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Play Text Audio">
@@ -116,7 +128,7 @@ export function ListActionPanel(props: ActionListPanelProps) {
           icon={playSoundIcon("black")}
           shortcut={{ modifiers: ["cmd"], key: "s" }}
           onAction={() => {
-            console.log(`start play sound: ${queryWordInfo.word}`);
+            console.log(`start play sound: ${word}`);
             playYoudaoWordAudioAfterDownloading(queryWordInfo);
           }}
         />
@@ -131,7 +143,7 @@ export function ListActionPanel(props: ActionListPanelProps) {
              *
              *  Todo: add a shortcut to stop playing audio.
              */
-            sayTruncateCommand(displayItem.copyText, queryWordInfo.toLanguage);
+            sayTruncateCommand(copyText, toLanguage);
           }}
         />
       </ActionPanel.Section>
@@ -140,18 +152,18 @@ export function ListActionPanel(props: ActionListPanelProps) {
         <ActionPanel.Section title="Target Language">
           {languageItemList.map((selectedLanguageItem) => {
             // hide auto language
-            const isAutoLanguage = selectedLanguageItem.youdaoId === "auto";
+            const isAutoLanguage = selectedLanguageItem.youdaoLangCode === "auto";
             // hide current detected language
-            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoId === queryWordInfo.fromLanguage;
-            const isSameWithTargetLanguage = selectedLanguageItem.youdaoId === queryWordInfo.toLanguage;
+            const isSameWithDetectedLanguage = selectedLanguageItem.youdaoLangCode === fromLanguage;
+            const isSameWithTargetLanguage = selectedLanguageItem.youdaoLangCode === toLanguage;
             if (isAutoLanguage || isSameWithDetectedLanguage) {
               return null;
             }
 
             return (
               <Action
-                key={selectedLanguageItem.youdaoId}
-                title={selectedLanguageItem.englishName}
+                key={selectedLanguageItem.youdaoLangCode}
+                title={selectedLanguageItem.langEnglishName}
                 onAction={() => props.onLanguageUpdate(selectedLanguageItem)}
                 icon={isSameWithTargetLanguage ? Icon.ArrowRight : { source: selectedLanguageItem.emoji }}
               />
@@ -167,6 +179,22 @@ export function ListActionPanel(props: ActionListPanelProps) {
         <ActionFeedback />
       </ActionPanel.Section>
     </ActionPanel>
+  );
+}
+
+/**
+ * Copy text action
+ */
+function CopyTextAction(props: { copyText: string }) {
+  const { copyText } = props;
+  return (
+    <Action.CopyToClipboard
+      onCopy={() => {
+        console.log("copy: ", copyText);
+      }}
+      title={`Copy Text`}
+      content={copyText}
+    />
   );
 }
 
@@ -194,7 +222,7 @@ function CurrentVersionAction() {
   const easydict = new Easydict();
   return (
     <Action.OpenInBrowser
-      icon={Icon.Eye}
+      icon={Icon.Document}
       title={`Version: ${easydict.version}`}
       url={easydict.getCurrentReleaseTagUrl()}
     />
@@ -213,7 +241,7 @@ function playSoundIcon(lightTintColor: string) {
  */
 export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
   const { displayType } = listItem;
-  // console.log(`---> list type: ${listDisplayType}, typeof: ${typeof listDisplayType}`);
+  // console.log(`---> get list type: ${displayType}`);
 
   let itemIcon: Image.ImageLike = {
     source: Icon.Dot,
@@ -222,17 +250,11 @@ export function getListItemIcon(listItem: ListDisplayItem): Image.ImageLike {
 
   if (checkIsYoudaoDictionaryListItem(listItem)) {
     itemIcon = getYoudaoListItemIcon(displayType as YoudaoDictionaryListItemType);
-  }
-
-  if (checkIsLingueeListItem(listItem)) {
+  } else if (checkIsLingueeListItem(listItem)) {
     itemIcon = getLingueeListItemIcon(displayType as LingueeListItemType);
-  }
-
-  if (checkIsTranslationType(displayType as TranslationType)) {
+  } else if (checkIsTranslationType(displayType as TranslationType)) {
     itemIcon = getQueryTypeIcon(displayType as TranslationType);
   }
-
-  // console.log(`---> end list type: ${listDisplayType}`);
 
   return itemIcon;
 }
@@ -302,6 +324,10 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
       dotColor = Color.Red;
       break;
     }
+    case YoudaoDictionaryListItemType.ModernChineseDict: {
+      dotColor = "#006000";
+      break;
+    }
     case YoudaoDictionaryListItemType.Explanation: {
       dotColor = Color.Blue;
       break;
@@ -350,8 +376,8 @@ function getQueryTypeIcon(queryType: QueryType): Image.ImageLike {
  *  Get List.Item.Accessory[] based on the ListDisplayItem.
  */
 export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[] {
-  let wordExamTypeAccessory = [];
-  let pronunciationAccessory = [];
+  let wordExamTypeAccessory: List.Item.Accessory[] = [];
+  let pronunciationAccessory: List.Item.Accessory[] = [];
   let wordAccessories: List.Item.Accessory[] = [];
   const accessoryItem = item.accessoryItem;
   if (accessoryItem) {
@@ -383,7 +409,7 @@ export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[]
  * Get WebQueryItem according to the query type and info
  */
 function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQueryItem | undefined {
-  const title = `Open In ${queryType}`;
+  const title = `Open in ${queryType}`;
   const icon = getQueryTypeIcon(queryType);
 
   let webUrl;
@@ -398,6 +424,10 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
     }
     case TranslationType.Baidu: {
       webUrl = getBaiduWebTranslateURL(wordInfo);
+      break;
+    }
+    case TranslationType.Volcano: {
+      webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
     case DicionaryType.Linguee: {
@@ -417,18 +447,29 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
   return webUrl ? { type: queryType, webUrl, icon, title } : undefined;
 }
 
-function WebQueryAction(props: { webQueryItem?: WebQueryItem }) {
-  return props.webQueryItem?.webUrl ? (
-    <Action.OpenInBrowser
-      icon={props.webQueryItem.icon}
-      title={props.webQueryItem.title}
-      url={props.webQueryItem.webUrl}
-    />
-  ) : null;
+function WebQueryAction(props: { webQueryItem?: WebQueryItem; enableShortcutKey?: boolean }) {
+  if (props.enableShortcutKey) {
+    return props.webQueryItem?.webUrl ? (
+      <Action.OpenInBrowser
+        icon={props.webQueryItem.icon}
+        title={props.webQueryItem.title}
+        url={props.webQueryItem.webUrl}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+      />
+    ) : null;
+  } else {
+    return props.webQueryItem?.webUrl ? (
+      <Action.OpenInBrowser
+        icon={props.webQueryItem.icon}
+        title={props.webQueryItem.title}
+        url={props.webQueryItem.webUrl}
+      />
+    ) : null;
+  }
 }
 
 export function checkIfPreferredLanguagesConflict() {
-  if (preferredLanguage1.youdaoId === preferredLanguage2.youdaoId) {
+  if (preferredLanguage1.youdaoLangCode === preferredLanguage2.youdaoLangCode) {
     console.log("referredLanguage1 and referredLanguage2 are the same language");
     return (
       <List searchBarPlaceholder="Error">

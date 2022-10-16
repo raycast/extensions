@@ -1,6 +1,10 @@
 # Short.io Changelog
 
-## [Add Menu Bar command] - {PR_MERGE_DATE}
+## [Add actions to Menu Bar command] - {PR_MERGE_DATE}
+
+- Add new actions to menu bar commands: Copy(Left click) and Open(Right click)
+
+## [Add Menu Bar command] - 2022-09-05
 
 - Add Menu Bar command: Search Links
 

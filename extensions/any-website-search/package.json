@@ -20,25 +20,49 @@
   ],
   "preferences": [
     {
+      "name": "searchSuggestionsProvider",
+      "label": "Search Suggestions",
+      "title": "Search Suggestions",
+      "type": "dropdown",
+      "default": "ddg",
+      "required": false,
+      "description": "The search engine to fetch search suggestions from, or none if you don't want search suggestions",
+      "data": [
+        {
+          "title": "None (no suggestions)",
+          "value": "__NONE__"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "ddg"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        }
+      ]
+    },
+    {
       "name": "prefillFromClipboard",
+      "title": "Other Settings",
       "label": "Prefill search from clipboard",
       "type": "checkbox",
       "default": false,
       "required": false,
-      "description": "Whether to pre-fill the search field with the text on the clipboard (if any)"
+      "description": "Whether to pre-fill the search field with the text on the clipboard, if any"
     },
     {
       "name": "interpretDdgBangs",
       "label": "Strip DuckDuckGo's \"bangs\" for search suggestions",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false,
-      "description": "If enabled, if the selected search site's URL looks like it's DuckDuckGo and the query starts with a \"bang\" (https://duckduckgo.com/bang), then the bang will be removed when fetching search suggestions. This setting only affects the text used for search *suggestions*, and only by removing the leading \"bang\"; the site you select will always be searched for the exact query you entered."
+      "description": "If enabled, if the selected search site's URL looks like it's DuckDuckGo and the query starts with a \"bang\" (https://duckduckgo.com/bang), then the bang will be removed when fetching search suggestions. Tl;dr you probably want this disabled if getting search suggestions from DuckDuckGo and enabled otherwise. See the README for more info."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.0",
+    "@raycast/utils": "^1.4.8",
     "he": "^1.2.0",
     "node-fetch": "^3.2.10",
     "uuid": "^9.0.0",

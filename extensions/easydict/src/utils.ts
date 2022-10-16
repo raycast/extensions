@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 23:42
+ * @lastEditTime: 2022-10-11 22:44
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -142,15 +142,16 @@ export function getEnabledDictionaryServices(): DicionaryType[] {
  * Show error toast according to errorInfo.
  */
 export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
-  if (!errorInfo) {
+  if (!errorInfo?.type) {
+    console.warn(`showErrorToast, errorInfo type is undefined: ${JSON.stringify(errorInfo, null, 4)}`);
     return;
   }
 
-  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 2)}`);
+  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 4)}`);
   const type = errorInfo.type.toString();
   showToast({
     style: Toast.Style.Failure,
-    title: `${type} Error: ${errorInfo.code || ""}`,
+    title: `${type} Error` + `${errorInfo.code ? `: ${errorInfo.code}` : ""}`,
     message: errorInfo.message,
   });
 }
@@ -255,4 +256,8 @@ export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
 
 export function md5(text: string): string {
   return CryptoJS.MD5(text).toString();
+}
+
+export function printObject(name: string, obj: unknown, space = 4) {
+  console.log(`${name}: ${JSON.stringify(obj, null, space)}`);
 }

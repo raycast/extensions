@@ -1,4 +1,4 @@
-import { SetStateAction, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "../types/directory-info";
 import { checkDirectoryValid, checkIsFolder } from "../utils/common-utils";
