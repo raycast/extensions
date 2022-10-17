@@ -5,7 +5,6 @@
     "description": "Generate a random identity",
     "icon": "command-icon.png",
     "author": "trungnghiatn",
-    "owner": "elten",
     "categories": [
         "Productivity",
         "Security"
