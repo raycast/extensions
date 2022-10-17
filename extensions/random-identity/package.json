@@ -1,10 +1,11 @@
 {
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "random-identity",
-    "title": "Random Identity Generator",
-    "description": "Generate a new random identity",
+    "title": "Random Identity",
+    "description": "Generate a random identity",
     "icon": "command-icon.png",
     "author": "trungnghiatn",
+    "owner": "elten",
     "categories": [
         "Productivity",
         "Security"
@@ -25,13 +26,13 @@
         {
             "name": "address",
             "title": "Adress Generator",
-            "description": "Generate a new random email",
+            "description": "Generate a new random address",
             "mode": "no-view"
         },
         {
             "name": "name",
             "title": "Name Generator",
-            "description": "Generate a new random email",
+            "description": "Generate a new random name",
             "mode": "no-view"
         },
         {
