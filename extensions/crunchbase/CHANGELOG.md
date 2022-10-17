@@ -1,3 +1,3 @@
 # Crunchbase Changelog
 
-## [Initial Version] - 2022-10-12
+## [Initial Version] - 2022-10-17
