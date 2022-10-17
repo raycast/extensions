@@ -82,7 +82,11 @@ export default function Command() {
                   ) : null}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Toggle Details" icon={Icon.Sidebar} onAction={() => setShowingDetail(!showingDetail)} />
+                  <Action
+                    title="Toggle Details"
+                    icon={Icon.Sidebar}
+                    onAction={() => setShowingDetail(!showingDetail)}
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }
