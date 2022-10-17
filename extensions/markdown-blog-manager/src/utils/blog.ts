@@ -17,8 +17,6 @@ export type CategorizedPosts = {
 	[category: string]: MarkdownFile[];
 };
 
-
-
 /**
  * Convert a file path to a MarkdownFile object
  */

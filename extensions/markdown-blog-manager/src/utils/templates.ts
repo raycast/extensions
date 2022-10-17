@@ -1,8 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import preferences from "./preferences";
-
-
+import preferences from './preferences';
 
 /**
  * If no template file is used, this is the default template that we'll fall-back to.

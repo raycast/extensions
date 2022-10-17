@@ -15,8 +15,6 @@ interface Post {
 	content: string;
 }
 
-
-
 export default function Command() {
 	const [title, setTitle] = useState('');
 	const [summary, setSummary] = useState('');

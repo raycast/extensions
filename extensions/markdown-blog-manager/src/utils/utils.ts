@@ -42,7 +42,7 @@ export function titleToSlug(title: string) {
 /**
  * Reverse engineer what a post title could look like without reading the file.
  */
- export function filenameToTitle(name: string) {
+export function filenameToTitle(name: string) {
 	return name
 		.replace(/_/g, ' ')
 		.replace(/-/g, ' ')

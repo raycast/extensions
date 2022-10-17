@@ -6,7 +6,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import { capitalize, clearFileCache } from './utils/utils';
 
-
 const filters = {
 	all: () => true,
 	published: (file: MarkdownFile) => !file.draft,
