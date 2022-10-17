@@ -5,6 +5,7 @@
     "description": "Get a direct link from a shareable link of Dropbox, Google Drive, and Imgur service.",
     "icon": "command-icon.png",
     "author": "trungnghiatn",
+    "handle": "elten",
     "categories": [
         "Productivity"
     ],
