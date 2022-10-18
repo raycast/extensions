@@ -1,4 +1,4 @@
-import {entrypoint, getInput, removeNewlines, setOutput, ToastException} from "../lib/utils";
+import { entrypoint, getInput, removeNewlines, setOutput, ToastException } from "../lib/utils";
 
 /**
  * Base64 decoding.
