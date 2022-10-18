@@ -1,15 +1,17 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { find, getObjects, SfObject, SfRecord } from "./salesforce/search";
+import { find, SfRecord } from "./salesforce/search";
 import { keysOf } from "./util/collections";
+import { ObjectSpec, SfObject } from "./salesforce/objects";
 
-export default function Command() {
+export function Command(objectSpecs: ObjectSpec[], getObjects: () => Promise<SfObject[]>) {
   const [query, setQuery] = useState("");
   const [filterObjectName, setFilterObjectName] = useState<string | undefined>(undefined);
   const { data: objects } = usePromise(getObjects, []);
   const { isLoading, data: records } = usePromise(find, [
     query,
+    objectSpecs,
     filterObjectName && filterObjectName !== "" ? filterObjectName : undefined,
   ]);
 
@@ -37,15 +39,11 @@ export default function Command() {
 
 function FilterList({ objects, onChange }: { objects: SfObject[]; onChange: (objectApiName: string) => void }) {
   const sortedByLabel = objects.sort((a, b) => a.labelPlural.localeCompare(b.labelPlural));
-  const categoryItems = (category: SfObject["category"]) =>
-    sortedByLabel.filter((o) => o.category === category).map((obj) => <FilterItem key={obj.apiName} object={obj} />);
-  const recordObjects = categoryItems("record");
-  const reportingObjects = categoryItems("reporting");
+  const items = sortedByLabel.map((obj) => <FilterItem key={obj.apiName} object={obj} />);
   return (
     <List.Dropdown tooltip="Filter Results by Type" storeValue={true} onChange={onChange}>
-      <List.Dropdown.Item title="All object types" value="" icon={Icon.StarCircle} />
-      <List.Dropdown.Section title={"Reporting"} children={reportingObjects} />
-      <List.Dropdown.Section title={"Record Types"} children={recordObjects} />
+      <List.Dropdown.Item title="All" value="" icon={Icon.StarCircle} />
+      {items}
     </List.Dropdown>
   );
 }
@@ -93,12 +91,6 @@ function recordSections(records: SfRecord[], objects: SfObject[]): RecordSection
     object: objects.find((o) => o.apiName === key)!, // eslint-disable-line
     records: records.filter((r) => r.objectApiName === key),
   }));
-  const compare = (a: RecordSection, b: RecordSection) => {
-    if (a.object.category !== b.object.category) {
-      return a.object.category === "reporting" ? -1 : 1;
-    } else {
-      return a.object.apiName.localeCompare(b.object.apiName);
-    }
-  };
+  const compare = (a: RecordSection, b: RecordSection) => a.object.apiName.localeCompare(b.object.apiName);
   return sections.sort(compare);
 }
