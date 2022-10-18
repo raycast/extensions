@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-09 21:53
+ * @lastEditTime: 2022-10-15 11:41
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -64,8 +64,9 @@ function getYoudaoWebCookie(): Promise<string | undefined> {
     axios
       .get(youdaoTranslatURL, { headers })
       .then((response) => {
-        if (response.headers["set-cookie"]) {
-          youdaoCookie = response.headers["set-cookie"]?.join(";");
+        const cookie = response.headers["set-cookie"];
+        if (cookie?.length && Array.isArray(cookie)) {
+          youdaoCookie = cookie.join(";");
           resolve(youdaoCookie);
           LocalStorage.setItem(youdaoCookieKey, youdaoCookie);
           console.log(`get web youdaoCookie: ${youdaoCookie}`);

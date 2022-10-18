@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 22:24
+ * @lastEditTime: 2022-10-15 10:57
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -23,11 +23,17 @@ console.log(`enter easydict.tsx`);
 
 const dataManager = new DataManager();
 
-export default function () {
+interface EasydictArguments {
+  queryText: string;
+}
+
+export default function (props: { arguments?: EasydictArguments }) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
   }
+
+  const queryText = props.arguments ? trimTextLength(props.arguments.queryText) : undefined;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -40,7 +46,9 @@ export default function () {
   });
 
   /**
-   * use to display input text
+   * Use to display input text.
+   *
+   * * Note: default value should be undefined, it used to call setup function.
    */
   const [inputText, setInputText] = useState<string>();
   /**
@@ -90,30 +98,48 @@ export default function () {
    */
   function setup() {
     console.log(`setup when extension is activated.`);
+
+    if (queryText?.length) {
+      console.log(`---> arguments queryText: ${queryText}`);
+    }
+
     const startTime = Date.now();
 
-    // In this case, must wait for the proxy to be configured before request.
-    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
-      Promise.all([getSelectedText(), configAxiosProxy()])
-        .then(([selectedText]) => {
-          console.log(`after config proxy, getSelectedText: ${selectedText}`);
-          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
-          updateInputTextAndQueryText(trimTextLength(selectedText), false);
-        })
-        .catch((error) => {
-          console.error(`set up, config proxy error: ${error}`);
-          querySelecedtText().then(() => {
-            console.log(`after query selected text`);
-            delayGetSystemProxy();
-          });
+    // If enabled system proxy, we need to wait for the system proxy to be ready.
+    if (myPreferences.enableSystemProxy) {
+      // If has arguments, use arguments text as input text first.
+      if (queryText?.length) {
+        configAxiosProxy().then(() => {
+          console.log(`after config proxy`);
+          updateInputTextAndQueryText(queryText, false);
         });
-    } else if (myPreferences.enableAutomaticQuerySelectedText) {
-      querySelecedtText().then(() => {
-        console.log(`after query selected text`);
-        delayGetSystemProxy();
-      });
-    } else if (myPreferences.enableSystemProxy) {
-      configAxiosProxy();
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        Promise.all([getSelectedText(), configAxiosProxy()])
+          .then(([selectedText]) => {
+            console.log(`after config proxy, getSelectedText: ${selectedText}`);
+            console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+            updateInputTextAndQueryText(trimTextLength(selectedText), false);
+          })
+          .catch((error) => {
+            console.error(`set up, config proxy error: ${error}`);
+            querySelecedtText().then(() => {
+              console.log(`after query selected text`);
+              delayGetSystemProxy();
+            });
+          });
+      } else {
+        configAxiosProxy();
+      }
+    } else {
+      if (queryText?.length) {
+        updateInputTextAndQueryText(queryText, false);
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        querySelecedtText().then(() => {
+          console.log(`after query selected text`);
+        });
+      }
+
+      delayGetSystemProxy();
     }
 
     checkIfInstalledEudic().then((isInstalled) => {
@@ -133,8 +159,8 @@ export default function () {
           updateInputTextAndQueryText(selectedText, false);
           resolve();
         })
-        .catch((e) => {
-          console.log(`getSelectedText error: ${e}`);
+        .catch((error) => {
+          console.log(`getSelectedText error: ${error}`);
           resolve();
         });
     });
@@ -146,9 +172,9 @@ export default function () {
    * Todo: move it to dataManager.
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
-    console.log(
-      `selected language: ${selectedLanguageItem.youdaoLangCode}, current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`
-    );
+    console.log(`selected language: ${selectedLanguageItem.youdaoLangCode}`);
+    console.log(`current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`);
+
     if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
