@@ -312,7 +312,7 @@ function CreateShortcutActions(props: {
     <ActionPanel>
       <Action
         title="Create Shortcut"
-        icon={Icon.Download}
+        icon={Icon.PlusCircle}
         onAction={async () => {
           const _checkInfo = checkInfo(info.name, tactions);
           const _checkAffix = checkAffix(tactions);

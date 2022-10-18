@@ -2,7 +2,9 @@ import { Color, Icon, LocalStorage } from "@raycast/api";
 import { buildRegexp, calculateCharacter, camelCaseToOtherCase, isEmpty, regexPunctuation } from "./utils";
 import { Md5 } from "ts-md5";
 
-enum Tags {
+import title from "title";
+
+export enum Tags {
   ANNOTATION = "Annotation",
   CASE = "Case",
   CODER = "Coder",
@@ -322,7 +324,7 @@ function tactionCase(input: string, taction: Taction) {
       return input.toLowerCase();
     }
     case Cases.TITLE: {
-      return input.replace(input[0], input[0].toUpperCase());
+      return title(input);
     }
     case Cases.CAMEL: {
       const inputArray = input.toLowerCase().split(regexPunctuation);
