@@ -2,7 +2,7 @@
 
 ## [v2.6.0] - 2022-10-18
 
-✨ New
+### ✨ New
 
 - Added support for [Arguments](https://developers.raycast.com/information/arguments).
 - Added support for 25 languages, including Ukrainian, total 48 languages.
@@ -16,7 +16,7 @@
 ### 💎 Improvement
 
 - Improved the display effect of the details page when translating multiple lines of text.
-- Added \`Copy Text\` and open the web page query action to the details page.
+- Added `Copy Text` and open the web page query action to the details page.
 
 ### 🐞 Fixes
 
@@ -36,7 +36,7 @@
 
 💎 Improvement
 
-- Improved the action list, changed the default return action to 'Copy Text'.
+- Improved the action list, changed the default return action to `Copy Text`.
 - Changed Linguee to support system proxy by default.
 - Changed all lists to support 'Show More Details'.
 

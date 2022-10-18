@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-03 22:10
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-18 10:48
+ * @lastEditTime: 2022-10-18 11:01
  * @fileName: releaseNote.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -37,7 +37,7 @@ export const releaseNote = `
 
 ---
 
-✨ New
+### ✨ New
 
 - Added support for [Arguments](https://developers.raycast.com/information/arguments).
 - Added support for 25 languages, including Ukrainian, total 48 languages.
