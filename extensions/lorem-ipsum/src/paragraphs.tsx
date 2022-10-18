@@ -4,7 +4,7 @@ import { LoremIpsumArguments } from "./types";
 
 export default async function ParagraphCommand(props?: { arguments: LoremIpsumArguments }) {
   const { action = "clipboard" } = getPreferenceValues();
-  
+
   const numberArg = props?.arguments.numberOfLoremIpsumsToGenerate;
 
   const { error, safeLoremIpsumNumber } = await safeLoremIpsumNumberArg(numberArg);
