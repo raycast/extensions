@@ -94,9 +94,10 @@ export class Shortcut {
   tactions: Taction[];
 
   constructor(
-    info = {
+    info: ShortcutInfo = {
       name: "",
       id: "",
+      iconColor: Color.Blue,
       icon: icons[0][1],
       source: ShortcutSource.USER,
       visibility: true,
