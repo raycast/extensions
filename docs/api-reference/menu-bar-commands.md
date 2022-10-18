@@ -143,15 +143,16 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
+      <MenuBarExtra.Section title="New" />
       {newBookmarks.map((bookmark) => (
         <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
       ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived>
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
@@ -282,9 +283,9 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="MenuBarExtra.Submenu" />
 
-### MenuBarExtra.Separator
+### MenuBarExtra.Section
 
-An item that shows a separator line. Use it for grouping and visually separating menu items.
+An item to group related menu items. It has an optional title and a separator is added automatically between sections.
 
 #### Example
 
@@ -297,19 +298,24 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
-      {newBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      <MenuBarExtra.Section title="New">
+        {newBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived">
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
 ```
+
+#### Props
+
+<PropsTableFromJSDoc component="MenuBarExtra.Section" />
 
 ## Types
 

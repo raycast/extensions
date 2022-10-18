@@ -12,19 +12,21 @@ import {
   showInFinder,
   showHUD,
   Alert,
+  environment,
 } from "@raycast/api";
 import { BackupSystemHostName, HostFolderMode, HostInactiveByFolderTip, State, SystemHostFilePath } from "./const";
 import { exportHost, getContentFromFile, getSysHostAccess } from "./utils/file";
 import { useState } from "react";
 import { Action$ } from "raycast-toolkit";
 import path from "node:path";
+import { pathToFileURL } from "url";
 
 export function SysHostPermRequest() {
+  const image = pathToFileURL(`${environment.assetsPath}/sys-host-prem.png`).href;
   const md = `
   # Hey!👋 Welcome to use iHosts 🎉🎉🎉 \n
-  You're one step away from using it!\n
-  All you need to do is type ↩️ and allow iHosts to write to the **${SystemHostFilePath}** file~\n
-  ![](https://i.ibb.co/0VtWSFz/sys-host-prem.png)
+  You're one step away from using it! Please type ↩️ and allow iHosts to write to the **${SystemHostFilePath}** file~\n
+  ![](${image})
   `;
   return (
     <Detail

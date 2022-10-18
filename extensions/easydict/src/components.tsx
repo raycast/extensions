@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-29 16:37
+ * @lastEditTime: 2022-10-13 11:30
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,13 +11,13 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, openCommandPreferences } from "@raycast/api";
 import { useState } from "react";
 import { sayTruncateCommand } from "./audio";
-import { formateDetailMarkdown, isTextOneLineTooLong } from "./dataManager/utils";
+import { getShowMoreDetailMarkdown } from "./dataManager/utils";
 import { getLingueeWebDictionaryURL } from "./dictionary/linguee/parse";
 import { LingueeListItemType } from "./dictionary/linguee/types";
 import { QueryWordInfo, YoudaoDictionaryListItemType } from "./dictionary/youdao/types";
 import { getYoudaoWebDictionaryURL } from "./dictionary/youdao/utils";
 import { playYoudaoWordAudioAfterDownloading } from "./dictionary/youdao/youdao";
-import { chineseLanguageItem, languageItemList } from "./language/consts";
+import { languageItemList } from "./language/consts";
 import {
   getBaiduWebTranslateURL,
   getDeepLWebTranslateURL,
@@ -50,18 +50,13 @@ export function ListActionPanel(props: ActionListPanelProps) {
   const { word, fromLanguage, toLanguage } = queryWordInfo;
   const copyText = displayItem.copyText;
 
-  const detail = displayItem.subtitle || displayItem.title;
-  let detailLanguage = toLanguage;
-  if (displayItem.displayType === YoudaoDictionaryListItemType.Baike) {
-    detailLanguage = chineseLanguageItem.youdaoLangCode;
-  }
-
   console.log(`---> current list type: ${displayItem.queryType}, ${displayItem.displayType}`);
-  console.log(`copyText: ${copyText} (${detailLanguage}, ${copyText.length})`);
+  console.log(`copyText: ${copyText}`);
+  console.log(`markdown: ${displayItem.detailsMarkdown}`);
 
-  const isShowingDetail = isTextOneLineTooLong(detail, detailLanguage);
-  const showMoreDetails = formateDetailMarkdown(displayItem);
+  const showMoreDetailMarkdown = getShowMoreDetailMarkdown(displayItem);
 
+  // Todo: need to optimize the code.
   const googleWebItem = getWebQueryItem(TranslationType.Google, queryWordInfo);
   const isShowingGoogleTop = displayItem.queryType === TranslationType.Google;
 
@@ -95,33 +90,24 @@ export function ListActionPanel(props: ActionListPanelProps) {
         {isShowingReleasePrompt && (
           <ReleaseNotesAction title="✨ New Version Released" onPush={onNewReleasePromptClick} />
         )}
-
-        {props.isInstalledEudic && (
-          <Action icon={Icon.MagnifyingGlass} title="Open In Eudic App" onAction={() => openInEudic(word)} />
+        {props.isInstalledEudic && myPreferences.showOpenInEudicFirst && (
+          <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
         )}
-
-        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
-        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
-        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
-        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
-        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
-        {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} />}
-
-        {isShowingDetail && (
-          <Action.Push
-            title="Show More Details"
-            icon={Icon.Eye}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-            target={<Detail markdown={showMoreDetails} />}
-          />
+        {CopyTextAction({ copyText })}
+        {props.isInstalledEudic && !myPreferences.showOpenInEudicFirst && (
+          <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
         )}
-
-        <Action.CopyToClipboard
-          onCopy={() => {
-            console.log("copy: ", copyText);
-          }}
-          title={`Copy Text`}
-          content={copyText || ""}
+        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} enableShortcutKey={true} />}
+        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} enableShortcutKey={true} />}
+        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} enableShortcutKey={true} />}
+        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} enableShortcutKey={true} />}
+        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} enableShortcutKey={true} />}
+        {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} enableShortcutKey={true} />}
+        <Action.Push
+          title="Show More Details"
+          icon={Icon.Eye}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
+          target={<Detail markdown={showMoreDetailMarkdown} />}
         />
       </ActionPanel.Section>
 
@@ -193,6 +179,22 @@ export function ListActionPanel(props: ActionListPanelProps) {
         <ActionFeedback />
       </ActionPanel.Section>
     </ActionPanel>
+  );
+}
+
+/**
+ * Copy text action
+ */
+function CopyTextAction(props: { copyText: string }) {
+  const { copyText } = props;
+  return (
+    <Action.CopyToClipboard
+      onCopy={() => {
+        console.log("copy: ", copyText);
+      }}
+      title={`Copy Text`}
+      content={copyText}
+    />
   );
 }
 
@@ -322,6 +324,10 @@ export function getYoudaoListItemIcon(youdaoListType: YoudaoDictionaryListItemTy
       dotColor = Color.Red;
       break;
     }
+    case YoudaoDictionaryListItemType.ModernChineseDict: {
+      dotColor = "#006000";
+      break;
+    }
     case YoudaoDictionaryListItemType.Explanation: {
       dotColor = Color.Blue;
       break;
@@ -403,7 +409,7 @@ export function getWordAccessories(item: ListDisplayItem): List.Item.Accessory[]
  * Get WebQueryItem according to the query type and info
  */
 function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQueryItem | undefined {
-  const title = `Open In ${queryType}`;
+  const title = `Open in ${queryType}`;
   const icon = getQueryTypeIcon(queryType);
 
   let webUrl;
@@ -441,14 +447,25 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
   return webUrl ? { type: queryType, webUrl, icon, title } : undefined;
 }
 
-function WebQueryAction(props: { webQueryItem?: WebQueryItem }) {
-  return props.webQueryItem?.webUrl ? (
-    <Action.OpenInBrowser
-      icon={props.webQueryItem.icon}
-      title={props.webQueryItem.title}
-      url={props.webQueryItem.webUrl}
-    />
-  ) : null;
+function WebQueryAction(props: { webQueryItem?: WebQueryItem; enableShortcutKey?: boolean }) {
+  if (props.enableShortcutKey) {
+    return props.webQueryItem?.webUrl ? (
+      <Action.OpenInBrowser
+        icon={props.webQueryItem.icon}
+        title={props.webQueryItem.title}
+        url={props.webQueryItem.webUrl}
+        shortcut={{ modifiers: ["cmd"], key: "o" }}
+      />
+    ) : null;
+  } else {
+    return props.webQueryItem?.webUrl ? (
+      <Action.OpenInBrowser
+        icon={props.webQueryItem.icon}
+        title={props.webQueryItem.title}
+        url={props.webQueryItem.webUrl}
+      />
+    ) : null;
+  }
 }
 
 export function checkIfPreferredLanguagesConflict() {

@@ -14,13 +14,12 @@ import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { checkIfIpInChina } from "../../checkIP";
 import { isChineseIPKey, userAgent } from "../../consts";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getBingLangCode, getYoudaoLangCodeFromBingCode } from "../../language/languages";
-import { QueryTypeResult } from "../../types";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { DetectedLangModel, LanguageDetectType } from "./../../detectLanauge/types";
-import { autoDetectLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { RequestErrorInfo, TranslationType } from "./../../types";
 import { BingConfig, BingTranslateResult } from "./types";
 
 console.log(`enter bing.ts`);
