@@ -77,6 +77,10 @@ function RecordItem({ record, object }: { record: SfRecord; object?: SfObject })
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={record.url} />
+          <ActionPanel.Section title={"Copy to Clipboard"}>
+            <Action.CopyToClipboard title="Copy URL" content={record.url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <Action.CopyToClipboard title="Copy Name" content={record.name} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
