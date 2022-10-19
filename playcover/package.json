@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "playcover",
+  "title": "Playcover",
+  "description": "Allows you to control your PlayCover app using RayCast!",
+  "icon": "PlayCover.png",
+  "author": "JoseMoreville",
+  "categories": [
+    "Applications",
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open an app with PlayCover",
+      "description": "Show a list of games and apps to open with PlayCover",
+      "mode": "view"
+    },
+    {
+      "name": "playcover",
+      "title": "Launch PlayCover",
+      "description": "Launch PlayCover",
+      "mode": "no-view"
+    },
+    {
+      "name": "sideload",
+      "title": "Sideload with PlayCover",
+      "description": "Sideload with PlayCover",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.9",
+    "file-icon": "^5.1.0",
+    "playcover-cli": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
