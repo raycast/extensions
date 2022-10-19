@@ -28,6 +28,7 @@ export default function OpenLinkInSpecificBrowser() {
               openLinkApplication={browser}
               openLinkApplications={customApps}
               itemInput={itemInput}
+              isCustom={true}
             />
           ))}
         </MenuBarExtra.Section>
@@ -39,6 +40,7 @@ export default function OpenLinkInSpecificBrowser() {
             openLinkApplication={browser}
             openLinkApplications={customApps}
             itemInput={itemInput}
+            isCustom={false}
           />
         ))}
       </MenuBarExtra.Section>
@@ -59,14 +61,15 @@ function OpenLinkAppMenuBarItem(props: {
   openLinkApplication: OpenLinkApplication;
   openLinkApplications: OpenLinkApplication[];
   itemInput: ItemInput;
+  isCustom: boolean;
 }) {
-  const { openLinkApplication, openLinkApplications, itemInput } = props;
+  const { openLinkApplication, openLinkApplications, itemInput, isCustom } = props;
   return (
     <MenuBarExtra.Item
       title={openLinkApplication.name}
       icon={{ fileIcon: openLinkApplication.path }}
       onAction={async () => {
-        await upBrowserRank(itemInput, openLinkApplication, openLinkApplications);
+        isCustom && (await upBrowserRank(itemInput, openLinkApplication, openLinkApplications));
         await actionOnApplicationItem(itemInput, openLinkApplication, () => null);
       }}
     />

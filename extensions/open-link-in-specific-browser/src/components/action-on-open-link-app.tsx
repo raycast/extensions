@@ -31,7 +31,7 @@ export function ActionOnOpenLinkApp(props: {
         title={actionTitle(itemInput, openLinkApplication.name)}
         icon={actionIcon(itemInput)}
         onAction={async () => {
-          await upBrowserRank(itemInput, openLinkApplication, openLinkApplications);
+          isCustom && (await upBrowserRank(itemInput, openLinkApplication, openLinkApplications));
           await actionOnApplicationItem(itemInput, openLinkApplication, setRefresh);
         }}
       />
