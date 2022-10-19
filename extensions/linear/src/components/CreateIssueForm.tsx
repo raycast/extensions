@@ -55,7 +55,7 @@ export type CreateIssueValues = {
 
 type Preferences = {
   signature: boolean;
-  autofocusTitle: boolean;
+  autofocusField: "teamId" | "title";
   copyToastAction: "key" | "url" | "title";
 };
 
@@ -73,7 +73,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature, autofocusTitle, copyToastAction } = getPreferenceValues<Preferences>();
+  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
@@ -145,8 +145,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             parentId: "",
           });
 
-          if (autofocusTitle || !hasMoreThanOneTeam) {
-            return focus("title");
+          if (hasMoreThanOneTeam) {
+            return focus(autofocusField);
           }
 
           return focus("teamId");
@@ -235,7 +235,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       <Form.TextField
         title="Title"
         placeholder="Issue title"
-        {...(autofocusTitle ? { autoFocus: true } : {})}
+        {...(autofocusField === "title" ? { autoFocus: true } : {})}
         {...itemProps.title}
       />
 

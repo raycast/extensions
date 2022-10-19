@@ -32,13 +32,22 @@
           "default": true
         },
         {
-          "name": "autofocusTitle",
-          "type": "checkbox",
-          "title": "Autofocus",
-          "label": "Automatically focus title field",
-          "description": "When enabled, the title field will be automatically focused once the form is rendered.",
+          "name": "autofocusField",
+          "title": "Autofocus Field",
+          "type": "dropdown",
           "required": false,
-          "default": true
+          "description": "Select the field to focus automatically once the form is rendered",
+          "default": "team",
+          "data": [
+            {
+              "title": "Team",
+              "value": "teamId"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            }
+          ]
         },
         {
           "name": "copyToastAction",
