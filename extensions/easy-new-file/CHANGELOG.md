@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Update UI] - {PR_MERGE_DATE}
+## [Update UI] - 2022-10-20
 
 - Update UI
 
