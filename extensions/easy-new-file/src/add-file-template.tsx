@@ -32,7 +32,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         <ActionPanel>
           <Action
             title={"Add File Template"}
-            icon={Icon.TextDocument}
+            icon={Icon.Document}
             onAction={async () => {
               if (path.length === 0) {
                 setPathError("The field should't be empty!");
@@ -46,7 +46,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
           <ActionPanel.Section title="File Path Action">
             <Action
               title={"Fetch File Path"}
-              icon={Icon.TwoArrowsClockwise}
+              icon={Icon.Repeat}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
                 const _path = await fetchFilePath();
@@ -104,7 +104,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         value={name}
         onChange={setName}
       />
-      <Form.Description title={"Extension"} text={parse(path).name} />
+      <Form.Description title={"Extension"} text={parse(path).ext} />
     </Form>
   );
 }
