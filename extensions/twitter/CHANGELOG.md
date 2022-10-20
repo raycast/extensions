@@ -1,5 +1,10 @@
 # Twitter Changelog
 
+## [Add Search options] - 2022-10-20
+
+- Add Top Tweets search
+- Add Latest Tweets search
+
 ## [Add v2 support] - 2022-06-28
 
 - Add OAuth support
