@@ -122,7 +122,7 @@
           "description": "Set the inset of the shortcut items. (Only works with Grid layout)",
           "required": false,
           "title": "Shortcut Item Inset",
-          "default": "md",
+          "default": "sm",
           "data": [
             {
               "title": "No Inset",
