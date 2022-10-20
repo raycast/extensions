@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-11 23:32
+ * @lastEditTime: 2022-10-13 22:40
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -785,9 +785,9 @@ export class DataManager {
       return;
     }
 
-    const oneLineTranslation = sourceResult.translations.map((translation) => translation).join(", ");
+    const oneLineTranslation = sourceResult.translations.join(", ");
     sourceResult.oneLineTranslation = oneLineTranslation;
-    let copyText = oneLineTranslation;
+    let copyText = sourceResult.translations.join("\n");
 
     // Debug: used for viewing long text log.
     if (environment.isDevelopment && type === TranslationType.Google) {
