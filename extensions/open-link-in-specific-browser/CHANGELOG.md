@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Add Menu Bar command] - {PR_MERGE_DATE}
+## [Add Menu Bar command] - 2022-10-20
 
 - Add Menu Bar command: Open Link in Specific Browser
 
