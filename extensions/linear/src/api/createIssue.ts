@@ -8,12 +8,12 @@ export type CreateIssuePayload = {
   labelIds: string[];
   priority: number;
   teamId: string;
+  dueDate: Date | null;
   estimate?: number;
   assigneeId?: string;
   cycleId?: string;
   projectId?: string;
   parentId?: string;
-  dueDate?: Date;
 };
 
 export async function createIssue(payload: CreateIssuePayload) {
