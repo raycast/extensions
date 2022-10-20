@@ -29,6 +29,20 @@
       "mode": "view"
     },
     {
+      "name": "latest_tweets_search",
+      "title": "Search Latest Tweets",
+      "subtitle": "Twitter",
+      "description": "Search Latest Tweets",
+      "mode": "view"
+    },
+    {
+      "name": "top_tweets_search",
+      "title": "Search Top Tweets",
+      "subtitle": "Twitter",
+      "description": "Search Top Tweets",
+      "mode": "view"
+    },
+    {
       "name": "user_search",
       "title": "Search User",
       "subtitle": "Twitter",
