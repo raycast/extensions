@@ -1,6 +1,6 @@
 # Text Shortcuts Changelog
 
-## [Add Menu Bar command] - {PR_MERGE_DATE}
+## [Add Menu Bar command] - 2022-10-20
 
 - Add Menu Bar command: Shortcut Library
 - Update Title Case with The Chicago Manual of Style
