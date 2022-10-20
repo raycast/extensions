@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [New Feature] - 2022-10-01
+## [New Feature] - 2022-10-20
 
 - Add a manual refresh action to command's main window.
 
