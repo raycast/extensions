@@ -4,7 +4,6 @@ Lightning Time is a new way to measure time. It's a spin on hexadecimal time—t
 
 Because Lightning Time is hexadecimal time, it can also be used to represent time with three colors.
 
-This extension allows you to play around with Lightning Time via convert to/from Lightning Time and getting Lightning Time colors.
+This extension allows you to play around with Lightning Time via converting to/from Lightning Time and getting Lightning Time colors.
 
 Learn more about how Lightning Time works & play around with it here: https://blog.purduehackers.com/posts/lightning-time
-
