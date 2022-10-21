@@ -1,5 +1,9 @@
 # Hide Files Changelog
 
+## [Update UI] - {PR_MERGE_DATE}
+
+- Update empty view icon
+
 ## [Optimize the icon clarity] - 2022-05-24
 
 - Optimize the icon clarity
