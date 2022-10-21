@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [Update UI] - {PR_MERGE_DATE}
+## [Update UI] - 2022-10-21
 
 - Update empty view icon
 
