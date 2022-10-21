@@ -1,0 +1,88 @@
+import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import React from "react";
+import { Preferences } from "./types/preferences";
+import { getLoadingStyle } from "./utils/common-util";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { checkNetworkSpeed } from "./hooks/hooks";
+import { ActionOpenNetworkSpeed } from "./components/action-open-network-speed";
+
+export default function Command() {
+  const { testSequentially, loadingStyle } = getPreferenceValues<Preferences>();
+  const { networkSpeedInfo, networkSpeed, loading } = checkNetworkSpeed(0, testSequentially);
+
+  return (
+    <List searchBarPlaceholder="Network speed">
+      <List.EmptyView
+        icon={getLoadingStyle(parseInt(loadingStyle))}
+        title={loading ? "Testing Your Connection..." : "No info"}
+        description={loading ? "Takes about 20 seconds" : ""}
+        actions={
+          <ActionPanel>
+            <ActionOpenCommandPreferences />
+          </ActionPanel>
+        }
+      />
+
+      {!loading && (
+        <>
+          <List.Item
+            title={"DownLoad"}
+            icon={{ source: Icon.Download, tintColor: Color.Blue }}
+            subtitle={networkSpeed?.downloadCapacity}
+            actions={
+              <ActionPanel>
+                <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title={"Upload"}
+            icon={{ source: Icon.Upload, tintColor: Color.Red }}
+            subtitle={networkSpeed?.uploadCapacity}
+            actions={
+              <ActionPanel>
+                <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+              </ActionPanel>
+            }
+          />
+          {!testSequentially && (
+            <List.Item
+              title={"RPM"}
+              icon={{ source: Icon.Switch, tintColor: Color.Yellow }}
+              subtitle={networkSpeed?.responsiveness}
+              actions={
+                <ActionPanel>
+                  <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {testSequentially && (
+            <>
+              <List.Item
+                title={"RPM"}
+                icon={{ source: Icon.ArrowDown, tintColor: Color.Green }}
+                subtitle={networkSpeed?.downloadResponsiveness}
+                actions={
+                  <ActionPanel>
+                    <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+                  </ActionPanel>
+                }
+              />
+              <List.Item
+                title={"RPM"}
+                icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }}
+                subtitle={networkSpeed?.uploadResponsiveness}
+                actions={
+                  <ActionPanel>
+                    <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+                  </ActionPanel>
+                }
+              />
+            </>
+          )}
+        </>
+      )}
+    </List>
+  );
+}
