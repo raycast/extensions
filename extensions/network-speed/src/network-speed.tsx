@@ -11,7 +11,7 @@ export default function Command() {
   const { networkSpeedInfo, networkSpeed, loading } = checkNetworkSpeed(0, testSequentially);
 
   return (
-    <List searchBarPlaceholder="Network speed">
+    <List searchBarPlaceholder="Network speed" filtering={false}>
       <List.EmptyView
         icon={getLoadingStyle(parseInt(loadingStyle))}
         title={loading ? "Testing Your Connection..." : "No info"}
