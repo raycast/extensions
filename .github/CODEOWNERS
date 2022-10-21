@@ -123,6 +123,7 @@
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
 /extensions/crossbell                                @Songkeys
+/extensions/crunchbase                               @qdequele
 /extensions/css-calculations                         @teziovsky
 /extensions/css-gg                                   @astrit
 /extensions/cuid-generator                           @dgrcode
@@ -290,6 +291,7 @@
 /extensions/is-it-toxic-to                           @chesterhow @pernielsentikaer
 /extensions/itch-io                                  @Aayush9029
 /extensions/itranslate                               @404J
+/extensions/iwork                                    @SKaplanOfficial
 /extensions/jenkins                                  @k8scat
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
 /extensions/jira-search                              @svenwiegand
@@ -574,7 +576,7 @@
 /extensions/tmdb                                     @Aayush9029
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart
-/extensions/toggl-track                              @franzwilhelm
+/extensions/toggl-track                              @franzwilhelm @bkeys818
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toolbox                                  @kkange
 /extensions/toothpick                                @briankosw

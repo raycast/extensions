@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 11:05
+ * @lastEditTime: 2022-10-15 11:24
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -31,7 +31,7 @@ export let httpsAgent: HttpsProxyAgent | undefined;
 /**
  * Becacuse get system proxy will block 0.4s, we need to get it after finish query.
  */
-export const delayGetSystemProxyTime = 5000;
+export const delayGetSystemProxyTime = 3000;
 
 const systemProxyURLKey = "systemProxyURL";
 

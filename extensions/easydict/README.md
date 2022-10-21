@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easily look up words or translate text. </p>
-<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
+<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇹🇷 🇱🇹 🇱🇻 🇺🇦 🇧🇬 🇮🇩 🇲🇾 🇸🇮 🇪🇪 🇻🇳 🇮🇷 🇵🇰 🇹🇱 🇹🇦 🇮🇳 🇵🇭 🇫🇮 🇰🇭 🇱🇦 🇧🇳 🇲🇲 🇳🇴 🇷🇸 🇭🇷 🇲🇳 🇮🇱 </p>
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
 - [x] Support DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
-- [x] Support 23 languages.
+- [x] Support 48+ languages.
 
 Next:
 
@@ -43,6 +43,8 @@ Next:
 ---
 
 ### Youdao Modern Chinese Dict
+
+![xiaxi-1665674049](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/xiaxi-1665674049.png)
 
 ![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
 
@@ -112,7 +114,7 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 ### Supported Languages
 
-Currently we support 23 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.**
+Currently we support 48 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech, Turkish, Lithuanian, Latvian, Ukrainian, Bulgarian, Indonesian, Malay, Slovenian, Estonian, Vietnamese, Persian, Hindi, Telugu, Tamil, Urdu, Filipino, Khmer, Lao, Bengali, Burmese, Norwegian, Serbian, Croatian, Mongolian, Hebrew.**
 
 #### Language Detection
 
@@ -147,6 +149,31 @@ Details of the languages supported by each language detection service are as fol
 | Finnish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
 | Polish                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
 | Czech                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Turkish                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Lithuanian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Latvian                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Ukrainian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Bulgarian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Indonesian             |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Malay                  |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Slovenian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Estonian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Vietnamese             |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Persian                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hindi                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Telugu                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Tamil                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Urdu                   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Filipino               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Khmer                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Lao                    |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Bengali                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Burmese                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Georgian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Serbian                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Croatian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Mongolian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hebrew                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
 
 #### Dictionary
 
@@ -184,15 +211,40 @@ Supported translation languages:
 | Arabic                 |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
 | Swedish                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Romanian               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Thai                   |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Thai                   |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
 | Slovak                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Dutch                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Dutch                  |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Hungarian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Greek                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Danish                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Finnish                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Polish                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Polish                 |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |   ❌   |
 | Czech                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Turkish                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Lithuanian             |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Latvian                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Ukrainian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Bulgarian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Indonesian             |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Malay                  |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Slovenian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Estonian               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Vietnamese             |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Persian                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Hindi                  |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Telugu                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Tamil                  |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Urdu                   |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Filipino               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Khmer                  |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Lao                    |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Bengali                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Burmese                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Norwegian              |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Serbian                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Croatian               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Mongolian              |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Hebrew                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 
 > Note: ⚠️ means the translation of source language to Traditional Chinese is not supported, such as DeepL. If you enter Traditional Chinese for translation, it will be treated as Simplified Chinese.
 

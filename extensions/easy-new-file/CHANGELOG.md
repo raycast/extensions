@@ -1,5 +1,9 @@
 # Easy New File Changelog
 
+## [Update UI] - 2022-10-20
+
+- Update UI
+
 ## [Add text field validation] - 2022-07-04
 
 - Add text field validation

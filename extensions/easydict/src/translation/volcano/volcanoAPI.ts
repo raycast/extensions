@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-30 20:58
+ * @lastEditTime: 2022-10-17 20:38
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -151,20 +151,20 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(errorInfo);
         }
 
-        const detectedVolcanoLanguage = volcanoDetectResult.DetectedLanguageList[0];
-        const volcanoLangCode = detectedVolcanoLanguage.Language;
+        const detectedLanguage = volcanoDetectResult.DetectedLanguageList[0];
+        const volcanoLangCode = detectedLanguage.Language;
         const youdaoLangCode = getYoudaoLangCodeFromVolcanoCode(volcanoLangCode);
-        const isConfirmed = detectedVolcanoLanguage.Confidence > 0.5;
-        const detectedLanguage: DetectedLangModel = {
+        const isConfirmed = detectedLanguage.Confidence > 0.5;
+        const detectedLanguageModel: DetectedLangModel = {
           type: type,
           sourceLangCode: volcanoLangCode,
           youdaoLangCode: youdaoLangCode,
           confirmed: isConfirmed,
           result: volcanoDetectResult,
         };
-        resolve(detectedLanguage);
+        resolve(detectedLanguageModel);
 
-        console.log(`Volcano detect: ${JSON.stringify(detectedVolcanoLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
+        console.warn(`Volcano detect language: ${JSON.stringify(detectedLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
         console.warn(`Volcano detect cost time: ${res.headers[requestCostTime]} ms`);
       })
       .catch((error) => {

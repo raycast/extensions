@@ -1,5 +1,12 @@
 # Linear Changelog
 
+## [Create issue customization] - 2022-10-13
+
+- Add a preference to select the toast copy action after creating the issue
+- Add a preference to automatically the title field or not
+- Fix a bug where the sections were not ordered when searching
+- Refactor the project and issue edition to use `useForm`
+
 ## [Support emojis for projects] - 2022-09-20
 
 - Add support for emojis in projects
