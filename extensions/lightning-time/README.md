@@ -1,13 +1,10 @@
-# Lightning Time Converter
+# Lightning Time
 
-A Raycast extention to convert between traditional time and Lightning Time ⚡
+Lightning Time is a new way to measure time. It's a spin on hexadecimal time—the day is split into 16 parts, then 16 again, and so on. A typical Lightning Time string looks like `8~e~f`, or `8~e~f|b`.
 
-## Install
+Because Lightning Time is hexadecimal time, it can also be used to represent time with three colors.
 
-This extension is not yet on the Raycast store. For now, to use it:
+This extension allows you to play around with Lightning Time via convert to/from Lightning Time and getting Lightning Time colors.
 
-- Clone this repository
-- Navigate to the directory where you cloned it
-- Run `npm i && npm run dev`
+Learn more about how Lightning Time works & play around with it here: https://blog.purduehackers.com/posts/lightning-time
 
-The extension should now be running locally & you should be able to use it. It will stay in your Raycast even after you stop the server.
