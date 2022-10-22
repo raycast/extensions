@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Add SQS Queue Purge Action] - 2022-10-22
+
+- Add purge action to queue list item ([#3299](https://github.com/raycast/extensions/pull/3299))
+
 ## [Improve icon usage] - 2022-08-01
 
 - Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
