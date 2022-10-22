@@ -91,6 +91,7 @@ const Actions = (props: { item: Message }) => {
   return (
     <ActionPanel title="Action">
       <ActionPanel.Section>
+        <Action.Paste content={item.code} title="Paste Code" />
         <Action.CopyToClipboard content={item.code} title="Copy Code to Clipboard" />
         <Action.CopyToClipboard content={item.text} title="Copy Content to Clipboard" />
         <Action.CopyToClipboard content={item.code + "\t" + item.text} title="Copy Code & Content to Clipboard" />
