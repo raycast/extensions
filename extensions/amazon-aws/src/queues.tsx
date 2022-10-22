@@ -1,4 +1,4 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
@@ -98,6 +98,28 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
     return _acc;
   }
 
+  function handlePurgeQueueAction(queue: string) {
+    confirmAlert({
+      title: "Are you sure you want to purge the queue?",
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Purge",
+        onAction: async () => {
+          const toast = await showToast({ style: Toast.Style.Animated, title: "Purging queue..." });
+
+          try {
+            await sqs.purgeQueue({ QueueUrl: queue }).promise();
+            toast.style = Toast.Style.Success;
+            toast.title = "Purged queue";
+          } catch (err) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to purge queue";
+          }
+        },
+      },
+    });
+  }
+
   const path =
     "https://" +
     preferences.region +
@@ -116,6 +138,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
+          <Action.SubmitForm title="Purge Queue" onSubmit={() => handlePurgeQueueAction(queue)} />
         </ActionPanel>
       }
       accessories={getAccessories()}
