@@ -98,7 +98,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
     return _acc;
   }
 
-  function handlePurgeQueueAction(queue: string) {
+  function handlePurgeQueueAction() {
     confirmAlert({
       title: "Are you sure you want to purge the queue?",
       message: "This action cannot be undone.",
@@ -138,7 +138,10 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
-          <Action.SubmitForm title="Purge Queue" onSubmit={() => handlePurgeQueueAction(queue)} />
+          <Action.SubmitForm
+            title={`Purge Queue (${attr?.ApproximateNumberOfMessages || "empty"})`}
+            onSubmit={handlePurgeQueueAction}
+          />
         </ActionPanel>
       }
       accessories={getAccessories()}
