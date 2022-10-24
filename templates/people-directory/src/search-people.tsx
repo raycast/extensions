@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 type Person = {
   id: string;
   url: string;
-  icon: {
+  icon?: {
     file: {
       url: string;
     };
@@ -53,7 +53,7 @@ export default function Command() {
       {data?.map((person) => (
         <List.Item
           key={person.id}
-          icon={{ source: person.icon.file.url, mask: Image.Mask.Circle }}
+          icon={person.icon ? { source: person.icon.file.url, mask: Image.Mask.Circle } : undefined}
           title={person.properties.Name.title[0].plain_text}
           subtitle={person.properties["Company email"].email}
           accessories={[
