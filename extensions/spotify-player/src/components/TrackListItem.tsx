@@ -46,7 +46,7 @@ export default function TrackListItem(props: {
               }}
             />
           )}
-          {spotifyInstalled && track.uri && (
+          {installed && track.uri && (
             <Action
               title="Add To Queue"
               icon={Icon.Plus}
