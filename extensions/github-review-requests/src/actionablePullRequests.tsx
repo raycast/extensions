@@ -33,7 +33,7 @@ const actionablePullRequests = () => {
 
       {recentlyVisitedPulls.length > 0 && (
         <MenuBarExtra.Submenu title="Recently Visited">
-          {recentlyVisitedPulls.map(pull => (
+          {recentlyVisitedPulls.map((pull) => (
             <PullRequestItem key={pull.id} pull={pull} onAction={() => open(pull.url)} />
           ))}
         </MenuBarExtra.Submenu>
@@ -50,9 +50,7 @@ const actionablePullRequests = () => {
 export default actionablePullRequests;
 
 const getTitle = (updatedPulls: PullRequestShort[]) =>
-  updatedPulls.length > 0
-    ? `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""}`
-    : undefined;
+  updatedPulls.length > 0 ? `${updatedPulls.length} PR${updatedPulls.length > 1 ? "s" : ""}` : undefined;
 
 const getIcon = (updatedPulls: PullRequestShort[]) => ({
   source: "icon.png",
