@@ -11,14 +11,25 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Index",
-      "description": "An Index to test",
-      "mode": "view"
+      "name": "issues",
+      "title": "Issues",
+      "description": "List my Issues",
+      "mode": "view",
+      "subtitle": "GitHub",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "projects",
+      "title": "My Projects",
+      "description": "List My Projects",
+      "mode": "view",
+      "subtitle": "GitHub",
+      "icon": "command-icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1"
+    "@raycast/api": "^1.41.1",
+    "octokit": "^2.0.9"
   },
   "devDependencies": {
     "@types/node": "16.10.3",
@@ -36,5 +47,15 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "pat",
+      "description": "Personal Access Token from GitHub",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "placeholder": "PAT"
+    }
+  ]
 }
