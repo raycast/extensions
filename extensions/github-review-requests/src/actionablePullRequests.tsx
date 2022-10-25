@@ -33,7 +33,7 @@ const actionablePullRequests = () => {
 
       {recentlyVisitedPulls.length > 0 && (
         <MenuBarExtra.Submenu title="Recently Visited">
-          {recentlyVisitedPulls.map((pull) => (
+          {recentlyVisitedPulls.map(pull => (
             <PullRequestItem key={pull.id} pull={pull} onAction={() => open(pull.url)} />
           ))}
         </MenuBarExtra.Submenu>
