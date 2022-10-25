@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scrapbox",
-  "title": "Scrapbox(β)",
+  "title": "Scrapbox",
   "description": "Search Scrapbox pages",
   "icon": "command-icon.png",
   "author": "zakuni",
