@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geist-ui-components",
-  "title": "Geist Ui Components ",
-  "description": "This extension provides links to components in Geist UI Documentation ",
+  "title": "Geist Ui Components",
+  "description": "This extension provides links to components in Geist UI Documentation",
   "icon": "command-icon.png",
   "author": "RahulatRaycast",
   "categories": [
