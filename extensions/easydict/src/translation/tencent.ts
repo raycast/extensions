@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-18 10:21
+ * @lastEditTime: 2022-10-01 23:48
  * @fileName: tencent.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -12,16 +12,14 @@ import axios from "axios";
 import crypto, { BinaryToTextEncoding } from "crypto";
 import * as tencentcloud from "tencentcloud-sdk-nodejs-tmt";
 import { requestCostTime } from "../axiosConfig";
-import { LanguageDetectType, LanguageDetectTypeResult } from "../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../detectLanauge/types";
 import { QueryWordInfo } from "../dictionary/youdao/types";
-import { getTencentLanguageId, getYoudaoLanguageIdFromTencentId } from "../language/languages";
-import { KeyStore } from "../preferences";
+import { getTencentLangCode, getYoudaoLangCodeFromTencentCode } from "../language/languages";
+import { AppKeyStore } from "../preferences";
 import { QueryTypeResult, RequestErrorInfo, TencentTranslateResult, TranslationType } from "../types";
 
-const TmtClient = tencentcloud.tmt.v20180321.Client;
-
-const SECRET_ID = KeyStore.tencentSecretId;
-const SECRET_KEY = KeyStore.tencentSecretKey;
+const SECRET_ID = AppKeyStore.tencentSecretId;
+const SECRET_KEY = AppKeyStore.tencentSecretKey;
 
 const endpoint = "tmt.tencentcloudapi.com";
 const region = "ap-guangzhou";
@@ -39,7 +37,6 @@ const clientConfig = {
     },
   },
 };
-const client = new TmtClient(clientConfig);
 
 /**
  * Tencent translate, use axios, sign manually. Cost time: ~0.1 ms
@@ -48,17 +45,24 @@ const client = new TmtClient(clientConfig);
  * Ref: https://github.com/raycast/extensions/blob/8ec3e04197695a78691e508f33db2044dce3e16f/extensions/itranslate/src/itranslate.shared.tsx#L426
  */
 export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
-  console.log(`---> start request Tencent translate`);
+  console.log(`---> start axios request Tencent translate`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const from = getTencentLanguageId(fromLanguage);
-  const to = getTencentLanguageId(toLanguage);
-  if (!from || !to) {
-    console.warn(`Tencent translate not support language: ${fromLanguage} --> ${toLanguage}`);
+  const from = getTencentLangCode(fromLanguage);
+  const to = getTencentLangCode(toLanguage);
+  const type = TranslationType.Tencent;
+
+  const hasAppKey = SECRET_ID && SECRET_KEY;
+  if (!from || !to || !hasAppKey) {
+    if (!hasAppKey) {
+      console.warn(`---> Tencent translate no app key`);
+    } else {
+      console.warn(`Tencent translate not support language: ${fromLanguage} --> ${toLanguage}`);
+    }
     const result: QueryTypeResult = {
-      type: TranslationType.Tencent,
+      type: type,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }
@@ -139,8 +143,6 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
     "Signature=" +
     signature;
 
-  const type = TranslationType.Tencent;
-
   return new Promise((resolve, reject) => {
     axios
       .post(`https://${endpoint}`, payload, {
@@ -156,25 +158,41 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
       })
       .then((response) => {
         const tencentResult = response.data.Response as TencentTranslateResult;
+        // console.log(`---> Tencent translate result: ${JSON.stringify(tencentResult)}`);
+
+        // wtf: though request error, such as not supported language, Tencent will return resolve, come here!
+        const error = tencentResult.Error;
+        if (error) {
+          console.error(`Tencent axios translate error: ${error.Message}`);
+          const errorInfo: RequestErrorInfo = {
+            type: type,
+            // code: error.Code,
+            message: error.Message,
+          };
+          return reject(errorInfo);
+        }
+
         const translations = tencentResult.TargetText.split("\n");
-        console.warn(`---> Tencent translate: ${translations}, cost: ${response.headers[requestCostTime]}`);
+        console.warn(
+          `---> Tencent translations: ${translations}, ${tencentResult.Source} cost: ${response.headers[requestCostTime]}`
+        );
         const typeResult: QueryTypeResult = {
           type: type,
           result: tencentResult,
           translations: tencentResult.TargetText.split("\n"),
-          wordInfo: queryWordInfo,
+          queryWordInfo: queryWordInfo,
         };
         resolve(typeResult);
       })
       .catch((err) => {
         if (err.message === "canceled") {
           console.log(`---> Tencent canceled`);
-          return;
+          return reject(undefined);
         }
 
-        // console.error(`tencent translate error: ${JSON.stringify(err, null, 2)}`);
+        // console.error(`tencent translate err: ${JSON.stringify(err, null, 4)}`);
         const error = err as { code: string; message: string };
-        console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
+        console.error(`Tencent translate err, code: ${error.code}, message: ${error.message}`);
         const errorInfo: RequestErrorInfo = {
           type: type,
           code: error.code,
@@ -191,19 +209,25 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
  * 腾讯文本翻译，5次/秒： https://cloud.tencent.com/document/api/551/15619
  */
 export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
-  console.log(`---> start request Tencent translate`);
+  console.log(`---> start sdk request Tencent translate`);
+
   const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const from = getTencentLanguageId(fromLanguage);
-  const to = getTencentLanguageId(toLanguage);
+  const from = getTencentLangCode(fromLanguage);
+  const to = getTencentLangCode(toLanguage);
   const type = TranslationType.Tencent;
 
-  if (!from || !to) {
-    console.warn(`Tencent translate not support language: ${fromLanguage} --> ${toLanguage}`);
+  const hasAppKey = hasTencentAppKey();
+  if (!from || !to || !hasAppKey) {
+    if (!hasAppKey) {
+      console.warn(`---> Tencent translate sdk no app key`);
+    } else {
+      console.warn(`Tencent translate sdk not support language: ${fromLanguage} --> ${toLanguage}`);
+    }
     const result: QueryTypeResult = {
       type: type,
       result: undefined,
       translations: [],
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(result);
   }
@@ -216,6 +240,9 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
   const startTime = new Date().getTime();
 
   try {
+    const TmtClient = tencentcloud.tmt.v20180321.Client;
+    const client = new TmtClient(clientConfig);
+
     const tencentResult = (await client.TextTranslate(params)) as TencentTranslateResult;
     const endTime = new Date().getTime();
     console.log(`Tencen translate: ${tencentResult.TargetText}, cost: ${endTime - startTime} ms`);
@@ -223,16 +250,16 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
       type: type,
       result: tencentResult as TencentTranslateResult,
       translations: tencentResult.TargetText.split("\n"),
-      wordInfo: queryWordInfo,
+      queryWordInfo: queryWordInfo,
     };
     return Promise.resolve(typeResult);
   } catch (err) {
-    // console.error(`tencent translate error: ${JSON.stringify(err, null, 2)}`);
+    // console.error(`tencent sdk translate err: ${JSON.stringify(err, null, 4)}`);
     const error = err as { code: string; message: string };
     console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
       type: type,
-      code: error.code,
+      // code: error.code,
       message: error.message,
     };
     return Promise.reject(errorInfo);
@@ -240,13 +267,15 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
 }
 
 /**
- * Tecent language detect, use Tencent nodejs sdk. Cost time: ~0.2s
+ * Tecent language detect, use Tencent nodejs sdk. Cost time: ~150ms
  *
  * 腾讯语种识别，5次/秒： https://cloud.tencent.com/document/product/551/15620?cps_key=1d358d18a7a17b4a6df8d67a62fd3d3d
  *
  * Todo: use axios to rewrite.
  */
-export async function tencentLanguageDetect(text: string): Promise<LanguageDetectTypeResult> {
+export function tencentDetect(text: string): Promise<DetectedLangModel> {
+  console.log(`---> start sdk request Tencent detect`);
+
   const params = {
     Text: text,
     ProjectId: projectId,
@@ -254,31 +283,60 @@ export async function tencentLanguageDetect(text: string): Promise<LanguageDetec
   const startTime = new Date().getTime();
   const type = LanguageDetectType.Tencent;
 
-  try {
-    const response = await client.LanguageDetect(params);
-    const endTime = new Date().getTime();
-    const tencentLanguageId = response.Lang || "";
-    const youdaoLanguageId = getYoudaoLanguageIdFromTencentId(tencentLanguageId);
-    console.warn(
-      `tencent detect language id: ${tencentLanguageId}, youdaoId: ${youdaoLanguageId}, cost time: ${
-        endTime - startTime
-      } ms`
-    );
-    const typeResult: LanguageDetectTypeResult = {
+  if (!hasTencentAppKey()) {
+    console.warn(`Tencent detect has no app key`);
+    const result: DetectedLangModel = {
       type: type,
-      sourceLanguageId: tencentLanguageId,
-      youdaoLanguageId: youdaoLanguageId,
+      sourceLangCode: "",
+      youdaoLangCode: "",
       confirmed: false,
     };
-    return Promise.resolve(typeResult);
-  } catch (err) {
-    const error = err as { code: string; message: string };
-    console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
-    const errorInfo: RequestErrorInfo = {
-      type: type,
-      code: error.code,
-      message: error.message,
-    };
-    return Promise.reject(errorInfo);
+    return Promise.resolve(result);
+  }
+
+  return new Promise((resolve, reject) => {
+    const TmtClient = tencentcloud.tmt.v20180321.Client;
+    const client = new TmtClient(clientConfig);
+
+    client
+      .LanguageDetect(params)
+      .then((response) => {
+        const endTime = new Date().getTime();
+        const tencentLanguageId = response.Lang || "";
+        const youdaoLanguageId = getYoudaoLangCodeFromTencentCode(tencentLanguageId);
+        console.warn(`tencent detect language: ${tencentLanguageId}, youdaoId: ${youdaoLanguageId}`);
+        console.warn(`tencent cost time: ${endTime - startTime} ms`);
+        const typeResult: DetectedLangModel = {
+          type: type,
+          sourceLangCode: tencentLanguageId,
+          youdaoLangCode: youdaoLanguageId,
+          confirmed: false,
+        };
+        resolve(typeResult);
+      })
+      .catch((err) => {
+        const error = err as { code: string; message: string };
+        console.error(`tencent detect error, code: ${error.code}, message: ${error.message}`);
+        const errorInfo: RequestErrorInfo = {
+          type: type,
+          code: error.code,
+          message: error.message,
+        };
+        reject(errorInfo);
+      });
+  });
+}
+
+/**
+ * Check has Tencent AppId and AppKey.
+ */
+export function hasTencentAppKey(): boolean {
+  const AppId = AppKeyStore.tencentSecretId;
+  const AppSecret = AppKeyStore.tencentSecretKey;
+
+  if (AppId && AppSecret) {
+    return true;
+  } else {
+    return false;
   }
 }

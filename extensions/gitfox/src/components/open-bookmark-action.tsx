@@ -10,7 +10,7 @@ type OpenBookMarkActionProps = {
   bookmark: Bookmark;
 };
 
-const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JSX.Element => (
+const OpenBookmarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JSX.Element => (
   <Action
     {...props}
     icon={Icon.Link}
@@ -29,4 +29,4 @@ const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JS
   />
 );
 
-export default OpenBookMarkAction;
+export default OpenBookmarkAction;

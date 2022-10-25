@@ -1,16 +1,26 @@
 import fetch from "node-fetch";
 import { getOAuthToken } from "../components/withZoomAuth";
 
-export type Meeting = {
+type BaseMeeting = {
   id: string;
   duration: number;
   join_url: string;
   topic: string;
-  start_time: string;
   timezone: string;
   agenda: string;
   uuid: string;
 };
+
+export type ScheduledMeeting = BaseMeeting & {
+  type: 1 | 2 | 8;
+  start_time: string;
+};
+
+export type RecurringMeetingWithNoFixedTime = BaseMeeting & {
+  type: 3;
+};
+
+export type Meeting = ScheduledMeeting | RecurringMeetingWithNoFixedTime;
 
 export async function getUpcomingMeetings() {
   const response = await fetch(`https://api.zoom.us/v2/users/me/meetings?type=upcoming`, {
