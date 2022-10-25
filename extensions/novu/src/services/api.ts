@@ -18,9 +18,9 @@ export function triggerEvent(data: IFormData) {
       }
     )
     .then((response) => response.data?.data)
-    .then((response) => triggerSentToast())
+    .then(() => triggerSentToast())
     .catch((error) => {
-      return Promise.reject(error);
+      exceptionToast(error.code);
     });
 }
 
@@ -28,5 +28,12 @@ export async function triggerSentToast() {
   await showToast({
     style: Toast.Style.Success,
     title: "Trigger sent",
+  });
+}
+
+export async function exceptionToast(errorCode: string) {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: `Exception Occurred - ${errorCode}`,
   });
 }
