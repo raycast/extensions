@@ -1,4 +1,4 @@
-import { getMeetTab, openMeetTab } from "./helpers";
+import { getMeetTab, openMeetTabDefaultProfile } from "./helpers";
 
 import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
 
@@ -9,7 +9,7 @@ export default async function main() {
       title: "Creating meeting...",
     });
 
-    await openMeetTab();
+    await openMeetTabDefaultProfile();
 
     const meetTab = await getMeetTab();
 
