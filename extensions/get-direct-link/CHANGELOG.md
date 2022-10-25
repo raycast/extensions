@@ -1,3 +1,3 @@
 # Get Direct Link Changelog
 
-## [Initial Version] - 2022-10-15
+## [Initial Version] - 2022-10-25
