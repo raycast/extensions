@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Icon, List, Action } from "@raycast/api";
 
 const GENERAL = [
   {
@@ -17,7 +17,7 @@ const GENERAL = [
     title: "Icons",
     url: "https://geist-ui.dev/en-us/components/icons",
   },
-]
+];
 
 const LAYOUT = [
   {
@@ -32,8 +32,7 @@ const LAYOUT = [
     title: "Spacer",
     url: "https://geist-ui.dev/en-us/components/spacer",
   },
-
-]
+];
 
 const SURFACES = [
   {
@@ -48,7 +47,7 @@ const SURFACES = [
     title: "Fieldset",
     url: "https://geist-ui.dev/en-us/components/fieldset",
   },
-]
+];
 
 const DATA_ENTRY = [
   {
@@ -65,7 +64,7 @@ const DATA_ENTRY = [
   },
   {
     title: "Input",
-    url: "https://geist-ui.dev/en-us/components/input"
+    url: "https://geist-ui.dev/en-us/components/input",
   },
   {
     title: "Radio",
@@ -87,7 +86,7 @@ const DATA_ENTRY = [
     title: "Toggle",
     url: "https://geist-ui.dev/en-us/components/toggle",
   },
-]
+];
 
 const DATA_DISPLAY = [
   {
@@ -136,7 +135,7 @@ const DATA_DISPLAY = [
   },
   {
     title: "Tag",
-    url: "https://geist-ui.dev/en-us/components/tag"
+    url: "https://geist-ui.dev/en-us/components/tag",
   },
   {
     title: "Tooltip",
@@ -146,8 +145,7 @@ const DATA_DISPLAY = [
     title: "User",
     url: "https://geist-ui.dev/en-us/components/user",
   },
-
-]
+];
 
 const FEEDBACK = [
   {
@@ -182,7 +180,7 @@ const FEEDBACK = [
     title: "Toast",
     url: "https://geist-ui.dev/en-us/components/toast",
   },
-]
+];
 
 const NAVIGATION = [
   {
@@ -205,7 +203,7 @@ const NAVIGATION = [
     title: "Button Dropdown",
     url: "https://geist-ui.dev/en-us/components/button-dropdown",
   },
-]
+];
 
 const OTHERS = [
   {
@@ -216,123 +214,122 @@ const OTHERS = [
     title: "Snippet",
     url: "https://geist-ui.dev/en-us/components/snippet",
   },
-
 ];
 
 export default function Command() {
   return (
     <List isLoading={false} searchBarPlaceholder="Search for components">
       <List.Section title="GENERAL">
-      {GENERAL.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {GENERAL.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="LAYOUT">
-      {LAYOUT.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {LAYOUT.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="SURFACES">
-      {SURFACES.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {SURFACES.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="DATA ENTRY">
-      {DATA_ENTRY.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {DATA_ENTRY.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="DATA DISPLAY">
-      {DATA_DISPLAY.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {DATA_DISPLAY.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="FEEDBACK">
-      {FEEDBACK.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {FEEDBACK.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="NAVIGATION">
-      {NAVIGATION.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {NAVIGATION.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
       <List.Section title="OTHERS">
-      {OTHERS.map((item) => (
-        <List.Item
-          key={item.title}
-          icon={{ source: Icon.Link }}
-          title={item.title}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={item.url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {OTHERS.map((item) => (
+          <List.Item
+            key={item.title}
+            icon={{ source: Icon.Link }}
+            title={item.title}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={item.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
