@@ -26,7 +26,7 @@ export default function Command() {
       {!loading && (
         <>
           <List.Item
-            title={"DownLoad"}
+            title={{ value: "Downlink", tooltip: "Downlink Capacity" }}
             icon={{ source: Icon.Download, tintColor: Color.Blue }}
             subtitle={networkSpeed?.downloadCapacity}
             actions={
@@ -36,7 +36,7 @@ export default function Command() {
             }
           />
           <List.Item
-            title={"Upload"}
+            title={{ value: "Uplink", tooltip: "Uplink Capacity" }}
             icon={{ source: Icon.Upload, tintColor: Color.Red }}
             subtitle={networkSpeed?.uploadCapacity}
             actions={
@@ -47,7 +47,7 @@ export default function Command() {
           />
           {!testSequentially && (
             <List.Item
-              title={"RPM"}
+              title={{ value: "RPM", tooltip: "Responsiveness" }}
               icon={{ source: Icon.Switch, tintColor: Color.Yellow }}
               subtitle={networkSpeed?.responsiveness}
               actions={
@@ -60,7 +60,7 @@ export default function Command() {
           {testSequentially && (
             <>
               <List.Item
-                title={"RPM"}
+                title={{ value: "RPM", tooltip: "Downlink Responsiveness" }}
                 icon={{ source: Icon.ArrowDown, tintColor: Color.Green }}
                 subtitle={networkSpeed?.downloadResponsiveness}
                 actions={
@@ -70,7 +70,7 @@ export default function Command() {
                 }
               />
               <List.Item
-                title={"RPM"}
+                title={{ value: "RPM", tooltip: "Uplink Responsiveness" }}
                 icon={{ source: Icon.ArrowUp, tintColor: Color.Orange }}
                 subtitle={networkSpeed?.uploadResponsiveness}
                 actions={
@@ -80,6 +80,18 @@ export default function Command() {
                 }
               />
             </>
+          )}
+          {networkSpeed?.hasIdleLatency && (
+            <List.Item
+              title={{ value: "Latency", tooltip: "Idle Latency" }}
+              icon={{ source: Icon.Heartbeat, tintColor: Color.Purple }}
+              subtitle={networkSpeed?.idleLatency}
+              actions={
+                <ActionPanel>
+                  <ActionOpenNetworkSpeed value={networkSpeedInfo} />
+                </ActionPanel>
+              }
+            />
           )}
         </>
       )}

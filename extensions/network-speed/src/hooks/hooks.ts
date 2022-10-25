@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
 import { spawn } from "child_process";
 import { NetworkSpeed } from "../types/type";
+import { getNetSpeed } from "../utils/common-util";
 
 export const checkNetworkSpeed = (refresh: number, testSequentially = false) => {
   const [networkSpeedInfo, setNetworkSpeedInfo] = useState<string>("");
@@ -13,21 +14,7 @@ export const checkNetworkSpeed = (refresh: number, testSequentially = false) => 
     const result = spawn("networkQuality", [args], { shell: true });
 
     result.stdout.on("data", (data: string) => {
-      const finalData = data + "E";
-      const uploadCapacity = finalData.match(/Upload capacity: ([\s\S]*?)\nDownload capacity/);
-      const downloadCapacity = finalData.match(/Download capacity: ([\s\S]*?)\nUpload flows/);
-      const responsiveness = finalData.match(/Responsiveness: ([\s\S]*?)E/);
-      const uploadResponsiveness = finalData.match(/Upload Responsiveness: ([\s\S]*?)\nDownload/);
-      const downloadResponsiveness = finalData.match(/Download Responsiveness: ([\s\S]*?)E/);
-      const network: NetworkSpeed = {
-        uploadCapacity: uploadCapacity !== null ? uploadCapacity[1].trim() : "0 Mbps",
-        downloadCapacity: downloadCapacity !== null ? downloadCapacity[1].trim() : "0 Mbps",
-        uploadResponsiveness: uploadResponsiveness !== null ? uploadResponsiveness[1].trim() : "0 RPM",
-        downloadResponsiveness: downloadResponsiveness !== null ? downloadResponsiveness[1].trim() : "0 RPM",
-        responsiveness: responsiveness !== null ? responsiveness[1].trim() : "0 RPM",
-      };
-
-      setNetworkSpeed(network);
+      setNetworkSpeed(getNetSpeed(testSequentially, data));
       setNetworkSpeedInfo(data);
       setLoading(false);
     });
