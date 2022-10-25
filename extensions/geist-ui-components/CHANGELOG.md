@@ -1,3 +1,3 @@
 # Geist UI Components Changelog
 
-## [Initial Version] - 2022-08-01
+## [Initial Version] - 2022-10-25
