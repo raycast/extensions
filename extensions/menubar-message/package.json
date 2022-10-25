@@ -2,12 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "menubar-message",
   "title": "Menubar Message",
-  "description": "Jazz up your menubar with a custom message!",
+  "description": "Have a custom message on your menubar!",
   "icon": "command-icon.png",
-  "author": "Ek217",
-  "contributors": [
-    "pernielsentikaer"
-  ],
+  "author": "pernielsentikaer",
   "license": "MIT",
   "preferences": [
     {
@@ -22,8 +19,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "MenuTime",
-      "description": "Text showing in menubar",
+      "title": "Menubar Message",
+      "description": "Shows a custom message in the menubar",
       "mode": "menu-bar"
     }
   ],
