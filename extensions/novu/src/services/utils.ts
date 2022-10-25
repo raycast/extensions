@@ -1,4 +1,4 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export function isJsonString(str: string) {
@@ -17,9 +17,5 @@ export async function runAppleScriptSilently(appleScript: string): Promise<void>
 
 export async function openBrowserSilently(url: string): Promise<void> {
   await closeMainWindow();
-  await runAppleScript(getBrowserScript(url));
+  await open(url);
 }
-
-const getBrowserScript = (url: string) => `
-do shell script "open '${url}'"
-  `;
