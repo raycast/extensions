@@ -103,7 +103,7 @@ export default function Command(): ReactElement {
                     "&tl=" +
                     r.target_language +
                     "&text=" +
-                    toTranslate +
+                    encodeURIComponent(toTranslate) +
                     "&op=translate"
                   }
                 />

@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { basename } from "path";
 
-import { Action, ActionPanel, Color, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import mdfind from "mdfind";
@@ -10,6 +10,10 @@ import moment from "moment";
 import { copyRecentToClipboard, showInfoInFinder, maybeMoveResultToTrash } from "./utils";
 
 import { Scope, ScopeDictionary, SpotlightResult } from "./types";
+
+interface RecentsPreferences {
+  limit: string;
+}
 
 const queryScopes = {
   default: {
@@ -40,6 +44,7 @@ const queryScopes = {
 const getRecents = async (scope: string | undefined, callback: (result: SpotlightResult) => void): Promise<boolean> => {
   return await new Promise((resolve) => {
     let queryParts: Scope = queryScopes["default"];
+    const { limit } = getPreferenceValues<RecentsPreferences>();
 
     if (scope) {
       queryParts = queryScopes[scope];
@@ -49,6 +54,7 @@ const getRecents = async (scope: string | undefined, callback: (result: Spotligh
       query: queryParts.query,
       directories: queryParts.directories,
       attributes: ["kMDItemDisplayName", "kMDItemKind", "kMDItemLastUsedDate"],
+      limit: parseInt(limit, 10) || 1000,
     });
 
     query.output.on("data", (data: SpotlightResult) => {

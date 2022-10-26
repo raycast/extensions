@@ -122,6 +122,7 @@
 /extensions/craftdocs                                @kudrykv @kudrykv
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
+/extensions/cron-description                         @niall-maloney
 /extensions/crossbell                                @Songkeys
 /extensions/crunchbase                               @qdequele
 /extensions/css-calculations                         @teziovsky
@@ -216,7 +217,9 @@
 /extensions/format-graphql                           @tngranados
 /extensions/frankerfacez                             @davidchalifoux
 /extensions/gather                                   @yannglt
+/extensions/geist-ui-components                      @Rahuls-Coding
 /extensions/geohash-encode-decode                    @alrico88
+/extensions/get-direct-link                          @trungnghiatn
 /extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
 /extensions/git-repos                                @moored
@@ -291,6 +294,7 @@
 /extensions/is-it-toxic-to                           @chesterhow @pernielsentikaer
 /extensions/itch-io                                  @Aayush9029
 /extensions/itranslate                               @404J
+/extensions/iwork                                    @SKaplanOfficial
 /extensions/jenkins                                  @k8scat
 /extensions/jetbrains                                @gdsmith @adrienbaron @dima-m711
 /extensions/jira-search                              @svenwiegand
@@ -331,6 +335,7 @@
 /extensions/library-genesis                          @yz3440
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
+/extensions/lightning-time                           @MatthewStanciu
 /extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann
 /extensions/linguee                                  @geekdada
 /extensions/link-cleaner                             @MisakiCoca
@@ -352,6 +357,7 @@
 /extensions/maven-central-repository                 @koinzhang
 /extensions/meme-generator                           @timoransky
 /extensions/mempool                                  @dillionverma
+/extensions/menubar-message                          @pernielsentikaer
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/mlb-scores                               @jso8910
 /extensions/mldocs                                   @sadanand-singh
@@ -372,6 +378,7 @@
 /extensions/nba-game-viewer                          @AbhinavPalacharla
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt
+/extensions/network-speed                            @koinzhang
 /extensions/new-york-times                           @Antonwy
 /extensions/nextcloud                                @uetchy
 /extensions/nextjs-docs                              @PrasadChinwal
@@ -383,6 +390,7 @@
 /extensions/noteplan-3                               @shakedlokits @lukerandall
 /extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
 /extensions/nouns                                    @peduarte
+/extensions/novu                                     @djabarovgeorge
 /extensions/nsis-reference                           @idleberg
 /extensions/nuget                                    @hexpl0it
 /extensions/numi                                     @AndresMorelos @pernielsentikaer
@@ -418,6 +426,7 @@
 /extensions/password-generator                       @joshuaiz
 /extensions/paste-as-plain-text                      @koinzhang
 /extensions/pastebin                                 @vimtor
+/extensions/pera-explorer                            @akgunberk
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/pexels                                   @koinzhang
 /extensions/php-docs                                 @comes @pernielsentikaer
@@ -575,7 +584,7 @@
 /extensions/tmdb                                     @Aayush9029
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart
-/extensions/toggl-track                              @franzwilhelm
+/extensions/toggl-track                              @franzwilhelm @bkeys818
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toolbox                                  @kkange
 /extensions/toothpick                                @briankosw

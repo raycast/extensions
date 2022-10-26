@@ -1,4 +1,4 @@
-# Background Refresh ᵇᵉᵗᵃ
+# Background Refresh
 
 Commands of an extension can be configured to be automatically run in the background, without the user manually opening them.
 Background refresh can be useful for:
@@ -29,13 +29,13 @@ Example:
 },
 ```
 
-The interval specifies that the command should be launched in the background every X seconds (s), minutes (m), hours (h) or days (d). Examples: `10m`, `12h`, `1d`. The minimum value is 1 minute (`1m`), which should be used cautiously, also see the section on best practices.
+The interval specifies that the command should be launched in the background every X seconds (s), minutes (m), hours (h) or days (d). Examples: `10m`, `12h`, `1d`. The minimum value is 10 seconds (`10s`), which should be used cautiously, also see the section on best practices.
 
-Note that the actual scheduling is not exact and might vary within a tolerance level. macOS determines the best time for running the command in order to optimize energy consumption, and scheduling times can also vary when running on battery. Scheduling is skipped if another instance of the same command is already running.
+Note that the actual scheduling is not exact and might vary within a tolerance level. macOS determines the best time for running the command in order to optimize energy consumption, and scheduling times can also vary when running on battery. To prevent overlapping background launches of the same command, commands are terminated after a timeout that is dynamically adjusted to the interval.
 
 ## Running in the background
 
-The entry point of your command stays the same when launched from the background. For no-view commands, a command will run until the Promise of the main async function resolves. Menu bar commands render a React component and run until the `isLoading` property is set to `false` – which can be set programmatically or via React Suspense.
+The entry point of your command stays the same when launched from the background. For no-view commands, a command will run until the Promise of the main async function resolves. Menu bar commands render a React component and run until the `isLoading` property is set to `false`.
 
 You can use the global `environment.launchType` in your command to determine whether the command has been launched by the user (`LaunchType.UserInitiated`) or via background refresh (`LaunchType.Background`).
 
@@ -60,7 +60,9 @@ For local commands under development, errors are shown as usual via the console.
 
 ![](../.gitbook/assets/background-refresh-error.png)
 
-When the background run leads to an error, users will also see a warning icon on the root search command and a tooltip with a hint to show the error via the Action Panel. The tooltip over the subtitle of a command shows the last run time.
+When the background run leads to an error, users will also see a warning icon on the root search command and a tooltip with a hint to show the error via the Action Panel. The tooltip over the subtitle of a command shows the last run time.  
+
+You can launch the built-in root search command "Extension Diagnostics" to see which of your commands run in background and when they last ran.
 
 ## Preferences
 

@@ -30,6 +30,46 @@
           "description": "When enabled, \"Created via Raycast\" signature will be added at the bottom of the description.",
           "required": false,
           "default": true
+        },
+        {
+          "name": "autofocusField",
+          "title": "Autofocus Field",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the field to focus automatically once the form is rendered",
+          "default": "team",
+          "data": [
+            {
+              "title": "Team",
+              "value": "teamId"
+            },
+            {
+              "title": "Title",
+              "value": "title"
+            }
+          ]
+        },
+        {
+          "name": "copyToastAction",
+          "title": "Toast Copy Action",
+          "type": "dropdown",
+          "required": false,
+          "description": "Select the copy action for the toast secondary action",
+          "default": "key",
+          "data": [
+            {
+              "title": "Copy Issue Key",
+              "value": "key"
+            },
+            {
+              "title": "Copy Issue URL",
+              "value": "url"
+            },
+            {
+              "title": "Copy Issue Title",
+              "value": "title"
+            }
+          ]
         }
       ]
     },
@@ -134,8 +174,8 @@
   ],
   "dependencies": {
     "@linear/sdk": "^1.22.0",
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.6",
+    "@raycast/api": "^1.41.0",
+    "@raycast/utils": "^1.4.9",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",

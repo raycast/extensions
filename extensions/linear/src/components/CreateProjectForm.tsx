@@ -20,8 +20,8 @@ export type CreateProjectValues = {
   leadId: string;
   memberIds: string[];
   milestoneId: string;
-  startDate: Date;
-  targetDate: Date;
+  startDate: Date | null;
+  targetDate: Date | null;
 };
 
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
@@ -70,8 +70,8 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             leadId: "",
             memberIds: [],
             milestoneId: "",
-            startDate: undefined,
-            targetDate: undefined,
+            startDate: null,
+            targetDate: null,
           });
           focus("teamIds");
         }

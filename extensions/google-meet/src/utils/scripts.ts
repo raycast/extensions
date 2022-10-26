@@ -26,7 +26,7 @@ export const getOpenedUrlsScript = (browserName: string): string => `
 
 // Easy way to access the focused window when the meet link opens
 export const getOpenedBrowserScript = `
-    set cmd to "lsappinfo metainfo | grep -E -o 'Google Chrome|Safari|Mozilla Firefox|Microsoft Edge|Opera|QQ|Sogou Explorer|Yandex|Brave' | head -1"
+    set cmd to "lsappinfo metainfo | grep -E -o 'Google Chrome|Safari|Mozilla Firefox|Microsoft Edge|Opera|QQ|Sogou Explorer|Yandex|Brave|Firefox Developer Edition' | head -1"
 
     set frontmostBrowser to do shell script cmd
 
