@@ -54,7 +54,7 @@ const getRecents = async (scope: string | undefined, callback: (result: Spotligh
       query: queryParts.query,
       directories: queryParts.directories,
       attributes: ["kMDItemDisplayName", "kMDItemKind", "kMDItemLastUsedDate"],
-      limit,
+      limit: limit || 1000,
     });
 
     query.output.on("data", (data: SpotlightResult) => {
