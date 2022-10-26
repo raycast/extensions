@@ -1,6 +1,6 @@
 # Novu Changelog
 
-## [Initial Version] - 2022-10-03
+## [Initial Version] - 2022-10-26
 
 Initial version code, added the following commands:
 
