@@ -122,6 +122,7 @@
 /extensions/craftdocs                                @kudrykv @kudrykv
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
+/extensions/cron-description                         @niall-maloney
 /extensions/crossbell                                @Songkeys
 /extensions/crunchbase                               @qdequele
 /extensions/css-calculations                         @teziovsky
