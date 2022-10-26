@@ -43,32 +43,16 @@
               "value": "0"
             },
             {
-              "title": "Circle Filled",
+              "title": "Graph",
               "value": "1"
             },
             {
-              "title": "Dot",
+              "title": "Speed Test (Blue)",
               "value": "2"
             },
             {
-              "title": "Graph",
-              "value": "3"
-            },
-            {
-              "title": "Panel",
-              "value": "4"
-            },
-            {
-              "title": "Rectangle",
-              "value": "5"
-            },
-            {
-              "title": "Speed Test (Blue)",
-              "value": "6"
-            },
-            {
               "title": "Speed Test (Red)",
-              "value": "7"
+              "value": "3"
             }
           ]
         }

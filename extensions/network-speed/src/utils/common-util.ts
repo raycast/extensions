@@ -3,11 +3,7 @@ import { NetworkSpeed } from "../types/type";
 
 const loadingStyles = [
   "loading/loading-circle.gif",
-  "loading/loading-circle-filled.gif",
-  "loading/loading-dot.gif",
   "loading/loading-graph.gif",
-  "loading/loading-panel.gif",
-  "loading/loading-rectangle.gif",
   "loading/loading-speed-blue.gif",
   "loading/loading-speed-red.gif",
 ];
