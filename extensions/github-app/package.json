@@ -30,6 +30,13 @@
       "description": "Get my Pull Requests",
       "mode": "view",
       "subtitle": "GitHub"
+    },
+    {
+      "name": "searchissues",
+      "title": "Search Issues",
+      "description": "Search your created Issues",
+      "mode": "view",
+      "subtitle": "GitHub"
     }
   ],
   "dependencies": {

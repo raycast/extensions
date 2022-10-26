@@ -1,20 +1,84 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
-import { Octokit } from "octokit";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Issue, IssueState, Repo, User } from "../github";
+import { getGitHubAPI, Issue, IssueState, Label, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
 
 export interface IssueSearchParams {
-  query: string | undefined;
-  assignedTo: string | undefined;
-  state: IssueState | undefined;
+  query?: string | undefined;
+  assignedTo?: string | undefined;
+  state?: IssueState | undefined;
+}
+
+export function LabelTagList(props: { labels: Label[] | undefined }): JSX.Element | null {
+  const labels = props.labels;
+  if (!labels || labels.length <= 0) {
+    return null;
+  }
+  return (
+    <Detail.Metadata.TagList title="Labels">
+      {labels?.map((l) => (
+        <LabelTagItem key={l.id} label={l} />
+      ))}
+    </Detail.Metadata.TagList>
+  );
+}
+
+export function LabelTagItem(props: { label: Label }): JSX.Element {
+  const l = props.label;
+  return <Detail.Metadata.TagList.Item text={l.name} icon={undefined} color={l.color} />;
+}
+
+export function AuthorTagList(props: { user: User }): JSX.Element {
+  const u = props.user;
+  return (
+    <Detail.Metadata.TagList title="Author">
+      <Detail.Metadata.TagList.Item text={u.login} icon={{ source: u.avatar_url, mask: Image.Mask.Circle }} />
+    </Detail.Metadata.TagList>
+  );
+}
+
+function IssueDetail(props: { issue: Issue }): JSX.Element {
+  const i = props.issue;
+  const parts: string[] = [`# ${i.title}`];
+  if (i.body && i.body.length > 0) {
+    parts.push(i.body);
+  }
+  const md = parts.join("\n");
+  return (
+    <Detail
+      markdown={md}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item text={getState(i)} color={getColorByState(i)} />
+          </Detail.Metadata.TagList>
+          <AuthorTagList user={i.user} />
+          <LabelTagList labels={i.labels} />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <IssueOpenInBrowserAction issue={i} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function IssueOpenInBrowserAction(props: { issue: Issue }): JSX.Element {
+  const i = props.issue;
+  return <Action.OpenInBrowser url={i.html_url} />;
+}
+
+function getColorByState(issue: Issue): Color {
+  return issue.state === "open" ? Color.Green : Color.Red;
 }
 
 function getIconByState(issue: Issue): Image.ImageLike {
-  return { source: "exclamation.png", tintColor: issue.state === "open" ? Color.Green : Color.Red };
+  return { source: "exclamation.png", tintColor: getColorByState(issue) };
 }
 
-function getTooltipByState(issue: Issue): string {
+function getState(issue: Issue): string {
   return issue.state === "open" ? "Open" : "Closed";
 }
 
@@ -25,14 +89,15 @@ function Issue(props: { issue: Issue }): JSX.Element {
       key={i.id.toString()}
       title={i.title}
       subtitle={`#${i.number}`}
-      icon={{ value: getIconByState(i), tooltip: getTooltipByState(i) }}
+      icon={{ value: getIconByState(i), tooltip: getState(i) }}
       accessories={[
         { date: new Date(i.updated_at) },
         { icon: { source: i.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: i.user.login },
       ]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={i.html_url} />
+          <Action.Push title="Open Issue" icon={Icon.Terminal} target={<IssueDetail issue={i} />} />
+          <IssueOpenInBrowserAction issue={i} />
         </ActionPanel>
       }
     />
@@ -48,6 +113,23 @@ export function MyAssingedIssues(): JSX.Element {
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
       <List.Section title="Your Assigned Issues" subtitle={`${issues?.length}`}>
+        {issues?.map((i) => (
+          <Issue key={i.id} issue={i} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+export function MyCreatedIssues(): JSX.Element {
+  const [searchtext, setSearchtext] = useState("");
+  const { issues, error, isLoading } = useIssues({ query: searchtext, assignedTo: "@me" });
+  if (error) {
+    showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
+  }
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
+      <List.Section title="Created Recently" subtitle={`${issues?.length}`}>
         {issues?.map((i) => (
           <Issue key={i.id} issue={i} />
         ))}
@@ -92,12 +174,14 @@ function useIssues(params: IssueSearchParams): {
           title: p.title,
           url: p.url,
           html_url: p.html_url,
+          body: p.body,
           body_text: p.body_text,
           repository: p.repository as Repo | undefined,
           user: p.user as User | undefined,
           created_at: p.created_at,
           updated_at: p.updated_at,
           state: p.state,
+          labels: p.labels as Label[] | undefined,
         }));
         if (!cancel) {
           setIssues(data);

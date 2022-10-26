@@ -12,6 +12,16 @@ export interface Repo {
   full_name: string;
 }
 
+export interface Label {
+  id?: number;
+  node_id?: string;
+  url?: string;
+  name?: string;
+  color?: string;
+  default?: boolean;
+  description?: string | null;
+}
+
 export interface User {
   login: string;
   id: number;
@@ -28,8 +38,10 @@ export interface Issue {
   url: string;
   title: string;
   html_url: string;
-  body_text: string;
+  body?: string;
+  body_text?: string;
   repository?: Repo;
+  labels?: Label[];
   //milestone
   user: User;
   updated_at: string;
@@ -44,8 +56,10 @@ export interface PullRequest {
   url: string;
   title: string;
   html_url: string;
-  body_text: string;
+  body?: string;
+  body_text?: string;
   repository?: Repo;
+  labels?: Label[];
   //milestone
   user: User;
   updated_at: string;

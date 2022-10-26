@@ -1,8 +1,15 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
-import { Octokit } from "octokit";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { PullRequest, Repo, User } from "../github";
+import { getGitHubAPI, Label, PullRequest, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
+import { AuthorTagList, LabelTagList } from "./issues";
+
+function getColorByState(pr: PullRequest): Color {
+  if (pr.state === "closed") {
+    return pr.merged_at ? Color.Purple : Color.Red;
+  }
+  return Color.Green;
+}
 
 function getIconByState(pr: PullRequest): Image.ImageLike {
   if (pr.state === "closed") {
@@ -15,11 +22,44 @@ function getIconByState(pr: PullRequest): Image.ImageLike {
   return { source: "propen.png", tintColor: Color.Green };
 }
 
-function getTooltip(pr: PullRequest): string {
+function getState(pr: PullRequest): string {
   if (pr.state === "closed") {
     return pr.merged_at ? "Merged" : "Closed";
   }
   return "Open";
+}
+
+function PullRequestDetail(props: { pr: PullRequest }): JSX.Element {
+  const pr = props.pr;
+  const parts: string[] = [`# ${pr.title}`];
+  if (pr.body && pr.body.length > 0) {
+    parts.push(pr.body);
+  }
+  const md = parts.join("\n");
+  return (
+    <Detail
+      markdown={md}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item text={getState(pr)} color={getColorByState(pr)} />
+          </Detail.Metadata.TagList>
+          <AuthorTagList user={pr.user} />
+          <LabelTagList labels={pr.labels} />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <PullRequestOpenInBrowerAction pr={pr} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function PullRequestOpenInBrowerAction(props: { pr: PullRequest }): JSX.Element {
+  const pr = props.pr;
+  return <Action.OpenInBrowser url={pr.html_url} />;
 }
 
 function PullRequest(props: { pr: PullRequest }): JSX.Element {
@@ -29,14 +69,15 @@ function PullRequest(props: { pr: PullRequest }): JSX.Element {
       key={pr.id.toString()}
       title={pr.title}
       subtitle={`#${pr.number}`}
-      icon={{ value: getIconByState(pr), tooltip: getTooltip(pr) }}
+      icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
         { date: new Date(pr.updated_at) },
         { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login },
       ]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={pr.html_url} />
+          <Action.Push title="Open Pull Request" icon={Icon.Terminal} target={<PullRequestDetail pr={pr} />} />
+          <PullRequestOpenInBrowerAction pr={pr} />
         </ActionPanel>
       }
     />
@@ -85,10 +126,7 @@ function usePullRequests(query: string | undefined): {
       setIsLoading(true);
       setError(undefined);
       try {
-        const prefs = getPreferenceValues();
-        const pat = (prefs.pat as string) || undefined;
-
-        const octokit = new Octokit({ auth: pat });
+        const octokit = getGitHubAPI();
         const d = await octokit.rest.search.issuesAndPullRequests({
           q: `type:pr author:@me sort:updated ${query}`,
         });
@@ -98,6 +136,7 @@ function usePullRequests(query: string | undefined): {
           title: p.title,
           url: p.url,
           html_url: p.html_url,
+          body: p.body,
           body_text: p.body_text,
           repository: p.repository as Repo | undefined,
           user: p.user as User | undefined,
@@ -106,6 +145,7 @@ function usePullRequests(query: string | undefined): {
           state: p.state,
           state_reason: p.state_reason,
           merged_at: p.pull_request?.merged_at,
+          labels: p.labels as Label[] | undefined,
         }));
         if (!cancel) {
           setPrs(data);
