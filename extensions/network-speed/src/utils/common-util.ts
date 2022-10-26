@@ -1,21 +1,4 @@
-import { randomInt } from "crypto";
 import { NetworkSpeed } from "../types/type";
-
-const loadingStyles = [
-  "loading/loading-circle.gif",
-  "loading/loading-graph.gif",
-  "loading/loading-speed-blue.gif",
-  "loading/loading-speed-red.gif",
-];
-
-export function getLoadingStyle(loadingStyle: number) {
-  if (loadingStyle === -1) {
-    const index = randomInt(0, loadingStyles.length);
-    return loadingStyles[index];
-  } else {
-    return loadingStyles[loadingStyle];
-  }
-}
 
 export function getNetSpeed(testSequentially: boolean, execResult: string) {
   let network: NetworkSpeed;

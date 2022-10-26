@@ -25,36 +25,6 @@
           "label": "Run tests sequentially instead of parallel",
           "description": "Running the tests in parallel better reflects real-world situations",
           "default": false
-        },
-        {
-          "name": "loadingStyle",
-          "type": "dropdown",
-          "required": true,
-          "title": "Loading style",
-          "description": "Loading animation style when detecting internet speed",
-          "default": "-1",
-          "data": [
-            {
-              "title": "Random",
-              "value": "-1"
-            },
-            {
-              "title": "Circle",
-              "value": "0"
-            },
-            {
-              "title": "Graph",
-              "value": "1"
-            },
-            {
-              "title": "Speed Test (Blue)",
-              "value": "2"
-            },
-            {
-              "title": "Speed Test (Red)",
-              "value": "3"
-            }
-          ]
         }
       ]
     }

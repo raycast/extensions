@@ -1,19 +1,18 @@
 import { ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import React from "react";
 import { Preferences } from "./types/preferences";
-import { getLoadingStyle } from "./utils/common-util";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { checkNetworkSpeed } from "./hooks/hooks";
 import { ActionOpenNetworkSpeed } from "./components/action-open-network-speed";
 
 export default function Command() {
-  const { testSequentially, loadingStyle } = getPreferenceValues<Preferences>();
+  const { testSequentially } = getPreferenceValues<Preferences>();
   const { networkSpeedInfo, networkSpeed, loading } = checkNetworkSpeed(0, testSequentially);
 
   return (
     <List searchBarPlaceholder="Network speed" filtering={false}>
       <List.EmptyView
-        icon={getLoadingStyle(parseInt(loadingStyle))}
+        icon={"loading/loading-graph.gif"}
         title={loading ? "Testing Your Connection..." : "No info"}
         description={loading ? "Takes about 20 seconds" : ""}
         actions={
