@@ -1,5 +1,12 @@
 # `Easydict` Changelog
 
+## [v2.6.1] - 2022-10-26
+
+### 💎 Improvement
+
+- Optimized code.
+- Updated README.
+
 ## [v2.6.0] - 2022-10-18
 
 ### ✨ New
