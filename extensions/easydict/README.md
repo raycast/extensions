@@ -15,7 +15,7 @@
 
 `Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
-![easydict-1-1664438822](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1664438822-1664438852.png)
+![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1666538159.png)
 
 ## Features
 
@@ -27,6 +27,7 @@
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort query results manually.
+- [x] Support Arguments.
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
@@ -42,13 +43,19 @@ Next:
 
 ---
 
+### Arguments
+
+![arguments-1666060638](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/arguments-1666060638.png)
+
+![hello-1666060655](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png)
+
 ### Youdao Modern Chinese Dict
 
 ![xiaxi-1665674049](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/xiaxi-1665674049.png)
 
 ![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
 
-![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+![ai](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1666538579.png)
 
 [艾](https://youdao.com/result?word=%E8%89%BE&lang=en)
 
@@ -56,7 +63,7 @@ Next:
 
 ### [Linguee Dictionary](https://www.linguee.com/)：English <--> Chinese
 
-![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1666538642.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
@@ -74,7 +81,7 @@ Next:
 
 ![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
 
-![easydict-2-1664439977](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1664439977.png)
+![uk](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/uk-1666538447.png)
 
 ### Translation
 
@@ -82,13 +89,13 @@ Next:
 
 ![easydict-5-1663604086](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1663604086.png)
 
-![easydict-6-1664440833](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1664440833.png)
+![easydict-6-1666538717](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1666538717.png)
 
 ## Installation
 
 [`Easydict`](<(https://www.raycast.com/isfeng/easydict)>) is an extension of Raycast, so you need to install [Raycast](https://www.raycast.com/) first.
 
-> `Raycast` is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
+> [Raycast](https://www.raycast.com/) is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
 
 ### Install from Raycast Store
 

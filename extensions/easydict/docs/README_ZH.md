@@ -27,7 +27,8 @@
 - [x] 支持自动播放单词发音。使用 `Cmd + S` 手动播放单词发音。
 - [x] 支持有道文本合成语音（TTS）。
 - [x] 支持手动排序查询结果。
-- [x] 支持使系统代理。
+- [x] 支持 Arguments 参数。
+- [x] 支持系统代理。
 - [x] 支持 Linguee 和有道词典查询。
 - [x] 支持 macOS 系统翻译。详情请看 [如何在 Easydict 中使用 🍎 macOS 系统翻译？](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/%E5%A6%82%E4%BD%95%E5%9C%A8Easydict%E4%B8%AD%E4%BD%BF%E7%94%A8macOS%F0%9F%8D%8E%E7%B3%BB%E7%BB%9F%E7%BF%BB%E8%AF%91.md)
 - [x] 支持 DeepL，Google，Bing，百度，腾讯，火山，有道和彩云翻译。
@@ -42,13 +43,19 @@
 
 ---
 
+### Arguments
+
+![arguments-1666060638](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/arguments-1666060638.png)
+
+![hello-1666060655](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png)
+
 ### 有道-现代汉语词典
 
 ![xiaxi-1665674049](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/xiaxi-1665674049.png)
 
 ![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
 
-![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+![ai](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1666538579.png)
 
 #### [艾](https://youdao.com/result?word=%E8%89%BE&lang=en)
 
@@ -56,7 +63,7 @@
 
 ### [Linguee 词典](https://www.linguee.com/)：英语 <--> 中文
 
-![easydict-3-1665794533](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1665794533.png)
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1666538642.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
@@ -74,7 +81,7 @@
 
 ![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
 
-![easydict-2-1664439977](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1664439977.png)
+![uk](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/uk-1666538447.png)
 
 ### 文本翻译
 
@@ -82,13 +89,13 @@
 
 ![easydict-5-1663604086](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1663604086.png)
 
-![easydict-6-1664440833](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1664440833.png)
+![easydict-6-1666538717](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1666538717.png)
 
 ## 安装
 
 `Easydict` 是一个 Raycast extension，因此需要先安装 [Raycast](https://www.raycast.com/)。
 
-> `Raycast` 是一款速度极快、完全可扩展的启动器。与 [Alfred](https://www.alfredapp.com/) 类似，但它完全免费！
+> [Raycast](https://www.raycast.com/) 是一款速度极快、完全可扩展的启动器。与 [Alfred](https://www.alfredapp.com/) 类似，但它完全免费！
 
 ### 从 Raycast 商店安装
 

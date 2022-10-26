@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-15 10:57
+ * @lastEditTime: 2022-10-26 11:09
  * @fileName: components.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -39,6 +39,47 @@ import {
 } from "./types";
 import { checkIsLingueeListItem, checkIsTranslationType, checkIsYoudaoDictionaryListItem } from "./utils";
 
+const queryWebItemTypes = [
+  DicionaryType.Youdao,
+  DicionaryType.Linguee,
+  DicionaryType.Eudic,
+  TranslationType.DeepL,
+  TranslationType.Google,
+  TranslationType.Baidu,
+  TranslationType.Volcano,
+];
+
+/**
+ * Current type web query item.
+ */
+function CurrentTypeWebQueryAction(props: { queryType: QueryType; queryWordInfo: QueryWordInfo }) {
+  const { queryType, queryWordInfo } = props;
+
+  if (!queryWebItemTypes.includes(queryType)) {
+    return null;
+  }
+
+  const currentWebItem = getWebQueryItem(queryType, queryWordInfo);
+  return <WebQueryAction webQueryItem={currentWebItem} enableShortcutKey={true} />;
+}
+
+/**
+ * Except current type web query item.
+ */
+function ExceptCurrentTypeWebQueryActionPanel(props: { queryType: QueryType; queryWordInfo: QueryWordInfo }) {
+  const { queryType, queryWordInfo } = props;
+
+  const exceptWebItemTypes = queryWebItemTypes.filter((item) => item !== queryType);
+  return (
+    <ActionPanel.Section title="Search Query Text Online">
+      {exceptWebItemTypes.map((queryType) => {
+        const webQueryItem = getWebQueryItem(queryType, queryWordInfo);
+        return <WebQueryAction webQueryItem={webQueryItem} enableShortcutKey={false} key={queryType} />;
+      })}
+    </ActionPanel.Section>
+  );
+}
+
 /**
  * Get the list action panel item with ListItemActionPanelItem
  */
@@ -54,27 +95,6 @@ export function ListActionPanel(props: ActionListPanelProps) {
   console.log(`detailsMarkdown: ${detailsMarkdown}`);
 
   const showMoreDetailMarkdown = getShowMoreDetailMarkdown(displayItem);
-
-  // Todo: need to optimize the code.
-  const googleWebItem = getWebQueryItem(TranslationType.Google, queryWordInfo);
-  const isShowingGoogleTop = queryType === TranslationType.Google;
-
-  const deepLWebItem = getWebQueryItem(TranslationType.DeepL, queryWordInfo);
-  const isShowingDeepLTop = queryType === TranslationType.DeepL;
-
-  const baiduWebItem = getWebQueryItem(TranslationType.Baidu, queryWordInfo);
-  const isShowingBaiduTop = queryType === TranslationType.Baidu;
-
-  const volcanoWebItem = getWebQueryItem(TranslationType.Volcano, queryWordInfo);
-  const isShowingVolcanoTop = queryType === TranslationType.Volcano;
-
-  const lingueeWebItem = getWebQueryItem(DicionaryType.Linguee, queryWordInfo);
-  const isShowingLingueeTop = queryType === DicionaryType.Linguee;
-
-  const youdaoWebItem = getWebQueryItem(DicionaryType.Youdao, queryWordInfo);
-  const isShowingYoudaoDictioanryTop = queryType === DicionaryType.Youdao;
-
-  const eudicWebItem = getWebQueryItem(DicionaryType.Eudic, queryWordInfo);
 
   function onNewReleasePromptClick() {
     const easydict = new Easydict();
@@ -96,13 +116,6 @@ export function ListActionPanel(props: ActionListPanelProps) {
         {props.isInstalledEudic && !myPreferences.showOpenInEudicFirst && (
           <Action icon={Icon.MagnifyingGlass} title="Open in Eudic App" onAction={() => openInEudic(word)} />
         )}
-        {/* // Todo: need to optimize. */}
-        {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} enableShortcutKey={true} />}
-        {isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} enableShortcutKey={true} />}
-        {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} enableShortcutKey={true} />}
-        {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} enableShortcutKey={true} />}
-        {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} enableShortcutKey={true} />}
-        {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} enableShortcutKey={true} />}
         <Action.Push
           title="Show More Details"
           icon={Icon.Eye}
@@ -113,31 +126,16 @@ export function ListActionPanel(props: ActionListPanelProps) {
               actions={
                 <ActionPanel>
                   {CopyTextAction({ copyText })}
-                  {isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} enableShortcutKey={true} />}
-                  {isShowingYoudaoDictioanryTop && (
-                    <WebQueryAction webQueryItem={youdaoWebItem} enableShortcutKey={true} />
-                  )}
-                  {isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} enableShortcutKey={true} />}
-                  {isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} enableShortcutKey={true} />}
-                  {isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} enableShortcutKey={true} />}
-                  {isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} enableShortcutKey={true} />}
+                  <CurrentTypeWebQueryAction queryType={queryType} queryWordInfo={queryWordInfo} />
                 </ActionPanel>
               }
             />
           }
         />
+        <CurrentTypeWebQueryAction queryType={queryType} queryWordInfo={queryWordInfo} />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Search Query Text Online">
-        {!isShowingLingueeTop && <WebQueryAction webQueryItem={lingueeWebItem} />}
-        {!isShowingYoudaoDictioanryTop && <WebQueryAction webQueryItem={youdaoWebItem} />}
-        {<WebQueryAction webQueryItem={eudicWebItem} />}
-
-        {!isShowingDeepLTop && <WebQueryAction webQueryItem={deepLWebItem} />}
-        {!isShowingGoogleTop && <WebQueryAction webQueryItem={googleWebItem} />}
-        {!isShowingBaiduTop && <WebQueryAction webQueryItem={baiduWebItem} />}
-        {!isShowingVolcanoTop && <WebQueryAction webQueryItem={volcanoWebItem} />}
-      </ActionPanel.Section>
+      <ExceptCurrentTypeWebQueryActionPanel queryType={queryType} queryWordInfo={queryWordInfo} />
 
       <ActionPanel.Section title="Play Text Audio">
         <Action
@@ -154,9 +152,9 @@ export function ListActionPanel(props: ActionListPanelProps) {
           icon={playSoundIcon("black")}
           onAction={() => {
             /**
-             *  directly use say command to play the result text.
-             *  because it is difficult to determine whether the result is a word, impossible to use Youdao web audio directly.
-             *  in addition, TTS needs to send additional youdao query requests.
+             *  Directly use say command to play the result text.
+             *  Because it is difficult to determine whether the result is a word, impossible to use Youdao web audio directly.
+             *  In addition, TTS needs to send additional youdao query requests.
              *
              *  Todo: add a shortcut to stop playing audio.
              */
