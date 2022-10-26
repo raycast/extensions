@@ -9,7 +9,7 @@ Arguments are configured in the [manifest](./manifest.md#argument-properties) pe
 {% hint style="info" %}
 
 - **Maximum number of arguments:** 3 (if you have a use case that requires more, please let us know via feedback or in the [Slack community](https://www.raycast.com/community))
-- The order of the arguments specified in the manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before optional ones.
+- The order of the arguments specified in the manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before the optional ones.
 
 {% endhint %}
 
@@ -65,10 +65,10 @@ import { Form } from "@raycast/api";
 
 interface TodoArguments {
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }
 
-export default function Todoist(props: { arguments?: TodoArguments }) {
+export default function Todoist(props: { arguments: TodoArguments }) {
   const { title, subtitle } = props.arguments;
   console.log(`title: ${title}, subtitle: ${subtitle}`);
 
@@ -84,12 +84,6 @@ export default function Todoist(props: { arguments?: TodoArguments }) {
 ## Top-level `arguments` prop
 
 A command receives the values of its arguments via a top-level prop named `arguments`. It is an object with the arguments' `name` as keys and their values as the property's values.
-
-{% hint style="info" %}
-
-If there are only optional arguments, the prop might not be present (for example when launching the command _via_ a hotkey). Hence, it is a good practice to always consider that the `arguments` prop might not be present and provide good default.
-
-{% endhint %}
 
 Depending on the `type` of the argument, the type of its value will be different.
 
