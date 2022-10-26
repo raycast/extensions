@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-15 10:57
+ * @lastEditTime: 2022-10-26 21:47
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -24,16 +24,17 @@ console.log(`enter easydict.tsx`);
 const dataManager = new DataManager();
 
 interface EasydictArguments {
-  queryText: string;
+  queryText?: string;
 }
 
-export default function (props: { arguments?: EasydictArguments }) {
+export default function (props: { arguments: EasydictArguments }) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
   }
 
-  const queryText = props.arguments ? trimTextLength(props.arguments.queryText) : undefined;
+  const { queryText } = props.arguments;
+  const trimQueryText = queryText ? trimTextLength(queryText) : undefined;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -99,8 +100,8 @@ export default function (props: { arguments?: EasydictArguments }) {
   function setup() {
     console.log(`setup when extension is activated.`);
 
-    if (queryText?.length) {
-      console.log(`---> arguments queryText: ${queryText}`);
+    if (trimQueryText?.length) {
+      console.log(`---> arguments queryText: ${trimQueryText}`);
     }
 
     const startTime = Date.now();
@@ -108,10 +109,10 @@ export default function (props: { arguments?: EasydictArguments }) {
     // If enabled system proxy, we need to wait for the system proxy to be ready.
     if (myPreferences.enableSystemProxy) {
       // If has arguments, use arguments text as input text first.
-      if (queryText?.length) {
+      if (trimQueryText?.length) {
         configAxiosProxy().then(() => {
           console.log(`after config proxy`);
-          updateInputTextAndQueryText(queryText, false);
+          updateInputTextAndQueryText(trimQueryText, false);
         });
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         Promise.all([getSelectedText(), configAxiosProxy()])
@@ -131,8 +132,8 @@ export default function (props: { arguments?: EasydictArguments }) {
         configAxiosProxy();
       }
     } else {
-      if (queryText?.length) {
-        updateInputTextAndQueryText(queryText, false);
+      if (trimQueryText?.length) {
+        updateInputTextAndQueryText(trimQueryText, false);
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         querySelecedtText().then(() => {
           console.log(`after query selected text`);
