@@ -1,5 +1,14 @@
 # `Easydict` Changelog
 
+### 💎 Improvement
+
+- Optimized code.
+- Updated README.
+
+### 🐞 Fixes
+
+- Fixed the problem that the latest Raycast 1.42.0 version will cause the extension to crash when arguments is empty.
+
 ## [v2.6.0] - 2022-10-18
 
 ### ✨ New
