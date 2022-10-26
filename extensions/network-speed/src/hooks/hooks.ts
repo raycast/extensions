@@ -15,7 +15,8 @@ export const checkNetworkSpeed = (refresh: number, testSequentially = false) => 
 
     result.stdout.on("data", (data: string) => {
       setNetworkSpeed(getNetSpeed(testSequentially, data));
-      setNetworkSpeedInfo(data);
+      const info = String(data);
+      setNetworkSpeedInfo(info.slice(info.indexOf("=")));
       setLoading(false);
     });
   }, [refresh]);
