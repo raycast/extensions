@@ -1,4 +1,4 @@
-# Menu Bar Commands ᵇᵉᵗᵃ
+# Menu Bar Commands
 
 {% hint style="info" %}
 As of version 1.38.1, you can create Raycast commands that place glanceable information in your menu bar!

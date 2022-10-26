@@ -98,7 +98,7 @@ export default function Main() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| children<mark style="color:red;">*</mark> | The Detail.Metadata.Item elements of the Metadata view. | <code>React.ReactNode</code> | - |
+| children<mark style="color:red;">*</mark> | The elements of the Metadata view. | <code>React.ReactNode</code> | - |
 
 ### Detail.Metadata.Label
 
@@ -130,7 +130,7 @@ export default function Main() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| title<mark style="color:red;">*</mark> | The title shown above the item. | <code>string</code> | - |
+| title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | text | The text value of the item. | <code>string</code> | - |
 

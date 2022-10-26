@@ -241,15 +241,15 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
-| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
+| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | Grid sections or items. If [Grid.Item](grid.md#grid.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | columns | Column count for the grid's sections. Minimum value is 1, maximum value is 8. | <code>number</code> | 5 |
-| enableFiltering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter grid items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |
 | inset | Indicates how much space there should be between a [Grid.Item](grid.md#grid.item)s' content and its borders. The absolute value depends on the value of the `itemSize` prop. | <code>[Grid.Inset](grid.md#grid.inset)</code> | - |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
-| searchBarAccessory | [Grid.Dropdown](grid.md#grid.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[Grid.Dropdown.Props](grid.md#props), string></code> | - |
+| searchBarAccessory | [Grid.Dropdown](grid.md#grid.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search value..."` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
@@ -307,7 +307,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
-| children | Grid sections or items. If [Grid.Dropdown.Item](grid.md#grid.dropdown.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| children | Grid sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
 | placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
@@ -538,7 +538,7 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
+| aspectRatio | Aspect ratio for the [Grid.Item](grid.md#grid.item) elements. Defaults to 1. | <code>"1"</code> or <code>"3/2"</code> or <code>"2/3"</code> or <code>"4/3"</code> or <code>"3/4"</code> or <code>"16/9"</code> or <code>"9/16"</code> | - |
 | children | The [Grid.Item](grid.md#grid.item) elements of the section. | <code>React.ReactNode</code> | - |
 | columns | Column count for the section. Minimum value is 1, maximum value is 8. | <code>number</code> | 5 |
 | fit | Fit for the [Grid.Item](grid.md#grid.item) element content. Defaults to "contain" | <code>[Grid.Fit](grid.md#grid.fit)</code> | - |

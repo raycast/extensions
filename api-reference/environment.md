@@ -37,6 +37,7 @@ console.log(`LaunchType: ${environment.launchType}`);
 | raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
+| launchContext | Any custom context values passed from a programmatic command launch via `launchCommand`. | <code>[LaunchContext](environment.md#launchcontext)</code> |
 
 ### getSelectedFinderItems
 
@@ -129,3 +130,7 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
+
+### LaunchContext
+
+Represents the passed context object of programmatic command launches.

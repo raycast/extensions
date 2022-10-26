@@ -276,7 +276,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- |
 | actions | A reference to an [ActionPanel](action-panel.md#actionpanel). It will only be shown when there aren't any children. | <code>React.ReactNode</code> | - |
 | children | List sections or items. If [List.Item](list.md#list.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
-| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter list items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | isLoading | Indicates whether a loading bar should be shown or hidden below the search bar | <code>boolean</code> | `false` |
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
@@ -344,13 +344,13 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
-| children | List sections or items. If [List.Dropdown.Item](list.md#list.dropdown.item) elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| children | Grid sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
 | placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
 | storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
 | value | The currently value of the dropdown. | <code>string</code> | - |
-| onChange | Callback triggered when the list item selection changes. | <code>(newValue: string) => void</code> | - |
+| onChange | Callback triggered when the grid item selection changes. | <code>(newValue: string) => void</code> | - |
 
 ### List.Dropdown.Item
 
@@ -649,7 +649,7 @@ export default function Metadata() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| children<mark style="color:red;">*</mark> | The [Detail.Metadata.Item](detail.md#detail.metadata)s of the Metadata view. | <code>React.ReactNode</code> | - |
+| children<mark style="color:red;">*</mark> | The elements of the Metadata view. | <code>React.ReactNode</code> | - |
 
 ### List.Item.Detail.Metadata.Label
 
