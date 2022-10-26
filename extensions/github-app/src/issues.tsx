@@ -35,12 +35,13 @@ interface Issue {
 }
 
 export default function IssuesCommand(): JSX.Element {
-  const { issues, error, isLoading } = useIssues("");
+  const [query, setQuery] = useState("");
+  const { issues, error, isLoading } = useIssues(query);
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
   }
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
       {issues?.map((i) => (
         <List.Item
           key={i.id.toString()}
@@ -81,7 +82,7 @@ function useIssues(query: string | undefined): {
         const pat = (prefs.pat as string) || undefined;
 
         const octokit = new Octokit({ auth: pat });
-        const d = await octokit.rest.search.issuesAndPullRequests({ q: "type:issue author:@me is:open sort:updated" });
+        const d = await octokit.rest.search.issuesAndPullRequests({ q: `type:issue author:@me is:open sort:updated ${query}` });
         const data: Issue[] | undefined = d.data?.items?.map((p) => ({
           id: p.id,
           number: p.number,
