@@ -25,7 +25,8 @@ export default function main() {
     <Form
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={description} />
+          <Action.CopyToClipboard title="Copy Description to Clipboard" content={description} />
+          <Action.CopyToClipboard title="Copy Cron Expression to Clipboard" content={cron} />
         </ActionPanel>
       }
     >
