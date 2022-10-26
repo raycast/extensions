@@ -38,6 +38,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "limit",
+      "title": "Limit",
+      "description": "The maximum number of items to display",
+      "type": "textfield",
+      "default": "1000",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.40.3",
     "mdfind": "^1.0.0",
