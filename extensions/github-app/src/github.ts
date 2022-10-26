@@ -1,3 +1,6 @@
+import { getPreferenceValues } from "@raycast/api";
+import { Octokit } from "octokit";
+
 export interface Repo {
   id: number;
   name: string;
@@ -54,4 +57,16 @@ export interface Project {
   full_name: string;
   owner_avatar_url?: string;
   stargazers_count: number;
+}
+
+let octokitInstance: Octokit | undefined;
+
+export function getGitHubAPI(): Octokit {
+  if (!octokitInstance) {
+    const prefs = getPreferenceValues();
+    const pat = (prefs.pat as string) || undefined;
+
+    octokitInstance = new Octokit({ auth: pat });
+  }
+  return octokitInstance;
 }

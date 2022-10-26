@@ -50,19 +50,9 @@ function useProjects(query: string | undefined): {
           owner_avatar_url: p.owner?.avatar_url,
           stargazers_count: p.stargazers_count,
         }));
-        for (const p of d.data) {
-          //p.stargazers_count
-          //console.log(p.stargazers_count);
-          //console.log(`${p.name} ${p.full_name}`);
-        }
         if (!cancel) {
           setProjects(pros);
         }
-        //const d = await octokit.rest.issues.list();
-        //console.log(d.data);
-        //console.log(d.data);
-        //await octokit.rest.repos.get({user})
-        //octokit.rest.issues.list();
       } catch (error) {
         setError(getErrorMessage(error));
       } finally {

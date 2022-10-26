@@ -1,5 +1,5 @@
-import { MyIssues } from "./components/issues";
+import { MyAssingedIssues } from "./components/issues";
 
 export default function MyIssuesRootCommand(): JSX.Element {
-  return <MyIssues />;
+  return <MyAssingedIssues />;
 }

@@ -107,10 +107,6 @@ function usePullRequests(query: string | undefined): {
           state_reason: p.state_reason,
           merged_at: p.pull_request?.merged_at,
         }));
-        for (const p of d.data.items) {
-          console.log(p.state_reason);
-        }
-        //console.log(d.data.items[0].pull_request.);
         if (!cancel) {
           setPrs(data);
         }

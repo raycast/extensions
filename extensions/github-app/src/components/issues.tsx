@@ -1,39 +1,60 @@
-import { Action, ActionPanel, getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
-import { Issue, Repo, User } from "../github";
+import { getGitHubAPI, Issue, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
 
-export function MyIssues(): JSX.Element {
+function getIconByState(issue: Issue): Image.ImageLike {
+  return { source: "exclamation.png", tintColor: issue.state === "open" ? Color.Green : Color.Red };
+}
+
+function getTooltipByState(issue: Issue): string {
+  return issue.state === "open" ? "Open" : "Closed";
+}
+
+function Issue(props: { issue: Issue }): JSX.Element {
+  const i = props.issue;
+  return (
+    <List.Item
+      key={i.id.toString()}
+      title={i.title}
+      subtitle={`#${i.number}`}
+      icon={{ value: getIconByState(i), tooltip: getTooltipByState(i) }}
+      accessories={[
+        { date: new Date(i.updated_at) },
+        { icon: { source: i.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: i.user.login },
+      ]}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={i.html_url} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function MyAssingedIssues(): JSX.Element {
   const [query, setQuery] = useState("");
-  const { issues, error, isLoading } = useIssues(query);
+  const { issues, error, isLoading } = useIssues(query, "@me", "open");
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
   }
   return (
     <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
-      {issues?.map((i) => (
-        <List.Item
-          key={i.id.toString()}
-          title={i.title}
-          subtitle={`#${i.number}`}
-          icon={{ source: i.user?.avatar_url, mask: Image.Mask.Circle }}
-          accessories={[
-            { date: new Date(i.updated_at) },
-            { icon: { source: i.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: i.user.login },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={i.html_url} />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <List.Section title="Your Assigned Issues" subtitle={`${issues?.length}`}>
+        {issues?.map((i) => (
+          <Issue key={i.id} issue={i} />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-function useIssues(query: string | undefined): {
+function useIssues(
+  query: string | undefined,
+  assignedTo: string | undefined,
+  state: string | undefined
+): {
   issues: Issue[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
@@ -48,12 +69,20 @@ function useIssues(query: string | undefined): {
       setIsLoading(true);
       setError(undefined);
       try {
-        const prefs = getPreferenceValues();
-        const pat = (prefs.pat as string) || undefined;
-
-        const octokit = new Octokit({ auth: pat });
+        const octokit = getGitHubAPI();
+        const searchParts = ["type:issue", "sort:updated"];
+        if (assignedTo) {
+          searchParts.push(`assignee:${assignedTo}`);
+        }
+        if (state) {
+          searchParts.push(`is:${state}`);
+        }
+        if (query) {
+          searchParts.push(query);
+        }
+        const q = searchParts.join(" ");
         const d = await octokit.rest.search.issuesAndPullRequests({
-          q: `type:issue author:@me is:open sort:updated ${query}`,
+          q: q, //`type:issue assignee:@me is:open sort:updated ${query}`, // author:@me
         });
         const data: Issue[] | undefined = d.data?.items?.map((p) => ({
           id: p.id,
@@ -84,7 +113,7 @@ function useIssues(query: string | undefined): {
     return () => {
       cancel = true;
     };
-  }, [query]);
+  }, [query, assignedTo, state]);
 
   return { issues, error, isLoading };
 }
