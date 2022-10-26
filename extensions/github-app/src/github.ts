@@ -1,6 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Octokit } from "octokit";
 
+export enum IssueState {
+  open = "open",
+  closed = "closed",
+}
+
 export interface Repo {
   id: number;
   name: string;

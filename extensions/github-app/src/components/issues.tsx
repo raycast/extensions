@@ -1,8 +1,14 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Image, List, showToast, Toast } from "@raycast/api";
 import { Octokit } from "octokit";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Issue, Repo, User } from "../github";
+import { getGitHubAPI, Issue, IssueState, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
+
+export interface IssueSearchParams {
+  query: string | undefined;
+  assignedTo: string | undefined;
+  state: IssueState | undefined;
+}
 
 function getIconByState(issue: Issue): Image.ImageLike {
   return { source: "exclamation.png", tintColor: issue.state === "open" ? Color.Green : Color.Red };
@@ -34,13 +40,13 @@ function Issue(props: { issue: Issue }): JSX.Element {
 }
 
 export function MyAssingedIssues(): JSX.Element {
-  const [query, setQuery] = useState("");
-  const { issues, error, isLoading } = useIssues(query, "@me", "open");
+  const [searchtext, setSearchtext] = useState("");
+  const { issues, error, isLoading } = useIssues({ query: searchtext, assignedTo: "@me", state: IssueState.open });
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
   }
   return (
-    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+    <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
       <List.Section title="Your Assigned Issues" subtitle={`${issues?.length}`}>
         {issues?.map((i) => (
           <Issue key={i.id} issue={i} />
@@ -50,11 +56,7 @@ export function MyAssingedIssues(): JSX.Element {
   );
 }
 
-function useIssues(
-  query: string | undefined,
-  assignedTo: string | undefined,
-  state: string | undefined
-): {
+function useIssues(params: IssueSearchParams): {
   issues: Issue[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
@@ -71,14 +73,14 @@ function useIssues(
       try {
         const octokit = getGitHubAPI();
         const searchParts = ["type:issue", "sort:updated"];
-        if (assignedTo) {
-          searchParts.push(`assignee:${assignedTo}`);
+        if (params.assignedTo) {
+          searchParts.push(`assignee:${params.assignedTo}`);
         }
-        if (state) {
-          searchParts.push(`is:${state}`);
+        if (params.state) {
+          searchParts.push(`is:${params.state}`);
         }
-        if (query) {
-          searchParts.push(query);
+        if (params.query) {
+          searchParts.push(params.query);
         }
         const q = searchParts.join(" ");
         const d = await octokit.rest.search.issuesAndPullRequests({
@@ -113,7 +115,7 @@ function useIssues(
     return () => {
       cancel = true;
     };
-  }, [query, assignedTo, state]);
+  }, [params.query, params.assignedTo, params.state]);
 
   return { issues, error, isLoading };
 }
