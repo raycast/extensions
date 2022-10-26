@@ -66,6 +66,7 @@ function useIssues(query: string | undefined): {
           user: p.user as User | undefined,
           created_at: p.created_at,
           updated_at: p.updated_at,
+          state: p.state,
         }));
         if (!cancel) {
           setIssues(data);

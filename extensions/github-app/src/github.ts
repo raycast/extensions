@@ -26,6 +26,25 @@ export interface Issue {
   user: User;
   updated_at: string;
   created_at: string;
+  state: string;
+  // labels[]
+}
+
+export interface PullRequest {
+  id: number;
+  number: number;
+  url: string;
+  title: string;
+  html_url: string;
+  body_text: string;
+  repository?: Repo;
+  //milestone
+  user: User;
+  updated_at: string;
+  created_at: string;
+  state: string;
+  state_reason: string | null | undefined;
+  merged_at?: string | null | undefined;
   // labels[]
 }
 

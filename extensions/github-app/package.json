@@ -23,6 +23,13 @@
       "description": "List My Projects",
       "mode": "view",
       "subtitle": "GitHub"
+    },
+    {
+      "name": "myprs",
+      "title": "My Pull Requests",
+      "description": "Get my Pull Requests",
+      "mode": "view",
+      "subtitle": "GitHub"
     }
   ],
   "dependencies": {
