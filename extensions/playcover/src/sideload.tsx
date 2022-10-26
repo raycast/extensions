@@ -4,7 +4,6 @@ interface Sideload {
   path: string;
 }
 
-
 export default function Command(props: { draftValues?: Sideload }) {
   const { draftValues } = props;
   //const [isInstalling, setIsInstalling] = useState(false);
@@ -22,23 +21,22 @@ export default function Command(props: { draftValues?: Sideload }) {
         console.log("sideLoading", await useSideload(values.path));
         toast.style = Toast.Style.Success;
         toast.title = "Sideload complete";
-        toast.hide()
+        toast.hide();
         await showHUD("Sideload complete");
         if (await confirmAlert({ title: "You need to launch the app manually the first time for the app to work" })) {
-          await showHUD("Launching PlayCover")
-          open("/Applications/PlayCover.app")
+          await showHUD("Launching PlayCover");
+          open("/Applications/PlayCover.app");
         }
-        popToRoot(); 
+        popToRoot();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.message = "An error has occurred";
-        toast.hide()
+        toast.hide();
         console.log("An error has occurred", error);
-        popToRoot(); 
-      }
+        popToRoot();
       }
     }
-
+  }
 
   return (
     <Form
@@ -53,7 +51,7 @@ export default function Command(props: { draftValues?: Sideload }) {
         </ActionPanel>
       }
     >
-        <Form.TextField id="path" title="Application Path" defaultValue={draftValues?.path} />
+      <Form.TextField id="path" title="Application Path" defaultValue={draftValues?.path} />
     </Form>
   );
 }

@@ -1,1 +1,1 @@
-declare module 'playcover-cli';
+declare module "playcover-cli";

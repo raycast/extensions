@@ -13,9 +13,9 @@ export default function Command() {
   const [firstRun, setFirstRun] = useState(false);
   const [searchText, setSearchText] = useState<string>("");
   const [games, setGames] = useState<PlayCoverApp[]>([]);
-  
+
   useEffect(() => {
-    showPlayCoverNotInstalledToast()
+    showPlayCoverNotInstalledToast();
     setGames(usePlayCover());
   }, []);
 
@@ -23,7 +23,7 @@ export default function Command() {
     () => {
       setGames(usePlayCoverSearch(firstRun, searchText));
       setFirstRun(true);
-      showPlayCoverNotInstalledToast()
+      showPlayCoverNotInstalledToast();
     },
     [searchText],
     500
