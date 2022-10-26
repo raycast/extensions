@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-app",
-  "title": "github-app",
+  "title": "Github App",
   "description": "An all-in-one GitHub extension",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "tonka3000",
   "categories": [
     "Developer Tools"
@@ -12,19 +12,17 @@
   "commands": [
     {
       "name": "issues",
-      "title": "Issues",
+      "title": "My Open Issues",
       "description": "List my Issues",
       "mode": "view",
-      "subtitle": "GitHub",
-      "icon": "command-icon.png"
+      "subtitle": "GitHub"
     },
     {
       "name": "projects",
       "title": "My Projects",
       "description": "List My Projects",
       "mode": "view",
-      "subtitle": "GitHub",
-      "icon": "command-icon.png"
+      "subtitle": "GitHub"
     }
   ],
   "dependencies": {
