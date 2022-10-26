@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation, List, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, List, showToast, Toast, Icon } from "@raycast/api";
 import getColors from "../lib/colors";
 import ColorListItem from "./components/color-list-item";
 import { useState } from "react";
@@ -24,7 +24,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Get Colors" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Get Colors" icon={Icon.EyeDropper} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { convertFromLightning } from "../lib/convert";
 import validate from "../lib/validate";
@@ -23,7 +23,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Convert" icon={Icon.EyeDropper} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -45,7 +45,7 @@ function Result({
     <List searchBarPlaceholder={lightningString} enableFiltering={false}>
       <List.Item
         title={withoutSeconds}
-        subtitle="no seconds"
+        subtitle="No seconds"
         actions={
           <ActionPanel>
             <Action.CopyToClipboard content={withoutSeconds} />
@@ -54,7 +54,7 @@ function Result({
       />
       <List.Item
         title={withSeconds}
-        subtitle="with seconds"
+        subtitle="With seconds"
         actions={
           <ActionPanel>
             <Action.CopyToClipboard content={withSeconds} />

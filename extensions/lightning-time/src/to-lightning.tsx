@@ -28,7 +28,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Convert" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Convert" icon={Icon.Switch} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
