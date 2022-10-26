@@ -1,142 +1,110 @@
 import path from 'path';
-import fs from 'fs-extra';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { Form, ActionPanel, Action, popToRoot, showToast, Toast, open } from '@raycast/api';
-import { categories, getPosts } from './utils/blog';
-import preferences from './utils/preferences';
+import { subdirectories, getPosts, createDraft, Post } from './utils/blog';
 import { titleToSlug } from './utils/utils';
 import { fillTemplateVariables } from './utils/templates';
-
-interface Post {
-	title: string;
-	summary: string;
-	category: string;
-	date: string;
-	content: string;
-}
+import { FormValidation, useForm } from '@raycast/utils';
 
 export default function Command() {
-	const [title, setTitle] = useState('');
-	const [summary, setSummary] = useState('');
-	const [category, setCategory] = useState('');
-	const [preview, setPreview] = useState('');
-	const [extension, setExtension] = useState('.md');
-	const [slug, setSlug] = useState('');
-	const previewRef = useRef<Form.TextArea>(null);
-	const slugRef = useRef<Form.TextField>(null);
 	const posts = getPosts();
 
-	const [slugError, setSlugError] = useState<string | undefined>();
+	const { handleSubmit, itemProps, setValue } = useForm<Post>({
+		onSubmit: async (post: Post) => {
+			const draft = createDraft(post);
 
-	useEffect(() => {
-		setPreview(fillTemplateVariables(category, title, summary));
-	}, [category, title, summary]);
-
-	useEffect(() => {
-		previewRef.current?.reset();
-	}, [preview]);
-
-	useEffect(() => {
-		setSlug(titleToSlug(title));
-	}, [title]);
-
-	useEffect(() => {
-		validatePostSlug();
-		slugRef.current?.reset();
-	}, [slug]);
-
-	async function handleSubmit(values: Post): Promise<boolean> {
-		if (!validatePostSlug()) {
-			return false;
-		}
-
-		const content = values.content;
-		let category = '';
-
-		if (values.category) {
-			category = values.category + '/';
-		}
-		const postPath = path.join(preferences().draftsPath, category, `${slug}.${extension}`);
-		fs.ensureDirSync(path.dirname(postPath));
-		fs.writeFileSync(postPath, content);
-
-		await showToast({
-			style: Toast.Style.Success,
-			title: 'Success',
-			message: `Created ${path}`,
-		});
-
-		await open(postPath);
-		popToRoot();
-
-		return true;
-	}
-
-	function validatePostSlug() {
-		if (!slug) {
-			setSlugError('Slug is required');
-			return false;
-		}
-
-		const existingPost = posts.find((post) => post.name.replace(/\.mdx?/, '') === slug);
-		if (existingPost) {
-			showToast({
-				style: Toast.Style.Failure,
-				title: 'Post already exists',
-				message: `${path.basename(path.dirname(existingPost.path))}/${existingPost.name}`,
+			await showToast({
+				style: Toast.Style.Success,
+				title: 'Success',
+				message: `Created ${post.title}`,
 			});
 
-			setSlugError('Post Already Exists!');
-			return false;
-		}
+			await open(draft);
+			popToRoot();
+		},
+		validation: {
+			title: FormValidation.Required,
+			content: FormValidation.Required,
+			slug: (slug) => {
+				if (!slug) {
+					return 'Slug is required';
+				}
 
-		setSlugError(undefined);
-		return true;
-	}
+				const existingPost = posts.find((post) => post.name.replace(/\.mdx?/, '') === slug);
+				if (existingPost) {
+					showToast({
+						style: Toast.Style.Failure,
+						title: 'Post already exists',
+						message: `${path.basename(path.dirname(existingPost.path))}/${existingPost.name}`,
+					});
+
+					return 'Post already exists';
+				}
+			}
+
+		},
+		initialValues: {
+			summary: 'A new draft has been created.',
+			extension: 'md',
+		}
+	});
+
+
+	useEffect(() => {
+		const subdirectory = itemProps.subdirectory.value || '';
+		const title = itemProps.title.value || '';
+		const summary = itemProps.summary.value || '';
+		setValue('content', fillTemplateVariables(subdirectory, title, summary));
+	}, [
+		itemProps.subdirectory.value,
+		itemProps.title.value,
+		itemProps.summary.value
+	]);
+
+
+
+	useEffect(() => {
+		if (!itemProps.title.value) {
+			return;
+		}
+		setValue('slug', titleToSlug(itemProps.title.value))
+	}, [itemProps.title.value]);
 
 	return (
 		<Form
 			enableDrafts
-			navigationTitle={`Creating ${slug}.${extension}`}
+			navigationTitle={`Creating ${itemProps.slug.value}.${itemProps.extension.value}`}
 			actions={
 				<ActionPanel>
 					<Action.SubmitForm onSubmit={handleSubmit} />
 				</ActionPanel>
 			}
 		>
-			<Form.TextField id="title" title="Title" defaultValue="Post Title" onChange={setTitle} />
+			<Form.TextField title="Title" placeholder="Post Title" {...itemProps.title} />
 			<Form.TextField
-				id="summary"
 				title="Summary"
-				defaultValue="A new draft has been created."
-				onChange={setSummary}
+				{...itemProps.summary}
 			/>
-			<Form.Dropdown id="category" title="Category" defaultValue="" onChange={setCategory}>
+			<Form.Dropdown title="Subdirectory" {...itemProps.subdirectory}>
 				<Form.Dropdown.Item value="" title="None" />
-				{categories().map((category) => (
-					<Form.Dropdown.Item key={category} value={category} title={category} />
+				{subdirectories().map((subdirectory) => (
+					<Form.Dropdown.Item key={subdirectory} value={subdirectory} title={subdirectory} />
 				))}
 			</Form.Dropdown>
 			<Form.TextField
-				id="slug"
 				title="Post Slug"
-				defaultValue={slug}
-				onChange={setSlug}
-				error={slugError}
-				ref={slugRef}
+				{...itemProps.slug}
 			/>
-			<Form.Dropdown id="extension" title="File Extension" defaultValue="" onChange={setExtension}>
+			<Form.Dropdown title="File Extension" {...itemProps.extension}>
 				<Form.Dropdown.Item value="md" title=".md" />
 				<Form.Dropdown.Item value="mdx" title=".mdx" />
 			</Form.Dropdown>
 			<Form.Separator />
 			<Form.Description text="A new markdown file will be created in your drafts folder. with the following content:" />
 			<Form.TextArea
-				id="content"
 				title="Preview"
 				enableMarkdown={true}
-				defaultValue={preview}
-				ref={previewRef}
+				{...itemProps.content}
 			/>
 		</Form>
 	);

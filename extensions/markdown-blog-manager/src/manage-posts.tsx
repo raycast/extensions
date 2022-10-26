@@ -1,9 +1,7 @@
 import { ActionPanel, Action, List, useNavigation, Icon, Color } from '@raycast/api';
 import { useState, useEffect } from 'react';
-import { type MarkdownFile, getCategorizedPosts } from './utils/blog';
+import { type MarkdownFile, getOrganizedPosts, publishPost } from './utils/blog';
 import NewPost from './new-post';
-import fs from 'fs-extra';
-import path from 'path';
 import { capitalize, clearFileCache } from './utils/utils';
 
 const filters = {
@@ -15,7 +13,7 @@ const filters = {
 type AvailableFilters = keyof typeof filters;
 
 function getFilteredPosts(filterName: AvailableFilters) {
-	const posts = getCategorizedPosts();
+	const posts = getOrganizedPosts();
 	for (const [key, group] of Object.entries(posts)) {
 		posts[key] = group.filter(filters[filterName]);
 	}
@@ -29,7 +27,7 @@ export default function Command() {
 
 	function refreshFiles() {
 		clearFileCache();
-		setFiles(getCategorizedPosts());
+		setFiles(getOrganizedPosts());
 	}
 
 	function changeActiveFilter(value: string) {
@@ -44,7 +42,7 @@ export default function Command() {
 		setFiles(getFilteredPosts(filter));
 	}, [filter]);
 
-	const categories = Object.keys(files);
+	const subdirectories = Object.keys(files);
 	return (
 		<List
 			navigationTitle="Browse Posts"
@@ -56,15 +54,15 @@ export default function Command() {
 				</List.Dropdown>
 			}
 		>
-			{categories.length === 0 && (
+			{subdirectories.length === 0 && (
 				<List.EmptyView title="Couldn't find any .md or .mdx files!" description="" />
 			)}
 
-			{categories.length !== 0 &&
-				categories.map((category) => (
-					<List.Section title={capitalize(category)} key={category}>
-						{category in files &&
-							files[category].map((file) => (
+			{subdirectories.length !== 0 &&
+				subdirectories.map((subdirectory) => (
+					<List.Section title={capitalize(subdirectory)} key={subdirectory}>
+						{subdirectory in files &&
+							files[subdirectory].map((file) => (
 								<Post file={file} key={file.path} refreshFiles={refreshFiles} />
 							))}
 					</List.Section>
@@ -77,16 +75,8 @@ function Post({ file, refreshFiles }: { file: MarkdownFile; refreshFiles: () => 
 	const { push } = useNavigation();
 	const createNewPost = () => push(<NewPost />);
 
-	function publishPost() {
-		const publishPath = file.path.replace('/draft/', '/public/');
-
-		let content = fs.readFileSync(file.path, 'utf8');
-		const today = new Date().toISOString().split('T')[0];
-		content = content.replace(/^date:.*$/gim, `date: ${today}`);
-		fs.ensureDirSync(path.dirname(publishPath));
-		fs.writeFileSync(publishPath, content);
-		fs.unlinkSync(file.path);
-
+	function publish() {
+		publishPost(file);
 		refreshFiles();
 	}
 
@@ -123,7 +113,7 @@ function Post({ file, refreshFiles }: { file: MarkdownFile; refreshFiles: () => 
 								icon={{ source: Icon.PlusCircleFilled, tintColor: Color.Green }}
 								title={`Publish "${file.name}"`}
 								shortcut={{ modifiers: ['cmd'], key: 's' }}
-								onAction={publishPost}
+								onAction={publish}
 							/>
 						)}
 					</ActionPanel.Section>

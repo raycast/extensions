@@ -2,19 +2,31 @@ import { statSync } from 'fs';
 import path from 'path';
 import preferences from './preferences';
 import { getRecursiveFiles, getRecursiveDirectories, filenameToTitle } from './utils';
+import fs from 'fs-extra';
 
-export type MarkdownFile = {
+
+export interface Post {
+	title: string;
+	summary: string;
+	subdirectory: string;
+	extension: string;
+	slug: string;
+	date: string;
+	content: string;
+}
+
+export interface MarkdownFile {
 	name: string;
 	draft: boolean;
 	path: string;
-	category: string;
+	subdirectory: string;
 	title: string;
 	lastModifiedAt: Date;
 	keywords: string[];
 };
 
-export type CategorizedPosts = {
-	[category: string]: MarkdownFile[];
+export type OrganizedPosts = {
+	[subdirectory: string]: MarkdownFile[];
 };
 
 /**
@@ -22,20 +34,20 @@ export type CategorizedPosts = {
  */
 function pathToPost(filepath: string, draft: boolean): MarkdownFile {
 	const name = path.basename(filepath);
-	const contentPaths = [preferences().contentPath, preferences().draftsPath];
+	const contentPaths = [preferences().publicPath, preferences().draftsPath];
 	const relativePath = contentPaths.reduce((acc, root) => {
 		return acc.replace(root, '');
 	}, filepath);
 
-	const category = path.basename(path.dirname(relativePath)) || 'Uncategorized';
+	const subdirectory = path.basename(path.dirname(relativePath)) || 'Uncategorized';
 	return {
 		name,
-		category,
+		subdirectory: subdirectory,
 		draft,
 		path: filepath,
 		title: filenameToTitle(name),
 		lastModifiedAt: statSync(filepath).mtime,
-		keywords: [category + name],
+		keywords: [subdirectory + name],
 	};
 }
 
@@ -43,7 +55,7 @@ function pathToPost(filepath: string, draft: boolean): MarkdownFile {
  * Get Public and Draft posts
  */
 export function getPosts(): MarkdownFile[] {
-	const published = getRecursiveFiles(preferences().contentPath);
+	const published = getRecursiveFiles(preferences().publicPath);
 	const drafts = getRecursiveFiles(preferences().draftsPath);
 
 	return [
@@ -53,45 +65,79 @@ export function getPosts(): MarkdownFile[] {
 }
 
 /**
- * Organize posts by category
+ * Organize posts by subdirectory
  */
-export function getCategorizedPosts(): CategorizedPosts {
+export function getOrganizedPosts(): OrganizedPosts {
 	const files = getPosts();
 
-	const categories = files.reduce((acc, file) => {
-		if (!acc[file.category]) {
-			acc[file.category] = [];
+	const subdirectories = files.reduce((acc, file) => {
+		if (!acc[file.subdirectory]) {
+			acc[file.subdirectory] = [];
 		}
-		acc[file.category].push(file);
+		acc[file.subdirectory].push(file);
 		return acc;
-	}, {} as CategorizedPosts);
+	}, {} as OrganizedPosts);
 
-	return categories;
+	return subdirectories;
 }
 
 /**
- * Get all the categories in the content directory
+ * Get all the subdirectories in the content directory
  *
  * @returns {string[]}
  * For example:
- * - /content/drafts/my-category/my-post.md
- * - /content/drafts/my-category/my-other-post.md
- * - /content/public/my-other-category/my-post.md
+ * - /content/drafts/my-subdirectory/my-post.md
+ * - /content/drafts/my-subdirectory/my-other-post.md
+ * - /content/public/my-other-subdirectory/my-post.md
  *
  * Will return:
- * - ['my-category', 'my-other-category']
+ * - ['my-subdirectory', 'my-other-subdirectory']
  */
-export function categories(): string[] {
-	const { draftsPath, contentPath } = preferences();
+export function subdirectories(): string[] {
+	const { draftsPath, publicPath } = preferences();
 
-	const paths = [draftsPath, contentPath];
+	const paths = [draftsPath, publicPath];
 
-	const categories = new Set<string>();
+	const subdirectories = new Set<string>();
 	return Array.from(
-		paths.reduce((acc, path) => {
-			const directories = getRecursiveDirectories(path);
-			directories.forEach((dir) => acc.add(dir));
+		paths.reduce((acc, postPath) => {
+			const directories = getRecursiveDirectories(postPath);
+			directories.forEach((dir) => acc.add(path.basename(dir)));
 			return acc;
-		}, categories)
-	).map((dir) => path.basename(dir));
+		}, subdirectories)
+	);
+}
+
+export function publishPost(post: MarkdownFile): void {
+	const { draftsPath, publicPath } = preferences();
+
+	if (!post.path.startsWith(draftsPath)) {
+		throw new Error(`Cannot publish post that is not in drafts directory`);
+	}
+
+	const newPostPath = post.path.replace(draftsPath, publicPath);
+
+	// Set the current date in the post content.
+	const content = fs.readFileSync(post.path, 'utf8');
+	const today = new Date().toISOString().split('T')[0];
+	const updatedContent = content.replace(/^date:.*$/gim, `date: ${today}`);
+
+	fs.ensureDirSync(path.dirname(newPostPath));
+	fs.writeFileSync(newPostPath, updatedContent);
+	fs.unlinkSync(post.path);
+}
+
+
+export function createDraft(post: Post): string {
+	let subdirectory = '';
+
+	const postPath = path.join(preferences().draftsPath, subdirectory, `${post.slug}.${post.extension}`);
+	if (post.subdirectory) {
+		subdirectory = post.subdirectory + '/';
+	}
+
+	fs.ensureDirSync(path.dirname(postPath));
+	fs.writeFileSync(postPath, post.content);
+
+	return postPath;
 }

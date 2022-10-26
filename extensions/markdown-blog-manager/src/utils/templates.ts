@@ -14,9 +14,9 @@ date: __date__
 Once upon a time...
 `.trim();
 
-export function getPostTemplate(category: string) {
-	const templatePath = path.join(preferences().draftsPath, category, '.template.md');
-	if (category && fs.existsSync(templatePath)) {
+export function getPostTemplate(subdirectory: string) {
+	const templatePath = path.join(preferences().draftsPath, subdirectory, '.template.md');
+	if (subdirectory && fs.existsSync(templatePath)) {
 		return fs.readFileSync(templatePath, 'utf8');
 	}
 
@@ -28,8 +28,8 @@ export function getPostTemplate(category: string) {
 	return defaultTemplate;
 }
 
-export function fillTemplateVariables(category: string, title: string, summary: string) {
-	let template = getPostTemplate(category);
+export function fillTemplateVariables(subdirectory: string, title: string, summary: string) {
+	let template = getPostTemplate(subdirectory);
 
 	template = template.replaceAll('__title__', title);
 	template = template.replaceAll('__summary__', summary);

@@ -29,15 +29,15 @@
 		{
 			"name": "draftsPath",
 			"title": "Drafts Path",
-			"description": "Path to the folder where your post drafts are stored",
+			"description": "Directory where the drafts are stored.",
 			"type": "textfield",
 			"required": true,
 			"placeholder": "e.g. ~/Documents/Blog/Drafts"
 		},
 		{
-			"name": "contentPath",
-			"title": "Content Path",
-			"description": "Path to the folder where your published posts are stored.",
+			"name": "publicPath",
+			"title": "Public Path",
+			"description": "Directory where published posts are stored.",
 			"type": "textfield",
 			"required": true,
 			"placeholder": "e.g. ~/Documents/Blog/Content"
