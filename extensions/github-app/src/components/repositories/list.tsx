@@ -1,5 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
-import { Octokit } from "octokit";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getGitHubAPI, Project } from "../../github";
 import { getErrorMessage } from "../../utils";
@@ -15,6 +14,7 @@ function RepoNavList(props: { project: Project }): JSX.Element {
     <List>
       <List.Item
         title="Issues"
+        icon={{ source: "exclamation.png", tintColor: Color.Green }}
         actions={
           <ActionPanel>
             <Action.Push
