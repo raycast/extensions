@@ -51,6 +51,13 @@
       "description": "Search Pull Requests",
       "mode": "view",
       "subtitle": "GitHub"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Manage Notifications",
+      "mode": "view",
+      "subtitle": "GitHub"
     }
   ],
   "dependencies": {

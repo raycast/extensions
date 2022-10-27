@@ -119,7 +119,7 @@ export function MyPullRequests(): JSX.Element {
 
 export function SearchPullRequests(): JSX.Element {
   const [query, setQuery] = useState("");
-  const { prs, error, isLoading } = usePullRequests({ query: query, author: "@me"});
+  const { prs, error, isLoading } = usePullRequests({ query: query, author: "@me" });
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
@@ -188,6 +188,7 @@ function usePullRequests(params: PullRequestSearchParams): {
       setError(undefined);
       try {
         const octokit = getGitHubAPI();
+        //octokit.rest.activity.listNotificationsForAuthenticatedUser()
         const searchParts = ["type:pr", "sort:updated"];
         if (params.author) {
           searchParts.push(`author:${params.author}`);

@@ -79,6 +79,20 @@ export interface Project {
   html_url: string;
 }
 
+export interface Subject {
+  title: string;
+  url: string;
+  type: string;
+}
+
+export interface Notification {
+  id: string;
+  unread: boolean;
+  reason: string;
+  subject: Subject;
+  updated_at: string;
+}
+
 let octokitInstance: Octokit | undefined;
 
 export function getGitHubAPI(): Octokit {
