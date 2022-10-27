@@ -16,39 +16,30 @@
       "subtitle": "WakaTime",
       "title": "Show Summary",
       "description": "Show your WakaTime Summary",
+      "mode": "view"
+    },
+    {
+      "name": "leaderboard",
+      "subtitle": "WakaTime",
+      "title": "Show Public Leaderboard",
+      "description": "Check your rank against others all around the world.",
       "mode": "view",
       "preferences": [
         {
           "name": "apiKey",
           "description": "Use your WakaTime API key to use your account",
           "type": "password",
-          "required": true,
+          "required": false,
           "title": "WakaTime API Key"
         }
       ]
-    },
-    {
-      "name": "leaderboard",
-      "subtitle": "WakaTime",
-      "title": "Show Public Leaderboard",
-      "description": "An overview of the public leaderboard. Check your rank against others all around the world.",
-      "mode": "view"
     },
     {
       "name": "private-leaderboards",
       "subtitle": "WakaTime",
       "title": "Show Private Leaderboards",
       "description": "Show your private leaderboards",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "apiKey",
-          "description": "Use your WakaTime API key to use your account",
-          "type": "password",
-          "required": true,
-          "title": "WakaTime API Key"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "today-summary",
@@ -56,22 +47,13 @@
       "title": "Show Today Summary",
       "description": "Show Today's Summary in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "1m",
-      "preferences": [
-        {
-          "name": "apiKey",
-          "description": "Use your WakaTime API key to use your account",
-          "type": "password",
-          "required": true,
-          "title": "WakaTime API Key"
-        }
-      ]
+      "interval": "1m"
     }
   ],
   "preferences": [
     {
       "name": "apiKey",
-      "required": false,
+      "required": true,
       "title": "WakaTime API Key",
       "type": "password",
       "description": "Use your WakaTime API key to use your account",
