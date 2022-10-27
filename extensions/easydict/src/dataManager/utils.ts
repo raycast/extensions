@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-17 17:41
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-29 16:02
+ * @lastEditTime: 2022-10-13 22:50
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,8 +11,9 @@
 import { hasLingueeDictionaryEntries } from "../dictionary/linguee/parse";
 import { LingueeDictionaryResult } from "../dictionary/linguee/types";
 import { hasYoudaoDictionaryEntries } from "../dictionary/youdao/formatData";
-import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
+import { QueryWordInfo, YoudaoDictionaryFormatResult, YoudaoDictionaryListItemType } from "../dictionary/youdao/types";
 import { getYoudaoWebDictionaryURL } from "../dictionary/youdao/utils";
+import { chineseLanguageItem, englishLanguageItem } from "../language/consts";
 import {
   getLanguageItemFromYoudaoCode,
   maxLineLengthOfChineseTextDisplay,
@@ -27,8 +28,13 @@ import {
   TranslationItem,
   TranslationType,
 } from "../types";
-import { checkIsDictionaryType, checkIsTranslationType, checkIsWord } from "../utils";
-import { chineseLanguageItem, englishLanguageItem } from "./../language/consts";
+import {
+  checkIsDictionaryType,
+  checkIsLingueeListItem,
+  checkIsTranslationType,
+  checkIsWord,
+  checkIsYoudaoDictionaryListItem,
+} from "../utils";
 
 /**
  * Sort query results by designated order.
@@ -203,39 +209,88 @@ export function getFromToLanguageTitle(from: string, to: string, onlyEmoji = fal
 }
 
 /**
- * Show more detail markdown.
+ * Get show more detail markdown.
  */
-export function formateDetailMarkdown(displayItem: ListDisplayItem) {
-  const { queryType, title, subtitle } = displayItem;
+export function getShowMoreDetailMarkdown(displayItem: ListDisplayItem) {
+  console.log(`getShowMoreDetailMarkdown`);
+
+  const { queryType, displayType, title, subtitle, copyText, detailsMarkdown } = displayItem;
   const { word, fromLanguage, toLanguage } = displayItem.queryWordInfo;
 
   const type = queryType.toString();
   const fromToLang = getFromToLanguageTitle(fromLanguage, toLanguage);
   const fromToTitle = `${type}  (${fromToLang})`;
 
-  let queryWord = subtitle ? title : "";
-  let explanation = subtitle || title;
+  console.log(`fromToTitle: ${fromToTitle}`);
+  console.log(`word: ${word}`);
+  console.log(`title: ${title}`);
+  console.log(`copyText: ${copyText}`);
 
-  const isTranslationType = checkIsTranslationType(queryType);
-  if (isTranslationType) {
-    queryWord = word;
-    explanation = title;
+  let markdown = "";
+
+  // Translate type
+  if (checkIsTranslationType(queryType)) {
+    markdown += `## ${fromToTitle} \n`;
+    // * Note: word may contain wrap character, so we need to handle it.
+    word.split("\n").forEach((line) => {
+      markdown += `### ${line} \n`;
+    });
+    markdown += `----\n`;
+    copyText.split("\n").forEach((line) => {
+      markdown += `${line} \n\n`;
+    });
+    console.log(`markdown: ${markdown}`);
+
+    return markdown;
   }
 
-  const markdown = `
-  ## ${fromToTitle} 
+  let queryWord = word;
+  let explanation = title;
 
-  ### ${queryWord}
-  ----
-  ${explanation}
-  `;
+  // Linguee dictionary
+  if (checkIsLingueeListItem(displayItem)) {
+    queryWord = word;
+    explanation = displayItem.copyText;
+  }
+
+  // Youdao dictionary
+  if (checkIsYoudaoDictionaryListItem(displayItem)) {
+    queryWord = word;
+    explanation = subtitle ? `${title} ${subtitle}` : title;
+    if (subtitle?.startsWith(title)) {
+      explanation = subtitle;
+    }
+    // if subtitle starts with "title", use subtitle
+    if (subtitle) {
+      const reg = /"(.*)"/;
+      const match = reg.exec(subtitle);
+      if (match) {
+        const startWord = match[1];
+        if (startWord === title) {
+          explanation = subtitle;
+        }
+      }
+    }
+    if (displayType === YoudaoDictionaryListItemType.ModernChineseDict) {
+      explanation = detailsMarkdown || copyText;
+    }
+  }
+
+  markdown = `
+## ${fromToTitle} 
+### ${queryWord}
+----
+${explanation}
+`;
+  console.log(`markdown: ${markdown}`);
+
   return markdown;
 }
 
 /**
- * Format translation to markdown.
+ * Get translation markdown.
  */
-export function formatTranslationToMarkdown(sourceResult: QueryTypeResult) {
+function getTranslationMarkdown(sourceResult: QueryTypeResult) {
   const { type, translations, queryWordInfo: wordInfo } = sourceResult;
   const oneLineTranslation = translations.join("\n");
   if (oneLineTranslation.trim().length === 0) {
@@ -246,10 +301,10 @@ export function formatTranslationToMarkdown(sourceResult: QueryTypeResult) {
   const fromTo = getFromToLanguageTitle(wordInfo.fromLanguage, wordInfo.toLanguage, true);
 
   const markdown = `
-  ## ${type}   (${fromTo})
-  ----  
-  ${text}
-  `;
+## ${type}   (${fromTo})
+----  
+${text}
+`;
   return markdown;
 }
 
@@ -268,7 +323,7 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
     const isTranslationType = checkIsTranslationType(type);
     if (sourceResult && isTranslationType) {
       const type = sourceResult.type as TranslationType;
-      const markdownTranslation = formatTranslationToMarkdown(sourceResult);
+      const markdownTranslation = getTranslationMarkdown(sourceResult);
       translations.push({ type: type, text: markdownTranslation });
     }
   }
@@ -286,7 +341,7 @@ export function updateTranslationMarkdown(queryResult: QueryResult, queryResults
 
   const listDiplayItem = displaySections[0].items;
   if (listDiplayItem?.length) {
-    listDiplayItem[0].translationMarkdown = markdown;
+    listDiplayItem[0].detailsMarkdown = markdown;
   }
 }
 

@@ -16,7 +16,8 @@ export function ShortcutLibraryGridLayout(props: { preferences: Preferences }) {
   const { allShortcuts, userShortcuts, loading } = getShortcuts(refresh, preferences);
   return (
     <Grid
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={parseInt(preferences.columns)}
+      aspectRatio={"3/2"}
       inset={preferences.itemInset === "" ? undefined : (preferences.itemInset as Grid.Inset)}
       isLoading={loading}
       searchBarPlaceholder={"Search shortcuts"}

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 09:28
+ * @lastEditTime: 2022-10-13 22:40
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -23,6 +23,7 @@ import {
   requestYoudaoWebDictionary,
   requestYoudaoWebTranslate,
 } from "../dictionary/youdao/youdao";
+import { englishLanguageItem } from "../language/consts";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoCode } from "../language/languages";
 import { LanguageItem } from "../language/type";
 import { myPreferences } from "../preferences";
@@ -45,7 +46,6 @@ import {
   TranslationType,
 } from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, showErrorToast } from "../utils";
-import { englishLanguageItem } from "./../language/consts";
 import {
   checkIfEnableYoudaoDictionary,
   checkIfShowTranslationDetail,
@@ -105,6 +105,8 @@ export class DataManager {
 
   delayQueryTimer?: NodeJS.Timeout;
   delayAppleTranslateTimer?: NodeJS.Timeout;
+  delayProxyQueryTimer?: NodeJS.Timeout;
+
   /**
    * Delay the time to call the query API. Since API has frequency limit.
    *
@@ -151,8 +153,6 @@ export class DataManager {
     this.queryYoudaoDictionary(queryWordInfo);
     this.queryYoudaoTranslate(queryWordInfo);
 
-    // query Linguee dictionary, will automatically query DeepL translate.
-    this.queryLingueeDictionary(queryWordInfo);
     this.queryBingTranslate(queryWordInfo);
     this.queryBaiduTranslate(queryWordInfo);
     this.queryTencentTranslate(queryWordInfo);
@@ -175,6 +175,9 @@ export class DataManager {
    */
   private delayQuery(queryWordInfo: QueryWordInfo) {
     this.delayQueryWithProxy(() => {
+      // Query Linguee dictionary, will automatically query DeepL translate.
+      this.queryLingueeDictionary(queryWordInfo);
+
       if (myPreferences.enableDeepLTranslate && !myPreferences.enableLingueeDictionary) {
         this.queryDeepLTranslate(queryWordInfo);
       }
@@ -198,7 +201,7 @@ export class DataManager {
       return callback();
     }
 
-    setTimeout(() => {
+    this.delayProxyQueryTimer = setTimeout(() => {
       console.warn(`delay query with proxy`);
       getProxyAgent().then(() => {
         callback();
@@ -229,6 +232,10 @@ export class DataManager {
     // clear delay Apple translate.
     if (this.delayAppleTranslateTimer) {
       clearTimeout(this.delayAppleTranslateTimer);
+    }
+
+    if (this.delayProxyQueryTimer) {
+      clearTimeout(this.delayProxyQueryTimer);
     }
   }
 
@@ -446,13 +453,18 @@ export class DataManager {
 
       youdaoDictionayFnPtr(queryWordInfo, type)
         .then((youdaoDictionaryResult) => {
-          // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 2)}`);
+          // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 4)}`);
 
           const formatYoudaoResult = youdaoDictionaryResult.result as YoudaoDictionaryFormatResult | undefined;
+          if (!formatYoudaoResult) {
+            console.warn(`---> formatYoudaoResult is undefined`);
+            return;
+          }
+
           const youdaoDisplaySections = updateYoudaoDictionaryDisplay(formatYoudaoResult);
 
           // * use Youdao dictionary to check if query text is a word.
-          Object.assign(queryWordInfo, formatYoudaoResult?.queryWordInfo);
+          Object.assign(queryWordInfo, formatYoudaoResult.queryWordInfo);
 
           const youdaoDictResult: QueryResult = {
             type: type,
@@ -466,6 +478,7 @@ export class DataManager {
           if (myPreferences.enableYoudaoTranslate && enableYoudaoAPI) {
             const translationType = TranslationType.Youdao;
 
+            // * Deep copy Youdao dictionary result, as Youdao translate result.
             const youdaoWebTranslateResult = JSON.parse(JSON.stringify(youdaoDictionaryResult));
             youdaoWebTranslateResult.type = translationType;
             const youdaoTranslationResult: QueryResult = {
@@ -772,9 +785,9 @@ export class DataManager {
       return;
     }
 
-    const oneLineTranslation = sourceResult.translations.map((translation) => translation).join(", ");
+    const oneLineTranslation = sourceResult.translations.join(", ");
     sourceResult.oneLineTranslation = oneLineTranslation;
-    let copyText = oneLineTranslation;
+    let copyText = sourceResult.translations.join("\n");
 
     // Debug: used for viewing long text log.
     if (environment.isDevelopment && type === TranslationType.Google) {
@@ -953,7 +966,7 @@ export class DataManager {
    */
   private cancelCurrentQuery() {
     // console.warn(`---> cancel current query`);
-    // console.log(`childProcess: ${JSON.stringify(this.abortObject.childProcess, null, 2)}`);
+    // console.log(`childProcess: ${JSON.stringify(this.abortObject.childProcess, null, 4)}`);
 
     this.cancelAndRemoveAllQueries();
   }

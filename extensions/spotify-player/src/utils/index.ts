@@ -1,5 +1,4 @@
 import { getApplications, showHUD, showToast, Toast } from "@raycast/api";
-import { getState, getTrack } from "../spotify/applescript";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 
 export interface Preferences {

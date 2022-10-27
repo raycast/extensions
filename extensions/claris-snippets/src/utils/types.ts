@@ -42,4 +42,5 @@ export type Location = {
   id: string;
   path: string;
   name: string;
+  git?: boolean;
 };

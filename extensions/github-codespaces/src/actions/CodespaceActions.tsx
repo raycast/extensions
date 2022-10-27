@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon } from "@raycast/api";
 import { preferredEditor } from "../preferences";
 import { Client, clientNames, Codespace } from "../types";
 import handleDelete from "../methods/handleDelete";

@@ -826,19 +826,12 @@ async function fetchAliyunTransAPI(
     apiVersion: "2018-10-12",
   });
 
-  const preferences: IPreferences = getPreferenceValues<IPreferences>();
-  if (provider.serviceProvider === preferences.defaultServiceProvider) {
-    try {
-      const from = await client.request<IAliyunDetectLangResponse>(
-        "GetDetectLanguage",
-        { SourceText: queryText },
-        { method: "POST" }
-      );
-      fromLang = from.DetectedLanguage;
-    } catch {
-      console.log("GetDetectLanguage err");
-    }
-  }
+  const from = await client.request<IAliyunDetectLangResponse>(
+    "GetDetectLanguage",
+    { SourceText: queryText },
+    { method: "POST" }
+  );
+  fromLang = from.DetectedLanguage;
   return new Promise<ITranslateRes>((resolve) => {
     const notSupport = checkServiceNotSupportLang(provider.serviceProvider, targetLang, queryText);
     if (notSupport) resolve(notSupport);

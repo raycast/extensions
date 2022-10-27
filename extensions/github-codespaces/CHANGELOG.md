@@ -1,5 +1,10 @@
 # GitHub Codespaces Changelog
 
+## [Adds SSH command] - 2022-10-19
+
+- Adds SSH option as one of the preferred clients
+- Reducing polling period for menubar application
+
 ## [Supporting insiders] - 2022-09-22
 
 - Added support for the Insiders build for VS Code

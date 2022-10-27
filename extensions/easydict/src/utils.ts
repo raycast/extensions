@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-26 18:18
+ * @lastEditTime: 2022-10-11 22:44
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -143,11 +143,11 @@ export function getEnabledDictionaryServices(): DicionaryType[] {
  */
 export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
   if (!errorInfo?.type) {
-    console.warn("showErrorToast, errorInfo type is undefined");
+    console.warn(`showErrorToast, errorInfo type is undefined: ${JSON.stringify(errorInfo, null, 4)}`);
     return;
   }
 
-  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 2)}`);
+  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 4)}`);
   const type = errorInfo.type.toString();
   showToast({
     style: Toast.Style.Failure,

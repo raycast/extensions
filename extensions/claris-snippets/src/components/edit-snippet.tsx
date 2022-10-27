@@ -87,9 +87,11 @@ export default function EditSnippet({ snippet, onSubmit }: EditSnippetProps) {
       {locations.length > 0 ? (
         <Form.Dropdown title="Location" {...itemProps.locId} defaultValue="default" storeValue>
           <Form.Dropdown.Item title="My Computer" value="default" />
-          {locations.map((location) => (
-            <Form.Dropdown.Item title={location.name} value={location.id} />
-          ))}
+          {locations
+            .filter((loc) => !loc.git)
+            .map((location) => (
+              <Form.Dropdown.Item title={location.name} value={location.id} />
+            ))}
         </Form.Dropdown>
       ) : (
         <Form.Description text="My Computer" title="Location" />

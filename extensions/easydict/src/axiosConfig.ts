@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 15:47
+ * @lastEditTime: 2022-10-15 11:24
  * @fileName: axiosConfig.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,7 @@
 import { environment, LocalStorage, showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 import EventEmitter from "events";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { HttpsProxyAgent } from "hpagent";
 import { getMacSystemProxy } from "mac-system-proxy";
 
 EventEmitter.defaultMaxListeners = 15; // default is 10.
@@ -31,7 +31,7 @@ export let httpsAgent: HttpsProxyAgent | undefined;
 /**
  * Becacuse get system proxy will block 0.4s, we need to get it after finish query.
  */
-export const delayGetSystemProxyTime = 5000;
+export const delayGetSystemProxyTime = 3000;
 
 const systemProxyURLKey = "systemProxyURL";
 
@@ -108,7 +108,10 @@ export function configAxiosAgent(proxyURL: string | undefined): void {
     return;
   }
 
-  const httpsAgent = new HttpsProxyAgent(proxyURL);
+  const httpsAgent = new HttpsProxyAgent({
+    keepAlive: true,
+    proxy: proxyURL,
+  });
   axios.defaults.httpsAgent = httpsAgent;
 }
 
@@ -128,11 +131,11 @@ export function getSystemProxyURL(): Promise<string | undefined> {
 
     const env = process.env;
     // Raycast default "PATH": "/usr/bin:undefined"
-    // console.log(`---> env: ${JSON.stringify(env, null, 2)}`);
+    // console.log(`---> env: ${JSON.stringify(env, null, 4)}`);
 
     // env.PATH = "/usr/sbin"; // $ where scutil
     env.PATH = "/usr/sbin:/usr/bin:/bin:/sbin";
-    // console.log(`---> env: ${JSON.stringify(env, null, 2)}`);
+    // console.log(`---> env: ${JSON.stringify(env, null, 4)}`);
 
     if (environment.isDevelopment) {
       /**
@@ -151,7 +154,7 @@ export function getSystemProxyURL(): Promise<string | undefined> {
     // * This function is sync and will block ~0.4s, even it's a promise.
     getMacSystemProxy()
       .then((systemProxy) => {
-        // console.log(`---> get system proxy: ${JSON.stringify(systemProxy, null, 2)}`);
+        // console.log(`---> get system proxy: ${JSON.stringify(systemProxy, null, 4)}`);
         if (!systemProxy.HTTPEnable || !systemProxy.HTTPProxy) {
           console.log(`---> no system http proxy`);
           return resolve(undefined);
@@ -164,7 +167,7 @@ export function getSystemProxyURL(): Promise<string | undefined> {
         resolve(proxyURL);
       })
       .catch((err) => {
-        // console.error(`---> get system proxy error: ${JSON.stringify(err, null, 2)}`);
+        // console.error(`---> get system proxy error: ${JSON.stringify(err, null, 4)}`);
         reject(err);
       })
       .finally(() => {
@@ -198,7 +201,11 @@ export function getProxyAgent(): Promise<HttpsProxyAgent | undefined> {
         }
 
         console.log(`---> get system proxy url: ${systemProxyURL}`);
-        const agent = new HttpsProxyAgent(systemProxyURL);
+        const agent = new HttpsProxyAgent({
+          keepAlive: true,
+          proxy: systemProxyURL,
+        });
+
         httpsAgent = agent;
         resolve(agent);
       })

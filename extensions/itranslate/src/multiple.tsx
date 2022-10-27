@@ -6,6 +6,7 @@ import {
   Action,
   Icon,
   openCommandPreferences,
+  environment,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TransAPIErrCode } from "./common/const";
@@ -185,7 +186,7 @@ export default function Command() {
       onSearchTextChange={onInputChange}
       actions={ListActions()}
     >
-      <List.EmptyView title="Type something to translate..." />
+      <List.EmptyView title="Type something to translate..." icon={{ source: `no-view@${environment.theme}.png` }} />
       {transResultsState.length > 0 &&
         transResultsState.map((trans) => {
           return (
@@ -194,8 +195,8 @@ export default function Command() {
                 <TranslateError transRes={trans} />
               )}
               {trans.code === TransAPIErrCode.NotSupport && <TranslateNotSupport transRes={trans} />}
-              {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} />}
-              {trans.code === TransAPIErrCode.Loading && <TranslateResult transRes={trans} />}
+              {trans.code === TransAPIErrCode.Success && <TranslateResult transRes={trans} fromMultiple={true} />}
+              {trans.code === TransAPIErrCode.Loading && <TranslateResult transRes={trans} fromMultiple={true} />}
             </List.Section>
           );
         })}
