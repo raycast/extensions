@@ -8,7 +8,7 @@
 
 Batch modify the hash of media files, which can be simply used for uploading online disk to prevent censorship. This is a Raycast extension of [modify_videos_md5](https://github.com/tisfeng/modify_videos_md5).
 
-But sometimes, just modifying the hash of the file is not enough to bypass the review, such as manual review, or video content recognition technology, so I added two commands to facilitate compressing and extracting files with encryption: `Zip Compress` and `Zip Extract`.
+But sometimes, just modifying the hash of the file is not enough to bypass censorship, such as manual censorship, or video content recognition technology, so I added two commands to facilitate compressing and extracting files with encryption: `Zip Compress` and `Zip Extract`.
 
 ## Features
 
