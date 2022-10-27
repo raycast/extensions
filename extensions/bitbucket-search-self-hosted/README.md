@@ -1,8 +1,36 @@
-# Bitbucket Search (Self-Hosted)
+<div align="center">
+  <img
+    src="./assets/bitbucket-logo.png"
+    width="50"
+  />
 
-Bitbucket Search (Self-Hosted)
+  <h1>
+    Bitbucket Search (Self-Hosted)
+  </h1>
 
+Raycast extension to search repositories, open recent Pull Requests.
+
+</div>
+
+### Features
+
+- Quick access to your repositories
+- See your recent open pull requests
+
+### Standing on the shoulders of giants
+
+- [raycast extensions bitbucket](https://github.com/raycast/extensions/tree/main/extensions/bitbucket)
+
+### Snapshots
+
+![](metadata/preferences.png)
 ![](metadata/screenshot-1.png)
 ![](metadata/screenshot-2.png)
 ![](metadata/screenshot-3.png)
 ![](metadata/screenshot-4.png)
+
+### Bitbucket API resource
+
+- [api-latest-repos-get](https://developer.atlassian.com/server/bitbucket/rest/v805/api-group-repository/#api-api-latest-repos-get)
+- [api-repositoryslug-pull-requests-get](https://developer.atlassian.com/server/bitbucket/rest/v805/api-group-pull-requests/#api-api-latest-projects-projectkey-repos-repositoryslug-pull-requests-get)
+- [api-dashboard-pull-requests-get](https://developer.atlassian.com/server/bitbucket/rest/v805/api-group-dashboard/#api-api-latest-dashboard-pull-requests-get)
