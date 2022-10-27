@@ -42,6 +42,7 @@ export default function LeaderBoardCommand({ id }: { id?: string }) {
               {data.page > 1 && (
                 <Action
                   title="Previous Page"
+                  icon={Icon.ArrowLeftCircleFilled}
                   onAction={() => setPage(String(data.page - 1))}
                   shortcut={{ key: "arrowLeft", modifiers: ["shift"] }}
                 />
@@ -49,6 +50,7 @@ export default function LeaderBoardCommand({ id }: { id?: string }) {
               {data.page < data.total_pages && (
                 <Action
                   title="Next Page"
+                  icon={Icon.ArrowRightCircleFilled}
                   onAction={() => setPage(String(data.page + 1))}
                   shortcut={{ key: "arrowRight", modifiers: ["shift"] }}
                 />
