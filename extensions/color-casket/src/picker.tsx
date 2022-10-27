@@ -22,7 +22,7 @@ export default async () => {
     popToRoot();
   };
 
-  openColorPicker(
+  await openColorPicker(
     getPreferenceValues<{
       format: string;
     }>().format as ColorType
