@@ -1,3 +1,3 @@
-# Menubar Message Changelog
+# One Thing Changelog
 
 ## [Initial Version] - 2022-10-25
