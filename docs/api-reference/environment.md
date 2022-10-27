@@ -16,6 +16,7 @@ import { environment } from "@raycast/api";
 console.log(`Raycast version: ${environment.raycastVersion}`);
 console.log(`Extension name: ${environment.extensionName}`);
 console.log(`Command name: ${environment.commandName}`);
+console.log(`Command mode: ${environment.commandMode}`);
 console.log(`Assets path: ${environment.assetsPath}`);
 console.log(`Support path: ${environment.supportPath}`);
 console.log(`Is development mode: ${environment.isDevelopment}`);
@@ -116,3 +117,7 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
+
+### LaunchContext
+
+Represents the passed context object of programmatic command launches.

@@ -1,8 +1,7 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { startTimer } from "./timerUtils";
 
 export default async () => {
   await closeMainWindow();
-  await startTimer(60 * 45);
-  await showHUD("Timer started for 45 minutes! 🎉");
+  startTimer(60 * 45, "45 Minute Timer");
 };

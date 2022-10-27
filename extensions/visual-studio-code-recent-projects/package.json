@@ -12,6 +12,9 @@
     "immint023",
     "pernielsentikaer"
   ],
+  "keywords": [
+    "vscode"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,10 +43,20 @@
           "title": "Visual Studio Code - Insiders"
         }
       ]
+    },
+    {
+      "name": "keepSectionOrder",
+      "type": "checkbox",
+      "title": "Advanced",
+      "required": false,
+      "label": "Keep Section Order",
+      "default": false,
+      "description": "Keep the order of the sections while searching folders, files, etc."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.35.0",
+    "@raycast/utils": "^1.4.0",
     "lodash.get": "^4.4.2",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"

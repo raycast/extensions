@@ -1,6 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
 import { Note } from "../utils/interfaces";
 
+//--------------------------------------------------------------------------------
+// All toasts for all commands should be defined here.
+// (makes it easier to manage translations when they are added to Raycast)
+//--------------------------------------------------------------------------------
+
 export function noVaultPathsToast() {
   showToast({
     title: "Path Error",

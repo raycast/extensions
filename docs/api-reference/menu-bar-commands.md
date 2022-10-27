@@ -1,4 +1,4 @@
-# Menu Bar Commands ᵇᵉᵗᵃ
+# Menu Bar Commands
 
 {% hint style="info" %}
 As of version 1.38.1, you can create Raycast commands that place glanceable information in your menu bar!
@@ -121,7 +121,6 @@ This case should work the same as when Raycast is restarted.
 - make sure you set `isLoading` to false when your command finishes executing
 - avoid setting long titles in `MenuBarExtra`, `MenuBarExtra.Submenu` or `MenuBarExtra.Item`
 - don't put identical `MenuBarExtra.Item`s at the same level (direct children of `MenuBarExtra` or in the same `Submenu`) as their `onAction` handlers will not be executed correctly
-- don't rely on state updates triggered by `onAction` handlers as your command might not have time to execute & re-render
 
 ## API Reference
 
@@ -144,15 +143,16 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
+      <MenuBarExtra.Section title="New" />
       {newBookmarks.map((bookmark) => (
         <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
       ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived>
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
@@ -283,9 +283,9 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="MenuBarExtra.Submenu" />
 
-### MenuBarExtra.Separator
+### MenuBarExtra.Section
 
-An item that shows a separator line. Use it for grouping and visually separating menu items.
+An item to group related menu items. It has an optional title and a separator is added automatically between sections.
 
 #### Example
 
@@ -298,16 +298,47 @@ export default function Command() {
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Item title="New" />
-      {newBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item title="Archived" />
-      {archivedBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+      <MenuBarExtra.Section title="New">
+        {newBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Archived">
+        {archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        ))}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="MenuBarExtra.Section" />
+
+## Types
+
+### MenuBarExtra.ActionEvent
+
+An interface describing Action events in callbacks.
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="MenuBarExtra.ActionEvent" />
+
+#### Example
+
+```typescript
+import { MenuBarExtra } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <MenuBarExtra>
+      <MenuBarExtra.Item
+        title="Log Action Event Type"
+        onAction={(event: MenuBarExtra.ActionEvent) => console.log("Action Event Type", event.type)} />
+    <MenuBarExtra>
   );
 }
 ```

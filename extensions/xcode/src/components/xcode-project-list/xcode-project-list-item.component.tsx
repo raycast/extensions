@@ -1,25 +1,32 @@
 import { XcodeProject } from "../../models/xcode-project/xcode-project.model";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.model";
 import tildify from "tildify";
+import { XcodeProjectIcon } from "../../shared/xcode-project-icon";
+import { XcodeProjectTypeName } from "../../shared/xcode-project-type-name";
 import { XcodeService } from "../../services/xcode.service";
 
 /**
  * Xcode Project List Item
  */
-export function XcodeProjectListItem(props: { project: XcodeProject; actions?: JSX.Element }): JSX.Element {
+export function XcodeProjectListItem(props: {
+  project: XcodeProject;
+  isFavorite: boolean;
+  actions?: [JSX.Element];
+  onToggleFavoriteAction: () => void;
+}): JSX.Element {
   const navigation = useNavigation();
   return (
     <List.Item
       key={props.project.filePath}
       title={props.project.name}
       subtitle={tildify(props.project.filePath)}
-      accessories={[{ text: accessoryTitle(props.project.type) }]}
+      accessories={[{ text: XcodeProjectTypeName(props.project.type) }]}
       keywords={props.project.keywords}
-      icon={{ source: imageAssetSource(props.project.type) }}
+      icon={XcodeProjectIcon(props.project.type)}
       actions={
-        props.actions ?? (
-          <ActionPanel>
+        <ActionPanel>
+          {props.actions ? props.actions : undefined}
+          {!props.actions ? (
             <Action.Open
               application={XcodeService.bundleIdentifier}
               key="open-with-xcode"
@@ -28,44 +35,17 @@ export function XcodeProjectListItem(props: { project: XcodeProject; actions?: J
               icon={Icon.Hammer}
               onOpen={navigation.pop}
             />
-            <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} />
-          </ActionPanel>
-        )
+          ) : undefined}
+          {!props.actions ? <Action.ShowInFinder key="show-in-finder" path={props.project.filePath} /> : undefined}
+          <Action
+            key="favorite"
+            title={props.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            icon={props.isFavorite ? Icon.StarDisabled : Icon.Star}
+            onAction={props.onToggleFavoriteAction}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          />
+        </ActionPanel>
       }
     />
   );
-}
-
-/**
- * Retrieve image asset source from XcodeProjectType
- * @param xcodeProjectType The XcodeProjectType
- */
-function imageAssetSource(xcodeProjectType: XcodeProjectType): string {
-  switch (xcodeProjectType) {
-    case XcodeProjectType.project:
-      return "xcode-project.png";
-    case XcodeProjectType.workspace:
-      return "xcode-workspace.png";
-    case XcodeProjectType.swiftPackage:
-      return "swift-package.png";
-    case XcodeProjectType.swiftPlayground:
-      return "swift-playground.png";
-  }
-}
-
-/**
- * Retrieve accessory title from XcodeProjectType
- * @param xcodeProjectType The XcodeProjectType
- */
-function accessoryTitle(xcodeProjectType: XcodeProjectType): string {
-  switch (xcodeProjectType) {
-    case XcodeProjectType.project:
-      return "Project";
-    case XcodeProjectType.workspace:
-      return "Workspace";
-    case XcodeProjectType.swiftPackage:
-      return "Swift Package";
-    case XcodeProjectType.swiftPlayground:
-      return "Playground";
-  }
 }

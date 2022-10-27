@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getStorage, StorageValues } from "../storage";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { generateProjectGroups, ProjectGroup } from "./ProjectGroup";
-import { clearLocalStorage, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 
 interface AppContextProps extends StorageValues {
   projectGroups: ProjectGroup[];
@@ -42,10 +42,10 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         setProjectGroups(projectGroups);
       } catch (e: any) {
         if (e.message.includes("403")) {
-          clearLocalStorage();
+          LocalStorage.clear();
           setIsValidToken(false);
         }
-        showToast(ToastStyle.Failure, "Failed to load data from Toggl. Please try again.");
+        showToast(Toast.Style.Failure, "Failed to load data from Toggl. Please try again.");
       }
 
       setIsLoading(false);

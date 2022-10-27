@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.5.0",
+  "version": "1.8.2",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
@@ -25,6 +25,94 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "show-recent-projects-in-menu-bar.command",
+      "title": "Show Recent Projects in Menu Bar",
+      "subtitle": "Xcode",
+      "description": "View and open your recent Xcode Projects from the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "showRecentProjectsInMenuBar_projectsLimit",
+          "type": "dropdown",
+          "required": false,
+          "title": "Number of visible recent projects",
+          "description": "Select the amount of recent projects that should be shown in the menu bar.",
+          "default": "10",
+          "data": [
+            {
+              "title": "10",
+              "value": "10"
+            },
+            {
+              "title": "15",
+              "value": "15"
+            },
+            {
+              "title": "20",
+              "value": "20"
+            },
+            {
+              "title": "25",
+              "value": "25"
+            },
+            {
+              "title": "30",
+              "value": "30"
+            },
+            {
+              "title": "All",
+              "value": "-1"
+            }
+          ]
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showFavorites",
+          "type": "checkbox",
+          "required": false,
+          "title": "Filter",
+          "description": "Show Favorites.",
+          "default": true,
+          "label": "Show Favorites"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showXcodeProjects",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Xcode Projects.",
+          "default": true,
+          "label": "Show Xcode Projects"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showXcodeWorkspaces",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Xcode Workspaces.",
+          "default": true,
+          "label": "Show Xcode Workspaces"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showSwiftPackages",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Swift Packages.",
+          "default": true,
+          "label": "Show Swift Package"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showSwiftPlaygrounds",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
+          "description": "Show Swift Playgrounds",
+          "default": true,
+          "label": "Show Swift Playgrounds."
+        }
+      ]
+    },
+    {
       "name": "search-recent-projects.command",
       "title": "Search Recent Projects",
       "subtitle": "Xcode",
@@ -42,10 +130,17 @@
       ]
     },
     {
+      "name": "show-swift-package-dependencies.command",
+      "title": "Show Swift Package Dependencies",
+      "subtitle": "Xcode",
+      "description": "Show Swift Package Dependencies of a Xcode Project.",
+      "mode": "view"
+    },
+    {
       "name": "installed-simulator-apps.command",
       "title": "Installed Simulator Apps",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
       "mode": "view"
     },
     {
@@ -56,8 +151,8 @@
       "mode": "view"
     },
     {
-      "name": "xcode-releases.command",
-      "title": "Xcode Releases",
+      "name": "search-xcode-releases.command",
+      "title": "Search Xcode Releases",
       "subtitle": "Xcode",
       "description": "Search, download and view the latest Xcode Releases.",
       "mode": "view"
@@ -70,24 +165,31 @@
       "mode": "view"
     },
     {
+      "name": "search-swift-package-index.command",
+      "title": "Search Swift Package Index",
+      "subtitle": "Xcode",
+      "description": "Search Swift Package Index.",
+      "mode": "view"
+    },
+    {
       "name": "add-swift-package.command",
       "title": "Add Swift Package",
       "subtitle": "Xcode",
-      "description": "Add a Swift Package from an URL to an opened Xcode project",
+      "description": "Add a Swift Package from an URL to a Xcode Project.",
       "mode": "view"
     },
     {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Package and open it directly in Xcode",
+      "description": "Create a new Swift Package and open it directly in Xcode.",
       "mode": "view"
     },
     {
       "name": "create-swift-playground.command",
       "title": "Create Swift Playground",
       "subtitle": "Xcode",
-      "description": "Create a new Swift Playground and open it directly in Xcode",
+      "description": "Create a new Swift Playground and open it directly in Xcode.",
       "mode": "view",
       "preferences": [
         {
@@ -124,22 +226,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
+    "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.9",
     "dedent": "^0.7.0",
-    "node-fetch": "^3.2.9",
+    "node-fetch": "^3.2.10",
     "tildify": "^3.0.0",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/dedent": "^0.7.0",
     "@types/node-fetch": "^2.6.2",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^5.35.1",
+    "@typescript-eslint/parser": "^5.35.1",
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",

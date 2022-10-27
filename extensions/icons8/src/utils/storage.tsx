@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Toast, showToast, Icon, Color, LocalStorage } from "@raycast/api";
 import React from "react";
-import { Icon8 } from "../types/types";
-import { IconProps } from "../components/icon";
-import { getGridSize } from "./grid";
+import { Icon8, IconProps, PinnedMovement } from "../types/types";
+import { gridSize, numRecent } from "./utils";
 
 export const IconStorageActions = (args: { props: IconProps; showMovement?: boolean }) => {
   const props = args.props;
@@ -44,7 +43,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               removePinnedIcon(props.icon.id);
               props.refresh();
-              showToast(Toast.Style.Success, "Removed Pinned Icon");
+              await showToast(Toast.Style.Success, "Removed Pinned Icon");
             }}
           />
           <Action
@@ -54,7 +53,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               clearPinnedIcons(props.platform);
               props.refresh();
-              showToast(Toast.Style.Success, "Pinned Icons Cleared");
+              await showToast(Toast.Style.Success, "Pinned Icons Cleared");
             }}
           />
         </React.Fragment>
@@ -66,7 +65,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
           onAction={async () => {
             await appendPinnedIcon(props.icon);
             props.refresh();
-            showToast(Toast.Style.Success, "Icon Pinned");
+            await showToast(Toast.Style.Success, "Icon Pinned");
           }}
         />
       )}
@@ -79,7 +78,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               await removeRecentIcon(props.icon.id);
               props.refresh();
-              showToast(Toast.Style.Success, "Removed Recent Icon");
+              await showToast(Toast.Style.Success, "Removed Recent Icon");
             }}
           />
           <Action
@@ -89,7 +88,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             onAction={async () => {
               await clearRecentIcons(props.platform);
               props.refresh();
-              showToast(Toast.Style.Success, "Recent Icons Cleared");
+              await showToast(Toast.Style.Success, "Recent Icons Cleared");
             }}
           />
         </React.Fragment>
@@ -104,12 +103,14 @@ const getStoredIcons = async (key: string) => {
   return JSON.parse(json);
 };
 
-export const getRecentIcons = async (): Promise<Icon8[]> => {
-  return await getStoredIcons("recent");
+export const getRecentIcons = async (platform?: string): Promise<Icon8[]> => {
+  const recent = await getStoredIcons("recent");
+  return recent.filter((icon: Icon8) => !platform || icon.platform === platform).slice(0, numRecent);
 };
 
-export const getPinnedIcons = async (): Promise<Icon8[]> => {
-  return await getStoredIcons("pinned");
+export const getPinnedIcons = async (platform?: string): Promise<Icon8[]> => {
+  const pinned = await getStoredIcons("pinned");
+  return pinned.filter((icon: Icon8) => !platform || icon.platform === platform);
 };
 
 const remove = (icons: Icon8[], id: string | undefined): Icon8[] => {
@@ -169,16 +170,9 @@ const clearPinnedIcons = async (platform?: string) => {
   }
 };
 
-export interface PinnedMovement {
-  up: boolean;
-  right: boolean;
-  down: boolean;
-  left: boolean;
-}
-
 export const getPinnedMovement = (icons: Icon8[], id: string): PinnedMovement => {
   const index = icons.findIndex((icon: Icon8) => icon.id === id);
-  const itemsPerRow = getGridSize() === "small" ? 8 : 5;
+  const itemsPerRow = gridSize === "small" ? 8 : 5;
   const up = index >= itemsPerRow && index % itemsPerRow === 0;
   const down = index < Math.floor(icons.length / itemsPerRow) * itemsPerRow && (index + 1) % itemsPerRow === 0;
   const right = !down && index !== icons.length - 1;

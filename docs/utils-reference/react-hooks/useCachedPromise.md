@@ -22,6 +22,7 @@ function useCachedPromise<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;
+    onWillExecute?: (args: Parameters<T>) -> void;
   }
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
@@ -105,7 +106,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 const Demo = () => {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, mutate } = useCachedPromise(
+  const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
       const result = await response.text();

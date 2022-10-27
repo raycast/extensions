@@ -12,6 +12,12 @@
       "title": "Manage Todo List",
       "description": "Create and delete items, mark them as completed and pin important tasks.",
       "mode": "view"
+    },
+    {
+      "name": "menu_bar",
+      "title": "Todo List",
+      "description": "See your Todos at a glance",
+      "mode": "menu-bar"
     }
   ],
   "categories": [
@@ -19,7 +25,7 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.1",
+    "@raycast/api": "^1.38.1",
     "@raycast/utils": "^1.1.0",
     "dayjs": "^1.10.7",
     "jotai": "^1.4.0",

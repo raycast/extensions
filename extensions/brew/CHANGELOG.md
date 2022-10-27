@@ -1,5 +1,17 @@
 # Brew Changelog
 
+
+## [Improvements] - 2022-08-17
+
+- Add a copy install command action
+- Add run install command in terminal action
+
+
+## [Bug Fix] - 2022-08-15
+
+- Fix error when loading "Show Outdated" command
+
+
 ## [Improvements] - 2022-08-10
 
 - Add a "Custom Brew Path" preference for users with brew installed in a non-standard path

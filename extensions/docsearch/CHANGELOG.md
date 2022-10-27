@@ -1,5 +1,29 @@
 # DocSearch Changelog
 
+## [Update] - 2022-10-20
+
+- Updated commands that could caused a crash in some scenarios
+
+## [Support for the new documentation] - 2022-08-22
+
+- 🌟 Add quick search argument for documentation.
+- 📄 Support [Dubbo](https://dubbo.apache.org/)
+- 📄 Support [Nuxt](https://nuxtjs.org/)
+- 📄 Support [Nuxt3](https://v3.nuxtjs.org/)
+- 📄 Support [pnpm](https://pnpm.io/)
+- 📄 Support [pnpm(zh-Hans)](https://pnpm.io/zh/)
+- 📄 Support [React Bootstrap](https://react-bootstrap.github.io/)
+- 📄 Support [Remix](https://remix.run/)
+- 📄 Support [React Native](https://reactnative.dev/)
+
+## [New feature and support for the new documentation] - 2022-08-10
+
+- 🌟 Add entry point for all documentation(You can close them in the Raycast preferences).
+- 📄 Support [Vue Router4](https://router.vuejs.org/)
+- 📄 Support [Laravel 9.x](https://laravel.com/)
+- 📄 Support [IPFS](https://docs.ipfs.tech/)
+- 📄 Support [Vue3(zh-Hans)](https://staging-cn.vuejs.org/)
+
 ## [New feature and support for the new documentation] - 2022-07-29
 
 - 🌟 Add open documentation homepage button

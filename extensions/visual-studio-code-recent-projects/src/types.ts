@@ -55,4 +55,9 @@ export enum VSCodeBuild {
 
 export interface Preferences {
   build: VSCodeBuild;
+  keepSectionOrder: boolean;
+}
+
+export interface RecentEntries {
+  entries: string;
 }
