@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { useEffect, useState } from "react";
 import { getGitHubAPI, Project } from "../../github";
 import { getErrorMessage } from "../../utils";
+import { ProjectPullRequests } from "../pullrequests";
 import { ProjectIssueList } from "./issues";
 
 function RepoOpenInBrowserAction(props: { project: Project }): JSX.Element {
@@ -9,19 +10,24 @@ function RepoOpenInBrowserAction(props: { project: Project }): JSX.Element {
   return <Action.OpenInBrowser url={p.html_url} />;
 }
 
-function RepoNavList(props: { project: Project }): JSX.Element {
+function RepoNavList(props: { repo: Project }): JSX.Element {
   return (
     <List>
       <List.Item
         title="Issues"
-        icon={{ source: "exclamation.png", tintColor: Color.Green }}
+        icon={{ source: "exclamation.png", tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Open Issues"
-              icon={Icon.Terminal}
-              target={<ProjectIssueList project={props.project} />}
-            />
+            <Action.Push title="Open Issues" icon={Icon.Terminal} target={<ProjectIssueList project={props.repo} />} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Pull Requests"
+        icon={{ source: "propen.png", tintColor: Color.PrimaryText }}
+        actions={
+          <ActionPanel>
+            <Action.Push title="Open Pull Requests" target={<ProjectPullRequests repo={props.repo} />} />
           </ActionPanel>
         }
       />
@@ -39,7 +45,7 @@ function RepoItem(props: { repo: Project }): JSX.Element {
       accessories={[{ text: `⭐ ${r.stargazers_count}` }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Open Project" icon={Icon.Terminal} target={<RepoNavList project={r} />} />
+          <Action.Push title="Open Project" icon={Icon.Terminal} target={<RepoNavList repo={r} />} />
           <RepoOpenInBrowserAction project={r} />
         </ActionPanel>
       }

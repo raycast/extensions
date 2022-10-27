@@ -1,8 +1,14 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Label, PullRequest, Repo, User } from "../github";
+import { getGitHubAPI, Label, Project, PullRequest, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
 import { AuthorTagList, LabelTagList } from "./issues";
+
+interface PullRequestSearchParams {
+  query?: string;
+  author?: string;
+  repo?: string;
+}
 
 function getColorByState(pr: PullRequest): Color {
   if (pr.state === "closed") {
@@ -86,7 +92,7 @@ function PullRequest(props: { pr: PullRequest }): JSX.Element {
 
 export function MyPullRequests(): JSX.Element {
   const [query, setQuery] = useState("");
-  const { prs, error, isLoading } = usePullRequests(query);
+  const { prs, error, isLoading } = usePullRequests({ query: query, author: "@me" });
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
@@ -111,7 +117,35 @@ export function MyPullRequests(): JSX.Element {
   );
 }
 
-function usePullRequests(query: string | undefined): {
+export function ProjectPullRequests(props: { repo: Project }): JSX.Element {
+  const repo = props.repo;
+  const [query, setQuery] = useState("");
+  const { prs, error, isLoading } = usePullRequests({ query: query, repo: repo.full_name });
+  if (error) {
+    showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
+  }
+  const openPrs = prs?.filter((pr) => pr.state === "open");
+  const closedPrs = prs?.filter((pr) => pr.state === "closed");
+  const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
+  const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+      <List.Section title="Open" subtitle={openText}>
+        {openPrs?.map((pr) => (
+          <PullRequest key={pr.id} pr={pr} />
+        ))}
+      </List.Section>
+      <List.Section title="Recently Closed" subtitle={closedText}>
+        {closedPrs?.map((pr) => (
+          <PullRequest key={pr.id} pr={pr} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+function usePullRequests(params: PullRequestSearchParams): {
   prs: PullRequest[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
@@ -127,8 +161,19 @@ function usePullRequests(query: string | undefined): {
       setError(undefined);
       try {
         const octokit = getGitHubAPI();
+        const searchParts = ["type:pr", "sort:updated"];
+        if (params.author) {
+          searchParts.push(`author:${params.author}`);
+        }
+        if (params.repo) {
+          searchParts.push(`repo:${params.repo}`);
+        }
+        if (params.query) {
+          searchParts.push(params.query);
+        }
+        const q = searchParts.join(" ");
         const d = await octokit.rest.search.issuesAndPullRequests({
-          q: `type:pr author:@me sort:updated ${query}`,
+          q: q, //`type:pr author:@me sort:updated ${query}`,
         });
         const data: PullRequest[] | undefined = d.data?.items?.map((p) => ({
           id: p.id,
@@ -163,7 +208,7 @@ function usePullRequests(query: string | undefined): {
     return () => {
       cancel = true;
     };
-  }, [query]);
+  }, [params.author, params.query, params.repo]);
 
   return { prs, error, isLoading };
 }
