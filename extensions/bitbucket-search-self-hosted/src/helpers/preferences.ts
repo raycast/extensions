@@ -4,5 +4,5 @@ export const preferences: Preferences = getPreferenceValues();
 
 export interface Preferences {
   token: string;
-  baseURL: string
+  baseURL: string;
 }

@@ -10,8 +10,8 @@ export interface PullRequest {
     url: string;
     nickname: string;
   };
-  repositoryUrl?: string
-  url?: string
+  repositoryUrl?: string;
+  url?: string;
 }
 
 export interface Repository {
@@ -22,6 +22,6 @@ export interface Repository {
   avatarUrl: string;
   url: string;
   project: {
-    key: string
-  }
+    key: string;
+  };
 }
