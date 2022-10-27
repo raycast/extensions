@@ -511,11 +511,10 @@ function fetchGoogleTransAPI(
     if (notSupport) resolve(notSupport);
     const fromLang = "auto";
     const preferences: IPreferences = getPreferenceValues<IPreferences>();
-    translate(
-      queryText,
-      { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD },
-      { timeout: 2500, retry: 0 }
-    )
+    const opt = Number(preferences.googleFreeTimeout)
+      ? { timeout: Number(preferences.googleFreeTimeout), retry: 0 }
+      : {};
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD }, opt)
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {

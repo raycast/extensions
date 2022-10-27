@@ -437,6 +437,40 @@
       ]
     },
     {
+      "name": "googleFreeTimeout",
+      "type": "dropdown",
+      "required": false,
+      "title": "Google(Free) API Timeout",
+      "description": "Select timeout of Google(Free) API",
+      "default": "2000",
+      "data": [
+        {
+          "title": "none",
+          "value": "0"
+        },
+        {
+          "title": "1000ms",
+          "value": "1000"
+        },
+        {
+          "title": "2000ms",
+          "value": "2000"
+        },
+        {
+          "title": "3000ms",
+          "value": "3000"
+        },
+        {
+          "title": "4000ms",
+          "value": "4000"
+        },
+        {
+          "title": "5000ms",
+          "value": "5000"
+        }
+      ]
+    },
+    {
       "name": "googleApiKey",
       "type": "password",
       "required": false,
