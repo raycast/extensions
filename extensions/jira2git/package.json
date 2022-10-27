@@ -14,8 +14,8 @@
     {
       "name": "transform",
       "title": "Transform Jira URL to Git branch name",
-      "description": "Transform Jira card URL to Git branch name and copy to clipboard.",
-      "mode": "view",
+      "description": "Transform Jira issue URL to Git branch name and copy to clipboard.",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "prefix",
@@ -25,15 +25,41 @@
         },
         {
           "name": "url",
-          "placeholder": "Jira card URL",
+          "placeholder": "Jira issue URL",
           "type": "text",
           "required": true
         }
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Domain",
+      "description": "Your Jira domain (e.g. 'my.atlassian.net')",
+      "placeholder": "my.atlassian.net"
+    },
+    {
+      "name": "user",
+      "type": "textfield",
+      "required": true,
+      "title": "User Name",
+      "description": "Your Jira user name",
+      "placeholder": "me@company.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your API token as described at https://developer.atlassian.com/cloud/jira/platform/basic-auth-for-rest-apis/#get-an-api-token"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.42.1"
+    "@raycast/api": "^1.42.1",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
