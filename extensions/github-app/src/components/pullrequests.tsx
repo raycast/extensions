@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Label, Project, PullRequest, Repo, User } from "../github";
+import { getGitHubAPI, Label, Project, PullRequest as PullRequestItem, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
 import { AuthorTagList, LabelTagList } from "./issues";
 
@@ -10,14 +10,14 @@ interface PullRequestSearchParams {
   repo?: string;
 }
 
-function getColorByState(pr: PullRequest): Color {
+function getColorByState(pr: PullRequestItem): Color {
   if (pr.state === "closed") {
     return pr.merged_at ? Color.Purple : Color.Red;
   }
   return Color.Green;
 }
 
-function getIconByState(pr: PullRequest): Image.ImageLike {
+function getIconByState(pr: PullRequestItem): Image.ImageLike {
   if (pr.state === "closed") {
     if (pr.merged_at) {
       return { source: "prmerged.png", tintColor: Color.Purple };
@@ -28,14 +28,14 @@ function getIconByState(pr: PullRequest): Image.ImageLike {
   return { source: "propen.png", tintColor: Color.Green };
 }
 
-function getState(pr: PullRequest): string {
+function getState(pr: PullRequestItem): string {
   if (pr.state === "closed") {
     return pr.merged_at ? "Merged" : "Closed";
   }
   return "Open";
 }
 
-function PullRequestDetail(props: { pr: PullRequest }): JSX.Element {
+function PullRequestDetail(props: { pr: PullRequestItem }): JSX.Element {
   const pr = props.pr;
   const parts: string[] = [`# ${pr.title}`];
   if (pr.body && pr.body.length > 0) {
@@ -63,12 +63,12 @@ function PullRequestDetail(props: { pr: PullRequest }): JSX.Element {
   );
 }
 
-function PullRequestOpenInBrowerAction(props: { pr: PullRequest }): JSX.Element {
+function PullRequestOpenInBrowerAction(props: { pr: PullRequestItem }): JSX.Element {
   const pr = props.pr;
   return <Action.OpenInBrowser url={pr.html_url} />;
 }
 
-function PullRequest(props: { pr: PullRequest }): JSX.Element {
+function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
   const pr = props.pr;
   return (
     <List.Item
@@ -105,12 +105,39 @@ export function MyPullRequests(): JSX.Element {
     <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
       <List.Section title="Open" subtitle={openText}>
         {openPrs?.map((pr) => (
-          <PullRequest key={pr.id} pr={pr} />
+          <PullRequestItem key={pr.id} pr={pr} />
         ))}
       </List.Section>
       <List.Section title="Recently Closed" subtitle={closedText}>
         {closedPrs?.map((pr) => (
-          <PullRequest key={pr.id} pr={pr} />
+          <PullRequestItem key={pr.id} pr={pr} />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+export function SearchPullRequests(): JSX.Element {
+  const [query, setQuery] = useState("");
+  const { prs, error, isLoading } = usePullRequests({ query: query, author: "@me"});
+  if (error) {
+    showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
+  }
+  const openPrs = prs?.filter((pr) => pr.state === "open");
+  const closedPrs = prs?.filter((pr) => pr.state === "closed");
+  const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
+  const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+      <List.Section title="Open" subtitle={openText}>
+        {openPrs?.map((pr) => (
+          <PullRequestItem key={pr.id} pr={pr} />
+        ))}
+      </List.Section>
+      <List.Section title="Recently Closed" subtitle={closedText}>
+        {closedPrs?.map((pr) => (
+          <PullRequestItem key={pr.id} pr={pr} />
         ))}
       </List.Section>
     </List>
@@ -133,12 +160,12 @@ export function ProjectPullRequests(props: { repo: Project }): JSX.Element {
     <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
       <List.Section title="Open" subtitle={openText}>
         {openPrs?.map((pr) => (
-          <PullRequest key={pr.id} pr={pr} />
+          <PullRequestItem key={pr.id} pr={pr} />
         ))}
       </List.Section>
       <List.Section title="Recently Closed" subtitle={closedText}>
         {closedPrs?.map((pr) => (
-          <PullRequest key={pr.id} pr={pr} />
+          <PullRequestItem key={pr.id} pr={pr} />
         ))}
       </List.Section>
     </List>
@@ -146,11 +173,11 @@ export function ProjectPullRequests(props: { repo: Project }): JSX.Element {
 }
 
 function usePullRequests(params: PullRequestSearchParams): {
-  prs: PullRequest[] | undefined;
+  prs: PullRequestItem[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
 } {
-  const [prs, setPrs] = useState<PullRequest[]>();
+  const [prs, setPrs] = useState<PullRequestItem[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -175,7 +202,7 @@ function usePullRequests(params: PullRequestSearchParams): {
         const d = await octokit.rest.search.issuesAndPullRequests({
           q: q, //`type:pr author:@me sort:updated ${query}`,
         });
-        const data: PullRequest[] | undefined = d.data?.items?.map((p) => ({
+        const data: PullRequestItem[] | undefined = d.data?.items?.map((p) => ({
           id: p.id,
           number: p.number,
           title: p.title,
