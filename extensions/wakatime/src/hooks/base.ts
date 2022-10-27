@@ -1,15 +1,19 @@
-import { showToast, Toast } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 export function useBase<D>({ handler, toasts = {} }: Props<D>) {
   const [data, setData] = useState<D>();
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(true);
+  const canShowToasts = environment.launchType === "userInitiated";
 
   useEffect(() => {
     async function run() {
       setError(undefined), setData(undefined), setIsLoading(true);
-      const toast = toasts.loading ? await showToast({ ...toasts.loading, style: Toast.Style.Animated }) : undefined;
+      const toast =
+        canShowToasts && toasts.loading
+          ? await showToast({ ...toasts.loading, style: Toast.Style.Animated })
+          : undefined;
 
       try {
         const { ok, error, result } = await handler();
@@ -17,7 +21,7 @@ export function useBase<D>({ handler, toasts = {} }: Props<D>) {
         if (!ok) throw new Error(error);
         setData(result as D);
 
-        if (toasts.success) {
+        if (canShowToasts && toasts.success) {
           if (toast == undefined) return showToast({ ...toasts.success, style: Toast.Style.Success });
           toast.style = Toast.Style.Success;
           toast.title = toasts.success.title;
@@ -27,7 +31,7 @@ export function useBase<D>({ handler, toasts = {} }: Props<D>) {
         const err = error as Error;
         setError(err);
 
-        if (toasts.error) {
+        if (canShowToasts && toasts.error) {
           const { title, message } = typeof toasts.error === "function" ? toasts.error(err) : toasts.error;
           if (toast == undefined) return showToast({ title, message, style: Toast.Style.Failure });
           toast.style = Toast.Style.Failure;
