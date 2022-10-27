@@ -76,6 +76,7 @@ export interface Project {
   full_name: string;
   owner_avatar_url?: string;
   stargazers_count: number;
+  html_url: string;
 }
 
 let octokitInstance: Octokit | undefined;

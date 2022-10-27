@@ -25,7 +25,7 @@ export function LabelTagList(props: { labels: Label[] | undefined }): JSX.Elemen
 
 export function LabelTagItem(props: { label: Label }): JSX.Element {
   const l = props.label;
-  return <Detail.Metadata.TagList.Item text={l.name} icon={undefined} color={l.color} />;
+  return <Detail.Metadata.TagList.Item text={l.name || "?"} icon={undefined} color={l.color} />;
 }
 
 export function AuthorTagList(props: { user: User }): JSX.Element {
@@ -82,7 +82,7 @@ function getState(issue: Issue): string {
   return issue.state === "open" ? "Open" : "Closed";
 }
 
-function Issue(props: { issue: Issue }): JSX.Element {
+export function IssueItem(props: { issue: Issue }): JSX.Element {
   const i = props.issue;
   return (
     <List.Item
@@ -114,7 +114,7 @@ export function MyAssingedIssues(): JSX.Element {
     <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
       <List.Section title="Your Assigned Issues" subtitle={`${issues?.length}`}>
         {issues?.map((i) => (
-          <Issue key={i.id} issue={i} />
+          <IssueItem key={i.id} issue={i} />
         ))}
       </List.Section>
     </List>
@@ -131,7 +131,7 @@ export function MyCreatedIssues(): JSX.Element {
     <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
       <List.Section title="Created Recently" subtitle={`${issues?.length}`}>
         {issues?.map((i) => (
-          <Issue key={i.id} issue={i} />
+          <IssueItem key={i.id} issue={i} />
         ))}
       </List.Section>
     </List>

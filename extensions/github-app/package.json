@@ -18,9 +18,9 @@
       "subtitle": "GitHub"
     },
     {
-      "name": "projects",
-      "title": "My Projects",
-      "description": "List My Projects",
+      "name": "myrepos",
+      "title": "My Repositories",
+      "description": "List My Repositories",
       "mode": "view",
       "subtitle": "GitHub"
     },
@@ -35,6 +35,13 @@
       "name": "searchissues",
       "title": "Search Issues",
       "description": "Search your created Issues",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "reposearch",
+      "title": "Search Repositories",
+      "description": "Search Repositories",
       "mode": "view",
       "subtitle": "GitHub"
     }
