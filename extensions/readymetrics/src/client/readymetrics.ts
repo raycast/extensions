@@ -19,7 +19,7 @@ const api = axios.create({
 });
 
 async function rmAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = api.request<ReadymetricsCheckinResponse, T>({ method, ...props })
+  const resp = api.request<ReadymetricsCheckinResponse, T>({ method, ...props });
   return resp;
 }
 
