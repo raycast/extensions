@@ -98,7 +98,7 @@ export default function Command() {
       onData(preferences) {
         setPinnedResults(preferences?.pinned || []);
         setSearchScope(preferences?.searchScope || "");
-        setIsShowingDetail(preferences?.isShowingDetail || true);
+        setIsShowingDetail(preferences?.isShowingDetail);
         setHasCheckedPreferences(true);
       },
       onError() {
@@ -173,7 +173,17 @@ export default function Command() {
       setResults([]);
       setIsQuerying(false);
 
-      setCanExecute(true);
+      // short-circuit for 'pinned'
+      if (searchScope === "pinned") {
+        setResults(
+          pinnedResults.filter((pin) =>
+            pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
+          )
+        );
+        setCanExecute(false);
+      } else {
+        setCanExecute(true);
+      }
     })();
   }, [searchText, searchScope]);
 
@@ -347,8 +357,9 @@ export default function Command() {
       searchBarAccessory={
         hasCheckedPlugins && hasCheckedPreferences ? (
           <List.Dropdown tooltip="Scope" onChange={setSearchScope} value={searchScope}>
-            <List.Dropdown.Item title="This Mac" value=""></List.Dropdown.Item>
-            <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir}></List.Dropdown.Item>
+            <List.Dropdown.Item title="Pinned" value="pinned" />
+            <List.Dropdown.Item title="This Mac" value="" />
+            <List.Dropdown.Item title={`User (${userInfo().username})`} value={userInfo().homedir} />
           </List.Dropdown>
         ) : null
       }
