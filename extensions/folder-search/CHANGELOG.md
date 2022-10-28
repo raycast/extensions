@@ -2,6 +2,7 @@
 
 ## [New Features] - 2022-10-28
 
+- **added** `Pinned Extras` additional actions when using `Pinned` filter. Move Pins up/down.
 - **added** Pins can now be searched using the new `Pinned` filter dropdown.
 - **added** `Toggle Details` preference is now maintained between sessions.
 

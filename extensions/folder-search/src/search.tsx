@@ -57,6 +57,9 @@ export default function Command() {
 
   const abortable = useRef<AbortController>();
 
+  // helper for pinned view
+  const isSearchingPinned = () => searchScope === "pinned";
+
   // check plugins
   usePromise(
     async () => {
@@ -174,7 +177,7 @@ export default function Command() {
       setIsQuerying(false);
 
       // short-circuit for 'pinned'
-      if (searchScope === "pinned") {
+      if (isSearchingPinned()) {
         setResults(
           pinnedResults.filter((pin) =>
             pin.kMDItemFSName.toLocaleLowerCase().includes(searchText.replace(/[[|\]]/gi, "").toLocaleLowerCase())
@@ -204,6 +207,23 @@ export default function Command() {
     }
 
     setSelectedItemId(`result-${resultIndex.toString()}`);
+  };
+
+  // pinned extras
+  const updateResultPinnedOrder = (result: SpotlightSearchResult, direction: string) => {
+    const workingPinnedResults = [...pinnedResults];
+    const oldLocation = workingPinnedResults.findIndex((pin) => pin.path === result.path);
+    const newLocation = oldLocation + (direction === "up" ? -1 : 1);
+
+    // bail if out of bounds
+    if (newLocation < 0 || newLocation > workingPinnedResults.length) {
+      return;
+    }
+
+    workingPinnedResults.splice(newLocation, 0, workingPinnedResults.splice(oldLocation, 1)[0]);
+
+    setPinnedResults(workingPinnedResults);
+    setSelectedItemId(`result-${newLocation.toString()}`);
   };
 
   // re-usable for results and 'pinned/favourites'
@@ -285,6 +305,22 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   onAction={() => toggleResultPinnedStatus(result, resultIndex)}
                 />
+                {isSearchingPinned() ? (
+                  <ActionPanel.Section title="Pinned Extras">
+                    <Action
+                      title="Move Pin Up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                      onAction={() => updateResultPinnedOrder(result, "up")}
+                    />
+                    <Action
+                      title="Move Pin Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                      onAction={() => updateResultPinnedOrder(result, "down")}
+                    />
+                  </ActionPanel.Section>
+                ) : null}
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title="Copy Folder"
