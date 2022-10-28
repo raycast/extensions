@@ -13,23 +13,17 @@ export interface Repo {
 }
 
 export interface Label {
-  id?: number;
-  node_id?: string;
-  url?: string;
+  id?: number | string;
   name?: string;
   color?: string;
-  default?: boolean;
+  is_default?: boolean;
   description?: string | null;
 }
 
 export interface User {
   login: string;
-  id: number;
-  node_id: string;
   avatar_url: string;
-  gravatar_id: string;
   html_url: string;
-  type: string;
 }
 
 export interface Issue {
@@ -48,6 +42,17 @@ export interface Issue {
   created_at: string;
   state: string;
   // labels[]
+}
+
+export interface CheckSuite {
+  status: string;
+  conclusion: string;
+}
+
+export interface Commit {
+  oid?: string;
+  commit_url?: string;
+  checksuite?: CheckSuite;
 }
 
 export interface PullRequest {
@@ -69,6 +74,7 @@ export interface PullRequest {
   state_reason: string | null | undefined;
   merged_at?: string | null | undefined;
   // labels[]
+  commit?: Commit;
 }
 
 export interface Project {

@@ -11,26 +11,33 @@ interface PullRequestSearchParams {
 }
 
 function getColorByState(pr: PullRequestItem): Color {
-  if (pr.state === "closed") {
+  if (pr.state.toLowerCase() === "closed") {
     return pr.merged_at ? Color.Purple : Color.Red;
+  } else if (pr.state.toLowerCase() === "merged") {
+    return Color.Purple;
   }
   return Color.Green;
 }
 
 function getIconByState(pr: PullRequestItem): Image.ImageLike {
-  if (pr.state === "closed") {
+  const state = pr.state.toLowerCase();
+  if (state === "closed") {
     if (pr.merged_at) {
       return { source: "prmerged.png", tintColor: Color.Purple };
     } else {
       return { source: "propen.png", tintColor: Color.Red };
     }
-  }
-  return { source: "propen.png", tintColor: Color.Green };
+  } else if (state === "merged") {
+    return { source: "prmerged.png", tintColor: Color.Purple };
+  } else return { source: "propen.png", tintColor: Color.Green };
 }
 
 function getState(pr: PullRequestItem): string {
-  if (pr.state === "closed") {
+  const state = pr.state.toLowerCase();
+  if (state === "closed") {
     return pr.merged_at ? "Merged" : "Closed";
+  } else if (state === "merged") {
+    return "Merged";
   }
   return "Open";
 }
@@ -68,8 +75,60 @@ function PullRequestOpenInBrowerAction(props: { pr: PullRequestItem }): JSX.Elem
   return <Action.OpenInBrowser url={pr.html_url} />;
 }
 
+const CheckStatusMap: Record<string, string> = {
+  QUEUED: "Queued",
+  IN_PROGRESS: "In Progress",
+  COMPLETED: "Completed",
+  WAITING: "Waiting",
+  PENDING: "Pending",
+  REQUESTED: "Requested",
+};
+
+const CheckConclusionMap: Record<string, string> = {
+  ACTION_REQUIRED: "Action Required",
+  TIMED_OUT: "Timed Out",
+  CANCELLED: "Cancelled",
+  FAILURE: "Failure",
+  SUCCESS: "Success",
+  NEUTRAL: "Neutral",
+  SKIPPED: "Skipped",
+  STARTUP_FAILURE: "Startup Failure",
+  STALE: "Stale",
+};
+
+const CheckConclusionIcon: Record<string, string> = {
+  ACTION_REQUIRED: "❗",
+  TIMED_OUT: "🕰️",
+  CANCELLED: "⛔",
+  FAILURE: "❌",
+  SUCCESS: "✅",
+  NEUTRAL: "🧪",
+  SKIPPED: "⛔",
+  STARTUP_FAILURE: "❌",
+  STALE: "🧦",
+};
+
+function getCheckStatus(pr: PullRequest): {
+  checkStatusIcon?: Image.ImageLike | undefined;
+  checkStatusText: string | undefined;
+} {
+  const status = pr.commit?.checksuite?.status;
+  if (status === "COMPLETED") {
+    const conclusion = pr.commit?.checksuite?.conclusion;
+    return {
+      checkStatusText: CheckConclusionMap[conclusion || ""],
+      checkStatusIcon: { source: CheckConclusionIcon[conclusion || ""] },
+    };
+  }
+  return {
+    checkStatusText: status ? CheckStatusMap[status || ""] || status : undefined,
+    checkStatusIcon: status ? { source: "⏱️" } : undefined,
+  };
+}
+
 function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
   const pr = props.pr;
+  const { checkStatusText, checkStatusIcon } = getCheckStatus(pr);
   return (
     <List.Item
       key={pr.id.toString()}
@@ -78,6 +137,7 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
       icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
         { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined },
+        { icon: checkStatusIcon, tooltip: checkStatusText },
         { date: new Date(pr.updated_at) },
         { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login },
       ]}
@@ -97,8 +157,8 @@ export function MyPullRequests(): JSX.Element {
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
-  const openPrs = prs?.filter((pr) => pr.state === "open");
-  const closedPrs = prs?.filter((pr) => pr.state === "closed");
+  const openPrs = prs?.filter((pr) => pr.state.toLowerCase() === "open");
+  const closedPrs = prs?.filter((pr) => pr.state.toLowerCase() === "closed" || pr.state.toLowerCase() === "merged");
   const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
   const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
 
@@ -124,10 +184,12 @@ export function SearchPullRequests(): JSX.Element {
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
-  const openPrs = prs?.filter((pr) => pr.state === "open");
-  const closedPrs = prs?.filter((pr) => pr.state === "closed");
+  console.log(prs?.length);
+  const openPrs = prs?.filter((pr) => pr.state.toLowerCase() === "open");
+  const closedPrs = prs?.filter((pr) => pr.state.toLowerCase() === "closed");
   const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
   const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
+  console.log(openPrs?.length);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
@@ -152,8 +214,8 @@ export function ProjectPullRequests(props: { repo: Project }): JSX.Element {
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
-  const openPrs = prs?.filter((pr) => pr.state === "open");
-  const closedPrs = prs?.filter((pr) => pr.state === "closed");
+  const openPrs = prs?.filter((pr) => pr.state.toLowerCase() === "open");
+  const closedPrs = prs?.filter((pr) => pr.state.toLowerCase() === "closed");
   const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
   const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
 
@@ -189,41 +251,10 @@ function usePullRequests(params: PullRequestSearchParams): {
       setError(undefined);
       try {
         const octokit = getGitHubAPI();
-        //octokit.rest.activity.listNotificationsForAuthenticatedUser()
-        const searchParts = ["type:pr", "sort:updated"];
-        if (params.author) {
-          searchParts.push(`author:${params.author}`);
-        }
-        if (params.repo) {
-          searchParts.push(`repo:${params.repo}`);
-        }
-        if (params.query) {
-          searchParts.push(params.query);
-        }
-        const q = searchParts.join(" ");
-        const d = await octokit.rest.search.issuesAndPullRequests({ q: q });
-        const data: PullRequest[] | undefined = d.data?.items?.map((p) => {
-          return {
-            id: p.id,
-            number: p.number,
-            title: p.title,
-            url: p.url,
-            html_url: p.html_url,
-            body: p.body,
-            body_text: p.body_text,
-            repository: p.repository as Repo | undefined,
-            user: p.user as User | undefined,
-            created_at: p.created_at,
-            updated_at: p.updated_at,
-            state: p.state,
-            state_reason: p.state_reason,
-            merged_at: p.pull_request?.merged_at,
-            labels: p.labels as Label[] | undefined,
-            draft: p.draft,
-          } as PullRequest;
-        });
+        const qd = await getPullRequests(params);
         if (!cancel) {
-          setPrs(data);
+          console.log("set", qd?.length);
+          setPrs(qd);
         }
       } catch (error) {
         setError(getErrorMessage(error));
@@ -241,4 +272,118 @@ function usePullRequests(params: PullRequestSearchParams): {
   }, [params.author, params.query, params.repo]);
 
   return { prs, error, isLoading };
+}
+
+async function getPullRequests(params: PullRequestSearchParams): Promise<PullRequest[] | undefined> {
+  const octokit = getGitHubAPI();
+  const searchParts = ["type:pr", "sort:updated"];
+  if (params.author) {
+    searchParts.push(`author:${params.author}`);
+  }
+  if (params.repo) {
+    searchParts.push(`repo:${params.repo}`);
+  }
+  if (params.query) {
+    searchParts.push(params.query);
+  }
+  const q = searchParts.join(" ");
+  console.log(q);
+  const qd = await octokit.graphql(`
+    {
+      search(first: 50, type: ISSUE, query: "${q}") {
+        edges {
+          node {
+            ... on PullRequest {
+              id
+              title
+              number
+              state
+              url
+              body
+              bodyText
+              isDraft
+              updatedAt
+              createdAt
+              labels(first: 100){
+                nodes{
+                  id
+                  name
+                  description
+                  color
+                  isDefault
+                }
+              }
+              author{
+                login
+                avatarUrl
+                url
+              }
+              commits(last: 1) {
+                nodes {
+                  commit {
+                    checkSuites(last: 1) {
+                      nodes {
+                        status
+                        conclusion
+                        workflowRun {
+                          id
+                        }
+                      }
+                    }
+                    commitUrl
+                    oid
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    `);
+  const rawSearchEdges = (qd as any).search.edges as any[] | undefined;
+  const searchEdges = rawSearchEdges?.filter((e) => e.node && Object.keys(e.node).length > 0);
+  const result = searchEdges?.map((e) => {
+    const n = e.node;
+    const author = n.author;
+    const commit = n.commits?.nodes[0].commit;
+    const data = {
+      id: n.id,
+      number: n.number,
+      url: n.url,
+      title: n.title,
+      html_url: n.url,
+      body: n.body,
+      body_text: n.bodyText,
+      draft: n.isDraft,
+      updated_at: n.updatedAt,
+      created_at: n.createdAt,
+      state: n.state as string,
+      user: {
+        login: author.login,
+        avatar_url: author.avatarUrl,
+        html_url: author.url,
+      },
+      commit: {
+        oid: commit?.oid,
+        commit_url: commit?.commitUrl,
+        checksuite: {
+          status: commit?.checkSuites?.nodes[0]?.status,
+          conclusion: commit?.checkSuites?.nodes[0]?.conclusion,
+        },
+      },
+      labels: n?.labels?.nodes?.map((l: any) => {
+        return {
+          id: l.id,
+          name: l.name,
+          color: l.color,
+          default: l.default,
+          description: l.description,
+          is_default: l.isDefault,
+        } as Label;
+      }),
+    } as PullRequest;
+    return data;
+  });
+  return result;
 }

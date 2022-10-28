@@ -135,7 +135,7 @@ export function RepoList(): JSX.Element {
       searchBarPlaceholder="Search for Repositories"
     >
       {repos?.map((r) => (
-        <RepoItem repo={r} />
+        <RepoItem key={r.id} repo={r} />
       ))}
       <List.EmptyView title="Type query e.g. 'raycast'" />
     </List>
