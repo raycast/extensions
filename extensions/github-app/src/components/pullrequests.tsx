@@ -184,12 +184,10 @@ export function SearchPullRequests(): JSX.Element {
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
-  console.log(prs?.length);
   const openPrs = prs?.filter((pr) => pr.state.toLowerCase() === "open");
   const closedPrs = prs?.filter((pr) => pr.state.toLowerCase() === "closed");
   const openText = openPrs ? `${openPrs.length} Pull Requests` : undefined;
   const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
-  console.log(openPrs?.length);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
@@ -250,10 +248,8 @@ function usePullRequests(params: PullRequestSearchParams): {
       setIsLoading(true);
       setError(undefined);
       try {
-        const octokit = getGitHubAPI();
         const qd = await getPullRequests(params);
         if (!cancel) {
-          console.log("set", qd?.length);
           setPrs(qd);
         }
       } catch (error) {
@@ -287,7 +283,6 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
     searchParts.push(params.query);
   }
   const q = searchParts.join(" ");
-  console.log(q);
   const qd = await octokit.graphql(`
     {
       search(first: 50, type: ISSUE, query: "${q}") {

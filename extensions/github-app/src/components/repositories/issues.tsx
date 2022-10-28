@@ -51,7 +51,6 @@ function useProjectIssues(
           searchParts.push(params.query);
         }
         const q = searchParts.join(" ");
-        console.log(q);
         const d = await octokit.rest.search.issuesAndPullRequests({
           q: q, //`type:issue assignee:@me is:open sort:updated ${query}`, // author:@me
         });
