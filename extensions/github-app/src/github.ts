@@ -60,6 +60,7 @@ export interface PullRequest {
   body_text?: string;
   repository?: Repo;
   labels?: Label[];
+  draft?: boolean;
   //milestone
   user: User;
   updated_at: string;

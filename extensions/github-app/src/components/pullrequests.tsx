@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Label, Project, PullRequest as PullRequestItem, Repo, User } from "../github";
+import { getGitHubAPI, Label, Project, PullRequest, PullRequest as PullRequestItem, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
 import { AuthorTagList, LabelTagList } from "./issues";
 
@@ -77,8 +77,9 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
       subtitle={`#${pr.number}`}
       icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
+        { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined},
         { date: new Date(pr.updated_at) },
-        { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login },
+        { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login }
       ]}
       actions={
         <ActionPanel>
@@ -173,11 +174,11 @@ export function ProjectPullRequests(props: { repo: Project }): JSX.Element {
 }
 
 function usePullRequests(params: PullRequestSearchParams): {
-  prs: PullRequestItem[] | undefined;
+  prs: PullRequest[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
 } {
-  const [prs, setPrs] = useState<PullRequestItem[]>();
+  const [prs, setPrs] = useState<PullRequest[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -200,26 +201,27 @@ function usePullRequests(params: PullRequestSearchParams): {
           searchParts.push(params.query);
         }
         const q = searchParts.join(" ");
-        const d = await octokit.rest.search.issuesAndPullRequests({
-          q: q, //`type:pr author:@me sort:updated ${query}`,
+        const d = await octokit.rest.search.issuesAndPullRequests({q: q});
+        const data: PullRequest[] | undefined = d.data?.items?.map((p) => {
+          return {
+            id: p.id,
+            number: p.number,
+            title: p.title,
+            url: p.url,
+            html_url: p.html_url,
+            body: p.body,
+            body_text: p.body_text,
+            repository: p.repository as Repo | undefined,
+            user: p.user as User | undefined,
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+            state: p.state,
+            state_reason: p.state_reason,
+            merged_at: p.pull_request?.merged_at,
+            labels: p.labels as Label[] | undefined,
+            draft: p.draft
+          } as PullRequest;
         });
-        const data: PullRequestItem[] | undefined = d.data?.items?.map((p) => ({
-          id: p.id,
-          number: p.number,
-          title: p.title,
-          url: p.url,
-          html_url: p.html_url,
-          body: p.body,
-          body_text: p.body_text,
-          repository: p.repository as Repo | undefined,
-          user: p.user as User | undefined,
-          created_at: p.created_at,
-          updated_at: p.updated_at,
-          state: p.state,
-          state_reason: p.state_reason,
-          merged_at: p.pull_request?.merged_at,
-          labels: p.labels as Label[] | undefined,
-        }));
         if (!cancel) {
           setPrs(data);
         }
