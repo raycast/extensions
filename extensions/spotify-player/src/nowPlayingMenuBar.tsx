@@ -18,40 +18,36 @@ import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spo
 import { SpotifyProvider, useSpotify } from "./utils/context";
 
 function NowPlayingMenuBar() {
-  const { installed, authorized } = useSpotify();
+  const { installed, authorized, loading: spotifyLoading } = useSpotify();
   const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>(null);
   const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [trackStateLoading, setTrackStateLoading] = useState(true);
 
   const fetchPlayerAndTrackState = async () => {
     let result: [SpotifyState | null, TrackInfo | null] = [null, null];
 
-    // Return early if we have not yet checked if Spotify is installed
-    if (installed == null) result;
+    if (!installed) {
+      return;
+    }
 
-    // If Spotify is installed then fetch the player and track state
-    if (installed) {
-      try {
-        const [state, track] = await Promise.all([getState(), getTrack()]);
-
-        setCurrentSpotifyState(state);
-        setCurrentlyPlayingTrack(track);
-
-        result = [state, track];
-      } catch (err) {
-        if (environment.launchType != LaunchType.Background) {
-          showToast(Toast.Style.Failure, String(err));
-        }
+    try {
+      const [state, track] = await Promise.all([getState(), getTrack()]);
+      setCurrentSpotifyState(state);
+      setCurrentlyPlayingTrack(track);
+      result = [state, track];
+    } catch (err) {
+      if (environment.launchType != LaunchType.Background) {
+        showToast(Toast.Style.Failure, String(err));
       }
     }
 
-    setIsLoading(false);
+    setTrackStateLoading(false);
     return result;
   };
 
   useEffect(() => {
     fetchPlayerAndTrackState();
-  }, [installed]);
+  }, [installed, spotifyLoading]);
 
   const handlePlay = async () => {
     await setCurrentSpotifyState((oldState) => {
@@ -77,15 +73,19 @@ function NowPlayingMenuBar() {
     await pause();
   };
 
-  if (isLoading) {
-    return <MenuBarExtra isLoading={isLoading}></MenuBarExtra>;
+  if (trackStateLoading || spotifyLoading) {
+    return <MenuBarExtra isLoading></MenuBarExtra>;
   }
 
-  if (currentSpotifyState?.state == SpotifyPlayingState.Stopped || !installed || !currentlyPlayingTrack) {
+  if (
+    (!(trackStateLoading && spotifyLoading) && currentSpotifyState?.state == SpotifyPlayingState.Stopped) ||
+    !installed ||
+    !currentlyPlayingTrack
+  ) {
     return null;
   }
 
-  const trackTitle = `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`;
+  const trackTitle = `${currentlyPlayingTrack.artist} - ${currentlyPlayingTrack.name}`;
 
   const optimizeTitle = (title: string | undefined) => {
     if (title === undefined) {
@@ -107,7 +107,7 @@ function NowPlayingMenuBar() {
       icon={installed && currentlyPlayingTrack ? "icon.png" : undefined}
       title={optimizeTitle(trackTitle)}
       tooltip={trackTitle}
-      isLoading={isLoading}
+      isLoading={trackStateLoading}
     >
       <>
         <MenuBarExtra.Item
@@ -140,7 +140,7 @@ function NowPlayingMenuBar() {
             onAction={async () => {
               const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
               await startPlaySimilar({ seed_tracks: trackId });
-              showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
+              showHUD(`♫ Playing Similar - ♫ ${trackTitle}`);
             }}
           />
         )}
@@ -154,7 +154,7 @@ function NowPlayingMenuBar() {
                 try {
                   const response = await likeCurrentlyPlayingTrack();
                   if (response?.result) {
-                    const title = `${response.result.artist} – ${response.result.name}`;
+                    const title = `${response.result.artist} - ${response.result.name}`;
                     showHUD(`💚 ${title}`);
                   }
                 } catch (err) {
@@ -169,7 +169,7 @@ function NowPlayingMenuBar() {
                 try {
                   const response = await dislikeCurrentlyPlayingTrack();
                   if (response?.result) {
-                    const title = `${response.result.artist} – ${response.result.name}`;
+                    const title = `${response.result.artist} - ${response.result.name}`;
                     showHUD(`💔 ${title}`);
                   }
                 } catch (err) {
@@ -192,7 +192,7 @@ function NowPlayingMenuBar() {
           onAction={async () => {
             const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
             Clipboard.copy(`https://open.spotify.com/track/${trackId}`);
-            showHUD(`♫ Copied URL – ${trackTitle}`);
+            showHUD(`♫ Copied URL - ${trackTitle}`);
           }}
         />
         {!authorized && (
