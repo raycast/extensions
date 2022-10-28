@@ -60,9 +60,11 @@ export function MyRepos(): JSX.Element {
   }
   return (
     <List isLoading={isLoading}>
-      {projects?.map((p) => (
-        <RepoItem key={p.id} repo={p} />
-      ))}
+      <List.Section title="Projects" subtitle={`${projects?.length}`}>
+        {projects?.map((p) => (
+          <RepoItem key={p.id} repo={p} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -83,8 +85,14 @@ function useMyRepos(query: string | undefined): {
       setError(undefined);
       try {
         const octokit = getGitHubAPI();
-        const d = await octokit.rest.repos.listForAuthenticatedUser();
-        const pros: Project[] = d.data?.map((p) => ({
+        const d = await octokit.paginate(
+          octokit.rest.repos.listForAuthenticatedUser,
+          {
+            per_page: 100,
+          },
+          (response) => response.data
+        );
+        const pros: Project[] = d?.map((p) => ({
           id: p.id,
           name: p.name,
           full_name: p.full_name,

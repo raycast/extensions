@@ -77,9 +77,9 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
       subtitle={`#${pr.number}`}
       icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
-        { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined},
+        { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined },
         { date: new Date(pr.updated_at) },
-        { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login }
+        { icon: { source: pr.user?.avatar_url, mask: Image.Mask.Circle }, tooltip: pr.user.login },
       ]}
       actions={
         <ActionPanel>
@@ -201,7 +201,7 @@ function usePullRequests(params: PullRequestSearchParams): {
           searchParts.push(params.query);
         }
         const q = searchParts.join(" ");
-        const d = await octokit.rest.search.issuesAndPullRequests({q: q});
+        const d = await octokit.rest.search.issuesAndPullRequests({ q: q });
         const data: PullRequest[] | undefined = d.data?.items?.map((p) => {
           return {
             id: p.id,
@@ -219,7 +219,7 @@ function usePullRequests(params: PullRequestSearchParams): {
             state_reason: p.state_reason,
             merged_at: p.pull_request?.merged_at,
             labels: p.labels as Label[] | undefined,
-            draft: p.draft
+            draft: p.draft,
           } as PullRequest;
         });
         if (!cancel) {
