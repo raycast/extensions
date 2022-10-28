@@ -55,21 +55,23 @@ function useProjectIssues(
         const d = await octokit.rest.search.issuesAndPullRequests({
           q: q, //`type:issue assignee:@me is:open sort:updated ${query}`, // author:@me
         });
-        const data: Issue[] | undefined = d.data?.items?.map((p) => ({
-          id: p.id,
-          number: p.number,
-          title: p.title,
-          url: p.url,
-          html_url: p.html_url,
-          body: p.body,
-          body_text: p.body_text,
-          repository: p.repository as Repo | undefined,
-          user: p.user as User | undefined,
-          created_at: p.created_at,
-          updated_at: p.updated_at,
-          state: p.state,
-          labels: p.labels as Label[] | undefined,
-        }));
+        const data: Issue[] | undefined = d.data?.items?.map((p) => {
+          return {
+            id: p.id,
+            number: p.number,
+            title: p.title,
+            url: p.url,
+            html_url: p.html_url,
+            body: p.body,
+            body_text: p.body_text,
+            repository: p.repository as Repo | undefined,
+            user: p.user as User | undefined,
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+            state: p.state,
+            labels: p.labels as Label[] | undefined,
+          } as Issue;
+        });
         if (!cancel) {
           setIssues(data);
         }
