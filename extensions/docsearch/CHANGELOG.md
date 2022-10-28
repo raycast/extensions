@@ -1,5 +1,9 @@
 # DocSearch Changelog
 
+## [Update] - 2022-10-20
+
+- Updated commands that could caused a crash in some scenarios
+
 ## [Support for the new documentation] - 2022-08-22
 
 - 🌟 Add quick search argument for documentation.

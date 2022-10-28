@@ -6,7 +6,16 @@
     "icon": "command-icon.png",
     "author": "Aayush9029",
     "license": "MIT",
-    "commands": [{
+    "commands": [
+        {
+            "name": "open-history",
+            "title": "Open History",
+            "subtitle": "CleanShot X",
+            "description": "Show Screenshots History",
+            "icon": "open-history.png",
+            "mode": "no-view"
+        },
+        {
             "name": "all-in-one",
             "title": "All in One",
             "subtitle": "CleanShot X",
@@ -119,10 +128,11 @@
             "mode": "no-view"
         }
     ],
-    "categories": ["Applications"],
+    "categories": [
+        "Applications"
+    ],
     "dependencies": {
-        "@raycast/api": "^1.26.3",
-        "open": "^8.4.0"
+        "@raycast/api": "^1.39.2"
     },
     "devDependencies": {
         "@types/node": "~16.10.0",

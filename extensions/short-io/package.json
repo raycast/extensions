@@ -28,6 +28,14 @@
       "mode": "view"
     },
     {
+      "name": "search-links-menu-bar",
+      "icon": "search-link-icon-menu-bar.png",
+      "title": "Search Links",
+      "subtitle": "Short.io",
+      "description": "Search short links with your own domain.",
+      "mode": "menu-bar"
+    },
+    {
       "name": "shorten-link-with-domain",
       "icon": "shorten-link-with-domain-icon.png",
       "title": "Shorten Link With Domain",
@@ -55,7 +63,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.40.1",
     "axios": "^0.27.2"
   },
   "devDependencies": {

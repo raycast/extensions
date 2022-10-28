@@ -1,5 +1,9 @@
 # Bing Wallpaper Changelog
 
+## [Update grid layout] - 2022-10-15
+
+- Update grid layout
+
 ## [Fix Bug] - 2022-08-18
 
 - Fix the bug that the [Auto Random Bing Wallpaper] command occasionally fails

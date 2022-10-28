@@ -1,5 +1,18 @@
 # Spotify Player Changelog
 
+## [Fix] - 2022-10-28
+
+- Fixed a bug that caused the menubar command to not function properly.
+
+## [Feature] - 2022-10-07
+
+- Implemented add track to queue, can be located in Search Tracks view
+
+## [Feature] - 2022-09-12
+
+- Introduce new command "Dislike Current Song"
+- Added dislike action for menu bar
+
 ## [Feature] - 2022-08-08
 
 - Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Now Playing Menu Bar")

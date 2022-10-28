@@ -11,7 +11,8 @@
     "andreaselia",
     "stuart",
     "tonka3000",
-    "dancannon"
+    "dancannon",
+    "sxn"
   ],
   "commands": [
     {
@@ -107,6 +108,13 @@
       "subtitle": "Spotify",
       "title": "Like Current Song",
       "description": "Likes currently playing song",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislikeCurrentSong",
+      "subtitle": "Spotify",
+      "title": "Dislike Current Song",
+      "description": "Dislikes currently playing song",
       "mode": "no-view"
     }
   ],

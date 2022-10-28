@@ -172,7 +172,7 @@ function DirectoryItem(props: {
               <>
                 <Action
                   title={"Remove Directory"}
-                  icon={Icon.Trash}
+                  icon={Icon.StarDisabled}
                   shortcut={{ modifiers: ["cmd", "ctrl"], key: "x" }}
                   onAction={async () => {
                     await alertDialog(

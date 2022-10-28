@@ -143,7 +143,7 @@ function FileDetail(props: { file: IObject; refresh: () => void }) {
 
   async function init() {
     updateLoadingState(true);
-    const urlAcl = await getObjUrl(props.file);
+    const urlAcl = await getObjUrl(props.file.name);
     updateUrlAclState(urlAcl);
     const markdown = await getFileDetailMarkdown(props.file, urlAcl.url);
     updateMarkdownState(markdown);
@@ -295,7 +295,7 @@ function FileCommonActions(props: { file: IObject; refresh: () => void; isDetail
         icon={Icon.CopyClipboard}
         shortcut={{ modifiers: ["cmd"], key: "return" }}
         onAction={async () => {
-          await Clipboard.copy((await getObjUrl(props.file)).url);
+          await Clipboard.copy((await getObjUrl(props.file.name)).url);
           await showHUD("Copied to Clipboard");
         }}
       ></Action>
@@ -304,7 +304,7 @@ function FileCommonActions(props: { file: IObject; refresh: () => void; isDetail
         icon={Icon.Globe}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
         onAction={async () => {
-          open((await getObjUrl(props.file)).url);
+          open((await getObjUrl(props.file.name)).url);
         }}
       ></Action>
       <Action

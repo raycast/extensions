@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-08-20 11:36
+ * @lastEditTime: 2022-10-12 21:52
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -28,11 +28,11 @@ export class Easydict {
 
   // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.0.0";
-  buildNumber = 8;
-  versionDate = "2022-08-20";
-  isNeedPrompt = true;
-  hasPrompted = false; // always default false, only show once, then should be set to true.
+  version = "2.6.1";
+  buildNumber = 17;
+  versionDate = "2022-10-26";
+  isNeedPrompt = false;
+  hasPrompted = false; // * always default false, only show once, then should be set to true.
   releaseMarkdown = releaseNote;
 
   getRepoUrl() {
@@ -108,7 +108,7 @@ export class Easydict {
     const currentEasydictInfo = await this.getVersionInfo(currentVersionKey);
     if (currentEasydictInfo) {
       // console.log(`get current easydict cost time: ${Date.now() - startTime} ms`);
-      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 2)}`);
+      // console.log(`current easydict info: ${JSON.stringify(currentEasydictInfo, null, 4)}`);
       return Promise.resolve(currentEasydictInfo);
     } else {
       const startStoredTime = Date.now();
@@ -126,7 +126,7 @@ export class Easydict {
    */
   public async fetchReleaseMarkdown(): Promise<string> {
     try {
-      console.log("fetch release markdown from github");
+      console.log(`fetch release markdown from github: ${this.getReleaseApiUrl()}`);
       const releaseInfo = await this.fetchReleaseInfo(this.getReleaseApiUrl());
       const releaseMarkdown = releaseInfo.body;
       console.log("fetch release markdown from github success");
