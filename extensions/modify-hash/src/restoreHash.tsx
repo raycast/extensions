@@ -8,8 +8,8 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import ModifyHash from "./utils";
+import RunCommand, { ActionType } from "./utils";
 
 export default function RestoreFileHash() {
-  return ModifyHash(false);
+  return RunCommand(ActionType.RestoreHash);
 }
