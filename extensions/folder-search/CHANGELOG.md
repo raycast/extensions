@@ -1,5 +1,10 @@
 # Folder Search Changelog
 
+## [New Features] - 2022-10-28
+
+- **added** Pins can now be searched using the new `Pinned` filter dropdown.
+- **added** `Toggle Details` preference is now maintained between sessions.
+
 ## [New Features] - 2022-09-25
 
 - **added** Enable 'exact' matching via [term] search
