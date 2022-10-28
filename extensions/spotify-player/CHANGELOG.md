@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix] - 2022-10-28
+
+- Fixed a bug that caused the menubar command to not function properly.
+
 ## [Feature] - 2022-10-07
 
 - Implemented add track to queue, can be located in Search Tracks view

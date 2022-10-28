@@ -6,11 +6,13 @@ type ProviderProps = { children: React.ReactNode };
 interface ContextState {
   installed: boolean | null;
   authorized: boolean;
+  loading: boolean;
 }
 
 const defaultState: ContextState = {
   installed: null,
   authorized: false,
+  loading: true,
 };
 
 const SpotifyContext = createContext<ContextState>(defaultState);
@@ -25,6 +27,7 @@ function SpotifyProvider({ children }: ProviderProps) {
     setState({
       installed,
       authorized,
+      loading: false,
     });
   };
 
