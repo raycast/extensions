@@ -45,18 +45,28 @@ export interface Account {
 
 export default function Command() {
   let results: Account[] = [];
-  let isLoading = false;
 
   // get fresh list of available accounts
-  const accountList = getAccountList();
-  isLoading = accountList.isLoading;
+  const { isLoading, error, accounts } = getAccountList();
 
-  if (cache.has("accounts") && (accountList.isLoading || accountList.error)) {
+  if (cache.has("accounts") && (isLoading || error)) {
     // if we have cached items, use them while waiting for fresh ones
     results = JSON.parse(cache.get("accounts") || "[]");
   } else {
     // once the fresh accounts have successfully loaded, update the results
-    results = accountList.result;
+    results = accounts;
+  }
+
+  if (!isLoading && results.length === 0) {
+    const description = error
+      ? "The ykman command failed to list your accounts."
+      : "You don't currently have any accounts. Add some using ykman or the Yubico Authenticator.";
+
+    return (
+      <List>
+        <List.EmptyView title="No accounts found" description={description} />
+      </List>
+    );
   }
 
   return (
@@ -183,13 +193,13 @@ function executeCodeCommand(
 }
 
 function getAccountList(): {
-  result: Account[];
+  accounts: Account[];
   isLoading: boolean;
   error: string | undefined;
 } {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [result, setResult] = useState<Account[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
     execFile(ykmanExecutable(), ["oath", "accounts", "code"], (error, stdout) => {
@@ -220,12 +230,12 @@ function getAccountList(): {
         });
 
       cache.set("accounts", JSON.stringify(accountResults));
-      setResult(accountResults);
+      setAccounts(accountResults);
       setIsLoading(false);
     });
   }, []);
 
-  return { result, isLoading, error };
+  return { accounts, isLoading, error };
 }
 
 function ykmanExecutable(): string {
@@ -246,9 +256,15 @@ function handleError(
   console.error(error);
   errorCallback(error.message);
   isLoadingCallback(false);
+
+  let errorMessage = error.message;
+  if (error.code && error.code === "ENOENT") {
+    errorMessage = "ykman doesn't exist at " + ykmanExecutable();
+  }
+
   showToast({
     style: Toast.Style.Failure,
     title: contextMessage,
-    message: error.message,
+    message: errorMessage,
   });
 }
