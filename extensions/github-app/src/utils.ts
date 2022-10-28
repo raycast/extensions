@@ -9,3 +9,7 @@ export function getErrorMessage(error: unknown): string {
   }
   return "Unknown Error";
 }
+
+export function capitalizeFirstLetter(name: string): string {
+  return name.replace(/^./, name[0].toUpperCase());
+}

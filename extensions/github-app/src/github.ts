@@ -83,6 +83,7 @@ export interface Subject {
   title: string;
   url: string;
   type: string;
+  latest_comment_url: string;
 }
 
 export interface Notification {
@@ -91,6 +92,7 @@ export interface Notification {
   reason: string;
   subject: Subject;
   updated_at: string;
+  html_url?: string | null | undefined;
 }
 
 let octokitInstance: Octokit | undefined;
