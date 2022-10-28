@@ -8,6 +8,8 @@ import {
   getPreferenceValues,
   Icon,
   Keyboard,
+  launchCommand,
+  LaunchType,
   List,
   showHUD,
 } from "@raycast/api";
@@ -70,7 +72,7 @@ export default function ColorPickers() {
           <Action
             title={`Pick in ${defaultFormat}`}
             icon={Icon.Brush}
-            onAction={() => openColorPicker(defaultFormat)}
+            onAction={() => launchCommand({ name: "picker", type: LaunchType.UserInitiated })}
           />
           <ActionPanel.Section key="pickers">
             {orderedPickFormats.map((type, index) => (
