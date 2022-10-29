@@ -1,4 +1,13 @@
-import { Clipboard, closeMainWindow, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  popToRoot,
+  showHUD,
+} from "@raycast/api";
 
 import { ColorType } from "./colors/Color";
 import { prepend } from "./hooks/colorSaver";
@@ -19,7 +28,12 @@ export default async () => {
     Clipboard.copy(color.stringValue());
     prepend("history", color);
     showHUD("Copied to Clipboard");
-    popToRoot();
+
+    if (environment.launchContext?.open === "fromRender") {
+      launchCommand({ name: "index", type: LaunchType.UserInitiated });
+    } else {
+      popToRoot();
+    }
   };
 
   await openColorPicker(

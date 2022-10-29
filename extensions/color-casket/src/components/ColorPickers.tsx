@@ -72,7 +72,9 @@ export default function ColorPickers() {
           <Action
             title={`Pick in ${defaultFormat}`}
             icon={Icon.Brush}
-            onAction={() => launchCommand({ name: "picker", type: LaunchType.UserInitiated })}
+            onAction={() =>
+              launchCommand({ name: "picker", type: LaunchType.UserInitiated, context: { open: "fromRender" } })
+            }
           />
           <ActionPanel.Section key="pickers">
             {orderedPickFormats.map((type, index) => (
