@@ -5,8 +5,18 @@ import { subdirectories, getPosts, createDraft, Post } from './utils/blog';
 import { titleToSlug } from './utils/utils';
 import { fillTemplateVariables } from './utils/templates';
 import { FormValidation, useForm } from '@raycast/utils';
+import { ValidatePreferences } from './utils/preferences';
+
 
 export default function Command() {
+	return (
+		<ValidatePreferences>
+			<NewPost />
+		</ValidatePreferences>
+	);
+}
+
+export function NewPost() {
 	const posts = getPosts();
 
 	const { handleSubmit, itemProps, setValue } = useForm<Post>({

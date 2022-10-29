@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { type MarkdownFile, getOrganizedPosts, publishPost } from './utils/blog';
 import NewPost from './new-post';
 import { capitalize, clearFileCache } from './utils/utils';
+import { ValidatePreferences } from './utils/preferences';
 
 const filters = {
 	all: () => true,
@@ -22,6 +23,14 @@ function getFilteredPosts(filterName: AvailableFilters) {
 }
 
 export default function Command() {
+	return (
+		<ValidatePreferences>
+			<ManagePosts />
+		</ValidatePreferences>
+	);
+}
+
+function ManagePosts() {
 	const [filter, setFilter] = useState<AvailableFilters>('all');
 	const [files, setFiles] = useState<Record<string, MarkdownFile[]>>(getFilteredPosts(filter));
 
