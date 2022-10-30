@@ -58,7 +58,7 @@ async function parseFetchYamlResponse(response: Response) {
     return linkResults;
 }
 
-function flattenYaml(json: any, linkResults: LinkResult[], parentKey: string): LinkResult[] {
+function flattenYaml(json: unknown[], linkResults: LinkResult[], parentKey: string): LinkResult[] {
 
     for (const [key, value] of Object.entries(json)) {
         if (typeof value === 'string') {
@@ -87,7 +87,7 @@ function flattenYaml(json: any, linkResults: LinkResult[], parentKey: string): L
             } else if(key.length > 1) {
                 nextParentKeyChain = key;
             }
-            flattenYaml(value, linkResults, nextParentKeyChain);
+            flattenYaml(value as unknown[], linkResults, nextParentKeyChain);
         }
     }
     return linkResults;
