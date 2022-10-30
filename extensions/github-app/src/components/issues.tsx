@@ -28,11 +28,33 @@ export function LabelTagItem(props: { label: Label }): JSX.Element {
   return <Detail.Metadata.TagList.Item text={l.name || "?"} icon={undefined} color={l.color} />;
 }
 
+export function UserTagListList(props: { user: User }): JSX.Element {
+  const u = props.user;
+  return <Detail.Metadata.TagList.Item text={u.login} icon={{ source: u.avatar_url, mask: Image.Mask.Circle }} />;
+}
+
 export function AuthorTagList(props: { user: User }): JSX.Element {
   const u = props.user;
   return (
     <Detail.Metadata.TagList title="Author">
-      <Detail.Metadata.TagList.Item text={u.login} icon={{ source: u.avatar_url, mask: Image.Mask.Circle }} />
+      <UserTagListList user={u} />
+    </Detail.Metadata.TagList>
+  );
+}
+
+export function UserTagList(props: {
+  users: User[] | null | undefined;
+  title?: string | undefined;
+}): JSX.Element | null {
+  const users = props.users;
+  if (!users || users.length <= 0) {
+    return null;
+  }
+  return (
+    <Detail.Metadata.TagList title={props.title || ""}>
+      {users?.map((u) => (
+        <UserTagListList key={u.login} user={u} />
+      ))}
     </Detail.Metadata.TagList>
   );
 }

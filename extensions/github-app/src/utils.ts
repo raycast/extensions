@@ -13,3 +13,10 @@ export function getErrorMessage(error: unknown): string {
 export function capitalizeFirstLetter(name: string): string {
   return name.replace(/^./, name[0].toUpperCase());
 }
+
+export function capitalizeFirstLetterAndRest(name: string | undefined | null): string | null | undefined {
+  if (name) {
+    return capitalizeFirstLetter(name.toLowerCase());
+  }
+  return name;
+}

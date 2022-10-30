@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Label, Project, PullRequest, PullRequest as PullRequestItem, Repo, User } from "../github";
-import { getErrorMessage } from "../utils";
-import { AuthorTagList, LabelTagList } from "./issues";
+import { getGitHubAPI, Label, Project, PullRequest, PullRequest as PullRequestItem, User } from "../github";
+import { capitalizeFirstLetterAndRest, getErrorMessage } from "../utils";
+import { AuthorTagList, LabelTagList, UserTagList } from "./issues";
 
 interface PullRequestSearchParams {
   query?: string;
@@ -57,8 +57,13 @@ function PullRequestDetail(props: { pr: PullRequestItem }): JSX.Element {
           <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item text={getState(pr)} color={getColorByState(pr)} />
           </Detail.Metadata.TagList>
+          <Detail.Metadata.Label title="From" text="?" />
+          <Detail.Metadata.Label title="Into" text={pr.base_ref_name} />
+          <Detail.Metadata.Label title="Created" text={new Date(pr.created_at).toLocaleString()} />
           <AuthorTagList user={pr.user} />
           <LabelTagList labels={pr.labels} />
+          <UserTagList users={pr.assignees} title="Assignees" />
+          <UserTagList users={pr.reviewers} title="Reviewers" />
         </Detail.Metadata>
       }
       actions={
@@ -136,6 +141,7 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
       subtitle={`#${pr.number}`}
       icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
+        { text: pr.review_decision ? `[${capitalizeFirstLetterAndRest(pr.review_decision)}]` : undefined },
         { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined },
         { icon: checkStatusIcon, tooltip: checkStatusText },
         { date: new Date(pr.updated_at) },
@@ -299,6 +305,8 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
               isDraft
               updatedAt
               createdAt
+              reviewDecision
+              baseRefName
               labels(first: 100){
                 nodes{
                   id
@@ -312,6 +320,23 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
                 login
                 avatarUrl
                 url
+              }
+              assignees(first: 50){
+                nodes{
+                  login
+                  avatarUrl
+                  url
+                }
+              }
+              reviews(last: 50) {
+                nodes {
+                  author {
+                    login
+                    avatarUrl
+                    url
+                  }
+                  state
+                }
               }
               commits(last: 1) {
                 nodes {
@@ -336,6 +361,14 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
       }
     }
     `);
+
+  const toUser = (data: any): User => {
+    return {
+      login: data.login,
+      avatar_url: data.avatarUrl,
+      html_url: data.url,
+    };
+  };
   const rawSearchEdges = (qd as any).search.edges as any[] | undefined;
   const searchEdges = rawSearchEdges?.filter((e) => e.node && Object.keys(e.node).length > 0);
   const result = searchEdges?.map((e) => {
@@ -354,11 +387,11 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
       updated_at: n.updatedAt,
       created_at: n.createdAt,
       state: n.state as string,
-      user: {
-        login: author.login,
-        avatar_url: author.avatarUrl,
-        html_url: author.url,
-      },
+      review_decision: n.reviewDecision as string,
+      base_ref_name: n.baseRefName,
+      user: toUser(author),
+      assignees: n.assignees?.nodes?.map((a: any) => toUser(a)),
+      reviewers: n.reviews?.nodes?.map((r: any) => toUser(r.author)),
       commit: {
         oid: commit?.oid,
         commit_url: commit?.commitUrl,

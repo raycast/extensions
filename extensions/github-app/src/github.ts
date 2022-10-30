@@ -66,7 +66,11 @@ export interface PullRequest {
   repository?: Repo;
   labels?: Label[];
   draft?: boolean;
+  review_decision?: string | null;
+  base_ref_name: string;
   //milestone
+  assignees?: User[] | null;
+  reviewers?: User[] | null;
   user: User;
   updated_at: string;
   created_at: string;
