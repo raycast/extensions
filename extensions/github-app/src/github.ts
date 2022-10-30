@@ -68,6 +68,7 @@ export interface PullRequest {
   draft?: boolean;
   review_decision?: string | null;
   base_ref_name: string;
+  comments_count?: number;
   //milestone
   assignees?: User[] | null;
   reviewers?: User[] | null;

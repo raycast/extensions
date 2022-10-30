@@ -141,6 +141,10 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
       subtitle={`#${pr.number}`}
       icon={{ value: getIconByState(pr), tooltip: getState(pr) }}
       accessories={[
+        {
+          text: pr.comments_count ? pr.comments_count.toString() : undefined,
+          icon: pr.comments_count ? { source: Icon.SpeechBubble, tintColor: Color.PrimaryText } : undefined,
+        },
         { text: pr.review_decision ? `[${capitalizeFirstLetterAndRest(pr.review_decision)}]` : undefined },
         { text: pr.draft !== undefined && pr.draft === true ? "[Draft]" : undefined },
         { icon: checkStatusIcon, tooltip: checkStatusText },
@@ -307,6 +311,9 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
               createdAt
               reviewDecision
               baseRefName
+              comments {
+                totalCount
+              }
               labels(first: 100){
                 nodes{
                   id
@@ -392,6 +399,7 @@ async function getPullRequests(params: PullRequestSearchParams): Promise<PullReq
       user: toUser(author),
       assignees: n.assignees?.nodes?.map((a: any) => toUser(a)),
       reviewers: n.reviews?.nodes?.map((r: any) => toUser(r.author)),
+      comments_count: n.comments?.totalCount,
       commit: {
         oid: commit?.oid,
         commit_url: commit?.commitUrl,
