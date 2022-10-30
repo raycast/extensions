@@ -53,11 +53,8 @@ async function initAuth() {
     scope: "",
     extraParameters: { x_authorize_url: monzoAuthorizeUri },
   });
-  console.log(authRequest);
   const { authorizationCode } = await client.authorize(authRequest);
-  console.log("Got auth code", authorizationCode);
   const tokens = await fetchTokens(authRequest, authorizationCode);
-  console.log("Got tokens", tokens);
   await client.setTokens(tokens);
 }
 
@@ -66,7 +63,6 @@ async function fetchTokens(
   authorizationCode: string
 ): Promise<OAuth.TokenResponse> {
   const preferences = getPreferenceValues<Preferences>();
-  console.log(authRequest.redirectURI);
   const data = new URLSearchParams();
   data.append("client_id", preferences.oauthClientId.trim());
   data.append("code", authorizationCode);
