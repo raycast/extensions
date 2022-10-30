@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getGitHubAPI, Issue, IssueState, Label, Repo, User } from "../github";
+import { getGitHubAPI, Issue, IssueState, Label, Project, Repo, User } from "../github";
 import { getErrorMessage } from "../utils";
+import { MyReposDropdown, useMyRepos } from "./repositories/list";
 
 export interface IssueSearchParams {
-  query?: string | undefined;
-  assignedTo?: string | undefined;
-  state?: IssueState | undefined;
+  query?: string;
+  assignedTo?: string;
+  state?: IssueState;
+  repo?: string;
 }
 
 export function LabelTagList(props: { labels: Label[] | undefined }): JSX.Element | null {
@@ -128,12 +130,24 @@ export function IssueItem(props: { issue: Issue }): JSX.Element {
 
 export function MyAssingedIssues(): JSX.Element {
   const [searchtext, setSearchtext] = useState("");
-  const { issues, error, isLoading } = useIssues({ query: searchtext, assignedTo: "@me", state: IssueState.open });
+  const [selectedRepo, setSelectedRepo] = useState<Project>();
+  const { projects: repos } = useMyRepos();
+  const { issues, error, isLoading } = useIssues({
+    query: searchtext,
+    assignedTo: "@me",
+    state: IssueState.open,
+    repo: selectedRepo ? selectedRepo.full_name : undefined,
+  });
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
   }
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchtext} throttle>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchtext}
+      throttle
+      searchBarAccessory={<MyReposDropdown repos={repos} onChange={setSelectedRepo} />}
+    >
       <List.Section title="Your Assigned Issues" subtitle={`${issues?.length}`}>
         {issues?.map((i) => (
           <IssueItem key={i.id} issue={i} />
@@ -183,6 +197,9 @@ function useIssues(params: IssueSearchParams): {
         if (params.state) {
           searchParts.push(`is:${params.state}`);
         }
+        if (params.repo && params.repo.length > 0) {
+          searchParts.push(`repo:${params.repo}`);
+        }
         if (params.query) {
           searchParts.push(params.query);
         }
@@ -223,7 +240,7 @@ function useIssues(params: IssueSearchParams): {
     return () => {
       cancel = true;
     };
-  }, [params.query, params.assignedTo, params.state]);
+  }, [params.query, params.assignedTo, params.state, params.repo]);
 
   return { issues, error, isLoading };
 }

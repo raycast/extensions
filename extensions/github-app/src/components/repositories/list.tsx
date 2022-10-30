@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getGitHubAPI, Project } from "../../github";
+import { useCache } from "../../lib/cache";
 import { getErrorMessage } from "../../utils";
 import { ProjectPullRequests } from "../pullrequests";
 import { ProjectIssueList } from "./issues";
@@ -53,8 +54,33 @@ function RepoItem(props: { repo: Project }): JSX.Element {
   );
 }
 
+export function MyReposDropdown(props: {
+  repos: Project[] | undefined;
+  onChange: (repo: Project | undefined) => void;
+}): JSX.Element {
+  const repos = props.repos;
+  return (
+    <List.Dropdown
+      tooltip="My Repositories"
+      onChange={(newValue) => {
+        const repo = repos?.find((r) => r.full_name === newValue);
+        props.onChange(repo);
+      }}
+    >
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title="All Repositories" value="" />
+      </List.Dropdown.Section>
+      <List.Dropdown.Section>
+        {repos?.map((r) => (
+          <List.Dropdown.Item key={r.full_name} icon={r.owner_avatar_url} title={r.full_name} value={r.full_name} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
 export function MyRepos(): JSX.Element {
-  const { projects, error, isLoading } = useMyRepos("");
+  const { projects, error, isLoading } = useMyRepos();
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Issues" });
   }
@@ -69,55 +95,40 @@ export function MyRepos(): JSX.Element {
   );
 }
 
-function useMyRepos(query: string | undefined): {
+export function useMyRepos(): {
   projects: Project[] | undefined;
   error?: string;
   isLoading: boolean | undefined;
 } {
-  const [projects, setProjects] = useState<Project[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let cancel = false;
-    async function fetchData() {
-      setIsLoading(true);
-      setError(undefined);
-      try {
-        const octokit = getGitHubAPI();
-        const d = await octokit.paginate(
-          octokit.rest.repos.listForAuthenticatedUser,
-          {
-            per_page: 100,
-          },
-          (response) => response.data
-        );
-        const pros: Project[] = d?.map((p) => ({
-          id: p.id,
-          name: p.name,
-          full_name: p.full_name,
-          owner_avatar_url: p.owner?.avatar_url,
-          stargazers_count: p.stargazers_count,
-          html_url: p.html_url,
-        }));
-        if (!cancel) {
-          setProjects(pros);
-        }
-      } catch (error) {
-        setError(getErrorMessage(error));
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
+  const {
+    data: projects,
+    error,
+    isLoading,
+  } = useCache<Project[]>(
+    "myprojects",
+    async () => {
+      const octokit = getGitHubAPI();
+      const d = await octokit.paginate(
+        octokit.rest.repos.listForAuthenticatedUser,
+        {
+          per_page: 100,
+        },
+        (response) => response.data
+      );
+      const pros: Project[] = d?.map((p) => ({
+        id: p.id,
+        name: p.name,
+        full_name: p.full_name,
+        owner_avatar_url: p.owner?.avatar_url,
+        stargazers_count: p.stargazers_count,
+        html_url: p.html_url,
+      }));
+      return pros;
+    },
+    {
+      deps: [],
     }
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
+  );
   return { projects, error, isLoading };
 }
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getGitHubAPI, Label, Project, PullRequest, PullRequest as PullRequestItem, User } from "../github";
 import { capitalizeFirstLetterAndRest, getErrorMessage } from "../utils";
 import { AuthorTagList, LabelTagList, UserTagList } from "./issues";
+import { MyReposDropdown, useMyRepos } from "./repositories/list";
 
 interface PullRequestSearchParams {
   query?: string;
@@ -163,7 +164,13 @@ function PullRequestItem(props: { pr: PullRequestItem }): JSX.Element {
 
 export function MyPullRequests(): JSX.Element {
   const [query, setQuery] = useState("");
-  const { prs, error, isLoading } = usePullRequests({ query: query, author: "@me" });
+  const [selectedRepo, setSelectedRepo] = useState<Project>();
+  const { projects: repos } = useMyRepos();
+  const { prs, error, isLoading } = usePullRequests({
+    query: query,
+    author: "@me",
+    repo: selectedRepo ? selectedRepo.full_name : undefined,
+  });
   if (error) {
     showToast({ style: Toast.Style.Failure, message: error, title: "Could not fetch Pull Requests" });
   }
@@ -173,7 +180,12 @@ export function MyPullRequests(): JSX.Element {
   const closedText = closedPrs ? `${closedPrs.length} Pull Requests` : undefined;
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setQuery}
+      throttle
+      searchBarAccessory={<MyReposDropdown repos={repos} onChange={setSelectedRepo} />}
+    >
       <List.Section title="Open" subtitle={openText}>
         {openPrs?.map((pr) => (
           <PullRequestItem key={pr.id} pr={pr} />

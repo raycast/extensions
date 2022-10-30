@@ -63,7 +63,7 @@ export interface PullRequest {
   html_url: string;
   body?: string;
   body_text?: string;
-  repository?: Repo;
+  repository: Repo;
   labels?: Label[];
   draft?: boolean;
   review_decision?: string | null;
