@@ -1,13 +1,6 @@
-import { open, showToast, Toast, useNavigation } from "@raycast/api";
+import { open, closeMainWindow } from "@raycast/api";
 
-export default () => {
-  const { pop } = useNavigation();
-  open("https://app.dashlane.com")
-    .then(() => pop())
-    .catch(async () => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to open your browser",
-      });
-    });
+export default async () => {
+  open("https://app.dashlane.com");
+  await closeMainWindow({ clearRootSearch: true });
 };
