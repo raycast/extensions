@@ -62,6 +62,7 @@ import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
 import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 import { ZoneShowDetailAction } from "./zones";
+import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -184,7 +185,6 @@ function getIcon(state: State): Image.ImageLike | undefined {
   } else if (e.startsWith("person")) {
     const ep = state.attributes.entity_picture;
     if (ep && ep.startsWith("/")) {
-      console.log(ha.urlJoin(ep));
       return { source: ha.urlJoin(ep), mask: Image.Mask.Circle };
     }
     return { source: "person.png", tintColor: PrimaryIconColor };
@@ -1155,6 +1155,20 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <ZoneShowDetailAction state={state} />
+          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
+        </ActionPanel>
+      );
+    }
+    case "person": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <PersonOpenInGoogleMapsAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Properties">
+            <PersonCopyIDAction state={state} />
+            <PersonCopyUserIDAction state={state} />
           </ActionPanel.Section>
           <EntityStandardActionSections state={state} />
         </ActionPanel>
