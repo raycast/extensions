@@ -197,10 +197,6 @@
               "value": "txt"
             },
             {
-              "title": "RTF",
-              "value": "rtf"
-            },
-            {
               "title": "Markdown",
               "value": "md"
             },
