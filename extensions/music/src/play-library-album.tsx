@@ -93,7 +93,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
       name,
       music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError
+      handleTaskEitherError("Operation failed.")
     )();
 
     pop();
