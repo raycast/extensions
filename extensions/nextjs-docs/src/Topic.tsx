@@ -35,7 +35,7 @@ const TopicDetail = (props: { topic: TopicType }) => {
         markdown={mark}
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open in Browser" url={`https://nextjs.org/docs/${props.topic.filepath}`} />
+            <Action.OpenInBrowser url={`https://nextjs.org/docs/${props.topic.filepath}`} />
           </ActionPanel>
         }
       />
