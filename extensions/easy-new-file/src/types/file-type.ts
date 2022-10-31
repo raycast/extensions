@@ -25,7 +25,7 @@ export const documentFileTypes: FileType[] = [
     icon: iconFolder + "text.png",
     inputContent: true,
   },
-  { name: "RTF", extension: "rtf", languageId: "rtf", keywords: [], icon: iconFolder + "rtf.png", inputContent: false },
+  { name: "RTF", extension: "rtf", languageId: "rtf", keywords: [], icon: iconFolder + "rtf.png", inputContent: true },
   {
     name: "Markdown",
     extension: "md",

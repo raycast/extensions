@@ -8,6 +8,7 @@ import { getTemplateFile } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { NewFileHereListLayout } from "./components/new-file-here-list-layout";
 import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
+import { rtfPreContent } from "./utils/constants";
 
 export default function NewFileHere() {
   const { layout } = getPreferenceValues<Preferences>();
@@ -46,13 +47,31 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
     ? (fileName = buildFileName(desPath, fileType.name, fileType.extension))
     : (fileName = fileName + "." + fileType.extension);
   const filePath = desPath + fileName;
-  if (fileType.name === "Excel") {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet([]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, filePath);
-  } else {
-    fse.writeFileSync(filePath, fileContent);
+
+  switch (fileType.name) {
+    case "Excel": {
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet([]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      XLSX.writeFile(workbook, filePath);
+      break;
+    }
+    case "RTF": {
+      const finalFileContent =
+        fileContent.length === 0
+          ? `${rtfPreContent}
+}`
+          : `${rtfPreContent}
+\\pard\\tx566\\tx1133\\tx1700\\tx2267\\tx2834\\tx3401\\tx3968\\tx4535\\tx5102\\tx5669\\tx6236\\tx6803\\pardirnatural\\partightenfactor0
+
+\\f0\\fs24 \\cf0 ${fileContent}}`;
+      fse.writeFileSync(filePath, finalFileContent);
+      break;
+    }
+    default: {
+      fse.writeFileSync(filePath, fileContent);
+      break;
+    }
   }
 
   await showCreateSuccess(fileName, filePath, desPath);
