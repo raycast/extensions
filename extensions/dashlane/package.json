@@ -15,7 +15,7 @@
       "name": "open-dashlane",
       "title": "Open Vault",
       "description": "Direct access to your Dashlane vault",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
