@@ -204,6 +204,13 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "zones",
+      "title": "Zones",
+      "description": "Get states about Zones",
+      "mode": "view",
+      "subtitle": "Home Assistant"
     }
   ],
   "preferences": [

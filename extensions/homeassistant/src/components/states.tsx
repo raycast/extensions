@@ -7,6 +7,7 @@ import { useHAStates } from "../hooks";
 import {
   CopyEntityIDAction,
   CopyStateValueAction,
+  EntityStandardActionSections,
   OpenEntityHistoryAction,
   OpenEntityLogbookAction,
   ShowAttributesAction,
@@ -60,8 +61,9 @@ import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
 import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
+import { ZoneShowDetailAction } from "./zones";
 
-const PrimaryIconColor = Color.Blue;
+export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
 const Unavailable = "unavailable";
 
@@ -180,6 +182,11 @@ function getIcon(state: State): Image.ImageLike | undefined {
     const source = getLightIconSource(state);
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
+    const ep = state.attributes.entity_picture;
+    if (ep && ep.startsWith("/")) {
+      console.log(ha.urlJoin(ep));
+      return { source: ha.urlJoin(ep), mask: Image.Mask.Circle };
+    }
     return { source: "person.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("update")) {
     const ep = (state.attributes.entity_picture as string) || undefined;
@@ -262,6 +269,8 @@ function getIcon(state: State): Image.ImageLike | undefined {
     }
 
     return { source: source, tintColor: tintColor };
+  } else if (e.startsWith("zone")) {
+    return { source: "home.svg", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -1138,6 +1147,16 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <OpenEntityHistoryAction state={state} />
             <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "zone": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ZoneShowDetailAction state={state} />
+          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
