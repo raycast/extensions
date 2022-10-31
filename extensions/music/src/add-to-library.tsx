@@ -4,6 +4,8 @@ import { hud } from "./util/feedback";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default async () => {
-  await pipe(music.currentTrack.addToLibrary, hud(`✅ Added to library`), handleTaskEitherError)();
-};
+export default pipe(
+  music.currentTrack.addToLibrary,
+  hud(`✅ Added to library`),
+  handleTaskEitherError("Failed to Add to Library", "Added to library")
+)();
