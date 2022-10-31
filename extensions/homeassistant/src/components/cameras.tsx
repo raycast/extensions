@@ -1,10 +1,23 @@
-import { Color, Detail, getPreferenceValues, Icon, showToast, Action, Toast } from "@raycast/api";
+import {
+  Color,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Action,
+  Toast,
+  List,
+  Grid,
+  ActionPanel,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { getErrorMessage } from "../utils";
 import afs from "fs/promises";
+import { useHAStates } from "../hooks";
+import { StateListItem, useStateSearch } from "./states";
 
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -154,4 +167,54 @@ export function getCameraRefreshInterval(): number | null {
   } else {
     return msec;
   }
+}
+
+function CameraGridItem(props: { state: State }): JSX.Element {
+  const s = props.state;
+  const { localFilepath } = useImage(s.entity_id);
+  return (
+    <Grid.Item
+      content={{ source: localFilepath || "" }}
+      title={s.attributes.friendly_name || s.entity_id}
+      actions={
+        <ActionPanel>
+          <CameraShowImage state={s} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function CameraGrid(): JSX.Element {
+  const [searchText, setSearchText] = useState<string>();
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useStateSearch(searchText, "camera", "", allStates);
+
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot get Home Assistant Cameras",
+      message: error.message,
+    });
+  }
+
+  if (!states) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
+  return (
+    <Grid inset={Grid.Inset.Small} isLoading={isLoading} columns={3} fit={Grid.Fit.Fill}>
+      {states?.map((s) => (
+        <CameraGridItem key={s.entity_id} state={s} />
+      ))}
+    </Grid>
+  );
+
+  return (
+    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+      {states?.map((state) => (
+        <StateListItem key={state.entity_id} state={state} />
+      ))}
+    </List>
+  );
 }
