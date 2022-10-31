@@ -55,9 +55,9 @@ export function CameraShowImage(props: { state: State }): JSX.Element | null {
   }
   return (
     <Action.Push
-      title="Show Image"
+      title="Show Image Detail"
       shortcut={{ modifiers: ["cmd"], key: "i" }}
-      icon={{ source: Icon.Eye, tintColor: Color.PrimaryText }}
+      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
       target={<CameraImage state={s} />}
     />
   );
@@ -112,8 +112,10 @@ export function useImage(
   localFilepath?: string;
   error?: string;
   isLoading: boolean;
+  imageFilepath?: string;
 } {
   const [localFilepath, setLocalFilepath] = useState<string | undefined>(defaultIcon);
+  const [imageFilepath, setImageFilepath] = useState<string | undefined>(defaultIcon);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -138,6 +140,7 @@ export function useImage(
             setTimeout(fetchData, interval);
           }
           setLocalFilepath(base64Img);
+          setImageFilepath(localFilepath);
         }
       } catch (error) {
         if (!didUnmount) {
@@ -157,7 +160,7 @@ export function useImage(
     };
   }, [entityID]);
 
-  return { localFilepath, error, isLoading };
+  return { localFilepath, error, isLoading, imageFilepath };
 }
 
 const defaultRefreshInterval = 3000;
@@ -182,15 +185,17 @@ export function getCameraRefreshInterval(): number | null {
 
 function CameraGridItem(props: { state: State }): JSX.Element {
   const s = props.state;
-  const { localFilepath } = useImage(s.entity_id);
+  const { localFilepath, imageFilepath } = useImage(s.entity_id);
   return (
     <Grid.Item
       content={{ source: localFilepath || "" }}
       title={getFriendlyName(s)}
+      quickLook={imageFilepath ? { name: getFriendlyName(s), path: imageFilepath } : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <CameraShowImage state={s} />
+            {imageFilepath && <Action.ToggleQuickLook />}
           </ActionPanel.Section>
           <EntityStandardActionSections state={s} />
         </ActionPanel>
