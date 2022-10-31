@@ -14,10 +14,11 @@ import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
 import { ha } from "../common";
 import { State } from "../haapi";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, getFriendlyName } from "../utils";
 import afs from "fs/promises";
 import { useHAStates } from "../hooks";
-import { StateListItem, useStateSearch } from "./states";
+import { useStateSearch } from "./states";
+import { EntityStandardActionSections } from "./entity";
 
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -175,10 +176,13 @@ function CameraGridItem(props: { state: State }): JSX.Element {
   return (
     <Grid.Item
       content={{ source: localFilepath || "" }}
-      title={s.attributes.friendly_name || s.entity_id}
+      title={getFriendlyName(s)}
       actions={
         <ActionPanel>
-          <CameraShowImage state={s} />
+          <ActionPanel.Section title="Controls">
+            <CameraShowImage state={s} />
+          </ActionPanel.Section>
+          <EntityStandardActionSections state={s} />
         </ActionPanel>
       }
     />
@@ -186,9 +190,8 @@ function CameraGridItem(props: { state: State }): JSX.Element {
 }
 
 export function CameraGrid(): JSX.Element {
-  const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, "camera", "", allStates);
+  const { states } = useStateSearch(undefined, "camera", "", allStates);
 
   if (error) {
     showToast({
@@ -203,18 +206,16 @@ export function CameraGrid(): JSX.Element {
   }
 
   return (
-    <Grid inset={Grid.Inset.Small} isLoading={isLoading} columns={3} fit={Grid.Fit.Fill}>
+    <Grid
+      searchBarPlaceholder="Filter by Name"
+      inset={Grid.Inset.Small}
+      isLoading={isLoading}
+      columns={3}
+      fit={Grid.Fit.Fill}
+    >
       {states?.map((s) => (
         <CameraGridItem key={s.entity_id} state={s} />
       ))}
     </Grid>
-  );
-
-  return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => (
-        <StateListItem key={state.entity_id} state={state} />
-      ))}
-    </List>
   );
 }
