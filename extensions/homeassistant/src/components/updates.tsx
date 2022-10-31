@@ -134,7 +134,7 @@ export function UpdatesList(): JSX.Element {
           <StateListItem key={state.entity_id} state={state} />
         ))}
       </List.Section>
-      <List.Section title="No Updates required">
+      <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
         {otherStates?.map((state) => (
           <StateListItem key={state.entity_id} state={state} />
         ))}
