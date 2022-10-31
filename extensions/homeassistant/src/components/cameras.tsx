@@ -34,7 +34,17 @@ function CameraImage(props: { state: State }): JSX.Element {
   if (localFilepath) {
     md += `\n![Camera](${localFilepath})`;
   }
-  return <Detail markdown={md} isLoading={isLoading} />;
+  return (
+    <Detail
+      markdown={md}
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <EntityStandardActionSections state={s} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export function CameraShowImage(props: { state: State }): JSX.Element | null {
