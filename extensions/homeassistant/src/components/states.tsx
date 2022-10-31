@@ -1191,7 +1191,7 @@ export function useStateSearch(
   device_class?: string,
   allStates?: State[]
 ): {
-  states?: State[];
+  states?: State[] | undefined;
 } {
   const [states, setStates] = useState<State[]>();
 
@@ -1214,7 +1214,7 @@ export function useStateSearch(
       haStates = haStates.slice(0, 1000);
       setStates(haStates);
     } else {
-      setStates([]);
+      return undefined;
     }
   }, [query, allStates]);
   return { states };
