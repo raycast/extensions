@@ -188,6 +188,48 @@ function getIcon(state: State): Image.ImageLike | undefined {
       return { source: ha.urlJoin(ep), mask: Image.Mask.Circle };
     }
     return { source: "person.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("device_tracker")) {
+    let source = "entity.png";
+    let color: Color.ColorLike = PrimaryIconColor;
+    switch (state.attributes.source_type) {
+      case "gps":
+        {
+          source = "person.png";
+        }
+        break;
+      case "router":
+        {
+          if (state.state === "home") {
+            source = "lan-connect.svg";
+          } else {
+            source = "lan-disconnect.svg";
+          }
+        }
+        break;
+      default:
+        {
+          source = "lan-disconnect.svg";
+        }
+        break;
+    }
+    switch (state.state) {
+      case "home":
+        {
+          color = Color.Yellow;
+        }
+        break;
+      case "not_home":
+        {
+          color = PrimaryIconColor;
+        }
+        break;
+      default:
+        {
+          color = UnavailableColor;
+        }
+        break;
+    }
+    return { source: source, tintColor: color };
   } else if (e.startsWith("update")) {
     const ep = (state.attributes.entity_picture as string) || undefined;
     if (ep) {
