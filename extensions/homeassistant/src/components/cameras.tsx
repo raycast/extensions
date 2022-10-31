@@ -9,6 +9,7 @@ import {
   List,
   Grid,
   ActionPanel,
+  Image,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
@@ -186,10 +187,16 @@ export function getCameraRefreshInterval(): number | null {
 function CameraGridItem(props: { state: State }): JSX.Element {
   const s = props.state;
   const { localFilepath, imageFilepath } = useImage(s.entity_id);
+  const content: Image.ImageLike =
+    s.state === "unavailable" ? { source: "video.png", tintColor: Color.Blue } : { source: localFilepath || "" };
+  const titleParts = [getFriendlyName(s)];
+  if (s.state === "unavailable") {
+    titleParts.push("❌");
+  }
   return (
     <Grid.Item
-      content={{ source: localFilepath || "" }}
-      title={getFriendlyName(s)}
+      content={content}
+      title={titleParts.join(" ")}
       quickLook={imageFilepath ? { name: getFriendlyName(s), path: imageFilepath } : undefined}
       actions={
         <ActionPanel>
