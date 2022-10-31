@@ -256,7 +256,7 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.42.0",
     "home-assistant-js-websocket": "^5.11.1",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
@@ -266,6 +266,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
