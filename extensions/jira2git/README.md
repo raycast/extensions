@@ -2,6 +2,8 @@
 
 The tool for making Jira and Git work together smoothly as silk for a better development experience.
 
+![screencast](assets/Jira2Git.gif)
+
 ## Features
 
 - Transform Jira URL to Git branch name
