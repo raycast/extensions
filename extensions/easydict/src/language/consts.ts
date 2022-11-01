@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:56
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-17 23:29
+ * @lastEditTime: 2022-10-27 11:32
  * @fileName: consts.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -139,7 +139,7 @@ export const languageItemList: LanguageItem[] = [
     langEnglishName: "French",
     langChineseName: "法语",
     appleDetectLangChineseName: "法语",
-    voiceList: ["Amelie", "Thomas"],
+    voiceList: ["Amélie", "Thomas"],
     emoji: "🇫🇷",
   },
   {
