@@ -7,19 +7,19 @@
     "Other"
   ],
   "icon": "icon.png",
-  "author": "RowanGW",
+  "author": "ViGeng",
   "license": "MIT",
   "commands": [
     {
       "name": "inputText",
-      "title": "Input to translate",
+      "title": "Input to Translate",
       "subtitle": "Bob",
       "description": "Open input window",
       "mode": "no-view"
     },
     {
       "name": "transClipboard",
-      "title": "Translate clipboard",
+      "title": "Translate Clipboard",
       "subtitle": "Bob",
       "description": "Translate latest text in clipboard",
       "mode": "no-view"

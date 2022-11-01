@@ -43,7 +43,5 @@ export async function runAppleScriptSilently(appleScript: string): Promise<void>
 }
 
 export const isEmpty = (string: string | null | undefined) => {
-    return !(string != null && String(string).length > 0);
+  return !(string != null && String(string).length > 0);
 };
-
-

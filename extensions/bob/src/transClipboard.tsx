@@ -1,6 +1,5 @@
-import {buildScriptEnsuringBobIsRunning, isEmpty, runAppleScriptSilently} from "./utils";
-import {Clipboard, showHUD} from "@raycast/api";
-
+import { buildScriptEnsuringBobIsRunning, isEmpty, runAppleScriptSilently } from "./utils";
+import { Clipboard, showHUD } from "@raycast/api";
 
 export default async () => {
   const clipboardText = await Clipboard.readText();
@@ -8,13 +7,14 @@ export default async () => {
     await showHUD("No text in clipboard");
   } else {
     const script = buildScriptEnsuringBobIsRunning(
-        `tell application "Bob"
+      `tell application "Bob"
     launch
-    translate "` + clipboardText + ` "
+    translate "` +
+        clipboardText +
+        ` "
 end tell`
     );
     await runAppleScriptSilently(script);
     await showHUD("Bob started");
   }
-
 };

@@ -10,7 +10,7 @@ Controls:
 
 ## Screenshot
 
-![screenshot](./metadata/screenshot-01.png)
+![screenshot](./screenshot-01.png)
 
 ## Acknowledge
 
