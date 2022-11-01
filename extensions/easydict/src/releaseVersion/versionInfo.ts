@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: Tisfeng
- * @lastEditTime: 2022-11-01 22:04
+ * @lastEditTime: 2022-11-01 22:09
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -38,6 +38,7 @@ export class Easydict {
 ### 🐞 修复
 
 - 修复了 DeepL 翻译额度超支时会有错误提示问题。
+- 更新法语朗读声音。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -46,6 +47,7 @@ export class Easydict {
 ### 🐞 Fixes
 
 - Fixed the problem that an error prompt will appear when DeepL translation quota is exceeded.
+- Updated French say voice.
 `;
 
   getRepoUrl() {
