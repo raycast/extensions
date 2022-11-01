@@ -54,7 +54,7 @@ function OpenWithIINAAction(props: { video: Video }): JSX.Element | null {
         <Action.Open
           title="Open with IINA"
           target={url}
-          application="iina"
+          application="IINA"
           icon={{ fileIcon: appPath }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onOpen={() => {
