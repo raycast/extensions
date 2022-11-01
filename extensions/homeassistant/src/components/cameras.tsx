@@ -20,6 +20,7 @@ import afs from "fs/promises";
 import { useHAStates } from "../hooks";
 import { useStateSearch } from "./states";
 import { EntityStandardActionSections } from "./entity";
+import fs from "fs";
 
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -41,6 +42,11 @@ function CameraImage(props: { state: State }): JSX.Element {
       isLoading={isLoading}
       actions={
         <ActionPanel>
+          <ActionPanel.Section title="Video Stream">
+            <CameraOpenStreamInBrowserAction state={s} />
+            <CameraOpenStreamInVLCAction state={s} />
+            <CameraOpenStreamInIINAAction state={s} />
+          </ActionPanel.Section>
           <EntityStandardActionSections state={s} />
         </ActionPanel>
       }
@@ -96,6 +102,77 @@ export function CameraTurnOffAction(props: { state: State }): JSX.Element | null
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       icon={{ source: "power-btn.png", tintColor: Color.Red }}
+    />
+  );
+}
+
+function getVideoStreamUrlFromCamera(state: State): string | undefined {
+  const access_token = state.attributes.access_token as string | undefined;
+  if (!access_token) {
+    return;
+  }
+  const url = ha.urlJoin(`api/camera_proxy_stream/${state.entity_id}?token=${access_token}`);
+  return url;
+}
+
+export function CameraOpenStreamInBrowserAction(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  if (!s.entity_id.startsWith("camera")) {
+    return null;
+  }
+  const url = getVideoStreamUrlFromCamera(s);
+  if (!url) {
+    return null;
+  }
+  return <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: ["cmd"], key: "b" }} url={url} />;
+}
+
+export function CameraOpenStreamInVLCAction(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  if (!s.entity_id.startsWith("camera")) {
+    return null;
+  }
+  const appPath = "/Applications/VLC.app";
+  if (!fs.existsSync(appPath)) {
+    return null;
+  }
+
+  const url = getVideoStreamUrlFromCamera(s);
+  if (!url) {
+    return null;
+  }
+  return (
+    <Action.Open
+      title="Open in VLC"
+      target={url}
+      application="VLC"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      icon={{ fileIcon: appPath }}
+    />
+  );
+}
+
+export function CameraOpenStreamInIINAAction(props: { state: State }): JSX.Element | null {
+  const s = props.state;
+  if (!s.entity_id.startsWith("camera")) {
+    return null;
+  }
+  const appPath = "/Applications/IINA.app";
+  if (!fs.existsSync(appPath)) {
+    return null;
+  }
+
+  const url = getVideoStreamUrlFromCamera(s);
+  if (!url) {
+    return null;
+  }
+  return (
+    <Action.Open
+      title="Open in IINA"
+      target={url}
+      application="IINA"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+      icon={{ fileIcon: appPath }}
     />
   );
 }
@@ -203,6 +280,11 @@ function CameraGridItem(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <CameraShowImage state={s} />
             {imageFilepath && <Action.ToggleQuickLook />}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Video Stream">
+            <CameraOpenStreamInBrowserAction state={s} />
+            <CameraOpenStreamInVLCAction state={s} />
+            <CameraOpenStreamInIINAAction state={s} />
           </ActionPanel.Section>
           <EntityStandardActionSections state={s} />
         </ActionPanel>
