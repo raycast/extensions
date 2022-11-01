@@ -48,7 +48,14 @@ import {
   VacuumTurnOffAction,
   VacuumTurnOnAction,
 } from "./vacuum";
-import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
+import {
+  CameraOpenStreamInBrowserAction,
+  CameraOpenStreamInIINAAction,
+  CameraOpenStreamInVLCAction,
+  CameraShowImage,
+  CameraTurnOffAction,
+  CameraTurnOnAction,
+} from "./cameras";
 import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
@@ -835,6 +842,11 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Image">
             <CameraShowImage state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Video Stream">
+            <CameraOpenStreamInBrowserAction state={state} />
+            <CameraOpenStreamInVLCAction state={state} />
+            <CameraOpenStreamInIINAAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Controls">
             <CameraTurnOnAction state={state} />
