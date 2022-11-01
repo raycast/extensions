@@ -19,7 +19,6 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
-  console.log(searchResult);
   return (
     <List.Item
       title={searchResult.name}
@@ -85,4 +84,3 @@ interface LinkResult {
   description: string;
   url: string;
 }
-
