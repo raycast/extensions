@@ -1,10 +1,25 @@
-import { Color, Detail, getPreferenceValues, Icon, showToast, Action, Toast } from "@raycast/api";
+import {
+  Color,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Action,
+  Toast,
+  List,
+  Grid,
+  ActionPanel,
+  Image,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
 import { ha } from "../common";
 import { State } from "../haapi";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, getFriendlyName } from "../utils";
 import afs from "fs/promises";
+import { useHAStates } from "../hooks";
+import { useStateSearch } from "./states";
+import { EntityStandardActionSections } from "./entity";
 
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -20,7 +35,17 @@ function CameraImage(props: { state: State }): JSX.Element {
   if (localFilepath) {
     md += `\n![Camera](${localFilepath})`;
   }
-  return <Detail markdown={md} isLoading={isLoading} />;
+  return (
+    <Detail
+      markdown={md}
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <EntityStandardActionSections state={s} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export function CameraShowImage(props: { state: State }): JSX.Element | null {
@@ -31,9 +56,9 @@ export function CameraShowImage(props: { state: State }): JSX.Element | null {
   }
   return (
     <Action.Push
-      title="Show Image"
+      title="Show Image Detail"
       shortcut={{ modifiers: ["cmd"], key: "i" }}
-      icon={{ source: Icon.Eye, tintColor: Color.PrimaryText }}
+      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
       target={<CameraImage state={s} />}
     />
   );
@@ -88,8 +113,10 @@ export function useImage(
   localFilepath?: string;
   error?: string;
   isLoading: boolean;
+  imageFilepath?: string;
 } {
   const [localFilepath, setLocalFilepath] = useState<string | undefined>(defaultIcon);
+  const [imageFilepath, setImageFilepath] = useState<string | undefined>(defaultIcon);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -114,6 +141,7 @@ export function useImage(
             setTimeout(fetchData, interval);
           }
           setLocalFilepath(base64Img);
+          setImageFilepath(localFilepath);
         }
       } catch (error) {
         if (!didUnmount) {
@@ -133,7 +161,7 @@ export function useImage(
     };
   }, [entityID]);
 
-  return { localFilepath, error, isLoading };
+  return { localFilepath, error, isLoading, imageFilepath };
 }
 
 const defaultRefreshInterval = 3000;
@@ -154,4 +182,62 @@ export function getCameraRefreshInterval(): number | null {
   } else {
     return msec;
   }
+}
+
+function CameraGridItem(props: { state: State }): JSX.Element {
+  const s = props.state;
+  const { localFilepath, imageFilepath } = useImage(s.entity_id);
+  const content: Image.ImageLike =
+    s.state === "unavailable" ? { source: "video.png", tintColor: Color.Blue } : { source: localFilepath || "" };
+  const titleParts = [getFriendlyName(s)];
+  if (s.state === "unavailable") {
+    titleParts.push("❌");
+  }
+  return (
+    <Grid.Item
+      content={content}
+      title={titleParts.join(" ")}
+      quickLook={imageFilepath ? { name: getFriendlyName(s), path: imageFilepath } : undefined}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <CameraShowImage state={s} />
+            {imageFilepath && <Action.ToggleQuickLook />}
+          </ActionPanel.Section>
+          <EntityStandardActionSections state={s} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function CameraGrid(): JSX.Element {
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useStateSearch(undefined, "camera", "", allStates);
+
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot get Home Assistant Cameras",
+      message: error.message,
+    });
+  }
+
+  if (!states) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
+  return (
+    <Grid
+      searchBarPlaceholder="Filter by Name"
+      inset={Grid.Inset.Small}
+      isLoading={isLoading}
+      columns={3}
+      fit={Grid.Fit.Fill}
+    >
+      {states?.map((s) => (
+        <CameraGridItem key={s.entity_id} state={s} />
+      ))}
+    </Grid>
+  );
 }

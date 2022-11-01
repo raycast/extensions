@@ -1,5 +1,15 @@
 # Home Assistant Changelog
 
+## [Zones] - 2022-10-31
+- Add Grid View support for cameras
+- Add QuickLook support for cameras in Grid View
+- Add sections for `Update`, `Motions` and `Windows` commands
+- Add `Zones` command
+- Persons will now show the avatar if available
+- Add icon support for `device_tracker` entities
+- Add `Copy Key to Clipboard` action to attribute list items
+- Add `Open in Google Maps` action for persons
+
 ## [Window Support] - 2022-08-09
 - Add icon and state support for window device class
 - Add actions to `Edit` or `Debug` scripts or automations in the browser
