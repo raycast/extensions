@@ -101,7 +101,7 @@
       "title": "Timers Menu Bar",
       "description": "View, start, or stop existing countdown timers from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "10s"
     },
     {
       "name": "startStopwatch",
@@ -207,7 +207,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3"
+    "@raycast/api": "^1.42.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
