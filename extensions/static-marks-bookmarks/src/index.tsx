@@ -1,22 +1,17 @@
 import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
-import { useState } from "react";
+import { useFetch } from "@raycast/utils";
 import YAML from "yaml";
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-
   const { data, isLoading } = useFetch(getPreferenceValues()["static-mark-yaml-url"], {
     parseResponse: parseFetchYamlResponse,
   });
 
-  const filteredData = filterData(searchText, data);
-
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search bookmarks..." throttle>
-      <List.Section title="Results" subtitle={filteredData?.length + ""}>
-        {filteredData?.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
+    <List isLoading={isLoading} searchBarPlaceholder="Search bookmarks...">
+      <List.Section title="Results" subtitle={data?.length + ""}>
+        {data?.map((searchResult, index) => (
+          <SearchListItem key={index} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -24,6 +19,7 @@ export default function Command() {
 }
 
 function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
+  console.log(searchResult);
   return (
     <List.Item
       title={searchResult.name}
@@ -84,15 +80,9 @@ function flattenYaml(json: unknown[], linkResults: LinkResult[], parentKey: stri
   return linkResults;
 }
 
-function filterData(searchText: string, results?: LinkResult[]) {
-  if (results == null) {
-    return results;
-  }
-  return results.filter((value) => value.name.toLowerCase().includes(searchText.toLowerCase()));
-}
-
 interface LinkResult {
   name: string;
   description: string;
   url: string;
 }
+
