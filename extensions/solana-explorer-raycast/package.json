@@ -4,7 +4,7 @@
   "title": "Solana Explorer",
   "description": "View Solana Account and Transaction details right from Raycast",
   "icon": "logo.png",
-  "author": "anishde12020",
+  "author": "AnishDe12020",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -14,9 +14,6 @@
     "explorer",
     "solscan",
     "web3"
-  ],
-  "contributors": [
-    "AnishDe12020"
   ],
   "license": "MIT",
   "commands": [
