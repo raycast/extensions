@@ -2,12 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira2git",
   "title": "Jira2Git",
-  "description": "Better development experience for developers.",
-  "icon": "command-icon.png",
+  "description": "The tool for making Jira and Git work together smoothly as silk for a better development experience.",
+  "icon": "Jira2Git.png",
   "author": "ipiranhaa",
   "categories": [
     "Developer Tools",
     "Productivity"
+  ],
+  "keywords": [
+    "git",
+    "jira"
   ],
   "license": "MIT",
   "commands": [
