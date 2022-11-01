@@ -5,7 +5,6 @@ import {
   getPreferenceValues,
   launchCommand,
   LaunchType,
-  popToRoot,
   showHUD,
 } from "@raycast/api";
 
@@ -14,6 +13,8 @@ import { prepend } from "./hooks/colorSaver";
 import pickColor from "./pickerHelper";
 
 export default async () => {
+  const internalLaunch = environment.launchContext?.internal;
+
   const openColorPicker = async (type: ColorType) => {
     closeMainWindow();
 
@@ -21,7 +22,11 @@ export default async () => {
 
     if (color === null) {
       showHUD("Cancelled");
-      popToRoot();
+
+      if (internalLaunch) {
+        launchCommand({ name: "index", type: LaunchType.UserInitiated });
+      }
+
       return;
     }
 
@@ -29,16 +34,16 @@ export default async () => {
     prepend("history", color);
     showHUD("Copied to Clipboard");
 
-    if (environment.launchContext?.open === "fromRender") {
+    if (internalLaunch) {
       launchCommand({ name: "index", type: LaunchType.UserInitiated });
-    } else {
-      popToRoot();
     }
   };
 
   await openColorPicker(
-    getPreferenceValues<{
-      format: string;
-    }>().format as ColorType
+    internalLaunch
+      ? environment.launchContext?.type
+      : (getPreferenceValues<{
+          format: string;
+        }>().format as ColorType)
   );
 };
