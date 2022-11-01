@@ -1,5 +1,8 @@
 # YouTube Changelog
 
+## [IINA] - 2022-11-01
+- Add correct appid for IINA otherwise the browser will be opened instead of IINA
+
 ## [Updates] - 2022-07-08
 
 - Added optional grid view. 
