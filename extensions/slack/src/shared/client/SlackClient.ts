@@ -1,5 +1,5 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { slackWebClient } from "./WebClient";
+import { SlackConversation, slackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
@@ -94,19 +94,35 @@ export class SlackClient {
     return users ?? [];
   }
 
-  public static async getChannels(): Promise<Channel[]> {
-    const publicChannels = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "public_channel",
-      limit: 1000,
-    });
-    const privateChannels = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "private_channel",
-      limit: 1000,
-    });
+  private static async getConversations(
+    type: "public_channel" | "private_channel" | "mpim"
+  ): Promise<SlackConversation[]> {
+    const conversations: SlackConversation[] = [];
 
-    const publicAndPrivateChannels = [...(publicChannels.channels ?? []), ...(privateChannels.channels ?? [])];
+    let cursor: string | undefined;
+    do {
+      try {
+        const response = await slackWebClient.conversations.list({
+          exclude_archived: true,
+          types: type,
+          limit: 1000,
+          cursor,
+        });
+        conversations.push(...(response.channels ?? []));
+        cursor = response.response_metadata?.next_cursor;
+      } catch (e) {
+        break;
+      }
+    } while (cursor);
+
+    return conversations;
+  }
+
+  public static async getChannels(): Promise<Channel[]> {
+    const publicChannels = await SlackClient.getConversations("public_channel");
+    const privateChannels = await SlackClient.getConversations("private_channel");
+
+    const publicAndPrivateChannels = [...publicChannels, ...privateChannels];
 
     const channels: Channel[] =
       publicAndPrivateChannels
@@ -124,14 +140,10 @@ export class SlackClient {
   public static async getGroups(): Promise<Group[]> {
     const users = await SlackClient.getUsers();
 
-    const conversations = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "mpim",
-      limit: 1000,
-    });
+    const conversations = await SlackClient.getConversations("mpim");
 
     const groups: Group[] =
-      conversations.channels
+      conversations
         ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
           const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";

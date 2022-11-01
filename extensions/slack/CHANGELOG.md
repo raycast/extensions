@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix] - 2022-11-01
+
+- Fix fetching of conversations when hitting the Slack API limit of 1k conversations
+
 ## [New Command] - 2022-05-04
 
 - Add `Unread Messages` command and update required permission scopes accordingly
