@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Fix bug] - 2022-11-01
 
 - Fix the bug that RTF files cannot be opened normally
 
