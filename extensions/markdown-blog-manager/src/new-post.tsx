@@ -12,7 +12,7 @@ export default function Command() {
 		<ValidatePreferences>
 			<NewPost />
 		</ValidatePreferences>
-	); 
+	);
 }
 
 export function NewPost() {
