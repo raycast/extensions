@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Video Stream Actions] - 2022-11-01
+- Add action to open a camera video stream in VLC, IINA and the Browser
+
 ## [Zones] - 2022-10-31
 - Add Grid View support for cameras
 - Add QuickLook support for cameras in Grid View
