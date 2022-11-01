@@ -129,11 +129,15 @@ export function VideoItemDetail(props: { video: Video }): JSX.Element {
       }
       actions={
         <ActionPanel>
-          <OpenVideoInBrowser video={props.video} />
-          <ShowChannelAction channelId={video.channelId} />
-          <OpenChannelInBrowser channelId={video.channelId} />
-          <CopyVideoUrlAction video={video} />
-          <OpenWithIINAAction video={props.video} />
+          <ActionPanel.Section>
+            <OpenVideoInBrowser video={props.video} />
+            <ShowChannelAction channelId={video.channelId} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenChannelInBrowser channelId={video.channelId} />
+            <CopyVideoUrlAction video={video} />
+            <OpenWithIINAAction video={props.video} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
