@@ -4,7 +4,6 @@ import preferences from './preferences';
 import { getRecursiveFiles, getRecursiveDirectories, filenameToTitle } from './utils';
 import fs from 'fs-extra';
 
-
 export interface Post {
 	title: string;
 	summary: string;
@@ -23,7 +22,7 @@ export interface MarkdownFile {
 	title: string;
 	lastModifiedAt: Date;
 	keywords: string[];
-};
+}
 
 export type OrganizedPosts = {
 	[subdirectory: string]: MarkdownFile[];
@@ -127,11 +126,14 @@ export function publishPost(post: MarkdownFile): void {
 	fs.unlinkSync(post.path);
 }
 
-
 export function createDraft(post: Post): string {
 	let subdirectory = '';
 
-	const postPath = path.join(preferences().draftsPath, subdirectory, `${post.slug}.${post.extension}`);
+	const postPath = path.join(
+		preferences().draftsPath,
+		subdirectory,
+		`${post.slug}.${post.extension}`
+	);
 	if (post.subdirectory) {
 		subdirectory = post.subdirectory + '/';
 	}
