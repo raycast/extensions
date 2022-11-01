@@ -1,6 +1,6 @@
 import { statSync } from 'fs';
 import path from 'path';
-import preferences from './preferences';
+import { getPreferences } from './preferences';
 import { getRecursiveFiles, getRecursiveDirectories, filenameToTitle } from './utils';
 import fs from 'fs-extra';
 
@@ -33,7 +33,7 @@ export type OrganizedPosts = {
  */
 function pathToPost(filepath: string, draft: boolean): MarkdownFile {
 	const name = path.basename(filepath);
-	const contentPaths = [preferences().publicPath, preferences().draftsPath];
+	const contentPaths = [getPreferences().publicPath, getPreferences().draftsPath];
 	const relativePath = contentPaths.reduce((acc, root) => {
 		return acc.replace(root, '');
 	}, filepath);
@@ -54,8 +54,8 @@ function pathToPost(filepath: string, draft: boolean): MarkdownFile {
  * Get Public and Draft posts
  */
 export function getPosts(): MarkdownFile[] {
-	const published = getRecursiveFiles(preferences().publicPath);
-	const drafts = getRecursiveFiles(preferences().draftsPath);
+	const published = getRecursiveFiles(getPreferences().publicPath);
+	const drafts = getRecursiveFiles(getPreferences().draftsPath);
 
 	return [
 		...drafts.map((path) => pathToPost(path, true)),
@@ -93,7 +93,7 @@ export function getOrganizedPosts(): OrganizedPosts {
  * - ['my-subdirectory', 'my-other-subdirectory']
  */
 export function subdirectories(): string[] {
-	const { draftsPath, publicPath } = preferences();
+	const { draftsPath, publicPath } = getPreferences();
 
 	const paths = [draftsPath, publicPath];
 
@@ -108,7 +108,7 @@ export function subdirectories(): string[] {
 }
 
 export function publishPost(post: MarkdownFile): void {
-	const { draftsPath, publicPath } = preferences();
+	const { draftsPath, publicPath } = getPreferences();
 
 	if (!post.path.startsWith(draftsPath)) {
 		throw new Error(`Cannot publish post that is not in drafts directory`);
@@ -130,7 +130,7 @@ export function createDraft(post: Post): string {
 	let subdirectory = '';
 
 	const postPath = path.join(
-		preferences().draftsPath,
+		getPreferences().draftsPath,
 		subdirectory,
 		`${post.slug}.${post.extension}`
 	);

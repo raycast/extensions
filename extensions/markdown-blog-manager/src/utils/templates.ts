@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import preferences from './preferences';
+import { getPreferences } from './preferences';
 
 /**
  * If no template file is used, this is the default template that we'll fall-back to.
@@ -15,12 +15,12 @@ Once upon a time...
 `.trim();
 
 export function getPostTemplate(subdirectory: string) {
-	const templatePath = path.join(preferences().draftsPath, subdirectory, '.template.md');
+	const templatePath = path.join(getPreferences().draftsPath, subdirectory, '.template.md');
 	if (subdirectory && fs.existsSync(templatePath)) {
 		return fs.readFileSync(templatePath, 'utf8');
 	}
 
-	const defaultTemplatePath = path.join(preferences().draftsPath, '.template.md');
+	const defaultTemplatePath = path.join(getPreferences().draftsPath, '.template.md');
 	if (fs.existsSync(defaultTemplatePath)) {
 		return fs.readFileSync(defaultTemplatePath, 'utf8');
 	}

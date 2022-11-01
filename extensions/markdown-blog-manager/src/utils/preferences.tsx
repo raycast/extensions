@@ -8,7 +8,7 @@ interface Preferences {
 	publicPath: string;
 }
 
-const getPreferences = () => {
+export const getPreferences = () => {
 	const values = getPreferenceValues<Preferences>();
 
 	values.draftsPath = values.draftsPath.replace('~/', `${homedir()}/`);
@@ -32,8 +32,6 @@ const getPreferences = () => {
 
 	return values;
 };
-
-export default getPreferences;
 
 export const ValidatePreferences = (props: { children: JSX.Element }) => {
 	try {
