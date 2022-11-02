@@ -4,7 +4,7 @@ import { count } from "./lib/count";
 
 export default function Command() {
   const [text, setText] = useState("");
-  const [includeWhitespace, setIncludeWhitespace] = useState(false);
+  const [includeWhitespace, setIncludeWhitespace] = useState(true);
   const [result, setResult] = useState<string>("");
 
   useEffect(() => {
