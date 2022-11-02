@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bobcontrol",
-  "title": "Bob - Translate",
+  "title": "Bob - Control Bob Translate",
   "description": "Control the Bob Translate app for macOS with your keyboard.",
   "categories": [
     "Other"
