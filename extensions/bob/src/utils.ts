@@ -1,5 +1,6 @@
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { checkBobInstallation } from "./checkInstall";
 
 /**
  * Builds AppleScript to ensure Bob is running and then wraps the passed command(s).
@@ -38,8 +39,10 @@ export function buildScriptEnsuringBobIsRunning(commandsToRunAfterBobIsRunning: 
  * @returns A promise that is resolved when the AppleScript finished running
  */
 export async function runAppleScriptSilently(appleScript: string): Promise<void> {
-  await closeMainWindow();
-  await runAppleScript(appleScript);
+  if (await checkBobInstallation()) {
+    await closeMainWindow();
+    await runAppleScript(appleScript);
+  }
 }
 
 export const isEmpty = (string: string | null | undefined) => {

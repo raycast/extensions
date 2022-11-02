@@ -7,6 +7,7 @@ export default async () => {
     await showHUD("No text in clipboard");
   } else {
     const script = buildScriptEnsuringBobIsRunning(
+      // todo: syntax check, this may encounter syntax err
       `tell application "Bob"
     launch
     translate "` +
@@ -15,6 +16,5 @@ export default async () => {
 end tell`
     );
     await runAppleScriptSilently(script);
-    await showHUD("Bob started");
   }
 };
