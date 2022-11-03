@@ -115,7 +115,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Adding Screenshots
 
-In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
+In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with ease.
 
 #### How to use it?
 
