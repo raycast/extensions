@@ -33,6 +33,11 @@ function UnreadNotifications() {
     await open(`https://linear.app/${urlKey}/inbox`, linearApp);
   }
 
+  const stringTruncate = (string: string, length: number) => {
+    const ellipsis = string.length > length ? "…" : "";
+    return string.substring(0, length) + ellipsis;
+  };
+
   return (
     <MenuBarExtra
       title={getNotificationMenuBarTitle(unreadNotifications)}
@@ -62,8 +67,9 @@ function UnreadNotifications() {
             <MenuBarExtra.Item
               key={notification.id}
               icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
-              title={notification.issue ? `${notification.issue.identifier}: ${baseTitle}` : baseTitle}
-              tooltip={notification.issue?.title}
+              title={baseTitle}
+              subtitle={notification.issue?.title ? stringTruncate(notification.issue.title, 20) : ""}
+              tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
               onAction={() => openNotification(notification)}
             />
           );
