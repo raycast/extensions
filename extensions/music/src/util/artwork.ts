@@ -51,22 +51,26 @@ export const getAlbumArtwork = async (artist: string, album: string): Promise<st
   const query = `http://ws.audioscrobbler.com/2.0/?method=album.getinfo&artist=${encodeURIComponent(
     artist
   )}&album=${encodeURIComponent(album)}&api_key=${api}&format=json`;
-  const response = await fetch(query);
-  if (response.status === 200) {
-    const data: any = await response.json();
-    if ("album" in data && "image" in data.album) {
-      const images = data.album.image || [];
-      if (images.length > 0) {
-        const artwork = images[images.length - 1]["#text"];
-        if (artwork) {
-          artworks.set(key, artwork);
-          return artwork;
+  try {
+    const response = await fetch(query);
+    if (response.status === 200) {
+      const data: any = await response.json();
+      if ("album" in data && "image" in data.album) {
+        const images = data.album.image || [];
+        if (images.length > 0) {
+          const artwork = images[images.length - 1]["#text"];
+          if (artwork) {
+            artworks.set(key, artwork);
+            return artwork;
+          }
         }
       }
     }
-  }
-  if (album.includes(" - Single")) {
-    return await getAlbumArtwork(artist, album.replace(" - Single", ""));
+    if (album.includes(" - Single")) {
+      return await getAlbumArtwork(artist, album.replace(" - Single", ""));
+    }
+  } catch (error) {
+    console.error(error);
   }
   return undefined;
 };

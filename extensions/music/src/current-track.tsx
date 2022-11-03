@@ -20,30 +20,35 @@ export default function CurrentTrack() {
   const [playing, setPlaying] = useState<boolean | undefined>(undefined);
   const [noTrack, setNoTrack] = useState<boolean>(false);
 
-  useEffect(() => {
-    const getTrack = async () => {
-      try {
-        setPlaying(await music.player.isPlaying());
-        const track = await music.track.getCurrentTrackDetails();
-        setTrack(track);
-        const items = [];
-        items.push({ h1: track.name });
-        if (track.artwork && track.artwork !== "../assets/no-track.png") {
-          items.push({
-            img: { source: track.artwork.replace("300x300", "600x600") },
-          });
-        }
-        setMarkdown(json2md(items));
-      } catch {
-        setNoTrack(true);
+  const getTrack = async () => {
+    try {
+      setLoading(true);
+      setPlaying(await music.player.isPlaying());
+      const track = await music.track.getCurrentTrackDetails();
+      setTrack(track);
+      const items: json2md.DataObject[] = [{ h1: track.name }];
+      if (track.artwork && track.artwork !== "../assets/no-track.png") {
+        items.push({
+          img: { title: track.name, source: track.artwork.replace("300x300", "600x600") },
+        });
       }
-    };
+      setMarkdown(json2md(items));
+      setLoading(false);
+    } catch {
+      setNoTrack(true);
+    }
+  };
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refresh, setRefresh] = useState<boolean>(false);
+
+  useEffect(() => {
     getTrack();
     return () => {
       setTrack(undefined);
       setMarkdown(undefined);
     };
-  }, []);
+  }, [refresh]);
 
   return noTrack ? (
     <List
@@ -76,103 +81,134 @@ export default function CurrentTrack() {
     </List>
   ) : (
     <Detail
-      isLoading={markdown === undefined}
+      navigationTitle={track?.name}
+      isLoading={loading}
       markdown={markdown}
       metadata={markdown && track && <DetailMetadata track={track} />}
       actions={
         track && (
           <ActionPanel>
-            <Action
-              title={playing ? "Pause" : "Play"}
-              icon={playing ? Icon.Pause : Icon.Play}
-              onAction={async () => {
-                await handleTaskEitherError(music.player.togglePlay)();
-                setPlaying(!playing);
-              }}
-            />
-            <Action
-              title="Show Track"
-              icon={Icons.Music}
-              onAction={async () => {
-                await handleTaskEitherError(music.player.revealTrack)();
-                await handleTaskEitherError(music.player.activate)();
-              }}
-            />
-            {!track.inLibrary && (
+            <ActionPanel.Section>
               <Action
-                title="Add to Library"
-                icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "a" }}
+                title={playing ? "Pause" : "Play"}
+                icon={playing ? Icon.Pause : Icon.Play}
                 onAction={async () => {
-                  await pipe(
-                    music.player.addToLibrary,
-                    TE.map(async () => {
-                      showToast(Toast.Style.Success, "Added to Library");
-                      setTrack({ ...track, inLibrary: true });
-                      await wait(5);
-                      await refreshCache();
-                    }),
-                    TE.mapLeft(() => showToast(Toast.Style.Failure, "Failed to Add to Library"))
-                  )();
+                  await handleTaskEitherError(music.player.togglePlay)();
+                  setPlaying(!playing);
                 }}
               />
-            )}
-            <Action
-              title={`${track.loved ? "Unlove" : "Love"} Track`}
-              icon={Icon.Heart}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-              onAction={async () => {
-                await handleTaskEitherError(music.player.toggleLove)();
-                setTrack({ ...track, loved: !track.loved });
-              }}
-            />
-            <Action
-              title="Dislike Track"
-              icon={Icon.HeartDisabled}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={async () => {
-                await handleTaskEitherError(music.player.dislike)();
-                await handleTaskEitherError(music.player.setRating(0))();
-                setTrack({ ...track, rating: 0 });
-              }}
-            />
-            {track.inLibrary && (
-              <React.Fragment>
-                <ActionPanel.Submenu title="Set Rating" icon={Icon.Star} shortcut={{ modifiers: ["cmd"], key: "r" }}>
-                  {Array.from({ length: 6 }, (_, i) => i).map((rating) => (
-                    <Action
-                      key={rating}
-                      title={`${rating} Star${rating === 1 ? "" : "s"}`}
-                      icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
-                      onAction={async () => {
-                        await pipe(
-                          rating * 20,
-                          music.player.setRating,
-                          TE.map(() => setTrack({ ...track, rating: rating })),
-                          TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
-                        )();
-                      }}
-                    />
-                  ))}
-                </ActionPanel.Submenu>
+              <Action
+                title="Show Track"
+                icon={Icons.Music}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.revealTrack)();
+                  await handleTaskEitherError(music.player.activate)();
+                }}
+              />
+              <Action
+                title="Next Track"
+                icon={Icon.Forward}
+                shortcut={{ modifiers: [], key: "arrowRight" }}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.next)();
+                  setRefresh(!refresh);
+                }}
+              />
+              <Action
+                title="Previous Track"
+                icon={Icon.Rewind}
+                shortcut={{ modifiers: [], key: "arrowLeft" }}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.previous)();
+                  setRefresh(!refresh);
+                }}
+              />
+              <Action
+                title="Restart Track"
+                shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                icon={Icon.ArrowCounterClockwise}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.restart)();
+                }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section title={track?.name}>
+              {!track.inLibrary && (
                 <Action
-                  title="Delete from Library"
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  title="Add to Library"
+                  icon={Icon.Plus}
+                  shortcut={{ modifiers: ["cmd"], key: "a" }}
                   onAction={async () => {
                     await pipe(
-                      music.player.deleteFromLibrary,
+                      music.player.addToLibrary,
                       TE.map(async () => {
-                        showHUD("Deleted from Library");
+                        showToast(Toast.Style.Success, "Added to Library");
+                        setTrack({ ...track, inLibrary: true });
                         await wait(5);
                         await refreshCache();
                       }),
-                      TE.mapLeft(() => showHUD("Failed to Delete from Library"))
+                      TE.mapLeft(() => showToast(Toast.Style.Failure, "Failed to Add to Library"))
                     )();
                   }}
                 />
-              </React.Fragment>
-            )}
+              )}
+              <Action
+                title={`${track.loved ? "Unlove" : "Love"} Track`}
+                icon={Icon.Heart}
+                shortcut={{ modifiers: ["cmd"], key: "l" }}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.toggleLove)();
+                  setTrack({ ...track, loved: !track.loved });
+                }}
+              />
+              <Action
+                title="Dislike Track"
+                icon={Icon.HeartDisabled}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={async () => {
+                  await handleTaskEitherError(music.player.dislike)();
+                  await handleTaskEitherError(music.player.setRating(0))();
+                  setTrack({ ...track, rating: 0 });
+                }}
+              />
+              {track.inLibrary && (
+                <React.Fragment>
+                  <ActionPanel.Submenu title="Set Rating" icon={Icon.Star} shortcut={{ modifiers: ["cmd"], key: "r" }}>
+                    {Array.from({ length: 6 }, (_, i) => i).map((rating) => (
+                      <Action
+                        key={rating}
+                        title={`${rating} Star${rating === 1 ? "" : "s"}`}
+                        icon={track.rating === rating ? Icons.StarFilled : Icons.Star}
+                        onAction={async () => {
+                          await pipe(
+                            rating * 20,
+                            music.player.setRating,
+                            TE.map(() => setTrack({ ...track, rating: rating })),
+                            TE.mapLeft(() => showHUD("Add Track to Library to Set Rating"))
+                          )();
+                        }}
+                      />
+                    ))}
+                  </ActionPanel.Submenu>
+                  <Action
+                    title="Delete from Library"
+                    icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={async () => {
+                      await pipe(
+                        music.player.deleteFromLibrary,
+                        TE.map(async () => {
+                          showHUD("Deleted from Library");
+                          await wait(5);
+                          await refreshCache();
+                        }),
+                        TE.mapLeft(() => showHUD("Failed to Delete from Library"))
+                      )();
+                    }}
+                  />
+                </React.Fragment>
+              )}
+            </ActionPanel.Section>
           </ActionPanel>
         )
       }
