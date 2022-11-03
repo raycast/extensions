@@ -1,12 +1,7 @@
-import { Detail } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 
-export default function Command() {
-  const d20Roll = Math.ceil(Math.random() * 20).toString();
+export default async function Command() {
+  const d20Roll: string = Math.ceil(Math.random() * 20).toString();
 
-  const markdown = `
-  # Roll D20
-  **Your roll:** ${d20Roll}
-  `;
-
-  return <Detail markdown={markdown} navigationTitle="Roll D20" />;
+  await showHUD("Your roll: " + d20Roll);
 }
