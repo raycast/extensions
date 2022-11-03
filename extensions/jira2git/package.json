@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "transform",
-      "title": "Transform Jira URL to Git branch name",
+      "title": "Transform Jira URL to Git Branch Name",
       "description": "Transform Jira issue URL to Git branch name and copy to clipboard.",
       "mode": "no-view",
       "arguments": [
