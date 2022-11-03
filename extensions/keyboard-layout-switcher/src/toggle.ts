@@ -1,7 +1,7 @@
-import { showHUD, Clipboard } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { LayoutManager } from "./model/LayoutManager";
 
 export default async function main() {
-  const selectedInput = await LayoutManager.nextInput();
+  const selectedInput = await LayoutManager.setNextInput();
   await showHUD(`${selectedInput.title} selected`);
 }
