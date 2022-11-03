@@ -12,10 +12,10 @@ export class XcodeCleanupService {
     return runAppleScript([
       'set dd to (path to home folder as string) & "Library:Developer:Xcode:DerivedData"',
       'tell application "Finder"',
-        'if dd exists then',
-          'move dd to trash',
-        'end if',
-      'end tell'
+      "if dd exists then",
+      "move dd to trash",
+      "end if",
+      "end tell",
     ]).then();
   }
 
