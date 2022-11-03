@@ -3,15 +3,17 @@ import { useEffect, useState } from "react";
 import { showFailureToast } from "./utils";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
+import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
 import { preferences } from "./preferences";
 
 interface State {
   outdated?: OutdatedResults;
   isLoading: boolean;
+  filter: InstallableFilterType;
 }
 
 export default function Main(): JSX.Element {
-  const [state, setState] = useState<State>({ isLoading: true });
+  const [state, setState] = useState<State>({ isLoading: true, filter: InstallableFilterType.all });
 
   useEffect(() => {
     if (!state.isLoading) {
@@ -19,11 +21,11 @@ export default function Main(): JSX.Element {
     }
     brewFetchOutdated(preferences.greedyUpgrades)
       .then((outdated) => {
-        setState({ outdated: outdated, isLoading: false });
+        setState((oldState) => ({ ...oldState, outdated: outdated, isLoading: false }));
       })
       .catch((err) => {
         showFailureToast("Brew outdated failed", err);
-        setState({ isLoading: false });
+        setState((oldState) => ({ ...oldState, isLoading: false }));
       });
   }, [state]);
 
@@ -31,6 +33,16 @@ export default function Main(): JSX.Element {
     <OutdatedList
       outdated={state.outdated}
       isLoading={state.isLoading}
+      filterType={state.filter}
+      searchBarAccessory={
+        <InstallableFilterDropdown
+          onSelect={(filterType) => {
+            if (state.filter != filterType) {
+              setState((oldState) => ({ ...oldState, filter: filterType }));
+            }
+          }}
+        />
+      }
       onAction={() => {
         setState((oldState) => ({ ...oldState, isLoading: true }));
       }}
@@ -72,12 +84,24 @@ function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula; onAction: 
   );
 }
 
-function OutdatedList(props: { outdated?: OutdatedResults; isLoading: boolean; onAction: () => void }) {
-  const formulae = props.outdated?.formulae ?? [];
-  const casks = props.outdated?.casks ?? [];
+interface OutdatedListProps {
+  outdated?: OutdatedResults;
+  isLoading: boolean;
+  searchBarAccessory?: JSX.Element;
+  filterType: InstallableFilterType;
+  onAction: () => void;
+}
+
+function OutdatedList(props: OutdatedListProps) {
+  const formulae = props.filterType != InstallableFilterType.casks ? props.outdated?.formulae ?? [] : [];
+  const casks = props.filterType != InstallableFilterType.formulae ? props.outdated?.casks ?? [] : [];
 
   return (
-    <List searchBarPlaceholder={"Filter formulae by name" + String.ellipsis} isLoading={props.isLoading}>
+    <List
+      searchBarPlaceholder={"Filter formulae by name" + String.ellipsis}
+      searchBarAccessory={props.searchBarAccessory}
+      isLoading={props.isLoading}
+    >
       <List.Section title="Formulae">
         {formulae.map((formula) => (
           <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />

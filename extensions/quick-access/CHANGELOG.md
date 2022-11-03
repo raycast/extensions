@@ -1,5 +1,38 @@
 # Quick Access Changelog
 
+## [Add new layout options] - 2022-10-15
+
+- Add new layout options: List or Grid
+
+## [New feature: Pin Files] - 2022-10-14
+
+- Add Pin Files feature: Now you can pin the file by **Pin** command
+- Update command name: Pin Folder -> **Pin**, Search Pinned Folder -> **Search Pins**
+- Update Menubar command, add more actions: Open, Show, Unpin pinned files or folders
+
+## [Add new actions] - 2022-10-14
+
+- Optimize Menubar command, add more actions
+- Add new action for Search Pinned Folder command: Paste File to the current selection of the frontmost application
+
+## [Add actions to Menu Bar command] - 2022-09-28
+
+- Add new actions to menu bar commands: Copy or Open
+
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command
+- Modify Directory to Folder
+- Add the ability to show open folders
+
+## [Add file preview] - 2022-06-30
+
+- Add file preview (CMD+Y)
+
+## [Add feature: Enter sub-folder] - 2022-06-29
+
+- Add feature **Enter sub-folder**: Now you can enter and exit folders with _Enter Folder_(⌘+⎇+↓) and _Enclosing Folder_(⌘+⎇+↑) actions
+
 ## [Update empty view] - 2022-05-23
 
 - Update empty view

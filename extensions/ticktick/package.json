@@ -13,14 +13,14 @@
       "name": "index",
       "title": "Today Tasks",
       "subtitle": "TickTick",
-      "description": "Show today tasks.",
+      "description": "Show today to-do tasks.",
       "mode": "view"
     },
     {
       "name": "next7Days",
       "title": "Next 7 Days Tasks",
       "subtitle": "TickTick",
-      "description": "Show next 7 days tasks.",
+      "description": "Show next 7 days to-do tasks.",
       "mode": "view"
     },
     {

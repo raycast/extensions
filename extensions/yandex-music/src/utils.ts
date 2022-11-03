@@ -11,9 +11,9 @@ interface OsaError {
 
 function runJS(browser: SupportedBrowsers | string, code: string): string {
   if (browser === "Safari") {
-    return `tell t to do javascript "${code}"`;
+    return `do javascript "${code}"`;
   } else {
-    return `tell t to execute javascript "${code}"`;
+    return `execute javascript "${code}"`;
   }
 }
 
@@ -21,28 +21,30 @@ export async function runJSInYandexMusicTab(code: string) {
   const browser = getPreferenceValues<{ browser: Application }>().browser;
 
   try {
-    const tabFound =
-      (await runAppleScript(`
+    const jsResult = await runAppleScript(`
             tell application "${browser.name}"
                 repeat with w in (every window)		
-                    repeat with t in (every tab whose URL contains "music.yandex.ru") of w			
-                        ${runJS(browser.name, code)}
-                        return true
+                    repeat with t in (every tab whose URL contains "music.yandex.ru") of w
+                      tell t
+                         return ${runJS(browser.name, code)}
+                      end tell
                     end repeat	
                 end repeat
             end tell
-            return false
-        `)) === "true";
+            return "false"
+        `);
 
-    if (!tabFound) {
+    if (jsResult === "false") {
       await showToast({
         style: Toast.Style.Failure,
         title: "The Yandex Music tab hasn't been found",
         message: `Try to check selected browser in extension preferences.`,
       });
+
+      return false;
     }
 
-    return tabFound;
+    return jsResult;
   } catch (e) {
     const message = (e as OsaError).stderr;
 
@@ -52,8 +54,8 @@ export async function runJSInYandexMusicTab(code: string) {
         title: "Cannot run JavaScript in selected browser.",
         message: `Enable the 'Allow JavaScript from Apple Events' option in ${browser.name}'s Develop menu.`,
       });
-
-      return false;
     }
+
+    return false;
   }
 }

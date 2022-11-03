@@ -2,14 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "apple-maps-search",
   "title": "Apple Maps Search",
-  "description": "Quickly open Apple Maps directions, for example from your current location to your home.",
+  "description": "Quickly search Apple Maps or find directions.",
   "icon": "apple-maps-icon.png",
   "author": "djpowers",
   "contributors": [
     "ratoru"
   ],
   "categories": [
-    "Other"
+    "Applications"
   ],
   "keywords": [
     "directions",
@@ -18,25 +18,42 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "travelHome",
-      "title": "Travel Home",
+      "name": "directionsHome",
+      "title": "Directions Home",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions from your current location to your home.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "travel home"
+      ]
     },
     {
-      "name": "travelTo",
-      "title": "Travel To",
+      "name": "directionsTo",
+      "title": "Directions To",
       "subtitle": "Apple Maps",
       "description": "Open Apple Maps with directions to a destination.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "travel to"
+      ]
     },
     {
-      "name": "find",
-      "title": "Find Place",
+      "name": "searchMaps",
+      "title": "Search Maps",
       "subtitle": "Apple Maps",
       "description": "Find a specific place or category on Apple Maps.",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Location or Category",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "find place"
+      ]
     }
   ],
   "preferences": [
@@ -50,37 +67,36 @@
     },
     {
       "name": "preferredMode",
-      "title": "Preferred Mode of Travel",
-      "description": "Select your default mode of travel.",
+      "title": "Preferred Mode of Transport",
+      "description": "Select your preferred type of transport.",
       "type": "dropdown",
       "required": true,
       "default": "r",
       "data": [
         {
-          "title": "🚗 Driving",
+          "title": "Driving",
           "value": "d"
         },
         {
-          "title": "🚶‍♀️ Walking",
+          "title": "Walking",
           "value": "w"
         },
         {
-          "title": "🚆 Transit",
+          "title": "Transit",
           "value": "r"
         },
         {
-          "title": "🚲 Cycling",
+          "title": "Cycling",
           "value": "c"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.0"
+    "@raycast/api": "^1.38.1",
+    "open": "^8.4.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

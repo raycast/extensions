@@ -66,6 +66,19 @@ const TranslateForm = () => {
           <ActionPanel.Section title="Generals">
             <Action.CopyToClipboard title="Copy Translated" content={translated ?? ""} icon={toLangObj?.flag} />
             <Action.CopyToClipboard title="Copy Text" content={text ?? ""} icon={fromLangObj?.flag} />
+            <Action.OpenInBrowser
+              title="Open in Google Translate"
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+              url={
+                "https://translate.google.com/?sl=" +
+                fromLang +
+                "&tl=" +
+                toLang +
+                "&text=" +
+                encodeURIComponent(text) +
+                "&op=translate"
+              }
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Settings">

@@ -6,7 +6,7 @@ const Caffeinate = async (args?: string) => {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
     await showHUD("Your Mac is already caffeinated");
   } catch (_) {
-    runAppleScript(`do shell script "caffeinate -di${args ? ` ${args}` : ""}"`);
+    runAppleScript(`do shell script "caffeinate -di${typeof args === "string" ? ` ${args}` : ""}"`);
     await showHUD("Your Mac is caffeinated");
   }
 };

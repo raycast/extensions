@@ -26,13 +26,9 @@ export default class Bookmark {
     return this.Folder ? this.Folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
   }
 
-  get isComplete() {
-    return this.RepositoryIdentifier !== "";
-  }
-
   get getBranch() {
     const branch = getCurrentBranchName(this.getPath);
 
-    return branch.length > 50 ? `${branch.slice(0, 50)}...` : branch;
+    return branch.length > 32 ? `${branch.slice(0, 32)}...` : branch;
   }
 }

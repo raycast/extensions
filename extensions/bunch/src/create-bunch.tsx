@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { bunchInstalled, createBunchesByContent } from "./utils/common-utils";
+import { bunchInstalled, createBunchesByContent, isEmpty } from "./utils/common-utils";
 import { BunchNotInstallView } from "./components/bunch-not-install-view";
 import { ActionOpenFolder } from "./components/action-open-folder";
 import { getBunchesPreview } from "./hooks/hooks-create-bunches";
@@ -10,6 +10,7 @@ import SearchBunchReferences from "./search-bunch-references";
 
 export default function CreateBunch() {
   const [title, setTitle] = useState<string>("");
+  const [titleError, setTitleError] = useState<string | undefined>();
   const [tags, setTags] = useState<string>("");
   const [shortcut, setShortcut] = useState<string>("");
   const [content, setContent] = useState<string>("");
@@ -23,6 +24,10 @@ export default function CreateBunch() {
             icon={Icon.TextDocument}
             title={"Create Bunch"}
             onAction={() => {
+              if (isEmpty(title)) {
+                setTitleError("The field should't be empty!");
+                return false;
+              }
               createBunchesByContent(title, tags, content, bunchesPreview).then((result) => {
                 if (result) pop();
               });
@@ -56,8 +61,21 @@ export default function CreateBunch() {
         title={"Title"}
         placeholder={"Title"}
         value={title}
+        error={titleError}
         info={"When detecting duplicate bunches, the file name case is ignored."}
-        onChange={setTitle}
+        onChange={(newValue) => {
+          setTitle(newValue);
+          if (newValue.length > 0) {
+            setTitleError(undefined);
+          }
+        }}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setTitleError("The field should't be empty!");
+          } else {
+            setTitleError(undefined);
+          }
+        }}
       />
       <Form.TextField
         id={"Tags"}

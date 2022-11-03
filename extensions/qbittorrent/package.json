@@ -13,6 +13,13 @@
       "subtitle": "qBittorrent",
       "description": "list qBitorrent torrents",
       "mode": "view"
+    },
+    {
+      "name": "add-torrents",
+      "title": "Add Torrents",
+      "subtitle": "qBittorrent",
+      "description": "add qBitorrent torrents",
+      "mode": "view"
     }
   ],
   "preferences": [

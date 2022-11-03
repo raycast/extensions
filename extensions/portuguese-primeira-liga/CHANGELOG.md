@@ -1,5 +1,15 @@
 # Portuguese Primeira Liga Changelog
 
+## [New Additions] - 2022-10-14
+
+- Added View Top Scorers command
+- Small UX improvements
+
+## [Improvements] - 2022-07-01
+
+- Added cache mechanism
+- Removed detail view for newspaper covers
+
 ## [New Additions] - 2022-06-18
 
 - Removed inset from Grid

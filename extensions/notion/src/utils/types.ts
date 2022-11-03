@@ -100,17 +100,11 @@ export interface KabanView {
   canceled_ids: string[];
 }
 
-type UnwrapRecord<T> = T extends Record<string, infer U> ? U : T;
+export type UnwrapRecord<T> = T extends Record<never, infer U> ? U : never;
+export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
+export type UnwrapArray<T> = T extends Array<infer U> ? U : never;
 
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-function getPropertiesTypes(page: UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>) {
-  if (page.object === "page" && "properties" in page) {
-    return page.properties;
-  }
-  throw new Error("this function won't ever be called, it's only for typescript");
-}
-
-export type PagePropertyType = UnwrapRecord<ReturnType<typeof getPropertiesTypes>>;
+type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
+export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;

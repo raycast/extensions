@@ -24,7 +24,7 @@ jobs:
         run: gh pr checkout ${{ github.event.inputs.pr_number }}
       - name: Update CHANGELOG.md
         run: |
-          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md)
+          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md || true)
           for changelog in $changelogs
           do
               echo "$changelog:"

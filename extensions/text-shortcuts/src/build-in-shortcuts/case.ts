@@ -3,7 +3,7 @@ export const cases = [
     info: {
       name: "UPPER CASE",
       id: "build_in_1647439015702",
-      icon: "pencil-16",
+      icon: "uppercase-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -14,7 +14,7 @@ export const cases = [
     info: {
       name: "lower case",
       id: "build_in_1647439044772",
-      icon: "pencil-16",
+      icon: "lowercase-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -25,7 +25,7 @@ export const cases = [
     info: {
       name: "camelCase",
       id: "build_in_1647438658683",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -36,7 +36,7 @@ export const cases = [
     info: {
       name: "PascalCase",
       id: "build_in_1647439067142",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -47,7 +47,7 @@ export const cases = [
     info: {
       name: "snake_case",
       id: "build_in_1647439125162",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -58,7 +58,7 @@ export const cases = [
     info: {
       name: "kebab-case",
       id: "build_in_1647439156694",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -69,7 +69,7 @@ export const cases = [
     info: {
       name: "Title case",
       id: "build_in_1647440060447",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -80,7 +80,7 @@ export const cases = [
     info: {
       name: "camelCase to snake_case",
       id: "build_in_1651306768124",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -96,7 +96,7 @@ export const cases = [
     info: {
       name: "camelCase to kebab-case",
       id: "build_in_1651306783829",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -112,7 +112,7 @@ export const cases = [
     info: {
       name: "snake_case to camelCase",
       id: "build_in_1651306867056",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],
@@ -132,7 +132,7 @@ export const cases = [
     info: {
       name: "kebab-case to camelCase",
       id: "build_in_1651306886878",
-      icon: "pencil-16",
+      icon: "text-16",
       source: "Build-in",
       visibility: true,
       tag: ["Case"],

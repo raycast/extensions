@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { Comment, Task } from "@doist/todoist-api-typescript";
-import { mutate } from "swr";
 import { todoist, handleError } from "../api";
-import { SWRKeys } from "../types";
+import { MutatePromise } from "@raycast/utils";
 
 interface TaskCommentFormProps {
   comment?: Comment;
   task: Task;
+  mutateTasks?: MutatePromise<Task[] | undefined>;
+  mutateComments?: MutatePromise<Comment[] | undefined>;
 }
 
-export default function TaskEdit({ comment, task }: TaskCommentFormProps) {
+export default function TaskEdit({ comment, task, mutateComments, mutateTasks }: TaskCommentFormProps) {
   const { pop } = useNavigation();
 
   const [content, setContent] = useState(comment ? comment.content : "");
@@ -25,7 +26,14 @@ export default function TaskEdit({ comment, task }: TaskCommentFormProps) {
 
       await showToast({ style: Toast.Style.Success, title: `Comment ${comment ? "updated" : "added"}` });
 
-      mutate(SWRKeys.comments);
+      if (mutateComments) {
+        mutateComments();
+      }
+
+      if (mutateTasks) {
+        mutateTasks();
+      }
+
       pop();
     } catch (error) {
       handleError({ error, title: `Unable to ${comment ? "update" : "add"} comment` });

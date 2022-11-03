@@ -10,6 +10,8 @@ const exec = promisify(cExec);
 export default class ProcessInfo implements IProcessInfo {
   private static useSudo: boolean = getPreferenceValues().sudo ?? false;
 
+  public path?: string;
+  public parentPath?: string;
   private constructor(
     public readonly pid: number,
     public readonly name?: string,
@@ -20,6 +22,22 @@ export default class ProcessInfo implements IProcessInfo {
     public readonly portInfo?: PortInfo[],
     public readonly internetProtocol?: string
   ) {}
+
+  private async getProcessPath(pid: number, useSudo: boolean) {
+    const cmd = `${useSudo ? "/usr/bin/sudo " : ""}/bin/ps -p ${pid} -o comm=`;
+    const { stdout, stderr } = await exec(cmd);
+    if (stderr) throw new Error(stderr);
+    return stdout.replace("\n", "");
+  }
+
+  public async loadPath() {
+    this.path = await this.getProcessPath(this.pid, ProcessInfo.useSudo);
+  }
+
+  public async loadParentPath() {
+    if (this.parentPid === undefined) return;
+    this.parentPath = await this.getProcessPath(this.parentPid, ProcessInfo.useSudo);
+  }
 
   public static async getCurrent() {
     const cmd = `${ProcessInfo.useSudo ? "/usr/bin/sudo " : ""}/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
@@ -77,17 +95,18 @@ export default class ProcessInfo implements IProcessInfo {
               break;
           }
         }
-        instances.push(
-          new ProcessInfo(
-            values.pid,
-            values.name,
-            values.parentPid,
-            values.user,
-            values.uid,
-            values.protocol,
-            values.portInfo
-          )
+        const p = new ProcessInfo(
+          values.pid,
+          values.name,
+          values.parentPid,
+          values.user,
+          values.uid,
+          values.protocol,
+          values.portInfo
         );
+        await p.loadPath();
+        await p.loadParentPath();
+        instances.push(p);
       }
       return instances;
     } catch (e) {

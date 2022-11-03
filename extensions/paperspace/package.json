@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperspace",
+  "title": "Paperspace",
+  "description": "Control your Paperspace machines",
+  "icon": "command-icon.png",
+  "author": "yuri",
+  "categories": [
+    "Developer Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Control Machines",
+      "description": "Control Your Paperspace Machines",
+      "subtitle": "Paperspace",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "paperspaceApiKey",
+          "description": "Your API Key for Paperspace",
+          "title": "Paperspace API Key",
+          "placeholder": "See https://console.paperspace.com/settings/apikeys",
+          "type": "password",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.8",
+    "undici": "^5.10.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop --emoji",
+    "lint:fix": "ray lint --fix --emoji",
+    "lint": "ray lint --emoji",
+    "publish": "ray publish --emoji"
+  }
+}

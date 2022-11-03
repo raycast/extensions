@@ -14,11 +14,12 @@ export function NewFileHereGridLayout(props: {
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const { isLoading, templateFiles, setRefresh } = props;
-  const { layout, itemSize, itemInset, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
+  const { layout, columns, itemInset, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   return (
     <Grid
       inset={isEmpty(itemInset) ? undefined : (itemInset as Grid.Inset)}
-      itemSize={itemSize as Grid.ItemSize}
+      columns={parseInt(columns)}
+      aspectRatio={"3/2"}
       isLoading={isLoading}
       searchBarPlaceholder={"Search and create files"}
       selectedItemId={templateFiles.length > 0 ? templateFiles[0].path : ""}
@@ -41,6 +42,7 @@ export function NewFileHereGridLayout(props: {
                 tooltip: template.name + "." + template.extension,
               }}
               title={template.name}
+              quickLook={{ path: template.path, name: template.name }}
               actions={
                 <ActionNewTemplateFileHere
                   template={template}

@@ -4,7 +4,7 @@ import type { Article } from "../types/news.types";
 type PropTypes = {
   article: Article;
   isShowingDetail: boolean;
-  setIsShowingDetail: any;
+  setIsShowingDetail: (show: boolean) => void;
 };
 
 const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: PropTypes) => {
@@ -13,7 +13,7 @@ const ArticleComponent = ({ article, isShowingDetail, setIsShowingDetail }: Prop
       key={article.title}
       title={article.title}
       icon={{ source: article.imageURL }}
-      accessories={[{ text: `${new Date(article.publishedAt).toLocaleDateString()}` }]}
+      accessories={[{ date: new Date(article.publishedAt) }]}
       detail={
         <List.Item.Detail
           markdown={`<img src="${article.imageURL}" alt="image" width="350" />`}

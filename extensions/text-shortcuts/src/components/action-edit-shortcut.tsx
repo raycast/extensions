@@ -14,7 +14,7 @@ export function ActionEditShortcut(props: {
     <ActionPanel.Section>
       <Action.Push
         title={"Create Shortcut"}
-        icon={Icon.Download}
+        icon={Icon.PlusCircle}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         target={<CreateShortcut shortcut={undefined} setRefresh={setRefresh} />}
       />

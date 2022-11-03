@@ -1,5 +1,19 @@
 # Amazon AWS Changelog
 
+## [Add SQS Queue Purge Action] - 2022-10-26
+
+Add purge action to queue list item ([#3299](https://github.com/raycast/extensions/pull/3299))
+
+## [Improve icon usage] - 2022-08-01
+
+Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
+
+## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-15
+
+- Added ECS Clusters ([#2254](https://github.com/raycast/extensions/pull/2254))
+- Migrate to Raycast API 1.36.0 ([#2254](https://github.com/raycast/extensions/pull/2254))
+- Moved some subtitles to Raycast List Component accessories prop ([#2254](https://github.com/raycast/extensions/pull/2254))
+
 ## [Bug fix for EC2 Instances & UX improvement for SQS command] - 2022-05-23
 
 - Manage the case where there is no public ip in EC2 ([#1715](https://github.com/raycast/extensions/pull/1715))
@@ -7,11 +21,11 @@
 
 ## [DynamoDB tables command] - 2022-05-10
 
-- Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
+Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
 
 ## [Improvement] - 2022-04-07
 
-- Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
+Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
 
 ## [Full list of resources] - 2022-04-06
 

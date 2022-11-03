@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   domain: string;
-  prefix: string;
+  prefix: string | undefined;
 }
 
 export const generateEmail = () => {

@@ -1,7 +1,7 @@
 import convert from "color-convert";
 
 import Color from "./Color";
-import { RGB } from "color-convert/conversions";
+import { APPLE, RGB } from "color-convert/conversions";
 import { HEXColor, HSLColor, KeywordColor } from "./index";
 import { Keyboard } from "@raycast/api";
 
@@ -9,6 +9,8 @@ import { isValidRGB } from "../validators";
 import { parseValues } from "../typeUtilities";
 
 export default class RGBColor extends Color<RGB> {
+  public type = "RGB";
+
   public static validator = isValidRGB;
 
   public static prepareValue = <RGB>(value: string): RGB => parseValues(value) as unknown as RGB;

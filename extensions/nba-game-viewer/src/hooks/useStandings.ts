@@ -1,67 +1,50 @@
 import getStandings from "../utils/getStandings";
-import { useState, useEffect } from "react";
-import { Team, Conferences } from "../types/standings.types";
+import { useCallback } from "react";
+import { Team } from "../types/standings.types";
+import { useCachedPromise } from "@raycast/utils";
 
-const useStandings = (): {
-  standings: Conferences;
-  loading: boolean;
-  error: boolean;
-} => {
-  const [standings, setStandings] = useState<Conferences>({ eastern: [], western: [] });
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
+const useStandings = () => {
+  const fetchTeamStandings = useCallback(async () => {
+    const data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
 
-  useEffect(() => {
-    const getTeamStandings = async () => {
-      let data: any = null;
+    const eastern: Array<Team> = data.children[0].standings.entries
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((data: any) => {
+        return {
+          id: data.team.id,
+          name: data.team.displayName,
+          logo: data.team.logos[0].href,
+          link: data.team.links[0].href,
+          rank: data.stats[0].value,
+          wins: data.stats[1].value,
+          losses: data.stats[2].value,
+        };
+      })
+      .sort((a: Team, b: Team) => {
+        return a.rank - b.rank;
+      });
 
-      try {
-        data = await getStandings({ year: new Date().getUTCFullYear().toString(), group: "conference" });
-      } catch (error) {
-        setError(true);
-        return error;
-      }
+    const western: Array<Team> = data.children[1].standings.entries
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((data: any) => {
+        return {
+          id: data.team.id,
+          name: data.team.displayName,
+          logo: data.team.logos[0].href,
+          link: data.team.links[0].href,
+          rank: data.stats[0].value,
+          wins: data.stats[1].value,
+          losses: data.stats[2].value,
+        };
+      })
+      .sort((a: Team, b: Team) => {
+        return a.rank - b.rank;
+      });
 
-      const eastern: Array<Team> = data.children[0].standings.entries
-        .map((data: any) => {
-          return {
-            id: data.team.id,
-            name: data.team.displayName,
-            logo: data.team.logos[0].href,
-            link: data.team.links[0].href,
-            rank: data.stats[0].value,
-            wins: data.stats[1].value,
-            losses: data.stats[2].value,
-          };
-        })
-        .sort((a: Team, b: Team) => {
-          return a.rank - b.rank;
-        });
-
-      const western: Array<Team> = data.children[1].standings.entries
-        .map((data: any) => {
-          return {
-            id: data.team.id,
-            name: data.team.displayName,
-            logo: data.team.logos[0].href,
-            link: data.team.links[0].href,
-            rank: data.stats[0].value,
-            wins: data.stats[1].value,
-            losses: data.stats[2].value,
-          };
-        })
-        .sort((a: Team, b: Team) => {
-          return a.rank - b.rank;
-        });
-
-      setStandings({ eastern, western });
-      setLoading(false);
-    };
-
-    getTeamStandings();
+    return { eastern, western };
   }, []);
 
-  return { standings, loading, error };
+  return useCachedPromise(fetchTeamStandings);
 };
 
 export default useStandings;

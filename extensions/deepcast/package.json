@@ -5,8 +5,14 @@
   "description": "Translate words, or entire sentences, into 26 different languages using DeepL.",
   "icon": "icon.png",
   "author": "mooxl",
-  "contributors": ["peter-gy"],
+  "contributors": [
+    "peter-gy"
+  ],
   "license": "MIT",
+  "keywords": [
+    "deepl",
+    "translate"
+  ],
   "commands": [
     {
       "name": "index",

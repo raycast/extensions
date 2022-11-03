@@ -5,7 +5,7 @@ export default function GetNewspapers() {
   const newspapers = useNewspapers();
 
   return (
-    <Grid throttle isLoading={!newspapers} itemSize={Grid.ItemSize.Large} enableFiltering={false}>
+    <Grid isLoading={!newspapers} itemSize={Grid.ItemSize.Large} enableFiltering={false}>
       {newspapers?.map((paper) => {
         return (
           <Grid.Item
@@ -22,18 +22,15 @@ export default function GetNewspapers() {
                     <Detail
                       markdown={`![](${paper.cover})`}
                       navigationTitle={paper.title}
-                      metadata={
-                        <Detail.Metadata>
-                          <Detail.Metadata.Link
-                            title={paper.name || ""}
-                            target={paper.url || ""}
-                            text="Go to website"
-                          />
-                        </Detail.Metadata>
+                      actions={
+                        <ActionPanel>
+                          <Action.OpenInBrowser url={paper.url || ""} />
+                        </ActionPanel>
                       }
                     />
                   }
                 />
+                <Action.OpenInBrowser url={paper.url || ""} />
               </ActionPanel>
             }
           />

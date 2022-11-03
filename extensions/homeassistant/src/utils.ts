@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { State } from "./haapi";
 
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
@@ -11,23 +11,6 @@ export function ensureMinMax(v1: number, v2: number): [min: number, max: number]
   return [v2, v1];
 }
 
-export function ensureCleanAccessories(
-  accessories: List.Item.Accessory[] | undefined
-): List.Item.Accessory[] | undefined {
-  if (accessories) {
-    if (accessories.length <= 0) {
-      return undefined;
-    }
-    const result: List.Item.Accessory[] = [];
-    for (const a of accessories) {
-      if (a.icon || a.text) {
-        result.push(a);
-      }
-    }
-    if (result.length <= 0) {
-      return undefined;
-    }
-    return result;
-  }
-  return undefined;
+export function getFriendlyName(state: State): string {
+  return state.attributes.friendly_name || state.entity_id;
 }

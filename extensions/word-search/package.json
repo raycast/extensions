@@ -38,7 +38,7 @@
       "name": "word-adjective-search",
       "title": "Search Word Adjective",
       "subtitle": "Datamuse",
-      "description": "Search for rhymes given a word",
+      "description": "Search for adjectives given a word",
       "mode": "view"
     },
     {
