@@ -1,5 +1,5 @@
 export type Scope = {
-  query: string;
+  query: (excludeFolders?: boolean) => string;
   directories: string[];
   filters?: boolean;
 };
