@@ -55,7 +55,7 @@ export default async function searchRequest(query: SearchQuery): Promise<[Link]>
   // @ts-expect-error: Don’t know how to satify URLSearchParams’s type.
   const searchParams = new URLSearchParams(query);
   const preferences: Preferences = getPreferenceValues();
-  return fetch("http://localhost:6391/search?" + searchParams, {
+  return fetch("http://127.0.0.1:6391/search?" + searchParams, {
     method: "GET",
     headers: {
       "x-api-key": preferences.api_key,

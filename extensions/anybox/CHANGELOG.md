@@ -1,5 +1,10 @@
 # Anybox Changelog
 
+## [Bug Fixes] - 2022-11-03
+
+- Fix in some scenarios the extension can’t connect to the app.
+- Change default link icon to `Icon.Globe`.
+
 ## [New Icon] - 2022-09-17
 
 - New app icon.
