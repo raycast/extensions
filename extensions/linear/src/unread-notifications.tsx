@@ -33,9 +33,9 @@ function UnreadNotifications() {
     await open(`https://linear.app/${urlKey}/inbox`, linearApp);
   }
 
-  const stringTruncate = (string: string, length: number) => {
-    const ellipsis = string.length > length ? "…" : "";
-    return string.substring(0, length) + ellipsis;
+  const truncate = (text: string, maxLength: number) => {
+    const ellipsis = text.length > maxLength ? "…" : "";
+    return text.substring(0, maxLength).trim() + ellipsis;
   };
 
   return (
@@ -68,7 +68,7 @@ function UnreadNotifications() {
               key={notification.id}
               icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
               title={baseTitle}
-              subtitle={notification.issue?.title ? stringTruncate(notification.issue.title, 20) : ""}
+              subtitle={notification.issue?.title ? truncate(notification.issue.title, 20) : ""}
               tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
               onAction={() => openNotification(notification)}
             />
