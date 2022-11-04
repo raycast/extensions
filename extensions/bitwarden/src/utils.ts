@@ -2,7 +2,7 @@ import { getPreferenceValues, Icon } from "@raycast/api";
 import { Item, PasswordGeneratorOptions, Preferences } from "./types";
 import { ObjectEntries } from "./types/global";
 import { URL } from "url";
-import { execFile } from "child_process";
+import { execa } from "execa";
 
 Object.typedEntries = function <T>(obj: T) {
   return Object.entries(obj) as ObjectEntries<T>;
@@ -70,25 +70,10 @@ export function extractKeywords(item: Item): string[] {
 /**
  * Runs an AppleScript script.
  *
- * @param applescript The script code.
+ * @param appleScript The script code.
  * @param args The arguments to pass to the script.
  */
-export function runApplescript(applescript: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    execFile(
-      "/usr/bin/osascript" /* hardcoded for security */,
-      ["-e", applescript, ...args],
-      {
-        shell: false,
-      },
-      (err, stdout, _stderr) => {
-        if (err != null) {
-          reject(err);
-          return;
-        }
-
-        resolve(stdout);
-      }
-    );
-  });
+export async function runAppleScript(appleScript: string, args: string[]) {
+  const { stdout } = await execa("/usr/bin/osascript", ["-e", appleScript, ...args], { shell: false });
+  return stdout;
 }

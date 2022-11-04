@@ -25,7 +25,7 @@ export function TroubleshootingGuide(): JSX.Element {
 
 export function CopyPasswordToClipboardAction(props: { title: string; content: string }): JSX.Element {
   async function doCopy() {
-    const copiedSecurely = await copyPassword(props.content);
+    const { copiedSecurely } = await copyPassword(props.content);
     showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
   }
 
