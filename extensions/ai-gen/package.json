@@ -3,7 +3,7 @@
   "name": "ai-gen",
   "title": "ai-gen",
   "description": "Generate images using AI",
-  "icon": "command-icon.png",
+  "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
   "categories": [
     "Media",
@@ -15,13 +15,33 @@
     {
       "name": "index",
       "title": "Create Image",
-      "subtitle": "DALL-E image generation",
+      "subtitle": "AI Image Generator",
       "description": "Generate a new AI image based on your text prompt",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "API Key from OpenAI.com. Generate your own key at https://beta.openai.com/account/api-keys",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "enableDrafts",
+      "label": "Enable drafts",
+      "title": "Drafts",
+      "description": "When enabled, any un-submitted requests will be stored as a draft and can be resumed from the main Raycast window",
+      "type": "checkbox",
+      "required": true,
+      "default": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.42.2"
+    "@raycast/api": "^1.42.2",
+    "node-fetch": "^3.2.10",
+    "openai": "^3.1.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
