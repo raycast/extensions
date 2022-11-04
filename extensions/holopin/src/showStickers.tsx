@@ -18,7 +18,6 @@ export default function ShowStickers() {
   const [filteredStickers, filterStickers] = useState<Sticker[]>([]);
 
   useEffect(() => {
-    console.log("searchText", searchText);
     filterStickers(
       data?.data.stickers?.filter(
         (item) =>
