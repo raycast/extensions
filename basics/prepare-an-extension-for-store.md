@@ -63,6 +63,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Extension Icon
 
+{% hint style="info" %}
+We made a new icon generator tool to ease the process of creating icons for your extensions. You can find it [here](https://icon.ray.so/).
+{% endhint %}
+
 - The published extension in the Store should have a 512x512px icon in `png` format
 - The icon should look good in both light and dark themes (you can switch the theme in Raycast Preferences → Appearance)
 - If you have separate light and dark icons, refer to the `package.json` [manifest](https://developers.raycast.com/information/manifest#extension-properties) documentation on how to configure them
@@ -115,7 +119,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Adding Screenshots
 
-In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with ease.
+In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect screenshots of your extension with an ease.
 
 #### How to use it?
 
