@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "holopin",
   "title": "Holopin",
-  "description": "Show Holopin badges",
+  "description": "Show Holopin stickers and board",
   "icon": "command-icon.png",
   "author": "timoransky",
   "categories": [
@@ -12,10 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "showGrid",
-      "title": "Show Badges",
+      "name": "showStickers",
+      "title": "Show Stickers",
       "subtitle": "Holopin",
-      "description": "Show Holopin badges in a grid",
+      "description": "Show Holopin stickers in a grid",
       "mode": "view"
     },
     {

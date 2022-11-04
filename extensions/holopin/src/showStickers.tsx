@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ShowDetail from "./showDetail";
 import { HolopinApiResponse, Preferences, Sticker } from "./types";
 
-export default function ShowGrid() {
+export default function ShowStickers() {
   const { username } = getPreferenceValues<Preferences>();
 
   const { isLoading, data, revalidate } = useFetch<HolopinApiResponse>(
