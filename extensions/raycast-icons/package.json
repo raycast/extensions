@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Icons",
-      "subtitle": "Raycast Icons",
+      "title": "Search Raycast Icons",
       "description": "Browse, copy and modify Raycast icons",
       "mode": "view"
     }
