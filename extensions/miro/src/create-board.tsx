@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import * as miro from "./oauth/miro";
 import ListBoards from "./list-boards";
 
@@ -9,14 +9,32 @@ interface CreateBoardProps {
 }
 
 export default function CreateBoard() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [nameError, setNameError] = useState<string | undefined>();
 
   const { push } = useNavigation();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await miro.authorize();
+        setIsLoading(false);
+      } catch (error) {
+        console.error(error);
+        setIsLoading(false);
+        await showToast({ style: Toast.Style.Failure, title: String(error) });
+      }
+    })();
+  }, []);
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
       setNameError(undefined);
     }
+  }
+
+  if (isLoading) {
+    return <Detail isLoading={isLoading} />;
   }
 
   return (
