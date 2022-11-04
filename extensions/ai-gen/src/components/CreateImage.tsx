@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
 import { ImagesGrid } from "./ImagesGrid";
 
+const DEFAULT_NUM = 1;
+const MAX_CHARS = 1000;
+
 export interface CreateImageValues {
   prompt: string;
   n: string;
@@ -20,8 +23,8 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
 
   function validatePrompt(prompt?: string) {
     const len = prompt?.length;
-    if (!len || len > 1000) {
-      setPromptError("A prompt is required and must be under 1000 characters in length");
+    if (!len || len > MAX_CHARS) {
+      setPromptError(`A prompt is required and must be under ${MAX_CHARS} characters in length`);
       return false;
     }
 
@@ -36,7 +39,7 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
     const len = num?.length;
     const int = parseInt(num ?? "", 10);
 
-    if (!len || len > 1000 || int.toString() !== num || int < 1 || int > 10) {
+    if (!len || len > MAX_CHARS || int.toString() !== num || int < 1 || int > 10) {
       setNumberError("Number of results must be betweeen 1 and 10");
       return false;
     }
@@ -69,7 +72,7 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
         id="prompt"
         title="Prompt"
         placeholder="Describe the image you want to create"
-        info="A text description of the desired image(s). The maximum length is 1000 characters."
+        info={`A text description of the desired image(s). The maximum length is ${MAX_CHARS} characters.`}
         error={promptError}
         onBlur={(event) => validatePrompt(event.target.value)}
         onChange={(value) => validatePrompt(value)}
@@ -94,7 +97,7 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
         title="Number of images"
         placeholder="The number of images to generate"
         info="Must be between 1 and 10. More images return more slowly and cost more credits."
-        defaultValue={draftValues?.n ?? "1"}
+        defaultValue={draftValues?.n ?? DEFAULT_NUM.toString()}
         error={numberError}
         onBlur={(event) => validateNumber(event.target.value)}
         onChange={(value) => validateNumber(value)}

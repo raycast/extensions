@@ -1,21 +1,15 @@
-import { CreateImageRequestSizeEnum } from "openai";
 import { useEffect } from "react";
 
 import { Action, ActionPanel, Clipboard, Grid, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 
+import { CreateImageValues } from "../components/CreateImage";
 import useOpenAIApi from "../hooks/useOpenAIApi";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
-
-interface FormValues {
-  prompt: string;
-  n: string;
-  size: CreateImageRequestSizeEnum;
-}
 
 const NUM_ROWS = 2;
 const MIN_COLS = 3;
 
-export function ImagesGrid(props: FormValues) {
+export function ImagesGrid(props: CreateImageValues) {
   const { prompt, n, size } = props;
   const [results, createImage, isLoading] = useOpenAIApi({ apiKey: getPreferenceValues()["apiKey"] });
 
