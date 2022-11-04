@@ -5,6 +5,7 @@ export type Preferences = {
   fetchFavicons: boolean;
   serverUrl: string;
   serverCertsPath: string;
+  repromptIgnoreDuration: string;
 };
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";

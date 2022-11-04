@@ -1,4 +1,4 @@
-import { Action, Clipboard, Icon, showHUD, useNavigation } from "@raycast/api";
+import { Action, Clipboard, Icon, popToRoot, showHUD, useNavigation } from "@raycast/api";
 import { copyPassword } from "./clipboard";
 import { RepromptForm, Session } from "./session";
 import { Item } from "./types";
@@ -23,16 +23,27 @@ function useReprompt(
   const { push, pop } = useNavigation();
   const { item, what } = options ?? {};
 
-  function onConfirm() {
-    action();
-    pop();
-  }
-
   const description = `Confirmation required${action == null ? "" : ` to ${what}`}${
     item == null ? "." : ` for ${item.name}.`
   }`;
 
-  return () => push(<RepromptForm session={session} onConfirm={onConfirm} description={description} />);
+  return () => {
+    if (session.canRepromptBeSkipped()) {
+      action();
+      return;
+    }
+
+    push(
+      <RepromptForm
+        session={session}
+        description={description}
+        onConfirm={() => {
+          pop();
+          action();
+        }}
+      />
+    );
+  };
 }
 
 /**
@@ -53,7 +64,7 @@ export function CopyPasswordAction(props: {
 }): JSX.Element {
   async function doCopy() {
     const { copiedSecurely } = await copyPassword(props.content);
-    showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
+    await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
   }
 
   const reprompt = useReprompt(props.session, doCopy, { item: props.item, what: "copy the password" });

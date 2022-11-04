@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from "@raycast/api";
-import { REPROMPT_HASH_KEY, REPROMPT_HASH_SALT, SESSION_KEY } from "./const";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { Action, ActionPanel, Form, LocalStorage, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { REPROMPT_PASSWORD_ENTERED_KEY, REPROMPT_HASH_KEY, REPROMPT_HASH_SALT, SESSION_KEY } from "./const";
+import { createContext, Dispatch, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from "react";
 import { Bitwarden } from "./api";
 import { useVaultMessages } from "./hooks";
 import { pbkdf2 } from "crypto";
+import { Preferences } from "./types";
 
 const SessionContext = createContext<Session | null>(null);
 
@@ -11,14 +12,17 @@ const SessionContext = createContext<Session | null>(null);
  * A Bitwarden login session.
  */
 export class Session {
+  private readonly setState: Dispatch<SetStateAction<SessionState>>;
   private readonly state: SessionState;
   public readonly api: Bitwarden;
 
   constructor(data: {
     state: SessionState;
+    setState: Dispatch<SetStateAction<SessionState>>;
     api: Bitwarden;
     actions: { lock: () => Promise<void>; logout: () => Promise<void> };
   }) {
+    this.setState = data.setState;
     this.state = data.state;
     this.api = data.api;
 
@@ -61,7 +65,25 @@ export class Session {
 
   async confirmMasterPassword(password: string): Promise<boolean> {
     const hash = await hashMasterPasswordForReprompting(password);
-    return hash === this.state.repromptHash;
+    if (hash !== this.state.repromptHash) {
+      return false;
+    }
+
+    const now = new Date();
+    await LocalStorage.setItem(REPROMPT_PASSWORD_ENTERED_KEY, now.toString());
+    this.setState((old) => ({ ...old, passwordEnteredDate: now }));
+    return true;
+  }
+
+  canRepromptBeSkipped(): boolean {
+    const { repromptIgnoreDuration } = getPreferenceValues<Preferences>();
+    if (this.state.passwordEnteredDate == null) {
+      return false;
+    }
+
+    const skipDuration = parseInt(repromptIgnoreDuration, 10);
+    const skipUntil = this.state.passwordEnteredDate.getTime() + skipDuration;
+    return Date.now() <= skipUntil;
   }
 }
 
@@ -73,6 +95,7 @@ interface SessionState {
   readonly isAuthenticated: boolean;
 
   readonly repromptHash: string | undefined;
+  readonly passwordEnteredDate: Date | undefined;
 }
 
 /**
@@ -90,6 +113,7 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
     isAuthenticated: false,
 
     repromptHash: undefined,
+    passwordEnteredDate: undefined,
   });
 
   // Internal functions.
@@ -151,12 +175,14 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
    * @param passwordHash A hash of the user's master password.
    */
   async function setToken(token: string, passwordHash: string): Promise<void> {
+    const now = new Date();
     await Promise.all([
       LocalStorage.setItem(SESSION_KEY, token),
       LocalStorage.setItem(REPROMPT_HASH_KEY, passwordHash),
+      LocalStorage.setItem(REPROMPT_PASSWORD_ENTERED_KEY, now.toString()),
     ]);
 
-    await update({ token, repromptHash: passwordHash });
+    await update({ token, repromptHash: passwordHash, passwordEnteredDate: now });
   }
 
   /**
@@ -189,9 +215,10 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
   // Load the saved session token from LocalStorage.
   useEffect(() => {
     (async () => {
-      const [token, passwordHash] = await Promise.all([
+      const [token, passwordHash, passwordEnteredDate] = await Promise.all([
         LocalStorage.getItem<string>(SESSION_KEY),
         LocalStorage.getItem<string>(REPROMPT_HASH_KEY),
+        LocalStorage.getItem<string>(REPROMPT_PASSWORD_ENTERED_KEY),
       ]);
 
       // UPGRADE: We can't use the "reprompt" confirmations without a hash of the master password.
@@ -202,13 +229,18 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
         return;
       }
 
-      await update({ token, repromptHash: passwordHash });
+      await update({
+        token,
+        repromptHash: passwordHash,
+        passwordEnteredDate: passwordEnteredDate === undefined ? undefined : new Date(passwordEnteredDate),
+      });
     })();
   }, [api]);
 
   // Create the Session object that will be provided to downstream components.
   // This provides an API view over the internal state of the provider.
   const session = new Session({
+    setState,
     state,
     api,
     actions: {
@@ -329,6 +361,7 @@ export function RepromptForm(props: { session: Session; description: string; onC
     onConfirm();
   }
 
+  // Render the form.
   return (
     <Form
       navigationTitle={"Confirmation Required"}
