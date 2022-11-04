@@ -23,7 +23,6 @@
 /extensions/antd-open-browser                        @crazyair
 /extensions/any-website-search                       @rben01
 /extensions/anybox                                   @francisfeng
-/extensions/api-icon-list                            @PitNikola
 /extensions/append-clipboard                         @koinzhang
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-maps-search                        @djpowers @ratoru
@@ -477,6 +476,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/random-password-generator                @textnav
 /extensions/ray-so                                   @gt-codes @RSO @dgrzedzielski
+/extensions/raycast-icons                            @PitNikola @peduarte
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raynab                                   @gogocharli
 /extensions/readwise                                 @natterstefan
