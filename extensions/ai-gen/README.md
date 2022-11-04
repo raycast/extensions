@@ -1,4 +1,4 @@
-# DALL-E AI Image Generator
+# ai-gen: OpenAI Image Generator
 
 The `ai-gen` extension uses the OpenAI [Create Image API](https://beta.openai.com/docs/api-reference/images/create) — colloquially known as [DALL-E 2](https://openai.com/dall-e-2/) — to generate images from a text-based prompt description.
 

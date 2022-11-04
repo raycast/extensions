@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-gen",
-  "title": "AI Image Generator",
+  "title": "OpenAI Image Generator",
   "description": "Generate images using AI",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Create Image",
-      "subtitle": "AI Image Generator",
+      "subtitle": "OpenAI Image Generator",
       "description": "Generate a new AI image based on your text prompt",
       "mode": "view"
     }
