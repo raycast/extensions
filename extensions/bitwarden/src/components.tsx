@@ -1,5 +1,4 @@
-import { showToast, ActionPanel, Toast, Action, Detail, Icon, showHUD } from "@raycast/api";
-import { copyPassword } from "./clipboard";
+import { showToast, ActionPanel, Toast, Action, Detail } from "@raycast/api";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -21,13 +20,4 @@ export function TroubleshootingGuide(): JSX.Element {
       }
     />
   );
-}
-
-export function CopyPasswordToClipboardAction(props: { title: string; content: string }): JSX.Element {
-  async function doCopy() {
-    const { copiedSecurely } = await copyPassword(props.content);
-    showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
-  }
-
-  return <Action title={props.title} icon={Icon.CopyClipboard} onAction={doCopy}></Action>;
 }

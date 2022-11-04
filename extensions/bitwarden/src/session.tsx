@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Form, LocalStorage, showToast, Toast } from "@raycast/api";
-import { SESSION_KEY } from "./const";
+import { REPROMPT_HASH_KEY, REPROMPT_HASH_SALT, SESSION_KEY } from "./const";
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
 import { Bitwarden } from "./api";
 import { useVaultMessages } from "./hooks";
+import { pbkdf2 } from "crypto";
 
 const SessionContext = createContext<Session | null>(null);
 
@@ -57,6 +58,11 @@ export class Session {
    * Logs out of the vault.
    */
   logout: () => Promise<void>;
+
+  async confirmMasterPassword(password: string): Promise<boolean> {
+    const hash = await hashMasterPasswordForReprompting(password);
+    return hash === this.state.repromptHash;
+  }
 }
 
 interface SessionState {
@@ -65,6 +71,8 @@ interface SessionState {
   readonly isLoading: boolean;
   readonly isLocked: boolean;
   readonly isAuthenticated: boolean;
+
+  readonly repromptHash: string | undefined;
 }
 
 /**
@@ -80,6 +88,8 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
     isLoading: true,
     isLocked: false,
     isAuthenticated: false,
+
+    repromptHash: undefined,
   });
 
   // Internal functions.
@@ -136,18 +146,24 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
 
   /**
    * Set the session token and save it to LocalStorage.
+   *
    * @param token The new session token.
+   * @param passwordHash A hash of the user's master password.
    */
-  async function setToken(token: string): Promise<void> {
-    await LocalStorage.setItem(SESSION_KEY, token);
-    await update({ token });
+  async function setToken(token: string, passwordHash: string): Promise<void> {
+    await Promise.all([
+      LocalStorage.setItem(SESSION_KEY, token),
+      LocalStorage.setItem(REPROMPT_HASH_KEY, passwordHash),
+    ]);
+
+    await update({ token, repromptHash: passwordHash });
   }
 
   /**
    * Delete the saved session token.
    */
   async function deleteToken(): Promise<void> {
-    await LocalStorage.removeItem(SESSION_KEY);
+    await Promise.all([LocalStorage.removeItem(SESSION_KEY), LocalStorage.removeItem(REPROMPT_HASH_KEY)]);
     await update({ token: undefined });
   }
 
@@ -173,8 +189,20 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
   // Load the saved session token from LocalStorage.
   useEffect(() => {
     (async () => {
-      const token = await LocalStorage.getItem<string>(SESSION_KEY);
-      await update({ token });
+      const [token, passwordHash] = await Promise.all([
+        LocalStorage.getItem<string>(SESSION_KEY),
+        LocalStorage.getItem<string>(REPROMPT_HASH_KEY),
+      ]);
+
+      // UPGRADE: We can't use the "reprompt" confirmations without a hash of the master password.
+      //          The old session needs to be invalidated so we can get that.
+      if (token != null && passwordHash == null) {
+        await api.lock();
+        await deleteToken();
+        return;
+      }
+
+      await update({ token, repromptHash: passwordHash });
     })();
   }, [api]);
 
@@ -210,10 +238,23 @@ export function useSession(): Session {
   return session;
 }
 
+async function hashMasterPasswordForReprompting(password: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    pbkdf2(password, REPROMPT_HASH_SALT, 100000, 64, "sha512", (error, hashed) => {
+      if (error != null) {
+        reject(error);
+        return;
+      }
+
+      resolve(hashed.toString("hex"));
+    });
+  });
+}
+
 /**
  * Form for unlocking or logging in to the Bitwarden vault.
  */
-function UnlockForm(props: { onUnlock: (token: string) => void; session: Session }): JSX.Element {
+function UnlockForm(props: { onUnlock: (token: string, hash: string) => void; session: Session }): JSX.Element {
   const { session, onUnlock } = props;
   const { api } = session;
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -241,8 +282,10 @@ function UnlockForm(props: { onUnlock: (token: string) => void; session: Session
         }
       }
       const sessionToken = await api.unlock(values.password);
+      const passwordHash = await hashMasterPasswordForReprompting(values.password);
+
       toast.hide();
-      onUnlock(sessionToken);
+      onUnlock(sessionToken, passwordHash);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
       setLoading(false);
@@ -261,6 +304,41 @@ function UnlockForm(props: { onUnlock: (token: string) => void; session: Session
     >
       {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
+      <Form.PasswordField autoFocus id="password" title="Master Password" />
+    </Form>
+  );
+}
+
+/**
+ * Form for confirming the master password.
+ * This compares with the hashed master password.
+ *
+ * @param props.session The session instance.
+ * @param props.description A description explaining why reprompting is required.
+ * @param props.onConfirm Callback if confirmation is successful.
+ */
+export function RepromptForm(props: { session: Session; description: string; onConfirm: () => void }) {
+  const { session, description, onConfirm } = props;
+
+  async function onSubmit(values: { password: string }) {
+    if (!(await session.confirmMasterPassword(values.password))) {
+      showToast(Toast.Style.Failure, "Confirmation failed.");
+      return;
+    }
+
+    onConfirm();
+  }
+
+  return (
+    <Form
+      navigationTitle={"Confirmation Required"}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Confirm" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text={description} />
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );

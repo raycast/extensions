@@ -11,12 +11,13 @@ import {
   Clipboard,
   Action,
 } from "@raycast/api";
-import { Item, Folder } from "./types";
+import { Item, Folder, Reprompt } from "./types";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
-import { CopyPasswordToClipboardAction, TroubleshootingGuide } from "./components";
+import { TroubleshootingGuide } from "./components";
 import { SessionProvider, useSession } from "./session";
+import { CopyPasswordAction, PastePasswordAction } from "./actions";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
@@ -184,7 +185,7 @@ function BitwardenItem(props: {
         <ActionPanel>
           {login ? (
             <ActionPanel.Section>
-              {login.password ? <PasswordActions password={login.password} /> : null}
+              {login.password ? <PasswordActions password={login.password} item={item} /> : null}
               {login.totp ? (
                 <Action
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -267,9 +268,17 @@ function getAccessories(item: Item, folder: Folder | undefined) {
   return accessories;
 }
 
-function PasswordActions(props: { password: string }) {
-  const copyAction = <CopyPasswordToClipboardAction key="copy" title="Copy Password" content={props.password} />;
-  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
+function PasswordActions(props: { password: string; item: Item }) {
+  const session = useSession();
+  const { password, item } = props;
+  const actionProps = {
+    item,
+    session,
+    reprompt: item.reprompt === Reprompt.REQUIRED,
+  };
+
+  const copyAction = <CopyPasswordAction key="copy" content={password} {...actionProps} />;
+  const pasteAction = <PastePasswordAction key="paste" content={props.password} {...actionProps} />;
 
   return <Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</Fragment>;
 }
