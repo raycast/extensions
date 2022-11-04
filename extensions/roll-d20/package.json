@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Roll D20",
       "description": "Shows the result of your d20 roll.",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
