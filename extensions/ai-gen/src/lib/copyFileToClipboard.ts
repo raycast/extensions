@@ -1,7 +1,7 @@
 import { Clipboard } from "@raycast/api";
 import fetch from "node-fetch";
 import path from "path";
-import {temporaryWrite, FileOptions } from "tempy";
+import { temporaryWrite, FileOptions } from "tempy";
 
 export default async function copyFileToClipboard(url: string, name?: string) {
   const response = await fetch(url);
