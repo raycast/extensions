@@ -1,8 +1,7 @@
 import { Clipboard } from "@raycast/api";
-import fs from "fs";
 import fetch from "node-fetch";
 import path from "path";
-import tempy, { FileOptions } from "tempy";
+import {temporaryWrite, FileOptions } from "tempy";
 
 export default async function copyFileToClipboard(url: string, name?: string) {
   const response = await fetch(url);
@@ -24,7 +23,7 @@ export default async function copyFileToClipboard(url: string, name?: string) {
 
   let file: string;
   try {
-    file = await tempy.write(await response.body, tempyOpt);
+    file = await temporaryWrite(await response.body, tempyOpt);
   } catch (e) {
     const error = e as Error;
     throw new Error(`Failed to download GIF: "${error.message}"`);
