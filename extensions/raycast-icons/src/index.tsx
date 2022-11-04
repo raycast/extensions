@@ -40,6 +40,8 @@ export default function Command() {
               />
               <ActionPanel.Section>
                 <Action.OpenInBrowser
+                  icon={Icon.Pencil}
+                  title="Create Extension Icon"
                   // Remove `-16` to match the Icon names in icon.ray.so
                   url={`https://icon.ray.so/?q=${icon.replace("-16", "")}`}
                 />
