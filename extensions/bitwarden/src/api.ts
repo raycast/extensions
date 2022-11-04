@@ -109,8 +109,8 @@ export class Bitwarden {
     await this.exec(["lock"]);
   }
 
-  async status(): Promise<VaultState> {
-    const { stdout } = await this.exec(["status"]);
+  async status(sessionToken?: string): Promise<VaultState> {
+    const { stdout } = await this.exec(sessionToken == null ? ["status"] : ["status", "--session", sessionToken]);
     return JSON.parse(stdout);
   }
 
