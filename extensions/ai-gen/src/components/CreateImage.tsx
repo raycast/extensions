@@ -4,18 +4,19 @@ import { useState } from "react";
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
 import { ImagesGrid } from "./ImagesGrid";
 
-interface FormValues {
+export interface CreateImageValues {
   prompt: string;
   n: string;
   size: CreateImageRequestSizeEnum;
 }
 
-export function CreateImage() {
+export function CreateImage(props: { draftValues?: CreateImageValues }) {
+  const { draftValues } = props;
+  const { enableDrafts } = getPreferenceValues();
+
   const { push } = useNavigation();
   const [promptError, setPromptError] = useState<string | undefined>();
   const [numberError, setNumberError] = useState<string | undefined>();
-
-  const { enableDrafts } = getPreferenceValues();
 
   function validatePrompt(prompt?: string) {
     const len = prompt?.length;
@@ -53,7 +54,7 @@ export function CreateImage() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={({ prompt, n, size }: FormValues) => {
+            onSubmit={({ prompt, n, size }: CreateImageValues) => {
               validatePrompt(prompt) && push(<ImagesGrid prompt={prompt} n={n} size={size} />);
             }}
           />
@@ -73,14 +74,15 @@ export function CreateImage() {
         onBlur={(event) => validatePrompt(event.target.value)}
         onChange={(value) => validatePrompt(value)}
         autoFocus={true}
-        storeValue={true}
+        storeValue={!draftValues?.prompt}
+        defaultValue={draftValues?.prompt}
       />
       <Form.Separator />
       <Form.Dropdown
         id="size"
         title="Size"
         info="The size of the generated images. Larger sizes are slower to generate and cost more credits."
-        defaultValue={CreateImageRequestSizeEnum._256x256}
+        defaultValue={draftValues?.size ?? CreateImageRequestSizeEnum._256x256}
         storeValue={true}
       >
         <Form.Dropdown.Item title="Small (256x256)" value={CreateImageRequestSizeEnum._256x256} />
@@ -92,7 +94,7 @@ export function CreateImage() {
         title="Number of images"
         placeholder="The number of images to generate"
         info="Must be between 1 and 10. More images return more slowly and cost more credits."
-        defaultValue="1"
+        defaultValue={draftValues?.n ?? "1"}
         error={numberError}
         onBlur={(event) => validateNumber(event.target.value)}
         onChange={(value) => validateNumber(value)}

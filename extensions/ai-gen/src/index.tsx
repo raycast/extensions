@@ -1,5 +1,5 @@
-import { CreateImage } from "./components/CreateImage";
+import { CreateImage, CreateImageValues } from "./components/CreateImage";
 
-export default function Command() {
-  return <CreateImage />;
+export default function Command(props: { draftValues?: CreateImageValues }) {
+  return <CreateImage draftValues={props.draftValues} />;
 }

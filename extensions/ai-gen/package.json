@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-gen",
-  "title": "ai-gen",
+  "title": "AI Image Generator",
   "description": "Generate images using AI",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
