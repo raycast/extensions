@@ -12,7 +12,7 @@ export interface CreateImageValues {
 
 export function CreateImage(props: { draftValues?: CreateImageValues }) {
   const { draftValues } = props;
-  const { enableDrafts } = getPreferenceValues();
+  const { enableDrafts, storeValue } = getPreferenceValues();
 
   const { push } = useNavigation();
   const [promptError, setPromptError] = useState<string | undefined>();
@@ -74,7 +74,7 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
         onBlur={(event) => validatePrompt(event.target.value)}
         onChange={(value) => validatePrompt(value)}
         autoFocus={true}
-        storeValue={!draftValues?.prompt}
+        storeValue={!draftValues?.prompt && storeValue}
         defaultValue={draftValues?.prompt}
       />
       <Form.Separator />

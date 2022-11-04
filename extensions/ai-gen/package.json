@@ -32,10 +32,19 @@
       "name": "enableDrafts",
       "label": "Enable drafts",
       "title": "Drafts",
-      "description": "When enabled, any un-submitted requests will be stored as a draft and can be resumed from the main Raycast window",
+      "description": "Any un-submitted requests will be stored as a draft and can be resumed from the main Raycast window",
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "storeValue",
+      "label": "Store prompt",
+      "title": "Prompts",
+      "description": "Store your most recently submitted prompt instead of starting from a blank slate when generating a new image",
+      "type": "checkbox",
+      "required": true,
+      "default": false
     }
   ],
   "dependencies": {
