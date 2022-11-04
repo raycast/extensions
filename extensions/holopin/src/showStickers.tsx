@@ -50,11 +50,11 @@ export default function ShowStickers() {
             subtitle={sticker.organization.name}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.Eye} title="Preview sticker" target={<ShowDetail {...sticker} />} />
+                <Action.Push icon={Icon.Eye} title="Show Detail" target={<ShowDetail {...sticker} />} />
                 {sticker.UserSticker[0] && (
                   <Action.OpenInBrowser
                     icon={Icon.Globe}
-                    title="View in browser"
+                    title="View in Browser"
                     url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`}
                   />
                 )}

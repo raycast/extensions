@@ -14,12 +14,12 @@ export default function ShowBoard() {
         <ActionPanel>
           <Action.CopyToClipboard
             icon={Icon.Clipboard}
-            title="Copy board URL"
+            title="Copy Board URL"
             content={`https://holopin.me/@${username}`}
           />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="View profile in browser"
+            title="View Profile in browser"
             url={`https://holopin.io/@${username}`}
           />
         </ActionPanel>

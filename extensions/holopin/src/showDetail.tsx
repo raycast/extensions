@@ -29,7 +29,7 @@ ${sticker.description}
           {sticker.UserSticker[0] && (
             <Action.OpenInBrowser
               icon={Icon.Globe}
-              title="View in browser"
+              title="View in Browser"
               url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`}
             />
           )}
