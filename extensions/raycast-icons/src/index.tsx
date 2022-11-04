@@ -38,6 +38,12 @@ export default function Command() {
                 title="Copy Colored Icon"
                 content={`{ source: Icon.${name}, tintColor: Color.${getColorName(color)}}`}
               />
+              <ActionPanel.Section>
+                <Action.OpenInBrowser
+                  // Remove `-16` to match the Icon names in icon.ray.so
+                  url={`https://icon.ray.so/?q=${icon.replace("-16", "")}`}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

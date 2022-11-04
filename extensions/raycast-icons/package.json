@@ -1,17 +1,20 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "api-icon-list",
-  "title": "Raycast API Icon List",
+  "name": "raycast-icons",
+  "title": "Raycast Icons",
   "author": "petr",
-  "description": "Helper extension with a list of built-in icons from Raycast API.",
-  "icon": "api-icons-list.png",
+  "contributors": [
+    "peduarte"
+  ],
+  "description": "Browse, copy and modify Raycast icons.",
+  "icon": "icon.png",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Search Icons",
-      "subtitle": "Raycast API",
-      "description": "List of built-in icons of the Raycast API",
+      "subtitle": "Raycast Icon",
+      "description": "Browse, copy and modify Raycast icons",
       "mode": "view"
     }
   ],
