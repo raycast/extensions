@@ -55,14 +55,14 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={({ prompt, n, size }: CreateImageValues) => {
-              validatePrompt(prompt) && push(<ImagesGrid prompt={prompt} n={n} size={size} />);
+              validatePrompt(prompt) && validateNumber(n) && push(<ImagesGrid prompt={prompt} n={n} size={size} />);
             }}
           />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="DALL-E AI Image Generation"
+        title="OpenAI Image Generation"
         text="Given a text prompt, generate a new image using the OpenAI DALL-E image model"
       />
       <Form.TextArea
