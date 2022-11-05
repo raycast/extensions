@@ -19,15 +19,15 @@ export interface XcodeSimulatorApplication {
   /**
    * The optional version
    */
-  version: string | undefined;
+  version?: string;
   /**
    * The optional build number
    */
-  buildNumber: string | undefined;
+  buildNumber?: string;
   /**
    * The optional app icon path
    */
-  appIconPath: string | undefined;
+  appIconPath?: string;
   /**
    * The corresponding XcodeSimulator
    * where the application is installed
