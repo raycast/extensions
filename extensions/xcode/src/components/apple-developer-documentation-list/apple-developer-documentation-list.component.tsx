@@ -22,9 +22,9 @@ export function AppleDeveloperDocumentationList(): JSX.Element {
   );
   return (
     <List
+      throttle
       isLoading={appleDeveloperDocumentationEntries.isLoading}
       searchBarPlaceholder="Search in Apple Developer Documentation"
-      throttle={true}
       onSearchTextChange={setSearchText}
     >
       {appleDeveloperDocumentationEntries.error ? (
@@ -42,9 +42,9 @@ export function AppleDeveloperDocumentationList(): JSX.Element {
       ) : appleDeveloperDocumentationEntries.data?.length === 0 ? (
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
       ) : (
-        appleDeveloperDocumentationEntries.data?.map((entry) => {
-          return <AppleDeveloperDocumentationListItem key={entry.url} entry={entry} />;
-        })
+        appleDeveloperDocumentationEntries.data?.map((entry) => (
+          <AppleDeveloperDocumentationListItem key={entry.url} entry={entry} />
+        ))
       )}
     </List>
   );

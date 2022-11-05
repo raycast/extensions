@@ -54,30 +54,26 @@ export function XcodeProjectList(props: {
       }
     >
       <List.Section title="Favorites">
-        {favoriteXcodeProjects?.map((xcodeProject) => {
-          return (
-            <XcodeProjectListItemContainer
-              key={xcodeProject.filePath}
-              xcodeProject={xcodeProject}
-              isFavorite={true}
-              actions={props.actions}
-              revalidate={favoriteXcodeProjectsState.revalidate}
-            />
-          );
-        })}
+        {favoriteXcodeProjects?.map((xcodeProject) => (
+          <XcodeProjectListItemContainer
+            key={xcodeProject.filePath}
+            xcodeProject={xcodeProject}
+            isFavorite={true}
+            actions={props.actions}
+            revalidate={favoriteXcodeProjectsState.revalidate}
+          />
+        ))}
       </List.Section>
       <List.Section title={favoriteXcodeProjects?.length ? "Recent Projects" : undefined}>
-        {xcodeProjects?.map((xcodeProject) => {
-          return (
-            <XcodeProjectListItemContainer
-              key={xcodeProject.filePath}
-              xcodeProject={xcodeProject}
-              isFavorite={false}
-              actions={props.actions}
-              revalidate={favoriteXcodeProjectsState.revalidate}
-            />
-          );
-        })}
+        {xcodeProjects?.map((xcodeProject) => (
+          <XcodeProjectListItemContainer
+            key={xcodeProject.filePath}
+            xcodeProject={xcodeProject}
+            isFavorite={false}
+            actions={props.actions}
+            revalidate={favoriteXcodeProjectsState.revalidate}
+          />
+        ))}
       </List.Section>
     </List>
   );

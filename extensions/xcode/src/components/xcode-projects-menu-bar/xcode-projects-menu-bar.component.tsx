@@ -16,9 +16,9 @@ export function XcodeProjectsMenuBar(): JSX.Element {
     >
       {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Item title="Favorites" /> : null}
       {menuBarList.data?.favoriteXcodeProjects.length ? <MenuBarExtra.Separator /> : null}
-      {menuBarList.data?.favoriteXcodeProjects.map((xcodeProject) => {
-        return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
-      })}
+      {menuBarList.data?.favoriteXcodeProjects.map((xcodeProject) => (
+        <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />
+      ))}
       <MenuBarExtra.Item
         title={
           menuBarList.isLoading
@@ -29,9 +29,9 @@ export function XcodeProjectsMenuBar(): JSX.Element {
         }
       />
       {menuBarList.data?.recentXcodeProjects.length ? <MenuBarExtra.Separator /> : null}
-      {menuBarList.data?.recentXcodeProjects.map((xcodeProject) => {
-        return <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />;
-      })}
+      {menuBarList.data?.recentXcodeProjects.map((xcodeProject) => (
+        <XcodeProjectsMenuBarItem key={xcodeProject.filePath} project={xcodeProject} />
+      ))}
     </MenuBarExtra>
   );
 }

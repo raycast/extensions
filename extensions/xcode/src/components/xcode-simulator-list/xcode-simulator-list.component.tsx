@@ -13,15 +13,13 @@ export function XcodeSimulatorList(): JSX.Element {
       {xcodeSimulatorGroups.data?.map((xcodeSimulatorGroup) => {
         return (
           <List.Section key={xcodeSimulatorGroup.runtime} title={xcodeSimulatorGroup.runtime}>
-            {xcodeSimulatorGroup.simulators.map((xcodeSimulator) => {
-              return (
-                <XcodeSimulatorListItem
-                  key={xcodeSimulator.udid}
-                  simulator={xcodeSimulator}
-                  revalidate={xcodeSimulatorGroups.revalidate}
-                />
-              );
-            })}
+            {xcodeSimulatorGroup.simulators.map((xcodeSimulator) => (
+              <XcodeSimulatorListItem
+                key={xcodeSimulator.udid}
+                simulator={xcodeSimulator}
+                revalidate={xcodeSimulatorGroups.revalidate}
+              />
+            ))}
           </List.Section>
         );
       })}

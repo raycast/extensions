@@ -12,8 +12,10 @@ import { XcodeService } from "../../services/xcode.service";
  */
 export function SwiftPackageIndexList(): JSX.Element {
   // Use is Xcode installed Promise
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], { onError: () => {} });
+  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onError: () => {},
+  });
   // Use search text state
   const [searchText, setSearchText] = useState<string>("");
   // Use page state. Default value `1`
@@ -61,6 +63,7 @@ export function SwiftPackageIndexList(): JSX.Element {
   );
   return (
     <List
+      throttle
       isLoading={swiftPackageIndexSearchResults.isLoading}
       onSelectionChange={(id) => {
         if (
@@ -71,7 +74,6 @@ export function SwiftPackageIndexList(): JSX.Element {
         }
       }}
       searchBarPlaceholder="Search Swift Package Index"
-      throttle={true}
       onSearchTextChange={(searchText) => {
         setPage(1);
         setSearchResults([]);
@@ -95,15 +97,13 @@ export function SwiftPackageIndexList(): JSX.Element {
       ) : !swiftPackageIndexSearchResults.data?.results.length ? (
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
       ) : (
-        swiftPackageIndexSearchResults.data?.results.map((searchResult) => {
-          return (
-            <SwiftPackageIndexListItem
-              key={searchResult.id}
-              searchResult={searchResult}
-              isAddToXcodeActionVisible={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
-            />
-          );
-        })
+        swiftPackageIndexSearchResults.data?.results.map((searchResult) => (
+          <SwiftPackageIndexListItem
+            key={searchResult.id}
+            searchResult={searchResult}
+            isAddToXcodeActionVisible={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
+          />
+        ))
       )}
     </List>
   );
