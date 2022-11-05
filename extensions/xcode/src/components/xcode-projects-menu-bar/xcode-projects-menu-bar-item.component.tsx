@@ -14,9 +14,7 @@ export function XcodeProjectsMenuBarItem(props: { project: XcodeProject }): JSX.
       icon={XcodeProjectIcon(props.project.type)}
       title={props.project.name}
       tooltip={tildify(props.project.filePath)}
-      onAction={async () => {
-        await open(props.project.filePath, XcodeService.bundleIdentifier);
-      }}
+      onAction={() => open(props.project.filePath, XcodeService.bundleIdentifier)}
     />
   );
 }

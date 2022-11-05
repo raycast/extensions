@@ -11,6 +11,7 @@ export class AppleDeveloperDocumentationService {
    * The host URL
    */
   private static hostUrl = "https://developer.apple.com";
+
   /**
    * Search Developer Documentation
    * @param query The search query

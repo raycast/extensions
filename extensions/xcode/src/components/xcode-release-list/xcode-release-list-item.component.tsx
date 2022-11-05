@@ -1,5 +1,5 @@
 import { XcodeRelease } from "../../models/xcode-release/xcode-release.model";
-import { ActionPanel, Action, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 
 /**
  * Xcode Release List Item
