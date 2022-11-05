@@ -35,9 +35,13 @@ export function AppleDeveloperDocumentationList(): JSX.Element {
         />
       ) : appleDeveloperDocumentationEntries.isLoading || !searchText || searchText.length === 0 ? (
         <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search Apple Developer Documentation"
-          description="Type something to search the Apple Developer Documentation."
+          icon={appleDeveloperDocumentationEntries.isLoading ? Icon.Hourglass : Icon.MagnifyingGlass}
+          title={appleDeveloperDocumentationEntries.isLoading ? "Searching" : "Search Apple Developer Documentation"}
+          description={
+            appleDeveloperDocumentationEntries.isLoading
+              ? "Please wait..."
+              : "Type something to search the Apple Developer Documentation."
+          }
         />
       ) : appleDeveloperDocumentationEntries.data?.length === 0 ? (
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
