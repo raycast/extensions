@@ -90,9 +90,13 @@ export function SwiftPackageIndexList(): JSX.Element {
       ) : (swiftPackageIndexSearchResults.isLoading && !swiftPackageIndexSearchResults.data?.results.length) ||
         !searchText.length ? (
         <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search Swift Package Index"
-          description="Type something to search the Swift Package Index."
+          icon={swiftPackageIndexSearchResults.isLoading ? Icon.Hourglass : Icon.MagnifyingGlass}
+          title={swiftPackageIndexSearchResults.isLoading ? "Searching" : "Search Swift Package Index"}
+          description={
+            swiftPackageIndexSearchResults.isLoading
+              ? "Please wait..."
+              : "Type something to search the Swift Package Index."
+          }
         />
       ) : !swiftPackageIndexSearchResults.data?.results.length ? (
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
