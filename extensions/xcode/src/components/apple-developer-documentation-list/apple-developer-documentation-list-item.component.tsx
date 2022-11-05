@@ -14,7 +14,7 @@ export function AppleDeveloperDocumentationListItem(props: { entry: AppleDevelop
       accessories={[{ text: props.entry.platform.at(0) }]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={props.entry.url} />
+          <Action.OpenInBrowser url={props.entry.url} />
           <Action.CopyToClipboard content={props.entry.url} />
         </ActionPanel>
       }
