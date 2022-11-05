@@ -51,26 +51,17 @@ export const LayoutManager: ILayoutManager = class Layout implements ILayout {
     for (const obj of rawSources) {
       sources.push(new Layout(obj.arg, obj.title));
     }
-    return sources;
+    return sources.sort((a, b) => a.title.localeCompare(b.title));
   }
 
   static async setNextInput() {
-    await setPermissions();
+    const allLayouts = await LayoutManager.getAll();
 
-    // Fetch data
-    const [inputsResult, activeResult] = await fetchData();
-
-    // Get active input
-    const activeInput = activeResult.stdout.split("\n")[0];
-
-    // Get all inputs
-    const rawSources = JSON.parse(inputsResult.stdout);
-
-    // Select the input right after the activeInput or the first one if the activeInput is the last one
-    let selected: ILayout = new Layout(rawSources[0].arg, rawSources[0].title);
-    for (let i = 0; i < rawSources.length; i++) {
-      if (rawSources[i].title === activeInput) {
-        selected = i + 1 < rawSources.length ? new Layout(rawSources[i + 1].arg, rawSources[i + 1].title) : selected;
+    // Select the input right after the active layout or the first one if the active layout is the last one
+    let selected: ILayout = allLayouts[0];
+    for (let i = 0; i < allLayouts.length; i++) {
+      if (allLayouts[i].active) {
+        selected = i + 1 < allLayouts.length ? allLayouts[i + 1] : selected;
         break;
       }
     }
