@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import * as miro from "./oauth/miro";
 import { Board } from "@mirohq/miro-api";
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import InviteBoard from "./invite-board";
 
 export default function ListBoards() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [items, setItems] = useState<Board[]>([]);
+
+  const { push } = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -42,6 +45,12 @@ export default function ListBoards() {
                   <>
                     <Action.OpenInBrowser url={item.viewLink} />
                     <Action.CopyToClipboard title="Copy URL" content={item.viewLink} />
+                    <Action
+                      title="Invite to Board"
+                      icon={Icon.PersonCircle}
+                      onAction={() => push(<InviteBoard id={item.id} />)}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    />
                   </>
                 )}
               </ActionPanel>

@@ -1,6 +1,6 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { Board } from "@mirohq/miro-api";
+import { Board, BoardMember } from "@mirohq/miro-api";
 
 // Miro App client ID
 const clientId = "3458764537065046460";
@@ -126,4 +126,57 @@ export async function createItem(title: string, description: string): Promise<bo
   }
 
   return true;
+}
+
+interface BoardMemberProps {
+  email: string;
+  role: BoardMember["role"];
+}
+
+// Invite to board
+export async function inviteToBoard(id: string, member: BoardMemberProps, message: string): Promise<boolean> {
+  const teamId = getPreferenceValues().team_id;
+
+  if (!teamId) {
+    throw new Error("Team ID not found");
+  }
+
+  const response = await fetch(`https://api.miro.com/v2/boards/${id}/members`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
+    body: JSON.stringify({
+      emails: [member.email],
+      role: member.role,
+      message: message,
+    }),
+  });
+
+  if (!response.ok) {
+    console.error("share item error:", await response.text());
+    throw new Error(response.statusText);
+  }
+
+  return true;
+}
+
+// Fetch board members
+export async function getBoardMembers(id: string): Promise<BoardMember[]> {
+  const response = await fetch(`https://api.miro.com/v2/boards/${id}/members`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    console.error("fetch members error:", await response.text());
+    throw new Error(response.statusText);
+  }
+
+  const json = (await response.json()) as { data: BoardMember[] };
+  return json.data;
 }
