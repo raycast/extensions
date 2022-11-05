@@ -166,6 +166,13 @@
       "mode": "view"
     },
     {
+      "name": "open-developer-documentation.command",
+      "title": "Open Developer Documentation",
+      "subtitle": "Xcode",
+      "description": "Open Apple Developer Documentation.",
+      "mode": "no-view"
+    },
+    {
       "name": "search-swift-package-index.command",
       "title": "Search Swift Package Index",
       "subtitle": "Xcode",
