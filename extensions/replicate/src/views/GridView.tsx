@@ -1,15 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  getPreferenceValues,
-  Icon,
-  showToast,
-  Toast,
-  List,
-  openCommandPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
 import { Prediction, PredictionResponse } from "../types";
 import { PREDICTIONS_URL } from "../constants";
 import { buildPredictionsList, copyImage, showAuthError } from "../utils/helpers";
@@ -22,7 +12,7 @@ type Props = {
 };
 export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
   const [predictions, setData] = useState<Prediction[]>();
-  const [itemSize, setItemSize] = useState<Grid.ItemSize>(Grid.ItemSize.Medium);
+  const [columns, setColumns] = useState("6");
   const [error, setError] = useState("");
   const { token } = getPreferenceValues();
   const headers = { Authorization: `Token ${token}` };
@@ -79,22 +69,15 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
   return (
     <Grid
       onSearchTextChange={onSearchTextChange}
-      itemSize={itemSize}
+      columns={Number(columns)}
       inset={undefined}
-      enableFiltering={false}
       searchBarPlaceholder="Search your prompts"
       isLoading={!predictions || isLoading}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Grid Item Size"
-          storeValue
-          onChange={(newValue) => {
-            setItemSize(newValue as Grid.ItemSize);
-          }}
-        >
-          <Grid.Dropdown.Item title="Large" value={Grid.ItemSize.Large} />
-          <Grid.Dropdown.Item title="Medium" value={Grid.ItemSize.Medium} />
-          <Grid.Dropdown.Item title="Small" value={Grid.ItemSize.Small} />
+        <Grid.Dropdown tooltip="Select image size" storeValue={true} onChange={setColumns}>
+          <Grid.Dropdown.Item title="Large" value="4" />
+          <Grid.Dropdown.Item title="Medium" value="6" />
+          <Grid.Dropdown.Item title="Small" value="8" />
         </Grid.Dropdown>
       }
     >
