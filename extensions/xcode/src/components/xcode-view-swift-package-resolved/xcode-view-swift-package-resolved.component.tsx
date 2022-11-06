@@ -14,6 +14,7 @@ export function XcodeViewSwiftPackageResolved(): JSX.Element {
       projectTypeFilter={(projectType) => projectType !== XcodeProjectType.swiftPlayground}
       actions={(xcodeProject) => [
         <Action.Push
+          key={xcodeProject.filePath}
           title="Show Swift Package Dependencies"
           target={<XcodeSwiftPackageResolvedEntryList xcodeProject={xcodeProject} />}
         />,
