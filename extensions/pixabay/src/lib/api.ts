@@ -36,6 +36,43 @@ export interface ImageSearchResult {
   hits?: Hit[];
 }
 
+export interface Video {
+  url: string;
+  width: number;
+  height: number;
+  size: number;
+}
+
+export interface Videos {
+  large: Video;
+  medium: Video;
+  small: Video;
+  tiny: Video;
+}
+
+export interface VideoHit {
+  id: number;
+  pageURL: string;
+  type: string;
+  tags: string;
+  duration: number;
+  picture_id: string;
+  videos: Videos;
+  views: number;
+  downloads: number;
+  likes: number;
+  comments: number;
+  user_id: number;
+  user: string;
+  userImageURL: string;
+}
+
+export interface VideoSearchResult {
+  total: number;
+  totalHits: number;
+  hits: VideoHit[];
+}
+
 class PixabayClient {
   private apikey?: string;
   constructor() {
@@ -72,18 +109,12 @@ class PixabayClient {
   }
 
   async downloadFile(url: string, params: { localFilepath: string }): Promise<void> {
-    console.log("url: ", url);
     if (fs.existsSync(params.localFilepath)) {
       console.log("use cache");
       return;
     }
-    console.log(`download ${url}`);
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer a`,
-      },
     });
     if (!response.ok) {
       throw new Error(`unexpected response ${response.statusText}`);
@@ -104,6 +135,18 @@ class PixabayClient {
       params.append("q", query);
     }
     const data = (await this.fetch("", params)) as ImageSearchResult | undefined;
+    return data;
+  }
+
+  async searchVideos(query: string | undefined): Promise<VideoSearchResult | undefined> {
+    if (!query || query.length <= 0) {
+      return;
+    }
+    const params = new URLSearchParams();
+    if (query) {
+      params.append("q", query);
+    }
+    const data = (await this.fetch("videos", params)) as VideoSearchResult | undefined;
     return data;
   }
 }

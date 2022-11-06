@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Grid, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { Hit, Pixabay } from "./lib/api";
@@ -7,8 +7,8 @@ import { useImage } from "./lib/hooks";
 function ImageDetail(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
   const { localFilepath, error } = useImage(hit.largeImageURL, hit.id.toString());
-  if(error){
-    showToast({style: Toast.Style.Failure, title:"Could not download Image", message: error});
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Could not download Image", message: error });
   }
   const parts: string[] = [];
   if (localFilepath) {
@@ -37,6 +37,11 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
           />
         </Detail.Metadata>
       }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={hit.pageURL} />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -49,7 +54,11 @@ function ImageGridItem(props: { hit: Hit }): JSX.Element {
       content={hit.previewURL}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Image" target={<ImageDetail hit={hit} />} />
+          <Action.Push
+            title="Show Image"
+            target={<ImageDetail hit={hit} />}
+            icon={{ source: Icon.Image, tintColor: Color.PrimaryText }}
+          />
         </ActionPanel>
       }
     />
@@ -73,7 +82,7 @@ export default function SearchCommand(): JSX.Element {
       {data?.hits?.map((hit) => (
         <ImageGridItem key={hit.id} hit={hit} />
       ))}
-      <Grid.EmptyView title="Enter query to search for images on pixabay.com" icon={"pixabay.png"} />
+      {!searchText && <Grid.EmptyView title="Enter query to search Images on pixabay.com" icon={"pixabay.png"} />}
     </Grid>
   );
 }
