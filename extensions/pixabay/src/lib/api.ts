@@ -126,7 +126,7 @@ class PixabayClient {
       throw new Error(`unexpected response ${response.statusText}`);
     }
     if (!response.body) {
-      throw new Error("");
+      throw new Error("Bad response body");
     }
     await streamPipeline(response.body as any, fs.createWriteStream(params.localFilepath));
   }

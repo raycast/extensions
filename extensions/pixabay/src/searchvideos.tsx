@@ -18,6 +18,10 @@ function getPreviewUrl(hit: VideoHit, size?: string): string {
   return `https://i.vimeocdn.com/video/${hit.picture_id}_${s}.jpg`;
 }
 
+function VideoPageOpenInBrowserAction(props: { hit: VideoHit }): JSX.Element {
+  return <Action.OpenInBrowser url={props.hit.pageURL} />;
+}
+
 function DownloadVideoAction(props: { video: Video | undefined; title: string; hit: VideoHit }): JSX.Element | null {
   const v = props.video;
   if (!v) {
@@ -90,7 +94,7 @@ function VideoDetail(props: { hit: VideoHit }): JSX.Element {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={hit.pageURL} />
+            <VideoPageOpenInBrowserAction hit={hit} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Videos">
             {Object.entries(hit.videos).map(([k, v]) => (
@@ -119,6 +123,7 @@ function VideoGridItem(props: { hit: VideoHit }): JSX.Element {
             target={<VideoDetail hit={hit} />}
             icon={{ source: Icon.Video, tintColor: Color.PrimaryText }}
           />
+          <VideoPageOpenInBrowserAction hit={hit} />
         </ActionPanel>
       }
     />

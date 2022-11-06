@@ -16,6 +16,10 @@ function getLargeFileExtension(hit: Hit): string {
   }
 }
 
+function ImagePageOpenInBrowserAction(props: { hit: Hit }): JSX.Element {
+  return <Action.OpenInBrowser url={props.hit.pageURL} />;
+}
+
 function ImageDownloadAction(props: { localFilepath: string | undefined; hit: Hit }): JSX.Element | null {
   const hit = props.hit;
   const lfp = props.localFilepath;
@@ -87,7 +91,7 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={hit.pageURL} />
+          <ImagePageOpenInBrowserAction hit={hit} />
           <ImageDownloadAction localFilepath={localFilepath} hit={hit} />
         </ActionPanel>
       }
@@ -111,6 +115,7 @@ function ImageGridItem(props: { hit: Hit }): JSX.Element {
             target={<ImageDetail hit={hit} />}
             icon={{ source: Icon.Image, tintColor: Color.PrimaryText }}
           />
+          <ImagePageOpenInBrowserAction hit={hit} />
         </ActionPanel>
       }
     />
