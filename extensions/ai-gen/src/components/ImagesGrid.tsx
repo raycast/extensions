@@ -22,17 +22,15 @@ const NUM_ROWS = 2;
 const MIN_COLS = 3;
 
 export type ImagesGridProps = {
-  title?: string;
+  prompt: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-} & (
-  | { prompt: string; file?: never; variationCount?: never }
-  | { prompt?: never; file: string; variationCount: number }
-);
+} & ({ file?: never; variationCount?: never } | { file: string; variationCount: number });
 
 export function ImagesGrid(props: ImagesGridProps) {
   const { prompt, file, n, size, variationCount = 0 } = props;
-  const title = props.title || prompt;
+
+  const title = file ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt}"` : prompt;
   const number = parseInt(n, 10);
 
   const { apiKey } = getPreferenceValues();
@@ -41,7 +39,7 @@ export function ImagesGrid(props: ImagesGridProps) {
   const { push } = useNavigation();
   async function createVariationAction(url: string, count: number) {
     const file = await downloadTempFile(url);
-    push(<ImagesGrid title={title} file={file} n={n} size={size} variationCount={count + 1} />);
+    push(<ImagesGrid prompt={prompt} file={file} n={n} size={size} variationCount={count + 1} />);
   }
 
   useEffect(() => {
@@ -68,7 +66,7 @@ export function ImagesGrid(props: ImagesGridProps) {
       columns={Math.max(MIN_COLS, Math.ceil((results.images?.length ?? 0) / NUM_ROWS))}
       enableFiltering={false}
       isLoading={isLoading}
-      searchBarPlaceholder={file ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${title}"` : title}
+      searchBarPlaceholder={title}
     >
       {!results.images?.length || isLoading ? (
         <Grid.EmptyView />
@@ -87,15 +85,17 @@ export function ImagesGrid(props: ImagesGridProps) {
                     <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={urlString} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
-                    <Action.Push
-                      title="View Details"
-                      icon={Icon.Eye}
-                      target={<ImageDetails url={urlString} opt={{ title: title, n: number, size: props.size }} />}
-                    />
                     <Action
                       title="Create Variation(s)"
                       icon={Icon.NewDocument}
                       onAction={() => createVariationAction(urlString, variationCount)}
+                    />
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={
+                        <ImageDetails url={urlString} opt={{ prompt, n: number, size: props.size, variationCount }} />
+                      }
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -108,7 +108,7 @@ export function ImagesGrid(props: ImagesGridProps) {
   );
 }
 
-function copyFileAction(url: string) {
+export function copyFileAction(url: string) {
   showToast({
     style: Toast.Style.Animated,
     title: "Copying...",
