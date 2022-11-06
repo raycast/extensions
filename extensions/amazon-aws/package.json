@@ -91,9 +91,11 @@
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.4.9",
     "aws-sdk": "^2.1023.0",
+    "lodash": "^4.17.21",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.188",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

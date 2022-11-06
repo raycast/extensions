@@ -1,11 +1,11 @@
 import { getPreferenceValues, ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { chunk } from "lodash";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { Preferences } from "./types";
 
 setupAws();
-const preferences: Preferences = getPreferenceValues();
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
@@ -28,6 +28,7 @@ export default function ListSQSQueues() {
 }
 
 function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
+  const preferences = getPreferenceValues<Preferences>();
   const queue = props.queue;
   const attr = props.attributes;
   const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
@@ -117,15 +118,25 @@ async function fetchQueues(token?: string, queues?: string[]): Promise<string[]>
 async function fetchQueueAttributes(...queueUrls: string[]) {
   const attributesMap: QueueAttributesMap = {};
 
-  for (const queueUrl of queueUrls) {
-    const { Attributes } = await sqs
-      .getQueueAttributes({
-        QueueUrl: queueUrl,
-        AttributeNames: ["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible", "CreatedTimestamp"],
-      })
-      .promise();
+  const queueUrlBatches = chunk(queueUrls, 15);
 
-    attributesMap[queueUrl] = Attributes as unknown as QueueAttributes;
+  for (const queueUrlBatch of queueUrlBatches) {
+    await Promise.all(
+      queueUrlBatch.map(async (queueUrl) => {
+        const { Attributes } = await sqs
+          .getQueueAttributes({
+            QueueUrl: queueUrl,
+            AttributeNames: [
+              "ApproximateNumberOfMessages",
+              "ApproximateNumberOfMessagesNotVisible",
+              "CreatedTimestamp",
+            ],
+          })
+          .promise();
+
+        attributesMap[queueUrl] = Attributes as unknown as QueueAttributes;
+      })
+    );
   }
 
   return attributesMap;
