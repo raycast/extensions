@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import MessageListItemDetail from "./MessageListItemDetail";
 import { Message } from "./useEmail";
 
