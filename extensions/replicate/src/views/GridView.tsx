@@ -74,7 +74,7 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
       searchBarPlaceholder="Search your prompts"
       isLoading={!predictions || isLoading}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select image size" storeValue={true} onChange={setColumns}>
+        <Grid.Dropdown tooltip="Select image size" storeValue={true} defaultValue={columns} onChange={setColumns}>
           <Grid.Dropdown.Item title="Large" value="4" />
           <Grid.Dropdown.Item title="Medium" value="6" />
           <Grid.Dropdown.Item title="Small" value="8" />
