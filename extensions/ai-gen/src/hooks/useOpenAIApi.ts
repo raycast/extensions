@@ -1,14 +1,14 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import { createReadStream, promises as fs } from 'fs';
-import { Configuration, OpenAIApi } from "openai";
+import { createReadStream } from 'fs';
+import { CreateImageRequestSizeEnum, Configuration, OpenAIApi } from "openai";
 import { useCallback, useRef, useState } from "react";
 
 import type { CreateImageRequest, ImagesResponse as AIImagesResponse, ImagesResponseDataInner } from "openai";
 
 export type CreateVariationRequest = {
-  n?: number;
-  size?: string;
+  n: number;
+  size: CreateImageRequestSizeEnum;
   responseFormat?: string;
   user?: string;
 }
