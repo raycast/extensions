@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "temp-mail",
+  "title": "Temp Mail",
+  "description": "Disposable temporary email service via Mail.tm",
+  "icon": "mail-tm.png",
+  "author": "danielamram",
+  "categories": [
+    "Communication",
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Temp Mail",
+      "subtitle": "Mail.tm",
+      "description": "Disposable Temporary and Free email via Mail.tm",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
+    "event-source-polyfill": "^1.0.31",
+    "node-fetch": "^3.2.10",
+    "turndown": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
