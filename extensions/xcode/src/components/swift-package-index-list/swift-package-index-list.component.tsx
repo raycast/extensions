@@ -73,7 +73,7 @@ export function SwiftPackageIndexList(): JSX.Element {
           setPage(swiftPackageIndexSearchResults.data.nextPage);
         }
       }}
-      searchBarPlaceholder="Search Swift Package Index"
+      searchBarPlaceholder="Search for Swift Packages"
       onSearchTextChange={(searchText) => {
         setPage(1);
         setSearchResults([]);

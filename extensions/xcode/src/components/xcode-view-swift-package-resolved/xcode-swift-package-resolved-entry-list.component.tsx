@@ -22,7 +22,6 @@ export function XcodeSwiftPackageResolvedEntryList(props: { xcodeProject: XcodeP
       navigationTitle={`${props.xcodeProject.name} Swift Package Dependencies`}
       isShowingDetail={!!packageResolved.data?.entries.length}
       isLoading={packageResolved.isLoading}
-      searchBarPlaceholder="Search Swift Package Dependencies"
     >
       {packageResolved.data && packageResolved.data.entries.length ? (
         <XcodeSwiftPackageResolvedEntryListSection

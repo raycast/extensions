@@ -33,7 +33,6 @@ export function AppleDeveloperDocumentationList(): JSX.Element {
   return (
     <List
       throttle
-      searchBarPlaceholder="Search in Apple Developer Documentation"
       isLoading={appleDeveloperDocumentationEntries.isLoading}
       isShowingDetail={!!filteredAppleDeveloperDocumentationEntries?.length}
       onSearchTextChange={setSearchText}
