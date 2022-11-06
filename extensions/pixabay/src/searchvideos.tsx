@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getDownloadFolder, Pixabay, Video, VideoHit } from "./lib/api";
 import { useImage } from "./lib/hooks";
-import { capitalizeFirstLetter, getErrorMessage, resolveFilepath } from "./lib/utils";
+import { capitalizeFirstLetter, getErrorMessage, resolveFilepath, splitTagString } from "./lib/utils";
 import fs from "fs";
 import path from "path";
 
@@ -56,6 +56,7 @@ function VideoDetail(props: { hit: VideoHit }): JSX.Element {
     parts.push("Download Video Preview ...");
   }
   const md = parts.join("\n");
+  const tags = splitTagString(hit.tags);
   return (
     <Detail
       markdown={md}
@@ -63,6 +64,11 @@ function VideoDetail(props: { hit: VideoHit }): JSX.Element {
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Author">
             <Detail.Metadata.TagList.Item text={hit.user} icon={hit.userImageURL} />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.TagList title="Tags">
+            {tags?.map((t) => (
+              <Detail.Metadata.TagList.Item key={t} text={t} />
+            ))}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Likes" text={`♥️ ${hit.likes}`} />
           <Detail.Metadata.Label title="Downloads" text={`${hit.downloads}`} />

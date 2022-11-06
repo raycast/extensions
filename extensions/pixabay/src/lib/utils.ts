@@ -22,3 +22,7 @@ export function resolveFilepath(filename: string): string {
   }
   return filename;
 }
+
+export function splitTagString(text: string): string[] {
+  return text.split(",").map((t) => t.trim());
+}

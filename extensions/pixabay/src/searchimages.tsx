@@ -5,7 +5,7 @@ import { getDownloadFolder, Hit, Pixabay } from "./lib/api";
 import fs from "fs";
 import { useImage } from "./lib/hooks";
 import path from "path";
-import { getErrorMessage } from "./lib/utils";
+import { getErrorMessage, splitTagString } from "./lib/utils";
 
 function getLargeFileExtension(hit: Hit): string {
   const last = hit.largeImageURL.split(".").slice(-1)[0];
@@ -59,7 +59,7 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
     parts.push("Download Image ...");
   }
   const md = parts.join("\n");
-  const tags = hit.tags.split(",");
+  const tags = splitTagString(hit.tags);
   return (
     <Detail
       markdown={md}
