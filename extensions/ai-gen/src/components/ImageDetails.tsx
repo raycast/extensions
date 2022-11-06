@@ -1,10 +1,10 @@
-import {Action, ActionPanel, Detail, Icon, useNavigation} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 
-import {CreateVariationRequest} from "../hooks/useOpenAIApi";
+import { CreateVariationRequest } from "../hooks/useOpenAIApi";
 import downloadTempFile from "../lib/downloadTempFile";
-import {ImagesGrid} from "./ImagesGrid";
+import { ImagesGrid } from "./ImagesGrid";
 
-export function ImageDetails(props: {url: string, opt: (CreateVariationRequest & {title?: string;})}) {
+export function ImageDetails(props: { url: string; opt: CreateVariationRequest & { title?: string } }) {
   const { url, opt } = props;
 
   const { push } = useNavigation();
@@ -22,5 +22,5 @@ export function ImageDetails(props: {url: string, opt: (CreateVariationRequest &
         </ActionPanel>
       }
     />
-  )
+  );
 }

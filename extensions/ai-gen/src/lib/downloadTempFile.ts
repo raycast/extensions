@@ -2,7 +2,7 @@ import axios from "axios";
 import { temporaryWrite, FileOptions } from "tempy";
 
 export default async function downloadTempFile(url: string, name?: string) {
-  const { status, data } = await axios(url, {responseType: 'arraybuffer'});
+  const { status, data } = await axios(url, { responseType: "arraybuffer" });
 
   if (status !== 200) {
     throw new Error(`File download failed. Server responded with ${status}`);

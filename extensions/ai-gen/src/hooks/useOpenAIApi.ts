@@ -1,6 +1,6 @@
-import axios from 'axios';
-import FormData from 'form-data';
-import { createReadStream } from 'fs';
+import axios from "axios";
+import FormData from "form-data";
+import { createReadStream } from "fs";
 import { CreateImageRequestSizeEnum, Configuration, OpenAIApi } from "openai";
 import { useCallback, useRef, useState } from "react";
 
@@ -11,7 +11,7 @@ export type CreateVariationRequest = {
   size: CreateImageRequestSizeEnum;
   responseFormat?: string;
   user?: string;
-}
+};
 
 export type ImagesResponse = {
   images?: ImagesResponseDataInner[];
@@ -64,22 +64,21 @@ export default function useOpenAIApi(config: { apiKey: string }, useTestData = f
 
       try {
         const formData = new FormData();
-        formData.append('image', createReadStream(filePath));
-        opt.n && formData.append('n', opt.n);
-        opt.size && formData.append('size', opt.size);
-
+        formData.append("image", createReadStream(filePath));
+        opt.n && formData.append("n", opt.n);
+        opt.size && formData.append("size", opt.size);
 
         // Another bug in the openai library, this time with how it makes the POST request using
         // axios vias the openai.createImageVariation function, so we make it ourselves
         const { data }: { data: AIImagesResponse } = await axios.post(
-          'https://api.openai.com/v1/images/variations',
+          "https://api.openai.com/v1/images/variations",
           formData,
           {
             headers: {
               Authorization: `Bearer ${config.apiKey}`,
               ...formData.getHeaders(),
             },
-          },
+          }
         );
 
         setState({ images: data.data });
@@ -87,7 +86,7 @@ export default function useOpenAIApi(config: { apiKey: string }, useTestData = f
       } catch (e) {
         const error = e as any;
         if (error.response) {
-          console.error(error.response.data.error)
+          console.error(error.response.data.error);
           setState({ error: new Error(`${error.response.status}: ${error.response.data.error.message}`) });
         } else {
           console.error(error.message);

@@ -1,12 +1,22 @@
 import { CreateImageRequestSizeEnum } from "openai";
 import { useEffect } from "react";
 
-import { Action, ActionPanel, Clipboard, Grid, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Grid,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 
 import useOpenAIApi from "../hooks/useOpenAIApi";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import downloadTempFile from "../lib/downloadTempFile";
-import {ImageDetails} from "./ImageDetails";
+import { ImageDetails } from "./ImageDetails";
 
 const NUM_ROWS = 2;
 const MIN_COLS = 3;
@@ -15,17 +25,14 @@ export type ImagesGridProps = {
   title?: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-} & (
-  | { prompt: string; file?: never; }
-  | { prompt?: never; file: string }
-)
+} & ({ prompt: string; file?: never } | { prompt?: never; file: string });
 
 export function ImagesGrid(props: ImagesGridProps) {
   const { prompt, file, n, size } = props;
   const title = props.title || prompt;
   const number = parseInt(n, 10);
 
-  const {apiKey} = getPreferenceValues();
+  const { apiKey } = getPreferenceValues();
   const [results, createImage, createVariation, isLoading] = useOpenAIApi({ apiKey });
 
   const { push } = useNavigation();
@@ -38,7 +45,7 @@ export function ImagesGrid(props: ImagesGridProps) {
     if (prompt) {
       createImage({ prompt, size, n: number });
     } else if (file) {
-      createVariation(file, {n: number, size});
+      createVariation(file, { n: number, size });
     }
   }, []);
 
@@ -77,8 +84,16 @@ export function ImagesGrid(props: ImagesGridProps) {
                     <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={urlString} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
-                    <Action.Push title="View Details" icon={Icon.Eye} target={<ImageDetails url={urlString} opt={{ title: title, n: number, size: props.size }} />} />
-                    <Action title="Create Variation(s)" icon={Icon.NewDocument} onAction={() => createVariationAction(urlString)} />
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={<ImageDetails url={urlString} opt={{ title: title, n: number, size: props.size }} />}
+                    />
+                    <Action
+                      title="Create Variation(s)"
+                      icon={Icon.NewDocument}
+                      onAction={() => createVariationAction(urlString)}
+                    />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
