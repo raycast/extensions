@@ -92,7 +92,7 @@ class PixabayClient {
       throw new Error("");
     }
     console.log(`write ${url} to ${params.localFilepath}`);
-    await streamPipeline(response.body, fs.createWriteStream(params.localFilepath));
+    await streamPipeline(response.body as any, fs.createWriteStream(params.localFilepath));
   }
 
   async searchImages(query: string | undefined): Promise<ImageSearchResult | undefined> {

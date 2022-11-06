@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Grid } from "@raycast/api";
+import { Action, ActionPanel, Detail, Grid, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { Hit, Pixabay } from "./lib/api";
@@ -6,7 +6,10 @@ import { useImage } from "./lib/hooks";
 
 function ImageDetail(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
-  const { localFilepath } = useImage(hit.largeImageURL, hit.id.toString());
+  const { localFilepath, error } = useImage(hit.largeImageURL, hit.id.toString());
+  if(error){
+    showToast({style: Toast.Style.Failure, title:"Could not download Image", message: error});
+  }
   const parts: string[] = [];
   if (localFilepath) {
     parts.push(`![Preview](${localFilepath})`);

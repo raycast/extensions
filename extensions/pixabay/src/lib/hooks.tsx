@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Pixabay } from "./api";
 import { getCacheFilepath } from "./cache";
-import { fileToBase64Image, getErrorMessage, sha256FromString } from "./utils";
+import { fileToBase64Image, getErrorMessage } from "./utils";
 
 export function useImage(
   url: string,
@@ -28,7 +28,6 @@ export function useImage(
       setError(undefined);
 
       try {
-        const urlHash = sha256FromString(url);
         const localFilepath = await getCacheFilepath(`img_${id}.png`, true);
         await Pixabay.downloadFile(url, { localFilepath: localFilepath });
         const base64 = await fileToBase64Image(localFilepath);
