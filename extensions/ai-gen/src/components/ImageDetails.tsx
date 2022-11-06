@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
+import { Detail, useNavigation } from "@raycast/api";
 
 import { CreateVariationRequest } from "../hooks/useOpenAIApi";
 import downloadTempFile from "../lib/downloadTempFile";
-import { copyFileAction, ImagesGrid } from "./ImagesGrid";
+import { ImagesGrid } from "./ImagesGrid";
+import { ImageActions } from "./ImageActions";
 
 export function ImageDetails(props: {
   url: string;
@@ -22,20 +23,14 @@ export function ImageDetails(props: {
     <Detail
       markdown={`![](${props.url})`}
       actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action title="Copy Image" icon={Icon.Clipboard} onAction={() => copyFileAction(url)} />
-            <Action.CopyToClipboard title="Copy URL" icon={Icon.Link} content={url} />
-            <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              icon={Icon.NewDocument}
-              title="Create Variation(s)"
-              onAction={() => createVariationAction(url, opt.variationCount ?? 0)}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
+        <ImageActions
+          showDetailAction={false}
+          url={url}
+          prompt={opt.prompt}
+          size={opt.size}
+          n={opt.n.toString()}
+          variationCount={opt.variationCount ?? 0}
+        />
       }
       metadata={
         <Detail.Metadata>
