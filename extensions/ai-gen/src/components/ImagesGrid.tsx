@@ -5,13 +5,20 @@ import { Action, ActionPanel, Clipboard, Grid, getPreferenceValues, Icon, showTo
 import { CreateImageValues } from "../components/CreateImage";
 import useOpenAIApi from "../hooks/useOpenAIApi";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
+import downloadTempFile from "../lib/downloadTempFile";
 
 const NUM_ROWS = 2;
 const MIN_COLS = 3;
 
 export function ImagesGrid(props: CreateImageValues) {
   const { prompt, n, size } = props;
-  const [results, createImage, isLoading] = useOpenAIApi({ apiKey: getPreferenceValues()["apiKey"] });
+  const {apiKey} = getPreferenceValues();
+  const [results, createImage, createVariation, isLoading] = useOpenAIApi({ apiKey });
+
+  async function createVariationAction(url: string) {
+    const file = await downloadTempFile(url);
+    createVariation(file, {n: parseInt(n, 10), size});
+  }
 
   useEffect(() => {
     createImage({ prompt, size, n: parseInt(n, 10) });
@@ -46,9 +53,14 @@ export function ImagesGrid(props: CreateImageValues) {
               content={{ source: urlString }}
               actions={
                 <ActionPanel>
-                  <Action title="Copy Image" icon={Icon.Clipboard} onAction={() => copyFileAction(urlString)} />
-                  <Action.CopyToClipboard title="Copy URL" icon={Icon.Link} content={urlString} />
-                  <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={urlString} />
+                  <ActionPanel.Section>
+                    <Action title="Copy Image" icon={Icon.Clipboard} onAction={() => copyFileAction(urlString)} />
+                    <Action.CopyToClipboard title="Copy URL" icon={Icon.Link} content={urlString} />
+                    <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={urlString} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action title="Create Variation" icon={Icon.NewDocument} onAction={() => createVariationAction(urlString)} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
