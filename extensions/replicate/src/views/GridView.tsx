@@ -65,10 +65,10 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
         <List.EmptyView
           icon={{ source: "🚀" }}
           title="No Predictions found"
-          description="Create one now at replicate.com"
+          description="Find models to run at replicate.com/explore"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser icon={Icon.Globe} url="https://replicate.com/" />
+              <Action.OpenInBrowser icon={Icon.Globe} url="https://replicate.com/explore" />
             </ActionPanel>
           }
         />
@@ -114,7 +114,7 @@ export const GridView = ({ isLoading, onSearchTextChange }: Props) => {
                 <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
                 <Action.OpenInBrowser
                   icon={Icon.Globe}
-                  title="Open on Replicate.com"
+                  title="Open on Replicate"
                   url={`https://replicate.com/p/${id.split("-")[0]}`}
                 />
                 {input?.prompt && (

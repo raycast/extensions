@@ -1,4 +1,7 @@
 # Replicate Changelog
+## [Update] - 2022-10-11
+
+Added an Open In Browser action to view on replicate.com
 
 ## [Update] - 2022-10-11
 

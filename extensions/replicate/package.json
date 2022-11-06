@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "replicate",
-  "title": "Replicate.com",
-  "description": "View and search your Replicate.com ai generate predictions",
+  "title": "Replicate",
+  "description": "View and search your Replicate predictions",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
+  "contributors": [
+    "replicate"
+  ],
   "categories": [
     "Media",
     "Design Tools",
@@ -15,8 +18,8 @@
     {
       "name": "replicate",
       "title": "View Predictions",
-      "subtitle": "Replicate.com",
-      "description": "View your Replicate.com predictoins",
+      "subtitle": "Replicate",
+      "description": "View your Replicate predictions",
       "mode": "view"
     }
   ],
@@ -25,7 +28,7 @@
       "name": "token",
       "type": "password",
       "title": "API Token",
-      "description": "Add your token from Replicate.com",
+      "description": "Add your token from Replicate",
       "placeholder": "Token",
       "required": true
     }
