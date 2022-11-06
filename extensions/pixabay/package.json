@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pixabay",
   "title": "Pixabay",
-  "description": "Search Content on pixabay.com",
+  "description": "Search Images and Videos on pixabay.com",
   "icon": "pixabay.png",
   "author": "tonka3000",
   "categories": [
