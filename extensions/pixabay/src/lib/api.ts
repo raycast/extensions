@@ -13,6 +13,11 @@ export function getDownloadFolder(): string {
   return resolveFilepath(folder);
 }
 
+export function showInFolderAfterDownload(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.showinfinder as boolean) || true;
+}
+
 export interface Hit {
   id: number;
   pageURL: string;

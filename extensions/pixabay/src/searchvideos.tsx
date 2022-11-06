@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { getDownloadFolder, Pixabay, Video, VideoHit } from "./lib/api";
+import { getDownloadFolder, Pixabay, showInFolderAfterDownload, Video, VideoHit } from "./lib/api";
 import { useImage } from "./lib/hooks";
 import {
   capitalizeFirstLetter,
@@ -37,8 +37,21 @@ function DownloadVideoAction(props: { video: Video | undefined; title: string; h
       fs.mkdirSync(downloadFolder, { recursive: true });
       const downloadFilename = path.join(downloadFolder, filename);
       await Pixabay.downloadFile(v.url, { localFilepath: resolveFilepath(downloadFilename) });
-      await showToast({ style: Toast.Style.Success, title: "Download succeeded", message: `${downloadFilename}` });
-      await showInFinder(downloadFilename);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Download succeeded",
+        message: `${downloadFilename}`,
+        primaryAction: {
+          title: "Show in Finder",
+          onAction: (toast) => {
+            showInFinder(downloadFilename);
+            toast.hide();
+          },
+        },
+      });
+      if (showInFolderAfterDownload()) {
+        await showInFinder(downloadFilename);
+      }
     } catch (error) {
       const e = getErrorMessage(error);
       await showToast({ style: Toast.Style.Failure, title: "Download failed", message: e });

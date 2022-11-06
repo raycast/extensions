@@ -56,6 +56,14 @@
       "required": true,
       "title": "API key",
       "placeholder": "API key from pixabay.com"
+    },
+    {
+      "name": "showinfinder",
+      "description": "Show In Finder after Download",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Show In Finder after Download"
     }
   ]
 }
