@@ -1,33 +1,10 @@
-import { Clipboard } from "@raycast/api";
-import fetch from "node-fetch";
 import path from "path";
-import { temporaryWrite, FileOptions } from "tempy";
+import { Clipboard } from "@raycast/api";
+
+import downloadTempFile from "./downloadTempFile";
 
 export default async function copyFileToClipboard(url: string, name?: string) {
-  const response = await fetch(url);
-
-  if (response.status !== 200) {
-    throw new Error(`GIF file download failed. Server responded with ${response.status}`);
-  }
-
-  if (response.body === null) {
-    throw new Error("Unable to read GIF response");
-  }
-
-  let tempyOpt: FileOptions;
-  if (name) {
-    tempyOpt = { name };
-  } else {
-    tempyOpt = { extension: ".png" };
-  }
-
-  let file: string;
-  try {
-    file = await temporaryWrite(await response.body, tempyOpt);
-  } catch (e) {
-    const error = e as Error;
-    throw new Error(`Failed to download GIF: "${error.message}"`);
-  }
+  const file = await downloadTempFile(url, name);
 
   try {
     await Clipboard.copy({ file });
