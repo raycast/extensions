@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List ,Detail} from "@raycast/api";
+import { ActionPanel, Action, List, Detail } from "@raycast/api";
 import { ICWMessage } from "./components/ICWMessage";
 import { CWMessageMgr } from "./components/CWMessageMgr";
 import { useEffect, useState } from "react";
@@ -30,19 +30,18 @@ export default function Command() {
     DoGetMsgs();
   }, []);
 
-  function DetailOfChat(props: { contents: string; link: string;}){
-    return  <Detail markdown={`${props.contents}`} actions={
-      <ActionPanel>
-        <Action.OpenInBrowser
-          title="Open in Chatwork"
-          url={props.link}
-        />
-        <Action.CopyToClipboard
-          title="Copy URL"
-          content={props.link}
-        />
-      </ActionPanel>
-    }/>;
+  function DetailOfChat(props: { contents: string; link: string }) {
+    return (
+      <Detail
+        markdown={`${props.contents}`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open in Chatwork" url={props.link} />
+            <Action.CopyToClipboard title="Copy URL" content={props.link} />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   return (
@@ -70,7 +69,15 @@ export default function Command() {
                   title={msg.body}
                   actions={
                     <ActionPanel>
-                      <Action.Push title="Read in detail" target={<DetailOfChat contents={msg.body} link={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}/>} />
+                      <Action.Push
+                        title="Read in detail"
+                        target={
+                          <DetailOfChat
+                            contents={msg.body}
+                            link={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
+                          />
+                        }
+                      />
                       <Action.OpenInBrowser
                         title="Open in Chatwork"
                         url={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
