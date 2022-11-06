@@ -25,10 +25,13 @@ export type ImagesGridProps = {
   title?: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-} & ({ prompt: string; file?: never } | { prompt?: never; file: string });
+} & (
+  | { prompt: string; file?: never; variationCount?: never }
+  | { prompt?: never; file: string; variationCount: number }
+);
 
 export function ImagesGrid(props: ImagesGridProps) {
-  const { prompt, file, n, size } = props;
+  const { prompt, file, n, size, variationCount = 0 } = props;
   const title = props.title || prompt;
   const number = parseInt(n, 10);
 
@@ -36,9 +39,9 @@ export function ImagesGrid(props: ImagesGridProps) {
   const [results, createImage, createVariation, isLoading] = useOpenAIApi({ apiKey });
 
   const { push } = useNavigation();
-  async function createVariationAction(url: string) {
+  async function createVariationAction(url: string, count: number) {
     const file = await downloadTempFile(url);
-    push(<ImagesGrid title={title} file={file} n={n} size={size} />);
+    push(<ImagesGrid title={title} file={file} n={n} size={size} variationCount={count + 1} />);
   }
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export function ImagesGrid(props: ImagesGridProps) {
       columns={Math.max(MIN_COLS, Math.ceil((results.images?.length ?? 0) / NUM_ROWS))}
       enableFiltering={false}
       isLoading={isLoading}
-      searchBarPlaceholder={file ? `Variation on "${title}"` : title}
+      searchBarPlaceholder={file ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${title}"` : title}
     >
       {!results.images?.length || isLoading ? (
         <Grid.EmptyView />
@@ -92,7 +95,7 @@ export function ImagesGrid(props: ImagesGridProps) {
                     <Action
                       title="Create Variation(s)"
                       icon={Icon.NewDocument}
-                      onAction={() => createVariationAction(urlString)}
+                      onAction={() => createVariationAction(urlString, variationCount)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
