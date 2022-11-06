@@ -5,7 +5,7 @@ import { getDownloadFolder, Hit, Pixabay } from "./lib/api";
 import fs from "fs";
 import { useImage } from "./lib/hooks";
 import path from "path";
-import { getErrorMessage, splitTagString } from "./lib/utils";
+import { compactNumberFormat, getErrorMessage, splitTagString } from "./lib/utils";
 
 function getLargeFileExtension(hit: Hit): string {
   const last = hit.largeImageURL.split(".").slice(-1)[0];
@@ -99,7 +99,10 @@ function ImageGridItem(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
   return (
     <Grid.Item
-      title={hit.tags}
+      title={`♥️${compactNumberFormat(hit.likes)} ⬇️${compactNumberFormat(hit.downloads)} 👁️${compactNumberFormat(
+        hit.views
+      )}`}
+      subtitle={hit.tags}
       content={hit.previewURL}
       actions={
         <ActionPanel>

@@ -26,3 +26,9 @@ export function resolveFilepath(filename: string): string {
 export function splitTagString(text: string): string[] {
   return text.split(",").map((t) => t.trim());
 }
+
+const fmt = new Intl.NumberFormat("en", { notation: "compact" });
+
+export function compactNumberFormat(num: number): string {
+  return fmt.format(num);
+}

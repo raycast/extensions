@@ -3,7 +3,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getDownloadFolder, Pixabay, Video, VideoHit } from "./lib/api";
 import { useImage } from "./lib/hooks";
-import { capitalizeFirstLetter, getErrorMessage, resolveFilepath, splitTagString } from "./lib/utils";
+import {
+  capitalizeFirstLetter,
+  compactNumberFormat,
+  getErrorMessage,
+  resolveFilepath,
+  splitTagString,
+} from "./lib/utils";
 import fs from "fs";
 import path from "path";
 
@@ -101,7 +107,10 @@ function VideoGridItem(props: { hit: VideoHit }): JSX.Element {
   const hit = props.hit;
   return (
     <Grid.Item
-      title={hit.tags}
+      title={`♥️${compactNumberFormat(hit.likes)} ⬇️${compactNumberFormat(hit.downloads)} 👁️${compactNumberFormat(
+        hit.views
+      )}`}
+      subtitle={hit.tags}
       content={getPreviewUrl(hit)}
       actions={
         <ActionPanel>
