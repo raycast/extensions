@@ -1,22 +1,65 @@
-import { Action, ActionPanel, Color, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { Hit, Pixabay } from "./lib/api";
+import { getDownloadFolder, Hit, Pixabay } from "./lib/api";
+import fs from "fs";
 import { useImage } from "./lib/hooks";
+import path from "path";
+import { getErrorMessage } from "./lib/utils";
+
+function getLargeFileExtension(hit: Hit): string {
+  const last = hit.largeImageURL.split(".").slice(-1)[0];
+  if (last && last.length > 0) {
+    return last;
+  } else {
+    return "png";
+  }
+}
+
+function ImageDownloadAction(props: { localFilepath: string | undefined; hit: Hit }): JSX.Element | null {
+  const hit = props.hit;
+  const lfp = props.localFilepath;
+  if (!lfp || !fs.existsSync(lfp)) {
+    return null;
+  }
+  const handle = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Downloading" });
+    try {
+      const [firsttag] = hit.tags.split(",");
+      const filename = `${firsttag} - ${hit.id}.${getLargeFileExtension(hit)}`;
+      const downloadFolder = getDownloadFolder();
+      fs.mkdirSync(downloadFolder, { recursive: true });
+      const localFilename = path.join(downloadFolder, filename);
+      fs.copyFileSync(lfp, localFilename);
+      await showToast({ style: Toast.Style.Success, title: "Download Succeeded", message: localFilename });
+      await showInFinder(localFilename);
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Download Failed", message: getErrorMessage(error) });
+    }
+  };
+  return (
+    <Action
+      title={`Download Image - ${hit.imageWidth} x ${hit.imageHeight}`}
+      onAction={handle}
+      icon={{ source: Icon.Download, tintColor: Color.PrimaryText }}
+    />
+  );
+}
 
 function ImageDetail(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
-  const { localFilepath, error } = useImage(hit.largeImageURL, hit.id.toString());
+  const { base64, localFilepath, error } = useImage(hit.largeImageURL, hit.id.toString());
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Could not download Image", message: error });
   }
   const parts: string[] = [];
-  if (localFilepath) {
-    parts.push(`![Preview](${localFilepath})`);
+  if (base64) {
+    parts.push(`![Preview](${base64})`);
   } else {
     parts.push("Download Image ...");
   }
   const md = parts.join("\n");
+  const tags = hit.tags.split(",");
   return (
     <Detail
       markdown={md}
@@ -26,6 +69,11 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
             <Detail.Metadata.TagList.Item text={hit.user} icon={hit.userImageURL} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Size" text={`${hit.imageWidth} x ${hit.imageHeight}`} />
+          <Detail.Metadata.TagList title="Tags">
+            {tags?.map((t) => (
+              <Detail.Metadata.TagList.Item key={t} text={t} />
+            ))}
+          </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Likes" text={`♥️ ${hit.likes}`} />
           <Detail.Metadata.Label title="Downloads" text={`${hit.downloads}`} />
           <Detail.Metadata.Label title="Views" text={`${hit.views}`} />
@@ -40,6 +88,7 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={hit.pageURL} />
+          <ImageDownloadAction localFilepath={localFilepath} hit={hit} />
         </ActionPanel>
       }
     />

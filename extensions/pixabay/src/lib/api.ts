@@ -3,7 +3,15 @@ import urlJoin from "url-join";
 import fs from "fs";
 import { pipeline } from "stream";
 import util from "util";
+import { resolveFilepath } from "./utils";
 const streamPipeline = util.promisify(pipeline);
+
+export function getDownloadFolder(): string {
+  const d = "~/Downloads";
+  const prefs = getPreferenceValues();
+  const folder = (prefs.downloadfolder as string) || d;
+  return resolveFilepath(folder);
+}
 
 export interface Hit {
   id: number;
@@ -95,7 +103,6 @@ class PixabayClient {
       throw Error("No API key defined");
     }
     const encodedUrl = fullUrl + "/?" + fullParams.toString();
-    console.log(encodedUrl);
     const response = await fetch(encodedUrl, {
       method: "GET",
       headers: {
@@ -110,7 +117,6 @@ class PixabayClient {
 
   async downloadFile(url: string, params: { localFilepath: string }): Promise<void> {
     if (fs.existsSync(params.localFilepath)) {
-      console.log("use cache");
       return;
     }
     const response = await fetch(url, {
@@ -122,7 +128,6 @@ class PixabayClient {
     if (!response.body) {
       throw new Error("");
     }
-    console.log(`write ${url} to ${params.localFilepath}`);
     await streamPipeline(response.body as any, fs.createWriteStream(params.localFilepath));
   }
 

@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Color, Detail, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { Pixabay, Video, VideoHit } from "./lib/api";
+import { getDownloadFolder, Pixabay, Video, VideoHit } from "./lib/api";
 import { useImage } from "./lib/hooks";
 import { capitalizeFirstLetter, getErrorMessage, resolveFilepath } from "./lib/utils";
+import fs from "fs";
+import path from "path";
 
 function getPreviewUrl(hit: VideoHit, size?: string): string {
   const s = size ? size : "295x166"; // Available sizes: 100x75, 200x150, 295x166, 640x360, 960x540, 1920x1080
@@ -19,21 +21,22 @@ function DownloadVideoAction(props: { video: Video | undefined; title: string; h
   const firstTag = hit.tags.split(",")[0];
   const filename = `${firstTag} - ${hit.id}.mp4`;
   const handle = async () => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading" });
+    await showToast({ style: Toast.Style.Animated, title: "Downloading" });
     try {
-      const downloadFilename = `~/Downloads/${filename}`;
+      const downloadFolder = getDownloadFolder();
+      fs.mkdirSync(downloadFolder, { recursive: true });
+      const downloadFilename = path.join(downloadFolder, filename);
       await Pixabay.downloadFile(v.url, { localFilepath: resolveFilepath(downloadFilename) });
-      await toast.hide();
-      showToast({ style: Toast.Style.Success, title: "Download succeeded", message: `Location: ${downloadFilename}` });
+      await showToast({ style: Toast.Style.Success, title: "Download succeeded", message: `${downloadFilename}` });
+      await showInFinder(downloadFilename);
     } catch (error) {
-      await toast.hide();
       const e = getErrorMessage(error);
       await showToast({ style: Toast.Style.Failure, title: "Download failed", message: e });
     }
   };
   return (
     <Action
-      title={`Download ${props.title}`}
+      title={`Download ${props.title} - ${v.width} x ${v.height}`}
       icon={{ source: Icon.Download, tintColor: Color.PrimaryText }}
       onAction={handle}
     />
@@ -42,13 +45,13 @@ function DownloadVideoAction(props: { video: Video | undefined; title: string; h
 
 function VideoDetail(props: { hit: VideoHit }): JSX.Element {
   const hit = props.hit;
-  const { localFilepath, error } = useImage(getPreviewUrl(hit, "960x540"), hit.id.toString());
+  const { base64, error } = useImage(getPreviewUrl(hit, "960x540"), hit.id.toString());
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Could not download Image", message: error });
   }
   const parts: string[] = [];
-  if (localFilepath) {
-    parts.push(`![Preview](${localFilepath})`);
+  if (base64) {
+    parts.push(`![Preview](${base64})`);
   } else {
     parts.push("Download Video Preview ...");
   }
@@ -79,7 +82,7 @@ function VideoDetail(props: { hit: VideoHit }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="Videos">
             {Object.entries(hit.videos).map(([k, v]) => (
-              <DownloadVideoAction video={v} title={capitalizeFirstLetter(k)} hit={hit} />
+              <DownloadVideoAction key={k} video={v} title={capitalizeFirstLetter(k)} hit={hit} />
             ))}
           </ActionPanel.Section>
         </ActionPanel>
