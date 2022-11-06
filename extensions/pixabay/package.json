@@ -11,10 +11,11 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search",
+      "name": "searchimages",
       "title": "Search Images",
       "description": "Search Images",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "Pixabay"
     },
     {
       "name": "searchvideos",
