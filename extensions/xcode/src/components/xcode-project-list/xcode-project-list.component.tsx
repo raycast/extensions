@@ -90,7 +90,6 @@ function XcodeProjectListItemContainer(props: {
 }): JSX.Element {
   return (
     <XcodeProjectListItem
-      key={props.xcodeProject.filePath}
       project={props.xcodeProject}
       isFavorite={props.isFavorite}
       actions={props.actions ? props.actions(props.xcodeProject) : undefined}

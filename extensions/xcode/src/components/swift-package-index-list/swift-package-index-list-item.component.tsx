@@ -13,7 +13,6 @@ export function SwiftPackageIndexListItem(props: {
   return (
     <List.Item
       id={props.searchResult.id}
-      key={props.searchResult.id}
       title={props.searchResult.name}
       accessories={[{ text: String(props.searchResult.stars), icon: Icon.Star }]}
       actions={

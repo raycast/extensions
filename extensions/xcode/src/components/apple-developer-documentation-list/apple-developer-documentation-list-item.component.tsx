@@ -9,7 +9,6 @@ import { AppleDeveloperDocumentationEntryTypeIcon } from "../../shared/apple-dev
 export function AppleDeveloperDocumentationListItem(props: { entry: AppleDeveloperDocumentationEntry }): JSX.Element {
   return (
     <List.Item
-      key={props.entry.url}
       icon={AppleDeveloperDocumentationEntryTypeIcon(props.entry.type)}
       title={props.entry.title}
       detail={<AppleDeveloperDocumentationListItemDetail entry={props.entry} />}

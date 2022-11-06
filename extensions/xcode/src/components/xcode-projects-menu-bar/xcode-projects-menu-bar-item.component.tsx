@@ -10,7 +10,6 @@ import { XcodeService } from "../../services/xcode.service";
 export function XcodeProjectsMenuBarItem(props: { project: XcodeProject }): JSX.Element {
   return (
     <MenuBarExtra.Item
-      key={props.project.filePath}
       icon={XcodeProjectIcon(props.project.type)}
       title={props.project.name}
       tooltip={tildify(props.project.filePath)}

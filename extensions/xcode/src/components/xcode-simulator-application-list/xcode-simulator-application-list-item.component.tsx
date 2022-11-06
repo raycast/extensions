@@ -9,7 +9,6 @@ import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 export function XcodeSimulatorApplicationListItem(props: { application: XcodeSimulatorApplication }): JSX.Element {
   return (
     <List.Item
-      key={props.application.id}
       icon={{
         source: props.application.appIconPath ?? "app-icon-placeholder.png",
         mask: Image.Mask.RoundedRectangle,
