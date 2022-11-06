@@ -148,7 +148,7 @@ export default function SearchCommand(): JSX.Element {
     }
   );
   return (
-    <Grid isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
+    <Grid searchBarPlaceholder="Search Images" isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
       {data?.hits?.map((hit) => (
         <ImageGridItem key={hit.id} hit={hit} />
       ))}

@@ -156,7 +156,7 @@ export default function SearchVideosCommand(): JSX.Element {
     }
   );
   return (
-    <Grid isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
+    <Grid searchBarPlaceholder="Search Videos" isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
       {data?.hits?.map((hit) => (
         <VideoGridItem key={hit.id} hit={hit} />
       ))}
