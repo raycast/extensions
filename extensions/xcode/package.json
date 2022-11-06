@@ -138,10 +138,10 @@
       "mode": "view"
     },
     {
-      "name": "installed-simulator-apps.command",
-      "title": "Installed Simulator Apps",
+      "name": "search-recent-builds.command",
+      "title": "Search Recent Builds",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
+      "description": "Search recent builds which are installed in a Xcode Simulator.",
       "mode": "view"
     },
     {
