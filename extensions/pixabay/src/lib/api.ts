@@ -136,25 +136,37 @@ class PixabayClient {
     await streamPipeline(response.body as any, fs.createWriteStream(params.localFilepath));
   }
 
-  async searchImages(query: string | undefined): Promise<ImageSearchResult | undefined> {
+  async searchImages(
+    query: string | undefined,
+    imagetype?: string | undefined
+  ): Promise<ImageSearchResult | undefined> {
     if (!query || query.length <= 0) {
       return;
     }
     const params = new URLSearchParams();
     if (query) {
       params.append("q", query);
+    }
+    if (imagetype) {
+      params.append("image_type", imagetype);
     }
     const data = (await this.fetch("", params)) as ImageSearchResult | undefined;
     return data;
   }
 
-  async searchVideos(query: string | undefined): Promise<VideoSearchResult | undefined> {
+  async searchVideos(
+    query: string | undefined,
+    videotype?: string | undefined
+  ): Promise<VideoSearchResult | undefined> {
     if (!query || query.length <= 0) {
       return;
     }
     const params = new URLSearchParams();
     if (query) {
       params.append("q", query);
+    }
+    if (videotype) {
+      params.append("video_type", videotype);
     }
     const data = (await this.fetch("videos", params)) as VideoSearchResult | undefined;
     return data;

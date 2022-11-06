@@ -5,7 +5,7 @@ import { getDownloadFolder, Hit, Pixabay, showInFolderAfterDownload } from "./li
 import fs from "fs";
 import { useImage } from "./lib/hooks";
 import path from "path";
-import { compactNumberFormat, getErrorMessage, splitTagString } from "./lib/utils";
+import { capitalizeFirstLetter, compactNumberFormat, getErrorMessage, splitTagString } from "./lib/utils";
 
 function getLargeFileExtension(hit: Hit): string {
   const last = hit.largeImageURL.split(".").slice(-1)[0];
@@ -136,19 +136,33 @@ function ImageGridItem(props: { hit: Hit }): JSX.Element {
 }
 
 export default function SearchCommand(): JSX.Element {
+  const [imagetype, setImagetype] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data } = useCachedPromise(
-    async (searchText: string | undefined) => {
-      const result = await Pixabay.searchImages(searchText);
+    async (searchText: string | undefined, imagetype: string) => {
+      const result = await Pixabay.searchImages(searchText, imagetype);
       return result;
     },
-    [searchText],
+    [searchText, imagetype],
     {
       keepPreviousData: true,
     }
   );
+  const imageTypes = ["all", "photo", "illustration", "vector"];
   return (
-    <Grid searchBarPlaceholder="Search Images" isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
+    <Grid
+      searchBarPlaceholder="Search Images"
+      isLoading={isLoading}
+      throttle
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Video Type" onChange={setImagetype}>
+          {imageTypes.map((t) => (
+            <Grid.Dropdown.Item key={t} title={capitalizeFirstLetter(t)} value={t} />
+          ))}
+        </Grid.Dropdown>
+      }
+    >
       {data?.hits?.map((hit) => (
         <ImageGridItem key={hit.id} hit={hit} />
       ))}

@@ -144,19 +144,33 @@ function VideoGridItem(props: { hit: VideoHit }): JSX.Element {
 }
 
 export default function SearchVideosCommand(): JSX.Element {
+  const [videotype, setVideotype] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data } = useCachedPromise(
-    async (searchText: string | undefined) => {
-      const result = await Pixabay.searchVideos(searchText);
+    async (searchText: string | undefined, videotype: string) => {
+      const result = await Pixabay.searchVideos(searchText, videotype);
       return result;
     },
-    [searchText],
+    [searchText, videotype],
     {
       keepPreviousData: true,
     }
   );
+  const videoTypes = ["all", "film", "animation"];
   return (
-    <Grid searchBarPlaceholder="Search Videos" isLoading={isLoading} throttle onSearchTextChange={setSearchText}>
+    <Grid
+      searchBarPlaceholder="Search Videos"
+      isLoading={isLoading}
+      throttle
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Video Type" onChange={setVideotype}>
+          {videoTypes.map((t) => (
+            <Grid.Dropdown.Item key={t} title={capitalizeFirstLetter(t)} value={t} />
+          ))}
+        </Grid.Dropdown>
+      }
+    >
       {data?.hits?.map((hit) => (
         <VideoGridItem key={hit.id} hit={hit} />
       ))}
