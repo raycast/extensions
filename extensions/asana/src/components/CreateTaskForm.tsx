@@ -99,10 +99,10 @@ export default function CreateTaskForm(props: {
     },
   });
 
-  const { data: workspaces } = useWorkspaces();
-  const { data: allProjects } = useProjects(values.workspace);
-  const { data: users } = useUsers(values.workspace);
-  const { data: me } = useMe();
+  const { data: workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
+  const { data: allProjects, isLoading: isLoadingProjects } = useProjects(values.workspace);
+  const { data: users, isLoading: isLoadingUsers } = useUsers(values.workspace);
+  const { data: me, isLoading: isLoadingMe } = useMe();
 
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
@@ -125,6 +125,7 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
+      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe}
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
@@ -132,18 +133,20 @@ export default function CreateTaskForm(props: {
         })}
       </Form.Dropdown>
 
-      <Form.TagPicker title="Projects" placeholder="Select one or more projects" storeValue {...itemProps.projects}>
-        {allProjects?.map((project) => {
-          return (
-            <Form.TagPicker.Item
-              key={project.gid}
-              icon={getProjectIcon(project)}
-              title={project.name}
-              value={project.gid}
-            />
-          );
-        })}
-      </Form.TagPicker>
+      {allProjects && allProjects.length ? (
+        <Form.TagPicker title="Projects" placeholder="Select one or more projects" storeValue {...itemProps.projects}>
+          {allProjects.map((project) => {
+            return (
+              <Form.TagPicker.Item
+                key={project.gid}
+                icon={getProjectIcon(project)}
+                title={project.name}
+                value={project.gid}
+              />
+            );
+          })}
+        </Form.TagPicker>
+      ) : null}
 
       <Form.Separator />
 
@@ -151,20 +154,21 @@ export default function CreateTaskForm(props: {
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
-      <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
-        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
-
-        {users?.map((user) => {
-          return (
-            <Form.Dropdown.Item
-              key={user.gid}
-              value={user.gid}
-              title={user.gid === me?.gid ? `${user.name} (me)` : user.name}
-              icon={getAvatarIcon(user.name)}
-            />
-          );
-        })}
-      </Form.Dropdown>
+      {users && users.length > 0 ? (
+        <Form.Dropdown title="Assignee" storeValue {...itemProps.assignee}>
+          <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+          {users?.map((user) => {
+            return (
+              <Form.Dropdown.Item
+                key={user.gid}
+                value={user.gid}
+                title={user.gid === me?.gid ? `${user.name} (me)` : user.name}
+                icon={getAvatarIcon(user.name)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
 
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />
 
