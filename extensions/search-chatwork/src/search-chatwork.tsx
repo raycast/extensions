@@ -1,10 +1,11 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
 import { CWMessageMgr } from "./components/CWMessageMgr";
+import { DetailOfChat } from "./components/DetailOfChat";
 import { useEffect, useState } from "react";
 import { getRooms, getMessagesOfAllRooms } from "./utils/chatwork-api";
 import { Constants } from "./utils/constants";
 
-export default function Command() {
+export default function CommandToSearchChatWork() {
   const [CWMessageMgr, setCWMessageMgr] = useState<CWMessageMgr[]>();
   const [isLoading, setLoading] = useState(true);
 
@@ -23,26 +24,6 @@ export default function Command() {
     }
     DoGetMsgs();
   }, []);
-
-  function DetailOfChat(props: { roomName: string; contents: string; link: string }) {
-    function getMarkDonw(roomName: string, contents: string) {
-      return `
-# ${props.roomName}
-# ${props.contents}
-`;
-    }
-    return (
-      <Detail
-        markdown={getMarkDonw(props.roomName, props.contents)}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open in Chatwork" url={props.link} />
-            <Action.CopyToClipboard title="Copy URL" content={props.link} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
 
   return (
     <List isLoading={isLoading}>
