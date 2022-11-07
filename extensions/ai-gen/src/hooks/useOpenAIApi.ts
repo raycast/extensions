@@ -86,10 +86,8 @@ export default function useOpenAIApi(config: { apiKey: string }) {
       } catch (e) {
         const error = e as any;
         if (error.response) {
-          console.error(error.response.data.error);
           setState({ error: new Error(`${error.response.status}: ${error.response.data.error.message}`) });
         } else {
-          console.error(error.message);
           setState({ error: error.message });
         }
       }
