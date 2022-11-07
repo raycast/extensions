@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import { Grid, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 
-import useOpenAIApi from "../hooks/useOpenAIApi";
+import useOpenAIImageApi from "../hooks/useOpenAIImageApi";
 import { ImageActions } from "./ImageActions";
 
 const NUM_ROWS = 2;
@@ -22,7 +22,7 @@ export function ImagesGrid(props: ImagesGridProps) {
   const number = parseInt(n, 10);
 
   const { apiKey } = getPreferenceValues();
-  const [results, createImage, createVariation, isLoading] = useOpenAIApi({ apiKey });
+  const [results, createImage, createVariation, isLoading] = useOpenAIImageApi({ apiKey });
 
   useEffect(() => {
     if (prompt) {

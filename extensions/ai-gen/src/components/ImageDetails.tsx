@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 
-import { CreateVariationRequest } from "../hooks/useOpenAIApi";
+import { CreateVariationRequest } from "../hooks/useOpenAIImageApi";
 import { ImageActions } from "./ImageActions";
 
 export function ImageDetails(props: {

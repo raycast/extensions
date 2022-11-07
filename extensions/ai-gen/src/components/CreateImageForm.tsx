@@ -13,7 +13,7 @@ export interface CreateImageValues {
   size: CreateImageRequestSizeEnum;
 }
 
-export function CreateImage(props: { draftValues?: CreateImageValues }) {
+export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
   const { draftValues } = props;
   const { enableDrafts, storeValue } = getPreferenceValues();
 
