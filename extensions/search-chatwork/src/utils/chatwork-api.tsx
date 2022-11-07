@@ -12,7 +12,7 @@ let headers = new Headers({
 });
 
 /**
- * authorize CW Api
+ * authorize CW API
  *
  * @param _headers
  * @returns headr with the token
@@ -52,8 +52,8 @@ export async function getRooms(): Promise<CWRoom[]> {
 }
 
 /**
- * 指定のルームのチャットの上位100件を取得する
  * get the latest 100 chats from the specified room the user joined
+ 
  * @param roomId
  * @param isForce
  * @returns
@@ -85,14 +85,20 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
   }
 }
 
-export async function getMessagesOfAllRooms(ICWRooms: CWRoom[]): Promise<CWMessageMgr> {
+/**
+ * get messages through all the room
+ * 
+ * @param CWRooms 
+ * @returns 
+ */
+export async function getMessagesOfAllRooms(CWRooms: CWRoom[]): Promise<CWMessageMgr> {
   try {
     await authorizeApi(headers);
     const rooms: CMRoomOwner[] = [];
-    for (let i = 0; i < ICWRooms.length; i++) {
-      const ret = await getMessages(String(ICWRooms[i].room_id));
+    for (let i = 0; i < CWRooms.length; i++) {
+      const ret = await getMessages(String(CWRooms[i].room_id));
       if (ret.length > 0) {
-        rooms.push(new CMRoomOwner(ICWRooms[i], ret));
+        rooms.push(new CMRoomOwner(CWRooms[i], ret));
       }
     }
     return new CWMessageMgr(rooms);
