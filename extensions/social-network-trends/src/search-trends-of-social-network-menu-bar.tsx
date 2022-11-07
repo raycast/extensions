@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { listIcon, listIconDark } from "./utils/common-utils";
 import { getTrends } from "./hooks/hooks";
 import { douyinSearchUrl } from "./utils/trend-utils";
@@ -26,8 +26,12 @@ export default function TrendOfWeibo() {
               },
             }}
             title={value.name + `    ${(value.hot / 10000).toFixed(1)}w`}
-            onAction={async () => {
-              await open(value.url);
+            onAction={async (event: MenuBarExtra.ActionEvent) => {
+              if (event.type == "left-click") {
+                await open(value.url);
+              } else {
+                await Clipboard.copy(value.name);
+              }
             }}
           />
         );
@@ -48,8 +52,12 @@ export default function TrendOfWeibo() {
               },
             }}
             title={value.query}
-            onAction={async () => {
-              await open(value.url);
+            onAction={async (event: MenuBarExtra.ActionEvent) => {
+              if (event.type == "left-click") {
+                await open(value.url);
+              } else {
+                await Clipboard.copy(value.name);
+              }
             }}
           />
         );
@@ -61,21 +69,23 @@ export default function TrendOfWeibo() {
       />
       {douYinTrends?.map((value, index) => {
         return (
-          index < 10 && (
-            <MenuBarExtra.Item
-              key={index + value.name}
-              icon={{
-                source: {
-                  light: `${listIcon[index]}`,
-                  dark: `${listIconDark[index]}`,
-                },
-              }}
-              title={value.name + `    ${(value.hot / 10000).toFixed(1)}w`}
-              onAction={async () => {
+          <MenuBarExtra.Item
+            key={index + value.name}
+            icon={{
+              source: {
+                light: `${listIcon[index]}`,
+                dark: `${listIconDark[index]}`,
+              },
+            }}
+            title={value.name + `    ${(value.hot / 10000).toFixed(1)}w`}
+            onAction={async (event: MenuBarExtra.ActionEvent) => {
+              if (event.type == "left-click") {
                 await open(douyinSearchUrl + encodeURIComponent(value.name));
-              }}
-            />
-          )
+              } else {
+                await Clipboard.copy(value.name);
+              }
+            }}
+          />
         );
       })}
       <MenuBarExtra.Separator />

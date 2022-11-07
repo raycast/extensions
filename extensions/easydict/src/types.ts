@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-04 21:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-11 23:44
+ * @lastEditTime: 2022-10-11 21:15
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -22,6 +22,8 @@ import {
   YoudaoWebTranslateResult,
 } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
+import { BingTranslateResult } from "./translation/microsoft/types";
+import { VolcanoDetectResult, VolcanoTranslateResult } from "./translation/volcano/types";
 
 export interface ActionListPanelProps {
   displayItem: ListDisplayItem;
@@ -38,6 +40,8 @@ export enum TranslationType {
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
   Google = "Google Translate",
+  Bing = "Bing Translate",
+  Volcano = "Volcano Translate",
 }
 
 export enum DicionaryType {
@@ -52,7 +56,7 @@ export type RequestType = TranslationType | DicionaryType | LanguageDetectType;
 
 export interface QueryTypeResult {
   type: QueryType;
-  wordInfo: QueryWordInfo; // dictionary type must has own word info.
+  queryWordInfo: QueryWordInfo; // dictionary type must has own word info.
   result?: QueryResponse; // when language is not supported, result is undefined.
   translations: string[]; // each translation is a paragraph.
   oneLineTranslation?: string; // one line translation. will automatically give value when updating if type is TranslationType.
@@ -62,6 +66,7 @@ export interface QueryTypeResult {
 export type QueryResponse =
   | YoudaoDictionaryFormatResult
   | YoudaoWebTranslateResult
+  | BingTranslateResult
   | BaiduTranslateResult
   | BaiduWebLanguageDetect
   | TencentTranslateResult
@@ -70,6 +75,8 @@ export type QueryResponse =
   | IcibaDictionaryResult
   | LingueeDictionaryResult
   | AppleTranslateResult
+  | VolcanoTranslateResult
+  | VolcanoDetectResult
   | GoogleTranslateResult;
 
 export interface RequestErrorInfo {
@@ -148,13 +155,14 @@ export interface ListDisplayItem {
   queryWordInfo: QueryWordInfo;
   key: string;
   title: string;
+  subtitle?: string;
   displayType: ListItemDisplayType; // LingueeListItemType.Example
   queryType: QueryType; // LingueeListItemType
   copyText: string;
   tooltip?: string;
-  subtitle?: string;
   speech?: string;
-  translationMarkdown?: string;
+  detailsMarkdown?: string;
+  sourceData?: QueryResponse;
 
   // accessory item
   accessoryItem?: ListAccessoryItem;

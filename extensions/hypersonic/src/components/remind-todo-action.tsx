@@ -30,7 +30,7 @@ function getNextMondayFromToday() {
 const dates = [
   { name: 'Tomorrow', value: t2 },
   {
-    name: new Intl.DateTimeFormat('en-En', {
+    name: new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
     }).format(t3),
     value: t3,

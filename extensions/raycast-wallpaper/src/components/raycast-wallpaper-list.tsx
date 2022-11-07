@@ -13,7 +13,7 @@ export function RaycastWallpaperList(props: { raycastWallpapers: RaycastWallpape
     <List
       isShowingDetail={raycastWallpapers.length !== 0}
       isLoading={raycastWallpapers.length === 0}
-      searchBarPlaceholder={"Search pictures"}
+      searchBarPlaceholder={"Search wallpapers"}
     >
       <RaycastWallpaperEmptyView layout={preferences.layout} />
       {raycastWallpapers.map((value, index) => {

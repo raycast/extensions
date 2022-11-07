@@ -1,5 +1,17 @@
 # Xcode Changelog
 
+## [Delete DerivedData Script] - 2022-11-04
+
+- Added a script to delete DerivedData via Finder instead of the `rm` command. This way apps that are going to be deleted will be deregistered from Launch Services.
+
+## [Menu Bar Project Favorites] - 2022-10-14
+
+- Added an option to show Xcode Project favorites in the menu bar. 
+
+## [Confirmation Alerts] - 2022-10-05
+
+- Added confirmation alerts to "Clear Derived Data", "Clear Swift Package Manager Cache" and "Delete Unsupported Simulators" commands.
+
 ## [Search Swift Package Index] - 2022-09-02
 
 - Added "Search Swift Package Index" command to search the Swift Package Index and easily add a Swift Package to a Xcode Project.

@@ -1,5 +1,10 @@
 # Text Shortcuts Changelog
 
+## [Add Menu Bar command] - 2022-10-20
+
+- Add Menu Bar command: Shortcut Library
+- Update Title Case with The Chicago Manual of Style
+
 ## [Fix bug] - 2022-08-19
 
 - Fix the bug that the icon is not displayed

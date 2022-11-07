@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
-import { authorize, oauthClient } from "./oauth";
+import { authorize } from "./oauth";
 import { isSpotifyInstalled } from "../utils";
 import { getTrack, isRunning, playTrack, setShuffling } from "./applescript";
 import { TrackInfo } from "./types";
@@ -11,18 +11,12 @@ export const spotifyApi = new SpotifyWebApi();
 
 async function authorizeIfNeeded(): Promise<void> {
   try {
-    await authorize();
+    const accessToken = await authorize();
+    spotifyApi.setAccessToken(accessToken);
   } catch (error) {
     console.error("authorization error:", error);
     showToast({ style: Toast.Style.Failure, title: String(error) });
     return;
-  }
-
-  const accessToken = (await oauthClient.getTokens())?.accessToken;
-  if (accessToken) {
-    spotifyApi.setAccessToken(accessToken);
-  } else {
-    showToast({ style: Toast.Style.Failure, title: "Invalid accessToken" });
   }
 }
 
@@ -671,4 +665,19 @@ export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi
   }, [categoryId]);
 
   return response;
+}
+
+export async function addTrackToQueue(trackUri: string): Promise<Response<SpotifyApi.AddToQueueResponse>> {
+  await authorizeIfNeeded();
+  try {
+    const response = (await spotifyApi
+      .addToQueue(trackUri)
+      .then((response: { body: any }) => response.body as SpotifyApi.AddToQueueResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.AddToQueueResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
 }

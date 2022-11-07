@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getDuration, getFlagEmoji } from "../utils";
 
 export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
+  PageActions,
   setShowDetail,
   showDetail,
   rank,
@@ -42,13 +43,16 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       }}
       actions={
         <ActionPanel>
-          <Action
-            icon={Icon.Sidebar}
-            onAction={() => setShowDetail(!showDetail)}
-            title={showDetail ? "Hide Details" : "Show Details"}
-          />
-          {user.website ? <Action.OpenInBrowser title="Go to Website" url={user.website} /> : <></>}
-          <Action.OpenInBrowser title="Go To WakaTime Profile" url={`https://wakatime.com/@${user.username}`} />
+          <ActionPanel.Section title="Item">
+            <Action
+              icon={Icon.Sidebar}
+              onAction={() => setShowDetail(!showDetail)}
+              title={showDetail ? "Hide Details" : "Show Details"}
+            />
+            {user.website ? <Action.OpenInBrowser title="Go to Website" url={user.website} /> : <></>}
+            <Action.OpenInBrowser title="Go To WakaTime Profile" url={`https://wakatime.com/@${user.username}`} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Page">{PageActions}</ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -58,4 +62,5 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
 type LeaderBoardItemProps = WakaTime.LeaderBoard["data"][number] & {
   showDetail: boolean;
   setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  PageActions: React.ReactNode;
 };
