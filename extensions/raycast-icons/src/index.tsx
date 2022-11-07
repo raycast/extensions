@@ -43,7 +43,7 @@ export default function Command() {
                   icon={Icon.Pencil}
                   title="Create Extension Icon"
                   // Remove `-16` to match the Icon names in icon.ray.so
-                  url={`https://icon.ray.so/?q=${icon.replace("-16", "")}`}
+                  url={`https://icon.ray.so/?icon=${icon.replace("-16", "")}`}
                 />
               </ActionPanel.Section>
             </ActionPanel>
