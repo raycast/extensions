@@ -87,9 +87,9 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
 
 /**
  * get messages through all the room
- * 
- * @param CWRooms 
- * @returns 
+ *
+ * @param CWRooms
+ * @returns
  */
 export async function getMessagesOfAllRooms(CWRooms: CWRoom[]): Promise<CWMessageMgr> {
   try {

@@ -16,7 +16,7 @@ const oauthClient = new OAuth.PKCEClient({
 
 /**
  * authorize to use API
- * 
+ *
  * @returns token
  */
 export async function authorize(): Promise<string> {
