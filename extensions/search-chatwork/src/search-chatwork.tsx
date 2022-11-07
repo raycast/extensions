@@ -30,10 +30,16 @@ export default function Command() {
     DoGetMsgs();
   }, []);
 
-  function DetailOfChat(props: { contents: string; link: string }) {
+  function DetailOfChat(props: { roomName: string; contents: string; link: string }) {
+    function getMarkDonw(roomName: string, contents: string) {
+      return `
+# ${props.roomName}
+# ${props.contents}
+`;
+    }
     return (
       <Detail
-        markdown={`${props.contents}`}
+        markdown={getMarkDonw(props.roomName, props.contents)}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open in Chatwork" url={props.link} />
@@ -73,6 +79,7 @@ export default function Command() {
                         title="Read in detail"
                         target={
                           <DetailOfChat
+                            roomName={CWMessageMgr[0].CWRooms[i].CWRoom.name}
                             contents={msg.body}
                             link={Constants.getCWAppLinkUrl(CWMessageMgr[0].CWRooms[i].CWRoom.room_id, msg.message_id)}
                           />

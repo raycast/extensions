@@ -1,6 +1,8 @@
 import fetch, { Headers } from "node-fetch";
 import { authorize } from "./oauth";
 import { ICWMessage } from "../components/ICWMessage";
+import { CWMessage } from "../components/CWMessage";
+import { CWChatParserV1 } from "../components/CWChatParserV1";
 import { ICWRoom } from "../components/ICWRoom";
 import { CMRoom } from "../components/CMRoom";
 import { CWMessageMgr } from "../components/CWMessageMgr";
@@ -73,9 +75,12 @@ export async function getMessages(roomId: string, isForce = true): Promise<ICWMe
     const messages = await response.json();
     const messages_obj: ICWMessage[] = [];
     messages.forEach((message) => {
-      messages_obj.push(message as ICWMessage);
+      const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
+      cwmsg.copyValueFromJson(message as CWMessage);
+      messages_obj.push(cwmsg);
     });
-    return messages;
+
+    return messages_obj;
   } catch (error) {
     throw new Error(error as string);
   }
