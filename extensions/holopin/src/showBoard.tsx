@@ -1,8 +1,11 @@
 import { Detail, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { useHolopinAPI } from "./hooks/useHolopinAPI";
 import { Preferences } from "./types";
 
 export default function ShowBoard() {
   const { username } = getPreferenceValues<Preferences>();
+
+  useHolopinAPI(username);
 
   const markdown = `![@${username}'s Holopin board](https://holopin.me/${username})`;
 

@@ -1,19 +1,13 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import { useHolopinAPI } from "./hooks/useHolopinAPI";
 import ShowDetail from "./showDetail";
-import { HolopinApiResponse, Preferences, Sticker } from "./types";
+import { Preferences, Sticker } from "./types";
 
 export default function ShowStickers() {
   const { username } = getPreferenceValues<Preferences>();
 
-  const { isLoading, data, revalidate } = useFetch<HolopinApiResponse>(
-    `https://holopin.io/api/stickers?username=${username}`,
-    {
-      keepPreviousData: true,
-    }
-  );
-
+  const { isLoading, data, revalidate } = useHolopinAPI(username);
   const [searchText, setSearchText] = useState("");
   const [filteredStickers, filterStickers] = useState<Sticker[]>([]);
 
