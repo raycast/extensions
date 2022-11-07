@@ -19,7 +19,7 @@
       "interval": "24h"
     },
     {
-      "name": "adhan-menu",
+      "name": "adhan",
       "title": "View Prayer Time on Menu Bar",
       "description": "View adhan prayer times directly from your menubar",
       "mode": "menu-bar",
