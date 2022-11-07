@@ -1,6 +1,6 @@
 # ai-gen: OpenAI Image Generator
 
-The `ai-gen` extension uses the OpenAI [Create Image API](https://beta.openai.com/docs/api-reference/images/create) — colloquially known as [DALL-E 2](https://openai.com/dall-e-2/) — to generate images from a text-based prompt description.
+The `ai-gen` extension uses the OpenAI [Create Image API](https://beta.openai.com/docs/api-reference/images/create) — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — to generate images from a text-based prompt description.
 
 ## API Keys
 
@@ -12,7 +12,7 @@ When you create a free account, you're granted $18 worth of credits for 12 month
 
 ## Pricing
 
-DALL-E API image generation is [priced](https://openai.com/api/pricing/) at the following rates:
+DALL·E API image generation is [priced](https://openai.com/api/pricing/) at the following rates:
 
 | Size       | Price          |
 | ---------- | -------------- |

@@ -66,7 +66,7 @@ export function CreateImage(props: { draftValues?: CreateImageValues }) {
     >
       <Form.Description
         title="OpenAI Image Generation"
-        text="Given a text prompt, generate a new image using the OpenAI DALL-E image model"
+        text="Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model"
       />
       <Form.TextArea
         id="prompt"

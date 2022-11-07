@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-gen",
-  "title": "OpenAI Image Generator",
-  "description": "Generate images using AI",
+  "title": "OpenAI DALL·E 2 Image Generator",
+  "description": "Generate images using OpenAI's DALL·E 2, an AI system that can create realistic images and art from a description in natural language",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
   "categories": [
@@ -15,7 +15,7 @@
     {
       "name": "index",
       "title": "Create Image",
-      "subtitle": "OpenAI Image Generator",
+      "subtitle": "DALL·E Image Generator",
       "description": "Generate a new AI image based on your text prompt",
       "mode": "view"
     }
