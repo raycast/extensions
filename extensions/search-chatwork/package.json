@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatwork-search",
   "title": "Chatwork Search",
-  "description": "search chats at Chatwork from Raycast!",
-  "icon": "command-icon.png",
+  "description": "Search chats through all the room",
+  "icon": "cw-icon.png",
   "author": "nagauta",
   "categories": [
     "Communication",
@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "search-chatwork",
-      "title": "Search Chatwork",
-      "subtitle": "Search Chatwork",
+      "title": "Search Chats",
+      "subtitle": "Chatwork",
       "description": "search chats at Chatwork",
       "mode": "view"
     }
