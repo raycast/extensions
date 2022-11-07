@@ -1,10 +1,9 @@
 import fetch, { Headers } from "node-fetch";
 import { authorize } from "./oauth";
-import { ICWMessage } from "../components/ICWMessage";
 import { CWMessage } from "../components/CWMessage";
 import { CWChatParserV1 } from "../components/CWChatParserV1";
-import { ICWRoom } from "../components/ICWRoom";
-import { CMRoom } from "../components/CMRoom";
+import { CWRoom } from "../components/CWRoom";
+import { CMRoomOwner } from "../components/CMRoomOwner";
 import { CWMessageMgr } from "../components/CWMessageMgr";
 import { Constants } from "../utils/constants";
 
@@ -29,7 +28,7 @@ async function authorizeApi(_headers: Headers) {
  *
  * @returns all the rooms the user joined
  */
-export async function getRooms(): Promise<ICWRoom[]> {
+export async function getRooms(): Promise<CWRoom[]> {
   try {
     headers = await authorizeApi(headers);
     const response = await fetch(`${Constants.CW_API_URL}rooms`, {
@@ -41,10 +40,10 @@ export async function getRooms(): Promise<ICWRoom[]> {
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const rooms = await response.json();
-    const rooms_obj: ICWRoom[] = [];
-    rooms.forEach((room) => {
-      rooms_obj.push(room as ICWRoom);
+    const rooms: any = await response.json();
+    const rooms_obj: CWRoom[] = [];
+    rooms.forEach((room: any) => {
+      rooms_obj.push(room as CWRoom);
     });
     return rooms_obj;
   } catch (error) {
@@ -59,7 +58,7 @@ export async function getRooms(): Promise<ICWRoom[]> {
  * @param isForce
  * @returns
  */
-export async function getMessages(roomId: string, isForce = true): Promise<ICWMessage[]> {
+export async function getMessages(roomId: string, isForce = true): Promise<CWMessage[]> {
   try {
     await authorizeApi(headers);
     const url = `${Constants.CW_API_URL}rooms/${roomId}/messages?force=${isForce == true ? "1" : "0"}`;
@@ -72,9 +71,9 @@ export async function getMessages(roomId: string, isForce = true): Promise<ICWMe
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const messages = await response.json();
-    const messages_obj: ICWMessage[] = [];
-    messages.forEach((message) => {
+    const messages: any = await response.json();
+    const messages_obj: CWMessage[] = [];
+    messages.forEach((message: any) => {
       const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
       cwmsg.copyValueFromJson(message as CWMessage);
       messages_obj.push(cwmsg);
@@ -86,36 +85,14 @@ export async function getMessages(roomId: string, isForce = true): Promise<ICWMe
   }
 }
 
-/**
- * Get the latest 100 chats from all the room user join
- *
- * @param CWRooms
- * @returns the latest 100 chats from all the room user join
- */
-export async function getMessagesOfAllRooms(CWRooms: ICWRoom[]): Promise<ICWMessage[]> {
+export async function getMessagesOfAllRooms(ICWRooms: CWRoom[]): Promise<CWMessageMgr> {
   try {
     await authorizeApi(headers);
-    let messages_obj: ICWMessage[] = [];
-    for (let i = 0; i < CWRooms.length; i++) {
-      const ret = await getMessages(String(CWRooms[i].room_id));
-      if (ret.length > 0) {
-        messages_obj = messages_obj.concat(ret);
-      }
-    }
-    return messages_obj;
-  } catch (error) {
-    throw new Error(error as string);
-  }
-}
-
-export async function getMessagesOfAllRooms2(ICWRooms: ICWRoom[]): Promise<CWMessageMgr> {
-  try {
-    await authorizeApi(headers);
-    const rooms: CMRoom[] = [];
+    const rooms: CMRoomOwner[] = [];
     for (let i = 0; i < ICWRooms.length; i++) {
       const ret = await getMessages(String(ICWRooms[i].room_id));
       if (ret.length > 0) {
-        rooms.push(new CMRoom(ICWRooms[i], ret));
+        rooms.push(new CMRoomOwner(ICWRooms[i], ret));
       }
     }
     return new CWMessageMgr(rooms);

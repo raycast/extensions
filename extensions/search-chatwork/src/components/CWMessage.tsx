@@ -1,41 +1,40 @@
-import { ICWMessage } from "./ICWMessage";
 import { ICWChatParser } from "./ICWChatParser";
-import { IAccount } from "./ICWAccount";
+import { Account } from "./CWAccount";
 
-export class CWMessage implements ICWMessage {
+export class CWMessage {
   constructor(ICWChatParser: ICWChatParser) {
     this.ICWChatParser = ICWChatParser;
   }
   private ICWChatParser: ICWChatParser;
-  private _message_id: string;
+  private _message_id = "";
   public get message_id(): string {
     return this._message_id;
   }
   public set message_id(value: string) {
     this._message_id = this.parseText(value);
   }
-  private _account: IAccount;
-  public get account(): IAccount {
+  private _account: Account = new Account();
+  public get account(): Account {
     return this._account;
   }
-  public set account(value: IAccount) {
+  public set account(value: Account) {
     this._account = value;
   }
-  private _body: string;
+  private _body = "";
   public get body(): string {
     return this._body;
   }
   public set body(value: string) {
     this._body = value;
   }
-  private _send_time: number;
+  private _send_time: number = Number.MIN_SAFE_INTEGER;
   public get send_time(): number {
     return this._send_time;
   }
   public set send_time(value: number) {
     this._send_time = value;
   }
-  private _update_time: number;
+  private _update_time: number = Number.MIN_SAFE_INTEGER;
   public get update_time(): number {
     return this._update_time;
   }

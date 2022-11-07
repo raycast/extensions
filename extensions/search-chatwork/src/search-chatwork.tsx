@@ -1,12 +1,10 @@
 import { ActionPanel, Action, List, Detail } from "@raycast/api";
-import { ICWMessage } from "./components/ICWMessage";
 import { CWMessageMgr } from "./components/CWMessageMgr";
 import { useEffect, useState } from "react";
-import { getMessagesOfAllRooms, getRooms, getMessagesOfAllRooms2 } from "./utils/chatwork-api";
+import { getRooms, getMessagesOfAllRooms } from "./utils/chatwork-api";
 import { Constants } from "./utils/constants";
 
 export default function Command() {
-  const [CWMessages, setCWMessage] = useState<ICWMessage[]>();
   // todo なぜクラスだと設定できないのか(undefinedのままなのか)調査する
   // 仮説：インスタンス参照の問題ではないかと思う。
   const [CWMessageMgr, setCWMessageMgr] = useState<CWMessageMgr[]>();
@@ -16,11 +14,9 @@ export default function Command() {
     async function DoGetMsgs() {
       try {
         const rms = await getRooms();
-        setCWMessage(await getMessagesOfAllRooms(rms));
-
-        const t = [];
-        t.push(await getMessagesOfAllRooms2(rms));
-        setCWMessageMgr(t);
+        const cWMessageMgr = [];
+        cWMessageMgr.push(await getMessagesOfAllRooms(rms));
+        setCWMessageMgr(cWMessageMgr);
       } catch (error) {
         console.log(error);
       } finally {

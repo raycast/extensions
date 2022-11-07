@@ -1,14 +1,14 @@
-import { CMRoom } from "./CMRoom";
+import { CMRoomOwner } from "./CMRoomOwner";
 
 export class CWMessageMgr {
-  private _CWRooms: CMRoom[] = [];
-  constructor(rms: CMRoom[]) {
+  private _CWRooms: CMRoomOwner[] = [];
+  constructor(rms: CMRoomOwner[]) {
     this._CWRooms = rms;
   }
-  public get CWRooms(): CMRoom[] {
+  public get CWRooms(): CMRoomOwner[] {
     return this._CWRooms;
   }
-  public addCWRoom(rm: CMRoom): void {
+  public addCWRoom(rm: CMRoomOwner): void {
     this._CWRooms.push(rm);
   }
   public removeCWRoom(roomId: number): void {
