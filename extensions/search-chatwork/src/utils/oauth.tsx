@@ -3,12 +3,10 @@ import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 import { Constants } from "../utils/constants";
 
-// const logo_name = "cw_logomark_color_rgb_PNG.png"
 const logo_name = `${Constants.CW_LOGO_NAME}`;
 const clientId = `${Constants.CW_OAUTH_CL_ID}`;
 const scope = `${Constants.CW_OAUTH_SCOPE}`;
-//
-// user-read-currently-playing
+
 const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: `${Constants.CW_OAUTH_PROVIDER_NAME}`,
@@ -16,16 +14,11 @@ const oauthClient = new OAuth.PKCEClient({
   description: `${Constants.CW_OAUTH_DESCRIPTION}`,
 });
 
-// Authorization
-
-export async function isAuthorized(): Promise<boolean> {
-  const tokenSet = await oauthClient.getTokens();
-  if (tokenSet?.accessToken) {
-    return tokenSet?.accessToken.length > 0;
-  }
-  return false;
-}
-
+/**
+ * authorize to use API
+ * 
+ * @returns token
+ */
 export async function authorize(): Promise<string> {
   const tokenSet = await oauthClient.getTokens();
   if (tokenSet?.accessToken) {
