@@ -32,19 +32,26 @@ export function ImageActions(props: ImageActionProps) {
       <ActionPanel.Section>
         <Action title="Copy Image" icon={Icon.Clipboard} onAction={() => copyFileAction(url)} />
         <Action.CopyToClipboard title="Copy URL" icon={Icon.Link} content={url} />
-        <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={url} />
+        <Action.OpenInBrowser
+          title="Open in Browser"
+          icon={Icon.Globe}
+          url={url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
           title="Create Variation(s)"
           icon={Icon.NewDocument}
           onAction={() => createVariationAction(url, variationCount)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
         />
         {showDetailAction && (
           <Action.Push
             title="View Details"
             icon={Icon.Eye}
             target={<ImageDetails url={url} opt={{ prompt, n: number, size: props.size, variationCount }} />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           />
         )}
       </ActionPanel.Section>
