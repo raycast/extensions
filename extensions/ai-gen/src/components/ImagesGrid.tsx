@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Grid, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 
 import useOpenAIApi from "../hooks/useOpenAIApi";
-import downloadTempFile from "../lib/downloadTempFile";
 import { ImageActions } from "./ImageActions";
 
 const NUM_ROWS = 2;
@@ -25,12 +24,6 @@ export function ImagesGrid(props: ImagesGridProps) {
   const { apiKey } = getPreferenceValues();
   const [results, createImage, createVariation, isLoading] = useOpenAIApi({ apiKey });
 
-  const { push } = useNavigation();
-  async function createVariationAction(url: string, count: number) {
-    const file = await downloadTempFile(url);
-    push(<ImagesGrid prompt={prompt} file={file} n={n} size={size} variationCount={count + 1} />);
-  }
-
   useEffect(() => {
     if (prompt) {
       createImage({ prompt, size, n: number });
@@ -39,7 +32,6 @@ export function ImagesGrid(props: ImagesGridProps) {
     }
   }, []);
 
-  // Display any API search errors
   useEffect(() => {
     if (results?.error) {
       showToast({

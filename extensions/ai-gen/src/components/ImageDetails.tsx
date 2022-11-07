@@ -1,8 +1,6 @@
-import { Detail, useNavigation } from "@raycast/api";
+import { Detail } from "@raycast/api";
 
 import { CreateVariationRequest } from "../hooks/useOpenAIApi";
-import downloadTempFile from "../lib/downloadTempFile";
-import { ImagesGrid } from "./ImagesGrid";
 import { ImageActions } from "./ImageActions";
 
 export function ImageDetails(props: {
@@ -10,14 +8,6 @@ export function ImageDetails(props: {
   opt: CreateVariationRequest & { prompt: string; variationCount?: number };
 }) {
   const { url, opt } = props;
-
-  const { push } = useNavigation();
-  async function createVariationAction(url: string, count: number) {
-    const file = await downloadTempFile(url);
-    push(
-      <ImagesGrid prompt={opt.prompt} file={file} n={opt.n.toString()} size={opt.size} variationCount={count + 1} />
-    );
-  }
 
   return (
     <Detail
