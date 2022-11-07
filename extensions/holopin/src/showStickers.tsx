@@ -34,7 +34,6 @@ export default function ShowStickers() {
       isLoading={isLoading}
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle={`${username}'s Holopin badges`}
       actions={
         <ActionPanel>
           <Action title="Reload" onAction={() => revalidate()} />

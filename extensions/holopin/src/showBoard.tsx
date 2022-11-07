@@ -9,7 +9,6 @@ export default function ShowBoard() {
   return (
     <Detail
       markdown={markdown}
-      navigationTitle={`${username}'s Holopin board`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
