@@ -9,9 +9,9 @@ interface DailyLogListArguments {
 }
 
 export default function Command(props: { arguments: DailyLogListArguments }) {
-  const dateInArguments = formatArgumentDate(props.arguments.date)
+  const dateInArguments = formatArgumentDate(props.arguments.date);
   const [items, setItems] = useState<DailyLog[]>([]);
-  const [date] = useState<Date>(dateInArguments)
+  const [date] = useState<Date>(dateInArguments);
 
   useEffect(() => {
     const items = getDailyLog(date);
@@ -57,4 +57,3 @@ function navigationTitle(date: Date): string {
   }
   return date.toLocaleDateString();
 }
-

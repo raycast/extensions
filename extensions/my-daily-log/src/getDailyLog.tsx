@@ -11,7 +11,8 @@ export function getDailyLog(date: Date) {
 }
 
 function readDailyLogs(date: Date) {
-  return fs.readFileSync(getDailyLogPath(date), "utf8")
+  return fs
+    .readFileSync(getDailyLogPath(date), "utf8")
     .split("\n")
     .filter((line) => line.length > 0)
     .map((line) => dailyLogFromLogLine(line, date));

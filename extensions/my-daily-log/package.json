@@ -2,6 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "my-daily-log",
   "title": "my-daily-log",
+  "description": "Log what you do every day.",
   "icon": "command-icon.png",
   "author": "frugoman",
   "license": "MIT",
