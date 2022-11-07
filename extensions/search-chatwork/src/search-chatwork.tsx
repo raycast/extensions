@@ -5,8 +5,6 @@ import { getRooms, getMessagesOfAllRooms } from "./utils/chatwork-api";
 import { Constants } from "./utils/constants";
 
 export default function Command() {
-  // todo なぜクラスだと設定できないのか(undefinedのままなのか)調査する
-  // 仮説：インスタンス参照の問題ではないかと思う。
   const [CWMessageMgr, setCWMessageMgr] = useState<CWMessageMgr[]>();
   const [isLoading, setLoading] = useState(true);
 
@@ -72,7 +70,7 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        title="Read in detail"
+                        title="Read in Detail"
                         target={
                           <DetailOfChat
                             roomName={CWMessageMgr[0].CWRooms[i].CWRoom.name}
