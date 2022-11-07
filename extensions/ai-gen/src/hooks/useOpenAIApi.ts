@@ -39,7 +39,6 @@ export default function useOpenAIApi(config: { apiKey: string }) {
         });
 
         setState({ images: data.data });
-        setIsLoading(false);
       } catch (e) {
         const error = e as any;
         if (error.response) {
@@ -48,6 +47,8 @@ export default function useOpenAIApi(config: { apiKey: string }) {
           setState({ error: error.message });
         }
       }
+
+      setIsLoading(false);
 
       return () => {
         cancelRef.current?.abort();
@@ -82,7 +83,6 @@ export default function useOpenAIApi(config: { apiKey: string }) {
         );
 
         setState({ images: data.data });
-        setIsLoading(false);
       } catch (e) {
         const error = e as any;
         if (error.response) {
@@ -93,6 +93,8 @@ export default function useOpenAIApi(config: { apiKey: string }) {
           setState({ error: error.message });
         }
       }
+
+      setIsLoading(false);
 
       return () => {
         cancelRef.current?.abort();
