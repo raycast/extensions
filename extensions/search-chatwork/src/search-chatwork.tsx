@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { CWMessageMgr } from "./components/CWMessageMgr";
 import { DetailOfChat } from "./components/DetailOfChat";
 import { useEffect, useState } from "react";
@@ -52,6 +52,7 @@ export default function CommandToSearchChatWork() {
                     <ActionPanel>
                       <Action.Push
                         title="Read in Detail"
+                        icon={Icon.AppWindow}
                         target={
                           <DetailOfChat
                             roomName={CWMessageMgr[0].CWRooms[i].CWRoom.name}
