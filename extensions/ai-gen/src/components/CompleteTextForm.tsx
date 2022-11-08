@@ -23,6 +23,8 @@ const DEFAULT_TOP_P = "1";
 const DEFAULT_FREQUENCY_PENALTY = "0";
 const DEFAULT_PRESENCE_PENALTY = "0";
 
+const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
+
 export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
   const { draftValues } = props;
   const { enableDrafts, storeValue } = getPreferenceValues();
@@ -46,7 +48,6 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     newModel && setModel(newModel);
   }
 
-  const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
   function validatePrompt(prompt?: string) {
     let len = 0;
     try {
