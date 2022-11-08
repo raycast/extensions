@@ -1,5 +1,5 @@
 import GPT3Tokenizer from "gpt3-tokenizer";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Action, ActionPanel, Form, useNavigation, getPreferenceValues } from "@raycast/api";
 import { PREFERRED_MODELS } from "../hooks/useOpenAICompletionApi";
@@ -171,13 +171,13 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     >
       <Form.Description
         title="GPT-3 Text Completion"
-        text="Given a text prompt, generate a text completion that attempts to match whatever context or pattern you gave it"
+        text="Generate a text completion that attempts to match whatever context or pattern you gave it"
       />
       <Form.TextArea
         id="prompt"
-        title="Prompt"
+        title={`Prompt\n${tokenCount}/${model.max} tokens`}
         placeholder="The prompt(s) to generate completions for"
-        info={`Tokens: ${tokenCount}/${model.max}\n\nLearn more about prompt design https://beta.openai.com/docs/guides/completion/prompt-design`}
+        info={`Learn more about prompt design https://beta.openai.com/docs/guides/completion/prompt-design`}
         error={promptError}
         onBlur={(event) => validatePrompt(event.target.value)}
         onChange={(value) => validatePrompt(value)}
