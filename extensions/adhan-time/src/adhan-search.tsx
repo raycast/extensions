@@ -1,7 +1,15 @@
-import { MenuBarExtra, getPreferenceValues, Icon, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  getPreferenceValues,
+  Icon,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import type { PrayerType, Prayers, Preferences } from "./prayer-types";
-
 export default function Command() {
   const userPreference: Preferences = getPreferenceValues();
   const { isLoading, data: prayerTimes } = useFetch<PrayerType>(
@@ -26,17 +34,26 @@ export default function Command() {
 
   const prayers: Prayers | undefined = prayerTimes?.data.timings;
   return (
-    <MenuBarExtra icon={Icon.Clock} title="Prayer times" tooltip="Prayer times" isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle="Prayer Name" searchBarPlaceholder="Convert decimal to...">
       {prayers &&
-        Object.entries(prayers).map(([key, value]) => <MenuBarExtra.Item key={key} title={`${key}: ${value}`} />)}
-      <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Change location Preferences"
-          onAction={() => {
-            openExtensionPreferences();
-          }}
-        />
-      </MenuBarExtra.Section>
-    </MenuBarExtra>
+        Object.entries(prayers).map(([key, value]) => (
+          <List.Item
+            key={key}
+            title={key}
+            subtitle={value}
+            icon={Icon.Sun}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy to Clipboard" content={`${key} time, ${value}`} />
+                <Action
+                  shortcut={{ modifiers: ["opt"], key: "," }}
+                  onAction={() => openExtensionPreferences()}
+                  title="Change Preferences"
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+    </List>
   );
 }
