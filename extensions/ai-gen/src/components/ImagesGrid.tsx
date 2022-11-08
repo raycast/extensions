@@ -49,8 +49,12 @@ export function ImagesGrid(props: ImagesGridProps) {
       isLoading={isLoading === undefined || isLoading}
       searchBarPlaceholder={title}
     >
-      {!isLoading && results.images?.length === 0 ? (
-        <Grid.EmptyView />
+      {!isLoading && (results.error?.message || results.images?.length === 0) ? (
+        <Grid.EmptyView
+          title={results?.error ? "Uh oh, something went wrong" : "No results"}
+          description={results?.error ? "" : "Try re-working your prompt to be less-specific"}
+          icon={results?.error ? Icon.ExclamationMark : null}
+        />
       ) : (
         results.images?.map(({ url }, index) => {
           const urlString = url ?? "";
