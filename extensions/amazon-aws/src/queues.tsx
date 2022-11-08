@@ -1,6 +1,6 @@
 import { getPreferenceValues, ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { chunk } from "lodash";
+import chunk from "lodash/chunk";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { Preferences } from "./types";
