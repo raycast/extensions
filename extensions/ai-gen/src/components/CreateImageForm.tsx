@@ -51,16 +51,19 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
     return true;
   }
 
+  function onSubmit({ prompt, n, size }: CreateImageValues) {
+    const valid = validatePrompt(prompt) && validateNumber(n);
+    if (valid) {
+      push(<ImagesGrid prompt={prompt} n={n} size={size} />);
+    }
+  }
+
   return (
     <Form
       enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={({ prompt, n, size }: CreateImageValues) => {
-              validatePrompt(prompt) && validateNumber(n) && push(<ImagesGrid prompt={prompt} n={n} size={size} />);
-            }}
-          />
+          <Action.SubmitForm onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

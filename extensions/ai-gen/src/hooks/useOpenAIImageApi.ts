@@ -20,7 +20,7 @@ export type ImagesResponse = {
 
 export default function useOpenAIImageApi(config: { apiKey: string }) {
   const [state, setState] = useState<ImagesResponse>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>();
   const cancelRef = useRef<AbortController | null>(null);
 
   const openai = new OpenAIApi(config as Configuration);

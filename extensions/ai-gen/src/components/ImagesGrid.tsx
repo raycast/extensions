@@ -1,7 +1,7 @@
 import { CreateImageRequestSizeEnum } from "openai";
 import { useEffect } from "react";
 
-import { Grid, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
+import { Grid, getPreferenceValues, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 
 import useOpenAIImageApi from "../hooks/useOpenAIImageApi";
 import { ImageActions } from "./ImageActions";
@@ -46,10 +46,10 @@ export function ImagesGrid(props: ImagesGridProps) {
     <Grid
       columns={Math.max(MIN_COLS, Math.ceil((results.images?.length ?? 0) / NUM_ROWS))}
       enableFiltering={false}
-      isLoading={isLoading}
+      isLoading={isLoading === undefined || isLoading}
       searchBarPlaceholder={title}
     >
-      {!results.images?.length || isLoading ? (
+      {!isLoading && results.images?.length === 0 ? (
         <Grid.EmptyView />
       ) : (
         results.images?.map(({ url }, index) => {
