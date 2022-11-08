@@ -48,7 +48,7 @@
       "name": "storeValue",
       "label": "Store prompt",
       "title": "Prompts",
-      "description": "Store your most recently submitted prompt instead of starting from a blank slate when generating a new image",
+      "description": "Store your most recently submitted prompt instead of starting from a blank slate when running the command next",
       "type": "checkbox",
       "required": true,
       "default": false
