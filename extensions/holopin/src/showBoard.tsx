@@ -15,14 +15,8 @@ export default function ShowBoard() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Board URL"
-            content={`https://holopin.me/@${username}`}
-          />
-          <Action.OpenInBrowser
-            title="View Profile in browser"
-            url={`https://holopin.io/@${username}`}
-          />
+          <Action.CopyToClipboard title="Copy Board URL" content={`https://holopin.me/@${username}`} />
+          <Action.OpenInBrowser title="View Profile in browser" url={`https://holopin.io/@${username}`} />
         </ActionPanel>
       }
     />
