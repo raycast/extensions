@@ -1,21 +1,30 @@
-# ai-gen: OpenAI Image Generator
+# ai-gen: OpenAI Image and Text Generator
 
-The `ai-gen` extension uses the OpenAI [Create Image API](https://beta.openai.com/docs/api-reference/images/create) — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — to generate images from a text-based prompt description.
+The `ai-gen` extension uses the OpenAI [Image Generation](https://beta.openai.com/docs/guides/images) API — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — and the [Text Completion](https://beta.openai.com/docs/guides/completion) API to generate results from a text-based prompt.
 
 ## API Keys
 
 In order to use OpenAI's APIs, you have to create an account and create [a new API key](https://beta.openai.com/account/api-keys). Once you have a key, paste it into the extenion's settings.
 
-Please make sure to [familiarize yourself](https://beta.openai.com/docs/guides/images/introduction) with the API's limits. While it's super fun to just start immediately generating images, the Create Image API is heavily rate-limited. You'll be limited to 10 images per minute, and 25 per 5 minutes.
+Please make sure to [familiarize yourself](https://beta.openai.com/docs/guides/images/introduction) with the API's limits. While it's super fun to just start immediately generating images, the Create Image API is heavily rate-limited (you'll be limited to 10 images per minute, and 25 per 5 minutes) and even the Text Completion API can run up a bill if you push it hard enough.
 
 When you create a free account, you're granted $18 worth of credits for 12 months. Once you blow through your free credits, you'll be blocked from making more requests until you enter billing information.
 
-## Pricing
+## [Pricing](https://openai.com/api/pricing/)
 
-DALL·E API image generation is [priced](https://openai.com/api/pricing/) at the following rates:
+The DALL·E Create Image API is priced based on image dimensions:
 
 | Size       | Price          |
 | ---------- | -------------- |
 | 1024×1024  | $0.020 / image |
 | 512×512    | $0.018 / image |
 | 256×256    | $0.016 / image |
+
+The [GPT-3](https://beta.openai.com/docs/models/gpt-3) Text Completion API is priced based on [token](https://beta.openai.com/tokenizer) usage:
+
+| AI Model                | Price
+| ----------------------- | -------------------- |
+| Ada (Fastest)           | $0.0004  / 1K tokens |
+| Babbage                 | $0.0005  / 1K tokens |
+| Curie                   | $0.0020  / 1K tokens |
+| Davinci (Most powerful) | $0.0200  / 1K tokens |

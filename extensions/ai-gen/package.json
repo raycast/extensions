@@ -15,8 +15,15 @@
     {
       "name": "createImage",
       "title": "Create Image",
-      "subtitle": "DALL·E Image Generator",
+      "subtitle": "DALL·E Image Generation",
       "description": "Generate images using OpenAI's DALL·E 2, an AI system that can create realistic images and art from a description in natural language",
+      "mode": "view"
+    },
+    {
+      "name": "completeText",
+      "title": "Complete Text",
+      "subtitle": "GPT-3 Text Completion",
+      "description": "Input some text as a prompt, and generate a text completion that attempts to match whatever context or pattern you gave it",
       "mode": "view"
     }
   ],
