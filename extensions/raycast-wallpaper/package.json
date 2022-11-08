@@ -5,6 +5,7 @@
   "description": "Get and set Raycast official wallpapers.",
   "icon": "command-icon.png",
   "author": "koinzhang",
+  "contributors": ["peduarte"],
   "categories": [
     "Media",
     "Productivity",
