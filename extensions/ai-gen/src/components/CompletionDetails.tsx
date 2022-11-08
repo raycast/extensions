@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 
-import { Detail, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
+
+import { CompleteTextForm } from "./CompleteTextForm";
 import useOpenAICompletionApi from "../hooks/useOpenAICompletionApi";
 
 export interface CompletionDetailProps {
   prompt: string;
+  showAdvanced: boolean;
   model: string;
   temperature: number;
   max_tokens: number;
@@ -14,13 +17,32 @@ export interface CompletionDetailProps {
 }
 
 export default function CompletionDetails(props: CompletionDetailProps) {
-  const { prompt, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty } = props;
+  const { prompt, showAdvanced, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty } = props;
 
   const { apiKey } = getPreferenceValues();
   const [completion, createCompletion, , , isLoading] = useOpenAICompletionApi({ apiKey });
 
   const promptHeaderStr = "**Prompt**\n\n" + prompt + "\n\n---\n**Response**\n\n";
   const [markdown, setMarkdown] = useState(promptHeaderStr + "*Loading*...");
+
+  const { push } = useNavigation();
+
+  function editRequestAction() {
+    push(
+      <CompleteTextForm
+        draftValues={{
+          prompt,
+          showAdvanced,
+          model,
+          temperature: temperature.toString(),
+          max_tokens: max_tokens.toString(),
+          top_p: top_p.toString(),
+          frequency_penalty: frequency_penalty.toString(),
+          presence_penalty: presence_penalty.toString(),
+        }}
+      />
+    );
+  }
 
   useEffect(() => {
     createCompletion({ prompt, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty });
@@ -47,6 +69,11 @@ export default function CompletionDetails(props: CompletionDetailProps) {
     <Detail
       markdown={markdown}
       isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action title="Edit Request" icon={Icon.Pencil} onAction={editRequestAction} />
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Model" text={model} />

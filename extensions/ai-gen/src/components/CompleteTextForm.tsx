@@ -8,12 +8,13 @@ const MAX_CHARS = 1000;
 
 export interface CompleteTextValues {
   prompt: string;
-  model: string;
-  temperature: string;
-  max_tokens: string;
-  top_p: string;
-  frequency_penalty: string;
-  presence_penalty: string;
+  showAdvanced?: boolean;
+  model?: string;
+  temperature?: string;
+  max_tokens?: string;
+  top_p?: string;
+  frequency_penalty?: string;
+  presence_penalty?: string;
 }
 
 const DEFAULT_MODEL = PREFERRED_MODELS[0].id;
@@ -126,6 +127,7 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
   function onSubmit(values: CompleteTextValues) {
     const {
       prompt,
+      showAdvanced,
       model = DEFAULT_MODEL,
       temperature = DEFAULT_TEMP,
       max_tokens = DEFAULT_MAX_TOKENS,
@@ -137,6 +139,7 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     push(
       <CompletionDetails
         prompt={prompt}
+        showAdvanced={showAdvanced ?? false}
         model={model}
         temperature={toNum(temperature)}
         max_tokens={toNum(max_tokens)}
@@ -172,7 +175,12 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
         storeValue={!draftValues?.prompt && storeValue}
         defaultValue={draftValues?.prompt}
       />
-      <Form.Checkbox id="showAdvanced" label="Show Advanced Options" onChange={setShowAdvanced} />
+      <Form.Checkbox
+        id="showAdvanced"
+        label="Show Advanced Options"
+        onChange={setShowAdvanced}
+        defaultValue={draftValues?.showAdvanced}
+      />
       {showAdvanced ? (
         <Fragment>
           <Form.Separator />
