@@ -4,7 +4,7 @@ import os from "os";
 import path from "path";
 import bplist from "bplist-parser";
 import Bookmark from "./dtos/bookmark-dto";
-import GitfoxRepositories, { GitfoxRepository } from "./interfaces/imported-gitfox-bookmark";
+import GitfoxRepositories, { GitfoxRepositoryV2, GitfoxRepositoryV3 } from "./interfaces/imported-gitfox-bookmark";
 import GitfoxPreferences from "./interfaces/gitfox-preferences";
 
 const plistLocations = [
@@ -41,23 +41,60 @@ export function gitfoxCliRequiredMessage(): string {
   `;
 }
 
-function extractBookmarks(obj: GitfoxRepository[], parents?: string): Bookmark[] {
+function extractBookmarks(isV3: boolean, obj: GitfoxRepositories | GitfoxRepositoryV3[]): Bookmark[] {
+  if (isV3) {
+    const repos = obj as GitfoxRepositoryV3[];
+    return extractBookmarksV3(repos);
+  } else {
+    const repos = (obj as GitfoxRepositories).children;
+    return extractBookmarksV2(repos);
+  }
+}
+
+function extractBookmarksV2(obj: GitfoxRepositoryV2[], parents?: string): Bookmark[] {
   const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
     return bookmarks;
   }
 
-  obj.forEach((bookmark: GitfoxRepository) => {
+  obj.forEach((bookmark: GitfoxRepositoryV2) => {
     const name = parents ? `${parents} / ${bookmark.title}` : bookmark.title;
 
     if (bookmark.children && bookmark.children.length > 0) {
-      const childBookmarks = extractBookmarks(bookmark.children, name);
+      const childBookmarks = extractBookmarksV2(bookmark.children, name);
 
       childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
     }
 
     const item = new Bookmark(bookmark.url?.relative, name, bookmark.uniqueIdentifier);
+
+    if (fs.existsSync(item.getPath)) {
+      bookmarks.push(item);
+    }
+  });
+
+  return bookmarks;
+}
+
+function extractBookmarksV3(obj: GitfoxRepositoryV3[], parents?: string): Bookmark[] {
+  const bookmarks: Bookmark[] = [];
+
+  if (!obj || obj.length === 0) {
+    return bookmarks;
+  }
+
+  obj.forEach((bookmark: GitfoxRepositoryV3) => {
+    const name = parents ? `${parents} / ${bookmark.title}` : bookmark.title;
+
+    if (bookmark.children && bookmark.children.length > 0) {
+      const childBookmarks = extractBookmarksV3(bookmark.children, name);
+
+      childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
+    }
+
+    const item = new Bookmark(bookmark.kind?.repository?.url.relative, name, bookmark.id);
+    console.log(item.folder);
 
     if (fs.existsSync(item.getPath)) {
       bookmarks.push(item);
@@ -75,21 +112,13 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
 
     const preferencesPlist = plistLocations[0];
     const obj = (await bplist.parseFile(fs.readFileSync(preferencesPlist)))[0];
-    const repos = (
-      await bplist.parseFile(obj.repositoryManagerRepositoriesRootNode)
-    )[0] as unknown as GitfoxRepositories;
+    const migratedToV3 = obj.didMigrateOldRepositoryManagerTreeNodes2;
+    const itemsKey = migratedToV3 ? "repositoryManagerOutlineItems" : "repositoryManagerRepositoriesRootNode";
+    const repos = (await bplist.parseFile(obj[itemsKey]))[0];
 
-    if (repos.children && repos.children.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Bookmarks found",
-        message: "Now is the time to start bookmarking!",
-      });
+    console.log(repos);
 
-      return Promise.resolve([]);
-    }
-
-    const bookmarks = extractBookmarks(repos.children);
+    const bookmarks = extractBookmarks(migratedToV3, repos);
 
     return Promise.resolve(bookmarks);
   } catch (error) {
