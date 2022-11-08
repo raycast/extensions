@@ -19,8 +19,8 @@ export default function CompletionDetails(props: CompletionDetailProps) {
   const { apiKey } = getPreferenceValues();
   const [completion, createCompletion, , , isLoading] = useOpenAICompletionApi({ apiKey });
 
-  const promptHeaderStr = "**Prompt**\n\n" + prompt;
-  const [markdown, setMarkdown] = useState(promptHeaderStr);
+  const promptHeaderStr = "**Prompt**\n\n" + prompt + "\n\n---\n**Response**\n\n";
+  const [markdown, setMarkdown] = useState(promptHeaderStr + "*Loading*...");
 
   useEffect(() => {
     createCompletion({ prompt, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty });
@@ -39,7 +39,7 @@ export default function CompletionDetails(props: CompletionDetailProps) {
   useEffect(() => {
     if (completion?.choices?.length) {
       const [topChoice] = completion.choices;
-      setMarkdown(promptHeaderStr + "\n\n---\n**Response**\n\n" + topChoice.text);
+      setMarkdown(promptHeaderStr + topChoice.text);
     }
   }, [completion?.choices]);
 
