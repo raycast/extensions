@@ -1,10 +1,9 @@
-import { Fragment, useState } from "react";
+import GPT3Tokenizer from "gpt3-tokenizer";
+import { Fragment, useEffect, useState } from "react";
 
 import { Action, ActionPanel, Form, useNavigation, getPreferenceValues } from "@raycast/api";
 import { PREFERRED_MODELS } from "../hooks/useOpenAICompletionApi";
 import CompletionDetails from "./CompletionDetails";
-
-const MAX_CHARS = 1000;
 
 export interface CompleteTextValues {
   prompt: string;
@@ -28,6 +27,8 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
   const { draftValues } = props;
   const { enableDrafts, storeValue } = getPreferenceValues();
 
+  const [tokenCount, setTokenCount] = useState<number>();
+
   const [promptError, setPromptError] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState<boolean>();
   const [model, setModel] = useState(PREFERRED_MODELS[0]);
@@ -45,10 +46,19 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     newModel && setModel(newModel);
   }
 
+  const tokenizer = new GPT3Tokenizer({ type: "gpt3" });
   function validatePrompt(prompt?: string) {
-    const len = prompt?.length;
-    if (!len || len > MAX_CHARS) {
-      setPromptError(`A prompt is required and must be under ${MAX_CHARS} characters in length`);
+    let len = 0;
+    try {
+      const { text }: { text?: string[] } = tokenizer.encode(prompt ?? "");
+      len = text?.length ?? prompt?.length ?? 0;
+    } catch {
+      len = prompt?.length ?? 0;
+    }
+    setTokenCount(len);
+
+    if (!len || len > model.max) {
+      setPromptError(`A prompt is required and must have fewer than ${model.max} tokens`);
       return false;
     }
 
@@ -167,7 +177,7 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
         id="prompt"
         title="Prompt"
         placeholder="The prompt(s) to generate completions for"
-        info="Learn more about prompt design https://beta.openai.com/docs/guides/completion/prompt-design"
+        info={`Tokens: ${tokenCount}/${model.max}\n\nLearn more about prompt design https://beta.openai.com/docs/guides/completion/prompt-design`}
         error={promptError}
         onBlur={(event) => validatePrompt(event.target.value)}
         onChange={(value) => validatePrompt(value)}
