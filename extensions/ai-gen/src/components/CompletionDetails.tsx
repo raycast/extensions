@@ -55,6 +55,8 @@ export default function CompletionDetails(props: CompletionDetailProps) {
         title: "Failed creating completion",
         message: completion?.error.message,
       });
+
+      setMarkdown(promptHeaderStr + "Uh oh, something went wrong!");
     }
   }, [completion?.error]);
 
