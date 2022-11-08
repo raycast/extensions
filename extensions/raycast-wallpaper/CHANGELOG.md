@@ -2,7 +2,7 @@
 
 ## [Add backup] - 2022-11-08
 
-- Add a hardcoded list of wallapapers in case there's an error fetching the wallpapers from the API.
+- Add a hardcoded list of wallpapers in case there's an error fetching the wallpapers from the API.
 
 ## [Update grid layout] - 2022-10-15
 
