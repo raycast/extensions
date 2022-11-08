@@ -29,10 +29,15 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
 
   const [promptError, setPromptError] = useState<string | undefined>();
   const [showAdvanced, setShowAdvanced] = useState<boolean>();
+  const [model, setModel] = useState(PREFERRED_MODELS[0]);
+
+  const [temperatureError, setTemperatureError] = useState<string | undefined>();
+  const [maxTokensError, setMaxTokensError] = useState<string | undefined>();
+  const [topPError, setTopPError] = useState<string | undefined>();
+  const [frequencyError, setFequencyError] = useState<string | undefined>();
+  const [presenceError, setPresenceError] = useState<string | undefined>();
 
   const { push } = useNavigation();
-
-  const [model, setModel] = useState(PREFERRED_MODELS[0]);
 
   function onModelChange(newValue: string) {
     const newModel = PREFERRED_MODELS.find(({ id }) => id == newValue);
@@ -51,6 +56,71 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     }
 
     return true;
+  }
+
+  function validateTemperature(value?: string, opt: { min?: number; max?: number } = {}) {
+    const valid = validateRange(value, opt);
+
+    if (!valid) {
+      setTemperatureError(`Value must be betwee ${opt.min} and ${opt.max}`);
+      return false;
+    }
+
+    if (temperatureError?.length) {
+      setTemperatureError(undefined);
+    }
+  }
+
+  function validateMaxTokens(value?: string, opt: { min?: number; max?: number } = {}) {
+    const valid = validateRange(value, opt);
+
+    if (!valid) {
+      setMaxTokensError(`Value must be betwee ${opt.min} and ${opt.max}`);
+      return false;
+    }
+
+    if (maxTokensError?.length) {
+      setMaxTokensError(undefined);
+    }
+  }
+
+  function validateTopP(value?: string, opt: { min?: number; max?: number } = {}) {
+    const valid = validateRange(value, opt);
+
+    if (!valid) {
+      setTopPError(`Value must be betwee ${opt.min} and ${opt.max}`);
+      return false;
+    }
+
+    if (topPError?.length) {
+      setTopPError(undefined);
+    }
+  }
+
+  function validateFrequency(value?: string, opt: { min?: number; max?: number } = {}) {
+    const valid = validateRange(value, opt);
+
+    if (!valid) {
+      setFequencyError(`Value must be betwee ${opt.min} and ${opt.max}`);
+      return false;
+    }
+
+    if (frequencyError?.length) {
+      setFequencyError(undefined);
+    }
+  }
+
+  function validatePresence(value?: string, opt: { min?: number; max?: number } = {}) {
+    const valid = validateRange(value, opt);
+
+    if (!valid) {
+      setPresenceError(`Value must be betwee ${opt.min} and ${opt.max}`);
+      return false;
+    }
+
+    if (presenceError?.length) {
+      setPresenceError(undefined);
+    }
   }
 
   function onSubmit(values: CompleteTextValues) {
@@ -117,17 +187,63 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
               <Form.Dropdown.Item key={model.id} title={model.id} value={model.id} />
             ))}
           </Form.Dropdown>
-          <Form.TextField id="temperature" title="Temperature" defaultValue={DEFAULT_TEMP} />
-          <Form.TextField id="max_tokens" title="Maximum length" defaultValue={DEFAULT_MAX_TOKENS} />
-          <Form.TextField id="top_p" title="Top P" defaultValue={DEFAULT_TOP_P} />
-          <Form.TextField id="frequency_penalty" title="Frequency penalty" defaultValue={DEFAULT_FREQUENCY_PENALTY} />
-          <Form.TextField id="presence_penalty" title="Presence penalty" defaultValue={DEFAULT_PRESENCE_PENALTY} />
+          <Form.TextField
+            id="temperature"
+            title="Temperature"
+            info="Controls randomness: Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive."
+            defaultValue={DEFAULT_TEMP}
+            error={temperatureError}
+            onBlur={(event) => validateTemperature(event.target.value)}
+          />
+          <Form.TextField
+            id="max_tokens"
+            title="Maximum length"
+            info={`The maximum number of tokens to generate. The "${model.id}" model can use up to ${model.max} tokens shared between prompt and completion. (One token is roughly 4 characters for normal English text)`}
+            defaultValue={DEFAULT_MAX_TOKENS}
+            error={maxTokensError}
+            onBlur={(event) => validateMaxTokens(event.target.value, { min: 0, max: model.max })}
+          />
+          <Form.TextField
+            id="top_p"
+            title="Top P"
+            info="Controls diversity via nucleus sampling: 0.5 means half of all likelihood-weighted options are considered."
+            defaultValue={DEFAULT_TOP_P}
+            error={topPError}
+            onBlur={(event) => validateTopP(event.target.value)}
+          />
+          <Form.TextField
+            id="frequency_penalty"
+            title="Frequency penalty"
+            info="How much to penalize new tokens based on their existing frequency in the text so far. Decreases the model's likelihood to repeat the same line verbatim."
+            defaultValue={DEFAULT_FREQUENCY_PENALTY}
+            error={frequencyError}
+            onBlur={(event) => validateFrequency(event.target.value, { min: 0, max: 2 })}
+          />
+          <Form.TextField
+            id="presence_penalty"
+            title="Presence penalty"
+            info="How much to penalize new tokens based on whether they appear in the text so far. Increases the model's likelihood to talk about new topics."
+            defaultValue={DEFAULT_PRESENCE_PENALTY}
+            error={presenceError}
+            onBlur={(event) => validatePresence(event.target.value, { min: 0, max: 2 })}
+          />
         </Fragment>
       ) : null}
     </Form>
   );
 }
 
-function toNum(str: string) {
-  return parseInt(str, 10);
+function toNum(str?: string) {
+  return parseFloat(str ?? "0");
+}
+
+function validateRange(value?: string, opt: { min?: number; max?: number } = {}) {
+  const num = toNum(value);
+  const { min = 0, max = 1 } = opt;
+
+  if (num < min || num > max) {
+    return false;
+  }
+
+  return true;
 }
