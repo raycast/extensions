@@ -27,11 +27,7 @@ ${sticker.description}
       actions={
         <ActionPanel>
           {sticker.UserSticker[0] && (
-            <Action.OpenInBrowser
-              icon={Icon.Globe}
-              title="View in Browser"
-              url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`}
-            />
+            <Action.OpenInBrowser url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`} />
           )}
         </ActionPanel>
       }

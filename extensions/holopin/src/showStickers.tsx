@@ -26,7 +26,7 @@ export default function ShowStickers() {
       columns={5}
       inset={Grid.Inset.Small}
       isLoading={isLoading}
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       actions={
         <ActionPanel>
@@ -45,11 +45,7 @@ export default function ShowStickers() {
               <ActionPanel>
                 <Action.Push icon={Icon.Eye} title="Show Detail" target={<ShowDetail {...sticker} />} />
                 {sticker.UserSticker[0] && (
-                  <Action.OpenInBrowser
-                    icon={Icon.Globe}
-                    title="View in Browser"
-                    url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`}
-                  />
+                  <Action.OpenInBrowser url={`https://holopin.io/userbadge/${sticker.UserSticker[0].id}`} />
                 )}
               </ActionPanel>
             }
