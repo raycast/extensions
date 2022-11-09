@@ -1,20 +1,59 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { drawingResult } from "./types/winner_result";
+import { drawingResult, ticket } from "./types/winner_result";
 import { userTickets } from "./service/tickets";
 import moment from "moment";
 import { formatNumber } from "./service/numbers";
 
 export default function Command() {
   const [list, setList] = useState<drawingResult[]>([]);
+  const [currentList, setCurrentList] = useState<drawingResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     userTickets().then((data: drawingResult[]) => {
-      setList(data);
+      setList(data.map(object => ({ ...object })));
+      setCurrentList(data.map(object => ({ ...object })));
     });
     setTimeout(() => setIsLoading(false), 500);
   }, []);
+
+  function countTickets(source: drawingResult[]): number {
+    let ticketCount = 0;
+
+    source.map((drawing: drawingResult) => {
+      ticketCount += drawing.tickets.length;
+    });
+
+    return ticketCount;
+  }
+
+  function showAllTickets() {
+    console.log('show all tickets');
+    setIsLoading(true);
+    setCurrentList(list);
+    showToast({
+      style: Toast.Style.Success,
+      title: "all tickets visible",
+      message: countTickets(list) + " visible",
+    });
+    setTimeout(() => setIsLoading(false), 500);
+  }
+
+  function showWinningTickets() {
+    setIsLoading(true);
+    currentList.map((drawing: drawingResult) => {
+      drawing.tickets = drawing.tickets.filter((ticket: ticket) => {
+        return ticket.payout_amount !== null && ticket.payout_amount > 0;
+      });
+    });
+    showToast({
+      style: Toast.Style.Success,
+      title: "winning tickets visible",
+      message: countTickets(currentList) + " visible",
+    });
+    setTimeout(() => setIsLoading(false), 500);
+  }
 
   return (
     <List
@@ -22,8 +61,8 @@ export default function Command() {
       navigationTitle="Your Defichain Lottery tickets"
       searchBarPlaceholder="Search your ticket number"
     >
-      {list.length != 0 &&
-        list.map((drawing) => (
+      {currentList.length != 0 &&
+        currentList.map((drawing) => (
           <List.Section
             key={drawing.meta.identifier}
             title={drawing.meta.identifier}
@@ -40,6 +79,12 @@ export default function Command() {
                   icon={Icon.ChevronRight}
                   key={ticket.ticket_number}
                   title={ticket.ticket_number ?? 'n/a'}
+                  actions={
+                    <ActionPanel title="Filter the tickets">
+                      <Action title="Show all tickets" onAction={() => showAllTickets()} />
+                      <Action title="Show winning tickets" onAction={() => showWinningTickets()} />
+                    </ActionPanel>
+                  }
                   subtitle={
                     (ticket.bucket != 0 && ticket.bucket != null ? ticket.bucket + " correct, " : "") +
                     (ticket.payout_amount != null ? "won " + formatNumber(ticket.payout_amount, "DFI") : "")
