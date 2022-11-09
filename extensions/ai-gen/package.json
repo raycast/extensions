@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-gen",
-  "title": "OpenAI Text and DALL·E Image Generator",
+  "title": "OpenAI Generator",
   "description": "Generate text or images using OpenAI's revolutionary AI generation models",
   "icon": "open-ai-app-icon.png",
   "author": "josephschmitt",
