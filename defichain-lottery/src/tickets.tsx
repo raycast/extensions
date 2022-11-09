@@ -35,7 +35,7 @@ export default function Command() {
     showToast({
       style: Toast.Style.Success,
       title: "all tickets visible",
-      message: countTickets(list) + " visible",
+      message: "(" + countTickets(list) + " visible)",
     });
     setTimeout(() => setIsLoading(false), 500);
   }
@@ -50,7 +50,7 @@ export default function Command() {
     showToast({
       style: Toast.Style.Success,
       title: "winning tickets visible",
-      message: countTickets(currentList) + " visible",
+      message: "(" + countTickets(currentList) + " visible)",
     });
     setTimeout(() => setIsLoading(false), 500);
   }
