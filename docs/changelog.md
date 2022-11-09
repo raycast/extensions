@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.43.0 - 2022-11-09
+
+### ✨ New
+
+- **Actions**: You can now specify an action to focus when opening the ActionPanel (and an ActionPanel.Submenu) by setting the `autoFocus` prop.
+- **Forms**: Introducing a new Form Item `Form.FilePicker` to select one or multiple files (or directories)
+
+### 💎 Improvements
+
+- **DX**: A warning will now be shown in the console when using async entry points for view and menu-bar commands.
+- **List/Grid**: Improved the keyword search algorithm to match intersecting keywords (for example, the search term ”black cat” matches keywords [”black”, “cat”]).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the sections' order is not changed based on items' ranking values; this can be useful for use cases where a small number of fixed sections should always appear in the same order when the user filters the grid. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- Fixed the Grid or List’s selection sometimes not being preserved when native filtering is disabled.
+- The `Image.Mask.RoundedRectangle` mask will be more consistent regardless of the size of the image.
+- Fixed an issue where the specified `searchText` property would not always be respected.
+
 ## 1.42.0 - 2022-10-26
 
 ### ✨ New
@@ -27,8 +46,8 @@
 - **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
 
 ![](.gitbook/assets/grid-styled-sections.png)
-    
-- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now *also* accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
+
+- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
 - **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
 - **Menu Bar Extra:** added a new `Section` component, which can be used to better group related `Item`s and/or `Submenu`s. The component has an optional title for the section. At the same time, we are deprecating the `Separator` component.
 - **Menu Bar Extra**: The `Item` component now accepts an optional `subtitle` prop.
