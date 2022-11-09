@@ -64,12 +64,12 @@ export default function Command() {
         currentList.map((drawing) => (
           <List.Section
             key={drawing.meta.identifier}
-            title={drawing.meta.identifier}
+            title={("#" + drawing.meta.round_number + " - ") + drawing.meta.identifier}
             subtitle={
-              (drawing.user_payout_total > 0 ? "total winning: " + formatNumber(drawing.user_payout_total, 'DFI') + ', ' : '') +
-              "ending at " + moment(drawing.meta.ending_at).format("DD.MM.YY HH:mm") +
-              " with pot size of " +
-              formatNumber(drawing.meta.pot_size, "DFI")
+              (drawing.user_payout_total > 0 ? "total winning: " + formatNumber(drawing.user_payout_total, 'DFI') : '') +
+              ", " + drawing.tickets.length + " tickets" +
+              ", ending " + moment(drawing.meta.ending_at).format("DD.MM.YY HH:mm") +
+              ", pot size: " + formatNumber(drawing.meta.pot_size, "DFI")
             }
           >
             {drawing.tickets.length != 0 &&
