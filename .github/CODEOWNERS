@@ -491,6 +491,7 @@
 /extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
 /extensions/refresh-wifi                             @natterstefan
+/extensions/regex-repl                               @hongkiulam
 /extensions/regex-tester                             @allenan
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remove-background                        @maantje @FezVrasta
