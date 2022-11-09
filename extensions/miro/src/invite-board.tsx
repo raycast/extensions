@@ -1,3 +1,6 @@
+// ShareBoard component
+// This component is used to share the board with other users
+
 import { BoardMember } from "@mirohq/miro-api";
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
 import * as miro from "./oauth/miro";
