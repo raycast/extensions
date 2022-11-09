@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "New file with selection",
+      "title": "New File With Selection",
       "subtitle": "Smultron",
       "description": "Creates a new Smultron file with selection",
       "mode": "no-view"
