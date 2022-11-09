@@ -325,7 +325,7 @@ const markdownReference = [
     description: "To create a strikethrough effect, add `~~` before and directly after a block of text",
     examples: [
       {
-        markdown: "I am ~~ unable ~~ able to do this",
+        markdown: "I am ~~unable~~ able to do this!",
       },
     ],
     additional_examples: [],
