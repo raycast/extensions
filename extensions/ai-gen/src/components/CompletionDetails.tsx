@@ -22,7 +22,7 @@ export default function CompletionDetails(props: CompletionDetailProps) {
   const { apiKey } = getPreferenceValues();
   const [completion, createCompletion, , , isLoading] = useOpenAICompletionApi({ apiKey });
 
-  const promptHeaderStr = "**Prompt**\n\n" + prompt + "\n\n---\n**Response**\n\n";
+  const promptHeaderStr = "**Prompt**\n\n" + prompt + "\n\n---\n**Result**\n\n";
   const [markdown, setMarkdown] = useState(promptHeaderStr + "*Loading*...");
 
   const { push } = useNavigation();
@@ -73,6 +73,9 @@ export default function CompletionDetails(props: CompletionDetailProps) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
+          {completion.choices?.[0] ? (
+            <Action.CopyToClipboard title="Copy Result" content={completion.choices?.[0]?.text ?? ""} />
+          ) : null}
           <Action title="Edit Request" icon={Icon.Pencil} onAction={editRequestAction} />
         </ActionPanel>
       }
