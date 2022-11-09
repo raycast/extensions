@@ -13,9 +13,9 @@ export default function Command() {
 
   return (
     <List>
-      {Object.entries(docs).map(([section, items]: Array<any>) => (
+      {Object.entries(docs).map(([section, items]) => (
         <List.Section title={section} key={section}>
-          {items.map((item: any) => {
+          {items.map((item) => {
             return (
               <List.Item
                 key={item.url}
