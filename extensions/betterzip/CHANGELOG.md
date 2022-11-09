@@ -1,6 +1,6 @@
 # BetterZip Changelog
 
-## [Support for Setapp BetterZip] - {PR_MERGE_DATE}
+## [Support for Setapp BetterZip] - 2022-11-09
 
 - Added support for Setapp version of BetterZip
 
