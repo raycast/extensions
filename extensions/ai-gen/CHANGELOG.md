@@ -1,4 +1,4 @@
-# ai-gen Changelog
+# OpenAI Generator Changelog
 
 ## [Advanced text completion fixes] - 2022-11-09
 - Fix text completion advanced options not saving if you hide the UI
