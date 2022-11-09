@@ -39,6 +39,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for the item. | <code>string</code> | - |
+| autoFocus | Indicates whether the Action should be focused automatically when the parent ActionPanel (or Actionpanel.Submenu) opens. | <code>boolean</code> | - |
 | icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the item. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | style | Defines the visual style of the Action. | <code>[Alert.ActionStyle](../feedback/alert.md#alert.actionstyle)</code> | [Action.Style.Regular](actions.md#action.style) |

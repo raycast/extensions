@@ -21,8 +21,8 @@ The search bar allows users to interact quickly with grid items. By default, [Gr
 
 ### Custom filtering
 
-Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `enableFiltering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
-Note that `enableFiltering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `enableFiltering` to true.
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -45,7 +45,7 @@ export default function Command() {
     <Grid
       columns={5}
       inset={Grid.Inset.Large}
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Emoji"
       searchBarPlaceholder="Search your favorite emoji"
@@ -307,13 +307,13 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
-| children | Grid sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
+| children | Dropdown sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
 | id | ID of the dropdown. | <code>string</code> | - |
 | placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
 | storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
 | value | The currently value of the dropdown. | <code>string</code> | - |
-| onChange | Callback triggered when the grid item selection changes. | <code>(newValue: string) => void</code> | - |
+| onChange | Callback triggered when the dropdown selection changes. | <code>(newValue: string) => void</code> | - |
 
 ### Grid.Dropdown.Item
 

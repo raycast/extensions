@@ -964,6 +964,160 @@ export default function Command() {
 }
 ```
 
+### Form.FilePicker
+
+A form item with a button to open a dialog to pick some files and/or some directories (depending on its props).
+
+{% hint style="info" %}
+While the user picked some items that existed, it might be possible for them to be deleted or changed when the `onSubmit` callback is called. Hence you should always make sure that the items exist before acting on them!
+{% endhint %}
+
+![](../../.gitbook/assets/form-filepicker-multiple.png)
+
+![Single Selection](../../.gitbook/assets/form-filepicker-single.png)
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const files = values.files.filter(
+                file => fs.existsSync(values.file) && fs.lstatSync(values.file).isFile()
+              )
+              // do something with the files
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Single selection file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isFile()) {
+                return false;
+              }
+              // do something with the file
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Directory picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isDirectory()) {
+                return false;
+              }
+              // do something with the directory
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Controlled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [files, setFiles] = useState<string[]>([]);
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" value={files} onChange={setFiles} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+| Prop | Description | Type | Default |
+| :--- | :--- | :--- | :--- |
+| id<mark style="color:red;">*</mark> | ID of the form item. Make sure to assign each form item a unique id. | <code>string</code> | - |
+| allowMultipleSelection | Indicates whether the user can select multiple items or only one. | <code>boolean</code> | `true` |
+| autoFocus | Indicates whether the item should be focused automatically once the form is rendered. | <code>boolean</code> | - |
+| canChooseDirectories | Indicates whether it's possible to choose a directory. | <code>boolean</code> | `false` |
+| canChooseFiles | Indicates whether it's possible to choose a file. | <code>boolean</code> | `true` |
+| defaultValue | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string[]</code> | - |
+| error | An optional error message to show the form item validation issues. If the `error` is present, the Form Item will be highlighted with red border and will show an error message on the right. | <code>string</code> | - |
+| info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
+| showHiddenFiles | Indicates whether the file picker displays files that are normally hidden from the user. | <code>boolean</code> | `false` |
+| storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
+| title | The title displayed on the left side of the item. | <code>string</code> | - |
+| value | The current value of the item. | <code>string[]</code> | - |
+| onBlur | The callback that will be triggered when the item loses its focus. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+| onChange | The callback which will be triggered when the `value` of the item changes. | <code>(newValue: string[]) => void</code> | - |
+| onFocus | The callback which will be triggered should be called when the item is focused. | <code>(event: FormEvent&lt;string[]>) => void</code> | - |
+
+#### Methods (Imperative API)
+
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
 ### Form.Description
 
 A form item with a simple text label.

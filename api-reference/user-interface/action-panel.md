@@ -143,6 +143,7 @@ export default function Command() {
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title displayed for submenu. | <code>string</code> | - |
+| autoFocus | Indicates whether the ActionPanel.Submenu should be focused automatically when the parent ActionPanel (or Actionpanel.Submenu) opens. | <code>boolean</code> | - |
 | children | Items of the submenu. | <code>[ActionPanel.Submenu.Children](action-panel.md#actionpanel.submenu.children)</code> | - |
 | icon | The icon displayed for the submenu. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
 | shortcut | The keyboard shortcut for the submenu. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
