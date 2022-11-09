@@ -29,9 +29,8 @@ export default function Command() {
   }
 
   function showAllTickets() {
-    console.log('show all tickets');
     setIsLoading(true);
-    setCurrentList(list);
+    setCurrentList(list.map(object => ({ ...object })));
     showToast({
       style: Toast.Style.Success,
       title: "all tickets visible",
