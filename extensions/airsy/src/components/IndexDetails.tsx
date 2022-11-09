@@ -16,7 +16,7 @@ const IndexDetails: FC<{ title: string; indexValue: string | undefined; value?: 
       <List.Item.Detail.Metadata.TagList title="Index">
         <List.Item.Detail.Metadata.TagList.Item text={text} color={color} />
       </List.Item.Detail.Metadata.TagList>
-      {value && (
+      {typeof value === "number" && (
         <List.Item.Detail.Metadata.TagList title="Value">
           <List.Item.Detail.Metadata.TagList.Item text={value ? parseFloat(value + "").toFixed(5) : "Unknown"} />
         </List.Item.Detail.Metadata.TagList>
