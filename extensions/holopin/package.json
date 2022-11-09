@@ -5,6 +5,9 @@
   "description": "Show Holopin stickers and board",
   "icon": "command-icon.png",
   "author": "timoransky",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun",
     "Media"
