@@ -1,21 +1,18 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "title",
-  "title": "title.sh",
+  "title": "Title",
   "description": "Correctly capitalizes your titles as per The Chicago Manual of Style.",
   "icon": "icon.png",
   "author": "manovotny",
   "categories": [
-    "Applications",
-    "Communication",
-    "Documentation",
     "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "title",
-      "title": "Title",
+      "name": "capitalize",
+      "title": "Capitalize",
       "description": "Correctly capitalizes your titles",
       "mode": "view"
     }

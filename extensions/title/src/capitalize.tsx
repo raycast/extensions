@@ -25,6 +25,7 @@ const Title = () => {
         </ActionPanel>
       }
     >
+      <Form.Description text="Enter your title below to get it capitalized properly according to the The Chicago Manual of Style:" />
       <Form.TextField
         id="title"
         placeholder="Paste or Enter Your Title"
