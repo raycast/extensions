@@ -4,9 +4,19 @@ import {useFetch} from "@raycast/utils";
 export default function Command() {
     try {
         const {isLoading, data, revalidate}: any = useFetch("https://laraveldaily.com/api/v1/tips?count=1&format=markdown");
-        const first = data.data[0];
-        const markdown = `\n# ${first.name}\n---\n${first.description}\n---\n![](${first.original_image})\n---\nCredit: [Laravel Daily](https://laraveldaily.com/)\n`;
+        const tipTitle = data.data[0].name;
+        const tipDescription = data.data[0].description;
+        const tipImage = data.data[0].original_image;
 
+        const markdown = `
+# ${tipTitle}
+---
+${tipDescription}
+---
+![](${tipImage})
+---
+Credit: [Laravel Daily](https://laraveldaily.com/)
+`;
         return (
             <Detail
                 isLoading={isLoading}
