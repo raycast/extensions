@@ -14,7 +14,16 @@
       "name": "capitalize",
       "title": "Capitalize",
       "description": "Correctly capitalizes your titles",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "special",
+          "description": "Specify words that should enforce their capitalization rules (separate words with a comma).",
+          "type": "textfield",
+          "required": false,
+          "title": "Special Words (separate words with a comma)"
+        }
+      ]
     }
   ],
   "dependencies": {

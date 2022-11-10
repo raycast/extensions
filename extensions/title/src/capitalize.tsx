@@ -1,10 +1,22 @@
-import { popToRoot, showHUD, ActionPanel, Icon, Form, Action, Clipboard } from "@raycast/api";
+import { ActionPanel, Icon, Form, Action, Clipboard, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
 import { useState } from "react";
 import title from "title";
 
 interface FormInput {
   title: string;
 }
+
+interface Preferences {
+  special?: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+const special = preferences.special?.split(",").map((word) => word.trim()) || [];
+const capitalizeTitle = (raw: string) => {
+  return title(raw, {
+    special,
+  });
+};
 
 const Title = () => {
   const [capitalized, setCapitalized] = useState<string>("");
@@ -17,7 +29,7 @@ const Title = () => {
             icon={Icon.Checkmark}
             title="Copy to Clipboard"
             onSubmit={(values: FormInput) => {
-              Clipboard.copy(title(values.title));
+              Clipboard.copy(capitalizeTitle(values.title));
               showHUD("Copied to Clipboard");
               popToRoot();
             }}
@@ -31,7 +43,7 @@ const Title = () => {
         placeholder="Paste or Enter Your Title"
         value={capitalized}
         onChange={(value: string) => {
-          setCapitalized(title(value));
+          setCapitalized(capitalizeTitle(value));
         }}
       />
     </Form>
