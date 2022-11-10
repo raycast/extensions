@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "Smultron",
+  "name": "smultron",
   "title": "Smultron",
   "description": "Creates a new Smultron File with Selection",
   "icon": "command-icon.png",
