@@ -3,7 +3,7 @@ import {useFetch} from "@raycast/utils";
 
 export default function Command() {
     try {
-        const {isLoading, data, revalidate} : any = useFetch("https://laraveldaily.com/api/v1/tips?count=1&format=markdown");
+        const {isLoading, data, revalidate}: any = useFetch("https://laraveldaily.com/api/v1/tips?count=1&format=markdown");
         const first = data.data[0];
         const markdown = `
 # ${first.name}
