@@ -2,7 +2,7 @@
 // This component is used to share the board with other users
 
 import { BoardMember } from "@mirohq/miro-api";
-import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import * as miro from "./oauth/miro";
 
 interface ShareBoardProps {
@@ -12,7 +12,7 @@ interface ShareBoardProps {
 }
 
 export default function InviteBoard({ id }: { id: string }) {
-  console.log(id);
+  const { pop } = useNavigation();
 
   return (
     <Form
@@ -24,7 +24,7 @@ export default function InviteBoard({ id }: { id: string }) {
               try {
                 await miro.inviteToBoard(id, { email: values.email, role: values.role }, values.message);
                 await showToast({ style: Toast.Style.Success, title: "🎉 Invited to board!" });
-                popToRoot();
+                pop();
               } catch {
                 await showToast({ style: Toast.Style.Failure, title: "Invite failed." });
               }
