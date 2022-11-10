@@ -57,6 +57,7 @@ export default function StateSubmenu({
         orderedStates.map((state) => (
           <Action
             key={state.id}
+            autoFocus={state.id === issue.state.id}
             title={state.name}
             icon={{ source: statusIcons[state.type], tintColor: state.color }}
             onAction={() => setStatus(state)}
