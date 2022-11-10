@@ -61,9 +61,11 @@ export async function removeAddress(address: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
     confirmAlert(options).then((clickedPrimary: boolean) => {
       if (clickedPrimary) {
-        removeAddressPromise().then((addresses: any) => {
-          resolve(addresses);
-        }).catch(() => reject());
+        removeAddressPromise()
+          .then((addresses: any) => {
+            resolve(addresses);
+          })
+          .catch(() => reject());
       } else {
         reject();
       }

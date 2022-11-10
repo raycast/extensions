@@ -20,7 +20,7 @@
     },
     {
       "name": "tickets",
-      "title": "My tickets and wins",
+      "title": "My Tickets and Wins",
       "description": "Check your own tickets and possible wins.",
       "mode": "view",
       "keywords": [

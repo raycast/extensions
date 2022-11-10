@@ -3,7 +3,7 @@ import { loadAddresses } from "./addresses";
 import { drawingResult, ticket } from "../types/winner_result";
 
 export async function userTickets(): Promise<drawingResult[]> {
-  const promises = new Array();
+  const promises = [];
   return new Promise((resolve) => {
     loadAddresses().then((addresses) => {
       addresses.map((address: string) => {
@@ -23,7 +23,7 @@ export async function userTickets(): Promise<drawingResult[]> {
   });
 }
 
-let result = new Array();
+let result = [];
 function addToResult(data: any) {
   // first element can be added
   if (result.length == 0) {
@@ -54,7 +54,7 @@ function drawingExist(data: any): boolean {
 function mergeResults(data: any): drawingResult[] {
   result.map((resultItem, index) => {
     if (resultItem.meta.identifier === data.meta.identifier) {
-      let mergedResultItem = {
+      const mergedResultItem = {
         meta: resultItem.meta,
         tickets: [...resultItem.tickets, ...data.tickets],
         user_payout_total: resultItem.user_payout_total + data.user_payout_total,

@@ -12,8 +12,8 @@ export default function Command() {
 
   useEffect(() => {
     userTickets().then((data: drawingResult[]) => {
-      setList(data.map(object => ({ ...object })));
-      setCurrentList(data.map(object => ({ ...object })));
+      setList(data.map((object) => ({ ...object })));
+      setCurrentList(data.map((object) => ({ ...object })));
     });
     setTimeout(() => setIsLoading(false), 500);
   }, []);
@@ -30,7 +30,7 @@ export default function Command() {
 
   function showAllTickets() {
     setIsLoading(true);
-    setCurrentList(list.map(object => ({ ...object })));
+    setCurrentList(list.map((object) => ({ ...object })));
     showToast({
       style: Toast.Style.Success,
       title: "all tickets visible",
@@ -64,12 +64,18 @@ export default function Command() {
         currentList.map((drawing) => (
           <List.Section
             key={drawing.meta.identifier}
-            title={("#" + drawing.meta.round_number + " - ") + drawing.meta.identifier}
+            title={"#" + drawing.meta.round_number + " - " + drawing.meta.identifier}
             subtitle={
-              (drawing.user_payout_total > 0 ? "total winning: " + formatNumber(drawing.user_payout_total, 'DFI') : '') +
-              ", " + drawing.tickets.length + " tickets" +
-              ", ending " + moment(drawing.meta.ending_at).format("DD.MM.YY HH:mm") +
-              ", pot size: " + formatNumber(drawing.meta.pot_size, "DFI")
+              (drawing.user_payout_total > 0
+                ? "total winning: " + formatNumber(drawing.user_payout_total, "DFI")
+                : "") +
+              ", " +
+              drawing.tickets.length +
+              " tickets" +
+              ", ending " +
+              moment(drawing.meta.ending_at).format("DD.MM.YY HH:mm") +
+              ", pot size: " +
+              formatNumber(drawing.meta.pot_size, "DFI")
             }
           >
             {drawing.tickets.length != 0 &&
@@ -77,7 +83,7 @@ export default function Command() {
                 <List.Item
                   icon={Icon.ChevronRight}
                   key={ticket.ticket_number}
-                  title={ticket.ticket_number ?? 'n/a'}
+                  title={ticket.ticket_number ?? "n/a"}
                   actions={
                     <ActionPanel title="Filter the tickets">
                       <Action title="Show all tickets" onAction={() => showAllTickets()} />

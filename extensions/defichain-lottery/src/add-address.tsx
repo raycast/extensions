@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { addAddress } from "./service/addresses";
 
 interface Address {
-  address: string
+  address: string;
 }
 
 export default async (props: { arguments: Address }) => {

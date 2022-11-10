@@ -77,24 +77,30 @@ export async function statsToMarkdown(stats: Stats): Promise<string> {
   - current pot size: ***${formatNumber(stats.upcoming_drawing.pot_size, "DFI")}***
 
   - round ending ${moment
-      .duration(moment(stats.upcoming_drawing.ending_at).diff(moment()))
-      .humanize(true, { d: 7, w: 4 })} (${moment(stats.upcoming_drawing.ending_at).format("DD.MM.YY HH:mm")} UTC)
+    .duration(moment(stats.upcoming_drawing.ending_at).diff(moment()))
+    .humanize(true, { d: 7, w: 4 })} (${moment(stats.upcoming_drawing.ending_at).format("DD.MM.YY HH:mm")} UTC)
 
   - ${soldTickets.dusd + soldTickets.dfi} tickets sold (${soldTickets.dfi}x DFI, ${soldTickets.dusd}x dUSD)
 
   - preview of buckets:
-    - Bucket 1: ***${formatNumber(bucketPreview.match_1.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_1.winning_chance_string
-    } = ${bucketPreview.match_1.winning_chance_percentage} %)
-    - Bucket 2: ***${formatNumber(bucketPreview.match_2.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_2.winning_chance_string
-    } = ${bucketPreview.match_2.winning_chance_percentage} %)
-    - Bucket 3: ***${formatNumber(bucketPreview.match_3.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_3.winning_chance_string
-    } = ${bucketPreview.match_3.winning_chance_percentage} %)
-    - Bucket 4: ***${formatNumber(bucketPreview.match_4.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_4.winning_chance_string
-    } = ${bucketPreview.match_4.winning_chance_percentage} %)
-    - Bucket 5: ***${formatNumber(bucketPreview.match_5.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_5.winning_chance_string
-    } = ${bucketPreview.match_5.winning_chance_percentage} %)
-    - Bucket 6: ***${formatNumber(bucketPreview.match_6.pot_size_preview, "DFI")}*** (chance ${bucketPreview.match_6.winning_chance_string
-    } = ${bucketPreview.match_6.winning_chance_percentage} %)
+    - Bucket 1: ***${formatNumber(bucketPreview.match_1.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_1.winning_chance_string
+  } = ${bucketPreview.match_1.winning_chance_percentage} %)
+    - Bucket 2: ***${formatNumber(bucketPreview.match_2.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_2.winning_chance_string
+  } = ${bucketPreview.match_2.winning_chance_percentage} %)
+    - Bucket 3: ***${formatNumber(bucketPreview.match_3.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_3.winning_chance_string
+  } = ${bucketPreview.match_3.winning_chance_percentage} %)
+    - Bucket 4: ***${formatNumber(bucketPreview.match_4.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_4.winning_chance_string
+  } = ${bucketPreview.match_4.winning_chance_percentage} %)
+    - Bucket 5: ***${formatNumber(bucketPreview.match_5.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_5.winning_chance_string
+  } = ${bucketPreview.match_5.winning_chance_percentage} %)
+    - Bucket 6: ***${formatNumber(bucketPreview.match_6.pot_size_preview, "DFI")}*** (chance ${
+    bucketPreview.match_6.winning_chance_string
+  } = ${bucketPreview.match_6.winning_chance_percentage} %)
 
     
     ## buy your tickets now:
