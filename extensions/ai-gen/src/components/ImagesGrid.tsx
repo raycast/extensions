@@ -1,4 +1,5 @@
 import { CreateImageRequestSizeEnum } from "openai";
+import path from "path";
 import { useEffect } from "react";
 
 import { Grid, getPreferenceValues, showToast, Toast, useNavigation, Icon } from "@raycast/api";
@@ -10,15 +11,19 @@ const NUM_ROWS = 2;
 const MIN_COLS = 3;
 
 export type ImagesGridProps = {
-  prompt: string;
+  prompt?: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-} & ({ file?: never; variationCount?: never } | { file: string; variationCount: number });
+  image?: string;
+  variationCount?: number;
+};
 
 export function ImagesGrid(props: ImagesGridProps) {
-  const { prompt, file, n, size, variationCount = 0 } = props;
+  const { prompt, image, n, size, variationCount = 0 } = props;
 
-  const title = file ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt}"` : prompt;
+  const title = image
+    ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt || path.basename(image)}"`
+    : prompt;
   const number = parseInt(n, 10);
 
   const { apiKey } = getPreferenceValues();
@@ -27,8 +32,8 @@ export function ImagesGrid(props: ImagesGridProps) {
   useEffect(() => {
     if (prompt) {
       createImage({ prompt, size, n: number });
-    } else if (file) {
-      createVariation(file, { n: number, size });
+    } else if (image) {
+      createVariation(image, { n: number, size });
     }
   }, []);
 
@@ -67,6 +72,7 @@ export function ImagesGrid(props: ImagesGridProps) {
                   showDetailAction={true}
                   url={urlString}
                   prompt={prompt}
+                  image={image}
                   size={size}
                   n={n}
                   variationCount={variationCount}

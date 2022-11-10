@@ -1,4 +1,7 @@
+import fs from "fs";
+import sizeOf from "image-size";
 import { CreateImageRequestSizeEnum } from "openai";
+import path from "path";
 import { useState } from "react";
 
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
@@ -6,19 +9,24 @@ import { ImagesGrid } from "./ImagesGrid";
 
 const DEFAULT_NUM = 1;
 const MAX_CHARS = 1000;
+const MAX_IMAGE_FILE_SIZE = 4000000;
 
-export interface CreateImageValues {
-  prompt: string;
+export type CreateImageValues = {
   n: string;
   size: CreateImageRequestSizeEnum;
+} & ({ prompt: string; images?: never } | { prompt?: never; images: string[] });
+
+export interface CreateImageVariationValues {
+  isVariation?: boolean;
 }
 
-export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
-  const { draftValues } = props;
+export function CreateImageForm(props: { draftValues?: CreateImageValues } & CreateImageVariationValues) {
+  const { draftValues, isVariation } = props;
   const { enableDrafts, storeValue } = getPreferenceValues();
 
   const { push } = useNavigation();
   const [promptError, setPromptError] = useState<string | undefined>();
+  const [imageError, setImageError] = useState<string | undefined>();
   const [numberError, setNumberError] = useState<string | undefined>();
 
   function validatePrompt(prompt?: string) {
@@ -30,6 +38,28 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
 
     if (promptError?.length) {
       setPromptError(undefined);
+    }
+
+    return true;
+  }
+
+  function validateFile(images?: string[]) {
+    const [image] = images || [];
+    const stats = fs.statSync(image);
+    const size = sizeOf(image);
+
+    const isImage = !!image || images?.length === 1;
+    const isSquare = size.height == size.width;
+    const isCorrectSize = stats.size <= MAX_IMAGE_FILE_SIZE;
+    const isPng = path.extname(image).toLowerCase() === ".png";
+
+    if (!isImage || !stats.isFile() || !isSquare || !isCorrectSize || !isPng) {
+      setImageError("Image must be a square PNG and under 4MB");
+      return false;
+    }
+
+    if (imageError?.length) {
+      setImageError(undefined);
     }
 
     return true;
@@ -51,10 +81,17 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
     return true;
   }
 
-  function onSubmit({ prompt, n, size }: CreateImageValues) {
-    const valid = validatePrompt(prompt) && validateNumber(n);
-    if (valid) {
-      push(<ImagesGrid prompt={prompt} n={n} size={size} />);
+  function onSubmit({ prompt, n, size, images }: CreateImageValues) {
+    if (isVariation) {
+      const valid = validateFile(images) && validateNumber(n);
+      if (valid && images) {
+        push(<ImagesGrid n={n} size={size} image={images[0]} variationCount={0} />);
+      }
+    } else {
+      const valid = validatePrompt(prompt) && validateNumber(n);
+      if (valid && prompt) {
+        push(<ImagesGrid prompt={prompt} n={n} size={size} />);
+      }
     }
   }
 
@@ -69,20 +106,39 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues }) {
     >
       <Form.Description
         title="OpenAI Image Generation"
-        text="Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model"
+        text={
+          isVariation
+            ? "Given an existing image, generate a variation on it using the OpenAI DALL·E 2 image model"
+            : "Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model"
+        }
       />
-      <Form.TextArea
-        id="prompt"
-        title="Prompt"
-        placeholder="Describe the image you want to create"
-        info={`A text description of the desired image(s). The maximum length is ${MAX_CHARS} characters.`}
-        error={promptError}
-        onBlur={(event) => validatePrompt(event.target.value)}
-        onChange={(value) => validatePrompt(value)}
-        autoFocus={true}
-        storeValue={!draftValues?.prompt && storeValue}
-        defaultValue={draftValues?.prompt}
-      />
+      {isVariation ? (
+        <Form.FilePicker
+          id="images"
+          title="Image"
+          info="The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square."
+          allowMultipleSelection={false}
+          error={imageError}
+          onBlur={(event) => validateFile(event.target.value)}
+          onChange={(value) => validateFile(value)}
+          autoFocus={isVariation}
+          defaultValue={draftValues?.images}
+          storeValue={!draftValues?.images && storeValue}
+        />
+      ) : (
+        <Form.TextArea
+          id="prompt"
+          title="Prompt"
+          placeholder="Describe the image you want to create"
+          info={`A text description of the desired image(s). The maximum length is ${MAX_CHARS} characters.`}
+          error={promptError}
+          onBlur={(event) => validatePrompt(event.target.value)}
+          onChange={(value) => validatePrompt(value)}
+          autoFocus={!isVariation}
+          storeValue={!draftValues?.prompt && storeValue}
+          defaultValue={draftValues?.prompt}
+        />
+      )}
       <Form.Separator />
       <Form.Dropdown
         id="size"
