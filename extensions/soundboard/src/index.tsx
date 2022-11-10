@@ -30,9 +30,8 @@ export default function Command() {
   return (
     <List isLoading={loading}>
       <List.EmptyView
-        title="No Sounds Found"
-        description="Press ⌘+N to add a file"
-        //icon={Icon.NewDocument}
+        title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
+        description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
         icon={{ source: "no-view.png" }}
         actions={
           <ActionPanel>
@@ -44,7 +43,6 @@ export default function Command() {
                 <SoundForm
                   onEdit={async function (item: Item): Promise<void> {
                     await handleCreate(item);
-                    pop();
                   }}
                 />
               }

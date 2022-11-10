@@ -91,9 +91,7 @@
   "dependencies": {
     "@raycast/api": "^1.43.0",
     "@raycast/utils": "^1.4.10",
-    "nanoid": "^4.0.0",
-    "raycast-toolkit": "^1.0.4",
-    "run-applescript": "^6.0.0"
+    "nanoid": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",
