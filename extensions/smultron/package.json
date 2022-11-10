@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "new-smultron-file",
-  "title": "New Smultron File with Selection",
+  "name": "Smultron",
+  "title": "Smultron",
   "description": "Creates a new Smultron File with Selection",
   "icon": "command-icon.png",
   "author": "felixthehat",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "New File with Selection",
+      "title": "New File With Selection",
       "subtitle": "Smultron",
       "description": "Creates a new Smultron File with Selection",
       "mode": "no-view"
