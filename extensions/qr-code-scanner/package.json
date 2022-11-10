@@ -14,6 +14,35 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "captureMode",
+      "title": "Capture Mode",
+      "description": "Select screen capture mode. Select \"Selection\" for more precise recognition.",
+      "type": "dropdown",
+      "required": false,
+      "default": "area",
+      "data": [
+        {
+          "title": "Selection",
+          "value": "area"
+        },
+        {
+          "title": "Entire Screen",
+          "value": "fullscreen"
+        }
+      ]
+    },
+    {
+      "name": "silence",
+      "title": "Silence Mode",
+      "label": "Do Not Play Sound",
+      "description": "Do not play sound when capturing screen.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.26.3",
     "jimp": "^0.16.1",

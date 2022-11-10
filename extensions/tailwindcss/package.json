@@ -1,17 +1,53 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tailwindcss",
-  "title": "Tailwind CSS Documentation",
-  "description": "Quickly search Tailwind CSS documentation and open it in the browser",
+  "title": "Tailwind CSS",
+  "description": "Utilities to work with Tailwind CSS",
   "icon": "tailwind-icon.png",
   "author": "vimtor",
+  "contributors": [
+    "cy-98"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-documentation",
-      "title": "Search CSS Documentation",
-      "subtitle": "Tailwind",
-      "description": "Search Tailwind CSS documentation and open it in the browser",
+      "title": "Search Documentation",
+      "subtitle": "Tailwind CSS",
+      "keywords": [
+        "css"
+      ],
+      "description": "Search documentation and open it in the browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-classes",
+      "title": "Search Classes",
+      "subtitle": "Tailwind CSS",
+      "keywords": [
+        "css"
+      ],
+      "description": "Search Tailwind CSS utility classes",
+      "mode": "view"
+    },
+    {
+      "name": "search-colors",
+      "title": "Search Colors",
+      "subtitle": "Tailwind CSS",
+      "keywords": [
+        "css"
+      ],
+      "description": "Search Tailwind CSS default color palette",
+      "mode": "view"
+    },
+    {
+      "name": "search-components",
+      "title": "Search Components",
+      "subtitle": "Tailwind UI",
+      "keywords": [
+        "css"
+      ],
+      "description": "Search Tailwind UI components",
       "mode": "view"
     }
   ],
@@ -20,16 +56,17 @@
     "Developer Tools"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "jsdom": "^18.0.0",
+    "@raycast/api": "^1.36.0",
     "react": "^17.0.2",
+    "tailwindcss": "^3.1.2",
+    "color-convert": "^2.0.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.29",
-    "@types/lodash": "^4.14.176",
-    "@types/jsdom": "^16.2.13",
+    "@types/lodash": "^4.14.182",
+    "@types/color-convert": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -39,6 +76,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

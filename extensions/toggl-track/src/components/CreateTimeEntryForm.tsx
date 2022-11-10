@@ -1,13 +1,4 @@
-import {
-  useNavigation,
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  Icon,
-  showToast,
-  ToastStyle,
-  clearSearchBar,
-} from "@raycast/api";
+import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
 import { Project } from "../toggl/types";
@@ -19,6 +10,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [billable, setBillable] = useState<boolean>(false);
 
   async function handleSubmit(values: { description: string }) {
     try {
@@ -26,14 +18,15 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         projectId: selectedProject?.id,
         description: values.description,
         tags: selectedTags,
+        billable,
       });
-      await showToast(ToastStyle.Animated, "Starting time entry...");
+      await showToast(Toast.Style.Animated, "Starting time entry...");
       await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, "Started time entry");
+      await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to start time entry");
+      await showToast(Toast.Style.Failure, "Failed to start time entry");
     }
   }
 
@@ -57,7 +50,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Time Entry" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -89,6 +82,9 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
       </Form.TagPicker>
+      {selectedProject?.billable && (
+        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
+      )}
     </Form>
   );
 }

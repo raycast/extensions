@@ -4,6 +4,9 @@
   "title": "Brew",
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
+  "contributors": [
+    "Aayush9029"
+  ],
   "license": "MIT",
   "icon": "icon.png",
   "commands": [
@@ -45,11 +48,19 @@
       "description": "Include auto-updating casks when upgrading or checking for outdated items.",
       "default": false,
       "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Brew Executable Path",
+      "description": "Set this if your brew executable is in a non-standard location"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "node-fetch": "^2.6.7"
+    "@raycast/api": "^1.38.0",
+    "node-fetch": "^2.6.7",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.11.26",
@@ -62,6 +73,10 @@
     "typescript": "^4.6.2"
   },
   "scripts": {
-    "dev": "ray develop target"
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

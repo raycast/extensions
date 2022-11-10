@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
@@ -13,6 +13,12 @@
       "title": "Search Documents",
       "subtitle": "Lark",
       "description": "Search and open documents in browser",
+      "keywords": [
+        "lark",
+        "feishu",
+        "docs",
+        "document"
+      ],
       "mode": "view"
     }
   ],
@@ -35,22 +41,6 @@
       ]
     },
     {
-      "name": "subdomain",
-      "type": "textfield",
-      "required": true,
-      "title": "Subdomain",
-      "description": "Subdomain of your Feishu/Lark enterprise e.g. bytedance",
-      "placeholder": "Subdomain of your Feishu/Lark enterprise"
-    },
-    {
-      "name": "spaceSession",
-      "type": "password",
-      "required": true,
-      "title": "Space Session",
-      "description": "Your Space Session. Open your docs homepage and copy it in Cookies.",
-      "placeholder": "Enter your space session"
-    },
-    {
       "name": "recentListCount",
       "type": "textfield",
       "required": false,
@@ -66,20 +56,24 @@
     "dev": "ray develop"
   },
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "axios": "^0.24.0",
-    "dayjs": "^1.10.7",
-    "string": "^3.3.3"
+    "@raycast/api": "^1.35.2",
+    "dayjs": "^1.11.2",
+    "got": "^12.1.0",
+    "qrcode": "^1.5.0",
+    "string": "^3.3.3",
+    "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.11.7",
-    "@types/react": "^17.0.34",
+    "@types/node": "~17.0.35",
+    "@types/qrcode": "^1.4.2",
+    "@types/react": "^18.0.9",
     "@types/string": "^0.0.31",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.21.0",
-    "typescript": "^4.4.4"
+    "@types/tough-cookie": "^4.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.7.2"
   }
 }

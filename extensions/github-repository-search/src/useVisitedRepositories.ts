@@ -1,4 +1,4 @@
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Repository } from "./types";
 
@@ -6,7 +6,7 @@ const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 async function loadVisitedRepositories() {
-  const item = await getLocalStorageItem<string>(VISITED_REPOSITORIES_KEY);
+  const item = await LocalStorage.getItem<string>(VISITED_REPOSITORIES_KEY);
   if (item) {
     const parsed = JSON.parse(item);
     return parsed as Repository[];
@@ -17,11 +17,11 @@ async function loadVisitedRepositories() {
 
 async function saveVisitedRepositories(repositories: Repository[]) {
   const data = JSON.stringify(repositories);
-  await setLocalStorageItem(VISITED_REPOSITORIES_KEY, data);
+  await LocalStorage.setItem(VISITED_REPOSITORIES_KEY, data);
 }
 
 export async function clearVisitedRepositories() {
-  return await removeLocalStorageItem(VISITED_REPOSITORIES_KEY);
+  return await LocalStorage.removeItem(VISITED_REPOSITORIES_KEY);
 }
 
 export function useVisitedRepositories() {

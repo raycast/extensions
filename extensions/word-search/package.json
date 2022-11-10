@@ -2,13 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-search",
   "title": "Word Search",
-  "description": "Search for synonyms, antonyms and rhymes",
+  "description": "Search for synonyms, antonyms, rhymes and more",
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [
     "thomas"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "word-synonym-search",
@@ -30,22 +33,36 @@
       "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
       "mode": "view"
+    },
+    {
+      "name": "word-adjective-search",
+      "title": "Search Word Adjective",
+      "subtitle": "Datamuse",
+      "description": "Search for adjectives given a word",
+      "mode": "view"
+    },
+    {
+      "name": "word-missing-letters-search",
+      "title": "Search Word With Missing Letters",
+      "subtitle": "Datamuse",
+      "description": "Search for word with missing letters",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
-    "node-fetch": "^3.2.0"
+    "@raycast/api": "^1.35.0",
+    "node-fetch": "^3.2.5"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/react": "^17.0.45",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react-devtools": "^4.24.7",
+    "typescript": "^4.7.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -12,7 +12,7 @@ What's an example section without a todo list?! Let's put one together in Raycas
 
 ![Example: A simple todo list](../.gitbook/assets/example-todo-list.png)
 
-### Render todo list
+## Render todo list
 
 Let's start with a set of todos and simply render them as a list in Raycast:
 
@@ -43,7 +43,7 @@ export default function Command() {
 
 For this we define a TypeScript interface to describe out Todo with a `title` and a `isCompleted` flag that we use later to complete the todo. We use [React's `useState` hook](https://reactjs.org/docs/hooks-state.html) to create a local state of our todos. This allows us to update them later and the list will get re-rendered. Lastly we render a list of all todos.
 
-### Create a todo
+## Create a todo
 
 A static list of todos isn't that much fun. Let's create new ones with a form. For this, we create a new React component that renders the form:
 
@@ -101,7 +101,7 @@ export default function Command() {
 }
 ```
 
-### Complete a todo
+## Complete a todo
 
 Now that we can create new todos, we also want to make sure that we can tick off something on our todo list. For this, we create a `<ToggleTodoAction>` that we assign to the `<List.Item>`:
 
@@ -159,7 +159,7 @@ function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
 
 In this case we added the `<ToggleTodoAction>` to the list item. By doing this we can use the `index` to toggle the appropriate todo. We also added an icon to our todo that reflects the `isCompleted` state.
 
-### Delete a todo
+## Delete a todo
 
 Similar to toggling a todo, we also add the possibility to delete one. You can follow the same steps and create a new `<DeleteTodoAction>` and add it to the `<List.Item>`.
 

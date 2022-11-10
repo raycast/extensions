@@ -108,16 +108,16 @@ export default function TorrentList() {
   }, [torrentsError]);
 
   const paddedRateDownloads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
+    [filteredTorrents]
   );
   const paddedRateUploads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
+    [filteredTorrents]
   );
   const paddedPercentDones = useMemo(
-    () => padList(sortedTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
+    [filteredTorrents]
   );
 
   return (
@@ -235,8 +235,23 @@ function TorrentListItem({
     .filter(Boolean)
     .join(" - ");
 
-  const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
-  const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
+  const downloadStats = useMemo(
+    () => [
+      { icon: Icon.ChevronDown, textIcon: "↓", text: rateDownload },
+      { icon: Icon.ChevronUp, textIcon: "↑", text: rateUpload },
+      { text: percentDone },
+    ],
+    [rateDownload, rateUpload, percentDone]
+  );
+
+  const details = useAsync(
+    () =>
+      renderDetails(
+        torrent,
+        downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")
+      ),
+    [torrent, downloadStats]
+  );
 
   const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
 
@@ -246,7 +261,7 @@ function TorrentListItem({
       key={torrent.id}
       title={truncate(torrent.name, 60)}
       icon={statusIcon(torrent)}
-      accessoryTitle={!isShowingDetail ? downloadStats : undefined}
+      accessories={!isShowingDetail ? downloadStats.map(({ text, icon }) => ({ text, icon })) : undefined}
       detail={
         isShowingDetail && (
           <List.Item.Detail

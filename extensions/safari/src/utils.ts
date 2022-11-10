@@ -57,12 +57,6 @@ export const getUrlDomain = (url: string) => {
   }
 };
 
-export const getFaviconUrl = (domain: string | undefined) => {
-  if (domain) {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
-  }
-};
-
 export const formatDate = (date: string) =>
   new Date(date).toLocaleDateString(undefined, {
     year: "numeric",

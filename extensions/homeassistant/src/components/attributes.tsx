@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { State } from "../haapi";
 
 export function EntityAttributesList(props: { state: State }): JSX.Element {
@@ -13,12 +13,25 @@ export function EntityAttributesList(props: { state: State }): JSX.Element {
           <List.Item
             key={state.entity_id + k}
             title={k}
-            accessoryTitle={`${v}`}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={`${v}`} />
+                <Action.CopyToClipboard
+                  title="Copy Value to Clipboard"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                  content={`${v}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Key to Clipboard"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+                  content={`${k}`}
+                />
               </ActionPanel>
             }
+            accessories={[
+              {
+                text: `${v}`,
+              },
+            ]}
           />
         ))}
       </List.Section>

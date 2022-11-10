@@ -107,3 +107,14 @@ export interface LoginResult {
   teams: LoginTeam[];
   org: LoginOrg;
 }
+
+export interface Preferences {
+  url: string;
+  email: string;
+  password: string;
+  teamUUID?: string;
+  manhourUser?: string;
+  manhourDays: string;
+  manhourTaskUUID?: string;
+  manhourMode: string;
+}

@@ -1,11 +1,10 @@
-import { runAppleScript } from "run-applescript";
-import { closeMainWindow, Toast, ToastStyle } from "@raycast/api";
-import { isFlowInstalled } from "./utils";
+import { closeMainWindow, Toast } from "@raycast/api";
+import { hideTimer, isFlowInstalled } from "./utils";
 
-export default async function hideTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Hiding timer",
-    style: ToastStyle.Animated,
+    style: Toast.Style.Animated,
   });
 
   toast.show();
@@ -13,10 +12,10 @@ export default async function hideTimer() {
   if (!(await isFlowInstalled())) {
     toast.title = "Flow not installed";
     toast.message = "Install it from: https://flowapp.info/download";
-    toast.style = ToastStyle.Failure;
+    toast.style = Toast.Style.Failure;
     return;
   }
 
-  await runAppleScript('tell application "Flow" to hide');
+  await hideTimer();
   await closeMainWindow();
 }

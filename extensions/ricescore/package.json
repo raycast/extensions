@@ -15,7 +15,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.33.0",
     "markdown-table": "^3.0.1"
   },
   "devDependencies": {
@@ -30,6 +30,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

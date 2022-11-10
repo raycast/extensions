@@ -18,6 +18,13 @@
   ],
   "commands": [
     {
+      "name": "config",
+      "title": "Help / Configure Extension",
+      "subtitle": "Display Placer",
+      "description": "Learn how to setup and use this extension",
+      "mode": "view"
+    },
+    {
       "name": "displayplacer",
       "title": "Switch Display Preset",
       "subtitle": "Display Placer",
@@ -61,7 +68,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0"
+    "@raycast/api": "^1.33.0",
+    "nanoid": "^3.3.3",
+    "react-use": "^17.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

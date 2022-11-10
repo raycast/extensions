@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import fetch from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
 
@@ -10,10 +10,16 @@ interface Season {
 const useSeasons = () => {
   const [seasons, setSeasons] = useState<Season[]>([]);
 
+  const cancelRef = useRef<AbortController | null>(null);
   useEffect(() => {
     async function fetchSeasons() {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
       try {
-        const res = await fetch("https://ergast.com/api/f1/seasons.json?limit=100");
+        const res = await fetch("https://ergast.com/api/f1/seasons.json?limit=100", {
+          method: "get",
+          signal: cancelRef.current.signal,
+        });
         const data = (await res.json()) as any;
         setSeasons((data?.MRData?.SeasonTable?.Seasons || []).sort((a: Season, b: Season) => b.season - a.season));
       } catch (error) {
@@ -26,8 +32,13 @@ const useSeasons = () => {
         setSeasons([]);
       }
     }
-
     fetchSeasons();
+  }, [cancelRef]);
+
+  useEffect(() => {
+    return () => {
+      cancelRef?.current?.abort();
+    };
   }, []);
 
   return seasons;

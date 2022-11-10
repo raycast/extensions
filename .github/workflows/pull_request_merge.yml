@@ -1,0 +1,85 @@
+name: Pull Request - Merge
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to merge"
+        required: true
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    name: Merge PR
+    env:
+      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+      - name: Setup GIT
+        uses: raycast/github-actions/setup-git@master
+      - name: Checkout PR
+        run: gh pr checkout ${{ github.event.inputs.pr_number }}
+      - name: Update CHANGELOG.md
+        run: |
+          changelogs=$(gh pr view ${{ github.event.inputs.pr_number }} --json files --jq '.files.[].path' | grep -i CHANGELOG.md || true)
+          for changelog in $changelogs
+          do
+              echo "$changelog:"
+              if [[ -f "$changelog" ]]; then
+                  pattern="{PR_MERGE_DATE}"
+                  replacement=$(date '+%Y-%m-%d')
+                  if grep -q $pattern $changelog; then
+                      echo "  pattern found"
+                      sed -i "s/$pattern/$replacement/g" $changelog
+                      echo "  updated to $replacement"
+                  else
+                      echo "  pattern not found - skipping"
+                  fi
+              else
+                  echo "  skipping (file not existing)"
+              fi
+          done
+      - name: Commit changes
+        id: commit_changes
+        run: |
+          if ! [[ -z $(git status -s .) ]] ; then
+            pr_info=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName,headRepository,headRepositoryOwner,maintainerCanModify,url)
+            echo $pr_info
+            can_modify=$(echo $pr_info | jq -r .maintainerCanModify)
+            if [[ "$can_modify" == "false" ]]; then
+              error="Edits from maintainers are disabled."
+              echo $error
+              # echo "::set-output name=error::$error"
+              exit 1
+            fi
+
+            git add .
+            git status .
+            git commit --message "Update CHANGELOG.md"
+
+            pr_branch=$(echo $pr_info | jq -r .headRefName)
+            pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
+            pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
+
+            git push https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git HEAD:$pr_branch
+          else
+            echo "No changes, skipping sync."
+          fi
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+      - name: Merge
+        run: gh pr merge ${{ github.event.inputs.pr_number }} --squash
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: |
+            PR ${{ github.event.inputs.pr_number }} merge failed. ${{ steps.commit_changes.outputs.error }}
+            Check <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|action logs>.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}

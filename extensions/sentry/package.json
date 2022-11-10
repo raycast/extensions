@@ -5,6 +5,9 @@
   "description": "Stay on top of your Sentry issues",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "mattisssa"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,16 +22,15 @@
     {
       "name": "token",
       "title": "Auth Token",
-      "type": "textfield",
+      "type": "password",
       "description": "Auth Token to communicate with Sentry",
       "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
-    "javascript-time-ago": "^2.3.13",
-    "node-fetch": "^3.2.1",
-    "swr": "^1.2.2"
+    "@raycast/api": "^1.31.0",
+    "@raycast/utils": "^1.4.8",
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@faker-js/faker": "^6.0.0-beta.0",

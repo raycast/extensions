@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dekudeals",
+  "title": "DekuDeals",
+  "description": "Search for deals on DekuDeals.com",
+  "icon": "icon.png",
+  "author": "rrroyal",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search DekuDeals",
+      "description": "Search for deals on DekuDeals.com",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "token",
+          "type": "password",
+          "required": false,
+          "title": "API token",
+          "description": "DekuDeals API token",
+          "placeholder": "API token"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.1",
+    "node-fetch": "^3.0.0",
+    "node-html-parser": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

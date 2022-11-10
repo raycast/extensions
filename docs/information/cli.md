@@ -10,15 +10,15 @@ The CLI is part of the `@raycast/api` package and is automatically installed in 
  npx ray -h
 ```
 
-### Build
+## Build
 
-`ray build` creates an optimized production build of your extension for distribution. This command is used by our CI to publish your extension to the store.
+`npx ray build` creates an optimized production build of your extension for distribution. This command is used by our CI to publish your extension to the store.
 
-You can use `ray build -e dist` to validate that your extension builds properly.
+You can use `npx ray build -e dist` to validate that your extension builds properly.
 
-### Development
+## Development
 
-`ray develop` starts your extension in development mode. The mode includes the following:
+`npx ray develop` starts your extension in development mode. The mode includes the following:
 
 - Extension shows up at the top of the root search for quick access
 - Commands get automatically reloaded when you save your changes (you can toggle auto-reloading via Raycast Preferences > Advanced > "Auto-reload on save")
@@ -27,10 +27,14 @@ You can use `ray build -e dist` to validate that your extension builds properly.
 - Status indicator is visible in the navigation title of the command to signal build errors
 - Imports the extension to Raycast if it wasn't before
 
-### Lint
+## Lint
 
-`ray lint` runs [ESLint](http://eslint.org) for all files in the `src` directory.
+`npx ray lint` runs [ESLint](http://eslint.org) for all files in the `src` directory.
 
-### Migrate
+## Migrate
 
-`ray migrate` [migrates](../migration/README.md) your extension to the latest version of the `@raycast/api`.
+`npx ray migrate` [migrates](../migration/README.md) your extension to the latest version of the `@raycast/api`.
+
+## Publish (For Teams Only)
+
+`npx ray publish` verifies, builds and publishes an extension to an organization store. This command is only availble to users that are part of an organization. Learn more about it [here](../teams/getting-started.md).

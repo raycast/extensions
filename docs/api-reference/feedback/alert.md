@@ -30,9 +30,7 @@ export default async () => {
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Alert.Options](#alert.options)</code> | Yes      | The options used to create the Alert. |
+<FunctionParametersTableFromJSDoc name="confirmAlert" />
 
 #### Return
 
@@ -69,13 +67,7 @@ export default async () => {
 
 #### Properties
 
-| Name          | Type                                                      | Required | Description                                                                                                                |
-| :------------ | :-------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- |
-| title         | <code>string</code>                                       | Yes      | The title of an alert. Displayed below the icon.                                                                           |
-| icon          | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | The icon of an alert to illustrate the action. Displayed on the top.                                                       |
-| message       | <code>string</code>                                       | No       | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. |
-| primaryAction | <code>[Alert.ActionOptions](#alert.actionoptions)</code>  | No       | The primary Action the user can take.                                                                                      |
-| dismissAction | <code>[Alert.ActionOptions](#alert.actionoptions)</code>  | No       | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action.              |
+<InterfaceTableFromJSDoc name="Alert.Options" />
 
 ### Alert.ActionOptions
 
@@ -83,11 +75,7 @@ The options to create an Alert Action.
 
 #### Properties
 
-| Name     | Type                                                 | Required | Description                                     |
-| :------- | :--------------------------------------------------- | :------- | :---------------------------------------------- |
-| title    | <code>string</code>                                  | Yes      | The title of the action.                        |
-| style    | <code>[Alert.ActionStyle](#alert.actionstyle)</code> | No       | The style of the action.                        |
-| onAction | <code>() => void</code>                              | No       | A callback called when the action is triggered. |
+<InterfaceTableFromJSDoc name="Alert.ActionOptions" />
 
 ### Alert.ActionStyle
 

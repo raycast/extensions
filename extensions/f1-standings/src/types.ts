@@ -70,25 +70,27 @@ interface Race {
   };
 }
 
-interface RaceResult extends Race {
-  Results: {
-    number: string;
-    position: string;
-    points: string;
-    Driver: {
-      driverId: string;
-      permanentNumber: string;
-      code: string;
-      url: string;
-      givenName: string;
-      familyName: string;
-      dateOfBirth: string;
-      nationality: string;
-    };
-    Constructor: Constructor;
-    grid: number;
-    status: string;
-  }[];
+interface RaceResultItem {
+  number: string;
+  position: string;
+  points: string;
+  Driver: {
+    driverId: string;
+    permanentNumber: string;
+    code: string;
+    url: string;
+    givenName: string;
+    familyName: string;
+    dateOfBirth: string;
+    nationality: string;
+  };
+  Constructor: Constructor;
+  grid: number;
+  status: string;
 }
 
-export type { Driver, Constructor, DriverStanding, ConstructorStanding, Race, RaceResult };
+interface RaceResult extends Race {
+  Results: RaceResultItem[];
+}
+
+export type { Driver, Constructor, DriverStanding, ConstructorStanding, Race, RaceResultItem, RaceResult };

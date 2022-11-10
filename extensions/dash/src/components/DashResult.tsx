@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, closeMainWindow } from "@raycast/api";
 import { execa } from "execa";
 import { decode } from "html-entities";
 import { DashResult } from "../types";
@@ -32,5 +32,6 @@ async function dashCallbackInBackground(dashIndex: number) {
   // open within Dash instead of being selected for use. This adds another click for the user. By opening
   // in the background (-g) the snippet is selected immediately and the user can start to fill in placeholders
   // right away.
+  await closeMainWindow({ clearRootSearch: true });
   await execa("open", ["-g", "dash-workflow-callback://" + dashIndex]);
 }

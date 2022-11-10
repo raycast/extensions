@@ -15,10 +15,17 @@
       "mode": "view"
     },
     {
-      "name": "search",
+      "name": "searchTodos",
       "title": "Search Todos",
       "subtitle": "Trello",
       "description": "Search all todos across all your boards",
+      "mode": "view"
+    },
+    {
+      "name": "searchBoards",
+      "title": "Search Boards",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
       "mode": "view"
     }
   ],
@@ -53,7 +60,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.29.1"
+    "@raycast/api": "^1.30.3"
   },
   "devDependencies": {
     "@types/node": "~17.0.21",
@@ -70,6 +77,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

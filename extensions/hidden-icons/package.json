@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hidden-icons",
+  "title": "Hidden Icons",
+  "description": "A casual game to find a hidden icon.",
+  "icon": "find-icons.png",
+  "author": "koinzhang",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "find-hidden-icon",
+      "title": "Find Hidden Icon",
+      "subtitle": "Hidden Icons",
+      "description": "A casual game to find a hidden icon.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "allCountDownTime",
+      "type": "dropdown",
+      "description": "Set the game duration.",
+      "required": true,
+      "title": "Game Duration",
+      "default": "30",
+      "data": [
+        {
+          "title": "5s",
+          "value": "5"
+        },
+        {
+          "title": "10s",
+          "value": "10"
+        },
+        {
+          "title": "15s",
+          "value": "15"
+        },
+        {
+          "title": "20s",
+          "value": "20"
+        },
+        {
+          "title": "25s",
+          "value": "25"
+        },
+        {
+          "title": "30s",
+          "value": "30"
+        },
+        {
+          "title": "40s",
+          "value": "40"
+        },
+        {
+          "title": "50s",
+          "value": "50"
+        },
+        {
+          "title": "60s",
+          "value": "60"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "file-url": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

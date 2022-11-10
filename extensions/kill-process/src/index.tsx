@@ -8,6 +8,7 @@ export default function ProcessList() {
   const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
   const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
   const shouldShowPID = (preferences.shouldShowPID?.value as boolean) ?? false;
+  const shouldShowPath = (preferences.shouldShowPath?.value as boolean) ?? false;
 
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -64,6 +65,20 @@ export default function ProcessList() {
     return process.path == null ? null : <CopyToClipboardAction title="Copy Path" content={process.path} />;
   };
 
+  const subtitleString = (process: Process) => {
+    let subtitle = undefined;
+
+    if (shouldShowPID) {
+      subtitle = process.id;
+    }
+
+    if (shouldShowPath) {
+      subtitle = subtitle ? `${subtitle} - ${process.path}` : process.path;
+    }
+
+    return subtitle;
+  };
+
   return (
     <List
       isLoading={state.length === 0}
@@ -101,7 +116,7 @@ export default function ProcessList() {
             <List.Item
               key={index}
               title={process.name}
-              subtitle={shouldShowPID ? process.id : undefined}
+              subtitle={subtitleString(process)}
               icon={icon}
               accessoryTitle={`${process.cpu}%`}
               actions={

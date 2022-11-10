@@ -1,0 +1,739 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "easydict",
+  "title": "Easy Dictionary",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "icon": "Eudic.png",
+  "author": "isfeng",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "easydict",
+      "title": "Search Word",
+      "subtitle": "Easydict",
+      "description": "Automatically detect the input text language, and query preferred language dictionary or translate the text.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools",
+    "Web"
+  ],
+  "keywords": [
+    "dictionary",
+    "translate",
+    "linguee",
+    "deepl",
+    "google",
+    "bing",
+    "apple",
+    "youdao",
+    "baidu",
+    "tencent",
+    "eudic",
+    "caiyun"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.42.0",
+    "@vitalets/google-translate-api": "^8.0.0",
+    "axios": "^0.25.0",
+    "cheerio": "^1.0.0-rc.12",
+    "crypto-js": "^4.1.1",
+    "execa": "^6.1.0",
+    "file-type": "^18.0.0",
+    "franc": "^6.0.0",
+    "hpagent": "^1.1.0",
+    "mac-system-proxy": "^1.0.4",
+    "node-html-parser": "^5.3.3",
+    "play-sound": "^1.1.5",
+    "qs": "^6.11.0",
+    "run-applescript": "^6.0.0",
+    "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
+    "@types/crypto-js": "^4.1.1",
+    "@types/node": "18.8.3",
+    "@types/play-sound": "^1.1.0",
+    "@types/qs": "^6.9.7",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.2",
+    "prettier": "^2.5.1",
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "lint-staged": "lint-staged",
+    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
+    "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "npm run eslint",
+    "**/*": [
+      "prettier --write . --ignore-unknown"
+    ]
+  },
+  "preferences": [
+    {
+      "title": "First Language",
+      "name": "language1",
+      "type": "dropdown",
+      "required": true,
+      "default": "zh-CHS",
+      "description": "Your first language",
+      "data": [
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "Estonian",
+          "value": "et"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Filipino",
+          "value": "fil"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Burmese",
+          "value": "my"
+        },
+        {
+          "title": "Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Montenegrin",
+          "value": "sr-Latn"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
+        }
+      ]
+    },
+    {
+      "title": "Second Language",
+      "name": "language2",
+      "type": "dropdown",
+      "required": true,
+      "default": "en",
+      "description": "Your second language",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese-Simplified",
+          "value": "zh-CHS"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-CHT"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "Estonian",
+          "value": "et"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Filipino",
+          "value": "fil"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Burmese",
+          "value": "my"
+        },
+        {
+          "title": "Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Montenegrin",
+          "value": "sr-Latn"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
+        }
+      ]
+    },
+    {
+      "title": "Switch Boxes",
+      "name": "enableAutomaticQuerySelectedText",
+      "type": "checkbox",
+      "label": "Query Selected Text Automatically",
+      "required": false,
+      "description": "Automatically query selected text from the frontmost application",
+      "default": true
+    },
+    {
+      "name": "showOpenInEudicFirst",
+      "type": "checkbox",
+      "label": "Show Open in Eudic First",
+      "required": false,
+      "description": "If enabled and Eudic is installed, `Open in Eudic` action will be shown in the first, otherwise `Copy Text` will be shown.",
+      "default": true
+    },
+    {
+      "name": "enableDetectLanguageSpeedFirst",
+      "type": "checkbox",
+      "label": "Detect Language Speed First",
+      "required": false,
+      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower ⚠️ .",
+      "default": true
+    },
+    {
+      "name": "enableAutomaticPlayWordAudio",
+      "type": "checkbox",
+      "label": "Play Word Pronunciation Automatically",
+      "required": false,
+      "description": "Automatically play word pronunciation after looking up a `English` word",
+      "default": true
+    },
+    {
+      "name": "enableSelectTargetLanguage",
+      "type": "checkbox",
+      "label": "Show Select Target Language",
+      "required": false,
+      "description": "If you need to select target language manually, turn on it.",
+      "default": false
+    },
+    {
+      "name": "enableSystemProxy",
+      "type": "checkbox",
+      "label": "Use System Proxy",
+      "required": false,
+      "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
+      "default": false
+    },
+    {
+      "title": "Apple System Features",
+      "name": "enableAppleTranslate",
+      "type": "checkbox",
+      "label": "Apple Translate",
+      "required": false,
+      "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "default": false
+    },
+    {
+      "name": "enableAppleLanguageDetect",
+      "type": "checkbox",
+      "label": "Apple Language Detect",
+      "required": false,
+      "description": "⚠️ An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
+      "default": false
+    },
+    {
+      "title": "Dictionary Services",
+      "type": "checkbox",
+      "name": "enableYoudaoDictionary",
+      "label": "Youdao Dictionary",
+      "required": false,
+      "description": "Support 5 langauges: (Chinese), English, French, Japanese, Korean.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "name": "enableLingueeDictionary",
+      "label": "Linguee Dictionary",
+      "required": false,
+      "description": "Support 19 langauges: (Chinese, Japanese, Russian), English, French, Spanish, Portuguese, Italian, German, Swedish, Romanian, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.",
+      "default": true
+    },
+    {
+      "title": "Translation Services",
+      "type": "checkbox",
+      "name": "enableDeepLTranslate",
+      "label": "DeepL Translate",
+      "required": false,
+      "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
+      "default": true
+    },
+    {
+      "name": "enableGoogleTranslate",
+      "type": "checkbox",
+      "label": "Google Translate",
+      "required": false,
+      "description": "⚠️ Use system proxy by default. A proxy is required to use Google if you are in China.",
+      "default": false
+    },
+    {
+      "name": "enableBingTranslate",
+      "type": "checkbox",
+      "label": "Bing Translate",
+      "required": false,
+      "description": "Turn on/off Bing Translate",
+      "default": true
+    },
+    {
+      "name": "enableBaiduTranslate",
+      "type": "checkbox",
+      "label": "Baidu Translate",
+      "required": false,
+      "description": "Turn on/off Baidu Translate. App Key is required.",
+      "default": true
+    },
+    {
+      "name": "enableTencentTranslate",
+      "type": "checkbox",
+      "label": "Tencent Translate",
+      "required": false,
+      "description": "Turn on/off Tencent Translate. App Key is required.",
+      "default": true
+    },
+    {
+      "name": "enableVolcanoTranslate",
+      "type": "checkbox",
+      "label": "Volcano Translate",
+      "required": false,
+      "description": "Turn on/off Volcano Translate. App Key is required.",
+      "default": true
+    },
+    {
+      "name": "enableYoudaoTranslate",
+      "type": "checkbox",
+      "label": "Youdao Translate",
+      "required": false,
+      "description": "Turn on/off Youdao Translate",
+      "default": false
+    },
+    {
+      "name": "enableCaiyunTranslate",
+      "type": "checkbox",
+      "label": "Caiyun Translate",
+      "required": false,
+      "description": "Turn on/off Caiyun Translate. App Key is required.",
+      "default": false
+    },
+    {
+      "title": "Display Order",
+      "name": "servicesOrder",
+      "type": "textfield",
+      "required": false,
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
+      "default": "",
+      "placeholder": "youdao dictionary, linguee dictionary, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
+    },
+    {
+      "title": "DeepL Auth Key",
+      "name": "deepLAuthKey",
+      "type": "textfield",
+      "required": false,
+      "description": "Your DeepL Auth Key",
+      "default": ""
+    },
+    {
+      "title": "Baidu App ID",
+      "name": "baiduAppId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Baidu App ID",
+      "default": ""
+    },
+    {
+      "title": "Baidu App Secret",
+      "name": "baiduAppSecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Baidu App Secret",
+      "default": ""
+    },
+    {
+      "title": "Tencent SecretId",
+      "name": "tencentSecretId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Tencent SecretId",
+      "default": ""
+    },
+    {
+      "title": "Tencent SecretKey",
+      "name": "tencentSecretKey",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Tencent SecretKey",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key ID",
+      "name": "volcanoAccessKeyId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key ID",
+      "default": ""
+    },
+    {
+      "title": "Volcano Access Key Secret",
+      "name": "volcanoAccessKeySecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Volcano Access Key Secret",
+      "default": ""
+    },
+    {
+      "title": "Youdao App ID",
+      "name": "youdaoAppId",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App ID",
+      "default": ""
+    },
+    {
+      "title": "Youdao App Secret",
+      "name": "youdaoAppSecret",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Youdao App Secret",
+      "default": ""
+    },
+    {
+      "title": "Caiyun Token",
+      "name": "caiyunToken",
+      "type": "textfield",
+      "required": false,
+      "description": "Your Caiyun Token",
+      "default": ""
+    }
+  ]
+}

@@ -24,7 +24,7 @@ extension
 
 The directory contains all source files, assets, and a few support files. Let's go over each of them:
 
-### Sources
+## Sources
 
 Put all your source files into the `src` folder. We recommend using TypeScript as a programming language. Our API is fully typed, which helps you catch errors at compile time rather than runtime. `ts`, `tsx`, `js` and `jsx` are supported as file extensions. As a rule of thumb, use `tsx` or `jsx` for commands with a UI.
 
@@ -32,11 +32,11 @@ An extension consists of an entry point file (e.g. `src/index.ts`) per command a
 
 Each command has a property `name` that maps to its main entry point file in the `src` folder. For example, a command with the name `create` in the `package.json` file, maps to the file `src/create{.ts,.tsx,.js,.jsx}`.
 
-### Assets
+## Assets
 
 The optional `assets` folder can contain icons that will be packaged into the extension archive. All bundled assets can be referenced at runtime. Additionally, icons can be used in the `package.json` as extension or command icons.
 
-### Support files
+## Support files
 
 The directory contains a few more files that setup common JavaScript tooling:
 

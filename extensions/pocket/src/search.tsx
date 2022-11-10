@@ -1,22 +1,34 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  Color,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  Icon,
-  List,
-  OpenInBrowserAction,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useBookmarks } from "./utils/hooks";
+import { useState } from "react";
+import { ReadState } from "./utils/types";
 
 const preferences = getPreferenceValues();
 
 export default function Search() {
-  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks();
+  const [readState, setReadState] = useState(preferences.defaultFilter);
+  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
+    readState,
+  });
 
   return (
-    <List throttle isLoading={loading} searchBarPlaceholder="Filter bookmarks by title...">
+    <List
+      throttle
+      isLoading={loading}
+      searchBarPlaceholder="Filter bookmarks by title..."
+      searchBarAccessory={
+        <List.Dropdown
+          storeValue
+          defaultValue={readState}
+          onChange={(readState) => setReadState(readState as ReadState)}
+          tooltip="Filter Bookmarks"
+        >
+          <List.Dropdown.Item title="All Bookmarks" value={ReadState.All} />
+          <List.Dropdown.Item title="Unread" value={ReadState.Unread} />
+          <List.Dropdown.Item title="Archived" value={ReadState.Archive} />
+        </List.Dropdown>
+      }
+    >
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
@@ -29,29 +41,29 @@ export default function Search() {
             <ActionPanel title={bookmark.title}>
               {preferences.defaultOpen === "pocket-website" ? (
                 <ActionPanel.Section>
-                  <OpenInBrowserAction title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
-                  <OpenInBrowserAction title="Open in Browser" url={bookmark.originalUrl} />
+                  <Action.OpenInBrowser title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
+                  <Action.OpenInBrowser title="Open in Browser" url={bookmark.originalUrl} />
                 </ActionPanel.Section>
               ) : (
                 <ActionPanel.Section>
-                  <OpenInBrowserAction title="Open in Browser" url={bookmark.originalUrl} />
-                  <OpenInBrowserAction title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
+                  <Action.OpenInBrowser title="Open in Browser" url={bookmark.originalUrl} />
+                  <Action.OpenInBrowser title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
                 </ActionPanel.Section>
               )}
               <ActionPanel.Section>
-                <ActionPanelItem
+                <Action
                   title="Archive Bookmark"
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
                   icon={Icon.Checkmark}
                   onAction={() => archiveBookmark(bookmark.id)}
                 />
-                <ActionPanelItem
+                <Action
                   title={`${bookmark.favorite ? "Unmark" : "Mark"} as Favorite`}
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
                   icon={Icon.Star}
                   onAction={() => toggleFavorite(bookmark.id)}
                 />
-                <ActionPanelItem
+                <Action
                   title="Delete Bookmark"
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -59,23 +71,23 @@ export default function Search() {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   title="Copy Bookmark Title"
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                   content={bookmark.title}
                 />
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   title="Copy Bookmark URL"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   content={bookmark.originalUrl}
                 />
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   title="Copy Pocket Bookmark URL"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   content={bookmark.pocketUrl}
                 />
                 {bookmark.author ? (
-                  <CopyToClipboardAction
+                  <Action.CopyToClipboard
                     title="Copy Bookmark Author"
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
                     content={bookmark.author}
@@ -83,7 +95,7 @@ export default function Search() {
                 ) : null}
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <ActionPanelItem
+                <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}

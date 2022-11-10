@@ -18,6 +18,10 @@ export interface Playlist {
   name: string;
   duration: string;
   count: string;
+
+  time: string;
+  description: string;
+  kind: `${"subscription" | "user" | "library"} playlist`;
 }
 
 export interface Album {
@@ -26,3 +30,13 @@ export interface Album {
   artist: string;
   count?: string;
 }
+
+export interface ScriptError extends Error {
+  shortMessage: string;
+  command: string;
+  failed: boolean;
+}
+
+export const ScriptError = {
+  is: (error: Error): error is ScriptError => "shortMessaage" in error,
+};

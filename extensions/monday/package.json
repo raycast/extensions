@@ -32,6 +32,26 @@
         "slug",
         "account"
       ]
+    },
+    {
+      "name": "quickAddItem",
+      "title": "Quick-add an Item",
+      "subtitle": "monday.com",
+      "description": "Adds an item to a pre-defined board",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "item"
+      ],
+      "preferences": [
+        {
+          "name": "quickAddBoardId",
+          "type": "textfield",
+          "required": true,
+          "title": "Board ID",
+          "description": "ID of the board to quick-add items to"
+        }
+      ]
     }
   ],
   "preferences": [

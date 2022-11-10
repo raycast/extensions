@@ -2,6 +2,8 @@ import { PasswordOptionField, PasswordOptions, PassphraseOptions, PasswordGenera
 
 export const SESSION_KEY = "sessionToken";
 
+export const DEFAULT_SERVER_URL = "https://bitwarden.com";
+
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   lowercase: true,
   uppercase: true,
@@ -29,7 +31,7 @@ export const PASSWORD_OPTIONS_MAP: {
       label: "Length of the password",
       hint: "5 - 128",
       type: "number",
-      errorMessage: "Field must be a number between 5 and 128",
+      errorMessage: "Number between 5 and 128",
     },
     uppercase: {
       label: "Uppercase characters",
@@ -57,13 +59,13 @@ export const PASSWORD_OPTIONS_MAP: {
       label: "Number of words",
       hint: "3 - 20",
       type: "number",
-      errorMessage: "Field must be a number between 3 and 20",
+      errorMessage: "Number between 3 and 20",
     },
     separator: {
       label: "Word separator",
       hint: "this-is-a-passphrase",
       type: "string",
-      errorMessage: "Field must be a single character",
+      errorMessage: "Must be a single character",
     },
     capitalize: {
       label: "Capitalise",

@@ -1,11 +1,19 @@
 import { splitEvery } from "ramda";
 import BitField from "bitfield";
 import { renderToString } from "react-dom/server";
+import { environment } from "@raycast/api";
+import { darken, mix } from "polished";
 
-const colors = {
-  gray: "#888888",
-  accent: "#007DD7",
-};
+const colors =
+  environment.theme === "light"
+    ? {
+        gray: "#C8CAC9",
+        accent: "#007DD7",
+      }
+    : {
+        gray: "#363A3A",
+        accent: "#007DD7",
+      };
 
 interface CellProps {
   alpha: number;
@@ -15,34 +23,62 @@ interface CellProps {
     accent: string;
   };
   cellSize: number;
-  strokeWidth: number;
+  px: number;
   colIndex: number;
   rowIndex: number;
 }
 
-const Cell = ({ alpha, complete, colors, cellSize, strokeWidth, colIndex, rowIndex }: CellProps) => {
+const Cell = ({ alpha, complete, colors, cellSize, px, colIndex, rowIndex }: CellProps) => {
   if (complete) alpha = 1;
 
+  const radius = px * 5;
+  const margin = px * 3;
   const fill = alpha < 0.1 ? colors.gray : colors.accent;
   const opacity = alpha < 0.1 ? 1 : Math.max(0.5, alpha);
-  const size = cellSize - strokeWidth * 2;
+  const color = mix(opacity, fill, colors.gray);
+  const size = cellSize - margin * 2;
   return (
     <rect
-      fill={fill}
+      fill={color}
       fillOpacity={opacity}
-      x={colIndex * cellSize + strokeWidth}
+      x={colIndex * cellSize + margin}
       y={rowIndex * cellSize}
+      stroke={darken(0.1, color)}
+      strokeWidth={px}
       width={size}
       height={size}
-      rx={strokeWidth}
-      ry={strokeWidth}
+      rx={radius}
+      ry={radius}
     />
   );
 };
 
+// Greatest common divisor of 2 integers
+function gcd2(a: number, b: number): number {
+  if (!b) return b === 0 ? a : NaN;
+  return gcd2(b, a % b);
+}
+
+// Least common multiple of 2 integers
+function lcm2(a: number, b: number): number {
+  return (a * b) / gcd2(a, b);
+}
+
+// Least common multiple of a list of integers
+function lcm(array: number[]): number {
+  let n = 1;
+  for (let i = 0; i < array.length; ++i) n = lcm2(array[i], n);
+  return n;
+}
+
+// Average number of a list of integers
+function avg(array: number[]): number {
+  return array.reduce((a, b) => a + b) / array.length;
+}
+
 export async function renderPieces({
   pieces,
-  width = 1000,
+  width = 435,
   complete = false,
 }: {
   pieces: string;
@@ -52,28 +88,21 @@ export async function renderPieces({
   const buffer = Buffer.from(pieces, "base64");
   const bitfield = new BitField(buffer);
 
-  const cellsCount = Math.pow(18, 2);
+  const cols = 30;
+  const rows = 5;
+  const cellsCount = cols * rows;
 
-  let bits: boolean[] = [];
-  bitfield.forEach((bit) => bits.push(bit));
+  const bits: number[] = [];
+  bitfield.forEach((bit) => bits.push(bit ? 1 : 0));
 
-  // if we don't have enough pieces to compose a graph, we multiply them
-  if (bits.length < cellsCount) {
-    const diff = Math.ceil(cellsCount / bits.length);
-    bits = bits.map((bit) => Array.from({ length: diff }, () => bit)).flat();
-  }
+  const factor = lcm([bits.length, cellsCount]) / bits.length;
+  const expandedBits = bits.flatMap((bit) => Array(factor).fill(bit));
+  const cells = splitEvery(Math.floor(expandedBits.length / cellsCount), expandedBits).map((nums) => avg(nums));
 
-  const cells =
-    bits.length > 0
-      ? splitEvery(Math.round(bits.length / cellsCount), bits).map(
-          (chunk) => ((100 / chunk.length) * chunk.filter(Boolean).length) / 100
-        )
-      : Array.from({ length: cellsCount }).map(() => 0);
+  const px = (100 / width) * 2;
+  const cellSize = width / cols;
 
-  const strokeWidth = width / 100;
-  const cellSize = width / 18;
-
-  const cellsMarkup = splitEvery(18, cells)
+  const cellsMarkup = splitEvery(cols, cells)
     .map((row: number[], rowIndex: number) =>
       row.map((alpha, colIndex) => (
         <Cell
@@ -82,7 +111,7 @@ export async function renderPieces({
           complete={complete}
           colors={colors}
           cellSize={cellSize}
-          strokeWidth={strokeWidth}
+          px={px}
           colIndex={colIndex}
           rowIndex={rowIndex}
         />

@@ -5,6 +5,12 @@
   "description": "Search for Streams, Channels or Games on Twitch",
   "icon": "icon.png",
   "author": "dieserRobin",
+  "contributors": [
+    "Aayush9029",
+    "suth",
+    "pernielsentikaer",
+    "MiracleXYZ"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -52,12 +58,19 @@
     {
       "name": "lowlatency",
       "type": "checkbox",
-      "label": "Low Latency",
+      "label": "Enable Low Latency",
       "default": false,
-      "title": "Latency (VLC Player is required if enabled)",
+      "title": "Stream Latency",
       "required": false,
       "description": "VLC Player is required for low latency streams"
     },
+{
+    "name": "streamlinkConfig",
+    "type": "textfield",
+    "title": "Custom Streamlink Config",
+    "required": false,
+    "description": "(optional) Path to custom streamlink config file"
+},
     {
       "name": "quality",
       "type": "dropdown",
@@ -94,13 +107,6 @@
       "mode": "view"
     },
     {
-      "name": "streamer",
-      "title": "Search Channels",
-      "description": "Search a Twitch Stream",
-      "icon": "icon.png",
-      "mode": "view"
-    },
-    {
       "name": "game",
       "title": "Search Games",
       "description": "Search a game on Twitch",
@@ -116,12 +122,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.38.1",
+    "dedent-js": "^1.0.1",
+    "millify": "^5.0.0",
     "node-fetch": "^3.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -132,6 +138,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

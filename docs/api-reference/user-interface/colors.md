@@ -3,8 +3,8 @@
 Anywhere you can pass a color in a component prop, you can pass either:
 
 - A standard [Color](#color)
-- A [Dynamic](#dynamic) Color
-- A [Raw](#raw) Color
+- A [Dynamic](#color.dynamic) Color
+- A [Raw](#color.raw) Color
 
 ## API Reference
 
@@ -84,7 +84,7 @@ export default function Command() {
 
 ## Types
 
-### ColorLike
+### Color.ColorLike
 
 ```typescript
 ColorLike: Color | Color.Dynamic | Color.Raw;
@@ -92,7 +92,7 @@ ColorLike: Color | Color.Dynamic | Color.Raw;
 
 Union type for the supported color types.
 
-When using a [Raw Color](#raw), it will be dynamically adjusted to achieve high contrast with the Raycast user interface.
+When using a [Raw Color](#color.raw), it will be dynamically adjusted to achieve high contrast with the Raycast user interface.
 
 #### Example
 
@@ -126,7 +126,7 @@ export default function Command() {
 }
 ```
 
-### Dynamic
+### Color.Dynamic
 
 A dynamic color applies different colors depending on the active Raycast theme.
 
@@ -163,13 +163,9 @@ export default function Command() {
 
 #### Properties
 
-| Name           | Type                 | Required | Description                                                                                                                                                                                                                                                                                                                               |
-| :------------- | :------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| adjustContrast | <code>boolean</code> | No       | Enables dynamic contrast adjustment for light and dark theme color. Colors different to the built-in {@link Color} can be dynamically adjusted to achieve high contrast with the Raycast user interface. This makes it easy to guarantee a good look and feel when you aren't in control of the color, e.g. get it via a network request. |
-| dark           | <code>string</code>  | Yes      | The color which is used in light theme.                                                                                                                                                                                                                                                                                                   |
-| light          | <code>string</code>  | Yes      | The color which is used in light theme.                                                                                                                                                                                                                                                                                                   |
+<InterfaceTableFromJSDoc name="Color.Dynamic" />
 
-### Raw
+### Color.Raw
 
 A color can also be a simple string. You can use any of the following color formats:
 

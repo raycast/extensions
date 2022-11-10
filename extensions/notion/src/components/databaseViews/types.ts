@@ -1,10 +1,12 @@
-import { Page, DatabaseProperty, DatabaseView } from "../../utils/notion";
+import { Page, DatabaseProperty, DatabaseView } from "../../utils/types";
 
 export type DatabaseViewProps = {
   databaseId: string;
   databasePages: Page[];
   databaseProperties: DatabaseProperty[];
   databaseView?: DatabaseView;
-  onForceRerender?: () => void;
+  onPageCreated: (page: Page) => void;
+  onPageUpdated: (page: Page) => void;
   saveDatabaseView: (newDatabaseView: DatabaseView) => void;
+  sort?: "last_edited_time" | "created_time";
 };

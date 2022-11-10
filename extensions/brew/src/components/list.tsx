@@ -4,10 +4,11 @@ import { brewFormatVersion, brewIsInstalled, brewName } from "../brew";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 
 export interface FormulaListProps {
+  isLoading: boolean;
   formulae: Formula[];
   casks: Cask[];
   searchBarPlaceholder: string;
-  isLoading: boolean;
+  searchBarAccessory?: JSX.Element;
   onSearchTextChange?: (q: string) => void;
   onAction: () => void;
 }
@@ -18,6 +19,7 @@ export function FormulaList(props: FormulaListProps): JSX.Element {
   return (
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
+      searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
     >

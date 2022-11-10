@@ -12,7 +12,7 @@ Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.c
 
 ![Example: Read frontpage of Hacker News](../.gitbook/assets/example-hacker-news.png)
 
-### Load top stories
+## Load top stories
 
 First, let's get the latest top stories. For this we use a [RSS feed](https://hnrss.org):
 
@@ -63,7 +63,7 @@ Breaking this down:
 - We print the top stories to the console.
 - We render a list and show the loading indicator as long as we load the stories.
 
-### Render stories
+## Render stories
 
 Now that we got the data from Hacker News, we want to render the stories. For this, we create a new React component and a few helper functions that render a story:
 
@@ -129,7 +129,7 @@ export default function Command() {
 }
 ```
 
-### Add actions
+## Add actions
 
 When we select a story in the list, we want to be able to open it in the browser and also copy it's link so that we can share it in our watercooler Slack channel. For this, we create a new React Component:
 
@@ -179,7 +179,7 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
 }
 ```
 
-### Handle errors
+## Handle errors
 
 Lastly, we want to be a good citizen and handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
 
@@ -201,6 +201,6 @@ export default function Command() {
 }
 ```
 
-### Wrapping up
+## Wrapping up
 
 That's it, you have a working extension to read the fronpage of Hacker News. As next steps, you can add another command to show the jobs feed or add an action to copy a Markdown formatted link.

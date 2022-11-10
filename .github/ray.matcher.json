@@ -1,6 +1,24 @@
 {
   "problemMatcher": [
     {
+      "owner": "eslint-in-ray",
+      "pattern": [
+        {
+          "regexp": "^([^\\s].*)$",
+          "file": 1
+        },
+        {
+          "regexp": "^\\s+(\\d+):(\\d+)\\s+(error|warning|info)\\s+(.*)\\s\\s+(.*)$",
+          "line": 1,
+          "column": 2,
+          "severity": 3,
+          "message": 4,
+          "code": 5,
+          "loop": true
+        }
+      ]
+    },
+    {
       "owner": "ray",
       "pattern": [
         {
@@ -16,19 +34,18 @@
       ]
     },
     {
-      "owner": "eslint-in-ray",
+      "owner": "full-ray",
       "pattern": [
         {
           "regexp": "^([^\\s].*)$",
           "file": 1
         },
         {
-          "regexp": "^\\s+(\\d+):(\\d+)\\s+(error|warning|info)\\s+(.*)\\s\\s+(.*)$",
+          "regexp": "^\\s+(\\d+):(\\d+)\\s+(error|warning|info)\\s+(.*)$",
           "line": 1,
           "column": 2,
           "severity": 3,
           "message": 4,
-          "code": 5,
           "loop": true
         }
       ]

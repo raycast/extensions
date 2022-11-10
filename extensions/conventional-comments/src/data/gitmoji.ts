@@ -1,5 +1,5 @@
-import { types } from "@jeromefitz/conventional-gitmoji";
 import type { TypesProps } from "@jeromefitz/conventional-gitmoji";
+import { types } from "@jeromefitz/conventional-gitmoji";
 
 export type GitmojiFormat = {
   title: string;
@@ -17,6 +17,7 @@ const gitmoji: GitmojiTypes = {
   formats: [
     { title: "♻️ (scope) description", value: "{emoji}{scope} {description}" },
     { title: "♻️ (scope): description", value: "{emoji}{scope}: {description}" },
+    { title: "♻️ refactor(scope): description", value: "{emoji}{type}{scope}: {description}" },
     { title: "refactor(scope): description", value: "{type}{scope}: {description}" },
   ],
   types,

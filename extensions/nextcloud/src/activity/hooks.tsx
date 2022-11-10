@@ -12,7 +12,7 @@ export function useActivity() {
   };
 }
 
-export async function performGetActivity(signal: AbortSignal): Promise<Activity[]> {
+async function performGetActivity(signal: AbortSignal): Promise<Activity[]> {
   const res = await ocsRequest({
     signal,
     base: `apps/activity/api/v2/activity?limit=200`,
@@ -70,13 +70,13 @@ async function ocsRequest({
   }
   return dom.ocs.data;
 }
+
 export interface Activity {
   activityId: string;
   app: string;
   type: string;
   user: string;
   subject: string;
-  // subject_rich: SubjectRich;
   objectType: string;
   objectId: string;
   objectName: string;
@@ -86,26 +86,25 @@ export interface Activity {
   datetime: string;
 }
 
-interface Response {
+export interface Response {
   ocs: Ocs;
 }
 
-interface Ocs {
+export interface Ocs {
   meta: Meta;
   data: Data;
 }
 
-interface Data {
+export interface Data {
   element: ActivityElement[];
 }
 
-interface ActivityElement {
+export interface ActivityElement {
   activity_id: string;
   app: string;
   type: string;
   user: string;
   subject: string;
-  subject_rich: SubjectRich;
   object_type: string;
   object_id: string;
   object_name: string;
@@ -115,28 +114,11 @@ interface ActivityElement {
   datetime: string;
 }
 
-interface Objects {
+export interface Objects {
   element: string[] | string;
 }
 
-interface SubjectRich {
-  element: SubjectRichElement[];
-}
-
-interface SubjectRichElement {
-  _text?: string;
-  file1?: File;
-  file?: File;
-  file2?: File;
-  file3?: File;
-  newfile?: File;
-  oldfile1?: File;
-  oldfile2?: File;
-  file4?: File;
-  file5?: File;
-}
-
-interface File {
+export interface File {
   type: string;
   id: string;
   name: string;
@@ -144,7 +126,7 @@ interface File {
   link: string;
 }
 
-interface Meta {
+export interface Meta {
   status: string;
   statuscode: number;
   message: string;

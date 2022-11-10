@@ -5,7 +5,6 @@ import { getPreferences } from "../preferences";
 
 export function useSearch() {
   const [query, setQuery] = useState<string>();
-
   const { data, isLoading } = useQuery((signal) => performSearch(signal, query), [query]);
 
   const search = useCallback((query: string) => {
@@ -50,7 +49,7 @@ function makeBodyForSearch({ username, query, scope = "" }: { username: string; 
 </d:searchrequest>`;
 }
 
-export async function performSearch(signal: AbortSignal, query?: string): Promise<SearchResult[]> {
+async function performSearch(signal: AbortSignal, query?: string): Promise<SearchResult[]> {
   if (!query || query.length === 0) return [];
 
   const { scope, username } = getPreferences();

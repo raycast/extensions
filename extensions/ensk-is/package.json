@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ensk-is",
+  "title": "Ensk.is",
+  "description": "Search the Ensk.is English to Icelandic dictionary",
+  "icon": "command-icon.png",
+  "author": "jokull",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "English to Icelandic",
+      "subtitle": "Ensk.is",
+      "description": "Find the Icelandic translation for an English word",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "better-sqlite3": "7.5.3",
+    "fuse.js": "6.6.2",
+    "node-fetch": "^3.0.0",
+    "sql.js": "1.7.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.5.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

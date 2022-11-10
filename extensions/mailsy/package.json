@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mailsy",
+  "title": "Mailsy",
+  "description": "Quickly Generate Disposable Email Address and view received mails.",
+  "icon": "send.png",
+  "author": "BalliAsghar",
+  "categories": [
+    "Communication",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gen",
+      "title": "Generate Temporary Email",
+      "subtitle": "Mailsy",
+      "description": "Create a new email address",
+      "mode": "no-view"
+    },
+    {
+      "name": "mails",
+      "title": "Fetch Emails",
+      "subtitle": "Mailsy",
+      "description": "Fetch all emails",
+      "mode": "view"
+    },
+    {
+      "name": "delete",
+      "title": "Delete Temporary Email Account",
+      "subtitle": "Mailsy",
+      "description": "Delete a email address",
+      "mode": "no-view"
+    },
+    {
+      "name": "info",
+      "title": "Temporary Account Information",
+      "subtitle": "Mailsy",
+      "description": "About Temporary Email",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "axios": "^0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
