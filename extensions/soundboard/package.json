@@ -3,7 +3,7 @@
   "name": "soundboard",
   "title": "Soundboard",
   "description": "Use Raycast as a soundboard and bind sounds to hotkeys",
-  "icon": "command-icon1.png",
+  "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "categories": [
     "Fun"
