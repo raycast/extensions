@@ -2,6 +2,7 @@ export interface Preferences {
   country: string;
   city: string;
   calculation_methods: string;
+  hanfi: boolean;
 }
 export type Prayers = {
   Fajr: string;
