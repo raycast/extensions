@@ -1,8 +1,11 @@
 # DocSearch Changelog
 
-## [Update] - 2022-10-20
+## [Support other DocSearch result and the new documentation] - 2022-08-22
 
-- Updated commands that could caused a crash in some scenarios
+- 🌟 Support other DocSearch result.
+- 📄 Support [GitBook](https://docs.gitbook.com/).
+- 📄 Support [Raycast](https://developers.raycast.com/).
+
 
 ## [Support for the new documentation] - 2022-08-22
 
@@ -10,8 +13,6 @@
 - 📄 Support [Dubbo](https://dubbo.apache.org/)
 - 📄 Support [Nuxt](https://nuxtjs.org/)
 - 📄 Support [Nuxt3](https://v3.nuxtjs.org/)
-- 📄 Support [pnpm](https://pnpm.io/)
-- 📄 Support [pnpm(zh-Hans)](https://pnpm.io/zh/)
 - 📄 Support [React Bootstrap](https://react-bootstrap.github.io/)
 - 📄 Support [Remix](https://remix.run/)
 - 📄 Support [React Native](https://reactnative.dev/)

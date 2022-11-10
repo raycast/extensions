@@ -52,6 +52,15 @@ export default <IAPIData[]>[
     },
   },
   {
+    name: "GitBook",
+    icon: "../assets/logo/gitbook.png",
+    apiKey:
+      "MDgxNzdmZGVhM2MzMDJiMjAxMzczZTllMmVmMDAxOGQ1N2YzMjAyM2M0ZWMxZjk5NmFmYjE0ODA0OWUzYzFlMGZpbHRlcnM9KHZpZXdhYmxlQnlQdWJsaWNTcGFjZXMlM0FOa0VHUzdoemVxYTM1c01YUVo0WC0xKSUyMEFORCUyMHByb2plY3RJZCUzQWdpdGJvb2steC1wcm9k",
+    appId: "U102FN9U1K",
+    indexName: "pages",
+    homepage: "https://docs.gitbook.com/",
+  },
+  {
     name: "Homebrew",
     icon: "../assets/logo/homebrew.png",
     apiKey: "a57ef92bf2adfae863a201ee43d6b5a1",
@@ -117,6 +126,15 @@ export default <IAPIData[]>[
     appId: "BH4D9OD16A",
     indexName: "rsshub",
     homepage: "https://docs.rsshub.app/",
+  },
+  {
+    name: "Raycast",
+    icon: "../assets/logo/raycast.png",
+    apiKey:
+      "YmZlNDIxZTVlYWQyOWQ4ZThhMzdkOGUxOTY0YjU2NGNjZDNkOTA5NjQ3MmZmMjg0MzViYjYzMDI4NTVkMmQ1ZmZpbHRlcnM9KHZpZXdhYmxlQnlQdWJsaWNTcGFjZXMlM0EtTWVfOEEzOXRGaFpnM1VhVm9TTi0yKSUyMEFORCUyMHByb2plY3RJZCUzQWdpdGJvb2steC1wcm9k",
+    appId: "U102FN9U1K",
+    indexName: "pages",
+    homepage: "https://developers.raycast.com/",
   },
   {
     name: "React",
@@ -290,7 +308,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/",
+    homepage: "https://pnpm.io/zh",
     searchParameters: {
       facetFilters: ["language:en"],
     },
@@ -301,7 +319,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/zh/",
+    homepage: "https://pnpm.io/zh",
     lang: "zh-Hans",
     searchParameters: {
       facetFilters: ["language:zh"],
