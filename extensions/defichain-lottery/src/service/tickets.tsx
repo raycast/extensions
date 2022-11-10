@@ -3,7 +3,7 @@ import { loadAddresses } from "./addresses";
 import { drawingResult, ticket } from "../types/winner_result";
 
 export async function userTickets(): Promise<drawingResult[]> {
-  const promises = [];
+  const promises = new Array();
   return new Promise((resolve) => {
     loadAddresses().then((addresses) => {
       addresses.map((address: string) => {
@@ -23,7 +23,7 @@ export async function userTickets(): Promise<drawingResult[]> {
   });
 }
 
-let result = [];
+let result = new Array<drawingResult>();
 function addToResult(data: any) {
   // first element can be added
   if (result.length == 0) {
