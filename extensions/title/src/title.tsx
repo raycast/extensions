@@ -1,28 +1,40 @@
 import { popToRoot, showHUD, ActionPanel, Icon, Form, Action, Clipboard } from "@raycast/api";
+import { useState } from "react";
 import title from "title";
 
 interface FormInput {
   title: string;
 }
 
-const main = () => (
-  <Form
-    actions={
-      <ActionPanel>
-        <Action.SubmitForm
-          icon={Icon.Checkmark}
-          title="Format"
-          onSubmit={(values: FormInput) => {
-            Clipboard.copy(title(values.title));
-            showHUD("Copied to clipboard");
-            popToRoot();
-          }}
-        />
-      </ActionPanel>
-    }
-  >
-    <Form.TextField id="title" title="Title" placeholder="Paste or Enter Your Title" />
-  </Form>
-);
+const Title = () => {
+  const [capitalized, setCapitalized] = useState<string>("");
 
-export default main;
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            icon={Icon.Checkmark}
+            title="Copy to Clipboard"
+            onSubmit={(values: FormInput) => {
+              Clipboard.copy(title(values.title));
+              showHUD("Copied to Clipboard");
+              popToRoot();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="title"
+        placeholder="Paste or Enter Your Title"
+        value={capitalized}
+        onChange={(value: string) => {
+          setCapitalized(title(value));
+        }}
+      />
+    </Form>
+  );
+};
+
+export default Title;
