@@ -57,8 +57,8 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Your Defichain Lottery tickets"
-      searchBarPlaceholder="Search your ticket number"
+      navigationTitle="Your Defichain Lottery Tickets"
+      searchBarPlaceholder="Search your Ticket Number"
     >
       {currentList.length != 0 &&
         currentList.map((drawing) => (

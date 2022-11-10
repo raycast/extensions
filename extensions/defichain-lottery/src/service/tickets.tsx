@@ -3,11 +3,12 @@ import { loadAddresses } from "./addresses";
 import { drawingResult, ticket } from "../types/winner_result";
 
 export async function userTickets(): Promise<drawingResult[]> {
-  const promises = new Array();
+  const promises: Array<Promise<drawingResult>> = [];
   return new Promise((resolve) => {
     loadAddresses().then((addresses) => {
       addresses.map((address: string) => {
-        promises.push(getAddressResult.loadData(address));
+        const addressResult = getAddressResult.loadData(address);
+        promises.push(addressResult);
       });
       Promise.all(promises).then((requests) => {
         requests.map((request) => {
@@ -23,7 +24,7 @@ export async function userTickets(): Promise<drawingResult[]> {
   });
 }
 
-let result = new Array<drawingResult>();
+let result: Array<drawingResult> = [];
 function addToResult(data: any) {
   // first element can be added
   if (result.length == 0) {

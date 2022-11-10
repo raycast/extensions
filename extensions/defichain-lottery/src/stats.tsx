@@ -11,7 +11,7 @@ export default function Command() {
 
   useEffect(() => {
     if (stats == undefined) {
-      getStats.loadData().then((loadedStats) => {
+      getStats.loadData().then((loadedStats: Stats) => {
         setStats(loadedStats);
         statsToMarkdown(loadedStats).then((markdown) => {
           setText(markdown);

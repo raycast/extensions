@@ -1,5 +1,4 @@
 import { Icon, Alert, LocalStorage, confirmAlert, showToast, Toast } from "@raycast/api";
-import { rejects } from "assert";
 
 const KEY_ADDRESS_STORAGE = "items";
 

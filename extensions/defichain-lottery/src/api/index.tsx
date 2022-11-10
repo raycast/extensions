@@ -33,13 +33,13 @@ export const getStats = {
 };
 
 export const getAddressResult = {
-  loadData: (address: string): Promise<drawingResult[]> =>
+  loadData: (address: string): Promise<drawingResult> =>
     requests
       .post(TICKET_RESULT_ENDPOINT, { address: address })
       .then((data) => {
         return data;
       })
-      .catch(function (err) {
+      .catch(() => {
         return null;
       }),
 };
