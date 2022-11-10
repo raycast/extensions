@@ -2,6 +2,14 @@
 
 The `ai-gen` extension uses the OpenAI [Image Generation](https://beta.openai.com/docs/guides/images) API — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — and the [Text Completion](https://beta.openai.com/docs/guides/completion) API to generate results from a text-based prompt.
 
+## Usage
+
+This extension provides 3 commands:
+
+1. **Complete Text** - uses the GPT-3 AI models to generate a text completion that attempts to match whatever context or pattern you gave it
+2. **Create Image** - uses the DALL•E AI model to generate new images
+3. **Create Image Variation** - uses the DALL•E AI model to create a variation on an image you upload from your local disk
+
 ## API Keys
 
 In order to use OpenAI's APIs, you have to create an account and create [a new API key](https://beta.openai.com/account/api-keys). Once you have a key, paste it into the extenion's settings.
