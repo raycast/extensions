@@ -1,35 +1,23 @@
-import { showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
 
+import { useBase } from "./base";
 import { getSummary } from "../utils";
 
 export function useTodaySummary() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [data, setData] = useState<WakaTime.Summary>();
+  const result = useBase({
+    handler: useCallback(async () => {
+      const data = await getSummary("Today", new Date());
+      if (!data.ok) throw new Error(data.error);
 
-  useEffect(() => {
-    async function getData() {
-      setIsLoading(true);
+      return data;
+    }, []),
+    toasts: {
+      error: (err) => ({
+        title: "Error Loading Today's Summary",
+        message: err.message,
+      }),
+    },
+  });
 
-      try {
-        const data = await getSummary("Today", new Date());
-
-        if (!data.ok) throw new Error(data.error);
-
-        setData(data);
-      } catch (error) {
-        await showToast(
-          Toast.Style.Failure,
-          "Error Loading Today's Summary",
-          (error as Record<string, string>).message
-        );
-      }
-
-      setIsLoading(false);
-    }
-
-    getData();
-  }, []);
-
-  return { data, isLoading };
+  return result;
 }

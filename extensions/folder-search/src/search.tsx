@@ -30,6 +30,7 @@ import {
   showFolderInfoInFinder,
   copyFolderToClipboard,
   maybeMoveResultToTrash,
+  lastUsedSort,
 } from "./utils";
 
 // allow string indexing on Icons
@@ -121,7 +122,7 @@ export default function Command() {
       searchScope,
       abortable,
       (result: SpotlightSearchResult) => {
-        setResults((results) => [result, ...results]);
+        setResults((results) => [result, ...results].sort(lastUsedSort));
       },
     ],
     {
@@ -240,8 +241,13 @@ export default function Command() {
                     />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
-                      title="Last opened"
+                      title="Last used"
                       text={result.kMDItemLastUsedDate?.toLocaleString() || "-"}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Use count"
+                      text={result.kMDItemUseCount?.toLocaleString() || "-"}
                     />
                     <List.Item.Detail.Metadata.Separator />
                   </List.Item.Detail.Metadata>

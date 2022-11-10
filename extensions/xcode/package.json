@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
-    "qeude"
+    "qeude",
+    "oliep"
   ],
   "categories": [
     "Developer Tools",
@@ -137,10 +138,10 @@
       "mode": "view"
     },
     {
-      "name": "installed-simulator-apps.command",
-      "title": "Installed Simulator Apps",
+      "name": "search-recent-builds.command",
+      "title": "Search Recent Builds",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
+      "description": "Search recent builds which are installed in a Xcode Simulator.",
       "mode": "view"
     },
     {
@@ -163,6 +164,13 @@
       "subtitle": "Xcode",
       "description": "Search Apple Developer Documentation.",
       "mode": "view"
+    },
+    {
+      "name": "open-developer-documentation.command",
+      "title": "Open Developer Documentation",
+      "subtitle": "Xcode",
+      "description": "Open Apple Developer Documentation.",
+      "mode": "no-view"
     },
     {
       "name": "search-swift-package-index.command",
@@ -226,8 +234,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1",
-    "@raycast/utils": "^1.4.9",
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "tildify": "^3.0.0",

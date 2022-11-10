@@ -1,5 +1,9 @@
 # Color Casket Changelog
 
+## [Bug fixes] - 2022-11-01
+
+Fixed bugs that might have caused the extension to not work properly.
+
 ## [Update] - 2022-09-14
 
 Ability to filter lists by color type. 

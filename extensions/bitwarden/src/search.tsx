@@ -17,7 +17,7 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
 import { SESSION_KEY } from "./const";
-import { TroubleshootingGuide, UnlockForm } from "./components";
+import { CopyPasswordToClipboardAction, TroubleshootingGuide, UnlockForm } from "./components";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
@@ -313,7 +313,7 @@ function getAccessories(item: Item, folder: Folder | undefined) {
 }
 
 function PasswordActions(props: { password: string }) {
-  const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
+  const copyAction = <CopyPasswordToClipboardAction key="copy" title="Copy Password" content={props.password} />;
   const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
 
   return <Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</Fragment>;
