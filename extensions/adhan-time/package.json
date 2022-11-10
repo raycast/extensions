@@ -42,6 +42,15 @@
       "required": true
     },
     {
+      "name": "hanfi",
+      "title": "Hanfi Calculation",
+      "description": "Use hanfi school calculation",
+      "label": "Use hanfi school calculation",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "calculation_methods",
       "title": "Calculation Methods",
       "description": "Choose your calculation method",
