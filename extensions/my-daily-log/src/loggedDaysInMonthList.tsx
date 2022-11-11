@@ -1,6 +1,5 @@
 import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { DailyLog } from "./domain/DailyLog";
+import { useState } from "react";
 import { getDailyLog } from "./domain/getDailyLog";
 import { getLoggedDays } from "./domain/getLoggedDays";
 import { LoggedDay } from "./domain/LoggedDay";
@@ -8,7 +7,7 @@ import { capitalize } from "./shared/capitalize";
 
 export default function Command() {
   const d = getLoggedDays()
-  const [items, setItems] = useState<LoggedDay[]>(d);
+  const [items] = useState<LoggedDay[]>(d);
   return (
     <List isShowingDetail>
       {items.map((item) => (

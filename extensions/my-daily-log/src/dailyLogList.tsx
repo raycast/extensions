@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { capitalize } from "./shared/capitalize";
 import { DailyLog } from "./domain/DailyLog";
 import { formatArgumentDate } from "./shared/formatArgumentDate";
@@ -13,11 +13,8 @@ interface DailyLogListArguments {
 export default function Command(props: { arguments: DailyLogListArguments }) {
   const dateInArguments = formatArgumentDate(props.arguments.date);
   const [date] = useState<Date>(dateInArguments);
-  const [items, setItems] = useState<DailyLog[]>(getDailyLog(date));
+  const [items] = useState<DailyLog[]>(getDailyLog(date));
 
-  useEffect(() => {
-    setItems(getDailyLog(date));
-  }, [date]);
   return (
     <List navigationTitle={formatDateToReadable(date)}>
       {items.map((item) => (
