@@ -1,6 +1,6 @@
 # Title
 
-> Vercel's [title.sh] for Raycast.
+> Vercel's [title.sh](https://title.sh) for Raycast.
 
 _Not affiliated with Vercel._
 
