@@ -16,6 +16,12 @@
       "title": "Paste as Plain Text",
       "description": "Paste text from the clipboard as plain text.",
       "mode": "no-view"
+    },
+    {
+      "name": "paste-without-newlines",
+      "title": "Paste Without Newlines",
+      "description": "Paste text from the clipboard as plain text without newlines.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
