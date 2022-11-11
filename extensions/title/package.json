@@ -18,7 +18,7 @@
       "preferences": [
         {
           "name": "special",
-          "description": "Specify words that should enforce their own capitalization rules (separate words with a comma).",
+          "description": "Add your own rules for capitalizing certain words (separate words with a comma).",
           "type": "textfield",
           "required": false,
           "title": "Special Words (separate words with a comma)"

@@ -14,7 +14,7 @@ Correctly capitalizes your titles as per [The Chicago Manual of Style](http://ww
 
 ### Special Words
 
-In the settings panel, you can add your own rules for capitalizing certain rules (separate words with a comma).
+In the settings panel, you can add your own rules for capitalizing certain words (separate words with a comma).
 
 <img src="media/title-settings.png" width="600">
 
