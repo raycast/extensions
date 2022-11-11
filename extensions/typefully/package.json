@@ -5,6 +5,9 @@
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
   "icon": "icon.png",
   "author": "danielferguson",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"
@@ -92,8 +95,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.43.0",
+    "@raycast/utils": "^1.4.10",
     "dayjs": "^1.11.3",
     "got": "^12.1.0"
   },

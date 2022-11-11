@@ -72,27 +72,27 @@ export default function Command() {
       isLoading={isLoading}
     >
       {/* Quick Links */}
-      <MenuBarExtra.Item title="Quick Links" />
-      <MenuBarExtra.Item title="Open Typefully" onAction={() => open("https://typefully.com")} />
-      <MenuBarExtra.Item title="Open Twitter" onAction={() => open("https://twitter.com")} />
-
-      <MenuBarExtra.Separator />
+      <MenuBarExtra.Section title="Quick Links">
+        <MenuBarExtra.Item title="Open Typefully" onAction={() => open("https://typefully.com")} />
+        <MenuBarExtra.Item title="Open Twitter" onAction={() => open("https://twitter.com")} />
+      </MenuBarExtra.Section>
 
       {/* Scheduled Posts */}
-      <MenuBarExtra.Item title="Upcoming Scheduled Posts" />
-      {data === undefined || data.length === 0 ? (
-        <MenuBarExtra.Item title="No posts found. 😔" />
-      ) : (
-        data
-          .sort(sortAscByDateFn)
-          .slice(0, 5)
-          .map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
-      )}
+      <MenuBarExtra.Section title="Upcoming Scheduled Posts">
+        {data === undefined || data.length === 0 ? (
+          <MenuBarExtra.Item title="No posts found. 😔" />
+        ) : (
+          data
+            .sort(sortAscByDateFn)
+            .slice(0, 5)
+            .map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
+        )}
 
-      {/* Optional extra, if there are > 5 posts */}
-      {data !== undefined && data.length > 5 && (
-        <MenuBarExtra.Item title="... more posts later" onAction={() => open(`https://typefully.com/`)} />
-      )}
+        {/* Optional extra, if there are > 5 posts */}
+        {data !== undefined && data.length > 5 && (
+          <MenuBarExtra.Item title="... more posts later" onAction={() => open(`https://typefully.com/`)} />
+        )}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
