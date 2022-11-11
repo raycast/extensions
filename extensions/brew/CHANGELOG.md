@@ -1,8 +1,8 @@
 # Brew Changelog
 
-## [Updated dependencies] - 2022-11-11
+## [Bug Fix] - 2022-11-11
 
-- Upgraded to latest node dependencies. Should fix a memory issue.
+- Reduce search results limit to avoid exceeding memory limit
 
 ## [Improvements] - 2022-08-17
 

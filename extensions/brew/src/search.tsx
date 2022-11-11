@@ -42,7 +42,7 @@ export default function Main(): JSX.Element {
     }
 
     const query = state.query?.trim() ?? "";
-    brewSearch(query, 200)
+    brewSearch(query, 100)
       .then((results) => {
         updateInstalled(results, state.installed);
         setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
