@@ -5,6 +5,9 @@
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
   "icon": "icon.png",
   "author": "danielferguson",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"

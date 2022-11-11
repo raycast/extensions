@@ -2,7 +2,7 @@
 
 ## [Added Menu Bar Sections] - 2022-11-11
 
-- Renders Menu bar sections instead of disabled items
+- Menu bar now shows headers as a title instead of just disabled text
 
 ## [Fix reported bugs and UX] - 2022-10-08
 
