@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Added Menu Bar Sections] - 2022-11-11
+
+- Renders Menu bar sections instead of disabled items
+
 ## [Fix reported bugs and UX] - 2022-10-08
 
 - Changed draft textarea to clear upon submission
