@@ -35,6 +35,7 @@
 /extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
 /extensions/authy                                    @guga4ka @gdsmith @lukekarrys
 /extensions/avatar                                   @koinzhang
+/extensions/axios-docs                               @denizyoldas
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
 /extensions/battery-health                           @o1y
@@ -498,7 +499,7 @@
 /extensions/remember-the-date                        @pernielsentikaer
 /extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
-/extensions/replicate                                @KevinBatdorf
+/extensions/replicate                                @KevinBatdorf @KevinBatdorf
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/retool                                   @andre347
 /extensions/reverso-context                          @MrModest
@@ -544,6 +545,7 @@
 /extensions/slack                                    @momme-rtf
 /extensions/slack-status                             @PitNikola
 /extensions/sm-ms                                    @koinzhang
+/extensions/smultron                                 @blackspike
 /extensions/snake                                    @tonka3000
 /extensions/social-network-trends                    @koinzhang
 /extensions/solana-explorer                          @TrGiLong

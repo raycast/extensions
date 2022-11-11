@@ -7,7 +7,9 @@ export default function Command() {
   const { isLoading, data: prayerTimes } = useFetch<PrayerType>(
     `https://api.aladhan.com/v1/timingsByCity?city=${encodeURI(userPreference.city)}&country=${encodeURI(
       userPreference.country
-    )}&method=${encodeURI(userPreference.calculation_methods)}`,
+    )}&method=${encodeURI(userPreference.calculation_methods)}&school=${encodeURI(
+      userPreference.hanfi === true ? "1" : "0"
+    )}`,
     {
       keepPreviousData: true,
       onError: (error: Error) => {
