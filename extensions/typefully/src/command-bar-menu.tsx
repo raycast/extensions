@@ -79,7 +79,6 @@ export default function Command() {
 
       {/* Scheduled Posts */}
       <MenuBarExtra.Section title="Upcoming Scheduled Posts">
-        <MenuBarExtra.Item title="" />
         {data === undefined || data.length === 0 ? (
           <MenuBarExtra.Item title="No posts found. 😔" />
         ) : (
