@@ -1,38 +1,29 @@
-import React, { useEffect, useState } from "react";
 import * as miro from "./oauth/miro";
-import { Board } from "@mirohq/miro-api";
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import InviteBoard from "./invite-board";
 import ListMembers from "./list-member";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function ListBoards() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [items, setItems] = useState<Board[]>([]);
+  const { isLoading, data, revalidate } = useCachedPromise(
+    async () => {
+      return await miro.fetchItems();
+    },
+    [],
+    {
+      initialData: [],
+      onError: async (error) => {
+        console.error(error);
+        await showToast({ style: Toast.Style.Failure, title: String(error) });
+      },
+    }
+  );
 
   const { push } = useNavigation();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        await miro.authorize();
-        const fetchedItems = await miro.fetchItems();
-        setItems(fetchedItems);
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        await showToast({ style: Toast.Style.Failure, title: String(error) });
-      }
-    })();
-  }, []);
-
-  if (isLoading) {
-    return <Detail isLoading={isLoading} />;
-  }
-
   return (
     <List isLoading={isLoading}>
-      {items.map((item) => {
+      {data.map((item) => {
         return (
           <List.Item
             key={item.id}
@@ -58,6 +49,7 @@ export default function ListBoards() {
                       onAction={() => push(<ListMembers id={item.id} />)}
                       shortcut={{ modifiers: ["cmd"], key: "m" }}
                     />
+                    <Action title="Reload" onAction={() => revalidate()} shortcut={{ modifiers: ["cmd"], key: "r" }} />
                   </>
                 )}
               </ActionPanel>

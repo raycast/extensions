@@ -38,6 +38,7 @@
   "dependencies": {
     "@mirohq/miro-api": "^1.0.2",
     "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.10",
     "dotenv": "^16.0.3",
     "node-fetch": "^3.2.10"
   },

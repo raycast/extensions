@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  launchCommand,
+  LaunchType,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import * as miro from "./oauth/miro";
-import ListBoards from "./list-boards";
 
 interface CreateBoardProps {
   name: string;
@@ -50,7 +59,7 @@ export default function CreateBoard() {
                   style: Toast.Style.Success,
                   title: "Board created",
                 });
-                push(<ListBoards />);
+                await launchCommand({ name: "list-boards", type: LaunchType.UserInitiated });
               } catch {
                 await showToast({
                   style: Toast.Style.Failure,
