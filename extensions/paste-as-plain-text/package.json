@@ -13,11 +13,38 @@
   "license": "MIT",
   "preferences": [
     {
+      "title": "Format",
       "label": "Clean line breaks",
       "name": "cleanLineBreaks",
       "type": "checkbox",
       "description": "Replace all line breaks with spaces",
       "default": false,
+      "required": false
+    },
+    {
+      "title": "Trim",
+      "name": "trim",
+      "type": "dropdown",
+      "description": "Trim leading and trailing spaces",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Leading spaces",
+          "value": "leading"
+        },
+        {
+          "title": "Trailing spaces",
+          "value": "trailing"
+        },
+        {
+          "title": "Both",
+          "value": "both"
+        }
+      ],
       "required": false
     }
   ],
