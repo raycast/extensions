@@ -69,7 +69,10 @@ export class XcodeSimulatorService {
    * @param xcodeSimulator The XcodeSimulator to boot
    */
   static boot(xcodeSimulator: XcodeSimulator): Promise<void> {
-    return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then();
+    return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then(() => {
+      // Silently open Simulator application
+      execAsync("open -a simulator");
+    });
   }
 
   /**
@@ -93,5 +96,20 @@ export class XcodeSimulatorService {
       case XcodeSimulatorState.shutdown:
         return XcodeSimulatorService.boot(xcodeSimulator);
     }
+  }
+
+  /**
+   * Launch an application by its bundle identifier on a given XcodeSimulator
+   * @param bundleIdentifier The bundle identifier of the application which should be launched
+   * @param xcodeSimulator The XcodeSimulator
+   */
+  static async launchApp(bundleIdentifier: string, xcodeSimulator: XcodeSimulator): Promise<void> {
+    try {
+      // Boot Xcode Simulator and ignore any errors
+      await XcodeSimulatorService.boot(xcodeSimulator);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    // Launch application by bundle identifier
+    return execAsync(`xcrun simctl launch ${xcodeSimulator.udid} ${bundleIdentifier}`).then();
   }
 }

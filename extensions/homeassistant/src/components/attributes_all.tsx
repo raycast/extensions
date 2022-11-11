@@ -70,7 +70,7 @@ function useSearch(
   query: string | undefined,
   allStates?: State[]
 ): {
-  states?: State[];
+  states?: State[] | undefined;
 } {
   const [states, setStates] = useState<State[]>();
   const lquery = query ? query.toLocaleLowerCase().trim() : query;
@@ -105,7 +105,7 @@ function useSearch(
       });
       setStates(filteredStates.slice(0, 100));
     } else {
-      setStates([]);
+      setStates(undefined);
     }
   }, [query, allStates]);
   return { states };

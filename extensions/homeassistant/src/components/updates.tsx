@@ -1,6 +1,9 @@
-import { Color, Detail, Icon, Action, ActionPanel, showHUD, confirmAlert } from "@raycast/api";
+import { Color, Detail, Icon, Action, ActionPanel, showHUD, confirmAlert, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import { ha } from "../common";
 import { State } from "../haapi";
+import { useHAStates } from "../hooks";
+import { StateListItem, useStateSearch } from "./states";
 
 function ChangelogDetail(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -101,5 +104,41 @@ export function UpdateSkipVersionAction(props: { state: State }): JSX.Element | 
       shortcut={{ modifiers: ["cmd"], key: "s" }}
       icon={{ source: Icon.ArrowRight, tintColor: Color.PrimaryText }}
     />
+  );
+}
+
+export function UpdatesList(): JSX.Element {
+  const [searchText, setSearchText] = useState<string>();
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useStateSearch(searchText, "update", "", allStates);
+
+  if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot fetch Home Assistant Updates",
+      message: error.message,
+    });
+  }
+
+  if (!states) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
+  const updateRequiredStates = states.filter((s) => s.state === "on");
+  const otherStates = states.filter((s) => s.state !== "on");
+
+  return (
+    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+      <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
+        {updateRequiredStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
+      </List.Section>
+      <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
+        {otherStates?.map((state) => (
+          <StateListItem key={state.entity_id} state={state} />
+        ))}
+      </List.Section>
+    </List>
   );
 }

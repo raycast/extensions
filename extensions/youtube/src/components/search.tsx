@@ -114,7 +114,7 @@ function SearchItem(props: {
           {props.clearAll && (
             <Action
               title="Clear Old Searches"
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
               onAction={handleClear}
             />
           )}

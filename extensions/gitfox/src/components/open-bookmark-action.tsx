@@ -20,10 +20,10 @@ const OpenBookmarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JS
         const prefs = getPreferenceValues<GitfoxPreferences>();
         await execp(`${prefs.gitfoxCliPath} ${bookmark.getFolder}`);
       } catch (e) {
-        showToast(Toast.Style.Failure, `Error!`, `There was a error opening: ${bookmark.Folder}`);
+        showToast(Toast.Style.Failure, `Error!`, `There was a error opening: ${bookmark.folder}`);
       } finally {
         closeMainWindow({ clearRootSearch: true });
-        showHUD(`Opening ${bookmark.Name} in Gitfox`);
+        showHUD(`Opening ${bookmark.name} in Gitfox`);
       }
     }}
   />

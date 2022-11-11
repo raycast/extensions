@@ -109,6 +109,14 @@ export default function Command() {
     await showHUD('Copied SVG to clipboard!');
   };
 
+  const copyFASlugToClipboard = async (icon: Icon) => {
+    // Copy SVG to clipboard
+    await Clipboard.copy(icon.id);
+
+    // Notify the user
+    await showHUD('Copied Slug to clipboard!');
+  };
+
   return (
     <Grid
       itemSize={Grid.ItemSize.Small}
@@ -131,6 +139,7 @@ export default function Command() {
                 icon="copy-clipboard-16"
                 onAction={() => copySvgToClipboard(icon, iconStyle)}
               />
+              <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
               <Action.OpenInBrowser
                 title="Open In Browser"
                 url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}

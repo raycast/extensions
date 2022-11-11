@@ -44,7 +44,7 @@
     "caiyun"
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.0",
+    "@raycast/api": "^1.42.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
@@ -61,13 +61,13 @@
     "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.2",
-    "@commitlint/config-conventional": "^17.0.2",
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
     "@types/crypto-js": "^4.1.1",
-    "@types/node": "~16.10.0",
+    "@types/node": "18.8.3",
     "@types/play-sound": "^1.1.0",
     "@types/qs": "^6.9.7",
-    "@types/react": "^17.0.28",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^7.32.0",

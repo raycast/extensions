@@ -39,6 +39,7 @@ export default function main() {
           actions={
             <ActionPanel>
               <Action.Push title={`Browse ${topic.title}`} target={<Topic topic={topic} />} />
+              <Action.OpenInBrowser url={`https://nextjs.org/docs/${topic.filepath}`} />
             </ActionPanel>
           }
           accessories={[{ text: topic.filepath }]}

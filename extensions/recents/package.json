@@ -46,6 +46,14 @@
       "type": "textfield",
       "default": "1000",
       "required": false
+    },
+    {
+      "name": "excludeFolders",
+      "label": "Exclude Folders",
+      "description": "From all results (except those in 'Recent Folders' command)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

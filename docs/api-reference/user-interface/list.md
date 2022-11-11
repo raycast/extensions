@@ -21,8 +21,8 @@ The search bar allows users to interact quickly with list items. By default, [Li
 
 ### Custom filtering
 
-Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `List`'s `enableFiltering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
-Note that `enableFiltering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `enableFiltering` to true.
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `List`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -40,7 +40,7 @@ export default function Command() {
 
   return (
     <List
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Beers"
       searchBarPlaceholder="Search your favorite beer"
