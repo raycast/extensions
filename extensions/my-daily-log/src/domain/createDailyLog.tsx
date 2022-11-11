@@ -1,4 +1,4 @@
-import { getDailyLogPath } from "./getDailyLogPath";
+import { getDailyLogPath } from "../shared/getDailyLogPath";
 import * as fs from "fs";
 
 export function createDailyLog(title: string) {

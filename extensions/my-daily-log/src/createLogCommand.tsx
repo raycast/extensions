@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, popToRoot, showToast, Toast } from "@raycast/api";
-import { createDailyLog } from "./createDailyLog";
+import { createDailyLog } from "./domain/createDailyLog";
+import { useForm } from "@raycast/utils";
 
 interface CreateLogArguments {
   title: string;
@@ -7,29 +8,33 @@ interface CreateLogArguments {
 
 export default function Command(props: { arguments: CreateLogArguments }) {
   const createLogAndExit = (title: string): void => {
-    if (title.length === 0) {
-      showToast(Toast.Style.Failure, "Title is required", "Please enter a title");
-      return;
-    }
     createDailyLog(title);
     popToRoot();
     showToast(Toast.Style.Success, "Log added", title);
   };
 
-  const { title } = props.arguments;
-
-  if (title) {
-    createLogAndExit(title);
+  const { title: argumentTitle } = props.arguments;
+  if (argumentTitle) {
+    createLogAndExit(argumentTitle);
   }
+
+  const { handleSubmit } = useForm<FormData>({
+    onSubmit: ({ title }) => createLogAndExit(title),
+    validation: {
+      title: title => {
+        if (title?.length === 0) {
+          return "Title is required"
+        }
+      }
+    }
+  })
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={(values: any) => {
-              createLogAndExit(values.title);
-            }}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
@@ -50,4 +55,8 @@ function randomPlaceholder(): string {
   ];
 
   return options[Math.floor(Math.random() * options.length)];
+}
+
+interface FormData {
+  title: string;
 }
