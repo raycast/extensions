@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "axios-reference",
-  "title": "Axios Reference",
-  "description": "Quickly find how to do something with axios",
+  "name": "axios-docs",
+  "title": "Axios Docs",
+  "description": "Quickly lookup Axios documentation",
   "icon": "command-icon.png",
   "author": "denizyoldas",
   "categories": [
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Axios Reference",
-      "subtitle": "Show detail",
-      "description": "Show axios reference",
+      "title": "Search Documentation",
+      "subtitle": "Axios",
+      "description": "Quickly lookup Axios documentation",
       "mode": "view"
     }
   ],

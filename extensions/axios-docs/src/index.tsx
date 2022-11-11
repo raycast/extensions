@@ -14,7 +14,7 @@ export default function Command() {
                 icon="command-icon.png"
                 actions={
                   <ActionPanel title={item.url}>
-                    <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                    <Action.OpenInBrowser url={item.url} />
                     <Action.CopyToClipboard content={item.url} title="Copy URL" />
                   </ActionPanel>
                 }
