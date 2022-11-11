@@ -1,7 +1,7 @@
 import { getPreferenceValues, getSelectedText } from "@raycast/api"
 import { runAppleScript } from "run-applescript"
 import { escape } from "."
-import { NewNote, Preferences } from "../typings"
+import type { NewNote, Preferences } from "../typings"
 
 export async function isRunning(appName: string) {
   try {

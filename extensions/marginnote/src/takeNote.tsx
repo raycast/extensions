@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
-  Color,
   Form,
   getPreferenceValues,
   Icon,
@@ -16,7 +15,7 @@ import {
 } from "@raycast/api"
 import { useEffect, useState } from "react"
 import { runAppleScript } from "run-applescript"
-import { Preferences } from "./typings"
+import type { Preferences } from "./typings"
 import { creatNote, dateFormat, getSelectedTextLink, unique } from "./utils"
 
 interface FormType {

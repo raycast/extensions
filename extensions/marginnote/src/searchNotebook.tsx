@@ -9,7 +9,7 @@ import {
 import { existsSync, readJsonSync } from "fs-extra"
 import { homedir } from "os"
 import React, { useEffect, useState } from "react"
-import { Notebook, NotebookFilter, SearchNotebookState } from "./typings"
+import type { Notebook, NotebookFilter, SearchNotebookState } from "./typings"
 import { openNotebook } from "./utils"
 
 const dataPath = `${homedir()}/Library/Containers/QReader.MarginStudyMac/Data/Library/MarginNote Extensions/marginnote.extension.raycastenhance/notebooks.json`
