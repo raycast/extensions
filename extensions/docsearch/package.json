@@ -9,6 +9,9 @@
     "Documentation"
   ],
   "license": "MIT",
+  "contributors": [
+    "AnishDe12020"
+  ],
   "commands": [
     {
       "name": "docsearch",
@@ -38,6 +41,21 @@
       "title": "Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "clerk",
+      "icon": "logo/clerk.png",
+      "title": "Clerk",
+      "subtitle": "DocSearch",
+      "description": "Search Clerk documentation",
       "arguments": [
         {
           "name": "search",

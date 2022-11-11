@@ -21,6 +21,14 @@ export default <IAPIData[]>[
     },
   },
   {
+    name: "Clerk",
+    icon: "../assets/logo/clerk.png",
+    apiKey: "52385d30a5ca4460564defe5b2d0ffb1",
+    appId: "RA7W9NZP4T",
+    indexName: "prod_sanity",
+    homepage: "https://clerk.dev",
+  },
+  {
     name: "Dubbo",
     icon: "../assets/logo/dubbo.png",
     apiKey: "364ae307e1da9d02b2335675e9db1eb1",
