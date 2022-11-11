@@ -4,11 +4,11 @@ An extension for creating and managing a todo list. Create and delete items, mar
 
 ## Insert Mode
 
-![insert mode image](/media/insert-mode.png)
+![insert mode image](media/insert-mode.png)
 
 ## Search Mode
 
-![search mode image](/media/search-mode.png)
+![search mode image](media/search-mode.png)
 
 ## Commands
 

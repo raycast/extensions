@@ -152,6 +152,36 @@ export default async () => {
 
 A Promise that resolves when the target has been opened.
 
+### launchCommand
+
+Launches another command of the same extension.
+Use this method if your command needs to open another command based on user interaction,
+or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
+
+#### Signature
+
+```typescript
+async function launchCommand(options: { name: string; type: LaunchType; arguments?: Arguments | null; context?: LaunchContext | null; }): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { launchCommand, LaunchType } from "@raycast/api";
+
+export default async () => {
+  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { "foo": "bar" } });
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="launchCommand" />
+
+#### Return
+
+A Promise that resolves when the command has been launched. (Note that this does not indicate that the launched command has finished executing.)
+
 ## Types
 
 ### Application
@@ -172,3 +202,7 @@ PathLike: string | Buffer | URL;
 ```
 
 Supported path types.
+
+### Arguments
+
+Holds the arguments (entered in Raycast Root Search Bar) that are passed to the command. The key is the `name` defined in manifest file and value is the user's input.

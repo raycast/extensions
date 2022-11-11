@@ -93,6 +93,7 @@ export default function CycleSubmenus({
           getCycleOptions(cycles || []).map((cycle) => (
             <Action
               key={cycle.id}
+              autoFocus={cycle.id === currentCycle?.id}
               title={cycle.title}
               icon={{ source: cycle.icon }}
               onAction={() => moveToCycle(cycle)}

@@ -4,7 +4,7 @@
 
 1. Enter your home address in Raycast preferences. It will be used to quickly pull up directions to your home.
 2. Select your preferred mode of travel. This will be the default for all searches.
-3. For full functionality you should allow [Apple Maps](https://www.apple.com/maps) to access your location in your preferred browser. This way `Travel Home` and `Travel To` will immediately pull up directions starting from your current location.
+3. For full functionality you should allow [Apple Maps](https://www.apple.com/maps) to access your location in your preferred browser. This way `Directions Home` and `Directions To` will immediately pull up directions starting from your current location.
 
 ## Searching
 

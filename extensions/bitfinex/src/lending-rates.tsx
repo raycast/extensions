@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import useSWR from "swr";
 import fetch from "node-fetch";
 import * as asciichart from "asciichart";
-import { getCurrency } from "./preference";
+import { getCurrency, getPreferenceValues } from "./preference";
 
 // ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
 const tfOptions = [
@@ -60,12 +60,18 @@ function LendingRatesSubMenu(props: LendingRatesDropdownProps) {
   );
 }
 
+const defaultRateView = getPreferenceValues().default_rate_view;
+
 const useToggleChartView = () => {
-  const [isChartView, setIsChartView] = useState(false);
+  const [isChartView, setIsChartView] = useState(defaultRateView === "chart");
   const onToggleChartView = useCallback(() => setIsChartView(!isChartView), [isChartView]);
 
   const action = (
-    <Action icon={Icon.List} title={`Switch to ${isChartView ? "list" : "chart"} view`} onAction={onToggleChartView} />
+    <Action
+      icon={isChartView ? Icon.List : Icon.LineChart}
+      title={`Switch to ${isChartView ? "list" : "chart"} view`}
+      onAction={onToggleChartView}
+    />
   );
 
   return {
@@ -212,7 +218,7 @@ function LendingRateChart({
 
     return asciichart.plot([ratesToPlot], {
       padding: "        ",
-      height: 20,
+      height: 16,
     });
   }, [rates, offset, windowSize, viewingRates]);
 
@@ -246,7 +252,7 @@ function LendingRateChart({
         <ActionPanel>
           {toggleAction}
 
-          <ActionPanel.Submenu title="Set Viewing Rates" icon={Icon.LevelMeter}>
+          <ActionPanel.Submenu title="Set Viewing Rates" icon={Icon.Gauge}>
             <Action title="High Rates" onAction={() => setRateToView(RateToView.High)} />
             <Action title="Average Rates" onAction={() => setRateToView(RateToView.Average)} />
             <Action title="Low Rates" onAction={() => setRateToView(RateToView.Low)} />
@@ -256,7 +262,7 @@ function LendingRateChart({
 
           <Action
             title="Previous Time Frame"
-            icon={Icon.ChevronUp}
+            icon={Icon.ChevronLeft}
             onAction={moveBackward}
             shortcut={{
               modifiers: ["cmd", "shift"],
@@ -266,7 +272,7 @@ function LendingRateChart({
 
           <Action
             title="Next Time Frame"
-            icon={Icon.ChevronDown}
+            icon={Icon.ChevronRight}
             onAction={moveForward}
             shortcut={{
               modifiers: ["cmd", "shift"],

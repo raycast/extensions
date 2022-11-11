@@ -103,7 +103,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 
 {% hint style="info" %}
 
-- Drafts for forms nested in navigation is not supported yet. In this case you will see a warning about it.
+- Drafts for forms nested in navigation are not supported yet. In this case, you will see a warning about it.
 - Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
 - Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
 - If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
@@ -171,9 +171,9 @@ interface TodoValues {
 export default function Command(props: { draftValues?: TodoValues }) {
   const { draftValues } = props;
 
-  const [title, setTitle] = useState<string | undefined>(draftValues?.title);
-  const [description, setDescription] = useState<string | undefined>(draftValues?.description);
-  const [dueDate, setDueDate] = useState<Date | undefined>(draftValues?.dueDate);
+  const [title, setTitle] = useState<string>(draftValues?.title || "");
+  const [description, setDescription] = useState<string>(draftValues?.description || "");
+  const [dueDate, setDueDate] = useState<Date>(draftValues?.dueDate || "");
 
   function handleSubmit(values: TodoValues) {
     console.log("onSubmit", values);
@@ -253,7 +253,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [name, setName] = useState<string>();
+  const [name, setName] = useState<string>("");
 
   return (
     <Form
@@ -321,7 +321,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [password, setPassword] = useState<string>();
+  const [password, setPassword] = useState<string>("");
 
   return (
     <Form
@@ -392,7 +392,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [description, setDescription] = useState<string>();
+  const [description, setDescription] = useState<string>("");
 
   return (
     <Form
@@ -528,7 +528,7 @@ import { ActionPanel, Form, Action } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | null>(null);
 
   return (
     <Form
@@ -851,6 +851,144 @@ export default function Command() {
 }
 ```
 
+### Form.FilePicker
+
+A form item with a button to open a dialog to pick some files and/or some directories (depending on its props).
+
+{% hint style="info" %}
+While the user picked some items that existed, it might be possible for them to be deleted or changed when the `onSubmit` callback is called. Hence you should always make sure that the items exist before acting on them!
+{% endhint %}
+
+![](../../.gitbook/assets/form-filepicker-multiple.png)
+
+![Single Selection](../../.gitbook/assets/form-filepicker-single.png)
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const files = values.files.filter(
+                file => fs.existsSync(values.file) && fs.lstatSync(values.file).isFile()
+              )
+              // do something with the files
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Single selection file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isFile()) {
+                return false;
+              }
+              // do something with the file
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Directory picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isDirectory()) {
+                return false;
+              }
+              // do something with the directory
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Controlled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [files, setFiles] = useState<string[]>([]);
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" value={files} onChange={setFiles} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+<PropsTableFromJSDoc component="Form.FilePicker" />
+
+#### Methods (Imperative API)
+
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
 ### Form.Description
 
 A form item with a simple text label.
@@ -934,7 +1072,7 @@ For type-safe form values, you can define your own interface. Use the ID's of th
 #### Example
 
 ```typescript
-import { Form } from "@raycast/api";
+import { Form, Action, ActionPanel } from "@raycast/api";
 
 interface Values {
   todo: string;

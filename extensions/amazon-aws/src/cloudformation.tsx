@@ -61,6 +61,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
+      icon="cloudformation-icon.png"
       title={stack.StackName}
       actions={
         <ActionPanel>
@@ -77,7 +78,9 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
       }
       accessories={[
         {
-          text: stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined,
+          text: stack.LastUpdatedTime
+            ? new Date(stack.LastUpdatedTime).toLocaleString()
+            : new Date(stack.CreationTime).toLocaleString(),
         },
       ]}
     />

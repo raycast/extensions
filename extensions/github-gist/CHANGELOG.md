@@ -1,5 +1,9 @@
 # GitHub Gist Changelog
 
+## [Optimize extension] - {PR_MERGE_DATE}
+
+- Optimize Search Gists command loading speed
+
 ## [Delete Gist action optimization] - 2022-07-04
 
 - Optimize delete Gist action: a warning will pop up to prompt the user to confirm before deleting the gist
