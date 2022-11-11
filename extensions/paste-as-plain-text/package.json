@@ -5,22 +5,27 @@
   "description": "Paste text from the clipboard as plain text.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
+  "contributors": ["pantajoe"],
   "categories": [
     "Productivity",
     "System"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "label": "Clean line breaks",
+      "name": "cleanLineBreaks",
+      "type": "checkbox",
+      "description": "Replace all line breaks with spaces",
+      "default": false,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "paste-as-plain-text",
       "title": "Paste as Plain Text",
       "description": "Paste text from the clipboard as plain text.",
-      "mode": "no-view"
-    },
-    {
-      "name": "paste-without-newlines",
-      "title": "Paste Without Newlines",
-      "description": "Paste text from the clipboard as plain text without newlines.",
       "mode": "no-view"
     }
   ],
