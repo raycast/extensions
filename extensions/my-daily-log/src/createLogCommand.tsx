@@ -21,21 +21,19 @@ export default function Command(props: { arguments: CreateLogArguments }) {
   const { handleSubmit } = useForm<FormData>({
     onSubmit: ({ title }) => createLogAndExit(title),
     validation: {
-      title: title => {
+      title: (title) => {
         if (title?.length === 0) {
-          return "Title is required"
+          return "Title is required";
         }
-      }
-    }
-  })
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
