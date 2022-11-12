@@ -1,4 +1,33 @@
 import { State } from "./haapi";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
+
+export function stringToDate(ds: string | null | undefined): Date | undefined {
+  if (!ds || ds.trim().length <= 0) {
+    return undefined;
+  }
+  try {
+    if (!isNaN(Date.parse(ds))) {
+      return new Date(ds);
+    }
+  } catch (error) {
+    return;
+  }
+}
+
+export function formatToHumanDateTime(input: Date | string | undefined): string | undefined {
+  if (!input) {
+    return;
+  }
+  const date = typeof input === "string" ? stringToDate(input) : input;
+  if (!date) {
+    return undefined;
+  }
+  return timeAgo.format(date) as string;
+}
 
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";

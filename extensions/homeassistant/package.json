@@ -265,6 +265,7 @@
   "dependencies": {
     "@raycast/api": "^1.42.0",
     "home-assistant-js-websocket": "^5.11.1",
+    "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",

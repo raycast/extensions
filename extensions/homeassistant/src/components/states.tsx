@@ -70,6 +70,7 @@ import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSk
 import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
+import { formatToHumanDateTime } from "../utils";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -508,6 +509,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
     return state.entity_id;
   };
 
+  const getTooltip = () => {
+    const lastChanged = formatToHumanDateTime(state.last_changed) || "?";
+    const lastUpdated = formatToHumanDateTime(state.last_updated) || "?";
+    return `Last Changed: ${lastChanged}\nLast Updated: ${lastUpdated}`;
+  };
+
   return (
     <List.Item
       key={state.entity_id}
@@ -518,6 +525,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       accessories={[
         {
           text: extraTitle(state) + stateValue(state),
+          tooltip: getTooltip(),
         },
       ]}
     />
