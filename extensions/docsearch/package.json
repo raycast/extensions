@@ -231,6 +231,21 @@
       "mode": "view"
     },
     {
+      "name": "slidev",
+      "icon": "logo/slidev.png",
+      "title": "Slidev",
+      "subtitle": "DocSearch",
+      "description": "Search Slidev documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "slidev_zh-Hans",
       "icon": "logo/slidev.png",
       "title": "Slidev(zh-Hans)",
