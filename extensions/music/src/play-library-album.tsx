@@ -75,8 +75,8 @@ export default function PlayLibraryAlbum() {
         <List.Item
           key={id}
           title={name ?? "--"}
-          subtitle={artist ?? "--"}
-          accessoryTitle={count ? `🎧 ${count}` : ""}
+          subtitle={`􀑫 ${artist}` ?? "--"}
+          accessoryTitle={count ? `􁟽 ${count}` : ""}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} pop={pop} />}
         />
@@ -86,7 +86,7 @@ export default function PlayLibraryAlbum() {
 }
 
 function Actions({ name, pop }: { name: string; pop: () => void }) {
-  const title = `Start Album "${name}"`;
+  const title = `􀊃  Start Album "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
@@ -102,7 +102,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
   return (
     <ActionPanel>
       <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} />
+      <Action title={`􀊝  Shuffle Album ${name}`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

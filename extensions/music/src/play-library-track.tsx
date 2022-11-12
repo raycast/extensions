@@ -57,8 +57,8 @@ export default function PlayLibraryTrack() {
         <List.Item
           key={id}
           title={name}
-          subtitle={artist}
-          accessoryTitle={`💿 ${album}`}
+          subtitle={`􀑫 ${artist}`}
+          accessoryTitle={`􀑪 ${album}`}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} id={id ?? ""} pop={pop} />}
         />
@@ -68,7 +68,7 @@ export default function PlayLibraryTrack() {
 }
 
 function Actions({ name, pop, id }: { id: string; name: string; pop: () => void }) {
-  const title = `Start Track "${name}"`;
+  const title = `􀊃  Start Track "${name}"`;
 
   const handleSubmit = async () => {
     await pipe(

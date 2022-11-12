@@ -49,7 +49,7 @@ function Actions({ value }: { value: number }) {
         showToast(Toast.Style.Failure, "Could not rate this track");
       }),
       TE.map(() => {
-        showHUD("⭐".repeat(value));
+        showHUD("􀋃".repeat(value));
         closeMainWindow();
       })
     )();
@@ -59,7 +59,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title="Rate" onAction={handleRating} />
+      <Action title="􀋂  Rate track" onAction={handleRating} />
     </ActionPanel>
   );
 }

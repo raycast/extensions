@@ -8,5 +8,5 @@ import { handleTaskEitherError } from "./util/utils";
 export default pipe(
   music.currentTrack.reveal,
   TE.apFirst(music.general.activate),
-  handleTaskEitherError("Could not display current track")
+  handleTaskEitherError("✗ Could not display current track")
 )();

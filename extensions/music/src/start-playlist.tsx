@@ -75,7 +75,7 @@ export default function PlaySelected() {
               <List.Item
                 key={playlist.id}
                 title={playlist.name}
-                accessoryTitle={`🎧 ${playlist.count}  ⏱ ${Math.floor(Number(playlist.duration) / 60)} min`}
+                accessoryTitle={`􀑬 ${playlist.count}   􀐫 ${Math.floor(Number(playlist.duration) / 60)} min`}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />
@@ -92,7 +92,7 @@ interface ActionsProps {
 }
 
 function Actions({ playlist: { name, id }, pop }: ActionsProps) {
-  const title = `Start Playlist "${name}"`;
+  const title = `􀊃  Start Playlist "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
@@ -108,7 +108,7 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
   return (
     <ActionPanel title={title}>
       <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={`Shuffle Playlist "${name}"`} onAction={handleSubmit(true)} />
+      <Action title={`􀊝  Shuffle Playlist "${name}"`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }
