@@ -11,23 +11,55 @@ const DEFAULT_NUM = 1;
 const MAX_CHARS = 1000;
 const MAX_IMAGE_FILE_SIZE = 4000000;
 
+type CreateImagePromptValues = {
+  prompt: string;
+  images?: never;
+  masks?: never;
+};
+
+type CreateVariationPromptValues = {
+  prompt?: never;
+  images: string[];
+  masks?: never;
+};
+
+type CreateEditPromptValues = {
+  prompt: string;
+  images: string[];
+  masks: string[];
+};
+
 export type CreateImageValues = {
   n: string;
   size: CreateImageRequestSizeEnum;
-} & ({ prompt: string; images?: never } | { prompt?: never; images: string[] });
+} & (CreateImagePromptValues | CreateVariationPromptValues | CreateEditPromptValues);
 
-export interface CreateImageVariationValues {
-  isVariation?: boolean;
-}
+export type CreateImageVariationValues =
+  | {
+      isVariation?: boolean;
+      isEdit?: never;
+    }
+  | {
+      isVariation?: never;
+      isEdit?: boolean;
+    };
 
 export function CreateImageForm(props: { draftValues?: CreateImageValues } & CreateImageVariationValues) {
-  const { draftValues, isVariation } = props;
+  const { draftValues, isVariation, isEdit } = props;
   const { enableDrafts, storeValue } = getPreferenceValues();
 
   const { push } = useNavigation();
   const [promptError, setPromptError] = useState<string | undefined>();
   const [imageError, setImageError] = useState<string | undefined>();
   const [numberError, setNumberError] = useState<string | undefined>();
+
+  let descText = "Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model";
+  if (isVariation) {
+    descText = "Given an existing image, generate a variation on it using the OpenAI DALL·E 2 image model";
+  } else if (isEdit) {
+    descText =
+      "Given a prompt, existing image, and a mask, generate an edited or extended image using the OpenAI DALL·E 2 image model";
+  }
 
   function validatePrompt(prompt?: string) {
     const len = prompt?.length;
@@ -81,11 +113,16 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
     return true;
   }
 
-  function onSubmit({ prompt, n, size, images }: CreateImageValues) {
+  function onSubmit({ prompt, n, size, images, masks }: CreateImageValues) {
     if (isVariation) {
       const valid = validateFile(images) && validateNumber(n);
       if (valid && images) {
         push(<ImagesGrid n={n} size={size} image={images[0]} variationCount={0} />);
+      }
+    } else if (isEdit) {
+      const valid = validatePrompt(prompt) && validateFile(images) && validateFile(masks) && validateNumber(n);
+      if (valid && prompt && images && masks) {
+        push(<ImagesGrid prompt={prompt} image={images[0]} mask={masks[0]} n={n} size={size} />);
       }
     } else {
       const valid = validatePrompt(prompt) && validateNumber(n);
@@ -104,28 +141,8 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="OpenAI Image Generation"
-        text={
-          isVariation
-            ? "Given an existing image, generate a variation on it using the OpenAI DALL·E 2 image model"
-            : "Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model"
-        }
-      />
-      {isVariation ? (
-        <Form.FilePicker
-          id="images"
-          title="Image"
-          info="The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square."
-          allowMultipleSelection={false}
-          error={imageError}
-          onBlur={(event) => validateFile(event.target.value)}
-          onChange={(value) => validateFile(value)}
-          autoFocus={isVariation}
-          defaultValue={draftValues?.images}
-          storeValue={!draftValues?.images && storeValue}
-        />
-      ) : (
+      <Form.Description title="OpenAI Image Generation" text={descText} />
+      {!isVariation ? (
         <Form.TextArea
           id="prompt"
           title="Prompt"
@@ -138,7 +155,34 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
           storeValue={!draftValues?.prompt && storeValue}
           defaultValue={draftValues?.prompt}
         />
-      )}
+      ) : null}
+      {isVariation || isEdit ? (
+        <Form.FilePicker
+          id="images"
+          title="Image"
+          info="The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square."
+          allowMultipleSelection={false}
+          error={imageError}
+          onBlur={(event) => validateFile(event.target.value)}
+          onChange={(value) => validateFile(value)}
+          autoFocus={isVariation}
+          defaultValue={draftValues?.images}
+          storeValue={!draftValues?.images && storeValue}
+        />
+      ) : null}
+      {isEdit ? (
+        <Form.FilePicker
+          id="masks"
+          title="Image Mask"
+          info="An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as image."
+          allowMultipleSelection={false}
+          error={imageError}
+          onBlur={(event) => validateFile(event.target.value)}
+          onChange={(value) => validateFile(value)}
+          defaultValue={draftValues?.masks}
+          storeValue={!draftValues?.masks && storeValue}
+        />
+      ) : null}
       <Form.Separator />
       <Form.Dropdown
         id="size"

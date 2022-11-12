@@ -27,6 +27,13 @@
       "mode": "view"
     },
     {
+      "name": "createImageEdit",
+      "title": "Create Image Edit",
+      "subtitle": "DALL·E Existing Image Edit",
+      "description": "Generate an edited or extended image given an original image and a prompt using OpenAI's DALL·E 2",
+      "mode": "view"
+    },
+    {
       "name": "completeText",
       "title": "Complete Text",
       "subtitle": "GPT-3 Text Completion",

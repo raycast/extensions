@@ -8,12 +8,17 @@ import { ImageActions } from "./ImageActions";
 
 export function ImageDetails(props: {
   url: string;
-  opt: CreateVariationRequest & { prompt?: string; variationCount?: number; image?: string };
+  opt: CreateVariationRequest & { prompt?: string; variationCount?: number; image?: string; mask?: string };
 }) {
   const { url, opt } = props;
-  let fileName = "";
+  let imageFile = "";
   if (opt.image) {
-    fileName = path.basename(opt.image);
+    imageFile = path.basename(opt.image);
+  }
+
+  let maskFile = "";
+  if (opt.mask) {
+    maskFile = path.basename(opt.mask);
   }
 
   return (
@@ -25,6 +30,7 @@ export function ImageDetails(props: {
           url={url}
           prompt={opt.prompt}
           image={opt.image}
+          mask={opt.mask}
           size={opt.size}
           n={opt.n.toString()}
           variationCount={opt.variationCount ?? 0}
@@ -32,10 +38,12 @@ export function ImageDetails(props: {
       }
       metadata={
         <Detail.Metadata>
-          {opt.prompt ? (
-            <Detail.Metadata.Label title="Prompt" text={opt.prompt} />
-          ) : fileName && opt.image ? (
-            <Detail.Metadata.Link title="Original Image" text={fileName} target={"file:///" + opt.image} />
+          {opt.prompt ? <Detail.Metadata.Label title="Prompt" text={opt.prompt} /> : null}
+          {imageFile && opt.image ? (
+            <Detail.Metadata.Link title="Original Image" text={imageFile} target={"file:///" + opt.image} />
+          ) : null}
+          {maskFile && opt.mask ? (
+            <Detail.Metadata.Link title="Mask" text={maskFile} target={"file:///" + opt.mask} />
           ) : null}
           <Detail.Metadata.Label title="Size" text={opt.size} />
           <Detail.Metadata.Label

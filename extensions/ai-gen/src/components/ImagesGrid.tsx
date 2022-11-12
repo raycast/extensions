@@ -12,28 +12,35 @@ const MIN_COLS = 3;
 
 export type ImagesGridProps = {
   prompt?: string;
+  image?: string;
+  mask?: string;
   n: string;
   size: CreateImageRequestSizeEnum;
-  image?: string;
   variationCount?: number;
 };
 
 export function ImagesGrid(props: ImagesGridProps) {
-  const { prompt, image, n, size, variationCount = 0 } = props;
+  const { prompt, image, mask, n, size, variationCount = 0 } = props;
+  const isVariation = image && !prompt;
+  const isImageEdit = !!(prompt && image && mask);
 
-  const title = image
+  const title = isVariation
     ? `Variation${variationCount > 1 ? ` ${variationCount}` : ""} on "${prompt || path.basename(image)}"`
+    : isImageEdit
+    ? `Extend image with "${prompt}"`
     : prompt;
   const number = parseInt(n, 10);
 
   const { apiKey } = getPreferenceValues();
-  const [results, createImage, createVariation, isLoading] = useOpenAIImageApi({ apiKey });
+  const [results, createImage, createVariation, createImageEdit, isLoading] = useOpenAIImageApi({ apiKey });
 
   useEffect(() => {
-    if (prompt) {
-      createImage({ prompt, size, n: number });
-    } else if (image) {
+    if (isImageEdit) {
+      createImageEdit({ prompt, image, mask, size, n: number });
+    } else if (isVariation) {
       createVariation(image, { n: number, size });
+    } else if (prompt) {
+      createImage({ prompt, size, n: number });
     }
   }, []);
 
@@ -73,6 +80,7 @@ export function ImagesGrid(props: ImagesGridProps) {
                   url={urlString}
                   prompt={prompt}
                   image={image}
+                  mask={mask}
                   size={size}
                   n={n}
                   variationCount={variationCount}
