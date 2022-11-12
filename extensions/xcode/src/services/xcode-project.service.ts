@@ -169,6 +169,7 @@ export class XcodeProjectService {
     return {
       name: name,
       type: fileExtension,
+      directoryPath: Path.dirname(xcodeProjectPath),
       filePath: xcodeProjectPath,
       keywords: keywords.reverse(),
     };
