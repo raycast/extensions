@@ -22,7 +22,7 @@
     },
     {
       "name": "apollo",
-      "icon": "logo/apollo.ico",
+      "icon": "logo/apollo.png",
       "title": "Apollo",
       "subtitle": "DocSearch",
       "description": "Search Apollo documentation",
