@@ -216,6 +216,21 @@
       "mode": "view"
     },
     {
+      "name": "supabase",
+      "icon": "logo/supabase.png",
+      "title": "Supabase",
+      "subtitle": "DocSearch",
+      "description": "Search Supabase documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "slidev_zh-Hans",
       "icon": "logo/slidev.png",
       "title": "Slidev(zh-Hans)",

@@ -38,6 +38,12 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
 
               return hit;
             });
+          } else if ("url" in res.hits[0] && !(res.hits[0].url as string).startsWith("http")) {
+            res.hits = res.hits.map((hit: any) => {
+              hit.url = currentAPI.homepage + hit.url;
+
+              return hit;
+            });
           }
         }
 

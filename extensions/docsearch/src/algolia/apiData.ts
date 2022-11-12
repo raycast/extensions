@@ -205,6 +205,14 @@ export default <IAPIData[]>[
     indexName: "remix",
   },
   {
+    name: "Supabase",
+    icon: "../assets/logo/supabase.png",
+    apiKey: "0424becc4055d51ec60e54cc37df5574",
+    appId: "B3Z5XYG8NS",
+    indexName: "prod_docs",
+    homepage: "https://supabase.com/docs",
+  },
+  {
     name: "Slidev",
     icon: "../assets/logo/slidev.png",
     apiKey: "1a5c5a504139c58f428974c78c55291d",
