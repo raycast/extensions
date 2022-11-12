@@ -67,9 +67,8 @@ export default function Command() {
             title={"#" + drawing.meta.round_number + " - " + drawing.meta.identifier}
             subtitle={
               (drawing.user_payout_total > 0
-                ? "total winning: " + formatNumber(drawing.user_payout_total, "DFI")
+                ? "total winning: " + formatNumber(drawing.user_payout_total, "DFI") + ", "
                 : "") +
-              ", " +
               drawing.tickets.length +
               " tickets" +
               ", ending " +
@@ -96,6 +95,19 @@ export default function Command() {
                   }
                 />
               ))}
+            {drawing.tickets.length == 0 && (
+              <List.Item
+                icon={Icon.XMarkCircleFilled}
+                key="no_tickets"
+                title="no tickets found"
+                actions={
+                  <ActionPanel title="Filter the tickets">
+                    <Action title="Show all tickets" onAction={() => showAllTickets()} />
+                    <Action title="Show winning tickets" onAction={() => showWinningTickets()} />
+                  </ActionPanel>
+                }
+              />
+            )}
           </List.Section>
         ))}
     </List>
