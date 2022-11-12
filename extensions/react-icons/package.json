@@ -1,0 +1,222 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "react-icons",
+  "title": "React Icons",
+  "description": "Browse and copy React Icon",
+  "icon": "default=icon.png",
+  "author": "teziovsky",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ant-design-icons",
+      "title": "Ant Design Icons",
+      "description": "Browse and copy Ant Design Icons of react-icons",
+      "icon": "ant-design-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "bootstrap-icons",
+      "title": "Bootstrap Icons",
+      "description": "Browse and copy Bootstrap Icons of react-icons",
+      "icon": "bootstrap-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "boxicons",
+      "title": "Boxicons",
+      "description": "Browse and copy Boxicons of react-icons",
+      "icon": "boxicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "circum-icons",
+      "title": "Circum Icons",
+      "description": "Browse and copy Curcum Icons of react-icons",
+      "icon": "circum-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "css-gg",
+      "title": "css.gg",
+      "description": "Browse and copy css.gg of react-icons",
+      "icon": "css-gg.png",
+      "mode": "view"
+    },
+    {
+      "name": "devicons",
+      "title": "Devicons",
+      "description": "Browse and copy Devicons of react-icons",
+      "icon": "devicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "feather",
+      "title": "Feather",
+      "description": "Browse and copy Feather of react-icons",
+      "icon": "feather.png",
+      "mode": "view"
+    },
+    {
+      "name": "flat-color-icons",
+      "title": "Flat Color Icons",
+      "description": "Browse and copy Flat Color Icons of react-icons",
+      "icon": "flat-color-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "font-awesome",
+      "title": "Font Awesome",
+      "description": "Browse and copy Font Awesome of react-icons",
+      "icon": "font-awesome.png",
+      "mode": "view"
+    },
+    {
+      "name": "game-icons",
+      "title": "Game Icons",
+      "description": "Browse and copy Game Icons of react-icons",
+      "icon": "game-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "github-octicons-icons",
+      "title": "Github Octicons Icons",
+      "description": "Browse and copy Github Octicons Icons of react-icons",
+      "icon": "github-octicons-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "grommet-icons",
+      "title": "Grommet Icons",
+      "description": "Browse and copy Grommet Icons of react-icons",
+      "icon": "grommet-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "heroicons",
+      "title": "Heroicons",
+      "description": "Browse and copy Heroicons of react-icons",
+      "icon": "heroicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "heroicons2",
+      "title": "Heroicons2",
+      "description": "Browse and copy Heroicons2 of react-icons",
+      "icon": "heroicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "icomoon-free",
+      "title": "IcoMoon Free",
+      "description": "Browse and copy IcoMoon Free of react-icons",
+      "icon": "icomoon-free.png",
+      "mode": "view"
+    },
+    {
+      "name": "ionicons4",
+      "title": "Ionicons4",
+      "description": "Browse and copy Ionicons4 of react-icons",
+      "icon": "ionicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "ionicons5",
+      "title": "Ionicons5",
+      "description": "Browse and copy Ionicons5 of react-icons",
+      "icon": "ionicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "material-design-icons",
+      "title": "Material Design Icons",
+      "description": "Browse and copy Material Design Icons of react-icons",
+      "icon": "material-design-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "remix-icons",
+      "title": "Remix Icons",
+      "description": "Browse and copy Remix Icons of react-icons",
+      "icon": "remix-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "simple-icons",
+      "title": "Simple Icons",
+      "description": "Browse and copy Simple Icons of react-icons",
+      "icon": "simple-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "simple-line-icons",
+      "title": "Simple Line Icons",
+      "description": "Browse and copy Simple Line Icons of react-icons",
+      "icon": "simple-line-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "tabler-icons",
+      "title": "Tabler Icons",
+      "description": "Browse and copy Tabler Icons of react-icons",
+      "icon": "tabler-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "themify-icons",
+      "title": "Themify Icons",
+      "description": "Browse and copy Themify Icons of react-icons",
+      "icon": "themify-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "typicons",
+      "title": "Typicons",
+      "description": "Browse and copy Typicons of react-icons",
+      "icon": "typicons.png",
+      "mode": "view"
+    },
+    {
+      "name": "vs-code-icons",
+      "title": "VS Code Icons",
+      "description": "Browse and copy VS Code Icons of react-icons",
+      "icon": "vs-code-icons.png",
+      "mode": "view"
+    },
+    {
+      "name": "weather-icons",
+      "title": "Weather Icons",
+      "description": "Browse and copy Weather Icons of react-icons",
+      "icon": "weather-icons.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2",
+    "react-icons": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/react-dom": "^18.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "react-dom": "^18.2.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "generate": "ts-node src/scripts/generate-icons.tsx"
+  }
+}
