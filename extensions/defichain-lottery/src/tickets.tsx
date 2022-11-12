@@ -98,8 +98,7 @@ export default function Command() {
             {drawing.tickets.length == 0 && (
               <List.Item
                 icon={Icon.XMarkCircleFilled}
-                key="no_tickets"
-                title="no tickets found"
+                title="No Tickets found"
                 actions={
                   <ActionPanel title="Filter the tickets">
                     <Action title="Show all tickets" onAction={() => showAllTickets()} />
