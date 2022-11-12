@@ -1,4 +1,4 @@
-import { Alert, confirmAlert, environment, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, environment, getPreferenceValues, Icon } from "@raycast/api";
 import fsSync from "node:fs/promises";
 import fs from "node:fs";
 import os from "node:os";
@@ -10,9 +10,8 @@ import {
   ExtractFormat,
   EXTRACT_FORMAT_METADATA,
   EXTRACT_HANDLES,
-  PerviousCompressFormatKey,
 } from "./const";
-import { ICompressPreferences, IExtractPreferences, IFileInfo } from "./types";
+import { ICompressPreferences, IExtractPreferences } from "./types";
 import { execa, execaSync } from "execa";
 
 const _7zaBinaryAsset = path.join(environment.assetsPath, `${process.arch}_7za`);
@@ -23,35 +22,6 @@ export function ensureBinary() {
     execaSync("cp", [_7zaBinaryAsset, _7zaBinary]);
     execaSync("chmod", ["+x", _7zaBinary]);
   }
-}
-
-export async function getStat(path: string): Promise<IFileInfo> {
-  const fileInfo: IFileInfo = {
-    path: path,
-    isDir: false,
-  };
-  try {
-    const stat = await fsSync.stat(path);
-    fileInfo.isDir = stat.isDirectory();
-    fileInfo.size = stat.size;
-  } catch (error) {
-    return fileInfo;
-  }
-  return fileInfo;
-}
-
-export function getFileSizeText(size: number): string {
-  let sizeStr = "";
-  if (size < 1024) {
-    sizeStr = `${size} B`;
-  } else if (size < 1024 * 1024) {
-    sizeStr = `${(size / 1024).toFixed(2)} KB`;
-  } else if (size < 1024 * 1024 * 1024) {
-    sizeStr = `${(size / 1024 / 1024).toFixed(2)} MB`;
-  } else if (size < 1024 * 1024 * 1024 * 1024) {
-    sizeStr = `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`;
-  }
-  return sizeStr;
 }
 
 export function isSupportExtractFormat(format: string): ExtractFormat | null {
@@ -65,14 +35,6 @@ export function isSupportExtractFormat(format: string): ExtractFormat | null {
     }
   });
   return extractFormat;
-}
-
-export async function getPerviousCompressFormat(): Promise<CompressFormat | undefined> {
-  return await LocalStorage.getItem<CompressFormat>(PerviousCompressFormatKey);
-}
-
-export async function setPerviousCompressFormat(format: CompressFormat) {
-  await LocalStorage.setItem(PerviousCompressFormatKey, format);
 }
 
 export async function compress(items: string[], format: CompressFormat, password?: string): Promise<string> {

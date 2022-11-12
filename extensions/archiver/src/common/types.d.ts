@@ -16,9 +16,7 @@ interface IExtractPreferences {
 }
 
 interface IFileInfo {
-  isDir: boolean;
   path: string;
-  size?: number;
   format?: CompressFormat | ExtractFormat;
 }
 

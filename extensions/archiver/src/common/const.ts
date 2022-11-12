@@ -3,7 +3,6 @@ import { FormatMetadata } from "./types";
 import { compressBy7za, extractBy7za } from "./utils";
 
 export enum CompressFormat {
-  BLANK = "",
   PREVIOUS = "PREVIOUS",
   "7Z" = "7Z",
   ZIP = "ZIP",
@@ -51,5 +50,3 @@ export const EXTRACT_HANDLES = new Map<
   [ExtractFormat.TAR, extractBy7za],
   [ExtractFormat.GZIP, extractBy7za],
 ]);
-
-export const PerviousCompressFormatKey = "$PerviousCompressFormatKey$";

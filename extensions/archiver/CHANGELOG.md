@@ -1,3 +1,3 @@
 # Archiver Changelog
 
-## [Initial Version] - 2022-10-10
+## [Initial Version] - 2022-11-12
