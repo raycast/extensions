@@ -51,6 +51,7 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
   const { push } = useNavigation();
   const [promptError, setPromptError] = useState<string | undefined>();
   const [imageError, setImageError] = useState<string | undefined>();
+  const [maskError, setMaskError] = useState<string | undefined>();
   const [numberError, setNumberError] = useState<string | undefined>();
 
   let descText = "Given a text prompt, generate a new image using the OpenAI DALL·E 2 image model";
@@ -75,23 +76,30 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
     return true;
   }
 
-  function validateFile(images?: string[]) {
-    const [image] = images || [];
-    const stats = fs.statSync(image);
-    const size = sizeOf(image);
+  function validateFile(images: string[], { set, err }: { set: (msg?: string) => void; err?: string }) {
+    const [image = ""] = images || [];
+
+    let stats: fs.Stats | undefined;
+    let size;
+    try {
+      stats = fs.statSync(image);
+      size = sizeOf(image);
+    } catch {
+      // no-op
+    }
 
     const isImage = !!image || images?.length === 1;
-    const isSquare = size.height == size.width;
-    const isCorrectSize = stats.size <= MAX_IMAGE_FILE_SIZE;
+    const isSquare = size?.height == size?.width;
+    const isCorrectSize = stats?.size ?? 0 <= MAX_IMAGE_FILE_SIZE;
     const isPng = path.extname(image).toLowerCase() === ".png";
 
-    if (!isImage || !stats.isFile() || !isSquare || !isCorrectSize || !isPng) {
-      setImageError("Image must be a square PNG and under 4MB");
+    if (!isImage || !stats?.isFile() || !isSquare || !isCorrectSize || !isPng) {
+      set("Image must be a square PNG and under 4MB");
       return false;
     }
 
-    if (imageError?.length) {
-      setImageError(undefined);
+    if (err?.length) {
+      set(undefined);
     }
 
     return true;
@@ -113,14 +121,18 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
     return true;
   }
 
-  function onSubmit({ prompt, n, size, images, masks }: CreateImageValues) {
+  function onSubmit({ prompt, n, size, images = [], masks = [] }: CreateImageValues) {
     if (isVariation) {
-      const valid = validateFile(images) && validateNumber(n);
+      const valid = validateFile(images, { set: setImageError, err: imageError }) && validateNumber(n);
       if (valid && images) {
         push(<ImagesGrid n={n} size={size} image={images[0]} variationCount={0} />);
       }
     } else if (isEdit) {
-      const valid = validatePrompt(prompt) && validateFile(images) && validateFile(masks) && validateNumber(n);
+      const valid =
+        validatePrompt(prompt) &&
+        validateFile(images, { set: setImageError, err: imageError }) &&
+        validateFile(masks, { set: setMaskError, err: maskError }) &&
+        validateNumber(n);
       if (valid && prompt && images && masks) {
         push(<ImagesGrid prompt={prompt} image={images[0]} mask={masks[0]} n={n} size={size} />);
       }
@@ -163,8 +175,8 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
           info="The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square."
           allowMultipleSelection={false}
           error={imageError}
-          onBlur={(event) => validateFile(event.target.value)}
-          onChange={(value) => validateFile(value)}
+          onBlur={(event) => validateFile(event.target.value || [], { set: setImageError, err: imageError })}
+          onChange={(value) => validateFile(value, { set: setImageError, err: imageError })}
           autoFocus={isVariation}
           defaultValue={draftValues?.images}
           storeValue={!draftValues?.images && storeValue}
@@ -176,9 +188,9 @@ export function CreateImageForm(props: { draftValues?: CreateImageValues } & Cre
           title="Image Mask"
           info="An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as image."
           allowMultipleSelection={false}
-          error={imageError}
-          onBlur={(event) => validateFile(event.target.value)}
-          onChange={(value) => validateFile(value)}
+          error={maskError}
+          onBlur={(event) => validateFile(event.target.value || [], { set: setMaskError, err: maskError })}
+          onChange={(value) => validateFile(value, { set: setMaskError, err: maskError })}
           defaultValue={draftValues?.masks}
           storeValue={!draftValues?.masks && storeValue}
         />
