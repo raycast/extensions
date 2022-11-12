@@ -2,14 +2,84 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "react-icons",
   "title": "React Icons",
-  "description": "Browse and copy React Icon",
-  "icon": "default=icon.png",
+  "description": "Browse and use React Icon",
+  "icon": "default-icon.png",
   "author": "teziovsky",
   "categories": [
     "Developer Tools",
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "description": "Primary action to perform when an icon is selected",
+      "type": "dropdown",
+      "required": true,
+      "default": "copyJSX",
+      "data": [
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Paste Name",
+          "value": "pasteName"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "title": "Secondary Action",
+      "description": "Secondary action to perform when an icon is selected",
+      "type": "dropdown",
+      "required": true,
+      "default": "copySVG",
+      "data": [
+        {
+          "title": "Copy JSX",
+          "value": "copyJSX"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copySVG"
+        },
+        {
+          "title": "Copy Name",
+          "value": "copyName"
+        },
+        {
+          "title": "Paste JSX",
+          "value": "pasteJSX"
+        },
+        {
+          "title": "Paste SVG",
+          "value": "pasteSVG"
+        },
+        {
+          "title": "Paste Name",
+          "value": "pasteName"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "ant-design-icons",
@@ -41,7 +111,7 @@
     },
     {
       "name": "css-gg",
-      "title": "css.gg",
+      "title": "Css.gg",
       "description": "Browse and copy css.gg of react-icons",
       "icon": "css-gg.png",
       "mode": "view"
