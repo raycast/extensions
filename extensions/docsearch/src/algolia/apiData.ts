@@ -2,6 +2,14 @@ import type { IAPIData } from "./types";
 
 export default <IAPIData[]>[
   {
+    name: "Apollo",
+    icon: "../assets/apollo.ico",
+    apiKey: "ef1ac4e3c439bc17a8e7572700691efc",
+    appId: "Q0CJ63JM7B",
+    indexName: "docs",
+    homepage: "https://www.apollographql.com/docs",
+  },
+  {
     name: "Arthas",
     icon: "../assets/logo/arthas.ico",
     apiKey: "03fb4b6577b57b5dafc792d9ddf66508",

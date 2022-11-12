@@ -21,6 +21,21 @@
       "mode": "view"
     },
     {
+      "name": "apollo",
+      "icon": "logo/apollo.ico",
+      "title": "Apollo",
+      "subtitle": "DocSearch",
+      "description": "Search Apollo documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "arthas",
       "icon": "logo/arthas.ico",
       "title": "Arthas",
