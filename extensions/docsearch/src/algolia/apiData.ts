@@ -205,14 +205,6 @@ export default <IAPIData[]>[
     indexName: "remix",
   },
   {
-    name: "Supabase",
-    icon: "../assets/logo/supabase.png",
-    apiKey: "0424becc4055d51ec60e54cc37df5574",
-    appId: "B3Z5XYG8NS",
-    indexName: "prod_docs",
-    homepage: "https://supabase.com/docs",
-  },
-  {
     name: "Slidev",
     icon: "../assets/logo/slidev.png",
     apiKey: "1ff173fe73b20edc962c1c24c0b1c160",
@@ -234,6 +226,14 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["language:cn"],
     },
+  },
+  {
+    name: "Supabase",
+    icon: "../assets/logo/supabase.png",
+    apiKey: "0424becc4055d51ec60e54cc37df5574",
+    appId: "B3Z5XYG8NS",
+    indexName: "prod_docs",
+    homepage: "https://supabase.com/docs",
   },
   {
     name: "TailwindCSS v3",

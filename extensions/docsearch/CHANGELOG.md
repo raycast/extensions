@@ -3,6 +3,9 @@
 ## [Support for new documentation] - 2022-11-11
 
 - 📄 Support [Clerk](https://clerk.dev)
+- 📄 Support [Apollo](https://www.apollographql.com/docs/)
+- 📄 Support [Supabase](https://supabase.io/docs)
+- 📄 Support [Slidev](https://sli.dev) (english language)
 
 ## [Support other DocSearch result and the new documentation] - 2022-08-22
 
