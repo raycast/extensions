@@ -43,3 +43,9 @@ export function ensureMinMax(v1: number, v2: number): [min: number, max: number]
 export function getFriendlyName(state: State): string {
   return state.attributes.friendly_name || state.entity_id;
 }
+
+export function getStateTooltip(state: State): string {
+  const lastChanged = formatToHumanDateTime(state.last_changed) || "?";
+  const lastUpdated = formatToHumanDateTime(state.last_updated) || "?";
+  return `Last Changed: ${lastChanged}\nLast Updated: ${lastUpdated}`;
+}
