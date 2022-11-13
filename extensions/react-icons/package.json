@@ -2,19 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "react-icons",
   "title": "React Icons",
-  "description": "Browse and use React Icon",
+  "description": "Search and copy or paste react-icons",
   "icon": "default-icon.png",
   "author": "teziovsky",
   "categories": [
     "Developer Tools",
-    "Productivity"
+    "Productivity",
+    "Design Tools"
   ],
   "license": "MIT",
   "preferences": [
     {
       "name": "primaryAction",
       "title": "Primary Action",
-      "description": "Primary action to perform when an icon is selected",
+      "description": "Primary action to perform when an icon is selected and pressed ↵",
       "type": "dropdown",
       "required": true,
       "default": "copyJSX",
@@ -48,7 +49,7 @@
     {
       "name": "secondaryAction",
       "title": "Secondary Action",
-      "description": "Secondary action to perform when an icon is selected",
+      "description": "Secondary action to perform when an icon is selected and pressed ⌘+↵",
       "type": "dropdown",
       "required": true,
       "default": "copySVG",
@@ -269,8 +270,8 @@
     "react-icons": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "18.11.9",
+    "@types/react": "18.0.25",
     "@types/react-dom": "^18.0.8",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
