@@ -7,6 +7,7 @@ import * as miro from "./oauth/miro";
 export default function ListMembers({ id }: { id: string }) {
   const { isLoading, data, revalidate } = useCachedPromise(
     async () => {
+      await miro.authorize();
       return await miro.getBoardMembers(id);
     },
     [],
