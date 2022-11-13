@@ -15,14 +15,12 @@ export class XcodeSimulatorApplicationService {
   static async xcodeSimulatorApplications(): Promise<XcodeSimulatorApplication[]> {
     // Retrieve all Simulators
     const simulators = await XcodeSimulatorService.xcodeSimulators();
-    // Find all Applications installed in each XcodeSimulator in parallel
-    const allApplications = await Promise.all(
-      simulators.map(XcodeSimulatorApplicationService.findXcodeSimulatorApplications)
+    // Find all Applications installed in each XcodeSimulator
+    return ([] as XcodeSimulatorApplication[]).concat(
+      ...(
+        await Promise.allSettled(simulators.map(XcodeSimulatorApplicationService.findXcodeSimulatorApplications))
+      ).map((result) => (result.status === "fulfilled" ? result.value : []))
     );
-    // Flat map 2D Array to 1D
-    const applications = ([] as XcodeSimulatorApplication[]).concat(...allApplications);
-    // Return Applications
-    return applications;
   }
 
   /**
@@ -94,15 +92,17 @@ export class XcodeSimulatorApplicationService {
       sandBoxBundleIdDirectoryPathMap.set(bundleId, sandBoxDirectoryPath);
     }
     // Retrieve all Applications in parallel
-    const applications = await Promise.all(
-      applicationDirectoryPaths.map((applicationDirectoryPath) => {
-        return XcodeSimulatorApplicationService.findXcodeSimulatorApplication(
-          simulator,
-          applicationDirectoryPath,
-          sandBoxBundleIdDirectoryPathMap
-        );
-      })
-    );
+    const applications = (
+      await Promise.allSettled(
+        applicationDirectoryPaths.map((applicationDirectoryPath) => {
+          return XcodeSimulatorApplicationService.findXcodeSimulatorApplication(
+            simulator,
+            applicationDirectoryPath,
+            sandBoxBundleIdDirectoryPathMap
+          );
+        })
+      )
+    ).map((result) => (result.status === "fulfilled" ? result.value : undefined));
     // Filter out falsy values and return Applications
     return applications.filter((application) => !!application) as XcodeSimulatorApplication[];
   }

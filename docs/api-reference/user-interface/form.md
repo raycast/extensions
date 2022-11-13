@@ -851,6 +851,144 @@ export default function Command() {
 }
 ```
 
+### Form.FilePicker
+
+A form item with a button to open a dialog to pick some files and/or some directories (depending on its props).
+
+{% hint style="info" %}
+While the user picked some items that existed, it might be possible for them to be deleted or changed when the `onSubmit` callback is called. Hence you should always make sure that the items exist before acting on them!
+{% endhint %}
+
+![](../../.gitbook/assets/form-filepicker-multiple.png)
+
+![Single Selection](../../.gitbook/assets/form-filepicker-single.png)
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const files = values.files.filter(
+                file => fs.existsSync(values.file) && fs.lstatSync(values.file).isFile()
+              )
+              // do something with the files
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Single selection file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isFile()) {
+                return false;
+              }
+              // do something with the file
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Directory picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
+              const file = values.file[0]
+              if (!fs.existsSync(file) || fs.lstatSync(file).isDirectory()) {
+                return false;
+              }
+              // do something with the directory
+            } />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="file" allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Controlled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [files, setFiles] = useState<string[]>([]);
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" value={files} onChange={setFiles} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+<PropsTableFromJSDoc component="Form.FilePicker" />
+
+#### Methods (Imperative API)
+
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
 ### Form.Description
 
 A form item with a simple text label.

@@ -1,5 +1,8 @@
 # Brew Changelog
 
+## [Updated dependencies] - 2022-11-11
+
+- Upgraded to latest node dependencies. Should fix a memory issue.
 
 ## [Improvements] - 2022-08-17
 

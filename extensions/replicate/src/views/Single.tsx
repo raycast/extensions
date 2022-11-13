@@ -19,7 +19,7 @@ export const Single = ({ prediction }: { prediction: Prediction }) => {
           <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Open on Replicate.com"
+            title="Open on Replicate"
             url={`https://replicate.com/p/${id.split("-")[0]}`}
           />
           {input?.prompt && (
