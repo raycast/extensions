@@ -1,3 +1,5 @@
+import { ElementType } from "react";
+
 export type TIconPath =
   | "AntDesignIcons"
   | "BootstrapIcons"
@@ -25,3 +27,7 @@ export type TIconPath =
   | "VSCodeIcons"
   | "WeatherIcons"
   | "CssGG";
+
+export type Actions = "copyJSX" | "copySVG" | "copyName" | "pasteJSX" | "pasteSVG" | "pasteName";
+
+export type ActionFunction = (name: string, IconComponent: ElementType) => JSX.Element;

@@ -1,32 +1,38 @@
-import { Action, ActionPanel, Color, Grid, getPreferenceValues } from "@raycast/api";
-import { TIconPath } from "../types";
+import { ActionPanel, Color, getPreferenceValues, Grid } from "@raycast/api";
+import { ElementType } from "react";
+import { ActionFunction, Actions, TIconPath } from "../types";
+import { actions } from "../utils/actions";
 
 type Preferences = {
-  primaryAction: "copyName" | "copyJSX" | "copySVG" | "pasteName" | "pasteJSX" | "pasteSVG";
-  secondaryAction: "copyName" | "copyJSX" | "copySVG" | "pasteName" | "pasteJSX" | "pasteSVG";
-}
+  primaryAction: Actions;
+  secondaryAction: Actions;
+};
 
 type Props = {
-  icons: Record<string, object>;
+  icons: Record<string, ElementType>;
   path: TIconPath;
 };
 
 export function GridComponent({ icons, path }: Props) {
   const { primaryAction, secondaryAction } = getPreferenceValues<Preferences>();
-  console.log("primaryAction: ", primaryAction);
-  console.log("secondaryAction: ", secondaryAction);
+  const {
+    [primaryAction]: primaryPreferredAction,
+    [secondaryAction]: secondaryPreferredAction,
+    ...restActions
+  } = actions;
 
   return (
     <Grid itemSize={Grid.ItemSize.Small} inset={Grid.Inset.Small}>
-      {Object.keys(icons).map((name) => (
+      {Object.entries(icons).map(([name, IconComponent]) => (
         <Grid.Item
           key={name}
           content={{ value: { source: `${path}/${name}.svg`, tintColor: Color.PrimaryText }, tooltip: name }}
           title={name}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Name" content={name} />
-              <Action.Paste title="Paste Name" content={name} />
+              {primaryPreferredAction(name, IconComponent)}
+              {secondaryPreferredAction(name, IconComponent)}
+              {Object.values<ActionFunction>(restActions).map((action) => action(name, IconComponent))}
             </ActionPanel>
           }
         />
