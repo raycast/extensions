@@ -410,7 +410,7 @@ export default function Command() {
         </List.Dropdown.Section>
       </List.Dropdown>
     }>
-      <List.Item title="Item in the Main List">
+      <List.Item title="Item in the Main List" />
     </List>
   );
 }
