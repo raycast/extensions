@@ -28,15 +28,6 @@ export type TIconPath =
   | "WeatherIcons"
   | "CssGG";
 
-export type Actions =
-  | "copyJSX"
-  | "copySVG"
-  | "copyName"
-  | "pasteJSX"
-  | "pasteSVG"
-  | "pasteName";
+export type Actions = "copyJSX" | "copySVG" | "copyName" | "pasteJSX" | "pasteSVG" | "pasteName";
 
-export type ActionFunction = (
-  name: string,
-  IconComponent: ElementType
-) => JSX.Element;
+export type ActionFunction = (name: string, IconComponent: ElementType) => JSX.Element;

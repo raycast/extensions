@@ -287,7 +287,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "generate": "ts-node src/scripts/generate-icons.tsx"
+    "publish": "ray publish"
   }
 }

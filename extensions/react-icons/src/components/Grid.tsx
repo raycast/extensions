@@ -1,7 +1,9 @@
 import { ActionPanel, Color, getPreferenceValues, Grid } from "@raycast/api";
 import { ElementType } from "react";
-import { ActionFunction, Actions, TIconPath } from "../types";
+import { renderToStaticMarkup } from "react-dom/server";
+import { ActionFunction, Actions } from "../types";
 import { actions } from "../utils/actions";
+import { transformJsxToHtml } from "../utils/transforms";
 
 type Preferences = {
   primaryAction: Actions;
@@ -10,10 +12,9 @@ type Preferences = {
 
 type Props = {
   icons: Record<string, ElementType>;
-  path: TIconPath;
 };
 
-export function GridComponent({ icons, path }: Props) {
+export function GridComponent({ icons }: Props) {
   const { primaryAction, secondaryAction } = getPreferenceValues<Preferences>();
   const {
     [primaryAction]: primaryPreferredAction,
@@ -28,7 +29,7 @@ export function GridComponent({ icons, path }: Props) {
           key={name}
           content={{
             value: {
-              source: `${path}/${name}.svg`,
+              source: `data:image/svg+xml;base64,${btoa(transformJsxToHtml(renderToStaticMarkup(<IconComponent />)))}`,
               tintColor: Color.PrimaryText,
             },
             tooltip: name,
@@ -38,9 +39,7 @@ export function GridComponent({ icons, path }: Props) {
             <ActionPanel>
               {primaryPreferredAction(name, IconComponent)}
               {secondaryPreferredAction(name, IconComponent)}
-              {Object.values<ActionFunction>(restActions).map((action) =>
-                action(name, IconComponent)
-              )}
+              {Object.values<ActionFunction>(restActions).map((action) => action(name, IconComponent))}
             </ActionPanel>
           }
         />
