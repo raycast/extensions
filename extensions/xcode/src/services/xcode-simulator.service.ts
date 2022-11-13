@@ -2,6 +2,10 @@ import { XcodeSimulator } from "../models/xcode-simulator/xcode-simulator.model"
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulatorGroup } from "../models/xcode-simulator/xcode-simulator-group.model";
 import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
+import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulator-app-action.model";
+import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
+import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
+import { groupBy } from "../shared/group-by";
 
 /**
  * XcodeSimulatorService
@@ -12,23 +16,11 @@ export class XcodeSimulatorService {
    */
   static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
     const simulators = await XcodeSimulatorService.xcodeSimulators();
-    const groupMap = new Map<string, XcodeSimulator[]>();
-    for (const simulator of simulators) {
-      const groupedSimulators = groupMap.get(simulator.runtime);
-      if (groupedSimulators) {
-        groupedSimulators.push(simulator);
-      } else {
-        groupMap.set(simulator.runtime, [simulator]);
-      }
-    }
-    const xcodeSimulatorGroups: XcodeSimulatorGroup[] = [];
-    for (const [runtime, simulators] of groupMap.entries()) {
-      xcodeSimulatorGroups.push({
-        runtime,
-        simulators,
-      });
-    }
-    return xcodeSimulatorGroups.sort((lhs, rhs) => lhs.runtime.localeCompare(rhs.runtime));
+    return groupBy(simulators, (simulator) => simulator.runtime)
+      .map((group) => {
+        return { runtime: group.key, simulators: group.values };
+      })
+      .sort((lhs, rhs) => lhs.runtime.localeCompare(rhs.runtime));
   }
 
   /**
@@ -98,18 +90,26 @@ export class XcodeSimulatorService {
     }
   }
 
-  /**
-   * Launch an application by its bundle identifier on a given XcodeSimulator
-   * @param bundleIdentifier The bundle identifier of the application which should be launched
-   * @param xcodeSimulator The XcodeSimulator
-   */
-  static async launchApp(bundleIdentifier: string, xcodeSimulator: XcodeSimulator): Promise<void> {
+  static async app(
+    action: XcodeSimulatorAppAction,
+    bundleIdentifier: string,
+    xcodeSimulator: XcodeSimulator
+  ): Promise<void> {
     try {
       // Boot Xcode Simulator and ignore any errors
       await XcodeSimulatorService.boot(xcodeSimulator);
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
-    return execAsync(`xcrun simctl launch ${xcodeSimulator.udid} ${bundleIdentifier}`).then();
+    return execAsync(`xcrun simctl ${action} ${xcodeSimulator.udid} ${bundleIdentifier}`).then();
+  }
+
+  static appPrivacy(
+    action: XcodeSimulatorAppPrivacyAction,
+    serviceType: XcodeSimulatorAppPrivacyServiceType,
+    bundleIdentifier: string,
+    xcodeSimulator: XcodeSimulator
+  ): Promise<void> {
+    return execAsync(`xcrun simctl privacy ${xcodeSimulator.udid} ${action} ${serviceType} ${bundleIdentifier}`).then();
   }
 }
