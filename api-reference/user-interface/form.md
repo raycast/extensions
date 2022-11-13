@@ -1020,11 +1020,11 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Submit Name" onSubmit={(values) => {
               const file = values.file[0]
-              if (!fs.existsSync(file) || fs.lstatSync(file).isFile()) {
+              if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
                 return false;
               }
               // do something with the file
-            } />
+            }} />
         </ActionPanel>
       }
     >
