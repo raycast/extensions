@@ -1,3 +1,6 @@
 # React Icons Changelog
 
-## [Initial Version] - 2022-11-10
+## [Added React Icons] - 2022-11-10
+
+Initial version code
+
