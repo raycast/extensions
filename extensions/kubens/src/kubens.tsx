@@ -27,11 +27,7 @@ const Command: React.FC = () => {
           icon={getAccessoryIcon(item)}
           actions={
             <ActionPanel>
-              <Action
-                title={`Switch to ${item}`}
-                icon={Icon.Checkmark}
-                onAction={() => handleSwitchNamespace(item)}
-              />
+              <Action title={`Switch to ${item}`} icon={Icon.Checkmark} onAction={() => handleSwitchNamespace(item)} />
               <Action.CopyToClipboard content={item} />
             </ActionPanel>
           }
