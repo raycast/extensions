@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, List, Icon } from "@raycast/api";
 import React from "react";
 import sanitizeHtml from "sanitize-html";
 import { News } from "./api";
@@ -16,8 +16,8 @@ export default class NewsItem extends React.Component<Props> {
   get actions() {
     return (
       <ActionPanel>
-        <Action.Push title="Read" target={this.details} />
-        <Action.OpenInBrowser title="Open in Browser" url={this.props.news.url} />
+        <Action.Push title="Read" icon={Icon.AppWindowSidebarRight} target={this.details} />
+        <Action.OpenInBrowser url={this.props.news.url} />
       </ActionPanel>
     );
   }
