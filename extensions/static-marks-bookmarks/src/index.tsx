@@ -26,6 +26,7 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+            <Action.CopyToClipboard title="Copy Link" content={searchResult.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
