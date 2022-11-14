@@ -236,8 +236,7 @@ export class XcodeSimulatorApplicationService {
         ).stdout.trim();
         // eslint-disable-next-line no-empty
       } catch {
-        // Ignore error as we continue with a fallback mechanism
-        // if the command fails which usually occurs if the simulator is not booted
+        // Ignore error as we continue with the fallback mechanism
       }
     }
     // Initialize simulator sandbox paths promise by using the cache
