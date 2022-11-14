@@ -2,6 +2,14 @@ import type { IAPIData } from "./types";
 
 export default <IAPIData[]>[
   {
+    name: "Apollo",
+    icon: "../assets/logo/apollo.png",
+    apiKey: "ef1ac4e3c439bc17a8e7572700691efc",
+    appId: "Q0CJ63JM7B",
+    indexName: "docs",
+    homepage: "https://www.apollographql.com/docs",
+  },
+  {
     name: "Arthas",
     icon: "../assets/logo/arthas.ico",
     apiKey: "03fb4b6577b57b5dafc792d9ddf66508",
@@ -19,6 +27,14 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["version:5.1"],
     },
+  },
+  {
+    name: "Clerk",
+    icon: "../assets/logo/clerk.png",
+    apiKey: "52385d30a5ca4460564defe5b2d0ffb1",
+    appId: "RA7W9NZP4T",
+    indexName: "prod_sanity",
+    homepage: "https://clerk.dev",
   },
   {
     name: "Dubbo",
@@ -191,6 +207,17 @@ export default <IAPIData[]>[
   {
     name: "Slidev",
     icon: "../assets/logo/slidev.png",
+    apiKey: "1ff173fe73b20edc962c1c24c0b1c160",
+    appId: "LCBV6MIFS6",
+    indexName: "slidev",
+    homepage: "https://sli.dev/",
+    searchParameters: {
+      facetFilters: ["language:en"],
+    },
+  },
+  {
+    name: "Slidev",
+    icon: "../assets/logo/slidev.png",
     apiKey: "1a5c5a504139c58f428974c78c55291d",
     appId: "BH4D9OD16A",
     indexName: "slidev",
@@ -199,6 +226,14 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["language:cn"],
     },
+  },
+  {
+    name: "Supabase",
+    icon: "../assets/logo/supabase.png",
+    apiKey: "0424becc4055d51ec60e54cc37df5574",
+    appId: "B3Z5XYG8NS",
+    indexName: "prod_docs",
+    homepage: "https://supabase.com/docs",
   },
   {
     name: "TailwindCSS v3",
