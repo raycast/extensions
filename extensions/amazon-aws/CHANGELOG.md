@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Lambda Command] - 2022-11-15
+
+Added a new command to list Lambda functions ([#TODO](https://github.com/raycast/extensions/pull/TODO))
+
 ## [Improve Data Fetching] - 2022-11-14
 
 Use Raycast's API for all data fetching ([#3421](https://github.com/raycast/extensions/pull/3421))

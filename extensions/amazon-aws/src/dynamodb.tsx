@@ -1,11 +1,10 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 
-import { Preferences } from "./types";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
 
-setupAws();
+const preferences = setupAws();
 const dynamoDB = new AWS.DynamoDB();
 
 export default function ListDynamoDbTables() {
@@ -27,8 +26,6 @@ export default function ListDynamoDbTables() {
 }
 
 function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
-  const preferences = getPreferenceValues<Preferences>();
-
   return (
     <List.Item
       title={tableName || "Unknown Table name"}

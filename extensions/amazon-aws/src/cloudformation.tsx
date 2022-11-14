@@ -1,11 +1,10 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import * as AWS from "aws-sdk";
-import { Preferences } from "./types";
 import { StackSummary } from "aws-sdk/clients/cloudformation";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
 
-setupAws();
+const preferences = setupAws();
 const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
 export default function ListStacks() {
@@ -27,8 +26,6 @@ export default function ListStacks() {
 }
 
 function CloudFormationStack({ stack }: { stack: StackSummary }) {
-  const preferences = getPreferenceValues<Preferences>();
-
   return (
     <List.Item
       id={stack.StackName}

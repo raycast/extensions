@@ -1,11 +1,10 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
+import { ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import chunk from "lodash/chunk";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
-import { Preferences } from "./types";
 
-setupAws();
+const preferences = setupAws();
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
@@ -28,7 +27,6 @@ export default function ListSQSQueues() {
 }
 
 function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
-  const preferences = getPreferenceValues<Preferences>();
   const queue = props.queue;
   const attr = props.attributes;
   const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");

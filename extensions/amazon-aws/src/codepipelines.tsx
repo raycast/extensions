@@ -1,11 +1,10 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
+import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
 import * as AWS from "aws-sdk";
-import { Preferences } from "./types";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
 import { PipelineSummary } from "aws-sdk/clients/codepipeline";
 
-setupAws();
+const preferences = setupAws();
 const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
@@ -27,7 +26,6 @@ export default function DescribeInstances() {
 }
 
 function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
-  const preferences = getPreferenceValues<Preferences>();
   const { data: execution } = useCachedPromise(fetchExecutionState, [pipeline.name]);
 
   const status = execution?.status || "Idle";
