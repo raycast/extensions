@@ -2,7 +2,7 @@
 
 ## [Lambda Command] - 2022-11-15
 
-Added a new command to list Lambda functions ([#TODO](https://github.com/raycast/extensions/pull/TODO))
+Added a new command to list Lambda functions ([#3525](https://github.com/raycast/extensions/pull/3525))
 
 ## [Improve Data Fetching] - 2022-11-14
 
