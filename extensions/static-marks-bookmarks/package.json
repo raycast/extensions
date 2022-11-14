@@ -24,12 +24,12 @@
   ],
   "preferences": [
     {
-      "name": "static-mark-yaml-url",
-      "description": "The url where your Static Marks YAML file is located",
+      "name": "static-mark-yaml-file",
+      "description": "The absolute path or public url where your Static Marks YAML file is located. Defaults to: `/Users/[user folder]/bookmarks.yml`",
       "type": "textfield",
-      "placeholder": "https://raw.githubusercontent.com/../bookmarks.yml",
-      "required": true,
-      "title": "Static Marks YAML URL"
+      "placeholder": "/Users/[user folder]/bookmarks.yml",
+      "required": false,
+      "title": "Static Marks YAML File"
     }
   ],
   "dependencies": {

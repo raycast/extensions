@@ -1,10 +1,16 @@
-import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
-import { useFetch, getFavicon } from "@raycast/utils";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getFavicon, useCachedPromise } from "@raycast/utils";
+import os from "os";
+import fs from "fs/promises";
+import { useRef } from "react";
 import YAML from "yaml";
 
+const bookmarksFile = getPreferenceValues()["static-mark-yaml-file"] || `${os.homedir()}/bookmarks.yml`;
+
 export default function Command() {
-  const { data, isLoading } = useFetch(getPreferenceValues()["static-mark-yaml-url"], {
-    parseResponse: parseFetchYamlResponse,
+  const abortable = useRef<AbortController>();
+  const { isLoading, data } = useCachedPromise(parseFetchYamlResponse, [bookmarksFile], {
+    abortable,
   });
 
   return (
@@ -35,16 +41,30 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
   );
 }
 
-async function parseFetchYamlResponse(response: Response) {
-  const json = YAML.parse(await response.text());
+async function parseFetchYamlResponse(url: string) {
+  try {
+    let bookmarks = "";
 
-  const linkResults = flattenYaml(json, [], "");
+    if (url.startsWith("http")) {
+      const bookmarksUrlRes = await fetch(url);
+      if (bookmarksUrlRes.status === 404) throw new Error("YAML file not found");
 
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
+      bookmarks = await bookmarksUrlRes.text();
+    } else {
+      bookmarks = await fs.readFile(url, "utf8");
+    }
+
+    const json = YAML.parse(bookmarks);
+    const linkResults = flattenYaml(json, [], "");
+
+    return linkResults;
+  } catch (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: (error as Error).message,
+    });
   }
-
-  return linkResults;
 }
 
 function flattenYaml(json: unknown[], linkResults: LinkResult[], parentKey: string): LinkResult[] {
