@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, getFavicon } from "@raycast/utils";
 import YAML from "yaml";
 
 export default function Command() {
@@ -22,6 +22,7 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
   return (
     <List.Item
       title={searchResult.name}
+      icon={getFavicon(searchResult.url)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
