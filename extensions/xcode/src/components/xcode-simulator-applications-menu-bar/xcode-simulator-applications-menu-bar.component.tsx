@@ -17,10 +17,10 @@ export function XcodeSimulatorApplicationsMenuBar(): JSX.Element {
       tooltip="Show Recent Builds"
     >
       <MenuBarExtra.Section title={"Recent Builds"} />
+      <MenuBarExtra.Separator />
       {!xcodeSimulatorApplicationsGroups.isLoading && !xcodeSimulatorApplicationsGroups.data?.length ? (
         <MenuBarExtra.Item title={"No recent builds"} />
       ) : undefined}
-      <MenuBarExtra.Separator />
       {xcodeSimulatorApplicationsGroups.data?.map((group) => (
         <MenuBarExtra.Section key={group.simulator.udid} title={`${group.simulator.name} (${group.simulator.runtime})`}>
           {group.applications.map((application) => (
