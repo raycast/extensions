@@ -5,6 +5,7 @@ import { XcodeSimulatorAppAction } from "../../models/xcode-simulator/xcode-simu
 import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simulator-app-privacy-service-type-name";
+import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
 
 /**
  * Xcode Simulator Applications Menu Bar Item
@@ -106,6 +107,11 @@ export function XcodeSimulatorApplicationsMenuBarItem(props: { application: Xcod
             props.application.simulator
           )
         }
+      />
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        title={`Delete Derived Data for ${props.application.name}`}
+        onAction={() => XcodeCleanupService.removeDerivedData(props.application.name)}
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item title={`Version: ${props.application.version} (${props.application.buildNumber})`} />

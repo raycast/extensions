@@ -5,6 +5,7 @@ import { XcodeSimulatorAppAction } from "../../models/xcode-simulator/xcode-simu
 import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simulator-app-privacy-service-type-name";
+import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
 
 /**
  * Xcode Simulator Application List Item
@@ -80,6 +81,13 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
                 )
               }
               shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            />
+            <Action
+              icon={Icon.Trash}
+              title="Delete Derived Data"
+              style={Action.Style.Destructive}
+              onAction={() => XcodeCleanupService.removeDerivedData(props.application.name)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Permissions">

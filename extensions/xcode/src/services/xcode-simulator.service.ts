@@ -90,6 +90,12 @@ export class XcodeSimulatorService {
     }
   }
 
+  /**
+   * Perform a XcodeSimulator AppAction
+   * @param action The XcodeSimulatorAppAction
+   * @param bundleIdentifier The bundle identifier of the application
+   * @param xcodeSimulator The XcodeSimulator
+   */
   static async app(
     action: XcodeSimulatorAppAction,
     bundleIdentifier: string,
@@ -101,15 +107,29 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
-    return execAsync(`xcrun simctl ${action} ${xcodeSimulator.udid} ${bundleIdentifier}`).then();
+    return execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" ")).then();
   }
 
-  static appPrivacy(
+  /**
+   * Perform a XcodeSimulator AppPrivacyAction for a given AppPrivacyServiceType
+   * @param action The XcodeSimulatorAppPrivacyAction
+   * @param serviceType The XcodeSimulatorAppPrivacyServiceType
+   * @param bundleIdentifier The bundle identifier of the application
+   * @param xcodeSimulator The XcodeSimulator
+   */
+  static async appPrivacy(
     action: XcodeSimulatorAppPrivacyAction,
     serviceType: XcodeSimulatorAppPrivacyServiceType,
     bundleIdentifier: string,
     xcodeSimulator: XcodeSimulator
   ): Promise<void> {
-    return execAsync(`xcrun simctl privacy ${xcodeSimulator.udid} ${action} ${serviceType} ${bundleIdentifier}`).then();
+    try {
+      // Boot Xcode Simulator and ignore any errors
+      await XcodeSimulatorService.boot(xcodeSimulator);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    return execAsync(
+      ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
+    ).then();
   }
 }

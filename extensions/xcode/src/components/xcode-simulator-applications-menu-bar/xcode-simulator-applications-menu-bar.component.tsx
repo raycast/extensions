@@ -1,4 +1,4 @@
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { XcodeSimulatorApplicationService } from "../../services/xcode-simulator-application.service";
 import { XcodeSimulatorApplicationsMenuBarItem } from "./xcode-simulator-applications-menu-bar-item.component";
@@ -7,13 +7,18 @@ import { XcodeSimulatorApplicationsMenuBarItem } from "./xcode-simulator-applica
  * Xcode Simulator Applications Menu Bar
  */
 export function XcodeSimulatorApplicationsMenuBar(): JSX.Element {
-  const xcodeSimulatorApplicationsGroups = usePromise(XcodeSimulatorApplicationService.xcodeSimulatorApplicationGroups);
+  const xcodeSimulatorApplicationsGroups = useCachedPromise(
+    XcodeSimulatorApplicationService.xcodeSimulatorApplicationGroups
+  );
   return (
-    <MenuBarExtra isLoading={xcodeSimulatorApplicationsGroups.isLoading} icon={Icon.Mobile}>
+    <MenuBarExtra
+      isLoading={xcodeSimulatorApplicationsGroups.isLoading}
+      icon={Icon.Mobile}
+      tooltip="Show Recent Builds"
+    >
       <MenuBarExtra.Section title={"Recent Builds"} />
-      {xcodeSimulatorApplicationsGroups.isLoading ? <MenuBarExtra.Item title={"Loading..."} /> : undefined}
       {!xcodeSimulatorApplicationsGroups.isLoading && !xcodeSimulatorApplicationsGroups.data?.length ? (
-        <MenuBarExtra.Item title={"No Simulators booted"} />
+        <MenuBarExtra.Item title={"No recent builds"} />
       ) : undefined}
       <MenuBarExtra.Separator />
       {xcodeSimulatorApplicationsGroups.data?.map((group) => (

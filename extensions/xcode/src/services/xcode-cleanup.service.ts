@@ -1,5 +1,8 @@
 import { execAsync } from "../shared/exec-async";
 import { runAppleScript } from "../shared/run-apple-script";
+import { readDirectoryAsync } from "../shared/fs-async";
+import Path from "path";
+import untildify from "untildify";
 
 /**
  * XcodeCleanupService
@@ -17,6 +20,23 @@ export class XcodeCleanupService {
       "end if",
       "end tell",
     ]).then();
+  }
+
+  /**
+   * Remove Derived Data directory for a given app
+   * @param appName The name of the app
+   */
+  static removeDerivedData(appName: string): Promise<void> {
+    const derivedDataPath = untildify("~/Library/Developer/Xcode/DerivedData");
+    return readDirectoryAsync(derivedDataPath).then((directories) => {
+      const directory = directories.find((directory) => directory.split("-").slice(0, -1).join("-") === appName);
+      if (!directory) {
+        return Promise.resolve();
+      }
+      return runAppleScript(
+        `tell application "Finder" to delete POSIX file "${Path.join(derivedDataPath, directory)}"`
+      ).then();
+    });
   }
 
   /**
