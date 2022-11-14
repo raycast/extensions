@@ -3,6 +3,7 @@
 ## [Bug Fix] - 2022-11-14
 
 - Reduce memory requirements for the "Search" command.
+- Improve caching logic
 
 ## [Updated dependencies] - 2022-11-11
 

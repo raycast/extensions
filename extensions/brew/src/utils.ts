@@ -80,18 +80,19 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
     await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
   }
 
-  let cacheTime = 0;
-  let lastModified = NaN;
+  let cacheInfo: fs.Stats | undefined;
+  let lastModified = 0;
 
   try {
-    cacheTime = (await stat(remote.cachePath)).mtimeMs;
+    cacheInfo = await stat(remote.cachePath);
     const response = await fetch(remote.url, { method: "HEAD" });
     lastModified = Date.parse(response.headers.get("last-modified") ?? "");
   } catch {
     console.log("Missed cache:", remote.cachePath); // keep prettier happy :-(
   }
 
-  if (isNaN(lastModified) || lastModified > cacheTime) {
+  // We check for a minimum size in case we received some invalid cache due to a previous error
+  if (!cacheInfo || cacheInfo.size < 1024 || lastModified > cacheInfo.mtimeMs) {
     await fetchURL();
   }
 
