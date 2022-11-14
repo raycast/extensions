@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 export const useJSON = () => {
   const [text, setText] = useState<string>();
   useEffect(() => {
-    Clipboard.readText().then(json => {
+    Clipboard.readText().then((json) => {
       try {
         if (!json) throw new Error("No content");
         const decoded = JSON.parse(json);
@@ -15,4 +15,4 @@ export const useJSON = () => {
     });
   }, []);
   return [text];
-}
+};

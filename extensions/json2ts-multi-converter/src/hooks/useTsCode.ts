@@ -4,28 +4,31 @@ import { Library } from "../types";
 import { useJSON } from "./useJson";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const libJson2ts = require('json2ts');
+const libJson2ts = require("json2ts");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { json2ts } = require('json-ts');
+const { json2ts } = require("json-ts");
 
 const headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 };
 
 const useTsCode = () => {
   const [json] = useJSON();
   const [code, setCode] = useState<string>();
-  const [markdown, setMarkdown] = useState<string>('No JSON data found in clipboard.');
-  const [lib] = useCachedState<string>('lib');
+  const [markdown, setMarkdown] = useState<string>("No JSON data found in clipboard.");
+  const [lib] = useCachedState<string>("lib");
   const libURL = useMemo(() => {
     switch (lib) {
       case Library.JSON2TS_COM_API:
-        return 'http://json2ts.com'
+        return "http://json2ts.com";
       default:
-        return `http://github.com/${lib}`
+        return `http://github.com/${lib}`;
     }
   }, []);
-  const getMarkdown = useCallback((code: string) => code ? `
+  const getMarkdown = useCallback(
+    (code: string) =>
+      code
+        ? `
 use converter [${lib}](${libURL})
 
 ---
@@ -34,18 +37,21 @@ use converter [${lib}](${libURL})
 ${code}
 \`\`\`
 
-` : '', [lib, libURL]);
+`
+        : "",
+    [lib, libURL]
+  );
   const body = useMemo(() => {
-    if (!json) return '';
+    if (!json) return "";
     const urlParams = new URLSearchParams();
-    urlParams.append('ns', 'someModule');
-    urlParams.append('code', json);
-    urlParams.append('root', 'root');
+    urlParams.append("ns", "someModule");
+    urlParams.append("code", json);
+    urlParams.append("root", "root");
     return urlParams.toString();
   }, [json]);
-  const fetchData = useFetch('http://json2ts.com/Home/GetTypeScriptDefinition', {
+  const fetchData = useFetch("http://json2ts.com/Home/GetTypeScriptDefinition", {
     execute: false,
-    method: 'POST',
+    method: "POST",
     headers,
     body,
     onError(error) {
@@ -55,11 +61,11 @@ ${code}
       return JSON.parse(await response.text());
     },
     onData: (data) => {
-      if (data.includes('declare module')) {
+      if (data.includes("declare module")) {
         setCode(data);
         setMarkdown(getMarkdown(data));
       } else {
-        setMarkdown('# Network error, try other converter.');
+        setMarkdown("# Network error, try other converter.");
       }
     },
   });
@@ -87,12 +93,12 @@ ${code}
       }
       case Library.JSON2TS_COM_API: {
         if (!json) return;
-        setMarkdown('# Loading...');
+        setMarkdown("# Loading...");
         fetchData.revalidate();
       }
     }
   }, [json, lib]);
   return [{ code, markdown, loading }];
-}
+};
 
 export default useTsCode;

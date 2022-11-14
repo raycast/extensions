@@ -1,13 +1,4 @@
-import {
-  Icon,
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  useNavigation,
-  popToRoot,
-  closeMainWindow,
-} from "@raycast/api";
+import { Icon, Action, ActionPanel, Clipboard, Detail, useNavigation, popToRoot, closeMainWindow } from "@raycast/api";
 import useTsCode from "./hooks/useTsCode";
 import LibSelectForm from "./lib-select-form";
 
@@ -34,8 +25,8 @@ export default function main() {
           <Action
             icon={Icon.Gear}
             shortcut={{
-              modifiers: ['cmd'],
-              key: 't'
+              modifiers: ["cmd"],
+              key: "t",
             }}
             title="Change convert library. "
             onAction={() => nav.push(<LibSelectForm />)}
