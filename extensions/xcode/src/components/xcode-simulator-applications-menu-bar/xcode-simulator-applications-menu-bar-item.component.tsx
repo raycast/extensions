@@ -13,11 +13,7 @@ import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
 export function XcodeSimulatorApplicationsMenuBarItem(props: { application: XcodeSimulatorApplication }): JSX.Element {
   return (
     <MenuBarExtra.Submenu
-      icon={
-        props.application.appIconPath
-          ? { source: props.application.appIconPath, mask: Image.Mask.RoundedRectangle }
-          : undefined
-      }
+      icon={{ source: props.application.appIconPath ?? "app-icon-placeholder.png", mask: Image.Mask.RoundedRectangle }}
       title={props.application.name}
     >
       {Object.keys(XcodeSimulatorAppPrivacyAction).map((privacyAction) => (
