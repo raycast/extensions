@@ -19,7 +19,7 @@ The extension has one command. The command is a simple form with a textfield for
 First, we render the static form. For this we add all the mentioned form items:
 
 ```typescript
-import { Form } from "@raycast/api";
+import { Form, showToast, Toast } from "@raycast/api";
 
 export default function Command() {
   return (
