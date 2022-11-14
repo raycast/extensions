@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { getPreferenceValues, popToRoot, showToast, Toast } from '@raycast/api'
+import { getPreferenceValues, openExtensionPreferences, showToast, Toast } from '@raycast/api'
 import { URL } from 'url'
 
 type Params = { [key: string]: string | number | undefined }
@@ -47,16 +47,18 @@ export class ScalewayAPI {
 }
 
 export async function catchError(error: unknown, message?: string) {
-  if ((error as { message: string })?.message === 'You do not have the permission') {
+  if ((error as { type: string })?.type === 'denied_authentication') {
     await showToast({
       style: Toast.Style.Failure,
       title: 'Invalid Credentials',
       message: 'Check your API token and try again.',
+      primaryAction: {
+        title: 'Open Preferences',
+        onAction: () => openExtensionPreferences(),
+      },
     })
-    await popToRoot({ clearSearchBar: true })
     return
   }
-  console.error(error)
 
   await showToast({
     title: message || 'Failed to fetch data',
