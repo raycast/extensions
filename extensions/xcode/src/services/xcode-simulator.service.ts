@@ -33,8 +33,8 @@ export class XcodeSimulatorService {
     const devicesResponseJSON = JSON.parse(output.stdout);
     // Check if JSON or devices within the JSON are not available
     if (!devicesResponseJSON || !devicesResponseJSON.devices) {
-      // Throw Error
-      throw new Error("Simulators are unavailable");
+      // Return empty simulators array
+      throw [];
     }
     // Initialize XcodeSimulators
     const simulators: XcodeSimulator[] = [];
