@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 import { Item } from "./types";
 import { getItem, getItems, saveItems } from "./storage";
-import { showHUD } from "@raycast/api";
+import { launchCommand, LaunchType } from "@raycast/api";
 
 export const playSoundFromIndex = async (index: number) => {
   const sound = await getItem(index);
@@ -10,7 +10,7 @@ export const playSoundFromIndex = async (index: number) => {
     return;
   }
 
-  await showHUD(`❌ Favourite #${index} is not defined`);
+  launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { index: index } });
 };
 
 export const playFile = async (item: Item) => {

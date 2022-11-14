@@ -1,4 +1,15 @@
-import { ActionPanel, Action, List, Icon, confirmAlert, Color, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  confirmAlert,
+  Color,
+  useNavigation,
+  showToast,
+  Toast,
+  environment,
+} from "@raycast/api";
 import { getItems } from "./storage";
 import { Item } from "./types";
 import { useState, useEffect } from "react";
@@ -12,7 +23,13 @@ export default function Command() {
 
   useEffect(() => {
     (async () => {
-      setConnectionsList(await getItems());
+      const items = await getItems();
+      setConnectionsList(items);
+
+      if (environment.launchContext && items.length === 0) {
+        showToast(Toast.Style.Failure, "No sounds found", "Create a sound to get started");
+      }
+
       setLoading(false);
     })();
   }, []);
