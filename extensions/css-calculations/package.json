@@ -44,8 +44,5 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  },
-  "volta": {
-    "node": "16.15.1"
   }
 }
