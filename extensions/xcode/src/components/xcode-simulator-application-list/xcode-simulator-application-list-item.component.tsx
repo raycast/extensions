@@ -22,7 +22,11 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
       accessories={[{ text: `Version: ${props.application.version} (${props.application.buildNumber})` }]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Directories">
+          <ActionPanel.Section
+            title={["Directories", props.application.userDefaultsPlistPath ? "Files" : undefined]
+              .filter(Boolean)
+              .join(" & ")}
+          >
             <Action.ShowInFinder title="Open Documents directory" path={props.application.sandBoxDocumentsPath} />
             <Action.ShowInFinder title="Open Caches directory" path={props.application.sandBoxCachesPath} />
             <Action.ShowInFinder
