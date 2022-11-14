@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Improve Data Fetching] - 2022-11-07
+## [Improve Data Fetching] - 2022-11-14
 
 Use Raycast's API for all data fetching ([#3421](https://github.com/raycast/extensions/pull/3421))
 
