@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { Item } from "./types";
 import { useForm, FormValidation } from "@raycast/utils";
 import { nanoid } from "nanoid";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
 interface SignUpFormValues {
   id: string;
