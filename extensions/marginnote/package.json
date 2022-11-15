@@ -57,14 +57,14 @@
   ],
   "commands": [
     {
-      "name": "searchNotebook",
+      "name": "search-notebook",
       "title": "Search Notebook",
       "subtitle": "MarginNote",
       "description": "Search notebook in MarginNote",
       "mode": "view"
     },
     {
-      "name": "takeNote",
+      "name": "take-note",
       "title": "Take Note",
       "subtitle": "MarginNote",
       "description": "Take note quickly. The note will be created as a child of the parent note that you set.",
@@ -121,13 +121,13 @@
           "description": "Tags that you usually use",
           "type": "textfield",
           "required": false,
-          "placeholder": "Just like #tag1 #tag2 #tag3"
+          "placeholder": "#tag1 #tag2"
         }
       ]
     },
     {
       "name": "restart",
-      "title": "Restart MarginNote",
+      "title": "Restart Application",
       "subtitle": "MarginNote",
       "description": "Restart marginote and skip the unsigned mnaddon alert",
       "mode": "no-view"

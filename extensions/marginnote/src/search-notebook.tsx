@@ -4,13 +4,15 @@ import {
   closeMainWindow,
   Icon,
   Action,
-  Detail
+  Detail,
+  showToast,
+  Toast
 } from "@raycast/api"
 import { existsSync, readJsonSync } from "fs-extra"
 import { homedir } from "os"
 import React, { useEffect, useState } from "react"
 import type { Notebook, NotebookFilter, SearchNotebookState } from "./typings"
-import { openNotebook } from "./utils"
+import { isMarginNoteInstalled, openNotebook } from "./utils"
 
 const dataPath = `${homedir()}/Library/Containers/QReader.MarginStudyMac/Data/Library/MarginNote Extensions/marginnote.extension.raycastenhance/notebooks.json`
 
@@ -21,16 +23,6 @@ const [day, month, year] = [
   today.getFullYear()
 ]
 
-function fetchData() {
-  try {
-    if (!existsSync(dataPath)) throw "not found notebooks.json"
-    const notebooks = readJsonSync(dataPath, "utf8") as Notebook[]
-    return notebooks.sort((m, n) => n.lastVisit - m.lastVisit)
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 export default function () {
   const [state, setState] = useState<SearchNotebookState>({
     notebooks: [],
@@ -39,17 +31,42 @@ export default function () {
 
   const [filter, setFileter] = useState<NotebookFilter>("all")
 
-  useEffect(() => {
-    setState({
-      notebooks: fetchData(),
-      loading: false
-    })
-    setTimeout(() => {
+  async function fetchData() {
+    try {
+      if (!(await isMarginNoteInstalled())) {
+        showToast(Toast.Style.Failure, "Error", "MarginNote 3 is not installed")
+        setState({
+          notebooks: undefined,
+          loading: false
+        })
+      } else if (!existsSync(dataPath)) {
+        showToast(
+          Toast.Style.Failure,
+          "No Data Source",
+          'Please install "Raycast Enhance" and latest MarginNote 3 (^3.7.21). Click to download "Raycast Enhance".               '
+        )
+        setState({
+          notebooks: undefined,
+          loading: false
+        })
+      } else {
+        const notebooks = readJsonSync(dataPath, "utf8") as Notebook[]
+        setState({
+          notebooks: notebooks.sort((m, n) => n.lastVisit - m.lastVisit),
+          loading: false
+        })
+      }
+    } catch (error: any) {
+      showToast(Toast.Style.Failure, "Error", error.message)
       setState({
-        notebooks: fetchData(),
+        notebooks: undefined,
         loading: false
       })
-    }, 1000)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [])
 
   return state.notebooks ? (
@@ -79,9 +96,9 @@ export default function () {
           (acc, cur) => {
             const date = new Date(cur.lastVisit)
             const [d, m, y] = [
-              today.getDate(),
-              today.getMonth() + 1,
-              today.getFullYear()
+              date.getDate(),
+              date.getMonth() + 1,
+              date.getFullYear()
             ]
             if (y === year && m === month && d === day) {
               acc[0].push(cur)
@@ -179,7 +196,7 @@ const Actions: React.FC<{ notebook: Notebook }> = ({ notebook }) => {
 const NotFound = () => {
   return (
     <Detail
-      markdown={`# ⚠️ Not found data source from MarginNote\n ## Please install MarginNote v3.7.21 or lastest and "Raycast Enhance" addon.`}
+      markdown=""
       actions={
         <ActionPanel title="Actions">
           <Action.OpenInBrowser

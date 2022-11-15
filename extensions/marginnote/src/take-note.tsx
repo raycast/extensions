@@ -6,17 +6,22 @@ import {
   getPreferenceValues,
   Icon,
   Keyboard,
-  LocalStorage,
   open,
+  openCommandPreferences,
   popToRoot,
   showHUD,
   showToast,
   Toast
 } from "@raycast/api"
-import { useEffect, useState } from "react"
-import { runAppleScript } from "run-applescript"
+import { useEffect, useRef, useState } from "react"
 import type { Preferences } from "./typings"
-import { creatNote, dateFormat, getSelectedTextLink, unique } from "./utils"
+import {
+  creatNote,
+  dateFormat,
+  getSelectedTextLink,
+  isMarginNoteInstalled,
+  unique
+} from "./utils"
 
 interface FormType {
   title: string
@@ -44,7 +49,7 @@ const parentNotes = [
   if (!k) return acc
   k = k.trim()
   const title = k.match(/^(.+)=marginnote/)
-  const id = k.match(/note\/(.+)$/)
+  const id = k.match(/marginnote3app:\/\/note\/(.+)$/)
   if (!id) return acc
   acc.push({
     title: "Creat to " + (title ? title[1] : "Parent Note " + (i + 1)),
@@ -52,6 +57,7 @@ const parentNotes = [
   })
   return acc
 }, [] as ParentNote[])
+
 const commonTags = preferences.commonTags?.split(/[ #]+/).filter(k => k) ?? []
 const colors = [
   ["Light Yellow", "#E9E38C"],
@@ -76,18 +82,12 @@ const today = dateFormat(new Date(), "YYYYmmdd")
 
 export default function (props: { draftValues?: FormType }) {
   const { draftValues } = props
+  const error = useRef(false)
   const [textEmptyError, setTextEmptyError] = useState<string | undefined>()
   const [excerptText, setExcerptText] = useState(draftValues?.excerptText ?? "")
   const [comment, setComment] = useState(draftValues?.commentText ?? "")
   const [link, setLink] = useState(draftValues?.link ?? "")
-  const [lastColorIndex, setLastColorIndex] = useState<number>(12)
 
-  async function fetchLastColor() {
-    const color = await LocalStorage.getItem("lastColor")
-    if (color !== undefined) {
-      setLastColorIndex(Number(color))
-    }
-  }
   function dropTextEmptyError() {
     if (textEmptyError) {
       setTextEmptyError(undefined)
@@ -98,7 +98,8 @@ export default function (props: { draftValues?: FormType }) {
     if (!excerptText) setExcerptText(ret.text)
     if (!link) setLink(ret.link)
   }
-  async function submit(form: FormType, node: ParentNote) {
+
+  async function creat(form: FormType, node: ParentNote, willOpenNote = false) {
     if (form.excerptText || form.commentText) {
       dropTextEmptyError()
       const tags = [
@@ -110,9 +111,7 @@ export default function (props: { draftValues?: FormType }) {
         }
         return acc
       }, [] as string[])
-      const color = form.color === "last" ? String(lastColorIndex) : form.color
-      LocalStorage.setItem("lastColor", color)
-      const id = await creatNote(
+      const error = await creatNote(
         {
           title: form.title,
           excerptText: form.excerptText,
@@ -121,17 +120,33 @@ export default function (props: { draftValues?: FormType }) {
             .map(k => "#" + k)
             .join(" "),
           link: form.link,
-          color
+          color: form.color
         },
-        node.id
+        node.id,
+        willOpenNote
       )
+      if (error) throw new Error("Parent note not found")
       preferences.showConfetti && open("raycast://confetti")
       showHUD("Creat Note Successfully")
       popToRoot()
       closeMainWindow()
-      return id
     } else {
-      setTextEmptyError("One of the fields should't be empty!")
+      setTextEmptyError("One of the fields should't be empty")
+      throw new Error("One of the fields should't be empty")
+    }
+  }
+
+  async function alertError() {
+    if (!(await isMarginNoteInstalled())) {
+      showToast(Toast.Style.Failure, "Error", "MarginNote 3 is not installed")
+      return true
+    } else if (parentNotes.length === 0) {
+      showToast(
+        Toast.Style.Failure,
+        "Error",
+        "Parent note url is in error format"
+      )
+      return true
     }
   }
 
@@ -141,7 +156,7 @@ export default function (props: { draftValues?: FormType }) {
 
   useEffect(() => {
     fetchExcerptLink()
-    fetchLastColor()
+    alertError()
   }, [])
 
   return (
@@ -149,63 +164,78 @@ export default function (props: { draftValues?: FormType }) {
       enableDrafts
       actions={
         <ActionPanel>
-          {parentNotes
-            .map((k, index) => [
-              <Action.SubmitForm
-                title={k.title}
-                key={index * 2}
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: `${index + 1}` as Keyboard.KeyEquivalent
-                }}
-                onSubmit={(v: FormType) => {
-                  submit(v, k)
-                }}
-              />,
-              <Action.SubmitForm
-                title={k.title + " and Open"}
-                key={index * 2 + 1}
-                shortcut={{
-                  modifiers: ["cmd", "shift"],
-                  key: `${index + 1}` as Keyboard.KeyEquivalent
-                }}
-                onSubmit={async (v: FormType) => {
-                  const toast = await showToast({
-                    style: Toast.Style.Animated,
-                    title: "Creating Note and Open..."
-                  })
-                  try {
-                    const id = await submit(v, k)
-                    if (id)
-                      await runAppleScript(
-                        `
-                      tell application "MarginNote 3" to activate
-                      open location "marginnote3app://note/${id}"`
-                      )
-                    toast.style = Toast.Style.Success
-                    toast.title = "Creat Note Successfully"
-                  } catch (err: any) {
-                    toast.style = Toast.Style.Failure
-                    toast.title = "Failed to Create Note"
-                    toast.message = err.message
-                  }
-                }}
-              />
-            ])
-            .flat()}
+          {parentNotes.length ? (
+            parentNotes
+              .map((k, index) => [
+                <Action.SubmitForm
+                  title={k.title}
+                  key={index * 2}
+                  shortcut={{
+                    modifiers: ["cmd"],
+                    key: `${index + 1}` as Keyboard.KeyEquivalent
+                  }}
+                  onSubmit={async (v: FormType) => {
+                    if (await alertError()) return
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: "Creating Note..."
+                    })
+                    try {
+                      await creat(v, k)
+                      toast.style = Toast.Style.Success
+                      toast.title = "Creat Note Successfully"
+                    } catch (err: any) {
+                      toast.style = Toast.Style.Failure
+                      toast.title = "Failed to Create Note"
+                      toast.message = err.message
+                    }
+                  }}
+                />,
+                <Action.SubmitForm
+                  title={k.title + " and Open"}
+                  key={index * 2 + 1}
+                  shortcut={{
+                    modifiers: ["cmd", "shift"],
+                    key: `${index + 1}` as Keyboard.KeyEquivalent
+                  }}
+                  onSubmit={async (v: FormType) => {
+                    if (await alertError()) return
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: "Creating Note and Open..."
+                    })
+                    try {
+                      await creat(v, k, true)
+                      toast.style = Toast.Style.Success
+                      toast.title = "Creat Note Successfully"
+                    } catch (err: any) {
+                      toast.style = Toast.Style.Failure
+                      toast.title = "Failed to Create Note"
+                      toast.message = err.message
+                    }
+                  }}
+                />
+              ])
+              .flat()
+          ) : (
+            <Action
+              title="Open Extension Preferences"
+              onAction={openCommandPreferences}
+            ></Action>
+          )}
         </ActionPanel>
       }
     >
       <Form.TextField
         id="title"
-        placeholder={`Use ";" to add multiple titles`}
+        placeholder={`use ";" to add multiple titles`}
         title="Title"
         defaultValue={draftValues?.title}
       />
       <Form.TextArea
         id="excerptText"
         title="Excerpt Text"
-        placeholder="Some text you want to excerpt"
+        placeholder="some text you want to excerpt"
         error={excerptText ? undefined : textEmptyError}
         onChange={text => {
           setExcerptText(text)
@@ -220,7 +250,7 @@ export default function (props: { draftValues?: FormType }) {
           setComment(text)
         }}
         error={comment ? undefined : textEmptyError}
-        placeholder="Some text about your feelings or thoughts"
+        placeholder="some text about your feelings or thoughts"
       />
       <Form.TextField
         id="link"
@@ -241,18 +271,15 @@ export default function (props: { draftValues?: FormType }) {
       <Form.TextField
         id="customTags"
         title="Custom Tags"
-        placeholder="Just like #tag1 #tag2"
+        placeholder="#tag1 #tag2"
         defaultValue={draftValues?.customTags}
       />
-      <Form.Dropdown id="color" title="Color" defaultValue={draftValues?.color}>
-        <Form.Dropdown.Item
-          value="last"
-          title="Last Color Used"
-          icon={{
-            source: Icon.CircleFilled,
-            tintColor: colors[lastColorIndex][1]
-          }}
-        />
+      <Form.Dropdown
+        id="color"
+        title="Color"
+        storeValue={true}
+        defaultValue={draftValues?.color}
+      >
         <Form.Dropdown.Section>
           {colors.map((color, i) => (
             <Form.Dropdown.Item
