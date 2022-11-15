@@ -11,6 +11,8 @@ export default function Main() {
       if (addresses) {
         setAddresses(addresses);
       }
+    }).catch(() => {
+      console.log('do nothing...');
     });
   }
 
