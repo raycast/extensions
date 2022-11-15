@@ -42,7 +42,11 @@ You can use the global `environment.launchType` in your command to determine whe
 ```typescript
 import { environment, updateCommandMetadata } from "@raycast/api";
 
-export default async function main() {
+async function fetchUnreadNotificationCount() {
+  return 10;
+}
+
+export default async function Command() {
   console.log("launchType", environment.launchType);
   const count = await fetchUnreadNotificationCount();
   await updateCommandMetadata({ subtitle: `Unread Notifications: ${count}` });
@@ -60,7 +64,7 @@ For local commands under development, errors are shown as usual via the console.
 
 ![](../.gitbook/assets/background-refresh-error.png)
 
-When the background run leads to an error, users will also see a warning icon on the root search command and a tooltip with a hint to show the error via the Action Panel. The tooltip over the subtitle of a command shows the last run time.  
+When the background run leads to an error, users will also see a warning icon on the root search command and a tooltip with a hint to show the error via the Action Panel. The tooltip over the subtitle of a command shows the last run time.
 
 You can launch the built-in root search command "Extension Diagnostics" to see which of your commands run in background and when they last ran.
 
@@ -75,7 +79,7 @@ When a user installs the command via the Store, background refresh is initially 
 ## Best Practices
 
 - Make sure the command is useful both when manually launched by the user or when launched in the background
-- Choose the interval value as high as possible – low values mean the command will run more often and consume more energy
+- Choose the interval value as high as possible - low values mean the command will run more often and consume more energy
 - If your command performs network requests, check the rate limits of the service and handle errors appropriately (e.g. automatically retry later)
 - Make sure the command finishes as quickly as possible; for menu bar commands, ensure `isLoading` is set to false as early as possible
 - Use defensive programming if state is shared between commands of an extension and handle potential data races and inaccessible data
