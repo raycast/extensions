@@ -67,7 +67,15 @@ const valid_keys = [
   "pinned",
 ];
 
+const maxFetchRetry = 1;
+
 export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
+  return _fetchRemote(remote, 0);
+}
+
+async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]> {
+  console.log("fetchRemote attempt:", attempt);
+
   if (remote.value) {
     return remote.value;
   }
@@ -91,8 +99,7 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
     console.log("Missed cache:", remote.cachePath); // keep prettier happy :-(
   }
 
-  // We check for a minimum size in case we received some invalid cache due to a previous error
-  if (!cacheInfo || cacheInfo.size < 1024 || lastModified > cacheInfo.mtimeMs) {
+  if (!cacheInfo || cacheInfo.size == 0 || lastModified > cacheInfo.mtimeMs) {
     await fetchURL();
   }
 
@@ -103,14 +110,24 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
   // (each time json response changes) will probably be high.
   const pipeline = chain([fs.createReadStream(remote.cachePath), parser(), filter({ filter: keysRe }), streamArray()]);
 
-  remote.value = [];
+  let value: T[] = [];
 
   return new Promise((resolve, reject) => {
-    pipeline.on("data", (data) => remote.value?.push(data.value));
+    pipeline.on("data", (data) => value?.push(data.value));
     pipeline.on("end", () => {
-      resolve(remote.value ?? []);
+      remote.value = value;
+      resolve(value);
     });
-    pipeline.on("err", (err) => reject(err));
+    pipeline.on("error", (err) => {
+      if (attempt < maxFetchRetry) {
+        fs.rmSync(remote.cachePath);
+        _fetchRemote(remote, attempt + 1)
+          .then(resolve)
+          .catch(reject);
+      } else {
+        reject(err);
+      }
+    });
   });
 }
 
