@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "latex-math-symbols",
   "title": "LateX Math Symbols",
-  "description": "LateX Math Symbols Search",
+  "description": "Search and copy LateX Math Symbols",
   "icon": "icon.png",
   "author": "JeffersonDing",
   "categories": [
