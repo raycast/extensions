@@ -128,7 +128,6 @@ function flattenBookmarks({ json, bookmarksList, parents }: flattenBookmarksType
         ...parents.flatMap((parent) => parent.split(" ")),
         ...(bookmarkDescription.length ? bookmarkDescription.split(" ") : []),
       ];
-      console.log("bookmarkKeywords", bookmarkKeywords);
 
       bookmarkUrls.forEach((bookmarkUrl) => {
         bookmarksList.push({
