@@ -31,10 +31,10 @@ interface Preferences {
   bodyHeight?: string;
 }
 
-export default async () => {
+export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   console.log(preferences);
-};
+}
 ```
 
 #### Return

@@ -21,21 +21,24 @@ async function copy(content: string | Content): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   // copy some text
   await Clipboard.copy("https://raycast.com");
-  
+
   const textContent: Clipboard.Content = {
     text: "https://raycast.com",
-  }
+  };
   await Clipboard.copy(textContent);
 
   // copy a file
-  const fileContent: Clipboard.Content = {
-    file: "/path/to/file.pdf",
+  const file = "/path/to/file.pdf";
+  try {
+    const fileContent: Clipboard.Content = { file };
+    await Clipboard.copy(fileContent);
+  } catch (error) {
+    console.log(`Could not copy file '${file}'. Reason: ${error}`);
   }
-  await Clipboard.copy(fileContent);
-};
+}
 ```
 
 #### Parameters
@@ -61,9 +64,9 @@ async function paste(content: string | Content): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await Clipboard.paste("I really like Raycast's API");
-};
+}
 ```
 
 #### Parameters
@@ -89,9 +92,9 @@ async function clear(): Promise<void>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await Clipboard.clear();
-};
+}
 ```
 
 #### Return
@@ -113,10 +116,10 @@ async function readText(): Promise<string | undefined>;
 ```typescript
 import { Clipboard } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const text = await Clipboard.readText();
   console.log(text);
-};
+}
 ```
 
 #### Return

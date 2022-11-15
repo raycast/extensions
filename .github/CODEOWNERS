@@ -30,6 +30,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour
 /extensions/asana                                    @thomaslombart
+/extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
@@ -166,7 +167,7 @@
 /extensions/dock-tinker                              @koinzhang
 /extensions/docker                                   @priithaamer @gebeto
 /extensions/dockerhub                                @k8scat @tonka3000
-/extensions/docsearch                                @Fatpandac
+/extensions/docsearch                                @Fatpandac @AnishDe12020
 /extensions/domainr                                  @Rawnly
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
@@ -336,6 +337,7 @@
 /extensions/lark-applink                             @chyroc
 /extensions/lastfm                                   @eggsy
 /extensions/latest-news                              @FilipeCerejo
+/extensions/latex-math-symbols                       @JeffersonDing
 /extensions/lenscast                                 @peduarte
 /extensions/libraries-io                             @djpowers
 /extensions/library-genesis                          @yz3440
@@ -348,6 +350,7 @@
 /extensions/linux-command                            @jaywcjlove
 /extensions/liveblocks                               @andreaselia
 /extensions/lobsters                                 @dev99problems
+/extensions/lodash                                   @vimtor
 /extensions/logseq                                   @futantan @futantan
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek
 /extensions/lucide-icons                             @gBasil
@@ -376,6 +379,7 @@
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly
 /extensions/must                                     @eggsy
+/extensions/my-daily-log                             @frugoman
 /extensions/myanimelist-search                       @luknl
 /extensions/myip                                     @kkange
 /extensions/n8n                                      @koinzhang
@@ -551,6 +555,7 @@
 /extensions/social-network-trends                    @koinzhang
 /extensions/solana-explorer                          @TrGiLong
 /extensions/sonarr                                   @Aayush9029
+/extensions/soundboard                               @pernielsentikaer
 /extensions/sourcegraph                              @bobheadxi
 /extensions/sourcetree                               @i906
 /extensions/spaces                                   @pradeepb28

@@ -59,8 +59,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.0",
+    "@types/stream-json": "^1.7.2",
     "node-fetch": "^2.6.7",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "stream-chain": "^2.2.5",
+    "stream-json": "^1.7.4"
   },
   "devDependencies": {
     "@types/node": "^16.11.26",

@@ -136,20 +136,22 @@ Adds an item to the menu bar, optionally with a menu attached in case its `child
 
 ```typescript
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useBookmarks } from "./hooks";
+
+const data = {
+  archivedBookmarks: [{ name: "Google Search", url: "www.google.com" }],
+  newBookmarks: [{ name: "Raycast", url: "www.raycast.com" }],
+};
 
 export default function Command() {
-  const [newBookmarks, archivedBookmarks, isLoading] = useBookmarks();
-
   return (
-    <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
-      <MenuBarExtra.Section title="New" />
-      {newBookmarks.map((bookmark) => (
-        <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
-      ))}
+    <MenuBarExtra icon={Icon.Bookmark}>
+      <MenuBarExtra.Section title="New">
+        {data?.newBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
+        ))}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Archived>
-        {archivedBookmarks.map((bookmark) => (
+      <MenuBarExtra.Section title="Archived">
+        {data?.archivedBookmarks.map((bookmark) => (
           <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
         ))}
       </MenuBarExtra.Section>
@@ -291,21 +293,23 @@ An item to group related menu items. It has an optional title and a separator is
 
 ```typescript
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useBookmarks } from "./hooks";
+
+const data = {
+  archivedBookmarks: [{ name: "Google Search", url: "www.google.com" }],
+  newBookmarks: [{ name: "Raycast", url: "www.raycast.com" }],
+};
 
 export default function Command() {
-  const [newBookmarks, archivedBookmarks, isLoading] = useBookmarks();
-
   return (
-    <MenuBarExtra icon={Icon.Bookmark} isLoading={isLoading}>
+    <MenuBarExtra icon={Icon.Bookmark}>
       <MenuBarExtra.Section title="New">
-        {newBookmarks.map((bookmark) => (
-          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        {data?.newBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
         ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Archived">
-        {archivedBookmarks.map((bookmark) => (
-          <MenuBarExtra.Item key={bookmark.url} title={bokmark.name} onAction={() => open(bookmark.url)} />
+        {data?.archivedBookmarks.map((bookmark) => (
+          <MenuBarExtra.Item key={bookmark.url} title={bookmark.name} onAction={() => open(bookmark.url)} />
         ))}
       </MenuBarExtra.Section>
     </MenuBarExtra>
@@ -337,8 +341,9 @@ export default function Command() {
     <MenuBarExtra>
       <MenuBarExtra.Item
         title="Log Action Event Type"
-        onAction={(event: MenuBarExtra.ActionEvent) => console.log("Action Event Type", event.type)} />
-    <MenuBarExtra>
+        onAction={(event: MenuBarExtra.ActionEvent) => console.log("Action Event Type", event.type)}
+      />
+    </MenuBarExtra>
   );
 }
 ```

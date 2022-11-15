@@ -7,6 +7,7 @@ import { useCachedPromise } from "@raycast/utils";
 export default function ListBoards() {
   const { isLoading, data, revalidate } = useCachedPromise(
     async () => {
+      await miro.authorize();
       return await miro.fetchItems();
     },
     [],

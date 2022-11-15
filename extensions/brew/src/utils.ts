@@ -1,15 +1,20 @@
 import { Clipboard, environment, Toast } from "@raycast/api";
 import path from "path";
-import { mkdirSync } from "fs";
-import { stat, readFile, writeFile } from "fs/promises";
+import fs from "fs";
+import { stat } from "fs/promises";
 import fetch, { FetchError } from "node-fetch";
+import { chain } from "stream-chain";
+import { parser } from "stream-json";
+import { filter } from "stream-json/filters/Filter";
+import { streamArray } from "stream-json/streamers/StreamArray";
+import { pipeline as streamPipeline } from "stream/promises";
 import { ExecError } from "./brew";
 
 /// Utils
 
 export const supportPath: string = (() => {
   try {
-    mkdirSync(environment.supportPath, { recursive: true });
+    fs.mkdirSync(environment.supportPath, { recursive: true });
   } catch (err) {
     console.log("Failed to create supportPath");
   }
@@ -37,43 +42,76 @@ export interface Remote<T> {
   value?: T[];
 }
 
+// Top-level object keys which should be parsed from the raw JSON objects.
+const valid_keys = [
+  "name",
+  "tap",
+  "desc",
+  "homepage",
+  "versions",
+  "outdated",
+  "caveats",
+  "token",
+  "version",
+  "installed",
+  "auto_updates",
+  "depends_on",
+  "conflicts_with",
+  "license",
+  "aliases",
+  "dependencies",
+  "build_dependencies",
+  "installed",
+  "keg_only",
+  "linked_key",
+  "pinned",
+];
+
 export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
   if (remote.value) {
     return remote.value;
   }
 
-  async function readCache(): Promise<T[] | undefined> {
-    const cacheTime = (await stat(remote.cachePath)).mtimeMs;
-    const response = await fetch(remote.url, { method: "HEAD" });
-    const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
-
-    if (!isNaN(lastModified) && lastModified < cacheTime) {
-      const cacheBuffer = await readFile(remote.cachePath);
-      remote.value = JSON.parse(cacheBuffer.toString());
-      return remote.value;
-    } else {
-      throw "Invalid cache";
-    }
-  }
-
-  async function fetchURL(): Promise<T[] | undefined> {
+  async function fetchURL(): Promise<void> {
     const response = await fetch(remote.url);
-    remote.value = await response.json();
-    try {
-      await writeFile(remote.cachePath, JSON.stringify(remote.value));
-    } catch (err) {
-      console.error("Failed to write formula cache:", err);
+    if (!response.ok) {
+      throw new Error(`Invalid response ${response.statusText}`);
     }
-    return remote.value;
+    await streamPipeline(response.body, fs.createWriteStream(remote.cachePath));
   }
 
-  let value;
+  let cacheInfo: fs.Stats | undefined;
+  let lastModified = 0;
+
   try {
-    value = await readCache();
+    cacheInfo = await stat(remote.cachePath);
+    const response = await fetch(remote.url, { method: "HEAD" });
+    lastModified = Date.parse(response.headers.get("last-modified") ?? "");
   } catch {
-    value = await fetchURL();
+    console.log("Missed cache:", remote.cachePath); // keep prettier happy :-(
   }
-  return value ? [...value] : [];
+
+  // We check for a minimum size in case we received some invalid cache due to a previous error
+  if (!cacheInfo || cacheInfo.size < 1024 || lastModified > cacheInfo.mtimeMs) {
+    await fetchURL();
+  }
+
+  const keysRe = new RegExp(`\\b(${valid_keys.join("|")})\\b`);
+
+  // stream-json/chain is quite slow, so unfortunately not suitable for real-time queries.
+  // migrating to a sqlite backend _might_ help, although the bootstrap cost
+  // (each time json response changes) will probably be high.
+  const pipeline = chain([fs.createReadStream(remote.cachePath), parser(), filter({ filter: keysRe }), streamArray()]);
+
+  remote.value = [];
+
+  return new Promise((resolve, reject) => {
+    pipeline.on("data", (data) => remote.value?.push(data.value));
+    pipeline.on("end", () => {
+      resolve(remote.value ?? []);
+    });
+    pipeline.on("err", (err) => reject(err));
+  });
 }
 
 /// Toast

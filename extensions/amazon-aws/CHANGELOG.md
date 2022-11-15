@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Improve Data Fetching] - 2022-11-14
+
+Use Raycast's API for all data fetching ([#3421](https://github.com/raycast/extensions/pull/3421))
+
 ## [Add SQS Queue Purge Action] - 2022-10-26
 
 Add purge action to queue list item ([#3299](https://github.com/raycast/extensions/pull/3299))
