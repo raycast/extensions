@@ -74,7 +74,7 @@ export default function Command() {
           title={item.title}
           subtitle={item.path.toString()}
           accessories={getAccessories(item)}
-          actions={<Actions item={item} onEdit={handleCreate} onItemRemove={removeItem} />}
+          actions={<Actions item={item} items={connectionsList} onEdit={handleCreate} onItemRemove={removeItem} />}
         />
       ))}
     </List>
@@ -92,10 +92,12 @@ function getAccessories(item: Item) {
 
 function Actions({
   item,
+  items,
   onEdit,
   onItemRemove,
 }: {
   item: Item;
+  items: Item[];
   onEdit: (item: Item) => Promise<void>;
   onItemRemove: (item: Item) => Promise<void>;
 }) {
@@ -112,13 +114,13 @@ function Actions({
         title="Add New Sound"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.Document}
-        target={<SoundForm onEdit={onEdit} />}
+        target={<SoundForm onEdit={onEdit} items={items} />}
       />
       <Action.Push
         title="Edit Sound"
         shortcut={{ modifiers: ["cmd"], key: "e" }}
         icon={Icon.Pencil}
-        target={<SoundForm item={item} onEdit={onEdit} />}
+        target={<SoundForm item={item} onEdit={onEdit} items={items} />}
       />
       <Action
         title="Remove Sound"
