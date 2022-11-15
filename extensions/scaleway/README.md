@@ -39,7 +39,7 @@ Raycast extension to search containers, database, instances or Redis clusters, t
 - Generate a new API key with a purpose e.g. `raycast`, and copy your `Secret Key`
 - Open a Scaleway command in Raycast and enter your `Secret Key`
 
-![configure-extension](./assets/screenshots/configure-extension.png)
+![configure-extension](./media/configure-extension.png)
 
 That's it! You're ready to use the extension! 🚀
 
@@ -47,23 +47,23 @@ That's it! You're ready to use the extension! 🚀
 
 ### Containers
 
-![list-containers](./assets/screenshots/containers.png)
+![list-containers](./metadata/1-containers.png)
 
 ### Logs of Container
 
-![container-logs](./assets/screenshots/container-logs.png)
+![container-logs](./metadata/2-container-logs.png)
 
 ### Instances
 
-![list-instances](./assets/screenshots/instances.png)
+![list-instances](./metadata/3-instances.png)
 
 ### Databases
 
-![list-databases](./assets/screenshots/databases.png)
+![list-databases](./metadata/4-databases.png)
 
 ### Redis Clusters
 
-![list-redis-clusters](./assets/screenshots/redis.png)
+![list-redis-clusters](./metadata/5-redis.png)
 
 ## Development
 
