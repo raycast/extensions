@@ -1,16 +1,18 @@
 import { exec } from "child_process";
 import { Item } from "./types";
 import { getItem, getItems, saveItems } from "./storage";
-import { launchCommand, LaunchType } from "@raycast/api";
+import { launchCommand, LaunchType, updateCommandMetadata } from "@raycast/api";
 
 export const playSoundFromIndex = async (index: number) => {
   const sound = await getItem(index);
   if (sound) {
     await playFile(sound);
+    await updateCommandMetadata({ subtitle: `Sound Name: ${sound.title}` });
     return;
   }
 
   launchCommand({ name: "index", type: LaunchType.UserInitiated, context: { index: index } });
+  await updateCommandMetadata({ subtitle: "Soundboard" });
 };
 
 export const playFile = async (item: Item) => {
