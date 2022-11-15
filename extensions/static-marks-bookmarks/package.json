@@ -28,7 +28,7 @@
       "description": "The absolute path or public url where your Static Marks YAML file is located",
       "type": "textfield",
       "placeholder": "/Users/[user folder]/bookmarks.yml",
-      "required": false,
+      "required": true,
       "title": "Static Marks YAML File"
     }
   ],
