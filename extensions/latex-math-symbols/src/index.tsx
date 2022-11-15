@@ -33,11 +33,7 @@ export default function Command() {
   }, [searchText]);
 
   return (
-    <List
-      filtering={false}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search LateX Math Symbols"
-    >
+    <List filtering={false} onSearchTextChange={setSearchText} searchBarPlaceholder="Search LateX Math Symbols">
       {filteredList.map((result) => {
         return (
           <List.Item
