@@ -200,6 +200,9 @@ const caskURL = "https://formulae.brew.sh/api/cask.json";
 const formulaRemote: utils.Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
 const caskRemote: utils.Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
+// Store the query so that text entered during the initial fetch is respected.
+let searchQuery: string | undefined;
+
 export async function brewFetchFormulae(): Promise<Formula[]> {
   return await utils.fetchRemote(formulaRemote);
 }
@@ -209,11 +212,13 @@ export async function brewFetchCasks(): Promise<Cask[]> {
 }
 
 export async function brewSearch(searchText: string, limit?: number): Promise<InstallableResults> {
+  searchQuery = searchText;
+
   let formulae = await brewFetchFormulae();
   let casks = await brewFetchCasks();
 
-  if (searchText.length > 0) {
-    const target = searchText.toLowerCase();
+  if (searchQuery.length > 0) {
+    const target = searchQuery.toLowerCase();
     formulae = formulae
       ?.filter((formula) => {
         return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
