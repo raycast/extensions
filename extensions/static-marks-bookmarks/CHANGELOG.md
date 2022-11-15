@@ -4,7 +4,7 @@
 
 - Added the possibility to reference a local YAML file
 - Show favicons for bookmarks
-- Show categories (folders) for each bookmark as annotaions
+- Show categories (folders) for each bookmark as annotations
 - Show extended descriptions for bookmarks
 - Categories and descriptions are taken into account in search results
 - Updated screenshots
