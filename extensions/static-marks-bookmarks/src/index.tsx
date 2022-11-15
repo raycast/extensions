@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Image } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import fs from "fs/promises";
 import { useRef } from "react";
@@ -32,7 +32,7 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      icon={getFavicon(searchResult.url)}
+      icon={getFavicon(searchResult.url, { mask: Image.Mask.RoundedRectangle, fallback: Icon.Bookmark })}
       accessories={parents}
       keywords={searchResult.keywords}
       actions={
