@@ -7,13 +7,15 @@ export default function Main() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   function removeAddressFromList(address: string) {
-    removeAddress(address).then((addresses: string[]) => {
-      if (addresses) {
-        setAddresses(addresses);
-      }
-    }).catch(() => {
-      console.log('do nothing...');
-    });
+    removeAddress(address)
+      .then((addresses: string[]) => {
+        if (addresses) {
+          setAddresses(addresses);
+        }
+      })
+      .catch(() => {
+        console.log("do nothing...");
+      });
   }
 
   useEffect(() => {

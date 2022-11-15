@@ -59,6 +59,17 @@ export default function Command() {
       isLoading={isLoading}
       navigationTitle="Your Defichain Lottery Tickets"
       searchBarPlaceholder="Search your Ticket Number"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter your Tickets"
+          onChange={(value) => {
+            value === "all" ? showAllTickets() : showWinningTickets();
+          }}
+        >
+          <List.Dropdown.Item title="Show all Tickets" value="all" />
+          <List.Dropdown.Item title="Show winning Tickets" value="winning" />
+        </List.Dropdown>
+      }
     >
       {currentList.length != 0 &&
         currentList.map((drawing) => (
