@@ -19,11 +19,11 @@ async function getApplications(path?: PathLike): Promise<Application[]>;
 ```typescript
 import { getApplications } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const installedApplications = await getApplications();
   console.log("The following applications are installed on your Mac:");
   console.log(installedApplications.map((a) => a.name).join(", "));
-};
+}
 ```
 
 #### Parameters
@@ -51,10 +51,10 @@ async function getDefaultApplication(path: PathLike): Promise<Application>;
 ```typescript
 import { getDefaultApplication } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const defaultApplication = await getDefaultApplication(__filename);
   console.log(`Default application for JavaScript is: ${defaultApplication.name}`);
-};
+}
 ```
 
 #### Parameters
@@ -84,7 +84,9 @@ import { showInFinder } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 
-showInFinder(join(homedir(), "Downloads"));
+export default async function Command() {
+  await showInFinder(join(homedir(), "Downloads"));
+}
 ```
 
 #### Parameters
@@ -115,11 +117,11 @@ import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
-export default async () => {
+export default async function Command() {
   const file = join(homedir(), "Desktop", "yolo.txt");
   await writeFile(file, "I will be deleted soon!");
   await trash(file);
-};
+}
 ```
 
 #### Parameters
@@ -147,9 +149,9 @@ async function open(target: string, application?: Application | string): Promise
 ```typescript
 import { open } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await open("https://www.raycast.com", "com.google.Chrome");
-};
+}
 ```
 
 #### Parameters
@@ -172,7 +174,12 @@ or when an immediate background refresh should be triggered, for example when a 
 #### Signature
 
 ```typescript
-async function launchCommand(options: { name: string; type: LaunchType; arguments?: Arguments | null; context?: LaunchContext | null; }): Promise<void>;
+async function launchCommand(options: {
+  name: string;
+  type: LaunchType;
+  arguments?: Arguments | null;
+  context?: LaunchContext | null;
+}): Promise<void>;
 ```
 
 #### Example
@@ -180,9 +187,9 @@ async function launchCommand(options: { name: string; type: LaunchType; argument
 ```typescript
 import { launchCommand, LaunchType } from "@raycast/api";
 
-export default async () => {
-  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { "foo": "bar" } });
-};
+export default async function Command() {
+  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
+}
 ```
 
 #### Parameters

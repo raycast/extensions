@@ -50,6 +50,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
+import { List } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { resolve } from "path";
 import { homedir } from "os";
@@ -61,7 +62,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, permissionView } = useSQL<NoteItem>(NOTES_DB, notesQuery);
 
   if (permissionView) {
@@ -75,7 +76,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -87,8 +88,9 @@ You can specify an `optimisticUpdate` function to mutate the data in order to re
 When doing so, you can specify a `rollbackOnError` function to mutate back the data if the asynchronous update fails. If not specified, the data will be automatically rolled back to its previous value (before the optimistic update).
 
 ```tsx
-import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
+import { homedir } from "os";
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 const notesQuery = `SELECT id, title FROM ...`;
@@ -97,7 +99,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate, permissionView } = useFetch("https://api.example");
 
   if (permissionView) {
@@ -145,7 +147,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types

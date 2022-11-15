@@ -21,11 +21,14 @@ async function confirmAlert(options: Alert.Options): Promise<boolean>;
 ```typescript
 import { confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   if (await confirmAlert({ title: "Are you sure?" })) {
+    console.log("confirmed");
     // do something
+  } else {
+    console.log("canceled");
   }
-};
+}
 ```
 
 #### Parameters
@@ -48,9 +51,9 @@ The options to create an Alert.
 #### Example
 
 ```typescript
-import { Alert } from "@raycast/api";
+import { Alert, confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const options: Alert.Options = {
     title: "Finished cooking",
     message: "Delicious pasta for lunch",
@@ -64,7 +67,7 @@ export default async () => {
     },
   };
   await confirmAlert(options);
-};
+}
 ```
 
 #### Properties

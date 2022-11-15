@@ -9,9 +9,7 @@ Clear the text in the search bar.
 #### Signature
 
 ```typescript
-async function clearSearchBar(options: {
-  forceScrollToTop: boolean;
-}): Promise<void>;
+async function clearSearchBar(options: { forceScrollToTop: boolean }): Promise<void>;
 ```
 
 #### Parameters
@@ -31,9 +29,7 @@ Closes the main Raycast window.
 #### Signature
 
 ```typescript
-async function closeMainWindow(options: {
-  clearRootSearch: boolean;
-}): Promise<void>;
+async function closeMainWindow(options: { clearRootSearch: boolean }): Promise<void>;
 ```
 
 #### Example
@@ -42,10 +38,10 @@ async function closeMainWindow(options: {
 import { closeMainWindow } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
-export default async () => {
+export default async function Command() {
   await setTimeout(1000);
   await closeMainWindow({ clearRootSearch: true });
-};
+}
 ```
 
 #### Parameters
@@ -71,12 +67,7 @@ export declare function openExtensionPreferences(): Promise<void>;
 #### Example
 
 ```typescript
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Detail, openExtensionPreferences } from "@raycast/api";
 
 export default function Command() {
   const markdown = `
@@ -87,10 +78,7 @@ API key incorrect. Please update it in extension preferences and try again.
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Preferences"
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -115,12 +103,7 @@ export declare function openCommandPreferences(): Promise<void>;
 #### Example
 
 ```typescript
-import {
-  ActionPanel,
-  Action,
-  Detail,
-  openCommandPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Detail, openCommandPreferences } from "@raycast/api";
 
 export default function Command() {
   const markdown = `
@@ -131,10 +114,7 @@ API key incorrect. Please update it in command preferences and try again.
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Preferences"
-            onAction={openCommandPreferences}
-          />
+          <Action title="Open Extension Preferences" onAction={openCommandPreferences} />
         </ActionPanel>
       }
     />
