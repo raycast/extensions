@@ -36,7 +36,6 @@ export default function Command() {
     <List
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Symbols"
       searchBarPlaceholder="Search LateX Math Symbols"
     >
       {filteredList.map((result) => {
