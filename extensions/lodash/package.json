@@ -3,7 +3,7 @@
   "name": "lodash",
   "title": "Lodash",
   "description": "Search Lodash documentation",
-  "icon": "./command-icon.png",
+  "icon": "command-icon.png",
   "author": "vimtor",
   "categories": [
     "Developer Tools",
