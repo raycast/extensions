@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-airtable-extension",
+  "title": "Airtable",
+  "description": "List your Airtable bases and follow deep links to specific tables, views, or your base's API docs.",
+  "icon": "airtable-logo.png",
+  "author": "marks",
+  "contributors": ["SeanKeenan-Airtable"],
+  "categories": [ "Productivity" ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "key": "airtableUiBaseUrl",
+      "name": "airtableUiBaseUrl",
+      "title": "Airtable UI Base URL",
+      "label": "Airtable UI Base URL",
+      "description": "The base URL for the Airtable UI (you probably don't need to change this)",
+      "default": "https://airtable.com",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "key": "airtableApiBaseUrl",
+      "name": "airtableApiBaseUrl",
+      "title": "Airtable API Base URL",
+      "label": "Airtable API Base URL",
+      "description": "The base URL for the Airtable API (you probably don't need to change this)",
+      "default": "https://api.airtable.com",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "key": "airtableOAuthClientId",
+      "name": "airtableOAuthClientId",
+      "title": "Airtable OAuth Client ID",
+      "label": "Airtable OAuth Integration Client ID",
+      "description": "The OAuth client ID for the Airtable integration",
+      "default": "76a7c93f-0834-41ba-82a5-e23e771fb19f",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "command-list-bases",
+      "title": "List Airtable Bases",
+      "subtitle": "and browse their tables, fields, and views",
+      "description": "See and search through a list of your Airtable bases and their tables/fields/views",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "license": "MIT"
+}
