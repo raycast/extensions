@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-app",
+  "title": "Github App",
+  "description": "An all-in-one GitHub extension",
+  "icon": "icon.png",
+  "author": "tonka3000",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "issues",
+      "title": "My Open Issues",
+      "description": "List my Issues",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "myrepos",
+      "title": "My Repositories",
+      "description": "List My Repositories",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "myprs",
+      "title": "My Pull Requests",
+      "description": "Get my Pull Requests",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "searchissues",
+      "title": "Search Issues",
+      "description": "Search your created Issues",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "reposearch",
+      "title": "Search Repositories",
+      "description": "Search Repositories",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "prsearch",
+      "title": "Search Pull Requests",
+      "description": "Search Pull Requests",
+      "mode": "view",
+      "subtitle": "GitHub"
+    },
+    {
+      "name": "notifications",
+      "title": "Notifications",
+      "description": "Manage Notifications",
+      "mode": "view",
+      "subtitle": "GitHub"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.41.1",
+    "octokit": "^2.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "pat",
+      "description": "Personal Access Token from GitHub",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "placeholder": "PAT"
+    }
+  ]
+}
