@@ -62,12 +62,13 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter your Tickets"
+          placeholder="Select a Filter for your Tickets"
           onChange={(value) => {
             value === "all" ? showAllTickets() : showWinningTickets();
           }}
         >
-          <List.Dropdown.Item title="Show all Tickets" value="all" />
-          <List.Dropdown.Item title="Show winning Tickets" value="winning" />
+          <List.Dropdown.Item title="All Tickets" value="all" />
+          <List.Dropdown.Item title="Winning Tickets" value="winning" />
         </List.Dropdown>
       }
     >
@@ -94,12 +95,6 @@ export default function Command() {
                   icon={Icon.ChevronRight}
                   key={ticket.ticket_number}
                   title={ticket.ticket_number ?? "n/a"}
-                  actions={
-                    <ActionPanel title="Filter the tickets">
-                      <Action title="Show all tickets" onAction={() => showAllTickets()} />
-                      <Action title="Show winning tickets" onAction={() => showWinningTickets()} />
-                    </ActionPanel>
-                  }
                   subtitle={
                     (ticket.bucket != 0 && ticket.bucket != null ? ticket.bucket + " correct, " : "") +
                     (ticket.payout_amount != null ? "won " + formatNumber(ticket.payout_amount, "DFI") : "")
