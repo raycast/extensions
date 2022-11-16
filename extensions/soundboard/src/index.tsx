@@ -84,7 +84,7 @@ export default function Command() {
             <Actions
               item={item}
               items={connectionsList}
-              saveItemEntries={saveItems}
+              saveItemEntries={saveItemEntries}
               onEdit={handleCreate}
               onItemRemove={removeItem}
             />
