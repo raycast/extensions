@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "currency-exchange",
+  "title": "Currency Exchange",
+  "description": "Simple Currency Exchange, uses Exchange Rate API as the data source",
+  "icon": "currency.png",
+  "author": "xeric",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Currency Exchange",
+      "description": "Calculate with Exchange Rate",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_key",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "You can get API Key at https://app.exchangerate-api.com/dashboard",
+      "placeholder": "Exchange Rate API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.30",
+    "@types/node-fetch": "^2.5.12",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

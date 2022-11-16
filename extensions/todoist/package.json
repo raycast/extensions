@@ -6,13 +6,44 @@
   "icon": "todoist.png",
   "author": "thomaslombart",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "today",
       "title": "Today Tasks",
       "subtitle": "Todoist",
       "description": "See your Todoist tasks due today.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "todayGroupBy",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Project",
+              "value": "project"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Label",
+              "value": "label"
+            }
+          ],
+          "default": "default",
+          "required": false,
+          "title": "Today's Group By Options",
+          "description": "Indicates how you want to group your tasks in the Today view."
+        }
+      ]
     },
     {
       "name": "upcoming",
@@ -22,10 +53,10 @@
       "mode": "view"
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
+      "name": "search",
+      "title": "Search Tasks",
       "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
+      "description": "Search across all your Todoist tasks.",
       "mode": "view"
     },
     {
@@ -34,6 +65,76 @@
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
       "mode": "view"
+    },
+    {
+      "name": "create-task-in-inbox",
+      "title": "Create Task in Inbox",
+      "description": "Create a new task in your Todoist inbox.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "description",
+          "placeholder": "Description",
+          "type": "text"
+        },
+        {
+          "name": "date",
+          "placeholder": "Human date",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "Todoist",
+      "description": "See your Todoist projects and tasks by project.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "projectGroupBy",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Date",
+              "value": "date"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Label",
+              "value": "label"
+            }
+          ],
+          "default": "default",
+          "required": false,
+          "title": "Project's Group By Options",
+          "description": "Indicates how you want to group your tasks in the Project view."
+        }
+      ]
     },
     {
       "name": "create-project",
@@ -54,21 +155,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "axios": "^0.24.0",
-    "date-fns": "^2.27.0",
+    "@doist/todoist-api-typescript": "^1.7.0",
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.1",
+    "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
-    "swr": "^1.0.0"
+    "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.178",
-    "@types/node": "^16.11.12",
-    "@types/react": "^17.0.37",
-    "@typescript-eslint/eslint-plugin": "^5.6.0",
-    "@typescript-eslint/parser": "^5.6.0",
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.5.3"
+    "@types/lodash": "^4.14.185",
+    "@types/node": "^18.7.18",
+    "@types/react": "^18.0.20",
+    "@types/remove-markdown": "^0.3.1",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

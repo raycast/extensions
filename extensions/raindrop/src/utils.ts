@@ -7,11 +7,6 @@ interface BookmarksResponse {
   items: Bookmark[];
 }
 
-export function faviconUrl(size: number, url: string): string {
-  const domain = new URL(url).hostname;
-  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-}
-
 export function useBookmarksSearch(query: string | undefined): {
   response?: BookmarksResponse;
   error?: string;
@@ -19,7 +14,7 @@ export function useBookmarksSearch(query: string | undefined): {
 } {
   const [response, setResponse] = useState<BookmarksResponse>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   let cancel = false;
 
@@ -41,7 +36,7 @@ export function useBookmarksSearch(query: string | undefined): {
       try {
         const preferences: Preferences = getPreferenceValues();
 
-        const url = `https://api.raindrop.io/rest/v1/raindrops/0?search=${
+        const url = `https://api.raindrop.io/rest/v1/raindrops/0?sort=-create&search=${
           encodeURIComponent(query) ?? ""
         }`;
         const response = await fetch(url, {
@@ -89,7 +84,7 @@ export function useLatestBookmarks(): {
 } {
   const [response, setResponse] = useState<BookmarksResponse>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   let cancel = false;
 
@@ -105,7 +100,7 @@ export function useLatestBookmarks(): {
       try {
         const preferences: Preferences = getPreferenceValues();
 
-        const url = "https://api.raindrop.io/rest/v1/raindrops/0";
+        const url = "https://api.raindrop.io/rest/v1/raindrops/0?sort=-created";
         const response = await fetch(url, {
           method: "GET",
           headers: {

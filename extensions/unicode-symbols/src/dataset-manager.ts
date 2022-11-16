@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { searchResultLimit } from "./consants";
+import { searchResultLimit } from "./constants";
 import { environment } from "@raycast/api";
 import fs from "fs";
 

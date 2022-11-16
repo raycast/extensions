@@ -1,0 +1,43 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "itch-io",
+    "title": "itch.io",
+    "description": "Raycast Extension for itch.io, browse through milions of games made by indie developers!",
+    "icon": "command-icon.png",
+    "author": "Aayush9029",
+    "categories": [
+        "Fun",
+        "Other"
+    ],
+    "license": "MIT",
+    "commands": [{
+        "name": "index",
+        "title": "Search Games",
+        "subtitle": "itch.io",
+        "description": "Explore the most popular games in itch.io",
+        "mode": "view"
+    }],
+    "dependencies": {
+        "@raycast/api": "^1.32.1",
+        "dedent-js": "^1.0.1",
+        "fast-xml-parser": "^4.0.7",
+        "node-fetch": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "~16.10.0",
+        "@types/react": "^17.0.28",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "react-devtools": "^4.19.2",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint"
+    }
+}

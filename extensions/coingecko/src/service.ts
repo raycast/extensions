@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from 'axios';
 
-import { getCurrency } from "./utils";
+import { getPreferredCurrency } from './utils';
 
 type Price = Record<string, Record<string, number>>;
 
@@ -9,7 +9,7 @@ interface PriceResponse {
 }
 
 const client = axios.create({
-  baseURL: "https://api.coingecko.com/api/v3",
+  baseURL: 'https://api.coingecko.com/api/v3',
 });
 
 export interface Coin {
@@ -28,10 +28,13 @@ interface CoinInfo {
   };
 }
 
+interface MarketCapRankedCoinList {
+  [key: number]: Coin;
+}
+
 export default class Service {
-  async getPrice(id: string): Promise<number | undefined> {
-    const currency = getCurrency();
-    const response = await client.get<Price>("/simple/price", {
+  async getPrice(id: string, currency: string): Promise<number | undefined> {
+    const response = await client.get<Price>('/simple/price', {
       params: {
         ids: id,
         vs_currencies: currency,
@@ -60,19 +63,49 @@ export default class Service {
   }
 
   async getCoinList(): Promise<Coin[]> {
-    const response = await client.get<Coin[]>("/coins/list");
+    const response = await client.get<Coin[]>('/coins/list');
     return response.data;
   }
 
-  async getCoinPriceHistory(id: string, days = 30) {
-    const currency = getCurrency();
-    const response = await client.get<PriceResponse>(`/coins/${id}/market_chart`, {
-      params: {
-        vs_currency: currency,
-        days,
-        interval: "daily",
-      },
+  async getTopCoins(currency: string, count: number): Promise<Coin[]> {
+    const coins: MarketCapRankedCoinList = {};
+    const requests = [];
+    const perPage = 250;
+    const totalPages = Math.ceil(count / perPage);
+    let currentPage = 1;
+
+    while (currentPage < totalPages) {
+      requests.push(
+        client.get<CoinInfo[]>(
+          `/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=${perPage}&page=${currentPage}`,
+        ),
+      );
+      currentPage++;
+    }
+
+    const results = await Promise.all(requests);
+
+    results.forEach((result) => {
+      result.data.forEach(({ id, symbol, name, market_cap_rank }) => {
+        coins[market_cap_rank] = { id, symbol, name };
+      });
     });
+
+    return Object.values(coins);
+  }
+
+  async getCoinPriceHistory(id: string, days = 30) {
+    const currency = getPreferredCurrency();
+    const response = await client.get<PriceResponse>(
+      `/coins/${id}/market_chart`,
+      {
+        params: {
+          vs_currency: currency.id,
+          days,
+          interval: 'daily',
+        },
+      },
+    );
     return response.data.prices;
   }
 }

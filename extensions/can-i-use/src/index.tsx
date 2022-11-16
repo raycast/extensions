@@ -1,26 +1,29 @@
-import {
-  ActionPanel,
-  OpenInBrowserAction,
-  List,
-  Icon,
-  Color,
-  ImageLike,
-  getPreferenceValues,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Color, getPreferenceValues, Action, Image } from "@raycast/api";
 import { features, feature } from "caniuse-lite";
 import * as caniuse from "caniuse-api";
 import browserslist from "browserslist";
 import { statusToName, resolvePath, getCanIUseLink } from "./utils";
-import FeatureDetail from "./components/FeatureDetail";
+import FeatureDetail, { Support } from "./components/FeatureDetail";
 
-const { environment, path } = getPreferenceValues();
+const { showReleaseDate, showPartialSupport, briefMode, defaultQuery, environment, path } = getPreferenceValues<{
+  showReleaseDate: boolean;
+  showPartialSupport: boolean;
+  briefMode: boolean;
+  defaultQuery: string;
+  environment: string;
+  path: string;
+}>();
 
 const env = environment || "production";
 
-let browsers: string[] | null = null;
-if (path) {
-  browsers = browserslist(null, { path: resolvePath(path), env });
+let browsers: string[] = [];
+try {
+  // No data is available for op_mini (Opera Mini)
+  browsers = (path ? browserslist(null, { path: resolvePath(path), env }) : browserslist(defaultQuery)).filter(
+    (browser) => browser !== "op_mini all"
+  );
+} catch (e) {
+  console.error("Failed to query Browserslist:", e);
 }
 
 export default function CanIUse() {
@@ -29,11 +32,16 @@ export default function CanIUse() {
       {Object.entries(features).map(([featureName, packedFeature]) => {
         const feat = feature(packedFeature);
 
-        let accessoryIcon: ImageLike | null = null;
-        if (browsers && browsers.length > 0) {
-          accessoryIcon = caniuse.isSupported(featureName, browsers)
-            ? { source: Icon.Checkmark, tintColor: Color.Green }
-            : { source: Icon.XmarkCircle, tintColor: Color.Red };
+        const accessories: List.Item.Accessory[] = [
+          { text: briefMode ? feat.status.toUpperCase() : statusToName[feat.status] },
+        ];
+
+        if (browsers.length > 0) {
+          const icon: List.Item.Accessory = caniuse.isSupported(featureName, browsers)
+            ? { icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: Support.Supported }
+            : { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: Support.Unsupported };
+
+          accessories.push(icon);
         }
 
         return (
@@ -41,14 +49,24 @@ export default function CanIUse() {
             key={featureName}
             title={feat.title}
             keywords={[featureName]}
-            accessoryTitle={statusToName[feat.status]}
-            {...(accessoryIcon ? { accessoryIcon } : {})}
             actions={
               <ActionPanel>
-                <PushAction title="Show details" icon={Icon.List} target={<FeatureDetail feature={featureName} />} />
-                <OpenInBrowserAction url={getCanIUseLink(featureName)} />
+                <Action.Push
+                  title="Show details"
+                  icon={Icon.List}
+                  target={
+                    <FeatureDetail
+                      feature={featureName}
+                      showReleaseDate={showReleaseDate}
+                      showPartialSupport={showPartialSupport}
+                      briefMode={briefMode}
+                    />
+                  }
+                />
+                <Action.OpenInBrowser url={getCanIUseLink(featureName)} />
               </ActionPanel>
             }
+            accessories={accessories}
           />
         );
       })}

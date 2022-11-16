@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, ImageMask, List, OpenWithAction } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, Action, Image } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -11,8 +11,8 @@ export default function Command() {
 
       <List.Section title="Bundled Assets">
         <List.Item title="Avatar" icon="avatar.png" />
-        <List.Item title="Circle avatar" icon={{ source: "avatar.png", mask: ImageMask.Circle }} />
-        <List.Item title="Rounded avatar" icon={{ source: "avatar.png", mask: ImageMask.RoundedRectangle }} />
+        <List.Item title="Circle avatar" icon={{ source: "avatar.png", mask: Image.Mask.Circle }} />
+        <List.Item title="Rounded avatar" icon={{ source: "avatar.png", mask: Image.Mask.RoundedRectangle }} />
         <List.Item title="Theme avatar" icon={{ source: { light: "avatar-light.png", dark: "avatar-dark.png" } }} />
       </List.Section>
 
@@ -23,7 +23,7 @@ export default function Command() {
           icon={{ fileIcon: __filename }}
           actions={
             <ActionPanel>
-              <OpenWithAction path={__filename} />
+              <Action.OpenWith path={__filename} />
             </ActionPanel>
           }
         />

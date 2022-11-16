@@ -1,0 +1,102 @@
+{
+  "OVERVIEW": [
+    {
+      "title": "Introduction",
+      "url": "https://spatie.be/docs/laravel-backup/v6/introduction"
+    },
+    {
+      "title": "Support Us",
+      "url": "https://spatie.be/docs/laravel-backup/v6/support-us"
+    },
+    {
+      "title": "Requirements",
+      "url": "https://spatie.be/docs/laravel-backup/v6/requirements"
+    },
+    {
+      "title": "High Level Overview",
+      "url": "https://spatie.be/docs/laravel-backup/v6/high-level-overview"
+    },
+    {
+      "title": "Installation and setup",
+      "url": "https://spatie.be/docs/laravel-backup/v6/installation-and-setup"
+    },
+    {
+      "title": "Questions and issues",
+      "url": "https://spatie.be/docs/laravel-backup/v6/questions-and-issues"
+    },
+    {
+      "title": "Changelog",
+      "url": "https://spatie.be/docs/laravel-backup/v6/changelog"
+    },
+    {
+      "title": "About us",
+      "url": "https://spatie.be/docs/laravel-backup/v6/about-us"
+    }
+  ],
+  "TAKING BACKUPS": [
+    {
+      "title": "Taking Backups",
+      "url": "https://spatie.be/docs/laravel-backup/v6/taking-backups/overview"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v6/taking-backups/events"
+    }
+  ],
+  "CLEANING UP OLD BACKUPS": [
+    {
+      "title": "Cleaning up old backups",
+      "url": "https://spatie.be/docs/laravel-backup/v6/cleaning-up-old-backups/overview"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v6/cleaning-up-old-backups/events"
+    }
+  ],
+  "MONITORING THE HEALTH OF ALL BACKUPS": [
+    {
+      "title": "Monitoring the health of all backups",
+      "url": "https://spatie.be/docs/laravel-backup/v6/monitoring-the-health-of-all-backups/overview"
+    },
+    {
+      "title": "Creating your custom health check",
+      "url": "https://spatie.be/docs/laravel-backup/v6/monitoring-the-health-of-all-backups/creating-your-custom-health-check"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v6/monitoring-the-health-of-all-backups/events"
+    }
+  ],
+  "SENDING NOTIFICATIONS": [
+    {
+      "title": "Sending notifications",
+      "url": "https://spatie.be/docs/laravel-backup/v6/sending-notifications/overview"
+    },
+    {
+      "title": "Adding extra notification channels",
+      "url": "https://spatie.be/docs/laravel-backup/v6/sending-notifications/adding-extra-notification-channels"
+    },
+    {
+      "title": "Customizing the notifiable",
+      "url": "https://spatie.be/docs/laravel-backup/v6/sending-notifications/customizing-the-notifiable"
+    }
+  ],
+  "ADVANCED USAGE": [
+    {
+      "title": "Adding extra files to a backup",
+      "url": "https://spatie.be/docs/laravel-backup/v6/advanced-usage/adding-extra-files-to-a-backup"
+    },
+    {
+      "title": "Backing up a non-laravel application",
+      "url": "https://spatie.be/docs/laravel-backup/v6/advanced-usage/backing-up-a-non-laravel-application"
+    },
+    {
+      "title": "Binary database dumps with PostgreSQL",
+      "url": "https://spatie.be/docs/laravel-backup/v6/advanced-usage/binary-database-dumps-with-postgresql"
+    },
+    {
+      "title": "Encrypt backup archives",
+      "url": "https://spatie.be/docs/laravel-backup/v6/advanced-usage/encrypt-backup-archives"
+    }
+  ]
+}

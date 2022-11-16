@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
-import { IssueList, IssueScope, IssueState } from "./components/issues";
+import { SearchMyIssues } from "./components/issues_search";
 
-render(<IssueList scope={IssueScope.created_by_me} state={IssueState.all} />);
+export default function MyIssuesSearchRoot(): JSX.Element {
+  return <SearchMyIssues />;
+}

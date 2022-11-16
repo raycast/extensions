@@ -5,6 +5,9 @@
   "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
   "icon": "bitbucket-logo.png",
   "author": "Francois",
+  "contributors": [
+    "earmstrong42"
+  ],
   "license": "MIT",
   "commands": [
     {

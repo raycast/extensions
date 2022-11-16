@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-decorator",
+  "title": "Text Decorator",
+  "description": "Super cool unicode text magic. Use 𝐛𝐨𝐥𝐝, 𝒊𝒕𝒂𝒍𝒊𝒄𝒔, and 🅜🅞🅡🅔 🄲🅁🄰🅉🅈 𝔩𝔬𝔬𝔨𝔦𝔫𝔤 fonts on Facebook, Twitter, and everywhere else.",
+  "icon": "text-decorator.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "decorate-text",
+      "title": "Decorate Text",
+      "description": "Decorate text from selection or clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "decorate-text-with-font",
+      "title": "Decorate Text With Font",
+      "description": "Decorate text with specific font and set font of Decorate Text command.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemLayout",
+          "type": "dropdown",
+          "description": "Set the layout of the font items.",
+          "required": true,
+          "title": "Font Layout",
+          "default": "Grid",
+          "data": [
+            {
+              "title": "Grid",
+              "value": "Grid"
+            },
+            {
+              "title": "List",
+              "value": "List"
+            }
+          ]
+        },
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the font items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Font Item Size",
+          "default": "small",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "actionAfterDecoration",
+      "type": "dropdown",
+      "required": true,
+      "title": "Action After Decoration",
+      "description": "Paste the result or copy the result to the clipboard after decorating text.",
+      "default": "Paste",
+      "data": [
+        {
+          "title": "Paste to Active App",
+          "value": "Paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "Copy"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.1",
+    "unicode-text-decorator": "^0.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

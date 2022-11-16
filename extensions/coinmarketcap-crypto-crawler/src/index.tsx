@@ -3,6 +3,8 @@ import {
   ActionPanelItem,
   Color,
   CopyToClipboardAction,
+  showToast,
+  ToastStyle,
   Icon,
   List,
   OpenInBrowserAction,
@@ -15,6 +17,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
+import refreshCryptoList from "./utils/refreshCryptoList";
 import useFavoriteCoins from "./utils/useFavoriteCoins";
 import { CryptoCurrency, PriceData } from "./types";
 import useCoinPriceStore from "./utils/useCoinPriceStore";
@@ -96,6 +99,11 @@ function CoinListItem({
             }}
           />
           <ActionPanelItem title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
+          <ActionPanelItem
+            title="Refresh Crypto List"
+            onAction={() => refreshCryptoList()}
+            icon={Icon.ArrowClockwise}
+          />
         </ActionPanel>
       }
     />
@@ -190,6 +198,7 @@ export default function SearchCryptoList() {
         refreshExistingCache((err, cryptoList) => {
           if (err) {
             console.error("WriteFileError:" + err);
+            showToast(ToastStyle.Failure, "Refresh failed", (err as Error)?.message);
             return;
           }
 
@@ -217,12 +226,11 @@ export default function SearchCryptoList() {
 
   const onSearchChange = (search: string) => {
     setIsLoading(true);
-
+    const MAX_SEARCH_RESULT = 500;
     const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ["symbol", "name"] });
-    const transformedFuzzyResult = fuzzyResult.map((result) => result.obj);
+    const transformedFuzzyResult = fuzzyResult.slice(0, MAX_SEARCH_RESULT - 1).map((result) => result.obj);
 
     setSearchResult(transformedFuzzyResult);
-
     setIsLoading(false);
   };
 

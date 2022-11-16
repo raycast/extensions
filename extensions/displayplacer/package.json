@@ -6,7 +6,24 @@
   "icon": "displayplacer.png",
   "author": "eluce2",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "path",
+      "title": "Shell Path",
+      "default": "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin",
+      "description": "Colon-delimited list of paths to search for displayplacer and homebrew",
+      "required": false,
+      "type": "textfield"
+    }
+  ],
   "commands": [
+    {
+      "name": "config",
+      "title": "Help / Configure Extension",
+      "subtitle": "Display Placer",
+      "description": "Learn how to setup and use this extension",
+      "mode": "view"
+    },
     {
       "name": "displayplacer",
       "title": "Switch Display Preset",
@@ -51,7 +68,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3"
+    "@raycast/api": "^1.33.0",
+    "nanoid": "^3.3.3",
+    "react-use": "^17.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

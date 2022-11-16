@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pie-for-pi-hole",
+  "title": "Pie for Pi-hole",
+  "description": "Control your Pi-hole from Raycast.",
+  "icon": "command-icon.png",
+  "author": "GLaDO8",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-pihole",
+      "title": "Toggle Pi-hole",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Enable or disable your Pi-Hole, for any custom time",
+      "mode": "view"
+    },
+    {
+      "name": "query-log",
+      "title": "Get Query Logs",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Get the query log for the last 2 hours.",
+      "mode": "view"
+    },
+    {
+      "name": "get-summary",
+      "title": "Get Summary",
+      "subtitle": "Pie for Pi-hole",
+      "description": "Get a summary of Pi-Hole vitals.",
+      "mode": "view"
+    },
+    {
+      "name": "top-queries",
+      "title": "Get Top Queries",
+      "subtitle": "Pie for Pi-hole",
+      "description": "View top allowed and blocked queries for the last 24 hours.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PIHOLE_URL",
+      "type": "textfield",
+      "required": true,
+      "title": "Pi-Hole URL",
+      "description": "Enter Raspberry Pi IP address or URL for your Pi-hole."
+    },
+    {
+      "name": "API_TOKEN",
+      "type": "textfield",
+      "required": true,
+      "title": "API Token",
+      "description": "Find this in settings > API/WEB Interface > Show API Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "dotenv": "^16.0.1",
+    "node-fetch": "^3.2.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

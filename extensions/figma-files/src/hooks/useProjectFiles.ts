@@ -1,5 +1,5 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import fetch from "node-fetch";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import fetch, { Response } from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { File, ProjectFiles, TeamProjects } from "../types";
@@ -9,9 +9,11 @@ export function useProjectFiles() {
   const [state, setState] = useState<{
     projectFiles?: ProjectFiles[];
     isLoading: boolean;
+    hasError: boolean;
   }>({
     projectFiles: undefined,
     isLoading: true,
+    hasError: false,
   });
 
   useEffect(() => {
@@ -21,15 +23,28 @@ export function useProjectFiles() {
         setState((oldState) => ({ ...oldState, projectFiles: cachedFiles }));
       }
 
-      const newFiles = await fetchFiles();
+      try {
+        const newFiles = await fetchFiles();
 
-      setState((oldState) => ({
-        ...oldState,
-        projectFiles: newFiles,
-        isLoading: false,
-      }));
+        setState((oldState) => ({
+          ...oldState,
+          projectFiles: newFiles,
+          isLoading: false,
+          hasError: false,
+        }));
 
-      await storeFiles(newFiles);
+        await storeFiles(newFiles);
+      } catch (error) {
+        console.error("error fetching files", error);
+        if ((error as Response)?.status >= 400) {
+          setState((oldState) => ({
+            ...oldState,
+            projectFiles: [],
+            isLoading: false,
+            hasError: true,
+          }));
+        }
+      }
     }
     fetch();
   }, []);
@@ -48,11 +63,15 @@ async function fetchTeamProjects(): Promise<TeamProjects> {
       },
     });
 
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
+
     const json = (await response.json()) as TeamProjects;
     return json;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load team");
+    showToast(Toast.Style.Failure, "Could not load team");
     return Promise.resolve({ name: "No team found", projects: [] });
   }
 }
@@ -74,7 +93,7 @@ async function fetchFiles(): Promise<ProjectFiles[]> {
       return { name: project.name, files: json.files as File[] };
     } catch (error) {
       console.error(error);
-      showToast(ToastStyle.Failure, "Could not load files");
+      showToast(Toast.Style.Failure, "Could not load files");
       return Promise.resolve([]);
     }
   });

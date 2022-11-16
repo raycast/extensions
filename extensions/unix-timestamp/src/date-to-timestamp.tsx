@@ -1,5 +1,18 @@
-import { showToast, ActionPanel, Icon, SubmitFormAction, Form, ToastStyle, copyTextToClipboard } from "@raycast/api";
-import { getTimestamp, toDate } from "./utils";
+import {
+  showToast,
+  ActionPanel,
+  Icon,
+  Form,
+  Action,
+  Clipboard,
+  Toast,
+} from '@raycast/api';
+import {
+  DateValidationError,
+  getTimestamp,
+  toDate,
+  validateDateInput,
+} from './utils';
 
 interface Form {
   year: string;
@@ -33,44 +46,97 @@ function ConvertAction() {
   async function handleSubmit(values: Form) {
     const { year, month, day, hours, minutes, seconds } = values;
 
-    const yearNumber = parseInt(year || "0");
-    const monthNumber = parseInt(month || "0");
-    const dayNumber = parseInt(day || "0");
-    const hoursNumber = parseInt(hours || "0");
-    const minutesNumber = parseInt(minutes || "0");
-    const secondsNumber = parseInt(seconds || "0");
+    const yearNumber = parseInt(year || '0');
+    const monthNumber = parseInt(month || '0');
+    const dayNumber = parseInt(day || '0');
+    const hoursNumber = parseInt(hours || '0');
+    const minutesNumber = parseInt(minutes || '0');
+    const secondsNumber = parseInt(seconds || '0');
 
-    if (isNaN(yearNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Year"');
-      return;
-    }
-    if (isNaN(monthNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Month"');
-      return;
-    }
-    if (isNaN(dayNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Day"');
-      return;
-    }
-    if (isNaN(hoursNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Hours"');
-      return;
-    }
-    if (isNaN(minutesNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Minutes"');
-      return;
-    }
-    if (isNaN(secondsNumber)) {
-      showToast(ToastStyle.Failure, 'Invalid field value: "Seconds"');
+    const validatationError = validateDateInput(
+      yearNumber,
+      monthNumber,
+      dayNumber,
+      hoursNumber,
+      minutesNumber,
+      secondsNumber,
+    );
+
+    if (validatationError) {
+      const title = getValidationErrorText(validatationError);
+      showToast({
+        style: Toast.Style.Failure,
+        title,
+      });
       return;
     }
 
-    const date = toDate(yearNumber, monthNumber, dayNumber, hoursNumber, minutesNumber, secondsNumber);
+    const date = toDate(
+      yearNumber,
+      monthNumber,
+      dayNumber,
+      hoursNumber,
+      minutesNumber,
+      secondsNumber,
+    );
     const timestamp = getTimestamp(date);
 
-    copyTextToClipboard(timestamp.toString());
-    showToast(ToastStyle.Success, "Copied to clipboard");
+    Clipboard.copy(timestamp.toString());
+    showToast({
+      style: Toast.Style.Success,
+      title: 'Copied to clipboard',
+    });
   }
 
-  return <SubmitFormAction icon={Icon.Checkmark} title="Convert" onSubmit={handleSubmit} />;
+  return (
+    <Action.SubmitForm
+      icon={Icon.Checkmark}
+      title="Convert"
+      onSubmit={handleSubmit}
+    />
+  );
+}
+
+function getValidationErrorText(validatationError: DateValidationError) {
+  const { error, field } = validatationError;
+
+  let errorText = '';
+  switch (error) {
+    case 'not-a-number':
+      errorText = 'Not a number';
+      break;
+    case 'negative':
+      errorText = 'Negative value';
+      break;
+    case 'out-of-bounds':
+      errorText = 'The value is too high';
+      break;
+    default:
+      errorText = 'Unknown error';
+      break;
+  }
+
+  let fieldText = '';
+  switch (field) {
+    case 'year':
+      fieldText = 'Year';
+      break;
+    case 'month':
+      fieldText = 'Month';
+      break;
+    case 'day':
+      fieldText = 'Day';
+      break;
+    case 'hours':
+      fieldText = 'Hours';
+      break;
+    case 'minutes':
+      fieldText = 'Minutes';
+      break;
+    case 'seconds':
+      fieldText = 'Seconds';
+      break;
+  }
+
+  return `${errorText}: "${fieldText}"`;
 }

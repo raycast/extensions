@@ -1,30 +1,20 @@
-import {
-  ActionPanel,
-  confirmAlert,
-  Detail,
-  getPreferenceValues,
-  List,
-  ListItem,
-  OpenAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import React from "react";
+import { Action, ActionPanel, getPreferenceValues, Grid, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
+import React, { useEffect, useState } from "react";
 
-import { Preferences } from "./interfaces/Preferences";
 import Game from "./interfaces/game";
+import { Preferences } from "./interfaces/Preferences";
 
 export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const clientId = preferences.clientId;
   const authorization = preferences.authorization;
 
-  const [loading, setLoading] = React.useState(false);
-  const [query, setQuery] = React.useState<string>("");
-  const [items, setItems] = React.useState<Game[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState<string>("");
+  const [items, setItems] = useState<Game[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (query.length == 0) return;
     setLoading(true);
 
@@ -40,38 +30,39 @@ export default function main() {
           setItems(data.data);
           setLoading(false);
         } else if (data.error && data.message.toLowerCase().includes("invalid")) {
-          showToast(ToastStyle.Failure, data.message);
+          showToast({
+            style: Toast.Style.Failure,
+            title: data.message,
+          });
         }
       });
   }, [query]);
 
   return (
-    <>
-      <List
-        isLoading={loading}
-        searchBarPlaceholder="Search for a Categorie on Twitch"
-        navigationTitle="Search a Categorie"
-        onSearchTextChange={(text) => setQuery(text)}
-      >
-        {items.map((item: Game) => {
-          return (
-            <ListItem
-              icon={item.box_art_url}
-              key={item.id}
-              id={item.id}
-              title={item.name}
-              actions={
-                <ActionPanel>
-                  <OpenAction
-                    title="Open Categorie"
-                    target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List>
-    </>
+    <Grid
+      isLoading={loading}
+      searchBarPlaceholder="Search for game..."
+      onSearchTextChange={(text) => setQuery(text)}
+      itemSize={Grid.ItemSize.Medium}
+    >
+      {items.map((item: Game) => {
+        return (
+          <Grid.Item
+            content={item.box_art_url.replace("52x72", "285x380")}
+            key={item.id}
+            id={item.id}
+            title={item.name}
+            actions={
+              <ActionPanel>
+                <Action.Open
+                  title="Open Category"
+                  target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </Grid>
   );
 }

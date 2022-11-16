@@ -12,8 +12,11 @@ export type State =
   | "BLOCKED"
   | "NOT_RUN";
 
-export function getStateIcon(state: State): Image | undefined {
+export function getStateIcon(state: State): Image.ImageLike | undefined {
   switch (state) {
+    case "SCHEDULED":
+      return Icon.Circle;
+
     case "CREATING":
     case "RUNNING":
       return { tintColor: Color.Yellow, source: Icon.Circle };
@@ -25,6 +28,6 @@ export function getStateIcon(state: State): Image | undefined {
     case "CANCELED":
     case "CANCELING":
     case "FAILED":
-      return { tintColor: Color.Red, source: Icon.XmarkCircle };
+      return { tintColor: Color.Red, source: Icon.XMarkCircle };
   }
 }

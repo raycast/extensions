@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wikipedia",
+  "title": "Wikipedia",
+  "description": "Search Wikipedia articles and view them",
+  "icon": "wikipedia.png",
+  "author": "vimtor",
+  "contributors": [
+    "shubzkothekar"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-page",
+      "title": "Search Page",
+      "subtitle": "Wikipedia",
+      "description": "Search Wikipedia pages by title",
+      "mode": "view"
+    },
+    {
+      "name": "random-page",
+      "title": "Open Random Page",
+      "subtitle": "Wikipedia",
+      "description": "Open a random Wikipedia page in browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "featured-page",
+      "title": "Open Featured Page",
+      "subtitle": "Wikipedia",
+      "description": "Open today's featured Wikipedia page in browser",
+      "mode": "no-view"
+    }
+  ],
+  "categories": [
+    "Web",
+    "News"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.1",
+    "swr": "^1.0.1",
+    "got": "^11.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pexels",
+  "title": "Pexels",
+  "description": "Search photos or collections on Pexels, download or set them as wallpaper.",
+  "icon": "pexels-icon.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-photos",
+      "title": "Search Photos",
+      "subtitle": "Pexels",
+      "description": "Search photos on Pexels. Download or set them as wallpaper.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-curated-photos",
+      "title": "Search Curated Photos",
+      "subtitle": "Pexels",
+      "description": "Search curated photos on Pexels. Download or set them as wallpaper.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-collections",
+      "title": "Search Collections",
+      "subtitle": "Pexels",
+      "description": "Search collections and photos on Pexels.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "itemSize",
+          "type": "dropdown",
+          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "required": false,
+          "title": "Photo Item Size",
+          "default": "medium",
+          "data": [
+            {
+              "title": "Small",
+              "value": "small"
+            },
+            {
+              "title": "Medium",
+              "value": "medium"
+            },
+            {
+              "title": "Large",
+              "value": "large"
+            }
+          ]
+        },
+        {
+          "name": "rememberTag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember Gist Filter Tag.",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "required": true,
+      "title": "Pexels API Key",
+      "description": "Authorization is required for the Pexels. Anyone with a Pexels account can request an API key.",
+      "default": ""
+    },
+    {
+      "name": "layout",
+      "type": "dropdown",
+      "description": "Set the layout of the photo items.",
+      "required": true,
+      "title": "Photo Layout",
+      "default": "Grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "Grid"
+        },
+        {
+          "title": "List",
+          "value": "List"
+        }
+      ]
+    },
+    {
+      "name": "applyTo",
+      "title": "Apply Wallpaper To",
+      "description": "Apply the wallpaper to which monitor. Valid only when you are using an extended monitor.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Current Monitor",
+          "value": "current"
+        },
+        {
+          "title": "Every Monitor",
+          "value": "every"
+        }
+      ],
+      "required": false,
+      "default": "every"
+    },
+    {
+      "name": "downloadSize",
+      "title": "Download Size",
+      "description": "The size of the wallpaper to download. Default is Original.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Original",
+          "value": "original"
+        },
+        {
+          "title": "Large2x",
+          "value": "large2x"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Portrait",
+          "value": "portrait"
+        },
+        {
+          "title": "Landscape",
+          "value": "landscape"
+        },
+        {
+          "title": "Tiny",
+          "value": "tiny"
+        }
+      ],
+      "required": false,
+      "default": "original"
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "The directory of photos to download. Path format: /Users/Username/Downloads or ~/Downloads.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/Downloads",
+      "default": "~/Downloads"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.36.0",
+    "fs-extra": "^10.0.1",
+    "node-fetch": "^3.2.3",
+    "pexels": "^1.3.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.29.4",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

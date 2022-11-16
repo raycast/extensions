@@ -1,0 +1,86 @@
+{
+  "OVERVIEW": [
+    {
+      "title": "Introduction",
+      "url": "https://spatie.be/docs/laravel-backup/v3/introduction"
+    },
+    {
+      "title": "Postcardware",
+      "url": "https://spatie.be/docs/laravel-backup/v3/postcardware"
+    },
+    {
+      "title": "Requirements",
+      "url": "https://spatie.be/docs/laravel-backup/v3/requirements"
+    },
+    {
+      "title": "High Level Overview",
+      "url": "https://spatie.be/docs/laravel-backup/v3/high-level-overview"
+    },
+    {
+      "title": "Installation and setup",
+      "url": "https://spatie.be/docs/laravel-backup/v3/installation-and-setup"
+    },
+    {
+      "title": "Questions and issues",
+      "url": "https://spatie.be/docs/laravel-backup/v3/questions-and-issues"
+    },
+    {
+      "title": "Changelog",
+      "url": "https://spatie.be/docs/laravel-backup/v3/changelog"
+    },
+    {
+      "title": "About us",
+      "url": "https://spatie.be/docs/laravel-backup/v3/about-us"
+    }
+  ],
+  "TAKING BACKUPS": [
+    {
+      "title": "Taking Backups",
+      "url": "https://spatie.be/docs/laravel-backup/v3/taking-backups/overview"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v3/taking-backups/events"
+    }
+  ],
+  "CLEANING UP OLD BACKUPS": [
+    {
+      "title": "Cleaning up old backups",
+      "url": "https://spatie.be/docs/laravel-backup/v3/cleaning-up-old-backups/overview"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v3/cleaning-up-old-backups/events"
+    }
+  ],
+  "MONITORING THE HEALTH OF ALL BACKUPS": [
+    {
+      "title": "Monitoring the health of all backups",
+      "url": "https://spatie.be/docs/laravel-backup/v3/monitoring-the-health-of-all-backups/overview"
+    },
+    {
+      "title": "Events",
+      "url": "https://spatie.be/docs/laravel-backup/v3/monitoring-the-health-of-all-backups/events"
+    }
+  ],
+  "SENDING NOTIFICATIONS": [
+    {
+      "title": "Sending notifications",
+      "url": "https://spatie.be/docs/laravel-backup/v3/sending-notifications/overview"
+    },
+    {
+      "title": "Creating a custom sender",
+      "url": "https://spatie.be/docs/laravel-backup/v3/sending-notifications/creating-a-custom-sender"
+    }
+  ],
+  "ADVANCED USAGE": [
+    {
+      "title": "Adding Extra Files to the zip",
+      "url": "https://spatie.be/docs/laravel-backup/v3/advanced-usage/adding-extra-files-to-the-zip"
+    },
+    {
+      "title": "Backing up a non-laravel application",
+      "url": "https://spatie.be/docs/laravel-backup/v3/advanced-usage/backing-up-a-non-laravel-application"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-declare module 'simple-plist' {
+declare module "simple-plist" {
   const readFile: (file: string) => BookmarkPListResult;
   export { readFile };
 }

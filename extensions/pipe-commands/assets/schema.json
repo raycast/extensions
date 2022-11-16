@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ScriptArgument": {
+            "properties": {
+                "percentEncoded": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "enum": [
+                        "text"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        }
+    },
+    "properties": {
+        "argument1": {
+            "$ref": "#/definitions/ScriptArgument"
+        },
+        "currentDirectoryPath": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "icon": {
+            "type": "string"
+        },
+        "iconDark": {
+            "type": "string"
+        },
+        "mode": {
+            "enum": [
+                "pipe",
+                "silent"
+            ],
+            "type": "string"
+        },
+        "needsConfirmation": {
+            "type": "boolean"
+        },
+        "packageName": {
+            "type": "string"
+        },
+        "schemaVersion": {
+            "enum": [
+                1
+            ],
+            "type": "number"
+        },
+        "title": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "mode",
+        "schemaVersion",
+        "title"
+    ],
+    "type": "object"
+}
+

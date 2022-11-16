@@ -1,0 +1,50 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Loader
+order: 1
+slug: /core/loader/
+category: "feedback"
+description: "Indicate loading state"
+props: ["Loader"]
+import: "import { Loader } from '@mantine/core';"
+source: "mantine-core/src/components/Loader/Loader.tsx"
+docs: "core/Loader.mdx"
+styles: ["Loader", "single-node"]
+---
+
+import { LoaderDemos } from "@mantine/demos";
+
+## Usage
+
+By default, loader will be rendered with `theme.primaryColor`.
+You can choose any color defined in [theme.colors](/theming/extend-theme/#default-colors):
+
+<Demo data={LoaderDemos.configurator} />
+
+## Configure default loader
+
+You can configure default loader in [MantineProvider](/theming/mantine-provider/),
+it will be used in Loader and [LoadingOverlay](/core/loading-overlay/) components by default:
+
+```tsx
+import { MantineProvider } from "@mantine/core";
+
+function Demo() {
+  return (
+    <MantineProvider theme={{ loader: "bars" }}>
+      <YourApp />
+    </MantineProvider>
+  );
+}
+```
+
+## Size
+
+Size controls loader height or width (depends on loader variant). Loader has predefined sizes: xs, sm, md, lg, xl.
+Alternatively, you can use a number to set width or height in px:
+
+```tsx
+<Loader size="sm" /> // -> predefined small size
+<Loader size={50} /> // -> size in px
+```

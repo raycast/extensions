@@ -1,0 +1,123 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pocket",
+  "title": "Pocket",
+  "description": "Search and edit Pocket bookmarks",
+  "icon": "pocket-logo.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "consumerKey",
+      "title": "Consumer Key",
+      "type": "password",
+      "required": true,
+      "description": "Token you created in Apps",
+      "placeholder": "1234-abcd1234abcd1234abcd1234"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "type": "password",
+      "required": true,
+      "description": "Token from the OAuth flow",
+      "placeholder": "5678defg-5678-defg-5678-defg56"
+    },
+    {
+      "name": "defaultOpen",
+      "title": "Default App",
+      "type": "dropdown",
+      "description": "What should be the primary action",
+      "default": "pocket-website",
+      "required": false,
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Pocket Website",
+          "value": "pocket-website"
+        }
+      ]
+    },
+    {
+      "name": "defaultFilter",
+      "title": "Default Filter",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "description": "Default filter for the list of bookmarks",
+      "data": [
+        {
+          "title": "All Bookmarks",
+          "value": "all"
+        },
+        {
+          "title": "Unread",
+          "value": "unread"
+        },
+        {
+          "title": "Archived",
+          "value": "archive"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Bookmarks",
+      "subtitle": "Pocket",
+      "description": "Search Pocket unread bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Open Random Bookmark",
+      "subtitle": "Pocket",
+      "description": "Opens a random unread bookmark",
+      "mode": "no-view"
+    },
+    {
+      "name": "latest",
+      "title": "Open Latest Bookmark",
+      "subtitle": "Pocket",
+      "description": "Opens the latest added unread bookmark",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Create Bookmark from Clipboard",
+      "subtitle": "Pocket",
+      "description": "Create bookmark from clipboard contents",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3",
+    "swr": "^1.2.0",
+    "got": "^12.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

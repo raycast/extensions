@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, OpenInBrowserAction, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, Action, useNavigation } from "@raycast/api";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -66,7 +66,7 @@ export default function LookUp() {
       markdown={data}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             url={"https://ipaddress.my"}
             onOpen={() => {
               pop();

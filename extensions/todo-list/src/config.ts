@@ -1,4 +1,4 @@
-import { Color, Icon, environment, ImageLike } from "@raycast/api";
+import { Color, Icon, environment, Image } from "@raycast/api";
 import { TodoSections } from "./atoms";
 export const TODO_FILE = `${environment.supportPath}/todo.json`;
 export const DEFAULT_SECTIONS = { pinned: [], todo: [], completed: [] };
@@ -6,7 +6,7 @@ type Data = Record<
   keyof TodoSections,
   {
     name: string;
-    accessoryIcon?: ImageLike;
+    accessoryIcon?: Image.ImageLike;
   }
 >;
 

@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  ImageLike,
-  KeyboardShortcut,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useInterval from "use-interval";
 import { Game, GameScore, Move } from "../lib/game";
@@ -18,11 +8,11 @@ function CursorAction(props: {
   game: Game;
   move: Move;
   title: string;
-  shortcut?: KeyboardShortcut | undefined;
-  icon?: ImageLike | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
+  icon?: Image.ImageLike | undefined;
 }): JSX.Element {
   return (
-    <ActionPanel.Item
+    <Action
       title={props.title}
       shortcut={props.shortcut}
       icon={props.icon}
@@ -57,7 +47,11 @@ export function SnakeGame(): JSX.Element {
 
   const codefence = "```" + field + "```";
   if (error) {
-    showToast(ToastStyle.Failure, "Error", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: error,
+    });
   }
 
   const scoreText = (): string => {
@@ -88,14 +82,14 @@ export function SnakeGame(): JSX.Element {
       actions={
         <ActionPanel>
           {message === undefined && (
-            <ActionPanel.Item
+            <Action
               title={pause ? "Continue" : "Pause"}
               icon={{ source: pause ? "play.png" : "pause.png", tintColor: Color.PrimaryText }}
               onAction={() => setPause(!pause)}
             />
           )}
-          <ActionPanel.Item title="Restart Game" icon={{ source: Icon.ArrowClockwise }} onAction={() => restart()} />
-          <CopyToClipboardAction title="Copy Score to Clipboard" content={score?.food || 0} />
+          <Action title="Restart Game" icon={{ source: Icon.ArrowClockwise }} onAction={() => restart()} />
+          <Action.CopyToClipboard title="Copy Score to Clipboard" content={score?.food || 0} />
           <CursorAction
             game={game}
             title="Up"

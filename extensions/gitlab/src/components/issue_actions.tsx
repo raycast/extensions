@@ -1,35 +1,28 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  Color,
-  CopyToClipboardAction,
-  Icon,
-  KeyboardShortcut,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { LabelList } from "./label";
 import { IssueMRCreateForm } from "./mr_create";
 
-export function CloseIssueAction(props: { issue: Issue }) {
+export function CloseIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
   const issue = props.issue;
   async function handleAction() {
     try {
-      await closeMainWindow();
       await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/notes`, { body: "/close" });
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Failed to close issue", error instanceof Error ? error.message : error.toString());
+      if (props.finished) {
+        props.finished();
+      }
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Failed to close Issue");
     }
   }
   return (
     <ActionPanel.Item
       title="Close Issue"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
       onAction={handleAction}
     />
   );
@@ -37,7 +30,7 @@ export function CloseIssueAction(props: { issue: Issue }) {
 
 export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       icon={Icon.Pencil}
       title="Create Merge Request"
       shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
@@ -46,21 +39,19 @@ export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
   );
 }
 
-export function ReopenIssueAction(props: { issue: Issue }) {
+export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
   const issue = props.issue;
   async function handleAction() {
     try {
-      await closeMainWindow();
       await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/notes`, { body: "/reopen" });
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to reopen issue",
-        error instanceof Error ? error.message : error.toString()
-      );
+      if (props.finished) {
+        props.finished();
+      }
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Failed to reopen Issue");
     }
   }
-  return <ActionPanel.Item title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
+  return <Action title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
 function ShowIssueLabelsAction(props: { labels: Label[] }) {
@@ -68,7 +59,7 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
     return null;
   }
   return (
-    <PushAction
+    <Action.Push
       title="Show attached Labels"
       target={<LabelList labels={props.labels} />}
       shortcut={{ modifiers: ["cmd"], key: "l" }}
@@ -77,23 +68,19 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   );
 }
 
-export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: KeyboardShortcut }) {
+export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard.Shortcut }): JSX.Element | null {
   const issue = props.issue;
   async function handleAction() {
     try {
       await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/todo`);
-      showToast(ToastStyle.Success, "To do created");
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to add as to do",
-        error instanceof Error ? error.message : error.toString()
-      );
+      showToast(Toast.Style.Success, "To do created");
+    } catch (error) {
+      showErrorToast(getErrorMessage(error), "Failed to add as to do");
     }
   }
   if (issue.state === "opened") {
     return (
-      <ActionPanel.Item
+      <Action
         title="Add a to do"
         shortcut={props.shortcut}
         icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
@@ -105,18 +92,18 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
   }
 }
 
-export function IssueItemActions(props: { issue: Issue }) {
+export function IssueItemActions(props: { issue: Issue; onDataChange?: () => void }): JSX.Element {
   const issue = props.issue;
   return (
     <React.Fragment>
       <CreateIssueTodoAction issue={issue} shortcut={{ modifiers: ["cmd"], key: "t" }} />
       <ShowIssueLabelsAction labels={issue.labels} />
       {issue.state == "opened" && <CreateMRAction issue={issue} />}
-      {issue.state == "opened" && <CloseIssueAction issue={issue} />}
-      {issue.state == "closed" && <ReopenIssueAction issue={issue} />}
-      <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />
-      <CopyToClipboardAction title="Copy Issue URL" content={issue.web_url} />
-      <CopyToClipboardAction title="Copy Issue Title" content={issue.title} />
+      {issue.state == "opened" && <CloseIssueAction issue={issue} finished={props.onDataChange} />}
+      {issue.state == "closed" && <ReopenIssueAction issue={issue} finished={props.onDataChange} />}
+      <Action.CopyToClipboard title="Copy Issue Number" content={issue.iid} />
+      <Action.CopyToClipboard title="Copy Issue URL" content={issue.web_url} />
+      <Action.CopyToClipboard title="Copy Issue Title" content={issue.title} />
     </React.Fragment>
   );
 }

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "specify",
+  "title": "Specify",
+  "description": "Search all your design tokens and assets, copy and paste them in your favorite tools: Notion pages, Pitch presentations, Slack discussions, etc.",
+  "icon": "specify-icon.png",
+  "author": "AllanM",
+  "version": "1.0.0",
+  "categories": [
+    "Design Tools",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-colors",
+      "title": "Search Colors",
+      "subtitle": "Specify",
+      "description": "Search your colors in your Specify repositories",
+      "mode": "view"
+    },
+    {
+      "name": "search-bitmaps",
+      "title": "Search Bitmaps",
+      "subtitle": "Specify",
+      "description": "Search your bitmap files in your Specify repositories",
+      "mode": "view"
+    },
+    {
+      "name": "search-vectors",
+      "title": "Search Vectors",
+      "subtitle": "Specify",
+      "description": "Search your vector files in your Specify repositories (PDFs files are not supported yet)",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "View extension's README for instructions.",
+      "placeholder": "a1b2...c3d4"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "axios": "^0.27.2",
+    "js-base64": "^3.7.2",
+    "react-use": "^17.4.0",
+    "run-applescript": "^6.0.0",
+    "slugify": "^1.6.5",
+    "tinycolor2": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/tinycolor2": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

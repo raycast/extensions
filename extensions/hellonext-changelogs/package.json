@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hellonext-changelogs",
+  "title": "Hellonext Changelogs",
+  "description": "This extension allows you to view the latest changelogs of your Hellonext organization.",
+  "icon": "hn-logo.png",
+  "author": "heerthees",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Changelogs",
+      "subtitle": "Hellonext",
+      "description": "This command will list the latest changelogs of your organizations.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hellonext_api_key",
+      "type": "password",
+      "required": true,
+      "title": "Hellonext API Key",
+      "description": "In Hellonext go to Dashboard > Organization Settings > Advanced and copy the API key.",
+      "placeholder": "cHTGhl6sPyvV5gSTQSfg",
+      "link": "https://portal.hellonext.co"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.33.2",
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

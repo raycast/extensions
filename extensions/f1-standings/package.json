@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "f1-standings",
+  "title": "Formula 1",
+  "description": "List the current standings in Formula 1",
+  "icon": "command-icon.png",
+  "author": "csigritz",
+  "contributors": [
+    "sxn",
+    "qeude"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "driver",
+      "title": "Driver Standings",
+      "subtitle": "F1",
+      "description": "Current F1 Driver's Championship Standings",
+      "mode": "view",
+      "keywords": [
+        "formula"
+      ]
+    },
+    {
+      "name": "constructor",
+      "title": "Constructor Standings",
+      "subtitle": "F1",
+      "description": "Current F1 Constructor's Championship Standings",
+      "mode": "view",
+      "keywords": [
+        "formula"
+      ]
+    },
+    {
+      "name": "schedule",
+      "title": "Race Schedule",
+      "subtitle": "F1",
+      "description": "Current F1 Race Schedule",
+      "mode": "view",
+      "keywords": [
+        "formula"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.35.1",
+    "cheerio": "^1.0.0-rc.10",
+    "moment": "^2.29.3",
+    "node-fetch": "^3.0.0",
+    "raycast-toolkit": "^1.0.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

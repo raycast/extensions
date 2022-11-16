@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Color } from "@raycast/api";
+import { Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -7,12 +7,8 @@ export function ButtonPressAction(props: { state: State }): JSX.Element | null {
   if (!s.entity_id.startsWith("button")) {
     return null;
   }
-  const name = s.entity_id.substring(7);
-  console.log(name);
   const handle = async () => {
     await ha.callService("button", "press", { entity_id: s.entity_id });
   };
-  return (
-    <ActionPanel.Item title="Press" onAction={handle} icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }} />
-  );
+  return <Action title="Press" onAction={handle} icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }} />;
 }

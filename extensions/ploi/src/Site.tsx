@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-  setLocalStorageItem,
-} from "@raycast/api";
+import { ActionPanel, Icon, List, Action, LocalStorage } from "@raycast/api";
 import { useState } from "react";
 import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
@@ -27,7 +19,7 @@ export const SitesList = ({
       if (isMounted.current && sites?.length) {
         setSites(sites);
 
-        await setLocalStorageItem(
+        await LocalStorage.setItem(
           `ploi-sites-${server.id}`,
           JSON.stringify(sites)
         );
@@ -60,7 +52,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               icon={Icon.Globe}
               title="Open Site Info"
               target={<SitesSingleView site={site} server={server} />}
@@ -131,6 +123,36 @@ export const SitesSingleView = ({
               </ActionPanel>
             }
           />
+          <List.Item
+            id="open-in-ssh"
+            key="open-in-ssh"
+            title={`Open SSH Connection (${site.systemUser})`}
+            icon={Icon.Terminal}
+            accessoryTitle={`ssh://${site.systemUser}@${server.ipAddress}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title={`SSH In As User ${site.systemUser}`}
+                  url={`ssh://${site.systemUser}@${server.ipAddress}`}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            id="open-in-sftp"
+            key="open-in-sftp"
+            title={`Open SFTP Connection (${site.systemUser})`}
+            icon={Icon.Terminal}
+            accessoryTitle={`sftp://${site.systemUser}@${server.ipAddress}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title={`SFTP As User ${site.systemUser}`}
+                  url={`sftp://${site.systemUser}@${server.ipAddress}`}
+                />
+              </ActionPanel>
+            }
+          />
         </List.Section>
         <List.Section title="Site Information">
           <List.Item
@@ -141,7 +163,7 @@ export const SitesSingleView = ({
             accessoryTitle="ploi.io"
             actions={
               <ActionPanel>
-                <OpenInBrowserAction
+                <Action.OpenInBrowser
                   url={`${PLOI_PANEL_URL}/servers/${server.id}/sites/${site.id}`}
                 />
               </ActionPanel>
@@ -151,6 +173,7 @@ export const SitesSingleView = ({
             id: "Site ID",
             serverId: "Server ID",
             domain: "Domain",
+            systemUser: "System User",
             webDirectory: "Public Directory",
             projectType: "Project Type",
             zeroDowntimeDeployment: "Zero-downtime Deployments Enabled",
@@ -166,7 +189,7 @@ export const SitesSingleView = ({
                   icon={Icon.Document}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction content={value ?? ""} />
+                      <Action.CopyToClipboard content={value ?? ""} />
                     </ActionPanel>
                   }
                 />
@@ -196,7 +219,7 @@ export const SiteCommands = ({
   return (
     <>
       {url && (
-        <OpenInBrowserAction
+        <Action.OpenInBrowser
           icon={Icon.Globe}
           title={`Open site in browser`}
           url={url.toString()}
@@ -225,4 +248,5 @@ export interface ISite {
   phpVersion: string;
   createdAt: string;
   domain: string;
+  systemUser: string;
 }

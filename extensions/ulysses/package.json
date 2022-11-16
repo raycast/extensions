@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ulysses",
+  "title": "Ulysses",
+  "description": "Use Ulysses with Raycast",
+  "icon": "command-icon.png",
+  "author": "praveenjuge",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-empty-sheet",
+      "title": "New Empty Sheet",
+      "subtitle": "Ulysses",
+      "description": "Open a new empty sheet in Ulysses",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-group",
+      "title": "New Group",
+      "subtitle": "Ulysses",
+      "description": "Create a new group in Ulysses",
+      "mode": "view"
+    },
+    {
+      "name": "open-all",
+      "title": "Open All",
+      "subtitle": "Ulysses",
+      "description": "See all sheets in Ulysses",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-recent",
+      "title": "Open Recent",
+      "subtitle": "Ulysses",
+      "description": "See recently opened files in Ulysses",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-favorites",
+      "title": "Open Favorites",
+      "subtitle": "Ulysses",
+      "description": "See your favorite sheets in Ulysses",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

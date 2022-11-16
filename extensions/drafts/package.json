@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "drafts",
+  "title": "Drafts",
+  "description": "integrate Raycast with Drafts app",
+  "icon": "drafts-icon.png",
+  "author": "FlohGro",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-draft-and-open",
+      "title": "Create Draft",
+      "subtitle": "Drafts",
+      "description": "creates a new draft in Drafts with the provided content",
+      "mode": "view"
+    },
+    {
+      "name": "open-new-draft",
+      "title": "Create Blank Draft",
+      "subtitle": "Drafts",
+      "description": "opens a new empty draft in Drafts app",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-clipboard",
+      "title": "Create Draft From Clipboard",
+      "subtitle": "Drafts",
+      "description": "creates a new draft with the clipboard as content",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-drafts-dictate",
+      "title": "Dictate Draft",
+      "subtitle": "Drafts",
+      "description": "open the dictation interface of Drafts",
+      "mode": "no-view"
+    },
+    {
+      "name": "workspace-list",
+      "title": "Open Drafts Workspace",
+      "subtitle": "Drafts",
+      "description": "open stored quick access workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "action-runner-list",
+      "title": "Run Draft Action",
+      "subtitle": "Drafts",
+      "description": "run stored quick access actions",
+      "mode": "view"
+    },
+    {
+      "name": "drafts-list-options",
+      "title": "Append/Prepend to Draft",
+      "subtitle": "Drafts",
+      "description": "append or prepend text to Drafts",
+      "mode": "view"
+    },
+    {
+      "name": "quicklink-helper",
+      "title": "Create Drafts Quicklink",
+      "subtitle": "Drafts",
+      "description": "easily create Raycast Quicklinks for Drafts",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
+

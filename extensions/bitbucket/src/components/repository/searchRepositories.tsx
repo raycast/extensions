@@ -6,7 +6,7 @@ import { getRepositories } from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
 import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
-import { ShowPipelinesActions } from "./actions";
+import { ShowPipelinesActions, ShowPullRequestsActions } from "./actions";
 
 export function SearchRepositories() {
   return (
@@ -79,6 +79,7 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="Details">
             <ShowPipelinesActions repo={repo} />
+            <ShowPullRequestsActions repo={repo} />
           </ActionPanel.Section>
         </ActionPanel>
       }

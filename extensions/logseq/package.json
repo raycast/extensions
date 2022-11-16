@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logseq",
+  "title": "Logseq",
+  "description": "Add notes quickly in Logseq",
+  "icon": "command-icon.png",
+  "author": "futantan",
+  "contributors": [
+    "sawhney17"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "graphPath",
+      "type": "textfield",
+      "placeholder": "/path/to/logseq-graph",
+      "title": "Path to Graph",
+      "required": true,
+      "description": "Specify the path to your notes graph location"
+    },
+    {
+      "name": "insertTime",
+      "label": "Add current time as the leading text",
+      "type": "checkbox",
+      "default": false,
+      "title": "Leading Time",
+      "description": "Add current time as the leading text",
+      "required": false
+    },
+    {
+      "name": "addQuickCaptureTag",
+      "label": "Add quick capture tag [[quick capture]]",
+      "type": "checkbox",
+      "default": false,
+      "title": "Quick Capture",
+      "description": "Add quick capture tag like logseq mobile",
+      "required": false
+    },
+    {
+      "name": "smartSearch",
+      "type": "checkbox",
+      "default": true,
+      "title": "Smart Search Enabled?",
+      "required": true,
+      "description": "Would you like to enable smart search or use simple search?",
+      "label": "Smart Search"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Quick Note",
+      "subtitle": "Logseq",
+      "description": "Add notes to Logseq quickly",
+      "mode": "view"
+    },
+    {
+      "name": "logsearch",
+      "title": "LogSearch",
+      "subtitle": "Logseq Search",
+      "description": "Search Your Logseq Database",
+      "mode": "view"
+    }
+  ],
+  "engines": {
+    "node": ">=16.10"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "dayjs": "^1.11.0",
+    "edn-data": "^0.2.0",
+    "logseq-dateutils": "0.0.22",
+    "minisearch": "^4.0.3",
+    "ramda": "^0.28.0",
+    "untildify": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/ramda": "^0.28.7",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

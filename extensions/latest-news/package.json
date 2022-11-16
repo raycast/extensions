@@ -1,0 +1,42 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "latest-news",
+    "title": "Latest Local News",
+    "description": "Latest local news served by Microsoft Bing",
+    "icon": "command-icon.png",
+    "author": "FilipeCerejo",
+    "categories": [
+        "News"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Latest Local News",
+            "subtitle": "Microsoft Bing",
+            "description": "Get the latest local news updates by Microsoft Bing",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.35.2",
+        "axios": "^0.27.2",
+        "cheerio": "^1.0.0-rc.11"
+    },
+    "devDependencies": {
+        "@types/node": "~16.10.0",
+        "@types/react": "^17.0.28",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint"
+    }
+}

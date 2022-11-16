@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bible",
+  "title": "Bible",
+  "description": "Search the bible",
+  "icon": "extension-icon.png",
+  "author": "josmithua",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bibleSearch",
+      "title": "Bible Search",
+      "description": "Search for, display, copy and paste bible passages. Configure whether to include verse numbers or show one verse per line.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "enterToSearch",
+          "label": "Press Enter to search",
+          "description": "Press Enter key to perform search, as opposed to searching while typing. Saves network calls.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "includeVerseNumbers",
+          "label": "Include verse numbers",
+          "description": "Include individual verse numbers in the results.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "oneVersePerLine",
+          "label": "Show one verse per line",
+          "description": "Display each verse on a separate line. Might separate verses into multiple lines, for ex. see Psalm 1 (ESV)",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10",
+    "node-html-parser": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "update-bible-versions && ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "update-bible-versions": "node ./scripts/updateBibleVersions.js"
+  }
+}
