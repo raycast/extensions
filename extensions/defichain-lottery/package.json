@@ -18,12 +18,14 @@
     {
       "name": "stats",
       "title": "Statistics",
+      "subtitle": "Defichain Lottery",
       "description": "Current and alltime Defichain Lottery stats",
       "mode": "view"
     },
     {
       "name": "tickets",
       "title": "My Tickets and Wins",
+      "subtitle": "Defichain Lottery",
       "description": "Check your own tickets and possible wins.",
       "mode": "view",
       "keywords": [
@@ -36,6 +38,7 @@
     {
       "name": "add-address",
       "title": "Add Address",
+      "subtitle": "Defichain Lottery",
       "description": "Add an address to your watchlist (used by the tickets command)",
       "mode": "no-view",
       "arguments": [
@@ -56,6 +59,7 @@
     {
       "name": "remove-address",
       "title": "Remove Address",
+      "subtitle": "Defichain Lottery",
       "description": "Remove an address from the watchlist",
       "mode": "view",
       "keywords": [
