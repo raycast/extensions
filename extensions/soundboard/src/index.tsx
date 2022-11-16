@@ -18,9 +18,8 @@ import { addItem, playFile, removeItemEntry } from "./utils";
 
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<Item[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
-
-  //saveItems([]);
 
   useEffect(() => {
     (async () => {
@@ -45,13 +44,14 @@ export default function Command() {
     setConnectionsList(items);
   }
 
-  async function saveItemEntries(items: Item[]) {
+  async function saveItemEntries(items: Item[], item: Item) {
     await saveItems(items);
-    setConnectionsList(items);
+    await setConnectionsList(items);
+    setSelectedItemId(item.id);
   }
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} selectedItemId={selectedItemId}>
       <List.EmptyView
         title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
         description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
@@ -75,6 +75,7 @@ export default function Command() {
       />
       {connectionsList.map((item) => (
         <List.Item
+          id={item.id}
           key={item.id}
           icon={Icon.Music}
           title={item.title}
@@ -114,7 +115,7 @@ function Actions({
   item: Item;
   items: Item[];
   onEdit: (item: Item) => Promise<void>;
-  saveItemEntries: (items: Item[]) => Promise<void>;
+  saveItemEntries: (items: Item[], item: Item) => Promise<void>;
   onItemRemove: (item: Item) => Promise<void>;
 }) {
   return (
@@ -141,36 +142,33 @@ function Actions({
 
       <ActionPanel.Section>
         <Action
-          title="Move up"
-          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          title="Move Up"
+          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
           icon={Icon.ChevronUp}
           onAction={async () => {
             const index = items.findIndex((i) => i.id === item.id);
-            console.log(index, "UP");
             if (index > 0) {
-              //const newItems = [...items];
-              items[index] = items[index - 1];
-              items[index - 1] = item;
-              console.log({ items });
+              const newItems = [...items];
 
-              await saveItemEntries(items);
+              newItems[index] = newItems[index - 1];
+              newItems[index - 1] = item;
+
+              await saveItemEntries(newItems, item);
             }
           }}
         />
         <Action
-          title="Move down"
-          shortcut={{ modifiers: ["cmd"], key: "j" }}
+          title="Move Down"
+          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
           icon={Icon.ChevronDown}
           onAction={async () => {
             const index = items.findIndex((i) => i.id === item.id);
-            console.log(index, "DOWN");
             if (index < items.length - 1) {
-              //const items = [...items];
-              items[index] = items[index + 1];
-              items[index + 1] = item;
-              console.log({ items });
+              const newItems = [...items];
+              newItems[index] = newItems[index + 1];
+              newItems[index + 1] = item;
 
-              await saveItemEntries(items);
+              await saveItemEntries(newItems, item);
             }
           }}
         />
