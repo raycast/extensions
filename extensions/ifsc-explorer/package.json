@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ifsc-explorer",
+  "title": "IFSC Explorer",
+  "description": "This extenstion let's you get bank information by typing in bank's IFSC code. \n\nDisclaimer - This extension only supports Indian Banks.",
+  "icon": "command-icon.png",
+  "author": "aditya.padhiar",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ifsc-code",
+      "title": "Get Bank Details",
+      "description": "Get complete bank details from it's IFSC code.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "ifsc": "^2.0.10",
+    "prettier": "^2.5.1",
+    "typescript": "^4.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
