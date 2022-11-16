@@ -22,7 +22,9 @@ export default ({
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.path?.replace(HOME_PATH, '~') || searchResult.description}
+      subtitle={
+        searchResult.path?.replace(HOME_PATH, "~") || searchResult.description
+      }
       accessoryTitle={searchResult.hits}
       icon={searchResult.icon}
       actions={

@@ -1,4 +1,4 @@
-import { Application } from '@raycast/api';
+import { Application } from "@raycast/api";
 
 /**
  * @description: 插件偏好设置
