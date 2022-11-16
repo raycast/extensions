@@ -49,8 +49,15 @@ export const addItem = async (item: Item) => {
     });
   }
 
-  items = items.filter((i) => i.id !== item.id);
-  items.push(item);
+  // Figure out if item.id already exists in items and is so, replace it else add it
+  const alreadyExists = items.find((i) => i.id === item.id);
+  if (alreadyExists) {
+    items = items.map((i) => {
+      return i.id === item.id ? item : i;
+    });
+  } else {
+    items.push(item);
+  }
 
   await saveItems(items);
   await updateFavoriteSubtitles(item);

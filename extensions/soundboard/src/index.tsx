@@ -10,7 +10,7 @@ import {
   Toast,
   environment,
 } from "@raycast/api";
-import { getItems } from "./storage";
+import { getItems, saveItems } from "./storage";
 import { Item } from "./types";
 import { useState, useEffect } from "react";
 import { SoundForm } from "./soundform";
@@ -19,7 +19,8 @@ import { addItem, playFile, removeItemEntry } from "./utils";
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { pop } = useNavigation();
+
+  //saveItems([]);
 
   useEffect(() => {
     (async () => {
@@ -41,6 +42,11 @@ export default function Command() {
 
   async function handleCreate(item: Item) {
     const items = await addItem(item);
+    setConnectionsList(items);
+  }
+
+  async function saveItemEntries(items: Item[]) {
+    await saveItems(items);
     setConnectionsList(items);
   }
 
@@ -74,7 +80,15 @@ export default function Command() {
           title={item.title}
           subtitle={item.path.toString()}
           accessories={getAccessories(item)}
-          actions={<Actions item={item} items={connectionsList} onEdit={handleCreate} onItemRemove={removeItem} />}
+          actions={
+            <Actions
+              item={item}
+              items={connectionsList}
+              saveItemEntries={saveItems}
+              onEdit={handleCreate}
+              onItemRemove={removeItem}
+            />
+          }
         />
       ))}
     </List>
@@ -94,11 +108,13 @@ function Actions({
   item,
   items,
   onEdit,
+  saveItemEntries,
   onItemRemove,
 }: {
   item: Item;
   items: Item[];
   onEdit: (item: Item) => Promise<void>;
+  saveItemEntries: (items: Item[]) => Promise<void>;
   onItemRemove: (item: Item) => Promise<void>;
 }) {
   return (
@@ -122,6 +138,44 @@ function Actions({
         icon={Icon.Pencil}
         target={<SoundForm item={item} onEdit={onEdit} items={items} />}
       />
+
+      <ActionPanel.Section>
+        <Action
+          title="Move up"
+          shortcut={{ modifiers: ["cmd"], key: "u" }}
+          icon={Icon.ChevronUp}
+          onAction={async () => {
+            const index = items.findIndex((i) => i.id === item.id);
+            console.log(index, "UP");
+            if (index > 0) {
+              //const newItems = [...items];
+              items[index] = items[index - 1];
+              items[index - 1] = item;
+              console.log({ items });
+
+              await saveItemEntries(items);
+            }
+          }}
+        />
+        <Action
+          title="Move down"
+          shortcut={{ modifiers: ["cmd"], key: "j" }}
+          icon={Icon.ChevronDown}
+          onAction={async () => {
+            const index = items.findIndex((i) => i.id === item.id);
+            console.log(index, "DOWN");
+            if (index < items.length - 1) {
+              //const items = [...items];
+              items[index] = items[index + 1];
+              items[index + 1] = item;
+              console.log({ items });
+
+              await saveItemEntries(items);
+            }
+          }}
+        />
+      </ActionPanel.Section>
+
       <Action
         title="Remove Sound"
         style={Action.Style.Destructive}

@@ -78,7 +78,7 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
           <Form.Dropdown.Item key={item.value} title={item.title} value={`${item.value}`} />
         ))}
       </Form.Dropdown>
-      {favoriteInUse && <Form.Description title="Already Assigned" text={favoriteInUse} />}
+      {favoriteInUse && <Form.Description title="Already Assigned!" text={favoriteInUse} />}
     </Form>
   );
 }
