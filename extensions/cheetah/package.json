@@ -80,8 +80,8 @@
   "preferences": [
     {
       "name": "workspaces",
-      "description": "The tool will search for projects in the working directory you set, with multiple directories separated by commas.",
-      "required": false,
+      "description": "The tool will search for projects in the working directory you set, with multiple directories separated by commas, Need to configure the absolute path of the directory, This directory should contain projects managed with Git.",
+      "required": true,
       "type": "textfield",
       "title": "Setting working directory"
     },
