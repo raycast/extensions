@@ -1,10 +1,9 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
-import { Preferences } from "./types";
 import { useCachedPromise } from "@raycast/utils";
 
-setupAws();
+const preferences = setupAws();
 const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
@@ -28,7 +27,6 @@ export default function DescribeInstances() {
 function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
   const instance = props.instance;
   const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
-  const preferences = getPreferenceValues<Preferences>();
 
   function getAccessories(): List.Item.Accessory[] {
     const _acc: List.Item.Accessory[] = [];

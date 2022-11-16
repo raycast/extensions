@@ -1,11 +1,11 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
-import { Preferences } from "./types";
+
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
-setupAws();
+const preferences = setupAws();
 const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
 export default function DescribeECSClusters() {
@@ -29,7 +29,6 @@ export default function DescribeECSClusters() {
 function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
-  const preferences = getPreferenceValues<Preferences>();
 
   const subtitle = useMemo(() => {
     switch (cluster.status || "INACTIVE") {
