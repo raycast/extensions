@@ -7,6 +7,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { WEB_IDES } from "../helpers/repository";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
+import { RepositoryIssueList } from "./RepositoryIssues";
 import RepositoryReleases from "./RepositoryReleases";
 
 type RepositoryActionProps = {
@@ -91,6 +92,13 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
     <ActionPanel title={repository.nameWithOwner}>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={repository.url} onOpen={() => onVisit(repository)} />
+        <Action.Push
+          title="Show Issues"
+          icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
+          target={<RepositoryIssueList repo={repository.nameWithOwner} />}
+          onPush={() => onVisit(repository)}
+        />
 
         <ActionPanel.Submenu icon={Icon.Globe} title="Open in Web IDE">
           {WEB_IDES.map((ide) => (

@@ -5,16 +5,22 @@ import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
-export function useOpenIssues(repository: string | null) {
+export function useIssues(repository: string | null) {
   const { github } = getGitHubClient();
 
   const { data, ...rest } = useCachedPromise(
     (repository) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
-      const updatedFilter = `update≤d:>${twoWeeksAgo}`;
+      const updatedFilter = `updated:>${twoWeeksAgo}`;
 
       const repositoryFilter = repository ? `repo:${repository}` : "";
+
+      /*const data = github.searchIssues({
+        query: "is:issue",
+        numberOfItems: 20,
+        avatarSize: 64,
+      });*/
 
       return github.searchOpenIssues({
         assignedOpenQuery: `is:issue assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
