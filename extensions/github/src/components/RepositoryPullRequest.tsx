@@ -2,12 +2,12 @@ import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 
-import { IssueFieldsFragment } from "../generated/graphql";
+import { PullRequestFieldsFragment } from "../generated/graphql";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
-import IssueListItem from "./IssueListItem";
+import PullRequestListItem from "./PullRequestListItem";
 
-export function RepositoryIssueList(props: { repo: string }): JSX.Element {
+export function RepositoryPullRequestList(props: { repo: string }): JSX.Element {
   const { github } = getGitHubClient();
   const [searchText, setSearchText] = useState("");
   const query = searchText;
@@ -18,21 +18,21 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     mutate: mutateList,
   } = usePromise(
     async (query) => {
-      const result = github.searchIssues({
-        query: `is:issue ${repoFilter} ${query}`,
+      const result = await github.searchPullRequests({
+        query: `is:pr ${repoFilter} archived:false ${query}`,
         numberOfItems: 20,
         avatarSize: 64,
       });
-      return (await result).search.nodes?.map((node) => node as IssueFieldsFragment);
+      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },
     [query]
   );
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} navigationTitle={props.repo} throttle>
-      <List.Section title="Issues" subtitle={`${data?.length}`}>
+      <List.Section title="Pull Requests" subtitle={`${data?.length}`}>
         {data?.map((d) => (
-          <IssueListItem key={d.id} issue={d} mutateList={mutateList} />
+          <PullRequestListItem key={d.id} pullRequest={d} mutateList={mutateList} />
         ))}
       </List.Section>
     </List>
