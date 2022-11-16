@@ -5,6 +5,9 @@
   "description": "Stats and your tickets for the Defichain Lottery",
   "icon": "defichain-lottery-icon.png",
   "author": "adrian-schnell",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun",
     "Finance",

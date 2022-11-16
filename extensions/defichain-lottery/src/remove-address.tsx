@@ -23,12 +23,13 @@ export default function Main() {
     setTimeout(() => setIsLoading(false), 500);
   }, []);
 
-  if (addresses.length == 0) {
-    return <Detail markdown="No addresses added right now. use the `add address` command first" />;
-  }
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Delete selected address...">
+      <List.EmptyView
+        icon="no-view.png"
+        title="No Addresses Added"
+        description={`Use the Add Address command to add`}
+      />
       {addresses.length != 0 &&
         addresses.map((item) => (
           <List.Item
@@ -37,7 +38,12 @@ export default function Main() {
             icon={Icon.Wallet}
             actions={
               <ActionPanel>
-                <Action title="Delete address" onAction={() => removeAddressFromList(`${item}`)} />
+                <Action
+                  title="Delete Address"
+                  style={Action.Style.Destructive}
+                  icon={Icon.Trash}
+                  onAction={() => removeAddressFromList(`${item}`)}
+                />
               </ActionPanel>
             }
           />

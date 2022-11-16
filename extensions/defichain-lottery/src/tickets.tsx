@@ -72,6 +72,11 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      <List.EmptyView
+        icon="no-view.png"
+        title="No Addresses Added"
+        description={`Use the Add Address command to add`}
+      />
       {currentList.length != 0 &&
         currentList.map((drawing) => (
           <List.Section
