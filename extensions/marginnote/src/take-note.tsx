@@ -52,7 +52,7 @@ const parentNotes = [
   const id = k.match(/marginnote3app:\/\/note\/(.+)$/)
   if (!id) return acc
   acc.push({
-    title: "Creat to " + (title ? title[1] : "Parent Note " + (i + 1)),
+    title: "Create to " + (title ? title[1] : "Parent Note " + (i + 1)),
     id: id[1]
   })
   return acc
