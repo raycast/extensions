@@ -129,7 +129,7 @@
       "name": "restart",
       "title": "Restart Application",
       "subtitle": "MarginNote",
-      "description": "Restart marginote and skip the unsigned mnaddon alert",
+      "description": "Restart MarginNote and skip the unsigned mnaddon alert",
       "mode": "no-view"
     }
   ],
