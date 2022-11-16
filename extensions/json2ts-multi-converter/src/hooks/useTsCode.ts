@@ -17,7 +17,7 @@ const useTsCode = () => {
   const [json] = useJSON();
   const [code, setCode] = useState<string>();
   const [markdown, setMarkdown] = useState<string>("No JSON data found in clipboard.");
-  const { "convert-library": lib } = getPreferenceValues<{ 'convert-library': string }>();
+  const { "convert-library": lib } = getPreferenceValues<{ "convert-library": string }>();
   const libURL = useMemo(() => {
     switch (lib) {
       case Library.JSON2TS_COM_API:
