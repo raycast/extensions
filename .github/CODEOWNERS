@@ -325,6 +325,7 @@
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/kubectx                                  @oktaysenkan
+/extensions/kubens                                   @ChristianKohler
 /extensions/kubernetes-docs                          @rpvsilva
 /extensions/laliga                                   @anhthang
 /extensions/laracasts                                @danyelkeddah
