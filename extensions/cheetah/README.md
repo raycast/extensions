@@ -11,12 +11,13 @@ The tool will search for projects in the working directory you set, with multipl
 ### example
 ```
 /Users/<User Name>/Documents/work/open-source
+~/Documents/work/open-source
 ```
 ```
-/Users/<User Name>/Documents/work/open-source,/Users/<User Name>/Documents/work/tools
+~/Documents/work/open-source,/Users/<User Name>/Documents/work/tools
 ```
 ```
-/Users/<User Name>/Documents/work/open-source,/Users/<User Name>/Documents/work/tools,/Users/<User Name>/Documents/work/test
+/Users/<User Name>/Documents/work/open-source,~/Documents/work/tools,/Users/<User Name>/Documents/work/test
 ```
 
 

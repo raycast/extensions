@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { COMMAND } from "cheetah-core";
+import { COMMAND, HOME_PATH } from "cheetah-core";
 import { ResultItem } from "../types";
 import Actions from "./actions";
 
@@ -22,7 +22,7 @@ export default ({
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.path || searchResult.description}
+      subtitle={searchResult.path?.replace(HOME_PATH, '~') || searchResult.description}
       accessoryTitle={searchResult.hits}
       icon={searchResult.icon}
       actions={

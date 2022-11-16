@@ -1,4 +1,5 @@
-import { Action, ActionPanel, useNavigation } from "@raycast/api";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
 import { COMMAND, updateHits } from "cheetah-core";
 import { refreshKeyword } from "../constant";
 import { ResultItem } from "../types";
@@ -20,6 +21,7 @@ export default ({
       <ActionPanel>
         <Action
           title="Refresh Cache"
+          icon={Icon.Repeat}
           onAction={() => {
             filterProject(`${refreshKeyword}${searchResult.arg}`);
           }}
@@ -33,6 +35,7 @@ export default ({
       <ActionPanel>
         <Action
           title="Choose Application"
+          icon={Icon.Box}
           onAction={() =>
             push(<ApplicationList projectPath={searchResult.path!} />)
           }

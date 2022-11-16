@@ -1,11 +1,11 @@
 // 查找与关键词匹配的项目
-import { useState } from "react";
-import { Project, filterWithSearchResult, filterWithCache } from "cheetah-core";
-import { refreshKeyword } from "../constant";
-import { ResultItem } from "../types";
-import { output } from "../core";
-import { environment } from "@raycast/api";
-import { errorHandle } from "../utils";
+import { useState } from 'react';
+import { Project, filterWithSearchResult, filterWithCache } from 'cheetah-core';
+import { refreshKeyword } from '../constant';
+import { ResultItem } from '../types';
+import { output } from '../core';
+import { environment } from '@raycast/api';
+import { errorHandle } from '../utils';
 
 export default (): [
   ResultItem[],
@@ -23,7 +23,7 @@ export default (): [
   async function filterProject(keyword: string): Promise<void> {
     try {
       const needRefresh: boolean = keyword.includes(refreshKeyword);
-      const searchKeyword = keyword.replace(refreshKeyword, "");
+      const searchKeyword = keyword.replace(refreshKeyword, '');
       setLoading(true);
       let projects: Project[] = await filterWithCache(searchKeyword);
       let fromCache = true;
@@ -37,9 +37,9 @@ export default (): [
 
       if (fromCache) {
         result.push({
-          name: "Ignore cache re search",
+          name: 'Ignore cache re search',
           description:
-            "Ignore the cache and search for items in the working directory again",
+            'Ignore the cache and search for items in the working directory again',
           icon: `${environment.assetsPath}/refresh.png`,
           arg: searchKeyword,
           refresh: true,
@@ -48,7 +48,7 @@ export default (): [
 
       setResultList(result);
       setLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       errorHandle(error);
     }
   }

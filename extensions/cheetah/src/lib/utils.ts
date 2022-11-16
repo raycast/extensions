@@ -3,9 +3,9 @@ import {
   openExtensionPreferences,
   popToRoot,
   showHUD,
-} from "@raycast/api";
-import { ErrorCodeMessage } from "./constant";
-import { Preferences } from "./types";
+} from '@raycast/api';
+import { ErrorCodeMessage } from './constant';
+import { Preferences } from './types';
 
 /**
  * @description: 获取插件偏好设置
@@ -36,7 +36,7 @@ export function sleep(interval: number): Promise<void> {
  */
 export async function errorHandle(error: any): Promise<void> {
   const errorCode: string = error.message;
-  const needHandleCodes = ["112", "113", "114", "103"];
+  const needHandleCodes = ['112', '113', '114', '103'];
   await showHUD(ErrorCodeMessage[errorCode]);
   popToRoot({ clearSearchBar: true });
   if (needHandleCodes.includes(errorCode)) {
