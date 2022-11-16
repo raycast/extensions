@@ -2,7 +2,7 @@ import { ActionPanel, List, Action } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
 
-export default function Command() {
+export default function Console() {
   const { data: services, isLoading } = useCachedPromise(loadJSON);
 
   return (

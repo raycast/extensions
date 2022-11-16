@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 const preferences = setupAws();
 
-export default function ListLambdaFunctions() {
+export default function Lambda() {
   const { data: functions, error, isLoading } = useCachedPromise(fetchFunctions);
 
   if (error) {

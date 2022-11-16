@@ -7,7 +7,7 @@ import { useCachedPromise } from "@raycast/utils";
 const preferences = setupAws();
 const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
-export default function ListStacks() {
+export default function CloudFormation() {
   const { data: stacks, error, isLoading } = useCachedPromise(fetchStacks);
 
   if (error) {
