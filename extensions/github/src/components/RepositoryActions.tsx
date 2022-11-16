@@ -111,6 +111,13 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
 
+        <Action.OpenInBrowser
+          icon="vscode.svg"
+          title="Clone in GitHub.dev"
+          url={(repository.url as string).replace(".com", ".dev")}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+        />
+
         {repository.viewerHasStarred ? (
           <Action
             title="Remove Star from Repository"
