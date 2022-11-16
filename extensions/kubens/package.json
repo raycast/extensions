@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kubens",
-  "title": "Kubens",
+  "title": "kubens",
   "description": "Switch between Kubernetes namespaces",
   "icon": "kubernetes-icon.png",
   "author": "ChrisKohler",
