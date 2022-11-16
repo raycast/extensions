@@ -29,7 +29,7 @@ function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName })
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
-      icon="dynamodb-icon.png"
+      icon="dynamodb.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

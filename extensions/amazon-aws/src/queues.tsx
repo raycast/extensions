@@ -86,7 +86,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
       id={queue}
       key={queue}
       title={displayName ?? ""}
-      icon="sqs-list-icon.png"
+      icon="sqs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />

@@ -57,7 +57,7 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
       key={instance.InstanceId}
       title={name || "Unknown Instance name"}
       subtitle={instance.InstanceType}
-      icon="list-icon.png"
+      icon="ec2.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

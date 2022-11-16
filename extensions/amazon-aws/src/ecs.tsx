@@ -53,7 +53,7 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
       key={cluster.clusterArn}
       title={name || "Unknown ECS name"}
       subtitle={subtitle}
-      icon="list-icon.png"
+      icon="ecs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

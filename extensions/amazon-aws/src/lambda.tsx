@@ -24,7 +24,7 @@ export default function ListLambdaFunctions() {
 function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
   return (
     <List.Item
-      icon="lambda-icon.png"
+      icon="lambda.png"
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
@@ -61,17 +61,17 @@ async function fetchFunctions(
 
 const getRuntimeIcon = (runtime: AWS.Lambda.Runtime) => {
   if (runtime.includes("node")) {
-    return "runtimes/nodejs.png";
+    return "lambda-runtime-icons/nodejs.png";
   } else if (runtime.includes("python")) {
-    return "runtimes/python.png";
+    return "lambda-runtime-icons/python.png";
   } else if (runtime.includes("java")) {
-    return "runtimes/java.png";
+    return "lambda-runtime-icons/java.png";
   } else if (runtime.includes("dotnet")) {
-    return "runtimes/dotnet.png";
+    return "lambda-runtime-icons/dotnet.png";
   } else if (runtime.includes("go")) {
-    return "runtimes/go.png";
+    return "lambda-runtime-icons/go.png";
   } else if (runtime.includes("ruby")) {
-    return "runtimes/ruby.png";
+    return "lambda-runtime-icons/ruby.png";
   } else {
     return Icon.ComputerChip;
   }
