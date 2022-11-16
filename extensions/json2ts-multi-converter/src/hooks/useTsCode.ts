@@ -1,4 +1,5 @@
-import { useCachedState, useFetch } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Library } from "../types";
 import { useJSON } from "./useJson";
@@ -16,7 +17,7 @@ const useTsCode = () => {
   const [json] = useJSON();
   const [code, setCode] = useState<string>();
   const [markdown, setMarkdown] = useState<string>("No JSON data found in clipboard.");
-  const [lib] = useCachedState<string>("lib", Library.JSON_2_TS);
+  const { "convert-library": lib } = getPreferenceValues<{ 'convert-library': string }>();
   const libURL = useMemo(() => {
     switch (lib) {
       case Library.JSON2TS_COM_API:

@@ -1,10 +1,17 @@
-import { Icon, Action, ActionPanel, Clipboard, Detail, useNavigation, popToRoot, closeMainWindow } from "@raycast/api";
+import {
+  Icon,
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  popToRoot,
+  closeMainWindow,
+  openCommandPreferences,
+} from "@raycast/api";
 import useTsCode from "./hooks/useTsCode";
-import LibSelectForm from "./lib-select-form";
 
 export default function main() {
   const [{ code, markdown, loading }] = useTsCode();
-  const nav = useNavigation();
   return (
     <Detail
       isLoading={loading}
@@ -28,8 +35,8 @@ export default function main() {
               modifiers: ["cmd"],
               key: "t",
             }}
-            title="Change convert library. "
-            onAction={() => nav.push(<LibSelectForm />)}
+            title="Change convert library. (CMD + T)"
+            onAction={() => openCommandPreferences()}
           />
         </ActionPanel>
       }

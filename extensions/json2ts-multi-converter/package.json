@@ -17,13 +17,29 @@
       "subtitle": "Convert JSON to typescript types",
       "description": "Convert JSON to typescript types",
       "mode": "view"
-    },
+    }
+  ],
+  "preferences": [
     {
-      "name": "lib-select-form",
-      "title": "Json2ts Config",
-      "subtitle": "Change converter",
-      "description": "Select converter library",
-      "mode": "view"
+      "name": "convert-library",
+      "title": "Convert Library",
+      "type": "dropdown",
+      "description": "Use this library to convert.",
+      "required": true,
+      "data": [
+        {
+          "title": "shakyshane/json-ts",
+          "value": "shakyshane/json-ts"
+        },
+        {
+          "title": "GregorBiswanger/json2ts",
+          "value": "GregorBiswanger/json2ts"
+        },
+        {
+          "title": "json2ts.com web API",
+          "value": "json2ts.com"
+        }
+      ]
     }
   ],
   "dependencies": {
