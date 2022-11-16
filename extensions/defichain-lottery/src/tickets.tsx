@@ -76,7 +76,13 @@ export default function Command() {
         currentList.map((drawing) => (
           <List.Section
             key={drawing.meta.identifier}
-            title={"#" + drawing.meta.round_number + " - " + drawing.meta.identifier}
+            title={
+              "#" +
+              drawing.meta.round_number +
+              " - " +
+              drawing.meta.identifier +
+              (drawing.meta.winning_number ? " - winning number: " + drawing.meta.winning_number : "")
+            }
             subtitle={
               (drawing.user_payout_total > 0
                 ? "total winning: " + formatNumber(drawing.user_payout_total, "DFI") + ", "
