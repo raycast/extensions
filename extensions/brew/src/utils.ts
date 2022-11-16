@@ -40,6 +40,7 @@ export interface Remote<T> {
   url: string;
   cachePath: string;
   value?: T[];
+  /** in flight fetch of the remote */
   fetch?: Promise<T[]>;
 }
 
@@ -76,7 +77,15 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
   } else if (remote.fetch) {
     return remote.fetch;
   } else {
-    return _fetchRemote(remote, 0);
+    remote.fetch = _fetchRemote(remote, 0)
+      .then((value) => {
+        remote.value = value;
+        return value;
+      })
+      .finally(() => {
+        remote.fetch = undefined;
+      });
+    return remote.fetch;
   }
 }
 
@@ -137,19 +146,7 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
     });
   }
 
-  const promise = updateCache()
-    .then(() => {
-      return readCache();
-    })
-    .then((value) => {
-      remote.value = value;
-      return value;
-    })
-    .finally(() => {
-      remote.fetch = undefined;
-    });
-  remote.fetch = promise;
-  return promise;
+  return updateCache().then(readCache);
 }
 
 /// Toast

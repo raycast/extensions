@@ -170,7 +170,8 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
       const cacheBuffer = await fs.readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
-      throw "Invalid cache";
+      console.error("Invalid cache");
+      return await updateCache();
     }
   }
 
@@ -211,11 +212,28 @@ export async function brewFetchCasks(): Promise<Cask[]> {
   return await utils.fetchRemote(caskRemote);
 }
 
-export async function brewSearch(searchText: string, limit?: number): Promise<InstallableResults> {
+export async function brewSearch(
+  searchText: string,
+  limit?: number,
+  signal?: AbortSignal
+): Promise<InstallableResults> {
   searchQuery = searchText;
 
   let formulae = await brewFetchFormulae();
+
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
   let casks = await brewFetchCasks();
+
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
 
   if (searchQuery.length > 0) {
     const target = searchQuery.toLowerCase();
