@@ -1,5 +1,5 @@
 import {useCachedPromise} from "@raycast/utils";
-import {Token} from "../entities/Token";
+import {Token, tokenAuthHeader, tokenValid} from "../entities/Token";
 
 export type IconResponse = {
   id: number;
@@ -31,18 +31,18 @@ export type IconLinksResponse = {
 export default (token: Token, search = "") => {
   const {isLoading, data } = useCachedPromise(
     async (token: Token, search: string): Promise<IconResponse[] | undefined> => {
-      if (!token.valid()) return;
+      if (!tokenValid(token)) return;
       if (search.length === 0) return;
 
       console.debug("Fetching icons from API");
       const response = await fetch("https://api.flaticon.com/v3/search/icons?q="+encodeURIComponent(search), {
-        headers: {Accept: 'application/json', ...token.authHeader()},
+        headers: {Accept: 'application/json', ...tokenAuthHeader(token)},
       });
 
-      const body = await response.json() as {data: IconResponse[], error?: string};
-      console.debug("Fetched icons from API, icons len", body.data?.length, "error", body.error);
+      const body = await response.json() as {data: IconResponse[], status?: string, message?: string};
+      console.debug("Fetched icons from API, icons len", body.data?.length, "error", body.message, 'status', body.status);
 
-      if (body.error) throw new Error(body.error);
+      if (body.status && body.status === 'error') throw new Error(body.message);
 
       return body.data;
     },

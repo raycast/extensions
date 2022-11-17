@@ -5,34 +5,37 @@ type SerializedToken = {
   expires: number;
 };
 
-export class Token {
-  constructor(private token: string, private expires: number) {
-  }
+export type Token = {
+  token: string;
+  expires: number;
+}
 
-  valid = () => this.expires - (Date.now() / 1000) > 30;
+export const newToken = ({token, expires}: SerializedToken): Token => ({token, expires});
+export const emptyToken = () => ({token: '', expires: 0});
+export const tokenValid = ({expires}: Token): boolean => expires - (Date.now() / 1000) > 30;
+export const tokenAuthHeader = ({token}: Token) => ({Authorization: `Bearer ${token}`});
 
-  authHeader = () => ({Authorization: `Bearer ${this.token}`});
+export const tokenToLocalStorage = async (apiKey: string, token: Token): Promise<void> => {
+  if (!apiKey) throw new Error("No API key provided");
 
-  toLocalStorage = async (apiKey: string): Promise<void> => {
-    if (!apiKey) throw new Error("No API key provided");
+  return await LocalStorage.setItem(apiKey, JSON.stringify(token));
+}
 
-    await LocalStorage.setItem(apiKey, this.serialize());
-  }
+export const tokenFromLocalStorage = async (apiKey: string): Promise<Token> => {
+  if (!apiKey) throw new Error("No API key provided");
 
-  private serialize = () => JSON.stringify({token: this.token, expires: this.expires} as SerializedToken)
+  const token = await LocalStorage.getItem(apiKey);
 
-  static fromLocalStorage = async (apiKey: string): Promise<Token> => {
-    if (!apiKey) return new Token("", 0);
+  if (!token) throw new Error("No token found");
 
-    return this.parse(await LocalStorage.getItem(apiKey));
-  }
+  return parse(token);
+}
 
-  static parse = (serialized: LocalStorage.Value | undefined): Token => {
-    if (!serialized) return new Token("", 0);
-    if (typeof serialized !== "string") return new Token("", 0);
+const parse = (serialized: LocalStorage.Value): Token => {
+  if (!serialized) return emptyToken();
+  if (typeof serialized !== "string") return emptyToken();
 
-    const parsed = JSON.parse(serialized) as SerializedToken;
+  const {token, expires} = JSON.parse(serialized) as SerializedToken;
 
-    return new Token(parsed.token, parsed.expires);
-  }
+  return {token, expires};
 }

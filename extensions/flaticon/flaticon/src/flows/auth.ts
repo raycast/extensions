@@ -1,4 +1,4 @@
-import {Token} from "../entities/Token";
+import {newToken, Token} from "../entities/Token";
 
 export const auth = async (apikey: string): Promise<Token> => {
   const response = await fetch(authURI, options(apikey));
@@ -7,7 +7,9 @@ export const auth = async (apikey: string): Promise<Token> => {
   const body = await response.json() as { data: { token: string, expires: number }, error?: string };
   if (body.error) throw new Error(body.error);
 
-  return new Token(body.data.token, body.data.expires);
+  const {token, expires} = body.data;
+
+  return newToken({token, expires});
 }
 
 const authURI = 'https://api.flaticon.com/v3/app/authentication';

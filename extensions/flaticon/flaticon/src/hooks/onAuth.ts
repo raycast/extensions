@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Token} from "../entities/Token";
+import {emptyToken, Token, tokenFromLocalStorage, tokenToLocalStorage, tokenValid} from "../entities/Token";
 import {auth} from "../flows/auth";
 
 export type State = {
@@ -8,14 +8,14 @@ export type State = {
 }
 
 export default (apiKey: string) => {
-  const [state, setState] = useState<State>({token: new Token("", 0), isLoading: true});
+  const [state, setState] = useState<State>({token: emptyToken(), isLoading: true});
 
   const load = async (apiKey: string): Promise<void> => {
-    let token = await Token.fromLocalStorage(apiKey);
+    let token = await tokenFromLocalStorage(apiKey);
 
-    if (!token.valid()) {
+    if (!tokenValid(token)) {
       token = await auth(apiKey);
-      await token.toLocalStorage(apiKey);
+      await tokenToLocalStorage(apiKey, token)
     }
 
     await setState({token, isLoading: false});
