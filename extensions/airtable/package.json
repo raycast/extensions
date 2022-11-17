@@ -5,8 +5,12 @@
   "description": "List your Airtable bases and follow deep links to specific tables, views, or your base's API docs.",
   "icon": "airtable-logo.png",
   "author": "marks",
-  "contributors": ["SeanKeenan-Airtable"],
-  "categories": [ "Productivity" ],
+  "contributors": [
+    "SeanKeenan-Airtable"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "preferences": [
     {
       "type": "textfield",
