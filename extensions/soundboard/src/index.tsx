@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  confirmAlert,
-  Color,
-  useNavigation,
-  showToast,
-  Toast,
-  environment,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, confirmAlert, Color, showToast, Toast, environment } from "@raycast/api";
 import { getItems, saveItems } from "./storage";
 import { Item } from "./types";
 import { useState, useEffect } from "react";
