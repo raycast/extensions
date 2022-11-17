@@ -8,7 +8,7 @@ The software made available from this folder is not supported by Formagrid Inc (
 
 ---
 
-The following GIF and screenshots show the functionality of this extension. Step by step instructions on how to install and configure the extension can be found below.
+The following screenshots show the functionality of this extension. Step by step instructions on how to install and configure the extension can be found below.
 
 | Description | Preview |
 |---|---|
