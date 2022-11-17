@@ -5,6 +5,9 @@
   "description": "A simple timer to help you keep productive during work time.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -24,6 +27,10 @@
           "required": false,
           "title": "Start of Workday",
           "data": [
+            {
+              "title": "6:00",
+              "value": "6"
+            },
             {
               "title": "7:00",
               "value": "7"
@@ -54,6 +61,14 @@
           "required": false,
           "title": "End of Workday",
           "data": [
+            {
+              "title": "15:00",
+              "value": "15"
+            },
+            {
+              "title": "16:00",
+              "value": "16"
+            },
             {
               "title": "17:00",
               "value": "17"
@@ -90,7 +105,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.0",
-    "@raycast/utils": "^1.3.1",
     "date-fns": "^2.29.2"
   },
   "devDependencies": {
