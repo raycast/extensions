@@ -27,6 +27,7 @@
       "required": false,
       "title": "Also hide Raycast",
       "description": "Whether to close Raycast when hiding all apps or not",
+      "label": "Also hide Raycast",
       "default": true
     }
   ],
