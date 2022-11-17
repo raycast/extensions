@@ -22,7 +22,7 @@
   "preferences": [
     {
       "name": "api_key",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "API key",
       "description": "Get your API key at cloudconvert.com",
