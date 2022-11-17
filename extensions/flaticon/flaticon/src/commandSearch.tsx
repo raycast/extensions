@@ -1,41 +1,34 @@
-import {Action, ActionPanel, getPreferenceValues, Grid, Icon} from "@raycast/api";
+import {getPreferenceValues, Grid} from "@raycast/api";
 import onAuth from "./hooks/onAuth";
-import onSearchIcons from "./hooks/onSearchIcons";
+import onSearchIcons, {IconResponse} from "./hooks/onSearchIcons";
 import {useState} from "react";
-import copyFileToClipboard from "./functions/copyFileToClipboard";
+import EmptyView from "./components/EmptyView";
+import NotFoundView from "./components/NotFoundView";
+import IconItem from "./components/IconItem";
 
 const {apiKey} = getPreferenceValues();
 
 // noinspection JSUnusedGlobalSymbols
-export default function CommandSearch() {
+export default () => {
   const [search, setSearch] = useState("");
   const auth = onAuth(apiKey);
   const results = onSearchIcons(auth.token, search);
 
   const isLoading = auth.isLoading || results.isLoading;
+  const list = results.data || [];
 
   return <Grid isLoading={isLoading} onSearchTextChange={setSearch} throttle>
-    {results.data?.length === 0 && <Grid.EmptyView title={search.length > 0 ? 'Nothing was found' : 'FlatIcon'}/>}
-    {results.data?.map(
-      ({id, images, description, tags}) => <Grid.Item
-        key={id}
-        content={images["512"]}
-        subtitle={description}
-        keywords={tags && tags.length > 0 ? tags.split(",") : undefined}
-        actions={<ActionPanel>
-          <Action
-            title="Copy to Clipboard"
-            icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-            onAction={() => copyFileToClipboard({url: images["512"]})}
-          />
-          <Action.OpenInBrowser url={images["512"]} title="Open in Browser"/>
-          <Action.OpenInBrowser
-            url={`https://www.flaticon.com/free-icon/whatever_${id}`}
-            title="Open Icon Page"
-          />
-        </ActionPanel>}
-      />
-    )}
+    {displayResults({search, list})}
   </Grid>
+}
+
+const displayResults = ({search, list}: { search: string; list: IconResponse[] }) => {
+  switch (true) {
+    case search.length === 0:
+      return [<EmptyView key="empty-view"/>];
+    case list.length === 0:
+      return [<NotFoundView key="not-found-view"/>];
+    default:
+      return list.map(icon => <IconItem key={icon.id} icon={icon}/>);
+  }
 }

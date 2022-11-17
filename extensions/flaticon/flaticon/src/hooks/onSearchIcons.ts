@@ -1,7 +1,7 @@
 import {useCachedPromise} from "@raycast/utils";
 import {Token} from "./onAuth";
 
-type IconResponse = {
+export type IconResponse = {
   id: number;
   description: string;
   colors: number;
@@ -18,7 +18,7 @@ type IconResponse = {
   images: IconLinksResponse;
 };
 
-type IconLinksResponse = {
+export type IconLinksResponse = {
   '16': string;
   '24': string;
   '32': string;
