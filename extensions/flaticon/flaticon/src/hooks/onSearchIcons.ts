@@ -1,5 +1,5 @@
 import {useCachedPromise} from "@raycast/utils";
-import {Token} from "./onAuth";
+import {Token} from "../entities/Token";
 
 export type IconResponse = {
   id: number;
@@ -36,7 +36,7 @@ export default (token: Token, search = "") => {
 
       console.debug("Fetching icons from API");
       const response = await fetch("https://api.flaticon.com/v3/search/icons?q="+encodeURIComponent(search), {
-        headers: {Accept: 'application/json', ...token.auth()},
+        headers: {Accept: 'application/json', ...token.authHeader()},
       });
 
       const body = await response.json() as {data: IconResponse[], error?: string};
