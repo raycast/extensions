@@ -126,8 +126,8 @@ export class SlackClient {
 
     const channels: Channel[] =
       publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids, is_private }) => {
-          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
+        ?.map(({ id, name, shared_team_ids, internal_team_ids,  context_team_id, is_private }) => {
+          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? []), ...(context_team_id ? [context_team_id] : [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })

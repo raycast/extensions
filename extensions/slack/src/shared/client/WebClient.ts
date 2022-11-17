@@ -6,6 +6,7 @@ export interface SlackConversation {
   name?: string;
   shared_team_ids?: string[];
   internal_team_ids?: string[];
+  context_team_id?: string;
   is_private?: boolean;
 }
 
