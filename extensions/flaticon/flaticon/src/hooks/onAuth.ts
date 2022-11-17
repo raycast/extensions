@@ -1,23 +1,6 @@
 import {useEffect, useState} from "react";
 import {Token} from "../entities/Token";
-
-const auth = async (apikey: string): Promise<Token> => {
-  console.debug("Authenticating");
-
-  const response = await fetch('https://api.flaticon.com/v3/app/authentication', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({apikey})
-  });
-
-  const body = await response.json() as {data: {token: string, expires: number}, error?: string};
-
-  console.debug("Auth response", body);
-
-  if (body.error) throw new Error(body.error);
-
-  return new Token(body.data.token, body.data.expires);
-}
+import {auth} from "../flows/auth";
 
 export type State = {
   token: Token;
