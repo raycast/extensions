@@ -1,5 +1,9 @@
 # Common Directory Changelog
 
+## [Extension Optimization] - {PR_MERGE_DATE}
+
+- Some small optimizations
+
 ## [Extension Optimization] - 2022-10-13
 
 - Some small optimizations
