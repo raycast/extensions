@@ -5,6 +5,9 @@
   "description": "Get code examples instantly",
   "icon": "codegrepper.png",
   "author": "emircanerkul",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],
