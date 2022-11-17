@@ -1,16 +1,5 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  confirmAlert,
-  Color,
-  useNavigation,
-  showToast,
-  Toast,
-  environment,
-} from "@raycast/api";
-import { getItems } from "./storage";
+import { ActionPanel, Action, List, Icon, confirmAlert, Color, showToast, Toast, environment } from "@raycast/api";
+import { getItems, saveItems } from "./storage";
 import { Item } from "./types";
 import { useState, useEffect } from "react";
 import { SoundForm } from "./soundform";
@@ -18,8 +7,8 @@ import { addItem, playFile, removeItemEntry } from "./utils";
 
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<Item[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
-  const { pop } = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -44,8 +33,14 @@ export default function Command() {
     setConnectionsList(items);
   }
 
+  async function saveItemEntries(items: Item[], item: Item) {
+    await saveItems(items);
+    await setConnectionsList(items);
+    setSelectedItemId(item.id);
+  }
+
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} selectedItemId={selectedItemId}>
       <List.EmptyView
         title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
         description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
@@ -69,12 +64,21 @@ export default function Command() {
       />
       {connectionsList.map((item) => (
         <List.Item
+          id={item.id}
           key={item.id}
           icon={Icon.Music}
           title={item.title}
           subtitle={item.path.toString()}
           accessories={getAccessories(item)}
-          actions={<Actions item={item} onEdit={handleCreate} onItemRemove={removeItem} />}
+          actions={
+            <Actions
+              item={item}
+              items={connectionsList}
+              saveItemEntries={saveItemEntries}
+              onEdit={handleCreate}
+              onItemRemove={removeItem}
+            />
+          }
         />
       ))}
     </List>
@@ -92,11 +96,15 @@ function getAccessories(item: Item) {
 
 function Actions({
   item,
+  items,
   onEdit,
+  saveItemEntries,
   onItemRemove,
 }: {
   item: Item;
+  items: Item[];
   onEdit: (item: Item) => Promise<void>;
+  saveItemEntries: (items: Item[], item: Item) => Promise<void>;
   onItemRemove: (item: Item) => Promise<void>;
 }) {
   return (
@@ -112,14 +120,49 @@ function Actions({
         title="Add New Sound"
         shortcut={{ modifiers: ["cmd"], key: "n" }}
         icon={Icon.Document}
-        target={<SoundForm onEdit={onEdit} />}
+        target={<SoundForm onEdit={onEdit} items={items} />}
       />
       <Action.Push
         title="Edit Sound"
         shortcut={{ modifiers: ["cmd"], key: "e" }}
         icon={Icon.Pencil}
-        target={<SoundForm item={item} onEdit={onEdit} />}
+        target={<SoundForm item={item} onEdit={onEdit} items={items} />}
       />
+
+      <ActionPanel.Section>
+        <Action
+          title="Move Up"
+          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+          icon={Icon.ChevronUp}
+          onAction={async () => {
+            const index = items.findIndex((i) => i.id === item.id);
+            if (index > 0) {
+              const newItems = [...items];
+
+              newItems[index] = newItems[index - 1];
+              newItems[index - 1] = item;
+
+              await saveItemEntries(newItems, item);
+            }
+          }}
+        />
+        <Action
+          title="Move Down"
+          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+          icon={Icon.ChevronDown}
+          onAction={async () => {
+            const index = items.findIndex((i) => i.id === item.id);
+            if (index < items.length - 1) {
+              const newItems = [...items];
+              newItems[index] = newItems[index + 1];
+              newItems[index + 1] = item;
+
+              await saveItemEntries(newItems, item);
+            }
+          }}
+        />
+      </ActionPanel.Section>
+
       <Action
         title="Remove Sound"
         style={Action.Style.Destructive}
