@@ -34,7 +34,11 @@ export default function Command() {
       {data?.more_answers?.map((answers) => (
         <List.Item
           key={answers.id}
-          title={`${answers.profile_slug}'s answer: ${answers.upvotes}👍 ${answers.downvotes}👎`}
+          title={`${answers.profile_slug}'s answer`}
+          accessories={[
+            { icon: "👍", text: `${answers.upvotes}` },
+            { icon: "👎", text: `${answers.downvotes}` },
+          ]}
           subtitle={answers.language}
           icon="codegrepper.png"
           actions={
@@ -49,7 +53,7 @@ export default function Command() {
                         <Action.CopyToClipboard content={answers.answer}></Action.CopyToClipboard>
                       </ActionPanel>
                     }
-                    markdown={answers.answer}
+                    markdown={"## " + answers.profile_slug + "'s answer\n```" + answers.answer + "```"}
                     navigationTitle="The Code Example"
                   />
                 }
@@ -71,10 +75,10 @@ export default function Command() {
         />
       ))}
       {!searchText && (
-        <List.EmptyView title="Enter query to search code examples on codegrepper.com" icon={"codegrepper.png"} />
+        <List.EmptyView title="Enter query to search code examples on codegrepper.com" icon={"no-view.png"} />
       )}
       {searchText != undefined && searchText?.length > 1 && data?.more_answers.length == 0 && (
-        <List.Item title="There is no code example found on codegrepper.com" icon="codegrepper.png" />
+        <List.Item title="There is no code example found on codegrepper.com" icon="no-view.png" />
       )}
       {searchText != undefined && searchText?.length > 1 && (
         <>
