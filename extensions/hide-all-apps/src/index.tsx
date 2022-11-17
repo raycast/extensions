@@ -8,7 +8,6 @@ export default async function Command() {
     await closeMainWindow();
   }
 
-  // https://gist.github.com/Teraflopst/e1863cfff5f0deb46ec2cabe9984305b
   await runAppleScript(`
 activate application "Finder"
 tell application "System Events"
