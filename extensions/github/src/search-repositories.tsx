@@ -1,6 +1,7 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
@@ -16,12 +17,14 @@ function SearchRepositories() {
   const preferences = getPreferenceValues<{ includeForks: boolean }>();
 
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText] = useDebounce(searchText, 200);
+
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
-    [searchText, searchFilter]
+    () => `${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`,
+    [debouncedSearchText, searchFilter]
   );
 
   const {
@@ -38,12 +41,16 @@ function SearchRepositories() {
     { keepPreviousData: true }
   );
 
+  const foundRepositories = useMemo(
+    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
+    [data]
+  );
+
   return (
     <List
-      isLoading={isLoading}
+      isLoading={searchText !== debouncedSearchText || isLoading}
       searchBarPlaceholder="Search in public and private repositories"
       onSearchTextChange={setSearchText}
-      throttle
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
     >
       <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
@@ -57,9 +64,12 @@ function SearchRepositories() {
         ))}
       </List.Section>
 
-      {data ? (
-        <List.Section title={searchText ? "Search Results" : "Found Repositories"} subtitle={`${data.length}`}>
-          {data.map((repository) => {
+      {foundRepositories ? (
+        <List.Section
+          title={searchText ? "Search Results" : "Found Repositories"}
+          subtitle={`${foundRepositories.length}`}
+        >
+          {foundRepositories.map((repository) => {
             return (
               <RepositoryListItem
                 key={repository.id}
@@ -72,7 +82,7 @@ function SearchRepositories() {
         </List.Section>
       ) : null}
 
-      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} />
+      <RepositoryListEmptyView searchText={debouncedSearchText} isLoading={isLoading} />
     </List>
   );
 }
