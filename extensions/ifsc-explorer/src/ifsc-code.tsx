@@ -1,4 +1,13 @@
-import { List, Toast, showToast, Clipboard, LocalStorage, ActionPanel, Action, showHUD } from "@raycast/api";
+import {
+  List,
+  Toast,
+  showToast,
+  Clipboard,
+  LocalStorage,
+  ActionPanel,
+  Action,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 const ifsc = require("ifsc");
 
@@ -49,9 +58,15 @@ export default function Command() {
             title: "Invalid IFSC Code",
             message: "📋 Copied IFSC code is not valid.",
           });
-        } else if (!parsedCodes[0] || (parsedCodes[0] && parsedCodes[0].code != text)) {
+        } else if (
+          !parsedCodes[0] ||
+          (parsedCodes[0] && parsedCodes[0].code != text)
+        ) {
           ifsc.fetchDetails(text).then(function (res: details) {
-            const newCode = [{ uuid: Date.now(), code: text, details: res }, ...parsedCodes];
+            const newCode = [
+              { uuid: Date.now(), code: text, details: res },
+              ...parsedCodes,
+            ];
             setCodes(newCode);
             LocalStorage.setItem("storedCodes", JSON.stringify(newCode));
           });
@@ -79,7 +94,10 @@ export default function Command() {
             });
         } else if (!codes[0] || (codes[0] && codes[0].code != newValue)) {
           ifsc.fetchDetails(newValue).then(function (res: details) {
-            const newCode: codes[] = [{ uuid: Date.now(), code: newValue, details: res }, ...codes];
+            const newCode: codes[] = [
+              { uuid: Date.now(), code: newValue, details: res },
+              ...codes,
+            ];
             setCodes(newCode);
             LocalStorage.setItem("storedCodes", JSON.stringify(newCode));
           });
@@ -105,21 +123,45 @@ export default function Command() {
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="BRANCH" text={code.details.BRANCH} />
+                  <List.Item.Detail.Metadata.Label
+                    title="BRANCH"
+                    text={code.details.BRANCH}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="ADDRESS" text={code.details.ADDRESS} />
+                  <List.Item.Detail.Metadata.Label
+                    title="ADDRESS"
+                    text={code.details.ADDRESS}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="CITY" text={code.details.CITY} />
+                  <List.Item.Detail.Metadata.Label
+                    title="CITY"
+                    text={code.details.CITY}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="DISTRICT" text={code.details.DISTRICT} />
+                  <List.Item.Detail.Metadata.Label
+                    title="DISTRICT"
+                    text={code.details.DISTRICT}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="STATE" text={code.details.STATE} />
+                  <List.Item.Detail.Metadata.Label
+                    title="STATE"
+                    text={code.details.STATE}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="CONTACT" text={code.details.CONTACT} />
+                  <List.Item.Detail.Metadata.Label
+                    title="CONTACT"
+                    text={code.details.CONTACT}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="BANK CODE" text={code.details.BANKCODE} />
+                  <List.Item.Detail.Metadata.Label
+                    title="BANK CODE"
+                    text={code.details.BANKCODE}
+                  />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="MICR CODE" text={code.details.MICR} />
+                  <List.Item.Detail.Metadata.Label
+                    title="MICR CODE"
+                    text={code.details.MICR}
+                  />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.TagList title="UPI">
                     <List.Item.Detail.Metadata.TagList.Item
