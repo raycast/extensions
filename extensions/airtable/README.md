@@ -2,13 +2,10 @@
 
 This [Raycast](https://www.raycast.com/) Extension uses [Airtable](https://www.airtable.com)'s (beta as of November 2022) [OAuth support](https://airtable.com/developers/web/guides/oauth-integrations) to allow a user to browse the bases, tables, fields, and views they granted the application access to (a part of the Airtable OAuth flow).
 
-The following GIF and screenshots show the functionality of this extension.
-
  [_Click here to skip past the screenshots to local setup instructions_](#local-setup-and-development).
 
 | Description | Preview |
 |---|---|
-| 20 second GIF (.mov) showing functionality highlights ([.mov version](./metadata/video-demo-20-seconds.mov)) | [![20 second video](./metadata/video-demo-20-seconds.gif)](./metadata/video-demo-20-seconds.gif) |
 | List/filter bases | [![List/filter bases](./metadata/screenshot-0-list-all-bases.png)](./metadata/screenshot-0-list-all-bases.png) |
 | Deep link into API docs from list of bases | [![Deep link into API docs from list of bases](./metadata/screenshot-1-open-api-docs-for-base.png)](./metadata/screenshot-1-open-api-docs-for-base.png) |
 | List/filter a base's tables | [![List/filter a base's tables](./metadata/screenshot-2-browse-list-of-tables.png)](./metadata/screenshot-2-browse-list-of-tables.png) |
