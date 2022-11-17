@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
-import {emptyToken, Token, tokenFromLocalStorage, tokenToLocalStorage, tokenValid} from "../entities/Token";
-import {auth} from "../flows/auth";
+import {emptyToken, Token} from "../entities/Token";
+import {bootAuthToken} from "../flows/bootAuthToken";
 
-export type State = {
+type State = {
   token: Token;
   isLoading: boolean;
 }
@@ -10,20 +10,8 @@ export type State = {
 export default (apiKey: string) => {
   const [state, setState] = useState<State>({token: emptyToken(), isLoading: true});
 
-  const load = async (apiKey: string): Promise<void> => {
-    let token = await tokenFromLocalStorage(apiKey);
-
-    if (!tokenValid(token)) {
-      token = await auth(apiKey);
-      await tokenToLocalStorage(apiKey, token)
-    }
-
-    await setState({token, isLoading: false});
-  };
-
   useEffect(() => {
-    // noinspection JSIgnoredPromiseFromCall
-    load(apiKey);
+    bootAuthToken(apiKey).then(token => setState({token, isLoading: false}));
   }, [apiKey]);
 
   return state;

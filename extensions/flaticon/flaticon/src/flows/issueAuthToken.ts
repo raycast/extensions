@@ -1,6 +1,6 @@
 import {newToken, Token} from "../entities/Token";
 
-export const auth = async (apikey: string): Promise<Token> => {
+export const issueAuthToken = async (apikey: string): Promise<Token> => {
   const response = await fetch(authURI, options(apikey));
 
   // noinspection TypeScriptValidateJSTypes
