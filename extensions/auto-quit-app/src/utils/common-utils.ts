@@ -15,7 +15,7 @@ export function getEnabledApps() {
     { name: "Notes", windows: "1", enabled: notes },
     { name: "Shortcuts", windows: "1", enabled: shortcuts },
     { name: "TV", windows: "1", enabled: tv },
-    { name: "Mail", windows: "1", enabled: mail },
+    { name: "Mail", windows: "0", enabled: mail },
   ];
 
   return appWindowCounts.filter((value) => {
