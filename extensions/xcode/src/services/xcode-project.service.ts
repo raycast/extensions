@@ -44,7 +44,7 @@ export class XcodeProjectService {
       // Decode each Xcode Project Path
       .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
       // Filter out null values
-      .filter((xcodeProject) => !!xcodeProject) as XcodeProject[];
+      .filter(Boolean) as XcodeProject[];
     // Return XcodeProjects
     return xcodeProjects;
   }
@@ -96,7 +96,7 @@ export class XcodeProjectService {
         // Decode each Xcode Project Path
         .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
         // Filter out null values
-        .filter((xcodeProject) => !!xcodeProject) as XcodeProject[]
+        .filter(Boolean) as XcodeProject[]
     );
   }
 
