@@ -63,7 +63,7 @@ export class SlackClient {
       try {
         const response = await slackWebClient.users.list({
           limit: 1000,
-          cursor
+          cursor,
         });
         slackMembers.push(...(response.members ?? []));
         cursor = response.response_metadata?.next_cursor;
@@ -73,7 +73,6 @@ export class SlackClient {
     } while (cursor);
 
     const dmConversations = await SlackClient.getConversations("im");
-
 
     const users =
       slackMembers
@@ -100,7 +99,7 @@ export class SlackClient {
             conversationId: conversation?.id,
           };
         })
-        .filter((i): i is User => (!!(i.id?.trim() && i.name?.trim() && i.teamId?.trim())))
+        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users ?? [];
@@ -138,12 +137,16 @@ export class SlackClient {
 
     const channels: Channel[] =
       publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids,  context_team_id, is_private }) => {
-          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? []), ...(context_team_id ? [context_team_id] : [])];
+        ?.map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
+          const teamIds = [
+            ...(internal_team_ids ?? []),
+            ...(shared_team_ids ?? []),
+            ...(context_team_id ? [context_team_id] : []),
+          ];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
-        .filter((i): i is Channel => (!!(i.id?.trim() && i.name?.trim() && i.teamId.trim())))
+        .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return channels ?? [];
@@ -168,7 +171,7 @@ export class SlackClient {
 
           return { id, name: displayName, teamId, icon: "channel-private.png" };
         })
-        .filter((i): i is Group => (!!(i.id?.trim() && i.name?.trim() && i.teamId.trim())))
+        .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups ?? [];
