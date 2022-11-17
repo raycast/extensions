@@ -8,8 +8,6 @@ The software made available from this folder is not supported by Formagrid Inc (
 
 ---
 
-The following screenshots show the functionality of this extension. Step by step instructions on how to install and configure the extension can be found below.
-
 | Description | Preview |
 |---|---|
 | List/filter bases | [![List/filter bases](./metadata/screenshot-0-list-all-bases.png)](./metadata/screenshot-0-list-all-bases.png) |
