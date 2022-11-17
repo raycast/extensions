@@ -1,5 +1,5 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { SlackConversation, slackWebClient } from "./WebClient";
+import { SlackConversation, SlackMember, slackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
@@ -56,15 +56,27 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
 
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
-    const userList = await slackWebClient.users.list();
-    const conversations = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "im",
-      limit: 1000,
-    });
+    const slackMembers: SlackMember[] = [];
+
+    let cursor: string | undefined;
+    do {
+      try {
+        const response = await slackWebClient.users.list({
+          limit: 1000,
+          cursor
+        });
+        slackMembers.push(...(response.members ?? []));
+        cursor = response.response_metadata?.next_cursor;
+      } catch (e) {
+        break;
+      }
+    } while (cursor);
+
+    const dmConversations = await SlackClient.getConversations("im");
+
 
     const users =
-      userList.members
+      slackMembers
         ?.filter(
           ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
         )
@@ -77,7 +89,7 @@ export class SlackClient {
             (x): x is string => !!x?.trim()
           );
 
-          const conversation = conversations.channels?.find((c) => c.user === id);
+          const conversation = dmConversations.find((c) => c.user === id);
 
           return {
             id,
@@ -88,14 +100,14 @@ export class SlackClient {
             conversationId: conversation?.id,
           };
         })
-        .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))
+        .filter((i): i is User => (!!(i.id?.trim() && i.name?.trim() && i.teamId?.trim())))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users ?? [];
   }
 
   private static async getConversations(
-    type: "public_channel" | "private_channel" | "mpim"
+    type: "public_channel" | "private_channel" | "mpim" | "im"
   ): Promise<SlackConversation[]> {
     const conversations: SlackConversation[] = [];
 
@@ -131,7 +143,7 @@ export class SlackClient {
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
-        .filter((i): i is Channel => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .filter((i): i is Channel => (!!(i.id?.trim() && i.name?.trim() && i.teamId.trim())))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return channels ?? [];
@@ -156,7 +168,7 @@ export class SlackClient {
 
           return { id, name: displayName, teamId, icon: "channel-private.png" };
         })
-        .filter((i): i is Group => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .filter((i): i is Group => (!!(i.id?.trim() && i.name?.trim() && i.teamId.trim())))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups ?? [];

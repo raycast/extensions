@@ -2,7 +2,8 @@
 
 ## [Fix] - 2022-11-01
 
-- Fix fetching of conversations when hitting the Slack API limit of 1k conversations
+- Fix fetching of conversations and users when hitting the Slack API limit of 1k
+- Enable accessibility of channels shared via Slack Connect
 
 ## [New Command] - 2022-05-04
 
