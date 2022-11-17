@@ -5,6 +5,9 @@
   "description": "A simple timer to help you keep productive during work time.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity"
   ],
