@@ -1,0 +1,24 @@
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../types/preferences";
+import { AppWindowCount } from "../types/type";
+
+export function getEnabledApps() {
+  const { notes, preview, textEdit, terminal, quickTimePlayer, shortcuts, tv, messages, mail } =
+    getPreferenceValues<Preferences>();
+
+  const appWindowCounts: AppWindowCount[] = [
+    { name: "Preview", windows: "0", enabled: preview },
+    { name: "TextEdit", windows: "0", enabled: textEdit },
+    { name: "Messages", windows: "0", enabled: messages },
+    { name: "Terminal", windows: "0", enabled: terminal },
+    { name: "QuickTime Player", windows: "0", enabled: quickTimePlayer },
+    { name: "Notes", windows: "1", enabled: notes },
+    { name: "Shortcuts", windows: "1", enabled: shortcuts },
+    { name: "TV", windows: "1", enabled: tv },
+    { name: "Mail", windows: "1", enabled: mail },
+  ];
+
+  return appWindowCounts.filter((value) => {
+    return value.enabled;
+  });
+}
