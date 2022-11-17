@@ -1,20 +1,20 @@
 import {Action, ActionPanel, Grid, Icon} from "@raycast/api";
-import {IconResponse} from "../hooks/onSearchIcons";
 import copyFileToClipboard from "../functions/copyFileToClipboard";
+import {FlatIcon} from "../entities/FlatIcon";
 
-export default ({icon: {id, images, description, tags}}: { icon: IconResponse }) => <Grid.Item
+export default ({icon: {id, sizes: {_512}, description, tags}}: { icon: FlatIcon }) => <Grid.Item
   key={id}
-  content={images["512"]}
+  content={_512}
   subtitle={description}
-  keywords={tags && tags.length > 0 ? tags.split(",") : undefined}
+  keywords={tags}
   actions={<ActionPanel>
     <Action
       title="Copy to Clipboard"
       icon={Icon.Clipboard}
       shortcut={{modifiers: ["cmd"], key: "c"}}
-      onAction={() => copyFileToClipboard({url: images["512"]})}
+      onAction={() => copyFileToClipboard({url: _512})}
     />
-    <Action.OpenInBrowser url={images["512"]} title="Open in Browser"/>
+    <Action.OpenInBrowser url={_512} title="Open in Browser"/>
     <Action.OpenInBrowser
       url={`https://www.flaticon.com/free-icon/whatever_${id}`}
       title="Open Icon Page"
