@@ -1,5 +1,5 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator/xcode-simulator-application.model";
-import { Color, Icon, Image, MenuBarExtra, open } from "@raycast/api";
+import { Clipboard, Color, Icon, Image, MenuBarExtra, open } from "@raycast/api";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { XcodeSimulatorAppAction } from "../../models/xcode-simulator/xcode-simulator-app-action.model";
 import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
@@ -47,29 +47,49 @@ export function XcodeSimulatorApplicationsMenuBarItem(props: { application: Xcod
       <MenuBarExtra.Item
         icon={{ source: Icon.Folder, tintColor: Color.Blue }}
         title="Application Bundle (.app)"
-        onAction={() => open(props.application.bundlePath)}
+        onAction={(event) =>
+          event.type === "left-click"
+            ? open(props.application.bundlePath)
+            : Clipboard.paste(props.application.bundlePath)
+        }
       />
       <MenuBarExtra.Item
         icon={{ source: Icon.Folder, tintColor: Color.Blue }}
         title="Sandbox User Data"
-        onAction={() => open(props.application.sandBoxPath)}
+        onAction={(event) =>
+          event.type === "left-click"
+            ? open(props.application.sandBoxPath)
+            : Clipboard.paste(props.application.sandBoxPath)
+        }
       />
       <MenuBarExtra.Item
         icon={{ source: Icon.Folder, tintColor: Color.Blue }}
         title="Caches"
-        onAction={() => open(props.application.sandBoxCachesPath)}
+        onAction={(event) =>
+          event.type === "left-click"
+            ? open(props.application.sandBoxCachesPath)
+            : Clipboard.paste(props.application.sandBoxCachesPath)
+        }
       />
       <MenuBarExtra.Item
         icon={{ source: Icon.Folder, tintColor: Color.Blue }}
         title="Documents"
-        onAction={() => open(props.application.sandBoxDocumentsPath)}
+        onAction={(event) =>
+          event.type === "left-click"
+            ? open(props.application.sandBoxDocumentsPath)
+            : Clipboard.paste(props.application.sandBoxDocumentsPath)
+        }
       />
       {props.application.userDefaultsPlistPath ? (
         <MenuBarExtra.Item
           icon={Icon.Document}
           title="User Defaults"
-          onAction={() =>
-            props.application.userDefaultsPlistPath ? open(props.application.userDefaultsPlistPath) : undefined
+          onAction={(event) =>
+            props.application.userDefaultsPlistPath
+              ? event.type === "left-click"
+                ? open(props.application.userDefaultsPlistPath)
+                : Clipboard.paste(props.application.userDefaultsPlistPath)
+              : undefined
           }
         />
       ) : undefined}
