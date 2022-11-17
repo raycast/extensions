@@ -11,7 +11,7 @@ interface ShareBoardProps {
   message: string;
 }
 
-export default function InviteBoard({ id }: { id: string }) {
+export default function InviteBoard({ board }: { board: { id: string } }) {
   const { pop } = useNavigation();
 
   return (
@@ -19,27 +19,32 @@ export default function InviteBoard({ id }: { id: string }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Invite To Board"
+            title="Invite to Board"
             onSubmit={async (values: ShareBoardProps) => {
+              const toast = await showToast({ style: Toast.Style.Animated, title: "Sending invite to the board..." });
               try {
-                await miro.inviteToBoard(id, { email: values.email, role: values.role }, values.message);
-                await showToast({ style: Toast.Style.Success, title: "🎉 Invited to board!" });
+                await miro.inviteToBoard(board.id, { email: values.email, role: values.role }, values.message);
+                toast.title = "🎉 Invite to the board sent!";
+                toast.style = Toast.Style.Success;
                 pop();
-              } catch {
-                await showToast({ style: Toast.Style.Failure, title: "Invite failed." });
+              } catch (err) {
+                console.error(err);
+                toast.title = "Could not send the invite.";
+                toast.message = String(err);
+                toast.style = Toast.Style.Failure;
               }
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="email" title="Email" placeholder="Enter email" />
+      <Form.TextField id="email" title="Email" placeholder="jane@mycompany.com" />
       <Form.Dropdown id="role" title="Role">
         {(Object.keys(BoardMember.RoleEnum) as Array<keyof typeof BoardMember.RoleEnum>).map((role) => (
           <Form.Dropdown.Item key={role} value={role} title={role} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea id="message" title="Message" placeholder="Enter welcome message" />
+      <Form.TextArea id="message" title="Welcome Message" placeholder="Hey! Have a look at this awesome board..." />
     </Form>
   );
 }
