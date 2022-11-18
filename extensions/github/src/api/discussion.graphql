@@ -1,0 +1,21 @@
+fragment DiscussionFields on Discussion {
+  id
+  title
+  bodyText
+  publishedAt
+  repository {
+    ...RepositoryFields
+  }
+  url
+  answer {
+    bodyText
+  }
+}
+
+query searchDiscussions($query: String!, $numberOfOpenItems: Int!, $avatarSize: Int!) {
+  openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+    nodes {
+      ...DiscussionFields
+    }
+  }
+}

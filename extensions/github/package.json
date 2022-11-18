@@ -105,6 +105,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "my-discussions",
+      "title": "My Discussions",
+      "description": "Show your Discussions",
+      "mode": "view"
     }
   ],
   "preferences": [
