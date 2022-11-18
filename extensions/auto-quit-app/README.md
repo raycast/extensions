@@ -1,6 +1,6 @@
 # Auto Quit App
 
-Automatically quit the application when the application window is closed and it does not have any windows(auto run every 10 minutes).
+Automatically quit the application after all windows are closed(auto run every 10 minutes).
 
 You can set whether to automatically quit the following applications in the command's preferences.
 

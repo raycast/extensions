@@ -2,4 +2,4 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Automatically exit the application at regular intervals after closing the application window (if the app does not have any windows)
+- Automatically quit the application after all windows are closed
