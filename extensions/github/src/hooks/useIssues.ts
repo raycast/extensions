@@ -16,12 +16,6 @@ export function useIssues(repository: string | null) {
 
       const repositoryFilter = repository ? `repo:${repository}` : "";
 
-      /*const data = github.searchIssues({
-        query: "is:issue",
-        numberOfItems: 20,
-        avatarSize: 64,
-      });*/
-
       return github.searchOpenIssues({
         assignedOpenQuery: `is:issue assignee:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,
         mentionedOpenQuery: `is:issue mentions:@me archived:false is:open ${updatedFilter} ${repositoryFilter}`,

@@ -17,12 +17,12 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     mutate: mutateList,
   } = usePromise(
     async (searchText) => {
-      const result = github.searchIssues({
+      const result = await github.searchIssues({
         query: `is:issue ${repoFilter} ${searchText}`,
         numberOfItems: 20,
         avatarSize: 64,
       });
-      return (await result).search.nodes?.map((node) => node as IssueFieldsFragment);
+      return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
     [searchText]
   );
