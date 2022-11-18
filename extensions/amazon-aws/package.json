@@ -74,6 +74,13 @@
       "subtitle": "Amazon AWS",
       "description": "List your DynamoDB Tables",
       "mode": "view"
+    },
+    {
+      "name": "s3",
+      "title": "S3 Buckets",
+      "subtitle": "Amazon AWS",
+      "description": "List your S3 Buckets",
+      "mode": "view"
     }
   ],
   "preferences": [
