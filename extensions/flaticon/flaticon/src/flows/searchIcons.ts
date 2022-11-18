@@ -1,29 +1,29 @@
-import {Token, tokenAuthHeader, tokenValid} from "../entities/Token";
-import {FlatIcon} from "../entities/FlatIcon";
+import { Token, tokenAuthHeader, tokenValid } from '../entities/Token';
+import { FlatIcon } from '../entities/FlatIcon';
 
-export const searchIcons = async (token: Token, search: string): Promise<{ list: FlatIcon[], error?: Error }> => {
-  if (!tokenValid(token)) return {list: []};
-  if (search.length === 0) return {list: []};
+export const searchIcons = async (token: Token, search: string): Promise<{ list: FlatIcon[]; error?: Error }> => {
+  if (!tokenValid(token)) return { list: [] };
+  if (search.length === 0) return { list: [] };
 
-  const {list, error} = await makeRequestForIcons(token, search);
+  const { list, error } = await makeRequestForIcons(token, search);
 
-  return {list: list.map(mapResponseIconToFlatIcon), error};
-}
+  return { list: list.map(mapResponseIconToFlatIcon), error };
+};
 
-const makeRequestForIcons = async (token: Token, search: string): Promise<{ list: IconResponse[], error?: Error }> => {
-  const params = new URLSearchParams({q: search});
+const makeRequestForIcons = async (token: Token, search: string): Promise<{ list: IconResponse[]; error?: Error }> => {
+  const params = new URLSearchParams({ q: search });
   const response = await fetch(`${uri}?${params}`, options(token));
 
-  const body = await response.json() as { data: IconResponse[], status?: string, message?: string };
+  const body = (await response.json()) as { data: IconResponse[]; status?: string; message?: string };
 
-  if (body.status && body.status === 'error') return {list: [], error: new Error(body.message)};
+  if (body.status && body.status === 'error') return { list: [], error: new Error(body.message) };
 
-  return {list: body.data};
-}
+  return { list: body.data };
+};
 
 const uri = 'https://api.flaticon.com/v3/search/icons';
 const options = (token: Token) => ({
-  headers: {Accept: 'application/json', ...tokenAuthHeader(token)},
+  headers: { Accept: 'application/json', ...tokenAuthHeader(token) },
 });
 
 type IconResponse = {
@@ -51,11 +51,11 @@ type IconLinksResponse = {
   '128': string;
   '256': string;
   '512': string;
-}
+};
 
-const mapResponseIconToFlatIcon = ({id, description, tags, images}: IconResponse): FlatIcon => ({
+const mapResponseIconToFlatIcon = ({ id, description, tags, images }: IconResponse): FlatIcon => ({
   id,
   description,
   tags: tags.split(','),
-  sizes: {_512: images['512']},
-})
+  sizes: { _512: images['512'] },
+});

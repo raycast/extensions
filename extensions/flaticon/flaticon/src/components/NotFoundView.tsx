@@ -1,5 +1,3 @@
-import {Grid} from "@raycast/api";
+import { Grid } from '@raycast/api';
 
-export default () => <Grid.EmptyView
-  title="No results found"
-/>
+export default () => <Grid.EmptyView title="No results found" />;
