@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, open, Toast, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Form, open, Toast, Clipboard, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 import { createScheduledMeeting } from "../api/meetings";
@@ -19,8 +19,7 @@ type MeetingFormProps = {
 export default function MeetingForm({ enableDrafts = false, draftValues }: MeetingFormProps) {
   const { handleSubmit, itemProps, focus, reset } = useForm<MeetingFormValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Scheduling meeting" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Scheduling meeting" });
 
       try {
         const payload = {

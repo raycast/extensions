@@ -2,21 +2,21 @@
 
 import { List, ActionPanel, Action, Image, Icon } from "@raycast/api";
 import { play, playShuffled } from "../spotify/client";
+import { useSpotify } from "../utils/context";
 
-export default function PlaylistListItem(props: {
-  playlist: SpotifyApi.PlaylistObjectSimplified;
-  spotifyInstalled: boolean;
-}) {
-  const { playlist, spotifyInstalled } = props;
+export default function PlaylistListItem(props: { playlist: SpotifyApi.PlaylistObjectSimplified }) {
+  const { installed } = useSpotify();
 
+  const { playlist } = props;
+
+  const title = playlist.name;
+  const subtitle = playlist.owner.display_name;
   const imageURL = playlist.images[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {
     source: imageURL ?? Icon.BlankDocument,
     mask: Image.Mask.Circle,
   };
 
-  const title = playlist.name;
-  const subtitle = playlist.owner.display_name;
   return (
     <List.Item
       title={title}
@@ -41,7 +41,7 @@ export default function PlaylistListItem(props: {
           />
           <Action.OpenInBrowser
             title={`Show Playlist (${playlist.name.trim()})`}
-            url={spotifyInstalled ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
+            url={installed ? `spotify:playlist:${playlist.id}` : playlist.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />

@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { basename } from "path";
 
-import { Action, ActionPanel, Color, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import mdfind from "mdfind";
@@ -11,28 +11,39 @@ import { copyRecentToClipboard, showInfoInFinder, maybeMoveResultToTrash } from 
 
 import { Scope, ScopeDictionary, SpotlightResult } from "./types";
 
+interface RecentsPreferences {
+  limit: string;
+  excludeFolders: boolean;
+}
+
+const queryScopesSharedQueryPart = (excludeFolders: boolean) =>
+  `(kMDItemLastUsedDate = "*") && ((kMDItemContentTypeTree = public.content) || (kMDItemContentTypeTree = "com.microsoft.*"cdw) || (kMDItemContentTypeTree = public.archive) ${
+    !excludeFolders ? `|| (kMDItemContentTypeTree = public.folder)` : ""
+  }) && (kMDItemSupportFileType != MDSystemFile)`;
+
 const queryScopes = {
   default: {
-    query: `kMDItemLastUsedDate = "*"`,
+    query: (excludeFolders: boolean) => `${queryScopesSharedQueryPart(excludeFolders)}`,
     directories: [`${homedir()}`],
     filters: true,
   },
   applications: {
-    query: 'kMDItemKind == Application && kMDItemLastUsedDate = "*"',
+    query: () => `kMDItemKind = Application && kMDItemLastUsedDate = "*"`,
     directories: [`${homedir()}/Applications`, "/Applications", "/System/Applications"],
   },
   documents: {
-    query: 'kMDItemLastUsedDate = "*"',
+    query: (excludeFolders: boolean) => `${queryScopesSharedQueryPart(excludeFolders)}`,
     directories: [`${homedir()}/Documents`],
     filters: true,
   },
   downloads: {
-    query: 'kMDItemLastUsedDate = "*"',
+    query: (excludeFolders: boolean) => `${queryScopesSharedQueryPart(excludeFolders)}`,
     directories: [`${homedir()}/Downloads`],
     filters: true,
   },
   folders: {
-    query: 'kMDItemKind == Folder && kMDItemLastUsedDate = "*"',
+    query: () =>
+      '(kMDItemContentTypeTree = public.folder && kMDItemLastUsedDate = "*" && kMDItemSupportFileType != MDSystemFile)',
     directories: [`${homedir()}`],
   },
 } as ScopeDictionary;
@@ -40,15 +51,18 @@ const queryScopes = {
 const getRecents = async (scope: string | undefined, callback: (result: SpotlightResult) => void): Promise<boolean> => {
   return await new Promise((resolve) => {
     let queryParts: Scope = queryScopes["default"];
+    const { limit, excludeFolders } = getPreferenceValues<RecentsPreferences>();
+    const shouldExcludeFolders = excludeFolders && !["folders", "applications"].includes(scope || "default");
 
     if (scope) {
       queryParts = queryScopes[scope];
     }
 
     const query = mdfind({
-      query: queryParts.query,
+      query: queryParts.query(shouldExcludeFolders),
       directories: queryParts.directories,
       attributes: ["kMDItemDisplayName", "kMDItemKind", "kMDItemLastUsedDate"],
+      limit: parseInt(limit, 10) || 1000,
     });
 
     query.output.on("data", (data: SpotlightResult) => {
@@ -94,8 +108,8 @@ export default function Command(props: { scope?: string | undefined }) {
     setFiltered(
       recents.sort(
         (a, b) =>
-          moment(b.kMDItemLastUsedDate, "YYYY-MM-DD hh:mm:ss +0000").unix() -
-          moment(a.kMDItemLastUsedDate, "YYYY-MM-DD hh:mm:ss +0000").unix()
+          moment(b.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").unix() -
+          moment(a.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").unix()
       )
     );
 
@@ -212,9 +226,13 @@ export default function Command(props: { scope?: string | undefined }) {
           }
           accessories={[
             {
-              text: `Last Used: ${moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD hh:mm:ss +0000").format(
-                "DD/MM/YYYY"
-              )}`,
+              text: `Last used: ${
+                moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").isDST()
+                  ? moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000")
+                      .add("1", "hour")
+                      .format("DD MMMM YYYY @ HH:mm:ss")
+                  : moment(recent.kMDItemLastUsedDate, "YYYY-MM-DD HH:mm:ss +0000").format("DD MMMM YYYY @ HH:mm:ss")
+              }`,
             },
           ]}
         />

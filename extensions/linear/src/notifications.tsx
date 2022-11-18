@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, launchCommand, LaunchType } from "@raycast/api";
 import { format } from "date-fns";
 
 import { NotificationResult } from "./api/getNotifications";
@@ -78,6 +78,7 @@ function Notifications() {
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as read" });
+      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -118,6 +119,7 @@ function Notifications() {
       });
 
       await showToast({ style: Toast.Style.Success, title: "Marked as unread" });
+      await launchCommand({ name: "unread-notifications", type: LaunchType.Background });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,

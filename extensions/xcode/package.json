@@ -2,12 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
-    "qeude"
+    "qeude",
+    "oliep"
   ],
   "categories": [
     "Developer Tools",
@@ -35,8 +36,8 @@
           "name": "showRecentProjectsInMenuBar_projectsLimit",
           "type": "dropdown",
           "required": false,
-          "title": "Number of visible projects",
-          "description": "Select the amount of projects that should be shown in the menu bar.",
+          "title": "Number of visible recent projects",
+          "description": "Select the amount of recent projects that should be shown in the menu bar.",
           "default": "10",
           "data": [
             {
@@ -66,10 +67,19 @@
           ]
         },
         {
-          "name": "showRecentProjectsInMenuBar_showXcodeProjects",
+          "name": "showRecentProjectsInMenuBar_showFavorites",
           "type": "checkbox",
           "required": false,
           "title": "Filter",
+          "description": "Show Favorites.",
+          "default": true,
+          "label": "Show Favorites"
+        },
+        {
+          "name": "showRecentProjectsInMenuBar_showXcodeProjects",
+          "type": "checkbox",
+          "required": false,
+          "title": "",
           "description": "Show Xcode Projects.",
           "default": true,
           "label": "Show Xcode Projects"
@@ -128,10 +138,10 @@
       "mode": "view"
     },
     {
-      "name": "installed-simulator-apps.command",
-      "title": "Installed Simulator Apps",
+      "name": "search-recent-builds.command",
+      "title": "Search Recent Builds",
       "subtitle": "Xcode",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator.",
+      "description": "Search recent builds which are installed in a Xcode Simulator.",
       "mode": "view"
     },
     {
@@ -142,8 +152,8 @@
       "mode": "view"
     },
     {
-      "name": "xcode-releases.command",
-      "title": "Xcode Releases",
+      "name": "search-xcode-releases.command",
+      "title": "Search Xcode Releases",
       "subtitle": "Xcode",
       "description": "Search, download and view the latest Xcode Releases.",
       "mode": "view"
@@ -154,6 +164,13 @@
       "subtitle": "Xcode",
       "description": "Search Apple Developer Documentation.",
       "mode": "view"
+    },
+    {
+      "name": "open-developer-documentation.command",
+      "title": "Open Developer Documentation",
+      "subtitle": "Xcode",
+      "description": "Open Apple Developer Documentation.",
+      "mode": "no-view"
     },
     {
       "name": "search-swift-package-index.command",
@@ -217,8 +234,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "tildify": "^3.0.0",

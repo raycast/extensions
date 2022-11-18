@@ -1,5 +1,58 @@
 # `Easydict` Changelog
 
+### 💎 Improvement
+
+- Optimized code.
+- Updated README.
+
+### 🐞 Fixes
+
+- Fixed the problem that the latest Raycast 1.42.0 version will cause the extension to crash when arguments is empty.
+
+## [v2.6.0] - 2022-10-18
+
+### ✨ New
+
+- Added support for [Arguments](https://developers.raycast.com/information/arguments).
+- Added support for 25 languages, including Ukrainian, total 48 languages.
+
+![arguments-1666060638](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/arguments-1666060638.png)
+
+![hello-1666060655](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png)
+
+![Ukrainian-1666061433](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Ukrainian-1666061433.png)
+
+### 💎 Improvement
+
+- Improved the display effect of the details page when translating multiple lines of text.
+- Added `Copy Text` and open the web page query action to the details page.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
+## [v2.5.0] - 2022-10-12
+
+✨ New
+
+- Added support for Youdao Modern Chinese Dictionary.
+
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
+
+![ai-1665582591](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582591.png)
+
+![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
+
+💎 Improvement
+
+- Improved the action list, changed the default return action to `Copy Text`.
+- Changed Linguee to support system proxy by default.
+- Changed all lists to support 'Show More Details'.
+
+🐞 Fix
+
+- Fixed many known issues.
+
 ## [v2.4.1] - 2022-10-02
 
 ### 💎 Improvements

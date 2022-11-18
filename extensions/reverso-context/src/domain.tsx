@@ -3,6 +3,11 @@ export enum LangCode {
   EN = "en",
 }
 
+export interface LangPair {
+  from: LangCode;
+  to: LangCode;
+}
+
 export interface UsageExample {
   sExample: string;
   tExample: string;

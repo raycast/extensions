@@ -268,7 +268,7 @@ const runInTerminal = (command: string) => {
   runAppleScript(script);
 };
 
-export default function Command(props: { arguments: ShellArguments }) {
+export default function Command(props: { arguments?: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
@@ -285,7 +285,7 @@ export default function Command(props: { arguments: ShellArguments }) {
 
   const preferences = getPreferenceValues<Preferences>();
   const terminal_type = preferences["arguments_terminal_type"];
-  if (props.arguments.command.length > 0) {
+  if (props.arguments?.command) {
     if (preferences.arguments_terminal) {
       addToRecentlyUsed(props.arguments.command);
       showHUD("Ran command in " + terminal_type);

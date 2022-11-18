@@ -1,71 +1,24 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 
-import { Preferences } from "./types";
+import setupAws from "./util/setupAws";
+import { useCachedPromise } from "@raycast/utils";
+
+const preferences = setupAws();
+const dynamoDB = new AWS.DynamoDB();
 
 export default function ListDynamoDbTables() {
-  const preferences: Preferences = getPreferenceValues();
-  AWS.config.update({ region: preferences.region });
-  const dynamoDB = new AWS.DynamoDB();
+  const { data: tables, isLoading, error } = useCachedPromise(fetchTables);
 
-  const [state, setState] = useState<{ tables: AWS.DynamoDB.TableName[]; loaded: boolean; hasError: boolean }>({
-    tables: [],
-    loaded: false,
-    hasError: false,
-  });
-
-  useEffect(() => {
-    async function fetch() {
-      const tableNames: AWS.DynamoDB.TableName[] = [];
-      let startTableName: string | undefined;
-      let hasError = false;
-      do {
-        await dynamoDB
-          .listTables({ ExclusiveStartTableName: startTableName }, (err, data) => {
-            if (!err) {
-              tableNames.push(...(data.TableNames || []));
-              startTableName = data.LastEvaluatedTableName;
-            } else {
-              hasError = true;
-            }
-          })
-          .promise();
-      } while (startTableName && !hasError);
-
-      if (hasError) {
-        setState((currentState) => ({
-          ...currentState,
-          hasError,
-        }));
-      } else {
-        setState({
-          hasError: false,
-          loaded: true,
-          tables: [...new Set(tableNames)].sort((a, b) => {
-            if (a < b) {
-              return -1;
-            }
-            if (a > b) {
-              return 1;
-            }
-            return 0;
-          }),
-        });
-      }
-    }
-    fetch();
-  }, []);
-
-  if (state.hasError) {
+  if (error) {
     return (
       <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
     );
   }
 
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter tables by name...">
-      {state.tables.map((i, index) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter tables by name...">
+      {tables?.map((i, index) => (
         <TableNameListItem key={index} tableName={i} />
       ))}
     </List>
@@ -73,8 +26,6 @@ export default function ListDynamoDbTables() {
 }
 
 function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
-  const preferences: Preferences = getPreferenceValues();
-
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
@@ -97,4 +48,17 @@ function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName })
       }
     />
   );
+}
+
+async function fetchTables(token?: string, accTables?: AWS.DynamoDB.TableName[]): Promise<AWS.DynamoDB.TableName[]> {
+  const { LastEvaluatedTableName, TableNames } = await dynamoDB
+    .listTables({ ExclusiveStartTableName: token })
+    .promise();
+  const combinedTables = [...(accTables || []), ...(TableNames || [])];
+
+  if (LastEvaluatedTableName) {
+    return fetchTables(LastEvaluatedTableName, combinedTables);
+  }
+
+  return combinedTables;
 }

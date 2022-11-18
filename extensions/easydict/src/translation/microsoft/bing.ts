@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 15:47
+ * @lastEditTime: 2022-10-17 20:33
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,13 +14,12 @@ import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { checkIfIpInChina } from "../../checkIP";
 import { isChineseIPKey, userAgent } from "../../consts";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getBingLangCode, getYoudaoLangCodeFromBingCode } from "../../language/languages";
-import { QueryTypeResult } from "../../types";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { DetectedLangModel, LanguageDetectType } from "./../../detectLanauge/types";
-import { autoDetectLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { RequestErrorInfo, TranslationType } from "./../../types";
 import { BingConfig, BingTranslateResult } from "./types";
 
 console.log(`enter bing.ts`);
@@ -173,7 +172,7 @@ export async function bingDetect(text: string): Promise<DetectedLangModel> {
         const bingTranslateResult = result.result as BingTranslateResult;
         const detectedLanguageCode = bingTranslateResult.detectedLanguage.language;
         const youdaoLangCode = getYoudaoLangCodeFromBingCode(detectedLanguageCode);
-        console.warn(`bing detect:${detectedLanguageCode}, youdaoId: ${youdaoLangCode}`);
+        console.warn(`bing detect language: ${detectedLanguageCode}, youdaoLangCode: ${youdaoLangCode}`);
 
         const detectedLanguageResult: DetectedLangModel = {
           type: type,

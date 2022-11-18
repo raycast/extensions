@@ -1,8 +1,11 @@
 # Logseq Changelog
 
-## [Update] - 2022-10-03
+## [Support for org files] - 2022-10-14
 
-Decoding “%2F” to “/” when the logseq page has a “hierarchy” section for better readability.
+Add org files support for LogSearch by fetching preferred format from Logseq config
+
+## [Fix] - 20220-10-10
+- Fix Date incorrect for journals setup with EEEE for day name [Issue](https://github.com/raycast/extensions/issues/3033)
 
 ## [Support insert leading time and quick capture tag when using quick note] - 2022-07-27
 - Add support for insert leading time and quick capture tag when using quick note just like logseq on mobile.

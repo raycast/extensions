@@ -1,7 +1,6 @@
-import { Action, ActionPanel, environment, Grid, Icon, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, environment, Grid, Icon, showHUD } from "@raycast/api";
 import { readdirSync, statSync } from "fs";
 import { basename, join } from "path";
-import { runAppleScript } from "run-applescript";
 import { titleCase } from "title-case";
 import colors from "../assets/colors.json";
 
@@ -16,8 +15,8 @@ export default function Command() {
     .filter((item) => statSync(item).isDirectory());
 
   return (
-    <Grid>
-      <Grid.Section title="Colors">
+    <Grid columns={3}>
+      <Grid.Section title="Colors" columns={6}>
         {colors.map((color) => (
           <ColorItem key={color.name} color={color} />
         ))}
@@ -61,7 +60,7 @@ function ColorItem(props: { color: Color }) {
   return (
     <Grid.Item
       title={props.color.name}
-      subtitle={props.color.name}
+      subtitle={props.color.value}
       content={{
         color: {
           light: props.color.value,
@@ -71,7 +70,7 @@ function ColorItem(props: { color: Color }) {
       }}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={props.color.name} />
+          <Action.CopyToClipboard content={props.color.value} />
         </ActionPanel>
       }
     />
@@ -79,26 +78,15 @@ function ColorItem(props: { color: Color }) {
 }
 
 function CopyFileToClipboardAction(props: { file: string }) {
-  async function handleAction() {
-    const toast = new Toast({
-      style: Toast.Style.Animated,
-      title: `Copying file to clipboard`,
-    });
-    await toast.show();
-
-    try {
-      await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${props.file}" )`);
-
-      toast.style = Toast.Style.Success;
-      toast.title = `Copied file to clipboard`;
-    } catch (error) {
-      console.error(error);
-
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed copying file to clipboard`;
-      toast.message = error instanceof Error ? error.message : undefined;
-    }
-  }
-
-  return <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={handleAction} />;
+  return (
+    <Action
+      title="Copy to Clipboard"
+      icon={Icon.Clipboard}
+      onAction={() => {
+        Clipboard.copy({ file: props.file });
+        closeMainWindow();
+        showHUD("Copied to Clipboard");
+      }}
+    />
+  );
 }

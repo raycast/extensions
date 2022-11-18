@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-02 15:52
+ * @lastEditTime: 2022-10-26 21:47
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -23,11 +23,18 @@ console.log(`enter easydict.tsx`);
 
 const dataManager = new DataManager();
 
-export default function () {
+interface EasydictArguments {
+  queryText?: string;
+}
+
+export default function (props: { arguments: EasydictArguments }) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
   }
+
+  const { queryText } = props.arguments;
+  const trimQueryText = queryText ? trimTextLength(queryText) : undefined;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -40,7 +47,9 @@ export default function () {
   });
 
   /**
-   * use to display input text
+   * Use to display input text.
+   *
+   * * Note: default value should be undefined, it used to call setup function.
    */
   const [inputText, setInputText] = useState<string>();
   /**
@@ -90,30 +99,48 @@ export default function () {
    */
   function setup() {
     console.log(`setup when extension is activated.`);
+
+    if (trimQueryText?.length) {
+      console.log(`---> arguments queryText: ${trimQueryText}`);
+    }
+
     const startTime = Date.now();
 
-    // In this case, must wait for the proxy to be configured before request.
-    if (myPreferences.enableAutomaticQuerySelectedText && myPreferences.enableSystemProxy) {
-      Promise.all([getSelectedText(), configAxiosProxy()])
-        .then(([selectedText]) => {
-          console.log(`after config proxy, getSelectedText: ${selectedText}`);
-          console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
-          updateInputTextAndQueryText(trimTextLength(selectedText), false);
-        })
-        .catch((error) => {
-          console.error(`set up, config proxy error: ${error}`);
-          querySelecedtText().then(() => {
-            console.log(`after query selected text`);
-            delayGetSystemProxy();
-          });
+    // If enabled system proxy, we need to wait for the system proxy to be ready.
+    if (myPreferences.enableSystemProxy) {
+      // If has arguments, use arguments text as input text first.
+      if (trimQueryText?.length) {
+        configAxiosProxy().then(() => {
+          console.log(`after config proxy`);
+          updateInputTextAndQueryText(trimQueryText, false);
         });
-    } else if (myPreferences.enableAutomaticQuerySelectedText) {
-      querySelecedtText().then(() => {
-        console.log(`after query selected text`);
-        delayGetSystemProxy();
-      });
-    } else if (myPreferences.enableSystemProxy) {
-      configAxiosProxy();
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        Promise.all([getSelectedText(), configAxiosProxy()])
+          .then(([selectedText]) => {
+            console.log(`after config proxy, getSelectedText: ${selectedText}`);
+            console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+            updateInputTextAndQueryText(trimTextLength(selectedText), false);
+          })
+          .catch((error) => {
+            console.error(`set up, config proxy error: ${error}`);
+            querySelecedtText().then(() => {
+              console.log(`after query selected text`);
+              delayGetSystemProxy();
+            });
+          });
+      } else {
+        configAxiosProxy();
+      }
+    } else {
+      if (trimQueryText?.length) {
+        updateInputTextAndQueryText(trimQueryText, false);
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        querySelecedtText().then(() => {
+          console.log(`after query selected text`);
+        });
+      }
+
+      delayGetSystemProxy();
     }
 
     checkIfInstalledEudic().then((isInstalled) => {
@@ -133,8 +160,8 @@ export default function () {
           updateInputTextAndQueryText(selectedText, false);
           resolve();
         })
-        .catch((e) => {
-          console.log(`getSelectedText error: ${e}`);
+        .catch((error) => {
+          console.log(`getSelectedText error: ${error}`);
           resolve();
         });
     });
@@ -146,9 +173,9 @@ export default function () {
    * Todo: move it to dataManager.
    */
   const updateSelectedTargetLanguageItem = (selectedLanguageItem: LanguageItem) => {
-    console.log(
-      `selected language: ${selectedLanguageItem.youdaoLangCode}, current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`
-    );
+    console.log(`selected language: ${selectedLanguageItem.youdaoLangCode}`);
+    console.log(`current target language: ${userSelectedTargetLanguageItem.youdaoLangCode}`);
+
     if (selectedLanguageItem.youdaoLangCode === userSelectedTargetLanguageItem.youdaoLangCode) {
       return;
     }
@@ -221,12 +248,12 @@ export default function () {
                   title={item.title}
                   subtitle={item.subtitle}
                   accessories={getWordAccessories(item)}
-                  detail={<List.Item.Detail markdown={item.translationMarkdown} />}
+                  detail={<List.Item.Detail markdown={item.detailsMarkdown} />}
                   actions={
                     <ListActionPanel
                       displayItem={item}
                       isShowingReleasePrompt={isShowingReleasePrompt}
-                      isInstalledEudic={isInstalledEudic && myPreferences.enableOpenInEudic}
+                      isInstalledEudic={isInstalledEudic}
                       onLanguageUpdate={updateSelectedTargetLanguageItem}
                     />
                   }
@@ -240,17 +267,3 @@ export default function () {
     </List>
   );
 }
-
-/**
- * Easter egg: if you use PopClip and have added a shortcut for `Easydict`, such as `Cmd + E`, then you can use PopClip to quickly open Easydict!
- * 
- * Reference: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
- * 
- * Usage: select following text, then PopClip will show "Install Easydict", click it! 
-
-  # popclip
-  name: Easydict
-  icon: search E
-  key combo: command E
-
- */

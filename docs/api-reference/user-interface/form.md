@@ -8,9 +8,9 @@ Our `Form` component provides great user experience to collect some data from a 
 
 Items in React can be one of two types: controlled or uncontrolled.
 
-An uncontrolled item is the simpler of the two. It’s the closest to a plain HTML input. React puts it on the page, and Raycast keeps track of the rest. Uncontrolled inputs require less code, but make it harder to do certain things.
+An uncontrolled item is the simpler of the two. It's the closest to a plain HTML input. React puts it on the page, and Raycast keeps track of the rest. Uncontrolled inputs require less code, but make it harder to do certain things.
 
-With a controlled item, YOU explicitly control the `value` that the item displays. You have to write code to respond to changes with defining `onChange` callback, store the current `value` somewhere, and pass that value back to the item to be displayed. It’s a feedback loop with your code in the middle. It’s more manual work to wire these up, but they offer the most control.
+With a controlled item, YOU explicitly control the `value` that the item displays. You have to write code to respond to changes with defining `onChange` callback, store the current `value` somewhere, and pass that value back to the item to be displayed. It's a feedback loop with your code in the middle. It's more manual work to wire these up, but they offer the most control.
 
 You can take look at these two styles below under each of the supported items.
 
@@ -173,7 +173,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
 
   const [title, setTitle] = useState<string>(draftValues?.title || "");
   const [description, setDescription] = useState<string>(draftValues?.description || "");
-  const [dueDate, setDueDate] = useState<Date>(draftValues?.dueDate || "");
+  const [dueDate, setDueDate] = useState<Date | null>(draftValues?.dueDate || null);
 
   function handleSubmit(values: TodoValues) {
     console.log("onSubmit", values);
@@ -649,7 +649,7 @@ A dropdown item in a [Form.Dropdown](form.md#form.dropdown)
 #### Example
 
 ```typescript
-import { ActionPanel, Form, Action } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -851,6 +851,151 @@ export default function Command() {
 }
 ```
 
+### Form.FilePicker
+
+A form item with a button to open a dialog to pick some files and/or some directories (depending on its props).
+
+{% hint style="info" %}
+While the user picked some items that existed, it might be possible for them to be deleted or changed when the `onSubmit` callback is called. Hence you should always make sure that the items exist before acting on them!
+{% endhint %}
+
+![](../../.gitbook/assets/form-filepicker-multiple.png)
+
+![Single Selection](../../.gitbook/assets/form-filepicker-single.png)
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Name"
+            onSubmit={(values: { files: string[] }) => {
+              const files = values.files.filter((file: any) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+              console.log(files);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Single selection file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Name"
+            onSubmit={(values: { files: string[] }) => {
+              const file = values.files[0];
+              if (!fs.existsSync(file) || !fs.lstatSync(file).isFile()) {
+                return false;
+              }
+              console.log(file);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" allowMultipleSelection={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Directory picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import fs from "fs";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Name"
+            onSubmit={(values: { folders: string[] }) => {
+              const folder = values.folders[0];
+              if (!fs.existsSync(folder) || fs.lstatSync(folder).isDirectory()) {
+                return false;
+              }
+              console.log(folder);
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="folders" allowMultipleSelection={false} canChooseDirectories canChooseFiles={false} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Controlled file picker" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [files, setFiles] = useState<string[]>([]);
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker id="files" value={files} onChange={setFiles} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+<PropsTableFromJSDoc component="Form.FilePicker" />
+
+#### Methods (Imperative API)
+
+| Name  | Signature               | Description                                                                |
+| ----- | ----------------------- | -------------------------------------------------------------------------- |
+| focus | <code>() => void</code> | Makes the item request focus.                                              |
+| reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
 ### Form.Description
 
 A form item with a simple text label.
@@ -897,6 +1042,8 @@ Some Form.Item callbacks (like `onFocus` and `onBlur`) can return a `Form.Event`
 #### Example
 
 ```typescript
+import { Form } from "@raycast/api";
+
 export default function Main() {
   return (
     <Form>
@@ -916,7 +1063,7 @@ export default function Main() {
   );
 }
 
-function logEvent(event: Form.Event) {
+function logEvent(event: Form.Event<string[] | string>) {
   console.log(`Event '${event.type}' has happened for '${event.target.id}'. Current 'value': '${event.target.value}'`);
 }
 ```
@@ -1050,7 +1197,7 @@ export default function Command() {
       <Form.Dropdown
         id="dropdown"
         title="Dropdown"
-        defaultValue="one"
+        defaultValue="first"
         onChange={(newValue) => {
           console.log(newValue);
         }}

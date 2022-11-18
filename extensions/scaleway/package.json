@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scaleway",
+  "title": "Scaleway",
+  "description": "Quick access to your Scaleway services",
+  "icon": "scaleway.png",
+  "author": "flozdra",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "containers",
+      "title": "Containers",
+      "description": "Get information about containers",
+      "mode": "view",
+      "icon": "icons/containers.png"
+    },
+    {
+      "name": "instances",
+      "title": "Instances",
+      "description": "Get information about instances",
+      "mode": "view",
+      "icon": "icons/instances.png"
+    },
+    {
+      "name": "databases",
+      "title": "Databases",
+      "description": "Get information about databases",
+      "mode": "view",
+      "icon": "icons/databases.png"
+    },
+    {
+      "name": "redis",
+      "title": "Redis",
+      "description": "Get information about redis clusters",
+      "mode": "view",
+      "icon": "icons/redis.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.1",
+    "@raycast/utils": "^1.4.10",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "preferences": [
+    {
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "Your Scaleway project API Token",
+      "type": "password",
+      "default": "",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

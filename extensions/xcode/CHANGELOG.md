@@ -1,5 +1,21 @@
 # Xcode Changelog
 
+## [Open Developer Documentation] - 2022-11-07
+
+- Added "Open Developer Documentation" command to open the Developer Documentation in Xcode.
+- Improved the layout of lists via detail views to show more information.
+- Renamed the "Installed Simulator Apps" command to "Search Recent Builds".
+- Added a launch action to the "Search Recent Builds" list.
+- A left click on a menu bar entry of the "Show Recent Projects in Menu Bar" command now opens the corresponding directory in the finder.
+
+## [Delete DerivedData Script] - 2022-11-04
+
+- Added a script to delete DerivedData via Finder instead of the `rm` command. This way apps that are going to be deleted will be deregistered from Launch Services.
+
+## [Menu Bar Project Favorites] - 2022-10-14
+
+- Added an option to show Xcode Project favorites in the menu bar. 
+
 ## [Confirmation Alerts] - 2022-10-05
 
 - Added confirmation alerts to "Clear Derived Data", "Clear Swift Package Manager Cache" and "Delete Unsupported Simulators" commands.

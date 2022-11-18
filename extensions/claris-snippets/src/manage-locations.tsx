@@ -1,15 +1,16 @@
 import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { SelectFolder } from "./utils/selectFolder";
 import { v4 as uuidv4 } from "uuid";
 import { existsSync } from "fs";
 import type { Location } from "./utils/types";
 import { getDefaultPath, loadSnippets } from "./utils/snippets";
-import { useLocations } from "./utils/use-locations";
+import { getLocationPath, refreshGitLocation, useLocations } from "./utils/use-locations";
+
+type FormValues = Location & { locType: "local" | "git" };
 
 export default function Command() {
   const [locations, setLocations] = useLocations();
-  const { push, pop } = useNavigation();
+  const { pop } = useNavigation();
 
   function DeleteLocationAction({ id, onDelete }: { id: string; onDelete?: () => void }) {
     return (
@@ -26,7 +27,7 @@ export default function Command() {
               primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
             })
           ) {
-            setLocations(locations.filter((l) => l.id !== id));
+            setLocations((locations) => locations.filter((l) => l.id !== id));
             if (onDelete) onDelete();
           }
         }}
@@ -35,13 +36,29 @@ export default function Command() {
   }
 
   function EditLocationForm({ location }: { location: Partial<Location> }) {
-    const { handleSubmit, itemProps } = useForm<Location>({
-      onSubmit: (data) => {
+    const { handleSubmit, itemProps, values, setValidationError } = useForm<FormValues>({
+      onSubmit: async (data) => {
         data.id = location.id ?? uuidv4();
+        data.git = Boolean(data.locType === "git");
+
+        if (data.git) {
+          // form is not using FilePicker component here, so can trust the path is `string`
+          try {
+            await refreshGitLocation(data);
+          } catch (e) {
+            console.error(e);
+            const msg = typeof e === "string" ? e : "Unknown error with git";
+            setValidationError("path", msg);
+            return;
+          }
+        } else {
+          // form is using file picker, so path will come in as `string[]`
+          data.path = data.path[0];
+        }
 
         locations.findIndex((l) => l.id === data.id) === -1
-          ? setLocations([...locations, data])
-          : setLocations(locations.map((l) => (l.id === data.id ? data : l)));
+          ? setLocations((locations) => [...locations, data])
+          : setLocations((locations) => locations.map((l) => (l.id === data.id ? data : l)));
 
         pop();
       },
@@ -58,7 +75,29 @@ export default function Command() {
         }
       >
         <Form.TextField {...itemProps.name} title="Name" info="A friendly reference to this folder" />
-        <Form.TextField {...itemProps.path} title="Path" />
+        <Form.Dropdown {...(itemProps.locType as Form.ItemProps<string>)} title="Location Type">
+          <Form.Dropdown.Item value="local" title="My Computer" />
+          <Form.Dropdown.Item value="git" title="Git Repository" />
+        </Form.Dropdown>
+        {values.locType === "local" && (
+          <Form.FilePicker
+            id={itemProps.path.id}
+            value={itemProps.path.value ? [itemProps.path.value] : []}
+            onChange={(val) => itemProps.path.onChange && itemProps.path.onChange(val[0])}
+            error={itemProps.path.error}
+            allowMultipleSelection={false}
+            canChooseDirectories
+            canChooseFiles={false}
+            title="Folder"
+          />
+        )}
+        {values.locType === "git" && (
+          <>
+            <Form.TextField {...itemProps.path} title="Git URL" info="The URL of the git repository" />
+            <Form.Description text="Any snippets found in this git repository will be available to you" />
+            <Form.Description text="The Git URL must be publically accessible or contain credentials in the URL." />
+          </>
+        )}
       </Form>
     );
   }
@@ -70,21 +109,6 @@ export default function Command() {
         shortcut={{ key: "n", modifiers: ["cmd"] }}
         icon={Icon.NewFolder}
         target={<EditLocationForm location={{}} />}
-      />
-    );
-    // remove the applescript filepicker since it doesn't work with pop to root search set to immediately
-    // https://raycastcommunity.slack.com/archives/C01AC2X0GMN/p1664542350911429?thread_ts=1653409347.925799&cid=C01AC2X0GMN
-    return (
-      <SelectFolder
-        title="Add Location"
-        prompt="Select a folder to add"
-        shortcut={{ key: "n", modifiers: ["cmd"] }}
-        icon={Icon.NewFolder}
-        onSelect={(path) => {
-          if (path) {
-            push(<EditLocationForm location={{ path }} />);
-          }
-        }}
       />
     );
   }
@@ -119,12 +143,12 @@ export default function Command() {
           return (
             <List.Item
               title={location.name}
-              icon={Icon.Folder}
+              icon={location.git ? Icon.Compass : Icon.Folder}
               subtitle={location.path}
               accessories={[countSnippets(location)]}
               actions={
                 <ActionPanel>
-                  <RevealInFinderAction path={location.path} />
+                  <RevealInFinderAction path={getLocationPath(location)} />
                   <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}
@@ -155,7 +179,7 @@ export default function Command() {
 }
 
 function countSnippets(location?: Location): List.Item.Accessory {
-  const path = location?.path ?? getDefaultPath();
+  const path = getLocationPath(location);
   const folderExists = existsSync(path);
   if (!folderExists) {
     return { icon: Icon.Warning, text: "Not Found" };

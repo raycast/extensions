@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-24 17:58
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-26 11:13
+ * @lastEditTime: 2022-10-07 23:54
  * @fileName: linguee.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,7 @@
 import { LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
 import util from "util";
-import { requestCostTime } from "../../axiosConfig";
+import { httpsAgent, requestCostTime } from "../../axiosConfig";
 import { userAgent } from "../../consts";
 import { DicionaryType, QueryTypeResult } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
@@ -50,6 +50,7 @@ export async function rquestLingueeDictionary(queryWordInfo: QueryWordInfo): Pro
     const config: AxiosRequestConfig = {
       headers: headers,
       responseType: "arraybuffer", // handle French content-type iso-8859-15
+      httpsAgent, // use proxy, if ip was blocked by linguee, we can change ip.
     };
 
     axios

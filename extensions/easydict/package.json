@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "easydict",
   "title": "Easy Dictionary",
-  "description": "Easily look up words or translate text, support 23 languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
+  "description": "Easily look up words or translate text, support 48+ languages, support Linguee and Youdao dictionary, support DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao and Caiyun translation.",
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
@@ -12,7 +12,15 @@
       "title": "Search Word",
       "subtitle": "Easydict",
       "description": "Automatically detect the input text language, and query preferred language dictionary or translate the text.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "queryText",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "categories": [
@@ -36,7 +44,7 @@
     "caiyun"
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.0",
+    "@raycast/api": "^1.42.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
@@ -44,7 +52,7 @@
     "execa": "^6.1.0",
     "file-type": "^18.0.0",
     "franc": "^6.0.0",
-    "https-proxy-agent": "^5.0.1",
+    "hpagent": "^1.1.0",
     "mac-system-proxy": "^1.0.4",
     "node-html-parser": "^5.3.3",
     "play-sound": "^1.1.5",
@@ -53,13 +61,13 @@
     "tencentcloud-sdk-nodejs-tmt": "^4.0.354"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.2",
-    "@commitlint/config-conventional": "^17.0.2",
+    "@commitlint/cli": "^17.1.2",
+    "@commitlint/config-conventional": "^17.1.0",
     "@types/crypto-js": "^4.1.1",
-    "@types/node": "~16.10.0",
+    "@types/node": "18.8.3",
     "@types/play-sound": "^1.1.0",
     "@types/qs": "^6.9.7",
-    "@types/react": "^17.0.28",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^7.32.0",
@@ -185,6 +193,106 @@
         {
           "title": "Czech",
           "value": "cs"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "Estonian",
+          "value": "et"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Filipino",
+          "value": "fil"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Burmese",
+          "value": "my"
+        },
+        {
+          "title": "Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Montenegrin",
+          "value": "sr-Latn"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
         }
       ]
     },
@@ -287,6 +395,106 @@
         {
           "title": "Czech",
           "value": "cs"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "Estonian",
+          "value": "et"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Telugu",
+          "value": "te"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Filipino",
+          "value": "fil"
+        },
+        {
+          "title": "Khmer",
+          "value": "km"
+        },
+        {
+          "title": "Lao",
+          "value": "lo"
+        },
+        {
+          "title": "Bengali",
+          "value": "bn"
+        },
+        {
+          "title": "Burmese",
+          "value": "my"
+        },
+        {
+          "title": "Georgian",
+          "value": "ka"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Montenegrin",
+          "value": "sr-Latn"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
         }
       ]
     },
@@ -294,33 +502,33 @@
       "title": "Switch Boxes",
       "name": "enableAutomaticQuerySelectedText",
       "type": "checkbox",
-      "label": "Automatic Query Selected Text",
+      "label": "Query Selected Text Automatically",
       "required": false,
-      "description": "Automatic query selected text of the frontmost application",
+      "description": "Automatically query selected text from the frontmost application",
       "default": true
     },
     {
-      "name": "enableOpenInEudic",
+      "name": "showOpenInEudicFirst",
       "type": "checkbox",
-      "label": "Show Open In Eudic",
+      "label": "Show Open in Eudic First",
       "required": false,
-      "description": "Show `Open In Eudic` in action panel if Eudic is installed",
+      "description": "If enabled and Eudic is installed, `Open in Eudic` action will be shown in the first, otherwise `Copy Text` will be shown.",
+      "default": true
+    },
+    {
+      "name": "enableDetectLanguageSpeedFirst",
+      "type": "checkbox",
+      "label": "Detect Language Speed First",
+      "required": false,
+      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower ⚠️ .",
       "default": true
     },
     {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
-      "label": "Automatic Play Word Audio",
+      "label": "Play Word Pronunciation Automatically",
       "required": false,
-      "description": "Automatic play audio after looking up a `English` word",
-      "default": true
-    },
-    {
-      "name": "enableLanguageDetectionSpeedFirst",
-      "type": "checkbox",
-      "label": "Detect Language Speed First",
-      "required": false,
-      "description": "Turned on by default, the speed and accuracy of language detection is well balanced. Turn off if you want more accurate language detection, but slower.",
+      "description": "Automatically play word pronunciation after looking up a `English` word",
       "default": true
     },
     {
@@ -379,7 +587,7 @@
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
-      "description": "Turn on/off DeepL Translate. Use system proxy automatically by default. App Key is required.",
+      "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
       "default": true
     },
     {
@@ -387,7 +595,7 @@
       "type": "checkbox",
       "label": "Google Translate",
       "required": false,
-      "description": "⚠️ Use system proxy automatically by default. A proxy is required to use Google if you are in China.",
+      "description": "⚠️ Use system proxy by default. A proxy is required to use Google if you are in China.",
       "default": false
     },
     {

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-26 15:52
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-30 20:58
+ * @lastEditTime: 2022-10-17 20:38
  * @fileName: volcanoAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,14 +10,13 @@
 
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
-import { DetectedLangModel } from "../../detectLanauge/types";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { checkIfPreferredLanguagesContainChinese } from "../../detectLanauge/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { LanguageDetectType } from "./../../detectLanauge/types";
-import { chineseLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { QueryTypeResult, RequestErrorInfo, TranslationType } from "./../../types";
 import { VolcanoDetectResult, VolcanoTranslateResult } from "./types";
 import { genVolcanoSign } from "./volcanoSign";
 
@@ -97,7 +96,7 @@ export function requestVolcanoTranslate(queryWordInfo: QueryWordInfo): Promise<Q
           return reject(undefined);
         }
 
-        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano Translate err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
@@ -152,20 +151,20 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(errorInfo);
         }
 
-        const detectedVolcanoLanguage = volcanoDetectResult.DetectedLanguageList[0];
-        const volcanoLangCode = detectedVolcanoLanguage.Language;
+        const detectedLanguage = volcanoDetectResult.DetectedLanguageList[0];
+        const volcanoLangCode = detectedLanguage.Language;
         const youdaoLangCode = getYoudaoLangCodeFromVolcanoCode(volcanoLangCode);
-        const isConfirmed = detectedVolcanoLanguage.Confidence > 0.5;
-        const detectedLanguage: DetectedLangModel = {
+        const isConfirmed = detectedLanguage.Confidence > 0.5;
+        const detectedLanguageModel: DetectedLangModel = {
           type: type,
           sourceLangCode: volcanoLangCode,
           youdaoLangCode: youdaoLangCode,
           confirmed: isConfirmed,
           result: volcanoDetectResult,
         };
-        resolve(detectedLanguage);
+        resolve(detectedLanguageModel);
 
-        console.log(`Volcano detect: ${JSON.stringify(detectedVolcanoLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
+        console.warn(`Volcano detect language: ${JSON.stringify(detectedLanguage)}, youdaoLangCode: ${youdaoLangCode}`);
         console.warn(`Volcano detect cost time: ${res.headers[requestCostTime]} ms`);
       })
       .catch((error) => {
@@ -174,7 +173,7 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
           return reject(undefined);
         }
 
-        console.log(`Volcano detect err: ${JSON.stringify(error, null, 2)}`);
+        console.log(`Volcano detect err: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });

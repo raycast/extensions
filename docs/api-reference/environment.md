@@ -13,15 +13,17 @@ Contains environment values such as the Raycast version, extension info, and pat
 ```typescript
 import { environment } from "@raycast/api";
 
-console.log(`Raycast version: ${environment.raycastVersion}`);
-console.log(`Extension name: ${environment.extensionName}`);
-console.log(`Command name: ${environment.commandName}`);
-console.log(`Command mode: ${environment.commandMode}`);
-console.log(`Assets path: ${environment.assetsPath}`);
-console.log(`Support path: ${environment.supportPath}`);
-console.log(`Is development mode: ${environment.isDevelopment}`);
-console.log(`Theme: ${environment.theme}`);
-console.log(`LaunchType: ${environment.launchType}`);
+export default async function Command() {
+  console.log(`Raycast version: ${environment.raycastVersion}`);
+  console.log(`Extension name: ${environment.extensionName}`);
+  console.log(`Command name: ${environment.commandName}`);
+  console.log(`Command mode: ${environment.commandMode}`);
+  console.log(`Assets path: ${environment.assetsPath}`);
+  console.log(`Support path: ${environment.supportPath}`);
+  console.log(`Is development mode: ${environment.isDevelopment}`);
+  console.log(`Theme: ${environment.theme}`);
+  console.log(`LaunchType: ${environment.launchType}`);
+}
 ```
 
 #### Properties
@@ -41,14 +43,12 @@ async function getSelectedFinderItems(): Promise<FileSystemItem[]>;
 #### Example
 
 ```typescript
-import { getSelectedFinderItems, Clipboard, showToast, Toast } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   try {
     const selectedItems = await getSelectedFinderItems();
-    if (selectedItems.length) {
-      await Clipboard.paste(selectedItems[0].path);
-    }
+    console.log(selectedItems);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -56,7 +56,7 @@ export default async () => {
       message: String(error),
     });
   }
-};
+}
 ```
 
 #### Return
@@ -78,7 +78,7 @@ async function getSelectedText(): Promise<string>;
 ```typescript
 import { getSelectedText, Clipboard, showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   try {
     const selectedText = await getSelectedText();
     const transformedText = selectedText.toUpperCase();
@@ -90,7 +90,7 @@ export default async () => {
       message: String(error),
     });
   }
-};
+}
 ```
 
 #### Return
@@ -117,3 +117,7 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
+
+### LaunchContext
+
+Represents the passed context object of programmatic command launches.

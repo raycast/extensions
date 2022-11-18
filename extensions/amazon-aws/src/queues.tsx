@@ -1,101 +1,76 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import chunk from "lodash/chunk";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
-import { Preferences } from "./types";
 
-setupAws();
-const preferences: Preferences = getPreferenceValues();
+const preferences = setupAws();
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
-  const [state, setState] = useState<{
-    loaded: boolean;
-    queues: string[];
-    showingQueues: string[];
-    attributes: QueueAttributes[];
-    hasError: boolean;
-  }>({ loaded: false, queues: [], showingQueues: [], attributes: [], hasError: false });
+  const { data: queues, error, isLoading } = useCachedPromise(fetchQueues);
+  const { data: attributes, revalidate: revalidateAttributes } = useCachedPromise(fetchQueueAttributes, queues || []);
 
-  const loadItems = async function (q: string[]) {
-    const att: ReturnType<typeof getQueue>[] = [];
-
-    for (let i = 0; i < q.length; i++) {
-      att.push(getQueue(q[i]));
-    }
-
-    const attributes: QueueAttributes[] = [];
-
-    for (let i = 0; i < att.length; i++) {
-      const result = await att[i];
-      attributes.push({ ...result.Attributes, Name: q[i] } as QueueAttributes);
-    }
-
-    setState((o) => {
-      return { ...o, attributes };
-    });
-  };
-
-  useEffect(() => {
-    async function fetch(token?: string, queues?: string[]): Promise<string[]> {
-      const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
-      const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
-
-      if (NextToken) {
-        fetch(NextToken, combinedQueues);
-      }
-
-      return combinedQueues;
-    }
-
-    fetch()
-      .then((queues) => {
-        setState((o) => ({ ...o, loaded: true, queues, showingQueues: queues }));
-        loadItems(queues);
-      })
-      .catch(() => setState((o) => ({ ...o, hasError: true })));
-  }, []);
-
-  if (state.hasError) {
+  if (error) {
     return (
       <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
     );
   }
 
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter queues by name...">
-      {state.showingQueues.map((i, k) => {
-        const attr = state.attributes.find((a: QueueAttributes) => i === a.Name);
-        return <QueueListItem key={k} queue={i} attributes={attr} />;
-      })}
+    <List isLoading={isLoading} searchBarPlaceholder="Filter queues by name...">
+      {queues?.map((i, k) => (
+        <QueueListItem key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
+      ))}
     </List>
   );
 }
 
-function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined }) {
+function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
   const queue = props.queue;
   const attr = props.attributes;
   const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
 
-  function getAccessories(): List.Item.Accessory[] {
-    const _acc: List.Item.Accessory[] = [];
-    _acc.push({
+  const accessories: List.Item.Accessory[] = [
+    {
       icon: "📨",
       text: attr ? attr.ApproximateNumberOfMessages : "...",
       tooltip: "Approximated Number of Messages",
-    });
-    _acc.push({
+    },
+    {
       icon: "✈️",
       text: attr ? attr.ApproximateNumberOfMessagesNotVisible : "...",
       tooltip: "Approximated Number of Messages Not Visible",
-    });
-    _acc.push({
+    },
+    {
       icon: "⏰",
       text: attr ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "...",
       tooltip: "Creation Time",
-    });
+    },
+  ];
 
-    return _acc;
+  function handlePurgeQueueAction() {
+    confirmAlert({
+      title: "Are you sure you want to purge the queue?",
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Purge",
+        onAction: async () => {
+          const toast = await showToast({ style: Toast.Style.Animated, title: "Purging queue..." });
+
+          try {
+            await sqs.purgeQueue({ QueueUrl: queue }).promise();
+            toast.style = Toast.Style.Success;
+            toast.title = "Purged queue";
+          } catch (err) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to purge queue";
+          } finally {
+            props.onPurge();
+          }
+        },
+      },
+    });
   }
 
   const path =
@@ -116,25 +91,61 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
+          <Action.SubmitForm
+            title={`Purge Queue (${attr?.ApproximateNumberOfMessages || "..."})`}
+            onSubmit={handlePurgeQueueAction}
+          />
         </ActionPanel>
       }
-      accessories={getAccessories()}
+      accessories={accessories}
     />
   );
 }
 
-type QueueAttributes = {
-  Name: string;
+async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
+  const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
+  const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
+
+  if (NextToken) {
+    fetchQueues(NextToken, combinedQueues);
+  }
+
+  return combinedQueues;
+}
+
+async function fetchQueueAttributes(...queueUrls: string[]) {
+  const attributesMap: QueueAttributesMap = {};
+
+  const queueUrlBatches = chunk(queueUrls, 15);
+
+  for (const queueUrlBatch of queueUrlBatches) {
+    await Promise.all(
+      queueUrlBatch.map(async (queueUrl) => {
+        const { Attributes } = await sqs
+          .getQueueAttributes({
+            QueueUrl: queueUrl,
+            AttributeNames: [
+              "ApproximateNumberOfMessages",
+              "ApproximateNumberOfMessagesNotVisible",
+              "CreatedTimestamp",
+            ],
+          })
+          .promise();
+
+        attributesMap[queueUrl] = Attributes as unknown as QueueAttributes;
+      })
+    );
+  }
+
+  return attributesMap;
+}
+
+interface QueueAttributes {
   ApproximateNumberOfMessages: string;
   ApproximateNumberOfMessagesNotVisible: string;
   CreatedTimestamp: string;
-};
+}
 
-function getQueue(q: string) {
-  return sqs
-    .getQueueAttributes({
-      QueueUrl: q,
-      AttributeNames: ["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible", "CreatedTimestamp"],
-    })
-    .promise();
+interface QueueAttributesMap {
+  [url: string]: QueueAttributes;
 }

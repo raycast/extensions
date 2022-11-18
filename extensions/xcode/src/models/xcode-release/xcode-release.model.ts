@@ -23,11 +23,11 @@ export interface XcodeRelease {
   /**
    * The optional beta number
    */
-  beta: number | undefined;
+  beta?: number;
   /**
    * The optional xcode-release candidate (RC) number
    */
-  releaseCandidate: number | undefined;
+  releaseCandidate?: number;
   /**
    * The SDKs embedded within this release
    */
@@ -35,13 +35,13 @@ export interface XcodeRelease {
   /**
    * The optional Swift version that is bundled with this release
    */
-  swiftVersion: string | undefined;
+  swiftVersion?: string;
   /**
    * The optional release notes link
    */
-  releaseNotesLink: string | undefined;
+  releaseNotesLink?: string;
   /**
    * The optional download link
    */
-  downloadLink: string | undefined;
+  downloadLink?: string;
 }

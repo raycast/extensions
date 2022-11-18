@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-11-17
+
+- Add preference to show ellipsis when menu bar title is truncated.
+
+## [Fix] - 2022-11-14
+
+- Fixed a bug that caused `Like Current Song` and `Dislike Current Song` to not function properly.
+
+## [Fix] - 2022-10-28
+
+- Fixed a bug that caused the menubar command to not function properly.
+
 ## [Feature] - 2022-10-07
 
 - Implemented add track to queue, can be located in Search Tracks view

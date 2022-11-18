@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/Eudic-1664029439.png" height="128">
   <h1 align="center">Easydict</h1>
   <h4 align="center"> Easily look up words or translate text. </p>
-<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿</p>
+<p align="center">🇨🇳 🇺🇸 🇯🇵 🇰🇷 🇫🇷 🇪🇸 🇵🇹 🇮🇹 🇷🇺 🇩🇪 🇸🇦 🇸🇪 🇳🇱 🇷🇴 🇹🇭 🇸🇰 🇭🇺 🇬🇷 🇩🇰 🇫🇮 🇵🇱 🇨🇿 🇹🇷 🇱🇹 🇱🇻 🇺🇦 🇧🇬 🇮🇩 🇲🇾 🇸🇮 🇪🇪 🇻🇳 🇮🇷 🇵🇰 🇹🇱 🇹🇦 🇮🇳 🇵🇭 🇫🇮 🇰🇭 🇱🇦 🇧🇳 🇲🇲 🇳🇴 🇷🇸 🇭🇷 🇲🇳 🇮🇱 </p>
 </p>
 
 <p align="center">
@@ -15,7 +15,7 @@
 
 `Easydict` is an easy dictionary, for looking up words or translating text easily. Use it out of the box, automatically detect the input text language, and support [Linguee](https://www.linguee.com/) and [Youdao Dictionary](https://www.youdao.com/), **🍎 MacOS system translation**, [DeepL](https://www.deepl.com/translator), [Google](https://translate.google.com), [Bing](https://www.bing.com/translator), [Baidu](https://fanyi.baidu.com/), [Tencent](https://fanyi.qq.com/), [Volcano](https://translate.volcengine.com/translate), [Youdao](https://fanyi.youdao.com/), and [Caiyun](https://fanyi.caiyunapp.com/#/) translation.
 
-![easydict-1-1664438822](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1664438822-1664438852.png)
+![easydict-1](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-1-1666538159.png)
 
 ## Features
 
@@ -27,11 +27,12 @@
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).
 - [x] Support to sort query results manually.
+- [x] Support Arguments.
 - [x] Support system proxy.
 - [x] Support Linguee and Youdao Dictionary.
 - [x] Support macOS system translation. (_Please see [How to use 🍎 macOS system translation in Easydict?](https://github.com/tisfeng/Raycast-Easydict/blob/main/docs/How-to-use-macOS%F0%9F%8D%8Esystem-translation-in-Easydict.md)_)
 - [x] Support DeepL, Google, Bing, Baidu, Tencent, Volcano, Youdao, and Caiyun translation.
-- [x] Support 23 languages.
+- [x] Support 48+ languages.
 
 Next:
 
@@ -42,15 +43,33 @@ Next:
 
 ---
 
+### Arguments
+
+![arguments-1666060638](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/arguments-1666060638.png)
+
+![hello-1666060655](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/hello-1666060655.png)
+
+### Youdao Modern Chinese Dict
+
+![xiaxi-1665674049](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/xiaxi-1665674049.png)
+
+![yi-1665582552](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/yi-1665582552.png)
+
+![ai](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1666538579.png)
+
+[艾](https://youdao.com/result?word=%E8%89%BE&lang=en)
+
+#### ![ai-1665582690](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/ai-1665582690.png)
+
 ### [Linguee Dictionary](https://www.linguee.com/)：English <--> Chinese
 
-![easydict-2-1662904408](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1662904408-20220911215421566-1662904461.png)
+![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1666538642.png)
 
 #### [float](https://www.linguee.com/english-chinese/search?query=float)
 
 ![image-20220822170315915](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/image-20220822170315915-1661158995.png)
 
-### [Linguee 词典](https://www.linguee.com/)：English <--> French
+### [Linguee Dictionary](https://www.linguee.com/)：English <--> French
 
 ![easydict-3](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-3-1660916319.png)
 
@@ -62,7 +81,7 @@ Next:
 
 ![showMore-1664440735](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/showMore-1664440735.png)
 
-![easydict-2-1664439977](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-2-1664439977.png)
+![uk](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/uk-1666538447.png)
 
 ### Translation
 
@@ -70,13 +89,13 @@ Next:
 
 ![easydict-5-1663604086](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1663604086.png)
 
-![easydict-6-1664440833](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1664440833.png)
+![easydict-6-1666538717](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/easydict-6-1666538717.png)
 
 ## Installation
 
 [`Easydict`](<(https://www.raycast.com/isfeng/easydict)>) is an extension of Raycast, so you need to install [Raycast](https://www.raycast.com/) first.
 
-> `Raycast` is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
+> [Raycast](https://www.raycast.com/) is a blazingly fast, totally extendable launcher. Similar to [Alfred](https://www.alfredapp.com/) but it's completely free!
 
 ### Install from Raycast Store
 
@@ -102,7 +121,7 @@ Actually, it works well without you having to do any extra work. The next are ad
 
 ### Supported Languages
 
-Currently we support 23 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech.**
+Currently we support 48 languages: **Chinese-Simplified, Chinese-Traditional, English, Japanese, Korean, French, Spanish, Portuguese, Italian, German, Russian, Arabic, Swedish, Romanian, Thai, Slovak, Dutch, Hungarian, Greek, Danish, Finnish, Polish, Czech, Turkish, Lithuanian, Latvian, Ukrainian, Bulgarian, Indonesian, Malay, Slovenian, Estonian, Vietnamese, Persian, Hindi, Telugu, Tamil, Urdu, Filipino, Khmer, Lao, Bengali, Burmese, Norwegian, Serbian, Croatian, Mongolian, Hebrew.**
 
 #### Language Detection
 
@@ -112,31 +131,56 @@ Considering user privacy, only Bing language detection is enabled by default (no
 
 Details of the languages supported by each language detection service are as follows:
 
-| 语言                   | Bing | 🍎 Apple | Baidu | Volcano | Tencent |
-| :--------------------- | :--: | :------: | :---: | :-----: | :-----: |
-| Chinese (Simplified)   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Chinese（Traditional） |  ✅  |    ❌    |  ❌   |   ✅    |   ❌    |
-| English                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Japanese               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Korean                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| French                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Spanish                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Portuguese             |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Italian                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| German                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Russian                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Arabic                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Swedish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Romanian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Thai                   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
-| Slovak                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Dutch                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Hungarian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Greek                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Danish                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Finnish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Polish                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
-| Czech                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Languages             | Bing | 🍎 Apple | Baidu | Volcano | Tencent |
+| :-------------------- | :--: | :------: | :---: | :-----: | :-----: |
+| Chinese (Simplified)  |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Chinese (Traditional) |  ✅  |    ❌    |  ❌   |   ✅    |   ❌    |
+| English               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Japanese              |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Korean                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| French                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Spanish               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Portuguese            |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Italian               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| German                |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Russian               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Arabic                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Swedish               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Romanian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Thai                  |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Slovak                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Dutch                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hungarian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Greek                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Danish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Finnish               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Polish                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Czech                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Turkish               |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Lithuanian            |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Latvian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Ukrainian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Bulgarian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Indonesian            |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Malay                 |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Slovenian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Estonian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Vietnamese            |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |
+| Persian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hindi                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Telugu                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Tamil                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Urdu                  |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Filipino              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Khmer                 |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Lao                   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Bengali               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Burmese               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Georgian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Serbian               |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Croatian              |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Mongolian             |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
+| Hebrew                |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |
 
 #### Dictionary
 
@@ -158,31 +202,56 @@ Google and DeepL translations will use the system proxy by default. (DeepL works
 
 Supported translation languages:
 
-| language               | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
-| :--------------------- | :----: | :---: | :----: | :--: | :------: | :---: | :-----: | :-----: | :----: |
-| Chinese (Simplified)   |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
-| Chinese（Traditional） |   ✅   |  ⚠️   |   ✅   |  ✅  |    ⚠️    |  ✅   |   ✅    |   ✅    |   ⚠️   |
-| English                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
-| Japanese               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
-| Korean                 |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| French                 |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Spanish                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Portuguese             |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Italian                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| German                 |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Russian                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Arabic                 |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Swedish                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Romanian               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Thai                   |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
-| Slovak                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Dutch                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Hungarian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Greek                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Danish                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Finnish                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Polish                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
-| Czech                  |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Languages             | Youdao | DeepL | Google | Bing | 🍎 Apple | Baidu | Volcano | Tencent | Caiyun |
+| :-------------------- | :----: | :---: | :----: | :--: | :------: | :---: | :-----: | :-----: | :----: |
+| Chinese (Simplified)  |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
+| Chinese (Traditional) |   ✅   |  ⚠️   |   ✅   |  ✅  |    ⚠️    |  ✅   |   ✅    |   ✅    |   ⚠️   |
+| English               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
+| Japanese              |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ✅   |
+| Korean                |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| French                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Spanish               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Portuguese            |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Italian               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| German                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Russian               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Arabic                |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Swedish               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Romanian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Thai                  |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Slovak                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Dutch                 |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Hungarian             |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Greek                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Danish                |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Finnish               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Polish                |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Czech                 |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Turkish               |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Lithuanian            |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Latvian               |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Ukrainian             |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Bulgarian             |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Indonesian            |   ✅   |  ✅   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Malay                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Slovenian             |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Estonian              |   ✅   |  ✅   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Vietnamese            |   ✅   |  ❌   |   ✅   |  ✅  |    ✅    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Persian               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Hindi                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ✅    |   ❌   |
+| Telugu                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Tamil                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Urdu                  |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Filipino              |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Khmer                 |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Lao                   |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Bengali               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Burmese               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Norwegian             |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Serbian               |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Croatian              |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Mongolian             |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
+| Hebrew                |   ✅   |  ❌   |   ✅   |  ✅  |    ❌    |  ✅   |   ✅    |   ❌    |   ❌   |
 
 > Note: ⚠️ means the translation of source language to Traditional Chinese is not supported, such as DeepL. If you enter Traditional Chinese for translation, it will be treated as Simplified Chinese.
 
@@ -279,6 +348,21 @@ When this feature is turned on, `Easydict` will try to get the Mac system agent,
 
 > Note ⚠️: Please don't turn on `Use System Proxy` while using the developer tools with MitM, otherwise some service requests will report certificate errors, for example: https://github.com/tisfeng/Raycast-Easydict/issues/18 .
 
+### Use with PopClip
+
+You need to install [PopClip](https://pilotmoon.com/popclip/) first, then add a shortcut key for `Easydict`, such as `Cmd + E`, then you can open `Easydict` quickly with `PopClip`!
+
+Usage: Select the following code block, `PopClip` will show "Install Easydict", just click it.
+
+```
+  # popclip
+  name: Easydict
+  icon: search E
+  key combo: command E
+```
+
+> Ref: https://github.com/pilotmoon/PopClip-Extensions#extension-snippets-examples
+
 ### Translation Services
 
 For easy to use, we provide some built-in translation APIs appid and appkey, but these Services have request frequency limits. If many people use them at the same time, it is likely to slow down or even stop. Therefore, for a better use experience, you'd better apply for a dedicated appid and appkey, and then replace the built-in services on the Preferences page.
@@ -302,9 +386,7 @@ The following application tutorial is from [`Bob`](https://bobtranslate.com/guid
 
 ## Friendly Recommendation
 
-[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application. Bob is probably the best translation application on the MacOS platform, and it's free!
-
-> Update: Bob is now available on the Mac App Store, welcome to support: [Bob - 翻译和 OCR 工具](https://apps.apple.com/us/app/bob-%E7%BF%BB%E8%AF%91%E5%92%8C-ocr-%E5%B7%A5%E5%85%B7/id1630034110?l=zh&mt=12)
+[`Bob`](https://bobtranslate.com/) is a MacOS **translation** and **OCR** application.
 
 ![image-20220620150946277](https://cdn.jsdelivr.net/gh/tisfeng/ImageBed@main/uPic/image-20220620150946277.png)
 

@@ -17,12 +17,19 @@ import { Location, snippetTypesMap } from "./utils/types";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import CreateSnippet from "./create-snippet";
 import { XMLToFMObjects } from "./utils/FmClipTools";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import EditSnippet from "./components/edit-snippet";
 import { uniqBy } from "lodash";
 
 export default function Command() {
   const [locations] = useCachedState<Location[]>("locations", []);
+  const locationMap = useMemo(() => {
+    const map: Record<string, Location> = {};
+    locations.forEach((location) => {
+      map[location.id] = location;
+    });
+    return map;
+  }, [locations]);
   const {
     data: snippets,
     isLoading,
@@ -153,20 +160,22 @@ ${snippet.snippet}`}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action.Push
-                    title="Edit Snippet"
-                    icon={Icon.Pencil}
-                    shortcut={{ key: "e", modifiers: ["cmd"] }}
-                    target={
-                      <EditSnippet
-                        onSubmit={() => {
-                          revalidate();
-                          pop();
-                        }}
-                        snippet={snippet}
-                      />
-                    }
-                  />
+                  {locationMap[snippet.locId]?.git || (
+                    <Action.Push
+                      title="Edit Snippet"
+                      icon={Icon.Pencil}
+                      shortcut={{ key: "e", modifiers: ["cmd"] }}
+                      target={
+                        <EditSnippet
+                          onSubmit={() => {
+                            revalidate();
+                            pop();
+                          }}
+                          snippet={snippet}
+                        />
+                      }
+                    />
+                  )}
                   <Action.Push
                     title="Duplicate Snippet"
                     shortcut={{ key: "d", modifiers: ["cmd"] }}
@@ -177,7 +186,11 @@ ${snippet.snippet}`}
                           revalidate();
                           pop();
                         }}
-                        snippet={{ ...snippet, id: undefined }}
+                        snippet={{
+                          ...snippet,
+                          id: undefined,
+                          locId: locationMap[snippet.locId]?.git ? "default" : snippet.locId,
+                        }}
                       />
                     }
                   />
@@ -196,26 +209,28 @@ ${snippet.snippet}`}
                     shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
                   /> */}
                 </ActionPanel.Section>
-                <ActionPanel.Section>
-                  <Action
-                    title="Delete Snippet"
-                    icon={Icon.Trash}
-                    shortcut={{ key: "delete", modifiers: ["cmd"] }}
-                    style={Action.Style.Destructive}
-                    onAction={async () => {
-                      if (
-                        await confirmAlert({
-                          title: "Are you sure?",
-                          message: "This will permanently delete the snippet. This cannot be undone.",
-                          primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
-                        })
-                      ) {
-                        deleteSnippetFile(snippet);
-                        revalidate();
-                      }
-                    }}
-                  />
-                </ActionPanel.Section>
+                {locationMap[snippet.locId]?.git || (
+                  <ActionPanel.Section>
+                    <Action
+                      title="Delete Snippet"
+                      icon={Icon.Trash}
+                      shortcut={{ key: "delete", modifiers: ["cmd"] }}
+                      style={Action.Style.Destructive}
+                      onAction={async () => {
+                        if (
+                          await confirmAlert({
+                            title: "Are you sure?",
+                            message: "This will permanently delete the snippet. This cannot be undone.",
+                            primaryAction: { style: Alert.ActionStyle.Destructive, title: "Delete" },
+                          })
+                        ) {
+                          deleteSnippetFile(snippet);
+                          revalidate();
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                )}
               </ActionPanel>
             }
           />

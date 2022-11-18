@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Icon, showHUD, showToast, Toast } from "@raycast/api";
-import { copyFileByPath, getFinderPath } from "../utils/common-utils";
+import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
+import { getFinderPath } from "../utils/common-utils";
 import NewFileWithName from "../new-file-with-name";
 import { homedir } from "os";
 import AddFileTemplate from "../add-file-template";
@@ -32,7 +32,7 @@ export function ActionNewTemplateFileHere(props: {
       />
       <Action.Push
         title="New File with Name"
-        icon={Icon.TextDocument}
+        icon={Icon.NewDocument}
         target={<NewFileWithName newFileType={{ section: "Template", index: index }} templateFiles={templateFiles} />}
       />
       <Action
@@ -47,15 +47,26 @@ export function ActionNewTemplateFileHere(props: {
           }
         }}
       />
-      <Action
-        title={"Copy File to Clipboard"}
-        icon={Icon.Clipboard}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
-        onAction={async () => {
-          await copyFileByPath(template.path);
-          await showHUD(`${template.name} copied to clipboard.`);
-        }}
-      />
+      <ActionPanel.Section>
+        <Action
+          title={"Copy File to Clipboard"}
+          icon={Icon.Clipboard}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+          onAction={async () => {
+            await Clipboard.copy({ file: template.path });
+            await showHUD(`${template.name} copied to clipboard`);
+          }}
+        />
+        <Action
+          title={"Paste File to Front App"}
+          icon={Icon.AppWindow}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
+          onAction={async () => {
+            await Clipboard.paste({ file: template.path });
+            await showHUD(`${template.name} pasted to front app`);
+          }}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.Push
           title={"Add File Template"}

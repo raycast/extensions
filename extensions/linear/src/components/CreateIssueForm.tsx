@@ -1,9 +1,19 @@
 import { useEffect } from "react";
-import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  Clipboard,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  useNavigation,
+  showToast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
-import { getLastCreatedIssues } from "../api/getIssues";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
 
 import useLabels from "../hooks/useLabels";
@@ -47,23 +57,40 @@ export type CreateIssueValues = {
   assigneeId: string;
   labelIds: string[];
   estimate: string;
-  dueDate: Date;
+  dueDate: Date | null;
   cycleId: string;
   projectId: string;
   parentId: string;
 };
 
+type Preferences = {
+  signature: boolean;
+  autofocusField: "teamId" | "title";
+  copyToastAction: "key" | "url" | "title";
+};
+
+function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
+  if (copyToastAction === "url") {
+    return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
+  }
+
+  if (copyToastAction === "title") {
+    return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
+  }
+
+  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+}
+
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-  const { signature } = getPreferenceValues<{ signature: boolean }>();
+  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
   const hasMoreThanOneTeam = teams && teams.length > 1;
 
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       let payloadDescription = values.description || "";
       if (signature) {
@@ -114,9 +141,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           };
 
           toast.secondaryAction = {
-            title: "Copy Issue Key",
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-            onAction: () => Clipboard.copy(issue.identifier),
+            ...getCopyToastAction(copyToastAction, issue),
           };
 
           reset({
@@ -124,11 +150,15 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             description: "",
             estimate: "",
             labelIds: [],
-            dueDate: undefined,
+            dueDate: null,
             parentId: "",
           });
 
-          focus("title");
+          if (hasMoreThanOneTeam) {
+            return focus(autofocusField);
+          }
+
+          return focus("teamId");
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
@@ -211,7 +241,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </>
       ) : null}
 
-      <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
+      <Form.TextField
+        title="Title"
+        placeholder="Issue title"
+        {...(autofocusField === "title" ? { autoFocus: true } : {})}
+        {...itemProps.title}
+      />
 
       <Form.TextArea
         title="Description"
