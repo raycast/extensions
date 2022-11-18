@@ -125,7 +125,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         )}
       </ActionPanel.Section>
 
-      <ActionPanel.Section>
+      <ActionPanel.Section title="Open in Raycast">
         <Action.Push
           title="Show Issues"
           icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
@@ -143,7 +143,7 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         {repository.releases?.totalCount > 0 && (
           <Action.Push
             icon={Icon.List}
-            title="Browse Releases"
+            title="Show Releases"
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             target={<RepositoryReleases repository={repository} />}
           />

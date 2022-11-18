@@ -12,7 +12,7 @@ export function useOpenIssues(repository: string | null) {
     (repository) => {
       const numberOfDays = 60;
       const twoWeeksAgo = format(subDays(Date.now(), numberOfDays), "yyyy-MM-dd");
-      const updatedFilter = `update≤d:>${twoWeeksAgo}`;
+      const updatedFilter = `updated:>${twoWeeksAgo}`;
 
       const repositoryFilter = repository ? `repo:${repository}` : "";
 

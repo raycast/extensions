@@ -10,22 +10,21 @@ import IssueListItem from "./IssueListItem";
 export function RepositoryIssueList(props: { repo: string }): JSX.Element {
   const { github } = getGitHubClient();
   const [searchText, setSearchText] = useState("");
-  const query = searchText;
   const repoFilter = props.repo && props.repo.length > 0 ? `repo:${props.repo}` : "";
   const {
     data,
     isLoading,
     mutate: mutateList,
   } = usePromise(
-    async (query) => {
+    async (searchText) => {
       const result = github.searchIssues({
-        query: `is:issue ${repoFilter} ${query}`,
+        query: `is:issue ${repoFilter} ${searchText}`,
         numberOfItems: 20,
         avatarSize: 64,
       });
       return (await result).search.nodes?.map((node) => node as IssueFieldsFragment);
     },
-    [query]
+    [searchText]
   );
 
   return (
