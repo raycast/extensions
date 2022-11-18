@@ -16,12 +16,12 @@ export default async () => {
   const internalLaunch = environment.launchContext?.internal;
 
   const openColorPicker = async (type: ColorType) => {
-    closeMainWindow();
+    await closeMainWindow();
 
     const color = await pickColor(type);
 
     if (color === null) {
-      showHUD("Cancelled");
+      await showHUD("Cancelled");
 
       if (internalLaunch) {
         launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -30,9 +30,9 @@ export default async () => {
       return;
     }
 
-    Clipboard.copy(color.stringValue());
-    prepend("history", color);
-    showHUD("Copied to Clipboard");
+    await Clipboard.copy(color.stringValue());
+    await prepend("history", color);
+    await showHUD("Copied to Clipboard");
 
     if (internalLaunch) {
       launchCommand({ name: "index", type: LaunchType.UserInitiated });
