@@ -1,17 +1,11 @@
 import { runAppleScript } from "run-applescript";
-import { showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 
 export default async () => {
+  const directory = await Clipboard.readText();
   const script = `
-    if application "Finder" is not running then
-        return "Not running"
-    end if
-
-    tell application "Finder"
-      set pathList to (quoted form of POSIX path of (folder of the front window as alias))
-    end tell
-
     tell application "System Events"
+      set pathList to "${directory}"
       if not (exists (processes where name is "Terminal")) then
         do shell script "open -a Terminal " & pathList
       else
@@ -28,11 +22,10 @@ export default async () => {
       end if
     end tell
   `;
-
   try {
     const result = await runAppleScript(script);
     await showToast(Toast.Style.Success, "Done", result);
   } catch (err) {
-    await showToast(Toast.Style.Failure, "Finder is not running");
+    await showToast(Toast.Style.Failure, "Something went wrong");
   }
 };
