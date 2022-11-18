@@ -26543,6 +26543,7 @@ export type DiscussionFieldsFragment = {
   bodyText: string;
   publishedAt?: any | null;
   url: any;
+  upvoteCount: number;
   repository: {
     __typename?: "Repository";
     id: string;
@@ -26586,6 +26587,7 @@ export type SearchDiscussionsQuery = {
           bodyText: string;
           publishedAt?: any | null;
           url: any;
+          upvoteCount: number;
           repository: {
             __typename?: "Repository";
             id: string;
@@ -30240,6 +30242,7 @@ export const DiscussionFieldsFragmentDoc = gql`
       ...RepositoryFields
     }
     url
+    upvoteCount
     answer {
       bodyText
     }

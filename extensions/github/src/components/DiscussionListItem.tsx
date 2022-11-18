@@ -14,6 +14,11 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           icon: { source: d.answer ? Icon.Checkmark : "", tintColor: Color.Green },
           tooltip: d.answer ? "Answered" : undefined,
         },
+        {
+          icon: { source: Icon.ArrowUp, tintColor: Color.Purple },
+          text: `${d.upvoteCount}`,
+          tooltip: `${d.upvoteCount} Upvotes`,
+        },
         { date: new Date(d.publishedAt) },
       ]}
       actions={
