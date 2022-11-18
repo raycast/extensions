@@ -7,6 +7,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { WEB_IDES } from "../helpers/repository";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
+import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
@@ -146,6 +147,15 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
             title="Show Releases"
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             target={<RepositoryReleases repository={repository} />}
+          />
+        )}
+        {repository.hasDiscussionsEnabled && (
+          <Action.Push
+            icon={Icon.SpeechBubble}
+            title="Show Discussions"
+            shortcut={{ modifiers: ["cmd", "ctrl", "opt"], key: "d" }}
+            target={<RepositoryDiscussionList repository={repository.nameWithOwner} />}
+            onPush={() => onVisit(repository)}
           />
         )}
       </ActionPanel.Section>

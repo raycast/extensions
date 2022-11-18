@@ -11,10 +11,19 @@ fragment DiscussionFields on Discussion {
   answer {
     bodyText
   }
+  author {
+    login
+    avatarUrl
+  }
 }
 
 query searchDiscussions($query: String!, $numberOfOpenItems: Int!, $avatarSize: Int!) {
   openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+    nodes {
+      ...DiscussionFields
+    }
+  }
+  searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
     nodes {
       ...DiscussionFields
     }

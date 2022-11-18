@@ -21,6 +21,7 @@ fragment RepositoryFields on Repository {
   hasIssuesEnabled
   hasWikiEnabled
   hasProjectsEnabled
+  hasDiscussionsEnabled
   releases {
     totalCount
   }

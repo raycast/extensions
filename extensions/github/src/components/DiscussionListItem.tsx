@@ -1,4 +1,4 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action, Image } from "@raycast/api";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";
 
@@ -20,6 +20,7 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           tooltip: `${d.upvoteCount} Upvotes`,
         },
         { date: new Date(d.publishedAt) },
+        { icon: { source: d.author?.avatarUrl, mask: Image.Mask.Circle }, tooltip: d.author?.login },
       ]}
       actions={
         <ActionPanel>
