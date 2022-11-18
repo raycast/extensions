@@ -1,6 +1,18 @@
 import { runAppleScript } from "run-applescript";
 import { AppWindowCount } from "../types/type";
 
+export async function appIsActive() {
+  const script = `tell application "System Events"
+	return name of the first process whose frontmost is true
+end tell`;
+
+  try {
+    return await runAppleScript(script);
+  } catch (e) {
+    return "";
+  }
+}
+
 export async function appIsRunning(appName: string) {
   const script = `   tell application "System Events" to set isRunning to exists (processes where name is "${appName}")
    if isRunning then

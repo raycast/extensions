@@ -4,5 +4,5 @@ import { getEnabledApps } from "./utils/common-utils";
 
 export default async () => {
   await closeMainWindow();
-  await quitApps(getEnabledApps());
+  await quitApps(await getEnabledApps());
 };

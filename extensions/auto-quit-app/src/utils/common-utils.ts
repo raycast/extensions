@@ -1,10 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
 import { AppWindowCount } from "../types/type";
+import { appIsActive } from "./applescript-utils";
 
-export function getEnabledApps() {
+export async function getEnabledApps() {
   const { notes, preview, textEdit, terminal, quickTimePlayer, shortcuts, tv, messages, mail } =
     getPreferenceValues<Preferences>();
+
+  const activeAppName = await appIsActive();
 
   const appWindowCounts: AppWindowCount[] = [
     { name: "Preview", windows: "0", enabled: preview },
@@ -19,6 +22,6 @@ export function getEnabledApps() {
   ];
 
   return appWindowCounts.filter((value) => {
-    return value.enabled;
+    return value.enabled && value.name !== activeAppName;
   });
 }
