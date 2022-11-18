@@ -26,7 +26,7 @@ export const tokenFromLocalStorage = async (apiKey: string): Promise<Token> => {
 
   const token = await LocalStorage.getItem(apiKey);
 
-  if (!token) throw new Error("No token found");
+  if (!token) return emptyToken();
 
   return parse(token);
 }

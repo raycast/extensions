@@ -1,24 +1,24 @@
 import {Token, tokenAuthHeader, tokenValid} from "../entities/Token";
 import {FlatIcon} from "../entities/FlatIcon";
 
-export const searchIcons = async (token: Token, search: string): Promise<FlatIcon[]> => {
-  if (!tokenValid(token)) return [];
-  if (search.length === 0) return [];
+export const searchIcons = async (token: Token, search: string): Promise<{ list: FlatIcon[], error?: Error }> => {
+  if (!tokenValid(token)) return {list: []};
+  if (search.length === 0) return {list: []};
 
-  const body = await makeRequestForIcons(token, search);
+  const {list, error} = await makeRequestForIcons(token, search);
 
-  return body.map(mapResponseIconToFlatIcon);
+  return {list: list.map(mapResponseIconToFlatIcon), error};
 }
 
-const makeRequestForIcons = async (token: Token, search: string) => {
+const makeRequestForIcons = async (token: Token, search: string): Promise<{ list: IconResponse[], error?: Error }> => {
   const params = new URLSearchParams({q: search});
   const response = await fetch(`${uri}?${params}`, options(token));
 
   const body = await response.json() as { data: IconResponse[], status?: string, message?: string };
 
-  if (body.status && body.status === 'error') throw new Error(body.message);
+  if (body.status && body.status === 'error') return {list: [], error: new Error(body.message)};
 
-  return body.data;
+  return {list: body.data};
 }
 
 const uri = 'https://api.flaticon.com/v3/search/icons';

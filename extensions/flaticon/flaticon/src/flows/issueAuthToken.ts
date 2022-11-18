@@ -1,15 +1,15 @@
-import {newToken, Token} from "../entities/Token";
+import {emptyToken, newToken, Token} from "../entities/Token";
 
-export const issueAuthToken = async (apikey: string): Promise<Token> => {
+export const issueAuthToken = async (apikey: string): Promise<{ token: Token, error?: Error }> => {
   const response = await fetch(authURI, options(apikey));
 
   // noinspection TypeScriptValidateJSTypes
   const body = await response.json() as { data: { token: string, expires: number }, error?: string };
-  if (body.error) throw new Error(body.error);
+  if (body.error) return { token: emptyToken(), error: new Error(body.error) };
 
   const {token, expires} = body.data;
 
-  return newToken({token, expires});
+  return {token: newToken({token, expires}), error: undefined};
 }
 
 const authURI = 'https://api.flaticon.com/v3/app/authentication';
