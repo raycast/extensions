@@ -1,6 +1,7 @@
 # Json2TS Changelog
 
 ## [Update Dependencies] - 2022-11-17
+
 - Update npm dependencies
 - Update raycast api
 
