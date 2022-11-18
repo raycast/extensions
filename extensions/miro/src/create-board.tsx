@@ -1,91 +1,46 @@
-import React, { useEffect, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import * as miro from "./oauth/miro";
+import { FormValidation, useForm } from "@raycast/utils";
 
 interface CreateBoardProps {
   name: string;
   description: string;
 }
 
+const placeholders = ["Flowchart", "Quick Retrospective", "Brainwriting", "Product Roadmap"];
+const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+
 export default function CreateBoard() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [nameError, setNameError] = useState<string | undefined>();
-
-  const { push } = useNavigation();
-
-  useEffect(() => {
-    (async () => {
+  const { itemProps, handleSubmit } = useForm<CreateBoardProps>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating board..." });
       try {
-        await miro.authorize();
-        setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setIsLoading(false);
-        await showToast({ style: Toast.Style.Failure, title: String(error) });
+        await miro.createItem(values.name, values.description);
+        toast.title = "🎉 Board created!";
+        toast.style = Toast.Style.Success;
+        await launchCommand({ name: "list-boards", type: LaunchType.UserInitiated });
+      } catch (err) {
+        console.error(err);
+        toast.title = "Could not create the board.";
+        toast.message = String(err);
+        toast.style = Toast.Style.Failure;
       }
-    })();
-  }, []);
-
-  function dropNameErrorIfNeeded() {
-    if (nameError && nameError.length > 0) {
-      setNameError(undefined);
-    }
-  }
-
-  if (isLoading) {
-    return <Detail isLoading={isLoading} />;
-  }
+    },
+    validation: {
+      name: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Board"
-            onSubmit={async (values: CreateBoardProps) => {
-              try {
-                await miro.createItem(values.name, values.description);
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Board created",
-                });
-                await launchCommand({ name: "list-boards", type: LaunchType.UserInitiated });
-              } catch {
-                await showToast({
-                  style: Toast.Style.Failure,
-                  title: "Board creation failed",
-                });
-              }
-            }}
-          />
+          <Action.SubmitForm title="Create Board" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Board Name"
-        placeholder="Enter your name"
-        error={nameError}
-        onChange={dropNameErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("The field should't be empty!");
-          } else {
-            dropNameErrorIfNeeded();
-          }
-        }}
-      />
-      <Form.TextArea id="description" title="Description" placeholder="Enter board description" />
+      <Form.TextField title="Board Name" placeholder={placeholder} {...itemProps.name} />
+      <Form.TextArea id="description" title="Board Description" placeholder="Description..." />
     </Form>
   );
 }

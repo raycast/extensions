@@ -1,8 +1,12 @@
-# Airtable Raycast Extension
+[Airtable](https://www.airtable.com) is a connected apps platform for building collaborative app. It allows you to create (data)bases to organize your data in tables and fields -- as well as build interfaces to display information to users and automations to automate processes.
 
-This [Raycast](https://www.raycast.com/) Extension uses [Airtable](https://www.airtable.com)'s (beta as of November 2022) [OAuth support](https://airtable.com/developers/web/guides/oauth-integrations) to allow a user to browse the bases, tables, fields, and views they granted the application access to (a part of the Airtable OAuth flow).
+This extension uses Airtable's [OAuth support](https://airtable.com/developers/web/guides/oauth-integrations) ([beta as of November 2022](https://community.airtable.com/t/new-beta-new-api-authentication-methods-endpoints-and-public-api-docs/52714)) to allow a user to browse the bases, tables, fields, and views they granted the application access to (a part of the Airtable OAuth flow).
 
- [_Click here to skip past the screenshots to local setup instructions_](#local-setup-and-development).
+---
+
+The software made available from this folder is not supported by Formagrid Inc (Airtable) or part of the Airtable Service. It is made available on an "as is" basis and provided without express or implied warranties of any kind.
+
+---
 
 | Description | Preview |
 |---|---|
@@ -12,29 +16,22 @@ This [Raycast](https://www.raycast.com/) Extension uses [Airtable](https://www.a
 | Preview base details including a list of tables, fields, and links to open the base and API docs in your browser | [![Preview base details including a list of tables, fields, and links to open the base and API docs in your browser](./metadata/screenshot-2c-base-details-view.png)](./metadata/screenshot-2c-base-details-view.png) |
 | List/filter a table's fields and copy/paste field IDs (similar functionality is available for a table's views) | [![List/filter a table's fields and copy/paste field IDs](./metadata/screenshot-3-list-fields-and-copy-id.png)](./metadata/screenshot-3-list-fields-and-copy-id.png) |
 
----
 
-The software made available from this folder is not supported by Formagrid Inc (Airtable) or part of the Airtable Service. It is made available on an "as is" basis and provided without express or implied warranties of any kind.
+## Setup
 
----
+1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/marks/raycast-airtable-extension)
 
-## Local setup and development
+2. **Authenticate with Airtable**: The first time you use the extension, you'll need to follow a few steps to authenticate with Airtable:
 
-### A. How to install this extension
+    a.  Open the `List Airtable Bases` command in Raycast
 
-At this time, this extension has not been published to the Raycast Extension Store. You'll need to follow the directions below to install it:
+    b. Click `Sign in with Airtable` to securely connect the Raycast extension to your Airtable account using OAuth
+  
+    c. Follow the Airtable OAuth flow to authorize the Raycast extension to access `All current and future bases in all current and future workspaces`. You can choose only a specific base or workspace if you'd prefer.
 
-1. Clone or download this repository
-2. Open the `Import Extension` command in Raycast and select the folder from step 1
+    d. You should be redirected by to Raycast and see a success message. After a few seconds, you will be sent to the result of the `List Airtable Bases` command you originally requested.
 
-### B. How to configure/setup this extension
-
-The following steps are only required the first time you try to use the application:
-
-1. Open the `List Airtable Bases` command in Raycast
-2. Click `Sign in with Airtable` to securely connect the Raycast extension to your Airtable account using OAuth
-3. Follow the Airtable OAuth flow to authorize the Raycast extension to access `All current and future bases in all current and future workspaces`. You can choose only a specific workspace if you'd like.
-4. You should be redirected by to Raycast and see a success message. After a few seconds, you will be sent to the result of the `List Airtable Bases` command you originally requested (and you can now use that command directly without going through these setup/configuration seteps)
+    e. You're done! You can now use the `List Airtable Bases` command directly without going through these setup/configuration steps in the future)
 
 
 ## Acknowledgement/Thank yous
