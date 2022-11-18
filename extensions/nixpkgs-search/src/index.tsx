@@ -277,7 +277,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       attrName: result.package_attr_name,
       description: result.package_description,
       version: result.package_pversion,
-      homepage: result.package_homepage,
+      homepage: result.package_homepage.filter((url) => url?.length > 0),
       source:
         result.package_position &&
         `https://github.com/NixOS/nixpkgs/blob/nixos-unstable/${result.package_position.replace(/:([0-9]+)$/, "")}`,
