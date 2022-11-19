@@ -4,7 +4,7 @@ import { handleError, todoist } from "./api";
 import { getSectionsWithDueDates } from "./helpers/sections";
 import { checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { useEffect } from "react";
-import MenubarTask from "./components/MenuBarTask";
+import MenubarTask from "./components/MenubarTask";
 import { Task } from "@doist/todoist-api-typescript";
 
 export default function Command() {
