@@ -3,7 +3,7 @@ import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { getSectionsWithDueDates } from "./helpers/sections";
 import { checkTodoistApp } from "./helpers/isTodoistInstalled";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import MenubarTask from "./components/MenubarTask";
 import { Task } from "@doist/todoist-api-typescript";
 
@@ -25,12 +25,25 @@ export default function Command() {
     checkTodoistApp();
   }, []);
 
+  const numOfTasksToday = useMemo(() => {
+    if (tasks?.length) {
+      if (isTodayView) {
+        const len = tasks.length;
+        return len > 0 ? len.toString() : "🎉";
+      } else {
+        const len = tasks?.filter((task) => task.due?.date === new Date().toISOString().substring(0, 10)).length;
+        return len > 0 ? len.toString() : "🎉";
+      }
+    }
+  }, [tasks]);
+
   return (
     <MenuBarExtra
       icon={{
         source: { light: "icon.png", dark: "icon@dark.png" },
       }}
       isLoading={isLoadingTasks}
+      title={numOfTasksToday}
     >
       {isTodayView
         ? tasks && <TodayView tasks={tasks} mutateTasks={mutateTasks} />
