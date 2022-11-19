@@ -8,7 +8,7 @@ import { checkTodoistApp, isTodoistInstalled } from "../helpers/isTodoistInstall
 
 interface MenubarTaskProps {
   task: Task;
-  mutateTasks: MutatePromise<Task[]>;
+  mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
 const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {

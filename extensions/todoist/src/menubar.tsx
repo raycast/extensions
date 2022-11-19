@@ -32,11 +32,9 @@ export default function Command() {
       }}
       isLoading={isLoadingTasks}
     >
-      {isTodayView ? (
-        <TodayView tasks={tasks} mutateTasks={mutateTasks} />
-      ) : (
-        <UpcomingView tasks={tasks} mutateTasks={mutateTasks} />
-      )}
+      {isTodayView
+        ? tasks && <TodayView tasks={tasks} mutateTasks={mutateTasks} />
+        : tasks && <UpcomingView tasks={tasks} mutateTasks={mutateTasks} />}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
@@ -50,27 +48,35 @@ export default function Command() {
 
 interface TaskViewProps {
   tasks: Task[];
-  mutateTasks: MutatePromise<Task[]>;
+  mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-const UpcomingView = ({ tasks, mutateTasks }: TaskViewProps) => {
+const UpcomingView = ({ tasks, mutateTasks }: TaskViewProps): JSX.Element => {
   const upcomingTasks = tasks?.filter((task) => task.due?.date) || [];
   const sections = getSectionsWithDueDates(upcomingTasks);
 
-  return sections.map((section, index) => {
-    return (
-      <MenuBarExtra.Section title={section.name} key={index}>
-        {section.tasks.map((task) => (
-          <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
-        ))}
-      </MenuBarExtra.Section>
-    );
-  });
+  return (
+    <>
+      {sections.map((section, index) => {
+        return (
+          <MenuBarExtra.Section title={section.name} key={index}>
+            {section.tasks.map((task) => (
+              <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
+            ))}
+          </MenuBarExtra.Section>
+        );
+      })}
+    </>
+  );
 };
 
 const TodayView = ({ tasks, mutateTasks }: TaskViewProps) => {
   return tasks.length > 0 ? (
-    tasks.map((task) => <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />)
+    <>
+      {tasks.map((task) => (
+        <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
+      ))}
+    </>
   ) : (
     <MenuBarExtra.Item title="Congratulations! No tasks left for today!" icon="🎉" />
   );
