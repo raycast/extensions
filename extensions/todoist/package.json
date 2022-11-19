@@ -9,6 +9,9 @@
   "categories": [
     "Productivity"
   ],
+  "contributors": [
+    "AnishDe12020"
+  ],
   "commands": [
     {
       "name": "today",
@@ -142,6 +145,13 @@
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
       "mode": "view"
+    },
+    {
+      "name": "upcoming-menubar",
+      "title": "Upcoming Tasks Menubar",
+      "subtitle": "Todoist",
+      "description": "See your upcoming Todoist tasks in your menubar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
@@ -156,7 +166,7 @@
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^1.7.0",
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.43.2",
     "@raycast/utils": "^1.4.1",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
