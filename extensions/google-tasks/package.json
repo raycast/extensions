@@ -15,12 +15,6 @@
       "title": "View Lists",
       "description": "View task lists",
       "mode": "view"
-    },
-    {
-      "name": "create-task",
-      "title": "Create Task",
-      "description": "Create a new task",
-      "mode": "view"
     }
   ],
   "preferences": [
