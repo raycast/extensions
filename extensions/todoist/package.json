@@ -147,8 +147,8 @@
       "mode": "view"
     },
     {
-      "name": "upcoming-menubar",
-      "title": "Upcoming Tasks Menubar",
+      "name": "menubar",
+      "title": "Tasks",
       "subtitle": "Todoist",
       "description": "See your upcoming Todoist tasks in your menubar",
       "mode": "menu-bar"
