@@ -11,6 +11,7 @@ export default function Command() {
     data: tasks,
     isLoading: isLoadingTasks,
     error: tasksError,
+    mutate: mutateTasks,
   } = useCachedPromise(() => todoist.getTasks({ filter: "all" }));
 
   if (tasksError) {
@@ -27,7 +28,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={{
-        source: "todoist.png",
+        source: { light: "icon.png", dark: "icon@dark.png" },
       }}
       isLoading={isLoadingTasks}
     >
@@ -35,7 +36,7 @@ export default function Command() {
         return (
           <MenuBarExtra.Section title={section.name} key={index}>
             {section.tasks.map((task) => (
-              <MenubarTask key={task.id} task={task} />
+              <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
             ))}
           </MenuBarExtra.Section>
         );
