@@ -11,6 +11,14 @@ import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
 import { fetchLists } from "../api/endpoints";
 import { TaskForm } from "../types";
+import { useForm, FormValidation } from "@raycast/utils";
+
+interface CreateTaskFormValues {
+  title: string;
+  notes: string;
+  due: Date | null;
+  listId: string;
+}
 
 export default function CreateTaskForm(props: {
   listId?: string;
@@ -20,6 +28,25 @@ export default function CreateTaskForm(props: {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
   const { pop } = useNavigation();
+  const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
+    onSubmit(values) {
+      props.onCreate(values.listId, {
+        title: values.title,
+        notes: values.notes,
+        due: values.due,
+      });
+      showToast({
+        style: Toast.Style.Success,
+        title: "Task Created!",
+        message: `${values.title} created`,
+      });
+      pop();
+    },
+    initialValues: { title: props.title, listId: props.listId },
+    validation: {
+      title: FormValidation.Required,
+    },
+  });
 
   useEffect(() => {
     (async () => {
@@ -36,18 +63,6 @@ export default function CreateTaskForm(props: {
     })();
   }, [google]);
 
-  const handleSubmit = useCallback(
-    (values: { title: string; notes: string; due: string; listId: string }) => {
-      props.onCreate(values.listId, {
-        title: values.title,
-        notes: values.notes,
-        due: values.due,
-      });
-      pop();
-    },
-    [props.onCreate, pop]
-  );
-
   if (isLoading) {
     return <Detail isLoading={isLoading} />;
   }
@@ -60,10 +75,10 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" defaultValue={props.title} />
-      <Form.TextArea id="notes" title="Details" />
-      <Form.DatePicker id="due" title="Due Date" />
-      <Form.Dropdown id="listId" title="Task List" defaultValue={props.listId}>
+      <Form.TextField title="Title" {...itemProps.title} />
+      <Form.TextArea title="Details" {...itemProps.notes} />
+      <Form.DatePicker title="Due Date" {...itemProps.due} />
+      <Form.Dropdown title="Task List" {...itemProps.listId}>
         {lists.map((list) => {
           return (
             <Form.Dropdown.Item
