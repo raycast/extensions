@@ -34,7 +34,7 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
 
     try {
       await todoist.updateTask(task.id, { dueString });
-      await showHUD("Task Due Date Updated 🙌");
+      await showHUD("Updated task due date 🙌");
       mutateTasks();
     } catch (error) {
       console.log(error);
