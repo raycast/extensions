@@ -1,12 +1,17 @@
 # Todoist Changelog
 
+## [Menu bar command for tasks] - 2022-11-19
+
+- Upgrade `@raycast/api`
+- Add a menu bar command that shows upcoming tasks/tasks for that day (can be changed via preferences)
+- User can complete task, change due date, change priority, open task in Todoist and delete task from the menu bar
 
 ## [Bunch of improvements] - 2022-09-22
 
 - Upgrade the dependencies
 - Improve destructive actions: apply styling and added descriptions for alerts.
 - Move the specific commands preferences (today's group by options, projects group by options) in the command's preferences
-- Use `@raycast/utils` data fetching hooks instead of `swr` enabling caching by default for every call in the extension 🚀 
+- Use `@raycast/utils` data fetching hooks instead of `swr` enabling caching by default for every call in the extension 🚀
 - Add "Open in Todoist app" action
 - Add new "Create Task in Inbox" command
 - Refactor "Create Task" and "Create Form" to use `useForm`
