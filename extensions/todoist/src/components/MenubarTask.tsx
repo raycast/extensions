@@ -99,7 +99,7 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
           onAction={() => changeDueDate(task, "next week")}
         />
         <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDueDate(task, "next weekend")} />
-        <MenuBarExtra.Item title="No Due Date" icon={Icon.Emoji} onAction={() => changeDueDate(task, "")} />
+        <MenuBarExtra.Item title="No Due Date" icon={Icon.XMarkCircle} onAction={() => changeDueDate(task, "")} />
       </MenuBarExtra.Submenu>
       <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
         {priorities.map((priority, index) => (

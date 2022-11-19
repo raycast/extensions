@@ -171,7 +171,8 @@
           "title": "View",
           "description": "Indicates which view you want to see in your menubar."
         }
-      ]
+      ],
+      "interval": "10m"
     }
   ],
   "preferences": [
