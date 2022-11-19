@@ -18,7 +18,7 @@ export interface Task {
 export interface TaskForm {
   title: string;
   notes?: string;
-  due?: string;
+  due: Date | null;
 }
 
 export interface TaskGroups {
