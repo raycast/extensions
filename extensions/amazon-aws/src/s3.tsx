@@ -65,6 +65,14 @@ function S3BucketObjects({ bucket }: { bucket: AWS.S3.Bucket }) {
                   preferences.region
                 }&prefix=${object.Key || ""}`}
               />
+              <Action.OpenInBrowser
+                title="Download"
+                url={new AWS.S3().getSignedUrl("getObject", {
+                  Bucket: bucket.Name || "",
+                  Key: object.Key || "",
+                  Expires: 60 * 5,
+                })}
+              />
               <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
             </ActionPanel>
           }
