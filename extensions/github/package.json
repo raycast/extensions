@@ -91,7 +91,6 @@
     {
       "name": "unread-notifications",
       "title": "Unread Notifications",
-      "subtitle": "GitHub",
       "description": "Shows unread notifications in the macOS menu bar.",
       "mode": "menu-bar",
       "interval": "15m",
