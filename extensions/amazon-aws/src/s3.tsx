@@ -1,9 +1,13 @@
-import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
+import fs from "fs";
+import { homedir } from "os";
+import { Readable } from "stream";
+import { ActionPanel, List, Detail, Action, Icon, showToast, Toast } from "@raycast/api";
 import * as AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
 
 const preferences = setupAws();
+const s3 = new AWS.S3();
 
 export default function S3() {
   const { data: buckets, error, isLoading } = useCachedPromise(fetchBuckets);
@@ -65,13 +69,23 @@ function S3BucketObjects({ bucket }: { bucket: AWS.S3.Bucket }) {
                   preferences.region
                 }&prefix=${object.Key || ""}`}
               />
-              <Action.OpenInBrowser
+              <Action.SubmitForm
                 title="Download"
-                url={new AWS.S3().getSignedUrl("getObject", {
-                  Bucket: bucket.Name || "",
-                  Key: object.Key || "",
-                  Expires: 60 * 5,
-                })}
+                onSubmit={async () => {
+                  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
+
+                  try {
+                    const data = await s3.getObject({ Bucket: bucket.Name || "", Key: object.Key || "" }).promise();
+                    Readable.from(data.Body as Buffer).pipe(
+                      fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`)
+                    );
+                    toast.style = Toast.Style.Success;
+                    toast.title = "Downloaded to Downloads folder";
+                  } catch (err) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "Failed to download";
+                  }
+                }}
               />
               <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
             </ActionPanel>
@@ -84,7 +98,7 @@ function S3BucketObjects({ bucket }: { bucket: AWS.S3.Bucket }) {
 }
 
 async function fetchBuckets() {
-  const { Buckets } = await new AWS.S3().listBuckets().promise();
+  const { Buckets } = await s3.listBuckets().promise();
 
   return Buckets;
 }
@@ -94,7 +108,7 @@ async function fetchBucketObjects(
   nextMarker?: string,
   objects: AWS.S3.Object[] = []
 ): Promise<AWS.S3.ObjectList> {
-  const { Contents, NextMarker } = await new AWS.S3().listObjects({ Bucket: bucket, Marker: nextMarker }).promise();
+  const { Contents, NextMarker } = await s3.listObjects({ Bucket: bucket, Marker: nextMarker }).promise();
 
   const combinedObjects = [...objects, ...(Contents || [])];
 
