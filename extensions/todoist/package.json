@@ -151,7 +151,27 @@
       "title": "Tasks",
       "subtitle": "Todoist",
       "description": "See your upcoming Todoist tasks in your menubar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "view",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            }
+          ],
+          "default": "upcoming",
+          "required": false,
+          "title": "View",
+          "description": "Indicates which view you want to see in your menubar."
+        }
+      ]
     }
   ],
   "preferences": [

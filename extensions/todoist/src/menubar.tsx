@@ -1,25 +1,25 @@
-import { Icon, MenuBarExtra, openCommandPreferences, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { MenuBarExtra, openCommandPreferences, getPreferenceValues } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { getSectionsWithDueDates } from "./helpers/sections";
-import { checkTodoistApp, isTodoistInstalled } from "./helpers/isTodoistInstalled";
+import { checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { useEffect } from "react";
 import MenubarTask from "./components/MenuBarTask";
+import { Task } from "@doist/todoist-api-typescript";
 
 export default function Command() {
+  const isTodayView = getPreferenceValues().view === "today";
+
   const {
     data: tasks,
     isLoading: isLoadingTasks,
     error: tasksError,
     mutate: mutateTasks,
-  } = useCachedPromise(() => todoist.getTasks({ filter: "all" }));
+  } = useCachedPromise(() => todoist.getTasks({ filter: isTodayView ? "today|overdue" : "all" }));
 
   if (tasksError) {
     handleError({ error: tasksError, title: "Unable to get tasks" });
   }
-
-  const upcomingTasks = tasks?.filter((task) => task.due?.date) || [];
-  const sections = getSectionsWithDueDates(upcomingTasks);
 
   useEffect(() => {
     checkTodoistApp();
@@ -32,15 +32,11 @@ export default function Command() {
       }}
       isLoading={isLoadingTasks}
     >
-      {sections.map((section, index) => {
-        return (
-          <MenuBarExtra.Section title={section.name} key={index}>
-            {section.tasks.map((task) => (
-              <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
-            ))}
-          </MenuBarExtra.Section>
-        );
-      })}
+      {isTodayView ? (
+        <TodayView tasks={tasks} mutateTasks={mutateTasks} />
+      ) : (
+        <UpcomingView tasks={tasks} mutateTasks={mutateTasks} />
+      )}
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
@@ -51,3 +47,31 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+interface TaskViewProps {
+  tasks: Task[];
+  mutateTasks: MutatePromise<Task[]>;
+}
+
+const UpcomingView = ({ tasks, mutateTasks }: TaskViewProps) => {
+  const upcomingTasks = tasks?.filter((task) => task.due?.date) || [];
+  const sections = getSectionsWithDueDates(upcomingTasks);
+
+  return sections.map((section, index) => {
+    return (
+      <MenuBarExtra.Section title={section.name} key={index}>
+        {section.tasks.map((task) => (
+          <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />
+        ))}
+      </MenuBarExtra.Section>
+    );
+  });
+};
+
+const TodayView = ({ tasks, mutateTasks }: TaskViewProps) => {
+  return tasks.length > 0 ? (
+    tasks.map((task) => <MenubarTask key={task.id} task={task} mutateTasks={mutateTasks} />)
+  ) : (
+    <MenuBarExtra.Item title="Congratulations! No tasks left for today!" icon="🎉" />
+  );
+};
