@@ -148,7 +148,7 @@
     },
     {
       "name": "menubar",
-      "title": "Tasks",
+      "title": "Menu Bar Tasks",
       "subtitle": "Todoist",
       "description": "See your upcoming Todoist tasks in your menubar",
       "mode": "menu-bar",
