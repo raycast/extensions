@@ -7,7 +7,7 @@ import {
   Action,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import * as google from "../api/oauth";
 import { fetchLists } from "../api/endpoints";
 import { TaskForm } from "../types";
