@@ -1,57 +1,23 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
+import { useCachedPromise } from "@raycast/utils";
 
-setupAws();
-
-interface Preferences {
-  region: string;
-}
-
-function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
-  return value !== null && value !== undefined;
-}
+const preferences = setupAws();
+const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
-  const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
+  const { data: instances, error, isLoading } = useCachedPromise(fetchEC2Instances);
 
-  const [state, setState] = useState<{ instances: AWS.EC2.Instance[]; loaded: boolean; hasError: boolean }>({
-    instances: [],
-    loaded: false,
-    hasError: false,
-  });
-
-  useEffect(() => {
-    async function fetch(token?: string, accInstances?: AWS.EC2.Instance[]): Promise<AWS.EC2.Instance[]> {
-      const { NextToken, Reservations } = await ec2.describeInstances({ NextToken: token }).promise();
-      const instances = (Reservations || []).reduce<AWS.EC2.Instance[]>(
-        (acc, reservation) => [...acc, ...(reservation.Instances || [])],
-        []
-      );
-      const combinedInstances = [...(accInstances || []), ...instances];
-
-      if (NextToken) {
-        return fetch(NextToken, combinedInstances);
-      }
-
-      return combinedInstances.filter(notEmpty);
-    }
-
-    fetch()
-      .then((instances) => setState({ instances, loaded: true, hasError: false }))
-      .catch(() => setState({ instances: [], loaded: true, hasError: true }));
-  }, []);
-
-  if (state.hasError) {
+  if (error) {
     return (
       <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
     );
   }
 
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter instances by name...">
-      {state.instances.map((i) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
+      {instances?.map((i) => (
         <InstanceListItem key={i.InstanceId} instance={i} />
       ))}
     </List>
@@ -61,11 +27,6 @@ export default function DescribeInstances() {
 function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
   const instance = props.instance;
   const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
-  const preferences: Preferences = getPreferenceValues();
-
-  const subtitle = useMemo(() => {
-    return `${instance.InstanceType}`;
-  }, [instance]);
 
   function getAccessories(): List.Item.Accessory[] {
     const _acc: List.Item.Accessory[] = [];
@@ -95,7 +56,7 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
       id={instance.InstanceId}
       key={instance.InstanceId}
       title={name || "Unknown Instance name"}
-      subtitle={subtitle}
+      subtitle={instance.InstanceType}
       icon="list-icon.png"
       actions={
         <ActionPanel>
@@ -119,4 +80,19 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
       accessories={getAccessories()}
     />
   );
+}
+
+async function fetchEC2Instances(token?: string, accInstances?: AWS.EC2.Instance[]): Promise<AWS.EC2.Instance[]> {
+  const { NextToken, Reservations } = await ec2.describeInstances({ NextToken: token }).promise();
+  const instances = (Reservations || []).reduce<AWS.EC2.Instance[]>(
+    (acc, reservation) => [...acc, ...(reservation.Instances || [])],
+    []
+  );
+  const combinedInstances = [...(accInstances || []), ...instances];
+
+  if (NextToken) {
+    return fetchEC2Instances(NextToken, combinedInstances);
+  }
+
+  return combinedInstances;
 }

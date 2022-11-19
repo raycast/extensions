@@ -45,7 +45,7 @@ export function OpenLinkInListLayout(props: {
           }
         />
       </List.Section>
-      <List.Section title="Custom Apps">
+      <List.Section title="Preferred">
         {customApps.map((browser, index) => {
           return (
             <SurfBoardsListItem
@@ -59,7 +59,7 @@ export function OpenLinkInListLayout(props: {
           );
         })}
       </List.Section>
-      <List.Section title="Build-In Apps">
+      <List.Section title="Recommended">
         {buildInApps.map((browser, index) => {
           return (
             <SurfBoardsListItem
@@ -73,7 +73,7 @@ export function OpenLinkInListLayout(props: {
           );
         })}
       </List.Section>
-      <List.Section title="Other Apps">
+      <List.Section title="Other">
         {otherApps.map((browser, index) => {
           return (
             <SurfBoardsListItem

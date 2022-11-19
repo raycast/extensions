@@ -1,5 +1,9 @@
 # Visual Studio Code Search Recent Projects Changelog
 
+## [Updates] - 2022-10-13
+
+- Added preference to keep section order. Disabled by default to keep current behavior.
+
 ## [Fixes] - 2022-07-03
 
 - Fixed an issue where some characters will display as percentage encoded format.

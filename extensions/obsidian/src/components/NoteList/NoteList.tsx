@@ -1,5 +1,5 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import React from "react";
+import React, { useState } from "react";
 
 import { Note, Vault, SearchNotePreferences, SearchArguments } from "../../utils/interfaces";
 import { NoteAction } from "../../utils/constants";
@@ -22,6 +22,7 @@ export function NoteList(props: {
   const { notes, allNotes, vault, isLoading, title, searchArguments, setNotes, action, onDelete, onSearchChange } =
     props;
   const pref = getPreferenceValues<SearchNotePreferences>();
+  const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
   const { showDetail } = pref;
 
   const tags = tagsForNotes(allNotes ?? []);
@@ -40,9 +41,12 @@ export function NoteList(props: {
     <List
       isLoading={isNotesUndefined}
       isShowingDetail={showDetail}
-      onSearchTextChange={onSearchChange}
+      onSearchTextChange={(value) => {
+        onSearchChange?.(value);
+        setSearchText(value);
+      }}
       navigationTitle={title}
-      searchText={searchArguments ? searchArguments.searchArgument : ""}
+      searchText={searchText}
       searchBarAccessory={
         <NoteListDropdown tags={tags} setNotes={setNotes} allNotes={allNotes} searchArguments={searchArguments} />
       }

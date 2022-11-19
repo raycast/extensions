@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "miro",
+  "title": "Miro",
+  "description": "Create, search and copy link, open Miro boards and more.",
+  "icon": "miro-logo.png",
+  "author": "felixhaeberle",
+  "contributors": [
+    "mathieudutour"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-board",
+      "title": "Create Board",
+      "description": "Create a Miro board straight from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "list-boards",
+      "title": "My Boards",
+      "description": "Search & Open your Miro boards in seconds",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@mirohq/miro-api": "^1.0.2",
+    "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.10",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

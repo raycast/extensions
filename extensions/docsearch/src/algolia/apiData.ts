@@ -2,6 +2,14 @@ import type { IAPIData } from "./types";
 
 export default <IAPIData[]>[
   {
+    name: "Apollo",
+    icon: "../assets/logo/apollo.png",
+    apiKey: "ef1ac4e3c439bc17a8e7572700691efc",
+    appId: "Q0CJ63JM7B",
+    indexName: "docs",
+    homepage: "https://www.apollographql.com/docs",
+  },
+  {
     name: "Arthas",
     icon: "../assets/logo/arthas.ico",
     apiKey: "03fb4b6577b57b5dafc792d9ddf66508",
@@ -19,6 +27,14 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["version:5.1"],
     },
+  },
+  {
+    name: "Clerk",
+    icon: "../assets/logo/clerk.png",
+    apiKey: "52385d30a5ca4460564defe5b2d0ffb1",
+    appId: "RA7W9NZP4T",
+    indexName: "prod_sanity",
+    homepage: "https://clerk.dev",
   },
   {
     name: "Dubbo",
@@ -50,6 +66,15 @@ export default <IAPIData[]>[
     searchParameters: {
       facetFilters: ["lang:zh"],
     },
+  },
+  {
+    name: "GitBook",
+    icon: "../assets/logo/gitbook.png",
+    apiKey:
+      "MDgxNzdmZGVhM2MzMDJiMjAxMzczZTllMmVmMDAxOGQ1N2YzMjAyM2M0ZWMxZjk5NmFmYjE0ODA0OWUzYzFlMGZpbHRlcnM9KHZpZXdhYmxlQnlQdWJsaWNTcGFjZXMlM0FOa0VHUzdoemVxYTM1c01YUVo0WC0xKSUyMEFORCUyMHByb2plY3RJZCUzQWdpdGJvb2steC1wcm9k",
+    appId: "U102FN9U1K",
+    indexName: "pages",
+    homepage: "https://docs.gitbook.com/",
   },
   {
     name: "Homebrew",
@@ -119,6 +144,15 @@ export default <IAPIData[]>[
     homepage: "https://docs.rsshub.app/",
   },
   {
+    name: "Raycast",
+    icon: "../assets/logo/raycast.png",
+    apiKey:
+      "YmZlNDIxZTVlYWQyOWQ4ZThhMzdkOGUxOTY0YjU2NGNjZDNkOTA5NjQ3MmZmMjg0MzViYjYzMDI4NTVkMmQ1ZmZpbHRlcnM9KHZpZXdhYmxlQnlQdWJsaWNTcGFjZXMlM0EtTWVfOEEzOXRGaFpnM1VhVm9TTi0yKSUyMEFORCUyMHByb2plY3RJZCUzQWdpdGJvb2steC1wcm9k",
+    appId: "U102FN9U1K",
+    indexName: "pages",
+    homepage: "https://developers.raycast.com/",
+  },
+  {
     name: "React",
     icon: "../assets/logo/react.ico",
     apiKey: "36221914cce388c46d0420343e0bb32e",
@@ -173,6 +207,17 @@ export default <IAPIData[]>[
   {
     name: "Slidev",
     icon: "../assets/logo/slidev.png",
+    apiKey: "1ff173fe73b20edc962c1c24c0b1c160",
+    appId: "LCBV6MIFS6",
+    indexName: "slidev",
+    homepage: "https://sli.dev/",
+    searchParameters: {
+      facetFilters: ["language:en"],
+    },
+  },
+  {
+    name: "Slidev",
+    icon: "../assets/logo/slidev.png",
     apiKey: "1a5c5a504139c58f428974c78c55291d",
     appId: "BH4D9OD16A",
     indexName: "slidev",
@@ -183,12 +228,23 @@ export default <IAPIData[]>[
     },
   },
   {
+    name: "Supabase",
+    icon: "../assets/logo/supabase.png",
+    apiKey: "0424becc4055d51ec60e54cc37df5574",
+    appId: "B3Z5XYG8NS",
+    indexName: "prod_docs",
+    homepage: "https://supabase.com/docs",
+  },
+  {
     name: "TailwindCSS v3",
     icon: "../assets/logo/tailwindcss.png",
     apiKey: "5fc87cef58bb80203d2207578309fab6",
     appId: "KNPXZI5B0M",
     indexName: "tailwindcss",
     homepage: "https://tailwindcss.com/",
+    searchParameters: {
+      facetFilters: ["version:v3"],
+    },
   },
   {
     name: "Unidata",
@@ -290,7 +346,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/",
+    homepage: "https://pnpm.io/zh",
     searchParameters: {
       facetFilters: ["language:en"],
     },
@@ -301,7 +357,7 @@ export default <IAPIData[]>[
     apiKey: "a337998a623aa8f80d2a97a79d565086",
     appId: "RAHRBBK2WL",
     indexName: "pnpm",
-    homepage: "https://pnpm.io/zh/",
+    homepage: "https://pnpm.io/zh",
     lang: "zh-Hans",
     searchParameters: {
       facetFilters: ["language:zh"],

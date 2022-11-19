@@ -1,5 +1,14 @@
 # Open Link in Specific Browser Changelog
 
+## [Add Menu Bar command] - 2022-10-20
+
+- Add Menu Bar command: Open Link in Specific Browser
+
+## [Rename Extension] - 2022-06-14
+
+- Rename Extension: Open Link in Specific Browser
+- Add new layout options: List or Grid.
+
 ## [Rename Extension] - 2022-06-14
 
 - Rename Extension: Open Link in Specific Browser

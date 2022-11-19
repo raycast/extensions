@@ -11,7 +11,8 @@
     "andreaselia",
     "stuart",
     "tonka3000",
-    "dancannon"
+    "dancannon",
+    "sxn"
   ],
   "commands": [
     {
@@ -50,6 +51,14 @@
           "type": "textfield",
           "required": false,
           "title": "Max. Menubar Title length"
+        },
+        {
+          "name": "showEllipsis",
+          "description": "Check to show ellipsis if title is longer than the max length.",
+          "type": "checkbox",
+          "title": "Show Ellipsis",
+          "label": "Show ellipsis (...) if title is truncated.",
+          "required": false
         }
       ]
     },

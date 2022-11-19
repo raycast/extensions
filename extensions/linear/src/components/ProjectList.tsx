@@ -37,6 +37,7 @@ export default function ProjectList() {
           }
         : {})}
       searchBarPlaceholder="Filter by project title, lead, status, or milestone name"
+      filtering={{ keepSectionOrder: true }}
     >
       {milestones.map((milestone) => (
         <List.Section title={milestone.name} key={milestone.id}>

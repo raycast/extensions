@@ -11,9 +11,9 @@ export default function Command() {
 
 ```typescript
 // Runs async. code in a non-view command
-export default async () => {
+export default async function Command() {
   await showHUD("Hello");
-};
+}
 ```
 
 You can inspect the [Environment](../api-reference/environment.md) for extension information and paths or access [Preference Properties](../api-reference/preferences.md) for user-entered values that are passed to the command.

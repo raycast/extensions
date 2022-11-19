@@ -16,33 +16,26 @@ import {
 import { useEffect, useState } from "react";
 import { likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
-import { isSpotifyInstalled, showTrackNotification } from "./utils";
+import { showTrackNotification } from "./utils";
 import { getState, getTrack, nextTrack, pause, play, playPause, previousTrack } from "./spotify/applescript";
-import { isAuthorized } from "./spotify/oauth";
 import NowPlayingDetailMetadata from "./components/NowPlayingDetailMetadata";
 import NowPlayingEmptyDetail from "./components/NowPlayingEmptyDetail";
+import { SpotifyProvider, useSpotify } from "./utils/context";
 
-export default function NowPlayingMenuBar() {
-  const [spotifyInstalled, setSpotifyInstalled] = useState<boolean | null>(null);
+function NowPlaying() {
+  const { installed, authorized } = useSpotify();
   const [currentlyPlayingTrack, setCurrentlyPlayingTrack] = useState<TrackInfo | null>(null);
   const [currentSpotifyState, setCurrentSpotifyState] = useState<SpotifyState | null>(null);
-  const [authorized, setAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchPlayerAndTrackState = async () => {
     let result: [SpotifyState | null, TrackInfo | null] = [null, null];
 
-    // Check if Spotify is installed (only try this once)
-    let isInstalled = spotifyInstalled;
-    if (isInstalled == null) {
-      isInstalled = await isSpotifyInstalled();
-      setSpotifyInstalled(await isSpotifyInstalled());
-    }
-
-    setAuthorized(await isAuthorized());
+    // Return early if we have not yet checked if Spotify is installed
+    if (installed == null) result;
 
     // If Spotify is installed then fetch the player and track state
-    if (isInstalled) {
+    if (installed) {
       try {
         const [state, track] = await Promise.all([getState(), getTrack()]);
 
@@ -63,7 +56,7 @@ export default function NowPlayingMenuBar() {
 
   useEffect(() => {
     fetchPlayerAndTrackState();
-  }, []);
+  }, [installed]);
 
   const handlePlayPause = async () => {
     await closeMainWindow();
@@ -111,9 +104,7 @@ export default function NowPlayingMenuBar() {
   };
 
   const trackTitle =
-    spotifyInstalled && currentlyPlayingTrack
-      ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`
-      : undefined;
+    installed && currentlyPlayingTrack ? `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}` : undefined;
 
   if (currentSpotifyState?.state == SpotifyPlayingState.Stopped)
     return <NowPlayingEmptyDetail title="Not Playing" showLoadingImage={false} />;
@@ -225,3 +216,9 @@ export default function NowPlayingMenuBar() {
     />
   );
 }
+
+export default () => (
+  <SpotifyProvider>
+    <NowPlaying />
+  </SpotifyProvider>
+);

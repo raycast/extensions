@@ -1,56 +1,27 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
-import { useState, useEffect, useMemo } from "react";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 
-setupAws();
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
-interface Preferences {
-  region: string;
-}
+const preferences = setupAws();
+const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
 export default function DescribeECSClusters() {
-  const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
+  const { data: clusters, error, isLoading } = useCachedPromise(fetchClusters);
 
-  const [state, setState] = useState<{ clusters?: AWS.ECS.Clusters; loaded: boolean; hasError: boolean }>({
-    clusters: undefined,
-    loaded: false,
-    hasError: false,
-  });
-
-  useEffect(() => {
-    async function fetchArns(token?: string, accClusters?: string[]): Promise<string[]> {
-      const { clusterArns, nextToken } = await ecs.listClusters({ nextToken: token }).promise();
-      const combinedClusters = [...(accClusters || []), ...(clusterArns || [])];
-
-      if (nextToken) {
-        return fetchArns(nextToken, combinedClusters);
-      }
-
-      return combinedClusters;
-    }
-
-    async function fetchClusters(arns: string[]): Promise<AWS.ECS.Cluster[]> {
-      const { clusters } = await ecs.describeClusters({ clusters: arns }).promise();
-      return [...(clusters || [])];
-    }
-
-    fetchArns()
-      .then((clustersArns) => {
-        fetchClusters(clustersArns).then((clusters) => setState({ clusters, loaded: true, hasError: false }));
-      })
-      .catch(() => setState({ clusters: undefined, loaded: true, hasError: true }));
-  }, []);
-
-  if (state.hasError) {
+  if (error) {
     return (
       <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
     );
   }
 
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter instances by name...">
-      {state.clusters && state.clusters.map((c) => <ClusterListItem key={c.clusterArn} cluster={c} />)}
+    <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
+      {clusters?.map((c) => (
+        <ClusterListItem key={c.clusterArn} cluster={c} />
+      ))}
     </List>
   );
 }
@@ -58,7 +29,6 @@ export default function DescribeECSClusters() {
 function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
-  const preferences: Preferences = getPreferenceValues();
 
   const subtitle = useMemo(() => {
     switch (cluster.status || "INACTIVE") {
@@ -118,4 +88,22 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
       ]}
     />
   );
+}
+
+async function fetchArns(token?: string, accClusters?: string[]): Promise<string[]> {
+  const { clusterArns, nextToken } = await ecs.listClusters({ nextToken: token }).promise();
+  const combinedClusters = [...(accClusters || []), ...(clusterArns || [])];
+
+  if (nextToken) {
+    return fetchArns(nextToken, combinedClusters);
+  }
+
+  return combinedClusters;
+}
+
+async function fetchClusters(): Promise<AWS.ECS.Cluster[]> {
+  const clustersArns = await fetchArns();
+
+  const { clusters } = await ecs.describeClusters({ clusters: clustersArns }).promise();
+  return [...(clusters || [])];
 }

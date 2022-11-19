@@ -204,6 +204,13 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "zones",
+      "title": "Zones",
+      "description": "Get states about Zones",
+      "mode": "view",
+      "subtitle": "Home Assistant"
     }
   ],
   "preferences": [
@@ -256,8 +263,9 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.42.0",
     "home-assistant-js-websocket": "^5.11.1",
+    "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
@@ -266,6 +274,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",

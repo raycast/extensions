@@ -1,15 +1,20 @@
-import { MenuBarExtra, open } from "@raycast/api";
+import { Application, getApplications, MenuBarExtra, open } from "@raycast/api";
 import { useProjectFiles } from "./hooks/useProjectFiles";
-import { useFigmaApp } from "./hooks/useFigmaApp";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
+import { useEffect, useState } from "react";
 
 export default function Command() {
   const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-
-  const desktopApp = useFigmaApp();
-
+  const [desktopApp, setDesktopApp] = useState<Application>();
   let url = "figma://file/";
+
+  useEffect(() => {
+    getApplications()
+      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
+      .then(setDesktopApp);
+  }, []);
+
   if (!desktopApp) {
     url = "https://figma.com/file/";
   }

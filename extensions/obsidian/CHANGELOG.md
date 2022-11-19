@@ -1,5 +1,13 @@
 # Obsidian Changelog
 
+## [Fix] - 2022-11-18
+
+- Fixed a bug where the searchbar text didn't update
+
+## [Small fix | Version 1.9.1] - 2022-10-28
+
+- Fix command execution with shortcut not working
+
 ## [Copy Code Action, Show Mentioning Notes Action, Tag List, Open URL & More | Version 1.9.0] - 2022-09-14
 
 - Add `Copy Code` action which either copies a code cell to the clipboard or opens a list to select one of the code cells

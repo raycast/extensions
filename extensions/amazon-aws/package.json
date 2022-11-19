@@ -37,14 +37,14 @@
       "name": "queues",
       "title": "SQS Queues",
       "subtitle": "Amazon AWS",
-      "description": "List All your SQS Queues",
+      "description": "List your SQS Queues",
       "mode": "view"
     },
     {
       "name": "codepipelines",
       "title": "CodePipelines",
       "subtitle": "Amazon AWS",
-      "description": "List All your CodePipelines",
+      "description": "List your CodePipelines",
       "mode": "view"
     },
     {
@@ -58,14 +58,21 @@
       "name": "cloudformation",
       "title": "CloudFormation Stacks",
       "subtitle": "Amazon AWS",
-      "description": "List All your CloudFormation Stacks",
+      "description": "List your CloudFormation Stacks",
+      "mode": "view"
+    },
+    {
+      "name": "lambda",
+      "title": "Lambda Functions",
+      "subtitle": "Amazon AWS",
+      "description": "List your Lambda Functions",
       "mode": "view"
     },
     {
       "name": "dynamodb",
       "title": "DynamoDB Tables",
       "subtitle": "Amazon AWS",
-      "description": "List All your DynamoDB Tables",
+      "description": "List your DynamoDB Tables",
       "mode": "view"
     }
   ],
@@ -75,7 +82,7 @@
       "type": "textfield",
       "required": true,
       "title": "AWS Region",
-      "description": "The Region Were You Have All Your Instances",
+      "description": "The region for which you want to list resources",
       "placeholder": "eu-central-1"
     },
     {
@@ -83,16 +90,19 @@
       "type": "textfield",
       "required": true,
       "title": "AWS Profile",
-      "description": "set aws profile name",
+      "description": "The AWS profile to use",
       "placeholder": "default"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "@raycast/utils": "^1.4.9",
     "aws-sdk": "^2.1023.0",
+    "lodash": "^4.17.21",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.188",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
