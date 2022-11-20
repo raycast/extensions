@@ -1,6 +1,7 @@
 import { Icon, List } from '@raycast/api'
-import { getCountryImage, getInstanceStateIcon } from '../utils'
 import { Instance } from '@scaleway/sdk'
+import { getInstanceStateIcon } from '../helpers/instances'
+import { getCountryImage } from '../helpers'
 
 export default function InstanceDetail(instance: Instance.v1.Server) {
   return (

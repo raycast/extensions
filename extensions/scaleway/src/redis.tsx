@@ -1,9 +1,10 @@
 import { ActionPanel, Icon, List } from '@raycast/api'
-import { getCountryImage, getRedisClusterStatusIcon } from './utils'
 import RedisDetail from './components/RedisDetail'
 import { Redis } from '@scaleway/sdk'
 import { CONSOLE_URL, getScalewayClient } from './api/client'
 import { useCachedPromise } from '@raycast/utils'
+import { getRedisClusterStatusIcon } from './helpers/redis'
+import { getCountryImage } from './helpers'
 
 export default function RedisView() {
   const api = new Redis.v1.API(getScalewayClient())

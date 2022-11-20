@@ -1,11 +1,11 @@
 import { Color, Icon, List } from '@raycast/api'
+import { Container } from '@scaleway/sdk'
 import {
   getContainerStatusIcon,
   getImageName,
   getPrivacyAccessory,
   getRegistryName,
-} from '../utils'
-import { Container } from '@scaleway/sdk'
+} from '../helpers/containers'
 
 export default function ContainerDetail(container: Container.v1beta1.Container) {
   return (

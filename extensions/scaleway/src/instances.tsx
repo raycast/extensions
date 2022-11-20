@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api'
-import { getCountryImage, getInstanceStateIcon } from './utils'
 import InstanceDetail from './components/InstanceDetail'
 import { Instance } from '@scaleway/sdk'
 import { CONSOLE_URL, getScalewayClient } from './api/client'
 import { useCachedPromise } from '@raycast/utils'
 import { powerOffInstance, powerOnInstance, rebootInstance } from './api/instances'
+import { getInstanceStateIcon } from './helpers/instances'
+import { getCountryImage } from './helpers'
 
 export default function InstancesView() {
   const api = new Instance.v1.API(getScalewayClient())

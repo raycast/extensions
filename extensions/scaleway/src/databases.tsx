@@ -1,9 +1,10 @@
 import { ActionPanel, Icon, List } from '@raycast/api'
-import { getCountryImage, getDatabaseStatusIcon } from './utils'
 import DatabaseDetail from './components/DatabaseDetail'
 import { RDB } from '@scaleway/sdk'
 import { CONSOLE_URL, getScalewayClient } from './api/client'
 import { useCachedPromise } from '@raycast/utils'
+import { getDatabaseStatusIcon } from './helpers/databases'
+import { getCountryImage } from './helpers'
 
 export default function DatabasesView() {
   const api = new RDB.v1.API(getScalewayClient())

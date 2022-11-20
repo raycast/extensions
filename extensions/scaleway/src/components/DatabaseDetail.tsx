@@ -1,6 +1,7 @@
 import { Icon, List } from '@raycast/api'
-import { bytesToSize, getCountryImage, getDatabaseStatusIcon } from '../utils'
 import { RDB } from '@scaleway/sdk'
+import { getDatabaseStatusIcon } from '../helpers/databases'
+import { bytesToSize, getCountryImage } from '../helpers'
 
 export default function DatabaseDetail(database: RDB.v1.Instance) {
   return (

@@ -1,5 +1,4 @@
 import { ActionPanel, Icon, List } from '@raycast/api'
-import { getContainerStatusIcon, getCountryImage, getPrivacyAccessory } from './utils'
 import { useState } from 'react'
 import ContainerDetail from './components/ContainerDetail'
 import ContainerLogs from './components/ContainerLogs'
@@ -7,6 +6,8 @@ import { Container } from '@scaleway/sdk'
 import { useCachedPromise } from '@raycast/utils'
 import { CONSOLE_URL, getScalewayClient } from './api/client'
 import { deployContainer } from './api/containers'
+import { getContainerStatusIcon, getPrivacyAccessory } from './helpers/containers'
+import { getCountryImage } from './helpers'
 
 export default function ContainersView() {
   const api = new Container.v1beta1.API(getScalewayClient())

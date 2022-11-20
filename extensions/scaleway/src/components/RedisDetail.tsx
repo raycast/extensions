@@ -1,6 +1,7 @@
 import { Icon, List } from '@raycast/api'
-import { getCountryImage, getRedisClusterStatusIcon } from '../utils'
 import { Redis } from '@scaleway/sdk'
+import { getRedisClusterStatusIcon } from '../helpers/redis'
+import { getCountryImage } from '../helpers'
 
 export default function RedisDetail(cluster: Redis.v1.Cluster) {
   return (
