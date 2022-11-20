@@ -8,6 +8,11 @@ fragment DiscussionFields on Discussion {
   }
   url
   upvoteCount
+  category {
+    name
+    emoji
+    emojiHTML
+  }
   answer {
     bodyText
   }

@@ -26566,6 +26566,7 @@ export type DiscussionFieldsFragment = {
     primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
     releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
+  category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
   answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
   author?:
     | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -26618,6 +26619,7 @@ export type SearchDiscussionsQuery = {
             primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
             releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
           answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -26670,6 +26672,7 @@ export type SearchDiscussionsQuery = {
             primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
             releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
           answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -30338,6 +30341,11 @@ export const DiscussionFieldsFragmentDoc = gql`
     }
     url
     upvoteCount
+    category {
+      name
+      emoji
+      emojiHTML
+    }
     answer {
       bodyText
     }
