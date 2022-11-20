@@ -13,6 +13,9 @@ fragment DiscussionFields on Discussion {
     emoji
     emojiHTML
   }
+  comments {
+    totalCount
+  }
   answer {
     bodyText
   }

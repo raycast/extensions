@@ -50,6 +50,11 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           text: `${d.upvoteCount}`,
           tooltip: `${d.upvoteCount} Upvotes`,
         },
+        {
+          text: d.comments ? `${d.comments.totalCount}` : undefined,
+          icon: d.comments ? Icon.SpeechBubble : undefined,
+          tooltip: d.comments ? `Comments: ${d.comments.totalCount}` : undefined,
+        },
         { date: new Date(d.publishedAt) },
         { icon: { source: d.author?.avatarUrl, mask: Image.Mask.Circle }, tooltip: d.author?.login },
       ]}

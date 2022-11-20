@@ -26567,6 +26567,7 @@ export type DiscussionFieldsFragment = {
     releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
   category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+  comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
   answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
   author?:
     | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -26620,6 +26621,7 @@ export type SearchDiscussionsQuery = {
             releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
           answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -26673,6 +26675,7 @@ export type SearchDiscussionsQuery = {
             releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
           answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
           author?:
             | { __typename?: "Bot"; login: string; avatarUrl: any }
@@ -30345,6 +30348,9 @@ export const DiscussionFieldsFragmentDoc = gql`
       name
       emoji
       emojiHTML
+    }
+    comments {
+      totalCount
     }
     answer {
       bodyText
