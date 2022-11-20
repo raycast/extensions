@@ -5,6 +5,7 @@
   "description": "The extension allow you to quickly access projects, deploys and plans in Bamboo",
   "icon": "bamboo-logo.png",
   "author": "axp-dev",
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
