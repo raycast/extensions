@@ -10,7 +10,7 @@ function getDiscussionIcon(discussion: DiscussionFieldsFragment):
   | Image.ImageLike
   | undefined {
   const categoryText = discussion.category?.name ? `Category: ${discussion.category?.name}` : "";
-  const emojiHTML = discussion.category.emojiHTML as string | null | undefined;
+  const emojiHTML = discussion.category?.emojiHTML as string | null | undefined;
   if (!emojiHTML) {
     return { value: { source: discussion.repository?.owner?.avatarUrl }, tooltip: categoryText };
   }
