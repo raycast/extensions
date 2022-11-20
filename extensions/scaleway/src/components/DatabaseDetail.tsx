@@ -1,8 +1,8 @@
 import { Icon, List } from '@raycast/api'
-import { Database } from '../scaleway/types'
 import { bytesToSize, getCountryImage, getDatabaseStatusIcon } from '../utils'
+import { RDB } from '@scaleway/sdk'
 
-export default function DatabaseDetails(database: Database) {
+export default function DatabaseDetail(database: RDB.v1.Instance) {
   return (
     <List.Item.Detail
       metadata={
@@ -37,21 +37,25 @@ export default function DatabaseDetails(database: Database) {
           <List.Item.Detail.Metadata.Label
             title="Type"
             icon={Icon.ComputerChip}
-            text={database.node_type.toUpperCase()}
+            text={database.nodeType.toUpperCase()}
           />
           <List.Item.Detail.Metadata.Label
             title="Volume"
-            text={`${bytesToSize(database.volume.size)} (${
-              database.volume.type === 'lssd' ? 'Local' : 'Block'
+            text={`${bytesToSize(database.volume?.size)} (${
+              database.volume?.type === 'lssd'
+                ? 'Local'
+                : database.volume?.type === 'bssd'
+                ? 'Block'
+                : 'Unknown'
             } storage)`}
           />
           <List.Item.Detail.Metadata.Label
             title="High availability"
-            text={database.is_ha_cluster ? 'Yes' : 'No'}
+            text={database.isHaCluster ? 'Yes' : 'No'}
           />
           <List.Item.Detail.Metadata.Label
             title="Read replicas"
-            text={database.read_replicas.length.toString()}
+            text={database.readReplicas.length.toString()}
           />
 
           {database.endpoints.map((endpoint, i) => (

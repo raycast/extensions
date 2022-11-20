@@ -1,48 +1,31 @@
 import { ActionPanel, Color, Icon, List } from '@raycast/api'
-import { Container, ContainerLog } from '../scaleway/types'
-import { useEffect, useState } from 'react'
-import { catchError, ScalewayAPI } from '../scaleway/api'
-import { ContainersAPI } from '../scaleway/containers-api'
+import { Container } from '@scaleway/sdk'
+import { useCachedPromise } from '@raycast/utils'
+import { CONSOLE_URL, getScalewayClient } from '../api/client'
 
-interface ContainersState {
-  isLoading: boolean
-  logs: ContainerLog[]
-  error?: unknown
-}
+export default function ContainerLogs({ container }: { container: Container.v1beta1.Container }) {
+  const api = new Container.v1beta1.API(getScalewayClient())
 
-export default function ContainerLogs(props: { container: Container }) {
-  useEffect(() => {
-    async function fetchLogs() {
-      setState((previous) => ({ ...previous, isLoading: true }))
-
-      try {
-        const logs = await ContainersAPI.getContainerLogs(props.container)
-
-        setState((previous) => ({ ...previous, logs, isLoading: false }))
-      } catch (error) {
-        await catchError(error)
-        setState((previous) => ({
-          ...previous,
-          error: error instanceof Error ? error : new Error('Something went wrong'),
-          logs: [],
-          isLoading: false,
-        }))
-      }
-    }
-
-    fetchLogs().then()
-  }, [])
-
-  const [state, setState] = useState<ContainersState>({ logs: [], isLoading: true })
+  const {
+    data: logs,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      return (await api.listLogs({ containerId: container.id, region: container.region })).logs
+    },
+    [],
+    { initialData: [] }
+  )
 
   return (
     <List
       isShowingDetail
-      isLoading={state.isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder={'Filter logs by content...'}
-      navigationTitle={props.container.name}
+      navigationTitle={container.name}
     >
-      {state.logs.map((log) => (
+      {logs.map((log) => (
         <List.Item
           key={log.id}
           title={log.message}
@@ -59,10 +42,12 @@ export default function ContainerLogs(props: { container: Container }) {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label
                     title="Timestamp"
-                    text={new Date(log.timestamp).toLocaleString('en-US', {
-                      dateStyle: 'medium',
-                      timeStyle: 'long',
-                    })}
+                    text={
+                      log.timestamp?.toLocaleString('en-US', {
+                        dateStyle: 'medium',
+                        timeStyle: 'long',
+                      }) || 'unknown'
+                    }
                   />
                   {log.level && <List.Item.Detail.Metadata.Label title="Level" text={log.level} />}
                   {log.source && (
@@ -86,7 +71,13 @@ export default function ContainerLogs(props: { container: Container }) {
           actions={
             <ActionPanel>
               <ActionPanel.Item.CopyToClipboard title="Copy Content" content={log.message} />
-              <ActionPanel.Item.OpenInBrowser url={getLoggingContainerUrl(props.container)} />
+              <ActionPanel.Item.OpenInBrowser url={getLoggingContainerUrl(container)} />
+              <ActionPanel.Item
+                title="Refresh"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                onAction={() => revalidate()}
+              />
             </ActionPanel>
           }
         />
@@ -95,11 +86,11 @@ export default function ContainerLogs(props: { container: Container }) {
   )
 }
 
-function getLoggingContainerUrl(container: Container) {
-  return `${ScalewayAPI.CONSOLE_URL}/containers/namespaces/${container.region}/${container.namespace_id}/containers/${container.id}/logging`
+function getLoggingContainerUrl(container: Container.v1beta1.Container) {
+  return `${CONSOLE_URL}/containers/namespaces/${container.region}/${container.namespaceId}/containers/${container.id}/logging`
 }
 
-function getLogMarkdown(log: ContainerLog) {
+function getLogMarkdown(log: Container.v1beta1.Log) {
   try {
     return '```\n' + JSON.stringify(JSON.parse(log.message), null, '\t') + '\n```'
   } catch {

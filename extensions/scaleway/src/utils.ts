@@ -1,36 +1,30 @@
 import { Color, Icon } from '@raycast/api'
-import {
-  Container,
-  ContainerStatus,
-  DatabaseStatus,
-  InstanceState,
-  Privacy,
-  RedisClusterStatus,
-} from './scaleway/types'
+import { Container, Instance, RDB, Redis, Region, Zone } from '@scaleway/sdk'
 
-export function getContainerStatusIcon(status: ContainerStatus) {
+export function getContainerStatusIcon(status: Container.v1beta1.ContainerStatus) {
   let icon: { source: Icon; tintColor?: Color }
 
   switch (status) {
-    case ContainerStatus.UNKNOWN:
+    case 'unknown':
       icon = { source: Icon.QuestionMarkCircle }
       break
-    case ContainerStatus.DELETING:
+    case 'deleting':
       icon = { source: Icon.Stop, tintColor: Color.Red }
       break
-    case ContainerStatus.ERROR:
+    case 'error':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Red }
       break
-    case ContainerStatus.LOCKED:
+    case 'locked':
       icon = { source: Icon.Lock, tintColor: Color.Green }
       break
-    case ContainerStatus.CREATING:
+    case 'creating':
       icon = { source: Icon.CircleProgress25, tintColor: Color.Green }
       break
-    case ContainerStatus.PENDING:
+    case 'pending':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Blue }
       break
-    case ContainerStatus.READY:
+    case 'ready':
+    case 'created':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Green }
       break
   }
@@ -41,24 +35,24 @@ export function getContainerStatusIcon(status: ContainerStatus) {
   }
 }
 
-export function getInstanceStateIcon(state: InstanceState) {
+export function getInstanceStateIcon(state: Instance.v1.ServerState) {
   let icon: { source: Icon; tintColor?: Color }
 
   switch (state) {
-    case InstanceState.STOPPED:
-    case InstanceState.STOPPED_IN_PLACE:
+    case 'stopped':
+    case 'stopped in place':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Red }
       break
-    case InstanceState.STARTING:
+    case 'starting':
       icon = { source: Icon.CircleProgress25, tintColor: Color.Blue }
       break
-    case InstanceState.RUNNING:
+    case 'running':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Green }
       break
-    case InstanceState.STOPPING:
+    case 'stopping':
       icon = { source: Icon.Stop, tintColor: Color.Red }
       break
-    case InstanceState.LOCKED:
+    case 'locked':
       icon = { source: Icon.Lock, tintColor: Color.Red }
       break
   }
@@ -68,37 +62,37 @@ export function getInstanceStateIcon(state: InstanceState) {
   }
 }
 
-export function getDatabaseStatusIcon(status: DatabaseStatus) {
+export function getDatabaseStatusIcon(status: RDB.v1.InstanceStatus) {
   let icon: { source: Icon; tintColor?: Color }
 
   switch (status) {
-    case DatabaseStatus.UNKNOWN:
+    case 'unknown':
       icon = { source: Icon.QuestionMarkCircle }
       break
-    case DatabaseStatus.AUTOHEALING:
-    case DatabaseStatus.BACKUPING:
-    case DatabaseStatus.CONFIGURING:
-    case DatabaseStatus.INITIALIZING:
-    case DatabaseStatus.PROVISIONING:
-    case DatabaseStatus.SNAPSHOTTING:
+    case 'autohealing':
+    case 'backuping':
+    case 'configuring':
+    case 'initializing':
+    case 'provisioning':
+    case 'snapshotting':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Blue }
       break
-    case DatabaseStatus.LOCKED:
+    case 'locked':
       icon = { source: Icon.Lock, tintColor: Color.Red }
       break
-    case DatabaseStatus.DISK_FULL:
+    case 'disk_full':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Red }
       break
-    case DatabaseStatus.ERROR:
+    case 'error':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Red }
       break
-    case DatabaseStatus.RESTARTING:
+    case 'restarting':
       icon = { source: Icon.CircleProgress25, tintColor: Color.Blue }
       break
-    case DatabaseStatus.READY:
+    case 'ready':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Green }
       break
-    case DatabaseStatus.DELETING:
+    case 'deleting':
       icon = { source: Icon.Stop, tintColor: Color.Red }
       break
   }
@@ -108,30 +102,30 @@ export function getDatabaseStatusIcon(status: DatabaseStatus) {
   }
 }
 
-export function getRedisClusterStatusIcon(status: RedisClusterStatus) {
+export function getRedisClusterStatusIcon(status: Redis.v1.ClusterStatus) {
   let icon: { source: Icon; tintColor?: Color }
 
   switch (status) {
-    case RedisClusterStatus.UNKNOWN:
+    case 'unknown':
       icon = { source: Icon.QuestionMarkCircle }
       break
-    case RedisClusterStatus.AUTOHEALING:
-    case RedisClusterStatus.CONFIGURING:
-    case RedisClusterStatus.INITIALIZING:
-    case RedisClusterStatus.PROVISIONING:
+    case 'autohealing':
+    case 'configuring':
+    case 'initializing':
+    case 'provisioning':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Blue }
       break
-    case RedisClusterStatus.LOCKED:
+    case 'locked':
       icon = { source: Icon.Lock, tintColor: Color.Red }
       break
-    case RedisClusterStatus.ERROR:
-    case RedisClusterStatus.SUSPENDED:
+    case 'error':
+    case 'suspended':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Red }
       break
-    case RedisClusterStatus.READY:
+    case 'ready':
       icon = { source: Icon.CircleProgress100, tintColor: Color.Green }
       break
-    case RedisClusterStatus.DELETING:
+    case 'deleting':
       icon = { source: Icon.Stop, tintColor: Color.Red }
       break
   }
@@ -141,30 +135,32 @@ export function getRedisClusterStatusIcon(status: RedisClusterStatus) {
   }
 }
 
-export function getCountryImage(region: string) {
+export function getCountryImage(region: Region | Zone) {
   return `flags/${region.toLowerCase().substring(0, 2)}.svg`
 }
 
-export function getPrivacyAccessory(privacy: Privacy) {
+export function getPrivacyAccessory(privacy: Container.v1beta1.ContainerPrivacy) {
   switch (privacy) {
-    case Privacy.PUBLIC:
+    case 'public':
       return { icon: { source: Icon.LockUnlocked, tintColor: Color.Green }, tooltip: 'Public' }
-    case Privacy.PRIVATE:
+    case 'private':
       return { icon: Icon.Lock, tooltip: 'Private' }
-    case Privacy.UNKOWN_PRIVACY:
+    case 'unknown_privacy':
       return { icon: Icon.QuestionMarkCircle, tooltip: 'Unknown' }
   }
 }
 
-export function getRegistryName(container: Container) {
-  return container.registry_image.substring(0, container.registry_image.lastIndexOf('/'))
+export function getRegistryName(container: Container.v1beta1.Container) {
+  return container.registryImage.substring(0, container.registryImage.lastIndexOf('/'))
 }
 
-export function getImageName(container: Container) {
-  return container.registry_image.split('/').pop()
+export function getImageName(container: Container.v1beta1.Container) {
+  return container.registryImage.split('/').pop()
 }
 
-export function bytesToSize(bytes: number) {
+export function bytesToSize(bytes?: number) {
+  if (bytes === undefined) return 'unknown'
+
   const sizes = ['Bytes', 'Ko', 'Mo', 'Go', 'To', 'Po']
   if (bytes == 0) return '0 Byte'
   const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1e3)).toString())

@@ -5,9 +5,9 @@ import {
   getPrivacyAccessory,
   getRegistryName,
 } from '../utils'
-import { Container, ContainerDomain } from '../scaleway/types'
+import { Container } from '@scaleway/sdk'
 
-export default function ContainerDetails(container: Container & { domains: ContainerDomain[] }) {
+export default function ContainerDetail(container: Container.v1beta1.Container) {
   return (
     <List.Item.Detail
       metadata={
@@ -19,10 +19,10 @@ export default function ContainerDetails(container: Container & { domains: Conta
             />
           </List.Item.Detail.Metadata.TagList>
 
-          {container.error_message && (
+          {container.errorMessage && (
             <List.Item.Detail.Metadata.Label
               title="Error"
-              text={container.error_message}
+              text={container.errorMessage}
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             />
           )}
@@ -44,36 +44,25 @@ export default function ContainerDetails(container: Container & { domains: Conta
           <List.Item.Detail.Metadata.Label
             title="Resources"
             icon={Icon.ComputerChip}
-            text={`${container.memory_limit} Mo - ${container.cpu_limit} mCPU`}
+            text={`${container.memoryLimit} Mo - ${container.cpuLimit} mCPU`}
           />
           <List.Item.Detail.Metadata.Label
             title="Scale"
-            text={`${container.min_scale} min - ${container.max_scale} max`}
+            text={`${container.minScale} min - ${container.maxScale} max`}
           />
           <List.Item.Detail.Metadata.Label
             title="Maximum concurrency"
-            text={`${container.max_concurrency}`}
+            text={`${container.maxConcurrency}`}
           />
           <List.Item.Detail.Metadata.Label title="Timeout" text={container.timeout} />
 
           <List.Item.Detail.Metadata.Separator />
 
-          {container.domains.length > 0 &&
-            container.domains.map((domain) => (
-              <List.Item.Detail.Metadata.Link
-                key={domain.id}
-                title="Domain"
-                text={domain.hostname}
-                target={domain.url}
-              />
-            ))}
-          {container.domains.length === 0 && (
-            <List.Item.Detail.Metadata.Link
-              title="Domain"
-              text={container.domain_name}
-              target={`https://${container.domain_name}`}
-            />
-          )}
+          <List.Item.Detail.Metadata.Link
+            title="Domain"
+            text={container.domainName}
+            target={`https://${container.domainName}`}
+          />
         </List.Item.Detail.Metadata>
       }
     />

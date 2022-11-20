@@ -1,45 +1,31 @@
-import { ActionPanel, List } from '@raycast/api'
-import { catchError, ScalewayAPI } from './scaleway/api'
-import { useEffect, useState } from 'react'
-import { Database } from './scaleway/types'
+import { ActionPanel, Icon, List } from '@raycast/api'
 import { getCountryImage, getDatabaseStatusIcon } from './utils'
-import DatabaseDetails from './databases/database-details'
-import { DatabasesAPI } from './scaleway/databases-api'
+import DatabaseDetail from './components/DatabaseDetail'
+import { RDB } from '@scaleway/sdk'
+import { CONSOLE_URL, getScalewayClient } from './api/client'
+import { useCachedPromise } from '@raycast/utils'
 
-interface DatabasesState {
-  isLoading: boolean
-  databases: Database[]
-  error?: unknown
-}
+export default function DatabasesView() {
+  const api = new RDB.v1.API(getScalewayClient())
 
-export default function Databases() {
-  const [state, setState] = useState<DatabasesState>({ databases: [], isLoading: true })
-
-  async function fetchDatabases() {
-    setState((previous) => ({ ...previous, isLoading: true }))
-
-    try {
-      const databases = await DatabasesAPI.getAllDatabases()
-
-      setState((previous) => ({ ...previous, databases, isLoading: false }))
-    } catch (error) {
-      await catchError(error)
-      setState((previous) => ({
-        ...previous,
-        error: error instanceof Error ? error : new Error('Something went wrong'),
-        isLoading: false,
-        databases: [],
-      }))
-    }
-  }
-
-  useEffect(() => {
-    fetchDatabases().then()
-  }, [])
+  const {
+    data: databases,
+    isLoading,
+    revalidate: fetchDatabases,
+  } = useCachedPromise(
+    async () => {
+      const response = await Promise.all(
+        RDB.v1.API.LOCALITIES.map((region) => api.listInstances({ region }))
+      )
+      return response.map((r) => r.instances).flat()
+    },
+    [],
+    { initialData: [] }
+  )
 
   return (
-    <List isLoading={state.isLoading} isShowingDetail searchBarPlaceholder="Search databases...">
-      {state.databases.map((database) => (
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search databases...">
+      {databases.map((database) => (
         <List.Item
           key={database.id}
           title={database.name}
@@ -50,13 +36,19 @@ export default function Databases() {
               tooltip: database.region,
             },
           ]}
-          detail={DatabaseDetails(database)}
+          detail={DatabaseDetail(database)}
           actions={
             <ActionPanel>
               <ActionPanel.Item.OpenInBrowser url={getDatabaseUrl(database)} />
               <ActionPanel.Item.CopyToClipboard
                 title="Copy URL"
                 content={getDatabaseUrl(database)}
+              />
+              <ActionPanel.Item
+                title="Refresh"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                onAction={() => fetchDatabases()}
               />
             </ActionPanel>
           }
@@ -66,6 +58,6 @@ export default function Databases() {
   )
 }
 
-function getDatabaseUrl(database: Database) {
-  return `${ScalewayAPI.CONSOLE_URL}/rdb/instances/${database.region}/${database.id}/overview`
+function getDatabaseUrl(database: RDB.v1.Instance) {
+  return `${CONSOLE_URL}/rdb/instances/${database.region}/${database.id}/overview`
 }

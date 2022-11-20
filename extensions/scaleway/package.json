@@ -42,6 +42,7 @@
   "dependencies": {
     "@raycast/api": "^1.43.1",
     "@raycast/utils": "^1.4.10",
+    "@scaleway/sdk": "^0.1.0-beta.22",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
@@ -54,12 +55,34 @@
   },
   "preferences": [
     {
+      "name": "accessKey",
+      "title": "Access Key",
+      "description": "You need an access key and a secret key to connect to Scaleway API. \nGenerate your token at the following address: \nhttps://console.scaleway.com/project/credentials",
+      "type": "password",
+      "required": true
+    },
+    {
       "name": "secretKey",
       "title": "Secret Key",
-      "description": "Your Scaleway project API Token",
+      "description": "The secret key is the value that can be used to authenticate against the API (the value used in X-Auth-Token HTTP-header). \nThe secret key MUST remain secret and not given to anyone or published online.",
       "type": "password",
-      "default": "",
       "required": true
+    },
+    {
+      "name": "defaultRegion",
+      "title": "Default region",
+      "description": "A region is represented as a geographical area such as France (Paris) or the Netherlands (Amsterdam).\nExamples: fr-par, nl-ams",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par"
+    },
+    {
+      "name": "defaultZone",
+      "title": "Default zone",
+      "description": "A region can be split into many availability zones (AZ).\nExamples: fr-par-1, nl-ams-1",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par-1"
     }
   ],
   "scripts": {

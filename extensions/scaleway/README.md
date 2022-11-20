@@ -36,8 +36,8 @@ Raycast extension to search containers, database, instances or Redis clusters, t
 
 - Go to the [Scaleway console](https://console.scaleway.com)
 - Click on your organisation at the top right, and go to `Credentials`
-- Generate a new API key with a purpose e.g. `raycast`, and copy your `Secret Key`
-- Open a Scaleway command in Raycast and enter your `Secret Key`
+- Generate a new API key with a purpose e.g. `raycast`, and copy your `Access Key` and `Secret Key`
+- Open a Scaleway command in Raycast and enter your `Access Key` and `Secret Key`
 
 ![configure-extension](./media/configure-extension.png)
 
@@ -64,10 +64,3 @@ That's it! You're ready to use the extension! 🚀
 ### Redis Clusters
 
 ![list-redis-clusters](./metadata/5-redis.png)
-
-## Development
-
-When running in development, the fake data will be used instead of the real API.
-
-If you want to use the real API while developing, you can set the `Use Node production environment`
-setting in Raycast preferences. [See docs](https://developers.raycast.com/basics/debug-an-extension#environments).

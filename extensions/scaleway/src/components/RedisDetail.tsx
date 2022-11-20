@@ -1,8 +1,8 @@
 import { Icon, List } from '@raycast/api'
-import { RedisCluster } from '../scaleway/types'
 import { getCountryImage, getRedisClusterStatusIcon } from '../utils'
+import { Redis } from '@scaleway/sdk'
 
-export default function RedisDetails(cluster: RedisCluster) {
+export default function RedisDetail(cluster: Redis.v1.Cluster) {
   return (
     <List.Item.Detail
       metadata={
@@ -37,9 +37,9 @@ export default function RedisDetails(cluster: RedisCluster) {
           <List.Item.Detail.Metadata.Label
             title="Type"
             icon={Icon.ComputerChip}
-            text={cluster.node_type.toUpperCase()}
+            text={cluster.nodeType.toUpperCase()}
           />
-          <List.Item.Detail.Metadata.Label title="Cluster size" text={`${cluster.cluster_size}`} />
+          <List.Item.Detail.Metadata.Label title="Cluster size" text={`${cluster.clusterSize}`} />
 
           {cluster.endpoints.map((endpoint, i) => (
             <List.Item.Detail.Metadata.Label

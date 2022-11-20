@@ -1,60 +1,32 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api'
-import { catchError, ScalewayAPI } from './scaleway/api'
-import { useEffect, useState } from 'react'
-import { Instance } from './scaleway/types'
 import { getCountryImage, getInstanceStateIcon } from './utils'
-import InstanceDetails from './instances/instance-details'
-import { powerOffInstance, powerOnInstance, rebootInstance } from './instances/instance-actions'
-import { InstancesAPI } from './scaleway/instances-api'
+import InstanceDetail from './components/InstanceDetail'
+import { Instance } from '@scaleway/sdk'
+import { CONSOLE_URL, getScalewayClient } from './api/client'
+import { useCachedPromise } from '@raycast/utils'
+import { powerOffInstance, powerOnInstance, rebootInstance } from './api/instances'
 
-interface InstancesState {
-  isLoading: boolean
-  instances: Instance[]
-  error?: unknown
-}
+export default function InstancesView() {
+  const api = new Instance.v1.API(getScalewayClient())
 
-export default function Instances() {
-  const [state, setState] = useState<InstancesState>({ instances: [], isLoading: true })
-
-  async function fetchInstances() {
-    setState((previous) => ({ ...previous, isLoading: true }))
-
-    try {
-      const instances = await InstancesAPI.getAllInstances()
-
-      setState((previous) => ({ ...previous, instances, isLoading: false }))
-    } catch (error) {
-      await catchError(error)
-      setState((previous) => ({
-        ...previous,
-        error: error instanceof Error ? error : new Error('Something went wrong'),
-        isLoading: false,
-        instances: [],
-      }))
-    }
-  }
-
-  useEffect(() => {
-    fetchInstances().then()
-  }, [])
-
-  async function executeAction(instance: Instance, action: 'poweron' | 'poweroff' | 'reboot') {
-    switch (action) {
-      case 'poweron':
-        if (await powerOnInstance(instance)) await fetchInstances()
-        return
-      case 'poweroff':
-        if (await powerOffInstance(instance)) await fetchInstances()
-        return
-      case 'reboot':
-        if (await rebootInstance(instance)) await fetchInstances()
-        return
-    }
-  }
+  const {
+    data: instances,
+    isLoading,
+    revalidate: fetchInstances,
+  } = useCachedPromise(
+    async () => {
+      const response = await Promise.all(
+        Instance.v1.API.LOCALITIES.map((zone) => api.listServers({ zone }))
+      )
+      return response.map((r) => r.servers).flat()
+    },
+    [],
+    { initialData: [] }
+  )
 
   return (
-    <List isLoading={state.isLoading} isShowingDetail searchBarPlaceholder="Search instances...">
-      {state.instances.map((instance) => (
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search instances...">
+      {instances.map((instance) => (
         <List.Item
           key={instance.id}
           title={instance.name}
@@ -65,7 +37,7 @@ export default function Instances() {
               tooltip: instance.zone,
             },
           ]}
-          detail={InstanceDetails(instance)}
+          detail={InstanceDetail(instance)}
           actions={
             <ActionPanel>
               <ActionPanel.Item.OpenInBrowser url={getInstanceUrl(instance)} />
@@ -73,31 +45,37 @@ export default function Instances() {
                 title="Copy URL"
                 content={getInstanceUrl(instance)}
               />
-              {instance.allowed_actions.includes('reboot') && (
+              {instance.allowedActions.includes('reboot') && (
                 <ActionPanel.Item
                   title="Reboot"
                   icon={Icon.RotateClockwise}
                   shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                  onAction={async () => await executeAction(instance, 'reboot')}
+                  onAction={async () => await rebootInstance(api, instance, fetchInstances)}
                 />
               )}
-              {instance.allowed_actions.includes('poweron') && (
+              {instance.allowedActions.includes('poweron') && (
                 <ActionPanel.Item
                   title="Power On"
                   icon={Icon.Play}
                   shortcut={{ modifiers: ['cmd'], key: 'u' }}
-                  onAction={async () => await executeAction(instance, 'poweron')}
+                  onAction={async () => await powerOnInstance(api, instance, fetchInstances)}
                 />
               )}
-              {instance.allowed_actions.includes('poweroff') && (
+              {instance.allowedActions.includes('poweroff') && (
                 <ActionPanel.Item
                   title="Shutdown"
                   icon={Icon.Stop}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ['cmd'], key: 'q' }}
-                  onAction={async () => await executeAction(instance, 'poweroff')}
+                  onAction={async () => await powerOffInstance(api, instance, fetchInstances)}
                 />
               )}
+              <ActionPanel.Item
+                title="Refresh"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                onAction={() => fetchInstances()}
+              />
             </ActionPanel>
           }
         />
@@ -106,6 +84,6 @@ export default function Instances() {
   )
 }
 
-function getInstanceUrl(instance: Instance) {
-  return `${ScalewayAPI.CONSOLE_URL}/instance/servers/${instance.zone}/${instance.id}/overview`
+function getInstanceUrl(instance: Instance.v1.Server) {
+  return `${CONSOLE_URL}/instance/servers/${instance.zone}/${instance.id}/overview`
 }
