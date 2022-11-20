@@ -1,6 +1,6 @@
 # Scaleway Changelog
 
-## [Improvement] - 2022-04-29
+## [Improvement] - 2022-11-20
 
 - Use the Scaleway JS SDK instead of the REST API
 - Use the `useCachedPromise` hook to fetch data
