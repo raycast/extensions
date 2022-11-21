@@ -1,6 +1,7 @@
 import { request } from "./request";
 import { CustomField } from "./tasks";
 
+
 export type Project = {
   gid: string;
   id: string;
@@ -14,9 +15,11 @@ export type Project = {
 };
 
 export async function getProjects(workspace: string) {
-  const { data } = await request<{ data: Project[] }>("/projects", {
+  const { data } = await request<{ data: Project[] }>(`/workspaces/${workspace}/typeahead`, {
     params: {
       workspace,
+      resource_type: "project",
+      // limit: 10,
       opt_fields: "id,name,icon,color,custom_field_settings.custom_field",
     },
   });
