@@ -51,7 +51,7 @@ export function getWeatherIcon(icon: string | undefined) {
       return Icon.Snippets;
     }
   } else {
-    return Icon.Bird;
+    return Icon.Sunrise;
   }
   return `http://openweathermap.org/img/wn/${icon}@2x.png`;
 }

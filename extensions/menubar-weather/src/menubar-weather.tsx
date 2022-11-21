@@ -10,78 +10,86 @@ export default function MenubarWeather() {
     <MenuBarExtra
       isLoading={loading}
       tooltip={`${weather?.weather[0].main}, ${weather?.weather[0].description}`}
-      title={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
+      title={typeof weather === "undefined" ? "" : ` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
       icon={getWeatherIcon(weather?.weather[0].icon)}
     >
-      <MenuBarExtra.Section title={"Weather"}>
-        {weather?.weather.map((value, index) => {
-          return (
-            <MenuBarExtra.Item
-              key={`${index} ${value.main}`}
-              title={value.main}
-              icon={getWeatherIcon(weather?.weather[0].icon)}
-              subtitle={` ${value.description}`}
-              onAction={async () => {
-                await Clipboard.copy(`${value.main} ${value.description}`);
-              }}
-            />
-          );
-        })}
-      </MenuBarExtra.Section>
-      {typeof weather?.main !== "undefined" && (
-        <MenuBarExtra.Section title={"Temp"}>
-          <MenuBarExtra.Item
-            title={"Temperature"}
-            icon={Icon.Temperature}
-            subtitle={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
-            onAction={async () => {
-              await Clipboard.copy(`${weather?.main.temp}${tempUnit}`);
-            }}
-          />
-          <MenuBarExtra.Item
-            title={"Feels-like"}
-            icon={Icon.Temperature}
-            subtitle={` ${parseInt(weather?.main.feels_like + "")}${tempUnit}`}
-            onAction={async () => {
-              await Clipboard.copy(`${weather?.main.feels_like}${tempUnit}`);
-            }}
-          />
-          <MenuBarExtra.Item
-            title={"Min/Max"}
-            icon={Icon.Temperature}
-            subtitle={` ${parseInt(weather?.main.temp_min + "")}/${parseInt(weather?.main.temp_max + "")}${tempUnit}`}
-            onAction={async () => {
-              await Clipboard.copy(`${weather?.main.temp_min}/${weather?.main.temp_max}${tempUnit}`);
-            }}
-          />
-        </MenuBarExtra.Section>
-      )}
-      {typeof weather?.wind !== "undefined" && (
-        <MenuBarExtra.Section title={"Wind"}>
-          <MenuBarExtra.Item
-            title={"Speed"}
-            icon={Icon.Gauge}
-            subtitle={` ${weather?.wind.speed}${windUint}`}
-            onAction={async () => {
-              await Clipboard.copy(`${weather?.wind.speed}${windUint}`);
-            }}
-          />
-        </MenuBarExtra.Section>
-      )}
+      {typeof weather !== "undefined" && (
+        <>
+          {typeof weather?.weather !== "undefined" && (
+            <MenuBarExtra.Section title={"Weather"}>
+              {weather?.weather.map((value, index) => {
+                return (
+                  <MenuBarExtra.Item
+                    key={`${index} ${value.main}`}
+                    title={value.main}
+                    icon={getWeatherIcon(weather?.weather[0].icon)}
+                    subtitle={` ${value.description}`}
+                    onAction={async () => {
+                      await Clipboard.copy(`${value.main} ${value.description}`);
+                    }}
+                  />
+                );
+              })}
+            </MenuBarExtra.Section>
+          )}
 
-      {typeof weather?.rain !== "undefined" && (
-        <MenuBarExtra.Section title={"Rain"}>
-          <MenuBarExtra.Item
-            title={"1Hour"}
-            icon={Icon.Raindrop}
-            subtitle={` ${weather?.rain["1h"]}mm`}
-            onAction={async () => {
-              await Clipboard.copy(`${weather?.rain["1h"]}mm`);
-            }}
-          />
-        </MenuBarExtra.Section>
-      )}
+          {typeof weather?.main !== "undefined" && (
+            <MenuBarExtra.Section title={"Temp"}>
+              <MenuBarExtra.Item
+                title={"Temperature"}
+                icon={Icon.Temperature}
+                subtitle={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${weather?.main.temp}${tempUnit}`);
+                }}
+              />
+              <MenuBarExtra.Item
+                title={"Feels-like"}
+                icon={Icon.Temperature}
+                subtitle={` ${parseInt(weather?.main.feels_like + "")}${tempUnit}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${weather?.main.feels_like}${tempUnit}`);
+                }}
+              />
+              <MenuBarExtra.Item
+                title={"Min/Max"}
+                icon={Icon.Temperature}
+                subtitle={` ${parseInt(weather?.main.temp_min + "")}/${parseInt(
+                  weather?.main.temp_max + ""
+                )}${tempUnit}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${weather?.main.temp_min}/${weather?.main.temp_max}${tempUnit}`);
+                }}
+              />
+            </MenuBarExtra.Section>
+          )}
+          {typeof weather?.wind !== "undefined" && (
+            <MenuBarExtra.Section title={"Wind"}>
+              <MenuBarExtra.Item
+                title={"Speed"}
+                icon={Icon.Gauge}
+                subtitle={` ${weather?.wind.speed}${windUint}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${weather?.wind.speed}${windUint}`);
+                }}
+              />
+            </MenuBarExtra.Section>
+          )}
 
+          {typeof weather?.rain !== "undefined" && (
+            <MenuBarExtra.Section title={"Rain"}>
+              <MenuBarExtra.Item
+                title={"1Hour"}
+                icon={Icon.Raindrop}
+                subtitle={` ${weather?.rain["1h"]}mm`}
+                onAction={async () => {
+                  await Clipboard.copy(`${weather?.rain["1h"]}mm`);
+                }}
+              />
+            </MenuBarExtra.Section>
+          )}
+        </>
+      )}
       {typeof location !== "undefined" && (
         <MenuBarExtra.Section title={"Location"}>
           <MenuBarExtra.Item
@@ -89,7 +97,7 @@ export default function MenubarWeather() {
             icon={Icon.ChessPiece}
             subtitle={` ${location?.name}`}
             onAction={async () => {
-              await Clipboard.copy(`${weather?.coord.lon}`);
+              await Clipboard.copy(`${location?.name}`);
             }}
           />
           <MenuBarExtra.Item
@@ -97,23 +105,24 @@ export default function MenubarWeather() {
             icon={Icon.BankNote}
             subtitle={` ${location?.country}`}
             onAction={async () => {
-              await Clipboard.copy(`${weather?.coord.lon}`);
+              location?.lat;
+              await Clipboard.copy(`${location?.country}`);
             }}
           />
           <MenuBarExtra.Item
             title={"Lon"}
             icon={Icon.ArrowDown}
-            subtitle={` ${weather?.coord.lon}`}
+            subtitle={` ${location?.lon}`}
             onAction={async () => {
-              await Clipboard.copy(`${weather?.coord.lon}`);
+              await Clipboard.copy(`${location?.lon}`);
             }}
           />
           <MenuBarExtra.Item
             title={"Lat"}
             icon={Icon.ArrowRight}
-            subtitle={` ${weather?.coord.lat}`}
+            subtitle={` ${location?.lat}`}
             onAction={async () => {
-              await Clipboard.copy(`${weather?.coord.lat}`);
+              await Clipboard.copy(`${location?.lat}`);
             }}
           />
         </MenuBarExtra.Section>
