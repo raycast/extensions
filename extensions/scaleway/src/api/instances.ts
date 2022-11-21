@@ -1,17 +1,20 @@
-import { Instance } from '../scaleway/types'
 import { Alert, confirmAlert, Icon, showToast, Toast } from '@raycast/api'
-import { catchError, ScalewayAPI } from '../scaleway/api'
+import { Instance } from '@scaleway/sdk'
+import { getErrorMessage } from '../helpers/errors'
 import ActionStyle = Alert.ActionStyle
 import Style = Toast.Style
-import { InstancesAPI } from '../scaleway/instances-api'
 
-export async function rebootInstance(instance: Instance) {
+export async function rebootInstance(
+  api: Instance.v1.API,
+  instance: Instance.v1.Server,
+  revalidate: () => void
+) {
   try {
     if (
       await confirmAlert({
         title: 'Are you sure you want to reboot this instance?',
         icon: Icon.RotateClockwise,
-        primaryAction: { title: 'Reboot', style: ActionStyle.Default },
+        primaryAction: { title: 'Reboot', style: ActionStyle.Destructive },
       })
     ) {
       await showToast({
@@ -20,7 +23,7 @@ export async function rebootInstance(instance: Instance) {
         style: Style.Animated,
       })
 
-      await InstancesAPI.rebootInstance(instance)
+      await api.serverAction({ serverId: instance.id, action: 'reboot' })
 
       await showToast({
         title: 'Instance successfully rebooted',
@@ -28,15 +31,23 @@ export async function rebootInstance(instance: Instance) {
         style: Style.Success,
       })
 
-      return true
+      revalidate()
     }
   } catch (error) {
-    await catchError(error, 'Error while rebooting instance')
+    await showToast({
+      title: 'Error while rebooting instance',
+      message: getErrorMessage(error),
+      style: Toast.Style.Failure,
+    })
   }
   return false
 }
 
-export async function powerOnInstance(instance: Instance) {
+export async function powerOnInstance(
+  api: Instance.v1.API,
+  instance: Instance.v1.Server,
+  revalidate: () => void
+) {
   try {
     if (
       await confirmAlert({
@@ -51,7 +62,7 @@ export async function powerOnInstance(instance: Instance) {
         style: Style.Animated,
       })
 
-      await InstancesAPI.powerOnInstance(instance)
+      await api.serverAction({ serverId: instance.id, action: 'poweron' })
 
       await showToast({
         title: 'Instance successfully powered on',
@@ -59,15 +70,23 @@ export async function powerOnInstance(instance: Instance) {
         style: Style.Success,
       })
 
-      return true
+      revalidate()
     }
   } catch (error) {
-    await catchError(error, 'Error while powering on instance')
+    await showToast({
+      title: 'Error while powering instance',
+      message: getErrorMessage(error),
+      style: Toast.Style.Failure,
+    })
   }
   return false
 }
 
-export async function powerOffInstance(instance: Instance) {
+export async function powerOffInstance(
+  api: Instance.v1.API,
+  instance: Instance.v1.Server,
+  revalidate: () => void
+) {
   try {
     if (
       await confirmAlert({
@@ -82,7 +101,7 @@ export async function powerOffInstance(instance: Instance) {
         style: Style.Animated,
       })
 
-      await InstancesAPI.powerOffInstance(instance)
+      await api.serverAction({ serverId: instance.id, action: 'poweroff' })
 
       await showToast({
         title: 'Instance successfully shutdown',
@@ -90,10 +109,14 @@ export async function powerOffInstance(instance: Instance) {
         style: Style.Success,
       })
 
-      return true
+      revalidate()
     }
   } catch (error) {
-    await catchError(error, 'Error while shutting down instance')
+    await showToast({
+      title: 'Error while shutting down instance',
+      message: getErrorMessage(error),
+      style: Toast.Style.Failure,
+    })
   }
   return false
 }

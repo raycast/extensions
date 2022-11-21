@@ -1,45 +1,32 @@
-import { ActionPanel, List } from '@raycast/api'
-import { catchError, ScalewayAPI } from './scaleway/api'
-import { useEffect, useState } from 'react'
-import { RedisCluster } from './scaleway/types'
-import { getCountryImage, getRedisClusterStatusIcon } from './utils'
-import { RedisAPI } from './scaleway/redis-api'
-import RedisDetails from './redis/redis-details'
+import { ActionPanel, Icon, List } from '@raycast/api'
+import RedisDetail from './components/RedisDetail'
+import { Redis } from '@scaleway/sdk'
+import { CONSOLE_URL, getScalewayClient } from './api/client'
+import { useCachedPromise } from '@raycast/utils'
+import { getRedisClusterStatusIcon } from './helpers/redis'
+import { getCountryImage } from './helpers'
 
-interface RedisState {
-  isLoading: boolean
-  clusters: RedisCluster[]
-  error?: unknown
-}
+export default function RedisView() {
+  const api = new Redis.v1.API(getScalewayClient())
 
-export default function Redis() {
-  const [state, setState] = useState<RedisState>({ clusters: [], isLoading: true })
-
-  async function fetchClusters() {
-    setState((previous) => ({ ...previous, isLoading: true }))
-
-    try {
-      const clusters = await RedisAPI.getAllClusters()
-
-      setState((previous) => ({ ...previous, clusters, isLoading: false }))
-    } catch (error) {
-      await catchError(error)
-      setState((previous) => ({
-        ...previous,
-        error: error instanceof Error ? error : new Error('Something went wrong'),
-        isLoading: false,
-        clusters: [],
-      }))
-    }
-  }
-
-  useEffect(() => {
-    fetchClusters().then()
-  }, [])
+  const {
+    data: clusters,
+    isLoading,
+    revalidate: fetchClusters,
+  } = useCachedPromise(
+    async () => {
+      const response = await Promise.all(
+        Redis.v1.API.LOCALITIES.map((zone) => api.listClusters({ zone }))
+      )
+      return response.map((r) => r.clusters).flat()
+    },
+    [],
+    { initialData: [] }
+  )
 
   return (
-    <List isLoading={state.isLoading} isShowingDetail searchBarPlaceholder="Search cluster...">
-      {state.clusters.map((cluster) => (
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search cluster...">
+      {clusters.map((cluster) => (
         <List.Item
           key={cluster.id}
           title={cluster.name}
@@ -50,13 +37,19 @@ export default function Redis() {
               tooltip: cluster.zone,
             },
           ]}
-          detail={RedisDetails(cluster)}
+          detail={RedisDetail(cluster)}
           actions={
             <ActionPanel>
               <ActionPanel.Item.OpenInBrowser url={getRedisClusterUrl(cluster)} />
               <ActionPanel.Item.CopyToClipboard
                 title="Copy URL"
                 content={getRedisClusterUrl(cluster)}
+              />
+              <ActionPanel.Item
+                title="Refresh"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                onAction={() => fetchClusters()}
               />
             </ActionPanel>
           }
@@ -66,6 +59,6 @@ export default function Redis() {
   )
 }
 
-function getRedisClusterUrl(cluster: RedisCluster) {
-  return `${ScalewayAPI.CONSOLE_URL}/redis/clusters/${cluster.zone}/${cluster.id}/overview`
+function getRedisClusterUrl(cluster: Redis.v1.Cluster) {
+  return `${CONSOLE_URL}/redis/clusters/${cluster.zone}/${cluster.id}/overview`
 }

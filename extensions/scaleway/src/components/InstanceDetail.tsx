@@ -1,8 +1,9 @@
 import { Icon, List } from '@raycast/api'
-import { Instance } from '../scaleway/types'
-import { getCountryImage, getInstanceStateIcon } from '../utils'
+import { Instance } from '@scaleway/sdk'
+import { getInstanceStateIcon } from '../helpers/instances'
+import { getCountryImage } from '../helpers'
 
-export default function InstanceDetails(instance: Instance) {
+export default function InstanceDetail(instance: Instance.v1.Server) {
   return (
     <List.Item.Detail
       metadata={
@@ -13,13 +14,10 @@ export default function InstanceDetails(instance: Instance) {
               color={getInstanceStateIcon(instance.state).value.tintColor}
             />
           </List.Item.Detail.Metadata.TagList>
-
           <List.Item.Detail.Metadata.Separator />
-
           <List.Item.Detail.Metadata.Label title="ID" text={instance.id} />
           <List.Item.Detail.Metadata.Label title="Name" text={instance.name} />
-          <List.Item.Detail.Metadata.Label title="Image" text={instance.image.name} />
-
+          <List.Item.Detail.Metadata.Label title="Image" text={instance.image?.name || 'Unknown'} />
           <List.Item.Detail.Metadata.Label
             title="Zone"
             text={instance.zone}
@@ -32,25 +30,28 @@ export default function InstanceDetails(instance: Instance) {
               ))}
             </List.Item.Detail.Metadata.TagList>
           )}
-
           <List.Item.Detail.Metadata.Separator />
-
           <List.Item.Detail.Metadata.Label
             title="Type"
             icon={Icon.ComputerChip}
-            text={instance.commercial_type.toUpperCase()}
+            text={instance.commercialType.toUpperCase()}
           />
           <List.Item.Detail.Metadata.Label title="Architecture" text={instance.arch} />
           <List.Item.Detail.Metadata.Label
             title="Security group"
-            text={instance.security_group.name}
+            text={instance.securityGroup?.name || 'Unknown'}
           />
-          <List.Item.Detail.Metadata.Label title="Public IP" text={instance.public_ip.address} />
-          <List.Item.Detail.Metadata.Link
-            title="SSH"
-            text="Open SSH terminal"
-            target={`ssh://root@${instance.public_ip.address}`}
+          <List.Item.Detail.Metadata.Label
+            title="Public IP"
+            text={instance.publicIp?.address || 'Unknown'}
           />
+          {instance.publicIp?.address && (
+            <List.Item.Detail.Metadata.Link
+              title="SSH"
+              text="Open SSH terminal"
+              target={`ssh://root@${instance.publicIp.address}`}
+            />
+          )}
         </List.Item.Detail.Metadata>
       }
     />
