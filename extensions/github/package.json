@@ -118,7 +118,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     }
