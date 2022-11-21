@@ -10,7 +10,6 @@ export const quitAppsHook = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const allApps = await getAllApps();
-    console.debug(allApps);
     setApps(allApps);
     const enabledApps = allApps.filter((value) => {
       return value.enabled && !value.isActive;
