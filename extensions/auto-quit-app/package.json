@@ -15,7 +15,7 @@
       "name": "auto-quit-app",
       "title": "Auto Quit App",
       "description": "Automatically quit the application after all windows are closed",
-      "mode": "no-view",
+      "mode": "menu-bar",
       "interval": "10m",
       "preferences": [
         {

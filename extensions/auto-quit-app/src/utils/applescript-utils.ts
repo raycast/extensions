@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { AppWindowCount } from "../types/type";
+import { Apps } from "../types/type";
 
 export async function appIsActive() {
   const script = `tell application "System Events"
@@ -29,7 +29,7 @@ export async function appIsRunning(appName: string) {
   }
 }
 
-export async function appCanQuit(appWindowCount: AppWindowCount) {
+export async function appCanQuit(appWindowCount: Apps) {
   try {
     const isRunning = await appIsRunning(appWindowCount.name);
     if (!isRunning) return false;
@@ -44,7 +44,7 @@ end tell`;
   }
 }
 
-export async function quitApp(appWindowCount: AppWindowCount) {
+export async function quitApp(appWindowCount: Apps) {
   const canQuit = await appCanQuit(appWindowCount);
   if (!canQuit) return;
   const script = `tell application "${appWindowCount.name}"
@@ -58,7 +58,7 @@ end tell`;
   }
 }
 
-export async function quitApps(apps: AppWindowCount[]) {
+export async function quitApps(apps: Apps[]) {
   for (let i = 0; i < apps.length; i++) {
     await quitApp(apps[i]);
   }
