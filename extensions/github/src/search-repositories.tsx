@@ -1,7 +1,6 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
-import { useDebounce } from "use-debounce";
 
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
@@ -17,14 +16,12 @@ function SearchRepositories() {
   const preferences = getPreferenceValues<{ includeForks: boolean }>();
 
   const [searchText, setSearchText] = useState("");
-  const [debouncedSearchText] = useDebounce(searchText, 200);
-
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${debouncedSearchText} fork:${preferences.includeForks}`,
-    [debouncedSearchText, searchFilter]
+    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
+    [searchText, searchFilter]
   );
 
   const {
@@ -48,10 +45,11 @@ function SearchRepositories() {
 
   return (
     <List
-      isLoading={searchText !== debouncedSearchText || isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search in public and private repositories"
       onSearchTextChange={setSearchText}
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
+      throttle
     >
       <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
         {history.map((repository) => (
@@ -82,7 +80,7 @@ function SearchRepositories() {
         </List.Section>
       ) : null}
 
-      <RepositoryListEmptyView searchText={debouncedSearchText} isLoading={isLoading} />
+      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} />
     </List>
   );
 }

@@ -124,8 +124,7 @@
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.10",
-    "octokit": "^2.0.10",
-    "use-debounce": "^8.0.4"
+    "octokit": "^2.0.10"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.12.1",
