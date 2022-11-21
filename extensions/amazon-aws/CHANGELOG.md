@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Support AWS Profile Switch] - 2022-11-21
+
+Added AWS profile switch & removed obsolete "AWS Profile" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
 ## [Lambda Command] - 2022-11-15
 
 Added a new command to list Lambda functions ([#3525](https://github.com/raycast/extensions/pull/3525))
