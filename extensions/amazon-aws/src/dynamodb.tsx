@@ -6,7 +6,6 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const dynamoDB = new AWS.DynamoDB();
 
 export default function ListDynamoDbTables() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -56,7 +55,7 @@ function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName })
 }
 
 async function fetchTables(token?: string, accTables?: AWS.DynamoDB.TableName[]): Promise<AWS.DynamoDB.TableName[]> {
-  const { LastEvaluatedTableName, TableNames } = await dynamoDB
+  const { LastEvaluatedTableName, TableNames } = await new AWS.DynamoDB()
     .listTables({ ExclusiveStartTableName: token })
     .promise();
   const combinedTables = [...(accTables || []), ...(TableNames || [])];

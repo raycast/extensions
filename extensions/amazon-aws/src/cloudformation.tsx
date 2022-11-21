@@ -6,7 +6,6 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
 export default function ListStacks() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -62,7 +61,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
 }
 
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
-  const { NextToken, StackSummaries } = await cloudformation.listStacks({ NextToken: token }).promise();
+  const { NextToken, StackSummaries } = await new AWS.CloudFormation().listStacks({ NextToken: token }).promise();
   const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
 
   if (NextToken) {

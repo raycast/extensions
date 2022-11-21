@@ -5,7 +5,6 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
@@ -88,7 +87,7 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
 }
 
 async function fetchEC2Instances(token?: string, accInstances?: AWS.EC2.Instance[]): Promise<AWS.EC2.Instance[]> {
-  const { NextToken, Reservations } = await ec2.describeInstances({ NextToken: token }).promise();
+  const { NextToken, Reservations } = await new AWS.EC2().describeInstances({ NextToken: token }).promise();
   const instances = (Reservations || []).reduce<AWS.EC2.Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],
     []

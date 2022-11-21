@@ -6,7 +6,6 @@ import setupAws from "./util/setupAws";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -64,7 +63,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
           const toast = await showToast({ style: Toast.Style.Animated, title: "Purging queue..." });
 
           try {
-            await sqs.purgeQueue({ QueueUrl: queue }).promise();
+            await new AWS.SQS().purgeQueue({ QueueUrl: queue }).promise();
             toast.style = Toast.Style.Success;
             toast.title = "Purged queue";
           } catch (err) {
@@ -108,7 +107,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
 }
 
 async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
-  const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
+  const { NextToken, QueueUrls } = await new AWS.SQS().listQueues({ NextToken: token }).promise();
   const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
 
   if (NextToken) {
@@ -126,7 +125,7 @@ async function fetchQueueAttributes(...queueUrls: string[]) {
   for (const queueUrlBatch of queueUrlBatches) {
     await Promise.all(
       queueUrlBatch.map(async (queueUrl) => {
-        const { Attributes } = await sqs
+        const { Attributes } = await new AWS.SQS()
           .getQueueAttributes({
             QueueUrl: queueUrl,
             AttributeNames: [

@@ -7,7 +7,6 @@ import { useMemo } from "react";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
 export default function DescribeECSClusters() {
   const { data: clusters, error, isLoading, revalidate } = useCachedPromise(fetchClusters);
@@ -96,7 +95,7 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
 }
 
 async function fetchArns(token?: string, accClusters?: string[]): Promise<string[]> {
-  const { clusterArns, nextToken } = await ecs.listClusters({ nextToken: token }).promise();
+  const { clusterArns, nextToken } = await new AWS.ECS().listClusters({ nextToken: token }).promise();
   const combinedClusters = [...(accClusters || []), ...(clusterArns || [])];
 
   if (nextToken) {
@@ -109,6 +108,6 @@ async function fetchArns(token?: string, accClusters?: string[]): Promise<string
 async function fetchClusters(): Promise<AWS.ECS.Cluster[]> {
   const clustersArns = await fetchArns();
 
-  const { clusters } = await ecs.describeClusters({ clusters: clustersArns }).promise();
+  const { clusters } = await new AWS.ECS().describeClusters({ clusters: clustersArns }).promise();
   return [...(clusters || [])];
 }

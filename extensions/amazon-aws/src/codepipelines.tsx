@@ -6,7 +6,6 @@ import { PipelineSummary } from "aws-sdk/clients/codepipeline";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
-const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -73,7 +72,7 @@ const iconMap: { [key: string]: Icon } = {
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
-  const { nextToken, pipelines } = await pipeline.listPipelines({ nextToken: token }).promise();
+  const { nextToken, pipelines } = await new AWS.CodePipeline().listPipelines({ nextToken: token }).promise();
   const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
   if (nextToken) {
@@ -87,6 +86,9 @@ async function fetchExecutionState(pipelineName?: string) {
   if (!pipelineName) {
     return;
   }
-  const { pipelineExecutionSummaries } = await pipeline.listPipelineExecutions({ pipelineName }).promise();
+
+  const { pipelineExecutionSummaries } = await new AWS.CodePipeline()
+    .listPipelineExecutions({ pipelineName })
+    .promise();
   return pipelineExecutionSummaries?.[0];
 }
