@@ -19,7 +19,6 @@ export async function getProjects(workspace: string) {
     params: {
       workspace,
       resource_type: "project",
-      // limit: 10,
       opt_fields: "id,name,icon,color,custom_field_settings.custom_field",
     },
   });

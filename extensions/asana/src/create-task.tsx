@@ -2,7 +2,6 @@ import CreateTaskForm from "./components/CreateTaskForm";
 import withAsanaAuth from "./components/withAsanaAuth";
 
 export type TaskFormValues = {
-  team: string;
   workspace: string;
   description: string;
   projects: string[];

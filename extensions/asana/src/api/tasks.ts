@@ -1,6 +1,5 @@
 import { request } from "./request";
 import { Project } from "./projects";
-import { Teams } from "./teams";
 
 type UserTaskList = {
   gid: string;
@@ -39,7 +38,6 @@ export type Task = {
   due_on: string | null;
   completed: boolean;
   permalink_url: string;
-  teams: Teams;
   projects: Project[];
   assignee_section: AssigneeSection;
   assignee: Assignee | null;
@@ -86,7 +84,6 @@ export async function getTask(taskId: string) {
 
 type TaskPayload = {
   workspace: string;
-  teams: string;
 } & Partial<{
   name: string;
   projects: string[];

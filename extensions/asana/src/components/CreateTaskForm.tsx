@@ -30,7 +30,6 @@ export default function CreateTaskForm(props: {
   draftValues?: TaskFormValues;
   assignee?: string;
   workspace?: string;
-  teams?: string;
   fromEmptyView?: boolean;
 }) {
   const { push } = useNavigation();
@@ -64,7 +63,6 @@ export default function CreateTaskForm(props: {
 
         const task = await createTask({
           workspace: values.workspace,
-          teams: values.team,
           name: values.name,
           custom_fields: customFields,
           ...(values.projects && values.projects.length > 0 ? { projects: values.projects } : {}),
@@ -155,13 +153,13 @@ export default function CreateTaskForm(props: {
       enableDrafts={!props.fromEmptyView}
       isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe}
     >
-      <Form.Dropdown title="Workspace" storeValue  {...itemProps.workspace}>
+      <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {
           return <Form.Dropdown.Item key={workspace.gid} value={workspace.gid} title={workspace.name} />;
         })}
       </Form.Dropdown>
 
-      <Form.TagPicker title="Projects" placeholder="Select one or more projects" autoFocus storeValue {...itemProps.projects}>
+      <Form.TagPicker title="Projects" placeholder="Select one or more projects" storeValue {...itemProps.projects}>
         {allProjects?.map((project) => {
           return (
             <Form.TagPicker.Item
@@ -176,7 +174,7 @@ export default function CreateTaskForm(props: {
 
       <Form.Separator />
 
-      <Form.TextField title="Task Name" placeholder="Short title for the task"   {...itemProps.name} />
+      <Form.TextField title="Task Name" placeholder="Short title for the task"  autoFocus {...itemProps.name} />
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
