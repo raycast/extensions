@@ -14,13 +14,14 @@
     {
       "name": "index",
       "title": "Matches",
+      "subtitle": "FIFA World Cup",
       "description": "See all matches calendar and results",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.43.2",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/utils": "^1.4.10",
     "@types/lodash.groupby": "^4.6.7",
     "date-fns": "^2.29.3",
     "lodash.groupby": "^4.6.0"
