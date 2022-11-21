@@ -6,6 +6,7 @@
   "icon": "icon-dark.png",
   "author": "thomas",
   "owner": "raycast",
+  "access": "public",
   "categories": [
     "Web",
     "Applications",
