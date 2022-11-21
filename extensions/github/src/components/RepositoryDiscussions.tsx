@@ -30,7 +30,7 @@ export function RepositoryDiscussionList(props: { repository: string }): JSX.Ele
   const { data, isLoading } = usePromise(
     async (searchText, filter) => {
       const result = await github.searchDiscussions({
-        query: `${repoFilter} ${filterText} ${searchText}`,
+        query: `${repoFilter} ${filterText} updated:>=2010-01-01 ${searchText}`,
         numberOfOpenItems: 20,
         avatarSize: 64,
       });
