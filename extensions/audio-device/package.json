@@ -56,6 +56,7 @@
     "@raycast/api": "^1.29.1",
     "execa": "^6.0.0",
     "macos-audio-devices": "^1.4.0",
+    "macos-version": "^5.2.1",
     "react-use": "^17.3.2",
     "run-applescript": "^6.0.0"
   },
