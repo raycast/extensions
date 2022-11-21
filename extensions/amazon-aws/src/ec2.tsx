@@ -2,12 +2,13 @@ import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
-  const { data: instances, error, isLoading } = useCachedPromise(fetchEC2Instances);
+  const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
 
   if (error) {
     return (
@@ -16,7 +17,11 @@ export default function DescribeInstances() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter instances by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {instances?.map((i) => (
         <InstanceListItem key={i.InstanceId} instance={i} />
       ))}

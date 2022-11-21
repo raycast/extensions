@@ -3,12 +3,13 @@ import * as AWS from "aws-sdk";
 import { StackSummary } from "aws-sdk/clients/cloudformation";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
 export default function ListStacks() {
-  const { data: stacks, error, isLoading } = useCachedPromise(fetchStacks);
+  const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
 
   if (error) {
     return (
@@ -17,7 +18,11 @@ export default function ListStacks() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter stacks by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter stacks by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {stacks?.map((s) => (
         <CloudFormationStack key={s.StackId} stack={s} />
       ))}

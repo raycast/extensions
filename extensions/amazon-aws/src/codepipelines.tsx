@@ -3,12 +3,13 @@ import * as AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
 import { PipelineSummary } from "aws-sdk/clients/codepipeline";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
 export default function DescribeInstances() {
-  const { data: pipelines, error, isLoading } = useCachedPromise(fetchPipelines);
+  const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
 
   if (error) {
     return (
@@ -17,7 +18,11 @@ export default function DescribeInstances() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter codepipelines by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter codepipelines by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {pipelines?.map((i) => (
         <CodePipelineListItem key={i.name} pipeline={i} />
       ))}

@@ -3,12 +3,13 @@ import AWS from "aws-sdk";
 
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const dynamoDB = new AWS.DynamoDB();
 
 export default function ListDynamoDbTables() {
-  const { data: tables, isLoading, error } = useCachedPromise(fetchTables);
+  const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
 
   if (error) {
     return (
@@ -17,7 +18,11 @@ export default function ListDynamoDbTables() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter tables by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter tables by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {tables?.map((i, index) => (
         <TableNameListItem key={index} tableName={i} />
       ))}

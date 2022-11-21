@@ -2,18 +2,23 @@ import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
 import * as AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 import { useCachedPromise } from "@raycast/utils";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 
 export default function ListLambdaFunctions() {
-  const { data: functions, error, isLoading } = useCachedPromise(fetchFunctions);
+  const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
 
   if (error) {
     return <Detail markdown="Something went wrong. Try again!" />;
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter functions by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter functions by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {functions?.map((func) => (
         <LambdaFunction key={func.FunctionName} func={func} />
       ))}

@@ -4,12 +4,13 @@ import setupAws from "./util/setupAws";
 
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
 export default function DescribeECSClusters() {
-  const { data: clusters, error, isLoading } = useCachedPromise(fetchClusters);
+  const { data: clusters, error, isLoading, revalidate } = useCachedPromise(fetchClusters);
 
   if (error) {
     return (
@@ -18,7 +19,11 @@ export default function DescribeECSClusters() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter instances by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {clusters?.map((c) => (
         <ClusterListItem key={c.clusterArn} cluster={c} />
       ))}

@@ -3,12 +3,13 @@ import { useCachedPromise } from "@raycast/utils";
 import chunk from "lodash/chunk";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
-  const { data: queues, error, isLoading } = useCachedPromise(fetchQueues);
+  const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
   const { data: attributes, revalidate: revalidateAttributes } = useCachedPromise(fetchQueueAttributes, queues || []);
 
   if (error) {
@@ -18,7 +19,18 @@ export default function ListSQSQueues() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter queues by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter queues by name..."
+      searchBarAccessory={
+        <AWSProfileDropdown
+          onProfileSelected={() => {
+            revalidate();
+            revalidateAttributes();
+          }}
+        />
+      }
+    >
       {queues?.map((i, k) => (
         <QueueListItem key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
       ))}
