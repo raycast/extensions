@@ -12823,6 +12823,7 @@ export type OrganizationSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -21804,6 +21805,7 @@ export type SponsorableSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -21999,6 +22001,8 @@ export type SponsorsListing = Node & {
   dashboardResourcePath: Scalars["URI"];
   /** The HTTP URL for the Sponsors dashboard for this Sponsors listing. */
   dashboardUrl: Scalars["URI"];
+  /** The records featured on the GitHub Sponsors profile. */
+  featuredItems: Array<SponsorsListingFeaturedItem>;
   /** The full description of the listing. */
   fullDescription: Scalars["String"];
   /** The full description of the listing rendered to HTML. */
@@ -22027,6 +22031,11 @@ export type SponsorsListing = Node & {
 };
 
 /** A GitHub Sponsors listing. */
+export type SponsorsListingFeaturedItemsArgs = {
+  featureableTypes?: InputMaybe<Array<SponsorsListingFeaturedItemFeatureableType>>;
+};
+
+/** A GitHub Sponsors listing. */
 export type SponsorsListingTiersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -22034,6 +22043,30 @@ export type SponsorsListingTiersArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsTierOrder>;
 };
+
+/** A record that is promoted on a GitHub Sponsors profile. */
+export type SponsorsListingFeaturedItem = Node & {
+  __typename?: "SponsorsListingFeaturedItem";
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** Will either be a description from the sponsorable maintainer about why they featured this item, or the item's description itself, such as a user's bio from their GitHub profile page. */
+  description?: Maybe<Scalars["String"]>;
+  id: Scalars["ID"];
+  /** The position of this featured item on the GitHub Sponsors profile with a lower position indicating higher precedence. Starts at 1. */
+  position: Scalars["Int"];
+  /** The GitHub Sponsors profile that features this record. */
+  sponsorsListing: SponsorsListing;
+  /** Identifies the date and time when the object was last updated. */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** The different kinds of records that can be featured on a GitHub Sponsors profile page. */
+export enum SponsorsListingFeaturedItemFeatureableType {
+  /** A repository owned by the user or organization with the GitHub Sponsors profile. */
+  Repository = "REPOSITORY",
+  /** A user who belongs to the organization with the GitHub Sponsors profile. */
+  User = "USER",
+}
 
 /** A GitHub Sponsors tier associated with a GitHub Sponsors listing. */
 export type SponsorsTier = Node & {
@@ -26054,6 +26087,7 @@ export type UserSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -27267,6 +27301,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
@@ -29234,6 +29269,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
@@ -29576,6 +29612,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
