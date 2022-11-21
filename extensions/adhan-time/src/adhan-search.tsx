@@ -26,7 +26,7 @@ export default function Command() {
           title: `${error} Check your preferences`,
           message: `Country ${userPreference.country} City ${userPreference.city}`,
           primaryAction: {
-            title: "Change  Preferences",
+            title: "Change Preferences",
             onAction: () => openExtensionPreferences(),
           },
         });
@@ -36,7 +36,7 @@ export default function Command() {
 
   const prayers: Prayers | undefined = prayerTimes?.data.timings;
   return (
-    <List isLoading={isLoading} navigationTitle="Prayer Name" searchBarPlaceholder="Convert decimal to...">
+    <List isLoading={isLoading} navigationTitle="Prayer Name" searchBarPlaceholder="Search by prayer name">
       {prayers &&
         Object.entries(prayers).map(([key, value]) => (
           <List.Item
