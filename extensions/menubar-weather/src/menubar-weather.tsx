@@ -1,6 +1,6 @@
 import { Clipboard, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { getCurrentWeather } from "./hooks/hooks";
-import { getUnits, getWeatherIcon } from "./utils/common-utils";
+import { getTime, getUnits, getWeatherIcon } from "./utils/common-utils";
 
 export default function MenubarWeather() {
   const { weather, location, loading } = getCurrentWeather();
@@ -119,6 +119,18 @@ export default function MenubarWeather() {
         </MenuBarExtra.Section>
       )}
 
+      <MenuBarExtra.Separator />
+
+      {typeof weather?.dt !== "undefined" && (
+        <MenuBarExtra.Item
+          title={"Time"}
+          icon={Icon.Clock}
+          subtitle={` ${getTime(weather?.dt)}`}
+          onAction={async () => {
+            await Clipboard.copy(`${getTime(weather?.dt)}`);
+          }}
+        />
+      )}
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
         title={"Preferences"}

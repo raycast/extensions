@@ -55,3 +55,9 @@ export function getWeatherIcon(icon: string | undefined) {
   }
   return `http://openweathermap.org/img/wn/${icon}@2x.png`;
 }
+
+export function getTime(stamp: number) {
+  const timeStamp = stamp * 1000;
+  const date = new Date(timeStamp);
+  return date.toLocaleString();
+}
