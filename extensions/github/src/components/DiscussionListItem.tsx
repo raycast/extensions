@@ -1,15 +1,11 @@
-import { List, Icon, Color, ActionPanel, Action, Image } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { format } from "date-fns";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";
+import { getGitHubUser } from "../helpers/users";
 
-function getDiscussionIcon(discussion: DiscussionFieldsFragment):
-  | {
-      value: Image.ImageLike | undefined | null;
-      tooltip: string;
-    }
-  | Image.ImageLike
-  | undefined {
-  const categoryText = discussion.category?.name ? `Category: ${discussion.category?.name}` : "";
+function getDiscussionIcon(discussion: DiscussionFieldsFragment): List.Item.Props["icon"] {
+  const categoryText = discussion.category?.name ? `Category: ${discussion.category?.name}` : "Unknown";
   const emojiHTML = discussion.category?.emojiHTML as string | null | undefined;
   if (!emojiHTML) {
     return { value: { source: discussion.repository?.owner?.avatarUrl }, tooltip: categoryText };
@@ -35,6 +31,7 @@ function getDiscussionIcon(discussion: DiscussionFieldsFragment):
 
 export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment }): JSX.Element {
   const d = props.discussion;
+  const user = getGitHubUser(d.author);
   return (
     <List.Item
       icon={getDiscussionIcon(d)}
@@ -55,8 +52,11 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           icon: d.comments ? Icon.SpeechBubble : undefined,
           tooltip: d.comments ? `Comments: ${d.comments.totalCount}` : undefined,
         },
-        { date: new Date(d.publishedAt) },
-        { icon: { source: d.author?.avatarUrl, mask: Image.Mask.Circle }, tooltip: d.author?.login },
+        {
+          date: new Date(d.publishedAt),
+          tooltip: d.publishedAt ? format(new Date(d.publishedAt), "EEEE d MMMM yyyy 'at' HH:mm") : undefined,
+        },
+        { icon: user.icon, tooltip: user.text },
       ]}
       actions={
         <ActionPanel>
