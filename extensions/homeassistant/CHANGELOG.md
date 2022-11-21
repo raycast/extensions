@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Fix Script Edit Action] - 2022-11-19
+- Fix wrong entity id when edit a script
+
 ## [Timestamps] - 2022-11-14
 - Add `last_updated` and `last_changed` states as tooltip as well as to the attributes list
 - Add HACS pending updates to `Updates` command if HACS is installed
