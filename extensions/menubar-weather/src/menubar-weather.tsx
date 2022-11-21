@@ -28,88 +28,96 @@ export default function MenubarWeather() {
           );
         })}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title={"Temp"}>
-        <MenuBarExtra.Item
-          title={"Temperature"}
-          icon={Icon.Temperature}
-          subtitle={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.main.temp}${tempUnit}`);
-          }}
-        />
-        <MenuBarExtra.Item
-          title={"Feels-like"}
-          icon={Icon.Temperature}
-          subtitle={` ${parseInt(weather?.main.feels_like + "")}${tempUnit}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.main.feels_like}${tempUnit}`);
-          }}
-        />
-        <MenuBarExtra.Item
-          title={"Min/Max"}
-          icon={Icon.Temperature}
-          subtitle={` ${parseInt(weather?.main.temp_min + "")}/${parseInt(weather?.main.temp_max + "")}${tempUnit}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.main.temp_min}/${weather?.main.temp_max}${tempUnit}`);
-          }}
-        />
-      </MenuBarExtra.Section>
-      <MenuBarExtra.Section title={"Wind"}>
-        <MenuBarExtra.Item
-          title={"Speed"}
-          icon={Icon.Gauge}
-          subtitle={` ${weather?.wind.speed}${windUint}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.wind.speed}${windUint}`);
-          }}
-        />
-      </MenuBarExtra.Section>
+      {typeof weather?.main !== "undefined" && (
+        <MenuBarExtra.Section title={"Temp"}>
+          <MenuBarExtra.Item
+            title={"Temperature"}
+            icon={Icon.Temperature}
+            subtitle={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.main.temp}${tempUnit}`);
+            }}
+          />
+          <MenuBarExtra.Item
+            title={"Feels-like"}
+            icon={Icon.Temperature}
+            subtitle={` ${parseInt(weather?.main.feels_like + "")}${tempUnit}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.main.feels_like}${tempUnit}`);
+            }}
+          />
+          <MenuBarExtra.Item
+            title={"Min/Max"}
+            icon={Icon.Temperature}
+            subtitle={` ${parseInt(weather?.main.temp_min + "")}/${parseInt(weather?.main.temp_max + "")}${tempUnit}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.main.temp_min}/${weather?.main.temp_max}${tempUnit}`);
+            }}
+          />
+        </MenuBarExtra.Section>
+      )}
+      {typeof weather?.wind !== "undefined" && (
+        <MenuBarExtra.Section title={"Wind"}>
+          <MenuBarExtra.Item
+            title={"Speed"}
+            icon={Icon.Gauge}
+            subtitle={` ${weather?.wind.speed}${windUint}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.wind.speed}${windUint}`);
+            }}
+          />
+        </MenuBarExtra.Section>
+      )}
 
-      <MenuBarExtra.Section title={"Rain"}>
-        <MenuBarExtra.Item
-          title={"1Hour"}
-          icon={Icon.Raindrop}
-          subtitle={` ${weather?.rain["1h"]}mm`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.rain["1h"]}mm`);
-          }}
-        />
-      </MenuBarExtra.Section>
+      {typeof weather?.rain !== "undefined" && (
+        <MenuBarExtra.Section title={"Rain"}>
+          <MenuBarExtra.Item
+            title={"1Hour"}
+            icon={Icon.Raindrop}
+            subtitle={` ${weather?.rain["1h"]}mm`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.rain["1h"]}mm`);
+            }}
+          />
+        </MenuBarExtra.Section>
+      )}
 
-      <MenuBarExtra.Section title={"Location"}>
-        <MenuBarExtra.Item
-          title={"City"}
-          icon={Icon.ChessPiece}
-          subtitle={` ${location?.name}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.coord.lon}`);
-          }}
-        />
-        <MenuBarExtra.Item
-          title={"Country"}
-          icon={Icon.BankNote}
-          subtitle={` ${location?.country}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.coord.lon}`);
-          }}
-        />
-        <MenuBarExtra.Item
-          title={"Lon"}
-          icon={Icon.ArrowDown}
-          subtitle={` ${weather?.coord.lon}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.coord.lon}`);
-          }}
-        />
-        <MenuBarExtra.Item
-          title={"Lat"}
-          icon={Icon.ArrowRight}
-          subtitle={` ${weather?.coord.lat}`}
-          onAction={async () => {
-            await Clipboard.copy(`${weather?.coord.lat}`);
-          }}
-        />
-      </MenuBarExtra.Section>
+      {typeof location !== "undefined" && (
+        <MenuBarExtra.Section title={"Location"}>
+          <MenuBarExtra.Item
+            title={"City"}
+            icon={Icon.ChessPiece}
+            subtitle={` ${location?.name}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.coord.lon}`);
+            }}
+          />
+          <MenuBarExtra.Item
+            title={"Country"}
+            icon={Icon.BankNote}
+            subtitle={` ${location?.country}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.coord.lon}`);
+            }}
+          />
+          <MenuBarExtra.Item
+            title={"Lon"}
+            icon={Icon.ArrowDown}
+            subtitle={` ${weather?.coord.lon}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.coord.lon}`);
+            }}
+          />
+          <MenuBarExtra.Item
+            title={"Lat"}
+            icon={Icon.ArrowRight}
+            subtitle={` ${weather?.coord.lat}`}
+            onAction={async () => {
+              await Clipboard.copy(`${weather?.coord.lat}`);
+            }}
+          />
+        </MenuBarExtra.Section>
+      )}
 
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
