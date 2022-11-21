@@ -1,6 +1,6 @@
 # YouTube Changelog
 
-## [Fix Crash] - 2022-11-18
+## [Fix Crash] - 2022-11-21
 - Fix crash when video title contain unusual characters
 
 ## [IINA] - 2022-11-01
