@@ -1,10 +1,10 @@
 import { Task } from "@doist/todoist-api-typescript";
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { useEffect } from "react";
 import { todoist } from "../api";
 import { priorities } from "../constants";
-import { checkTodoistApp, isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import View from "./View";
 
 interface MenubarTaskProps {
   task: Task;
@@ -12,10 +12,6 @@ interface MenubarTaskProps {
 }
 
 const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
-  useEffect(() => {
-    checkTodoistApp();
-  }, []);
-
   const priority = priorities.find((p) => p.value === task.priority);
 
   async function completeTask(task: Task) {
@@ -78,42 +74,44 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
   }
 
   return (
-    <MenuBarExtra.Submenu
-      title={task.content}
-      icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
-    >
-      <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
-      <MenuBarExtra.Item
-        title="Open in Todoist"
-        onAction={() => {
-          isTodoistInstalled ? open(`todoist://task?id=${task.id}`) : open(task.url);
-        }}
-        icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
-      />
-      <MenuBarExtra.Submenu title="Change Due Date" icon={Icon.Clock}>
-        <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDueDate(task, "today")} />
-        <MenuBarExtra.Item title="Tomorrow" icon={Icon.Sunrise} onAction={() => changeDueDate(task, "tomorrow")} />
+    <View>
+      <MenuBarExtra.Submenu
+        title={task.content}
+        icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
+      >
+        <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
         <MenuBarExtra.Item
-          title="Next Week"
-          icon={Icon.ArrowClockwise}
-          onAction={() => changeDueDate(task, "next week")}
+          title="Open in Todoist"
+          onAction={() => {
+            isTodoistInstalled ? open(`todoist://task?id=${task.id}`) : open(task.url);
+          }}
+          icon={isTodoistInstalled ? "todoist.png" : Icon.Globe}
         />
-        <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDueDate(task, "next weekend")} />
-        <MenuBarExtra.Item title="No Due Date" icon={Icon.XMarkCircle} onAction={() => changeDueDate(task, "")} />
-      </MenuBarExtra.Submenu>
-      <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
-        {priorities.map((priority, index) => (
+        <MenuBarExtra.Submenu title="Change Due Date" icon={Icon.Clock}>
+          <MenuBarExtra.Item title="Today" icon={Icon.Calendar} onAction={() => changeDueDate(task, "today")} />
+          <MenuBarExtra.Item title="Tomorrow" icon={Icon.Sunrise} onAction={() => changeDueDate(task, "tomorrow")} />
           <MenuBarExtra.Item
-            key={index}
-            title={priority.name}
-            icon={{ source: Icon.Circle, tintColor: priority.color }}
-            onAction={() => changePriority(task, priority.value)}
+            title="Next Week"
+            icon={Icon.ArrowClockwise}
+            onAction={() => changeDueDate(task, "next week")}
           />
-        ))}
-      </MenuBarExtra.Submenu>
+          <MenuBarExtra.Item title="Next Weekend" icon={"🌴"} onAction={() => changeDueDate(task, "next weekend")} />
+          <MenuBarExtra.Item title="No Due Date" icon={Icon.XMarkCircle} onAction={() => changeDueDate(task, "")} />
+        </MenuBarExtra.Submenu>
+        <MenuBarExtra.Submenu title="Change Priority" icon={{ source: "priority.svg", tintColor: Color.SecondaryText }}>
+          {priorities.map((priority, index) => (
+            <MenuBarExtra.Item
+              key={index}
+              title={priority.name}
+              icon={{ source: Icon.Circle, tintColor: priority.color }}
+              onAction={() => changePriority(task, priority.value)}
+            />
+          ))}
+        </MenuBarExtra.Submenu>
 
-      <MenuBarExtra.Item title="Delete Task" onAction={() => deleteTask(task)} icon={Icon.Trash} />
-    </MenuBarExtra.Submenu>
+        <MenuBarExtra.Item title="Delete Task" onAction={() => deleteTask(task)} icon={Icon.Trash} />
+      </MenuBarExtra.Submenu>
+    </View>
   );
 };
 
