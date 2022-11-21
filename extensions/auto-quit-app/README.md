@@ -6,4 +6,4 @@ You can set whether to automatically quit the following applications in the comm
 
 Includes: Notes, Preview, TextEdit, Messages, Terminal, Shortcuts, TV, QuickTime Player, Mail.
 
-![](https://user-images.githubusercontent.com/36128970/202435290-502d87fa-87a8-4e9a-ae89-b74bb0f7b595.png)
+![](https://user-images.githubusercontent.com/36128970/203059105-d5e51bc4-c4d0-4445-9cc6-60809804de8a.png)

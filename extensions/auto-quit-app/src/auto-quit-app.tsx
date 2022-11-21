@@ -5,7 +5,16 @@ export default function AutoQuitApp() {
   const { apps, loading } = quitAppsHook();
 
   return (
-    <MenuBarExtra icon={Icon.Airplane} isLoading={loading}>
+    <MenuBarExtra
+      icon={{
+        source: {
+          light: "menu-bar-icon.png",
+          dark: "menu-bar-icon@dark.png",
+        },
+      }}
+      isLoading={loading}
+      tooltip={"Auto Quit App"}
+    >
       <MenuBarExtra.Section title={"Enabled Apps"}>
         {apps?.map((value) => {
           return (
