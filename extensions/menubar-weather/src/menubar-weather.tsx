@@ -14,9 +14,10 @@ export default function MenubarWeather() {
       icon={getWeatherIcon(weather?.weather[0].icon)}
     >
       <MenuBarExtra.Section title={"Weather"}>
-        {weather?.weather.map((value, index, array) => {
+        {weather?.weather.map((value, index) => {
           return (
             <MenuBarExtra.Item
+              key={`${index} ${value.main}`}
               title={value.main}
               icon={getWeatherIcon(weather?.weather[0].icon)}
               subtitle={` ${value.description}`}
