@@ -22,14 +22,7 @@ export default function ListSQSQueues() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter queues by name..."
-      searchBarAccessory={
-        <AWSProfileDropdown
-          onProfileSelected={() => {
-            revalidate();
-            revalidateAttributes();
-          }}
-        />
-      }
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {queues?.map((i, k) => (
         <QueueListItem key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
