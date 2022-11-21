@@ -104,7 +104,8 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action
-                        title="See match on FIFA.com"
+                        title="See Match on FIFA.com"
+                        icon={Icon.SoccerBall}
                         onAction={() =>
                           open(
                             `https://www.fifa.com/fifaplus/es/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`
