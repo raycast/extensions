@@ -7,7 +7,7 @@ import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { DiscussionListItem } from "./DiscussionListItem";
 
-function DiscussionFilterDropdown(props: { onChange?: (value: string) => void }): JSX.Element {
+function DiscussionFilterDropdown(props: { onChange?: (value: string) => void }) {
   return (
     <List.Dropdown tooltip="Filter" onChange={props.onChange}>
       <List.Dropdown.Item value="" title="All" />
@@ -19,7 +19,7 @@ function DiscussionFilterDropdown(props: { onChange?: (value: string) => void })
   );
 }
 
-export function RepositoryDiscussionList(props: { repository: string }): JSX.Element {
+export function RepositoryDiscussionList(props: { repository: string }) {
   const { github } = getGitHubClient();
   const [searchText, setSearchText] = useState("");
   const [filter, setFilter] = useState("");
@@ -27,16 +27,16 @@ export function RepositoryDiscussionList(props: { repository: string }): JSX.Ele
   const filterText = filter.length > 0 ? `is:${filter}` : "";
 
   const repoFilter = props.repository && props.repository.length > 0 ? `repo:${props.repository}` : "";
+
   const { data, isLoading } = usePromise(
     async (searchText, filter) => {
       const result = await github.searchDiscussions({
-        query: `${repoFilter} ${filterText} updated:>=2010-01-01 ${searchText}`,
+        query: `${repoFilter} ${filter} updated:>=2010-01-01 ${searchText}`,
         numberOfOpenItems: 20,
-        avatarSize: 64,
       });
       return result.searchDiscussions.nodes?.map((d) => d as DiscussionFieldsFragment);
     },
-    [searchText, filter]
+    [searchText, filterText]
   );
 
   return (

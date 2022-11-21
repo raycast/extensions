@@ -4,7 +4,7 @@ fragment DiscussionFields on Discussion {
   bodyText
   publishedAt
   repository {
-    ...RepositoryFields
+    ...ShortRepositoryFields
   }
   url
   upvoteCount
@@ -25,7 +25,7 @@ fragment DiscussionFields on Discussion {
   }
 }
 
-query searchDiscussions($query: String!, $numberOfOpenItems: Int!, $avatarSize: Int!) {
+query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
   openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
     nodes {
       ...DiscussionFields

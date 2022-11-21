@@ -6,7 +6,7 @@ import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
-import { RepositoryFieldsFragment } from "./generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
@@ -30,9 +30,9 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20, avatarSize: 64 });
+      const result = await github.searchRepositories({ query, numberOfItems: 20 });
 
-      return result.search.nodes?.map((node) => node as RepositoryFieldsFragment);
+      return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
     { keepPreviousData: true }

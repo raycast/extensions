@@ -2,8 +2,6 @@ import { List } from "@raycast/api";
 import { random } from "lodash";
 import { useMemo } from "react";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
-
 const sampleQueries = [
   "apollo-11",
   "rails",

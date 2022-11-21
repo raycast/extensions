@@ -26,7 +26,6 @@ function SearchIssues() {
       const result = await github.searchIssues({
         query: `is:issue author:@me archived:false ${searchText}`,
         numberOfItems: 50,
-        avatarSize: 64,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
