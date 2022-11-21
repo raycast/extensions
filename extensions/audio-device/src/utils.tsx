@@ -101,7 +101,8 @@ export async function getOutputDevices() {
     end if
 
     return [ devices, "currentOutput", currentOutput ]
-  `);
+  `
+  );
 
   const list = stringList.split(", ");
 
@@ -169,5 +170,6 @@ export async function setOutputDevice(item: string) {
     if application "System Preferences" is running then
       tell application "System Preferences" to quit
     end if
-  `);
+  `
+  );
 }
