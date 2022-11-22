@@ -27,30 +27,28 @@ export const getCurrentWeather = () => {
       setRefreshTime(JSON.parse(cacheTime) as string);
     }
 
-    if (typeof cacheWeather === "undefined" || environment.launchType === LaunchType.Background) {
-      const date = new Date();
-      const refreshTime = date.toLocaleTimeString();
-      setRefreshTime(refreshTime);
-      try {
-        const { weather, geoLocation } = await getCurWeather();
-        if (typeof weather !== "undefined") {
-          setWeather(weather);
-          cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
-        } else {
-          cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(""));
-        }
-        if (typeof geoLocation !== "undefined") {
-          setLocation(geoLocation);
-          cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
-        } else {
-          cache.set(CacheKey.LOCATION, JSON.stringify(""));
-        }
-        cache.set(CacheKey.REFRSH_TIME, JSON.stringify(refreshTime));
-      } catch (e) {
-        console.error(e);
-        const error = e as AxiosError;
-        await showToast({ title: `${error.name}`, message: `${error.message}`, style: Toast.Style.Failure });
+    const date = new Date();
+    const refreshTime = date.toLocaleTimeString();
+    setRefreshTime(refreshTime);
+    try {
+      const { weather, geoLocation } = await getCurWeather();
+      if (typeof weather !== "undefined") {
+        setWeather(weather);
+        cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
+      } else {
+        cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(""));
       }
+      if (typeof geoLocation !== "undefined") {
+        setLocation(geoLocation);
+        cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
+      } else {
+        cache.set(CacheKey.LOCATION, JSON.stringify(""));
+      }
+      cache.set(CacheKey.REFRSH_TIME, JSON.stringify(refreshTime));
+    } catch (e) {
+      console.error(e);
+      const error = e as AxiosError;
+      await showToast({ title: `${error.name}`, message: `${error.message}`, style: Toast.Style.Failure });
     }
     setLoading(false);
   }, []);
