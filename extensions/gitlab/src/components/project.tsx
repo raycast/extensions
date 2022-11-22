@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
@@ -22,16 +22,39 @@ import { GitLabIcons, useImage } from "../icons";
 import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
 
+function getTextIcon(text: string): Image.ImageLike | undefined {
+  if (!text || text.length <= 0) {
+    return undefined;
+  }
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <rect x="0" y="0" width="40" height="40" fill="#FA6E34" rx="10"></rect>
+  <text
+  font-size="22"
+  fill="white"
+  font-family="Verdana"
+  text-anchor="middle"
+  alignment-baseline="baseline"
+  x="20.5"
+  y="32.5">${text}</text>
+</svg>
+  `.replaceAll("\n", "");
+
+  return {
+    source: `data:image/svg+xml,${svg}`,
+  };
+}
+
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
-  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project), GitLabIcons.project);
-
+  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
+  console.log(localImageFilepath);
   return (
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
       subtitle={project.star_count > 0 ? `⭐ ${project.star_count}` : ""}
-      icon={localImageFilepath}
+      icon={localImageFilepath ? { source: localImageFilepath } : getTextIcon(project.name[0].toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={project.name_with_namespace}>
