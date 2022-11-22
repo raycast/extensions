@@ -6,6 +6,10 @@ export enum CacheKey {
   LOCATION = "Location",
 }
 
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
 export function getUnits() {
   let tempUint: string;
   let windUint: string;

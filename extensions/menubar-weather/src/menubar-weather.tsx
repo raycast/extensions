@@ -1,6 +1,7 @@
 import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getCurrentWeather } from "./hooks/hooks";
 import { getDateTime, getTime, getUnits, getWeatherIcon } from "./utils/common-utils";
+import { isEmptyLonLat, latitude, longitude } from "./utils/open-weather-utils";
 
 export default function MenubarWeather() {
   const { weather, location, loading } = getCurrentWeather();
@@ -108,25 +109,29 @@ export default function MenubarWeather() {
               )}
             </>
           )}
-          {typeof location !== "undefined" && typeof weather?.sys !== "undefined" && (
+
+          {isEmptyLonLat() && typeof location !== "undefined" && typeof weather?.sys !== "undefined" && (
             <MenuBarExtra.Section title={"Location"}>
-              <MenuBarExtra.Item
-                title={"City"}
-                icon={Icon.ChessPiece}
-                subtitle={` ${location?.name}`}
-                onAction={async () => {
-                  await Clipboard.copy(`${location?.name}`);
-                }}
-              />
-              <MenuBarExtra.Item
-                title={"Country"}
-                icon={Icon.BankNote}
-                subtitle={` ${location?.country}`}
-                onAction={async () => {
-                  location?.lat;
-                  await Clipboard.copy(`${location?.country}`);
-                }}
-              />
+              {typeof location.name !== "undefined" && (
+                <MenuBarExtra.Item
+                  title={"City"}
+                  icon={Icon.ChessPiece}
+                  subtitle={` ${location?.name}`}
+                  onAction={async () => {
+                    await Clipboard.copy(`${location?.name}`);
+                  }}
+                />
+              )}
+              {typeof location.country !== "undefined" && (
+                <MenuBarExtra.Item
+                  title={"Country"}
+                  icon={Icon.BankNote}
+                  subtitle={` ${location?.country}`}
+                  onAction={async () => {
+                    await Clipboard.copy(`${location?.country}`);
+                  }}
+                />
+              )}
               <MenuBarExtra.Item
                 title={"Sunrise"}
                 icon={Icon.Sunrise}
@@ -143,17 +148,31 @@ export default function MenubarWeather() {
                   await Clipboard.copy(`${getTime(weather?.sys.sunset)}`);
                 }}
               />
+              {typeof location.lon !== "undefined" && typeof location.lat !== "undefined" && (
+                <MenuBarExtra.Item
+                  title={"Lon, Lat"}
+                  icon={Icon.EditShape}
+                  subtitle={` ${location?.lon?.toFixed(2)}, ${location?.lat?.toFixed(2)}`}
+                  onAction={async () => {
+                    await Clipboard.copy(`${location?.lon?.toFixed(2)}, ${location?.lat?.toFixed(2)}`);
+                  }}
+                />
+              )}
+            </MenuBarExtra.Section>
+          )}
+
+          {!isEmptyLonLat() && (
+            <MenuBarExtra.Section title={"Location"}>
               <MenuBarExtra.Item
                 title={"Lon, Lat"}
                 icon={Icon.EditShape}
-                subtitle={` ${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`}
+                subtitle={` ${parseFloat(longitude)?.toFixed(2)}, ${parseFloat(latitude)?.toFixed(2)}`}
                 onAction={async () => {
-                  await Clipboard.copy(`${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`);
+                  await Clipboard.copy(`${parseFloat(longitude)?.toFixed(2)}, ${parseFloat(latitude)?.toFixed(2)}`);
                 }}
               />
             </MenuBarExtra.Section>
           )}
-
           <MenuBarExtra.Separator />
 
           <MenuBarExtra.Item

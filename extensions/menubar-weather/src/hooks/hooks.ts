@@ -2,7 +2,7 @@ import { GeoLocation, Weather } from "../types/types";
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/open-weather-utils";
 import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
-import { CacheKey } from "../utils/common-utils";
+import { CacheKey, isEmpty } from "../utils/common-utils";
 import { AxiosError } from "axios";
 
 export const getCurrentWeather = () => {
@@ -15,20 +15,26 @@ export const getCurrentWeather = () => {
     const cache = new Cache();
     const cacheWeather = cache.get(CacheKey.CURRENT_WEATHER);
     const cacheLocation = cache.get(CacheKey.LOCATION);
-    if (typeof cacheWeather === "string") {
+    if (typeof cacheWeather === "string" && !isEmpty(cacheWeather)) {
       setWeather(JSON.parse(cacheWeather) as Weather);
     }
-    if (typeof cacheLocation === "string") {
+    if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
       setLocation(JSON.parse(cacheLocation) as GeoLocation);
     }
 
     if (typeof cacheWeather === "undefined" || environment.launchType === LaunchType.Background) {
       try {
         const { weather, geoLocation } = await getCurWeather();
-        setWeather(weather);
-        setLocation(geoLocation);
-        cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
-        cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
+        if (typeof weather !== "undefined") {
+          setWeather(weather);
+          cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
+        }
+        if (typeof geoLocation !== "undefined") {
+          setLocation(geoLocation);
+          cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
+        } else {
+          cache.set(CacheKey.LOCATION, JSON.stringify(""));
+        }
       } catch (e) {
         console.error(e);
         const error = e as AxiosError;

@@ -31,6 +31,22 @@
       "required": true
     },
     {
+      "name": "longitude",
+      "type": "textfield",
+      "title": "Longitude",
+      "description": "Longitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "required": false,
+      "placeholder": "0.00"
+    },
+    {
+      "name": "latitude",
+      "type": "textfield",
+      "title": "Latitude",
+      "description": "Latitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "required": false,
+      "placeholder": "0.00"
+    },
+    {
       "name": "unit",
       "type": "dropdown",
       "title": "Temperature Unit",
