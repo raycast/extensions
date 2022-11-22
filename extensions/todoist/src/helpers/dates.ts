@@ -2,7 +2,7 @@ import { Task } from "@doist/todoist-api-typescript";
 import { addDays, format, formatISO, isThisYear, isBefore, isSameDay } from "date-fns";
 
 export function isRecurring(task: Task): boolean {
-  return task.due?.recurring || false;
+  return task.due?.isRecurring || false;
 }
 
 export function isExactTimeTask(task: Task): boolean {
