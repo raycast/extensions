@@ -12,7 +12,7 @@ const BASE_URL = `https://api.fifa.com/api/v3`;
 const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
 // languages "lt" and "ru" are listed on fifa.com, but did not work when constructing URL
 const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
-const I18N_MAPPING = { en: enUS, es: es, fr: fr, de: de, ar: ar, ja: ja };
+const I18N_MAPPING: { [key: string]: any } = { en: enUS, es: es, fr: fr, de: de, ar: ar, ja: ja };
 const LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : `en`;
 const ID_SEASON = `255711`; // world cup qatar 2022
 const COUNT = 64; // limit to 64 (all matches)
