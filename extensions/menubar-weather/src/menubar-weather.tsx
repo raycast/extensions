@@ -109,7 +109,26 @@ export default function MenubarWeather() {
               )}
             </>
           )}
-
+          {typeof weather?.sys !== "undefined" && (
+            <MenuBarExtra.Section title={"Sun"}>
+              <MenuBarExtra.Item
+                title={"Sunrise"}
+                icon={Icon.Sunrise}
+                subtitle={` ${getTime(weather?.sys.sunrise)}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${getTime(weather?.sys.sunrise)}`);
+                }}
+              />
+              <MenuBarExtra.Item
+                title={"Sunset"}
+                icon={Icon.Moon}
+                subtitle={` ${getTime(weather?.sys.sunset)}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${getTime(weather?.sys.sunset)}`);
+                }}
+              />
+            </MenuBarExtra.Section>
+          )}
           {isEmptyLonLat() && typeof location !== "undefined" && typeof weather?.sys !== "undefined" && (
             <MenuBarExtra.Section title={"Location"}>
               {typeof location.name !== "undefined" && (
@@ -132,22 +151,6 @@ export default function MenubarWeather() {
                   }}
                 />
               )}
-              <MenuBarExtra.Item
-                title={"Sunrise"}
-                icon={Icon.Sunrise}
-                subtitle={` ${getTime(weather?.sys.sunrise)}`}
-                onAction={async () => {
-                  await Clipboard.copy(`${getTime(weather?.sys.sunrise)}`);
-                }}
-              />
-              <MenuBarExtra.Item
-                title={"Sunset"}
-                icon={Icon.Moon}
-                subtitle={` ${getTime(weather?.sys.sunset)}`}
-                onAction={async () => {
-                  await Clipboard.copy(`${getTime(weather?.sys.sunset)}`);
-                }}
-              />
               {typeof location.lon !== "undefined" && typeof location.lat !== "undefined" && (
                 <MenuBarExtra.Item
                   title={"Lon, Lat"}
