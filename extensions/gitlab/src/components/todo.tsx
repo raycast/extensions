@@ -93,7 +93,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       id={todo.id.toString()}
       title={todo.title}
       subtitle={subtitle}
-      accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author) }]}
+      accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author), tooltip: todo.author?.name }]}
       icon={getIcon(todo)}
       actions={
         <ActionPanel>
