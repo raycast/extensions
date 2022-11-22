@@ -2,7 +2,7 @@ import { closeMainWindow, showToast, getApplications, Toast } from "@raycast/api
 import { runAppleScript } from "run-applescript";
 
 interface SearchArguments {
-  searchTerm: String;
+  searchTerm: string;
 }
 
 export default async function main(props: { arguments: SearchArguments }) {
