@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
-import { enUS, es, fr, de, ar, ja } from "date-fns/locale";
 import groupBy from "lodash.groupby";
 import FilterDropdown from "./FilterDropdown";
 import flags from "./flags";
@@ -12,7 +11,6 @@ const BASE_URL = `https://api.fifa.com/api/v3`;
 const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
 // languages "lt" and "ru" are listed on fifa.com, but did not work when constructing URL
 const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
-const I18N_MAPPING: { [key: string]: any } = { en: enUS, es: es, fr: fr, de: de, ar: ar, ja: ja };
 const LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : `en`;
 const ID_SEASON = `255711`; // world cup qatar 2022
 const COUNT = 64; // limit to 64 (all matches)
@@ -23,7 +21,7 @@ type Data = {
 
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch(
-    `${BASE_URL}/calendar/matches?language=${LANG}&count=${COUNT}&idSeason=${ID_SEASON}`
+    `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
   );
   const [filter, setFilter] = useState("all");
 
@@ -49,7 +47,7 @@ export default function Command() {
     // not started
     if (match.MatchStatus === 1) {
       if (isToday(matchDate)) {
-        return formatDistanceToNowStrict(matchDate, { addSuffix: true, locale: I18N_MAPPING[LANG] });
+        return formatDistanceToNowStrict(matchDate, { addSuffix: true });
       } else {
         return format(matchDate, "hh:mm a");
       }
