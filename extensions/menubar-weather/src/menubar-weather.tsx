@@ -11,7 +11,7 @@ export default function MenubarWeather() {
     <MenuBarExtra
       isLoading={loading}
       tooltip={`${weather?.weather[0].main}, ${weather?.weather[0].description}`}
-      title={typeof weather === "undefined" ? "" : ` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
+      title={typeof weather === "undefined" ? "" : ` ${Math.round(weather?.main.temp)}${tempUnit}`}
       icon={getWeatherIcon(weather?.weather[0].icon)}
     >
       {!loading && (
@@ -41,7 +41,7 @@ export default function MenubarWeather() {
                   <MenuBarExtra.Item
                     title={"Temperature"}
                     icon={Icon.Temperature}
-                    subtitle={` ${parseInt(weather?.main.temp + "")}${tempUnit}`}
+                    subtitle={` ${Math.round(weather?.main.temp)}${tempUnit}`}
                     onAction={async () => {
                       await Clipboard.copy(`${weather?.main.temp}${tempUnit}`);
                     }}
@@ -49,7 +49,7 @@ export default function MenubarWeather() {
                   <MenuBarExtra.Item
                     title={"Feels-like"}
                     icon={Icon.Temperature}
-                    subtitle={` ${parseInt(weather?.main.feels_like + "")}${tempUnit}`}
+                    subtitle={` ${Math.round(weather?.main.feels_like)}${tempUnit}`}
                     onAction={async () => {
                       await Clipboard.copy(`${weather?.main.feels_like}${tempUnit}`);
                     }}
@@ -57,9 +57,7 @@ export default function MenubarWeather() {
                   <MenuBarExtra.Item
                     title={"Min/Max"}
                     icon={Icon.Temperature}
-                    subtitle={` ${parseInt(weather?.main.temp_min + "")}/${parseInt(
-                      weather?.main.temp_max + ""
-                    )}${tempUnit}`}
+                    subtitle={` ${Math.round(weather?.main.temp_min)}/${Math.round(weather?.main.temp_max)}${tempUnit}`}
                     onAction={async () => {
                       await Clipboard.copy(`${weather?.main.temp_min}/${weather?.main.temp_max}${tempUnit}`);
                     }}
@@ -67,17 +65,17 @@ export default function MenubarWeather() {
                   <MenuBarExtra.Item
                     title={"Pressure"}
                     icon={Icon.CricketBall}
-                    subtitle={` ${parseInt(weather?.main.pressure + "")}hPa`}
+                    subtitle={` ${Math.round(weather?.main.pressure)}hPa`}
                     onAction={async () => {
-                      await Clipboard.copy(`${parseInt(weather?.main.pressure + "hPa")}`);
+                      await Clipboard.copy(`${weather?.main.pressure}hPa`);
                     }}
                   />
                   <MenuBarExtra.Item
                     title={"Humidity"}
                     icon={Icon.Raindrop}
-                    subtitle={` ${parseInt(weather?.main.humidity + "")}%`}
+                    subtitle={` ${Math.round(weather?.main.humidity)}%`}
                     onAction={async () => {
-                      await Clipboard.copy(`${parseInt(weather?.main.humidity + "%")}`);
+                      await Clipboard.copy(`${weather?.main.humidity}%`);
                     }}
                   />
                 </MenuBarExtra.Section>
