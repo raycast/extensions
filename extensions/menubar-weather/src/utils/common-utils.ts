@@ -1,10 +1,15 @@
-import { getPreferenceValues, Icon } from "@raycast/api";
+import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
+import { GeoLocation, Weather } from "../types/types";
+import { cityName, latitude, longitude } from "./open-weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Current Weather",
   LOCATION = "Location",
   REFRESH_TIME = "Refresh Time",
+  CITY_NAME = "City Name",
+  LONGITUDE = "Longitude",
+  LATITUDE = "Latitude",
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -70,4 +75,30 @@ export function getTime(stamp: number) {
 export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
   const time = newRefreshTime - oldRefreshTime;
   return time >= 5 * 60 * 1000;
+}
+
+export function preferencesChanged() {
+  const cache = new Cache();
+
+  let oldCityName = "";
+  let oldLon = "";
+  let oldLat = "";
+
+  const cacheCityName = cache.get(CacheKey.CITY_NAME);
+  const cacheLon = cache.get(CacheKey.LONGITUDE);
+  const cacheLat = cache.get(CacheKey.LATITUDE);
+  if (typeof cacheCityName === "string" && !isEmpty(cacheCityName)) {
+    oldCityName = JSON.parse(cacheCityName) as string;
+  }
+  if (typeof cacheLon === "string" && !isEmpty(cacheLon)) {
+    oldLon = JSON.parse(cacheLon) as string;
+  }
+  if (typeof cacheLat === "string" && !isEmpty(cacheLat)) {
+    oldLat = JSON.parse(cacheLat) as string;
+  }
+  cache.set(CacheKey.CITY_NAME, JSON.stringify(cityName));
+  cache.set(CacheKey.LONGITUDE, JSON.stringify(longitude));
+  cache.set(CacheKey.LATITUDE, JSON.stringify(latitude));
+
+  return oldCityName !== cityName || oldLon !== longitude || oldLat !== latitude;
 }

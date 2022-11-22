@@ -2,7 +2,7 @@ import { GeoLocation, Weather } from "../types/types";
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/open-weather-utils";
 import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
-import { CacheKey, getTime, isEmpty, shouldRefresh } from "../utils/common-utils";
+import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
 import { AxiosError } from "axios";
 
 export const getCurrentWeather = () => {
@@ -27,7 +27,7 @@ export const getCurrentWeather = () => {
       oldRefreshTime = JSON.parse(cacheTime) as number;
     }
     const newRefreshTime = Date.now();
-    const isRefresh = shouldRefresh(oldRefreshTime, newRefreshTime);
+    const isRefresh = shouldRefresh(oldRefreshTime, newRefreshTime) || preferencesChanged();
 
     if (isRefresh || environment.launchType === LaunchType.Background) {
       try {
