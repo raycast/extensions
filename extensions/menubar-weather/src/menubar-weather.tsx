@@ -128,14 +128,6 @@ export default function MenubarWeather() {
                 }}
               />
               <MenuBarExtra.Item
-                title={"Lon, Lat"}
-                icon={Icon.EditShape}
-                subtitle={` ${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`}
-                onAction={async () => {
-                  await Clipboard.copy(`${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`);
-                }}
-              />
-              <MenuBarExtra.Item
                 title={"Sunrise"}
                 icon={Icon.Sunrise}
                 subtitle={` ${getTime(weather?.sys.sunrise)}`}
@@ -151,11 +143,27 @@ export default function MenubarWeather() {
                   await Clipboard.copy(`${getTime(weather?.sys.sunset)}`);
                 }}
               />
+              <MenuBarExtra.Item
+                title={"Lon, Lat"}
+                icon={Icon.EditShape}
+                subtitle={` ${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`}
+                onAction={async () => {
+                  await Clipboard.copy(`${location?.lon.toFixed(2)}, ${location?.lat.toFixed(2)}`);
+                }}
+              />
             </MenuBarExtra.Section>
           )}
 
           <MenuBarExtra.Separator />
 
+          <MenuBarExtra.Item
+            title={"Source"}
+            icon={Icon.BarChart}
+            subtitle={` OpenWeather`}
+            onAction={async () => {
+              await open("https://openweathermap.org");
+            }}
+          />
           {typeof weather?.dt !== "undefined" && (
             <MenuBarExtra.Item
               title={"Time"}
@@ -166,14 +174,6 @@ export default function MenubarWeather() {
               }}
             />
           )}
-          <MenuBarExtra.Item
-            title={"Source"}
-            icon={Icon.BarChart}
-            subtitle={` OpenWeather`}
-            onAction={async () => {
-              await open("https://openweathermap.org");
-            }}
-          />
           <MenuBarExtra.Separator />
           <MenuBarExtra.Item
             title={"Preferences"}
