@@ -6,7 +6,7 @@ import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 
-export default function DescribeInstances() {
+export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
 
   if (error) {
@@ -22,13 +22,13 @@ export default function DescribeInstances() {
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {instances?.map((i) => (
-        <InstanceListItem key={i.InstanceId} instance={i} />
+        <EC2Instance key={i.InstanceId} instance={i} />
       ))}
     </List>
   );
 }
 
-function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
+function EC2Instance(props: { instance: AWS.EC2.Instance }) {
   const instance = props.instance;
   const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
 
@@ -61,7 +61,7 @@ function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
       key={instance.InstanceId}
       title={name || "Unknown Instance name"}
       subtitle={instance.InstanceType}
-      icon="list-icon.png"
+      icon="ec2.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

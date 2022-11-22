@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix] - 2022-11-18
+
+- Fixed a bug where the searchbar text didn't update
+
 ## [Small fix | Version 1.9.1] - 2022-10-28
 
 - Fix command execution with shortcut not working

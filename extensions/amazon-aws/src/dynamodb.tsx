@@ -7,7 +7,7 @@ import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 
-export default function ListDynamoDbTables() {
+export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
 
   if (error) {
@@ -23,17 +23,17 @@ export default function ListDynamoDbTables() {
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {tables?.map((i, index) => (
-        <TableNameListItem key={index} tableName={i} />
+        <DynamoDbTable key={index} tableName={i} />
       ))}
     </List>
   );
 }
 
-function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
+function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
-      icon="dynamodb-icon.png"
+      icon="dynamodb.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

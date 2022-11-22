@@ -242,6 +242,9 @@ export default <IAPIData[]>[
     appId: "KNPXZI5B0M",
     indexName: "tailwindcss",
     homepage: "https://tailwindcss.com/",
+    searchParameters: {
+      facetFilters: ["version:v3"],
+    },
   },
   {
     name: "Unidata",

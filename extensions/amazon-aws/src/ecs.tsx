@@ -8,7 +8,7 @@ import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 
-export default function DescribeECSClusters() {
+export default function ECS() {
   const { data: clusters, error, isLoading, revalidate } = useCachedPromise(fetchClusters);
 
   if (error) {
@@ -24,13 +24,13 @@ export default function DescribeECSClusters() {
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {clusters?.map((c) => (
-        <ClusterListItem key={c.clusterArn} cluster={c} />
+        <ECSCluster key={c.clusterArn} cluster={c} />
       ))}
     </List>
   );
 }
 
-function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
+function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
 
@@ -57,7 +57,7 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
       key={cluster.clusterArn}
       title={name || "Unknown ECS name"}
       subtitle={subtitle}
-      icon="list-icon.png"
+      icon="ecs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

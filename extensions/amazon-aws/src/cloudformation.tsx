@@ -7,7 +7,7 @@ import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 const preferences = setupAws();
 
-export default function ListStacks() {
+export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
 
   if (error) {
@@ -34,7 +34,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
-      icon="cloudformation-icon.png"
+      icon="cloudformation.png"
       title={stack.StackName}
       actions={
         <ActionPanel>

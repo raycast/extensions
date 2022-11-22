@@ -38,13 +38,18 @@ function SearchRepositories() {
     { keepPreviousData: true }
   );
 
+  const foundRepositories = useMemo(
+    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
+    [data]
+  );
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search in public and private repositories"
       onSearchTextChange={setSearchText}
-      throttle
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
+      throttle
     >
       <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
         {history.map((repository) => (
@@ -57,9 +62,12 @@ function SearchRepositories() {
         ))}
       </List.Section>
 
-      {data ? (
-        <List.Section title={searchText ? "Search Results" : "Found Repositories"} subtitle={`${data.length}`}>
-          {data.map((repository) => {
+      {foundRepositories ? (
+        <List.Section
+          title={searchText ? "Search Results" : "Found Repositories"}
+          subtitle={`${foundRepositories.length}`}
+        >
+          {foundRepositories.map((repository) => {
             return (
               <RepositoryListItem
                 key={repository.id}
