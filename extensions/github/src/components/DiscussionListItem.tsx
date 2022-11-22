@@ -39,7 +39,7 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
       subtitle={d.repository?.nameWithOwner}
       accessories={[
         {
-          icon: { source: d.answer ? Icon.Checkmark : "", tintColor: Color.Green },
+          icon: d.answer ? { source: Icon.Checkmark, tintColor: Color.Green } : undefined,
           tooltip: d.answer ? "Answered" : undefined,
         },
         {
