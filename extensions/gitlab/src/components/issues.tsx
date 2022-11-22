@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { getGitLabGQL, gitlab } from "../common";
@@ -11,8 +11,8 @@ import {
   optimizeMarkdownText,
   Query,
   showErrorToast,
-  toDateString,
   tokenizeQueryText,
+  toLongDateString,
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -194,11 +194,21 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       id={issue.id.toString()}
       title={issue.title}
       subtitle={"#" + issue.iid}
-      icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
+      icon={{
+        source: GitLabIcons.issue,
+        tintColor: tintColor,
+        tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
+      }}
       accessories={[
-        { text: issue.milestone ? issue.milestone.title : undefined },
-        { text: toDateString(issue.updated_at) },
-        { icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle } },
+        {
+          text: issue.milestone ? issue.milestone.title : undefined,
+          tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
+        },
+        { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
+        {
+          icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle },
+          tooltip: issue.author ? `Author: ${issue.author?.name}` : undefined,
+        },
       ]}
       actions={
         <ActionPanel>
