@@ -13,6 +13,7 @@ import {
   showErrorToast,
   toDateString,
   tokenizeQueryText,
+  toLongDateString,
 } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
@@ -344,13 +345,18 @@ export function MRListItem(props: {
 }): JSX.Element {
   const mr = props.mr;
 
-  const getIcon = (): Image.ImageLike => {
+  const getIcon = (): List.Item.Props["icon"] => {
     if (mr.state === "merged") {
-      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: Image.Mask.Circle };
+      return {
+        source: GitLabIcons.merged,
+        tintColor: Color.Purple,
+        mask: Image.Mask.Circle,
+        tooltip: "Status: Merged",
+      };
     } else if (mr.state === "closed") {
-      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle, tooltip: "Status: Closed" };
     } else {
-      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle, tooltip: "Status: Open" };
     }
   };
 
@@ -373,9 +379,12 @@ export function MRListItem(props: {
 
   const accessories: List.Item.Accessory[] = [];
   if (!getListDetailsPreference()) {
-    accessories.push({ text: mr.milestone?.title }, { text: toDateString(mr.updated_at) });
+    accessories.push(
+      { text: mr.milestone?.title },
+      { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
+    );
   }
-  accessories.push({ icon: accessoryIcon });
+  accessories.push({ icon: accessoryIcon, tooltip: mr.author ? `Author: ${mr.author.name}` : undefined });
 
   const detailsIcon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
 

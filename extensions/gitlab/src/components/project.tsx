@@ -18,9 +18,13 @@ import {
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { GitLabIcons, useImage } from "../icons";
+import { useImage } from "../icons";
 import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
+
+function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
+  return getTextIcon(project.name[0].toUpperCase());
+}
 
 function getTextIcon(text: string): Image.ImageLike | undefined {
   if (!text || text.length <= 0) {
@@ -54,7 +58,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
       id={project.id.toString()}
       title={project.name_with_namespace}
       subtitle={project.star_count > 0 ? `⭐ ${project.star_count}` : ""}
-      icon={localImageFilepath ? { source: localImageFilepath } : getTextIcon(project.name[0].toUpperCase())}
+      icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={project.name_with_namespace}>
@@ -169,8 +173,14 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
 
 function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
   const pro = props.project;
-  const { localFilepath } = useImage(projectIconUrl(pro), GitLabIcons.project);
-  return <List.Dropdown.Item title={pro.name_with_namespace} icon={localFilepath} value={`${pro.id}`} />;
+  const { localFilepath } = useImage(projectIconUrl(pro));
+  return (
+    <List.Dropdown.Item
+      title={pro.name_with_namespace}
+      icon={localFilepath ? { source: localFilepath } : getProjectTextIcon(pro)}
+      value={`${pro.id}`}
+    />
+  );
 }
 
 export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {

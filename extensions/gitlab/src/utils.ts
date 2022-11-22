@@ -44,6 +44,11 @@ export function toDateString(d: string): string {
   return `${da}. ${mo}`;
 }
 
+export function toLongDateString(d: string) {
+  const date = new Date(d);
+  return date.toLocaleDateString();
+}
+
 export function getIdFromGqlId(id: string): number {
   const splits = id.split("/");
   return parseInt(splits.pop() || "");
