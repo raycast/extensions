@@ -22,10 +22,9 @@ export const getCurrentWeather = () => {
       setLocation(JSON.parse(cacheLocation) as GeoLocation);
     }
 
-    if (environment.launchType === LaunchType.Background) {
+    if (typeof cacheWeather === "undefined" || environment.launchType === LaunchType.Background) {
       try {
         const { weather, geoLocation } = await getCurWeather();
-        console.debug(weather);
         setWeather(weather);
         setLocation(geoLocation);
         cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
