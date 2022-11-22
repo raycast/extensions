@@ -7,7 +7,7 @@ import setupAws from "./util/setupAws";
 const preferences = setupAws();
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
-export default function ListSQSQueues() {
+export default function SQS() {
   const { data: queues, error, isLoading } = useCachedPromise(fetchQueues);
   const { data: attributes, revalidate: revalidateAttributes } = useCachedPromise(fetchQueueAttributes, queues || []);
 
@@ -20,13 +20,13 @@ export default function ListSQSQueues() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter queues by name...">
       {queues?.map((i, k) => (
-        <QueueListItem key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
+        <SQSQueue key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
       ))}
     </List>
   );
 }
 
-function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
+function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefined; onPurge: VoidFunction }) {
   const queue = props.queue;
   const attr = props.attributes;
   const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
@@ -86,7 +86,7 @@ function QueueListItem(props: { queue: string; attributes: QueueAttributes | und
       id={queue}
       key={queue}
       title={displayName ?? ""}
-      icon="sqs-list-icon.png"
+      icon="sqs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />

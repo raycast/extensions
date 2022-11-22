@@ -7,7 +7,7 @@ import { PipelineSummary } from "aws-sdk/clients/codepipeline";
 const preferences = setupAws();
 const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
-export default function DescribeInstances() {
+export default function CodePipeline() {
   const { data: pipelines, error, isLoading } = useCachedPromise(fetchPipelines);
 
   if (error) {
