@@ -1,7 +1,7 @@
 import { GeoLocation, Weather } from "../types/types";
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/open-weather-utils";
-import { Cache, showToast, Toast } from "@raycast/api";
+import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
 import { CacheKey } from "../utils/common-utils";
 import { AxiosError } from "axios";
 
@@ -21,16 +21,20 @@ export const getCurrentWeather = () => {
     if (typeof cacheLocation === "string") {
       setLocation(JSON.parse(cacheLocation) as GeoLocation);
     }
-    try {
-      const { weather, geoLocation } = await getCurWeather();
-      setWeather(weather);
-      setLocation(geoLocation);
-      cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
-      cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
-    } catch (e) {
-      console.error(e);
-      const error = e as AxiosError;
-      await showToast({ title: `${error.name}`, message: `${error.message}`, style: Toast.Style.Failure });
+
+    if (environment.launchType === LaunchType.Background) {
+      try {
+        const { weather, geoLocation } = await getCurWeather();
+        console.debug(weather);
+        setWeather(weather);
+        setLocation(geoLocation);
+        cache.set(CacheKey.CURRENT_WEATHER, JSON.stringify(weather));
+        cache.set(CacheKey.LOCATION, JSON.stringify(geoLocation));
+      } catch (e) {
+        console.error(e);
+        const error = e as AxiosError;
+        await showToast({ title: `${error.name}`, message: `${error.message}`, style: Toast.Style.Failure });
+      }
     }
     setLoading(false);
   }, []);

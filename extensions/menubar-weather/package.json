@@ -12,7 +12,7 @@
       "title": "Menubar Weather",
       "description": "Show current weather on the menu bar",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "10m"
     }
   ],
   "preferences": [
