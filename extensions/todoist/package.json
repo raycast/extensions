@@ -53,9 +53,9 @@
       "mode": "view"
     },
     {
-      "name": "today-focus",
-      "title": "Today's Focus",
-      "subtitle": "Focus on your most important task.",
+      "name": "today-tasks",
+      "title": "Today Tasks",
+      "subtitle": "See your most important task in the Command Bar",
       "description": "What's the most important task you should do today? (based on the 'Eat the frog' method). A task with the 'focus' label will appear in the Menu Bar. Label can be configured in Extension Preferences",
       "mode": "menu-bar"
     }
