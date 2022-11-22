@@ -1,10 +1,10 @@
 import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getCurrentWeather } from "./hooks/hooks";
-import { getDateTime, getTime, getUnits, getWeatherIcon } from "./utils/common-utils";
+import { getTime, getUnits, getWeatherIcon } from "./utils/common-utils";
 import { isEmptyLonLat, latitude, longitude } from "./utils/open-weather-utils";
 
 export default function MenubarWeather() {
-  const { weather, location, loading } = getCurrentWeather();
+  const { weather, location, refreshTime, loading } = getCurrentWeather();
   const { tempUnit, windUint } = getUnits();
 
   return (
@@ -186,14 +186,22 @@ export default function MenubarWeather() {
           />
           {typeof weather?.dt !== "undefined" && (
             <MenuBarExtra.Item
-              title={"Time"}
-              icon={Icon.Clock}
-              subtitle={` ${getDateTime(weather?.dt)}`}
+              title={"Detect Time"}
+              icon={Icon.Download}
+              subtitle={` ${getTime(weather?.dt)}`}
               onAction={async () => {
-                await Clipboard.copy(`${getDateTime(weather?.dt)}`);
+                await Clipboard.copy(`${getTime(weather?.dt)}`);
               }}
             />
           )}
+          <MenuBarExtra.Item
+            title={"Refresh Time"}
+            icon={Icon.Repeat}
+            subtitle={` ${refreshTime}`}
+            onAction={async () => {
+              await Clipboard.copy(`${refreshTime}`);
+            }}
+          />
           <MenuBarExtra.Separator />
           <MenuBarExtra.Item
             title={"Preferences"}

@@ -4,6 +4,7 @@ import { Preferences } from "../types/preferences";
 export enum CacheKey {
   CURRENT_WEATHER = "Current Weather",
   LOCATION = "Location",
+  REFRSH_TIME = "Refresh Time",
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -58,12 +59,6 @@ export function getWeatherIcon(icon: string | undefined) {
     return Icon.Sunrise;
   }
   return `http://openweathermap.org/img/wn/${icon}@2x.png`;
-}
-
-export function getDateTime(stamp: number) {
-  const timeStamp = stamp * 1000;
-  const date = new Date(timeStamp);
-  return date.toLocaleString();
 }
 
 export function getTime(stamp: number) {

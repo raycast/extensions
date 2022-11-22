@@ -1,6 +1,6 @@
 # Menubar Weather
 
-Show current weather on the menu bar. Weather information updated every 5 minutes.
+Show current weather on the menu bar. Weather information updated every 10 minutes.
 
 > How to get the OpenWeather Api key?
 >
