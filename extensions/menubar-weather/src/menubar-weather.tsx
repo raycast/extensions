@@ -4,7 +4,7 @@ import { getTime, getUnits, getWeatherIcon } from "./utils/common-utils";
 import { isEmptyLonLat, latitude, longitude } from "./utils/open-weather-utils";
 
 export default function MenubarWeather() {
-  const { weather, location, refreshTime, loading } = getCurrentWeather();
+  const { weather, location, loading } = getCurrentWeather();
   const { tempUnit, windUint } = getUnits();
 
   return (
@@ -194,14 +194,6 @@ export default function MenubarWeather() {
               }}
             />
           )}
-          <MenuBarExtra.Item
-            title={"Refresh Time"}
-            icon={Icon.Repeat}
-            subtitle={` ${refreshTime}`}
-            onAction={async () => {
-              await Clipboard.copy(`${refreshTime}`);
-            }}
-          />
           <MenuBarExtra.Separator />
           <MenuBarExtra.Item
             title={"Preferences"}

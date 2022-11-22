@@ -4,7 +4,7 @@ import { Preferences } from "../types/preferences";
 export enum CacheKey {
   CURRENT_WEATHER = "Current Weather",
   LOCATION = "Location",
-  REFRSH_TIME = "Refresh Time",
+  REFRESH_TIME = "Refresh Time",
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -65,4 +65,9 @@ export function getTime(stamp: number) {
   const timeStamp = stamp * 1000;
   const date = new Date(timeStamp);
   return date.toLocaleTimeString();
+}
+
+export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
+  const time = newRefreshTime - oldRefreshTime;
+  return time >= 5 * 60 * 1000;
 }
