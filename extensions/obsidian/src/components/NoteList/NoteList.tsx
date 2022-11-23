@@ -27,7 +27,7 @@ export function NoteList(props: {
 
   const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
   const list = useMemo(() => filterNotes(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
-  let _notes = list.slice(0, MAX_RENDERED_NOTES);
+  const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
   const tags = tagsForNotes(allNotes ?? []);
 
