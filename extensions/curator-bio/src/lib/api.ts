@@ -1,10 +1,10 @@
 import got from "got";
 import { CookieJar } from "tough-cookie";
-import { APIData, CollectionData, UserData } from "./types";
-// import RaycastCacheStore from "./cacheStore";
+import { APIData, CollectionData, Item, UserData } from "./types";
+import RaycastCacheStore from "./cacheStore";
 
-// const store = new RaycastCacheStore();
-const cookieJar = new CookieJar();
+const store = new RaycastCacheStore();
+const cookieJar = new CookieJar(store);
 
 const client = got.extend({
   prefixUrl: "https://www.curator.bio/api/v2",
@@ -40,7 +40,7 @@ export const getItems = async (page = 1, perPage = 30) => {
         perPage,
       },
     })
-    .json();
+    .json() as Promise<APIData<Item[]>>;
 };
 
 // https://www.curator.bio/api/v2/users/me/subscriptions/items?page=1&perPage=30
@@ -53,7 +53,7 @@ export const getSubscriptionItems = async (page = 1, perPage = 30) => {
         perPage,
       },
     })
-    .json();
+    .json() as Promise<APIData<Item[]>>;
 };
 
 // `/api/v2/users/${userCustomId}/colls`,
@@ -68,7 +68,7 @@ export const getCollectionItems = async (userId: string, collectionId: string) =
         collCustomId: collectionId,
       },
     })
-    .json();
+    .json() as Promise<APIData<Item[]>>;
 };
 
 export const getMyItemDetail = async (id: string) => {

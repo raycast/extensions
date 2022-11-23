@@ -1,21 +1,16 @@
 // Touch cookie store implementation for Raycast extension Cache storage
 // Modified from https://github.com/expo/tough-cookie-web-storage-store/blob/master/WebStorageCookieStore.js#L122
-
+// https://github.com/salesforce/tough-cookie/blob/b1a8898ee3f8af52c6c1c355555d9f50ebe626ce/lib/memstore.js#L65
 import ToughCookie from "tough-cookie";
 import { Cache } from "@raycast/api";
-
 import get from "lodash/get";
 import set from "lodash/set";
 import unset from "lodash/unset";
 import values from "lodash/values";
-
 const { Cookie, Store } = ToughCookie;
-
 const STORE_KEY = "__cookieStore__";
 
 export class CacheStore extends Store {
-  private cache: Cache;
-
   constructor() {
     super();
     this.cache = new Cache({
@@ -27,48 +22,36 @@ export class CacheStore extends Store {
   findCookie(domain, path, key, callback) {
     const store = this._readStore();
     const cookie = get(store, [domain, path, key], null);
-
-    if (typeof callback === "function") {
-      callback(null, Cookie.fromJSON(cookie));
-    } else {
-      return Cookie.fromJSON(cookie);
-    }
+    callback(null, Cookie.fromJSON(cookie));
   }
 
-  findCookies(domain, path, callback) {
-    if (!domain) {
-      if (typeof callback === "function") {
-        callback(null, []);
-      } else {
-        return [];
-      }
+  findCookies(domain, path, allowSpecialUseDomain, callback) {
+    if (typeof allowSpecialUseDomain === "function") {
+      callback = allowSpecialUseDomain;
+      allowSpecialUseDomain = true;
     }
 
-    let cookies: any[] = [];
+    if (!domain) {
+      callback(null, []);
+      return;
+    }
+    let cookies = [];
     const store = this._readStore();
     const domains = ToughCookie.permuteDomain(domain) || [domain];
     for (const domain of domains) {
       if (!store[domain]) {
         continue;
       }
-
       let matchingPaths = Object.keys(store[domain]);
       if (path != null) {
         matchingPaths = matchingPaths.filter((cookiePath) => this._isOnPath(cookiePath, path));
       }
-
       for (const path of matchingPaths) {
         cookies.push(...values(store[domain][path]));
       }
     }
-
     cookies = cookies.map((cookie) => Cookie.fromJSON(cookie));
-
-    if (typeof callback === "function") {
-      callback(null, cookies);
-    } else {
-      return cookies;
-    }
+    callback(null, cookies);
   }
 
   /**
@@ -78,15 +61,12 @@ export class CacheStore extends Store {
     if (!cookiePath) {
       return false;
     }
-
     if (cookiePath === urlPath) {
       return true;
     }
-
     if (!urlPath.startsWith(cookiePath)) {
       return false;
     }
-
     if (cookiePath[cookiePath.length - 1] !== "/" && urlPath[cookiePath.length] !== "/") {
       return false;
     }
@@ -97,12 +77,7 @@ export class CacheStore extends Store {
     const store = this._readStore();
     set(store, [cookie.domain, cookie.path, cookie.key], cookie);
     this._writeStore(store);
-
-    if (typeof callback === "function") {
-      callback(null);
-    } else {
-      return null;
-    }
+    callback(null);
   }
 
   updateCookie(oldCookie, newCookie, callback) {
@@ -113,12 +88,7 @@ export class CacheStore extends Store {
     const store = this._readStore();
     unset(store, [domain, path, key]);
     this._writeStore(store);
-
-    if (typeof callback === "function") {
-      callback(null);
-    } else {
-      return null;
-    }
+    callback(null);
   }
 
   removeCookies(domain, path, callback) {
@@ -129,48 +99,35 @@ export class CacheStore extends Store {
       unset(store, [domain, path]);
     }
     this._writeStore(store);
-
-    if (typeof callback === "function") {
-      callback(null);
-    } else {
-      return null;
-    }
+    callback(null);
   }
 
   getAllCookies(callback) {
-    let cookies: any[] = [];
+    let cookies = [];
     const store = this._readStore();
     for (const domain of Object.keys(store)) {
       for (const path of Object.keys(store[domain])) {
         cookies.push(...values(store[domain][path]));
       }
     }
-
     cookies = cookies.map((cookie) => Cookie.fromJSON(cookie));
     cookies.sort((c1, c2) => (c1.creationIndex || 0) - (c2.creationIndex || 0));
-
-    if (typeof callback === "function") {
-      callback(null, cookies);
-    } else {
-      return cookies;
-    }
+    callback(null, cookies);
   }
 
-  private _readStore() {
+  _readStore() {
     const json = this.cache.get(STORE_KEY);
     if (json) {
       try {
         return JSON.parse(json);
-      } catch {
+      } catch (_a) {
         return {};
       }
     }
     return {};
   }
-
-  _writeStore(store: any) {
+  _writeStore(store) {
     this.cache.set(STORE_KEY, JSON.stringify(store));
   }
 }
-
 export default CacheStore;

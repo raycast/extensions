@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { useId, useMemo } from "react";
+import { useMemo } from "react";
 import { useCollections, useUser } from "../lib/hooks";
 import { User } from "../lib/types";
 import Collection from "./Collection";
