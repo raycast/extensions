@@ -3,7 +3,7 @@
   "name": "curator-bio",
   "title": "Curator Bio",
   "description": "curator.bio extension",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "Yukai",
   "categories": [
     "Productivity",
