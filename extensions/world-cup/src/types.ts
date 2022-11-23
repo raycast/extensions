@@ -8,6 +8,7 @@ export type Match = {
   IdCompetition: string;
   IdSeason: string;
   IdStage: string;
+  Attendance: string | null;
   IdMatch: string;
   Stadium: Stadium;
   GroupName: { Description: string }[];

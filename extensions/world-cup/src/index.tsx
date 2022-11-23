@@ -89,6 +89,7 @@ export default function Command() {
                 IdCompetition,
                 IdSeason,
                 IdStage,
+                Attendance,
                 IdMatch,
                 GroupName,
                 StageName,
@@ -154,6 +155,7 @@ export default function Command() {
                             <List.Item.Detail.Metadata.Label title="Group" text={GroupName[0]?.Description} />
                           )}
                           <List.Item.Detail.Metadata.Label title="Stadium" text={Stadium.Name[0].Description} />
+                          {Attendance && <List.Item.Detail.Metadata.Label title="Attendance" text={Attendance} />}
 
                           {home.trim() != "Unknown" && MatchStatus !== 1 && (
                             <Fragment>
