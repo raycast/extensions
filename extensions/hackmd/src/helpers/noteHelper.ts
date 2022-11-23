@@ -15,7 +15,7 @@ export const getNoteUrl = (note: Note, editMode = false): string => {
   const namePath = note.userPath || note.teamPath;
 
   if (namePath) {
-    const noteUrl = new url.URL(`@${namePath}/${note.permalink || note.shortId}`, instance_url).toString()
+    const noteUrl = new url.URL(`@${namePath}/${note.permalink || note.shortId}`, instance_url).toString();
 
     return editMode ? `${noteUrl}/edit` : noteUrl;
   } else {
