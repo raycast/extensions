@@ -1,18 +1,13 @@
 import { Detail, ActionPanel, Action, List, Icon, Image } from "@raycast/api";
 import { Item } from "../../lib/types";
-import { toCapitalize } from "../../lib/utils";
+import { toCapitalize, getItemUserWorkaround } from "../../lib/utils";
 import Collection from "../Collection";
+import UserView from "../UserView";
 import { useItemRenderData } from "./hooks";
 
 type CollectionInfo = {
   userId: string;
   collectionId: string;
-};
-
-const getItemUserWorkaround = (item: Item) => {
-  const user = Array.isArray(item.user) ? item.user[0] : item.user;
-
-  return user;
 };
 
 const OpenCollectionAction = ({ item }: { item: Item }) => {
@@ -52,6 +47,16 @@ export const ItemDetail = ({ item }: { item: Item }) => {
           <ActionPanel.Section>
             <OpenCollectionAction item={item} />
           </ActionPanel.Section>
+
+          <Action.Push
+            title="Browse User"
+            icon={Icon.PersonCircle}
+            target={<UserView user={item.user} />}
+            shortcut={{
+              modifiers: ["cmd", "shift"],
+              key: "u",
+            }}
+          />
         </ActionPanel>
       }
       metadata={<ItemDetailMetadata item={item} />}
