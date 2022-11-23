@@ -1,4 +1,4 @@
-import { getMe, login, getSubscriptions } from "./api";
+import { getMe, login, getSubscriptionItems, getMyItemDetail } from "./api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preference } from "./types";
@@ -25,7 +25,11 @@ export const useMe = () => {
 };
 
 export const useSubscriptions = (page: number, execute: boolean) => {
-  return useCachedPromise(getSubscriptions, [page], {
+  return useCachedPromise(getSubscriptionItems, [page], {
     execute,
   });
+};
+
+export const useMyItemDetail = (id: string) => {
+  return useCachedPromise(getMyItemDetail, [id]);
 };

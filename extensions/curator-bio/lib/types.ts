@@ -22,6 +22,7 @@ export interface Item {
   updatedAt: string;
   status: string;
   settings: Settings;
+  views?: number;
 }
 export interface CollectionsItem {
   name: string;
@@ -64,6 +65,14 @@ type FileType =
   | {
       type: "embed";
       data: EmbedData;
+    }
+  | {
+      type: "paragraph";
+      data: ParagraphData;
+    }
+  | {
+      type: "string";
+      data: unknown;
     };
 
 export interface LinkData {
@@ -78,6 +87,10 @@ export interface LinkMeta {
 export interface Image {
   url: string;
 }
+
+export type ParagraphData = {
+  text: string;
+};
 
 export interface ImageData {
   file: File;

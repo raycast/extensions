@@ -27,7 +27,7 @@ export const getMe = async () => {
 
 // https://www.curator.bio/api/v2/users/me/subscriptions/items?page=1&perPage=30
 
-export const getSubscriptions = async (page = 1, perPage = 30) => {
+export const getSubscriptionItems = async (page = 1, perPage = 30) => {
   return client
     .get(`users/me/subscriptions/items?page=${page}&perPage=${perPage}`, {
       searchParams: {
@@ -38,3 +38,25 @@ export const getSubscriptions = async (page = 1, perPage = 30) => {
     .text()
     .then((r) => JSON.parse(r));
 };
+
+export const getCollectionItems = async (userId: string, collectionId: string) => {
+  return client.get(`users/${userId}/items`, {
+    searchParams: {
+      collCustomId: collectionId,
+    },
+  });
+};
+
+export const getMyItemDetail = async (id: string) => {
+  return client.get(`users/me/items/${id}`);
+};
+
+// Upload image
+// https://www.curator.bio/api/v2/upload?type=UserItemContent
+
+// Form, file: binary, response: { data: "url-of-image" }
+
+// https://www.curator.bio/api/v2/users/me/items
+// https://www.curator.bio/api/v2/users/charles
+// https://www.curator.bio/api/v2/users/charles/items?collCustomId=62d83095
+// https://www.curator.bio/api/v2/users/me/items/637f7742594a8ca164302abd
