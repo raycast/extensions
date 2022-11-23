@@ -88,7 +88,7 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
 
    ###  ${res["see-alsos"] == null ? "0" : res["see-alsos"].length} See Also(s)
 
-   ${res["see-alsos"] == null ? "No see also" : res["see-alsos"]?.map((res) => "`" + res +"`").join(" ")}
+   ${res["see-alsos"] == null ? "No see also" : res["see-alsos"]?.map((res) => "`" + res + "`").join(" ")}
 
    ### ${res.notes == null ? "0" : res.notes.length} Note(s)
 
