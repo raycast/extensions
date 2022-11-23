@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search HoudahSpot",
+      "title": "File Search",
       "subtitle": "HoudahSpot",
       "description": "Search with HoudahSpot",
       "mode": "no-view",
