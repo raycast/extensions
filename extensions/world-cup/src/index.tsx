@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
@@ -26,8 +26,37 @@ export default function Command() {
   );
   const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", true);
+  const [time, setTime] = useCachedState("time", null);
+  const [refresh, setRefresh] = useState<number | null>(null);
 
   let matches: Match[] = (data as Data)?.Results || [];
+
+  const currentMatch = matches.find((match) => match.MatchStatus === 3);
+
+  useEffect(() => {
+    if (!currentMatch) return;
+
+    const interval: ReturnType<typeof setInterval> = setInterval(() => {
+      setRefresh(Date.now());
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [currentMatch]);
+
+  useEffect(() => {
+    const fetchCurrentMatch = async (match: Match) => {
+      const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
+      const res = await fetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
+      const data = await res.json();
+      setTime(data?.MatchTime || null);
+    };
+
+    if (currentMatch) {
+      fetchCurrentMatch(currentMatch);
+    }
+  }, [currentMatch, refresh]);
 
   if (filter === "next") {
     matches = matches.filter((match) => match.MatchStatus !== 0);
@@ -60,13 +89,8 @@ export default function Command() {
       return "Finished";
     }
 
-    // in game
-    if (match.MatchTime) {
-      return match.MatchTime;
-    }
-
     if (match.MatchStatus === 3) {
-      return "now";
+      return time || "Now";
     }
 
     return "";
