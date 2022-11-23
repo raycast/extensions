@@ -10,6 +10,7 @@ import {
   closeMainWindow,
   showToast,
   Toast,
+  getFrontmostApplication,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
@@ -103,9 +104,17 @@ export default function changeChase() {
   ];
 
   const [clipboard, setClipboard] = useState<string>("");
+  const [frontmostAppName, setFrontmostAppName] = useState<string>("Active App");
 
   const preferences = getPreferenceValues();
   const preferredSource = preferences["source"];
+
+  useEffect(() => {
+    (async () => {
+      const { name } = await getFrontmostApplication();
+      setFrontmostAppName(name);
+    })();
+  }, []);
 
   useEffect(() => {
     readContent(preferredSource)
@@ -135,7 +144,11 @@ export default function changeChase() {
             actions={
               <ActionPanel>
                 <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
-                <Action title="Paste in Active App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
+                <Action
+                  title={`Paste in ${frontmostAppName}`}
+                  icon={Icon.BlankDocument}
+                  onAction={() => paste(modified)}
+                />
               </ActionPanel>
             }
           />
