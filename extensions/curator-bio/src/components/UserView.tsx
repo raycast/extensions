@@ -65,7 +65,7 @@ export default function UserView({ user }: { user: User }) {
   }, [user.about]);
 
   return (
-    <List isLoading={isLoading || isCollectionLoading}>
+    <List isLoading={isLoading || isCollectionLoading} filtering={false}>
       <List.Section>
         <List.Item
           title={user?.name || ""}
