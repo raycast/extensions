@@ -1,4 +1,6 @@
-export type Team = { TeamName: { Description: string }[]; Abbreviation: string };
+export type Team = { TeamName: { Description: string }[]; Abbreviation: string; Tactics: string };
+export type Stadium = { Name: { Description: string; Locale: string }[] };
+export type Officials = { NameShort: { Description: string; Locale: string }[] }[];
 
 export type Match = {
   Date: string;
@@ -6,7 +8,9 @@ export type Match = {
   IdCompetition: string;
   IdSeason: string;
   IdStage: string;
+  Attendance: string | null;
   IdMatch: string;
+  Stadium: Stadium;
   GroupName: { Description: string }[];
   StageName: { Description: string }[];
   HomeTeamScore: number | null;
@@ -14,4 +18,5 @@ export type Match = {
   MatchStatus: number;
   Home: Team | null;
   Away: Team | null;
+  Officials: Officials;
 };
