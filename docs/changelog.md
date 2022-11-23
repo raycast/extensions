@@ -11,10 +11,10 @@
 
 ### 💎 Improvements
 
-- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user’s “Pop to Root Search” preference in Raycast. `PopToRootType.Immediate` closes the window *and* immediately pops back to root, regardless of the user’s setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user’s “Pop to Root Search” preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user’s setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
 - **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
-- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as: 
-`![built-in icon](${Icon.AddPerson})` or `![local-assets-image](directory.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
+  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
 - **OAuth**: The client’s `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
 - **List and Detail Metadata**: Now show tooltips when labels get truncated.
 - **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
