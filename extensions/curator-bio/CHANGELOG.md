@@ -1,3 +1,3 @@
 # Curator Bio Changelog
 
-## [Initial Version] - 2022-11-24
+## [Initial Version] - 2022-11-25
