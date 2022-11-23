@@ -1,3 +1,3 @@
 # HoudahSpot Search Changelog
 
-## [Initial release] - {PR_MERGE_DATA}
+## [Initial release] - 2022-11-23
