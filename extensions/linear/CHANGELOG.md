@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Update] - 2022-12-23
+
+- Add a new "Copy Formatted Issue URL" Action
+
 ## [Create issue customization] - 2022-10-13
 
 - Add a preference to select the toast copy action after creating the issue
