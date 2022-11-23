@@ -97,7 +97,7 @@ export interface Link {
   value: string;
 }
 
-interface EmbedData {
+export interface EmbedData {
   service: string;
   source: string;
   embed: string;

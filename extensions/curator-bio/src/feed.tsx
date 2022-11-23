@@ -1,7 +1,25 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useMemo, useState } from "react";
+import url from "url";
 import { useMe, useSubscriptions } from "../lib/hooks";
-import { BlocksItem, Item, ImageData, LinkData } from "../lib/types";
+import { BlocksItem, Item, ImageData, LinkData, EmbedData } from "../lib/types";
+
+const renderEmbedData = (data: EmbedData) => {
+  const { service, source } = data;
+
+  switch (service) {
+    case "youtube": {
+      const videoId = new url.URL(source).searchParams.get("v");
+
+      return `![${videoId}](https://img.youtube.com/vi/${videoId}/hqdefault.jpg)
+      
+[Watch on YouTube](${source})`;
+    }
+    default: {
+      return `![${service}](${source})`;
+    }
+  }
+};
 
 const blocksToMarkdownRenderer = (blocks: BlocksItem[] = []): string => {
   return blocks
@@ -16,7 +34,7 @@ const blocksToMarkdownRenderer = (blocks: BlocksItem[] = []): string => {
           const description = _description.length > 150 ? _description.slice(0, 150) + "..." : _description;
           const title = _title.length > 100 ? _title.slice(0, 100) + "..." : _title;
 
-          return `### [${title}](${link})
+          return `#### [${title}](${link})
 
 > ${description}
 ${image?.url && `\n![${_title}](${image?.url})`}
@@ -30,6 +48,10 @@ ${image?.url && `\n![${_title}](${image?.url})`}
           } = data as ImageData;
 
           return `![${caption}](${url})`;
+        }
+
+        case "embed": {
+          return renderEmbedData(data as EmbedData);
         }
 
         default:
@@ -48,9 +70,9 @@ const ItemDetail = ({ item }: { item: Item }) => {
   }, [item.content.blocks]);
 
   const markdown = useMemo(() => {
-    return `# ${item.title}
+    return `## ${item.title}
 
-## ${item.subtitle}
+### ${item.subtitle}
 
 ${blocksMarkdown}
 `;
