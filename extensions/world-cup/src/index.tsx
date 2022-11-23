@@ -121,7 +121,7 @@ export default function Command() {
                       />
                       <Action title="Reload" icon={Icon.RotateClockwise} onAction={revalidate} />
                       <Action
-                        title="Toggle Detail"
+                        title="Toggle Details"
                         icon={Icon.AppWindowSidebarLeft}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                         onAction={() => setShowingDetail(!showingDetail)}
