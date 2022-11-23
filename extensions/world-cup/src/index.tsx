@@ -24,7 +24,7 @@ export default function Command() {
   const { isLoading, data, revalidate } = useFetch(
     `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
   );
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", true);
 
   let matches: Match[] = (data as Data)?.Results || [];
