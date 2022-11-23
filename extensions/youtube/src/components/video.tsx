@@ -54,7 +54,7 @@ function OpenWithIINAAction(props: { video: Video }): JSX.Element | null {
         <Action.Open
           title="Open with IINA"
           target={url}
-          application="iina"
+          application="IINA"
           icon={{ fileIcon: appPath }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onOpen={() => {
@@ -129,11 +129,15 @@ export function VideoItemDetail(props: { video: Video }): JSX.Element {
       }
       actions={
         <ActionPanel>
-          <OpenVideoInBrowser video={props.video} />
-          <ShowChannelAction channelId={video.channelId} />
-          <OpenChannelInBrowser channelId={video.channelId} />
-          <CopyVideoUrlAction video={video} />
-          <OpenWithIINAAction video={props.video} />
+          <ActionPanel.Section>
+            <OpenVideoInBrowser video={props.video} />
+            <ShowChannelAction channelId={video.channelId} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenChannelInBrowser channelId={video.channelId} />
+            <CopyVideoUrlAction video={video} />
+            <OpenWithIINAAction video={props.video} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -149,9 +153,7 @@ export function VideoItem(props: { video: Video; actions?: JSX.Element | undefin
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
-  const maxLength = 70;
-  const rawTitle = he.decode(video.title);
-  const title = rawTitle.slice(0, maxLength) + (rawTitle.length > maxLength ? " ..." : "");
+  const title = he.decode(video.title);
 
   const mainActions = () => {
     const showDetail = <ShowVideoDetails video={video} />;

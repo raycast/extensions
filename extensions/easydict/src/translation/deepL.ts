@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
- * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:40
+ * @lastEditor: Tisfeng
+ * @lastEditTime: 2022-10-30 23:12
  * @fileName: deepL.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,7 @@
 import { LocalStorage } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import querystring from "node:querystring";
-import { requestCostTime } from "../axiosConfig";
+import { httpsAgent, requestCostTime } from "../axiosConfig";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { getDeepLLangCode } from "../language/languages";
 import { AppKeyStore, myDecrypt, myEncrypt } from "../preferences";
@@ -59,7 +59,7 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
 
   return new Promise((resolve, reject) => {
     axios
-      .post(url, querystring.stringify(params))
+      .post(url, querystring.stringify(params), { httpsAgent })
       .then((response) => {
         const deepLResult = response.data as DeepLTranslateResult;
         const translatedText = deepLResult.translations[0].text;
@@ -96,7 +96,9 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
                 .catch((err) => reject(err));
             });
           }
+          return;
         }
+
         if (errorCode === 403) {
           errorInfo.message = "Authorization failed"; // Authorization failed. Please supply a valid auth_key parameter.
         }

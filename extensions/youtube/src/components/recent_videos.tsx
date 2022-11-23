@@ -111,7 +111,7 @@ export const RecentVideoActions = (props: { video: Video; refresh: boolean; setR
           props.setRefresh(!props.refresh);
           showToast(Toast.Style.Success, "Removed From Recent Videos");
         }}
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
       <Action
@@ -146,7 +146,7 @@ export const PinnedVideoActions = (props: { video: Video; refresh: boolean; setR
           props.setRefresh(!props.refresh);
           showToast(Toast.Style.Success, "Removed From Pinned Videos");
         }}
-        icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
       <Action

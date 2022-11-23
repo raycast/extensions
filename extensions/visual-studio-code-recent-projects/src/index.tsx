@@ -10,7 +10,11 @@ export default function Command() {
   const { data, isLoading } = useRecentEntries();
 
   return (
-    <List searchBarPlaceholder="Search recent projects..." isLoading={isLoading}>
+    <List
+      searchBarPlaceholder="Search recent projects..."
+      isLoading={isLoading}
+      filtering={{ keepSectionOrder: preferences.keepSectionOrder }}
+    >
       <List.Section title="Workspaces">
         {data?.filter(isWorkspaceEntry).map((entry) => (
           <LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />

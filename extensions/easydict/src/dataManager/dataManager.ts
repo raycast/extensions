@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:34
+ * @lastEditTime: 2022-10-13 22:40
  * @fileName: dataManager.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,6 +10,7 @@
 
 import { environment } from "@raycast/api";
 import axios from "axios";
+import { getProxyAgent } from "../axiosConfig";
 import { detectLanguage } from "../detectLanauge/detect";
 import { DetectedLangModel } from "../detectLanauge/types";
 import { rquestLingueeDictionary } from "../dictionary/linguee/linguee";
@@ -22,6 +23,7 @@ import {
   requestYoudaoWebDictionary,
   requestYoudaoWebTranslate,
 } from "../dictionary/youdao/youdao";
+import { englishLanguageItem } from "../language/consts";
 import { getAutoSelectedTargetLanguageItem, getLanguageItemFromYoudaoCode } from "../language/languages";
 import { LanguageItem } from "../language/type";
 import { myPreferences } from "../preferences";
@@ -44,7 +46,6 @@ import {
   TranslationType,
 } from "../types";
 import { checkIsDictionaryType, checkIsTranslationType, showErrorToast } from "../utils";
-import { englishLanguageItem } from "./../language/consts";
 import {
   checkIfEnableYoudaoDictionary,
   checkIfShowTranslationDetail,
@@ -55,6 +56,8 @@ import {
 } from "./utils";
 
 console.log(`enter dataManager.ts`);
+
+const delayQueryWithProxyTime = 600;
 
 /**
  * Data manager.
@@ -102,6 +105,8 @@ export class DataManager {
 
   delayQueryTimer?: NodeJS.Timeout;
   delayAppleTranslateTimer?: NodeJS.Timeout;
+  delayProxyQueryTimer?: NodeJS.Timeout;
+
   /**
    * Delay the time to call the query API. Since API has frequency limit.
    *
@@ -122,7 +127,7 @@ export class DataManager {
    * Delay the time to call the query API. Since API has frequency limit.
    */
   public delayQueryText(text: string, toLanguage: string, isDelay: boolean) {
-    console.log(`---> query text: ${text}, isDelay: ${isDelay}`);
+    console.log(`---> delay query text: ${text}, isDelay: ${isDelay}`);
     const delayTime = isDelay ? this.delayRequestTime : 0;
     this.delayQueryTimer = setTimeout(() => {
       this.queryText(text, toLanguage);
@@ -148,29 +153,60 @@ export class DataManager {
     this.queryYoudaoDictionary(queryWordInfo);
     this.queryYoudaoTranslate(queryWordInfo);
 
-    // query Linguee dictionary, will automatically query DeepL translate.
-    this.queryLingueeDictionary(queryWordInfo);
-    if (myPreferences.enableDeepLTranslate && !myPreferences.enableLingueeDictionary) {
-      this.queryDeepLTranslate(queryWordInfo);
-    }
-
-    // We need to pass a abort signal, becase google translate is used "got" to request, not axios.
-    this.queryGoogleTranslate(queryWordInfo, this.abortController);
     this.queryBingTranslate(queryWordInfo);
     this.queryBaiduTranslate(queryWordInfo);
     this.queryTencentTranslate(queryWordInfo);
     this.queryVolcanoTranslate(queryWordInfo);
     this.queryCaiyunTranslate(queryWordInfo);
 
-    // Put Apple translate at the end, because exec Apple Script will block thread, ~0.4s.
-    this.delayAppleTranslateTimer = setTimeout(() => {
-      this.queryAppleTranslate(queryWordInfo, this.abortController);
-    }, 1000);
+    this.delayQuery(queryWordInfo);
 
     // If no query, stop loading.
     if (this.queryRecordList.length === 0) {
       this.updateLoadingState(false);
     }
+  }
+
+  /**
+   * Delay query.
+   *
+   * 1. delay requests that need proxy but if no httpsAgent.
+   * 2. delay apple translate.
+   */
+  private delayQuery(queryWordInfo: QueryWordInfo) {
+    this.delayQueryWithProxy(() => {
+      // Query Linguee dictionary, will automatically query DeepL translate.
+      this.queryLingueeDictionary(queryWordInfo);
+
+      if (myPreferences.enableDeepLTranslate && !myPreferences.enableLingueeDictionary) {
+        this.queryDeepLTranslate(queryWordInfo);
+      }
+
+      // We need to pass a abort signal, becase google translate is used "got" to request, not axios.
+      this.queryGoogleTranslate(queryWordInfo, this.abortController);
+    });
+
+    // Put Apple translate at the end, because exec Apple Script will block thread, ~0.4s.
+    this.delayAppleTranslateTimer = setTimeout(() => {
+      this.queryAppleTranslate(queryWordInfo, this.abortController);
+      console.log(`after delay apple translate`);
+    }, delayQueryWithProxyTime + 100);
+  }
+
+  /**
+   * Delay query with proxy.
+   */
+  private delayQueryWithProxy(callback: () => void) {
+    if (myPreferences.enableSystemProxy) {
+      return callback();
+    }
+
+    this.delayProxyQueryTimer = setTimeout(() => {
+      console.warn(`delay query with proxy`);
+      getProxyAgent().then(() => {
+        callback();
+      });
+    }, delayQueryWithProxyTime);
   }
 
   /**
@@ -196,6 +232,10 @@ export class DataManager {
     // clear delay Apple translate.
     if (this.delayAppleTranslateTimer) {
       clearTimeout(this.delayAppleTranslateTimer);
+    }
+
+    if (this.delayProxyQueryTimer) {
+      clearTimeout(this.delayProxyQueryTimer);
     }
   }
 
@@ -248,7 +288,7 @@ export class DataManager {
    * Query text, automatically detect the language of input text
    */
   private queryText(text: string, toLanguage: string) {
-    console.log("start queryText: " + text);
+    console.warn("start queryText: " + text);
 
     this.updateLoadingState(true);
     this.resetProperties();
@@ -365,7 +405,10 @@ export class DataManager {
         });
 
       // at the same time, query DeepL translate.
-      this.queryDeepLTranslate(queryWordInfo);
+
+      this.delayQueryWithProxy(() => {
+        this.queryDeepLTranslate(queryWordInfo);
+      });
     }
   }
 
@@ -410,13 +453,18 @@ export class DataManager {
 
       youdaoDictionayFnPtr(queryWordInfo, type)
         .then((youdaoDictionaryResult) => {
-          // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 2)}`);
+          // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 4)}`);
 
           const formatYoudaoResult = youdaoDictionaryResult.result as YoudaoDictionaryFormatResult | undefined;
+          if (!formatYoudaoResult) {
+            console.warn(`---> formatYoudaoResult is undefined`);
+            return;
+          }
+
           const youdaoDisplaySections = updateYoudaoDictionaryDisplay(formatYoudaoResult);
 
           // * use Youdao dictionary to check if query text is a word.
-          Object.assign(queryWordInfo, formatYoudaoResult?.queryWordInfo);
+          Object.assign(queryWordInfo, formatYoudaoResult.queryWordInfo);
 
           const youdaoDictResult: QueryResult = {
             type: type,
@@ -430,6 +478,7 @@ export class DataManager {
           if (myPreferences.enableYoudaoTranslate && enableYoudaoAPI) {
             const translationType = TranslationType.Youdao;
 
+            // * Deep copy Youdao dictionary result, as Youdao translate result.
             const youdaoWebTranslateResult = JSON.parse(JSON.stringify(youdaoDictionaryResult));
             youdaoWebTranslateResult.type = translationType;
             const youdaoTranslationResult: QueryResult = {
@@ -736,9 +785,9 @@ export class DataManager {
       return;
     }
 
-    const oneLineTranslation = sourceResult.translations.map((translation) => translation).join(", ");
+    const oneLineTranslation = sourceResult.translations.join(", ");
     sourceResult.oneLineTranslation = oneLineTranslation;
-    let copyText = oneLineTranslation;
+    let copyText = sourceResult.translations.join("\n");
 
     // Debug: used for viewing long text log.
     if (environment.isDevelopment && type === TranslationType.Google) {
@@ -917,7 +966,7 @@ export class DataManager {
    */
   private cancelCurrentQuery() {
     // console.warn(`---> cancel current query`);
-    // console.log(`childProcess: ${JSON.stringify(this.abortObject.childProcess, null, 2)}`);
+    // console.log(`childProcess: ${JSON.stringify(this.abortObject.childProcess, null, 4)}`);
 
     this.cancelAndRemoveAllQueries();
   }

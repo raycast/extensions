@@ -27,10 +27,11 @@ async function getItem(key: string): Promise<Value | undefined>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
   const item = await LocalStorage.getItem<string>("favorite-fruit");
   console.log(item);
-};
+}
 ```
 
 #### Parameters
@@ -56,9 +57,11 @@ async function setItem(key: string, value: Value): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
-  await LocalStorage.setItem("favorite-fruit", "cherry");
-};
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
+  const item = await LocalStorage.getItem<string>("favorite-fruit");
+  console.log(item);
+}
 ```
 
 #### Parameters
@@ -84,9 +87,12 @@ async function removeItem(key: string): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
+  console.log(await LocalStorage.getItem<string>("favorite-fruit"));
   await LocalStorage.removeItem("favorite-fruit");
-};
+  console.log(await LocalStorage.getItem<string>("favorite-fruit"));
+}
 ```
 
 #### Parameters
@@ -117,10 +123,10 @@ interface Values {
   priority: number;
 }
 
-export default async () => {
+export default async function Command() {
   const items = await LocalStorage.allItems<Values>();
   console.log(`Local storage item count: ${Object.entries(items).length}`);
-};
+}
 ```
 
 #### Return
@@ -142,9 +148,9 @@ async function clear(): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await LocalStorage.clear();
-};
+}
 ```
 
 #### Return
@@ -178,7 +184,7 @@ Supported storage value types.
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   // String
   await LocalStorage.setItem("favorite-fruit", "cherry");
 
@@ -187,5 +193,5 @@ export default async () => {
 
   // Boolean
   await LocalStorage.setItem("fruit-eaten-today", true);
-};
+}
 ```

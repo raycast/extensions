@@ -511,7 +511,10 @@ function fetchGoogleTransAPI(
     if (notSupport) resolve(notSupport);
     const fromLang = "auto";
     const preferences: IPreferences = getPreferenceValues<IPreferences>();
-    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD })
+    const opt = Number(preferences.googleFreeTimeout)
+      ? { timeout: Number(preferences.googleFreeTimeout), retry: 0 }
+      : {};
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD }, opt)
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {
@@ -822,19 +825,12 @@ async function fetchAliyunTransAPI(
     apiVersion: "2018-10-12",
   });
 
-  const preferences: IPreferences = getPreferenceValues<IPreferences>();
-  if (provider.serviceProvider === preferences.defaultServiceProvider) {
-    try {
-      const from = await client.request<IAliyunDetectLangResponse>(
-        "GetDetectLanguage",
-        { SourceText: queryText },
-        { method: "POST" }
-      );
-      fromLang = from.DetectedLanguage;
-    } catch {
-      console.log("GetDetectLanguage err");
-    }
-  }
+  const from = await client.request<IAliyunDetectLangResponse>(
+    "GetDetectLanguage",
+    { SourceText: queryText },
+    { method: "POST" }
+  );
+  fromLang = from.DetectedLanguage;
   return new Promise<ITranslateRes>((resolve) => {
     const notSupport = checkServiceNotSupportLang(provider.serviceProvider, targetLang, queryText);
     if (notSupport) resolve(notSupport);
@@ -927,8 +923,8 @@ function checkServiceNotSupportLang(
 
 export async function capture(closeWindow: boolean): Promise<string> {
   let capturePath = path.join(os.tmpdir(), TempOCRImgName);
-  closeWindow && showHUD("Capture the text you want to translate");
-  !closeWindow && showToast({ title: "Capture the text you want to translate" });
+  closeWindow && (await showHUD("Capture the text you want to translate"));
+  !closeWindow && (await showToast({ title: "Capture the text you want to translate" }));
   execSync(`/usr/sbin/screencapture -i  ${capturePath}`);
   const now = new Date().getTime();
   const stat = fs.statSync(capturePath);

@@ -5,6 +5,9 @@
   "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
   "icon": "command-icon.png",
   "author": "es183923",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -210,6 +213,15 @@
       "title": "",
       "description": "Enable the \"Upper first\" Transformation",
       "label": "Upper First",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "SpongeCase",
+      "type": "checkbox",
+      "title": "",
+      "description": "Enable the \"SPonGE CasE\" Transformation",
+      "label": "Sponge Case",
       "default": true,
       "required": false
     }

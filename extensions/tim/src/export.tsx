@@ -18,7 +18,7 @@ import { format } from "prettier";
 import { useRef } from "react";
 
 import { runAppleScript } from "run-applescript";
-import { buildScriptEnsuringTimIsRunning, existsFile } from "./utils";
+import { buildScriptEnsuringTimIsRunning, checkIfTimInstalled, existsFile, showNotInstalledToast } from "./utils";
 
 export async function getExportData(): Promise<string> {
   const script = buildScriptEnsuringTimIsRunning(`export`);
@@ -31,6 +31,9 @@ export default function Command() {
   const placeHolderFileName = useRef(generateDefaultFileName());
 
   async function handleSubmit(values: { fileName: string; directory: string }) {
+    const timAvailable = await checkIfTimInstalled();
+    if (!timAvailable) return showNotInstalledToast();
+
     showToast({
       title: "Exporting data…",
       style: Toast.Style.Animated,

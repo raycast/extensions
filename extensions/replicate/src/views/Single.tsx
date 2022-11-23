@@ -3,7 +3,7 @@ import { copyImage, makeTitle } from "../utils/helpers";
 import { Prediction } from "../types";
 
 export const Single = ({ prediction }: { prediction: Prediction }) => {
-  const { input, output, metrics } = prediction;
+  const { input, output, metrics, id } = prediction;
   const markdown = prediction
     ? `
   ### ${input?.prompt?.trim() ?? "No prompt provided"}
@@ -17,6 +17,11 @@ export const Single = ({ prediction }: { prediction: Prediction }) => {
       actions={
         <ActionPanel>
           <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(output[0])} />
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            title="Open on Replicate"
+            url={`https://replicate.com/p/${id.split("-")[0]}`}
+          />
           {input?.prompt && (
             <Action.CopyToClipboard icon={Icon.Text} title="Copy Prompt" content={input?.prompt.trim()} />
           )}

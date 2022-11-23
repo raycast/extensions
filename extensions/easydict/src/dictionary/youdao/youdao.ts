@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-26 11:13
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-28 17:50
+ * @lastEditTime: 2022-10-15 11:41
  * @fileName: youdao.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -17,11 +17,10 @@ import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
 import { userAgent, YoudaoErrorCode } from "../../consts";
-import { AppKeyStore } from "../../preferences";
+import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
+import { AppKeyStore, myPreferences } from "../../preferences";
 import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
-import { englishLanguageItem } from "./../../language/consts";
-import { myPreferences } from "./../../preferences";
 import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
@@ -65,8 +64,9 @@ function getYoudaoWebCookie(): Promise<string | undefined> {
     axios
       .get(youdaoTranslatURL, { headers })
       .then((response) => {
-        if (response.headers["set-cookie"]) {
-          youdaoCookie = response.headers["set-cookie"]?.join(";");
+        const cookie = response.headers["set-cookie"];
+        if (cookie?.length && Array.isArray(cookie)) {
+          youdaoCookie = cookie.join(";");
           resolve(youdaoCookie);
           LocalStorage.setItem(youdaoCookieKey, youdaoCookie);
           console.log(`get web youdaoCookie: ${youdaoCookie}`);
@@ -175,7 +175,7 @@ export function requestYoudaoWebDictionary(
   const type = queryType ?? DicionaryType.Youdao;
 
   // * Note: "fanyi" only works when responese dicts has only one item ["meta"]
-  const dicts = [["web_trans", "ec", "ce", "baike", "wikipedia_digest"]];
+  const dicts = [["web_trans", "ec", "ce", "newhh", "baike", "wikipedia_digest"]];
 
   // English --> Chinese
   // ["web_trans","video_sents", "simple", "phrs",  "syno", "collins", "word_video",  "discriminate", "ec", "ee", "blng_sents_part", "individual", "collins_primary", "rel_word", "auth_sents_part", "media_sents_part", "expand_ec", "etym", "special","baike", "meta", "senior", "webster","oxford", "oxfordAdvance", "oxfordAdvanceHtml"]
@@ -215,8 +215,9 @@ export function requestYoudaoWebDictionary(
 
         const youdaoWebModel = res.data as YoudaoWebDictionaryModel;
         const youdaoFormatResult = formateYoudaoWebDictionaryModel(youdaoWebModel);
+        const youdaoQueryWordInfo = youdaoFormatResult.queryWordInfo;
 
-        if (!youdaoFormatResult.queryWordInfo.hasDictionaryEntries) {
+        if (!youdaoQueryWordInfo.hasDictionaryEntries) {
           const youdaoTypeResult: QueryTypeResult = {
             type: type,
             result: undefined,
@@ -226,10 +227,16 @@ export function requestYoudaoWebDictionary(
           return resolve(youdaoTypeResult);
         }
 
+        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂, so we need to update it.
+        if (queryWordInfo.fromLanguage !== autoDetectLanguageItem.youdaoLangCode) {
+          youdaoQueryWordInfo.fromLanguage = queryWordInfo.fromLanguage;
+          youdaoQueryWordInfo.toLanguage = queryWordInfo.toLanguage;
+        }
+
         const youdaoTypeResult: QueryTypeResult = {
           type: type,
           result: youdaoFormatResult,
-          queryWordInfo: youdaoFormatResult.queryWordInfo,
+          queryWordInfo: youdaoQueryWordInfo,
           translations: youdaoFormatResult.translation.split("\n"),
         };
         resolve(youdaoTypeResult);
@@ -350,7 +357,7 @@ export async function requestYoudaoWebTranslate(
           return reject(undefined);
         }
 
-        console.log(`---> youdao web translate error: ${JSON.stringify(error, null, 2)}`);
+        console.log(`---> youdao web translate error: ${JSON.stringify(error, null, 4)}`);
         const errorInfo = getTypeErrorInfo(type, error);
         reject(errorInfo);
       });
@@ -406,7 +413,7 @@ function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
  * Download query word audio and play after download.
  */
 export function playYoudaoWordAudioAfterDownloading(queryWordInfo: QueryWordInfo, enableYoudaoWebAudio = true) {
-  tryDownloadYoudaoAudio(queryWordInfo, enableYoudaoWebAudio, () => {
+  downloadYoudaoAudio(queryWordInfo, enableYoudaoWebAudio, () => {
     playWordAudio(queryWordInfo.word, queryWordInfo.fromLanguage);
   });
 }
@@ -416,25 +423,23 @@ export function playYoudaoWordAudioAfterDownloading(queryWordInfo: QueryWordInfo
  *
  * If query text is a English word, download audio file from youdao web api, otherwise downloaded from youdao tts.
  *
- * * NOTE: Audio 'Volcano' is different from 'volcano' in youdao web audio, so odd, so we use lower case word.
- *
  * * If query text is too long(>40), don't download audio file, later derectly use say command to play.
  */
-export function tryDownloadYoudaoAudio(
+export function downloadYoudaoAudio(
   queryWordInfo: QueryWordInfo,
   enableYoudaoWebAudio = true,
   callback?: () => void,
   forceDownload = false
 ) {
-  // For English word, Youdao web audio is better than Youdao tts, so we use Youdao web audio first.
-  if (
+  // For most English words, it seems that Youdao web audio is better than Youdao tts, but not all words have web audio.
+  if (queryWordInfo.speechUrl) {
+    downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
+  } else if (
     enableYoudaoWebAudio &&
     queryWordInfo.isWord &&
     queryWordInfo.fromLanguage === englishLanguageItem.youdaoLangCode
   ) {
     downloadYoudaoEnglishWordAudio(queryWordInfo.word, callback, (forceDownload = false));
-  } else if (queryWordInfo.speechUrl) {
-    downloadWordAudioWithURL(queryWordInfo.word, queryWordInfo.speechUrl, callback, forceDownload);
   } else {
     console.log(`use say command to play derectly`);
     callback && callback();
@@ -449,11 +454,14 @@ export function tryDownloadYoudaoAudio(
  * Example: https://dict.youdao.com/dictvoice?audio=good&type=2
  *
  * type: 1: uk, 2: us. ---> 0: us ?
+ *
+ * * NOTE: Audio 'Volcano' is different from 'volcano' in youdao web audio, so odd, so we use lower case word.
+ *
+ * * Note: some of words, both uppercase and lowercase, have the same audio url, eg: polaris and Polaris: https://dict.youdao.com/dictvoice?type=2&audio=Polaris
  */
 export function downloadYoudaoEnglishWordAudio(word: string, callback?: () => void, forceDownload = false) {
-  const lowerCaseWord = word.toLowerCase();
-  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(lowerCaseWord)}`;
-  console.log(`download youdao 'English' word audio: ${lowerCaseWord}`);
-  const audioPath = getWordAudioPath(lowerCaseWord);
+  const url = `https://dict.youdao.com/dictvoice?type=2&audio=${encodeURIComponent(word)}`;
+  console.log(`download web youdao 'English' word audio: ${word}`);
+  const audioPath = getWordAudioPath(word);
   downloadAudio(url, audioPath, callback, forceDownload);
 }

@@ -31,7 +31,7 @@ export default function Profiles(props: ProfileProps) {
             title={item.name}
             subtitle="Anybox"
             icon={{
-              source: `http://localhost:6391/sf-symbols/${item.icon}`,
+              source: `http://127.0.0.1:6391/sf-symbols/${item.icon}`,
               fallback: Icon.Coins,
               tintColor: {
                 light: "#505151",

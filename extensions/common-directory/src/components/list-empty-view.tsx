@@ -3,7 +3,6 @@ import React, { Dispatch, SetStateAction } from "react";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import AddCommonDirectory from "../add-common-directory";
 import { ActionType, getItemAndSend } from "../utils/send-file-utils";
-import { ActionCopyFile } from "./action-copy-file";
 
 export function ListEmptyView(props: { setRefresh: Dispatch<SetStateAction<number>> }) {
   const { setRefresh } = props;

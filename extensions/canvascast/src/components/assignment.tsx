@@ -32,7 +32,9 @@ export const Assignment = (props: assignment) => {
             icon={{ source: Icons["Assignment"], tintColor: Color.PrimaryText }}
             target={
               <Detail
-                markdown={`# ${apiAssignment.name}\n\n${convertHTMLToMD(apiAssignment.description)}`}
+                markdown={`# ${apiAssignment.name}\n\n${convertHTMLToMD(
+                  apiAssignment.description ?? "No additional details were added for this assignment."
+                )}`}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
@@ -101,6 +103,14 @@ export const Assignment = (props: assignment) => {
           <Action.OpenInBrowser
             url={`https://${preferences.domain}/courses/${props.course_id}/discussion_topics/${props.id}`}
           />
+          {apiAssignment.description?.match(/https:\/\/docs\.google\.com\/document\/d\/.*?\/copy/g)?.length && (
+            <Action.OpenInBrowser
+              title={`Copy Google Doc`}
+              icon={Icons.OpenGoogleCopyLink}
+              url={apiAssignment.description.match(/https:\/\/docs\.google\.com\/document\/d\/.*?\/copy/g)[0]}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          )}
         </ActionPanel>
       }
       accessories={

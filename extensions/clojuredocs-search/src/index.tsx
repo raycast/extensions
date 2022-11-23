@@ -43,7 +43,6 @@ export default function Command() {
     const { isLoading, data } = useFetch(
       "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
       {
-        // to make sure the screen isn't flickering when the searchText changes
         keepPreviousData: true,
         parseResponse: async (response) => {
           cache.set(

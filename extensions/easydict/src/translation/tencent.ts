@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 22:15
+ * @lastEditTime: 2022-10-01 23:48
  * @fileName: tencent.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -190,7 +190,7 @@ export function requestTencentTranslate(queryWordInfo: QueryWordInfo): Promise<Q
           return reject(undefined);
         }
 
-        // console.error(`tencent translate err: ${JSON.stringify(err, null, 2)}`);
+        // console.error(`tencent translate err: ${JSON.stringify(err, null, 4)}`);
         const error = err as { code: string; message: string };
         console.error(`Tencent translate err, code: ${error.code}, message: ${error.message}`);
         const errorInfo: RequestErrorInfo = {
@@ -254,7 +254,7 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
     };
     return Promise.resolve(typeResult);
   } catch (err) {
-    // console.error(`tencent sdk translate err: ${JSON.stringify(err, null, 2)}`);
+    // console.error(`tencent sdk translate err: ${JSON.stringify(err, null, 4)}`);
     const error = err as { code: string; message: string };
     console.error(`Tencent translate error, code: ${error.code}, message: ${error.message}`);
     const errorInfo: RequestErrorInfo = {
@@ -274,7 +274,7 @@ export async function requestTencentSDKTranslate(queryWordInfo: QueryWordInfo): 
  * Todo: use axios to rewrite.
  */
 export function tencentDetect(text: string): Promise<DetectedLangModel> {
-  console.log(`---> start sdk request Tencent language detect`);
+  console.log(`---> start sdk request Tencent detect`);
 
   const params = {
     Text: text,

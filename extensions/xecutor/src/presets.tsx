@@ -323,24 +323,35 @@ export default function Command() {
 
   const handleOnCreateOrEditPreset = (preset: Preset) => {
     if (preset.new) {
-      setAppPresets((appPresets) => [
-        ...appPresets,
-        { id: uuid(), name: preset.name, icon: preset.icon, color: preset.color, apps: preset.apps, urls: preset.urls },
-      ]);
+      setAppPresets((appPresets) =>
+        [
+          ...appPresets,
+          {
+            id: uuid(),
+            name: preset.name,
+            icon: preset.icon,
+            color: preset.color,
+            apps: preset.apps,
+            urls: preset.urls,
+          },
+        ].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLocaleLowerCase()))
+      );
     } else {
       setAppPresets((appPresets) =>
-        appPresets.map((appPreset) => {
-          return appPreset.id === preset.id
-            ? {
-                id: preset.id,
-                name: preset.name,
-                icon: preset.icon,
-                color: preset.color,
-                apps: preset.apps,
-                urls: preset.urls,
-              }
-            : appPreset;
-        })
+        appPresets
+          .map((appPreset) => {
+            return appPreset.id === preset.id
+              ? {
+                  id: preset.id,
+                  name: preset.name,
+                  icon: preset.icon,
+                  color: preset.color,
+                  apps: preset.apps,
+                  urls: preset.urls,
+                }
+              : appPreset;
+          })
+          .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLocaleLowerCase()))
       );
     }
 

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-09-17 10:35
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:43
+ * @lastEditTime: 2022-10-17 20:33
  * @fileName: bing.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -14,16 +14,15 @@ import qs from "qs";
 import { requestCostTime } from "../../axiosConfig";
 import { checkIfIpInChina } from "../../checkIP";
 import { isChineseIPKey, userAgent } from "../../consts";
+import { DetectedLangModel, LanguageDetectType } from "../../detectLanauge/types";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
+import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getBingLangCode, getYoudaoLangCodeFromBingCode } from "../../language/languages";
-import { QueryTypeResult } from "../../types";
+import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
-import { DetectedLangModel, LanguageDetectType } from "./../../detectLanauge/types";
-import { autoDetectLanguageItem, englishLanguageItem } from "./../../language/consts";
-import { RequestErrorInfo, TranslationType } from "./../../types";
 import { BingConfig, BingTranslateResult } from "./types";
 
-console.log(`enter microsoft.ts`);
+console.log(`enter bing.ts`);
 
 const bingConfigKey = "BingConfig";
 
@@ -104,7 +103,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
     axios(config)
       .then(function (response) {
         const responseData = response.data;
-        console.warn(`bing cost time: ${response.headers[requestCostTime]}`);
+        console.warn(`bing translate cost time: ${response.headers[requestCostTime]}`);
 
         // If bing translate response is empty, may be ip has been changed, bing tld is not correct, so check ip again, then request again.
         if (!responseData) {
@@ -158,7 +157,7 @@ export async function requestWebBingTranslate(queryWordInfo: QueryWordInfo): Pro
  * Bing language detect, use bing translate `audo-detect`.
  */
 export async function bingDetect(text: string): Promise<DetectedLangModel> {
-  console.log(`start bingLanguageDetect`);
+  console.log(`start bingDetect`);
 
   const queryWordInfo: QueryWordInfo = {
     word: text,
@@ -173,7 +172,7 @@ export async function bingDetect(text: string): Promise<DetectedLangModel> {
         const bingTranslateResult = result.result as BingTranslateResult;
         const detectedLanguageCode = bingTranslateResult.detectedLanguage.language;
         const youdaoLangCode = getYoudaoLangCodeFromBingCode(detectedLanguageCode);
-        console.warn(`bing detect:${detectedLanguageCode}, youdaoId: ${youdaoLangCode}`);
+        console.warn(`bing detect language: ${detectedLanguageCode}, youdaoLangCode: ${youdaoLangCode}`);
 
         const detectedLanguageResult: DetectedLangModel = {
           type: type,

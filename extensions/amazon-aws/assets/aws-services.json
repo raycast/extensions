@@ -8,7 +8,7 @@
       "arg": "/a2i/home",
       "autocomplete": "Amazon Augmented AI",
       "icon": {
-        "path": "./icons/a2i.png"
+        "path": "./aws-icons/a2i.png"
       }
     },
     {
@@ -19,7 +19,7 @@
       "arg": "/a4b/home",
       "autocomplete": "Alexa for Business",
       "icon": {
-        "path": "./icons/a4b.png"
+        "path": "./aws-icons/a4b.png"
       }
     },
     {
@@ -29,7 +29,7 @@
       "arg": "/access-analyzer/home",
       "autocomplete": "Access Analyzer",
       "icon": {
-        "path": "./icons/access-analyzer.png"
+        "path": "./aws-icons/access-analyzer.png"
       }
     },
     {
@@ -39,7 +39,7 @@
       "arg": "/acm-pca/home",
       "autocomplete": "ACM Private CA",
       "icon": {
-        "path": "./icons/acm-pca.png"
+        "path": "./aws-icons/acm-pca.png"
       }
     },
     {
@@ -50,7 +50,7 @@
       "arg": "/acm/home",
       "autocomplete": "Certificate Manager",
       "icon": {
-        "path": "./icons/acm.png"
+        "path": "./aws-icons/acm.png"
       }
     },
     {
@@ -61,7 +61,7 @@
       "arg": "/activate/home",
       "autocomplete": "Activate for Startups",
       "icon": {
-        "path": "./icons/activate.png"
+        "path": "./aws-icons/activate.png"
       }
     },
     {
@@ -72,7 +72,7 @@
       "arg": "/elemental-appliances-software/home",
       "autocomplete": "Elemental Appliances & Software",
       "icon": {
-        "path": "./icons/aesop.png"
+        "path": "./aws-icons/aesop.png"
       }
     },
     {
@@ -83,7 +83,7 @@
       "arg": "/amplify/home",
       "autocomplete": "AWS Amplify",
       "icon": {
-        "path": "./icons/amplify.png"
+        "path": "./aws-icons/amplify.png"
       }
     },
     {
@@ -94,7 +94,7 @@
       "arg": "/apigateway/home",
       "autocomplete": "API Gateway",
       "icon": {
-        "path": "./icons/ag.png"
+        "path": "./aws-icons/ag.png"
       }
     },
     {
@@ -105,7 +105,7 @@
       "arg": "/systems-manager/appconfig/home",
       "autocomplete": "AWS AppConfig",
       "icon": {
-        "path": "./icons/appconfig.png"
+        "path": "./aws-icons/appconfig.png"
       }
     },
     {
@@ -116,7 +116,7 @@
       "arg": "/appflow/home",
       "autocomplete": "Amazon AppFlow",
       "icon": {
-        "path": "./icons/appflow.png"
+        "path": "./aws-icons/appflow.png"
       }
     },
     {
@@ -127,7 +127,7 @@
       "arg": "/appmesh/home",
       "autocomplete": "AWS App Mesh",
       "icon": {
-        "path": "./icons/appmesh.png"
+        "path": "./aws-icons/appmesh.png"
       }
     },
     {
@@ -138,7 +138,7 @@
       "arg": "/appstream2/home",
       "autocomplete": "AppStream 2.0",
       "icon": {
-        "path": "./icons/appstream2.png"
+        "path": "./aws-icons/appstream2.png"
       }
     },
     {
@@ -149,7 +149,7 @@
       "arg": "/appsync/home",
       "autocomplete": "AWS AppSync",
       "icon": {
-        "path": "./icons/appsync.png"
+        "path": "./aws-icons/appsync.png"
       }
     },
     {
@@ -160,7 +160,7 @@
       "arg": "/artifact/home",
       "autocomplete": "Artifact",
       "icon": {
-        "path": "./icons/artifact.png"
+        "path": "./aws-icons/artifact.png"
       }
     },
     {
@@ -171,7 +171,7 @@
       "arg": "/athena/home",
       "autocomplete": "Athena",
       "icon": {
-        "path": "./icons/athena.png"
+        "path": "./aws-icons/athena.png"
       }
     },
     {
@@ -182,7 +182,7 @@
       "arg": "/backup/home",
       "autocomplete": "AWS Backup",
       "icon": {
-        "path": "./icons/backup.png"
+        "path": "./aws-icons/backup.png"
       }
     },
     {
@@ -193,7 +193,7 @@
       "arg": "/batch/home",
       "autocomplete": "Batch",
       "icon": {
-        "path": "./icons/batch.png"
+        "path": "./aws-icons/batch.png"
       }
     },
     {
@@ -204,7 +204,7 @@
       "arg": "/billing/home",
       "autocomplete": "Billing",
       "icon": {
-        "path": "./icons/b.png"
+        "path": "./aws-icons/b.png"
       }
     },
     {
@@ -215,7 +215,7 @@
       "arg": "/braket/home",
       "autocomplete": "Amazon Braket",
       "icon": {
-        "path": "./icons/braket.png"
+        "path": "./aws-icons/braket.png"
       }
     },
     {
@@ -226,7 +226,7 @@
       "arg": "/billing/home#/budgets#/home",
       "autocomplete": "AWS Budgets",
       "icon": {
-        "path": "./icons/budgets.png"
+        "path": "./aws-icons/budgets.png"
       }
     },
     {
@@ -237,7 +237,7 @@
       "arg": "/chatbot/home",
       "autocomplete": "AWS Chatbot",
       "icon": {
-        "path": "./icons/chatbot.png"
+        "path": "./aws-icons/chatbot.png"
       }
     },
     {
@@ -248,7 +248,7 @@
       "arg": "https://chime.aws.amazon.com",
       "autocomplete": "Amazon Chime",
       "icon": {
-        "path": "./icons/chime.png"
+        "path": "./aws-icons/chime.png"
       }
     },
     {
@@ -259,7 +259,7 @@
       "arg": "/cloud9/home",
       "autocomplete": "Cloud9",
       "icon": {
-        "path": "./icons/cloud9.png"
+        "path": "./aws-icons/cloud9.png"
       }
     },
     {
@@ -270,7 +270,7 @@
       "arg": "/cloudformation/home",
       "autocomplete": "CloudFormation",
       "icon": {
-        "path": "./icons/cfo.png"
+        "path": "./aws-icons/cfo.png"
       }
     },
     {
@@ -281,7 +281,7 @@
       "arg": "/cloudfront/home",
       "autocomplete": "CloudFront",
       "icon": {
-        "path": "./icons/cfr.png"
+        "path": "./aws-icons/cfr.png"
       }
     },
     {
@@ -292,7 +292,7 @@
       "arg": "/cloudhsm/home",
       "autocomplete": "CloudHSM",
       "icon": {
-        "path": "./icons/cloudhsm.png"
+        "path": "./aws-icons/cloudhsm.png"
       }
     },
     {
@@ -303,7 +303,7 @@
       "arg": "/cloudmap/home",
       "autocomplete": "AWS Cloud Map",
       "icon": {
-        "path": "./icons/cloudmap.png"
+        "path": "./aws-icons/cloudmap.png"
       }
     },
     {
@@ -314,7 +314,7 @@
       "arg": "/cloudsearch/home",
       "autocomplete": "CloudSearch",
       "icon": {
-        "path": "./icons/cs.png"
+        "path": "./aws-icons/cs.png"
       }
     },
     {
@@ -325,7 +325,7 @@
       "arg": "/cloudtrail/home",
       "autocomplete": "CloudTrail",
       "icon": {
-        "path": "./icons/ctr.png"
+        "path": "./aws-icons/ctr.png"
       }
     },
     {
@@ -336,7 +336,7 @@
       "arg": "/cloudwatch/home",
       "autocomplete": "CloudWatch",
       "icon": {
-        "path": "./icons/cw.png"
+        "path": "./aws-icons/cw.png"
       }
     },
     {
@@ -347,7 +347,7 @@
       "arg": "/codesuite/codeartifact/home",
       "autocomplete": "CodeArtifact",
       "icon": {
-        "path": "./icons/codeartifact.png"
+        "path": "./aws-icons/codeartifact.png"
       }
     },
     {
@@ -358,7 +358,7 @@
       "arg": "/codesuite/codebuild/home",
       "autocomplete": "CodeBuild",
       "icon": {
-        "path": "./icons/codebuild.png"
+        "path": "./aws-icons/codebuild.png"
       }
     },
     {
@@ -369,7 +369,7 @@
       "arg": "/codesuite/codecommit/home",
       "autocomplete": "CodeCommit",
       "icon": {
-        "path": "./icons/cc.png"
+        "path": "./aws-icons/cc.png"
       }
     },
     {
@@ -380,7 +380,7 @@
       "arg": "/codesuite/codedeploy/home",
       "autocomplete": "CodeDeploy",
       "icon": {
-        "path": "./icons/cd.png"
+        "path": "./aws-icons/cd.png"
       }
     },
     {
@@ -391,7 +391,7 @@
       "arg": "/codesuite/codepipeline/home",
       "autocomplete": "CodePipeline",
       "icon": {
-        "path": "./icons/cp.png"
+        "path": "./aws-icons/cp.png"
       }
     },
     {
@@ -402,7 +402,7 @@
       "arg": "/codesuite/codestar/home",
       "autocomplete": "CodeStar",
       "icon": {
-        "path": "./icons/codestar.png"
+        "path": "./aws-icons/codestar.png"
       }
     },
     {
@@ -413,7 +413,7 @@
       "arg": "/comprehend/v2/home",
       "autocomplete": "Amazon Comprehend",
       "icon": {
-        "path": "./icons/comprehend.png"
+        "path": "./aws-icons/comprehend.png"
       }
     },
     {
@@ -424,7 +424,7 @@
       "arg": "/compute-optimizer/home",
       "autocomplete": "AWS Compute Optimizer",
       "icon": {
-        "path": "./icons/compute-optimizer.png"
+        "path": "./aws-icons/compute-optimizer.png"
       }
     },
     {
@@ -435,7 +435,7 @@
       "arg": "/config/home",
       "autocomplete": "Config",
       "icon": {
-        "path": "./icons/cfg.png"
+        "path": "./aws-icons/cfg.png"
       }
     },
     {
@@ -445,7 +445,7 @@
       "arg": "/configrules/home",
       "autocomplete": "Config Rules",
       "icon": {
-        "path": "./icons/cfgr.png"
+        "path": "./aws-icons/cfgr.png"
       }
     },
     {
@@ -455,7 +455,7 @@
       "arg": "/console/home",
       "autocomplete": "Console Home",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
@@ -466,7 +466,7 @@
       "arg": "/controltower/home",
       "autocomplete": "Control Tower",
       "icon": {
-        "path": "./icons/controltower.png"
+        "path": "./aws-icons/controltower.png"
       }
     },
     {
@@ -477,7 +477,7 @@
       "arg": "/cost-management/home",
       "autocomplete": "AWS Cost Explorer",
       "icon": {
-        "path": "./icons/cost-management.png"
+        "path": "./aws-icons/cost-management.png"
       }
     },
     {
@@ -488,7 +488,7 @@
       "arg": "/dataexchange/home",
       "autocomplete": "AWS Data Exchange",
       "icon": {
-        "path": "./icons/dataexchange.png"
+        "path": "./aws-icons/dataexchange.png"
       }
     },
     {
@@ -499,7 +499,7 @@
       "arg": "/datapipeline/home",
       "autocomplete": "Data Pipeline",
       "icon": {
-        "path": "./icons/dp.png"
+        "path": "./aws-icons/dp.png"
       }
     },
     {
@@ -510,7 +510,7 @@
       "arg": "/datasync/home",
       "autocomplete": "DataSync",
       "icon": {
-        "path": "./icons/datasync.png"
+        "path": "./aws-icons/datasync.png"
       }
     },
     {
@@ -521,7 +521,7 @@
       "arg": "/deepcomposer/home",
       "autocomplete": "AWS DeepComposer",
       "icon": {
-        "path": "./icons/deepcomposer.png"
+        "path": "./aws-icons/deepcomposer.png"
       }
     },
     {
@@ -532,7 +532,7 @@
       "arg": "/deeplens/home",
       "autocomplete": "AWS DeepLens",
       "icon": {
-        "path": "./icons/deeplens.png"
+        "path": "./aws-icons/deeplens.png"
       }
     },
     {
@@ -543,7 +543,7 @@
       "arg": "/deepracer/home",
       "autocomplete": "AWS DeepRacer",
       "icon": {
-        "path": "./icons/deepracer.png"
+        "path": "./aws-icons/deepracer.png"
       }
     },
     {
@@ -554,7 +554,7 @@
       "arg": "/detective/home",
       "autocomplete": "Detective",
       "icon": {
-        "path": "./icons/detective.png"
+        "path": "./aws-icons/detective.png"
       }
     },
     {
@@ -565,7 +565,7 @@
       "arg": "/devicedefender/home",
       "autocomplete": "IoT Device Defender",
       "icon": {
-        "path": "./icons/devicedefender.png"
+        "path": "./aws-icons/devicedefender.png"
       }
     },
     {
@@ -576,7 +576,7 @@
       "arg": "/devicefarm/home",
       "autocomplete": "Device Farm",
       "icon": {
-        "path": "./icons/df.png"
+        "path": "./aws-icons/df.png"
       }
     },
     {
@@ -587,7 +587,7 @@
       "arg": "/directconnect/home",
       "autocomplete": "Direct Connect",
       "icon": {
-        "path": "./icons/dc.png"
+        "path": "./aws-icons/dc.png"
       }
     },
     {
@@ -598,7 +598,7 @@
       "arg": "/directoryservicev2/home",
       "autocomplete": "Directory Service",
       "icon": {
-        "path": "./icons/ds.png"
+        "path": "./aws-icons/ds.png"
       }
     },
     {
@@ -609,7 +609,7 @@
       "arg": "/discovery/home",
       "autocomplete": "Application Discovery Service",
       "icon": {
-        "path": "./icons/discovery.png"
+        "path": "./aws-icons/discovery.png"
       }
     },
     {
@@ -620,7 +620,7 @@
       "arg": "/dms/v2/home",
       "autocomplete": "Database Migration Service",
       "icon": {
-        "path": "./icons/dms.png"
+        "path": "./aws-icons/dms.png"
       }
     },
     {
@@ -631,7 +631,7 @@
       "arg": "/docdb/home",
       "autocomplete": "Amazon DocumentDB",
       "icon": {
-        "path": "./icons/docdb.png"
+        "path": "./aws-icons/docdb.png"
       }
     },
     {
@@ -642,7 +642,7 @@
       "arg": "/dynamodb/home",
       "autocomplete": "DynamoDB",
       "icon": {
-        "path": "./icons/ddb.png"
+        "path": "./aws-icons/ddb.png"
       }
     },
     {
@@ -653,7 +653,7 @@
       "arg": "/ec2/v2/home",
       "autocomplete": "EC2",
       "icon": {
-        "path": "./icons/ec2.png"
+        "path": "./aws-icons/ec2.png"
       }
     },
     {
@@ -663,7 +663,7 @@
       "arg": "/ec2spot/home",
       "autocomplete": "EC2 Spot",
       "icon": {
-        "path": "./icons/spt.png"
+        "path": "./aws-icons/spt.png"
       }
     },
     {
@@ -674,7 +674,7 @@
       "arg": "/ecs/home",
       "autocomplete": "Elastic Container Service",
       "icon": {
-        "path": "./icons/ecs.png"
+        "path": "./aws-icons/ecs.png"
       }
     },
     {
@@ -685,7 +685,7 @@
       "arg": "/efs/home",
       "autocomplete": "EFS",
       "icon": {
-        "path": "./icons/efs.png"
+        "path": "./aws-icons/efs.png"
       }
     },
     {
@@ -696,7 +696,7 @@
       "arg": "/eks/home",
       "autocomplete": "Elastic Kubernetes Service",
       "icon": {
-        "path": "./icons/eks.png"
+        "path": "./aws-icons/eks.png"
       }
     },
     {
@@ -707,7 +707,7 @@
       "arg": "/elasticache/home",
       "autocomplete": "ElastiCache",
       "icon": {
-        "path": "./icons/elc.png"
+        "path": "./aws-icons/elc.png"
       }
     },
     {
@@ -718,7 +718,7 @@
       "arg": "/elasticbeanstalk/home",
       "autocomplete": "Elastic Beanstalk",
       "icon": {
-        "path": "./icons/eb.png"
+        "path": "./aws-icons/eb.png"
       }
     },
     {
@@ -729,7 +729,7 @@
       "arg": "/elasticmapreduce/home",
       "autocomplete": "EMR",
       "icon": {
-        "path": "./icons/emr.png"
+        "path": "./aws-icons/emr.png"
       }
     },
     {
@@ -740,7 +740,7 @@
       "arg": "/elastictranscoder/home",
       "autocomplete": "Elastic Transcoder",
       "icon": {
-        "path": "./icons/ets.png"
+        "path": "./aws-icons/ets.png"
       }
     },
     {
@@ -751,7 +751,7 @@
       "arg": "/events/home",
       "autocomplete": "Amazon EventBridge",
       "icon": {
-        "path": "./icons/events.png"
+        "path": "./aws-icons/events.png"
       }
     },
     {
@@ -761,7 +761,7 @@
       "arg": "/firehose/home",
       "autocomplete": "Kinesis Firehose",
       "icon": {
-        "path": "./icons/fh.png"
+        "path": "./aws-icons/fh.png"
       }
     },
     {
@@ -772,7 +772,7 @@
       "arg": "/wafv2/home",
       "autocomplete": "AWS Firewall Manager",
       "icon": {
-        "path": "./icons/firewall-manager.png"
+        "path": "./aws-icons/firewall-manager.png"
       }
     },
     {
@@ -783,7 +783,7 @@
       "arg": "/forecast/home",
       "autocomplete": "Amazon Forecast",
       "icon": {
-        "path": "./icons/forecast.png"
+        "path": "./aws-icons/forecast.png"
       }
     },
     {
@@ -794,7 +794,7 @@
       "arg": "/frauddetector/home",
       "autocomplete": "Amazon Fraud Detector",
       "icon": {
-        "path": "./icons/frauddetector.png"
+        "path": "./aws-icons/frauddetector.png"
       }
     },
     {
@@ -805,7 +805,7 @@
       "arg": "/freertos/home",
       "autocomplete": "FreeRTOS",
       "icon": {
-        "path": "./icons/freertos.png"
+        "path": "./aws-icons/freertos.png"
       }
     },
     {
@@ -816,7 +816,7 @@
       "arg": "/fsx/home",
       "autocomplete": "FSx",
       "icon": {
-        "path": "./icons/fsx.png"
+        "path": "./aws-icons/fsx.png"
       }
     },
     {
@@ -827,7 +827,7 @@
       "arg": "/gamelift/home",
       "autocomplete": "Amazon GameLift",
       "icon": {
-        "path": "./icons/gal.png"
+        "path": "./aws-icons/gal.png"
       }
     },
     {
@@ -838,7 +838,7 @@
       "arg": "/glacier/home",
       "autocomplete": "S3 Glacier",
       "icon": {
-        "path": "./icons/gl.png"
+        "path": "./aws-icons/gl.png"
       }
     },
     {
@@ -849,7 +849,7 @@
       "arg": "https://us-west-2.console.aws.amazon.com/ec2/v2/home?region=us-west-2#GlobalAccelerator",
       "autocomplete": "Global Accelerator",
       "icon": {
-        "path": "./icons/globalaccelerator.png"
+        "path": "./aws-icons/globalaccelerator.png"
       }
     },
     {
@@ -860,7 +860,7 @@
       "arg": "/glue/home",
       "autocomplete": "AWS Glue",
       "icon": {
-        "path": "./icons/glue.png"
+        "path": "./aws-icons/glue.png"
       }
     },
     {
@@ -871,7 +871,7 @@
       "arg": "/greengrass/home",
       "autocomplete": "IoT Greengrass",
       "icon": {
-        "path": "./icons/greengrass.png"
+        "path": "./aws-icons/greengrass.png"
       }
     },
     {
@@ -882,7 +882,7 @@
       "arg": "/groundstation/home",
       "autocomplete": "Ground Station",
       "icon": {
-        "path": "./icons/groundstation.png"
+        "path": "./aws-icons/groundstation.png"
       }
     },
     {
@@ -893,7 +893,7 @@
       "arg": "/guardduty/home",
       "autocomplete": "GuardDuty",
       "icon": {
-        "path": "./icons/guardduty.png"
+        "path": "./aws-icons/guardduty.png"
       }
     },
     {
@@ -904,7 +904,7 @@
       "arg": "/honeycode/home",
       "autocomplete": "Amazon Honeycode",
       "icon": {
-        "path": "./icons/honeycode.png"
+        "path": "./aws-icons/honeycode.png"
       }
     },
     {
@@ -915,7 +915,7 @@
       "arg": "/iam/home",
       "autocomplete": "IAM",
       "icon": {
-        "path": "./icons/iam.png"
+        "path": "./aws-icons/iam.png"
       }
     },
     {
@@ -926,7 +926,7 @@
       "arg": "/imagebuilder/home",
       "autocomplete": "EC2 Image Builder",
       "icon": {
-        "path": "./icons/imagebuilder.png"
+        "path": "./aws-icons/imagebuilder.png"
       }
     },
     {
@@ -937,7 +937,7 @@
       "arg": "/importexport/home",
       "autocomplete": "AWS Snow Family",
       "icon": {
-        "path": "./icons/imex.png"
+        "path": "./aws-icons/imex.png"
       }
     },
     {
@@ -948,7 +948,7 @@
       "arg": "/inspector/home",
       "autocomplete": "Inspector",
       "icon": {
-        "path": "./icons/ins.png"
+        "path": "./aws-icons/ins.png"
       }
     },
     {
@@ -959,7 +959,7 @@
       "arg": "/iot/home",
       "autocomplete": "IoT Core",
       "icon": {
-        "path": "./icons/iot.png"
+        "path": "./aws-icons/iot.png"
       }
     },
     {
@@ -970,7 +970,7 @@
       "arg": "/iot1click/home",
       "autocomplete": "IoT 1-Click",
       "icon": {
-        "path": "./icons/iot1click.png"
+        "path": "./aws-icons/iot1click.png"
       }
     },
     {
@@ -981,7 +981,7 @@
       "arg": "/iotanalytics/home",
       "autocomplete": "IoT Analytics",
       "icon": {
-        "path": "./icons/iotanalytics.png"
+        "path": "./aws-icons/iotanalytics.png"
       }
     },
     {
@@ -992,7 +992,7 @@
       "arg": "/iotdm/home",
       "autocomplete": "IoT Device Management",
       "icon": {
-        "path": "./icons/iotdm.png"
+        "path": "./aws-icons/iotdm.png"
       }
     },
     {
@@ -1003,7 +1003,7 @@
       "arg": "/iotevents/home",
       "autocomplete": "IoT Events",
       "icon": {
-        "path": "./icons/iotevents.png"
+        "path": "./aws-icons/iotevents.png"
       }
     },
     {
@@ -1014,7 +1014,7 @@
       "arg": "/iotsitewise/home",
       "autocomplete": "IoT SiteWise",
       "icon": {
-        "path": "./icons/iotsitewise.png"
+        "path": "./aws-icons/iotsitewise.png"
       }
     },
     {
@@ -1025,7 +1025,7 @@
       "arg": "https://iq.aws.amazon.com/?utm=csl",
       "autocomplete": "AWS IQ",
       "icon": {
-        "path": "./icons/iq.png"
+        "path": "./aws-icons/iq.png"
       }
     },
     {
@@ -1036,7 +1036,7 @@
       "arg": "/keyspaces/home",
       "autocomplete": "Amazon Keyspaces",
       "icon": {
-        "path": "./icons/keyspaces.png"
+        "path": "./aws-icons/keyspaces.png"
       }
     },
     {
@@ -1047,7 +1047,7 @@
       "arg": "/kinesis/home",
       "autocomplete": "Kinesis",
       "icon": {
-        "path": "./icons/ki.png"
+        "path": "./aws-icons/ki.png"
       }
     },
     {
@@ -1057,7 +1057,7 @@
       "arg": "/kinesisanalytics/home",
       "autocomplete": "Kinesis Analytics",
       "icon": {
-        "path": "./icons/kia.png"
+        "path": "./aws-icons/kia.png"
       }
     },
     {
@@ -1068,7 +1068,7 @@
       "arg": "/kinesisvideo/home",
       "autocomplete": "Kinesis Video Streams",
       "icon": {
-        "path": "./icons/kinesisvideo.png"
+        "path": "./aws-icons/kinesisvideo.png"
       }
     },
     {
@@ -1079,7 +1079,7 @@
       "arg": "/kms/home",
       "autocomplete": "Key Management Service",
       "icon": {
-        "path": "./icons/kms.png"
+        "path": "./aws-icons/kms.png"
       }
     },
     {
@@ -1090,7 +1090,7 @@
       "arg": "/lakeformation/home",
       "autocomplete": "AWS Lake Formation",
       "icon": {
-        "path": "./icons/lakeformation.png"
+        "path": "./aws-icons/lakeformation.png"
       }
     },
     {
@@ -1101,7 +1101,7 @@
       "arg": "/lambda/home",
       "autocomplete": "Lambda",
       "icon": {
-        "path": "./icons/lam.png"
+        "path": "./aws-icons/lam.png"
       }
     },
     {
@@ -1112,7 +1112,7 @@
       "arg": "/lex/home",
       "autocomplete": "Amazon Lex",
       "icon": {
-        "path": "./icons/lex.png"
+        "path": "./aws-icons/lex.png"
       }
     },
     {
@@ -1123,7 +1123,7 @@
       "arg": "/license-manager/home",
       "autocomplete": "AWS License Manager",
       "icon": {
-        "path": "./icons/license-manager.png"
+        "path": "./aws-icons/license-manager.png"
       }
     },
     {
@@ -1134,7 +1134,7 @@
       "arg": "https://lightsail.aws.amazon.com/ls/webapp/home",
       "autocomplete": "Lightsail",
       "icon": {
-        "path": "./icons/lightsail.png"
+        "path": "./aws-icons/lightsail.png"
       }
     },
     {
@@ -1145,7 +1145,7 @@
       "arg": "/machinelearning/home",
       "autocomplete": "Amazon Machine Learning",
       "icon": {
-        "path": "./icons/ml.png"
+        "path": "./aws-icons/ml.png"
       }
     },
     {
@@ -1156,7 +1156,7 @@
       "arg": "/managedservices/home",
       "autocomplete": "Managed Services",
       "icon": {
-        "path": "./icons/managedservices.png"
+        "path": "./aws-icons/managedservices.png"
       }
     },
     {
@@ -1167,7 +1167,7 @@
       "arg": "/marketplace/home",
       "autocomplete": "AWS Marketplace Subscriptions",
       "icon": {
-        "path": "./icons/marketplace.png"
+        "path": "./aws-icons/marketplace.png"
       }
     },
     {
@@ -1178,7 +1178,7 @@
       "arg": "/mediaconnect/home",
       "autocomplete": "MediaConnect",
       "icon": {
-        "path": "./icons/mediaconnect.png"
+        "path": "./aws-icons/mediaconnect.png"
       }
     },
     {
@@ -1189,7 +1189,7 @@
       "arg": "/mediaconvert/home",
       "autocomplete": "MediaConvert",
       "icon": {
-        "path": "./icons/mediaconvert.png"
+        "path": "./aws-icons/mediaconvert.png"
       }
     },
     {
@@ -1200,7 +1200,7 @@
       "arg": "/medialive/home",
       "autocomplete": "MediaLive",
       "icon": {
-        "path": "./icons/medialive.png"
+        "path": "./aws-icons/medialive.png"
       }
     },
     {
@@ -1211,7 +1211,7 @@
       "arg": "/mediapackage/home",
       "autocomplete": "MediaPackage",
       "icon": {
-        "path": "./icons/mediapackage.png"
+        "path": "./aws-icons/mediapackage.png"
       }
     },
     {
@@ -1222,7 +1222,7 @@
       "arg": "/mediastore/home",
       "autocomplete": "MediaStore",
       "icon": {
-        "path": "./icons/mediastore.png"
+        "path": "./aws-icons/mediastore.png"
       }
     },
     {
@@ -1233,7 +1233,7 @@
       "arg": "/mediatailor/home",
       "autocomplete": "MediaTailor",
       "icon": {
-        "path": "./icons/mediatailor.png"
+        "path": "./aws-icons/mediatailor.png"
       }
     },
     {
@@ -1244,7 +1244,7 @@
       "arg": "/migrationhub/home",
       "autocomplete": "AWS Migration Hub",
       "icon": {
-        "path": "./icons/migrationhub.png"
+        "path": "./aws-icons/migrationhub.png"
       }
     },
     {
@@ -1255,7 +1255,7 @@
       "arg": "/mobilehub/home",
       "autocomplete": "Mobile Hub",
       "icon": {
-        "path": "./icons/mh.png"
+        "path": "./aws-icons/mh.png"
       }
     },
     {
@@ -1266,7 +1266,7 @@
       "arg": "/msk/home",
       "autocomplete": "MSK",
       "icon": {
-        "path": "./icons/msk.png"
+        "path": "./aws-icons/msk.png"
       }
     },
     {
@@ -1277,7 +1277,7 @@
       "arg": "/neptune/home",
       "autocomplete": "Neptune",
       "icon": {
-        "path": "./icons/neptune.png"
+        "path": "./aws-icons/neptune.png"
       }
     },
     {
@@ -1288,7 +1288,7 @@
       "arg": "/organizations/home",
       "autocomplete": "AWS Organizations",
       "icon": {
-        "path": "./icons/organizations.png"
+        "path": "./aws-icons/organizations.png"
       }
     },
     {
@@ -1299,7 +1299,7 @@
       "arg": "/outposts/home",
       "autocomplete": "AWS Outposts",
       "icon": {
-        "path": "./icons/outposts.png"
+        "path": "./aws-icons/outposts.png"
       }
     },
     {
@@ -1310,7 +1310,7 @@
       "arg": "/personalize/home",
       "autocomplete": "Amazon Personalize",
       "icon": {
-        "path": "./icons/personalize.png"
+        "path": "./aws-icons/personalize.png"
       }
     },
     {
@@ -1321,7 +1321,7 @@
       "arg": "https://phd.aws.amazon.com/phd/home",
       "autocomplete": "Personal Health Dashboard",
       "icon": {
-        "path": "./icons/phd.png"
+        "path": "./aws-icons/phd.png"
       }
     },
     {
@@ -1332,7 +1332,7 @@
       "arg": "/polly/home",
       "autocomplete": "Amazon Polly",
       "icon": {
-        "path": "./icons/polly.png"
+        "path": "./aws-icons/polly.png"
       }
     },
     {
@@ -1343,7 +1343,7 @@
       "arg": "/qldb/home",
       "autocomplete": "Amazon QLDB",
       "icon": {
-        "path": "./icons/qldb.png"
+        "path": "./aws-icons/qldb.png"
       }
     },
     {
@@ -1354,7 +1354,7 @@
       "arg": "https://quicksight.aws.amazon.com",
       "autocomplete": "QuickSight",
       "icon": {
-        "path": "./icons/qs.png"
+        "path": "./aws-icons/qs.png"
       }
     },
     {
@@ -1365,7 +1365,7 @@
       "arg": "/ram/home",
       "autocomplete": "Resource Access Manager",
       "icon": {
-        "path": "./icons/ram.png"
+        "path": "./aws-icons/ram.png"
       }
     },
     {
@@ -1376,7 +1376,7 @@
       "arg": "/rds/home",
       "autocomplete": "RDS",
       "icon": {
-        "path": "./icons/rds.png"
+        "path": "./aws-icons/rds.png"
       }
     },
     {
@@ -1387,7 +1387,7 @@
       "arg": "/redshift/home",
       "autocomplete": "Amazon Redshift",
       "icon": {
-        "path": "./icons/rs.png"
+        "path": "./aws-icons/rs.png"
       }
     },
     {
@@ -1398,7 +1398,7 @@
       "arg": "/rekognition/home",
       "autocomplete": "Amazon Rekognition",
       "icon": {
-        "path": "./icons/rekognition.png"
+        "path": "./aws-icons/rekognition.png"
       }
     },
     {
@@ -1409,7 +1409,7 @@
       "arg": "/resource-groups/home",
       "autocomplete": "Resource Groups &amp; Tag Editor",
       "icon": {
-        "path": "./icons/resource-groups.png"
+        "path": "./aws-icons/resource-groups.png"
       }
     },
     {
@@ -1420,7 +1420,7 @@
       "arg": "/robomaker/home",
       "autocomplete": "AWS RoboMaker",
       "icon": {
-        "path": "./icons/robomaker.png"
+        "path": "./aws-icons/robomaker.png"
       }
     },
     {
@@ -1431,7 +1431,7 @@
       "arg": "/route53/home",
       "autocomplete": "Route 53",
       "icon": {
-        "path": "./icons/r53.png"
+        "path": "./aws-icons/r53.png"
       }
     },
     {
@@ -1442,7 +1442,7 @@
       "arg": "/route53resolver/home",
       "autocomplete": "Route 53 Resolver",
       "icon": {
-        "path": "./icons/r53.png"
+        "path": "./aws-icons/r53.png"
       }
     },
     {
@@ -1453,7 +1453,7 @@
       "arg": "/s3/home",
       "autocomplete": "S3",
       "icon": {
-        "path": "./icons/s3.png"
+        "path": "./aws-icons/s3.png"
       }
     },
     {
@@ -1464,7 +1464,7 @@
       "arg": "/sagemaker/home",
       "autocomplete": "Amazon SageMaker",
       "icon": {
-        "path": "./icons/sagemaker.png"
+        "path": "./aws-icons/sagemaker.png"
       }
     },
     {
@@ -1475,7 +1475,7 @@
       "arg": "/secretsmanager/home",
       "autocomplete": "Secrets Manager",
       "icon": {
-        "path": "./icons/secretsmanager.png"
+        "path": "./aws-icons/secretsmanager.png"
       }
     },
     {
@@ -1486,7 +1486,7 @@
       "arg": "/securityhub/home",
       "autocomplete": "Security Hub",
       "icon": {
-        "path": "./icons/securityhub.png"
+        "path": "./aws-icons/securityhub.png"
       }
     },
     {
@@ -1497,7 +1497,7 @@
       "arg": "/serverlessrepo/home",
       "autocomplete": "Serverless Application Repository",
       "icon": {
-        "path": "./icons/serverlessrepo.png"
+        "path": "./aws-icons/serverlessrepo.png"
       }
     },
     {
@@ -1508,7 +1508,7 @@
       "arg": "/servermigration/home",
       "autocomplete": "Server Migration Service",
       "icon": {
-        "path": "./icons/servermigration.png"
+        "path": "./aws-icons/servermigration.png"
       }
     },
     {
@@ -1519,7 +1519,7 @@
       "arg": "/servicecatalog/home",
       "autocomplete": "Service Catalog",
       "icon": {
-        "path": "./icons/sc.png"
+        "path": "./aws-icons/sc.png"
       }
     },
     {
@@ -1530,7 +1530,7 @@
       "arg": "/servicequotas/home",
       "autocomplete": "Service Quotas",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
@@ -1541,7 +1541,7 @@
       "arg": "/ses/home",
       "autocomplete": "Simple Email Service",
       "icon": {
-        "path": "./icons/ses.png"
+        "path": "./aws-icons/ses.png"
       }
     },
     {
@@ -1552,7 +1552,7 @@
       "arg": "/sns/home",
       "autocomplete": "Simple Notification Service",
       "icon": {
-        "path": "./icons/sns.png"
+        "path": "./aws-icons/sns.png"
       }
     },
     {
@@ -1563,7 +1563,7 @@
       "arg": "/sqs/home",
       "autocomplete": "Simple Queue Service",
       "icon": {
-        "path": "./icons/sqs.png"
+        "path": "./aws-icons/sqs.png"
       }
     },
     {
@@ -1574,7 +1574,7 @@
       "arg": "/singlesignon/home",
       "autocomplete": "AWS Single Sign-On",
       "icon": {
-        "path": "./icons/sso.png"
+        "path": "./aws-icons/sso.png"
       }
     },
     {
@@ -1585,7 +1585,7 @@
       "arg": "/storagegateway/home",
       "autocomplete": "Storage Gateway",
       "icon": {
-        "path": "./icons/sg.png"
+        "path": "./aws-icons/sg.png"
       }
     },
     {
@@ -1596,7 +1596,7 @@
       "arg": "/support",
       "autocomplete": "Support",
       "icon": {
-        "path": "./icons/s.png"
+        "path": "./aws-icons/s.png"
       }
     },
     {
@@ -1607,7 +1607,7 @@
       "arg": "/swf/home",
       "autocomplete": "SWF",
       "icon": {
-        "path": "./icons/swf.png"
+        "path": "./aws-icons/swf.png"
       }
     },
     {
@@ -1617,7 +1617,7 @@
       "arg": "/synthetics/home",
       "autocomplete": "Synthetics",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
@@ -1628,7 +1628,7 @@
       "arg": "/systems-manager/home",
       "autocomplete": "Systems Manager",
       "icon": {
-        "path": "./icons/systems-manager.png"
+        "path": "./aws-icons/systems-manager.png"
       }
     },
     {
@@ -1639,7 +1639,7 @@
       "arg": "/textract/home",
       "autocomplete": "Amazon Textract",
       "icon": {
-        "path": "./icons/textract.png"
+        "path": "./aws-icons/textract.png"
       }
     },
     {
@@ -1650,7 +1650,7 @@
       "arg": "/thingsgraph/home",
       "autocomplete": "IoT Things Graph",
       "icon": {
-        "path": "./icons/thingsgraph.png"
+        "path": "./aws-icons/thingsgraph.png"
       }
     },
     {
@@ -1661,7 +1661,7 @@
       "arg": "/timestream/home",
       "autocomplete": "Amazon Timestream",
       "icon": {
-        "path": "./icons/timestream.png"
+        "path": "./aws-icons/timestream.png"
       }
     },
     {
@@ -1672,7 +1672,7 @@
       "arg": "/transcribe/home",
       "autocomplete": "Amazon Transcribe",
       "icon": {
-        "path": "./icons/transcribe.png"
+        "path": "./aws-icons/transcribe.png"
       }
     },
     {
@@ -1683,7 +1683,7 @@
       "arg": "/transfer/home",
       "autocomplete": "AWS Transfer Family",
       "icon": {
-        "path": "./icons/transfer.png"
+        "path": "./aws-icons/transfer.png"
       }
     },
     {
@@ -1694,7 +1694,7 @@
       "arg": "/translate/home",
       "autocomplete": "Amazon Translate",
       "icon": {
-        "path": "./icons/translate.png"
+        "path": "./aws-icons/translate.png"
       }
     },
     {
@@ -1705,7 +1705,7 @@
       "arg": "/trustedadvisor/home",
       "autocomplete": "Trusted Advisor",
       "icon": {
-        "path": "./icons/ta.png"
+        "path": "./aws-icons/ta.png"
       }
     },
     {
@@ -1716,7 +1716,7 @@
       "arg": "/vpc/home",
       "autocomplete": "VPC",
       "icon": {
-        "path": "./icons/vpc.png"
+        "path": "./aws-icons/vpc.png"
       }
     },
     {
@@ -1727,7 +1727,7 @@
       "arg": "/wafv2/home",
       "autocomplete": "WAF & Shield",
       "icon": {
-        "path": "./icons/waf.png"
+        "path": "./aws-icons/waf.png"
       }
     },
     {
@@ -1738,7 +1738,7 @@
       "arg": "/wellarchitected/home",
       "autocomplete": "AWS Well-Architected Tool",
       "icon": {
-        "path": "./icons/wellarchitected.png"
+        "path": "./aws-icons/wellarchitected.png"
       }
     },
     {
@@ -1749,7 +1749,7 @@
       "arg": "/worklink/home",
       "autocomplete": "WorkLink",
       "icon": {
-        "path": "./icons/worklink.png"
+        "path": "./aws-icons/worklink.png"
       }
     },
     {
@@ -1760,7 +1760,7 @@
       "arg": "/workmail/v2/home",
       "autocomplete": "WorkMail",
       "icon": {
-        "path": "./icons/wkm.png"
+        "path": "./aws-icons/wkm.png"
       }
     },
     {
@@ -1771,7 +1771,7 @@
       "arg": "/workspaces/home",
       "autocomplete": "WorkSpaces",
       "icon": {
-        "path": "./icons/wks.png"
+        "path": "./aws-icons/wks.png"
       }
     },
     {
@@ -1782,7 +1782,7 @@
       "arg": "/xray/home",
       "autocomplete": "X-Ray",
       "icon": {
-        "path": "./icons/xray.png"
+        "path": "./aws-icons/xray.png"
       }
     },
     {
@@ -1793,7 +1793,7 @@
       "arg": "/zocalo/home",
       "autocomplete": "WorkDocs",
       "icon": {
-        "path": "./icons/z.png"
+        "path": "./aws-icons/z.png"
       }
     },
     {
@@ -1803,7 +1803,7 @@
       "arg": "/gluestudio/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/glue-studio.png"
+        "path": "./aws-icons/glue-studio.png"
       }
     },
     {
@@ -1814,7 +1814,7 @@
       "arg": "/cloudshell/home",
       "autocomplete": "CloudShell",
       "icon": {
-        "path": "./icons/cloudshell.png"
+        "path": "./aws-icons/cloudshell.png"
       }
     },
     {
@@ -1824,7 +1824,7 @@
       "arg": "/systems-manager/change-manager/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/maui.png"
+        "path": "./aws-icons/maui.png"
       }
     },
     {
@@ -1835,7 +1835,7 @@
       "arg": "/pinpoint/home",
       "autocomplete": "Pinpoint",
       "icon": {
-        "path": "./icons/pinpoint.png"
+        "path": "./aws-icons/pinpoint.png"
       }
     },
     {
@@ -1846,7 +1846,7 @@
       "arg": "/signer/home",
       "autocomplete": "AWS Signer",
       "icon": {
-        "path": "./icons/signer.png"
+        "path": "./aws-icons/signer.png"
       }
     },
     {
@@ -1857,7 +1857,7 @@
       "arg": "/cognito/home",
       "autocomplete": "Cognito",
       "icon": {
-        "path": "./icons/c.png"
+        "path": "./aws-icons/c.png"
       }
     },
     {
@@ -1868,7 +1868,7 @@
       "arg": "/lookoutmetrics/home",
       "autocomplete": "Amazon Lookout for Metrics",
       "icon": {
-        "path": "./icons/lookoutformetrics.png"
+        "path": "./aws-icons/lookoutformetrics.png"
       }
     },
     {
@@ -1879,7 +1879,7 @@
       "arg": "/panorama/home",
       "autocomplete": "AWS Panorama",
       "icon": {
-        "path": "./icons/panorama.png"
+        "path": "./aws-icons/panorama.png"
       }
     },
     {
@@ -1890,7 +1890,7 @@
       "arg": "/lookoutequipment/home",
       "autocomplete": "Amazon Lookout for Equipment",
       "icon": {
-        "path": "./icons/lookoutforequipment.png"
+        "path": "./aws-icons/lookoutforequipment.png"
       }
     },
     {
@@ -1901,7 +1901,7 @@
       "arg": "/grafana/home",
       "autocomplete": "Amazon Grafana",
       "icon": {
-        "path": "./icons/grafana.png"
+        "path": "./aws-icons/grafana.png"
       }
     },
     {
@@ -1912,7 +1912,7 @@
       "arg": "/sumerianv2/home",
       "autocomplete": "Amazon Sumerian",
       "icon": {
-        "path": "./icons/sumerian.png"
+        "path": "./aws-icons/sumerian.png"
       }
     },
     {
@@ -1923,7 +1923,7 @@
       "arg": "/prometheus/home",
       "autocomplete": "Amazon Prometheus",
       "icon": {
-        "path": "./icons/prometheus.png"
+        "path": "./aws-icons/prometheus.png"
       }
     },
     {
@@ -1934,7 +1934,7 @@
       "arg": "/opsworks/landing/home",
       "autocomplete": "OpsWorks",
       "icon": {
-        "path": "./icons/ops.png"
+        "path": "./aws-icons/ops.png"
       }
     },
     {
@@ -1945,7 +1945,7 @@
       "arg": "/lookoutvision/home",
       "autocomplete": "Amazon Lookout for Vision",
       "icon": {
-        "path": "./icons/lookoutforvision.png"
+        "path": "./aws-icons/lookoutforvision.png"
       }
     },
     {
@@ -1956,7 +1956,7 @@
       "arg": "/codeguru/home",
       "autocomplete": "Amazon CodeGuru",
       "icon": {
-        "path": "./icons/codeguru.png"
+        "path": "./aws-icons/codeguru.png"
       }
     },
     {
@@ -1967,7 +1967,7 @@
       "arg": "/auditmanager/home",
       "autocomplete": "AWS Audit Manager",
       "icon": {
-        "path": "./icons/auditmanager.png"
+        "path": "./aws-icons/auditmanager.png"
       }
     },
     {
@@ -1978,7 +1978,7 @@
       "arg": "/awsautoscaling/home",
       "autocomplete": "AWS Auto Scaling",
       "icon": {
-        "path": "./icons/awsautoscaling.png"
+        "path": "./aws-icons/awsautoscaling.png"
       }
     },
     {
@@ -1989,7 +1989,7 @@
       "arg": "/connect/home",
       "autocomplete": "Amazon Connect",
       "icon": {
-        "path": "./icons/connect.png"
+        "path": "./aws-icons/connect.png"
       }
     },
     {
@@ -2000,7 +2000,7 @@
       "arg": "/monitron/home",
       "autocomplete": "Amazon Monitron",
       "icon": {
-        "path": "./icons/monitron.png"
+        "path": "./aws-icons/monitron.png"
       }
     },
     {
@@ -2011,7 +2011,7 @@
       "arg": "/amazon-mq/home",
       "autocomplete": "Amazon MQ",
       "icon": {
-        "path": "./icons/amazonmq.png"
+        "path": "./aws-icons/amazonmq.png"
       }
     },
     {
@@ -2021,7 +2021,7 @@
       "arg": "/dynamodbv2/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/dynamodbv2.png"
+        "path": "./aws-icons/dynamodbv2.png"
       }
     },
     {
@@ -2032,7 +2032,7 @@
       "arg": "/mwaa/home",
       "autocomplete": "Managed Apache Airflow",
       "icon": {
-        "path": "./icons/airflow.png"
+        "path": "./aws-icons/airflow.png"
       }
     },
     {
@@ -2043,7 +2043,7 @@
       "arg": "/proton/home",
       "autocomplete": "AWS Proton",
       "icon": {
-        "path": "./icons/proton.png"
+        "path": "./aws-icons/proton.png"
       }
     },
     {
@@ -2054,7 +2054,7 @@
       "arg": "/macie/home",
       "autocomplete": "Amazon Macie",
       "icon": {
-        "path": "./icons/macie.png"
+        "path": "./aws-icons/macie.png"
       }
     },
     {
@@ -2065,7 +2065,7 @@
       "arg": "/ecr/home",
       "autocomplete": "Elastic Container Registry",
       "icon": {
-        "path": "./icons/ecr.png"
+        "path": "./aws-icons/ecr.png"
       }
     },
     {
@@ -2076,7 +2076,7 @@
       "arg": "/iotwireless/home",
       "autocomplete": "AWS IoT Core for LoRaWAN",
       "icon": {
-        "path": "./icons/home.png"
+        "path": "./aws-icons/home.png"
       }
     },
     {
@@ -2086,7 +2086,7 @@
       "arg": "/storagegatewayv3/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/storagegatewayv3.png"
+        "path": "./aws-icons/storagegatewayv3.png"
       }
     },
     {
@@ -2097,7 +2097,7 @@
       "arg": "/es/home",
       "autocomplete": "Elasticsearch Service",
       "icon": {
-        "path": "./icons/es.png"
+        "path": "./aws-icons/es.png"
       }
     },
     {
@@ -2107,7 +2107,7 @@
       "arg": "/elasticviews/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/harrier.png"
+        "path": "./aws-icons/harrier.png"
       }
     },
     {
@@ -2118,7 +2118,7 @@
       "arg": "/location/home",
       "autocomplete": "Amazon Location Service",
       "icon": {
-        "path": "./icons/locationservice.png"
+        "path": "./aws-icons/locationservice.png"
       }
     },
     {
@@ -2128,7 +2128,7 @@
       "arg": "/s3-outposts/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/s3-outposts.png"
+        "path": "./aws-icons/s3-outposts.png"
       }
     },
     {
@@ -2139,7 +2139,7 @@
       "arg": "/databrew/home",
       "autocomplete": "AWS Glue DataBrew",
       "icon": {
-        "path": "./icons/gluedatabrew.png"
+        "path": "./aws-icons/gluedatabrew.png"
       }
     },
     {
@@ -2150,7 +2150,7 @@
       "arg": "/states/home",
       "autocomplete": "Step Functions",
       "icon": {
-        "path": "./icons/states.png"
+        "path": "./aws-icons/states.png"
       }
     },
     {
@@ -2161,7 +2161,7 @@
       "arg": "/managedblockchain/home",
       "autocomplete": "Amazon Managed Blockchain",
       "icon": {
-        "path": "./icons/managedblockchain.png"
+        "path": "./aws-icons/managedblockchain.png"
       }
     },
     {
@@ -2172,7 +2172,7 @@
       "arg": "/launchwizard/home",
       "autocomplete": "Launch Wizard",
       "icon": {
-        "path": "./icons/launchwizard.png"
+        "path": "./aws-icons/launchwizard.png"
       }
     },
     {
@@ -2182,7 +2182,7 @@
       "arg": "/wam/home",
       "autocomplete": null,
       "icon": {
-        "path": "./icons/wam.png"
+        "path": "./aws-icons/wam.png"
       }
     },
     {
@@ -2193,7 +2193,7 @@
       "arg": "/kendra/home",
       "autocomplete": "Amazon Kendra",
       "icon": {
-        "path": "./icons/kendra.png"
+        "path": "./aws-icons/kendra.png"
       }
     },
     {
@@ -2204,7 +2204,7 @@
       "arg": "/ivs/home",
       "autocomplete": "Amazon Interactive Video Service",
       "icon": {
-        "path": "./icons/ivs.png"
+        "path": "./aws-icons/ivs.png"
       }
     },
     {
@@ -2215,7 +2215,7 @@
       "arg": "/healthlake/home",
       "autocomplete": "Amazon HealthLake",
       "icon": {
-        "path": "./icons/healthlake.png"
+        "path": "./aws-icons/healthlake.png"
       }
     }
   ]
