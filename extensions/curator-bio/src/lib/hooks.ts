@@ -1,4 +1,13 @@
-import { getMe, login, getSubscriptionItems, getMyItemDetail, getCollectionItems, getItems } from "./api";
+import {
+  getMe,
+  login,
+  getSubscriptionItems,
+  getMyItemDetail,
+  getCollectionItems,
+  getItems,
+  getUser,
+  getCollections,
+} from "./api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preference } from "./types";
@@ -25,6 +34,18 @@ export const useMe = () => {
     } else {
       throw new Error("Login failed");
     }
+  });
+};
+
+export const useUser = (userId: string) => {
+  return useCachedPromise(getUser, [userId], {
+    execute: !!userId,
+  });
+};
+
+export const useCollections = (userId: string) => {
+  return useCachedPromise(getCollections, [userId], {
+    execute: !!userId,
   });
 };
 

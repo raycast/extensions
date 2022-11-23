@@ -39,6 +39,7 @@ export interface CollectionsItem {
 export interface User {
   id: string;
   customId: string;
+  custom_id?: string;
   name: string;
   avatar: string;
   about: string;
@@ -127,3 +128,74 @@ export type HeaderData = {
   text: string;
   level: number;
 };
+
+export interface UserData {
+  id: string;
+  googleId: string;
+  twitterId: string;
+  customId: string;
+  name: string;
+  avatar: string;
+  cover: string;
+  headline: string;
+  location: string;
+  about: string;
+  keywords: any[];
+  availabilities: any[];
+  urls: UrlsItem[];
+  settings: UserSettings;
+  sections: SectionsItem[];
+  status: Status;
+}
+interface UrlsItem {
+  type: string;
+  url: string;
+}
+interface UserSettings {
+  analytics: Analytics;
+  notification: Notification;
+}
+interface Analytics {
+  ga: string;
+}
+interface Notification {
+  weeklyReport: boolean;
+}
+interface SectionsItem {
+  layout: Layout;
+  source: Source;
+  title: string;
+  description: string;
+  id: string;
+}
+interface Layout {
+  type: string;
+}
+interface Source {
+  type: string;
+  value: string[];
+}
+interface Status {
+  onboard: string;
+}
+
+export type APIData<T> = {
+  status: number;
+  data: T;
+};
+
+export interface CollectionData {
+  id: string;
+  nestedColls: NestedCollsItem[];
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+interface NestedCollsItem {
+  id: string;
+  name: string;
+  icon: string;
+  customId: string;
+  items: string[];
+  childs: any[];
+}

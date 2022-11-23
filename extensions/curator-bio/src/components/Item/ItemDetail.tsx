@@ -36,6 +36,7 @@ const OpenCollectionAction = ({ item }: { item: Item }) => {
 
 export const ItemDetail = ({ item }: { item: Item }) => {
   const { markdown, link } = useItemRenderData(item);
+  const user = getItemUserWorkaround(item);
 
   return (
     <Detail
@@ -51,7 +52,7 @@ export const ItemDetail = ({ item }: { item: Item }) => {
           <Action.Push
             title="Browse User"
             icon={Icon.PersonCircle}
-            target={<UserView user={item.user} />}
+            target={<UserView user={user} />}
             shortcut={{
               modifiers: ["cmd", "shift"],
               key: "u",
