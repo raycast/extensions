@@ -1,8 +1,12 @@
 # World Cup Changelog
 
+## [Add live time] - 2022-11-23
+
+- Show live time for current match
+
 ## [Enhancements] - 2022-11-23
 
-- Added details pane 
+- Added details pane
 - Added Custom EmptyView
 - Moved Reload action to right place
 - Added action panel icons
