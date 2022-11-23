@@ -70,6 +70,8 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
   const mark = `
    # ${res.ns}/${res.name}
 
+   _${res.type} (since ${res.added})_
+
    ---
 
    ${res.arglists.length == 0 ? "No args" : res.arglists?.map((arg) => "`(" + res.name + " " + arg + ")`").join(" ")}
@@ -82,6 +84,10 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
 
    ${res.examples == null ? "`No examples`" : res.examples?.map((e) => "~~~\n" + e + "\n~~~").join("\n")}
 
+   ###  ${res["see-alsos"] == null ? "0" : res["see-alsos"].length} See Also(s)
+
+   ${res["see-alsos"] == null ? "No see also" : res["see-alsos"]?.map((res) => "`" + res +"`").join(" ")}
+
    ### ${res.notes == null ? "0" : res.notes.length} Note(s)
 
    ${res.notes == null ? "`No notes`" : res.notes?.map((n) => "~~~\n" + n + "\n~~~").join("\n")}
@@ -92,19 +98,6 @@ const CljDetail = ({ res }: { res: DocInfo }) => {
       <Detail
         navigationTitle={res.ns + "/" + res.name}
         markdown={mark}
-        metadata={
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Type" text={res.type} />
-            <Detail.Metadata.Label title="Available since" text={res.added} />
-            <Detail.Metadata.Link title="Library" text={res.ns} target={res["library-url"]} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.TagList title="See also">
-              {(res["see-alsos"] || []).map((result) => (
-                <Detail.Metadata.TagList.Item text={result} color={"#A9A9A9"} />
-              ))}
-            </Detail.Metadata.TagList>
-          </Detail.Metadata>
-        }
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={"https://clojuredocs.org" + res.href} />
