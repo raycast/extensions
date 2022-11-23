@@ -72,8 +72,6 @@ export default function Command() {
     return "";
   };
 
-  console.log({ isLoading, matchesByDay });
-
   return (
     <List
       isShowingDetail={showingDetail}
