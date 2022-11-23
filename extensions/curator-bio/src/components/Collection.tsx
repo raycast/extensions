@@ -23,6 +23,10 @@ export default function Collection({
             ...item,
             user,
           }}
+          collectionInfo={{
+            userId,
+            collectionId,
+          }}
         />
       ))}
     </List>

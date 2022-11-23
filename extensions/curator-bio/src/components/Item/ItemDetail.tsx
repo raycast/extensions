@@ -4,7 +4,19 @@ import { toCapitalize } from "../../lib/utils";
 import Collection from "../Collection";
 import { useItemRenderData } from "./hooks";
 
+type CollectionInfo = {
+  userId: string;
+  collectionId: string;
+};
+
+const getItemUserWorkaround = (item: Item) => {
+  const user = Array.isArray(item.user) ? item.user[0] : item.user;
+
+  return user;
+};
+
 const OpenCollectionAction = ({ item }: { item: Item }) => {
+  const user = getItemUserWorkaround(item);
   return (
     <ActionPanel.Submenu title="Open Collection...">
       {item.collections.map((collection) => {
@@ -15,9 +27,9 @@ const OpenCollectionAction = ({ item }: { item: Item }) => {
             icon={Icon.Folder}
             target={
               <Collection
-                userId={item.user.customId}
+                userId={user.customId || user.custom_id}
                 collectionId={collection.customId || collection.id.slice(0, 8)}
-                user={item.user}
+                user={user}
               />
             }
           />
@@ -47,7 +59,7 @@ export const ItemDetail = ({ item }: { item: Item }) => {
   );
 };
 
-export const ItemListDetail = ({ item }: { item: Item }) => {
+export const ItemListDetail = ({ item, collectionInfo }: { item: Item; collectionInfo?: CollectionInfo }) => {
   const { markdown, link } = useItemRenderData(item);
 
   return (
@@ -61,7 +73,14 @@ export const ItemListDetail = ({ item }: { item: Item }) => {
           {link && <Action.OpenInBrowser title="Open in Browser" url={link} />}
 
           <ActionPanel.Section>
-            <OpenCollectionAction item={item} />
+            {item.user.customId && <OpenCollectionAction item={item} />}
+
+            {collectionInfo && (
+              <Action.OpenInBrowser
+                title="Open in Collection in Browser"
+                url={`https://www.curator.bio/${collectionInfo.userId}/${collectionInfo.collectionId}`}
+              />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -71,13 +90,15 @@ export const ItemListDetail = ({ item }: { item: Item }) => {
 };
 
 export const ItemDetailMetadata = ({ item }: { item: Item }) => {
+  const user = getItemUserWorkaround(item);
+
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label
         title="User"
-        text={item.user.name}
+        text={user.name}
         icon={{
-          source: item.user.avatar,
+          source: user.avatar,
           mask: Image.Mask.Circle,
         }}
       />
