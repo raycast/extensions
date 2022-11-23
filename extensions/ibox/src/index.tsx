@@ -39,16 +39,6 @@ export default function Command() {
           }
         />
       ))}
-
-      {/* <List.Item
-        icon="list-icon.png"
-        title="Greeting"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
-          </ActionPanel>
-        }
-      /> */}
     </List>
   );
 }
