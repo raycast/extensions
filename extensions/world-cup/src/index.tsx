@@ -98,6 +98,7 @@ export default function Command() {
                 Home,
                 Away,
                 Stadium,
+                Officials,
               } = match;
 
               const home = `${flags[Home?.Abbreviation || ""] || ""} ${Home?.Abbreviation || "Unknown"}`;
@@ -153,20 +154,34 @@ export default function Command() {
                             <List.Item.Detail.Metadata.Label title="Group" text={GroupName[0]?.Description} />
                           )}
                           <List.Item.Detail.Metadata.Label title="Stadium" text={Stadium.Name[0].Description} />
-                          <List.Item.Detail.Metadata.Separator />
 
                           {home.trim() != "Unknown" && MatchStatus !== 1 && (
                             <Fragment>
+                              <List.Item.Detail.Metadata.Separator />
                               <List.Item.Detail.Metadata.Label title={home} />
                               {Home?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Home?.Tactics} />}
-                              <List.Item.Detail.Metadata.Separator />
                             </Fragment>
                           )}
 
                           {away.trim() != "Unknown" && MatchStatus !== 1 && (
                             <Fragment>
+                              <List.Item.Detail.Metadata.Separator />
                               <List.Item.Detail.Metadata.Label title={away} />
                               {Away?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Away?.Tactics} />}
+                            </Fragment>
+                          )}
+
+                          {Officials.length > 0 && (
+                            <Fragment>
+                              <List.Item.Detail.Metadata.Separator />
+                              <List.Item.Detail.Metadata.TagList title="Officials">
+                                {Officials?.map((official, index) => (
+                                  <List.Item.Detail.Metadata.TagList.Item
+                                    key={index}
+                                    text={`${official.NameShort[0].Description}`}
+                                  />
+                                ))}
+                              </List.Item.Detail.Metadata.TagList>
                             </Fragment>
                           )}
 
