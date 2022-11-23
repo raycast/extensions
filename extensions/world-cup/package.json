@@ -5,6 +5,9 @@
   "description": "See all FIFA World Cup Qatar 2022™ matches",
   "icon": "command-icon.png",
   "author": "isma",
+  "contributors": [
+    "djpowers"
+  ],
   "categories": [
     "News",
     "Fun"

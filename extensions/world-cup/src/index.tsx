@@ -8,7 +8,10 @@ import flags from "./flags";
 import { Match } from "./types";
 
 const BASE_URL = `https://api.fifa.com/api/v3`;
-const LANG = `en`;
+const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
+// languages "lt" and "ru" are listed on fifa.com, but did not work when constructing URL
+const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
+const LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : `en`;
 const ID_SEASON = `255711`; // world cup qatar 2022
 const COUNT = 64; // limit to 64 (all matches)
 
@@ -18,7 +21,7 @@ type Data = {
 
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch(
-    `${BASE_URL}/calendar/matches?language=${LANG}&count=${COUNT}&idSeason=${ID_SEASON}`
+    `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
   );
   const [filter, setFilter] = useState("all");
 
@@ -108,7 +111,7 @@ export default function Command() {
                         icon={Icon.SoccerBall}
                         onAction={() =>
                           open(
-                            `https://www.fifa.com/fifaplus/es/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`
+                            `https://www.fifa.com/fifaplus/${LANG}/match-centre/match/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`
                           )
                         }
                       />
