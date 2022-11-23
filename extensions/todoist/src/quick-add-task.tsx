@@ -5,7 +5,7 @@ import { handleError, todoist } from "./api";
 type Arguments = {
   title: string;
   description?: string;
-  date?: string;
+  info?: string;
 };
 
 type Preferences = {
@@ -23,11 +23,11 @@ const command = async (props: { arguments: Arguments }) => {
       await closeMainWindow();
     }
 
-    const { url, id } = await todoist.addTask({
-      content: props.arguments.title,
-      description: props.arguments.description,
-      dueString: props.arguments.date,
+    const { url, id } = await todoist.quickAddTask({
+      text: `${props.arguments.title}${props.arguments.info ? ` ${props.arguments.info}` : ""}`,
     });
+
+    await todoist.updateTask(id, { description: props.arguments.description });
 
     toast.style = Toast.Style.Success;
     toast.title = "Task created";
