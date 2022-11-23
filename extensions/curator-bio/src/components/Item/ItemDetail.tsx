@@ -18,7 +18,7 @@ const getItemUserWorkaround = (item: Item) => {
 const OpenCollectionAction = ({ item }: { item: Item }) => {
   const user = getItemUserWorkaround(item);
   return (
-    <ActionPanel.Submenu title="Open Collection...">
+    <ActionPanel.Submenu title="Open Collection..." icon={Icon.List}>
       {item.collections.map((collection) => {
         return (
           <Action.Push
