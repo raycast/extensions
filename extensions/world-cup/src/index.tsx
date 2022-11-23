@@ -72,12 +72,15 @@ export default function Command() {
     return "";
   };
 
+  console.log({ isLoading, matchesByDay });
+
   return (
     <List
       isShowingDetail={showingDetail}
       isLoading={isLoading}
       searchBarAccessory={<FilterDropdown handleChange={onFilterChange} />}
     >
+      <List.EmptyView title="No Matches Found" icon="no-view.png" />
       {Object.keys(matchesByDay).map((day) => {
         const dayString = format(startOfDay(new Date(day)), "E dd MMM");
 
@@ -101,8 +104,6 @@ export default function Command() {
 
               const home = `${flags[Home?.Abbreviation || ""] || ""} ${Home?.Abbreviation || "Unknown"}`;
               const away = `${flags[Away?.Abbreviation || ""] || ""} ${Away?.Abbreviation || "Unknown"}`;
-
-              console.log(MatchStatus);
 
               return (
                 <List.Item
