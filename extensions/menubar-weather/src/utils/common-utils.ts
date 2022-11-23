@@ -1,7 +1,6 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { GeoLocation, Weather } from "../types/types";
-import { cityName, latitude, longitude } from "./open-weather-utils";
+import { cityName, latitude, longitude } from "./weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Current Weather",
@@ -18,14 +17,12 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export function getUnits() {
   let tempUint: string;
-  let windUint: string;
-  const { unit } = getPreferenceValues<Preferences>();
-  if (unit === "Metric") {
+  const windUint = "Km/h";
+  const { tempUnits } = getPreferenceValues<Preferences>();
+  if (tempUnits === "celsius") {
     tempUint = "℃";
-    windUint = "m/s";
   } else {
     tempUint = "℉";
-    windUint = "m/h";
   }
 
   return { tempUnit: tempUint, windUint: windUint };
@@ -63,7 +60,19 @@ export function getWeatherIcon(icon: string | undefined) {
   } else {
     return Icon.Sunrise;
   }
-  return `http://openweathermap.org/img/wn/${icon}@2x.png`;
+}
+
+export function isoToDateTime(time: string) {
+  return time.replace("T", " ");
+}
+
+export function isoToTime(time: string) {
+  return time.substring(11);
+}
+
+export function timeHour() {
+  const date = new Date();
+  return date.getHours();
 }
 
 export function getTime(stamp: number) {
@@ -84,21 +93,26 @@ export function preferencesChanged() {
   let oldLon = "";
   let oldLat = "";
 
+  const newLon = typeof longitude === "undefined" ? "" : longitude;
+  const newLat = typeof latitude === "undefined" ? "" : latitude;
+  const newCityName = typeof cityName === "undefined" ? "" : cityName;
+
   const cacheCityName = cache.get(CacheKey.CITY_NAME);
   const cacheLon = cache.get(CacheKey.LONGITUDE);
   const cacheLat = cache.get(CacheKey.LATITUDE);
-  if (typeof cacheCityName === "string" && !isEmpty(cacheCityName)) {
+  if (typeof cacheCityName !== "undefined" && !isEmpty(cacheCityName)) {
     oldCityName = JSON.parse(cacheCityName) as string;
   }
-  if (typeof cacheLon === "string" && !isEmpty(cacheLon)) {
+  if (typeof cacheLon !== "undefined" && !isEmpty(cacheLon)) {
     oldLon = JSON.parse(cacheLon) as string;
   }
-  if (typeof cacheLat === "string" && !isEmpty(cacheLat)) {
+  if (typeof cacheLat !== "undefined" && !isEmpty(cacheLat)) {
     oldLat = JSON.parse(cacheLat) as string;
   }
-  cache.set(CacheKey.CITY_NAME, JSON.stringify(cityName));
-  cache.set(CacheKey.LONGITUDE, JSON.stringify(longitude));
-  cache.set(CacheKey.LATITUDE, JSON.stringify(latitude));
 
-  return oldCityName !== cityName || oldLon !== longitude || oldLat !== latitude;
+  cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
+  cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
+  cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
+
+  return oldCityName !== newCityName || oldLon !== newLon || oldLat !== newLat;
 }

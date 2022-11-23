@@ -1,3 +1,3 @@
 # Menubar Weather Changelog
 
-## [Initial Version] - 2022-11-22
+## [Initial Version] - {PR_MERGE_DATE}
