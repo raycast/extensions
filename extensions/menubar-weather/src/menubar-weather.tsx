@@ -7,7 +7,7 @@ import { OPEN_METEO } from "./utils/axios-utils";
 export default function MenubarWeather() {
   const { weather, location, loading } = getCurrentWeather();
   const { tempUnit, windUint } = getUnits();
-  const { description, icon } = getWeatherDescription(weather?.current_weather.weathercode);
+  const { description, icon } = getWeatherDescription(weather?.current_weather?.weathercode);
 
   return (
     <MenuBarExtra

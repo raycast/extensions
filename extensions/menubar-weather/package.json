@@ -46,7 +46,7 @@
       "type": "dropdown",
       "title": "Temperature Unit",
       "description": "Units of temperature",
-      "required": true,
+      "required": false,
       "default": "celsius",
       "data": [
         {

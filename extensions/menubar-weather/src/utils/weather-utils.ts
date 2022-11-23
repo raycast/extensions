@@ -64,6 +64,9 @@ export function isEmptyLonLat() {
 96, 99 	Thunderstorm with slight and heavy hail
  */
 export function getWeatherDescription(weatherCode: number | undefined) {
+  if (typeof weatherCode === "undefined") {
+    return { description: "No weather info", icon: Icon.Sunrise };
+  }
   switch (weatherCode) {
     case 0:
       return { description: "Clear sky", icon: Icon.Sun };
