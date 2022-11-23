@@ -46,7 +46,7 @@
       "type": "dropdown",
       "title": "Temperature Unit",
       "description": "Units of temperature",
-      "required": false,
+      "required": true,
       "default": "celsius",
       "data": [
         {
@@ -64,7 +64,7 @@
       "type": "dropdown",
       "title": "Precipitation Unit",
       "description": "Units of precipitation",
-      "required": false,
+      "required": true,
       "default": "mm",
       "data": [
         {
