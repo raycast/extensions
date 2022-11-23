@@ -1,7 +1,31 @@
 import { Detail, ActionPanel, Action, List, Icon, Image } from "@raycast/api";
 import { Item } from "../../lib/types";
 import { toCapitalize } from "../../lib/utils";
+import Collection from "../Collection";
 import { useItemRenderData } from "./hooks";
+
+const OpenCollectionAction = ({ item }: { item: Item }) => {
+  return (
+    <ActionPanel.Submenu title="Open Collection...">
+      {item.collections.map((collection) => {
+        return (
+          <Action.Push
+            key={collection.id}
+            title={collection.name}
+            icon={Icon.Folder}
+            target={
+              <Collection
+                userId={item.user.customId}
+                collectionId={collection.customId || collection.id.slice(0, 8)}
+                user={item.user}
+              />
+            }
+          />
+        );
+      })}
+    </ActionPanel.Submenu>
+  );
+};
 
 export const ItemDetail = ({ item }: { item: Item }) => {
   const { markdown, link } = useItemRenderData(item);
@@ -9,7 +33,15 @@ export const ItemDetail = ({ item }: { item: Item }) => {
   return (
     <Detail
       markdown={markdown}
-      actions={<ActionPanel>{link && <Action.OpenInBrowser url={link} title="Open in Browser" />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {link && <Action.OpenInBrowser url={link} title="Open in Browser" />}
+
+          <ActionPanel.Section>
+            <OpenCollectionAction item={item} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
       metadata={<ItemDetailMetadata item={item} />}
     />
   );
@@ -27,6 +59,10 @@ export const ItemListDetail = ({ item }: { item: Item }) => {
         <ActionPanel>
           <Action.Push title="Show Details" target={<ItemDetail item={item} />} icon={Icon.Sidebar} />
           {link && <Action.OpenInBrowser title="Open in Browser" url={link} />}
+
+          <ActionPanel.Section>
+            <OpenCollectionAction item={item} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       detail={<List.Item.Detail markdown={markdown} />}

@@ -112,7 +112,7 @@ export interface Link {
 
 export interface EmbedData {
   service: string;
-  source: string;
+  source?: string;
   embed: string;
   width: number;
   height: number;

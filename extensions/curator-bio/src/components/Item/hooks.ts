@@ -2,12 +2,24 @@ import url from "url";
 import { useMemo } from "react";
 import { EmbedData, BlocksItem, LinkData, Item, ImageData } from "../../lib/types";
 
+const getYouTubeVideoId = (data: EmbedData) => {
+  if (data.source) {
+    return new url.URL(data.source).searchParams.get("v");
+  } else {
+    return data.embed.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/)?.[1];
+  }
+};
+
 export const renderEmbedData = (data: EmbedData) => {
   const { service, source } = data;
 
   switch (service) {
     case "youtube": {
-      const videoId = new url.URL(source).searchParams.get("v");
+      const videoId = getYouTubeVideoId(data);
+
+      if (!videoId) {
+        return "";
+      }
 
       return `![${videoId}](https://img.youtube.com/vi/${videoId}/hqdefault.jpg)
       
@@ -25,12 +37,10 @@ export const blocksToMarkdownRenderer = (blocks: BlocksItem[] = []): string => {
       const data = block.data;
       switch (block.type) {
         case "linkTool": {
-          const {
-            meta: { image, title: _title, description: _description },
-            link,
-          } = data as LinkData;
-          const description = _description.length > 150 ? _description.slice(0, 150) + "..." : _description;
-          const title = _title.length > 100 ? _title.slice(0, 100) + "..." : _title;
+          const { meta: { image, title: _title, description: _description } = {}, link } = data as LinkData;
+          const description =
+            _description && (_description.length > 150 ? _description.slice(0, 150) + "..." : _description);
+          const title = _title && (_title.length > 100 ? _title.slice(0, 100) + "..." : _title);
 
           return `#### [${title}](${link})
 
@@ -65,7 +75,7 @@ ${image?.url && `\n![${_title}](${image?.url})`}
 };
 
 export const useItemRenderData = (item: Item) => {
-  const link = item.settings?.link?.value;
+  const link = item.settings?.link?.value || null;
 
   const blocksMarkdown = useMemo(() => {
     return blocksToMarkdownRenderer(item.content.blocks);

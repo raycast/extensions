@@ -40,11 +40,14 @@ export const getSubscriptionItems = async (page = 1, perPage = 30) => {
 };
 
 export const getCollectionItems = async (userId: string, collectionId: string) => {
-  return client.get(`users/${userId}/items`, {
-    searchParams: {
-      collCustomId: collectionId,
-    },
-  });
+  return client
+    .get(`users/${userId}/items`, {
+      searchParams: {
+        collCustomId: collectionId,
+      },
+    })
+    .text()
+    .then((r) => JSON.parse(r)) as Promise<any>;
 };
 
 export const getMyItemDetail = async (id: string) => {

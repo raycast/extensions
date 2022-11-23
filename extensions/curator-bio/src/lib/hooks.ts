@@ -1,4 +1,4 @@
-import { getMe, login, getSubscriptionItems, getMyItemDetail } from "./api";
+import { getMe, login, getSubscriptionItems, getMyItemDetail, getCollectionItems } from "./api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preference } from "./types";
@@ -10,7 +10,6 @@ export const useMe = () => {
     const res = await getMe();
 
     if (res.statusCode === 200) {
-      console.log("yeah already login");
       return res;
     }
 
@@ -32,4 +31,8 @@ export const useSubscriptions = (page: number, execute: boolean) => {
 
 export const useMyItemDetail = (id: string) => {
   return useCachedPromise(getMyItemDetail, [id]);
+};
+
+export const useCollectionItems = (userId: string, collectionId: string) => {
+  return useCachedPromise(getCollectionItems, [userId, collectionId]);
 };
