@@ -34,13 +34,13 @@ function getDocList(data: Doc): DocInfo[] {
 export default function Command() {
   const cache = new Cache();
   const cached = cache.get("items");
-  let res = {"data": null, "isLoading": true};
+  let res: DocInfo[] | undefined | void, loading: boolean;
 
   if (cached) {
-    res.data = JSON.parse(cached);
-    res.isLoading = false;
+    res = JSON.parse(cached);
+    loading = false;
   } else {
-    res = useFetch(
+    const { isLoading, data } = useFetch(
       "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
       {
         // to make sure the screen isn't flickering when the searchText changes
@@ -55,11 +55,14 @@ export default function Command() {
         },
       }
     );
+
+    res = data;
+    loading = isLoading;
   }
 
   return (
-    <List isLoading={res.isLoading} searchBarPlaceholder="Search..." throttle>
-      {(res.data || []).map((result, index) => (
+    <List isLoading={loading} searchBarPlaceholder="Search..." throttle>
+      {(res || []).map((result, index) => (
         <SearchListItem key={index} searchResult={result} />
       ))}
     </List>
