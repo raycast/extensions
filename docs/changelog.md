@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.44.0 – 2022-11-23
+
+### ✨ New
+
+- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` – same as for List and Grid where you can perform custom logic when the user changes the search text.
+- **Application:** You can now get the current frontmost Application of the system with the top-level `getFrontmostApplication` method.
+- **File and Directory Preferences**: We’ve added two new preference types `“directory”` and `“file”`, supported via the manifest. Both types show a file picker component and let the user select directory or file paths.
+- **Environment:** You can now get the user’s text size via `environment.textSize`.
+
+### 💎 Improvements
+
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user’s “Pop to Root Search” preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user’s setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
+  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **OAuth**: The client’s `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
+- **List and Detail Metadata**: Now show tooltips when labels get truncated.
+- **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
+
+### 🐞 Fixes
+
+- **Dropdown**: Fixed triggering a dropdown component’s `onChange` handler when navigating.
+- **Dropdown**: Fixed the missing `placeholder` property in the search bar dropdown.
+- **Forms**: Fixed submitting a form with marked text.
+
 ## 1.43.0 - 2022-11-09
 
 ### ✨ New

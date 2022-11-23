@@ -55,7 +55,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             assigneeIds: values.assignees,
             labelsIds: values.labels,
             milestoneId: values.milestone || null,
-            avatarSize: 64,
           });
 
           // It's not possible to add a PR to a project from the initPullRequest call

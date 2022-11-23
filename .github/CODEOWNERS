@@ -31,6 +31,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour
 /extensions/arc                                      @thomaspaulmann
+/extensions/archiver                                 @404J
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
@@ -237,7 +238,7 @@
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
-/extensions/github                                   @thomaslombart @unnamedd
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
 /extensions/github-gist                              @koinzhang
@@ -378,6 +379,7 @@
 /extensions/maven-central-repository                 @koinzhang
 /extensions/meme-generator                           @timoransky
 /extensions/mempool                                  @dillionverma
+/extensions/menubar-weather                          @koinzhang
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/miro                                     @felixhaeberle @mathieudutour
 /extensions/mlb-scores                               @jso8910
@@ -673,7 +675,7 @@
 /extensions/word-search                              @RishabSwift @thomaspaulmann
 /extensions/work-time-countdown                      @thomaspaulmann @pernielsentikaer
 /extensions/world-clock                              @koinzhang
-/extensions/world-cup                                @ismamz
+/extensions/world-cup                                @ismamz @djpowers @pernielsentikaer
 /extensions/wrike                                    @suarez-agu
 /extensions/xcode                                    @SvenTiigi @qeude @oliverepper
 /extensions/xecutor                                  @GastroGeek
