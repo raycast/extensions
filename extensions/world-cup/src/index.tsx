@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
 import groupBy from "lodash.groupby";
 import FilterDropdown from "./FilterDropdown";
 import flags from "./flags";
 import { Match } from "./types";
+import { capitalizeFirstLetter } from "./utils";
 
 const BASE_URL = `https://api.fifa.com/api/v3`;
 const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
@@ -24,6 +25,7 @@ export default function Command() {
     `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
   );
   const [filter, setFilter] = useState("all");
+  const [showingDetail, setShowingDetail] = useCachedState("showDetails", true);
 
   let matches: Match[] = (data as Data)?.Results || [];
 
@@ -72,13 +74,9 @@ export default function Command() {
 
   return (
     <List
+      isShowingDetail={showingDetail}
       isLoading={isLoading}
       searchBarAccessory={<FilterDropdown handleChange={onFilterChange} />}
-      actions={
-        <ActionPanel>
-          <Action title="Reload" onAction={revalidate} />
-        </ActionPanel>
-      }
     >
       {Object.keys(matchesByDay).map((day) => {
         const dayString = format(startOfDay(new Date(day)), "E dd MMM");
@@ -98,7 +96,13 @@ export default function Command() {
                 MatchStatus,
                 Home,
                 Away,
+                Stadium,
               } = match;
+
+              const home = `${flags[Home?.Abbreviation || ""] || ""} ${Home?.Abbreviation || "Unknown"}`;
+              const away = `${flags[Away?.Abbreviation || ""] || ""} ${Away?.Abbreviation || "Unknown"}`;
+
+              console.log(MatchStatus);
 
               return (
                 <List.Item
@@ -115,23 +119,65 @@ export default function Command() {
                           )
                         }
                       />
+                      <Action title="Reload" icon={Icon.RotateClockwise} onAction={revalidate} />
+                      <Action
+                        title="Toggle Detail"
+                        icon={Icon.AppWindowSidebarLeft}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={() => setShowingDetail(!showingDetail)}
+                      />
                     </ActionPanel>
                   }
                   icon={{
                     source: Icon.Dot,
                     tintColor: MatchStatus === 0 ? Color.Green : MatchStatus === 3 ? Color.Yellow : Color.Red,
                   }}
-                  subtitle={getTime(match) || ""}
+                  subtitle={MatchStatus !== 0 ? capitalizeFirstLetter(getTime(match)) : ""}
                   keywords={[Home?.TeamName[0]?.Description || "", Away?.TeamName[0]?.Description || ""]}
-                  title={`${flags[Home?.Abbreviation || ""] || ""} ${Home?.Abbreviation || "Unknown"}  vs  ${
-                    flags[Away?.Abbreviation || ""] || ""
-                  } ${Away?.Abbreviation || "Unknown"}`}
+                  title={`${home}  vs  ${away}`}
                   accessories={[
                     HomeTeamScore || HomeTeamScore === 0 ? { text: `${HomeTeamScore} : ${AwayTeamScore}` } : {},
                     {
-                      text: GroupName[0]?.Description ? GroupName[0]?.Description : StageName[0]?.Description,
+                      text: !showingDetail
+                        ? GroupName[0]?.Description
+                          ? GroupName[0]?.Description
+                          : StageName[0]?.Description
+                        : "",
                     },
                   ]}
+                  detail={
+                    <List.Item.Detail
+                      metadata={
+                        <List.Item.Detail.Metadata>
+                          <List.Item.Detail.Metadata.Label title="Stage" text={StageName[0]?.Description} />
+                          {GroupName[0]?.Description && (
+                            <List.Item.Detail.Metadata.Label title="Group" text={GroupName[0]?.Description} />
+                          )}
+                          <List.Item.Detail.Metadata.Label title="Stadium" text={Stadium.Name[0].Description} />
+                          <List.Item.Detail.Metadata.Separator />
+
+                          {home.trim() != "Unknown" && MatchStatus !== 1 && (
+                            <Fragment>
+                              <List.Item.Detail.Metadata.Label title={home} />
+                              {Home?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Home?.Tactics} />}
+                              <List.Item.Detail.Metadata.Separator />
+                            </Fragment>
+                          )}
+
+                          {away.trim() != "Unknown" && MatchStatus !== 1 && (
+                            <Fragment>
+                              <List.Item.Detail.Metadata.Label title={away} />
+                              {Away?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Away?.Tactics} />}
+                            </Fragment>
+                          )}
+
+                          {home.trim() === "Unknown" && away.trim() === "Unknown" && (
+                            <List.Item.Detail.Metadata.Label title="TBD" />
+                          )}
+                        </List.Item.Detail.Metadata>
+                      }
+                    />
+                  }
                 />
               );
             })}

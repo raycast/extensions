@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [
-    "djpowers"
+    "djpowers",
+    "pernielsentikaer"
   ],
   "categories": [
     "News",
@@ -24,7 +25,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.43.2",
-    "@raycast/utils": "^1.4.10",
+    "@raycast/utils": "^1.4.11",
     "@types/lodash.groupby": "^4.6.7",
     "date-fns": "^2.29.3",
     "lodash.groupby": "^4.6.0"

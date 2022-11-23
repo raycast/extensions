@@ -1,4 +1,5 @@
-export type Team = { TeamName: { Description: string }[]; Abbreviation: string };
+export type Team = { TeamName: { Description: string }[]; Abbreviation: string; Tactics: string };
+export type Stadium = { Name: { Description: string; Locale: string }[] };
 
 export type Match = {
   Date: string;
@@ -7,6 +8,7 @@ export type Match = {
   IdSeason: string;
   IdStage: string;
   IdMatch: string;
+  Stadium: Stadium;
   GroupName: { Description: string }[];
   StageName: { Description: string }[];
   HomeTeamScore: number | null;
