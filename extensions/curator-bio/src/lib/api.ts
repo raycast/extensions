@@ -23,7 +23,7 @@ export const login = async (email: string, password: string) => {
 };
 
 export const getMe = async () => {
-  return client.get("users/me/").json();
+  return client.get("users/me/").json() as Promise<APIData<UserData>>;
 };
 
 export const getUser = async (userId: string) => {

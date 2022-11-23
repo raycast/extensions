@@ -15,14 +15,21 @@
       "name": "feed",
       "title": "My Feed",
       "subtitle": "Curator Bio",
-      "description": "",
+      "description": "Show your feed",
       "mode": "view"
     },
     {
       "name": "discover",
       "title": "Discover",
       "subtitle": "Curator Bio",
-      "description": "",
+      "description": "Discover new items",
+      "mode": "view"
+    },
+    {
+      "name": "my-page",
+      "title": "My Page",
+      "subtitle": "Curator Bio",
+      "description": "Show your page",
       "mode": "view"
     }
   ],

@@ -23,7 +23,7 @@ export const useMe = () => {
       // noop
     }
 
-    if (res?.statusCode === 200) {
+    if (res?.status === 200) {
       return res;
     }
 

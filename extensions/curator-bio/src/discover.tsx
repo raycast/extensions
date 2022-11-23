@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Item } from "./lib/types";
 
 export default function Discover() {
-  const { isLoading: isLogging, data: userResponse, error } = useMe();
+  const { isLoading: isMeLoading, data: userResponse, error } = useMe();
 
   const fetchItems = !error && !!userResponse;
 
@@ -19,7 +19,7 @@ export default function Discover() {
     return data.filter((item: Item) => item.userId !== userId);
   }, [data, userId]);
 
-  const isListLoading = isLoading || isLogging;
+  const isListLoading = isMeLoading || isLoading;
 
   return (
     <List isLoading={isListLoading} isShowingDetail={true}>
