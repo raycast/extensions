@@ -1,7 +1,6 @@
 import { request } from "./request";
 import { CustomField } from "./tasks";
 
-
 export type Project = {
   gid: string;
   id: string;

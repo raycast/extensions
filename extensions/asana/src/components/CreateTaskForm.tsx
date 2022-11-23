@@ -25,7 +25,6 @@ import { asanaToRaycastColor } from "../helpers/colors";
 import { includes } from "lodash";
 import { title } from "process";
 
-
 export default function CreateTaskForm(props: {
   draftValues?: TaskFormValues;
   assignee?: string;
@@ -174,7 +173,7 @@ export default function CreateTaskForm(props: {
 
       <Form.Separator />
 
-      <Form.TextField title="Task Name" placeholder="Short title for the task"  autoFocus {...itemProps.name} />
+      <Form.TextField title="Task Name" placeholder="Short title for the task" autoFocus {...itemProps.name} />
 
       <Form.TextArea title="Description" placeholder="Add more detail to this task" {...itemProps.description} />
 
