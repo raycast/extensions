@@ -67,6 +67,31 @@ export default async function Command() {
 
 The default [Application](#application) that would open the file. Throws an error if no application was found.
 
+### getFrontmostApplication
+
+Returns the frontmost application.
+
+#### Signature
+
+```typescript
+async function getFrontmostApplication(): Promise<Application>;
+```
+
+#### Example
+
+```typescript
+import { getFrontmostApplication } from "@raycast/api";
+
+export default async function Command() => {
+  const defaultApplication = await getFrontmostApplication();
+  console.log(`The frontmost application is: ${frontmostApplication.name}`);
+};
+```
+
+#### Return
+
+The frontmost [Application](#application). Throws an error if no application was found.
+
 ### showInFinder
 
 Shows a file or directory in the Finder.
@@ -187,9 +212,9 @@ async function launchCommand(options: {
 ```typescript
 import { launchCommand, LaunchType } from "@raycast/api";
 
-export default async function Command() {
+export default async function Command() => {
   await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
-}
+};
 ```
 
 #### Parameters

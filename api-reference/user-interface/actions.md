@@ -74,11 +74,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | The contents that will be written to the clipboard as string. | <code>string</code> or <code>number</code> | - |
+| content<mark style="color:red;">*</mark> | The contents that will be copied to the clipboard. | <code>string</code> or <code>number</code> or <code>[Clipboard.Content](../clipboard.md#clipboard.content)</code> | - |
 | icon | A optional icon displayed for the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the action. | <code>string</code> | `"Copy to Clipboard"` |
-| onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number) => void</code> | - |
+| onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number \| [Clipboard.Content](../clipboard.md#clipboard.content)) => void</code> | - |
 
 ### Action.Open
 
@@ -220,11 +220,11 @@ export default function Command() {
 
 | Prop | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | The contents that will be written to the clipboard as string. | <code>string</code> or <code>number</code> | - |
+| content<mark style="color:red;">*</mark> | The contents that will be pasted to the frontmost application. | <code>string</code> or <code>number</code> or <code>[Clipboard.Content](../clipboard.md#clipboard.content)</code> | - |
 | icon | The icon displayed for the action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
-| title | An optional title for the action. | <code>string</code> | `"Paste in Active app"` |
-| onPaste | Callback when the content was pasted into the front-most application. | <code>(content: string \| number) => void</code> | - |
+| title | An optional title for the action. | <code>string</code> | `"Paste in Active App"` |
+| onPaste | Callback when the content was pasted into the front-most application. | <code>(content: string \| number \| [Clipboard.Content](../clipboard.md#clipboard.content)) => void</code> | - |
 
 ### Action.Push
 

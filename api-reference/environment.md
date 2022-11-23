@@ -22,6 +22,7 @@ export default async function Command() {
   console.log(`Support path: ${environment.supportPath}`);
   console.log(`Is development mode: ${environment.isDevelopment}`);
   console.log(`Theme: ${environment.theme}`);
+  console.log(`Text size: ${environment.textSize}`);
   console.log(`LaunchType: ${environment.launchType}`);
 }
 ```
@@ -38,6 +39,7 @@ export default async function Command() {
 | launchType<mark style="color:red;">*</mark> | The type of launch for the command (user initiated or background). | <code>[LaunchType](environment.md#launchtype)</code> |
 | raycastVersion<mark style="color:red;">*</mark> | The version of the main Raycast app | <code>string</code> |
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
+| textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
 | theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
 | launchContext | Any custom context values passed from a programmatic command launch via `launchCommand`. | <code>[LaunchContext](environment.md#launchcontext)</code> |
 

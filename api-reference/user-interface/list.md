@@ -320,7 +320,7 @@ export default function Command() {
 | searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search value..."` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
-| throttle | Defines whether the [List.Props.onSearchTextChange](list.md#props) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
 | onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
 | onSelectionChange | Callback triggered when the item selection in the list changes. | <code>(id: string) => void</code> | - |
 
@@ -384,11 +384,15 @@ export default function Command() {
 | tooltip<mark style="color:red;">*</mark> | Tooltip displayed when hovering the dropdown. | <code>string</code> | - |
 | children | Dropdown sections or items. If Dropdown.Item elements are specified, a default section is automatically created. | <code>React.ReactNode</code> | - |
 | defaultValue | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. | <code>string</code> | - |
+| filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | id | ID of the dropdown. | <code>string</code> | - |
+| isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
 | placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
 | storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
+| throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
 | value | The currently value of the dropdown. | <code>string</code> | - |
 | onChange | Callback triggered when the dropdown selection changes. | <code>(newValue: string) => void</code> | - |
+| onSearchTextChange | Callback triggered when the search bar text changes. | <code>(text: string) => void</code> | - |
 
 ### List.Dropdown.Item
 

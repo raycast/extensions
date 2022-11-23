@@ -45,7 +45,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | The content to copy to the clipboard. | <code>string</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
+| content<mark style="color:red;">*</mark> | The content to copy to the clipboard. | <code>string</code> or <code>number</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
 
 #### Return
 
@@ -75,7 +75,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| content<mark style="color:red;">*</mark> | The content to insert at the cursor. | <code>string</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
+| content<mark style="color:red;">*</mark> | The content to insert at the cursor. | <code>string</code> or <code>number</code> or <code>[Clipboard.Content](clipboard.md#clipboard.content)</code> |
 
 #### Return
 
