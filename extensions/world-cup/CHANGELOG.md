@@ -7,6 +7,8 @@
 - Moved Reload action to right place
 - Added action panel icons
 - Fixed flicker upon entering the extension
+- Added officials
+- Added attendance if set
 
 ## [Add support for additional languages] - 2022-11-21
 
