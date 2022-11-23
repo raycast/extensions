@@ -29,6 +29,7 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           text: issue.url,
         }}
         title="Copy Formatted Issue URL"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
       />
 
       <Action.CopyToClipboard content={issue.url} title="Copy Issue URL" />
