@@ -22,7 +22,20 @@ export const login = async (email: string, password: string) => {
 };
 
 export const getMe = async () => {
-  return client.get("users/me/");
+  return client.get("users/me/").json();
+};
+
+// https://www.curator.bio/api/v2/items?page=1&perPage=30
+
+export const getItems = async (page = 1, perPage = 30) => {
+  return client
+    .get("items", {
+      searchParams: {
+        page,
+        perPage,
+      },
+    })
+    .json();
 };
 
 // https://www.curator.bio/api/v2/users/me/subscriptions/items?page=1&perPage=30
@@ -35,8 +48,7 @@ export const getSubscriptionItems = async (page = 1, perPage = 30) => {
         perPage,
       },
     })
-    .text()
-    .then((r) => JSON.parse(r));
+    .json();
 };
 
 export const getCollectionItems = async (userId: string, collectionId: string) => {
@@ -46,8 +58,7 @@ export const getCollectionItems = async (userId: string, collectionId: string) =
         collCustomId: collectionId,
       },
     })
-    .text()
-    .then((r) => JSON.parse(r)) as Promise<any>;
+    .json();
 };
 
 export const getMyItemDetail = async (id: string) => {

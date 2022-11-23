@@ -71,6 +71,10 @@ type FileType =
       data: ParagraphData;
     }
   | {
+      type: "header";
+      data: HeaderData;
+    }
+  | {
       type: "string";
       data: unknown;
     };
@@ -118,3 +122,8 @@ export interface EmbedData {
   height: number;
   caption: string;
 }
+
+export type HeaderData = {
+  text: string;
+  level: number;
+};

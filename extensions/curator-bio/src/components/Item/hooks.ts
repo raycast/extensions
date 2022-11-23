@@ -1,6 +1,6 @@
 import url from "url";
 import { useMemo } from "react";
-import { EmbedData, BlocksItem, LinkData, Item, ImageData } from "../../lib/types";
+import { EmbedData, BlocksItem, LinkData, Item, ImageData, HeaderData } from "../../lib/types";
 
 const getYouTubeVideoId = (data: EmbedData) => {
   if (data.source) {
@@ -66,8 +66,14 @@ ${image?.url && `\n![${_title}](${image?.url})`}
           return block.data.text;
         }
 
+        case "header": {
+          const { text, level } = block.data as HeaderData;
+          return `${"#".repeat(level)} ${text}`;
+        }
+
         default:
           console.warn(`Unknown block type: ${block.type}`);
+          console.warn(JSON.stringify(block, null, 2));
           return "";
       }
     })

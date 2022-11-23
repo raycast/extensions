@@ -1,0 +1,31 @@
+import { List } from "@raycast/api";
+import { useMe, useItems } from "./lib/hooks";
+import { ItemListDetail } from "./components/Item/ItemDetail";
+import { useMemo } from "react";
+import { Item } from "./lib/types";
+
+export default function Discover() {
+  const { isLoading: isLogging, data: userResponse, error } = useMe();
+
+  const fetchItems = !error && !!userResponse;
+
+  const userId = useMemo(() => {
+    return userResponse?.data?.id;
+  }, [userResponse]);
+
+  const { isLoading, data: { data = [] } = {} } = useItems(1, fetchItems);
+
+  const displayItems = useMemo(() => {
+    return data.filter((item: Item) => item.userId !== userId);
+  }, [data, userId]);
+
+  const isListLoading = isLoading || isLogging;
+
+  return (
+    <List isLoading={isListLoading} isShowingDetail={true}>
+      {displayItems.map((item: any) => (
+        <ItemListDetail key={item.id} item={item} />
+      ))}
+    </List>
+  );
+}

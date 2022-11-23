@@ -1,4 +1,4 @@
-import { getMe, login, getSubscriptionItems, getMyItemDetail, getCollectionItems } from "./api";
+import { getMe, login, getSubscriptionItems, getMyItemDetail, getCollectionItems, getItems } from "./api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preference } from "./types";
@@ -7,9 +7,14 @@ export const useMe = () => {
   const { email, password } = getPreferenceValues<Preference>();
 
   return usePromise(async () => {
-    const res = await getMe();
+    let res;
+    try {
+      res = await getMe();
+    } catch {
+      // noop
+    }
 
-    if (res.statusCode === 200) {
+    if (res?.statusCode === 200) {
       return res;
     }
 
@@ -35,4 +40,10 @@ export const useMyItemDetail = (id: string) => {
 
 export const useCollectionItems = (userId: string, collectionId: string) => {
   return useCachedPromise(getCollectionItems, [userId, collectionId]);
+};
+
+export const useItems = (page: number, execute: boolean) => {
+  return useCachedPromise(getItems, [page], {
+    execute,
+  });
 };

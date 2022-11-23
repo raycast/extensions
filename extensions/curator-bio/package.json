@@ -17,6 +17,13 @@
       "subtitle": "Curator Bio",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "discover",
+      "title": "Discover",
+      "subtitle": "Curator Bio",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
