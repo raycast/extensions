@@ -27,14 +27,6 @@
       "title": "Support center base URL",
       "placeholder": "e.g., support.mycompany.com",
       "description": "The base URL for your Zendesk support center. When viewing your support articles online, the URL will be in the format https://support.mycompany.com/hc/en-us/articles/3600000000000-My-Article-Title. The base URL is everything after the https:// and before the /hc/ part of the URL."
-    },
-    {
-      "name": "locale",
-      "type": "textfield",
-      "required": false,
-      "title": "Support center locale",
-      "placeholder": "e.g., en-us",
-      "description": "Defaults to en-us if no locale is provided."
     }
   ],
   "dependencies": {

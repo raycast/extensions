@@ -37,9 +37,27 @@ export interface ArticleFetchRes {
 }
 
 export interface FilteredArticle {
-  id?: number;
+  id: number;
   url?: string;
   section?: number;
   title: string;
   body?: string;
+}
+
+export interface ZendeskLocale {
+  createdAt: string;
+  id: number;
+  locale: string;
+  name: string;
+  updated_at: string;
+  url: string;
+}
+
+export interface LocaleFetchRes {
+  data: { locales: ZendeskLocale[] };
+}
+
+export interface FilteredLocale {
+  name: string;
+  locale: string;
 }
