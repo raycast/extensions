@@ -33,7 +33,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
     mutate: mutateDetail,
   } = useCachedPromise(
     async (pullRequestId) => {
-      const pullRequestDetail = await github.pullRequestDetails({ nodeId: pullRequestId, avatarSize: 64 });
+      const pullRequestDetail = await github.pullRequestDetails({ nodeId: pullRequestId });
       return pullRequestDetail.node as PullRequestDetailsFieldsFragment;
     },
     [initialPullRequest.id],

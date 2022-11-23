@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { MutatePromise, getFavicon } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { WEB_IDES } from "../helpers/repository";
 import { getGitHubClient } from "../helpers/withGithubClient";
@@ -13,9 +13,9 @@ import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
 
 type RepositoryActionProps = {
-  repository: RepositoryFieldsFragment;
-  onVisit: (repository: RepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<RepositoryFieldsFragment[] | undefined>;
+  repository: ExtendedRepositoryFieldsFragment;
+  onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
+  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
 export default function RepositoryActions({ repository, mutateList, onVisit }: RepositoryActionProps) {

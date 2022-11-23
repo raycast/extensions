@@ -21,7 +21,6 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
       const result = await github.searchPullRequests({
         query: `is:pr ${repoFilter} archived:false ${query}`,
         numberOfItems: 20,
-        avatarSize: 64,
       });
       return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
     },

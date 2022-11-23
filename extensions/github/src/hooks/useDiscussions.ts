@@ -7,7 +7,7 @@ export function useDiscussions(query: string) {
 
   const { data, isLoading } = useCachedPromise(
     async (query) => {
-      const result = await github.searchDiscussions({ query: query, numberOfOpenItems: 20, avatarSize: 64 });
+      const result = await github.searchDiscussions({ query, numberOfOpenItems: 20 });
       return result.openDiscussions;
     },
     [query]

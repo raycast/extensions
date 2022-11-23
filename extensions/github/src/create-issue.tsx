@@ -41,7 +41,6 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           assigneeIds: values.assignees,
           labelIds: values.labels,
           milestoneId: values.milestone || null,
-          avatarSize: 64,
         });
 
         const issue = createResult?.createIssue?.issue;

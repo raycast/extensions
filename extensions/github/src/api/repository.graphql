@@ -1,10 +1,24 @@
-fragment RepositoryFields on Repository {
+fragment ShortRepositoryFields on Repository {
   id
   nameWithOwner
   name
   owner {
     login
-    avatarUrl(size: $avatarSize)
+    avatarUrl(size: 64)
+  }
+  url
+  mergeCommitAllowed
+  squashMergeAllowed
+  rebaseMergeAllowed
+}
+
+fragment ExtendedRepositoryFields on Repository {
+  id
+  nameWithOwner
+  name
+  owner {
+    login
+    avatarUrl(size: 64)
   }
   url
   mergeCommitAllowed
@@ -27,10 +41,10 @@ fragment RepositoryFields on Repository {
   }
 }
 
-query searchRepositories($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+query searchRepositories($query: String!, $numberOfItems: Int!) {
   search(query: $query, first: $numberOfItems, type: REPOSITORY) {
     nodes {
-      ...RepositoryFields
+      ...ExtendedRepositoryFields
     }
   }
 }
