@@ -18,7 +18,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: context.payload.label.name,
-                color: '808080',
+                color: 'CCCCCC',
                 description: 'Issues related to the ' + context.payload.label.name.replace('extension: ', '') + ' extension'
               })
             }
