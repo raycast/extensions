@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, List, Icon } from "@raycast/api";
+import { Detail, ActionPanel, Action, List, Icon, Image } from "@raycast/api";
 import { Item } from "../../lib/types";
 import { toCapitalize } from "../../lib/utils";
 import { useItemRenderData } from "./hooks";
@@ -37,6 +37,15 @@ export const ItemListDetail = ({ item }: { item: Item }) => {
 export const ItemDetailMetadata = ({ item }: { item: Item }) => {
   return (
     <List.Item.Detail.Metadata>
+      <List.Item.Detail.Metadata.Label
+        title="User"
+        text={item.user.name}
+        icon={{
+          source: item.user.avatar,
+          mask: Image.Mask.Circle,
+        }}
+      />
+
       <List.Item.Detail.Metadata.TagList title="Collections">
         {item.collections.map((collection) => (
           <List.Item.Detail.Metadata.TagList.Item key={collection.id} text={`${collection.icon} ${collection.name}`} />
@@ -51,7 +60,7 @@ export const ItemDetailMetadata = ({ item }: { item: Item }) => {
         </List.Item.Detail.Metadata.TagList>
       )}
 
-      <List.Item.Detail.Metadata.Label title="Information" />
+      <List.Item.Detail.Metadata.Separator />
 
       {item.views && <List.Item.Detail.Metadata.Label title="Visits" text={item.views.toString()} />}
 
