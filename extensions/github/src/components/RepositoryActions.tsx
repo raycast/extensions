@@ -7,6 +7,9 @@ import { getErrorMessage } from "../helpers/errors";
 import { WEB_IDES } from "../helpers/repository";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
+import { RepositoryDiscussionList } from "./RepositoryDiscussions";
+import { RepositoryIssueList } from "./RepositoryIssues";
+import { RepositoryPullRequestList } from "./RepositoryPullRequest";
 import RepositoryReleases from "./RepositoryReleases";
 
 type RepositoryActionProps = {
@@ -123,7 +126,41 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
         )}
       </ActionPanel.Section>
 
-      <ActionPanel.Section>
+      <ActionPanel.Section title="Open in Raycast">
+        <Action.Push
+          title="Show Issues"
+          icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+          target={<RepositoryIssueList repo={repository.nameWithOwner} />}
+          onPush={() => onVisit(repository)}
+        />
+        <Action.Push
+          title="Show Pull Requests"
+          icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+          target={<RepositoryPullRequestList repo={repository.nameWithOwner} />}
+          onPush={() => onVisit(repository)}
+        />
+        {repository.releases?.totalCount > 0 && (
+          <Action.Push
+            icon={Icon.List}
+            title="Show Releases"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            target={<RepositoryReleases repository={repository} />}
+          />
+        )}
+        {repository.hasDiscussionsEnabled && (
+          <Action.Push
+            icon={Icon.SpeechBubble}
+            title="Show Discussions"
+            shortcut={{ modifiers: ["cmd", "ctrl", "opt"], key: "d" }}
+            target={<RepositoryDiscussionList repository={repository.nameWithOwner} />}
+            onPush={() => onVisit(repository)}
+          />
+        )}
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Open in Browser">
         <Action.OpenInBrowser
           icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
@@ -159,15 +196,6 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
             url={`${repository.url}/projects`}
             shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "p" }}
             onOpen={() => onVisit(repository)}
-          />
-        )}
-
-        {repository.releases?.totalCount > 0 && (
-          <Action.Push
-            icon={Icon.List}
-            title="Browse Releases"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            target={<RepositoryReleases repository={repository} />}
           />
         )}
       </ActionPanel.Section>

@@ -8,7 +8,8 @@
   "author": "thomaslombart",
   "owner": "raycast",
   "contributors": [
-    "tholanda"
+    "tholanda",
+    "tonka3000"
   ],
   "categories": [
     "Developer Tools",
@@ -90,7 +91,6 @@
     {
       "name": "unread-notifications",
       "title": "Unread Notifications",
-      "subtitle": "GitHub",
       "description": "Shows unread notifications in the macOS menu bar.",
       "mode": "menu-bar",
       "interval": "15m",
@@ -104,6 +104,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "my-discussions",
+      "title": "My Discussions",
+      "description": "Show your Discussions",
+      "mode": "view"
     }
   ],
   "preferences": [

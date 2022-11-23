@@ -26536,6 +26536,166 @@ export enum WorkflowRunOrderField {
   CreatedAt = "CREATED_AT",
 }
 
+export type DiscussionFieldsFragment = {
+  __typename?: "Discussion";
+  id: string;
+  title: string;
+  bodyText: string;
+  publishedAt?: any | null;
+  url: any;
+  upvoteCount: number;
+  repository: {
+    __typename?: "Repository";
+    id: string;
+    nameWithOwner: string;
+    name: string;
+    url: any;
+    mergeCommitAllowed: boolean;
+    squashMergeAllowed: boolean;
+    rebaseMergeAllowed: boolean;
+    updatedAt: any;
+    stargazerCount: number;
+    viewerHasStarred: boolean;
+    hasIssuesEnabled: boolean;
+    hasWikiEnabled: boolean;
+    hasProjectsEnabled: boolean;
+    hasDiscussionsEnabled: boolean;
+    owner:
+      | { __typename?: "Organization"; login: string; avatarUrl: any }
+      | { __typename?: "User"; login: string; avatarUrl: any };
+    primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+    releases: { __typename?: "ReleaseConnection"; totalCount: number };
+  };
+  category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+  comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+  answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+  author?:
+    | { __typename?: "Bot"; login: string; avatarUrl: any }
+    | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+    | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+    | { __typename?: "Organization"; login: string; avatarUrl: any }
+    | { __typename?: "User"; login: string; avatarUrl: any }
+    | null;
+};
+
+export type SearchDiscussionsQueryVariables = Exact<{
+  query: Scalars["String"];
+  numberOfOpenItems: Scalars["Int"];
+  avatarSize: Scalars["Int"];
+}>;
+
+export type SearchDiscussionsQuery = {
+  __typename?: "Query";
+  openDiscussions: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | {
+          __typename?: "Discussion";
+          id: string;
+          title: string;
+          bodyText: string;
+          publishedAt?: any | null;
+          url: any;
+          upvoteCount: number;
+          repository: {
+            __typename?: "Repository";
+            id: string;
+            nameWithOwner: string;
+            name: string;
+            url: any;
+            mergeCommitAllowed: boolean;
+            squashMergeAllowed: boolean;
+            rebaseMergeAllowed: boolean;
+            updatedAt: any;
+            stargazerCount: number;
+            viewerHasStarred: boolean;
+            hasIssuesEnabled: boolean;
+            hasWikiEnabled: boolean;
+            hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
+            owner:
+              | { __typename?: "Organization"; login: string; avatarUrl: any }
+              | { __typename?: "User"; login: string; avatarUrl: any };
+            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+            releases: { __typename?: "ReleaseConnection"; totalCount: number };
+          };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          author?:
+            | { __typename?: "Bot"; login: string; avatarUrl: any }
+            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any }
+            | null;
+        }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+  searchDiscussions: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | {
+          __typename?: "Discussion";
+          id: string;
+          title: string;
+          bodyText: string;
+          publishedAt?: any | null;
+          url: any;
+          upvoteCount: number;
+          repository: {
+            __typename?: "Repository";
+            id: string;
+            nameWithOwner: string;
+            name: string;
+            url: any;
+            mergeCommitAllowed: boolean;
+            squashMergeAllowed: boolean;
+            rebaseMergeAllowed: boolean;
+            updatedAt: any;
+            stargazerCount: number;
+            viewerHasStarred: boolean;
+            hasIssuesEnabled: boolean;
+            hasWikiEnabled: boolean;
+            hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
+            owner:
+              | { __typename?: "Organization"; login: string; avatarUrl: any }
+              | { __typename?: "User"; login: string; avatarUrl: any };
+            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
+            releases: { __typename?: "ReleaseConnection"; totalCount: number };
+          };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          author?:
+            | { __typename?: "Bot"; login: string; avatarUrl: any }
+            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any }
+            | null;
+        }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+};
+
 export type IssueFieldsFragment = {
   __typename?: "Issue";
   id: string;
@@ -26569,6 +26729,7 @@ export type IssueFieldsFragment = {
     hasIssuesEnabled: boolean;
     hasWikiEnabled: boolean;
     hasProjectsEnabled: boolean;
+    hasDiscussionsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -26645,6 +26806,7 @@ export type SearchCreatedIssuesQuery = {
             hasIssuesEnabled: boolean;
             hasWikiEnabled: boolean;
             hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -26718,6 +26880,7 @@ export type SearchCreatedIssuesQuery = {
             hasIssuesEnabled: boolean;
             hasWikiEnabled: boolean;
             hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -26861,6 +27024,7 @@ export type SearchOpenIssuesQuery = {
             hasIssuesEnabled: boolean;
             hasWikiEnabled: boolean;
             hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -26934,6 +27098,7 @@ export type SearchOpenIssuesQuery = {
             hasIssuesEnabled: boolean;
             hasWikiEnabled: boolean;
             hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27003,6 +27168,7 @@ export type IssueDetailFieldsFragment = {
     hasIssuesEnabled: boolean;
     hasWikiEnabled: boolean;
     hasProjectsEnabled: boolean;
+    hasDiscussionsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27144,6 +27310,7 @@ export type IssueDetailsQuery = {
           hasIssuesEnabled: boolean;
           hasWikiEnabled: boolean;
           hasProjectsEnabled: boolean;
+          hasDiscussionsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27390,6 +27557,7 @@ export type SearchIssuesQuery = {
             hasIssuesEnabled: boolean;
             hasWikiEnabled: boolean;
             hasProjectsEnabled: boolean;
+            hasDiscussionsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27516,6 +27684,7 @@ export type CreateIssueMutation = {
         hasIssuesEnabled: boolean;
         hasWikiEnabled: boolean;
         hasProjectsEnabled: boolean;
+        hasDiscussionsEnabled: boolean;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27568,6 +27737,7 @@ export type PullRequestFieldsFragment = {
     hasIssuesEnabled: boolean;
     hasWikiEnabled: boolean;
     hasProjectsEnabled: boolean;
+    hasDiscussionsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27677,6 +27847,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27785,6 +27956,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27893,6 +28065,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28001,6 +28174,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28109,6 +28283,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28217,6 +28392,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28325,6 +28501,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28433,6 +28610,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28541,6 +28719,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28649,6 +28828,7 @@ export type MyPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28767,6 +28947,7 @@ export type SearchPullRequestsQuery = {
               hasIssuesEnabled: boolean;
               hasWikiEnabled: boolean;
               hasProjectsEnabled: boolean;
+              hasDiscussionsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28871,6 +29052,7 @@ export type PullRequestDetailsFieldsFragment = {
     hasIssuesEnabled: boolean;
     hasWikiEnabled: boolean;
     hasProjectsEnabled: boolean;
+    hasDiscussionsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29131,6 +29313,7 @@ export type PullRequestDetailsQuery = {
           hasIssuesEnabled: boolean;
           hasWikiEnabled: boolean;
           hasProjectsEnabled: boolean;
+          hasDiscussionsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29808,6 +29991,7 @@ export type InitPullRequestMutation = {
         hasIssuesEnabled: boolean;
         hasWikiEnabled: boolean;
         hasProjectsEnabled: boolean;
+        hasDiscussionsEnabled: boolean;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29877,6 +30061,7 @@ export type RepositoryFieldsFragment = {
   hasIssuesEnabled: boolean;
   hasWikiEnabled: boolean;
   hasProjectsEnabled: boolean;
+  hasDiscussionsEnabled: boolean;
   owner:
     | { __typename?: "Organization"; login: string; avatarUrl: any }
     | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29916,6 +30101,7 @@ export type SearchRepositoriesQuery = {
           hasIssuesEnabled: boolean;
           hasWikiEnabled: boolean;
           hasProjectsEnabled: boolean;
+          hasDiscussionsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -30117,15 +30303,6 @@ export type GetViewerQuery = {
   };
 };
 
-export const UserFieldsFragmentDoc = gql`
-  fragment UserFields on User {
-    id
-    avatarUrl
-    name
-    login
-    isViewer
-  }
-`;
 export const RepositoryFieldsFragmentDoc = gql`
   fragment RepositoryFields on Repository {
     id
@@ -30150,9 +30327,48 @@ export const RepositoryFieldsFragmentDoc = gql`
     hasIssuesEnabled
     hasWikiEnabled
     hasProjectsEnabled
+    hasDiscussionsEnabled
     releases {
       totalCount
     }
+  }
+`;
+export const DiscussionFieldsFragmentDoc = gql`
+  fragment DiscussionFields on Discussion {
+    id
+    title
+    bodyText
+    publishedAt
+    repository {
+      ...RepositoryFields
+    }
+    url
+    upvoteCount
+    category {
+      name
+      emoji
+      emojiHTML
+    }
+    comments {
+      totalCount
+    }
+    answer {
+      bodyText
+    }
+    author {
+      login
+      avatarUrl
+    }
+  }
+  ${RepositoryFieldsFragmentDoc}
+`;
+export const UserFieldsFragmentDoc = gql`
+  fragment UserFields on User {
+    id
+    avatarUrl
+    name
+    login
+    isViewer
   }
 `;
 export const IssueFieldsFragmentDoc = gql`
@@ -30571,6 +30787,21 @@ export const ReleaseFieldsFragmentDoc = gql`
     tagName
     url
   }
+`;
+export const SearchDiscussionsDocument = gql`
+  query searchDiscussions($query: String!, $numberOfOpenItems: Int!, $avatarSize: Int!) {
+    openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+      nodes {
+        ...DiscussionFields
+      }
+    }
+    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+      nodes {
+        ...DiscussionFields
+      }
+    }
+  }
+  ${DiscussionFieldsFragmentDoc}
 `;
 export const SearchCreatedIssuesDocument = gql`
   query searchCreatedIssues(
@@ -31175,6 +31406,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    searchDiscussions(
+      variables: SearchDiscussionsQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<SearchDiscussionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchDiscussionsQuery>(SearchDiscussionsDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "searchDiscussions",
+        "query"
+      );
+    },
     searchCreatedIssues(
       variables: SearchCreatedIssuesQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"]
