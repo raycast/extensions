@@ -78,7 +78,7 @@ async function readContent(preferredSource: string) {
   }
 }
 
-export default function changeChase() {
+export default function Command() {
   const data: { type: CaseType; func: (input: string, options?: object) => string }[] = [
     { type: "Camel Case", func: changeCase.camelCase },
     { type: "Capital Case", func: changeCase.capitalCase },
@@ -147,7 +147,7 @@ export default function changeChase() {
                 <Action
                   title={`Paste in ${frontmostAppName}`}
                   icon={Icon.BlankDocument}
-                  onAction={() => paste(modified)}
+                  onAction={() => paste(modified, frontmostAppName)}
                 />
               </ActionPanel>
             }
@@ -164,8 +164,8 @@ export async function copyToClipboard(content: string) {
   await closeMainWindow();
 }
 
-export async function paste(content: string) {
-  await showHUD("Pasted in Active App");
+export async function paste(content: string, appName: string) {
+  await showHUD(`Pasted in ${appName}`);
   await Clipboard.paste(content);
   await closeMainWindow();
 }
