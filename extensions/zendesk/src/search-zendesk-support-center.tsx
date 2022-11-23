@@ -33,38 +33,44 @@ export default function ZendeskSearch() {
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
-  )
+  );
 
-  const {data}: LocaleFetchRes = useFetch(`https://${supportCenter}/api/v2/locales/`, {
+  const { data }: LocaleFetchRes = useFetch(`https://${supportCenter}/api/v2/locales/`, {
     keepPreviousData: true,
     onData: (data) => {
-      if(data) {
-        return setLocales(data.locales.map((locale) => ({
-          name: locale.name,
-          locale: locale.locale,
-        })
-        ))
+      if (data) {
+        return setLocales(
+          data.locales.map((locale) => ({
+            name: locale.name,
+            locale: locale.locale,
+          }))
+        );
       }
     },
   });
 
   useEffect(() => {
     setSelectedLocale(locales[0]);
-  }, [locales])
+  }, [locales]);
 
   const {
     isLoading,
     data: articles,
     error,
-  }: ArticleFetchRes = useFetch(`https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&locale=${selectedLocale?.locale ? selectedLocale?.locale : ""}`, {
-    keepPreviousData: true,
-    onError: (error) => {
-      if (error.message === "Bad Request") {
-        return;
-      }
-      showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
-    },
-  });
+  }: ArticleFetchRes = useFetch(
+    `https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&locale=${
+      selectedLocale?.locale ? selectedLocale?.locale : ""
+    }`,
+    {
+      keepPreviousData: true,
+      onError: (error) => {
+        if (error.message === "Bad Request") {
+          return;
+        }
+        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
+      },
+    }
+  );
 
   const [searchResult, setSearchResult] = useState<FilteredArticle[] | undefined>(undefined);
 
@@ -104,11 +110,11 @@ export default function ZendeskSearch() {
       {searchResult ? (
         searchResult.map((item) => {
           if (item.url === undefined) {
-            return null
-          };
+            return null;
+          }
           return (
             <List.Item
-              key={item.id}
+              key={item.title}
               title={item.title}
               detail={<List.Item.Detail markdown={item.body} />}
               actions={
@@ -124,10 +130,7 @@ export default function ZendeskSearch() {
           );
         })
       ) : (
-        <List.EmptyView
-          title={getEmptyViewText()}
-          icon={Icon.AppWindowList}
-        />
+        <List.EmptyView title={getEmptyViewText()} icon={Icon.AppWindowList} />
       )}
     </List>
   );

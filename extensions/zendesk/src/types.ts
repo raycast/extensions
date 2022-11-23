@@ -37,7 +37,7 @@ export interface ArticleFetchRes {
 }
 
 export interface FilteredArticle {
-  id: number;
+  id?: number;
   url?: string;
   section?: number;
   title: string;
