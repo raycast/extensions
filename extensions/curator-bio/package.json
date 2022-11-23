@@ -51,6 +51,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
     "got": "^12.5.3",
     "tough-cookie": "^4.1.2"
   },
