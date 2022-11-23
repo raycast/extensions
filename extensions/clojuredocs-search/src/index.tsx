@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { parseEDNString } from "edn-data";
 
@@ -32,21 +32,35 @@ function getDocList(data: Doc): DocInfo[] {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch(
-    "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
-    {
-      // to make sure the screen isn't flickering when the searchText changes
-      keepPreviousData: true,
-      parseResponse: async (response) =>
-        getDocList(parseEDNString(await response.text(), { mapAs: "object", keywordAs: "string" }) as Doc),
-    }
-  );
-  // setList(getDocList(data));
+  const cache = new Cache();
+  const cached = cache.get("items");
+  let res = {"data": null, "isLoading": true};
+
+  if (cached) {
+    res.data = JSON.parse(cached);
+    res.isLoading = false;
+  } else {
+    res = useFetch(
+      "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
+      {
+        // to make sure the screen isn't flickering when the searchText changes
+        keepPreviousData: true,
+        parseResponse: async (response) => {
+          cache.set(
+            "items",
+            JSON.stringify(
+              getDocList(parseEDNString(await response.text(), { mapAs: "object", keywordAs: "string" }) as Doc)
+            )
+          );
+        },
+      }
+    );
+  }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search..." throttle>
-      {(data || []).map((result) => (
-        <SearchListItem key={result.ns + "/" + result.name} searchResult={result} />
+    <List isLoading={res.isLoading} searchBarPlaceholder="Search..." throttle>
+      {(res.data || []).map((result, index) => (
+        <SearchListItem key={index} searchResult={result} />
       ))}
     </List>
   );
@@ -109,7 +123,11 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       accessoryTitle={searchResult.type}
       actions={
         <ActionPanel>
-          <Action.Push title="Go to Detail" icon={Icon.AppWindowSidebarRight} target={<CljDetail res={searchResult} />} />
+          <Action.Push
+            title="Go to Detail"
+            icon={Icon.AppWindowSidebarRight}
+            target={<CljDetail res={searchResult} />}
+          />
           <ActionPanel.Section>
             <Action.OpenInBrowser url={"https://clojuredocs.org" + searchResult.href} />
           </ActionPanel.Section>
