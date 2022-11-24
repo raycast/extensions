@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Add forecast] - {PR_MERGE_DATE}
+## [Add forecast] - 2022-11-24
 
 - Add 7-day weather forecast
 - Add screencast
