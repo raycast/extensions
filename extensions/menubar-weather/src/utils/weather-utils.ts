@@ -111,7 +111,7 @@ export function getWeatherDescription(weatherCode: number | undefined) {
     case 73:
       return { description: "Moderate snow fall", icon: Icon.CloudSnow };
     case 75:
-      return { description: "Heavy intensity fall", icon: Icon.CloudSnow };
+      return { description: "Heavy intensity snow fall", icon: Icon.CloudSnow };
     case 77:
       return { description: "Snow grains", icon: Icon.CloudSnow };
     case 80:
