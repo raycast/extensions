@@ -1,11 +1,11 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
 import groupBy from "lodash.groupby";
 import FilterDropdown from "./FilterDropdown";
 import flags from "./flags";
-import { Match } from "./types";
+import { Goal, Match, Player, Team } from "./types";
 import { capitalizeFirstLetter } from "./utils";
 
 const BASE_URL = `https://api.fifa.com/api/v3`;
@@ -20,6 +20,44 @@ type Data = {
   [key: string]: Match[];
 };
 
+type LiveData = {
+  HomeTeam: Team;
+  AwayTeam: Team;
+};
+
+function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
+  const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
+  const { isLoading, data } = useFetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
+
+  if (!data) return null;
+
+  const team = (data as LiveData)[side === "home" ? "HomeTeam" : "AwayTeam"];
+  const goals = team?.Goals?.filter((goal: Goal) => goal.IdTeam === team.IdTeam) || [];
+
+  const getPlayerName = (playerId: string): string => {
+    const player = team?.Players?.find((p: Player) => p.IdPlayer === playerId);
+    return player?.PlayerName[0]?.Description || playerId;
+  };
+
+  if (isLoading) {
+    return <List.Item.Detail.Metadata.Label title="" text={`Loading…`} />;
+  }
+
+  return (
+    <>
+      {goals?.map((goal: Goal, i) => {
+        return (
+          <List.Item.Detail.Metadata.Label
+            key={goal.IdGoal || i}
+            title=""
+            text={`${getPlayerName(goal.IdPlayer)} ${goal.Minute}`}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 export default function Command() {
   const { isLoading, data, revalidate } = useFetch(
     `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
@@ -27,6 +65,7 @@ export default function Command() {
   const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", false);
   const [time, setTime] = useCachedState("time", null);
+  const [score, setScore] = useCachedState("score", "");
   const [refresh, setRefresh] = useState<number | null>(null);
 
   let matches: Match[] = (data as Data)?.Results || [];
@@ -51,6 +90,7 @@ export default function Command() {
       const res = await fetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
       const data = await res.json();
       setTime(data?.MatchTime || null);
+      setScore(`${data?.HomeTeam?.Score} : ${data?.AwayTeam?.Score}`);
     };
 
     if (currentMatch) {
@@ -75,8 +115,8 @@ export default function Command() {
   const getTime = (match: Match): string | null | undefined => {
     const matchDate = new Date(match.Date);
 
-    // not started
-    if (match.MatchStatus === 1) {
+    // not started or starts soon
+    if (match.MatchStatus === 1 || match.MatchStatus === 12) {
       if (isToday(matchDate)) {
         return formatDistanceToNowStrict(matchDate, { addSuffix: true });
       } else {
@@ -89,6 +129,7 @@ export default function Command() {
       return "Finished";
     }
 
+    // live
     if (match.MatchStatus === 3) {
       return time || "Now";
     }
@@ -102,7 +143,7 @@ export default function Command() {
       isLoading={isLoading}
       searchBarAccessory={<FilterDropdown handleChange={onFilterChange} />}
     >
-      <List.EmptyView title="No Matches Found" icon="no-view.png" />
+      <List.EmptyView title="No Matches Found" icon="mascot.gif" />
       {Object.keys(matchesByDay).map((day) => {
         const dayString = format(startOfDay(new Date(day)), "E dd MMM");
 
@@ -136,6 +177,11 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action
+                        title="Toggle Details"
+                        icon={Icon.AppWindowSidebarLeft}
+                        onAction={() => setShowingDetail(!showingDetail)}
+                      />
+                      <Action
                         title="See Match on FIFA.com"
                         icon={Icon.SoccerBall}
                         onAction={() =>
@@ -144,12 +190,11 @@ export default function Command() {
                           )
                         }
                       />
-                      <Action title="Reload" icon={Icon.RotateClockwise} onAction={revalidate} />
                       <Action
-                        title="Toggle Details"
-                        icon={Icon.AppWindowSidebarLeft}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                        onAction={() => setShowingDetail(!showingDetail)}
+                        title="Reload"
+                        icon={Icon.RotateClockwise}
+                        onAction={revalidate}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                       />
                     </ActionPanel>
                   }
@@ -161,7 +206,9 @@ export default function Command() {
                   keywords={[Home?.TeamName[0]?.Description || "", Away?.TeamName[0]?.Description || ""]}
                   title={`${home}  vs  ${away}`}
                   accessories={[
-                    HomeTeamScore || HomeTeamScore === 0 ? { text: `${HomeTeamScore} : ${AwayTeamScore}` } : {},
+                    MatchStatus === 3 || MatchStatus === 0
+                      ? { text: MatchStatus === 3 ? score : `${HomeTeamScore} : ${AwayTeamScore}` }
+                      : {},
                     {
                       text: !showingDetail
                         ? GroupName[0]?.Description
@@ -182,23 +229,25 @@ export default function Command() {
                           {Attendance && <List.Item.Detail.Metadata.Label title="Attendance" text={Attendance} />}
 
                           {home.trim() != "Unknown" && MatchStatus !== 1 && (
-                            <Fragment>
+                            <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={home} />
+                              <List.Item.Detail.Metadata.Label title={home} text={HomeTeamScore?.toString()} />
+                              <Goals match={match} side="home" />
                               {Home?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Home?.Tactics} />}
-                            </Fragment>
+                            </>
                           )}
 
                           {away.trim() != "Unknown" && MatchStatus !== 1 && (
-                            <Fragment>
+                            <>
                               <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title={away} />
+                              <List.Item.Detail.Metadata.Label title={away} text={AwayTeamScore?.toString()} />
+                              <Goals match={match} side="away" />
                               {Away?.Tactics && <List.Item.Detail.Metadata.Label title="Tactic" text={Away?.Tactics} />}
-                            </Fragment>
+                            </>
                           )}
 
                           {Officials.length > 0 && (
-                            <Fragment>
+                            <>
                               <List.Item.Detail.Metadata.Separator />
                               <List.Item.Detail.Metadata.TagList title="Officials">
                                 {Officials?.map((official, index) => (
@@ -208,7 +257,7 @@ export default function Command() {
                                   />
                                 ))}
                               </List.Item.Detail.Metadata.TagList>
-                            </Fragment>
+                            </>
                           )}
 
                           {home.trim() === "Unknown" && away.trim() === "Unknown" && (

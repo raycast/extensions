@@ -2,8 +2,11 @@
 
 ## [Enhancements] - 2022-11-24
 
-- Show live time for current match
+- Show live time and score for current match
 - Reversed the list for previous matches
+- Added animated GIF for empty view
+- Fixed time for matches about to start
+- Added goals information
 
 ## [Enhancements] - 2022-11-23
 
