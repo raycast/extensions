@@ -53,13 +53,15 @@ module.exports = async ({ github, context, core }) => {
     labels: [`extension: ${ext}`],
   });
 
-  if (context.payload.issue.labels.some((x) => x.name === "status: stalled")) {
+  try {
     await github.rest.issues.removeLabel({
       issue_number: context.payload.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
       name: "status: stalled",
     });
+  } catch (err) {
+    // ignore, it might not be there
   }
 
   const toNotify = owners.filter((x) => x !== sender);
