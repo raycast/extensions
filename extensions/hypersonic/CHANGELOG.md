@@ -1,5 +1,24 @@
 # Hypersonic Changelog
 
+## [1.0.0] - 2022-11-21
+
+- Update Raycast to "@raycast/api": "1.44.0",
+- Update Raycast to "@raycast/utils": "1.4.11"
+- Added Fuse to improve the creation of todos with tags, projects, assignees
+- Added chrono-node to improve the creation of todos with due dates
+- Added support for multiple database relationships
+- New preferences configurator to facilitate the database connection
+- New multi filter option to filter todos by projects, tags and assignees
+- Updated actions commands for easy access to the new features
+- Replaced snooze command with a new due date command
+- Deprecated move command
+- Updated menu bar command to work with the new features
+- Included Notion logo in Notion related commands
+- Added instant refresh to menu bar command through launchCommand method
+- Updated menu bar extensions background fetch time from 1 minute to 5 minutes
+- Added share task command
+- Logo update
+
 ## [0.0.3] - 2022-09-15
 
 - Update Raycast to "@raycast/api": "1.39.2"

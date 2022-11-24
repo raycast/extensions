@@ -15,9 +15,9 @@ export function SetLabelAction({
 }: SetLabelActionProps) {
   return (
     <ActionPanel.Submenu
-      title="Set Label"
+      title="Add Label"
       icon={{
-        source: 'label.png',
+        source: Icon.Tag,
         tintColor: Color.PrimaryText,
       }}
       shortcut={{ modifiers: ['cmd'], key: 'l' }}
@@ -25,6 +25,7 @@ export function SetLabelAction({
       {tags.map((tag) => (
         <Action
           key={tag.id}
+          autoFocus={tag.id === todo.tag?.id}
           icon={{
             source: 'dot.png',
             tintColor: tag.color,
