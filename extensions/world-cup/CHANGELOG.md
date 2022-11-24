@@ -1,8 +1,9 @@
 # World Cup Changelog
 
-## [Add live time] - 2022-11-23
+## [Enhancements] - 2022-11-24
 
 - Show live time for current match
+- Reversed the list for previous matches
 
 ## [Enhancements] - 2022-11-23
 
