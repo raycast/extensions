@@ -7,6 +7,7 @@
 - Added animated GIF for empty view
 - Fixed time for matches about to start
 - Added goals information
+- Details are hidden by default (use Enter key to toggle)
 
 ## [Enhancements] - 2022-11-23
 
