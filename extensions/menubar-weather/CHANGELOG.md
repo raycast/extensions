@@ -6,3 +6,5 @@
 - Add screencast
 
 ## [Initial Version] - 2022-11-23
+
+- Show current weather on the menu bar

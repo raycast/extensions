@@ -28,40 +28,6 @@ export function getUnits() {
   return { tempUnit: tempUint, windUint: windUint };
 }
 
-export function getWeatherIcon(icon: string | undefined) {
-  if (typeof icon === "string") {
-    if (icon === "01d" || icon === "01n") {
-      return Icon.Sun;
-    }
-    if (icon === "02d" || icon === "02n") {
-      return Icon.CloudSun;
-    }
-    if (icon === "03d" || icon === "03n") {
-      return Icon.Cloud;
-    }
-    if (icon === "04d" || icon === "04n") {
-      return Icon.Cloud;
-    }
-    if (icon === "09d" || icon === "09n") {
-      return Icon.CloudRain;
-    }
-    if (icon === "10d" || icon === "10n") {
-      return Icon.CloudRain;
-    }
-    if (icon === "11d" || icon === "11n") {
-      return Icon.CloudLightning;
-    }
-    if (icon === "13d" || icon === "13n") {
-      return Icon.Snowflake;
-    }
-    if (icon === "50d" || icon === "50n") {
-      return Icon.Snippets;
-    }
-  } else {
-    return Icon.Sunrise;
-  }
-}
-
 export function isoToDateTime(time: string) {
   return time.replace("T", " ");
 }
@@ -73,12 +39,6 @@ export function isoToTime(time: string) {
 export function timeHour() {
   const date = new Date();
   return date.getHours();
-}
-
-export function getTime(stamp: number) {
-  const timeStamp = stamp * 1000;
-  const date = new Date(timeStamp);
-  return date.toLocaleTimeString();
 }
 
 export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
@@ -120,7 +80,7 @@ export function preferencesChanged() {
 export function getDateIcon(day: string) {
   switch (day) {
     case "01":
-      return Icon.Number00;
+      return Icon.Number01;
     case "02":
       return Icon.Number02;
     case "03":
