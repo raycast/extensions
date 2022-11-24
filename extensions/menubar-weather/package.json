@@ -20,14 +20,15 @@
       "name": "cityName",
       "type": "textfield",
       "title": "City",
-      "description": "City name",
-      "required": true
+      "description": "City name. If you need more precise weather data, you can fill in the latitude and longitude in the Preferences Page of the command",
+      "required": true,
+      "placeholder": "City name. For example, New York"
     },
     {
       "name": "longitude",
       "type": "textfield",
       "title": "Longitude",
-      "description": "Longitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"
@@ -36,7 +37,7 @@
       "name": "latitude",
       "type": "textfield",
       "title": "Latitude",
-      "description": "Latitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Latitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"

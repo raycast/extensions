@@ -16,7 +16,7 @@ export async function getOpenMeteoWeather(lon: string, lat: string) {
       hourly:
         "temperature_2m,relativehumidity_2m,apparent_temperature,precipitation,rain,weathercode,surface_pressure,visibility,winddirection_120m",
       models: "best_match",
-      daily: "temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum",
+      daily: "weathercode,windspeed_10m_max,temperature_2m_max,temperature_2m_min,sunrise,sunset,rain_sum",
       current_weather: true,
       temperature_unit: tempUnits,
       precipitation_unit: precipitationUnits,
