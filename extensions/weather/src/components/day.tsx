@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { getIcon, getWindDirectionIcon } from "../icons";
+import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
 
@@ -48,7 +48,7 @@ export function DayList(props: { day: WeatherData; title: string }) {
             key={data.time.toString()}
             title={`${getTime(data.time)}`}
             subtitle={`${getTemp(data)} , ${getWeatherDesc(data)}`}
-            icon={getIcon(data.weatherCode)}
+            icon={getWeatherCodeIcon(data.weatherCode)}
             accessories={[
               {
                 icon: "💧",
