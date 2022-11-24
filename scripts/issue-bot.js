@@ -20,8 +20,6 @@ module.exports = async ({ github, context, core }) => {
 
   const codeowners = await getCodeOwners({ github, context });
 
-  console.log(context.payload.issue);
-
   const [, , ext] = newMatch.exec(context.payload.issue.body) || oldMatch.exec(context.payload.issue.body) || [];
 
   if (!ext) {
