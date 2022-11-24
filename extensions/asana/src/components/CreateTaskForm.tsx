@@ -22,8 +22,6 @@ import { getProjectIcon } from "../helpers/project";
 import TaskDetail from "./TaskDetail";
 import { createTask } from "../api/tasks";
 import { asanaToRaycastColor } from "../helpers/colors";
-import { includes } from "lodash";
-import { title } from "process";
 
 export default function CreateTaskForm(props: {
   draftValues?: TaskFormValues;
