@@ -1,5 +1,9 @@
 # shell Changelog
 
+## [Add Warp Support] - 2022-11-18
+This version adds the option to run commands in Warp. 
+Checkout the preferences and select your favorite console application in the dropdown to get going.
+
 ## [Update] - 2022-09-10
 Open new iTerm tab if iTerm is running and chooses Execute in iTerm.app.
 

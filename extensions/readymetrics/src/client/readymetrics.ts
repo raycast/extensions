@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export interface Checkin {
@@ -14,7 +14,7 @@ export interface Checkin {
 const { token } = getPreferenceValues();
 
 const api = axios.create({
-  baseURL: "https://api.readymetrics.com/integrations",
+  baseURL: "https://api.ready.app/integrations",
   headers: { Authorization: `Bearer ${token}` },
 });
 

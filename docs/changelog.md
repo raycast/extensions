@@ -1,5 +1,127 @@
 # Changelog
 
+## 1.44.0 – 2022-11-23
+
+### ✨ New
+
+- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` – same as for List and Grid where you can perform custom logic when the user changes the search text.
+- **Application:** You can now get the current frontmost Application of the system with the top-level `getFrontmostApplication` method.
+- **File and Directory Preferences**: We’ve added two new preference types `“directory”` and `“file”`, supported via the manifest. Both types show a file picker component and let the user select directory or file paths.
+- **Environment:** You can now get the user’s text size via `environment.textSize`.
+
+### 💎 Improvements
+
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user’s “Pop to Root Search” preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user’s setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
+  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **OAuth**: The client’s `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
+- **List and Detail Metadata**: Now show tooltips when labels get truncated.
+- **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
+
+### 🐞 Fixes
+
+- **Dropdown**: Fixed triggering a dropdown component’s `onChange` handler when navigating.
+- **Dropdown**: Fixed the missing `placeholder` property in the search bar dropdown.
+- **Forms**: Fixed submitting a form with marked text.
+
+## 1.43.0 - 2022-11-09
+
+### ✨ New
+
+- **Actions**: You can now specify an action to focus when opening the ActionPanel (and an ActionPanel.Submenu) by setting the `autoFocus` prop.
+- **Forms**: Introducing a new Form Item `Form.FilePicker` to select one or multiple files (or directories)
+
+### 💎 Improvements
+
+- **DX**: A warning will now be shown in the console when using async entry points for view and menu-bar commands.
+- **List/Grid**: Improved the keyword search algorithm to match intersecting keywords (for example, the search term ”black cat” matches keywords [”black”, “cat”]).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the sections' order is not changed based on items' ranking values; this can be useful for use cases where a small number of fixed sections should always appear in the same order when the user filters the grid. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- Fixed the Grid or List’s selection sometimes not being preserved when native filtering is disabled.
+- The `Image.Mask.RoundedRectangle` mask will be more consistent regardless of the size of the image.
+- Fixed an issue where the specified `searchText` property would not always be respected.
+
+## 1.42.0 - 2022-10-26
+
+### ✨ New
+
+- The Node runtime has been updated to [Node 18](https://nodejs.org/en/blog/announcements/v18-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- Commands can now launch other commands! Using the new `launchCommand` method, you can now trigger a background refresh of another command in the same extension - or even open another command. Some use cases are updating a menu bar command from a view command or, vice versa, launching a companion view command from the menu bar. (Note that for now we only support launches of other commands within the same extension.)
+
+### 💎 Improvements
+
+- **Grid** now supports two new aspect ratios: 4/3 and 3/4.
+- **Menu Bar** icon tinting is now theme-aware.
+- **Background Refresh:** The shortest interval available is now 10s instead of 1m (use cautiously and also see our [best practices guide](https://developers.raycast.com/information/background-refresh#best-practices)).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- **List Item Metadata Link and Detail Metadata Link** styling should now be consistent with their respective **List Item Metadata Label** and **Detail Metadata Label** respectively.
+- Fixed a bug where `List.Item`’s accessories might not be aligned.
+- Fixed a bug where the last API call or log in a no-view command would not run before the command gets unloaded.
+
+## 1.41.0 - 2022-10-12
+
+### New
+
+- **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
+
+![](.gitbook/assets/grid-styled-sections.png)
+
+- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
+- **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+- **Menu Bar Extra:** added a new `Section` component, which can be used to better group related `Item`s and/or `Submenu`s. The component has an optional title for the section. At the same time, we are deprecating the `Separator` component.
+- **Menu Bar Extra**: The `Item` component now accepts an optional `subtitle` prop.
+- **Clipboard:** `Clipboard.copy()` and `Clipboard.paste()` methods now accept file paths as a parameter.
+
+### 💎 Improvements
+
+- Improved dark/light mode detection for **Menu Bar Extra** icons.
+- If a **Menu Bar Extra**’s `title` spans multiple lines**,** only the first one will be displayed.
+
+### 🐞 Fixes
+
+- Fixed certain error stack traces causing CPU spikes of the Node process.
+- Fixed an issue with **macOS Ventura Beta** where **Menu Bar Extra**s would sometimes become unresponsive.
+- Fixed the type of the List and Grid’s `onSelectionChange`. It always used to return `null` when no items were selected but the type was `string | undefined`. It is now properly `string | null`. Note that this might trigger some TypeScript error when you upgrade but it should help you fix some bugs.
+
+## 1.40.0 - 2022-09-28
+
+### ✨ New
+
+- **Menu Bar Extras** can now be deactivated without disabling the menu bar command! To deactivate a menu bar command, run the `Deactivate Command` action from the command's Action Panel - or drag the menu bar extra out of the menu bar while holding down ⌘.
+- Commands with **Background Refresh** also now have a `Deactivate Command` action!
+- **Menu Bar Extras** now support both a primary and secondary action type (right click or control click).
+- **Dropdown**'s items can now specify `keywords` to match more search terms.
+- **Extension Diagnostics** command can now be used to help finding the cause behind any issues with extensions. It displays all `Loaded Commands`, commands with `Background Refresh` enabled and latest `Events` triggered.
+
+### 💎 Improvements
+
+- **Menu Bar Extra** action handlers will now either wait or force a render after finishing execution, to ensure any state updates performed in the action handler have had a chance to render.
+- **Menu Bar** commands now automatically refresh when their or their parent extension's preferences change.
+- **OAuth**: Path-based redirect URLs are now officially supported.
+- **OAuth**: ⚠️️ API methods for OAuth request creation now throw an error when used from a background command - you can check the launch type of a command to see whether authorization can be performed
+- **Types**: Node and React types have been added back as optional API peer dependencies and dev dependencies to the templates, so that VS Code autocompletion works.
+- **Templates**: Updated to include the utils package.
+- **DevX**: Added warnings when specifying a `value` without `onChange` or when changing a Form item from controlled to uncontrolled.
+- **DevX**: For starting development, the CLI does not depend on metadata attributes any more
+
+### 🐞 Fixes
+
+- **Forms**: The type of the `DatePicker`'s value is now `Date | null` (`null` happens when selecting `No Date`).
+  ⚠️ This might cause some TypeScript errors but it will now reflect what is really happening, preventing bugs at runtime.
+- Fixed an issue where `List.Item.Detail.Metadata` titles sometimes being cropped despite there being enough room.
+- **Menu Bar Extra** `Item` and `Submenu` icons now change based on the system's dark / light mode, not Raycast's.
+- **Forms**: Fixed a bug where the initial value for a controlled TextArea could not be deleted.
+- **Forms**: Fixed the info icon and message not coming back after clearing an error on form items.
+- **Forms**: Fixed updating the placeholder of the TagPicker item.
+- **Empty View**: Fix an issue where an Empty View's actions would be rendered even thought the Empty View isn't.
+- **OAuth**: Fixed a bug where multiple overlays could stack upon each other when OAuth was initiated from a menu bar or background launched command
+
 ## 1.39.2 - 2022-09-01
 
 ### ✨ New
@@ -19,13 +141,13 @@
 
 ### ✨ New
 
-- **List.Item.Detail.Metadata**: We’ve added support for new `Link` and `TagList` item types.
+- **List.Item.Detail.Metadata**: We've added support for new `Link` and `TagList` item types.
 - **Environment**: You can now check the `mode` of the current command _(as defined in the manifest)_ _via_ `environment.commandMode`.
 
 ### 💎 Improvements
 
 - **CLI**: The ray CLI is now code-signed
-- **CLI**: We’ve updated esbuild to v0.14.52
+- **CLI**: We've updated esbuild to v0.14.52
 - **NPM size:** is now 0.5MB instead of 25MB _(binary files for ray CLI have been moved out of the NPM package)_
 
 ### 🐞 Fixes
@@ -33,8 +155,8 @@
 - **Navigation**: Top-level components can now dynamically return a different view type when used inside a navigation stack
 - **Background Refresh**: Fixed an edge case where commands would run into a timeout that prevented further refreshing
 - **Menu Bar Commands**: Fixed a bug where the error screen of menu bar commands would repeatedly be shown in the root search
-- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn’t work entirely
-- **Form:** `TextArea` placeholder now won’t highlight markdowns if it has `enabledMarkdown`
+- **Actions:** Triggering actions by _numeric shortcut / double-clicking_ could trigger wrong actions or didn't work entirely
+- **Form:** `TextArea` placeholder now won't highlight markdowns if it has `enabledMarkdown`
 
 ## 1.38.3 - 2022-08-03
 
@@ -46,7 +168,7 @@
 ### 🐞 Fixes
 
 - **Menu Bar Commands**: Fixed issues around hot reloading, unloading, and inconsistent action handler behavior
-- **No-view Commands:** Fixed returning top-level props for commands that doesn’t have arguments or drafts
+- **No-view Commands:** Fixed returning top-level props for commands that doesn't have arguments or drafts
 
 ## 1.38.1 - 2022-07-21
 

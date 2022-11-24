@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitter-trendscast",
-  "title": "Show Trends from Twitter",
+  "title": "Show Trends From Twitter",
   "description": "With these simple shortcuts, you can keep up with the latest trends from people you follow or any other trends on Twitter.",
   "icon": "ext-icon.png",
   "author": "pradeepb28",

@@ -1,7 +1,8 @@
-import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
+import { showToast, Form, ActionPanel, Toast, Action, Detail, Icon, showHUD } from "@raycast/api";
 import { useState } from "react";
 import { Bitwarden } from "./api";
 import { useVaultMessages } from "./hooks";
+import { copyPassword } from "./clipboard";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -75,4 +76,13 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
+}
+
+export function CopyPasswordToClipboardAction(props: { title: string; content: string }): JSX.Element {
+  async function doCopy() {
+    const copiedSecurely = await copyPassword(props.content);
+    showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
+  }
+
+  return <Action title={props.title} icon={Icon.CopyClipboard} onAction={doCopy}></Action>;
 }

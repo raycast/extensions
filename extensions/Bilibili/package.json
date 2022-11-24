@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bilibili",
+  "title": "Bilibili",
+  "description": "Get notify from bilibili",
+  "icon": "bilibili.png",
+  "author": "Fatpandac",
+  "categories": [
+    "Applications",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dynamicFeed",
+      "title": "Show Dynamic Feed",
+      "description": "Show all dynamic feed",
+      "mode": "view"
+    },
+    {
+      "name": "popularVideos",
+      "title": "Popular Videos",
+      "description": "Show popular videos",
+      "mode": "view"
+    },
+    {
+      "name": "rcmdVideos",
+      "title": "Recommend Videos",
+      "description": "Show recommend videos",
+      "mode": "view"
+    },
+    {
+      "name": "popularSeries",
+      "title": "Weekly Popular Series",
+      "description": "Show weekly popular series",
+      "mode": "view"
+    },
+    {
+      "name": "login",
+      "title": "Login Bilibili",
+      "description": "Show QRCode to login Bilibili",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "got": "^12.4.1",
+    "prettier": "^2.5.1",
+    "qrcode": "^1.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

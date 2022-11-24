@@ -12,7 +12,7 @@ export function NoteListDropdown(props: {
 
   function defaultTagValue() {
     if (searchArguments) {
-      if (searchArguments.tagArgument != "") {
+      if (searchArguments.tagArgument) {
         if (searchArguments.tagArgument.startsWith("#")) {
           return searchArguments.tagArgument;
         } else {

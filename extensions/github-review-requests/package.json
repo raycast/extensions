@@ -45,7 +45,7 @@
     "@graphql-codegen/cli": "2.5.0",
     "@graphql-codegen/near-operation-file-preset": "^2.2.4",
     "@graphql-codegen/typescript": "2.4.3",
-    "@graphql-codegen/typescript-graphql-request": "^4.3.4",
+    "@graphql-codegen/typescript-graphql-request": "^4.5.8",
     "@graphql-codegen/typescript-operations": "2.2.4",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
