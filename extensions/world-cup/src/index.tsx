@@ -25,7 +25,7 @@ export default function Command() {
     `${BASE_URL}/calendar/matches?language=en&count=${COUNT}&idSeason=${ID_SEASON}`
   );
   const [filter, setFilter] = useCachedState("filter", "all");
-  const [showingDetail, setShowingDetail] = useCachedState("showDetails", true);
+  const [showingDetail, setShowingDetail] = useCachedState("showDetails", false);
   const [time, setTime] = useCachedState("time", null);
   const [refresh, setRefresh] = useState<number | null>(null);
 
