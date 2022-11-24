@@ -63,7 +63,7 @@ export default function Command() {
   }
 
   if (filter === "prev") {
-    matches = matches.filter((match) => match.MatchStatus === 0);
+    matches = matches.filter((match) => match.MatchStatus === 0).reverse();
   }
 
   const matchesByDay = groupBy(matches, (match: { Date: string }) => startOfDay(new Date(match.Date)));
