@@ -123,7 +123,17 @@
       "mode": "menu-bar",
       "subtitle": "Linear",
       "icon": "linear.png",
-      "interval": "15m"
+      "interval": "15m",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Always Show",
+          "name": "alwaysShow",
+          "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "create-issue-for-myself",
