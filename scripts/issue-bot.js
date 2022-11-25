@@ -40,7 +40,7 @@ module.exports = async ({ github, context, core }) => {
   const owners =
     codeowners[`/extensions/${ext}`] ||
     // some extensions don't have a folder that match their name
-    codeowners[`/extensions/${(await getExtensionName2Folder({ github, content }))[ext]}`];
+    codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
     console.log(`cannot find existing extension ${ext}`);
