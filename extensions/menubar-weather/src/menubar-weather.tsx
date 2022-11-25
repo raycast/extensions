@@ -1,7 +1,15 @@
 import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getCurrentWeather } from "./hooks/hooks";
 import { getDateIcon, getUnits, isoToDateTime, isoToTime, timeHour } from "./utils/common-utils";
-import { getWeatherDescription, isEmptyLonLat, latitude, longitude } from "./utils/weather-utils";
+import {
+  getWeatherDescription,
+  isEmptyLonLat,
+  latitude,
+  longitude,
+  showForecast,
+  showLocation,
+  showSun,
+} from "./utils/weather-utils";
 import { OPEN_METEO } from "./utils/axios-utils";
 
 export default function MenubarWeather() {
@@ -144,7 +152,7 @@ export default function MenubarWeather() {
             </>
           )}
 
-          {typeof weather?.daily !== "undefined" && (
+          {showSun && typeof weather?.daily !== "undefined" && (
             <MenuBarExtra.Section title={"Sun"}>
               <MenuBarExtra.Item
                 title={"Sunrise"}
@@ -164,7 +172,7 @@ export default function MenubarWeather() {
               />
             </MenuBarExtra.Section>
           )}
-          {typeof weather !== "undefined" && isEmptyLonLat() && typeof location !== "undefined" && (
+          {showLocation && typeof weather !== "undefined" && isEmptyLonLat() && typeof location !== "undefined" && (
             <MenuBarExtra.Section title={"Location"}>
               {typeof location.name !== "undefined" && (
                 <MenuBarExtra.Item
@@ -209,7 +217,7 @@ export default function MenubarWeather() {
             </MenuBarExtra.Section>
           )}
 
-          {!isEmptyLonLat() && (
+          {showLocation && !isEmptyLonLat() && (
             <MenuBarExtra.Section title={"Location"}>
               <MenuBarExtra.Item
                 title={"Lon, Lat"}
@@ -222,10 +230,10 @@ export default function MenubarWeather() {
             </MenuBarExtra.Section>
           )}
 
-          {typeof weather !== "undefined" && (
+          {showForecast && typeof weather !== "undefined" && (
             <MenuBarExtra.Section title={"Forecast"}>
               <MenuBarExtra.Submenu title={"Weather"} icon={Icon.Cloud}>
-                {weather?.daily?.weathercode?.map((value, index, array) => {
+                {weather?.daily?.weathercode?.map((value, index) => {
                   const { icon, description } = getWeatherDescription(weather?.daily?.weathercode[index]);
                   return (
                     <MenuBarExtra.Item
@@ -240,7 +248,7 @@ export default function MenubarWeather() {
                 })}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu title={"Temperature"} icon={Icon.Temperature}>
-                {weather?.daily?.temperature_2m_min?.map((value, index, array) => {
+                {weather?.daily?.temperature_2m_min?.map((value, index) => {
                   return (
                     <MenuBarExtra.Item
                       key={index + weather?.daily?.time[index] + weather?.daily?.temperature_2m_min[index]}
@@ -261,7 +269,7 @@ export default function MenubarWeather() {
                 })}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu title={"Wind"} icon={Icon.Boat}>
-                {weather?.daily?.windspeed_10m_max?.map((value, index, array) => {
+                {weather?.daily?.windspeed_10m_max?.map((value, index) => {
                   return (
                     <MenuBarExtra.Item
                       key={index + weather?.daily?.time[index] + weather?.daily?.windspeed_10m_max[index]}
@@ -275,7 +283,7 @@ export default function MenubarWeather() {
                 })}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu title={"Rain"} icon={Icon.Raindrop}>
-                {weather?.daily?.rain_sum?.map((value, index, array) => {
+                {weather?.daily?.rain_sum?.map((value, index) => {
                   return (
                     <MenuBarExtra.Item
                       key={index + weather?.daily?.time[index] + weather?.daily?.rain_sum[index]}
