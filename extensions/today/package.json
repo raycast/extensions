@@ -1,10 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "today",
-  "title": "today",
+  "title": "Today",
   "description": "hello today view the world",
   "icon": "command-icon.png",
-  "author": "dengshenkk@gmail.com",
+  "author": "seeyou",
+  "creator": "dengshenkk@gmail.com",
   "categories": [
     "System"
   ],
