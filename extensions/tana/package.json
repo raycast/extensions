@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tana",
   "title": "Tana",
-  "description": "Write notes in Raycast and capture them in Tana",
+  "description": "Write notes in Raycast, and capture them in Tana.",
   "icon": "tana-icon.png",
   "author": "cheslip",
   "categories": [
@@ -13,6 +13,7 @@
     {
       "name": "quickAddCommand",
       "title": "Quick Add",
+      "subtitle": "Tana",
       "description": "Create a new node",
       "mode": "view"
     }
