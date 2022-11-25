@@ -20,7 +20,6 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
       const result = await github.searchIssues({
         query: `is:issue ${repoFilter} ${searchText}`,
         numberOfItems: 20,
-        avatarSize: 64,
       });
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },

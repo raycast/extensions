@@ -31,6 +31,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour
 /extensions/arc                                      @thomaspaulmann
+/extensions/archiver                                 @404J
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
 /extensions/asyncapi                                 @smoya
@@ -91,7 +92,7 @@
 /extensions/cheetah                                  @RongleCat
 /extensions/chess-com                                @joshfarrant
 /extensions/chinese-character                        @koinzhang
-/extensions/chinese-numbers                          @Jax0rz
+/extensions/chinese-numbers                          @raffeyang
 /extensions/choose-a-license                         @sandypockets @Aayush9029
 /extensions/chuck-norris-facts                       @jorgecortesdev
 /extensions/circle-ci                                @qeude @kudrykv
@@ -289,6 +290,7 @@
 /extensions/homeassistant                            @tonka3000 @altrdev @rspeicher
 /extensions/homey                                    @DominicVonk
 /extensions/hostloc                                  @J3n5en
+/extensions/houdahspot-search                        @blackspike
 /extensions/how-long-to-beat                         @Cronos87
 /extensions/http-status-codes                        @AlexVanderbist
 /extensions/hue                                      @pindab0ter @thomaspaulmann @pindab0ter
@@ -450,7 +452,7 @@
 /extensions/party-parrot                             @thomaspaulmann
 /extensions/passphrase-generator                     @omBratteng @pernielsentikaer
 /extensions/password-generator                       @joshuaiz
-/extensions/paste-as-plain-text                      @koinzhang
+/extensions/paste-as-plain-text                      @koinzhang @pantajoe
 /extensions/pastebin                                 @vimtor
 /extensions/pera-explorer                            @akgunberk
 /extensions/pestphp-documentation                    @danyelkeddah
@@ -599,6 +601,7 @@
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor @macbookandrew
+/extensions/tana                                     @cheslip
 /extensions/tapo-smart-devices                       @timrogers
 /extensions/taskplane                                @albingroen
 /extensions/tc-no-generator                          @denizyoldas
@@ -674,7 +677,7 @@
 /extensions/word-search                              @RishabSwift @thomaspaulmann
 /extensions/work-time-countdown                      @thomaspaulmann @pernielsentikaer
 /extensions/world-clock                              @koinzhang
-/extensions/world-cup                                @ismamz @djpowers
+/extensions/world-cup                                @ismamz @djpowers @pernielsentikaer
 /extensions/wrike                                    @suarez-agu
 /extensions/xcode                                    @SvenTiigi @qeude @oliverepper
 /extensions/xecutor                                  @GastroGeek

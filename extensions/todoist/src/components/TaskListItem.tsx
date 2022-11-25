@@ -57,10 +57,10 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
     });
   }
 
-  if (task.labelIds.length > 0) {
+  if (task.labels && task.labels.length > 0) {
     additionalListItemProps.accessories.push({
       icon: { source: "tag.svg", tintColor: Color.SecondaryText },
-      tooltip: `${task.labelIds.length} label${task.labelIds.length === 1 ? "" : "s"}`,
+      tooltip: `${task.labels.length} label${task.labels.length === 1 ? "" : "s"}`,
     });
   }
 
@@ -85,7 +85,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
       subtitle={task.description}
       {...additionalListItemProps}
       actions={
-        <ActionPanel>
+        <ActionPanel title={task.content}>
           <Action.Push
             title="Show Details"
             target={<TaskDetail taskId={task.id} mutateTasks={mutateTasks} />}

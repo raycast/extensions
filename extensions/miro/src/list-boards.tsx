@@ -51,6 +51,7 @@ export default function ListBoards() {
                 <ActionPanel.Section>
                   <Action
                     title="Delete Board"
+                    icon={Icon.Trash}
                     style={Action.Style.Destructive}
                     onAction={() =>
                       confirmAlert({

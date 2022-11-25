@@ -1,19 +1,20 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 import { Note, Vault, SearchNotePreferences, SearchArguments } from "../../utils/interfaces";
-import { NoteAction } from "../../utils/constants";
+import { MAX_RENDERED_NOTES, NoteAction } from "../../utils/constants";
 import { tagsForNotes } from "../../utils/yaml";
 import { NoteListItem } from "./NoteListItem";
 import { NoteListDropdown } from "./NoteListDropdown";
+import { filterNotes } from "../../utils/search";
 
 export function NoteList(props: {
-  notes: Note[] | undefined;
+  title?: string;
   vault: Vault;
+  notes: Note[] | undefined;
   allNotes?: Note[];
   setNotes?: (notes: Note[]) => void;
   isLoading?: boolean;
-  title?: string;
   searchArguments?: SearchArguments;
   action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
   onDelete?: (note: Note, vault: Vault) => void;
@@ -21,9 +22,12 @@ export function NoteList(props: {
 }) {
   const { notes, allNotes, vault, isLoading, title, searchArguments, setNotes, action, onDelete, onSearchChange } =
     props;
+
   const pref = getPreferenceValues<SearchNotePreferences>();
+
   const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
-  const { showDetail } = pref;
+  const list = useMemo(() => filterNotes(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
+  const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
   const tags = tagsForNotes(allNotes ?? []);
 
@@ -39,10 +43,10 @@ export function NoteList(props: {
 
   return (
     <List
+      throttle={true}
       isLoading={isNotesUndefined}
-      isShowingDetail={showDetail}
+      isShowingDetail={pref.showDetail}
       onSearchTextChange={(value) => {
-        onSearchChange?.(value);
         setSearchText(value);
       }}
       navigationTitle={title}
@@ -51,7 +55,7 @@ export function NoteList(props: {
         <NoteListDropdown tags={tags} setNotes={setNotes} allNotes={allNotes} searchArguments={searchArguments} />
       }
     >
-      {notes?.map((note) => (
+      {_notes?.map((note) => (
         <NoteListItem note={note} vault={vault} key={note.path} pref={pref} onDelete={onDelete} action={action} />
       ))}
     </List>

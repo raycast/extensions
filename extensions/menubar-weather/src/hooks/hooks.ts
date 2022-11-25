@@ -1,24 +1,25 @@
-import { GeoLocation, Weather } from "../types/types";
 import { useCallback, useEffect, useState } from "react";
-import { getCurWeather } from "../utils/open-weather-utils";
+import { getCurWeather, getGeoLocation } from "../utils/weather-utils";
 import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
 import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
 import { AxiosError } from "axios";
+import { GeoLocation, OpenMeteoWeather } from "../types/types";
 
 export const getCurrentWeather = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [weather, setWeather] = useState<Weather>();
+  const [weather, setWeather] = useState<OpenMeteoWeather>();
   const [location, setLocation] = useState<GeoLocation>();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     const cache = new Cache();
+    await getGeoLocation();
     const cacheWeather = cache.get(CacheKey.CURRENT_WEATHER);
     const cacheLocation = cache.get(CacheKey.LOCATION);
     const cacheTime = cache.get(CacheKey.REFRESH_TIME);
     let oldRefreshTime = 0;
     if (typeof cacheWeather === "string" && !isEmpty(cacheWeather)) {
-      setWeather(JSON.parse(cacheWeather) as Weather);
+      setWeather(JSON.parse(cacheWeather) as OpenMeteoWeather);
     }
     if (typeof cacheLocation === "string" && !isEmpty(cacheLocation)) {
       setLocation(JSON.parse(cacheLocation) as GeoLocation);
@@ -48,7 +49,11 @@ export const getCurrentWeather = () => {
       } catch (e) {
         console.error(e);
         const error = e as AxiosError;
-        await showToast({ title: `${error.name}`, message: `${error.message}`, style: Toast.Style.Failure });
+        await showToast({
+          title: `${error.name}`,
+          message: `${error.message}`,
+          style: Toast.Style.Failure,
+        });
       }
     }
 

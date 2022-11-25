@@ -1,10 +1,20 @@
-import { getApplications, MenuBarExtra, open, openCommandPreferences, launchCommand, LaunchType } from "@raycast/api";
+import {
+  getApplications,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  launchCommand,
+  LaunchType,
+  getPreferenceValues,
+} from "@raycast/api";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
 import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificationTitle } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
+
+const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
 
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
@@ -37,6 +47,10 @@ function UnreadNotifications() {
     const ellipsis = text.length > maxLength ? "…" : "";
     return text.substring(0, maxLength).trim() + ellipsis;
   };
+
+  if (!preferences.alwaysShow && !isLoadingNotifications && unreadNotifications && unreadNotifications.length === 0) {
+    return null;
+  }
 
   return (
     <MenuBarExtra

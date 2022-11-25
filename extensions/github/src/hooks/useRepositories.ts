@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { useViewer } from "./useViewer";
@@ -13,14 +13,13 @@ export function useMyRepositories() {
     const result = await github.searchRepositories({
       query: `user:@me ${viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")}`,
       numberOfItems: 100,
-      avatarSize: 64,
     });
 
-    return result.search.nodes as RepositoryFieldsFragment[];
+    return result.search.nodes as ExtendedRepositoryFieldsFragment[];
   });
 }
 
-export function useReleases(repository: RepositoryFieldsFragment) {
+export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
   const { github } = getGitHubClient();
 
   const [owner, name] = repository.nameWithOwner.split("/");
