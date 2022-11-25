@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Fixes] - 2022-11-25
+
+- This commit filters out duplicate entries
+
 ## [Added screenshots] - 2022-11-17
 
 ## [Support ssh remote projects] - 2022-08-24
