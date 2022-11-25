@@ -8,9 +8,12 @@ export const { cityName, tempUnits, precipitationUnits, longitude, latitude } = 
 
 export async function getGeoLocation() {
   const geoLocation = await getOpenMeteoLocation();
-  const geo = geoLocation.results;
-  if (typeof geoLocation.results !== "undefined" && geoLocation.results.length >= 1) {
-    return geo[0] as GeoLocation;
+  if (
+    typeof geoLocation !== "undefined" &&
+    typeof geoLocation.results !== "undefined" &&
+    geoLocation.results.length >= 1
+  ) {
+    return geoLocation.results[0] as GeoLocation;
   } else
     return {
       id: 5128581,
@@ -65,7 +68,15 @@ export function isEmptyLonLat() {
  */
 export function getWeatherDescription(weatherCode: number | undefined) {
   if (typeof weatherCode === "undefined") {
-    return { description: "No weather info", icon: Icon.Sunrise };
+    return {
+      description: "No weather info",
+      icon: {
+        source: {
+          light: "menubar-icon.png",
+          dark: "menubar-icon@dark.png",
+        },
+      },
+    };
   }
   switch (weatherCode) {
     case 0:
@@ -137,6 +148,14 @@ export function getWeatherDescription(weatherCode: number | undefined) {
         icon: Icon.CloudLightning,
       };
     default:
-      return { description: "No weather info", icon: Icon.Sunrise };
+      return {
+        description: "No weather info",
+        icon: {
+          source: {
+            light: "menubar-icon.png",
+            dark: "menubar-icon@dark.png",
+          },
+        },
+      };
   }
 }

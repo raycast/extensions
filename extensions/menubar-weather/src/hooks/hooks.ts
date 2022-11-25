@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getCurWeather, getGeoLocation } from "../utils/weather-utils";
+import { getCurWeather } from "../utils/weather-utils";
 import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
 import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
 import { AxiosError } from "axios";
@@ -13,7 +13,6 @@ export const getCurrentWeather = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     const cache = new Cache();
-    await getGeoLocation();
     const cacheWeather = cache.get(CacheKey.CURRENT_WEATHER);
     const cacheLocation = cache.get(CacheKey.LOCATION);
     const cacheTime = cache.get(CacheKey.REFRESH_TIME);
@@ -47,6 +46,7 @@ export const getCurrentWeather = () => {
         }
         cache.set(CacheKey.REFRESH_TIME, JSON.stringify(newRefreshTime));
       } catch (e) {
+        setWeather(undefined);
         console.error(e);
         const error = e as AxiosError;
         await showToast({
@@ -56,7 +56,6 @@ export const getCurrentWeather = () => {
         });
       }
     }
-
     setLoading(false);
   }, []);
 
