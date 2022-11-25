@@ -1,3 +1,6 @@
-# Curator Bio
+# Curator Bio extension for Raycast
 
-curator.bio extension
+## Features
+
+- Read your feeds right in Raycast.
+- Explore other users' collections.
