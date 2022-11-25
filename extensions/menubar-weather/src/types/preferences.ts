@@ -4,4 +4,7 @@ export interface Preferences {
   latitude: string;
   tempUnits: string;
   precipitationUnits: string;
+  showSun: boolean;
+  showLocation: boolean;
+  showForecast: boolean;
 }
