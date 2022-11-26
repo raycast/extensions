@@ -348,15 +348,23 @@ export function MRListItem(props: {
   const getIcon = (): List.Item.Props["icon"] => {
     if (mr.state === "merged") {
       return {
-        source: GitLabIcons.merged,
-        tintColor: Color.Purple,
-        mask: Image.Mask.Circle,
+        value: {
+          source: GitLabIcons.merged,
+          tintColor: Color.Purple,
+          mask: Image.Mask.Circle,
+        },
         tooltip: "Status: Merged",
       };
     } else if (mr.state === "closed") {
-      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle, tooltip: "Status: Closed" };
+      return {
+        value: { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle },
+        tooltip: "Status: Closed",
+      };
     } else {
-      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle, tooltip: "Status: Open" };
+      return {
+        value: { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle },
+        tooltip: "Status: Open",
+      };
     }
   };
 

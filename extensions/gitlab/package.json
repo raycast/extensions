@@ -6,7 +6,7 @@
   "author": "tonka3000",
   "license": "MIT",
   "description": "Create, search and modify issues, manage merge requests, projects and more.",
-  "icon": "gitlab.svg",
+  "icon": "gitlab.png",
   "commands": [
     {
       "name": "issue_my",

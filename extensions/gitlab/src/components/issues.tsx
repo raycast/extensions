@@ -101,7 +101,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           </Detail.Metadata.TagList>
           {issue.author && (
             <Detail.Metadata.TagList title="Author">
-              <Detail.Metadata.TagList.Item text={issue.author.name} icon={userIcon(issue.author)} />
+              <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
             </Detail.Metadata.TagList>
           )}
           {issue.assignees.length > 0 && (
@@ -115,7 +115,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
               {issue.labels.map((i) => (
-                <Detail.Metadata.TagList.Item text={i.name} color={i.color} />
+                <Detail.Metadata.TagList.Item key={i.id} text={i.name} color={i.color} />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -195,8 +195,10 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       title={issue.title}
       subtitle={"#" + issue.iid}
       icon={{
-        source: GitLabIcons.issue,
-        tintColor: tintColor,
+        value: {
+          source: GitLabIcons.issue,
+          tintColor: tintColor,
+        },
         tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
       }}
       accessories={[
