@@ -114,8 +114,12 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
           {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
-              {issue.labels.map((i) => (
-                <Detail.Metadata.TagList.Item key={i.id} text={i.name} color={i.color} />
+              {issue.labels?.map((i) => (
+                <Detail.Metadata.TagList.Item
+                  key={i.id || (i as any)}
+                  text={i.name || (i as any) || "?"}
+                  color={i.color}
+                />
               ))}
             </Detail.Metadata.TagList>
           )}

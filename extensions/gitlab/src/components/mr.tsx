@@ -140,7 +140,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           {mr.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
               {mr.labels.map((m) => (
-                <Detail.Metadata.TagList.Item key={m.id} text={m.name} color={m.color} />
+                <Detail.Metadata.TagList.Item key={m.id || (m as any)} text={m.name || (m as any)} color={m.color} />
               ))}
             </Detail.Metadata.TagList>
           )}
