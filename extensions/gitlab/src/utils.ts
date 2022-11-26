@@ -1,6 +1,6 @@
 import { Clipboard, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Project } from "./gitlabapi";
-import { GitLabIcons } from "./icons";
+import { getSVGText, GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import { constants } from "fs";
@@ -27,14 +27,19 @@ export function projectIconUrl(project: Project): string | undefined {
 }
 
 export function projectIcon(project: Project): Image.ImageLike {
+  const svgSource = () => {
+    return getSVGText(project.name[0].toUpperCase()) || GitLabIcons.project;
+  };
   let result: string = GitLabIcons.project;
   // TODO check also namespace for icon
   if (project.avatar_url) {
     result = project.avatar_url;
   } else if (project.owner && project.owner.avatar_url) {
     result = project.owner.avatar_url;
+  } else {
+    result = svgSource();
   }
-  return { source: result, mask: Image.Mask.Circle };
+  return { source: result, mask: Image.Mask.Circle, fallback: svgSource() };
 }
 
 export function toDateString(d: string): string {

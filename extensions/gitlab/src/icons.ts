@@ -11,7 +11,7 @@ export enum GitLabIcons {
   todo = "todo.png",
   review = "list-icon.png",
   issue = "exclamation.png",
-  project = "main-list-view-16",
+  project = "credit-card-16",
   merged = "merged.png",
   mropen = "mropen.png",
   mraccepted = "todo.png",
@@ -105,7 +105,7 @@ export function useImage(
   return { localFilepath, error, isLoading };
 }
 
-export function getTextIcon(text: string): Image.ImageLike | undefined {
+export function getSVGText(text: string): string | undefined {
   if (!text || text.length <= 0) {
     return undefined;
   }
@@ -123,7 +123,12 @@ export function getTextIcon(text: string): Image.ImageLike | undefined {
 </svg>
   `.replaceAll("\n", "");
 
-  return {
-    source: `data:image/svg+xml,${svg}`,
-  };
+  return `data:image/svg+xml,${svg}`;
+}
+
+export function getTextIcon(text: string): Image.ImageLike | undefined {
+  if (!text || text.length <= 0) {
+    return undefined;
+  }
+  return getSVGText(text);
 }
