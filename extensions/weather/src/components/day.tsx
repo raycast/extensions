@@ -40,6 +40,14 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
     return `${val} ${getTemperatureUnit()}`;
   };
 
+  const getWindText = (hour: Hourly) => {
+    return `${getWind(hour)} ${getWindDirectionIcon(hour.winddirDegree)}`;
+  };
+
+  const getHumidityText = (hour: Hourly) => {
+    return `${hour.humidity}%`;
+  };
+
   return (
     <List>
       <List.Section title={props.title}>
@@ -47,16 +55,18 @@ export function DayList(props: { day: WeatherData; title: string }): JSX.Element
           <List.Item
             key={data.time.toString()}
             title={`${getTime(data.time)}`}
-            subtitle={`${getTemp(data)} , ${getWeatherDesc(data)}`}
-            icon={getWeatherCodeIcon(data.weatherCode)}
+            subtitle={`${getTemp(data)}     ${getWeatherDesc(data)}`}
+            icon={{ value: getWeatherCodeIcon(data.weatherCode), tooltip: "test" }}
             accessories={[
               {
                 icon: "💧",
-                text: `${data.humidity}%`,
+                text: getHumidityText(data),
+                tooltip: `Humidity: ${getHumidityText(data)}`,
               },
               {
                 icon: "💨",
-                text: `${getWind(data)} ${getWindDirectionIcon(data.winddirDegree)}`,
+                text: getWindText(data),
+                tooltip: `Wind: ${getWindText(data)}`,
               },
             ]}
           />

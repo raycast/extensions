@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, Action } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, Action, Icon } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useEffect, useState } from "react";
 import { getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
@@ -57,12 +57,17 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
   const wd = getWeekday(data.date);
   const weatherCodes = data.hourly.map((h) => h.weatherCode);
   const weatherCode = getHighestOccurrence(weatherCodes);
+  const max = getDayTemperature(data, "max");
+  const min = getDayTemperature(data, "min");
   return (
     <List.Item
       key={data.date}
       title={wd}
-      subtitle={`max: ${getDayTemperature(data, "max")}, min: ${getDayTemperature(data, "min")}`}
       icon={getWeatherCodeIcon(weatherCode || "")}
+      accessories={[
+        { text: max, icon: Icon.ArrowUp, tooltip: `Max. Temperature ${max}` },
+        { text: min, icon: Icon.ArrowDown, tooltip: `Min. Temperature ${min}` },
+      ]}
       actions={
         <ActionPanel>
           <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
@@ -138,7 +143,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
           key="_"
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}
-          icon={getWeatherCodeIcon(curcon?.weatherCode)}
+          icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
           accessories={[
             {
               icon: "💧",
@@ -163,7 +168,7 @@ function WeatherDailyForecaseFragment(props: { data: Weather | undefined }): Rea
   const { title } = getMetaData(data);
   return (
     <List.Section title="Daily Forecast">
-      {data?.weather?.map((d, index) => (
+      {data?.weather?.map((d) => (
         <DayListItem key={d.date} day={d} title={title} />
       ))}
     </List.Section>
