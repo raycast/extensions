@@ -29,7 +29,7 @@ function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
-  console.log(localImageFilepath);
+
   return (
     <List.Item
       id={project.id.toString()}

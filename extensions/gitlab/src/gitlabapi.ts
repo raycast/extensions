@@ -711,7 +711,7 @@ export class GitLab {
     const search = params.search;
     delete params.search;
 
-    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
+    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "usergroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
     return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });

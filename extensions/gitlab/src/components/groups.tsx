@@ -107,19 +107,18 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
     showErrorToast(error, "Cannot search Groups");
   }
 
-  if (isLoading === undefined) {
+  if (groupsinfo === undefined && error === undefined) {
     return <List isLoading={true} />;
   }
 
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
-
   return (
     <List searchBarPlaceholder="Filter Groups by name..." isLoading={isLoading} navigationTitle={navtitle}>
       {groupsinfo?.groups?.map((group) => (
         <GroupListItem key={group.id} group={group} />
       ))}
       {groupsinfo?.projects?.map((project) => (
-        <ProjectListItem project={project} />
+        <ProjectListItem key={project.id} project={project} />
       ))}
     </List>
   );
