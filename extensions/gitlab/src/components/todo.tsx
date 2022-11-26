@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Image, List } from "@raycast/api";
+import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@raycast/api";
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
@@ -74,6 +74,11 @@ export function TodoList(): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
+  const refreshAll = () => {
+    refresh();
+    launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+  };
+
   return (
     <List
       searchBarPlaceholder="Filter Todos by name..."
@@ -82,7 +87,7 @@ export function TodoList(): JSX.Element {
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
       {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
+        <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
       ))}
     </List>
   );

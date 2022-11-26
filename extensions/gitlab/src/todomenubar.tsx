@@ -81,13 +81,13 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
 
   const todos = allTodos?.slice(0, getMaxTodosPreference());
   const unshownTodos =
-    allTodos && allTodos.length > 0 && todos.length < allTodos.length ? allTodos.length - todos.length : 0;
+    todos && allTodos && allTodos.length > 0 && todos.length < allTodos.length ? allTodos.length - todos.length : 0;
   return (
     <TodosMenuBarExtra
       icon={menuBarIcon()}
       isLoading={isLoading}
       error={error}
-      title={allTodos.length > 0 && getShowTodoCountPreference() ? `${allTodos.length}` : undefined}
+      title={allTodos && allTodos.length > 0 && getShowTodoCountPreference() ? `${allTodos.length}` : undefined}
       tooltip="GitLab Todos"
     >
       <MenuBarExtra.Section>
