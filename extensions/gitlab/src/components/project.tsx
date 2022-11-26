@@ -1,4 +1,4 @@
-import { ActionPanel, Image, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
@@ -57,7 +57,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
-      subtitle={project.star_count > 0 ? `⭐ ${project.star_count}` : ""}
+      accessories={[{ icon: { source: Icon.Star, tintColor: Color.Yellow }, text: `${project.star_count}` }]}
       icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
