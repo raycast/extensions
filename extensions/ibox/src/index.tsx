@@ -21,11 +21,7 @@ export default function Command() {
 
   // searchText={searchText} 导致无法输入中文
   return (
-    <List
-      navigationTitle="搜索书签"
-      isLoading={status === AsyncStatus.pending}
-      onSearchTextChange={(text) => setSearchText(text)}
-    >
+    <List isLoading={status === AsyncStatus.pending} onSearchTextChange={(text) => setSearchText(text)}>
       {value?.list.map((item, index) => (
         <List.Item
           key={index}
@@ -58,7 +54,7 @@ async function fetchResource(search: string): Promise<BaseListData<Item>> {
   const { code, msg, data } = (await response.json()) as ResData<BaseListData<Item>>;
 
   if (code !== 0) {
-    throw new Error(msg || "服务异常");
+    throw new Error(msg || "error");
   }
 
   console.log("data length:", data?.list?.length);

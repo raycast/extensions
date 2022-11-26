@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ibox",
   "version": "0.1.1",
-  "title": "搜索书签",
-  "description": "i box",
+  "title": "Bookmark Search",
+  "description": "search, and access your bookmarks.",
   "icon": "command-icon.png",
   "author": "aidenZou",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "iBox",
-      "description": "用于快捷搜索书签收藏并打开",
+      "description": "Bookmark Search",
       "mode": "view"
     }
   ],
