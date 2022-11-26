@@ -62,10 +62,6 @@ function stateColor(state: string): Color.ColorLike {
   return state === "closed" ? "red" : "green";
 }
 
-function stateIcon(state: string): Image.ImageLike {
-  return { source: GitLabIcons.branches, tintColor: stateColor(state) };
-}
-
 export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
