@@ -28,14 +28,21 @@ function launchWeatherCommand() {
 function getAppearancePreferences(): { showMenuIcon: boolean; showMenuText: boolean } {
   const prefs = getPreferenceValues();
   const showMenuText = prefs.showmenutext as boolean | true;
-  const showMenuIcon = showMenuText == false ? true : (prefs.showmenuicon as boolean | true);
+  const showMenuIcon = prefs.showmenuicon as boolean | true;
   return {
     showMenuIcon,
     showMenuText,
   };
 }
 
-function getWeatherMenuIcon(curcon: WeatherConditions | undefined): Image.ImageLike {
+function getWeatherMenuIcon(curcon: WeatherConditions | undefined): Image.ImageLike | undefined {
+  const { showMenuIcon, showMenuText } = getAppearancePreferences();
+  if (!showMenuIcon && !showMenuText) {
+    return Icon.Cloud;
+  }
+  if (!showMenuIcon) {
+    return undefined;
+  }
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
 }
 
@@ -73,7 +80,7 @@ export default function MenuCommand(): JSX.Element {
       data={data}
       error={error}
       title={showMenuText ? temp : undefined}
-      icon={showMenuIcon ? getWeatherMenuIcon(curcon) : undefined}
+      icon={getWeatherMenuIcon(curcon)}
       isLoading={isLoading}
       tooltip={weatherDesc}
     >
