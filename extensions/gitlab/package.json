@@ -133,6 +133,40 @@
       "subtitle": "GitLab",
       "description": "Managed My Recent Commits",
       "mode": "view"
+    },
+    {
+      "name": "todomenubar",
+      "title": "Todos Menu Bar",
+      "description": "Show your todos directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "preferences": [
+        {
+          "name": "maxtodos",
+          "description": "Maximum Todos shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Max. Todos",
+          "placeholder": "10"
+        },
+        {
+          "name": "alwaysshow",
+          "description": "Show Todos always in the Menubar regardless if you have todos or not",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Always",
+          "title": "Appearance",
+          "default": true
+        },
+        {
+          "name": "showtext",
+          "description": "Show Todo Count",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Todo Count",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [

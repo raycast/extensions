@@ -347,6 +347,10 @@ export class GitLab {
     this.url = url;
   }
 
+  public joinUrl(relativeUrl: string): string {
+    return new URL(relativeUrl, this.url).href;
+  }
+
   public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
     const per_page = all ? 100 : 50;
     const fetchPage = async (page: number): Promise<Response> => {

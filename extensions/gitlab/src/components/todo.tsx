@@ -54,9 +54,12 @@ function getTargetTypeSource(tt: string): string {
   return result;
 }
 
-function getIcon(todo: Todo): Image.ImageLike {
+export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
   const tt = todo.target_type;
-  return { source: getTargetTypeSource(tt), tintColor: getActionColor(todo.action_name) };
+  return {
+    source: getTargetTypeSource(tt),
+    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+  };
 }
 
 export function TodoList(): JSX.Element {
@@ -94,7 +97,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       title={todo.title}
       subtitle={subtitle}
       accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author), tooltip: todo.author?.name }]}
-      icon={getIcon(todo)}
+      icon={getTodoIcon(todo)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
