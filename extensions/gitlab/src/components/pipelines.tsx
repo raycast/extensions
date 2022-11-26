@@ -91,6 +91,7 @@ export function PipelineListItem(props: {
   pipeline: any;
   projectFullPath: string;
   onRefreshPipelines: () => void;
+  navigationTitle?: string;
 }): JSX.Element {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
@@ -120,7 +121,12 @@ export function PipelineListItem(props: {
             <Action.Push
               title="Show Jobs"
               target={
-                <JobList projectFullPath={props.projectFullPath} pipelineID={pipeline.id} pipelineIID={pipeline.iid} />
+                <JobList
+                  projectFullPath={props.projectFullPath}
+                  pipelineID={pipeline.id}
+                  pipelineIID={pipeline.iid}
+                  navigationTitle={props.navigationTitle}
+                />
               }
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
@@ -135,7 +141,7 @@ export function PipelineListItem(props: {
   );
 }
 
-export function PipelineList(props: { projectFullPath: string, navigationTitle?:string }): JSX.Element {
+export function PipelineList(props: { projectFullPath: string; navigationTitle?: string }): JSX.Element {
   const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
   useInterval(() => {
     refresh();
@@ -152,6 +158,7 @@ export function PipelineList(props: { projectFullPath: string, navigationTitle?:
             pipeline={pipeline}
             projectFullPath={props.projectFullPath}
             onRefreshPipelines={refresh}
+            navigationTitle={props.navigationTitle}
           />
         ))}
       </List.Section>

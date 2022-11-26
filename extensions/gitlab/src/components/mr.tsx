@@ -288,7 +288,7 @@ function navTitle(project?: Project, group?: Group): string | undefined {
     return `Group MRs ${group.full_path}`;
   }
   if (project) {
-    return `MRs ${project.fullPath}`;
+    return `MRs ${project.name_with_namespace}`;
   }
   return undefined;
 }

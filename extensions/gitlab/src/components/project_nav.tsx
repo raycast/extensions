@@ -98,12 +98,12 @@ export function ProjectNavMenusList(props: { project: Project }): JSX.Element {
       <ProjectNavMenuItem
         title="Milestones"
         icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-        target={<MilestoneList project={project} />}
+        target={<MilestoneList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuItem
         title="Labels"
         icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
-        target={<ProjectLabelList project={project} />}
+        target={<ProjectLabelList project={project} navigationTitle={project.name_with_namespace} />}
       />
       <ProjectNavMenuBrowserItem
         title="Security & Compliance"
