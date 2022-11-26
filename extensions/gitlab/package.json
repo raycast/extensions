@@ -139,7 +139,7 @@
       "title": "Todos Menu Bar",
       "description": "Show your todos directly in the Menubar",
       "mode": "menu-bar",
-      "interval": "10m",
+      "interval": "15m",
       "preferences": [
         {
           "name": "maxtodos",
