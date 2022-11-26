@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
-import { GitLabIcons, useImage } from "../icons";
+import { getTextIcon, GitLabIcons, useImage } from "../icons";
 import { hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
@@ -31,12 +31,12 @@ function webUrl(group: Group, partial: string) {
 
 export function GroupListItem(props: { group: any }): JSX.Element {
   const group = props.group;
-  const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group), GitLabIcons.project);
+  const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
   return (
     <List.Item
       id={`${group.id}`}
       title={group.full_name}
-      icon={localImageFilepath}
+      icon={localImageFilepath || getTextIcon(group.name[0].toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
