@@ -26,6 +26,7 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
+      subtitle={`&${epic.iid}`}
       accessories={[
         { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
       ]}
