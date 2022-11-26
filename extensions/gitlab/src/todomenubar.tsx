@@ -61,6 +61,15 @@ function TodosMenuBarExtra(props: {
   );
 }
 
+function menuBarIcon(): Image.ImageLike {
+  const prefs = getPreferenceValues();
+  const useGrayscale = prefs.grayicon as boolean;
+  if (useGrayscale === true) {
+    return { source: "gitlab-dark.svg" };
+  }
+  return { source: "gitlab.svg" };
+}
+
 export default function TodosMenuBarCommand(): JSX.Element | null {
   const { todos: allTodos, error, isLoading } = useTodos();
 
@@ -75,7 +84,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
     allTodos && allTodos.length > 0 && todos.length < allTodos.length ? allTodos.length - todos.length : 0;
   return (
     <TodosMenuBarExtra
-      icon={"gitlab.png"}
+      icon={menuBarIcon()}
       isLoading={isLoading}
       error={error}
       title={allTodos.length > 0 && getShowTodoCountPreference() ? `${allTodos.length}` : undefined}
@@ -90,7 +99,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
         />
         <MenuBarExtra.Item
           title="Open Todos in Browser"
-          icon={"gitlab.png"}
+          icon={"gitlab.svg"}
           shortcut={{ modifiers: ["cmd"], key: "b" }}
           onAction={() => open(gitlab.joinUrl("dashboard/todos"))}
         />

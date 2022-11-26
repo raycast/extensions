@@ -6,7 +6,7 @@
   "author": "tonka3000",
   "license": "MIT",
   "description": "Create, search and modify issues, manage merge requests, projects and more.",
-  "icon": "gitlab.png",
+  "icon": "gitlab.svg",
   "commands": [
     {
       "name": "issue_my",
@@ -165,6 +165,14 @@
           "required": false,
           "label": "Show Todo Count",
           "default": true
+        },
+        {
+          "name": "grayicon",
+          "description": "Show Grayscale icon",
+          "type": "checkbox",
+          "required": false,
+          "label": "Grayscale Icon",
+          "default": false
         }
       ]
     }
