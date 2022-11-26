@@ -9,7 +9,7 @@ function getTime(time: string): string {
   return `${h} ${postfix}`;
 }
 
-export function DayList(props: { day: WeatherData; title: string }) {
+export function DayList(props: { day: WeatherData; title: string }): JSX.Element {
   const day = props.day;
 
   const getWeatherDesc = (hour: Hourly): string => {

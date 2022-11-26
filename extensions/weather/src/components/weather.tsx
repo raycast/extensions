@@ -30,26 +30,38 @@ function getHighestOccurrence(arr: string[]): string | undefined {
   return highestName;
 }
 
-export function DayListItem(props: { day: WeatherData; title: string }) {
+export function getDayTemperature(day: WeatherData, prefix: string): string {
+  const unit = getWttrTemperaturePostfix();
+  const key = `${prefix}temp${unit}`;
+  const rec = day as Record<string, any>;
+  let val = "?";
+  if (rec[key]) {
+    val = `${rec[key]}`;
+  }
+  return `${val} ${getTemperatureUnit()}`;
+}
+
+function getDayWeatherCode(day: WeatherData): string | undefined {
+  const weatherCodes = day.hourly.map((h) => h.weatherCode);
+  const weatherCode = getHighestOccurrence(weatherCodes);
+  return weatherCode;
+}
+
+export function getDayWeatherIcon(day: WeatherData): string {
+  const code = getDayWeatherCode(day);
+  return getWeatherCodeIcon(code || "");
+}
+
+export function DayListItem(props: { day: WeatherData; title: string }): JSX.Element {
   const data = props.day;
   const wd = getWeekday(data.date);
-  const getTemp = (prefix: string) => {
-    const unit = getWttrTemperaturePostfix();
-    const key = `${prefix}temp${unit}`;
-    const rec = data as Record<string, any>;
-    let val = "?";
-    if (rec[key]) {
-      val = `${rec[key]}`;
-    }
-    return `${val} ${getTemperatureUnit()}`;
-  };
   const weatherCodes = data.hourly.map((h) => h.weatherCode);
   const weatherCode = getHighestOccurrence(weatherCodes);
   return (
     <List.Item
       key={data.date}
       title={wd}
-      subtitle={`max: ${getTemp("max")}, min: ${getTemp("min")}`}
+      subtitle={`max: ${getDayTemperature(data, "max")}, min: ${getDayTemperature(data, "min")}`}
       icon={getWeatherCodeIcon(weatherCode || "")}
       actions={
         <ActionPanel>
@@ -60,7 +72,7 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
   );
 }
 
-function getWeekday(date: string): string {
+export function getWeekday(date: string): string {
   const d = moment(date);
   return d.locale("en").format("dddd");
 }

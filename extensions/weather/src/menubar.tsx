@@ -8,9 +8,18 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
-import { getCurrentTemperature, getCurrentWind, getMetaData, useWeather, getDefaultQuery } from "./components/weather";
+import {
+  getCurrentTemperature,
+  getCurrentWind,
+  getMetaData,
+  useWeather,
+  getDefaultQuery,
+  getDayWeatherIcon,
+  getWeekday,
+  getDayTemperature,
+} from "./components/weather";
 import { getWeatherCodeIcon, getWindDirectionIcon } from "./icons";
-import { WeatherConditions } from "./wttr";
+import { Weather, WeatherConditions } from "./wttr";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -30,16 +39,39 @@ function getWeatherMenuIcon(curcon: WeatherConditions | undefined): Image.ImageL
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
 }
 
+function WeatherMenuBarExtra(props: {
+  children: React.ReactNode;
+  data: Weather | undefined;
+  isLoading?: boolean;
+  title?: string;
+  icon?: Image.ImageLike | undefined;
+  tooltip?: string;
+  error?: string | undefined;
+}): JSX.Element {
+  const error = props.error;
+  return (
+    <MenuBarExtra
+      title={!error ? props.title : undefined}
+      icon={error ? Icon.Cloud : props.icon}
+      isLoading={props.isLoading}
+      tooltip={error ? `Error: ${error}` : props.tooltip}
+    >
+      {error ? <MenuBarExtra.Item title={`Error: ${error}`} /> : props.children}
+    </MenuBarExtra>
+  );
+}
+
 export default function MenuCommand(): JSX.Element {
-  const { data, isLoading } = useWeather(getDefaultQuery());
+  const { data, error, isLoading } = useWeather(getDefaultQuery());
   const { title, curcon, weatherDesc } = getMetaData(data);
   const { showMenuIcon, showMenuText } = getAppearancePreferences();
-  console.log(showMenuIcon);
 
   const temp = getCurrentTemperature(curcon);
   const wind = curcon ? `${getCurrentWind(curcon)} ${getWindDirectionIcon(curcon.winddirDegree)} ` : "?";
   return (
-    <MenuBarExtra
+    <WeatherMenuBarExtra
+      data={data}
+      error={error}
       title={showMenuText ? temp : undefined}
       icon={showMenuIcon ? getWeatherMenuIcon(curcon) : undefined}
       isLoading={isLoading}
@@ -69,6 +101,17 @@ export default function MenuCommand(): JSX.Element {
           onAction={launchWeatherCommand}
         />
       </MenuBarExtra.Section>
+      <MenuBarExtra.Section title="Forecast">
+        {data?.weather?.map((d) => (
+          <MenuBarExtra.Item
+            key={d.date}
+            title={getWeekday(d.date)}
+            icon={getDayWeatherIcon(d)}
+            subtitle={`⬆${getDayTemperature(d, "max")} ⬇ ${getDayTemperature(d, "min")}`}
+            onAction={launchWeatherCommand}
+          />
+        ))}
+      </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           icon={Icon.Link}
@@ -83,6 +126,6 @@ export default function MenuCommand(): JSX.Element {
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
-    </MenuBarExtra>
+    </WeatherMenuBarExtra>
   );
 }
