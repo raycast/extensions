@@ -1,5 +1,7 @@
 # iTranslate Changelog
 
+## [Optimize Experience] - 2022-11-28
+
 ## [Optimize Experience] - 2022-10-27
 
 Add `Google(Free)` API timeout option
