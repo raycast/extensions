@@ -19,7 +19,24 @@ export const weatherStatusToIcon: Record<string, string> = {
   "windy-variant": "💨",
 };
 
-interface Forecast {
+const weatherStatusToText: Record<string, string> = {
+  "clear-night": "Clear Night",
+  cloudy: "Cloudy",
+  exceptional: "Exceptional",
+  fog: "Fog",
+  hail: "Hail",
+  lightning: "Lightning",
+  partlycloudy: "Partly Cloudy",
+  pouring: "Pouring",
+  rainy: "Rainy",
+  snowy: "Snowy",
+  "snowy-rainy": "Snowy-Rainy",
+  sunny: "Sunny",
+  windy: "Windy",
+  "windy-variant": "Windy Variant",
+};
+
+export interface Forecast {
   condition: string;
   temperature?: number;
   templow?: number;
@@ -32,9 +49,59 @@ export function weatherConditionToIcon(condition: string): string {
   return weatherStatusToIcon[condition] || "✨";
 }
 
+export function weatherConditionToText(condition: string): string {
+  return weatherStatusToText[condition] || "❓";
+}
+
+export function getTemperatureFromState(state: State | undefined): string | undefined {
+  if (!state) {
+    return undefined;
+  }
+  const temp = state.attributes.temperature as number | undefined;
+  if (temp !== undefined) {
+    const unit = state.attributes.temperature_unit as string | undefined;
+    const result = unit !== undefined ? `${temp} ${unit}` : `${temp}`;
+    return result;
+  }
+}
+
+export function getWindspeedFromState(state: State | undefined): string | undefined {
+  if (!state) {
+    return undefined;
+  }
+  const wind_speed = state.attributes.wind_speed as number | undefined;
+  if (wind_speed !== undefined) {
+    const unit = state.attributes.wind_speed_unit as string | undefined;
+    const result = unit !== undefined ? `${wind_speed} ${unit}` : `${wind_speed}`;
+    return result;
+  }
+}
+
+export function getPressureFromState(state: State | undefined): string | undefined {
+  if (!state) {
+    return undefined;
+  }
+  const pressure = state.attributes.pressure as number | undefined;
+  if (pressure !== undefined) {
+    const unit = state.attributes.pressure_unit as string | undefined;
+    const result = unit !== undefined ? `${pressure} ${unit}` : `${pressure}`;
+    return result;
+  }
+}
+
+export function getHumidityFromState(state: State | undefined): string | undefined {
+  if (!state) {
+    return undefined;
+  }
+  const humidity = state.attributes.humidity as number | undefined;
+  if (humidity !== undefined) {
+    return `${humidity}%`;
+  }
+}
+
 function WeatherTemperature(props: { state: State }): ReactElement | null {
   const s = props.state;
-  const val = s.attributes.temperature as number | undefined;
+  const val = getTemperatureFromState(s);
   if (val === undefined) {
     return null;
   }
@@ -49,7 +116,7 @@ function WeatherTemperature(props: { state: State }): ReactElement | null {
 
 function WeatherHumidity(props: { state: State }): ReactElement | null {
   const s = props.state;
-  const val = s.attributes.humidity as number | undefined;
+  const val = getHumidityFromState(s);
   if (val === undefined) {
     return null;
   }
@@ -58,7 +125,7 @@ function WeatherHumidity(props: { state: State }): ReactElement | null {
 
 function WeatherPressure(props: { state: State }): ReactElement | null {
   const s = props.state;
-  const val = s.attributes.pressure as number | undefined;
+  const val = getPressureFromState(s);
   if (val === undefined) {
     return null;
   }
@@ -76,7 +143,7 @@ function WeatherWindBearing(props: { state: State }): ReactElement | null {
 
 function WeatherWindSpeed(props: { state: State }): ReactElement | null {
   const s = props.state;
-  const val = s.attributes.wind_speed as number | undefined;
+  const val = getWindspeedFromState(s);
   if (val === undefined) {
     return null;
   }
@@ -116,7 +183,7 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean }): R
   );
 }
 
-function isDailyForecast(forecast: Forecast[] | undefined): boolean {
+export function isDailyForecast(forecast: Forecast[] | undefined): boolean {
   if (forecast && forecast.length > 1) {
     const t1 = new Date(forecast[0].datetime);
     const t2 = new Date(forecast[1].datetime);
@@ -124,7 +191,6 @@ function isDailyForecast(forecast: Forecast[] | undefined): boolean {
     if (delta === 1) {
       return true;
     }
-    //console.log(delta);
   }
   return false;
 }

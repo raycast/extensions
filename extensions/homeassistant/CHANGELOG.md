@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Weather Menu Bar] - 2022-11-28
+- Add weather entity menubar command
+
 ## [Fix Script Edit Action] - 2022-11-19
 - Fix wrong entity id when edit a script
 
