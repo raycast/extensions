@@ -81,6 +81,6 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "generate": "npx tailwindcss -i ./generator/input.css -o ./generator/output.css && node ./generator/index.js"
+    "generate": "npx tailwindcss -i ./src/generator/input.css -o ./src/generator/output.css && node ./src/generator/index.js"
   }
 }

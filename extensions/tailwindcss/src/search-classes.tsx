@@ -1,15 +1,12 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import output from "../generator/output.json";
 import { useState } from "react";
-
-const classes = Object.entries(output).map(([selector, classes]) => ({
-  selector,
-  classes,
-}));
+import { Action, ActionPanel, List } from "@raycast/api";
+import classes from "./generator/output.json";
 
 export default function SearchClasses() {
   const [query, setQuery] = useState("");
-  const results = classes.filter((c) => c.selector.includes(query)).slice(0, 100);
+  const results = (classes as Array<{ selector: string; classes: string }>)
+    .filter((c) => c.selector.includes(query))
+    .slice(0, 100);
   return (
     <List searchText={query} onSearchTextChange={setQuery} searchBarPlaceholder="Search all classes...">
       {results.map(({ selector, classes }) => (
