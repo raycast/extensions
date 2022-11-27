@@ -32,9 +32,14 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
 
   return (
     <List.Item
-      id={project.id.toString()}
       title={project.name_with_namespace}
-      accessories={[{ icon: { source: Icon.Star, tintColor: Color.Yellow }, text: `${project.star_count}` }]}
+      accessories={[
+        {
+          icon: { source: Icon.Star, tintColor: Color.Yellow },
+          text: `${project.star_count}`,
+          tooltip: `Number of stars: ${project.star_count}`,
+        },
+      ]}
       icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
