@@ -1,9 +1,10 @@
 import { Detail, ActionPanel, Action, List, Icon, Image } from "@raycast/api";
 import { Item } from "../../lib/types";
-import { toCapitalize, getItemUserWorkaround } from "../../lib/utils";
+import { getItemUserWorkaround } from "../../lib/utils";
 import Collection from "../Collection";
 import UserView from "../UserView";
 import { useItemRenderData } from "./hooks";
+import capitalize from 'lodash/capitalize'
 
 type CollectionInfo = {
   userId: string;
@@ -127,7 +128,7 @@ export const ItemDetailMetadata = ({ item }: { item: Item }) => {
 
       {item.views && <List.Item.Detail.Metadata.Label title="Visits" text={item.views.toString()} />}
 
-      <List.Item.Detail.Metadata.Label title="Status" text={toCapitalize(item.status)} />
+      <List.Item.Detail.Metadata.Label title="Status" text={capitalize(item.status)} />
 
       <List.Item.Detail.Metadata.Label title="Created" text={new Date(item.createdAt).toLocaleString()} />
 
