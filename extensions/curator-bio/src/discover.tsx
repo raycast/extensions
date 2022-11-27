@@ -5,13 +5,9 @@ import { useMemo } from "react";
 import { Item } from "./lib/types";
 
 export default function Discover() {
-  const { isLoading: isMeLoading, data: userResponse, error } = useMe();
+  const { isLoading: isMeLoading, data: userResponse, error, userId } = useMe();
 
   const fetchItems = !error && !!userResponse;
-
-  const userId = useMemo(() => {
-    return userResponse?.data?.id;
-  }, [userResponse]);
 
   const { isLoading, data: { data = [] } = {} } = useItems(1, fetchItems);
 

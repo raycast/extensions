@@ -8,14 +8,25 @@ import {
   getUser,
   getCollections,
 } from "./api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import { Preference } from "./types";
+import { useEffect, useMemo } from "react";
+
+export const useUserId = (userId?: string) => {
+  const [id, setId] = useCachedState<string | undefined>("userId", userId);
+
+  useEffect(() => {
+    setId(userId);
+  }, [userId]);
+
+  return id;
+};
 
 export const useMe = () => {
   const { email, password } = getPreferenceValues<Preference>();
 
-  return usePromise(async () => {
+  const useMeData = usePromise(async () => {
     let res;
     try {
       res = await getMe();
@@ -35,6 +46,17 @@ export const useMe = () => {
       throw new Error("Login failed");
     }
   });
+
+  const userId = useMemo(() => {
+    return useMeData?.data?.data?.id;
+  }, [useMeData?.data]);
+
+  const cachedUserId = useUserId(userId);
+
+  return {
+    ...useMeData,
+    userId: cachedUserId,
+  };
 };
 
 export const useUser = (userId: string) => {
