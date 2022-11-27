@@ -96,6 +96,14 @@ export default function UserView({ user }: { user: User }) {
     return userInfo?.urls || [];
   }, [userInfo]);
 
+  const userRowAccessoryText = useMemo(() => {
+    // userInfo?.headline + (userInfo?.location ? `・${userInfo?.location}` : "") || "",
+    const headline = userInfo?.headline || "";
+    const location = userInfo?.location || "";
+
+    return `${headline}${location ? `・${location}` : ""}`;
+  }, [userInfo]);
+
   return (
     <List isLoading={isLoading || isCollectionLoading} filtering={false}>
       <List.Section>
@@ -108,7 +116,7 @@ export default function UserView({ user }: { user: User }) {
           subtitle={`@${userId}`}
           accessories={[
             {
-              text: userInfo?.headline + (userInfo?.location ? `・${userInfo?.location}` : "") || "",
+              text: userRowAccessoryText,
             },
           ]}
           actions={
