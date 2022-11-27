@@ -63,7 +63,7 @@ ${image?.url && `\n![${_title}](${image?.url})`}
         }
 
         case "paragraph": {
-          return block.data.text;
+          return `\n${block.data.text}\n`
         }
 
         case "header": {
