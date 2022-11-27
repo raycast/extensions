@@ -4,7 +4,7 @@ import { getItemUserWorkaround } from "../../lib/utils";
 import Collection from "../Collection";
 import UserView from "../UserView";
 import { useItemRenderData } from "./hooks";
-import capitalize from 'lodash/capitalize'
+import capitalize from "lodash/capitalize";
 
 type CollectionInfo = {
   userId: string;
