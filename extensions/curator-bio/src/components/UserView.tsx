@@ -1,8 +1,17 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useMemo } from "react";
+import * as linkify from 'linkifyjs';
 import { useCollections, useUser } from "../lib/hooks";
 import { User } from "../lib/types";
 import Collection from "./Collection";
+
+const findLinksInLine = (line: string) => {
+  const links = linkify.find(line, {
+    defaultProtocol: 'https'
+  });
+
+  return links.map(link => link.href);
+};
 
 const MAX_CHARACTERS = 90;
 const splitParagraphIntoLines = (_paragraph: string) => {
@@ -89,9 +98,17 @@ export default function UserView({ user }: { user: User }) {
 
       {userAbout && (
         <List.Section title="About">
-          {userAbout.map((line, index) => (
-            <List.Item key={index} title={line} />
-          ))}
+          {userAbout.map((line, index) => {
+            const links = findLinksInLine(line);
+
+            const actions = links.length > 0 ? <ActionPanel>
+              {links.map((link, index) => (
+                <Action.OpenInBrowser title={`Open ${link}`} url={link} key={index} />
+              ))}
+            </ActionPanel> : null;
+
+            return <List.Item key={index} title={line} actions={actions} />
+          })}
         </List.Section>
       )}
 
