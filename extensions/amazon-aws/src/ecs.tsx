@@ -1,21 +1,11 @@
-import { ActionPanel, List, Detail, Action } from "@raycast/api";
-import AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
-
+import { Cluster, DescribeClustersCommand, ECSClient, ListClustersCommand } from "@aws-sdk/client-ecs";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
-const preferences = setupAws();
-
 export default function ECS() {
   const { data: clusters, error, isLoading, revalidate } = useCachedPromise(fetchClusters);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
 
   return (
     <List
@@ -23,14 +13,16 @@ export default function ECS() {
       searchBarPlaceholder="Filter instances by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {clusters?.map((c) => (
-        <ECSCluster key={c.clusterArn} cluster={c} />
-      ))}
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        clusters?.map((c) => <ECSCluster key={c.clusterArn} cluster={c} />)
+      )}
     </List>
   );
 }
 
-function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
+function ECSCluster(props: { cluster: Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
 
@@ -64,9 +56,9 @@ function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
             title="Open in Browser"
             url={
               "https://" +
-              preferences.region +
+              process.env.AWS_REGION +
               ".console.aws.amazon.com/ecs/home?region=" +
-              preferences.region +
+              process.env.AWS_REGION +
               "#clusters/" +
               cluster.clusterName
             }
@@ -95,7 +87,7 @@ function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
 }
 
 async function fetchArns(token?: string, accClusters?: string[]): Promise<string[]> {
-  const { clusterArns, nextToken } = await new AWS.ECS().listClusters({ nextToken: token }).promise();
+  const { clusterArns, nextToken } = await new ECSClient({}).send(new ListClustersCommand({ nextToken: token }));
   const combinedClusters = [...(accClusters || []), ...(clusterArns || [])];
 
   if (nextToken) {
@@ -105,9 +97,9 @@ async function fetchArns(token?: string, accClusters?: string[]): Promise<string
   return combinedClusters;
 }
 
-async function fetchClusters(): Promise<AWS.ECS.Cluster[]> {
+async function fetchClusters(): Promise<Cluster[]> {
   const clustersArns = await fetchArns();
 
-  const { clusters } = await new AWS.ECS().describeClusters({ clusters: clustersArns }).promise();
+  const { clusters } = await new ECSClient({}).send(new DescribeClustersCommand({ clusters: clustersArns }));
   return [...(clusters || [])];
 }

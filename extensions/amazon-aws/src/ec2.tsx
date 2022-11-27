@@ -1,19 +1,10 @@
-import { ActionPanel, List, Detail, Action } from "@raycast/api";
-import AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
+import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-ec2";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
-const preferences = setupAws();
-
 export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
 
   return (
     <List
@@ -21,14 +12,16 @@ export default function EC2() {
       searchBarPlaceholder="Filter instances by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {instances?.map((i) => (
-        <EC2Instance key={i.InstanceId} instance={i} />
-      ))}
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        instances?.map((i) => <EC2Instance key={i.InstanceId} instance={i} />)
+      )}
     </List>
   );
 }
 
-function EC2Instance(props: { instance: AWS.EC2.Instance }) {
+function EC2Instance(props: { instance: Instance }) {
   const instance = props.instance;
   const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
 
@@ -68,9 +61,9 @@ function EC2Instance(props: { instance: AWS.EC2.Instance }) {
             title="Open in Browser"
             url={
               "https://" +
-              preferences.region +
+              process.env.AWS_REGION +
               ".console.aws.amazon.com/ec2/v2/home?region=" +
-              preferences.region +
+              process.env.AWS_REGION +
               "#InstanceDetails:instanceId=" +
               instance.InstanceId
             }
@@ -86,9 +79,9 @@ function EC2Instance(props: { instance: AWS.EC2.Instance }) {
   );
 }
 
-async function fetchEC2Instances(token?: string, accInstances?: AWS.EC2.Instance[]): Promise<AWS.EC2.Instance[]> {
-  const { NextToken, Reservations } = await new AWS.EC2().describeInstances({ NextToken: token }).promise();
-  const instances = (Reservations || []).reduce<AWS.EC2.Instance[]>(
+async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Promise<Instance[]> {
+  const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
+  const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],
     []
   );

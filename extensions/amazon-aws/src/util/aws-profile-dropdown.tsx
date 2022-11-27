@@ -1,4 +1,3 @@
-import AWS from "aws-sdk";
 import { List } from "@raycast/api";
 import { useEffect } from "react";
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
@@ -10,8 +9,11 @@ interface Props {
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
+  const { data: configs } = useCachedPromise(loadSharedConfigFiles);
 
-  const { data: profileOptions } = useCachedPromise(fetchProfileOptions);
+  const { configFile, credentialsFile } = configs || {};
+
+  const profileOptions = configFile ? Object.keys(configFile) : credentialsFile ? Object.keys(credentialsFile) : [];
 
   useEffect(() => {
     if (!selectedProfile && profileOptions) {
@@ -21,7 +23,9 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
 
   useEffect(() => {
     if (selectedProfile) {
-      AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: selectedProfile });
+      process.env.AWS_PROFILE = selectedProfile;
+      process.env.AWS_REGION = configFile?.[selectedProfile]?.region || credentialsFile?.[selectedProfile]?.region;
+
       onProfileSelected?.(selectedProfile);
     }
   }, [selectedProfile]);
@@ -37,8 +41,4 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
       ))}
     </List.Dropdown>
   );
-}
-
-async function fetchProfileOptions() {
-  return loadSharedConfigFiles().then((profiles) => Object.keys(profiles.credentialsFile));
 }

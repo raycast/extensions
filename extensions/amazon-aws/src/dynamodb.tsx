@@ -1,20 +1,10 @@
-import { ActionPanel, List, Detail, Action } from "@raycast/api";
-import AWS from "aws-sdk";
-
-import setupAws from "./util/setupAws";
+import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
-const preferences = setupAws();
-
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
 
   return (
     <List
@@ -22,14 +12,16 @@ export default function DynamoDb() {
       searchBarPlaceholder="Filter tables by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {tables?.map((i, index) => (
-        <DynamoDbTable key={index} tableName={i} />
-      ))}
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        tables?.map((i, index) => <DynamoDbTable key={index} tableName={i} />)
+      )}
     </List>
   );
 }
 
-function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
+function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
@@ -40,9 +32,9 @@ function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
             title="Open in Browser"
             url={
               "https://" +
-              preferences.region +
+              process.env.AWS_REGION +
               ".console.aws.amazon.com/dynamodbv2/home?region=" +
-              preferences.region +
+              process.env.AWS_REGION +
               "#table?initialTagKey=&name=" +
               tableName +
               "&tab=overview"
@@ -54,10 +46,10 @@ function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
   );
 }
 
-async function fetchTables(token?: string, accTables?: AWS.DynamoDB.TableName[]): Promise<AWS.DynamoDB.TableName[]> {
-  const { LastEvaluatedTableName, TableNames } = await new AWS.DynamoDB()
-    .listTables({ ExclusiveStartTableName: token })
-    .promise();
+async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
+  const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
+    new ListTablesCommand({ ExclusiveStartTableName: token })
+  );
   const combinedTables = [...(accTables || []), ...(TableNames || [])];
 
   if (LastEvaluatedTableName) {

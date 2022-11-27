@@ -1,17 +1,10 @@
-import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
-import * as AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
+import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
-const preferences = setupAws();
-
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
-
-  if (error) {
-    return <Detail markdown="Something went wrong. Try again!" />;
-  }
 
   return (
     <List
@@ -19,14 +12,16 @@ export default function Lambda() {
       searchBarPlaceholder="Filter functions by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {functions?.map((func) => (
-        <LambdaFunction key={func.FunctionName} func={func} />
-      ))}
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        functions?.map((func) => <LambdaFunction key={func.FunctionName} func={func} />)
+      )}
     </List>
   );
 }
 
-function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
+function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
       icon="lambda.png"
@@ -35,7 +30,7 @@ function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://${preferences.region}.console.aws.amazon.com/lambda/home?region=${preferences.region}#/functions/${func.FunctionName}?tab=monitoring`}
+            url={`https://${process.env.AWS_REGION}.console.aws.amazon.com/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
           />
           <Action.CopyToClipboard title="Copy ARN" content={func.FunctionArn || ""} />
           <Action.CopyToClipboard title="Copy Name" content={func.FunctionName || ""} />
@@ -43,7 +38,7 @@ function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
       }
       accessories={[
         { date: func.LastModified ? new Date(func.LastModified) : undefined },
-        { icon: getRuntimeIcon(func.Runtime || ""), tooltip: func.Runtime || "" },
+        { icon: getRuntimeIcon(func.Runtime), tooltip: func.Runtime || "" },
       ]}
     />
   );
@@ -51,9 +46,9 @@ function LambdaFunction({ func }: { func: AWS.Lambda.FunctionConfiguration }) {
 
 async function fetchFunctions(
   nextMarker?: string,
-  functions?: AWS.Lambda.FunctionList
-): Promise<AWS.Lambda.FunctionList> {
-  const { NextMarker, Functions } = await new AWS.Lambda().listFunctions({ Marker: nextMarker }).promise();
+  functions?: FunctionConfiguration[]
+): Promise<FunctionConfiguration[]> {
+  const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];
 
@@ -64,7 +59,11 @@ async function fetchFunctions(
   return combinedFunctions;
 }
 
-const getRuntimeIcon = (runtime: AWS.Lambda.Runtime) => {
+const getRuntimeIcon = (runtime: FunctionConfiguration["Runtime"]) => {
+  if (!runtime) {
+    return Icon.QuestionMark;
+  }
+
   if (runtime.includes("node")) {
     return "lambda-runtime-icons/nodejs.png";
   } else if (runtime.includes("python")) {

@@ -1,20 +1,10 @@
-import { ActionPanel, List, Detail, Action } from "@raycast/api";
-import * as AWS from "aws-sdk";
-import { StackSummary } from "aws-sdk/clients/cloudformation";
-import setupAws from "./util/setupAws";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { CloudFormationClient, ListStacksCommand, StackSummary } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
-const preferences = setupAws();
-
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
 
   return (
     <List
@@ -22,9 +12,11 @@ export default function CloudFormation() {
       searchBarPlaceholder="Filter stacks by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {stacks?.map((s) => (
-        <CloudFormationStack key={s.StackId} stack={s} />
-      ))}
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        stacks?.map((s) => <CloudFormationStack key={s.StackId} stack={s} />)
+      )}
     </List>
   );
 }
@@ -35,33 +27,30 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
       id={stack.StackName}
       key={stack.StackId}
       icon="cloudformation.png"
-      title={stack.StackName}
+      title={stack.StackName || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
             url={
               "https://console.aws.amazon.com/cloudformation/home?region=" +
-              preferences.region +
+              process.env.AWS_REGION +
               "#/stacks/stackinfo?stackId=" +
               stack.StackId
             }
           />
         </ActionPanel>
       }
-      accessories={[
-        {
-          text: stack.LastUpdatedTime
-            ? new Date(stack.LastUpdatedTime).toLocaleString()
-            : new Date(stack.CreationTime).toLocaleString(),
-        },
-      ]}
+      accessories={[{ date: stack.LastUpdatedTime || stack.CreationTime }]}
     />
   );
 }
 
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
-  const { NextToken, StackSummaries } = await new AWS.CloudFormation().listStacks({ NextToken: token }).promise();
+  const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
+    new ListStacksCommand({ NextToken: token })
+  );
+
   const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
 
   if (NextToken) {
