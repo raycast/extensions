@@ -1,16 +1,35 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { useMemo } from "react";
-import * as linkify from 'linkifyjs';
+import * as linkify from "linkifyjs";
 import { useCollections, useUser } from "../lib/hooks";
 import { User } from "../lib/types";
 import Collection from "./Collection";
+import capitalize from "lodash/capitalize";
 
 const findLinksInLine = (line: string) => {
   const links = linkify.find(line, {
-    defaultProtocol: 'https'
+    defaultProtocol: "https",
   });
 
-  return links.map(link => link.href);
+  return links.map((link) => link.href);
+};
+
+const typeToIconMap = {
+  site: Icon.Link,
+  email: Icon.Envelope,
+  facebook: Icon.TwoPeople,
+  instagram: Icon.Image,
+  twitter: Icon.Bird,
+  linkedin: Icon.PersonCircle,
+  youtube: Icon.Video,
+  twitch: Icon.Livestream,
+  telegram: Icon.Message,
+  tiktok: Icon.TwoPeople,
+  pinterest: Icon.Image,
+  discord: Icon.Microphone,
+  buymeacoffee: Icon.Cog,
+  producthunt: Icon.Contrast,
+  reddit: Icon.Rocket,
 };
 
 const MAX_CHARACTERS = 90;
@@ -73,6 +92,10 @@ export default function UserView({ user }: { user: User }) {
     return splitParagraphIntoLines(user.about || "");
   }, [user.about]);
 
+  const userUrls = useMemo(() => {
+    return userInfo?.urls || [];
+  }, [userInfo]);
+
   return (
     <List isLoading={isLoading || isCollectionLoading} filtering={false}>
       <List.Section>
@@ -85,7 +108,7 @@ export default function UserView({ user }: { user: User }) {
           subtitle={`@${userId}`}
           accessories={[
             {
-              text: userInfo?.headline || "",
+              text: userInfo?.headline + (userInfo?.location ? `・${userInfo?.location}` : "") || "",
             },
           ]}
           actions={
@@ -101,14 +124,37 @@ export default function UserView({ user }: { user: User }) {
           {userAbout.map((line, index) => {
             const links = findLinksInLine(line);
 
-            const actions = links.length > 0 ? <ActionPanel>
-              {links.map((link, index) => (
-                <Action.OpenInBrowser title={`Open ${link}`} url={link} key={index} />
-              ))}
-            </ActionPanel> : null;
+            const actions =
+              links.length > 0 ? (
+                <ActionPanel>
+                  {links.map((link, index) => (
+                    <Action.OpenInBrowser title={`Open ${link}`} url={link} key={index} />
+                  ))}
+                </ActionPanel>
+              ) : null;
 
-            return <List.Item key={index} title={line} actions={actions} />
+            return <List.Item key={index} title={line} actions={actions} />;
           })}
+        </List.Section>
+      )}
+
+      {userUrls.length > 0 && (
+        <List.Section title="User Links">
+          <List.Item
+            title="Select to open a link"
+            icon={Icon.Link}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Submenu title="Open Link...">
+                  {userUrls.map((url, index) => {
+                    const icon = typeToIconMap[url.type as keyof typeof typeToIconMap] || Icon.Link;
+
+                    return <Action.OpenInBrowser title={capitalize(url.type)} url={url.url} icon={icon} key={index} />;
+                  })}
+                </ActionPanel.Submenu>
+              </ActionPanel>
+            }
+          />
         </List.Section>
       )}
 
