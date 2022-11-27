@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 
 import { ProjectResult } from "../api/getProjects";
@@ -30,8 +30,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
 
   const { handleSubmit, itemProps } = useForm<CreateProjectValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Editing project" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Editing project" });
 
       try {
         const { success } = await linearClient.projectUpdate(project.id, {

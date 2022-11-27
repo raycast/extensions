@@ -77,7 +77,7 @@ function UnreadNotifications() {
             return (
               <MenuBarExtra.Item
                 key={notification.id}
-                icon={{ source: icon.value, tintColor: Color.PrimaryText }}
+                icon={{ source: icon.value, tintColor: { light: "#000", dark: "#fff" } }}
                 title={notification.subject.title}
                 subtitle={getNotificationSubtitle(notification)}
                 tooltip={getNotificationTooltip(updatedAt)}

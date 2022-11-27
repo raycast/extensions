@@ -12823,6 +12823,7 @@ export type OrganizationSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -21804,6 +21805,7 @@ export type SponsorableSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -21999,6 +22001,8 @@ export type SponsorsListing = Node & {
   dashboardResourcePath: Scalars["URI"];
   /** The HTTP URL for the Sponsors dashboard for this Sponsors listing. */
   dashboardUrl: Scalars["URI"];
+  /** The records featured on the GitHub Sponsors profile. */
+  featuredItems: Array<SponsorsListingFeaturedItem>;
   /** The full description of the listing. */
   fullDescription: Scalars["String"];
   /** The full description of the listing rendered to HTML. */
@@ -22027,6 +22031,11 @@ export type SponsorsListing = Node & {
 };
 
 /** A GitHub Sponsors listing. */
+export type SponsorsListingFeaturedItemsArgs = {
+  featureableTypes?: InputMaybe<Array<SponsorsListingFeaturedItemFeatureableType>>;
+};
+
+/** A GitHub Sponsors listing. */
 export type SponsorsListingTiersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -22034,6 +22043,30 @@ export type SponsorsListingTiersArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsTierOrder>;
 };
+
+/** A record that is promoted on a GitHub Sponsors profile. */
+export type SponsorsListingFeaturedItem = Node & {
+  __typename?: "SponsorsListingFeaturedItem";
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** Will either be a description from the sponsorable maintainer about why they featured this item, or the item's description itself, such as a user's bio from their GitHub profile page. */
+  description?: Maybe<Scalars["String"]>;
+  id: Scalars["ID"];
+  /** The position of this featured item on the GitHub Sponsors profile with a lower position indicating higher precedence. Starts at 1. */
+  position: Scalars["Int"];
+  /** The GitHub Sponsors profile that features this record. */
+  sponsorsListing: SponsorsListing;
+  /** Identifies the date and time when the object was last updated. */
+  updatedAt: Scalars["DateTime"];
+};
+
+/** The different kinds of records that can be featured on a GitHub Sponsors profile page. */
+export enum SponsorsListingFeaturedItemFeatureableType {
+  /** A repository owned by the user or organization with the GitHub Sponsors profile. */
+  Repository = "REPOSITORY",
+  /** A user who belongs to the organization with the GitHub Sponsors profile. */
+  User = "USER",
+}
 
 /** A GitHub Sponsors tier associated with a GitHub Sponsors listing. */
 export type SponsorsTier = Node & {
@@ -26054,6 +26087,7 @@ export type UserSponsorsActivitiesArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
+  includeAsSponsor?: InputMaybe<Scalars["Boolean"]>;
   last?: InputMaybe<Scalars["Int"]>;
   orderBy?: InputMaybe<SponsorsActivityOrder>;
   period?: InputMaybe<SponsorsActivityPeriod>;
@@ -26502,6 +26536,138 @@ export enum WorkflowRunOrderField {
   CreatedAt = "CREATED_AT",
 }
 
+export type DiscussionFieldsFragment = {
+  __typename?: "Discussion";
+  id: string;
+  title: string;
+  bodyText: string;
+  publishedAt?: any | null;
+  url: any;
+  upvoteCount: number;
+  repository: {
+    __typename?: "Repository";
+    id: string;
+    nameWithOwner: string;
+    name: string;
+    url: any;
+    mergeCommitAllowed: boolean;
+    squashMergeAllowed: boolean;
+    rebaseMergeAllowed: boolean;
+    owner:
+      | { __typename?: "Organization"; login: string; avatarUrl: any }
+      | { __typename?: "User"; login: string; avatarUrl: any };
+  };
+  category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+  comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+  answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+  author?:
+    | { __typename?: "Bot"; login: string; avatarUrl: any }
+    | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+    | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+    | { __typename?: "Organization"; login: string; avatarUrl: any }
+    | { __typename?: "User"; login: string; avatarUrl: any }
+    | null;
+};
+
+export type SearchDiscussionsQueryVariables = Exact<{
+  query: Scalars["String"];
+  numberOfOpenItems: Scalars["Int"];
+}>;
+
+export type SearchDiscussionsQuery = {
+  __typename?: "Query";
+  openDiscussions: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | {
+          __typename?: "Discussion";
+          id: string;
+          title: string;
+          bodyText: string;
+          publishedAt?: any | null;
+          url: any;
+          upvoteCount: number;
+          repository: {
+            __typename?: "Repository";
+            id: string;
+            nameWithOwner: string;
+            name: string;
+            url: any;
+            mergeCommitAllowed: boolean;
+            squashMergeAllowed: boolean;
+            rebaseMergeAllowed: boolean;
+            owner:
+              | { __typename?: "Organization"; login: string; avatarUrl: any }
+              | { __typename?: "User"; login: string; avatarUrl: any };
+          };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          author?:
+            | { __typename?: "Bot"; login: string; avatarUrl: any }
+            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any }
+            | null;
+        }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+  searchDiscussions: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | {
+          __typename?: "Discussion";
+          id: string;
+          title: string;
+          bodyText: string;
+          publishedAt?: any | null;
+          url: any;
+          upvoteCount: number;
+          repository: {
+            __typename?: "Repository";
+            id: string;
+            nameWithOwner: string;
+            name: string;
+            url: any;
+            mergeCommitAllowed: boolean;
+            squashMergeAllowed: boolean;
+            rebaseMergeAllowed: boolean;
+            owner:
+              | { __typename?: "Organization"; login: string; avatarUrl: any }
+              | { __typename?: "User"; login: string; avatarUrl: any };
+          };
+          category: { __typename?: "DiscussionCategory"; name: string; emoji: string; emojiHTML: any };
+          comments: { __typename?: "DiscussionCommentConnection"; totalCount: number };
+          answer?: { __typename?: "DiscussionComment"; bodyText: string } | null;
+          author?:
+            | { __typename?: "Bot"; login: string; avatarUrl: any }
+            | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
+            | { __typename?: "Mannequin"; login: string; avatarUrl: any }
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any }
+            | null;
+        }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+};
+
 export type IssueFieldsFragment = {
   __typename?: "Issue";
   id: string;
@@ -26529,17 +26695,9 @@ export type IssueFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
-    updatedAt: any;
-    stargazerCount: number;
-    viewerHasStarred: boolean;
-    hasIssuesEnabled: boolean;
-    hasWikiEnabled: boolean;
-    hasProjectsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
-    primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-    releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
   comments: { __typename?: "IssueCommentConnection"; totalCount: number };
   assignees: {
@@ -26561,7 +26719,6 @@ export type SearchCreatedIssuesQueryVariables = Exact<{
   createdClosedQuery: Scalars["String"];
   numberOfOpenItems: Scalars["Int"];
   numberOfClosedItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type SearchCreatedIssuesQuery = {
@@ -26605,17 +26762,9 @@ export type SearchCreatedIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
-            updatedAt: any;
-            stargazerCount: number;
-            viewerHasStarred: boolean;
-            hasIssuesEnabled: boolean;
-            hasWikiEnabled: boolean;
-            hasProjectsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
-            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-            releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           comments: { __typename?: "IssueCommentConnection"; totalCount: number };
           assignees: {
@@ -26678,17 +26827,9 @@ export type SearchCreatedIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
-            updatedAt: any;
-            stargazerCount: number;
-            viewerHasStarred: boolean;
-            hasIssuesEnabled: boolean;
-            hasWikiEnabled: boolean;
-            hasProjectsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
-            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-            releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           comments: { __typename?: "IssueCommentConnection"; totalCount: number };
           assignees: {
@@ -26777,7 +26918,6 @@ export type SearchOpenIssuesQueryVariables = Exact<{
   assignedOpenQuery: Scalars["String"];
   mentionedOpenQuery: Scalars["String"];
   numberOfOpenItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type SearchOpenIssuesQuery = {
@@ -26821,17 +26961,9 @@ export type SearchOpenIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
-            updatedAt: any;
-            stargazerCount: number;
-            viewerHasStarred: boolean;
-            hasIssuesEnabled: boolean;
-            hasWikiEnabled: boolean;
-            hasProjectsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
-            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-            releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           comments: { __typename?: "IssueCommentConnection"; totalCount: number };
           assignees: {
@@ -26894,17 +27026,9 @@ export type SearchOpenIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
-            updatedAt: any;
-            stargazerCount: number;
-            viewerHasStarred: boolean;
-            hasIssuesEnabled: boolean;
-            hasWikiEnabled: boolean;
-            hasProjectsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
-            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-            releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           comments: { __typename?: "IssueCommentConnection"; totalCount: number };
           assignees: {
@@ -26963,17 +27087,9 @@ export type IssueDetailFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
-    updatedAt: any;
-    stargazerCount: number;
-    viewerHasStarred: boolean;
-    hasIssuesEnabled: boolean;
-    hasWikiEnabled: boolean;
-    hasProjectsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
-    primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-    releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
   assignees: {
     __typename?: "UserConnection";
@@ -26996,7 +27112,6 @@ export type IssueDetailFieldsFragment = {
 
 export type IssueDetailsQueryVariables = Exact<{
   nodeId: Scalars["ID"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type IssueDetailsQuery = {
@@ -27104,17 +27219,9 @@ export type IssueDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
-          updatedAt: any;
-          stargazerCount: number;
-          viewerHasStarred: boolean;
-          hasIssuesEnabled: boolean;
-          hasWikiEnabled: boolean;
-          hasProjectsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
-          primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-          releases: { __typename?: "ReleaseConnection"; totalCount: number };
         };
         assignees: {
           __typename?: "UserConnection";
@@ -27267,6 +27374,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
@@ -27305,7 +27413,6 @@ export type IssueDetailsQuery = {
 export type SearchIssuesQueryVariables = Exact<{
   query: Scalars["String"];
   numberOfItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type SearchIssuesQuery = {
@@ -27349,17 +27456,9 @@ export type SearchIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
-            updatedAt: any;
-            stargazerCount: number;
-            viewerHasStarred: boolean;
-            hasIssuesEnabled: boolean;
-            hasWikiEnabled: boolean;
-            hasProjectsEnabled: boolean;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
-            primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-            releases: { __typename?: "ReleaseConnection"; totalCount: number };
           };
           comments: { __typename?: "IssueCommentConnection"; totalCount: number };
           assignees: {
@@ -27441,7 +27540,6 @@ export type CreateIssueMutationVariables = Exact<{
   assigneeIds: Array<Scalars["ID"]> | Scalars["ID"];
   labelIds: Array<Scalars["ID"]> | Scalars["ID"];
   milestoneId?: InputMaybe<Scalars["ID"]>;
-  avatarSize: Scalars["Int"];
 }>;
 
 export type CreateIssueMutation = {
@@ -27475,17 +27573,9 @@ export type CreateIssueMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
-        updatedAt: any;
-        stargazerCount: number;
-        viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
-        primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-        releases: { __typename?: "ReleaseConnection"; totalCount: number };
       };
       comments: { __typename?: "IssueCommentConnection"; totalCount: number };
       assignees: {
@@ -27527,17 +27617,9 @@ export type PullRequestFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
-    updatedAt: any;
-    stargazerCount: number;
-    viewerHasStarred: boolean;
-    hasIssuesEnabled: boolean;
-    hasWikiEnabled: boolean;
-    hasProjectsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
-    primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-    releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
   headRef?: { __typename?: "Ref"; name: string } | null;
   author?:
@@ -27598,7 +27680,6 @@ export type MyPullRequestsQueryVariables = Exact<{
   reviewedByClosedQuery: Scalars["String"];
   numberOfOpenItems: Scalars["Int"];
   numberOfClosedItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type MyPullRequestsQuery = {
@@ -27636,17 +27717,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -27744,17 +27817,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -27852,17 +27917,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -27960,17 +28017,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28068,17 +28117,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28176,17 +28217,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28284,17 +28317,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28392,17 +28417,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28500,17 +28517,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28608,17 +28617,9 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28688,7 +28689,6 @@ export type MyPullRequestsQuery = {
 export type SearchPullRequestsQueryVariables = Exact<{
   query: Scalars["String"];
   numberOfItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type SearchPullRequestsQuery = {
@@ -28726,17 +28726,9 @@ export type SearchPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
-              updatedAt: any;
-              stargazerCount: number;
-              viewerHasStarred: boolean;
-              hasIssuesEnabled: boolean;
-              hasWikiEnabled: boolean;
-              hasProjectsEnabled: boolean;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
-              primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-              releases: { __typename?: "ReleaseConnection"; totalCount: number };
             };
             headRef?: { __typename?: "Ref"; name: string } | null;
             author?:
@@ -28830,17 +28822,9 @@ export type PullRequestDetailsFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
-    updatedAt: any;
-    stargazerCount: number;
-    viewerHasStarred: boolean;
-    hasIssuesEnabled: boolean;
-    hasWikiEnabled: boolean;
-    hasProjectsEnabled: boolean;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
-    primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-    releases: { __typename?: "ReleaseConnection"; totalCount: number };
   };
   baseRef?: { __typename?: "Ref"; name: string } | null;
   headRef?: { __typename?: "Ref"; name: string } | null;
@@ -28857,14 +28841,6 @@ export type PullRequestDetailsFieldsFragment = {
     | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
     | null;
   comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-  reviewThreads: {
-    __typename?: "PullRequestReviewThreadConnection";
-    totalCount: number;
-    nodes?: Array<{
-      __typename?: "PullRequestReviewThread";
-      comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
-    } | null> | null;
-  };
   reviewRequests?: {
     __typename?: "ReviewRequestConnection";
     totalCount: number;
@@ -28913,7 +28889,6 @@ export type PullRequestDetailsFieldsFragment = {
 
 export type PullRequestDetailsQueryVariables = Exact<{
   nodeId: Scalars["ID"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type PullRequestDetailsQuery = {
@@ -29090,17 +29065,9 @@ export type PullRequestDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
-          updatedAt: any;
-          stargazerCount: number;
-          viewerHasStarred: boolean;
-          hasIssuesEnabled: boolean;
-          hasWikiEnabled: boolean;
-          hasProjectsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
-          primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-          releases: { __typename?: "ReleaseConnection"; totalCount: number };
         };
         baseRef?: { __typename?: "Ref"; name: string } | null;
         headRef?: { __typename?: "Ref"; name: string } | null;
@@ -29117,14 +29084,6 @@ export type PullRequestDetailsQuery = {
           | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
           | null;
         comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-        reviewThreads: {
-          __typename?: "PullRequestReviewThreadConnection";
-          totalCount: number;
-          nodes?: Array<{
-            __typename?: "PullRequestReviewThread";
-            comments: { __typename?: "PullRequestReviewCommentConnection"; totalCount: number };
-          } | null> | null;
-        };
         reviewRequests?: {
           __typename?: "ReviewRequestConnection";
           totalCount: number;
@@ -29234,6 +29193,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
@@ -29576,6 +29536,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "SecurityAdvisory" }
     | { __typename?: "SponsorsActivity" }
     | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
     | { __typename?: "SponsorsTier" }
     | { __typename?: "Sponsorship" }
     | { __typename?: "SponsorshipNewsletter" }
@@ -29727,7 +29688,6 @@ export type InitPullRequestMutationVariables = Exact<{
   assigneeIds: Array<Scalars["ID"]> | Scalars["ID"];
   labelsIds: Array<Scalars["ID"]> | Scalars["ID"];
   milestoneId?: InputMaybe<Scalars["ID"]>;
-  avatarSize: Scalars["Int"];
 }>;
 
 export type InitPullRequestMutation = {
@@ -29765,17 +29725,9 @@ export type InitPullRequestMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
-        updatedAt: any;
-        stargazerCount: number;
-        viewerHasStarred: boolean;
-        hasIssuesEnabled: boolean;
-        hasWikiEnabled: boolean;
-        hasProjectsEnabled: boolean;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
-        primaryLanguage?: { __typename?: "Language"; id: string; name: string; color?: string | null } | null;
-        releases: { __typename?: "ReleaseConnection"; totalCount: number };
       };
       headRef?: { __typename?: "Ref"; name: string } | null;
       author?:
@@ -29825,7 +29777,21 @@ export type InitPullRequestMutation = {
   } | null;
 };
 
-export type RepositoryFieldsFragment = {
+export type ShortRepositoryFieldsFragment = {
+  __typename?: "Repository";
+  id: string;
+  nameWithOwner: string;
+  name: string;
+  url: any;
+  mergeCommitAllowed: boolean;
+  squashMergeAllowed: boolean;
+  rebaseMergeAllowed: boolean;
+  owner:
+    | { __typename?: "Organization"; login: string; avatarUrl: any }
+    | { __typename?: "User"; login: string; avatarUrl: any };
+};
+
+export type ExtendedRepositoryFieldsFragment = {
   __typename?: "Repository";
   id: string;
   nameWithOwner: string;
@@ -29840,6 +29806,7 @@ export type RepositoryFieldsFragment = {
   hasIssuesEnabled: boolean;
   hasWikiEnabled: boolean;
   hasProjectsEnabled: boolean;
+  hasDiscussionsEnabled: boolean;
   owner:
     | { __typename?: "Organization"; login: string; avatarUrl: any }
     | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29850,7 +29817,6 @@ export type RepositoryFieldsFragment = {
 export type SearchRepositoriesQueryVariables = Exact<{
   query: Scalars["String"];
   numberOfItems: Scalars["Int"];
-  avatarSize: Scalars["Int"];
 }>;
 
 export type SearchRepositoriesQuery = {
@@ -29879,6 +29845,7 @@ export type SearchRepositoriesQuery = {
           hasIssuesEnabled: boolean;
           hasWikiEnabled: boolean;
           hasProjectsEnabled: boolean;
+          hasDiscussionsEnabled: boolean;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -30080,6 +30047,50 @@ export type GetViewerQuery = {
   };
 };
 
+export const ShortRepositoryFieldsFragmentDoc = gql`
+  fragment ShortRepositoryFields on Repository {
+    id
+    nameWithOwner
+    name
+    owner {
+      login
+      avatarUrl(size: 64)
+    }
+    url
+    mergeCommitAllowed
+    squashMergeAllowed
+    rebaseMergeAllowed
+  }
+`;
+export const DiscussionFieldsFragmentDoc = gql`
+  fragment DiscussionFields on Discussion {
+    id
+    title
+    bodyText
+    publishedAt
+    repository {
+      ...ShortRepositoryFields
+    }
+    url
+    upvoteCount
+    category {
+      name
+      emoji
+      emojiHTML
+    }
+    comments {
+      totalCount
+    }
+    answer {
+      bodyText
+    }
+    author {
+      login
+      avatarUrl
+    }
+  }
+  ${ShortRepositoryFieldsFragmentDoc}
+`;
 export const UserFieldsFragmentDoc = gql`
   fragment UserFields on User {
     id
@@ -30087,35 +30098,6 @@ export const UserFieldsFragmentDoc = gql`
     name
     login
     isViewer
-  }
-`;
-export const RepositoryFieldsFragmentDoc = gql`
-  fragment RepositoryFields on Repository {
-    id
-    nameWithOwner
-    name
-    owner {
-      login
-      avatarUrl(size: $avatarSize)
-    }
-    url
-    mergeCommitAllowed
-    squashMergeAllowed
-    rebaseMergeAllowed
-    updatedAt
-    stargazerCount
-    viewerHasStarred
-    primaryLanguage {
-      id
-      name
-      color
-    }
-    hasIssuesEnabled
-    hasWikiEnabled
-    hasProjectsEnabled
-    releases {
-      totalCount
-    }
   }
 `;
 export const IssueFieldsFragmentDoc = gql`
@@ -30132,7 +30114,7 @@ export const IssueFieldsFragmentDoc = gql`
       ... on Bot {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on User {
         ...UserFields
@@ -30140,19 +30122,19 @@ export const IssueFieldsFragmentDoc = gql`
       ... on Mannequin {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on Organization {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on EnterpriseUserAccount {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
     }
     milestone {
@@ -30160,7 +30142,7 @@ export const IssueFieldsFragmentDoc = gql`
       title
     }
     repository {
-      ...RepositoryFields
+      ...ShortRepositoryFields
     }
     comments(first: 0) {
       totalCount
@@ -30175,7 +30157,7 @@ export const IssueFieldsFragmentDoc = gql`
     }
   }
   ${UserFieldsFragmentDoc}
-  ${RepositoryFieldsFragmentDoc}
+  ${ShortRepositoryFieldsFragmentDoc}
 `;
 export const IssueDetailFieldsFragmentDoc = gql`
   fragment IssueDetailFields on Issue {
@@ -30192,7 +30174,7 @@ export const IssueDetailFieldsFragmentDoc = gql`
       ... on Bot {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on User {
         ...UserFields
@@ -30200,22 +30182,22 @@ export const IssueDetailFieldsFragmentDoc = gql`
       ... on Mannequin {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on Organization {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on EnterpriseUserAccount {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
     }
-    labels(first: 25, orderBy: { field: NAME, direction: ASC }) {
+    labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
       totalCount
       nodes {
         id
@@ -30229,7 +30211,7 @@ export const IssueDetailFieldsFragmentDoc = gql`
       title
     }
     repository {
-      ...RepositoryFields
+      ...ShortRepositoryFields
     }
     assignees(first: 50) {
       totalCount
@@ -30248,7 +30230,7 @@ export const IssueDetailFieldsFragmentDoc = gql`
     }
   }
   ${UserFieldsFragmentDoc}
-  ${RepositoryFieldsFragmentDoc}
+  ${ShortRepositoryFieldsFragmentDoc}
 `;
 export const PullRequestFieldsFragmentDoc = gql`
   fragment PullRequestFields on PullRequest {
@@ -30267,7 +30249,7 @@ export const PullRequestFieldsFragmentDoc = gql`
     }
     reviewDecision
     repository {
-      ...RepositoryFields
+      ...ShortRepositoryFields
     }
     headRefName
     headRef {
@@ -30277,7 +30259,7 @@ export const PullRequestFieldsFragmentDoc = gql`
       ... on Bot {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on User {
         ...UserFields
@@ -30285,19 +30267,19 @@ export const PullRequestFieldsFragmentDoc = gql`
       ... on Mannequin {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on Organization {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on EnterpriseUserAccount {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
     }
     comments(first: 0) {
@@ -30335,7 +30317,7 @@ export const PullRequestFieldsFragmentDoc = gql`
       }
     }
   }
-  ${RepositoryFieldsFragmentDoc}
+  ${ShortRepositoryFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
 export const PullRequestDetailsFieldsFragmentDoc = gql`
@@ -30358,7 +30340,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       title
     }
     repository {
-      ...RepositoryFields
+      ...ShortRepositoryFields
     }
     baseRefName
     baseRef {
@@ -30368,7 +30350,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
     headRef {
       name
     }
-    labels(first: 100, orderBy: { field: NAME, direction: ASC }) {
+    labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
       totalCount
       nodes {
         id
@@ -30380,7 +30362,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       ... on Bot {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on User {
         ...UserFields
@@ -30388,31 +30370,23 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       ... on Mannequin {
         id
         login
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on Organization {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
       ... on EnterpriseUserAccount {
         id
         login
         name
-        avatarUrl(size: $avatarSize)
+        avatarUrl(size: 64)
       }
     }
     comments(first: 0) {
       totalCount
-    }
-    reviewThreads(first: 100) {
-      totalCount
-      nodes {
-        comments(first: 0) {
-          totalCount
-        }
-      }
     }
     reviewRequests(first: 50) {
       totalCount
@@ -30421,23 +30395,23 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
           ... on Team {
             id
             teamName: name
-            teamAvatarURL: avatarUrl(size: $avatarSize)
+            teamAvatarURL: avatarUrl(size: 64)
           }
           ... on User {
             id
             githubUsername: login
             userName: name
-            userAvatarURL: avatarUrl(size: $avatarSize)
+            userAvatarURL: avatarUrl(size: 64)
           }
           ... on Mannequin {
             id
             githubUsername: login
-            userAvatarURL: avatarUrl(size: $avatarSize)
+            userAvatarURL: avatarUrl(size: 64)
           }
         }
       }
     }
-    reviews(first: 50, states: [PENDING, APPROVED, CHANGES_REQUESTED]) {
+    reviews(first: 10, states: [PENDING, APPROVED, CHANGES_REQUESTED]) {
       totalCount
       nodes {
         state
@@ -30445,30 +30419,30 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
           ... on Bot {
             id
             login
-            avatarUrl(size: $avatarSize)
+            avatarUrl(size: 64)
           }
           ... on User {
             id
             login
             name
-            avatarUrl(size: $avatarSize)
+            avatarUrl(size: 64)
           }
           ... on Mannequin {
             id
             login
-            avatarUrl(size: $avatarSize)
+            avatarUrl(size: 64)
           }
           ... on Organization {
             id
             login
             name
-            avatarUrl(size: $avatarSize)
+            avatarUrl(size: 64)
           }
           ... on EnterpriseUserAccount {
             id
             login
             name
-            avatarUrl(size: $avatarSize)
+            avatarUrl(size: 64)
           }
         }
       }
@@ -30481,7 +30455,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
         }
       }
     }
-    projectsV2(first: 25) {
+    projectsV2(first: 20) {
       totalCount
       nodes {
         id
@@ -30489,7 +30463,7 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
       }
     }
   }
-  ${RepositoryFieldsFragmentDoc}
+  ${ShortRepositoryFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
 export const PullRequestCommitFieldsFragmentDoc = gql`
@@ -30524,6 +30498,36 @@ export const CommitFieldsFragmentDoc = gql`
     message
   }
 `;
+export const ExtendedRepositoryFieldsFragmentDoc = gql`
+  fragment ExtendedRepositoryFields on Repository {
+    id
+    nameWithOwner
+    name
+    owner {
+      login
+      avatarUrl(size: 64)
+    }
+    url
+    mergeCommitAllowed
+    squashMergeAllowed
+    rebaseMergeAllowed
+    updatedAt
+    stargazerCount
+    viewerHasStarred
+    primaryLanguage {
+      id
+      name
+      color
+    }
+    hasIssuesEnabled
+    hasWikiEnabled
+    hasProjectsEnabled
+    hasDiscussionsEnabled
+    releases {
+      totalCount
+    }
+  }
+`;
 export const ReleaseFieldsFragmentDoc = gql`
   fragment ReleaseFields on Release {
     id
@@ -30535,13 +30539,27 @@ export const ReleaseFieldsFragmentDoc = gql`
     url
   }
 `;
+export const SearchDiscussionsDocument = gql`
+  query searchDiscussions($query: String!, $numberOfOpenItems: Int!) {
+    openDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+      nodes {
+        ...DiscussionFields
+      }
+    }
+    searchDiscussions: search(query: $query, type: DISCUSSION, first: $numberOfOpenItems) {
+      nodes {
+        ...DiscussionFields
+      }
+    }
+  }
+  ${DiscussionFieldsFragmentDoc}
+`;
 export const SearchCreatedIssuesDocument = gql`
   query searchCreatedIssues(
     $createdOpenQuery: String!
     $createdClosedQuery: String!
     $numberOfOpenItems: Int!
     $numberOfClosedItems: Int!
-    $avatarSize: Int!
   ) {
     createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       nodes {
@@ -30602,12 +30620,7 @@ export const RepositoryProjectsForIssuesDocument = gql`
   }
 `;
 export const SearchOpenIssuesDocument = gql`
-  query searchOpenIssues(
-    $assignedOpenQuery: String!
-    $mentionedOpenQuery: String!
-    $numberOfOpenItems: Int!
-    $avatarSize: Int!
-  ) {
+  query searchOpenIssues($assignedOpenQuery: String!, $mentionedOpenQuery: String!, $numberOfOpenItems: Int!) {
     assignedOpen: search(query: $assignedOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       nodes {
         ...IssueFields
@@ -30622,7 +30635,7 @@ export const SearchOpenIssuesDocument = gql`
   ${IssueFieldsFragmentDoc}
 `;
 export const IssueDetailsDocument = gql`
-  query issueDetails($nodeId: ID!, $avatarSize: Int!) {
+  query issueDetails($nodeId: ID!) {
     node(id: $nodeId) {
       ...IssueDetailFields
     }
@@ -30630,7 +30643,7 @@ export const IssueDetailsDocument = gql`
   ${IssueDetailFieldsFragmentDoc}
 `;
 export const SearchIssuesDocument = gql`
-  query searchIssues($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+  query searchIssues($query: String!, $numberOfItems: Int!) {
     search(query: $query, type: ISSUE, first: $numberOfItems) {
       nodes {
         ...IssueFields
@@ -30686,7 +30699,6 @@ export const CreateIssueDocument = gql`
     $assigneeIds: [ID!]!
     $labelIds: [ID!]!
     $milestoneId: ID
-    $avatarSize: Int!
   ) {
     createIssue(
       input: {
@@ -30719,7 +30731,6 @@ export const MyPullRequestsDocument = gql`
     $reviewedByClosedQuery: String!
     $numberOfOpenItems: Int!
     $numberOfClosedItems: Int!
-    $avatarSize: Int!
   ) {
     createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
       pullRequests: edges {
@@ -30784,7 +30795,7 @@ export const MyPullRequestsDocument = gql`
         }
       }
     }
-    reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfOpenItems) {
+    reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
       pullRequests: edges {
         pullRequest: node {
           ...PullRequestFields
@@ -30795,7 +30806,7 @@ export const MyPullRequestsDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const SearchPullRequestsDocument = gql`
-  query searchPullRequests($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+  query searchPullRequests($query: String!, $numberOfItems: Int!) {
     search(query: $query, type: ISSUE, first: $numberOfItems) {
       edges {
         node {
@@ -30807,7 +30818,7 @@ export const SearchPullRequestsDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const PullRequestDetailsDocument = gql`
-  query pullRequestDetails($nodeId: ID!, $avatarSize: Int!) {
+  query pullRequestDetails($nodeId: ID!) {
     node(id: $nodeId) {
       ...PullRequestDetailsFields
     }
@@ -30963,7 +30974,6 @@ export const InitPullRequestDocument = gql`
     $assigneeIds: [ID!]!
     $labelsIds: [ID!]!
     $milestoneId: ID
-    $avatarSize: Int!
   ) {
     requestReviews(input: { pullRequestId: $pullRequestId, userIds: $reviewersIds }) {
       pullRequest {
@@ -30989,14 +30999,14 @@ export const InitPullRequestDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const SearchRepositoriesDocument = gql`
-  query searchRepositories($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+  query searchRepositories($query: String!, $numberOfItems: Int!) {
     search(query: $query, first: $numberOfItems, type: REPOSITORY) {
       nodes {
-        ...RepositoryFields
+        ...ExtendedRepositoryFields
       }
     }
   }
-  ${RepositoryFieldsFragmentDoc}
+  ${ExtendedRepositoryFieldsFragmentDoc}
 `;
 export const MilestonesForRepositoryDocument = gql`
   query milestonesForRepository($owner: String!, $name: String!) {
@@ -31138,6 +31148,20 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    searchDiscussions(
+      variables: SearchDiscussionsQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<SearchDiscussionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchDiscussionsQuery>(SearchDiscussionsDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "searchDiscussions",
+        "query"
+      );
+    },
     searchCreatedIssues(
       variables: SearchCreatedIssuesQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"]

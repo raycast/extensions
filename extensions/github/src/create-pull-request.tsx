@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -34,8 +34,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
 
   const { handleSubmit, itemProps, values, setValue } = useForm<PullRequestFormValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating pull request" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating pull request" });
 
       try {
         const createResult = await github.createPullRequest({
@@ -56,7 +55,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
             assigneeIds: values.assignees,
             labelsIds: values.labels,
             milestoneId: values.milestone || null,
-            avatarSize: 64,
           });
 
           // It's not possible to add a PR to a project from the initPullRequest call

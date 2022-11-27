@@ -287,6 +287,12 @@ export default function PullRequestActions({
           title="Copy Pull Request Title"
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
+
+        <Action.CopyToClipboard
+          content={`[${pullRequest.title}](${pullRequest.permalink})`}
+          title="Copy Markdown URL"
+          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

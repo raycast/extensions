@@ -6,7 +6,7 @@ import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import View from "./components/View";
-import { RepositoryFieldsFragment } from "./generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
@@ -30,12 +30,17 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
-      const result = await github.searchRepositories({ query, numberOfItems: 20, avatarSize: 64 });
+      const result = await github.searchRepositories({ query, numberOfItems: 20 });
 
-      return result.search.nodes?.map((node) => node as RepositoryFieldsFragment);
+      return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
     },
     [query],
     { keepPreviousData: true }
+  );
+
+  const foundRepositories = useMemo(
+    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
+    [data]
   );
 
   return (
@@ -43,8 +48,8 @@ function SearchRepositories() {
       isLoading={isLoading}
       searchBarPlaceholder="Search in public and private repositories"
       onSearchTextChange={setSearchText}
-      throttle
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
+      throttle
     >
       <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
         {history.map((repository) => (
@@ -57,9 +62,12 @@ function SearchRepositories() {
         ))}
       </List.Section>
 
-      {data ? (
-        <List.Section title={searchText ? "Search Results" : "Found Repositories"} subtitle={`${data.length}`}>
-          {data.map((repository) => {
+      {foundRepositories ? (
+        <List.Section
+          title={searchText ? "Search Results" : "Found Repositories"}
+          subtitle={`${foundRepositories.length}`}
+        >
+          {foundRepositories.map((repository) => {
             return (
               <RepositoryListItem
                 key={repository.id}

@@ -7,7 +7,7 @@ import { useCachedPromise } from "@raycast/utils";
 const preferences = setupAws();
 const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
-export default function ListStacks() {
+export default function CloudFormation() {
   const { data: stacks, error, isLoading } = useCachedPromise(fetchStacks);
 
   if (error) {
@@ -30,7 +30,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
-      icon="cloudformation-icon.png"
+      icon="cloudformation.png"
       title={stack.StackName}
       actions={
         <ActionPanel>

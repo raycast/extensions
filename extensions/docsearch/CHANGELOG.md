@@ -1,5 +1,9 @@
 # DocSearch Changelog
 
+## [Fix for TailwindCSS V3] - 20220-11-17
+
+- 🐛 Fix TailwindCSS V3 which was searching results not just is V3
+
 ## [Support for new documentation] - 2022-11-11
 
 - 📄 Support [Clerk](https://clerk.dev)

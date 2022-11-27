@@ -5,6 +5,9 @@
   "description": "Use Raycast as a soundboard and bind sounds to hotkeys",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
   "categories": [
     "Fun"
   ],

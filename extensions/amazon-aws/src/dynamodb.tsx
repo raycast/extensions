@@ -7,7 +7,7 @@ import { useCachedPromise } from "@raycast/utils";
 const preferences = setupAws();
 const dynamoDB = new AWS.DynamoDB();
 
-export default function ListDynamoDbTables() {
+export default function DynamoDb() {
   const { data: tables, isLoading, error } = useCachedPromise(fetchTables);
 
   if (error) {
@@ -19,17 +19,17 @@ export default function ListDynamoDbTables() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter tables by name...">
       {tables?.map((i, index) => (
-        <TableNameListItem key={index} tableName={i} />
+        <DynamoDbTable key={index} tableName={i} />
       ))}
     </List>
   );
 }
 
-function TableNameListItem({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
+function DynamoDbTable({ tableName }: { tableName: AWS.DynamoDB.TableName }) {
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
-      icon="dynamodb-icon.png"
+      icon="dynamodb.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

@@ -1,5 +1,7 @@
 # WakaTime Changelog
 
+## [Added screenshots] - 2022-11-17
+
 ## [New Features and Fixes] - 2022-08-06
 
 ### Added

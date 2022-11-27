@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -31,8 +31,7 @@ export function IssueForm({ draftValues }: IssueFormProps) {
 
   const { handleSubmit, itemProps, values, setValue } = useForm<IssueFormValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       try {
         const createResult = await github.createIssue({
@@ -42,7 +41,6 @@ export function IssueForm({ draftValues }: IssueFormProps) {
           assigneeIds: values.assignees,
           labelIds: values.labels,
           milestoneId: values.milestone || null,
-          avatarSize: 64,
         });
 
         const issue = createResult?.createIssue?.issue;
