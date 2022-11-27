@@ -12,7 +12,11 @@ export default function Discover() {
   const { isLoading, data: { data = [] } = {} } = useItems(1, fetchItems);
 
   const displayItems = useMemo(() => {
-    return data.filter((item: Item) => item.userId !== userId);
+    return data
+      .filter((item: Item) => item.userId !== userId)
+      .sort((a: Item, b: Item) => {
+        return new Date(b.updatedAt).valueOf() - new Date(a.updatedAt).valueOf();
+      });
   }, [data, userId]);
 
   const isListLoading = isMeLoading || isLoading;
