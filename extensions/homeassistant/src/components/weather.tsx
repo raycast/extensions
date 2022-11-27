@@ -156,13 +156,13 @@ function WeatherCondition(props: { condition: string }): ReactElement | null {
   return <List.Item title="Condition" icon={source} accessories={[{ text: `${c}` }]} />;
 }
 
-function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean }): ReactElement {
+function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean; tempUnit?: string }): ReactElement {
   const f = props.forecast;
-  const tostr = (val: number | undefined): string | undefined => {
+  const tostr = (val: number | undefined, param?: { prefix?: string; suffix?: string }): string | undefined => {
     if (val === undefined) {
       return undefined;
     }
-    return val.toString();
+    return [param?.prefix, val.toString(), param?.suffix].filter((t) => t !== undefined).join("");
   };
   const ts = new Date(f.datetime);
   const day = ts.toLocaleDateString("default", { day: "numeric" });
@@ -174,10 +174,10 @@ function WeatherForecastItem(props: { forecast: Forecast; isDaily: boolean }): R
   return (
     <List.Item
       title={tsString}
-      icon={{ source: weatherConditionToIcon(f.condition), tooltip: f.condition }}
+      icon={{ source: weatherConditionToIcon(f.condition), tooltip: weatherConditionToText(f.condition) }}
       accessories={[
-        { text: tostr(f.templow), tooltip: "min" },
-        { text: tostr(f.temperature), tooltip: "max" },
+        { text: tostr(f.temperature, { prefix: "⬆ ", suffix: props.tempUnit }), tooltip: "max" },
+        { text: tostr(f.templow, { prefix: "⬇ ", suffix: props.tempUnit }), tooltip: "min" },
       ]}
     />
   );
@@ -199,6 +199,7 @@ function WeatherList(props: { state: State }): ReactElement {
   const s = props.state;
   const forecast = s.attributes.forecast as Forecast[] | undefined;
   const isDaily = isDailyForecast(forecast);
+  const tempUnit = s.attributes.temperature_unit as string | undefined;
   return (
     <List>
       <List.Section title="Current">
@@ -211,7 +212,7 @@ function WeatherList(props: { state: State }): ReactElement {
       </List.Section>
       <List.Section title="Forecast">
         {forecast?.map((f) => (
-          <WeatherForecastItem forecast={f} isDaily={isDaily} />
+          <WeatherForecastItem forecast={f} isDaily={isDaily} tempUnit={tempUnit} />
         ))}
       </List.Section>
     </List>
