@@ -50,3 +50,5 @@ export const EXTRACT_HANDLES = new Map<
   [ExtractFormat.TAR, extractBy7za],
   [ExtractFormat.GZIP, extractBy7za],
 ]);
+
+export const PRE_PWD_CHECK_THRESHOLD = 50;
