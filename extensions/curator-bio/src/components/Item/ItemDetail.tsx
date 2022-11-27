@@ -14,7 +14,14 @@ type CollectionInfo = {
 const OpenCollectionAction = ({ item }: { item: Item }) => {
   const user = getItemUserWorkaround(item);
   return (
-    <ActionPanel.Submenu title="Open Collection..." icon={Icon.List}>
+    <ActionPanel.Submenu
+      title="Open Collection..."
+      icon={Icon.List}
+      shortcut={{
+        modifiers: ["cmd", "shift"],
+        key: "c",
+      }}
+    >
       {item.collections.map((collection) => {
         return (
           <Action.Push
