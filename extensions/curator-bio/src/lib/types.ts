@@ -76,6 +76,10 @@ type FileType =
       data: HeaderData;
     }
   | {
+      type: "delimiter";
+      data: Record<string, never>;
+    }
+  | {
       type: "string";
       data: unknown;
     };

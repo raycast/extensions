@@ -71,6 +71,10 @@ ${image?.url && `\n![${_title}](${image?.url})`}
           return `${"#".repeat(level)} ${text}`;
         }
 
+        case "delimiter": {
+          return "\n---\n";
+        }
+
         default:
           console.warn(`Unknown block type: ${block.type}`);
           console.warn(JSON.stringify(block, null, 2));
