@@ -1,12 +1,12 @@
 # Amazon AWS Changelog
 
+## [Support AWS Profile Switch] - 2022-11-28
+
+Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
 ## [S3 Command] - 2022-11-18
 
 Added a new command to list S3 buckets and objects ([#3589](https://github.com/raycast/extensions/pull/3589))
-
-## [Support AWS Profile Switch] - 2022-11-21
-
-Added AWS profile switch & removed obsolete "AWS Profile" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
 
 ## [Lambda Command] - 2022-11-15
 
