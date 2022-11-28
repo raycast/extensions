@@ -1,28 +1,28 @@
-import React from 'react';
-import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from '@raycast/api';
+import React from "react";
+import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
 
 enum DefaultActionPreference {
-  CopyToClipboard = 'copyToClipboard',
-  PasteInApp = 'pasteInApp',
-  OpenInBrowser = 'openInBrowser',
+  CopyToClipboard = "copyToClipboard",
+  PasteInApp = "pasteInApp",
+  OpenInBrowser = "openInBrowser",
 }
 interface Preferences {
-  defaultAction?: DefaultActionPreference
+  defaultAction?: DefaultActionPreference;
 }
 
 interface ActionsOpts {
-  value: string
+  value: string;
 }
 function _getActions({ value }: ActionsOpts) {
-  const isValidUrl = value && value.startsWith('http');
+  const isValidUrl = value && value.startsWith("http");
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
   const ACTIONS = [
     <Action.CopyToClipboard key={DefaultActionPreference.CopyToClipboard} content={value} />,
     <Action.Paste key={DefaultActionPreference.PasteInApp} content={value} />,
     isValidUrl ? <Action.OpenInBrowser key={DefaultActionPreference.OpenInBrowser} url={value} /> : null,
-  ].filter(Boolean) as React.ReactElement[]
-  const defaultAction = ACTIONS.find(action => action.key === defaultPreference)
-  const otherActions = ACTIONS.filter(action => action.key !== defaultPreference)
+  ].filter(Boolean) as React.ReactElement[];
+  const defaultAction = ACTIONS.find((action) => action.key === defaultPreference);
+  const otherActions = ACTIONS.filter((action) => action.key !== defaultPreference);
   return (
     <ActionPanel>
       <>
@@ -30,7 +30,7 @@ function _getActions({ value }: ActionsOpts) {
         {otherActions}
       </>
     </ActionPanel>
-  )
+  );
 }
 
 export default function Command() {
@@ -39,18 +39,18 @@ export default function Command() {
   const [encoded, setEncoded] = React.useState<string | undefined>(undefined);
   const [decoded, setDecoded] = React.useState<string | undefined>(undefined);
   React.useEffect(() => {
-    Clipboard.readText().then(clipboardContents => {
+    Clipboard.readText().then((clipboardContents) => {
       setClipboardText(clipboardContents);
     });
   }, []);
   React.useEffect(() => {
-    const _input = input || clipboardText
+    const _input = input || clipboardText;
     if (_input) {
-      setDecoded(Buffer.from(_input, 'base64').toString('utf8'));
-      setEncoded(Buffer.from(_input, 'utf8').toString('base64'));
+      setDecoded(Buffer.from(_input, "base64").toString("utf8"));
+      setEncoded(Buffer.from(_input, "utf8").toString("base64"));
     } else {
-      setDecoded(undefined)
-      setEncoded(undefined)
+      setDecoded(undefined);
+      setEncoded(undefined);
     }
   }, [input, clipboardText]);
 
@@ -59,22 +59,22 @@ export default function Command() {
       onSearchTextChange={(newValue) => {
         setInput(newValue || clipboardText);
       }}
-      searchBarPlaceholder={'Text to encode / decode...'}
+      searchBarPlaceholder={"Text to encode / decode..."}
     >
       {encoded && decoded ? (
         <>
           <List.Section title={`Input: ${input || clipboardText}`}>
             <List.Item
-              key={'encode'}
+              key={"encode"}
               icon={Icon.CodeBlock}
-              title={'Encode'}
+              title={"Encode"}
               subtitle={encoded}
               actions={encoded ? _getActions({ value: encoded }) : undefined}
             />
             <List.Item
-              key={'decode'}
+              key={"decode"}
               icon={Icon.Code}
-              title={'Decode'}
+              title={"Decode"}
               subtitle={decoded}
               actions={decoded ? _getActions({ value: decoded }) : undefined}
             />
@@ -83,10 +83,10 @@ export default function Command() {
       ) : (
         <List.EmptyView
           icon={Icon.QuestionMarkCircle}
-          title={'Nothing to Encode / Decode'}
-          description={'Copy some content to your clipboard, or start typing text to encode or decode.'}
+          title={"Nothing to Encode / Decode"}
+          description={"Copy some content to your clipboard, or start typing text to encode or decode."}
         />
       )}
     </List>
-  )
+  );
 }
