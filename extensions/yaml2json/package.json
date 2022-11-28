@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yaml2json",
-  "title": "yaml2json",
+  "title": "Yaml2json",
   "version": "0.0.1",
   "description": "Transform yaml into a JSON",
   "icon": "command-icon.png",
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "yaml2json",
+      "title": "Yaml2json",
       "description": "Transform yaml into a JSON",
       "mode": "view"
     }

@@ -1,3 +1,3 @@
-# yaml2json
+# Yaml2json
 
 Util to transform yaml into a json.
