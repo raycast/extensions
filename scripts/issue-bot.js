@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/[^\/]+\/([^\/\s]+)/;
-const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\//;
+const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatch =
   /# Extension – \[[^\]]*\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
