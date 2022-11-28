@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "yaml2json",
   "title": "yaml2json",
-  "description": "Util to transform yamel into a json.",
+  "version": "0.0.1",
+  "description": "Transform yaml into a JSON",
   "icon": "command-icon.png",
   "author": "gbarba",
   "categories": [
@@ -12,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Submit Form",
-      "description": "Template for submitting a form",
+      "title": "yaml2json",
+      "description": "Transform yaml into a JSON",
       "mode": "view"
     }
   ],
