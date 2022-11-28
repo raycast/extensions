@@ -1,7 +1,7 @@
 import fs from "fs";
 import { homedir } from "os";
 import { Readable } from "stream";
-import { ActionPanel, List, Detail, Action, Icon, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   Bucket,
@@ -10,6 +10,7 @@ import {
   ListBucketsCommand,
   ListObjectsCommand,
   _Object,
+  S3ServiceException,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
@@ -56,53 +57,53 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
 function S3BucketObjects({ bucket }: { bucket: Bucket }) {
   const { data: objects, error, isLoading } = useCachedPromise(fetchBucketObjects, [bucket.Name || ""]);
 
-  if (error) {
-    return <Detail markdown="Something went wrong. Try again!" />;
-  }
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
-      {objects?.map((object) => (
-        <List.Item
-          key={object.Key || ""}
-          icon={Icon.Document}
-          title={object.Key || ""}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={`https://s3.console.aws.amazon.com/s3/object/${bucket.Name || ""}?region=${
-                  process.env.AWS_REGION
-                }&prefix=${object.Key || ""}`}
-              />
-              <Action.SubmitForm
-                title="Download"
-                onSubmit={async () => {
-                  const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        objects?.map((object) => (
+          <List.Item
+            key={object.Key || ""}
+            icon={Icon.Document}
+            title={object.Key || ""}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open in Browser"
+                  url={`https://s3.console.aws.amazon.com/s3/object/${bucket.Name || ""}?region=${
+                    process.env.AWS_REGION
+                  }&prefix=${object.Key || ""}`}
+                />
+                <Action.SubmitForm
+                  title="Download"
+                  onSubmit={async () => {
+                    const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
 
-                  try {
-                    const data = await new S3Client({}).send(
-                      new GetObjectCommand({ Bucket: bucket.Name || "", Key: object.Key || "" })
-                    );
-                    if (data.Body instanceof Readable) {
-                      data.Body.pipe(fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`));
-                    } else {
-                      throw new Error("Could not download object");
+                    try {
+                      const data = await new S3Client({}).send(
+                        new GetObjectCommand({ Bucket: bucket.Name || "", Key: object.Key || "" })
+                      );
+                      if (data.Body instanceof Readable) {
+                        data.Body.pipe(fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`));
+                      } else {
+                        throw new Error("Could not download object");
+                      }
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Downloaded to Downloads folder";
+                    } catch (err) {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "Failed to download";
                     }
-                    toast.style = Toast.Style.Success;
-                    toast.title = "Downloaded to Downloads folder";
-                  } catch (err) {
-                    toast.style = Toast.Style.Failure;
-                    toast.title = "Failed to download";
-                  }
-                }}
-              />
-              <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
-            </ActionPanel>
-          }
-          accessories={[{ text: humanFileSize(object.Size || 0) }]}
-        />
-      ))}
+                  }}
+                />
+                <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
+              </ActionPanel>
+            }
+            accessories={[{ text: humanFileSize(object.Size || 0) }]}
+          />
+        ))
+      )}
     </List>
   );
 }
@@ -113,18 +114,40 @@ async function fetchBuckets() {
   return Buckets;
 }
 
-async function fetchBucketObjects(bucket: string, nextMarker?: string, objects: _Object[] = []): Promise<_Object[]> {
-  const { Contents, NextMarker } = await new S3Client({}).send(
-    new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
-  );
+async function fetchBucketObjects(
+  bucket: string,
+  region?: string,
+  nextMarker?: string,
+  objects: _Object[] = []
+): Promise<_Object[]> {
+  try {
+    const { Contents, NextMarker } = await new S3Client({ region }).send(
+      new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
+    );
 
-  const combinedObjects = [...objects, ...(Contents || [])];
+    const combinedObjects = [...objects, ...(Contents || [])];
 
-  if (NextMarker) {
-    return fetchBucketObjects(bucket, NextMarker, combinedObjects);
+    if (NextMarker) {
+      return fetchBucketObjects(bucket, region, NextMarker, combinedObjects);
+    }
+
+    return combinedObjects;
+  } catch (err) {
+    if (isPermanentRedirectError(err)) {
+      const region = err.Endpoint.split(".")[1].replace("s3-", "");
+      return fetchBucketObjects(bucket, region, nextMarker, objects);
+    }
+    throw err;
   }
+}
 
-  return combinedObjects;
+function isPermanentRedirectError(err: unknown): err is S3PermanentRedirectError {
+  return err instanceof S3ServiceException && err.name === "PermanentRedirect";
+}
+
+interface S3PermanentRedirectError extends S3ServiceException {
+  Code: "PermanentRedirect";
+  Endpoint: string;
 }
 
 // inspired by https://stackoverflow.com/a/14919494
