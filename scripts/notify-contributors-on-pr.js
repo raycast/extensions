@@ -58,7 +58,7 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: ["extension fix / improvement"],
+      labels: ["extension fix / improvement", `extension: ${ext}`],
     });
 
     if (owners[0] === sender) {
