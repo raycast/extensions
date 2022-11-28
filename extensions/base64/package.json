@@ -5,6 +5,7 @@
   "description": "Quickly encode or decode base64 from the clipboard",
   "icon": "command-icon.png",
   "author": "DanielSinclair",
+  "contributors": ["sammarks"],
   "license": "MIT",
   "commands": [
     {
