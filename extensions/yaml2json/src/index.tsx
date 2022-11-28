@@ -2,13 +2,7 @@ import {Form, ActionPanel, Action, showToast, Toast, showHUD, popToRoot, Clipboa
 import {useCachedPromise} from "@raycast/utils";
 import {useState} from "react";
 
-import {generateJsonFromYaml, isValidYaml} from "./utils";
-
-
-type CommandFormValues = {
-    textarea: string;
-    checkbox: boolean;
-};
+import {copyToClipboard, generateJsonFromYaml, isValidYaml} from "./utils";
 
 function JsonView(props: { yaml: string }) {
     const {yaml} = props;
@@ -20,40 +14,30 @@ function JsonView(props: { yaml: string }) {
 
                 return await generateJsonFromYaml(yaml);
             },
-            [],
-            {
-                initialData: "Some Text",
-            }
+            []
         );
 
-    return <Detail markdown={"``" + JSON.stringify(data, null, '\t') + "``"}/>;
+    if (data === undefined) {
+        return <Command />;
+    }
+
+    return <Detail navigationTitle="Generated Json" markdown={JSON.stringify(data, null, '\t')} actions={
+        <ActionPanel>
+            <Action.Push title="Back" target={<Command />} />
+        </ActionPanel>
+    } />;
 }
 
 export default function Command() {
     const [yaml, setYaml] = useState<string>("");
     const [minify, setMinify] = useState<boolean>(false);
 
-    async function handleSubmit(values: CommandFormValues) {
-        const {textarea, checkbox} = values;
-
-        if (!await isValidYaml(textarea)) {
-            return;
-        }
-
-        const jsonFromYaml = await generateJsonFromYaml(textarea);
-        const jsonResult = checkbox ? JSON.stringify(jsonFromYaml) : JSON.stringify(jsonFromYaml, null, '\t')
-        await Clipboard.copy(jsonResult);
-
-        await showHUD("Copied to clipboard");
-        await popToRoot();
-    }
-
     return (
         <Form
             actions={
                 <ActionPanel>
-                    <Action.SubmitForm onSubmit={handleSubmit} title="Generate and copy"/>
-                    <Action.Push title="Show generated json" target={<JsonView yaml={yaml}/>}/>
+                    <Action.SubmitForm onSubmit={copyToClipboard} title="Generate and copy"/>
+                    <Action.Push title="Show generated json" shortcut={{ modifiers: ["cmd"], key: "s" }} target={<JsonView yaml={yaml}/>}/>
                 </ActionPanel>
             }
         >
