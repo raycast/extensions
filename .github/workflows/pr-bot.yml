@@ -1,4 +1,4 @@
-name: Contributors
+name: PR Bot
 on:
   pull_request_target:
     paths:
@@ -6,9 +6,9 @@ on:
     branches: [main, master]
 
 jobs:
-  notify-contributors-on-pr:
+  pr-bot:
     if: github.repository == 'raycast/extensions'
-    name: "Notify"
+    name: "PR Bot"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |
-            const script = require('./scripts/notify-contributors-on-pr')
+            const script = require('./scripts/pr-bot')
             await script({
               github,
               context,

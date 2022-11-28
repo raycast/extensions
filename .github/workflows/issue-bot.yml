@@ -1,11 +1,11 @@
-name: Triage Issue
+name: Issue Bot
 on:
   issues:
     types: [opened, edited]
 
 jobs:
-  issue_open:
-    name: Issue opened or edited
+  issue_bot:
+    name: Issue Bot
     if: ${{ !github.event.issue.pull_request }} && github.repository == 'raycast/extensions'
     runs-on: ubuntu-latest
     steps:
