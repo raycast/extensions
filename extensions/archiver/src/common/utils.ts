@@ -208,3 +208,8 @@ export function processingAlert() {
   };
   confirmAlert(options);
 }
+
+export function getFileSize(file: string): number {
+  const state = fs.statSync(file);
+  return state.size / 1000 / 1000;
+}
