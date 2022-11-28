@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/([^\/]+)\/([^\/\s]+)/;
+const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\//;
 const oldMatch =
   /# Extension – \[([^\]]+)\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
@@ -20,7 +21,11 @@ module.exports = async ({ github, context, core }) => {
 
   const codeowners = await getCodeOwners({ github, context });
 
-  const [, , ext] = newMatch.exec(context.payload.issue.body) || oldMatch.exec(context.payload.issue.body) || [];
+  const [, , ext] =
+    newMatch.exec(context.payload.issue.body) ||
+    newMatchGitHub.exec(context.payload.issue.body) ||
+    oldMatch.exec(context.payload.issue.body) ||
+    [];
 
   if (!ext) {
     await comment({
