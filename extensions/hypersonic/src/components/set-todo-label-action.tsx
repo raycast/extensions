@@ -6,12 +6,14 @@ type SetLabelActionProps = {
   todo: Todo
   tags: Tag[]
   onSetLabel: (todo: Todo, tag: Tag | null) => void
+  allowCreate?: boolean
 }
 
 export function SetLabelAction({
   todo,
   tags,
   onSetLabel,
+  allowCreate = false,
 }: SetLabelActionProps) {
   return (
     <ActionPanel.Submenu
@@ -34,7 +36,9 @@ export function SetLabelAction({
           onAction={() => onSetLabel(todo, tag)}
         />
       ))}
-      <Action.OpenInBrowser title="Create" icon={Icon.Plus} url={todo.url} />
+      {allowCreate && (
+        <Action.OpenInBrowser title="Create" icon={Icon.Plus} url={todo.url} />
+      )}
     </ActionPanel.Submenu>
   )
 }

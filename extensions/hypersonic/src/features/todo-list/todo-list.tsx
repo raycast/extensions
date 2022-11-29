@@ -149,6 +149,7 @@ export function TodoList() {
                     todo={todo}
                     tags={tags}
                     onSetLabel={handleSetTag}
+                    allowCreate
                   />
                 )}
                 {hasProjectProperty && (
