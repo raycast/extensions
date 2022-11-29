@@ -12,7 +12,7 @@ type SetLabelActionProps = {
 export function SetUserAction({ todo, users, onSetUser }: SetLabelActionProps) {
   return (
     <ActionPanel.Submenu
-      title="Add User"
+      title="Assign To"
       icon={{
         source: Icon.AddPerson,
         tintColor: Color.PrimaryText,
