@@ -23,11 +23,8 @@ Raycast extension to search repositories, open recent Pull Requests.
 
 ### Snapshots
 
-![](metadata/preferences.png)
-![](metadata/screenshot-1.png)
-![](metadata/screenshot-2.png)
-![](metadata/screenshot-3.png)
-![](metadata/screenshot-4.png)
+![](metadata/bitbucket-search-self-hosted-1.png)
+![](metadata/bitbucket-search-self-hosted-2.png)
 
 ### Bitbucket API resource
 
