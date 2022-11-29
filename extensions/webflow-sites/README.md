@@ -2,7 +2,7 @@
 
 ###### Supercharged productivity for Webflow. 
 
-![](https://uploads-ssl.webflow.com/636cd6453bfcc709eab35c30/63865228d1da813277d0aab2_peeks%20raycast.gif)
+![](https://uploads-ssl.webflow.com/636cd6453bfcc709eab35c30/63865ab790477ce350dcb774_webflow-peeks-raycast.gif)
 
 This extension gives you shortcuts over common Webflow project tasks to help save you time! Bring Webflow to every corner of your OS.
 

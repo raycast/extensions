@@ -66,7 +66,7 @@ export default function Command() {
   return (
     <Grid isLoading={isLoading} fit={Grid.Fit.Fill} aspectRatio={"16/9"} searchBarPlaceholder="Search site">
       <Grid.EmptyView
-        icon="webflow-logo.png"
+        icon="webflow-128x128.png"
         title="No Results"
         description="Ensure the token can access all sites or check API key"
       />
