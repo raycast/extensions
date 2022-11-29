@@ -56,11 +56,11 @@
         },
         {
           "name": "locationSaveCompressed",
-          "type": "textfield",
+          "type": "directory",
           "required": false,
           "title": "Location to Save Compressed",
-          "description": "Please enter location, default is next to original",
-          "placeholder": "Enter Location to Save Compressed"
+          "description": "Please select location, default is next to original",
+          "placeholder": "Select Location to Save Compressed"
         },
         {
           "name": "defaultCompressionFormat",
@@ -145,17 +145,17 @@
         },
         {
           "name": "locationSaveExtracted",
-          "type": "textfield",
+          "type": "directory",
           "required": false,
           "title": "Location to Save Extracted",
-          "description": "Please enter location, default is next to original",
-          "placeholder": "Enter Location to Save Extracted"
+          "description": "Please select location, default is next to original",
+          "placeholder": "Select Location to Save Extracted"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
+    "@raycast/api": "^1.44.0",
     "execa": "^6.1.0"
   },
   "devDependencies": {

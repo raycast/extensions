@@ -1,9 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/([^\/]+)\/([^\/\s]+)/;
+const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/[^\/]+\/([^\/\s]+)/;
+const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatch =
-  /# Extension – \[([^\]]+)\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+  /# Extension – \[[^\]]*\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 module.exports = async ({ github, context, core }) => {
   const sender = context.payload.sender.login;
@@ -20,9 +21,11 @@ module.exports = async ({ github, context, core }) => {
 
   const codeowners = await getCodeOwners({ github, context });
 
-  console.log(context.payload.issue);
-
-  const [, , ext] = newMatch.exec(context.payload.issue.body) || oldMatch.exec(context.payload.issue.body) || [];
+  const [, ext] =
+    newMatch.exec(context.payload.issue.body) ||
+    newMatchGitHub.exec(context.payload.issue.body) ||
+    oldMatch.exec(context.payload.issue.body) ||
+    [];
 
   if (!ext) {
     await comment({
@@ -39,7 +42,10 @@ module.exports = async ({ github, context, core }) => {
     return;
   }
 
-  const owners = codeowners[`/extensions/${ext}`];
+  const owners =
+    codeowners[`/extensions/${ext}`] ||
+    // some extensions don't have a folder that match their name
+    codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
     console.log(`cannot find existing extension ${ext}`);
@@ -53,13 +59,15 @@ module.exports = async ({ github, context, core }) => {
     labels: [`extension: ${ext}`],
   });
 
-  if (context.payload.issue.labels.some((x) => x.name === "status: stalled")) {
+  try {
     await github.rest.issues.removeLabel({
       issue_number: context.payload.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
       name: "status: stalled",
     });
+  } catch (err) {
+    // ignore, it might not be there
   }
 
   const toNotify = owners.filter((x) => x !== sender);
@@ -78,16 +86,7 @@ module.exports = async ({ github, context, core }) => {
 };
 
 async function getCodeOwners({ github, context }) {
-  const { data } = await github.rest.repos.getContent({
-    mediaType: {
-      format: "raw",
-    },
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    path: ".github/CODEOWNERS",
-  });
-
-  const codeowners = Buffer.from(data.content, "base64").toString("utf8");
+  const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
   const regex = /(\/extensions\/[\w-]+) +(.+)/g;
   const matches = codeowners.matchAll(regex);
@@ -96,6 +95,24 @@ async function getCodeOwners({ github, context }) {
     prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
     return prev;
   }, {});
+}
+
+async function getExtensionName2Folder({ github, context }) {
+  const file = await getGitHubFile(".github/extensionName2Folder.json", { github, context });
+  return JSON.parse(file);
+}
+
+async function getGitHubFile(path, { github, context }) {
+  const { data } = await github.rest.repos.getContent({
+    mediaType: {
+      format: "raw",
+    },
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    path,
+  });
+
+  return Buffer.from(data.content, "base64").toString("utf8");
 }
 
 // Create a new comment or update the existing one

@@ -23,12 +23,14 @@ export interface CurrentWeather {
 }
 
 export interface Daily {
-  time: Date[];
+  time: string[];
   temperature_2m_max: number[];
   temperature_2m_min: number[];
   sunrise: string[];
   sunset: string[];
   rain_sum: number[];
+  weathercode: number[];
+  windspeed_10m_max: number[];
 }
 
 export interface DailyUnits {

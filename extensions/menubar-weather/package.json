@@ -20,14 +20,15 @@
       "name": "cityName",
       "type": "textfield",
       "title": "City",
-      "description": "City name",
-      "required": true
+      "description": "City name. If you need more precise weather data, you can fill in the latitude and longitude in the Preferences Page of the command",
+      "required": true,
+      "placeholder": "City name. For example, New York"
     },
     {
       "name": "longitude",
       "type": "textfield",
       "title": "Longitude",
-      "description": "Longitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Longitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"
@@ -36,7 +37,7 @@
       "name": "latitude",
       "type": "textfield",
       "title": "Latitude",
-      "description": "Latitude. If you need more precise weather information, please fill in the latitude and longitude",
+      "description": "Latitude. If you need more precise weather data, please fill in the latitude and longitude",
       "required": false,
       "default": "",
       "placeholder": "0.00"
@@ -76,6 +77,31 @@
           "value": "inch"
         }
       ]
+    },
+    {
+      "name": "showSun",
+      "type": "checkbox",
+      "label": "Sunrise and sunset",
+      "title": "Additional Info",
+      "description": "Show sunrise and sunset",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLocation",
+      "type": "checkbox",
+      "label": "Geolocation Information",
+      "description": "Show geolocation information",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showForecast",
+      "type": "checkbox",
+      "label": "7-day weather forecast",
+      "description": "Show 7-day weather forecast",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

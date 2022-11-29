@@ -1,8 +1,17 @@
 # World Cup Changelog
 
+## [Enhancements] - 2022-11-24
+
+- Show live time and score for current match
+- Reversed the list for previous matches
+- Added animated GIF for empty view
+- Fixed time for matches about to start
+- Added goals information
+- Details are hidden by default (use Enter key to toggle)
+
 ## [Enhancements] - 2022-11-23
 
-- Added details pane 
+- Added details pane
 - Added Custom EmptyView
 - Moved Reload action to right place
 - Added action panel icons
