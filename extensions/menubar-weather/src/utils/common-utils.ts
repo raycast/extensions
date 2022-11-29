@@ -1,6 +1,6 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { cityName, latitude, longitude } from "./weather-utils";
+import { cityName, latitude, longitude, showForecast, showLocation, showSun } from "./weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Open-Meteo Weather",
@@ -9,6 +9,9 @@ export enum CacheKey {
   CITY_NAME = "City Name",
   LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
+  SHOW_SUN = "Show Sun",
+  SHOW_LOCATION = "Show Location",
+  SHOW_FORECAST = "Show Forecast",
 }
 
 export const isEmpty = (string: string | null | undefined) => {
@@ -28,40 +31,6 @@ export function getUnits() {
   return { tempUnit: tempUint, windUint: windUint };
 }
 
-export function getWeatherIcon(icon: string | undefined) {
-  if (typeof icon === "string") {
-    if (icon === "01d" || icon === "01n") {
-      return Icon.Sun;
-    }
-    if (icon === "02d" || icon === "02n") {
-      return Icon.CloudSun;
-    }
-    if (icon === "03d" || icon === "03n") {
-      return Icon.Cloud;
-    }
-    if (icon === "04d" || icon === "04n") {
-      return Icon.Cloud;
-    }
-    if (icon === "09d" || icon === "09n") {
-      return Icon.CloudRain;
-    }
-    if (icon === "10d" || icon === "10n") {
-      return Icon.CloudRain;
-    }
-    if (icon === "11d" || icon === "11n") {
-      return Icon.CloudLightning;
-    }
-    if (icon === "13d" || icon === "13n") {
-      return Icon.Snowflake;
-    }
-    if (icon === "50d" || icon === "50n") {
-      return Icon.Snippets;
-    }
-  } else {
-    return Icon.Sunrise;
-  }
-}
-
 export function isoToDateTime(time: string) {
   return time.replace("T", " ");
 }
@@ -73,12 +42,6 @@ export function isoToTime(time: string) {
 export function timeHour() {
   const date = new Date();
   return date.getHours();
-}
-
-export function getTime(stamp: number) {
-  const timeStamp = stamp * 1000;
-  const date = new Date(timeStamp);
-  return date.toLocaleTimeString();
 }
 
 export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
@@ -93,6 +56,10 @@ export function preferencesChanged() {
   let oldLon = "";
   let oldLat = "";
 
+  let oldShowSun = true;
+  let oldShowLocation = true;
+  let oldShowForecast = true;
+
   const newLon = typeof longitude === "undefined" ? "" : longitude;
   const newLat = typeof latitude === "undefined" ? "" : latitude;
   const newCityName = typeof cityName === "undefined" ? "" : cityName;
@@ -100,6 +67,9 @@ export function preferencesChanged() {
   const cacheCityName = cache.get(CacheKey.CITY_NAME);
   const cacheLon = cache.get(CacheKey.LONGITUDE);
   const cacheLat = cache.get(CacheKey.LATITUDE);
+  const cacheShowSun = cache.get(CacheKey.SHOW_SUN);
+  const cacheShowLocation = cache.get(CacheKey.SHOW_LOCATION);
+  const cacheShowForecast = cache.get(CacheKey.SHOW_FORECAST);
   if (typeof cacheCityName !== "undefined" && !isEmpty(cacheCityName)) {
     oldCityName = JSON.parse(cacheCityName) as string;
   }
@@ -109,18 +79,37 @@ export function preferencesChanged() {
   if (typeof cacheLat !== "undefined" && !isEmpty(cacheLat)) {
     oldLat = JSON.parse(cacheLat) as string;
   }
+  if (typeof cacheShowSun !== "undefined" && !isEmpty(cacheShowSun)) {
+    oldShowSun = JSON.parse(cacheShowSun) as boolean;
+  }
+  if (typeof cacheShowLocation !== "undefined" && !isEmpty(cacheShowLocation)) {
+    oldShowLocation = JSON.parse(cacheShowLocation) as boolean;
+  }
+  if (typeof cacheShowForecast !== "undefined" && !isEmpty(cacheShowForecast)) {
+    oldShowForecast = JSON.parse(cacheShowForecast) as boolean;
+  }
 
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
+  cache.set(CacheKey.SHOW_SUN, JSON.stringify(showSun));
+  cache.set(CacheKey.SHOW_LOCATION, JSON.stringify(showLocation));
+  cache.set(CacheKey.SHOW_FORECAST, JSON.stringify(showForecast));
 
-  return oldCityName !== newCityName || oldLon !== newLon || oldLat !== newLat;
+  return (
+    oldCityName !== newCityName ||
+    oldLon !== newLon ||
+    oldLat !== newLat ||
+    oldShowSun !== showSun ||
+    oldShowLocation !== showLocation ||
+    oldShowForecast !== showForecast
+  );
 }
 
 export function getDateIcon(day: string) {
   switch (day) {
     case "01":
-      return Icon.Number00;
+      return Icon.Number01;
     case "02":
       return Icon.Number02;
     case "03":

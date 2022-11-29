@@ -40,6 +40,7 @@ import {
 import { isNotePinned, unpinNote } from "./pinNoteUtils";
 import { useNotes } from "./cache";
 import { MediaLoader } from "./loader";
+import { URLSearchParams } from "url";
 
 export function getCodeBlocks(content: string): CodeBlock[] {
   const codeBlockMatches = content.matchAll(CODE_BLOCK_REGEX);
@@ -304,6 +305,18 @@ export const getOpenPathInObsidianTarget = (path: string) => {
 
 export const getDailyNoteTarget = (vault: Vault) => {
   return "obsidian://advanced-uri?vault=" + encodeURIComponent(vault.name) + "&daily=true";
+};
+
+export const getDailyNoteAppendTarget = (vault: Vault, text: string, heading: string | undefined) => {
+  const headingParam = heading ? "&heading=" + encodeURIComponent(heading) : "";
+  return (
+    "obsidian://advanced-uri?daily=true&mode=append" +
+    "&data=" +
+    encodeURIComponent(text) +
+    "&vault=" +
+    encodeURIComponent(vault.name) +
+    headingParam
+  );
 };
 
 export function getListOfExtensions(media: Media[]) {

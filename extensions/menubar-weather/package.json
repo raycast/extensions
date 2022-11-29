@@ -77,6 +77,31 @@
           "value": "inch"
         }
       ]
+    },
+    {
+      "name": "showSun",
+      "type": "checkbox",
+      "label": "Sunrise and sunset",
+      "title": "Additional Info",
+      "description": "Show sunrise and sunset",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showLocation",
+      "type": "checkbox",
+      "label": "Geolocation Information",
+      "description": "Show geolocation information",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showForecast",
+      "type": "checkbox",
+      "label": "7-day weather forecast",
+      "description": "Show 7-day weather forecast",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

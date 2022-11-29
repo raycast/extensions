@@ -16,16 +16,19 @@ import {
   checkPwdOnExtract,
   ensureBinary,
   extract,
+  getFileSize,
   isNeedPwdOnExtract,
   isSupportExtractFormat,
   processingAlert,
 } from "./common/utils";
 import path from "node:path";
 import { IExtractPreferences, IFileInfo } from "./common/types";
+import { PRE_PWD_CHECK_THRESHOLD } from "./common/const";
 
 export default function Command() {
   const preferences: IExtractPreferences = getPreferenceValues<IExtractPreferences>();
   const [file, updateFileState] = useState<IFileInfo>();
+  const [pwdChecked, updatePwdCheckedState] = useState<boolean>(false);
   const [needPwd, updateNeedPwdState] = useState<boolean>(false);
   const [pwdError, updatePwdErrorState] = useState<string | undefined>();
   const [isLoading, updateLoadingState] = useState<boolean>(true);
@@ -55,7 +58,10 @@ export default function Command() {
         format,
       };
       updateFileState(file);
-      updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+      if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
+        updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+        updatePwdCheckedState(true);
+      }
       updatePwdErrorState(undefined);
       // eslint-disable-next-line no-empty
     } catch (error) {
@@ -80,6 +86,14 @@ export default function Command() {
                 }
                 updateLoadingState(true);
                 try {
+                  if (!pwdChecked) {
+                    const need = isNeedPwdOnExtract(file.path, file.format);
+                    updateNeedPwdState(need);
+                    updatePwdCheckedState(true);
+                    if (need) {
+                      return;
+                    }
+                  }
                   if (needPwd && !value.password) {
                     updatePwdErrorState("The password should't be empty");
                     return;
@@ -122,6 +136,7 @@ export default function Command() {
             if (!values.length) {
               updateFileState(undefined);
               updateNeedPwdState(false);
+              updatePwdCheckedState(false);
               return;
             }
             const filePath = values[0];
@@ -138,7 +153,10 @@ export default function Command() {
               format,
             };
             updateFileState(file);
-            updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+            if (getFileSize(file.path) <= PRE_PWD_CHECK_THRESHOLD) {
+              updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
+              updatePwdCheckedState(true);
+            }
           } catch (error) {
             showToast({ title: "Sorry! Something went wrong...", style: Toast.Style.Failure });
           } finally {
