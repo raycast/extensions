@@ -60,8 +60,16 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
       {isPermanentRedirectError(error) ? (
         <List.EmptyView
           title="Wrong region for bucket."
-          description={`The ${error.Bucket} cannot be accessed with your current region (${process.env.AWS_REGION}).`}
+          description={`The ${error.Bucket} cannot be accessed with your current region (${process.env.AWS_REGION}).\nHit \`Enter\` to open this bucket in the AWS Console.`}
           icon={Icon.Globe}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open in Browser"
+                url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}`}
+              />
+            </ActionPanel>
+          }
         />
       ) : error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
