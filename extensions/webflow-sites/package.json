@@ -5,6 +5,9 @@
   "description": "Supercharged productivity for Webflow. Bring Webflow to every corner of your OS. Open any project from anywhere. Site settings and more.",
   "icon": "peeks.png",
   "author": "peeks",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "keywords": [
     "webflow",
     "web",
@@ -21,7 +24,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Open Webflow Sites",
+      "title": "Open Sites",
+      "subtitle": "Webflow",
       "description": "List all your sites. Choose to open a site in designer or in production.",
       "mode": "view"
     }
@@ -37,8 +41,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.10"
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11"
   },
   "devDependencies": {
     "@types/request": "^2.48.8",
