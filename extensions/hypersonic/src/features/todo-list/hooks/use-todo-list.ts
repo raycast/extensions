@@ -20,6 +20,7 @@ import { useFilter } from '@/services/notion/hooks/use-filter'
 import { autocomplete } from '../utils/autocomplete'
 import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
 import { refreshMenuBar } from './refresh-menu-bar'
+import { optimisticSorting } from '../utils/optimistic-sorting'
 
 export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
@@ -63,9 +64,11 @@ export function useTodoList() {
       await mutate(inProgressTodo(todo.id), {
         optimisticUpdate(data) {
           if (!data) return data
-          return data.map((t) =>
+          const todos = data.map((t) =>
             t.id === todo.id ? { ...todo, inProgress: true } : t
           )
+
+          return optimisticSorting(todos)
         },
         shouldRevalidateAfter: true,
       })
@@ -110,7 +113,8 @@ export function useTodoList() {
             return data
           }
 
-          return [optimisticTodo, ...data]
+          const todos = [optimisticTodo, ...data]
+          return optimisticSorting(todos)
         },
         shouldRevalidateAfter: true,
       })
@@ -128,6 +132,11 @@ export function useTodoList() {
       await mutate(updateTodoTag(todo.id, tagId), {
         optimisticUpdate(data) {
           if (!data) return data
+
+          if (filterTodo.tag && filterTodo.tag.id !== tagId) {
+            return data.filter((t) => t.id !== todo.id)
+          }
+
           return data.map((t) => (t.id === todo.id ? { ...todo, tag } : t))
         },
         shouldRevalidateAfter: true,
@@ -143,6 +152,11 @@ export function useTodoList() {
       await mutate(updateTodoProject(todo.id, projectId), {
         optimisticUpdate(data) {
           if (!data) return data
+
+          if (filterTodo.projectId && filterTodo.projectId !== projectId) {
+            return data.filter((t) => t.id !== todo.id)
+          }
+
           return data.map((t) => (t.id === todo.id ? { ...todo, project } : t))
         },
         shouldRevalidateAfter: true,
@@ -158,6 +172,11 @@ export function useTodoList() {
       await mutate(updateTodoUser(todo.id, userId), {
         optimisticUpdate(data) {
           if (!data) return data
+
+          if (filterTodo.user && filterTodo.user.id !== userId) {
+            return data.filter((t) => t.id !== todo.id)
+          }
+
           return data.map((t) => (t.id === todo.id ? { ...todo, user } : t))
         },
         shouldRevalidateAfter: true,
@@ -178,7 +197,7 @@ export function useTodoList() {
       await mutate(updateTodoDate(todo.id, dateValue), {
         optimisticUpdate(data) {
           if (!data) return data
-          return data.map((t) =>
+          const todos = data.map((t) =>
             t.id === todo.id
               ? {
                   ...todo,
@@ -187,6 +206,8 @@ export function useTodoList() {
                 }
               : t
           )
+
+          return optimisticSorting(todos)
         },
         shouldRevalidateAfter: true,
       })
