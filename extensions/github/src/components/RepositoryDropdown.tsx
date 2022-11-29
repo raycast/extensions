@@ -1,4 +1,5 @@
 import { List, Image } from "@raycast/api";
+import { useState } from "react";
 
 import { useMyRepositories } from "../hooks/useRepositories";
 
@@ -11,10 +12,19 @@ export default function RepositoriesDropdown({
   setSelectedRepository,
   withAllRepositories = true,
 }: RepositoryDropdownProps) {
-  const { data: repositories } = useMyRepositories();
+  const [searchText, setSearchText] = useState("");
+  const { data: repositories, isLoading } = useMyRepositories(searchText);
 
   return (
-    <List.Dropdown tooltip="Select Repository" storeValue onChange={setSelectedRepository}>
+    <List.Dropdown
+      tooltip="Select Repository"
+      storeValue
+      onChange={setSelectedRepository}
+      placeholder="Search for repositories"
+      onSearchTextChange={setSearchText}
+      throttle
+      isLoading={isLoading}
+    >
       {withAllRepositories ? <List.Dropdown.Item value="" title="All Repositories" /> : null}
 
       {repositories && repositories.length > 0 ? (
