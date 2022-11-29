@@ -5,6 +5,7 @@ function DeleteDrupalWebsiteAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Drupal Website"
+      style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onDelete}
     />
