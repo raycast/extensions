@@ -5,6 +5,7 @@ import { completeTodo } from '@/services/notion/operations/complete-todo'
 import { Todo } from '@/types/todo'
 import { Color, MenuBarExtra } from '@raycast/api'
 import { getProgressIcon } from '@raycast/utils'
+import { truncate } from './truncate'
 
 export function MenuBar() {
   const { preferences } = useLocalPreferences()
@@ -50,7 +51,7 @@ export function MenuBar() {
                 source: getProgressIcon(todo.inProgress ? 0.5 : 0),
                 tintColor: todo.inProgress ? Color.Yellow : Color.SecondaryText,
               }}
-              title={todo.title}
+              title={truncate(todo.title)}
             />
           ))
         : null}
