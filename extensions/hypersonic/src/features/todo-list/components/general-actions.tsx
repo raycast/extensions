@@ -23,10 +23,10 @@ export function GeneralActions({
         onAction={openCommandPreferences}
         shortcut={{ modifiers: ['cmd'], key: ',' }}
       />
-      <Action.CopyToClipboard
+      <Action.OpenInBrowser
         title="Drop us a Line"
         icon={Icon.Heart}
-        content={'hypersonic@reboot.studio'}
+        url={'https://twitter.com/rebootstudio_'}
         shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
       />
     </ActionPanel.Section>
