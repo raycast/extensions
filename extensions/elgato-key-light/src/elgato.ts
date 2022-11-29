@@ -81,7 +81,7 @@ export class KeyLight {
   }
 
   private async getKeyLight(service: RemoteService) {
-    const url = `http://${service.host}:${service.port}/elgato/lights`;
+    const url = `http://${service.referer.address}:${service.port}/elgato/lights`;
     const response = await axios.get(url);
     return response.data.lights[0];
   }
@@ -90,7 +90,7 @@ export class KeyLight {
     service: RemoteService,
     options: { brightness?: number; temperature?: number; on?: boolean }
   ) {
-    const url = `http://${service.host}:${service.port}/elgato/lights`;
+    const url = `http://${service.referer.address}:${service.port}/elgato/lights`;
     await axios.put(url, {
       lights: [
         {
