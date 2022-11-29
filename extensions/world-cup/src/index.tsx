@@ -157,7 +157,7 @@ export default function Command() {
 
     // live
     if (match.MatchStatus === 3) {
-      return (match.IdMatch === match2.IdMatch ? time2 : time) || "Now";
+      return (match?.IdMatch === match2?.IdMatch ? time2 : time) || "Now";
     }
 
     return "";
