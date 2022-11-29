@@ -65,11 +65,8 @@ export default function Command() {
 
   return (
     <Grid isLoading={isLoading} fit={Grid.Fit.Fill} aspectRatio={"16/9"} searchBarPlaceholder="Search site">
-      <Grid.EmptyView
-        icon={{ source: "https://placekitten.com/400/400" }}
-        title="Not found! Ensure the token can access all sites."
-      />
-      <Grid.Section columns={4} title="Recently published">
+      <Grid.EmptyView icon="no-view.png" title="No Results" description="Ensure the token can access all sites" />
+      <Grid.Section columns={4} title="Recently Published">
         {sortByLastPublished(data)
           ?.slice(0, 8)
           .map((site: any) => returnItem(site))}
@@ -146,7 +143,7 @@ function returnItem(site: any) {
 function returnSection(data: any) {
   if (data?.length > 8) {
     return (
-      <Grid.Section columns={5} title="All sites">
+      <Grid.Section columns={5} title="All Sites">
         {sortByLastPublished(data)
           ?.slice(8)
           .map((site: any) => returnItem(site))}
