@@ -15,7 +15,7 @@ export function NoteList(props: {
   allNotes?: Note[];
   setNotes?: (notes: Note[]) => void;
   isLoading?: boolean;
-  searchArguments?: SearchArguments;
+  searchArguments: SearchArguments;
   action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
   onDelete?: (note: Note, vault: Vault) => void;
   onSearchChange?: (search: string) => void;
@@ -25,7 +25,7 @@ export function NoteList(props: {
 
   const pref = getPreferenceValues<SearchNotePreferences>();
 
-  const [searchText, setSearchText] = useState(searchArguments ? searchArguments.searchArgument : "");
+  const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
   const list = useMemo(() => filterNotes(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
   const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
