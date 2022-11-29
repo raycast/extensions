@@ -1,13 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "webflow-sites",
-<<<<<<< HEAD
-  "title": "Webflow Extension by Peeks",
-=======
   "title": "Webflow",
->>>>>>> 90c4e7068117f8d0467a13bba113f2c21afef6b8
   "description": "Supercharged productivity for Webflow. Bring Webflow to every corner of your OS. Open any project from anywhere. Site settings and more.",
-  "icon": "peeks.png",
+  "icon": "webflow-logo.png",
   "author": "peeks",
   "contributors": [
     "pernielsentikaer"
@@ -38,7 +34,7 @@
     {
       "name": "webflowToken",
       "title": "Webflow API Token",
-      "description": "Generate at: www.peeks.co/raycast/auth",
+      "description": "Generate at: https://www.peeks.co/raycast",
       "type": "password",
       "required": true,
       "placeholder": "Paste Webflow API Token"
