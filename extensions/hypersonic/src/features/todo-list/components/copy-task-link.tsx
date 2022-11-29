@@ -9,7 +9,7 @@ export function CopyTaskLinkAction({ todo }: CopyToDoActionProps) {
   return (
     <Action.CopyToClipboard
       icon={Icon.Clipboard}
-      title="Copy Task Url"
+      title="Copy Task URL"
       content={{
         text: todo.shareUrl,
         html: `<a href="${todo.shareUrl}">${todo.title}</a>`,
