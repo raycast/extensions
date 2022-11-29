@@ -1,6 +1,5 @@
-import { Action } from '@raycast/api'
+import { Action, Icon } from '@raycast/api'
 import { Todo } from '@/types/todo'
-import { getProgressIcon } from '@raycast/utils'
 
 export function NotStartedAction({
   todo,
@@ -11,12 +10,7 @@ export function NotStartedAction({
 }) {
   return (
     <Action
-      icon={{
-        source: {
-          light: getProgressIcon(0, '#000000'),
-          dark: getProgressIcon(0, '#ffffff'),
-        },
-      }}
+      icon={Icon.Circle}
       title={'Mark as Not Started'}
       onAction={() => notStarted(todo)}
     />
