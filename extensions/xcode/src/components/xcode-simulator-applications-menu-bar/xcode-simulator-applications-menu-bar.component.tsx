@@ -16,8 +16,6 @@ export function XcodeSimulatorApplicationsMenuBar(): JSX.Element {
       icon={Icon.Mobile}
       tooltip="Show Recent Builds"
     >
-      <MenuBarExtra.Section title={"Recent Builds"} />
-      <MenuBarExtra.Separator />
       {!xcodeSimulatorApplicationsGroups.isLoading && !xcodeSimulatorApplicationsGroups.data?.length ? (
         <MenuBarExtra.Item title={"No recent builds"} />
       ) : undefined}
