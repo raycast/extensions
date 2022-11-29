@@ -2,22 +2,32 @@
 
 ## [1.0.0] - 2022-11-21
 
-- Update Raycast to "@raycast/api": "1.44.0",
-- Update Raycast to "@raycast/utils": "1.4.11"
-- Added Fuse to improve the creation of todos with tags, projects, assignees
-- Added chrono-node to improve the creation of todos with due dates
-- Added support for multiple database relationships
-- New preferences configurator to facilitate the database connection
-- New multi filter option to filter todos by projects, tags and assignees
-- Updated actions commands for easy access to the new features
-- Replaced snooze command with a new due date command
-- Deprecated move command
-- Updated menu bar command to work with the new features
-- Included Notion logo in Notion related commands
-- Added instant refresh to menu bar command through launchCommand method
-- Updated menu bar extensions background fetch time from 1 minute to 5 minutes
-- Added share task command
-- Logo update
+#### New
+
+- You can now create todos with natural language. Including tags, projects, assignees.
+- Support for multiple database relationships.
+- Database settings view to improve set up.
+- Combine filters by projects, tags and assignees.
+- Added instant refresh to menu bar command.
+- Copy Task URL action.
+- Mark as not started action.
+- Add Project to a task action.
+- Assign user to a task action.
+
+#### Updated
+
+- Modify task date using natural language.
+- Replaced 'Remind me' action for 'Due Date'.
+- Menu bar command to work with filters.
+- Menu bar command background fetch time from 1 to 5 minutes.
+- Share your work action to work with filters.
+- Conditional Open detail action if Notion is installed.
+- Conditional Open Notion database action if Notion is installed.
+- Hypersonic icon.
+
+#### Deprecated
+
+- Move command
 
 ## [0.0.3] - 2022-09-15
 
