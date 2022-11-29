@@ -29,17 +29,7 @@
       "interval": "5m"
     }
   ],
-  "preferences": [
-    {
-      "name": "open_in_native_app",
-      "type": "checkbox",
-      "title": "Open links in the desktop app",
-      "label": "Open links in the desktop app",
-      "description": "Enable if you want to open links in the desktop app instead of the browser",
-      "default": true,
-      "required": false
-    }
-  ],
+  "preferences": [],
   "dependencies": {
     "@notionhq/client": "2.2.0",
     "@raycast/api": "1.44.0",

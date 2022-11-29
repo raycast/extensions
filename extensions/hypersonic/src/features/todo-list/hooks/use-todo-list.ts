@@ -21,6 +21,7 @@ import { autocomplete } from '../utils/autocomplete'
 import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
 import { refreshMenuBar } from './refresh-menu-bar'
 import { optimisticSorting } from '../utils/optimistic-sorting'
+import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-installed'
 
 export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
@@ -37,6 +38,7 @@ export function useTodoList() {
   } = useProjects(preferences.properties?.relatedDatabase?.databaseId)
   const { tags } = useTags(preferences.databaseName)
   const { users } = useUsers()
+  const isNotionInstalled = useIsNotionInstalled()
 
   const handleComplete = async (todo: Todo) => {
     try {
@@ -371,7 +373,9 @@ export function useTodoList() {
   return {
     todos: filteredTodos,
     tags: tags,
-    notionDbUrl: preferences.normalizedUrl,
+    notionDbUrl: isNotionInstalled
+      ? preferences.normalizedUrl
+      : preferences.databaseUrl,
     hasStatusProperty: preferences?.properties?.status?.type === 'status',
     hasAssigneeProperty: !!preferences?.properties?.assignee,
     hasProjectProperty: !!preferences?.properties?.project,
@@ -395,5 +399,6 @@ export function useTodoList() {
     resetFilter,
     searchText,
     mutatePreferences,
+    isNotionInstalled,
   }
 }

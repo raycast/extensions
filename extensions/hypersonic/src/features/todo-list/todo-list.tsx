@@ -14,8 +14,9 @@ import { SetFilter } from './components/set-filter-action'
 import { useMemo } from 'react'
 import { createAccessoriesArray } from '@/utils/create-accessories-array'
 import { GeneralActions } from './components/general-actions'
-import { getNotionIcon } from './utils/get-notion-icon'
 import { CopyTaskLinkAction } from './components/copy-task-link'
+import { OpenInNotionAction } from './components/open-in-notion-action'
+import { OpenOnNotionAction } from './components/open-on-notion'
 
 export function TodoList() {
   const {
@@ -45,6 +46,7 @@ export function TodoList() {
     handleSetFilter,
     resetFilter,
     mutatePreferences,
+    isNotionInstalled,
   } = useTodoList()
 
   const filterCount = useMemo(() => {
@@ -176,12 +178,11 @@ export function TodoList() {
                 ) : null}
                 <CopyToDoAction todo={todo} />
                 <CopyTaskLinkAction todo={todo} />
-                <Action.OpenInBrowser
-                  title="Open Detail"
-                  icon={{ source: getNotionIcon() }}
-                  url={todo.url}
-                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
-                />
+                {isNotionInstalled ? (
+                  <OpenInNotionAction url={todo.url} />
+                ) : (
+                  <OpenOnNotionAction url={todo.shareUrl} />
+                )}
                 <DeleteTodoAction todo={todo} onDelete={handleDelete} />
               </ActionPanel.Section>
               <GeneralActions
