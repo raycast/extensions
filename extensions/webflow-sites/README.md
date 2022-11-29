@@ -2,9 +2,9 @@
 
 ###### Supercharged productivity for Webflow. 
 
-This extension gives you shortcuts over common Webflow project tasks to help save you time! Bring Webflow to every corner of your OS.
+![](https://uploads-ssl.webflow.com/636cd6453bfcc709eab35c30/63865228d1da813277d0aab2_peeks%20raycast.gif)
 
-![](https://uploads-ssl.webflow.com/636cd6453bfcc709eab35c30/6385eb417ae48dd6791b313d_webflow-sites-3.png)
+This extension gives you shortcuts over common Webflow project tasks to help save you time! Bring Webflow to every corner of your OS.
 
 ###  Features
 - List & Search All Your Projects
@@ -12,11 +12,13 @@ This extension gives you shortcuts over common Webflow project tasks to help sav
 - Open Live Site
 - Open Site settings, account settings, Webflow showcase etc.
 
+![](https://uploads-ssl.webflow.com/636cd6453bfcc709eab35c30/6385eb417ae48dd6791b313d_webflow-sites-3.png)
+
 #### How to authenticate your account
 
 1. Click generate at https://www.peeks.co/raycast
 2. Select all your sites and click Authorize
-3. Copy the API key and paste into Raycast Extension
+3. Copy the `API key` and paste into Raycast Webflow Extension
 
 Now you should be able to access Webflow with Raycast 🚀.
 
