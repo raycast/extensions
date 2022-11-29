@@ -33,7 +33,7 @@ The interface of the extension follows the interface of the OpenAI Playground.
 
 You can set different parameters for the AI model:
 
-`AI Model`: type of the model you want to use. `text-davinci-002` is the most powerful one for now.
+`AI Model`: type of the model you want to use. `text-davinci-003` is the most powerful one for now.
 
 `Temperature`: controls randomness of the AI model. The lower it is, the less random (and "creative") the results will be.
 

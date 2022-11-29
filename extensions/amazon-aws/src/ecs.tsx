@@ -8,7 +8,7 @@ import { useMemo } from "react";
 const preferences = setupAws();
 const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
-export default function DescribeECSClusters() {
+export default function ECS() {
   const { data: clusters, error, isLoading } = useCachedPromise(fetchClusters);
 
   if (error) {
@@ -20,13 +20,13 @@ export default function DescribeECSClusters() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
       {clusters?.map((c) => (
-        <ClusterListItem key={c.clusterArn} cluster={c} />
+        <ECSCluster key={c.clusterArn} cluster={c} />
       ))}
     </List>
   );
 }
 
-function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
+function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
 
@@ -53,7 +53,7 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
       key={cluster.clusterArn}
       title={name || "Unknown ECS name"}
       subtitle={subtitle}
-      icon="list-icon.png"
+      icon="ecs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

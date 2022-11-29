@@ -2,15 +2,15 @@ import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
-import { RepositoryFieldsFragment } from "../generated/graphql";
+import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getGitHubUser } from "../helpers/users";
 
 import RepositoryActions from "./RepositoryActions";
 
 type RepositoryListItemProps = {
-  repository: RepositoryFieldsFragment;
-  onVisit: (repository: RepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<RepositoryFieldsFragment[] | undefined>;
+  repository: ExtendedRepositoryFieldsFragment;
+  onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
+  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
 };
 
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {

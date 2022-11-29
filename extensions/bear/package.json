@@ -43,6 +43,15 @@
       "default": false,
       "label": "Focus cursor at end of the note",
       "required": false
+    },
+    {
+      "name": "showPreviewInListView",
+      "title": "Notes List",
+      "description": "Shows a preview of the note to the right of the note list",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show preview in list view",
+      "required": false
     }
   ],
   "dependencies": {

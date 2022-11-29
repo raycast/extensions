@@ -34,17 +34,17 @@
       "mode": "view"
     },
     {
-      "name": "queues",
+      "name": "sqs",
       "title": "SQS Queues",
       "subtitle": "Amazon AWS",
       "description": "List your SQS Queues",
       "mode": "view"
     },
     {
-      "name": "codepipelines",
-      "title": "CodePipelines",
+      "name": "codepipeline",
+      "title": "CodePipeline Pipelines",
       "subtitle": "Amazon AWS",
-      "description": "List your CodePipelines",
+      "description": "List your CodePipeline Pipelines",
       "mode": "view"
     },
     {
@@ -73,6 +73,13 @@
       "title": "DynamoDB Tables",
       "subtitle": "Amazon AWS",
       "description": "List your DynamoDB Tables",
+      "mode": "view"
+    },
+    {
+      "name": "s3",
+      "title": "S3 Buckets",
+      "subtitle": "Amazon AWS",
+      "description": "List your S3 Buckets",
       "mode": "view"
     }
   ],

@@ -1,5 +1,7 @@
 import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
-import { gitmojis } from "gitmojis";
+import { gitmojis as defaultGitmojis } from "gitmojis";
+import fetch from "node-fetch";
+import { useEffect, useState } from "react";
 
 interface PreferenceValues {
   copy: "emoji" | "code";
@@ -14,8 +16,32 @@ type Gitmoji = {
 };
 
 const GitmojiList = () => {
+  const [gitmojis, setGitmojis] = useState<Gitmoji[]>(defaultGitmojis);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    async function fetchGitmojis() {
+      setIsLoading(true);
+      try {
+        const response = await fetch("https://gitmoji.dev/api/gitmojis");
+        if (response.status == 200) {
+          const json = await response.json();
+          setGitmojis((json as Record<string, Gitmoji[]>).gitmojis);
+        } else {
+          setGitmojis(defaultGitmojis);
+        }
+        setIsLoading(false);
+      } catch {
+        setGitmojis(defaultGitmojis);
+        setIsLoading(false);
+      }
+    }
+
+    fetchGitmojis();
+  }, []);
+
   return (
-    <List searchBarPlaceholder="Search your gitmoji...">
+    <List searchBarPlaceholder="Search your gitmoji..." isLoading={isLoading}>
       {gitmojis.map((gitmoji) => (
         <GitmojiListItem key={gitmoji.name} gitmoji={gitmoji} />
       ))}

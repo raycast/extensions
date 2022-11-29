@@ -17,6 +17,7 @@ export default function NoteActions({
   onDeleteCallback?: () => void;
 }) {
   const noteUrl = getNoteUrl(note);
+  const editUrl = getNoteUrl(note, true);
 
   const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
   const { pop } = useNavigation();
@@ -26,8 +27,8 @@ export default function NoteActions({
       <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
       <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} />
 
-      {singleNoteData && (
-        <ActionPanel.Section>
+      <ActionPanel.Section>
+        {singleNoteData && (
           <Action.Push
             icon={Icon.Pencil}
             title="Edit Note"
@@ -64,8 +65,16 @@ export default function NoteActions({
               />
             }
           />
-        </ActionPanel.Section>
-      )}
+        )}
+        <Action.OpenInBrowser
+          title="Edit in Browser"
+          url={editUrl}
+          shortcut={{
+            modifiers: ["cmd", "shift"],
+            key: "k",
+          }}
+        />
+      </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action

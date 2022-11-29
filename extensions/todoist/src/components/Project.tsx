@@ -6,20 +6,21 @@ import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist } from "../api";
 import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
 import CreateTask from "../create-task";
+import { Project as TProject } from "@doist/todoist-api-typescript";
 
 interface ProjectProps {
-  projectId: number;
+  project: TProject;
 }
 
-function Project({ projectId }: ProjectProps): JSX.Element {
+function Project({ project }: ProjectProps): JSX.Element {
   const {
     data: tasks,
     isLoading: isLoadingTasks,
     mutate: mutateTasks,
-  } = useCachedPromise((projectId) => todoist.getTasks({ projectId }), [projectId]);
+  } = useCachedPromise((projectId) => todoist.getTasks({ projectId }), [project.id]);
   const { data: allSections, isLoading: isLoadingSections } = useCachedPromise(
     (projectId) => todoist.getSections(projectId),
-    [projectId]
+    [project.id]
   );
   const { data: labels, isLoading: isLoadingLabels } = useCachedPromise(() => todoist.getLabels());
 
@@ -31,7 +32,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
     sections = [
       {
         name: "No section",
-        tasks: tasks?.filter((task) => task.sectionId === 0) || [],
+        tasks: tasks?.filter((task) => !task.sectionId) || [],
       },
     ];
 
@@ -65,7 +66,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
   }
 
   return tasks?.length === 0 ? (
-    <List isLoading={isLoadingTasks || isLoadingSections || isLoadingLabels}>
+    <List isLoading={isLoadingTasks || isLoadingSections || isLoadingLabels} navigationTitle={project.name}>
       <List.EmptyView
         title="No tasks in this project."
         description="How about creating one?"
@@ -73,7 +74,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
           <ActionPanel>
             <Action.Push
               title="Create Task"
-              target={<CreateTask fromProjectId={projectId} mutateTasks={mutateTasks} />}
+              target={<CreateTask fromProjectId={project.id} mutateTasks={mutateTasks} />}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
           </ActionPanel>

@@ -44,6 +44,9 @@ function getProjectEntries(): ProjectEntry[] {
     if (existsSync(cachedFile)) {
       const cachedEntries: CachedProjectEntry[] = JSON.parse(readFileSync(cachedFile).toString());
       cachedEntries.forEach(({ name, fullPath }) => {
+        if (projectEntries.find(({ rootPath }) => rootPath === fullPath)) {
+          return;
+        }
         projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
       });
     }

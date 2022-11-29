@@ -6,7 +6,7 @@ import { handleTaskEitherError } from "./util/utils";
 
 export default async () => {
   await pipe(
-    music.currentTrack.addToLibrary,
+    music.currentTrack.love,
     handleTaskEitherError(SFSymbols.WARNING + " Failed to love the track", SFSymbols.LOVE + " Loved")
   )();
 };

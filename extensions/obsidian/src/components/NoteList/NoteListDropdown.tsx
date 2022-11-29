@@ -12,7 +12,7 @@ export function NoteListDropdown(props: {
 
   function defaultTagValue() {
     if (searchArguments) {
-      if (searchArguments.tagArgument) {
+      if (searchArguments.tagArgument != "" && searchArguments.tagArgument) {
         if (searchArguments.tagArgument.startsWith("#")) {
           return searchArguments.tagArgument;
         } else {
@@ -58,7 +58,7 @@ export function NoteListDropdown(props: {
 
   function dropdownWithoutDefault() {
     return (
-      <List.Dropdown tooltip="Search For" onChange={handleChange}>
+      <List.Dropdown tooltip="Search For" defaultValue="all" onChange={handleChange}>
         {dropdownContent()}
       </List.Dropdown>
     );
