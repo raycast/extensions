@@ -15,7 +15,7 @@ import {
 import { pathToFileURL } from "url";
 import { useFetch } from "@raycast/utils";
 
-const imageApiError = pathToFileURL(`${environment.assetsPath}/peeks api incorrect.png`).href;
+const imageApiError = pathToFileURL(`${environment.assetsPath}/peeks-api-incorrect.png`).href;
 
 export default function Command() {
   const preferences = getPreferenceValues();
@@ -65,7 +65,11 @@ export default function Command() {
 
   return (
     <Grid isLoading={isLoading} fit={Grid.Fit.Fill} aspectRatio={"16/9"} searchBarPlaceholder="Search site">
-      <Grid.EmptyView icon="no-view.png" title="No Results" description="Ensure the token can access all sites" />
+      <Grid.EmptyView
+        icon="webflow-128x128.png"
+        title="No Results"
+        description="Ensure the token can access all sites or check API key"
+      />
       <Grid.Section columns={4} title="Recently Published">
         {sortByLastPublished(data)
           ?.slice(0, 8)
