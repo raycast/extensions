@@ -91,13 +91,13 @@ function NowPlayingMenuBar() {
     }
     const prefs = getPreferenceValues();
     const max = Number(prefs.maxtitlelength);
-    if (Number.isNaN(max)) {
+    const showEllipsis = Boolean(prefs.showEllipsis);
+
+    if (Number.isNaN(max) || max <= 0 || title.length <= max) {
       return title;
     }
-    if (max <= 0) {
-      return title;
-    }
-    return title.slice(0, max);
+
+    return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
   };
 
   return (

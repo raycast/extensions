@@ -34,17 +34,17 @@
       "mode": "view"
     },
     {
-      "name": "queues",
+      "name": "sqs",
       "title": "SQS Queues",
       "subtitle": "Amazon AWS",
-      "description": "List All your SQS Queues",
+      "description": "List your SQS Queues",
       "mode": "view"
     },
     {
-      "name": "codepipelines",
-      "title": "CodePipelines",
+      "name": "codepipeline",
+      "title": "CodePipeline Pipelines",
       "subtitle": "Amazon AWS",
-      "description": "List All your CodePipelines",
+      "description": "List your CodePipeline Pipelines",
       "mode": "view"
     },
     {
@@ -58,14 +58,28 @@
       "name": "cloudformation",
       "title": "CloudFormation Stacks",
       "subtitle": "Amazon AWS",
-      "description": "List All your CloudFormation Stacks",
+      "description": "List your CloudFormation Stacks",
+      "mode": "view"
+    },
+    {
+      "name": "lambda",
+      "title": "Lambda Functions",
+      "subtitle": "Amazon AWS",
+      "description": "List your Lambda Functions",
       "mode": "view"
     },
     {
       "name": "dynamodb",
       "title": "DynamoDB Tables",
       "subtitle": "Amazon AWS",
-      "description": "List All your DynamoDB Tables",
+      "description": "List your DynamoDB Tables",
+      "mode": "view"
+    },
+    {
+      "name": "s3",
+      "title": "S3 Buckets",
+      "subtitle": "Amazon AWS",
+      "description": "List your S3 Buckets",
       "mode": "view"
     }
   ],
@@ -75,7 +89,7 @@
       "type": "textfield",
       "required": true,
       "title": "AWS Region",
-      "description": "The Region Were You Have All Your Instances",
+      "description": "The region for which you want to list resources",
       "placeholder": "eu-central-1"
     },
     {
@@ -83,7 +97,7 @@
       "type": "textfield",
       "required": true,
       "title": "AWS Profile",
-      "description": "set aws profile name",
+      "description": "The AWS profile to use",
       "placeholder": "default"
     }
   ],

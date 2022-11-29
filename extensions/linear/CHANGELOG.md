@@ -1,5 +1,13 @@
 # Linear Changelog
 
+## [Copy Formatted Issue URL Action] - 2022-12-23
+
+- Add a new "Copy Formatted Issue URL" Action
+
+## [Add all teams option in "Search Projects" command] - 2022-11-21
+
+- Add an `All teams` option in `Search Projects` command allowing users to see all projects in a Linear workspace
+
 ## [Create issue customization] - 2022-10-13
 
 - Add a preference to select the toast copy action after creating the issue

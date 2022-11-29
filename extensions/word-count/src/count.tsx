@@ -35,7 +35,7 @@ export default function Command() {
         onAction={() => setIncludeWhitespace(!includeWhitespace)}
         shortcut={{
           modifiers: ["cmd"],
-          key: "w",
+          key: "t",
         }}
         icon={Icon.Switch}
       />

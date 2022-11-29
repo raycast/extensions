@@ -1,6 +1,6 @@
-import { OAuth, getPreferenceValues } from "@raycast/api";
+import { OAuth, LocalStorage } from "@raycast/api";
 import fetch from "node-fetch";
-import { Board, BoardMember } from "@mirohq/miro-api";
+import { Board, BoardMember, MiroApi } from "@mirohq/miro-api";
 
 // Miro App client ID
 const clientId = "3458764538138428083";
@@ -15,12 +15,18 @@ const client = new OAuth.PKCEClient({
 
 // Authorization
 export async function authorize() {
+  const teamId = await LocalStorage.getItem("teamId");
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
-    if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+    if (tokenSet.refreshToken) {
+      if (tokenSet.isExpired() || !teamId) {
+        const tokens = await refreshTokens(tokenSet.refreshToken);
+        await client.setTokens(tokens);
+      }
+      return;
+    } else if (teamId) {
+      return;
     }
-    return;
   }
 
   const authRequest = await client.authorizationRequest({
@@ -29,7 +35,8 @@ export async function authorize() {
     scope: "",
   });
   const { authorizationCode } = await client.authorize(authRequest);
-  await client.setTokens(await fetchTokens(authRequest, authorizationCode));
+  const tokens = await fetchTokens(authRequest, authorizationCode);
+  await client.setTokens(tokens);
 }
 
 // Fetch tokens
@@ -52,7 +59,9 @@ export async function fetchTokens(
     console.error("fetch tokens error:", await response.text());
     throw new Error(response.statusText);
   }
-  return (await response.json()) as OAuth.TokenResponse;
+  const result = (await response.json()) as OAuth.TokenResponse & { team_id: string };
+  await LocalStorage.setItem("teamId", result.team_id);
+  return result;
 }
 
 // Refresh tokens
@@ -70,16 +79,17 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     console.error("refresh tokens error:", await response.text());
     throw new Error(response.statusText);
   }
-  const tokenResponse = (await response.json()) as OAuth.TokenResponse;
+  const tokenResponse = (await response.json()) as OAuth.TokenResponse & { team_id: string };
+  await LocalStorage.setItem("teamId", tokenResponse.team_id);
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
 }
 
 // Fetch boards
 export async function fetchItems(): Promise<Board[]> {
-  const teamId = getPreferenceValues().team_id;
+  const teamId = await LocalStorage.getItem("teamId");
 
-  if (!teamId) {
+  if (typeof teamId !== "string") {
     throw new Error("Team ID not found");
   }
 
@@ -102,9 +112,11 @@ export async function fetchItems(): Promise<Board[]> {
 
 // Create board
 export async function createItem(title: string, description: string): Promise<boolean> {
-  const teamId = getPreferenceValues().team_id;
+  await authorize();
 
-  if (!teamId) {
+  const teamId = await LocalStorage.getItem("teamId");
+
+  if (typeof teamId !== "string") {
     throw new Error("Team ID not found");
   }
 
@@ -135,14 +147,6 @@ interface BoardMemberProps {
 
 // Share board
 export async function inviteToBoard(id: string, member: BoardMemberProps, message: string): Promise<boolean> {
-  // get team id
-  const teamId = getPreferenceValues().team_id;
-
-  // return eror if team id not found
-  if (!teamId) {
-    throw new Error("Team ID not found");
-  }
-
   const response = await fetch(`https://api.miro.com/v2/boards/${id}/members`, {
     method: "POST",
     headers: {
@@ -220,4 +224,21 @@ export async function changeBoardMemberRole(id: string, memberId: string, role: 
   }
 
   return true;
+}
+
+// fetch board members
+export async function deleteBoard(id: string): Promise<void> {
+  const response = await fetch(`https://api.miro.com/v2/boards/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    console.error("delete board error:", await response.text());
+    throw new Error(response.statusText);
+  }
+
+  return;
 }

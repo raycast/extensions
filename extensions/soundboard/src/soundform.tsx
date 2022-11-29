@@ -2,19 +2,26 @@ import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { Item } from "./types";
 import { useForm, FormValidation } from "@raycast/utils";
 import { nanoid } from "nanoid";
+import { useEffect, useState } from "react";
 
 interface SignUpFormValues {
   id: string;
   title: string;
   path: string[];
   favourite: string;
+  last_favourite: string;
 }
 
-export function SoundForm(props: { item?: Item; onEdit: (item: Item) => void }) {
+export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: Item) => void }) {
   const { pop } = useNavigation();
-  const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
+  const [favoriteInUse, setFavoriteInUse] = useState<string>("");
+  const { handleSubmit, itemProps, values } = useForm<SignUpFormValues>({
     async onSubmit(values) {
-      props.onEdit(props?.item ? { ...values, id: props.item.id } : { ...values, id: nanoid() });
+      props.onEdit(
+        props?.item
+          ? { ...values, id: props.item.id, last_favourite: props.item.favourite }
+          : { ...values, id: nanoid() }
+      );
       pop();
     },
     validation: {
@@ -28,19 +35,31 @@ export function SoundForm(props: { item?: Item; onEdit: (item: Item) => void }) 
     },
   });
 
-  const favouriteItems = [
-    { title: "Not added as favourite", value: "0" },
-    { title: "Favourite #1", value: "1" },
-    { title: "Favourite #2", value: "2" },
-    { title: "Favourite #3", value: "3" },
-    { title: "Favourite #4", value: "4" },
-    { title: "Favourite #5", value: "5" },
-    { title: "Favourite #6", value: "6" },
-    { title: "Favourite #7", value: "7" },
-    { title: "Favourite #8", value: "8" },
-    { title: "Favourite #9", value: "9" },
-    { title: "Favourite #10", value: "10" },
-  ];
+  useEffect(() => {
+    if (values.favourite !== "0") {
+      // Map items to array of favourites
+      const favourites = props.items?.map((item) => item.favourite);
+
+      // Check if values.favorite is in favourites array
+      if (favourites?.includes(values.favourite) && values.favourite !== props.item?.favourite) {
+        // Find the item with the same favourite
+        const item = props.items?.find((item) => item.favourite === values.favourite);
+        setFavoriteInUse(
+          `Favorite #${values.favourite} is already assigned - if you continue, it will be removed from "${item?.title}" `
+        );
+      } else {
+        setFavoriteInUse("");
+      }
+    } else {
+      setFavoriteInUse("");
+    }
+  }, [values.favourite]);
+
+  const favouriteItems = Array.from(Array(10).keys()).map((i) => {
+    return { title: `Favourite #${i + 1}`, value: `${i + 1}` };
+  });
+
+  favouriteItems.unshift({ title: "None", value: "0" });
 
   return (
     <Form
@@ -59,6 +78,7 @@ export function SoundForm(props: { item?: Item; onEdit: (item: Item) => void }) 
           <Form.Dropdown.Item key={item.value} title={item.title} value={`${item.value}`} />
         ))}
       </Form.Dropdown>
+      {favoriteInUse && <Form.Description title="Already Assigned!" text={favoriteInUse} />}
     </Form>
   );
 }

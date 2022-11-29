@@ -22,6 +22,7 @@ export default async function Command() {
   console.log(`Support path: ${environment.supportPath}`);
   console.log(`Is development mode: ${environment.isDevelopment}`);
   console.log(`Theme: ${environment.theme}`);
+  console.log(`Text size: ${environment.textSize}`);
   console.log(`LaunchType: ${environment.launchType}`);
 }
 ```

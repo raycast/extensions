@@ -1,14 +1,14 @@
-import { getPreferenceValues, ActionPanel, List, Detail, Action } from "@raycast/api";
+import { ActionPanel, List, Detail, Action } from "@raycast/api";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
-import { Preferences } from "./types";
+
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
-setupAws();
+const preferences = setupAws();
 const ecs = new AWS.ECS({ apiVersion: "2016-11-15" });
 
-export default function DescribeECSClusters() {
+export default function ECS() {
   const { data: clusters, error, isLoading } = useCachedPromise(fetchClusters);
 
   if (error) {
@@ -20,16 +20,15 @@ export default function DescribeECSClusters() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter instances by name...">
       {clusters?.map((c) => (
-        <ClusterListItem key={c.clusterArn} cluster={c} />
+        <ECSCluster key={c.clusterArn} cluster={c} />
       ))}
     </List>
   );
 }
 
-function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
+function ECSCluster(props: { cluster: AWS.ECS.Cluster }) {
   const cluster = props.cluster;
   const name = cluster.clusterName;
-  const preferences = getPreferenceValues<Preferences>();
 
   const subtitle = useMemo(() => {
     switch (cluster.status || "INACTIVE") {
@@ -54,7 +53,7 @@ function ClusterListItem(props: { cluster: AWS.ECS.Cluster }) {
       key={cluster.clusterArn}
       title={name || "Unknown ECS name"}
       subtitle={subtitle}
-      icon="list-icon.png"
+      icon="ecs.png"
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

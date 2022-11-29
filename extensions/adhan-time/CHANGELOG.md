@@ -1,6 +1,10 @@
 # Adhan time Changelog
 
-## [Update] - 2022-11-9
+## [Update] - 2022-11-21
+
+- UI: Updated placeholders to be more descriptive
+
+## [Update] - 2022-11-09
 - Added hanfi school calculation as an optional preference
 
 ## [Update] - 2022-11-08

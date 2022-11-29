@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Bug fix] - 2022-11-16
+
+- Improved error handling for invalid json cache
+- Ensure cache is fetched only once (avoids memory errors)
+
 ## [Bug Fix] - 2022-11-14
 
 - Reduce memory requirements for the "Search" command.
