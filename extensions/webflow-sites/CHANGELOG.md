@@ -1,6 +1,6 @@
 # Webflow Extension by Peeks Changelog
 
-## [Initial Version] - 2022-09-21
+## [Initial Version] - 2022-11-29
 
 - Added `Open Sites` command
 - List all Webflow sites
