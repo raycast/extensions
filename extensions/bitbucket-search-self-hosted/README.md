@@ -19,7 +19,7 @@ Raycast extension to search repositories, open recent Pull Requests.
 
 ### Standing on the shoulders of giants
 
-- [raycast extensions bitbucket](https://github.com/raycast/extensions/tree/main/extensions/bitbucket)
+- [Raycast bitbucket extension](https://www.raycast.com/Francois/bitbucket)
 
 ### Snapshots
 
