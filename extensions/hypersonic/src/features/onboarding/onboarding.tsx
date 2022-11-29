@@ -66,7 +66,7 @@ export function Onboarding() {
                   />
                   {todo.contentUrl ? (
                     <Action
-                      title="Open Link"
+                      title="Open Content URL"
                       icon={Icon.Link}
                       shortcut={{ modifiers: ['cmd'], key: 'e' }}
                       onAction={async () => {

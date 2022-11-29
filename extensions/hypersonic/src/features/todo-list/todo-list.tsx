@@ -175,7 +175,7 @@ export function TodoList() {
                 )}
                 {todo.contentUrl ? (
                   <Action.OpenInBrowser
-                    title="Open Link"
+                    title="Open Content URL"
                     icon={Icon.Link}
                     url={todo.contentUrl}
                     shortcut={{ modifiers: ['cmd'], key: 'e' }}
