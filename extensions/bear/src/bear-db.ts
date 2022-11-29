@@ -151,7 +151,7 @@ export class BearDb {
 
   private toNote(row: ParamsObject): Note {
     const tags = (row.tags as string | undefined)?.split(",") ?? [];
-    const text = row.text as string ?? "";
+    const text = (row.text as string) ?? "";
     return {
       id: row.id as string,
       title: row.title as string,
