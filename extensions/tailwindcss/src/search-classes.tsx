@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
-import classes from "./generator/output.json";
+import classes from "./classes.json";
 
 export default function SearchClasses() {
   const [query, setQuery] = useState("");
