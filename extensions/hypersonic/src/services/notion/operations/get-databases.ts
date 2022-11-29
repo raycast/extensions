@@ -74,6 +74,10 @@ const normalizeColumns = (
           item.status.groups[1].option_ids[
             item.status.groups[1].option_ids.length - 1
           ],
+        notStartedId:
+          item.status.groups[0].option_ids[
+            item.status.groups[0].option_ids.length - 1
+          ],
       }
 
       columns.status.unshift({ data, value: JSON.stringify(data) })

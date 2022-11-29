@@ -13,6 +13,7 @@ export type Preferences = {
       name: string
       doneName?: string
       inProgressId?: string
+      notStartedId?: string
     }
     tag?: string
     assignee?: string

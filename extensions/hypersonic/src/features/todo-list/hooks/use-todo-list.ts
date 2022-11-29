@@ -22,6 +22,7 @@ import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
 import { refreshMenuBar } from './refresh-menu-bar'
 import { optimisticSorting } from '../utils/optimistic-sorting'
 import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-installed'
+import { notStartedTodo } from '@/services/notion/operations/not-started-todo'
 
 export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
@@ -76,6 +77,28 @@ export function useTodoList() {
       })
 
       showToast(Toast.Style.Success, 'Marked as In Progress')
+    } catch (e: any) {
+      showToast(Toast.Style.Failure, e?.message)
+    }
+  }
+
+  const handleNotStarted = async (todo: Todo) => {
+    try {
+      if (todo.id.includes('fake-id-')) return null
+
+      await mutate(notStartedTodo(todo.id), {
+        optimisticUpdate(data) {
+          if (!data) return data
+          const todos = data.map((t) =>
+            t.id === todo.id ? { ...todo, inProgress: false } : t
+          )
+
+          return optimisticSorting(todos)
+        },
+        shouldRevalidateAfter: true,
+      })
+
+      showToast(Toast.Style.Success, 'Marked as Not Started')
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
     }
@@ -384,6 +407,7 @@ export function useTodoList() {
     handleCreate,
     handleComplete,
     handleInProgress,
+    handleNotStarted,
     handleSetTag,
     handleSetDate,
     handleDelete,

@@ -51,6 +51,7 @@ const normalizeValuesToStore = (
         name: status.name,
         doneName: status.doneName,
         inProgressId: status.inProgressId,
+        notStartedId: status.notStartedId,
       },
       tag: handleOptionalField(values.tagsProperty),
       assignee: handleOptionalField(values.assigneeProperty),

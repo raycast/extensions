@@ -8,6 +8,7 @@ type Status = {
   name: string
   doneName?: string
   inProgressId?: string
+  notStartedId?: string
 }
 
 type TypeWithValue<T> = {

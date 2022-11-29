@@ -17,6 +17,7 @@ import { GeneralActions } from './components/general-actions'
 import { CopyTaskLinkAction } from './components/copy-task-link'
 import { OpenInNotionAction } from './components/open-in-notion-action'
 import { OpenOnNotionAction } from './components/open-on-notion'
+import { NotStartedAction } from './components/not-started-action'
 
 export function TodoList() {
   const {
@@ -31,6 +32,7 @@ export function TodoList() {
     handleCreate,
     handleComplete,
     handleInProgress,
+    handleNotStarted,
     handleSetTag,
     handleSetDate,
     handleDelete,
@@ -133,9 +135,12 @@ export function TodoList() {
           actions={
             <ActionPanel>
               <CompleteTodoAction todo={todo} onComplete={handleComplete} />
-              {hasStatusProperty && (
+              {hasStatusProperty && todo.inProgress === false ? (
                 <InProgressAction todo={todo} inProgress={handleInProgress} />
-              )}
+              ) : null}
+              {hasStatusProperty && todo.inProgress === true ? (
+                <NotStartedAction todo={todo} notStarted={handleNotStarted} />
+              ) : null}
               {hasTagProperty || hasAssigneeProperty || hasProjectProperty ? (
                 <SetFilter
                   users={users}
