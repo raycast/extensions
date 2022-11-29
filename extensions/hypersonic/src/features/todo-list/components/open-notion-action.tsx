@@ -1,5 +1,5 @@
 import { Action } from '@raycast/api'
-import { getNotionIcon } from '../utils/get-notion-icon'
+import { getNotionIcon } from '../../../utils/get-notion-icon'
 
 type OpenNotionActionProps = {
   notionDbUrl: string

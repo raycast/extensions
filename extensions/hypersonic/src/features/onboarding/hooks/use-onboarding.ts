@@ -1,9 +1,14 @@
 import { Tag } from '@/types/tag'
 import { Todo } from '@/types/todo'
 import { Color, showToast, Toast } from '@raycast/api'
+import { useCachedState } from '@raycast/utils'
 import { useCallback, useMemo, useState } from 'react'
 
-const ONBOARDING_DATA: Todo[] = [
+type OnboardingTodo = Todo & {
+  completed: boolean
+}
+
+const ONBOARDING_DATA: OnboardingTodo[] = [
   {
     id: '1',
     title: '👋 Hey there! - Press ↵ to complete your first task',
@@ -12,6 +17,7 @@ const ONBOARDING_DATA: Todo[] = [
     shareUrl: '',
     contentUrl: '',
     inProgress: false,
+    completed: false,
   },
   {
     id: '2',
@@ -21,6 +27,7 @@ const ONBOARDING_DATA: Todo[] = [
     shareUrl: '',
     contentUrl: '',
     inProgress: false,
+    completed: false,
   },
   {
     id: '3',
@@ -30,15 +37,7 @@ const ONBOARDING_DATA: Todo[] = [
     shareUrl: '',
     contentUrl: '',
     inProgress: false,
-  },
-  {
-    id: '4',
-    title: '🗑️ Press ⌘ + ⌫ to delete this task',
-    tag: null,
-    url: '',
-    shareUrl: '',
-    contentUrl: '',
-    inProgress: false,
+    completed: false,
   },
   {
     id: '5',
@@ -48,6 +47,7 @@ const ONBOARDING_DATA: Todo[] = [
     shareUrl: '',
     contentUrl: 'https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494',
     inProgress: false,
+    completed: false,
   },
   {
     id: '6',
@@ -58,6 +58,7 @@ const ONBOARDING_DATA: Todo[] = [
     contentUrl:
       'https://reboot-studio.notion.site/85dd2134f0cc4cc5b1f5ac7aab3ecbae?v=ee2ec2d05a8449b4a58a6f954ce5e250',
     inProgress: false,
+    completed: false,
   },
   {
     id: '7',
@@ -68,6 +69,7 @@ const ONBOARDING_DATA: Todo[] = [
     shareUrl: '',
     contentUrl: '',
     inProgress: false,
+    completed: false,
   },
 ]
 
@@ -77,19 +79,28 @@ const TAGS: Tag[] = [
 ]
 
 export const useOnboarding = () => {
-  const [data, setData] = useState<Todo[]>(ONBOARDING_DATA)
+  const [data, setData] = useCachedState<OnboardingTodo[]>(
+    'onboarding-data',
+    ONBOARDING_DATA
+  )
   const [searchText, setSearchText] = useState<string>('')
 
   const handleComplete = useCallback(
-    async (todo: Todo) => {
-      const optimisticData = data.filter((t) => t.id !== todo.id)
+    (todo: Todo) => {
+      const optimisticData = data.map((t) => {
+        if (t.id === todo.id) {
+          return { ...t, completed: true }
+        }
+
+        return t
+      })
       setData(optimisticData)
       showToast(Toast.Style.Success, 'Marked as Completed')
     },
     [data]
   )
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     const optimisticTodo = {
       id: `fake-id-${Math.random() * 100}`,
       title: searchText,
@@ -98,6 +109,7 @@ export const useOnboarding = () => {
       shareUrl: '',
       contentUrl: '',
       inProgress: false,
+      completed: false,
     }
 
     setData([optimisticTodo, ...data])
@@ -106,26 +118,32 @@ export const useOnboarding = () => {
   }, [searchText])
 
   const handleSetTag = useCallback(
-    async (todo: Todo, tag: Tag | null) => {
+    (todo, tag: Tag | null) => {
+      const completed = todo.id === '3' ? true : todo.completed
+
       const optimisticData = data.map((t) =>
-        t.id === todo.id ? { ...todo, tag } : t
-      )
+        t.id === todo.id ? { ...todo, tag, completed } : t
+      ) as OnboardingTodo[]
+
       setData(optimisticData)
     },
     [data]
   )
 
   const handleSetDate = useCallback(
-    async (todo: Todo, dateValue: string | null, name: string) => {
+    async (todo, dateValue: string | null, name: string) => {
+      const completed = todo.id === '2' ? true : todo.completed
+
       const optimisticData = data.map((t) =>
         t.id === todo.id
           ? {
               ...todo,
               dateValue: dateValue,
               date: new Date(dateValue || ''),
+              completed,
             }
           : t
-      )
+      ) as OnboardingTodo[]
 
       setData(optimisticData)
       showToast(Toast.Style.Success, `Scheduled for ${name}`)
@@ -133,14 +151,17 @@ export const useOnboarding = () => {
     [data]
   )
 
-  const handleDelete = useCallback(
-    async (todoId: string) => {
-      const optimisticData = data.filter((t) => t.id !== todoId)
-      setData(optimisticData)
-      showToast(Toast.Style.Success, 'Task Deleted')
-    },
-    [data]
-  )
+  const handleOnAuthorize = useCallback(() => {
+    const optimisticData = data.map((t) => {
+      if (t.id === '7') {
+        return { ...t, completed: true }
+      }
+
+      return t
+    })
+
+    setData(optimisticData)
+  }, [data])
 
   const todos = useMemo(() => {
     if (searchText) {
@@ -162,6 +183,6 @@ export const useOnboarding = () => {
     handleComplete,
     handleSetTag,
     handleSetDate,
-    handleDelete,
+    handleOnAuthorize,
   }
 }
