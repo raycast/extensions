@@ -1,5 +1,7 @@
 # Tailwind CSS Changelog
 
+## [Updated CSS classes] - 2022-11-29
+
 ## [Generate all CSS classes] - 2022-11-27
 - Generate all CSS classes for the `Search Classes` command
 
