@@ -56,7 +56,7 @@ async function fetchGHUsername(extension, raycastUsername) {
     const commitHash = await new Promise((resolve, reject) =>
       exec(
         // find commit that added the package.json
-        `cd "${extensionsDir}" && git log --diff-filter=A --format=format:%H -- "${extension.name}/package.json"`,
+        `cd "${extensionsDir}" && git log --diff-filter=A --format=format:%H -- "${extension.extensionFolder}/package.json"`,
         (err, stdout, stderr) => {
           if (err || stderr) {
             reject(err || new Error(stderr));
@@ -76,13 +76,13 @@ async function fetchGHUsername(extension, raycastUsername) {
 
     return commit.author.login;
   } else {
-    const package = await fs.readFile(path.join(extensionsDir, `${extension.name}/package.json`), "utf8");
+    const package = await fs.readFile(path.join(extensionsDir, `${extension.extensionFolder}/package.json`), "utf8");
 
     const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1) + 1;
     const commitHash = await new Promise((resolve, reject) =>
       exec(
         // find commit that added contributor to the package.json
-        `cd "${extensionsDir}" && git blame --porcelain  -L ${line},${line} "${extension.name}/package.json"`,
+        `cd "${extensionsDir}" && git blame --porcelain  -L ${line},${line} "${extension.extensionFolder}/package.json"`,
         (err, stdout, stderr) => {
           if (err || stderr) {
             reject(err || new Error(stderr));
