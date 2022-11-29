@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "denmarks-address-web-api",
+  "title": "Search Through The Danish Address Web API",
+  "description": "Get information about addresses in Denmark by searching through the Danish Address Web API with the adgangsadresseid as value.",
+  "icon": "dawa_icon.png",
+  "author": "SimonJ",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "icon": "dawa_icon.png",
+      "title": "Search Address",
+      "subtitle": "Search Denmarks addresses by adgangsadresseid",
+      "description": "Search Denmarks addresses by adgangsadresseid",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "adgangsadresseid",
+          "placeholder": "adgangsadresseid",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
