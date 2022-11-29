@@ -42,9 +42,7 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}?region=${
-              process.env.AWS_REGION
-            }&tab=objects`}
+            url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}`}
           />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
@@ -59,7 +57,13 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
-      {error ? (
+      {isPermanentRedirectError(error) ? (
+        <List.EmptyView
+          title="Wrong region for bucket."
+          description={`The ${error.Bucket} cannot be accessed with your current region (${process.env.AWS_REGION}).`}
+          icon={Icon.Globe}
+        />
+      ) : error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
         objects?.map((object) => (
@@ -114,31 +118,18 @@ async function fetchBuckets() {
   return Buckets;
 }
 
-async function fetchBucketObjects(
-  bucket: string,
-  region?: string,
-  nextMarker?: string,
-  objects: _Object[] = []
-): Promise<_Object[]> {
-  try {
-    const { Contents, NextMarker } = await new S3Client({ region }).send(
-      new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
-    );
+async function fetchBucketObjects(bucket: string, nextMarker?: string, objects: _Object[] = []): Promise<_Object[]> {
+  const { Contents, NextMarker } = await new S3Client({}).send(
+    new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
+  );
 
-    const combinedObjects = [...objects, ...(Contents || [])];
+  const combinedObjects = [...objects, ...(Contents || [])];
 
-    if (NextMarker) {
-      return fetchBucketObjects(bucket, region, NextMarker, combinedObjects);
-    }
-
-    return combinedObjects;
-  } catch (err) {
-    if (isPermanentRedirectError(err)) {
-      const region = err.Endpoint.split(".")[1].replace("s3-", "");
-      return fetchBucketObjects(bucket, region, nextMarker, objects);
-    }
-    throw err;
+  if (NextMarker) {
+    return fetchBucketObjects(bucket, NextMarker, combinedObjects);
   }
+
+  return combinedObjects;
 }
 
 function isPermanentRedirectError(err: unknown): err is S3PermanentRedirectError {
@@ -147,6 +138,7 @@ function isPermanentRedirectError(err: unknown): err is S3PermanentRedirectError
 
 interface S3PermanentRedirectError extends S3ServiceException {
   Code: "PermanentRedirect";
+  Bucket: string;
   Endpoint: string;
 }
 
