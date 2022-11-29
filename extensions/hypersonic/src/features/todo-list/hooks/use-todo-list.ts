@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react'
-import { showToast, Toast } from '@raycast/api'
+import {
+  Action,
+  Alert,
+  confirmAlert,
+  Icon,
+  showToast,
+  Toast,
+} from '@raycast/api'
 import { Todo } from '@/types/todo'
 import { Tag } from '@/types/tag'
 import { createTodo } from '@/services/notion/operations/create-todo'
@@ -244,19 +251,30 @@ export function useTodoList() {
   }
 
   const handleDelete = async (todoId: string) => {
-    try {
-      await mutate(deleteTodo(todoId), {
-        optimisticUpdate(data) {
-          if (!data) return data
-          return data.filter((t) => t.id !== todoId)
+    if (
+      await confirmAlert({
+        title: 'Are you sure you want to delete?',
+        icon: Icon.Trash,
+        primaryAction: {
+          title: 'Delete',
+          style: Alert.ActionStyle.Destructive,
         },
-        shouldRevalidateAfter: false,
       })
+    ) {
+      try {
+        await mutate(deleteTodo(todoId), {
+          optimisticUpdate(data) {
+            if (!data) return data
+            return data.filter((t) => t.id !== todoId)
+          },
+          shouldRevalidateAfter: false,
+        })
 
-      showToast(Toast.Style.Success, 'Task Deleted')
-      refreshMenuBar()
-    } catch (e: any) {
-      showToast(Toast.Style.Failure, e?.message)
+        showToast(Toast.Style.Success, 'Task Deleted')
+        refreshMenuBar()
+      } catch (e: any) {
+        showToast(Toast.Style.Failure, e?.message)
+      }
     }
   }
 
