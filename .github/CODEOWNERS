@@ -57,6 +57,7 @@
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bing-wallpaper                           @koinzhang
 /extensions/bitbucket                                @Lp-Francois @esarmstrong
+/extensions/bitbucket-search-self-hosted             @yuercl
 /extensions/bitcoin-price                            @futantan
 /extensions/bitfinex                                 @Yukaii
 /extensions/bitly-url-shortener                      @blessanm86
@@ -660,7 +661,7 @@
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @MaxLeiter @gleich @dgrcode
 /extensions/vim-bro                                  @ajaypremshankar
-/extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @TobiasYin
+/extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @TobiasYin @yossizahn
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @macbookandrew @immint023 @pernielsentikaer
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
@@ -694,6 +695,7 @@
 /extensions/youversion-suggest                       @caleb531
 /extensions/yubikey-code                             @yoyoyeti
 /extensions/zen-mode                                 @pradeepb28
+/extensions/zendesk                                  @cpenned
 /extensions/zeplin-project-search                    @dorukgunes
 /extensions/zoom                                     @thomaslombart
 /extensions/zotero                                   @sadanand-singh

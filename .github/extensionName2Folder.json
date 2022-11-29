@@ -56,6 +56,7 @@
   "binance": "binance",
   "bing-wallpaper": "bing-wallpaper",
   "bitbucket": "bitbucket",
+  "bitbucket-search-self-hosted": "bitbucket-search-self-hosted",
   "bitcoin-price": "bitcoin-price",
   "bitfinex": "bitfinex",
   "bitly-url-shortener": "bitly-url-shortener",
@@ -693,6 +694,7 @@
   "youversion-suggest": "youversion-suggest",
   "yubikey-code": "yubikey-code",
   "zen-mode": "zen-mode",
+  "zendesk": "zendesk",
   "zeplin-project-raycast-extension": "zeplin-project-search",
   "zoom": "zoom",
   "zotero": "zotero"
