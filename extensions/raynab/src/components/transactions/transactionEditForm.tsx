@@ -21,7 +21,6 @@ interface FormValues {
 
 export function TransactionEditForm({ transaction }: { transaction: TransactionDetail }) {
   const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const [amount, setAmount] = useState(formatToReadablePrice({ amount: transaction.amount, locale: false }));
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
 
   const { data: payees, isValidating: isPayeesLoading } = usePayees(activeBudgetId);
@@ -46,6 +45,8 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
     });
   }
 
+  const [amount, setAmount] = useState(formatToReadablePrice({ amount: transaction.amount, locale: false }));
+  const [amountError, setAmountError] = useState<string | undefined>();
   const currencySymbol = activeBudgetCurrency?.currency_symbol;
   return (
     <Form
@@ -71,6 +72,15 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         title={`Amount ${currencySymbol ? `(${currencySymbol})` : ''}`}
         value={amount}
         onChange={setAmount}
+        error={amountError}
+        onBlur={(event) => {
+          const currentAmount = event.target.value ?? '';
+          if (!isNumber(currentAmount)) {
+            setAmountError(currentAmount ? `"${currentAmount} "is not a valid number` : 'Enter a valid number');
+          } else {
+            setAmountError(undefined);
+          }
+        }}
       />
       <Form.Dropdown
         id="payee_id"
@@ -131,15 +141,5 @@ function isValidFormSubmission(values: FormValues) {
       return;
     }
   });
-
-  if (!isNumber(values.amount)) {
-    isValid = false;
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Incorrect value for the amount`,
-      message: values.amount ? `${values.amount} is not a valid number` : 'Enter a valid number',
-    });
-  }
-
   return isValid;
 }
