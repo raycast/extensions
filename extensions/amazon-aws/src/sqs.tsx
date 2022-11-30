@@ -1,27 +1,26 @@
-import { ActionPanel, List, Detail, Action, confirmAlert, Toast, showToast } from "@raycast/api";
+import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import chunk from "lodash/chunk";
-import AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
-
-const preferences = setupAws();
-const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 export default function SQS() {
-  const { data: queues, error, isLoading } = useCachedPromise(fetchQueues);
+  const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
   const { data: attributes, revalidate: revalidateAttributes } = useCachedPromise(fetchQueueAttributes, queues || []);
 
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
-
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter queues by name...">
-      {queues?.map((i, k) => (
-        <SQSQueue key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter queues by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        queues?.map((i, k) => (
+          <SQSQueue key={k} queue={i} attributes={attributes?.[i]} onPurge={revalidateAttributes} />
+        ))
+      )}
     </List>
   );
 }
@@ -59,7 +58,7 @@ function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefine
           const toast = await showToast({ style: Toast.Style.Animated, title: "Purging queue..." });
 
           try {
-            await sqs.purgeQueue({ QueueUrl: queue }).promise();
+            await new SQSClient({}).send(new PurgeQueueCommand({ QueueUrl: queue }));
             toast.style = Toast.Style.Success;
             toast.title = "Purged queue";
           } catch (err) {
@@ -75,9 +74,9 @@ function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefine
 
   const path =
     "https://" +
-    preferences.region +
+    process.env.AWS_REGION +
     ".console.aws.amazon.com/sqs/v2/home?region=" +
-    preferences.region +
+    process.env.AWS_REGION +
     "#/queues/" +
     encodeURIComponent(queue);
 
@@ -103,7 +102,7 @@ function SQSQueue(props: { queue: string; attributes: QueueAttributes | undefine
 }
 
 async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
-  const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
+  const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
   const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
 
   if (NextToken) {
@@ -121,8 +120,8 @@ async function fetchQueueAttributes(...queueUrls: string[]) {
   for (const queueUrlBatch of queueUrlBatches) {
     await Promise.all(
       queueUrlBatch.map(async (queueUrl) => {
-        const { Attributes } = await sqs
-          .getQueueAttributes({
+        const { Attributes } = await new SQSClient({}).send(
+          new GetQueueAttributesCommand({
             QueueUrl: queueUrl,
             AttributeNames: [
               "ApproximateNumberOfMessages",
@@ -130,7 +129,7 @@ async function fetchQueueAttributes(...queueUrls: string[]) {
               "CreatedTimestamp",
             ],
           })
-          .promise();
+        );
 
         attributesMap[queueUrl] = Attributes as unknown as QueueAttributes;
       })

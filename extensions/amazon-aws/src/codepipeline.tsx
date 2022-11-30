@@ -1,26 +1,27 @@
-import { ActionPanel, List, Detail, Action, Icon } from "@raycast/api";
-import * as AWS from "aws-sdk";
-import setupAws from "./util/setupAws";
+import {
+  CodePipelineClient,
+  ListPipelineExecutionsCommand,
+  ListPipelinesCommand,
+  PipelineSummary,
+} from "@aws-sdk/client-codepipeline";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { PipelineSummary } from "aws-sdk/clients/codepipeline";
-
-const preferences = setupAws();
-const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
+import AWSProfileDropdown from "./util/aws-profile-dropdown";
 
 export default function CodePipeline() {
-  const { data: pipelines, error, isLoading } = useCachedPromise(fetchPipelines);
-
-  if (error) {
-    return (
-      <Detail markdown="No valid [configuration and credential file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
-    );
-  }
+  const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter codepipelines by name...">
-      {pipelines?.map((i) => (
-        <CodePipelineListItem key={i.name} pipeline={i} />
-      ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter codepipelines by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : (
+        pipelines?.map((i) => <CodePipelineListItem key={i.name} pipeline={i} />)
+      )}
     </List>
   );
 }
@@ -45,7 +46,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
               "https://console.aws.amazon.com/codesuite/codepipeline/pipelines/" +
               pipeline.name +
               "/view?region=" +
-              preferences.region
+              process.env.AWS_REGION
             }
           />
         </ActionPanel>
@@ -68,7 +69,9 @@ const iconMap: { [key: string]: Icon } = {
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
-  const { nextToken, pipelines } = await pipeline.listPipelines({ nextToken: token }).promise();
+  const { nextToken, pipelines } = await new CodePipelineClient({}).send(
+    new ListPipelinesCommand({ nextToken: token })
+  );
   const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
   if (nextToken) {
@@ -82,6 +85,9 @@ async function fetchExecutionState(pipelineName?: string) {
   if (!pipelineName) {
     return;
   }
-  const { pipelineExecutionSummaries } = await pipeline.listPipelineExecutions({ pipelineName }).promise();
+
+  const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
+    new ListPipelineExecutionsCommand({ pipelineName })
+  );
   return pipelineExecutionSummaries?.[0];
 }

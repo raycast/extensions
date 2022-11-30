@@ -83,28 +83,18 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "region",
-      "type": "textfield",
-      "required": true,
-      "title": "AWS Region",
-      "description": "The region for which you want to list resources",
-      "placeholder": "eu-central-1"
-    },
-    {
-      "name": "aws_profile",
-      "type": "textfield",
-      "required": true,
-      "title": "AWS Profile",
-      "description": "The AWS profile to use",
-      "placeholder": "default"
-    }
-  ],
   "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.216.0",
+    "@aws-sdk/client-codepipeline": "^3.216.0",
+    "@aws-sdk/client-dynamodb": "^3.216.0",
+    "@aws-sdk/client-ec2": "^3.216.0",
+    "@aws-sdk/client-ecs": "^3.216.0",
+    "@aws-sdk/client-lambda": "^3.216.0",
+    "@aws-sdk/client-s3": "^3.216.0",
+    "@aws-sdk/client-sqs": "^3.216.0",
+    "@aws-sdk/shared-ini-file-loader": "^3.215.0",
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.4.9",
-    "aws-sdk": "^2.1023.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.0.0"
   },
