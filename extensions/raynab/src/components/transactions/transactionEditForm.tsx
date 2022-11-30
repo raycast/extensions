@@ -5,14 +5,17 @@ import { useState } from 'react';
 import { updateTransaction } from '@lib/api';
 
 import { SaveTransaction } from 'ynab';
+
 import { usePayees } from '@hooks/usePayees';
 import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useCategoryGroups } from '@hooks/useCategoryGroups';
 
-interface Values {
+interface FormValues {
   date: Date;
   amount: string;
   payee_id: string;
   memo?: string;
+  category_id: string;
   flag_color: SaveTransaction.FlagColorEnum | '';
 }
 
@@ -21,9 +24,10 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
   const [amount, setAmount] = useState(formatToReadablePrice({ amount: transaction.amount, locale: false }));
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
 
-  const { data: payees, isValidating } = usePayees(activeBudgetId);
+  const { data: payees, isValidating: isPayeesLoading } = usePayees(activeBudgetId);
+  const { data: categoryGroups, isValidating: isLoadingCategories } = useCategoryGroups(activeBudgetId);
 
-  async function handleSubmit(values: Values) {
+  async function handleSubmit(values: FormValues) {
     if (!isValidFormSubmission(values)) return;
 
     const submittedValues = {
@@ -51,7 +55,6 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
-      isLoading={isValidating}
     >
       <Form.Description
         title="Edit Transaction"
@@ -64,10 +67,27 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         value={amount}
         onChange={setAmount}
       />
-      <Form.Dropdown id="payee_id" title="Payee" defaultValue={transaction.payee_id ?? undefined}>
+      <Form.Dropdown
+        id="payee_id"
+        title="Payee"
+        isLoading={isPayeesLoading}
+        defaultValue={transaction.payee_id ?? undefined}
+      >
         {payees?.map((payee) => (
           <Form.Dropdown.Item key={payee.id} value={payee.id} title={payee.name} />
         ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        id="category_id"
+        title="Category"
+        isLoading={isLoadingCategories}
+        defaultValue={transaction.category_id ?? undefined}
+      >
+        {categoryGroups
+          ?.flatMap((g) => g.categories)
+          .map((category) => (
+            <Form.Dropdown.Item key={category.id} value={category.id} title={category.name} />
+          ))}
       </Form.Dropdown>
       <Form.TextArea
         id="memo"
@@ -90,7 +110,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
 
 const REQUIRED_FORM_VALUES = new Map([['payee_id', 'Payee']]);
 
-function isValidFormSubmission(values: Values) {
+function isValidFormSubmission(values: FormValues) {
   let isValid = true;
 
   Object.entries({ ...values }).forEach(([key, value]) => {
