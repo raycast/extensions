@@ -37,7 +37,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
       key={pipeline.name}
       title={pipeline.name || "Unknown pipeline name"}
       subtitle={status}
-      icon={iconMap[status]}
+      icon={Icon.List}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
@@ -55,6 +55,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
         {
           text: pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined,
         },
+        { icon: iconMap[status] },
       ]}
     />
   );

@@ -49,7 +49,7 @@ function ECSCluster(props: { cluster: Cluster }) {
       key={cluster.clusterArn}
       title={name || "Unknown ECS name"}
       subtitle={subtitle}
-      icon="ecs.png"
+      icon={Icon.Box}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

@@ -25,7 +25,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
       title={tableName || "Unknown Table name"}
-      icon="dynamodb.png"
+      icon={Icon.HardDrive}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

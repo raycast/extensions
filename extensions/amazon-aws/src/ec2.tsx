@@ -54,7 +54,7 @@ function EC2Instance(props: { instance: Instance }) {
       key={instance.InstanceId}
       title={name || "Unknown Instance name"}
       subtitle={instance.InstanceType}
-      icon="ec2.png"
+      icon={Icon.Layers}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

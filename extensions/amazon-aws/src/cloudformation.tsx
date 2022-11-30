@@ -26,7 +26,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
-      icon="cloudformation.png"
+      icon={Icon.AppWindowGrid2x2}
       title={stack.StackName || ""}
       actions={
         <ActionPanel>

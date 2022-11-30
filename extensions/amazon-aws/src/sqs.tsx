@@ -80,7 +80,7 @@ function SQSQueue({ queue }: { queue: string }) {
       id={queue}
       key={queue}
       title={displayName ?? ""}
-      icon="sqs.png"
+      icon={Icon.Forward}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
