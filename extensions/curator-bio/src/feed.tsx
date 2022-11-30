@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { useMe, useSubscriptions } from "./lib/hooks";
 import { ItemListDetail } from "./components/Item/ItemDetail";
+import ErrorView from "./components/ErrorView";
 
 export default function Login() {
   const { isLoading: isMeLoading, data: userResponse, error } = useMe();
@@ -11,11 +12,15 @@ export default function Login() {
 
   const isListLoading = isMeLoading || isLoading;
 
-  return (
-    <List isLoading={isListLoading} isShowingDetail={true}>
-      {data.map((item: any) => (
-        <ItemListDetail key={item.id} item={item} />
-      ))}
-    </List>
-  );
+  if (error) {
+    return <ErrorView error={error} />;
+  } else {
+    return (
+      <List isLoading={isListLoading} isShowingDetail={true}>
+        {data.map((item: any) => (
+          <ItemListDetail key={item.id} item={item} />
+        ))}
+      </List>
+    );
+  }
 }

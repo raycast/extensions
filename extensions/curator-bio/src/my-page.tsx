@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { useMe } from "./lib/hooks";
 import { useMemo } from "react";
 import UserView from "./components/UserView";
+import ErrorView from "./components/ErrorView";
 
 export default function MyPage() {
   const { isLoading: isLoading, data: userResponse, error } = useMe();
@@ -10,5 +11,9 @@ export default function MyPage() {
     return userResponse?.data;
   }, [userResponse]);
 
-  return user ? <UserView user={user} /> : <List isLoading={!user || isLoading} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  } else {
+    return user ? <UserView user={user} /> : <List isLoading={isLoading} />;
+  }
 }

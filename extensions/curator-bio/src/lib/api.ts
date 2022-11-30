@@ -1,6 +1,6 @@
 import got from "got";
 import { CookieJar } from "tough-cookie";
-import { APIData, CollectionData, Item, UserData } from "./types";
+import { APIData, CollectionData, Item, UserData, LoginResponse } from "./types";
 import RaycastCacheStore from "./cacheStore";
 
 const store = new RaycastCacheStore();
@@ -8,18 +8,19 @@ const cookieJar = new CookieJar(store);
 
 const client = got.extend({
   prefixUrl: "https://www.curator.bio/api/v2",
-  resolveBodyOnly: true,
   cookieJar,
+  followRedirect: false,
 });
 
 export const login = async (email: string, password: string) => {
-  return client.post("users/signIn", {
-    json: {
-      email,
-      password,
-    },
-    resolveBodyOnly: false,
-  });
+  return client
+    .post("users/signIn", {
+      json: {
+        email,
+        password,
+      },
+    })
+    .json() as Promise<LoginResponse>;
 };
 
 export const getMe = async () => {
@@ -72,7 +73,7 @@ export const getCollectionItems = async (userId: string, collectionId: string) =
 };
 
 export const getMyItemDetail = async (id: string) => {
-  return client.get(`users/me/items/${id}`);
+  return client.get(`users/me/items/${id}`).json();
 };
 
 // Upload image

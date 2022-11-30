@@ -3,6 +3,7 @@ import { useMe, useItems } from "./lib/hooks";
 import { ItemListDetail } from "./components/Item/ItemDetail";
 import { useMemo } from "react";
 import { Item } from "./lib/types";
+import ErrorView from "./components/ErrorView";
 
 export default function Discover() {
   const { isLoading: isMeLoading, data: userResponse, error, userId } = useMe();
@@ -21,11 +22,15 @@ export default function Discover() {
 
   const isListLoading = isMeLoading || isLoading;
 
-  return (
-    <List isLoading={isListLoading} isShowingDetail={true}>
-      {displayItems.map((item: any) => (
-        <ItemListDetail key={item.id} item={item} />
-      ))}
-    </List>
-  );
+  if (error) {
+    return <ErrorView error={error} />;
+  } else {
+    return (
+      <List isLoading={isListLoading} isShowingDetail={true}>
+        {displayItems.map((item: any) => (
+          <ItemListDetail key={item.id} item={item} />
+        ))}
+      </List>
+    );
+  }
 }

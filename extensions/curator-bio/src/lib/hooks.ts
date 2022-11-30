@@ -38,12 +38,16 @@ export const useMe = () => {
       return res;
     }
 
-    const { statusCode } = await login(email, password);
+    try {
+      const { status } = await login(email, password);
 
-    if (statusCode === 200) {
-      return getMe();
-    } else {
-      throw new Error("Login failed");
+      if (status === 200) {
+        return getMe();
+      } else {
+        throw new Error("loginError");
+      }
+    } catch (error) {
+      throw new Error("loginError");
     }
   });
 

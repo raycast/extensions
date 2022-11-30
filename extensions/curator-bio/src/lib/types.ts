@@ -203,3 +203,16 @@ interface NestedCollsItem {
   items: string[];
   childs: any[];
 }
+
+export type LoginResponse =
+  | {
+      status: 200;
+      data: UserData;
+    }
+  | {
+      status: 201;
+      data: {
+        verificationId: string;
+        verificationEmail: string;
+      };
+    };
