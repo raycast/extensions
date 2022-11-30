@@ -1,7 +1,6 @@
 # Amazon AWS Changelog
 
-## [Support AWS Profile Switch] - 2022-11-28
-
+## [Support AWS Profile Switch] - 2022-11-30
 Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
 
 ## [S3 Command] - 2022-11-18
