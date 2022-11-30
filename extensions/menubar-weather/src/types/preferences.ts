@@ -3,6 +3,7 @@ export interface Preferences {
   longitude: string;
   latitude: string;
   tempUnits: string;
+  windSpeedUnits: string;
   precipitationUnits: string;
   showSun: boolean;
   showLocation: boolean;
