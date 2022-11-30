@@ -40,6 +40,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
               "&tab=overview"
             }
           />
+          <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>
       }
     />

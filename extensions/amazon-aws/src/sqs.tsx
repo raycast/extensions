@@ -23,25 +23,6 @@ export default function SQS() {
 
 function SQSQueue({ queue }: { queue: string }) {
   const { data: attributes, revalidate } = useCachedPromise(fetchQueueAttributes, [queue]);
-  const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
-
-  const accessories: List.Item.Accessory[] = [
-    {
-      icon: "📨",
-      text: attributes ? attributes.ApproximateNumberOfMessages : "...",
-      tooltip: "Approximated Number of Messages",
-    },
-    {
-      icon: "✈️",
-      text: attributes ? attributes.ApproximateNumberOfMessagesNotVisible : "...",
-      tooltip: "Approximated Number of Messages Not Visible",
-    },
-    {
-      icon: "⏰",
-      text: attributes ? new Date(Number.parseInt(attributes.CreatedTimestamp) * 1000).toLocaleDateString() : "...",
-      tooltip: "Creation Time",
-    },
-  ];
 
   function handlePurgeQueueAction() {
     confirmAlert({
@@ -79,19 +60,36 @@ function SQSQueue({ queue }: { queue: string }) {
     <List.Item
       id={queue}
       key={queue}
-      title={displayName ?? ""}
+      title={queue.slice(queue.lastIndexOf("/") + 1)}
       icon={Icon.Forward}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
+          <Action.OpenInBrowser title="Open in Browser" url={path} />
+          <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
           <Action.SubmitForm
+            icon={Icon.Trash}
             title={`Purge Queue (${attributes?.ApproximateNumberOfMessages || "..."})`}
             onSubmit={handlePurgeQueueAction}
           />
         </ActionPanel>
       }
-      accessories={accessories}
+      accessories={[
+        {
+          icon: Icon.Message,
+          text: attributes?.ApproximateNumberOfMessages || "",
+          tooltip: "Messages available",
+        },
+        {
+          icon: Icon.AirplaneLanding,
+          text: attributes?.ApproximateNumberOfMessagesNotVisible || "...",
+          tooltip: "Messages in flight",
+        },
+        {
+          date: attributes && new Date(Number.parseInt(attributes.CreatedTimestamp) * 1000),
+          tooltip: "Creation Time",
+        },
+      ]}
     />
   );
 }

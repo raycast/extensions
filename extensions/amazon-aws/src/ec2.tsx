@@ -21,32 +21,8 @@ export default function EC2() {
   );
 }
 
-function EC2Instance(props: { instance: Instance }) {
-  const instance = props.instance;
+function EC2Instance({ instance }: { instance: Instance }) {
   const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
-
-  function getAccessories(): List.Item.Accessory[] {
-    const _acc: List.Item.Accessory[] = [];
-    _acc.push({
-      icon: "🔒",
-      text: instance.PrivateIpAddress,
-      tooltip: "Private Ip Address",
-    });
-    if (instance.PublicIpAddress) {
-      _acc.push({
-        icon: "🌍",
-        text: instance.PublicIpAddress,
-        tooltip: "Public Ip Address",
-      });
-    }
-    _acc.push({
-      icon: "⏰",
-      text: instance.LaunchTime ? instance.LaunchTime.toLocaleDateString() : undefined,
-      tooltip: "Launch Time",
-    });
-
-    return _acc;
-  }
 
   return (
     <List.Item
@@ -68,13 +44,16 @@ function EC2Instance(props: { instance: Instance }) {
               instance.InstanceId
             }
           />
-          <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress || ""} />
+          <Action.CopyToClipboard title="Copy Instance ID" content={instance.InstanceId || ""} />
+          {instance.PrivateIpAddress && (
+            <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress} />
+          )}
           {instance.PublicIpAddress && (
             <Action.CopyToClipboard title="Copy Public IP" content={instance.PublicIpAddress} />
           )}
         </ActionPanel>
       }
-      accessories={getAccessories()}
+      accessories={[{ date: instance.LaunchTime }]}
     />
   );
 }

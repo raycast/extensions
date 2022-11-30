@@ -49,14 +49,10 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
               process.env.AWS_REGION
             }
           />
+          <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
         </ActionPanel>
       }
-      accessories={[
-        {
-          text: pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined,
-        },
-        { icon: iconMap[status] },
-      ]}
+      accessories={[{ date: pipeline.updated || pipeline.created }, { icon: iconMap[status] }]}
     />
   );
 }

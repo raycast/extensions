@@ -89,12 +89,13 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
                 />
                 <Action.SubmitForm
                   title="Download"
+                  icon={Icon.Download}
                   onSubmit={async () => {
                     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
 
                     try {
                       const data = await new S3Client({}).send(
-                        new GetObjectCommand({ Bucket: bucket.Name || "", Key: object.Key || "" })
+                        new GetObjectCommand({ Bucket: bucket.Name, Key: object.Key || "" })
                       );
                       if (data.Body instanceof Readable) {
                         data.Body.pipe(fs.createWriteStream(`${homedir()}/Downloads/${object.Key?.split("/").pop()}`));
