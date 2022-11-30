@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, Color, getLocalStorageItem } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
 import groupBy from "lodash.groupby";
@@ -40,7 +40,7 @@ function Goals({ match, side }: { match: Match; side: "home" | "away" }) {
   };
 
   if (isLoading) {
-    return <List.Item.Detail.Metadata.Label title="" text={`Loading…`} />;
+    return null;
   }
 
   return (
@@ -64,16 +64,24 @@ export default function Command() {
   );
   const [filter, setFilter] = useCachedState("filter", "all");
   const [showingDetail, setShowingDetail] = useCachedState("showDetails", false);
+
   const [time, setTime] = useCachedState("time", null);
   const [score, setScore] = useCachedState("score", "");
+
+  const [time2, setTime2] = useCachedState("time", null);
+  const [score2, setScore2] = useCachedState("score2", "");
+
   const [refresh, setRefresh] = useState<number | null>(null);
 
   let matches: Match[] = (data as Data)?.Results || [];
 
-  const currentMatch = matches.find((match) => match.MatchStatus === 3);
+  const currentMatches = matches.filter((match) => match.MatchStatus === 3);
+
+  const match1 = currentMatches[0];
+  const match2 = currentMatches[1];
 
   useEffect(() => {
-    if (!currentMatch) return;
+    if (!currentMatches.length) return;
 
     const interval: ReturnType<typeof setInterval> = setInterval(() => {
       setRefresh(Date.now());
@@ -82,7 +90,7 @@ export default function Command() {
     return () => {
       clearInterval(interval);
     };
-  }, [currentMatch]);
+  }, [currentMatches]);
 
   useEffect(() => {
     const fetchCurrentMatch = async (match: Match) => {
@@ -93,10 +101,28 @@ export default function Command() {
       setScore(`${data?.HomeTeam?.Score} : ${data?.AwayTeam?.Score}`);
     };
 
-    if (currentMatch) {
-      fetchCurrentMatch(currentMatch);
+    if (match1) {
+      fetchCurrentMatch(match1);
     }
-  }, [currentMatch, refresh]);
+  }, [match1, refresh]);
+
+  useEffect(() => {
+    const fetchCurrentMatch = async (match: Match) => {
+      const { IdCompetition, IdSeason, IdStage, IdMatch } = match;
+      const res = await fetch(`${BASE_URL}/live/football/${IdCompetition}/${IdSeason}/${IdStage}/${IdMatch}`);
+      const data = await res.json();
+      setTime2(data?.MatchTime || null);
+      setScore2(`${data?.HomeTeam?.Score} : ${data?.AwayTeam?.Score}`);
+    };
+
+    if (match2) {
+      fetchCurrentMatch(match2);
+    }
+  }, [match2, refresh]);
+
+  const getScore = (match: Match) => {
+    return match?.IdMatch === match2?.IdMatch ? score2 : score;
+  };
 
   if (filter === "next") {
     matches = matches.filter((match) => match.MatchStatus !== 0);
@@ -131,7 +157,7 @@ export default function Command() {
 
     // live
     if (match.MatchStatus === 3) {
-      return time || "Now";
+      return (match?.IdMatch === match2?.IdMatch ? time2 : time) || "Now";
     }
 
     return "";
@@ -207,7 +233,7 @@ export default function Command() {
                   title={`${home}  vs  ${away}`}
                   accessories={[
                     MatchStatus === 3 || MatchStatus === 0
-                      ? { text: MatchStatus === 3 ? score : `${HomeTeamScore} : ${AwayTeamScore}` }
+                      ? { text: MatchStatus === 3 ? getScore(match) : `${HomeTeamScore} : ${AwayTeamScore}` }
                       : {},
                     {
                       text: !showingDetail
