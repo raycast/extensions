@@ -88,7 +88,8 @@
             "subtitle": "CleanShot X",
             "description": "Capture text using OCR",
             "icon": "capture-text.png",
-            "mode": "no-view"
+            "mode": "no-view",
+            "keywords": ["text recognition"]
         },
         {
             "name": "annotate",
