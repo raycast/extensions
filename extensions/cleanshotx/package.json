@@ -5,6 +5,9 @@
     "description": "Capture and record your screen!",
     "icon": "command-icon.png",
     "author": "Aayush9029",
+    "contributors": [
+        "thomaslombart"
+    ],
     "license": "MIT",
     "commands": [
         {
