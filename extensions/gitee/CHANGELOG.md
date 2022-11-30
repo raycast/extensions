@@ -1,6 +1,6 @@
 # Gitee Changelog
 
-## [Update Raycast API] - {PR_MERGE_DATE}
+## [Update Raycast API] - 2022-11-30
 
 - Update Raycast API version to 1.44.0
 
