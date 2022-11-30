@@ -3,7 +3,7 @@
   "name": "aws",
   "title": "Amazon AWS",
   "description": "Integrate your AWS account in Raycast",
-  "icon": "command-icon.png",
+  "icon": "aws-logo.png",
   "author": "Falcon",
   "contributors": [
     "Hodglim",
