@@ -80,10 +80,10 @@
             "mode": "no-view"
         },
         {
-            "name": "text-recognition",
-            "title": "Text Recognition",
+            "name": "capture-text",
+            "title": "Capture Text (OCR)",
             "subtitle": "CleanShot X",
-            "description": "Text Recognition Using Ocr",
+            "description": "Capture text using OCR",
             "icon": "capture-text.png",
             "mode": "no-view"
         },
