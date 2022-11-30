@@ -88,3 +88,12 @@ export async function setOutput(output: string, title: string) {
     message: "Copied output to clipboard",
   });
 }
+
+/**
+ * Removes newlines from a string.
+ *
+ * @param input The string to remove newlines from.
+ */
+export function removeNewlines(input: string): string {
+  return input.replaceAll("\n", "")
+}

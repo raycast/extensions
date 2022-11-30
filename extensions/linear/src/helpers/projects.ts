@@ -1,4 +1,6 @@
+import { Project } from "@linear/sdk";
 import { Image } from "@raycast/api";
+import emojis from "node-emoji";
 
 type IconAsset = {
   light: Image.Asset;
@@ -40,3 +42,21 @@ export const projectStatusText: Record<string, string> = {
   completed: "Completed",
   canceled: "Canceled",
 };
+
+export function getProjectIcon(project?: Pick<Project, "icon" | "color">) {
+  if (!project) {
+    return { source: { light: "light/no-project.svg", dark: "dark/no-project.svg" } };
+  }
+
+  const emojiRegex = new RegExp(/:(.*):/, "g");
+  if (project.icon && emojiRegex.test(project.icon)) {
+    const emoji = emojis.get(project.icon);
+    // if there's no corresponding emoji, the same emoji code is returned
+    return emoji === project.icon ? { source: { light: "light/project.svg", dark: "dark/project.svg" } } : emoji;
+  }
+
+  return {
+    source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
+    tintColor: project.color,
+  };
+}

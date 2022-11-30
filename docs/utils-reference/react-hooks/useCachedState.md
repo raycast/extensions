@@ -45,7 +45,9 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      ...
+      {
+        // your list items
+      }
     </List>
   );
 }

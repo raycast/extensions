@@ -1,8 +1,19 @@
-import { useState, useRef, useEffect } from "react";
-import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import { useEffect } from "react";
+import {
+  Clipboard,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  useNavigation,
+  showToast,
+} from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
-import { getLastCreatedIssues } from "../api/getIssues";
+import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
 
 import useLabels from "../hooks/useLabels";
@@ -18,7 +29,7 @@ import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
 import { getCycleOptions } from "../helpers/cycles";
-import { projectStatusText } from "../helpers/projects";
+import { getProjectIcon, projectStatusText } from "../helpers/projects";
 import { getTeamIcon } from "../helpers/teams";
 
 import IssueDetail from "./IssueDetail";
@@ -46,47 +57,150 @@ export type CreateIssueValues = {
   assigneeId: string;
   labelIds: string[];
   estimate: string;
-  dueDate: Date;
+  dueDate: Date | null;
   cycleId: string;
   projectId: string;
   parentId: string;
 };
 
+type Preferences = {
+  signature: boolean;
+  autofocusField: "teamId" | "title";
+  copyToastAction: "key" | "url" | "title";
+};
+
+function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
+  if (copyToastAction === "url") {
+    return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
+  }
+
+  if (copyToastAction === "title") {
+    return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
+  }
+
+  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+}
+
 export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { push } = useNavigation();
-
-  const { signature } = getPreferenceValues<{ signature: boolean }>();
-
-  const titleField = useRef<Form.TextField>(null);
-
-  const [teamId, setTeamId] = useState(props.draftValues?.teamId || props.teamId);
-  const [title, setTitle] = useState(props.draftValues?.title);
-  const [description, setDescription] = useState(props.draftValues?.description);
-  const [priority, setPriority] = useState(props.draftValues?.priority);
-  const [stateId, setStateId] = useState(props.draftValues?.stateId);
-  const [estimate, setEstimate] = useState(props.draftValues?.estimate);
-  const [assigneeId, setAssigneeId] = useState(props.draftValues?.assigneeId || props.assigneeId);
-  const [labelIds, setLabelIds] = useState<string[]>(props.draftValues?.labelIds || []);
-  const [dueDate, setDueDate] = useState(props.draftValues?.dueDate);
-  const [cycleId, setCycleId] = useState(props.draftValues?.cycleId || props.cycleId);
-  const [projectId, setProjectId] = useState(props.draftValues?.projectId || props.projectId);
-  const [parentId, setParentId] = useState(props.draftValues?.parentId || props.parentId);
-
-  const [titleError, setTitleError] = useState<string | undefined>();
+  const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
   const { teams, isLoadingTeams } = useTeams();
-  const { states } = useStates(teamId);
-  const { labels } = useLabels(teamId);
-  const { cycles } = useCycles(teamId);
+  const hasMoreThanOneTeam = teams && teams.length > 1;
+
+  const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
+
+      let payloadDescription = values.description || "";
+      if (signature) {
+        if (values.description) {
+          payloadDescription += "\n\n---\n";
+        }
+
+        payloadDescription += "Created via [Raycast](https://www.raycast.com)";
+      }
+
+      const teamId = hasMoreThanOneTeam ? values.teamId : teams?.[0]?.id;
+
+      if (!teamId) {
+        // that should never happen
+        setValidationError("teamId", "The team is required.");
+        return false;
+      }
+
+      try {
+        const payload: CreateIssuePayload = {
+          teamId,
+          title: values.title,
+          description: payloadDescription,
+          stateId: values.stateId,
+          labelIds: values.labelIds,
+          dueDate: values.dueDate,
+          ...(scale && values.estimate ? { estimate: parseInt(values.estimate) } : {}),
+          ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
+          ...(values.cycleId ? { cycleId: values.cycleId } : {}),
+          ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.parentId ? { parentId: values.parentId } : {}),
+          priority: parseInt(values.priority),
+        };
+
+        const { success, issue } = await createIssue(payload);
+
+        if (success && issue) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Created Issue • ${issue?.identifier}`;
+
+          toast.primaryAction = {
+            title: "Open Issue",
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: async () => {
+              push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
+              await toast.hide();
+            },
+          };
+
+          toast.secondaryAction = {
+            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            ...getCopyToastAction(copyToastAction, issue),
+          };
+
+          reset({
+            title: "",
+            description: "",
+            estimate: "",
+            labelIds: [],
+            dueDate: null,
+            parentId: "",
+          });
+
+          if (hasMoreThanOneTeam) {
+            return focus(autofocusField);
+          }
+
+          return focus("teamId");
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create issue";
+        toast.message = getErrorMessage(error);
+      }
+    },
+    validation: {
+      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
+      title: FormValidation.Required,
+      stateId: FormValidation.Required,
+      priority: FormValidation.Required,
+    },
+    initialValues: {
+      teamId: props.draftValues?.teamId || props.teamId,
+      title: props.draftValues?.title,
+      description: props.draftValues?.description,
+      priority: props.draftValues?.priority,
+      stateId: props.draftValues?.stateId,
+      estimate: props.draftValues?.estimate,
+      assigneeId: props.draftValues?.assigneeId || props.assigneeId,
+      labelIds: props.draftValues?.labelIds || [],
+      dueDate: props.draftValues?.dueDate,
+      cycleId: props.draftValues?.cycleId || props.cycleId,
+      projectId: props.draftValues?.projectId || props.projectId,
+      parentId: props.draftValues?.parentId || props.parentId,
+    },
+  });
+
+  const { states } = useStates(values.teamId);
+  const { labels } = useLabels(values.teamId);
+  const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(teamId);
+  const { projects } = useProjects(values.teamId);
 
   useEffect(() => {
     if (teams?.length === 1) {
-      setTeamId(teams[0].id);
+      setValue("teamId", teams[0].id);
     }
   }, [teams]);
-  const team = teams?.find((team) => team.id === teamId);
+
+  const team = teams?.find((team) => team.id === values.teamId);
 
   const scale = team
     ? getEstimateScale({
@@ -98,7 +212,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const orderedStates = getOrderedStates(states || []);
 
-  const hasMoreThanOneTeam = teams && teams.length > 1;
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
   const hasUsers = props.users && props.users.length > 0;
@@ -106,82 +219,6 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
   const hasIssues = issues && issues.length > 0;
-
-  async function handleSubmit() {
-    if (!title || !teamId || !stateId || !priority) {
-      console.log("missing some content", { title, teamId, description, stateId, priority });
-      return;
-    }
-
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-    await toast.show();
-
-    let payloadDescription = description || "";
-    if (signature) {
-      if (description) {
-        payloadDescription += "\n\n---\n";
-      }
-
-      payloadDescription += "Created via [Raycast](https://www.raycast.com)";
-    }
-
-    try {
-      const payload: CreateIssuePayload = {
-        teamId,
-        title,
-        description: payloadDescription,
-        stateId,
-        labelIds,
-        dueDate,
-        ...(scale && estimate ? { estimate: parseInt(estimate) } : {}),
-        ...(assigneeId ? { assigneeId } : {}),
-        ...(cycleId ? { cycleId } : {}),
-        ...(projectId ? { projectId } : {}),
-        ...(parentId ? { parentId } : {}),
-        priority: parseInt(priority),
-      };
-
-      const { success, issue } = await createIssue(payload);
-
-      if (success && issue) {
-        toast.style = Toast.Style.Success;
-        toast.title = `Created Issue • ${issue?.identifier}`;
-
-        toast.primaryAction = {
-          title: "Open Issue",
-          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-          onAction: async () => {
-            push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
-            await toast.hide();
-          },
-        };
-
-        toast.secondaryAction = {
-          title: "Copy Issue Key",
-          shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-          onAction: () => Clipboard.copy(issue.identifier),
-        };
-
-        setTitle("");
-        setDescription("");
-        setLabelIds([]);
-        setParentId("");
-        setEstimate("");
-
-        titleField.current?.focus();
-      }
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create issue";
-      toast.message = getErrorMessage(error);
-    }
-  }
-
-  function dropTitleErrorIfNeeded() {
-    if (titleError && titleError.length > 0) {
-      setTitleError(undefined);
-    }
-  }
 
   return (
     <Form
@@ -195,16 +232,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
     >
       {hasMoreThanOneTeam ? (
         <>
-          <Form.Dropdown
-            id="teamId"
-            title="Team"
-            value={teamId}
-            onChange={(teamId) => {
-              setStateId("");
-              setTeamId(teamId);
-            }}
-            storeValue
-          >
+          <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
             {teams.map((team) => {
               return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
             })}
@@ -214,36 +242,20 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       ) : null}
 
       <Form.TextField
-        id="title"
         title="Title"
         placeholder="Issue title"
-        ref={titleField}
-        value={title}
-        error={titleError}
-        onChange={(title) => {
-          setTitle(title);
-          dropTitleErrorIfNeeded();
-        }}
-        autoFocus
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setTitleError("The title is required");
-          } else {
-            dropTitleErrorIfNeeded();
-          }
-        }}
+        {...(autofocusField === "title" ? { autoFocus: true } : {})}
+        {...itemProps.title}
       />
 
       <Form.TextArea
-        id="description"
         title="Description"
         placeholder="Add some details (supports Markdown, e.g. **bold**)"
         enableMarkdown
-        value={description}
-        onChange={setDescription}
+        {...itemProps.description}
       />
 
-      <Form.Dropdown id="stateId" title="Status" value={stateId} onChange={setStateId} storeValue>
+      <Form.Dropdown title="Status" storeValue {...itemProps.stateId}>
         {hasStates
           ? orderedStates.map((state) => {
               return (
@@ -258,7 +270,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority} storeValue>
+      <Form.Dropdown title="Priority" storeValue {...itemProps.priority}>
         {hasPriorities
           ? props.priorities?.map(({ priority, label }) => {
               return (
@@ -274,7 +286,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       </Form.Dropdown>
 
       {hasUsers ? (
-        <Form.Dropdown id="assigneeId" title="Assignee" value={assigneeId} onChange={setAssigneeId} storeValue>
+        <Form.Dropdown title="Assignee" storeValue {...itemProps.assigneeId}>
           <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
           {props.users?.map((user) => {
@@ -283,7 +295,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.TagPicker id="labelIds" title="Labels" value={labelIds} onChange={setLabelIds} placeholder="Add label">
+      <Form.TagPicker title="Labels" placeholder="Add label" {...itemProps.labelIds}>
         {hasLabels
           ? labels.map(({ id, name, color }) => (
               <Form.TagPicker.Item title={name} value={id} key={id} icon={{ source: Icon.Dot, tintColor: color }} />
@@ -292,7 +304,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       </Form.TagPicker>
 
       {scale ? (
-        <Form.Dropdown id="estimate" title="Estimate" value={estimate} onChange={setEstimate}>
+        <Form.Dropdown title="Estimate" {...itemProps.estimate}>
           <Form.Dropdown.Item
             title="No estimate"
             value=""
@@ -312,18 +324,12 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.DatePicker
-        id="dueDate"
-        title="Due Date"
-        value={dueDate}
-        onChange={setDueDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.dueDate} />
 
       {hasCycles || hasProjects || hasIssues ? <Form.Separator /> : null}
 
       {hasCycles ? (
-        <Form.Dropdown id="cycleId" title="Cycle" value={cycleId} onChange={setCycleId} storeValue>
+        <Form.Dropdown title="Cycle" storeValue {...itemProps.cycleId}>
           <Form.Dropdown.Item
             title="No Cycle"
             value=""
@@ -339,7 +345,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       ) : null}
 
       {hasProjects ? (
-        <Form.Dropdown id="projectId" title="Project" value={projectId} onChange={setProjectId} storeValue>
+        <Form.Dropdown title="Project" storeValue {...itemProps.projectId}>
           <Form.Dropdown.Item
             title="No Project"
             value=""
@@ -352,10 +358,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title={`${project.name} (${projectStatusText[project.state]})`}
                 value={project.id}
                 key={project.id}
-                icon={{
-                  source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-                  tintColor: project.color,
-                }}
+                icon={getProjectIcon(project)}
               />
             );
           })}
@@ -363,7 +366,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       ) : null}
 
       {hasIssues ? (
-        <Form.Dropdown id="parentId" title="Parent" value={parentId} onChange={setParentId}>
+        <Form.Dropdown title="Parent" {...itemProps.parentId}>
           <Form.Dropdown.Item
             title="No Issue"
             value=""

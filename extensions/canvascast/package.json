@@ -72,14 +72,22 @@
       "subtitle": "Canvas",
       "description": "See the modules, assignments, and announcements for your courses.",
       "mode": "view"
+    },
+    {
+      "name": "feed",
+      "title": "Canvas Feed",
+      "subtitle": "Canvas Dashboard List View",
+      "description": "See assignments, announcements, and events on a timeline-like feed.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@api-blueprints/pathmaker": "^1.0.0",
+    "@api-blueprints/pathmaker": "^1.2.0",
     "@raycast/api": "^1.38.1",
+    "@raycast/utils": "^1.4.8",
     "node-fetch": "^3.2.6",
-    "open": "^8.4.0",
-    "turndown-rn": "^6.1.0"
+    "node-html-markdown": "^1.2.0",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

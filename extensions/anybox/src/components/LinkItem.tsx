@@ -24,7 +24,7 @@ dayjs.locale("en");
 dayjs.extend(calendar);
 
 function updateDateLastOpened(id: string) {
-  fetch("http://localhost:6391/document/" + id, {
+  fetch("http://127.0.0.1:6391/document/" + id, {
     method: "PUT",
     headers: {
       "x-api-key": preferences.api_key,
@@ -73,11 +73,11 @@ export default function LinkItem(props: Props) {
   const item = props.item;
 
   const iconLink = (identifier: string) => {
-    return `http://localhost:6391/images/${identifier}/icon`;
+    return `http://127.0.0.1:6391/images/${identifier}/icon`;
   };
 
   const imageLink = (identifier: string) => {
-    return `http://localhost:6391/images/${identifier}/image`;
+    return `http://127.0.0.1:6391/images/${identifier}/image`;
   };
 
   const getDetail = (link: Link) => {
@@ -94,14 +94,12 @@ export default function LinkItem(props: Props) {
     return md;
   };
 
-  const defaultBrowserIcon = "http://localhost:6391/images/default-browser-icon.png";
-
   const DefaultAction = (props: Props) => {
     const item = props.item;
     return (
       <Action
         title="Open in Browser"
-        icon={defaultBrowserIcon}
+        icon={Icon.Globe}
         onAction={() => {
           open(item.url, item.preferredBrowser);
           updateDateLastOpened(item.id);
