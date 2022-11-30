@@ -5,7 +5,10 @@
   "description": "Put a single task or goal in your menu bar",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
-  "contributors": ["mathieudutour", "thomaslombart"],
+  "contributors": [
+    "mathieudutour",
+    "thomaslombart"
+  ],
   "license": "MIT",
   "commands": [
     {
