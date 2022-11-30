@@ -23,7 +23,6 @@
       "title": "Set Focus",
       "description": "Set current focus",
       "mode": "no-view",
-      "interval": "1m",
       "arguments": [
         {
           "name": "title",
@@ -32,10 +31,85 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "show-focus",
+      "title": "Show Focus",
+      "description": "Show current focus",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "clear-focus",
+      "title": "Clear Focus",
+      "description": "Clear current focus",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard-focus",
+      "title": "Clipboard Focus",
+      "description": "Set clipboard content as current focus",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide-reminder",
+      "title": "Hide Reminder",
+      "description": "Hide reminder",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "reminder",
+      "title": "Missing Focus",
+      "description": "Show a reminder when there is no focus set",
+      "default": true,
+      "required": true,
+      "label": "Show a reminder when there is no focus set"
+    },
+    {
+      "type": "dropdown",
+      "name": "interval",
+      "title": "Reminder Interval",
+      "description": "How often to show the reminder",
+      "default": "1m",
+      "data": [
+        {
+          "title": "10 seconds",
+          "value": "10s"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30s"
+        },
+        {
+          "title": "1 minute",
+          "value": "1m"
+        },
+        {
+          "title": "3 minutes",
+          "value": "3m"
+        },
+        {
+          "title": "5 minutes",
+          "value": "5m"
+        },
+        {
+          "title": "10 minutes",
+          "value": "10m"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30m"
+        }
+      ],
+      "required": true,
+      "label": "Show reminder"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
+    "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.5"
   },
   "devDependencies": {
