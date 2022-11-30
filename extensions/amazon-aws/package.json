@@ -92,6 +92,7 @@
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-sqs": "^3.216.0",
+    "@aws-sdk/client-ssm": "^3.218.0",
     "@aws-sdk/shared-ini-file-loader": "^3.215.0",
     "@raycast/api": "^1.38.2",
     "@raycast/utils": "^1.4.9"
