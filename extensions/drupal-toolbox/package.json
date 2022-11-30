@@ -5,6 +5,9 @@
   "description": "Valuable tools and shortcuts for your Drupal Websites",
   "icon": "logo.png",
   "author": "emircanerkul",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Web",
