@@ -60,7 +60,12 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         title="Edit Transaction"
         text="Change one or more of the following fields to update the transaction. Amount can be positive or negative."
       />
-      <Form.DatePicker id="date" title="Date of Transaction" defaultValue={new Date(transaction.date)} />
+      <Form.DatePicker
+        id="date"
+        title="Date of Transaction"
+        defaultValue={new Date(transaction.date)}
+        type={Form.DatePicker.Type.Date}
+      />
       <Form.TextField
         id="amount"
         title={`Amount ${currencySymbol ? `(${currencySymbol})` : ''}`}

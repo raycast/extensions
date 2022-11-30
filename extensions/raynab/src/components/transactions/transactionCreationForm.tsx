@@ -54,7 +54,12 @@ export function TransactionCreationForm({ categoryId, accountId }: { categoryId?
         title="Edit Transaction"
         text="Change one or more of the following fields to update the transaction."
       />
-      <Form.DatePicker id="date" title="Date of Transaction" defaultValue={new Date()} />
+      <Form.DatePicker
+        id="date"
+        title="Date of Transaction"
+        defaultValue={new Date()}
+        type={Form.DatePicker.Type.Date}
+      />
       <Form.TextField id="amount" title={`Amount ${currencySymbol ? `(${currencySymbol})` : ''}`} defaultValue="0" />
       <Form.TextField id="payee_name" title="Payee Name" defaultValue="" placeholder="Enter the counterparty" />
       <Form.Dropdown id="account_id" title="Account" defaultValue={accountId}>
