@@ -1,7 +1,7 @@
-import { Action, ActionPanel, closeMainWindow, Detail, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import AdvancedURIPluginNotInstalled from "./components/AdvancedURIPluginNotInstalled";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
 import { applyTemplates, getDailyNoteAppendTarget, useObsidianVaults, vaultPluginCheck } from "./utils/utils";
 
