@@ -1,25 +1,14 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 
-import { Note, Vault, SearchNotePreferences, SearchArguments } from "../../utils/interfaces";
-import { MAX_RENDERED_NOTES, NoteAction } from "../../utils/constants";
+import { SearchNotePreferences, NoteListProps } from "../../utils/interfaces";
+import { MAX_RENDERED_NOTES } from "../../utils/constants";
 import { tagsForNotes } from "../../utils/yaml";
 import { NoteListItem } from "./NoteListItem";
 import { NoteListDropdown } from "./NoteListDropdown";
 import { filterNotes } from "../../utils/search";
 
-export function NoteList(props: {
-  title?: string;
-  vault: Vault;
-  notes: Note[] | undefined;
-  allNotes?: Note[];
-  setNotes?: (notes: Note[]) => void;
-  isLoading?: boolean;
-  searchArguments: SearchArguments;
-  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
-  onDelete?: (note: Note, vault: Vault) => void;
-  onSearchChange?: (search: string) => void;
-}) {
+export function NoteList(props: NoteListProps) {
   const { notes, allNotes, vault, isLoading, title, searchArguments, setNotes, action, onDelete, onSearchChange } =
     props;
 
