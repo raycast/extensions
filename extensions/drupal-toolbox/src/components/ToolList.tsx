@@ -47,7 +47,7 @@ function ToolList(props: { drupalWebsite: DrupalWebsite }) {
             icon={tool.icon ?? "logo.png"}
             actions={
               <ActionPanel>
-                <Action 
+                <Action
                   icon={tool.icon}
                   title={tool.title}
                   onAction={() => {
