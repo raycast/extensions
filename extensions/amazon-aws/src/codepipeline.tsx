@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/client-codepipeline";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
 export default function CodePipeline() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -42,17 +42,12 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://console.aws.amazon.com/codesuite/codepipeline/pipelines/" +
-              pipeline.name +
-              "/view?region=" +
-              process.env.AWS_REGION
-            }
+            url={`${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${pipeline.name}/view?region=${process.env.AWS_REGION}`}
           />
           <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
         </ActionPanel>
       }
-      accessories={[{ date: pipeline.updated || pipeline.created }, { icon: iconMap[status] }]}
+      accessories={[{ date: pipeline.updated || pipeline.created }, { icon: iconMap[status], tooltip: status }]}
     />
   );
 }

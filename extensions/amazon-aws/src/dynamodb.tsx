@@ -1,7 +1,7 @@
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -30,15 +30,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://" +
-              process.env.AWS_REGION +
-              ".console.aws.amazon.com/dynamodbv2/home?region=" +
-              process.env.AWS_REGION +
-              "#table?initialTagKey=&name=" +
-              tableName +
-              "&tab=overview"
-            }
+            url={`${AWS_URL_BASE}/dynamodbv2/home?region=${process.env.AWS_REGION}#table?name=${tableName}`}
           />
           <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>

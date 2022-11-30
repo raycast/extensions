@@ -1,7 +1,7 @@
 import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
 export default function SQS() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -48,14 +48,6 @@ function SQSQueue({ queue }: { queue: string }) {
     });
   }
 
-  const path =
-    "https://" +
-    process.env.AWS_REGION +
-    ".console.aws.amazon.com/sqs/v2/home?region=" +
-    process.env.AWS_REGION +
-    "#/queues/" +
-    encodeURIComponent(queue);
-
   return (
     <List.Item
       id={queue}
@@ -64,7 +56,10 @@ function SQSQueue({ queue }: { queue: string }) {
       icon={Icon.Forward}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={path} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={`${AWS_URL_BASE}/sqs/v2/home?region=${process.env.AWS_REGION}#/queues/${encodeURIComponent(queue)}`}
+          />
           <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
           <Action.SubmitForm

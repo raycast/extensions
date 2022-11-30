@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { CloudFormationClient, ListStacksCommand, StackSummary } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -32,12 +32,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://console.aws.amazon.com/cloudformation/home?region=" +
-              process.env.AWS_REGION +
-              "#/stacks/stackinfo?stackId=" +
-              stack.StackId
-            }
+            url={`${AWS_URL_BASE}/cloudformation/home?region=${process.env.AWS_REGION}#/stacks/stackinfo?stackId=${stack.StackId}`}
           />
           <Action.CopyToClipboard title="Copy Stack ID" content={stack.StackId || ""} />
         </ActionPanel>

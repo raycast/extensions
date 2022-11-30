@@ -12,7 +12,7 @@ import {
   _Object,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -40,10 +40,7 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
       actions={
         <ActionPanel>
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}`}
-          />
+          <Action.OpenInBrowser title="Open in Browser" url={`${AWS_URL_BASE}/s3/buckets/${bucket.Name}`} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
       }
@@ -64,10 +61,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
           icon={Icon.Globe}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={`https://s3.console.aws.amazon.com/s3/buckets/${bucket.Name || ""}`}
-              />
+              <Action.OpenInBrowser title="Open in Browser" url={`${AWS_URL_BASE}/s3/buckets/${bucket.Name}`} />
             </ActionPanel>
           }
         />
@@ -83,9 +77,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
               <ActionPanel>
                 <Action.OpenInBrowser
                   title="Open in Browser"
-                  url={`https://s3.console.aws.amazon.com/s3/object/${bucket.Name || ""}?region=${
-                    process.env.AWS_REGION
-                  }&prefix=${object.Key || ""}`}
+                  url={`${AWS_URL_BASE}/s3/object/${bucket.Name}?region=${process.env.AWS_REGION}&prefix=${object.Key}`}
                 />
                 <Action.SubmitForm
                   title="Download"
