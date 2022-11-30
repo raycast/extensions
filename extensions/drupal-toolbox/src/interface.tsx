@@ -27,5 +27,12 @@ interface Tool {
   action: () => void;
 }
 
+interface AddDrupalFormValues {
+  title: string;
+  version: string;
+  tool: DevelopmentTool;
+  root: string[];
+}
+
 export { Filter, DevelopmentTool };
-export type { DrupalWebsite, Tool };
+export type { DrupalWebsite, Tool, AddDrupalFormValues };

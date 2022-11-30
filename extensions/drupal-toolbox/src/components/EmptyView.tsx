@@ -12,8 +12,8 @@ function EmptyView(props: {
     return (
       <List.EmptyView
         icon="drupal-toolbox.png"
-        title="No matching Drupal websites found"
-        description={`Can't find a Drupal website matching ${props.searchText}.\nAdd it now!`}
+        title="No Matching Sites Found"
+        description={`Press ⌘+N to add a site`}
         actions={
           <ActionPanel>
             <AddDrupalWebsiteAction defaultTitle={props.searchText} onCreate={props.onCreate} />
@@ -25,8 +25,8 @@ function EmptyView(props: {
   return (
     <List.EmptyView
       icon="drupal-toolbox.png"
-      title="No Drupal websites found"
-      description="You don't have any Drupal websites yet. Why not add some?"
+      title="No Sites Found"
+      description="Press ⌘+N to add a site"
       actions={
         <ActionPanel>
           <AddDrupalWebsiteAction defaultTitle={props.searchText} onCreate={props.onCreate} />

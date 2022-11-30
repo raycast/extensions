@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
-import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
+import { Form, Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { AddDrupalFormValues } from "../interface";
 import { DevelopmentTool, Filter } from "../interface";
 
 function AddDrupalWebsiteForm(props: {
@@ -8,65 +10,35 @@ function AddDrupalWebsiteForm(props: {
   defaultTool?: string;
   onCreate: (title: string, version: string, root: string, tool: DevelopmentTool) => void;
 }) {
-  const [titleError, setTitleError] = useState<string | undefined>();
-  const [rootError, setRootError] = useState<string | undefined>();
-
   const { onCreate, defaultTitle = "", defaultVersion = Filter.Drupal10, defaultTool = DevelopmentTool.None } = props;
   const { pop } = useNavigation();
 
-  const handleSubmit = useCallback(
-    (values: { title: string; version: string; root: string; tool: DevelopmentTool }) => {
-      if (values.title.length == 0) {
-        setTitleError("The field should't be empty!");
-        return;
-      }
-
-      if (values.root.length == 0) {
-        setRootError("The field should't be empty!");
-        return;
-      }
-
+  const { handleSubmit, itemProps } = useForm<AddDrupalFormValues>({
+    onSubmit(values) {
       onCreate(values.title, values.version, values.root[0], values.tool);
       pop();
     },
-    [onCreate, pop]
-  );
-
-  function dropTitleErrorIfNeeded() {
-    if (titleError && titleError.length > 0) {
-      setTitleError(undefined);
-    }
-  }
-
-  function dropRootErrorIfNeeded() {
-    if (rootError && rootError.length > 0) {
-      setRootError(undefined);
-    }
-  }
+    validation: {
+      title: FormValidation.Required,
+      version: FormValidation.Required,
+      tool: FormValidation.Required,
+      root: FormValidation.Required,
+    },
+    initialValues: {
+      title: defaultTitle,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Drupal Website" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Drupal Website" icon={Icon.NewFolder} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        defaultValue={defaultTitle}
-        title="Title"
-        info="Enter the Drupal project's title"
-        error={titleError}
-        onChange={dropTitleErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setTitleError("The field should't be empty!");
-          } else {
-            dropTitleErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextField title="Title" info="Enter the Drupal project's title" {...itemProps.title} />
+
       <Form.Dropdown
         id="version"
         defaultValue={defaultVersion}
@@ -89,21 +61,14 @@ function AddDrupalWebsiteForm(props: {
         <Form.Dropdown.Item value={DevelopmentTool.Docksal} title="Docksal" />
         <Form.Dropdown.Item value={DevelopmentTool.Lando} title="Lando" />
       </Form.Dropdown>
+
       <Form.FilePicker
-        id="root"
         title="Project's Root Folder"
         info="Select the Drupal project's root folder"
         allowMultipleSelection={false}
         canChooseDirectories={true}
-        error={rootError}
-        onChange={dropRootErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setRootError("The field should't be empty!");
-          } else {
-            dropRootErrorIfNeeded();
-          }
-        }}
+        canChooseFiles={false}
+        {...itemProps.root}
       />
     </Form>
   );

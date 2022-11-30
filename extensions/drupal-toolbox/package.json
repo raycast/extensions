@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.43.2",
+    "@raycast/api": "1.44.0",
     "@raycast/utils": "^1.4.11",
     "nanoid": "^3.3.1"
   },
