@@ -37,7 +37,7 @@ export default function IssueDetail({ initialIssue, mutateList }: PullRequestDet
     mutate: mutateDetail,
   } = useCachedPromise(
     async (issueId) => {
-      const issueDetails = await github.issueDetails({ nodeId: issueId, avatarSize: 64 });
+      const issueDetails = await github.issueDetails({ nodeId: issueId });
       return issueDetails.node as IssueDetailFieldsFragment;
     },
     [initialIssue.id],

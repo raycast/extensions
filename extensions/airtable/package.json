@@ -6,7 +6,8 @@
   "icon": "airtable-logo.png",
   "author": "marks",
   "contributors": [
-    "SeanKeenan-Airtable"
+    "SeanKeenan-Airtable",
+    "pernielsentikaer"
   ],
   "categories": [
     "Productivity"
@@ -46,8 +47,8 @@
   "commands": [
     {
       "name": "command-list-bases",
-      "title": "List Airtable Bases",
-      "subtitle": "and browse their tables, fields, and views",
+      "title": "List Bases",
+      "subtitle": "Airtable",
       "description": "See and search through a list of your Airtable bases and their tables/fields/views",
       "mode": "view"
     }

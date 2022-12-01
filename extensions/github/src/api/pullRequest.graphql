@@ -14,7 +14,7 @@ fragment PullRequestFields on PullRequest {
   }
   reviewDecision
   repository {
-    ...RepositoryFields
+    ...ShortRepositoryFields
   }
   headRefName
   headRef {
@@ -24,7 +24,7 @@ fragment PullRequestFields on PullRequest {
     ... on Bot {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on User {
       ...UserFields
@@ -32,19 +32,19 @@ fragment PullRequestFields on PullRequest {
     ... on Mannequin {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on Organization {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on EnterpriseUserAccount {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
   }
   comments(first: 0) {
@@ -96,7 +96,6 @@ query myPullRequests(
   $reviewedByClosedQuery: String!
   $numberOfOpenItems: Int!
   $numberOfClosedItems: Int!
-  $avatarSize: Int!
 ) {
   createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
     pullRequests: edges {
@@ -161,7 +160,7 @@ query myPullRequests(
       }
     }
   }
-  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfOpenItems) {
+  reviewedByClosed: search(query: $reviewedByClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
     pullRequests: edges {
       pullRequest: node {
         ...PullRequestFields
@@ -170,7 +169,7 @@ query myPullRequests(
   }
 }
 
-query searchPullRequests($query: String!, $numberOfItems: Int!, $avatarSize: Int!) {
+query searchPullRequests($query: String!, $numberOfItems: Int!) {
   search(query: $query, type: ISSUE, first: $numberOfItems) {
     edges {
       node {
@@ -199,7 +198,7 @@ fragment PullRequestDetailsFields on PullRequest {
     title
   }
   repository {
-    ...RepositoryFields
+    ...ShortRepositoryFields
   }
   baseRefName
   baseRef {
@@ -209,7 +208,7 @@ fragment PullRequestDetailsFields on PullRequest {
   headRef {
     name
   }
-  labels(first: 100, orderBy: { field: NAME, direction: ASC }) {
+  labels(first: 50, orderBy: { field: NAME, direction: ASC }) {
     totalCount
     nodes {
       id
@@ -221,7 +220,7 @@ fragment PullRequestDetailsFields on PullRequest {
     ... on Bot {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on User {
       ...UserFields
@@ -229,31 +228,23 @@ fragment PullRequestDetailsFields on PullRequest {
     ... on Mannequin {
       id
       login
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on Organization {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
     ... on EnterpriseUserAccount {
       id
       login
       name
-      avatarUrl(size: $avatarSize)
+      avatarUrl(size: 64)
     }
   }
   comments(first: 0) {
     totalCount
-  }
-  reviewThreads(first: 100) {
-    totalCount
-    nodes {
-      comments(first: 0) {
-        totalCount
-      }
-    }
   }
   reviewRequests(first: 50) {
     totalCount
@@ -262,23 +253,23 @@ fragment PullRequestDetailsFields on PullRequest {
         ... on Team {
           id
           teamName: name
-          teamAvatarURL: avatarUrl(size: $avatarSize)
+          teamAvatarURL: avatarUrl(size: 64)
         }
         ... on User {
           id
           githubUsername: login
           userName: name
-          userAvatarURL: avatarUrl(size: $avatarSize)
+          userAvatarURL: avatarUrl(size: 64)
         }
         ... on Mannequin {
           id
           githubUsername: login
-          userAvatarURL: avatarUrl(size: $avatarSize)
+          userAvatarURL: avatarUrl(size: 64)
         }
       }
     }
   }
-  reviews(first: 50, states: [PENDING, APPROVED, CHANGES_REQUESTED]) {
+  reviews(first: 10, states: [PENDING, APPROVED, CHANGES_REQUESTED]) {
     totalCount
     nodes {
       state
@@ -286,30 +277,30 @@ fragment PullRequestDetailsFields on PullRequest {
         ... on Bot {
           id
           login
-          avatarUrl(size: $avatarSize)
+          avatarUrl(size: 64)
         }
         ... on User {
           id
           login
           name
-          avatarUrl(size: $avatarSize)
+          avatarUrl(size: 64)
         }
         ... on Mannequin {
           id
           login
-          avatarUrl(size: $avatarSize)
+          avatarUrl(size: 64)
         }
         ... on Organization {
           id
           login
           name
-          avatarUrl(size: $avatarSize)
+          avatarUrl(size: 64)
         }
         ... on EnterpriseUserAccount {
           id
           login
           name
-          avatarUrl(size: $avatarSize)
+          avatarUrl(size: 64)
         }
       }
     }
@@ -322,7 +313,7 @@ fragment PullRequestDetailsFields on PullRequest {
       }
     }
   }
-  projectsV2(first: 25) {
+  projectsV2(first: 20) {
     totalCount
     nodes {
       id
@@ -331,7 +322,7 @@ fragment PullRequestDetailsFields on PullRequest {
   }
 }
 
-query pullRequestDetails($nodeId: ID!, $avatarSize: Int!) {
+query pullRequestDetails($nodeId: ID!) {
   node(id: $nodeId) {
     ...PullRequestDetailsFields
   }
@@ -501,7 +492,6 @@ mutation initPullRequest(
   $assigneeIds: [ID!]!
   $labelsIds: [ID!]!
   $milestoneId: ID
-  $avatarSize: Int!
 ) {
   requestReviews(input: { pullRequestId: $pullRequestId, userIds: $reviewersIds }) {
     pullRequest {

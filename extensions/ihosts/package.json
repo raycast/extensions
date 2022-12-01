@@ -31,11 +31,11 @@
       "preferences": [
         {
           "name": "exportLoc",
-          "type": "textfield",
+          "type": "directory",
           "required": false,
           "title": "Host Export Location",
-          "description": "Please enter host export location, default is Desktop",
-          "placeholder": "Enter Host Export Location"
+          "description": "Please select host export location, default is Desktop",
+          "placeholder": "Select Host Export Location"
         }
       ]
     },
@@ -67,7 +67,7 @@
     "etc/hosts"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.44.0",
     "raycast-toolkit": "^1.0.6",
     "run-applescript": "^6.0.0",
     "uuid": "^8.3.2"

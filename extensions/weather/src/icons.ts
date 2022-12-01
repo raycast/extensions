@@ -1,6 +1,9 @@
 // codes from https://raw.githubusercontent.com/chubin/wttr.in/master/lib/constants.py
 
-export function getIcon(weatherCode: string): string {
+export function getWeatherCodeIcon(weatherCode: string | undefined): string {
+  if (!weatherCode) {
+    return "";
+  }
   const code = WWO_CODE[weatherCode] || "";
   const ico = WEATHER_SYMBOL[code] || WEATHER_SYMBOL["Unknown"];
   return ico;

@@ -54,11 +54,12 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
 
   const priority = priorities.find((priority) => priority.value === task?.priority);
   const project = projects?.find((project) => project.id === task?.projectId);
-  const taskLabels = task?.labelIds.map((labelId) => {
-    const associatedLabel = labels?.find((label) => label.id === labelId);
+  const taskLabels = task?.labels.map((labelName) => {
+    const associatedLabel = labels?.find((label) => label.name === labelName);
+
     return {
       ...associatedLabel,
-      color: colors.find((color) => color.id === associatedLabel?.color),
+      color: colors.find((color) => color.key === associatedLabel?.color),
     };
   });
   const hasComments = comments && comments.length > 0;
@@ -73,6 +74,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
   return (
     <Detail
       isLoading={isLoadingTask || isLoadingProjects || isLoadingLabels || isLoadingComments}
+      navigationTitle={task?.content}
       {...(task
         ? {
             markdown: `# ${task?.content}\n\n${task?.description}`,
@@ -81,7 +83,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                 <Detail.Metadata.Label
                   title="Project"
                   text={project?.name}
-                  icon={project?.inboxProject ? Icon.Envelope : Icon.List}
+                  icon={project?.isInboxProject ? Icon.Envelope : Icon.List}
                 />
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
@@ -100,7 +102,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                       <Detail.Metadata.TagList.Item
                         key={taskLabel?.id || index}
                         text={taskLabel?.name || ""}
-                        color={taskLabel.color?.value}
+                        color={taskLabel.color?.hexValue}
                       />
                     ))}
                   </Detail.Metadata.TagList>

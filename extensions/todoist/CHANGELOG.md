@@ -6,6 +6,12 @@
 - Add a menu bar command that shows upcoming tasks/tasks for that day (can be changed via preferences)
 - User can complete task, change due date, change priority, open task in Todoist and delete task from the menu bar
 
+## [Migrate to Todoist REST API v2]
+
+- Refactor the extension to use Todoist's REST API v2
+- Support view style for projects (either list or board)
+- Add new command called `Quick Add Task` replacing `Create Task in Inbox`: this new command allows users to add more info to their newly created tasks
+
 ## [Bunch of improvements] - 2022-09-22
 
 - Upgrade the dependencies

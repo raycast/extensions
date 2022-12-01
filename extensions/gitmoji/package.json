@@ -36,7 +36,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.1",
-    "gitmojis": "^3.12.0"
+    "gitmojis": "^3.13.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

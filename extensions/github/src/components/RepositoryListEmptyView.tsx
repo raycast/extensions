@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { random } from "lodash";
+import { useMemo } from "react";
 
 const sampleQueries = [
   "apollo-11",
@@ -20,13 +21,11 @@ type RepositoryListEmptyViewProps = {
 };
 
 export default function RepositoryListEmptyView({ searchText, isLoading }: RepositoryListEmptyViewProps) {
-  return (
-    <List.EmptyView
-      title={
-        searchText.length > 0 && !isLoading
-          ? "No repositories found"
-          : `Type query e.g "${sampleQueries[random(0, sampleQueries.length - 1)]}"`
-      }
-    />
-  );
+  const example = useMemo(() => sampleQueries[random(0, sampleQueries.length - 1)], []);
+
+  if (searchText.length > 0 && !isLoading) {
+    return <List.EmptyView title="No repositories found" />;
+  }
+
+  return <List.EmptyView title={`Type query e.g "${example}"`} />;
 }
