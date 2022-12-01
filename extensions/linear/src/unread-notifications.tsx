@@ -6,6 +6,7 @@ import {
   launchCommand,
   LaunchType,
   getPreferenceValues,
+  showHUD,
 } from "@raycast/api";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
@@ -19,10 +20,7 @@ const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
-  async function openNotification(notification: NotificationResult) {
-    const applications = await getApplications();
-    const linearApp = applications.find((app) => app.bundleId === "com.linear");
-    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+  async function markNotificationAsRead(notification: NotificationResult, showNotification: boolean = false) {
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
@@ -35,6 +33,17 @@ function UnreadNotifications() {
       },
       shouldRevalidateAfter: true,
     });
+
+    if (showNotification) {
+      await showHUD("Notification marked as read");
+    }
+  }
+
+  async function openNotification(notification: NotificationResult) {
+    const applications = await getApplications();
+    const linearApp = applications.find((app) => app.bundleId === "com.linear");
+    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+    await markNotificationAsRead(notification);
   }
 
   async function openInbox() {
@@ -84,7 +93,13 @@ function UnreadNotifications() {
               title={baseTitle}
               subtitle={notification.issue?.title ? truncate(notification.issue.title, 20) : ""}
               tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
-              onAction={() => openNotification(notification)}
+              onAction={async (event: MenuBarExtra.ActionEvent) => {
+                if (event.type === "left-click") {
+                  openNotification(notification);
+                } else if (event.type === "right-click") {
+                  await markNotificationAsRead(notification, true);
+                }
+              }}
             />
           );
         })}
