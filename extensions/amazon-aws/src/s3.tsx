@@ -10,7 +10,7 @@ import {
   ListBucketsCommand,
   ListObjectsCommand,
   _Object,
-  S3ServiceException,
+  GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
@@ -44,7 +44,6 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
       }
-      accessories={[{ date: bucket.CreationDate }]}
     />
   );
 }
@@ -54,18 +53,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter objects by name...">
-      {isPermanentRedirectError(error) ? (
-        <List.EmptyView
-          title="Wrong region for bucket."
-          description={`The ${error.Bucket} cannot be accessed with your current region (${process.env.AWS_REGION}).\nHit \`Enter\` to open this bucket in the AWS Console.`}
-          icon={Icon.Globe}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Open in Browser" url={`${AWS_URL_BASE}/s3/buckets/${bucket.Name}`} />
-            </ActionPanel>
-          }
-        />
-      ) : error ? (
+      {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
         objects?.map((object) => (
@@ -119,28 +107,25 @@ async function fetchBuckets() {
   return Buckets;
 }
 
-async function fetchBucketObjects(bucket: string, nextMarker?: string, objects: _Object[] = []): Promise<_Object[]> {
-  const { Contents, NextMarker } = await new S3Client({}).send(
+async function fetchBucketObjects(
+  bucket: string,
+  _region?: string,
+  nextMarker?: string,
+  objects: _Object[] = []
+): Promise<_Object[]> {
+  const region =
+    _region || (await new S3Client({}).send(new GetBucketLocationCommand({ Bucket: bucket }))).LocationConstraint;
+  const { Contents, NextMarker } = await new S3Client({ region }).send(
     new ListObjectsCommand({ Bucket: bucket, Marker: nextMarker })
   );
 
   const combinedObjects = [...objects, ...(Contents || [])];
 
   if (NextMarker) {
-    return fetchBucketObjects(bucket, NextMarker, combinedObjects);
+    return fetchBucketObjects(bucket, region, NextMarker, combinedObjects);
   }
 
   return combinedObjects;
-}
-
-function isPermanentRedirectError(err: unknown): err is S3PermanentRedirectError {
-  return err instanceof S3ServiceException && err.name === "PermanentRedirect";
-}
-
-interface S3PermanentRedirectError extends S3ServiceException {
-  Code: "PermanentRedirect";
-  Bucket: string;
-  Endpoint: string;
 }
 
 // inspired by https://stackoverflow.com/a/14919494

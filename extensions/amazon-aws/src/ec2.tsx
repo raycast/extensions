@@ -22,14 +22,13 @@ export default function EC2() {
 }
 
 function EC2Instance({ instance }: { instance: Instance }) {
-  const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
+  const name = instance.Tags?.find((t) => t.Key === "Name")?.Value;
 
   return (
     <List.Item
       id={instance.InstanceId}
       key={instance.InstanceId}
       title={name || "Unknown Instance name"}
-      subtitle={instance.InstanceType}
       icon={Icon.Layers}
       actions={
         <ActionPanel>
@@ -46,7 +45,7 @@ function EC2Instance({ instance }: { instance: Instance }) {
           )}
         </ActionPanel>
       }
-      accessories={[{ date: instance.LaunchTime }]}
+      accessories={[{ text: instance.InstanceType }]}
     />
   );
 }

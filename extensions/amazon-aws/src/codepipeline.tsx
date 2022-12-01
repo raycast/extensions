@@ -36,7 +36,6 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
       id={pipeline.name}
       key={pipeline.name}
       title={pipeline.name || "Unknown pipeline name"}
-      subtitle={status}
       icon={Icon.List}
       actions={
         <ActionPanel>
@@ -47,7 +46,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
           <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
         </ActionPanel>
       }
-      accessories={[{ date: pipeline.updated || pipeline.created }, { icon: iconMap[status], tooltip: status }]}
+      accessories={[{ text: status }, { icon: iconMap[status] }]}
     />
   );
 }

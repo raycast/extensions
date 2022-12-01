@@ -62,28 +62,12 @@ function SQSQueue({ queue }: { queue: string }) {
           />
           <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
-          <Action.SubmitForm
-            icon={Icon.Trash}
-            title={`Purge Queue (${attributes?.ApproximateNumberOfMessages || "..."})`}
-            onSubmit={handlePurgeQueueAction}
-          />
+          <Action.SubmitForm icon={Icon.Trash} title="Purge Queue" onSubmit={handlePurgeQueueAction} />
         </ActionPanel>
       }
       accessories={[
-        {
-          icon: Icon.Message,
-          text: attributes?.ApproximateNumberOfMessages || "",
-          tooltip: "Messages available",
-        },
-        {
-          icon: Icon.AirplaneLanding,
-          text: attributes?.ApproximateNumberOfMessagesNotVisible || "...",
-          tooltip: "Messages in flight",
-        },
-        {
-          date: attributes && new Date(Number.parseInt(attributes.CreatedTimestamp) * 1000),
-          tooltip: "Creation Time",
-        },
+        { text: attributes?.ApproximateNumberOfMessages || "", tooltip: "Messages available" },
+        { icon: Icon.Message },
       ]}
     />
   );
@@ -104,7 +88,7 @@ async function fetchQueueAttributes(queueUrl: string) {
   const { Attributes } = await new SQSClient({}).send(
     new GetQueueAttributesCommand({
       QueueUrl: queueUrl,
-      AttributeNames: ["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible", "CreatedTimestamp"],
+      AttributeNames: ["ApproximateNumberOfMessages"],
     })
   );
 

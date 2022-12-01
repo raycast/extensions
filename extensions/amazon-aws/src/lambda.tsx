@@ -36,10 +36,7 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
           <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
         </ActionPanel>
       }
-      accessories={[
-        { date: func.LastModified ? new Date(func.LastModified) : undefined },
-        { icon: getRuntimeIcon(func.Runtime), tooltip: func.Runtime || "" },
-      ]}
+      accessories={[{ text: func.Runtime || "" }, { icon: getRuntimeIcon(func.Runtime) }]}
     />
   );
 }

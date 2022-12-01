@@ -37,7 +37,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
           <Action.CopyToClipboard title="Copy Stack ID" content={stack.StackId || ""} />
         </ActionPanel>
       }
-      accessories={[{ date: stack.LastUpdatedTime || stack.CreationTime }]}
+      accessories={[{ text: stack.StackStatus }]}
     />
   );
 }
