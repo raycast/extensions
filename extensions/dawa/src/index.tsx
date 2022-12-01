@@ -35,16 +35,16 @@ export default function Command(props: { arguments: AddressArguments }) {
     addressResult = `
   ## Address result for id: ${data?.id ?? "N/A"}
 
-  * **Adgangsadresseid**: ${data?.id ?? "N/A"}
-  * **Adressebetegnelse**: ${data?.adressebetegnelse ?? "N/A"}
+  * **Access address ID**: ${data?.id ?? "N/A"}
+  * **Address designation**: ${data?.adressebetegnelse ?? "N/A"}
   * **Kvhx**: ${data?.kvh ?? "N/A"}
-  * **Vejnavn:** ${data?.vejstykke.navn ?? "N/A"}
-  * **Husnr:** ${data?.husnr ?? "N/A"}
-  * **Etage:** ${data?.etage ?? "N/A"}
-  * **Dør:** ${data?.dør ?? "N/A"}
-  * **Supplerende bynavn:** ${data?.supplerendebynavn ?? "N/A"}
-  * **Postnr nummer:** ${data?.postnummer.nr ?? "N/A"}
-  * **Postnr navn:** ${data?.postnummer.navn ?? "N/A"}
+  * **Street name:** ${data?.vejstykke.navn ?? "N/A"}
+  * **House number:** ${data?.husnr ?? "N/A"}
+  * **Floor:** ${data?.etage ?? "N/A"}
+  * **Door:** ${data?.dør ?? "N/A"}
+  * **Supplementary city name:** ${data?.supplerendebynavn ?? "N/A"}
+  * **Zipcode number:** ${data?.postnummer.nr ?? "N/A"}
+  * **City:** ${data?.postnummer.navn ?? "N/A"}
   * ${data?.id ? `[Link to DAWA](https://dawa.aws.dk/adgangsadresser/${adgangsadresseid})` : "N/A"}
   `;
   }
