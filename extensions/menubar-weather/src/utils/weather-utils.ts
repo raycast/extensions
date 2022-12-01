@@ -4,8 +4,17 @@ import { isEmpty } from "./common-utils";
 import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
 import { GeoLocation } from "../types/types";
 
-export const { cityName, tempUnits, precipitationUnits, longitude, latitude, showSun, showLocation, showForecast } =
-  getPreferenceValues<Preferences>();
+export const {
+  cityName,
+  tempUnits,
+  windSpeedUnits,
+  precipitationUnits,
+  longitude,
+  latitude,
+  showSun,
+  showLocation,
+  showForecast,
+} = getPreferenceValues<Preferences>();
 
 export async function getGeoLocation() {
   const geoLocation = await getOpenMeteoLocation();

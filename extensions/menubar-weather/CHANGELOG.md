@@ -1,6 +1,10 @@
 # Menubar Weather Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Add Preferences] - 2022-12-01
+
+- Add Preferences **Wind Speed Units**: Km/h, m/s, Mph, Knots
+
+## [Fix bug] - 2022-11-26
 
 - Fix the bug of crashing without network
 - Add Preferences **Additional Info**: Whether to show sunrise and sunset, location and 7-day weather forecast
