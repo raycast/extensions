@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Add Preferences] - {PR_MERGE_DATE}
+## [Add Preferences] - 2022-12-01
 
 - Add Preferences **Wind Speed Units**: Km/h, m/s, Mph, Knots
 
