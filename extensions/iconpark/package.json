@@ -20,8 +20,8 @@
     }
   ],
   "dependencies": {
-    "@icon-park/svg": "^1.4.0",
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.44.0",
+    "@icon-park/svg": "^1.4.2",
     "d3-color": "^3.1.0",
     "js-base64": "^3.7.2"
   },
