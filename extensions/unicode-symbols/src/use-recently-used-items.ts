@@ -34,6 +34,7 @@ const useStateAndLocalStorage = <T, _ = void>(
     };
   }, []);
 
+  // @ts-expect-error TS struggles to infer the types as T could potentially be a function
   const setStateAndLocalStorage = useCallback((updater) => {
     setState((state) => {
       const newValue = typeof updater === "function" ? updater(state) : updater;
