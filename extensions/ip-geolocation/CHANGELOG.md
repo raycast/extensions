@@ -1,5 +1,10 @@
 # IP Geolocation Changelog
 
+## [Update UI] - {PR_MERGE_DATE}
+
+- Update UI: new extension icon, new information icon
+- Update Raycast API version to 1.44.0
+
 ## [Support arguments for command] - 2022-08-07
 
 - Support arguments for command so that you can enter values right from Root Search before opening the command
