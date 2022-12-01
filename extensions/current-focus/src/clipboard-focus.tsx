@@ -1,20 +1,8 @@
-import { Cache, Clipboard, getSelectedText, launchCommand, LaunchType, showHUD } from "@raycast/api";
-
-const cache = new Cache();
+import { Clipboard } from "@raycast/api";
+import { startFocus } from "./utils";
 
 export default async function clipboardFocus() {
-  const text = await getSelectedText();
-  console.log(text);
-  const focus = await Clipboard.readText();
-
-  if (focus) {
-    cache.set("current-focus", focus);
-  }
-
-  await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-
-  if (focus) {
-    cache.set("last-reminder", Date.now().toString());
-    await showHUD(focus);
-  }
+  return startFocus({
+    text: await Clipboard.readText() ?? "",
+  });
 }

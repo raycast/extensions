@@ -1,4 +1,5 @@
-import { Cache, showHUD, environment, getPreferenceValues } from "@raycast/api";
+import {Cache, showHUD, environment, getPreferenceValues, updateCommandMetadata} from "@raycast/api";
+import { getFocus, startFocus } from "./utils";
 
 const cache = new Cache();
 
@@ -7,31 +8,21 @@ interface Preferences {
   interval: "10s" | "30s" | "1m" | "5m" | "10m" | "30m";
 }
 
-export default async function showFocus() {
+export default async function currentFocus() {
   const preferences = getPreferenceValues<Preferences>();
-
-  const focus = cache.get("current-focus");
-  const visible = cache.get("visible") === "true";
-
-  if (!visible && environment.launchType === "background") {
-    return;
-  } else {
-    cache.set("visible", "true");
-  }
+  const focus = getFocus();
 
   if (!focus && (preferences.reminder || environment.launchType === "userInitiated")) {
     await showHUD("❌ Missing Focus");
     return;
   }
 
-  if (!focus) {
-    return;
-  }
+  await updateCommandMetadata({
+    subtitle: focus.text
+  })
 
   if (environment.launchType === "userInitiated") {
-    cache.set("last-reminder", Date.now().toString());
-    await showHUD(focus);
-    return;
+    return startFocus(focus);
   }
 
   const interval =
@@ -43,17 +34,13 @@ export default async function showFocus() {
   const lastReminder = cache.get("last-reminder");
 
   if (!lastReminder) {
-    cache.set("last-reminder", Date.now().toString());
-    await showHUD(focus);
-    return;
+    return startFocus(focus);
   } else {
     const lastReminderTime = parseInt(lastReminder);
     const currentTime = Date.now();
 
     if (currentTime - lastReminderTime > interval) {
-      cache.set("last-reminder", currentTime.toString());
-      await showHUD(focus);
-      return;
+      return startFocus(focus);
     }
   }
 }

@@ -1,26 +1,22 @@
-import { Cache, MenuBarExtra } from "@raycast/api";
+import { Icon, MenuBarExtra } from "@raycast/api";
+import { Focus, getFocus } from "./utils";
 
-const cache = new Cache();
+function getIcon(name?: Focus["icon"]) {
+  switch (name) {
+    case "task":
+      return Icon.Checkmark;
+    case "email":
+      return Icon.AtSymbol;
+    case "browser":
+      return Icon.Globe;
+    default:
+      return undefined;
+  }
+}
 
 export default function Command() {
-  const focus = cache.get("current-focus");
+  const focus = getFocus();
+  const icon = getIcon(focus?.icon);
 
-  return (
-    <MenuBarExtra title={focus}>
-      <MenuBarExtra.Item title="Seen" />
-      <MenuBarExtra.Item
-        title="Example Seen Pull Request"
-        onAction={() => {
-          console.log("seen pull request clicked");
-        }}
-      />
-      <MenuBarExtra.Item title="Unseen" />
-      <MenuBarExtra.Item
-        title="Example Unseen Pull Request"
-        onAction={() => {
-          console.log("unseen pull request clicked");
-        }}
-      />
-    </MenuBarExtra>
-  );
+  return <MenuBarExtra icon={icon} title={focus.text} />;
 }

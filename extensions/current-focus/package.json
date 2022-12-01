@@ -3,7 +3,7 @@
   "name": "current-focus",
   "title": "Current Focus",
   "description": "Get reminded on what is your current focus",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "vimtor",
   "categories": [
     "Productivity",
@@ -33,17 +33,11 @@
       ]
     },
     {
-      "name": "show-focus",
-      "title": "Show Focus",
+      "name": "current-focus",
+      "title": "Current Focus",
       "description": "Show current focus",
       "mode": "no-view",
       "interval": "10s"
-    },
-    {
-      "name": "clear-focus",
-      "title": "Clear Focus",
-      "description": "Clear current focus",
-      "mode": "no-view"
     },
     {
       "name": "clipboard-focus",
@@ -52,9 +46,15 @@
       "mode": "no-view"
     },
     {
-      "name": "hide-reminder",
-      "title": "Hide Reminder",
-      "description": "Hide reminder",
+      "name": "selected-focus",
+      "title": "Selected Text Focus",
+      "description": "Set current focus using the selected text",
+      "mode": "no-view"
+    },
+    {
+      "name": "application-focus",
+      "title": "Application Focus",
+      "description": "Set current focus using front-most application (e.g. Things 3)",
       "mode": "no-view"
     }
   ],
@@ -110,7 +110,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.5"
+    "@raycast/utils": "^1.4.5",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
