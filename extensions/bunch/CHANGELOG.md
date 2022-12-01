@@ -1,5 +1,9 @@
 # Bunch Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
 ## [Text field validation] - 2022-07-04
 
 - Add text field validation
