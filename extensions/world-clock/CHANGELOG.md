@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
 ## [Add Menu Bar command] - 2022-09-05
 
 - Add Menu Bar command: Query World Time
