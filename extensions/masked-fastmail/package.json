@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "kpa",
   "categories": [
-    "Productivity"
+    "Communication",
+    "Productivity",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
