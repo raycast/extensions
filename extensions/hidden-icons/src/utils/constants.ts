@@ -1,7 +1,4 @@
-import { environment } from "@raycast/api";
 import { HistoryScore } from "../types/types";
-
-const assetPath = environment.assetsPath;
 
 export const numberPathList = (theme: string) => {
   return [

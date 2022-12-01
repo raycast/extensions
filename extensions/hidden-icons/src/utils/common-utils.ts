@@ -1,5 +1,4 @@
 import { environment } from "@raycast/api";
-import fileUrl from "file-url";
 import { numberPathList } from "./constants";
 
 export const getNumberCanvas = (iconTheme: string, number: number) => {
