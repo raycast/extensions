@@ -20,7 +20,7 @@ const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
-  async function markNotificationAsRead(notification: NotificationResult, showNotification: boolean = false) {
+  async function markNotificationAsRead(notification: NotificationResult, showNotification = false) {
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
