@@ -1,7 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const integrationIconURL = (integrationId: string) =>
-  `https://static.resmo.com/integrations/icons/${integrationId}.svg`;
+export const integrationIconURL = (integrationId: string) => ({
+  source: `https://static.resmo.com/integrations/icons/${integrationId}.svg`,
+  fallback: "fallback.png",
+});
 
 export const getDomain = () => {
   const tmpDomain = `${getPreferenceValues().resmoDomain.trim()}`;

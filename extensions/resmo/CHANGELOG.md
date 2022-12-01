@@ -1,3 +1,3 @@
 # Resmo Changelog
 
-## [Initial Version] - 2022-11-29
+## [Initial Version] - {PR_MERGE_DATE}

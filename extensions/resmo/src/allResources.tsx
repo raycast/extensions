@@ -66,6 +66,7 @@ export default function Command() {
         ) : null
       }
     >
+      <List.EmptyView title="No Results" icon="noview.png" />
       <List.Section title="Results" subtitle={String(data?.rows?.length)}>
         {data?.rows?.map((row, index) => (
           <ResourcesListItem
@@ -111,10 +112,11 @@ function ResourcesListItem({
         <ActionPanel>
           <Action
             onAction={() => setShowDetail((current) => !current)}
-            title={showDetail ? "Hide detail" : "Show detail"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            icon={Icon.AppWindowSidebarLeft}
+            title="Toggle Details"
           />
           <Action.OpenInBrowser
-            title="Open in Browser"
             url={resmoDomain + "explore/resources/" + resource._meta.type + "/" + resource._meta.recordId}
           />
         </ActionPanel>
