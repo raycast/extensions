@@ -12,29 +12,27 @@ Fastest Notion task manager
 
 **[Watch video presentation](https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494)**
 
-<img width="1920" src="https://user-images.githubusercontent.com/42417619/203419833-5ed304a1-303b-4921-92b3-1fc2712c43d5.png">
+![Hypersonic interface](/metadata/hypersonic-1.png)
 
 ### Connect any Notion database
 
 Sign in with your Notion account and connect your project and task databases.
 
-<img width="1920" src="https://user-images.githubusercontent.com/42417619/203419985-e0e16751-61d3-4fb7-b2da-4251d093caf4.png">
-
 We automatically detect the right properties in your database to display on Hypersonic. You can also configure additional properties as labels, users or related databases.
 
-<img width="1920" src="https://user-images.githubusercontent.com/42417619/203420121-22eb93e6-da79-45af-a9fd-d9c4195ddc9a.png">
+![Notion connection](/metadata/hypersonic-5.png)
 
 ### Create and assign tasks using natural language
 
 You can manage your tasks faster than ever in Hypersonic. We use natural language recognition to separate the task from its metadata, so you just need to type.
 
-<img width="1920" src="https://user-images.githubusercontent.com/42417619/203420292-280741ab-a368-48cb-8752-d2cdc8a8346b.png">
+![Natural language](/metadata/hypersonic-2.png)
 
 ### Multi-filtering to cut through the noise
 
 You can filter your task by user, project or label. Combining multiple filter you will increase your focus and productivity.
 
-<img width="1920" src="https://user-images.githubusercontent.com/42417619/203420468-4f1c9fe3-668b-46cc-b082-81a0ae968d7c.png">
+![Smart filtering](/metadata/hypersonic-3.png)
 
 ### List of commands
 
