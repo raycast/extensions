@@ -1,5 +1,9 @@
 # Maven Central Repository Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
 ## [Support arguments for command] - 2022-08-07
 
 - Support arguments for command so that you can enter values right from Root Search before opening the command
