@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
 ## [Update extension icons] - 2022-05-23
 
 - Update extension icons.
