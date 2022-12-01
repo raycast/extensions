@@ -6,7 +6,6 @@ import {
   launchCommand,
   LaunchType,
   getPreferenceValues,
-  showHUD,
 } from "@raycast/api";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
@@ -20,7 +19,7 @@ const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
-  async function markNotificationAsRead(notification: NotificationResult, showNotification = false) {
+  async function markNotificationAsRead(notification: NotificationResult) {
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
@@ -33,10 +32,6 @@ function UnreadNotifications() {
       },
       shouldRevalidateAfter: true,
     });
-
-    if (showNotification) {
-      await showHUD("Notification marked as read");
-    }
   }
 
   async function openNotification(notification: NotificationResult) {
@@ -97,7 +92,7 @@ function UnreadNotifications() {
                 if (event.type === "left-click") {
                   openNotification(notification);
                 } else if (event.type === "right-click") {
-                  await markNotificationAsRead(notification, true);
+                  await markNotificationAsRead(notification);
                 }
               }}
             />
