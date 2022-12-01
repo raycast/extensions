@@ -1,6 +1,6 @@
 import { getFrontmostApplication, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Focus, startFocus } from "./utils";
+import { Focus, showFocus } from "./utils";
 
 async function getAppFocus(): Promise<Focus | undefined> {
   const application = await getFrontmostApplication();
@@ -48,6 +48,6 @@ async function getAppFocus(): Promise<Focus | undefined> {
 export default async function applicationFocus() {
   const focus = await getAppFocus();
   if (focus) {
-    return startFocus(focus);
+    return showFocus(focus);
   }
 }

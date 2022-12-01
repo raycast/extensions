@@ -1,8 +1,8 @@
 import { getSelectedText } from "@raycast/api";
-import { startFocus } from "./utils";
+import { showFocus } from "./utils";
 
 export default async function selectedFocus() {
-  return startFocus({
+  return showFocus({
     text: await getSelectedText(),
   });
 }

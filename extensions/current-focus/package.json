@@ -22,12 +22,12 @@
       "name": "set-focus",
       "title": "Set Focus",
       "description": "Set current focus",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "title",
           "placeholder": "Title",
-          "required": true,
+          "required": false,
           "type": "text"
         }
       ]
@@ -38,6 +38,12 @@
       "description": "Show current focus",
       "mode": "no-view",
       "interval": "10s"
+    },
+    {
+      "name": "pause-reminder",
+      "title": "Pause Reminder",
+      "description": "Pause the reminder until a new focus is set",
+      "mode": "no-view"
     },
     {
       "name": "clipboard-focus",
@@ -60,15 +66,6 @@
   ],
   "preferences": [
     {
-      "type": "checkbox",
-      "name": "reminder",
-      "title": "Missing Focus",
-      "description": "Show a reminder when there is no focus set",
-      "default": true,
-      "required": true,
-      "label": "Show a reminder when there is no focus set"
-    },
-    {
       "type": "dropdown",
       "name": "interval",
       "title": "Reminder Interval",
@@ -88,6 +85,10 @@
           "value": "1m"
         },
         {
+          "title": "2 minutes",
+          "value": "2m"
+        },
+        {
           "title": "3 minutes",
           "value": "3m"
         },
@@ -104,7 +105,7 @@
           "value": "30m"
         }
       ],
-      "required": true,
+      "required": false,
       "label": "Show reminder"
     }
   ],
