@@ -1,5 +1,10 @@
 # Hidden Icons Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
+
 ## [Improve gameplay with Grid layout] - 2022-06-10
 
 - Release of Hidden Icons version 2.0
