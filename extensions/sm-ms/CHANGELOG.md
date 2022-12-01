@@ -1,5 +1,11 @@
 # SM.MS Changelog
 
+## [Add alternate domain] - {PR_MERGE_DATE}
+
+- Add alternate domain name selection
+- Update image file selection method
+- Update Raycast API version to 1.44.0
+
 ## [Add text field validation] - 2022-07-04
 
 - Add text field validation
