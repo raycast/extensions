@@ -20,7 +20,7 @@
   ],
   "preferences": [
     {
-      "type": "textfield",
+      "type": "password",
       "name": "resmoApiKey",
       "title": "API Key",
       "description": "The API Key of the REST API",
