@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "masked-fastmail",
   "title": "Masked Fastmail",
-  "description": "",
+  "description": "Create new Fastmail masked emails.",
   "icon": "icon.png",
   "author": "kpa",
   "categories": [
