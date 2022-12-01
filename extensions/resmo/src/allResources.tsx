@@ -66,7 +66,7 @@ export default function Command() {
         ) : null
       }
     >
-      <List.EmptyView title="No Results" icon="noview.png" />
+      <List.EmptyView title="No Results" icon="noview.svg" />
       <List.Section title="Results" subtitle={String(data?.rows?.length)}>
         {data?.rows?.map((row, index) => (
           <ResourcesListItem
