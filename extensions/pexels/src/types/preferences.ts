@@ -1,7 +1,7 @@
 export interface Preferences {
   apikey: string;
   layout: string;
-  itemSize: string;
+  columns: string;
   applyTo: string;
   downloadSize: string;
   downloadDirectory: string;

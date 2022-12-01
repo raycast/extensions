@@ -1,5 +1,9 @@
 # Pexels Changelog
 
+## [Update Raycast API] - {PR_MERGE_DATE}
+
+- Update Raycast API version to 1.44.0
+
 ## [Add new photo layout options] - 2022-06-13
 
 - Add new photo layout options: List or Grid.
