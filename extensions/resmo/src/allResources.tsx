@@ -73,7 +73,6 @@ export default function Command() {
             key={row.name + "-" + row.referencedType + "-" + index}
             resource={row}
             resmoDomain={resmoDomain}
-            showDetail={showDetail}
             setShowDetail={setShowDetail}
           />
         ))}
@@ -85,12 +84,10 @@ export default function Command() {
 function ResourcesListItem({
   resource,
   resmoDomain,
-  showDetail,
   setShowDetail,
 }: {
   resource: ResourceRow;
   resmoDomain: string;
-  showDetail: boolean;
   setShowDetail: Dispatch<SetStateAction<boolean>>;
 }) {
   const riskScore = resource._meta.riskScore;
