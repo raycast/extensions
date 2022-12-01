@@ -1,20 +1,18 @@
-import { loadDatabase } from '@/services/storage'
+import { loadPreferences } from '@/services/storage'
 import { useCachedPromise } from '@raycast/utils'
 
-export function useLocalDatabase() {
+export function useLocalPreferences() {
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    loadDatabase,
+    loadPreferences,
     [],
     {
-      initialData: {
-        tags: [],
-      },
+      initialData: {},
       keepPreviousData: true,
     }
   )
 
   return {
-    database: data,
+    preferences: data,
     error,
     isLoading,
     mutate,

@@ -1,18 +1,17 @@
-import { loadDoneProperty } from '@/services/storage'
-import { TodoPage } from '@/types/todo-page'
-import { getPreferenceValues } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 
-export async function inProgressTodo(pageId: string): Promise<any> {
+export async function inProgressTodo(pageId: string): Promise<boolean> {
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
+
+  if (!status.inProgressId) return false
+
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
-  const status = await loadDoneProperty()
-
-  const page = await notionClient.pages.update({
+  await notionClient.pages.update({
     page_id: pageId,
     properties: {
-      [preferences.property_done]: {
+      [status.name]: {
         status: {
           id: status.inProgressId,
         },
@@ -20,5 +19,5 @@ export async function inProgressTodo(pageId: string): Promise<any> {
     },
   })
 
-  return mapPageToTodo(page as TodoPage, preferences)
+  return true
 }

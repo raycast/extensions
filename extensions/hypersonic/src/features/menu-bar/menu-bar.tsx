@@ -1,17 +1,19 @@
-import { useLocalDatabase } from '@/services/notion/hooks/use-local-database'
+import { useFilter } from '@/services/notion/hooks/use-filter'
+import { useLocalPreferences } from '@/services/notion/hooks/use-local-preferences'
 import { useTodos } from '@/services/notion/hooks/use-todos'
 import { completeTodo } from '@/services/notion/operations/complete-todo'
-import { storeHasDoneToday } from '@/services/storage'
 import { Todo } from '@/types/todo'
-import { MenuBarExtra } from '@raycast/api'
+import { Color, MenuBarExtra } from '@raycast/api'
 import { getProgressIcon } from '@raycast/utils'
+import { truncate } from './truncate'
 
 export function MenuBar() {
-  const { database, isLoading: isLoadingDb } = useLocalDatabase()
-  const { todos, error, isLoading, mutate } = useTodos(
-    database.databaseId,
-    isLoadingDb
-  )
+  const { preferences } = useLocalPreferences()
+  const { filterTodo } = useFilter()
+  const { todos, error, isLoading, mutate } = useTodos({
+    databaseId: preferences.databaseId,
+    filter: filterTodo,
+  })
 
   const handleComplete = async (todo: Todo) => {
     await mutate(completeTodo(todo.id), {
@@ -21,8 +23,6 @@ export function MenuBar() {
       },
       shouldRevalidateAfter: true,
     })
-
-    await storeHasDoneToday()
   }
 
   return (
@@ -48,12 +48,10 @@ export function MenuBar() {
               onAction={() => handleComplete(todo)}
               key={todo.id}
               icon={{
-                source: {
-                  light: getProgressIcon(todo.inProgress ? 0.5 : 0, '#E0A905'),
-                  dark: getProgressIcon(todo.inProgress ? 0.5 : 0, '#edc03c'),
-                },
+                source: getProgressIcon(todo.inProgress ? 0.5 : 0),
+                tintColor: todo.inProgress ? Color.Yellow : Color.SecondaryText,
               }}
-              title={todo.title}
+              title={truncate(todo.title)}
             />
           ))
         : null}
