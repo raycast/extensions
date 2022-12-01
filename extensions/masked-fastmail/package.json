@@ -28,7 +28,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.33.2",
-    "fetch-cookie": "^2.0.3",
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {
