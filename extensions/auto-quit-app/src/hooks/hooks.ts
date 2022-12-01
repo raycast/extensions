@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Apps } from "../types/type";
+import { App } from "../types/type";
 import { getAllApps } from "../utils/common-utils";
 import { quitApps } from "../utils/applescript-utils";
 
 export const quitAppsHook = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [apps, setApps] = useState<Apps[]>();
+  const [apps, setApps] = useState<App[]>();
 
   const fetchData = useCallback(async () => {
     setLoading(true);

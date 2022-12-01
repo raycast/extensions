@@ -1,21 +1,33 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getFrontmostApplication, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { Apps } from "../types/type";
-import { appIsActive } from "./applescript-utils";
+import { App } from "../types/type";
+
+export const appsWithBundle: string[] = [
+  "com.apple.Preview",
+  "com.apple.TextEdit",
+  "com.apple.MobileSMS",
+  "com.apple.Terminal",
+  "com.apple.QuickTimePlayerX",
+  "com.apple.Notes",
+  "com.apple.shortcuts",
+  "com.apple.TV",
+  "com.apple.Mail",
+];
 
 export async function getAllApps() {
   const { notes, preview, textEdit, terminal, quickTimePlayer, shortcuts, tv, messages, mail } =
     getPreferenceValues<Preferences>();
 
-  const activeAppName = await appIsActive();
+  const activeAppName = (await getFrontmostApplication()).name;
 
-  const apps: Apps[] = [
+  const apps: App[] = [
     {
       name: "Preview",
       windows: "0",
       enabled: preview,
       isActive: activeAppName === "Preview",
       path: "/System/Applications/Preview.app",
+      bundleProcessName: "com.apple.Preview",
     },
     {
       name: "TextEdit",
@@ -23,6 +35,7 @@ export async function getAllApps() {
       enabled: textEdit,
       isActive: activeAppName === "TextEdit",
       path: "/System/Applications/TextEdit.app",
+      bundleProcessName: "com.apple.TextEdit",
     },
     {
       name: "Messages",
@@ -30,6 +43,7 @@ export async function getAllApps() {
       enabled: messages,
       isActive: activeAppName === "Messages",
       path: "/System/Applications/Messages.app",
+      bundleProcessName: "com.apple.MobileSMS",
     },
     {
       name: "Terminal",
@@ -37,6 +51,7 @@ export async function getAllApps() {
       enabled: terminal,
       isActive: activeAppName === "Terminal",
       path: "/System/Applications/Utilities/Terminal.app",
+      bundleProcessName: "com.apple.Terminal",
     },
     {
       name: "QuickTime Player",
@@ -44,6 +59,7 @@ export async function getAllApps() {
       enabled: quickTimePlayer,
       isActive: activeAppName === "QuickTime Player",
       path: "/System/Applications/QuickTime Player.app",
+      bundleProcessName: "com.apple.QuickTimePlayerX",
     },
     {
       name: "Notes",
@@ -51,6 +67,7 @@ export async function getAllApps() {
       enabled: notes,
       isActive: activeAppName === "Notes",
       path: "/System/Applications/Notes.app",
+      bundleProcessName: "com.apple.Notes",
     },
     {
       name: "Shortcuts",
@@ -58,6 +75,7 @@ export async function getAllApps() {
       enabled: shortcuts,
       isActive: activeAppName === "Shortcuts",
       path: "/System/Applications/Shortcuts.app",
+      bundleProcessName: "com.apple.shortcuts",
     },
     {
       name: "TV",
@@ -65,6 +83,7 @@ export async function getAllApps() {
       enabled: tv,
       isActive: activeAppName === "TV",
       path: "/System/Applications/TV.app",
+      bundleProcessName: "com.apple.TV",
     },
     {
       name: "Mail",
@@ -72,6 +91,7 @@ export async function getAllApps() {
       enabled: mail,
       isActive: activeAppName === "Mail",
       path: "/System/Applications/Mail.app",
+      bundleProcessName: "com.apple.Mail",
     },
   ];
   return apps;

@@ -23,6 +23,7 @@ export default function AutoQuitApp() {
                 key={value.name}
                 title={value.name}
                 subtitle={value.isActive ? " Active" : ""}
+                tooltip={value.isActive ? "Activated app will not be closed" : `Click to open ${value.name}`}
                 icon={{ fileIcon: value.path }}
                 onAction={() => {
                   open(value.path).then();
@@ -40,6 +41,7 @@ export default function AutoQuitApp() {
                 key={value.name}
                 title={value.name}
                 icon={{ fileIcon: value.path }}
+                tooltip={`Click to open ${value.name}`}
                 onAction={() => {
                   open(value.path).then();
                 }}
@@ -48,15 +50,16 @@ export default function AutoQuitApp() {
           );
         })}
       </MenuBarExtra.Section>
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title={"Preferences"}
-        icon={Icon.Gear}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-        onAction={() => {
-          openCommandPreferences().then(() => null);
-        }}
-      />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Preferences"}
+          icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={() => {
+            openCommandPreferences().then(() => null);
+          }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

@@ -1,37 +1,23 @@
 import { runAppleScript } from "run-applescript";
-import { Apps } from "../types/type";
+import { App } from "../types/type";
+import { appsWithBundle } from "./common-utils";
 
-export async function appIsActive() {
+export async function getAllBundleProcess() {
   const script = `tell application "System Events"
-	return name of the first process whose frontmost is true
+	get the bundle identifier of processes
 end tell`;
 
   try {
-    return await runAppleScript(script);
+    const allProcess = await runAppleScript(script);
+    return allProcess.split(", ");
   } catch (e) {
-    return "";
+    return appsWithBundle;
   }
 }
 
-export async function appIsRunning(appName: string) {
-  const script = `   tell application "System Events" to set isRunning to exists (processes where name is "${appName}")
-   if isRunning then
-      return true
-   else
-      return false
-   end if`;
-
+export async function appCanQuit(appWindowCount: App, allProcess: string[]) {
   try {
-    const isRunning = await runAppleScript(script);
-    return isRunning === "true";
-  } catch (e) {
-    return false;
-  }
-}
-
-export async function appCanQuit(appWindowCount: Apps) {
-  try {
-    const isRunning = await appIsRunning(appWindowCount.name);
+    const isRunning = allProcess.includes(appWindowCount.bundleProcessName);
     if (!isRunning) return false;
 
     const script = `tell application "${appWindowCount.name}"
@@ -44,8 +30,8 @@ end tell`;
   }
 }
 
-export async function quitApp(appWindowCount: Apps) {
-  const canQuit = await appCanQuit(appWindowCount);
+export async function quitApp(appWindowCount: App, allProcess: string[]) {
+  const canQuit = await appCanQuit(appWindowCount, allProcess);
   if (!canQuit) return;
   const script = `tell application "${appWindowCount.name}"
    quit
@@ -58,8 +44,9 @@ end tell`;
   }
 }
 
-export async function quitApps(apps: Apps[]) {
+export async function quitApps(apps: App[]) {
+  const allProcess = await getAllBundleProcess();
   for (let i = 0; i < apps.length; i++) {
-    await quitApp(apps[i]);
+    await quitApp(apps[i], allProcess);
   }
 }
