@@ -102,6 +102,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
 }
 
 async function fetchBuckets() {
+  if (!process.env.AWS_PROFILE) return [];
   const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
 
   return Buckets;

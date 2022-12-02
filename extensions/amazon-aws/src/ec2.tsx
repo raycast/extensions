@@ -51,6 +51,7 @@ function EC2Instance({ instance }: { instance: Instance }) {
 }
 
 async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Promise<Instance[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
   const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],

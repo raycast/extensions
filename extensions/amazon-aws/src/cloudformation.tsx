@@ -43,6 +43,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
 }
 
 async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
     new ListStacksCommand({ NextToken: token })
   );

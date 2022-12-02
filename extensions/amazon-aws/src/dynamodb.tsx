@@ -40,6 +40,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
 }
 
 async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
     new ListTablesCommand({ ExclusiveStartTableName: token })
   );

@@ -74,6 +74,7 @@ function SQSQueue({ queue }: { queue: string }) {
 }
 
 async function fetchQueues(token?: string, queues?: string[]): Promise<string[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextToken, QueueUrls } = await new SQSClient({}).send(new ListQueuesCommand({ NextToken: token }));
   const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
 

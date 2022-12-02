@@ -60,6 +60,7 @@ const iconMap: { [key: string]: Icon } = {
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { nextToken, pipelines } = await new CodePipelineClient({}).send(
     new ListPipelinesCommand({ nextToken: token })
   );

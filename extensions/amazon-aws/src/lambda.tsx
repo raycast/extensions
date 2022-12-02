@@ -45,6 +45,7 @@ async function fetchFunctions(
   nextMarker?: string,
   functions?: FunctionConfiguration[]
 ): Promise<FunctionConfiguration[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];

@@ -54,6 +54,7 @@ async function fetchArns(token?: string, accClusters?: string[]): Promise<string
 }
 
 async function fetchClusters(): Promise<Cluster[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const clustersArns = await fetchArns();
 
   const { clusters } = await new ECSClient({}).send(new DescribeClustersCommand({ clusters: clustersArns }));
