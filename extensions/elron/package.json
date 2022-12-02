@@ -3,7 +3,7 @@
   "name": "elron",
   "title": "Elron Train Times",
   "description": "Fetch train times for Elron train times",
-  "icon": "\uD83D\uDE82",
+  "icon": "elron-icon.png",
   "author": "raimond",
   "categories": [
     "Other"
