@@ -1,5 +1,5 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { CloudFormationClient, ListStacksCommand, StackSummary } from "@aws-sdk/client-cloudformation";
+import { CloudFormationClient, ListStacksCommand, StackStatus, StackSummary } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
 
@@ -37,7 +37,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
           <Action.CopyToClipboard title="Copy Stack ID" content={stack.StackId || ""} />
         </ActionPanel>
       }
-      accessories={[{ text: stack.StackStatus }]}
+      accessories={[{ icon: iconMap[stack.StackStatus as StackStatus], tooltip: stack.StackStatus }]}
     />
   );
 }
@@ -55,3 +55,29 @@ async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<Sta
 
   return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
 }
+
+const iconMap: Record<StackStatus, Icon> = {
+  CREATE_COMPLETE: Icon.CheckCircle,
+  CREATE_FAILED: Icon.ExclamationMark,
+  CREATE_IN_PROGRESS: Icon.CircleProgress50,
+  DELETE_COMPLETE: Icon.CheckCircle,
+  DELETE_FAILED: Icon.ExclamationMark,
+  DELETE_IN_PROGRESS: Icon.CircleProgress50,
+  ROLLBACK_COMPLETE: Icon.CheckCircle,
+  ROLLBACK_FAILED: Icon.ExclamationMark,
+  ROLLBACK_IN_PROGRESS: Icon.CircleProgress50,
+  UPDATE_COMPLETE: Icon.CheckCircle,
+  UPDATE_COMPLETE_CLEANUP_IN_PROGRESS: Icon.CircleProgress50,
+  UPDATE_IN_PROGRESS: Icon.CircleProgress50,
+  UPDATE_ROLLBACK_COMPLETE: Icon.CheckCircle,
+  UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS: Icon.CircleProgress50,
+  UPDATE_ROLLBACK_FAILED: Icon.ExclamationMark,
+  UPDATE_ROLLBACK_IN_PROGRESS: Icon.CircleProgress50,
+  REVIEW_IN_PROGRESS: Icon.CircleProgress50,
+  IMPORT_COMPLETE: Icon.CheckCircle,
+  IMPORT_IN_PROGRESS: Icon.CircleProgress50,
+  IMPORT_ROLLBACK_COMPLETE: Icon.CheckCircle,
+  IMPORT_ROLLBACK_FAILED: Icon.ExclamationMark,
+  IMPORT_ROLLBACK_IN_PROGRESS: Icon.CircleProgress50,
+  UPDATE_FAILED: Icon.ExclamationMark,
+};
