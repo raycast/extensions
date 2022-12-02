@@ -58,7 +58,7 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
       ) : (
         objects?.map((object) => (
           <List.Item
-            key={object.Key || ""}
+            key={object.Key}
             icon={Icon.Document}
             title={object.Key || ""}
             actions={
