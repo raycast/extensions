@@ -5,6 +5,9 @@
   "description": "Get information about addresses in Denmark by searching through the Danish Address Web API with the adgangsadresseid as value.",
   "icon": "dawa_icon.png",
   "author": "SimonJ",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Developer Tools"

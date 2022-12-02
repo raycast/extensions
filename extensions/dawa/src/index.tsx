@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface AddressArguments {
@@ -24,19 +24,20 @@ interface DataResponse {
 
 export default function Command(props: { arguments: AddressArguments }) {
   const { adgangsadresseid } = props.arguments;
-  const { data, error, isLoading } = useFetch<DataResponse>(`https://dawa.aws.dk/adgangsadresser/${adgangsadresseid}`);
+  const { data, error, isLoading } = useFetch<DataResponse>(`https://dawa.aws.dk/adgangsadresser/${adgangsadresseid}`, {
+    keepPreviousData: false,
+  });
   let addressResult = null;
 
-  if (error) {
-    addressResult = `## Failed to fetch address data
-  Check your **adgangsadresseid** and try again.
-    `;
-  } else {
-    addressResult = `
-  ## Address result for id: ${data?.id ?? "N/A"}
+  if (!isLoading) {
+    if (error) {
+      addressResult = "## Failed to fetch address data\n Check the `id` and try again.";
+    } else {
+      addressResult = `
+  ## Address result for id: ${data?.id ?? "N/A"}\n\n
 
   * **Access address ID**: ${data?.id ?? "N/A"}
-  * **Address designation**: ${data?.adressebetegnelse ?? "N/A"}
+  * **Address designation**: ${data?.adressebetegnelse ?? "N/A"}  
   * **Kvhx**: ${data?.kvh ?? "N/A"}
   * **Street name:** ${data?.vejstykke.navn ?? "N/A"}
   * **House number:** ${data?.husnr ?? "N/A"}
@@ -45,9 +46,22 @@ export default function Command(props: { arguments: AddressArguments }) {
   * **Supplementary city name:** ${data?.supplerendebynavn ?? "N/A"}
   * **Zipcode number:** ${data?.postnummer.nr ?? "N/A"}
   * **City:** ${data?.postnummer.navn ?? "N/A"}
-  * ${data?.id ? `[Link to DAWA](https://dawa.aws.dk/adgangsadresser/${adgangsadresseid})` : "N/A"}
   `;
+    }
   }
 
-  return <Detail isLoading={isLoading} markdown={addressResult} />;
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={addressResult}
+      actions={
+        <ActionPanel>
+          {data?.id && <Action.OpenInBrowser url={`https://dawa.aws.dk/adgangsadresser/${adgangsadresseid}`} />}
+          {data?.adressebetegnelse && (
+            <Action.CopyToClipboard content={data.adressebetegnelse} title="Copy Full Address" />
+          )}
+        </ActionPanel>
+      }
+    />
+  );
 }
