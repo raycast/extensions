@@ -59,7 +59,7 @@ export interface Preferences {
 export default async function searchRequest(query: SearchQuery): Promise<[Link]> {
   const preferences: Preferences = getPreferenceValues();
   if (preferences.searchLinkDescriptions) {
-    query.linkDescriptions = 'yes'
+    query.linkDescriptions = "yes";
   }
   // @ts-expect-error: Don’t know how to satify URLSearchParams’s type.
   const searchParams = new URLSearchParams(query);

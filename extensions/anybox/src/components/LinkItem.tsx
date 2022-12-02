@@ -48,7 +48,7 @@ function formatSubtitle(link: Link): string {
     // em space U+2003
     return link.host + " " + link.comment;
   }
-  return link.host
+  return link.host;
 }
 
 function fullDate(dateString: string): string {
