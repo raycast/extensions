@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { CloudFormationClient, ListStacksCommand, StackStatus, StackSummary } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);

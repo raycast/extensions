@@ -1,7 +1,7 @@
 import { Cluster, DescribeClustersCommand, ECSClient, ListClustersCommand } from "@aws-sdk/client-ecs";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function ECS() {
   const { data: clusters, error, isLoading, revalidate } = useCachedPromise(fetchClusters);

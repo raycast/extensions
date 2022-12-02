@@ -12,7 +12,7 @@ import {
   _Object,
   GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
