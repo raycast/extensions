@@ -28,7 +28,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
 
       onProfileSelected?.(selectedProfile);
     }
-  }, [selectedProfile]);
+  }, [selectedProfile, configs]);
 
   if (!profileOptions || profileOptions.length < 2) {
     return null;
