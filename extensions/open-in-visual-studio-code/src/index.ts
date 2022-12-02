@@ -32,7 +32,9 @@ const getSelectedFinderWindow = (): Promise<string> => {
 
 export default async () => {
   const applications = await getApplications();
-  const visualStudioCode = applications.find((app) => app.bundleId === "com.microsoft.VSCode");
+  const visualStudioCode = applications.find(
+    (app) => app.bundleId === "com.microsoft.VSCode" || app.bundleId === "com.vscodium"
+  );
 
   if (!visualStudioCode) {
     await showToast({
