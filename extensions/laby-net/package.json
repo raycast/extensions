@@ -13,14 +13,14 @@
   "commands": [
     {
       "name": "profile-search",
-      "title": "Search profiles",
+      "title": "Search Profiles",
       "subtitle": "laby.net",
       "description": "Searches Minecraft user profile via username.",
       "mode": "view"
     },
     {
       "name": "texture-search",
-      "title": "Search textures",
+      "title": "Search Textures",
       "subtitle": "laby.net",
       "description": "Searches Minecraft skins & capes",
       "mode": "view"
