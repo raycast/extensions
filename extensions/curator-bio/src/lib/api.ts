@@ -4,7 +4,7 @@ import { APIData, CollectionData, Item, UserData, LoginResponse } from "./types"
 import RaycastCacheStore from "./cacheStore";
 
 const store = new RaycastCacheStore();
-const cookieJar = new CookieJar(store);
+export const cookieJar = new CookieJar(store);
 
 const client = got.extend({
   prefixUrl: "https://www.curator.bio/api/v2",

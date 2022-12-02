@@ -9,9 +9,9 @@ import {
   getCollections,
 } from "./api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
-import { Preference } from "./types";
 import { useEffect, useMemo } from "react";
+import { checkLoginCredentials } from "./utils";
+import { getPreferences } from "./preference";
 
 export const useUserId = (userId?: string) => {
   const [id, setId] = useCachedState<string | undefined>("userId", userId);
@@ -24,9 +24,11 @@ export const useUserId = (userId?: string) => {
 };
 
 export const useMe = () => {
-  const { email, password } = getPreferenceValues<Preference>();
+  const { email, password } = getPreferences();
 
   const useMeData = usePromise(async () => {
+    await checkLoginCredentials();
+
     let res;
     try {
       res = await getMe();
