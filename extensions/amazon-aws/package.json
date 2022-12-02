@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aws",
   "title": "Amazon AWS",
-  "description": "Integrate your AWS account in Raycast",
+  "description": "The best way to interact with your AWS resources",
   "icon": "aws-logo.png",
   "author": "Falcon",
   "contributors": [
@@ -22,64 +22,55 @@
     {
       "name": "ec2",
       "title": "EC2 Instances",
-      "subtitle": "Amazon AWS",
-      "description": "List and Filter All your EC2 Instances",
+      "description": "Find and open an instance",
       "mode": "view"
     },
     {
       "name": "ecs",
       "title": "ECS Clusters",
-      "subtitle": "Amazon AWS",
-      "description": "List and Filter All your ECS Clusters",
+      "description": "Find and open a cluster",
       "mode": "view"
     },
     {
       "name": "sqs",
       "title": "SQS Queues",
-      "subtitle": "Amazon AWS",
-      "description": "List your SQS Queues",
+      "description": "Find and open a queue (or purge it)",
       "mode": "view"
     },
     {
       "name": "codepipeline",
       "title": "CodePipeline Pipelines",
-      "subtitle": "Amazon AWS",
-      "description": "List your CodePipeline Pipelines",
+      "description": "Find and open a pipeline",
       "mode": "view"
     },
     {
       "name": "console",
       "title": "Console",
-      "subtitle": "Amazon AWS",
-      "description": "Launch AWS console links",
+      "description": "Get a direct link to a service in the AWS console",
       "mode": "view"
     },
     {
       "name": "cloudformation",
       "title": "CloudFormation Stacks",
-      "subtitle": "Amazon AWS",
-      "description": "List your CloudFormation Stacks",
+      "description": "Find and open a stack",
       "mode": "view"
     },
     {
       "name": "lambda",
       "title": "Lambda Functions",
-      "subtitle": "Amazon AWS",
-      "description": "List your Lambda Functions",
+      "description": "Find and open a function",
       "mode": "view"
     },
     {
       "name": "dynamodb",
       "title": "DynamoDB Tables",
-      "subtitle": "Amazon AWS",
-      "description": "List your DynamoDB Tables",
+      "description": "Find and open a table",
       "mode": "view"
     },
     {
       "name": "s3",
       "title": "S3 Buckets",
-      "subtitle": "Amazon AWS",
-      "description": "List your S3 Buckets",
+      "description": "Find and open a bucket and its content (or download it)",
       "mode": "view"
     }
   ],
