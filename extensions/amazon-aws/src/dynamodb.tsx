@@ -24,7 +24,7 @@ export default function DynamoDb() {
 function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
-      title={tableName || "Unknown Table name"}
+      title={tableName || ""}
       icon={Icon.HardDrive}
       actions={
         <ActionPanel>

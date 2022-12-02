@@ -26,7 +26,7 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
     <List.Item
       id={cluster.clusterArn}
       key={cluster.clusterArn}
-      title={cluster.clusterName || "Unknown ECS name"}
+      title={cluster.clusterName || ""}
       icon={Icon.Box}
       actions={
         <ActionPanel>

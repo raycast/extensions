@@ -35,7 +35,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
     <List.Item
       id={pipeline.name}
       key={pipeline.name}
-      title={pipeline.name || "Unknown pipeline name"}
+      title={pipeline.name || ""}
       icon={Icon.List}
       actions={
         <ActionPanel>

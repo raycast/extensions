@@ -28,7 +28,7 @@ function EC2Instance({ instance }: { instance: Instance }) {
     <List.Item
       id={instance.InstanceId}
       key={instance.InstanceId}
-      title={name || "Unknown Instance name"}
+      title={name || ""}
       icon={Icon.Layers}
       actions={
         <ActionPanel>
