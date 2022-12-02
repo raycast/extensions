@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail } from "@raycast/api";
+import { ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 interface AddressArguments {
@@ -58,7 +58,14 @@ export default function Command(props: { arguments: AddressArguments }) {
         <ActionPanel>
           {data?.id && <Action.OpenInBrowser url={`https://dawa.aws.dk/adgangsadresser/${adgangsadresseid}`} />}
           {data?.adressebetegnelse && (
-            <Action.CopyToClipboard content={data.adressebetegnelse} title="Copy Full Address" />
+            <>
+              <Action.OpenInBrowser
+                url={`https://www.google.com/maps/search/?api=1&query=${encodeURI(data.adressebetegnelse)}`}
+                title="Open in Google Maps"
+                icon={Icon.Map}
+              />
+              <Action.CopyToClipboard content={data.adressebetegnelse} title="Copy Full Address" />
+            </>
           )}
         </ActionPanel>
       }
