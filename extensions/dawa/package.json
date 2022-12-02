@@ -21,7 +21,7 @@
       "arguments": [
         {
           "name": "adgangsadresseid",
-          "placeholder": "adgangsadresseid",
+          "placeholder": "0a3f5081-c522-32b8-e044-0003ba298018",
           "type": "text",
           "required": true
         }
