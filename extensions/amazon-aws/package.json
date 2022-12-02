@@ -93,11 +93,11 @@
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-sqs": "^3.216.0",
     "@aws-sdk/shared-ini-file-loader": "^3.215.0",
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.4.9"
+    "@raycast/api": "^1.42.0",
+    "@raycast/utils": "^1.4.11"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
