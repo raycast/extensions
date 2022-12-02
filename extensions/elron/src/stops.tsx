@@ -31,13 +31,7 @@ const Stops: React.FC<Props> = ({ tripId }) => {
     <>
       <List isLoading={!stops}>
         {stops?.stop_time.map((stop) => {
-          return (
-            <List.Item
-              key={stop.id}
-              title={stop.arrival_time.slice(0, 5)}
-              subtitle={stop.stop_name}
-            />
-          );
+          return <List.Item key={stop.id} title={stop.arrival_time.slice(0, 5)} subtitle={stop.stop_name} />;
         })}
       </List>
     </>

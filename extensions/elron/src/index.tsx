@@ -12,7 +12,10 @@ export default function Command() {
         title="Tallinn -> Tartu"
         actions={
           <ActionPanel>
-            <Action.Push title="Show times" target={<Times originStopAreaId={TALLINN_STOP_ID} destinationStopAreaId={TARTU_STOP_ID} />} />
+            <Action.Push
+              title="Show times"
+              target={<Times originStopAreaId={TALLINN_STOP_ID} destinationStopAreaId={TARTU_STOP_ID} />}
+            />
           </ActionPanel>
         }
       />
@@ -21,7 +24,10 @@ export default function Command() {
         title="Tartu -> Tallinn"
         actions={
           <ActionPanel>
-            <Action.Push title="Show times" target={<Times originStopAreaId={TARTU_STOP_ID} destinationStopAreaId={TALLINN_STOP_ID} />} />
+            <Action.Push
+              title="Show times"
+              target={<Times originStopAreaId={TARTU_STOP_ID} destinationStopAreaId={TALLINN_STOP_ID} />}
+            />
           </ActionPanel>
         }
       />
