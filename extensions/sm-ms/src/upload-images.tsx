@@ -61,6 +61,7 @@ export default function UploadImages() {
           title={"Image"}
           value={imagePaths}
           error={imagePathError}
+          info={`⌘+R to switch to ${curMode ? "URL" : "Path"} upload`}
           allowMultipleSelection={false}
           canChooseDirectories={false}
           onChange={(newValue) => {
@@ -78,6 +79,7 @@ export default function UploadImages() {
           title={"Image"}
           value={imageUrl}
           error={imagePathError}
+          info={`⌘+R to switch to ${curMode ? "URL" : "Path"} upload`}
           onChange={(newValue) => {
             setImageUrl(newValue);
             if (newValue.length > 0) {
