@@ -14,7 +14,7 @@ export default function CodePipeline() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter codepipelines by name..."
+      searchBarPlaceholder="Filter pipelines by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {error ? (

@@ -9,7 +9,7 @@ export default function ECS() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter instances by name..."
+      searchBarPlaceholder="Filter clusters by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {error ? (
