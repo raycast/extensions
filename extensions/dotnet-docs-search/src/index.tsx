@@ -42,7 +42,7 @@ export default function SearchResultsList() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={result.url} />
-              <Action.CopyToClipboard content={result.url} />
+              <Action.CopyToClipboard title="Copy URL to Clipboard" content={result.url} />
             </ActionPanel>
           }
         />
