@@ -90,7 +90,7 @@ function UnreadNotifications() {
               tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
               onAction={async (event: MenuBarExtra.ActionEvent) => {
                 if (event.type === "left-click") {
-                  openNotification(notification);
+                  await openNotification(notification);
                 } else if (event.type === "right-click") {
                   await markNotificationAsRead(notification);
                 }
