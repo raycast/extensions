@@ -17,7 +17,7 @@ interface ProfileItem {
 
 interface NameHistoryEntry {
   name: string;
-  changedAt: Date | null;
+  changedAt: Date | string | null;
   accurate: boolean | null;
   lastSeenAt: Date | null;
 }
@@ -188,9 +188,17 @@ class Service {
       uuid: response.data.uuid,
       username: response.data.username,
       username_history: response.data.username_history.map((entry) => {
+        let changedAt: Date | string | null = null;
+        if (entry.changed_at !== null) {
+          if (entry.changed_at.length === 4) {
+            changedAt = entry.changed_at;
+          } else {
+            changedAt = new Date(entry.changed_at);
+          }
+        }
         return {
           name: entry.name,
-          changedAt: new Date(entry.changed_at),
+          changedAt: changedAt,
           accurate: entry.accurate,
           lastSeenAt: new Date(entry.last_seen_at),
         };

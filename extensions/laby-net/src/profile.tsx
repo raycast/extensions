@@ -52,18 +52,26 @@ export default function ProfileView(props: ProfileViewProps) {
   }
 
   const markdown = `
-## ${profile.profile.username} 
-${profile.profile.uuid}
+# ${profile.profile.username} 
+UUID: \`${profile.profile.uuid}\`
 
+### Name History
+${profile.profile.username_history
+  .reverse()
+  .map(
+    (name) =>
+      `- ${name.name} | ${name.accurate === false ? "~" : ""}${name.changedAt ? name.changedAt.toLocaleString() : "-"}`
+  )
+  .join("\n")}
 
-## Skins
+### Skins
 ${profile.profile.textures.skins
   .map((skin) => {
     return `[![](https://skin.laby.net/api/render/texture/${skin.imageHash}.png?shadow=true&height=120)](https://laby.net/skin/${skin.imageHash})`;
   })
   .join("\n")}
 
-## Capes
+### Capes
 ${
   profile.profile.textures.capes
     ?.map(
@@ -81,12 +89,16 @@ ${
         <Detail.Metadata>
           <Detail.Metadata.Label title="Views" text={profile.views.views.toFixed()} />
           <Detail.Metadata.Label title="Account type" text={profile.accountType} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Badges">
-            {profile.badges.map((badge) => {
-              return <Detail.Metadata.TagList.Item key={badge.uuid} text={badge.name} />;
-            })}
-          </Detail.Metadata.TagList>
+          {profile.badges.length > 0 ? (
+            <div>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.TagList title="Badges">
+                {profile.badges.map((badge) => {
+                  return <Detail.Metadata.TagList.Item key={badge.uuid} text={badge.name} />;
+                })}
+              </Detail.Metadata.TagList>
+            </div>
+          ) : null}
           <Detail.Metadata.Separator />
           {profile.socialMedia.map((socialMedia) => {
             return (
