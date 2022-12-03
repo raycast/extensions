@@ -40,6 +40,21 @@ async function getAppFocus(): Promise<Focus | undefined> {
         icon: "browser",
         text: await runAppleScript(`tell application "Safari" to return name of front document`),
       };
+    case "com.google.Chrome":
+      return {
+        icon: "browser",
+        text: await runAppleScript(`tell application "Google Chrome" to return title of active tab of front window`),
+      };
+    case "com.brave.Browser":
+      return {
+        icon: "browser",
+        text: await runAppleScript(`tell application "Brave Browser" to return title of active tab of front window`),
+      };
+    case "company.thebrowser.Browser":
+      return {
+        icon: "browser",
+        text: await runAppleScript(`tell application "Arc" to return title of active tab of front window`),
+      };
     default:
       await showHUD("❌ Unsupported App");
   }

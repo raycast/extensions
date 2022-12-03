@@ -1,6 +1,7 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra } from "@raycast/api";
 import { getFocus, getFocusHistory, getIcon, isPaused, showFocus } from "./utils";
 import { useState } from "react";
+import { truncate } from "lodash";
 
 export default function MenuBar() {
   const [focus, setFocus] = useState(getFocus);
@@ -12,7 +13,7 @@ export default function MenuBar() {
   }
 
   return (
-    <MenuBarExtra icon={icon} title={focus.text}>
+    <MenuBarExtra icon={icon} title={truncate(focus.text, { length: 50 })}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Edit Focus"
