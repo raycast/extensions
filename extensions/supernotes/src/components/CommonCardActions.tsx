@@ -27,13 +27,13 @@ const CommonCardActions = ({ card, removeFromList }: CommonCardActionsProps) => 
     <>
       <Action.OpenInBrowser
         title="Open in Supernotes"
-        icon={Icon.TextDocument}
+        icon={Icon.BlankDocument}
         url={`${SUPERNOTES_APP_LINK_URL}card_id=${card.data.id}`}
       />
       <Action.CopyToClipboard title="Copy Markdown" icon={Icon.Clipboard} content={card.data.markup} />
       <Action.CopyToClipboard title="Copy HTML" icon={Icon.Clipboard} content={card.data.html} />
       <Action title="Junk Card" icon={Icon.Trash} onAction={() => junk(card.data.id)} />
-      {found && <Action title="Remove from Recently Viewed" icon={Icon.XmarkCircle} onAction={remove} />}
+      {found && <Action title="Remove from Recently Viewed" icon={Icon.XMarkCircle} onAction={remove} />}
     </>
   );
 };
