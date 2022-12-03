@@ -3,6 +3,6 @@ import { showFocus } from "./utils";
 
 export default async function clipboardFocus() {
   return showFocus({
-    text: await Clipboard.readText() ?? "",
+    text: (await Clipboard.readText()) ?? "",
   });
 }

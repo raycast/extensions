@@ -26,14 +26,14 @@ export async function showFocus(nextFocus: Focus, { background = true, hud = tru
     cache.set("last-reminder", Date.now().toString());
     cache.set("paused", "false");
     if (background) {
-      await launchCommand({name: "menu-bar", type: LaunchType.Background});
+      await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     }
     if (hud) {
       await showHUD(nextFocus.text);
     }
   } else {
     if (background) {
-      await launchCommand({name: "menu-bar", type: LaunchType.Background});
+      await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     }
     await closeMainWindow();
   }
