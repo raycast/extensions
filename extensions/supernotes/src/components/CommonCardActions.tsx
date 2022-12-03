@@ -2,6 +2,7 @@ import { Action, Icon, popToRoot } from "@raycast/api";
 
 import useJunk from "hooks/useJunk";
 import { useRecentRemover } from "hooks/useRecent";
+import { SUPERNOTES_APP_LINK_URL } from "utils/defines";
 import { ICard } from "utils/types";
 
 interface CommonCardActionsProps {
@@ -24,6 +25,11 @@ const CommonCardActions = ({ card, removeFromList }: CommonCardActionsProps) => 
 
   return (
     <>
+      <Action.OpenInBrowser
+        title="Open in Supernotes"
+        icon={Icon.TextDocument}
+        url={`${SUPERNOTES_APP_LINK_URL}card_id=${card.data.id}`}
+      />
       <Action.CopyToClipboard title="Copy Markdown" icon={Icon.Clipboard} content={card.data.markup} />
       <Action.CopyToClipboard title="Copy HTML" icon={Icon.Clipboard} content={card.data.html} />
       <Action title="Junk Card" icon={Icon.Trash} onAction={() => junk(card.data.id)} />
