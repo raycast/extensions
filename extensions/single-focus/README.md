@@ -7,6 +7,8 @@
 
 ## How it works
 
+https://user-images.githubusercontent.com/36263538/205444605-45600af1-75b3-41da-b519-ddda675f41dd.mp4
+
 1. Run both the `Current Focus` and `Menu Bar` commands to have the full experience.
 2. Use any of the commands to set your current focus.
     - `Set Focus` will allow you to manually input a focus.
@@ -15,9 +17,10 @@
     - `Application Focus` will set the focus using the frontmost application. (e.g. the current tab in your
       browser, [see below](#supported-applications))
 3. Assign one of more shortcuts for the focus set command you use most.
-4. You will be reminded every 1 minute of your current focus with a HUD and in the menu bar (the interval can be changed
+4. Set the `Current Focus` command as a favorite so you see your current focus when you open Raycast.
+5. You will be reminded every 1 minute of your current focus with a HUD and in the menu bar (the interval can be changed
    in the extension settings).
-5. If you are in a meeting or wish to stop seeing a reminder run the `Pause Reminder` command.
+6. If you are in a meeting or wish to stop seeing a reminder run the `Pause Reminder` command.
 
 ### Supported Applications
 
