@@ -7,17 +7,34 @@ export interface Focus {
   icon?: "email" | "task" | "browser" | "none";
 }
 
-export async function showFocus(focus: Focus) {
-  cache.set("focus-text", focus.text);
-  cache.set("focus-icon", focus?.icon ?? "none");
+export function getFocusHistory(): Focus[] {
+  return JSON.parse(cache.get("focus-history") ?? "[]");
+}
 
-  if (focus) {
+export async function showFocus(nextFocus: Focus, { background = true, hud = true } = {}) {
+  const currentFocus = getFocus();
+
+  cache.set("focus-text", nextFocus.text);
+  cache.set("focus-icon", nextFocus?.icon ?? "none");
+
+  if (currentFocus.text !== nextFocus.text) {
+    const history = JSON.parse(cache.get("focus-history") ?? "[]");
+    cache.set("focus-history", JSON.stringify([currentFocus, ...history].slice(0, 9)));
+  }
+
+  if (nextFocus) {
     cache.set("last-reminder", Date.now().toString());
     cache.set("paused", "false");
-    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
-    await showHUD(focus.text);
+    if (background) {
+      await launchCommand({name: "menu-bar", type: LaunchType.Background});
+    }
+    if (hud) {
+      await showHUD(nextFocus.text);
+    }
   } else {
-    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+    if (background) {
+      await launchCommand({name: "menu-bar", type: LaunchType.Background});
+    }
     await closeMainWindow();
   }
 }

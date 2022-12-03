@@ -1,3 +1,3 @@
-# Current Focus
+# Single Focus
 
 Get reminded on what is your current focus
