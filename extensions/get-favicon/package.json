@@ -8,10 +8,34 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Get Favicon",
-      "description": "Download or copy favicon from URL",
-      "mode": "view"
+      "name": "copy",
+      "icon": "copy.png",
+      "title": "Copy Favicon",
+      "description": "Copy favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "https://raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "download",
+      "icon": "download.png",
+      "title": "Download Favicon",
+      "description": "Download favicon from URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "required": true,
+          "placeholder": "https://raycast.com",
+          "name": "url",
+          "type": "text"
+        }
+      ]
     }
   ],
   "preferences": [
