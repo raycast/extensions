@@ -17,6 +17,10 @@ export default async function currentFocus() {
     return showHUD("❌ Missing Focus");
   }
 
+  if (!focus.text) {
+    return;
+  }
+
   await updateCommandMetadata({ subtitle: focus.text });
 
   if (environment.launchType === "userInitiated") {

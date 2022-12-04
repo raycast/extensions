@@ -70,7 +70,7 @@
       "name": "interval",
       "title": "Reminder Interval",
       "description": "How often to show the reminder",
-      "default": "1m",
+      "default": "3m",
       "data": [
         {
           "title": "10 seconds",
