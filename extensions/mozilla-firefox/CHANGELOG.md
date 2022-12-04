@@ -5,3 +5,4 @@
 - Add New Tab from search query, Open Tabs and History
 - Add Search Open Tabs
 - Add Search History
+- Add Search from Google, DuckDuckGo, Bing, Brave and Baidu

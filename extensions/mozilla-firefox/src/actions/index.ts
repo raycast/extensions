@@ -1,12 +1,13 @@
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Tab } from "../interfaces";
+import { Preferences, Tab } from "../interfaces";
+import { SEARCH_ENGINE } from "../util/constants";
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
 
-  const script = `
+    const script = `
     tell application "Firefox"
       activate
       repeat while not frontmost
@@ -15,23 +16,23 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
       tell application "System Events"
         keystroke "t" using {command down}
         ${
-          queryText
+        queryText
             ? `keystroke "l" using {command down}
            keystroke "a" using {command down}
            key code 51
-           keystroke "https://www.google.com/search?q=${queryText}"
+           keystroke "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
            key code 36`
             : ""
-        }
+    }
       end tell
     end tell
   `;
 
-  return await runAppleScript(script);
+    return await runAppleScript(script);
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
+    await runAppleScript(`
     tell application "Firefox"
       activate
       repeat with w from 1 to count of windows

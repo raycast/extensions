@@ -1,8 +1,8 @@
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-export interface State {
-  tabs?: Tab[];
+export interface Preferences {
+  searchEngine: string;
 }
 
 export class Tab {

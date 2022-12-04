@@ -32,7 +32,39 @@
       "title": "New Tab",
       "subtitle": "Mozilla Firefox",
       "description": "Open a new Google Chrome tab.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "searchEngine",
+          "type": "dropdown",
+          "required": false,
+          "title": "Search Engine",
+          "description": "Search Engine for query (default: Google).",
+          "default": "Google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "Google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "DuckDuckGo"
+            },
+            {
+              "title": "Bing",
+              "value": "Bing"
+            },
+            {
+              "title": "Baidu",
+              "value": "Baidu"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
