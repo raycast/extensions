@@ -1,3 +1,3 @@
-# Kubernetes Helm ArtifactHub
+# Mozilla Firefox
 
-Search and install Helm charts
+Search and open Mozilla Firefox tabs from search query, opened tabs and history.
