@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "crates-io-search",
+  "title": "Search Rust Crates",
+  "description": "Search Rust crates on Crates.io",
+  "icon": "cargo.png",
+  "author": "belltoy",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "rust",
+    "crates.io",
+    "crates",
+    "cargo"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Rust Crates",
+      "description": "Search Rust crates on Crates.io",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showDetails",
+          "title": "Show Crates Details",
+          "description": "Show crates details in the result list",
+          "label": "Show crates details in the result list",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ],
+      "keyword": "rs"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@types/human-format": "^1.0.0",
+    "dayjs": "^1.11.6",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
