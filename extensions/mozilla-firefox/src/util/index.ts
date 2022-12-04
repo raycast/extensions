@@ -1,8 +1,5 @@
-import util from "util";
 import fs from "fs";
 import path from "path";
-
-const fsReadDir = util.promisify(fs.readdir);
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -12,18 +9,30 @@ const userDataDirectoryPath = () => {
   return path.join(process.env.HOME, "Library", "Application Support", "Firefox", "Profiles");
 };
 
-const getProfileName = async () => {
-  const profiles = await fsReadDir(userDataDirectoryPath());
+const getProfileName = async (userDirectoryPath: string) => {
+  const profiles = await fs.promises.readdir(userDirectoryPath);
   return profiles.filter((profile) => profile.endsWith(".default-release"))[0];
 };
 
-export const getHistoryDbPath = async () => path.join(userDataDirectoryPath(), await getProfileName(), "places.sqlite");
+export const getHistoryDbPath = async () => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(userDirectoryPath, await getProfileName(userDirectoryPath), "places.sqlite");
+};
 
-export const getSessionInactivePath = async () =>
-  path.join(userDataDirectoryPath(), await getProfileName(), "sessionstore.jsonlz4");
+export const getSessionInactivePath = async () => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(userDirectoryPath, await getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
+};
 
-export const getSessionActivePath = async () =>
-  path.join(userDataDirectoryPath(), await getProfileName(), "sessionstore-backups", "recovery.jsonlz4");
+export const getSessionActivePath = async () => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(
+    userDirectoryPath,
+    await getProfileName(userDirectoryPath),
+    "sessionstore-backups",
+    "recovery.jsonlz4"
+  );
+};
 
 export function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
   sIdx = sIdx || 0;

@@ -1,18 +1,15 @@
 import path from "path";
 import fs from "fs";
-import util from "util";
 import initSqlJs, { Database } from "sql.js";
 import { useEffect, useRef, useState } from "react";
 import { environment } from "@raycast/api";
 import { HistorySearchResults, HistoryEntry } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 
-const fsReadFile = util.promisify(fs.readFile);
-
 const loadDb = async (): Promise<Database> => {
   const dbPath = await getHistoryDbPath();
-  const fileBuffer = await fsReadFile(dbPath);
-  const wasmBinary = await fsReadFile(path.join(environment.assetsPath, "sql.wasm"));
+  const fileBuffer = await fs.promises.readFile(dbPath);
+  const wasmBinary = await fs.promises.readFile(path.join(environment.assetsPath, "sql.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileBuffer);
 };
