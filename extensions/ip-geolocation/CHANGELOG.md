@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Update UI] - {PR_MERGE_DATE}
+## [Update UI] - 2022-12-05
 
 - Update UI: new extension icon, new information icon
 - Update Raycast API version to 1.44.0
