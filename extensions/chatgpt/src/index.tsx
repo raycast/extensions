@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import crypto from "crypto";
 import fetch from "node-fetch";
@@ -27,7 +28,7 @@ export default function Command() {
 
   const [messageValue, setMessageValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Record<string, Message>>({});
+  const [messages, setMessages] = useCachedState<Record<string, Message>>("messages", {});
   const [conversationId, setConversationId] = useState<string | null>();
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
 
