@@ -32,11 +32,11 @@ const getSelectedFinderWindow = (): Promise<string> => {
 
 export default async () => {
   const applications = await getApplications();
-  const visualStudioCode = applications.find(
-    (app) => app.bundleId === "com.microsoft.VSCode" || app.bundleId === "com.vscodium"
-  );
+  const visualStudioCode = applications.find((app) => app.bundleId === "com.microsoft.VSCode");
+  const visualStudioCodium = applications.find((app) => app.bundleId === "com.vscodium");
+  const vscodeApplication = visualStudioCode ?? visualStudioCodium;
 
-  if (!visualStudioCode) {
+  if (!vscodeApplication) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Visual Studio Code is not installed",
@@ -52,12 +52,12 @@ export default async () => {
     const selectedFinderItems = await getSelectedFinderItems();
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, visualStudioCode);
+        await open(finderItem.path, vscodeApplication);
       }
       return;
     }
     const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, visualStudioCode);
+    await open(selectedFinderWindow, vscodeApplication);
     return;
   } catch (error: any) {
     await showToast({
