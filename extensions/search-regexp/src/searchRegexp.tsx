@@ -7,7 +7,12 @@ import { iconsMap } from "./icons";
 import { MappedExpression } from "./types";
 import { flatExpressions } from "./utilities";
 
-export const ExpressionItemActions = memo(({ regexp, link }: { regexp: string; link?: string }): JSX.Element => {
+interface ExpressionItemActionsProps {
+  regexp: string;
+  link?: string;
+}
+
+export const ExpressionItemActions = memo(({ regexp, link }: ExpressionItemActionsProps): JSX.Element => {
   return (
     <ActionPanel>
       <ActionPanel.Section>

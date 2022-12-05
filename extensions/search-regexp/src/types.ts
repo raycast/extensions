@@ -29,3 +29,9 @@ export type ZipCodeResponse = {
   name: string;
   key: string;
 };
+
+export enum Loading {
+  IDLE,
+  LOADING,
+  LOADED,
+}

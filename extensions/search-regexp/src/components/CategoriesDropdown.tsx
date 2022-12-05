@@ -1,13 +1,12 @@
 import { List } from "@raycast/api";
 import { Category } from "../types";
 
-export default function CategoriesDropdown({
-  categories,
-  onCategoryChange,
-}: {
+interface CategoriesDropdownProps {
   categories: Category[];
   onCategoryChange: (newCategory: string) => void;
-}): JSX.Element {
+}
+
+export default function CategoriesDropdown({ categories, onCategoryChange }: CategoriesDropdownProps): JSX.Element {
   return (
     <List.Dropdown tooltip="Select category" storeValue={false} onChange={onCategoryChange}>
       <List.Dropdown.Section title="Regexp categories">
