@@ -1,6 +1,6 @@
 # SM.MS Changelog
 
-## [Add alternate domain] - {PR_MERGE_DATE}
+## [Add alternate domain] - 2022-12-05
 
 - Add alternate domain name selection
 - Update image file selection method
