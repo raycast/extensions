@@ -1,5 +1,6 @@
 import { Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { quitAppsHook } from "./hooks/hooks";
+import { App } from "./types/type";
 
 export default function AutoQuitApp() {
   const { apps, loading } = quitAppsHook();
@@ -32,6 +33,9 @@ export default function AutoQuitApp() {
             )
           );
         })}
+        {!apps?.some((value) => {
+          return value.enabled;
+        }) && <MenuBarExtra.Item title={"No Apps"} icon={Icon.AppWindowGrid3x3} />}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title={"Disabled Apps"}>
         {apps?.map((value) => {
@@ -49,6 +53,9 @@ export default function AutoQuitApp() {
             )
           );
         })}
+        {apps?.every((value) => {
+          return value.enabled;
+        }) && <MenuBarExtra.Item title={"No Apps"} icon={Icon.AppWindowGrid3x3} />}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item

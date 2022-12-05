@@ -5,7 +5,7 @@ import { quitApps } from "../utils/applescript-utils";
 
 export const quitAppsHook = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [apps, setApps] = useState<App[]>();
+  const [apps, setApps] = useState<App[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
