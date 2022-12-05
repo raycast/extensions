@@ -1,5 +1,9 @@
 # Color Casket Changelog
 
+## [Bug fix] - 2022-11-21
+
+- Resolve an issue when launchCommand was called earlier than color is saved to history.
+
 ## [Bug fixes] - 2022-11-01
 
 Fixed bugs that might have caused the extension to not work properly.

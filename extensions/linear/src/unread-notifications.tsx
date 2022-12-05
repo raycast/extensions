@@ -1,4 +1,12 @@
-import { getApplications, MenuBarExtra, open, openCommandPreferences, launchCommand, LaunchType } from "@raycast/api";
+import {
+  getApplications,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+  launchCommand,
+  LaunchType,
+  getPreferenceValues,
+} from "@raycast/api";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
@@ -6,13 +14,12 @@ import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificatio
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
+const preferences = getPreferenceValues<{ alwaysShow: boolean }>();
+
 function UnreadNotifications() {
   const { isLoadingNotifications, unreadNotifications, urlKey, mutateNotifications } = useNotifications();
 
-  async function openNotification(notification: NotificationResult) {
-    const applications = await getApplications();
-    const linearApp = applications.find((app) => app.bundleId === "com.linear");
-    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+  async function markNotificationAsRead(notification: NotificationResult) {
     await mutateNotifications(updateNotification({ id: notification.id, readAt: new Date() }), {
       optimisticUpdate(data) {
         if (!data) {
@@ -27,6 +34,13 @@ function UnreadNotifications() {
     });
   }
 
+  async function openNotification(notification: NotificationResult) {
+    const applications = await getApplications();
+    const linearApp = applications.find((app) => app.bundleId === "com.linear");
+    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+    await markNotificationAsRead(notification);
+  }
+
   async function openInbox() {
     const applications = await getApplications();
     const linearApp = applications.find((app) => app.bundleId === "com.linear");
@@ -37,6 +51,10 @@ function UnreadNotifications() {
     const ellipsis = text.length > maxLength ? "…" : "";
     return text.substring(0, maxLength).trim() + ellipsis;
   };
+
+  if (!preferences.alwaysShow && !isLoadingNotifications && unreadNotifications && unreadNotifications.length === 0) {
+    return null;
+  }
 
   return (
     <MenuBarExtra
@@ -70,7 +88,13 @@ function UnreadNotifications() {
               title={baseTitle}
               subtitle={notification.issue?.title ? truncate(notification.issue.title, 20) : ""}
               tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
-              onAction={() => openNotification(notification)}
+              onAction={async (event: MenuBarExtra.ActionEvent) => {
+                if (event.type === "left-click") {
+                  await openNotification(notification);
+                } else if (event.type === "right-click") {
+                  await markNotificationAsRead(notification);
+                }
+              }}
             />
           );
         })}

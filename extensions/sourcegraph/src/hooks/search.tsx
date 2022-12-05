@@ -104,8 +104,10 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
         },
         onAlert: (alert) => {
           const toast = ExpandableToast(push, "Alert", alert.title, alert.description || "");
-          if (alert.kind === "lucky-search-queries") {
-            toast.style = Toast.Style.Success;
+          switch (alert.kind) {
+            case "smart-search-additional-results":
+            case "smart-search-pure-results":
+              toast.style = Toast.Style.Success;
           }
           toast.show();
         },

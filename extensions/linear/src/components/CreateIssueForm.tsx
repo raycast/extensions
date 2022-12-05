@@ -1,5 +1,15 @@
 import { useEffect } from "react";
-import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  Clipboard,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  useNavigation,
+  showToast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -80,8 +90,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       let payloadDescription = values.description || "";
       if (signature) {

@@ -1,23 +1,23 @@
-import { TodoPage } from '@/types/todo-page'
-import { getPreferenceValues } from '@raycast/api'
+import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
 
 export async function updateTodoTag(
   pageId: string,
   labelId: string | null
-): Promise<any> {
+): Promise<boolean> {
   const notionClient = await notion()
-  const preferences = getPreferenceValues()
+  const preferences = await loadPreferences()
 
-  const page = await notionClient.pages.update({
+  if (!preferences.properties.tag) return false
+
+  await notionClient.pages.update({
     page_id: pageId,
     properties: {
-      [preferences.property_label]: {
+      [preferences.properties.tag]: {
         select: labelId ? { id: labelId } : null,
       },
     },
   })
 
-  return mapPageToTodo(page as TodoPage, preferences)
+  return true
 }

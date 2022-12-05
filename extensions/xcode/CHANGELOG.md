@@ -1,5 +1,10 @@
 # Xcode Changelog
 
+## [Search Recent Builds Menu Bar] - 2022-11-29
+
+- Added "Show Recent Builds in Menu Bar" command to view the latest builds of your apps installed on a simulator.
+- Improved layout and actions of the "Search Recent Builds" command.
+
 ## [Open Developer Documentation] - 2022-11-07
 
 - Added "Open Developer Documentation" command to open the Developer Documentation in Xcode.

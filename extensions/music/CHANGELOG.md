@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Update] - 2022-11-21
+
+- Fixes the command "Love track" so it loves the track instead of adding to library.
+
 ## [Update] - 2022-10-29
 
 - Fixed "Add to Library" script.

@@ -1,5 +1,19 @@
 # Obsidian Changelog
 
+## [Fix | Version 1.10.1] - 2022-11-29
+
+- Fixed a bug where command executed with shortcut was not working
+
+## [Append to Daily Note Command | Version 1.10.0] - 2022-11-23
+
+- Add `Append to Daily Note Command` which can append text to a daily note. Text can be appended to the end of the note or to a specific heading. It supports all templates. Contributed by @iancanderson.
+- Fixed dropdown menu preventing search to function in newer Raycast versions
+- Update to Raycast API v1.44.0
+
+## [Fix | Version 1.9.2] - 2022-11-18
+
+- Fixed a bug where the searchbar text didn't update
+
 ## [Small fix | Version 1.9.1] - 2022-10-28
 
 - Fix command execution with shortcut not working

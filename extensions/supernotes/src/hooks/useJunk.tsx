@@ -3,8 +3,8 @@ import React from "react";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 
-import { SUPERNOTES_API_URL } from "utils/defines";
-import { SupernotesErrorPayload } from "utils/types";
+import { SUPERNOTES_API_URL, Status } from "utils/defines";
+import { ValidationError, WrappedCardResponses } from "utils/types";
 
 const useJunk = (successCallback: () => void) => {
   const { apiKey } = getPreferenceValues();
@@ -20,15 +20,19 @@ const useJunk = (successCallback: () => void) => {
     });
     try {
       if (!apiKey) throw new Error("No API key found");
-      const res = await fetch(`${SUPERNOTES_API_URL}/cards/${cardId}/junk`, {
-        method: "PUT",
-        headers: { "Api-Key": apiKey },
+      const res = await fetch(`${SUPERNOTES_API_URL}/cards/`, {
+        method: "PATCH",
+        headers: { "Api-Key": apiKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ [cardId]: { membership: { status: Status.DISABLED } } }),
       });
       setLoading(false);
-      if (res.status !== 200) {
-        const jsonError = await res.json();
-        throw new Error((jsonError as SupernotesErrorPayload).detail);
-      }
+      const jsonData = (await res.json()) as WrappedCardResponses | ValidationError;
+      if ("errors" in jsonData) throw new Error(jsonData.errors.body);
+      const wrapped_card = jsonData[0];
+      // error checking
+      if (wrapped_card.card_id !== cardId) throw new Error("Card mismatch");
+      if (!wrapped_card.success) throw new Error(wrapped_card.payload);
+      // success
       toast.style = Toast.Style.Success;
       toast.title = "Success";
       toast.message = "Card junked";

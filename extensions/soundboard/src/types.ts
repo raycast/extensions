@@ -3,4 +3,5 @@ export interface Item {
   title: string;
   path: string[];
   favourite: string;
+  last_favourite?: string;
 }

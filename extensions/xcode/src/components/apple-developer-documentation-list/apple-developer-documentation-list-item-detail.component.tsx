@@ -11,8 +11,7 @@ export function AppleDeveloperDocumentationListItemDetail(props: {
   entry: AppleDeveloperDocumentationEntry;
 }): JSX.Element {
   const imageUrl = usePromise(() => fetchOpenGraphImageUrl(props.entry.url), [], {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onError: () => {},
+    onError: () => Promise.resolve(),
   });
   return (
     <List.Item.Detail

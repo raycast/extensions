@@ -59,10 +59,14 @@ export async function performSearch(
     ["display", "200"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
-  const stream = src.token
-    ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
-    : new EventSource(requestURL);
+  const headers: { [key: string]: string } = {
+    "X-Requested-With": "Raycast-Sourcegraph",
+  };
+  if (src.token) {
+    headers["Authorization"] = `token ${src.token}`;
+  }
 
+  const stream = new EventSource(requestURL, { headers });
   return new Promise((resolve) => {
     /**
      * All events that indicate the end of the request should use this to resolve.
@@ -91,7 +95,7 @@ export async function performSearch(
             case "content":
               // Line number appears 0-indexed, for ease of use increment it so links
               // aren't off by 1.
-              match.lineMatches.forEach((l) => {
+              match.lineMatches?.forEach((l) => {
                 l.lineNumber += 1;
               });
               break;
@@ -157,7 +161,17 @@ export async function performSearch(
           event.data.proposedQueries.map((p) => {
             return {
               title: p.description || event.data.title,
-              description: !p.description ? event.data.title : "",
+              description: p.annotations
+                ?.map((annotation) => {
+                  switch (annotation.name) {
+                    case "ResultCount":
+                      return `${annotation.value} results`;
+                    default:
+                      return undefined;
+                  }
+                })
+                .filter((desc) => !!desc)
+                .join(", "),
               query: p.query,
             };
           }),

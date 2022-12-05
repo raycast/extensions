@@ -89,9 +89,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.44.0",
     "axios": "^0.27.2",
-    "public-ip": "^5.0.0"
+    "public-ip": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

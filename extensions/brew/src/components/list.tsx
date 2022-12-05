@@ -43,18 +43,22 @@ export function FormulaListItem(props: { formula: Formula; onAction: () => void 
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
+  let tooltip: string | undefined = undefined;
 
   if (brewIsInstalled(formula)) {
     version = brewFormatVersion(formula);
     tintColor = formula.outdated ? Color.Red : Color.Green;
+    tooltip = formula.outdated ? "Outdated" : "Up to date";
   }
+
+  const icon = { source: Icon.Checkmark, tintColor };
 
   return (
     <List.Item
       title={formula.name}
       subtitle={formula.desc}
-      accessoryTitle={version}
-      icon={{ source: Icon.Checkmark, tintColor: tintColor }}
+      accessories={[{ text: version }]}
+      icon={tooltip ? { value: icon, tooltip } : icon}
       actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={props.onAction} />}
     />
   );
@@ -64,18 +68,22 @@ export function CaskListItem(props: { cask: Cask; onAction: () => void }): JSX.E
   const cask = props.cask;
   let version = cask.version;
   let tintColor = Color.SecondaryText;
+  let tooltip: string | undefined = undefined;
 
   if (brewIsInstalled(cask)) {
     version = brewFormatVersion(cask);
     tintColor = cask.outdated ? Color.Red : Color.Green;
+    tooltip = cask.outdated ? "Outdated" : "Up to date";
   }
+
+  const icon = { source: Icon.Checkmark, tintColor };
 
   return (
     <List.Item
       title={brewName(cask)}
       subtitle={cask.desc}
-      accessoryTitle={version}
-      icon={{ source: Icon.Checkmark, tintColor: tintColor }}
+      accessories={[{ text: version }]}
+      icon={tooltip ? { value: icon, tooltip } : icon}
       actions={<CaskActionPanel cask={cask} showDetails={true} onAction={props.onAction} />}
     />
   );

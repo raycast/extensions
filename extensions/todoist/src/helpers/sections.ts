@@ -37,13 +37,13 @@ export function getSectionsWithPriorities(tasks: Task[]) {
 }
 
 export function getSectionsWithLabels({ tasks, labels }: { tasks: Task[]; labels: Label[] }) {
-  const tasksWithoutLabels = tasks?.filter((task) => task.labelIds.length === 0);
+  const tasksWithoutLabels = tasks?.filter((task) => task.labels.length === 0);
 
   const sections =
     labels?.map((label) => {
       return {
         name: label.name,
-        tasks: tasks?.filter((task) => task.labelIds.includes(label.id)) || [],
+        tasks: tasks?.filter((task) => task.labels.includes(label.id)) || [],
       };
     }) || [];
 

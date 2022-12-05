@@ -1,6 +1,6 @@
 import { notion } from '../client'
 
-export async function deleteTodo(pageId: string): Promise<any> {
+export async function deleteTodo(pageId: string): Promise<boolean> {
   const notionClient = await notion()
 
   await notionClient.pages.update({

@@ -14,9 +14,10 @@ export type Project = {
 };
 
 export async function getProjects(workspace: string) {
-  const { data } = await request<{ data: Project[] }>("/projects", {
+  const { data } = await request<{ data: Project[] }>(`/workspaces/${workspace}/typeahead`, {
     params: {
       workspace,
+      resource_type: "project",
       opt_fields: "id,name,icon,color,custom_field_settings.custom_field",
     },
   });

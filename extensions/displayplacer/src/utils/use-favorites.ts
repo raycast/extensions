@@ -6,12 +6,17 @@ export function useFavorites() {
   const [favs, actions] = useList<Favorite>([]);
   const [isLoading, setLoading] = useState(true);
 
+  async function updateAndSaveFavs(favs: Favorite[]): Promise<void> {
+    await LocalStorage.setItem("favorites", JSON.stringify(favs));
+    actions.set(favs);
+  }
+
   async function init() {
     const myFavs = await LocalStorage.getItem("favorites");
     if (myFavs) {
       actions.set(JSON.parse(myFavs.toString()));
     } else {
-      await LocalStorage.setItem("favorites", "[]");
+      await updateAndSaveFavs([]);
     }
   }
 
@@ -19,9 +24,5 @@ export function useFavorites() {
     init().then(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    LocalStorage.setItem("favorites", JSON.stringify(favs));
-  }, [favs]);
-
-  return { favorites: favs, isLoading, actions };
+  return { favorites: favs, isLoading, updateAndSaveFavs };
 }

@@ -55,7 +55,7 @@
     "node-fetch": "^3.0.0",
     "node-localstorage": "^2.2.1",
     "swr": "^1.1.2-beta.0",
-    "ynab": "^1.25.0"
+    "ynab": "^1.32.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

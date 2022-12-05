@@ -170,7 +170,8 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortContro
       const cacheBuffer = await fs.readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
-      throw "Invalid cache";
+      console.error("Invalid cache");
+      return await updateCache();
     }
   }
 
@@ -200,6 +201,9 @@ const caskURL = "https://formulae.brew.sh/api/cask.json";
 const formulaRemote: utils.Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
 const caskRemote: utils.Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
+// Store the query so that text entered during the initial fetch is respected.
+let searchQuery: string | undefined;
+
 export async function brewFetchFormulae(): Promise<Formula[]> {
   return await utils.fetchRemote(formulaRemote);
 }
@@ -208,12 +212,31 @@ export async function brewFetchCasks(): Promise<Cask[]> {
   return await utils.fetchRemote(caskRemote);
 }
 
-export async function brewSearch(searchText: string, limit?: number): Promise<InstallableResults> {
+export async function brewSearch(
+  searchText: string,
+  limit?: number,
+  signal?: AbortSignal
+): Promise<InstallableResults> {
+  searchQuery = searchText;
+
   let formulae = await brewFetchFormulae();
+
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
   let casks = await brewFetchCasks();
 
-  if (searchText.length > 0) {
-    const target = searchText.toLowerCase();
+  if (signal?.aborted) {
+    const error = new Error("Aborted");
+    error.name = "AbortError";
+    throw error;
+  }
+
+  if (searchQuery.length > 0) {
+    const target = searchQuery.toLowerCase();
     formulae = formulae
       ?.filter((formula) => {
         return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
@@ -270,7 +293,7 @@ export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortCon
 }
 
 export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
-  let cmd = `upgrade`;
+  let cmd = `upgrade --ignore-pinned`;
   if (greedy) {
     cmd += " --greedy";
   }

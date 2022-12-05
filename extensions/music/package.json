@@ -5,6 +5,9 @@
   "description": "Control the Apple Music app with your keyboard.",
   "icon": "icon.png",
   "author": "fedevitaledev",
+  "contributors": [
+    "peterdev22"
+  ],
   "license": "MIT",
   "keywords": [
     "music",

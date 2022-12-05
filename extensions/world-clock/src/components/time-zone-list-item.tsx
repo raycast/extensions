@@ -12,6 +12,7 @@ import {
 import { ActionOnTimezone } from "./action-on-timezone";
 import { ActionOnStarredTimezone } from "./action-on-starred-timezone";
 import Mask = Image.Mask;
+import { getAvatarIcon } from "@raycast/utils";
 
 export function TimeZoneListItem(props: {
   timezone: string;
@@ -26,11 +27,7 @@ export function TimeZoneListItem(props: {
   return (
     <List.Item
       id={JSON.stringify({ type: "all", region: timezone })}
-      icon={{
-        source: `https://avatars.dicebear.com/api/initials/${timezone}.png`,
-        mask: Mask.Circle,
-        fallback: "world-clock.png",
-      }}
+      icon={getAvatarIcon(timezone.replace("/", " "))}
       title={timezone}
       accessories={[
         timezone === timeInfo.timezone

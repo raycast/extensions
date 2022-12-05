@@ -7,7 +7,7 @@ export function PexelsEmptyView(props: { title: string; layout: string }) {
   return layout === "List" ? (
     <List.EmptyView
       title={title}
-      icon={"empty-view-icon.svg"}
+      icon={"empty-view-icon.png"}
       actions={
         <ActionPanel>
           <ActionToPexels />
@@ -25,7 +25,7 @@ export function PexelsEmptyView(props: { title: string; layout: string }) {
   ) : (
     <Grid.EmptyView
       title={title}
-      icon={"empty-view-icon.svg"}
+      icon={"empty-view-icon.png"}
       actions={
         <ActionPanel>
           <ActionToPexels />
