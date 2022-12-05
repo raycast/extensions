@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Added right click support to menubar] - 2022-12-01
+## [Added right click support to menubar] - 2022-12-05
 
 - Added right click support to menubar which mark the issue as read.
 
