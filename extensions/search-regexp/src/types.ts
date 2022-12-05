@@ -34,4 +34,5 @@ export enum Loading {
   IDLE,
   LOADING,
   LOADED,
+  FAILED,
 }
