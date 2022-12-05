@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-history",
+  "title": "Browser History",
+  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge or Brave.",
+  "icon": "icon.png",
+  "author": "crisboarna",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search Browser History",
+      "subtitle": "Browser History",
+      "description": "Search browser history across your browsers and open across browsers.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "firstInResults",
+          "type": "dropdown",
+          "required": false,
+          "title": "First in results",
+          "description": "Which browser history shows up first in results",
+          "data": [
+            {
+              "title": "Google Chrome",
+              "value": "Chrome"
+            },
+            {
+              "title": "Mozilla Firefox",
+              "value": "Firefox"
+            },
+            {
+              "title": "Safari",
+              "value": "Safari"
+            }
+          ]
+        },
+        {
+          "name": "enableChrome",
+          "type": "checkbox",
+          "required": false,
+          "title": "Browsers",
+          "description": "Enable Chrome history to show up in results",
+          "default": false,
+          "label": "Google Chrome"
+        },
+        {
+          "name": "enableFirefox",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Firefox history to show up in results",
+          "default": false,
+          "label": "Mozilla Firefox"
+        },
+        {
+          "name": "enableSafari",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Safari history to show up in results",
+          "default": false,
+          "label": "Safari"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.8",
+    "run-applescript": "6.0.0",
+    "sql.js": "1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@types/sql.js": "1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
