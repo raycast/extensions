@@ -16,12 +16,12 @@ const CardListItem = ({ card, removeFromList }: CardListItemProps) => {
     <List.Item
       title={card.data.name}
       icon={{
-        source: Icon.TextDocument,
+        source: Icon.BlankDocument,
         tintColor: card.membership.color ? ColorMap[card.membership.color] : Color.SecondaryText,
       }}
       actions={
         <ActionPanel>
-          <Action.Push title="View Card" icon={Icon.TextDocument} target={<CardDetail card={card} />} />
+          <Action.Push title="View Card" icon={Icon.BlankDocument} target={<CardDetail card={card} />} />
           <CommonCardActions card={card} removeFromList={removeFromList} />
         </ActionPanel>
       }

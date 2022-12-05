@@ -1,19 +1,18 @@
 import _ from "lodash";
 import { useState } from "react";
-
 import { List } from "@raycast/api";
 
-import { DeviceListSection, FallbackSearchSection, PermissionError } from "./components";
+import { DeviceListSection, FallbackSearchSection } from "./components";
 import { useDevices } from "./hooks";
 import { Device, Tab } from "./types";
 import { search } from "./utils";
 
 const Command = () => {
-  const { devices, hasPermission, refreshDevices } = useDevices();
+  const { devices, permissionView, refreshDevices } = useDevices();
   const [searchText, setSearchText] = useState<string>("");
 
-  if (!hasPermission) {
-    return <PermissionError />;
+  if (permissionView) {
+    return permissionView;
   }
 
   return (

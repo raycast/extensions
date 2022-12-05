@@ -140,6 +140,7 @@
 /extensions/css-calculations                         @teziovsky
 /extensions/css-gg                                   @astrit
 /extensions/cuid-generator                           @dgrcode
+/extensions/curator-bio                              @Yukaii
 /extensions/curl                                     @jonathangiardino
 /extensions/currency-exchange                        @xeric
 /extensions/cyberduck                                @scottaglia
@@ -359,7 +360,7 @@
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
 /extensions/lightning-time                           @MatthewStanciu
-/extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte
+/extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer
 /extensions/linguee                                  @geekdada
 /extensions/link-cleaner                             @MisakiCoca
 /extensions/linux-command                            @jaywcjlove
