@@ -79,15 +79,16 @@ export default function QueryWorldTime() {
         );
       })}
 
-      <MenuBarExtra.Separator />
-      <MenuBarExtra.Item
-        title={"Preferences"}
-        icon={Icon.Gear}
-        onAction={() => {
-          openExtensionPreferences().then();
-        }}
-        shortcut={{ modifiers: ["cmd"], key: "," }}
-      />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Preferences"}
+          icon={Icon.Gear}
+          onAction={() => {
+            openExtensionPreferences().then();
+          }}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

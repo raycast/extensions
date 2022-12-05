@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { getIPGeolocation, getIPV4Address, getIPV6Address, isEmpty } from "../utils/common-utils";
 import { showToast, Toast } from "@raycast/api";
 import { IPGeolocation, IPGeolocationReadable } from "../types/ip-geolocation";
-import publicIp from "public-ip";
 import Style = Toast.Style;
 import axios from "axios";
 import { WORLD_TIME_API } from "../utils/constants";
+import { publicIpv4, publicIpv6 } from "public-ip";
 
 export const searchIpGeolocation = (language: string, searchContent: string) => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
@@ -84,14 +84,12 @@ export const searchMyIpGeolocation = (language: string, showIPv6: boolean) => {
         const _ipv6 = getIPV6Address();
         myInternalIpv6 = (isEmpty(_ipv6) ? "" : _ipv6) as string;
       }
-      const myPublicIpv4 = await publicIp
-        .v4({ onlyHttps: true })
+      const myPublicIpv4 = await publicIpv4({ onlyHttps: true })
         .then((ip) => ip)
         .catch(() => "");
       let myPublicIpv6 = "";
       if (showIPv6) {
-        myPublicIpv6 = await publicIp
-          .v6({ onlyHttps: true })
+        myPublicIpv6 = await publicIpv6({ onlyHttps: true })
           .then((ip) => ip)
           .catch(() => "");
       }

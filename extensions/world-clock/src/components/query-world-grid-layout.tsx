@@ -9,7 +9,7 @@ import { StarredTimeZoneGridItem, TimeZoneGridItem } from "./time-zone-grid-item
 import { GridEmptyView } from "./grid-empty-view";
 
 export function QueryWorldGridLayout() {
-  const { rememberTag, itemSize } = getPreferenceValues<Preferences>();
+  const { rememberTag, columns } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("");
   const [region, setRegion] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
@@ -22,11 +22,11 @@ export function QueryWorldGridLayout() {
   return (
     <Grid
       inset={Grid.Inset.Small}
-      itemSize={itemSize as Grid.ItemSize}
+      columns={parseInt(columns)}
       isLoading={loading || (starTimezones.length !== 0 && tag === "")}
       searchBarPlaceholder={"Search timezones"}
       onSelectionChange={(id) => {
-        if (typeof id !== "undefined" && !isEmpty(id)) {
+        if (typeof id === "string" && !isEmpty(id)) {
           setRegion((JSON.parse(id) as TimezoneId).region);
         }
       }}
