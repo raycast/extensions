@@ -20,7 +20,7 @@ function renderSubTitle(mode: boolean, connection: ConnectionT): string {
 
 function renderAccessoryTitle(mode: boolean, connection: ConnectionT): string {
   if (mode) {
-    return `${prettyBytes(connection.download)}/s ↓ ${prettyBytes(connection.upload)}/s ↑`;
+    return `${prettyBytes(connection.download)} ↓ ${prettyBytes(connection.upload)} ↑`;
   } else {
     return `${connection.metadata.type}(${connection.metadata.network})`;
   }
