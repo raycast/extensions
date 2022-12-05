@@ -1,5 +1,9 @@
-import { getApplications, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
+
+interface OpenVSCodePreferences {
+  VSCodeVariant: string;
+}
 
 /**
  * Gets the selected Finder window.
@@ -31,10 +35,9 @@ const getSelectedFinderWindow = (): Promise<string> => {
 };
 
 export default async () => {
+  const preferences = getPreferenceValues<OpenVSCodePreferences>();
   const applications = await getApplications();
-  const visualStudioCode = applications.find((app) => app.bundleId === "com.microsoft.VSCode");
-  const visualStudioCodium = applications.find((app) => app.bundleId === "com.vscodium");
-  const vscodeApplication = visualStudioCode ?? visualStudioCodium;
+  const vscodeApplication = applications.find((app) => app.bundleId === preferences.VSCodeVariant);
 
   if (!vscodeApplication) {
     await showToast({

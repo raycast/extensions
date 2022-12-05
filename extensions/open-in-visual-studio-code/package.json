@@ -21,6 +21,26 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "VSCodeVariant",
+      "description": "VSCode variant to open the selected finder into.",
+      "type": "dropdown",
+      "title": "Visual Studio Code Variant",
+      "required": false,
+      "default": "Visual Studio Code",
+      "data": [
+        {
+          "title": "Visual Studio Code",
+          "value": "com.microsoft.VSCode"
+        },
+        {
+          "title": "VSCodium",
+          "value": "com.vscodium"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.39.1"
   },
