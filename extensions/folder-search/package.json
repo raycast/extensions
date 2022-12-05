@@ -62,6 +62,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.11.10",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "^5.0.0",
