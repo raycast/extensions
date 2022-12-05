@@ -4,6 +4,7 @@ import tempy from "tempy";
 import fs from "fs";
 import { encodeURI } from "js-base64";
 import { runAppleScript } from "run-applescript";
+import open from "open";
 
 interface Preferences {
   theme: string;
@@ -30,20 +31,6 @@ export default async () => {
 
   await showToast(ToastStyle.Animated, "Generating screenshot");
 
-  const url = `https://ray.so/api/image?code=${base64Text}&theme=${preferences.theme}&darkMode=${preferences.darkMode}&background=${preferences.background}&spacing=${preferences.padding}`;
-
-  const response = await fetch(url);
-
-  if (response.status !== 200) {
-    await showHUD(`❌ Screenshot generation failed. Server responded with ${response.status}`);
-    return;
-  }
-
-  if (response.body !== null) {
-    response.body.pipe(fs.createWriteStream(tempFile));
-
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${tempFile}" )`);
-
-    await showHUD("✅ Screenshot copied to clipboard!");
-  }
+  const url = `https://ray.so/?theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&spacing=${preferences.padding}&code=${base64Text}`;
+  open(url);
 };
