@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "curator-bio",
   "title": "Curator Bio",
-  "description": "curator.bio extension",
+  "description": "Control your curator.bio account from Raycast",
   "icon": "icon.png",
   "author": "Yukai",
   "categories": [
