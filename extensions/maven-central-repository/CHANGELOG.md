@@ -1,6 +1,6 @@
 # Maven Central Repository Changelog
 
-## [Update Raycast API] - {PR_MERGE_DATE}
+## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0
 
