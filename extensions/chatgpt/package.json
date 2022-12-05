@@ -3,7 +3,7 @@
   "name": "chatgpt",
   "title": "ChatGPT",
   "description": "Have a conversation with ChatGPT",
-  "icon": "command-icon.png",
+  "icon": "chatgpt-icon.png",
   "author": "domnantas",
   "categories": [
     "Fun",

@@ -1,6 +1,6 @@
 # OpenAI ChatGPT
 
-<img src="assets/command-icon.png" height="128">
+<img src="assets/chatgpt-icon.png" height="128">
 
 Prompt OpenAI [ChatGPT](https://chat.openai.com/) using Raycast. Extension uses unofficial API. It can stop working anytime and it may be breaking OpenAI ChatGPT Terms of Service. Use at your own risk.
 
