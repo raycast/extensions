@@ -36,7 +36,7 @@ import {
   lastUsedSort,
 } from "./utils";
 
-import fse, { exists } from "fs-extra";
+import fse from "fs-extra";
 import path = require("node:path");
 
 // allow string indexing on Icons
