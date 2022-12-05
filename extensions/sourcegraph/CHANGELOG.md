@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+[Improved support for some new API capabilities] - 2022-12-05
 
 - **search**: Improved support for some new API capabilities.
 - **internal**: Various dependency updates.
