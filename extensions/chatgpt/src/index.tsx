@@ -18,8 +18,8 @@ type Preferences = {
 
 type Message = {
   sent: string;
-  received: string;
-  receivedId: string;
+  received?: string;
+  receivedId?: string;
 };
 
 export default function Command() {
@@ -38,6 +38,15 @@ export default function Command() {
     const previousMessageId = allMessages.length
       ? allMessages[allMessages.length - 1][1].receivedId
       : crypto.randomUUID();
+
+    setMessages({
+      ...messages,
+      [messageId]: {
+        sent: messageValue,
+      },
+    });
+    setMessageValue("");
+    setSelectedItemId(messageId);
 
     const response = await fetch("https://chat.openai.com/backend-api/conversation", {
       method: "POST",
@@ -62,10 +71,8 @@ export default function Command() {
       }),
     });
 
-    setIsLoading(false);
-    setSelectedItemId(messageId);
-
     if (response.body === null) {
+      setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
@@ -96,20 +103,19 @@ export default function Command() {
           setConversationId(chunkData.conversation_id);
         }
 
-        setMessages({
-          ...messages,
+        setMessages((previousMessages) => ({
+          ...previousMessages,
           [messageId]: {
-            sent: messageValue,
+            ...previousMessages[messageId],
             received: chunkData.message.content.parts[0],
             receivedId: chunkData.message.id,
           },
-        });
+        }));
         // Swallowing JSON.parse errors when streamed JSON is incomplete
         // eslint-disable-next-line no-empty
       } catch (error) {}
     }
-
-    setMessageValue("");
+    setIsLoading(false);
   };
 
   const resetConversation = () => {
@@ -139,7 +145,7 @@ export default function Command() {
             key={messageId}
             id={messageId}
             title={message.sent}
-            detail={<List.Item.Detail markdown={`**You:**\n${message.sent}\n\n**ChatGPT:**\n${message.received}`} />}
+            detail={<List.Item.Detail markdown={`**You:**\n${message.sent}${message.received ? `\n\n**ChatGPT:**\n${message.received}` : ''}`} />}
             actions={
               <ActionPanel>
                 <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
