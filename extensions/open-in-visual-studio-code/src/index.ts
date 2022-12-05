@@ -44,6 +44,10 @@ export default async () => {
         title: "Install Visual Studio Code",
         onAction: () => open("https://code.visualstudio.com/download"),
       },
+      secondaryAction: {
+        title: "Install VSCodium",
+        onAction: () => open("https://github.com/VSCodium/vscodium/releases"),
+      },
     });
     return;
   }
