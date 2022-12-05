@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **search**: Improved support for some new API capabilities.
+- **internal**: Various dependency updates.
+
 ## [Updated iconography, search improvements](https://github.com/raycast/extensions/pull/2430) - 2022-08-04
 
 - **all**: Iconography has been updated throughout the extension.
