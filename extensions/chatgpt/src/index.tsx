@@ -13,7 +13,7 @@ import crypto from "crypto";
 import fetch from "node-fetch";
 
 type Preferences = {
-  chatGPTToken: string;
+  OpenAIAPIKey: string;
 };
 
 type Message = {
@@ -23,7 +23,7 @@ type Message = {
 };
 
 export default function Command() {
-  const { chatGPTToken } = getPreferenceValues<Preferences>();
+  const { OpenAIAPIKey } = getPreferenceValues<Preferences>();
 
   const [messageValue, setMessageValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,9 +42,7 @@ export default function Command() {
     const response = await fetch("https://chat.openai.com/backend-api/conversation", {
       method: "POST",
       headers: {
-        accept: "text/event-stream",
-        "accept-language": "en-US,en;q=0.9",
-        authorization: `Bearer ${chatGPTToken}`,
+        authorization: `Bearer ${OpenAIAPIKey}`,
         "content-type": "application/json",
       },
       referrer: "https://chat.openai.com/chat",
@@ -83,14 +81,14 @@ export default function Command() {
         if (chunkData?.detail?.code === "token_expired") {
           showToast({
             style: Toast.Style.Failure,
-            title: "Token expired",
-            message: "Please update the token in the extension preferences",
+            title: "API Key expired",
+            message: "Please update the OpenAI API Key in the extension preferences",
           });
         } else if (chunkData?.detail) {
           showToast({
             style: Toast.Style.Failure,
             title: "Error",
-            message: chunkData.detail,
+            message: chunkData.detail.message,
           });
         }
 
@@ -130,7 +128,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
-          <Action title="Change ChatGPT Token" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
+          <Action title="Change OpenAI API Key" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
       isShowingDetail={true}
@@ -146,7 +144,7 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
                 <Action title="Reset Conversation" icon={Icon.Repeat} onAction={resetConversation} />
-                <Action title="Change ChatGPT Token" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
+                <Action title="Change OpenAI API Key" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
               </ActionPanel>
             }
           />

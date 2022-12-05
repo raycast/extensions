@@ -1,14 +1,9 @@
-# Raycast ChatGPT
+# OpenAI ChatGPT
 
-Prompt ChatGPT using Raycast. Extension uses unofficial API. It can stop working anytime and it may be breaking OpenAI ChatGPT Terms of Service. Use at your own risk.
+<img src="assets/command-icon.png" height="128">
 
-## How can I obtain the JWT token?
+Prompt OpenAI [ChatGPT](https://chat.openai.com/) using Raycast. Extension uses unofficial API. It can stop working anytime and it may be breaking OpenAI ChatGPT Terms of Service. Use at your own risk.
 
-1. Open https://chat.openai.com/chat and log in
-2. Open browser DevTools (F12)
-3. Open Network tab
-4. Send any message to ChatGPT
-5. Find the `conversation` request
-6. Under Request Headers find `authorization` header
-7. Copy the part after `Bearer`. That is your JWT token
-8. Paste it in the extension preferences
+## Authorization
+
+In order to use this extension you must provide an OpenAI API key. [Log in to OpenAI](https://beta.openai.com/login/), click on your profile icon in the upper right corner, and navigate to `View API keys`. Create a new secret key and use it in the extension preferences.

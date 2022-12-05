@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt",
   "title": "ChatGPT",
-  "description": "Prompt ChatGPT easily",
+  "description": "Have a conversation with ChatGPT",
   "icon": "command-icon.png",
   "author": "domnantas",
   "categories": [
@@ -14,8 +14,8 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "chatGPTToken",
-      "title": "ChatGPT JWT token",
+      "name": "OpenAIAPIKey",
+      "title": "OpenAI API Key",
       "description": "Click About This Extension to learn how to obtain it",
       "type": "password",
       "required": true
@@ -26,7 +26,7 @@
       "name": "index",
       "title": "Prompt ChatGPT",
       "subtitle": "OpenAI",
-      "description": "Click About This Extension to learn how to obtain the JWT token",
+      "description": "Have a conversation with ChatGPT",
       "mode": "view"
     }
   ],
