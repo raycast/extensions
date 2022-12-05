@@ -3,12 +3,9 @@ import { OAuth, getPreferenceValues } from "@raycast/api";
 import MonzoClient from "@marceloclp/monzojs";
 import { IMonzoClient } from "@marceloclp/monzojs/lib/types/client";
 
-const authorizeUrl = "https://oauth-pkce-proxy-public.fly.dev/authorize";
-const tokenUrl = "https://oauth-pkce-proxy-public.fly.dev/access_token";
-
-const monzoAuthorizeUri = "https://auth.monzo.com/";
-const monzoAccessTokenUri = "https://api.monzo.com/oauth2/token";
-
+const authorizeUrl = "https://monzo.oauth-proxy.raycast.com/authorize";
+const tokenUrl = "https://monzo.oauth-proxy.raycast.com/token";
+const monzoRefreshTokenUri = "https://api.monzo.com/oauth2/token";
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Monzo",
@@ -51,7 +48,6 @@ async function initAuth() {
     endpoint: authorizeUrl,
     clientId: preferences.oauthClientId.trim(),
     scope: "",
-    extraParameters: { x_authorize_url: monzoAuthorizeUri },
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode);
@@ -63,19 +59,17 @@ async function fetchTokens(
   authorizationCode: string
 ): Promise<OAuth.TokenResponse> {
   const preferences = getPreferenceValues<Preferences>();
-  const data = new URLSearchParams();
-  data.append("client_id", preferences.oauthClientId.trim());
-  data.append("code", authorizationCode);
-  data.append("code_verifier", authRequest.codeVerifier);
-  data.append("grant_type", "authorization_code");
-  data.append("redirect_uri", authRequest.redirectURI);
-
-  data.append("x_client_secret", preferences.oauthClientSecret.trim());
-  data.append("x_access_token_uri", monzoAccessTokenUri);
-
   const response = await fetch(tokenUrl, {
     method: "POST",
-    body: data,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: preferences.oauthClientId.trim(),
+      client_secret: preferences.oauthClientSecret.trim(),
+      code: authorizationCode,
+      code_verifier: authRequest.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: authRequest.redirectURI,
+    }),
   });
 
   if (!response.ok) {
@@ -96,8 +90,7 @@ async function refreshTokens(
   data.append("refresh_token", refreshToken);
   data.append("grant_type", "refresh_token");
   data.append("client_secret", preferences.oauthClientSecret.trim());
-
-  const response = await fetch(monzoAccessTokenUri, {
+  const response = await fetch(monzoRefreshTokenUri, {
     method: "POST",
     body: data,
   });

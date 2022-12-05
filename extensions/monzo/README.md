@@ -38,15 +38,10 @@ This process is safe and secure.
 - All communication between the extension, Monzo, and the authentication server, is encrypted at all times.
 - Your data is not stored longer than necessary to support the use of the extension, and is not analysed in any way.
 
-That said, there are a few things to bear in mind:
+During sign-in, authentication is proxied through a Raycast server in order to provide compatability with Monzo's authentication. This is only temporary, during login, and no banking data is sent to Raycast servers.
 
-- The extension uses an authentication proxy to enable Raycast to work with Monzo's authentication system[^1]. During authentication this proxy stores data about your Monzo OAuth client for a short period of time[^2], and also has access to the API tokens generated, although these are never stored or logged.
-- You should keep the **OAuth Client Secret** you generate secret. If it does leak, the only risk is that someone else could pretend to be the same OAuth Client. This secret does not grant any access to your account. Delete the client and create a in the Monzo developer portal if it does leak, but don't stress over it.
-- While we have taken great care to ensure the security of this whole process, and are users of the extension ourselves, we accept no responsibility for any issues that may occur while using it.
+While we, the plugin authors and Raycast, have taken great care to ensure the security of this whole process, and are users of the extension ourselves, we accept no responsibility for any issues that may occur while using it.
 
 [monzo-dev]: https://developers.monzo.com/
 [monzo-clients]: https://developers.monzo.com/apps/home
 [raycast-oauth]: https://developers.raycast.com/api-reference/oauth
-
-[^1]: Monzo's authentication system doesn't support the newest OAuth mechanism – PKCE. For more details the opening paragraphs of the [Raycast developer documentation for OAuth](raycast-oauth)
-[^2]: Only the "code challenge" is stored, and only for 1 hour, or until used, at which point it is immediately deleted.
