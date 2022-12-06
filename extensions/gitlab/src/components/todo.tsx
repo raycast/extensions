@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Image, List } from "@raycast/api";
+import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@raycast/api";
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
@@ -54,9 +54,12 @@ function getTargetTypeSource(tt: string): string {
   return result;
 }
 
-function getIcon(todo: Todo): Image.ImageLike {
+export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
   const tt = todo.target_type;
-  return { source: getTargetTypeSource(tt), tintColor: getActionColor(todo.action_name) };
+  return {
+    source: getTargetTypeSource(tt),
+    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+  };
 }
 
 export function TodoList(): JSX.Element {
@@ -71,6 +74,11 @@ export function TodoList(): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
+  const refreshAll = () => {
+    refresh();
+    launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+  };
+
   return (
     <List
       searchBarPlaceholder="Filter Todos by name..."
@@ -79,7 +87,7 @@ export function TodoList(): JSX.Element {
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
       {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
+        <TodoListItem key={todo.id} todo={todo} refreshData={refreshAll} />
       ))}
     </List>
   );
@@ -93,8 +101,8 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       id={todo.id.toString()}
       title={todo.title}
       subtitle={subtitle}
-      accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author) }]}
-      icon={getIcon(todo)}
+      accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author), tooltip: todo.author?.name }]}
+      icon={getTodoIcon(todo)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

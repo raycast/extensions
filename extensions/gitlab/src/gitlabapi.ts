@@ -70,6 +70,7 @@ function userFromJson(data: any): User {
 export function dataToProject(project: any): Project {
   return {
     id: project.id,
+    name: project.name,
     name_with_namespace: project.name_with_namespace,
     fullPath: project.path_with_namespace,
     web_url: project.web_url,
@@ -271,6 +272,7 @@ export class Todo {
 export class Project {
   public id = 0;
   public name_with_namespace = "";
+  public name = "";
   public fullPath = "";
   public web_url = "";
   public star_count = 0;
@@ -343,6 +345,10 @@ export class GitLab {
   constructor(url: string, token: string) {
     this.token = token;
     this.url = url;
+  }
+
+  public joinUrl(relativeUrl: string): string {
+    return new URL(relativeUrl, this.url).href;
   }
 
   public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
@@ -705,7 +711,7 @@ export class GitLab {
     const search = params.search;
     delete params.search;
 
-    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
+    const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "usergroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
     return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });

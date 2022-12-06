@@ -1,5 +1,12 @@
 # GitLab Changelog
 
+## [Todos Menu Bar] - 2022-12-06
+
+- Add Todos menu bar command
+- Add tooltips to most command view
+- Use modern raycast feature to display data
+- Fix some bugs
+
 ## [Update] - 2022-10-11
 
 - Add Open in Browser option in project navigation
