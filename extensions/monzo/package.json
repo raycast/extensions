@@ -38,7 +38,7 @@
       "name": "oauthClientSecret",
       "title": "OAuth Client Secret",
       "description": "Secret for your Monzo extension, do not share",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "placeholder": "mnzconf..."
     }
