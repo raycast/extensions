@@ -23,7 +23,7 @@ import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
 
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon(project.name[0].toUpperCase());
+  return getTextIcon((project.name[0] || "?").toUpperCase());
 }
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {

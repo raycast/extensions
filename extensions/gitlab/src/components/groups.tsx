@@ -36,7 +36,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
     <List.Item
       id={`${group.id}`}
       title={group.full_name}
-      icon={localImageFilepath || getTextIcon(group.name[0].toUpperCase())}
+      icon={localImageFilepath || getTextIcon((group.name[0] || "?").toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
