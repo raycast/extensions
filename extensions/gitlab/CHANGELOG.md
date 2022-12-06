@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Todos Menu Bar] - 2022-11-27
+## [Todos Menu Bar] - 2022-12-06
 
 - Add Todos menu bar command
 - Add tooltips to most command view
