@@ -21,7 +21,7 @@ If you're comfortable with OAuth API setup, feel free to skip through these step
 | Name            | `Monzo for Raycast`                                 |
 | Logo URL        | Leave blank                                         |
 | Redirect URLs   | `https://oauth-pkce-proxy-monzo.fly.dev/oauth/code` |
-| Description     | Leave blank                                         |
+| Description     | This is a required field, enter whatever you like   |
 | Confidentiality | `Confidential`                                      |
 
 6. Click submit, and open your new client from the list.
