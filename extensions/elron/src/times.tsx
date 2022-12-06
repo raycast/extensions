@@ -7,6 +7,7 @@ import Stops from "./stops";
 interface Props {
   originStopAreaId: string;
   destinationStopAreaId: string;
+  route: string;
 }
 
 interface JourneysResult {
@@ -29,7 +30,7 @@ interface Trip {
   arrival_time: string;
 }
 
-const Times: React.FC<Props> = ({ destinationStopAreaId, originStopAreaId }) => {
+const Times: React.FC<Props> = ({ destinationStopAreaId, originStopAreaId, route }) => {
   const [times, setTimes] = useState<JourneysResult>({ data: undefined, error: false });
 
   useEffect(() => {
@@ -82,7 +83,7 @@ There was an error fetching the train times. Please try again later.
 
   return (
     <>
-      <List isLoading={!times.data && !times.error}>
+      <List isLoading={!times.data && !times.error} navigationTitle={`${route}: Show Times`}>
         <List.EmptyView title={`No more departures today`} />
         {times?.data?.journeys
           .filter((journey) => {
@@ -95,10 +96,13 @@ There was an error fetching the train times. Please try again later.
               <List.Item
                 key={trip.id}
                 title={formatTitle(trip).short}
-                subtitle={formatTitle(trip).duration}
+                subtitle={{ tooltip: "Duration", value: formatTitle(trip).duration }}
                 actions={
                   <ActionPanel>
-                    <Action.Push title="Show stops" target={<Stops tripId={trip.id} />} />
+                    <Action.Push
+                      title="Show Stops"
+                      target={<Stops tripId={trip.id} title={`${route}: Show Stops`} />}
+                    />
                   </ActionPanel>
                 }
               />

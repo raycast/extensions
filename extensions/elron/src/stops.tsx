@@ -4,6 +4,7 @@ import axios from "axios";
 
 interface Props {
   tripId: number;
+  title: string;
 }
 
 interface DetailsResponse {
@@ -16,7 +17,7 @@ interface DetailsResponse {
   ];
 }
 
-const Stops: React.FC<Props> = ({ tripId }) => {
+const Stops: React.FC<Props> = ({ tripId, title }) => {
   const [stops, setStops] = useState<DetailsResponse | null>(null);
 
   useEffect(() => {
@@ -29,7 +30,7 @@ const Stops: React.FC<Props> = ({ tripId }) => {
 
   return (
     <>
-      <List isLoading={!stops}>
+      <List isLoading={!stops} navigationTitle={title}>
         {stops?.stop_time.map((stop) => {
           return <List.Item key={stop.id} title={stop.arrival_time.slice(0, 5)} subtitle={stop.stop_name} />;
         })}
