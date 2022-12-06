@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-12-06
+
+- Change background refresh interval to keep the menu bar in a more updated state
+
 ## [Feature] - 2022-11-17
 
 - Add preference to show ellipsis when menu bar title is truncated.
