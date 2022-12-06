@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Feature] - 2022-12-2
+## [Feature] - 2022-12-06
 
 - Change background refresh interval to keep the menu bar in a more updated state
 
