@@ -1,6 +1,6 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, Toast } from "@raycast/api";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 type Values = {
   url: string;
@@ -11,13 +11,21 @@ export default function Command() {
   const [urlError, setUrlError] = useState<string | undefined>();
   const [expiresError, setExpiresError] = useState<string | undefined>();
 
+  const URLFieldRef = useRef<Form.TextField>(null);
+  const datePickerRef = useRef<Form.DatePicker>(null);
+
   const change = () => {
     setUrlError(undefined);
     setExpiresError(undefined);
   };
 
-  const handleSubmit = (values: Values) => {
+  const handleSubmit = async (values: Values) => {
     let date = values.expires;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Shortening URL...",
+    });
 
     if (!date) {
       date = new Date();
@@ -42,9 +50,12 @@ export default function Command() {
 
         Clipboard.copy(shortened);
 
-        showToast({
-          title: "Short URL copied to clipboard!",
-        });
+        URLFieldRef.current?.reset();
+        URLFieldRef.current?.focus();
+        datePickerRef.current?.reset();
+
+        toast.style = Toast.Style.Success;
+        toast.title = "Short URL copied to clipboard!";
       })
       .catch((err) => {
         setUrlError(err.response?.data?.errors?.url?.[0]);
@@ -61,8 +72,16 @@ export default function Command() {
       }
     >
       <Form.Description text="Shorten your URL with liba.ro" />
-      <Form.TextArea onChange={change} id="url" title="URL" placeholder="https://libaro.be" error={urlError} />
-      <Form.DatePicker onChange={change} id="expires" title="Expires at" error={expiresError} />
+      <Form.TextArea
+        onChange={change}
+        id="url"
+        title="URL"
+        placeholder="https://libaro.be"
+        ref={URLFieldRef}
+        error={urlError}
+      />
+      <Form.DatePicker onChange={change} id="expires" title="Expires at" ref={datePickerRef} error={expiresError} />
     </Form>
   );
 }
+
