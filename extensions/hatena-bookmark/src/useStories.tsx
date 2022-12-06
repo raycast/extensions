@@ -8,16 +8,16 @@ const CACHE_DURATION = 300000;
 type CacheEntry = { timestamp: number; items: Parser.Item[] };
 
 export enum Topic {
-  総合 = "hotentry.rss",
-  一般 = "hotentry/general.rss",
-  世の中 = "hotentry/social.rss",
-  政治と経済 = "hotentry/economics.rss",
-  暮らし = "hotentry/life.rss",
-  学び = "hotentry/knowledge.rss",
-  テクノロジー = "hotentry/it.rss",
-  おもしろ = "hotentry/fun.rss",
-  エンタメ = "hotentry/entertainment.rss",
-  アニメとゲーム = "hotentry/game.rss",
+  all = "hotentry.rss",
+  general = "hotentry/general.rss",
+  social = "hotentry/social.rss",
+  economics = "hotentry/economics.rss",
+  life = "hotentry/life.rss",
+  knowledge = "hotentry/knowledge.rss",
+  it = "hotentry/it.rss",
+  fun = "hotentry/fun.rss",
+  entertainment = "hotentry/entertainment.rss",
+  game = "hotentry/game.rss",
 }
 
 interface State {
