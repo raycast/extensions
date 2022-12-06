@@ -1,6 +1,8 @@
 import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
+import { AbortSignal as NodeFetchAbortSignal } from "./types";
+import { first } from "./utils";
 
 export interface Airline {
   id: string;
@@ -8,6 +10,7 @@ export interface Airline {
   iataCode: string;
   logoLockupUrl?: string;
   logoSymbolUrl?: string;
+  conditionsOfCarriageUrl?: string;
 }
 
 interface AirlineSearchState {
@@ -56,6 +59,9 @@ function AirlineListItem({ airline }: { airline: Airline }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name to Clipboard" content={airline.name} />
+            {airline.conditionsOfCarriageUrl && (
+              <Action.OpenInBrowser title="Open Conditions of Carriage" url={airline.conditionsOfCarriageUrl} />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -71,6 +77,15 @@ function useSearch(): { state: AirlineSearchState; search: (text: string) => voi
     async function search(searchText: string) {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
+
+      if (searchText === "") {
+        return setState((oldState) => ({
+          ...oldState,
+          isLoading: false,
+          results: [],
+        }));
+      }
+
       setState((oldState) => ({
         ...oldState,
         isLoading: true,
@@ -79,7 +94,7 @@ function useSearch(): { state: AirlineSearchState; search: (text: string) => voi
         const results = await performSearch(searchText, cancelRef.current.signal);
         setState((oldState) => ({
           ...oldState,
-          results: results,
+          results: first(results, 50),
           isLoading: false,
         }));
       } catch (error) {
@@ -116,9 +131,11 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<A
   const params = new URLSearchParams();
   params.append("query", searchText);
 
-  const response = await fetch("https://iata-code-decoder-api.herokuapp.com/airlines" + "?" + params.toString(), {
+  const response = await fetch("https://iata-code-decoder-api.onrender.com/airlines" + "?" + params.toString(), {
     method: "get",
-    signal: signal,
+    // Typescript's idea of an AbortSignal and node-fetch's idea of an AbortSignal
+    // don't seem to match. This handles it.
+    signal: signal as NodeFetchAbortSignal,
   });
 
   const json = (await response.json()) as AirlineSearchResponse;
