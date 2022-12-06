@@ -41,10 +41,10 @@ export default function Command() {
       : crypto.randomUUID();
 
     setMessages({
-      ...messages,
       [messageId]: {
         sent: messageValue,
       },
+      ...messages,
     });
     setMessageValue("");
     setSelectedItemId(messageId);
@@ -96,7 +96,7 @@ export default function Command() {
           showToast({
             style: Toast.Style.Failure,
             title: "Error",
-            message: chunkData.detail.message,
+            message: chunkData.detail.message || chunkData.detail,
           });
         }
 
@@ -105,12 +105,12 @@ export default function Command() {
         }
 
         setMessages((previousMessages) => ({
-          ...previousMessages,
           [messageId]: {
             ...previousMessages[messageId],
             received: chunkData.message.content.parts[0],
             receivedId: chunkData.message.id,
           },
+          ...previousMessages,
         }));
         // Swallowing JSON.parse errors when streamed JSON is incomplete
         // eslint-disable-next-line no-empty
@@ -146,7 +146,11 @@ export default function Command() {
             key={messageId}
             id={messageId}
             title={message.sent}
-            detail={<List.Item.Detail markdown={`**You:**\n${message.sent}${message.received ? `\n\n**ChatGPT:**\n${message.received}` : ''}`} />}
+            detail={
+              <List.Item.Detail
+                markdown={`**You:**\n${message.sent}${message.received ? `\n\n**ChatGPT:**\n${message.received}` : ""}`}
+              />
+            }
             actions={
               <ActionPanel>
                 <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
