@@ -35,11 +35,9 @@ export default function Command(props: { arguments: AddressArguments }) {
     } else {
       addressResult = `
   ## Address result for id: ${data?.id ?? "N/A"}\n\n
-
-  * **Access address ID**: ${data?.id ?? "N/A"}
   * **Address designation**: ${data?.adressebetegnelse ?? "N/A"}  
   * **Kvhx**: ${data?.kvh ?? "N/A"}
-  * **Street name:** ${data?.vejstykke.navn ?? "N/A"}
+  * **Street name:** ${data?.vejstykke.navn ?? "N/A"} 
   * **House number:** ${data?.husnr ?? "N/A"}
   * **Floor:** ${data?.etage ?? "N/A"}
   * **Door:** ${data?.dør ?? "N/A"}
@@ -64,7 +62,11 @@ export default function Command(props: { arguments: AddressArguments }) {
                 title="Open in Google Maps"
                 icon={Icon.Map}
               />
-              <Action.CopyToClipboard content={data.adressebetegnelse} title="Copy Full Address" />
+              <Action.CopyToClipboard
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={data.adressebetegnelse}
+                title="Copy Full Address"
+              />
             </>
           )}
         </ActionPanel>
