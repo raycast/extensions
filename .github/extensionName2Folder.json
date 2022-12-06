@@ -238,6 +238,7 @@
   "geist-ui-components": "geist-ui-components",
   "geohash-encode-decode": "geohash-encode-decode",
   "get-direct-link": "get-direct-link",
+  "get-favicon": "get-favicon",
   "gh-pic": "gh-pic",
   "gif-search": "gif-search",
   "git-repos": "git-repos",
