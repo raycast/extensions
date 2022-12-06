@@ -8,7 +8,7 @@ const service = new Service();
 export default function Command() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultEntry[]>([]);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
   const search = async () => {
     setLoading(true);
@@ -32,6 +32,7 @@ export default function Command() {
       if (query === "") {
         await service.getLatestSearches().then((res) => {
           setResults(res);
+          setLoading(false);
         });
         return;
       }
@@ -46,11 +47,10 @@ export default function Command() {
     <List
       isLoading={isLoading}
       throttle={true}
-      searchBarPlaceholder="Search for a username"
+      searchBarPlaceholder="Search for a username..."
       onSearchTextChange={async (query) => setQuery(query.trim())}
-      navigationTitle="Search for a Minecraft profile"
     >
-      <List.Section title={query === "" ? "Latest searches" : "Results"}>
+      <List.Section title={query === "" ? "Latest Searches" : "Results"}>
         {results.map((entry) => {
           return (
             <List.Item
@@ -62,12 +62,13 @@ export default function Command() {
                   icon: {
                     source: "https://laby.net/texture/profile/head/" + entry.uuid + ".png?size=8",
                     mask: Image.Mask.RoundedRectangle,
+                    fallback: "command-icon.png",
                   },
                 },
               ]}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Show profile" target={<ProfileView uuid={entry.uuid} />} icon={Icon.Link} />
+                  <Action.Push title="Show Profile" target={<ProfileView uuid={entry.uuid} />} icon={Icon.Person} />
                   <Action.CopyToClipboard
                     title="Copy UUID"
                     content={entry.uuid}

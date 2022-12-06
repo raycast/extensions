@@ -30,7 +30,7 @@ export default function Command() {
   const [type, setType] = useState<TextureType>(textureTypes[0]);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<TextureSearchTexture[]>([]);
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
   const search = async () => {
     setLoading(true);

@@ -90,14 +90,14 @@ ${
           <Detail.Metadata.Label title="Views" text={profile.views.views.toFixed()} />
           <Detail.Metadata.Label title="Account type" text={profile.accountType} />
           {profile.badges.length > 0 ? (
-            <div>
+            <>
               <Detail.Metadata.Separator />
               <Detail.Metadata.TagList title="Badges">
                 {profile.badges.map((badge) => {
                   return <Detail.Metadata.TagList.Item key={badge.uuid} text={badge.name} />;
                 })}
               </Detail.Metadata.TagList>
-            </div>
+            </>
           ) : null}
           <Detail.Metadata.Separator />
           {profile.socialMedia.map((socialMedia) => {
