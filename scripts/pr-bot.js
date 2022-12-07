@@ -108,9 +108,11 @@ function getCodeOwners() {
 function findExtensionName(ext) {
   const map = JSON.parse(fs.readFileSync(path.join(__dirname, "../.github/extensionName2Folder.json"), "utf8"));
 
-  const folder = ext.replace('/extensions/', '')
+  const folder = ext.replace("/extensions/", "");
 
-  return Object.entries(map).find(([name, _folder]) => _folder === folder)?.0;
+  const foundExtension = Object.entries(map).find(([name, _folder]) => _folder === folder);
+
+  return foundExtension ? foundExtension[0] : undefined;
 }
 
 // Create a new comment or update the existing one
