@@ -1,9 +1,9 @@
 import { Icon, List } from "@raycast/api";
 import { useMemo } from "react";
-import { useFundingCredits } from "./lib/hooks";
+import { useFundingInterests } from "./lib/hooks";
 
 export default function FundingOffers() {
-  const { data = [], isLoading } = useFundingCredits();
+  const { data = [], isLoading } = useFundingInterests();
 
   const totalInterest = useMemo(() => {
     return data.reduce((total, interest) => {

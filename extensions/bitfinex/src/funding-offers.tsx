@@ -2,11 +2,22 @@ import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation 
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "./lending-rates";
 import Bitfinex from "./lib/api";
-import useSWR, { mutate } from "swr";
 import { getCurrency, getPreferenceValues } from "./lib/preference";
-("swr");
+import { useFundingBalanceInfo, useFundingCredits, useFundingOffers } from "./lib/hooks";
 
-function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?: boolean; canCancel?: boolean }) {
+function OfferListItem({
+  offer,
+  canUpdate,
+  canCancel,
+  mutateBalanceInfo,
+  mutateFundingInfo,
+}: {
+  offer: any;
+  canUpdate?: boolean;
+  canCancel?: boolean;
+  mutateFundingInfo: () => void;
+  mutateBalanceInfo: () => void;
+}) {
   const rest = Bitfinex.rest();
   const symbol = offer.symbol.slice(1);
   const amount = Number(offer.amount).toFixed(2);
@@ -51,26 +62,42 @@ function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?
       ]}
       actions={
         <ActionPanel>
-          {canUpdate && <Action.Push title="Edit Offer" target={<EditOfferForm offer={offer} />} icon={Icon.Pencil} />}
+          {canUpdate && (
+            <Action.Push
+              title="Edit Offer"
+              target={
+                <EditOfferForm
+                  offer={offer}
+                  mutateBalanceInfo={mutateBalanceInfo}
+                  mutateFundingInfo={mutateFundingInfo}
+                />
+              }
+              icon={Icon.Pencil}
+            />
+          )}
           {canCancel && (
             <Action
               icon={Icon.XMarkCircle}
               title="Cancel Offer"
               onAction={async () => {
                 await rest.cancelFundingOffer(offer.id);
-                mutate("/api/funding-offers");
-                mutate("/api/balance");
+                mutateBalanceInfo();
+                mutateFundingInfo();
               }}
             />
           )}
-          <Action.Push icon={Icon.PlusCircle} title="Create Offer" target={<CreateOfferForm />} />
+          <Action.Push
+            icon={Icon.PlusCircle}
+            title="Create Offer"
+            target={<CreateOfferForm mutateBalanceInfo={mutateBalanceInfo} mutateFundingInfo={mutateFundingInfo} />}
+          />
         </ActionPanel>
       }
     />
   );
 }
 
-function EditOfferForm(props: { offer: any }) {
+function EditOfferForm(props: { offer: any; mutateFundingInfo: () => void; mutateBalanceInfo: () => void }) {
   const defaultRate = Number(props.offer.rate * 365 * 100).toFixed(3);
   const rest = Bitfinex.rest();
   const { pop } = useNavigation();
@@ -87,8 +114,8 @@ function EditOfferForm(props: { offer: any }) {
       await rest.cancelFundingOffer(props.offer.id);
       await rest.submitFundingOffer(newOffer);
 
-      mutate("/api/funding-offers");
-      mutate("/api/balance");
+      props.mutateFundingInfo();
+      props.mutateBalanceInfo();
 
       pop();
     } catch (e) {
@@ -115,7 +142,13 @@ function EditOfferForm(props: { offer: any }) {
   );
 }
 
-function CreateOfferForm() {
+function CreateOfferForm({
+  mutateBalanceInfo,
+  mutateFundingInfo,
+}: {
+  mutateFundingInfo: () => void;
+  mutateBalanceInfo: () => void;
+}) {
   const rest = Bitfinex.rest();
   const { pop } = useNavigation();
 
@@ -137,8 +170,9 @@ function CreateOfferForm() {
       });
     }
 
-    mutate("/api/funding-offers");
-    mutate("/api/balance");
+    mutateFundingInfo();
+    mutateBalanceInfo();
+
     pop();
   };
 
@@ -166,26 +200,20 @@ function CreateOfferForm() {
 }
 
 export default function FundingOffers() {
-  const rest = Bitfinex.rest();
   const { f_currency } = getPreferenceValues();
 
-  const { data = [], isValidating } = useSWR(
-    "/api/funding-credits",
-    () => rest.fundingCredits(getCurrency()) as Promise<any[]>
-  );
+  const currency = getCurrency();
 
-  const { data: activeOffers = [], isValidating: activeOfferLoading } = useSWR(
-    "/api/funding-offers",
-    () => rest.fundingOffers(getCurrency()) as Promise<any[]>
-  );
-
-  const { data: balanceInfo, isValidating: isBalanceLoading } = useSWR(
-    "/api/balance",
-    () => rest.calcAvailableBalance(getCurrency(), 0, 0, "FUNDING") as Promise<any>
-  );
+  const { data = [], isLoading } = useFundingCredits(currency);
+  const {
+    data: activeOffers = [],
+    isLoading: activeOfferLoading,
+    mutate: mutateFundingInfo,
+  } = useFundingOffers(currency);
+  const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
 
   return (
-    <List isLoading={isValidating || activeOfferLoading || isBalanceLoading}>
+    <List isLoading={isLoading || activeOfferLoading || isBalanceLoading}>
       {balanceInfo && (
         <List.Section title="Available Funding">
           <List.Item
@@ -202,7 +230,16 @@ export default function FundingOffers() {
 
       <List.Section title="Pending Offers">
         {activeOffers?.map((offer) => {
-          return <OfferListItem key={offer.id} offer={offer} canUpdate canCancel />;
+          return (
+            <OfferListItem
+              key={offer.id}
+              offer={offer}
+              canUpdate
+              canCancel
+              mutateBalanceInfo={mutateBalanceInfo}
+              mutateFundingInfo={mutateFundingInfo}
+            />
+          );
         })}
       </List.Section>
 
@@ -210,7 +247,14 @@ export default function FundingOffers() {
         {data
           ?.filter((offer) => !offer.hidden)
           .map((offer) => {
-            return <OfferListItem key={offer.id} offer={offer} />;
+            return (
+              <OfferListItem
+                key={offer.id}
+                offer={offer}
+                mutateBalanceInfo={mutateBalanceInfo}
+                mutateFundingInfo={mutateFundingInfo}
+              />
+            );
           })}
       </List.Section>
     </List>

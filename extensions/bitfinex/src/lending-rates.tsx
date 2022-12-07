@@ -1,9 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
-import useSWR from "swr";
-import fetch from "node-fetch";
 import * as asciichart from "asciichart";
 import { getCurrency, getPreferenceValues } from "./lib/preference";
+import { useFundingStatsHistory } from "./lib/hooks";
 
 // ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
 const tfOptions = [
@@ -84,9 +83,7 @@ export default function LendingRates() {
   const [tf, setTf] = useState<keyof typeof candlesTimeFrame>("1h");
   const query = useMemo(() => candlesTimeFrame[tf], [tf]);
 
-  const { data = [], isValidating } = useSWR("/api/funding/stats/hist" + query, () =>
-    fetch(query).then((r) => r.json() as Promise<any[]>)
-  );
+  const { data = [], isLoading } = useFundingStatsHistory(query);
 
   const { action, isChartView } = useToggleChartView();
 
@@ -95,7 +92,7 @@ export default function LendingRates() {
   } else {
     return (
       <List
-        isLoading={isValidating}
+        isLoading={isLoading}
         searchBarAccessory={
           <LendingRatesDropdown onChange={(value) => setTf(value as keyof typeof candlesTimeFrame)} />
         }
