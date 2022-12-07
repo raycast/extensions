@@ -45,6 +45,7 @@ export default function Command() {
         setSearch(search);
       }}
     >
+      <List.EmptyView title="No Contacts Found" icon="noview.svg" />
       {contacts?.map((contact) => {
         const firstname = contact?.properties?.firstname;
         const lastname = contact?.properties?.lastname;

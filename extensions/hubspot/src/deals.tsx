@@ -40,6 +40,7 @@ export default function Command() {
         setSearch(search);
       }}
     >
+      <List.EmptyView title="No Deals Found" icon="noview.svg" />
       {deals?.map((deal) => {
         const dealname = deal?.properties?.dealname;
         const dealstage = deal?.properties?.dealstage;
