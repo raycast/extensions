@@ -26,7 +26,7 @@ type Message = {
 export default function Command() {
   const { ChatGPTSessionToken } = getPreferenceValues<Preferences>();
 
-  const [messageValue, setMessageValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useCachedState<Record<string, Message>>("messages", {});
   const [conversationId, setConversationId] = useState<string | undefined>();
@@ -39,11 +39,11 @@ export default function Command() {
 
       setMessages({
         [messageId]: {
-          sent: messageValue,
+          sent: inputValue,
         },
         ...messages,
       });
-      setMessageValue("");
+      setInputValue("");
       setSelectedItemId(messageId);
 
       const api = new ChatGPTAPI({
@@ -53,33 +53,33 @@ export default function Command() {
       await api.ensureAuth();
 
       const allMessages = Object.entries(messages);
-      await api.sendMessage(messageValue, {
+      await api.sendMessage(inputValue, {
         conversationId,
         parentMessageId: allMessages[allMessages.length - 1]?.[1].receivedId,
         onConversationResponse: (conversationResponse) => {
           if (!conversationId) {
             setConversationId(conversationResponse.conversation_id);
             setMessages((previousMessages) => ({
+              ...previousMessages,
               [messageId]: {
                 ...previousMessages[messageId],
                 receivedId: conversationResponse.message?.id,
               },
-              ...previousMessages,
             }));
           }
         },
         onProgress: (progressResponse) => {
-          console.log(progressResponse);
           setMessages((previousMessages) => ({
+            ...previousMessages,
             [messageId]: {
               ...previousMessages[messageId],
               received: progressResponse,
             },
-            ...previousMessages,
           }));
         },
       });
     } catch (error) {
+      console.error(error);
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
@@ -99,8 +99,8 @@ export default function Command() {
   return (
     <List
       searchBarPlaceholder="Enter message..."
-      searchText={messageValue}
-      onSearchTextChange={setMessageValue}
+      searchText={inputValue}
+      onSearchTextChange={setInputValue}
       isLoading={isLoading}
       selectedItemId={selectedItemId}
       actions={
