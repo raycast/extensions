@@ -31,6 +31,30 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
   return await runAppleScript(script);
 }
 
+export async function openHistoryTab(url: string): Promise<boolean | string> {
+  popToRoot();
+  closeMainWindow({ clearRootSearch: true });
+
+  const script = `
+    tell application "Firefox"
+      activate
+      repeat while not frontmost
+        delay 0.1
+      end repeat
+      tell application "System Events"
+        keystroke "t" using {command down}
+        keystroke "l" using {command down}
+        keystroke "a" using {command down}
+        key code 51
+        keystroke "${url}"
+        key code 36
+      end tell
+    end tell
+  `;
+
+  return await runAppleScript(script);
+}
+
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Firefox"

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openNewTab, setActiveTab } from "../actions";
+import { openHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { HistoryEntry, Tab } from "../interfaces";
 
 export const NewTabAction = ({ query }: { query?: string }) => (
@@ -10,7 +10,7 @@ export const NewTabAction = ({ query }: { query?: string }) => (
 
 export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEntry }) => (
   <ActionPanel title={title}>
-    <Action.OpenInBrowser title="Open in Firefox" url={url} />
+    <MozillaFirefoxHistoryTab url={url} />
     <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
     <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
   </ActionPanel>
@@ -29,4 +29,12 @@ const MozillaFirefoxGoToTab = (props: { tab: Tab }) => {
     await closeMainWindow();
   }
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+};
+
+const MozillaFirefoxHistoryTab = ({ url }: { url: string }) => {
+  async function handleAction() {
+    await openHistoryTab(url);
+    await closeMainWindow();
+  }
+  return <ActionPanel.Item title="Open in Firefox" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 };
