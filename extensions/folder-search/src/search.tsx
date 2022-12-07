@@ -16,6 +16,7 @@ import {
   showHUD,
   confirmAlert,
   open,
+  getSelectedFinderItems,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -86,28 +87,6 @@ export default function Command() {
       },
     }
   );
-
-  async function getFinderSelection(): Promise<string[]> {
-    // The applescript below returns a string with a list of the items
-    // selected in Finder separated by return characters
-    const applescript = `
-    tell application "Finder"
-    set theItems to selection
-    end tell
-  
-    set itemsPaths to ""
-  
-    repeat with itemRef in theItems
-    set theItem to POSIX path of (itemRef as string)
-    set itemsPaths to itemsPaths & theItem & return
-    end repeat
-  
-    return itemsPaths
-    `;
-
-    const response = await runAppleScript(applescript);
-    return response === "" ? [] : response.split("\r");
-  }
 
   // check prefs
   usePromise(
@@ -300,8 +279,7 @@ export default function Command() {
                   icon={Icon.Folder}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   onAction={async () => {
-                    //const path = require('node:path');
-                    const selectedItems = await getFinderSelection();
+                    const selectedItems = await getSelectedFinderItems();
 
                     if (selectedItems.length === 0) {
                       await showHUD(`⚠️  No Finder selection to send.`);
@@ -313,9 +291,9 @@ export default function Command() {
                         // Destination folder = result.path
                         // Destination file = result.path + '/' + path.basename(item)
 
-                        const sourceFileName = path.basename(item);
+                        const sourceFileName = path.basename(item.path);
                         const destinationFolder = result.path;
-                        const destinationFile = result.path + "/" + path.basename(item);
+                        const destinationFile = result.path + "/" + path.basename(item.path);
 
                         try {
                           const exists = await fse.pathExists(destinationFile);
@@ -326,16 +304,16 @@ export default function Command() {
                             });
 
                             if (overwrite) {
-                              if (item == destinationFile) {
+                              if (item.path == destinationFile) {
                                 await showHUD("The source and destination file are the same");
                               }
-                              fse.moveSync(item, destinationFile, { overwrite: true });
-                              await showHUD("Moved file " + path.basename(item) + " to " + destinationFolder);
+                              fse.moveSync(item.path, destinationFile, { overwrite: true });
+                              await showHUD("Moved file " + path.basename(item.path) + " to " + destinationFolder);
                             } else {
                               await showHUD("Cancelling move");
                             }
                           } else {
-                            fse.moveSync(item, destinationFile);
+                            fse.moveSync(item.path, destinationFile);
                             await showHUD("Moved file " + sourceFileName + " to " + destinationFolder);
                           }
 
