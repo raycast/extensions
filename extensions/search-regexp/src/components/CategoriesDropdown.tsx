@@ -8,8 +8,8 @@ interface CategoriesDropdownProps {
 
 export default function CategoriesDropdown({ categories, onCategoryChange }: CategoriesDropdownProps): JSX.Element {
   return (
-    <List.Dropdown tooltip="Select category" storeValue={false} onChange={onCategoryChange}>
-      <List.Dropdown.Section title="Regexp categories">
+    <List.Dropdown tooltip="Select Category" storeValue={false} onChange={onCategoryChange}>
+      <List.Dropdown.Section title="Regexp Categories">
         {categories.map(({ shortname, displayName }: Category) => (
           <List.Dropdown.Item key={shortname} title={displayName} value={shortname} />
         ))}

@@ -16,13 +16,9 @@ export const ExpressionItemActions = memo(({ regexp, link }: ExpressionItemActio
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.CopyToClipboard content={regexp} title="Copy regexp.." />
+        <Action.CopyToClipboard content={regexp} title="Copy Regexp.." />
+        {link && <Action.OpenInBrowser url={link} title="Show Example in Browser" />}
       </ActionPanel.Section>
-      {link && (
-        <ActionPanel.Section>
-          <Action.OpenInBrowser url={link} title="Show example in browser" />
-        </ActionPanel.Section>
-      )}
     </ActionPanel>
   );
 });
@@ -31,7 +27,7 @@ function ZipCodeItemActions({ expressions }: { expressions: MappedExpression[] }
   const memoizedExpressions = useMemo(() => expressions, [expressions]);
   return (
     <ActionPanel>
-      <Action.Push title="Show zip codes" target={<ZipCodesList expressions={memoizedExpressions} />} />
+      <Action.Push title="Show ZIP Codes" target={<ZipCodesList expressions={memoizedExpressions} />} />
     </ActionPanel>
   );
 }
@@ -90,8 +86,8 @@ export default function Command() {
           key={item.id}
           title={item.name}
           icon={iconsMap.get(item.category)}
-          subtitle={item.displayName}
-          accessories={[{ text: item.displayName }]}
+          subtitle={item.regexp}
+          accessories={[{ text: item.displayName, tooltip: item.displayName }]}
           actions={
             item.category !== "zipcode" ? (
               <ExpressionItemActions regexp={item.regexp!} link={item.link} />

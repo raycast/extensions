@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-regexp",
-  "title": "Regular Expressions",
-  "description": "This extension allows you to quckly find the most common JS regular expressions.",
+  "title": "Regular Expressions Search",
+  "description": "Quickly find the most common JS regular expressions.",
   "icon": "command-icon.png",
   "author": "musienkoyuriy",
   "categories": [
