@@ -33,90 +33,93 @@ export default function Command() {
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
 
   const sendMessage = async () => {
-    setIsLoading(true);
-    const messageId = crypto.randomUUID();
-    const allMessages = Object.entries(messages);
-    const previousMessageId = allMessages.length
-      ? allMessages[allMessages.length - 1][1].receivedId
-      : crypto.randomUUID();
+    try {
+      setIsLoading(true);
+      const messageId = crypto.randomUUID();
+      const allMessages = Object.entries(messages);
+      const previousMessageId = allMessages.length
+        ? allMessages[allMessages.length - 1][1].receivedId
+        : crypto.randomUUID();
 
-    setMessages({
-      [messageId]: {
-        sent: messageValue,
-      },
-      ...messages,
-    });
-    setMessageValue("");
-    setSelectedItemId(messageId);
+      setMessages({
+        [messageId]: {
+          sent: messageValue,
+        },
+        ...messages,
+      });
+      setMessageValue("");
+      setSelectedItemId(messageId);
 
-    const response = await fetch("https://chat.openai.com/backend-api/conversation", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${OpenAIAPIKey}`,
-        "content-type": "application/json",
-      },
-      referrer: "https://chat.openai.com/chat",
-      referrerPolicy: "strict-origin-when-cross-origin",
-      body: JSON.stringify({
-        action: "next",
-        messages: [
-          {
-            id: messageId,
-            role: "user",
-            content: { content_type: "text", parts: [messageValue] },
-          },
-        ],
-        ...(conversationId ? { conversation_id: conversationId } : {}),
-        parent_message_id: previousMessageId,
-        model: "text-davinci-002-render",
-      }),
-    });
+      const response = await fetch("https://chat.openai.com/backend-api/conversation", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${OpenAIAPIKey}`,
+          "content-type": "application/json",
+        },
+        referrer: "https://chat.openai.com/chat",
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: JSON.stringify({
+          action: "next",
+          messages: [
+            {
+              id: messageId,
+              role: "user",
+              content: { content_type: "text", parts: [messageValue] },
+            },
+          ],
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          parent_message_id: previousMessageId,
+          model: "text-davinci-002-render",
+        }),
+      });
 
-    if (response.body === null) {
-      setIsLoading(false);
+      if (!response.ok || response.body === null) {
+        throw Error(response.statusText)
+      }
+
+      for await (const chunk of response.body) {
+        try {
+          const chunkData = JSON.parse(chunk.toString().replace("data: ", ""));
+          if (chunkData?.detail?.code === "token_expired") {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "API Key expired",
+              message: "Please update the OpenAI API Key in the extension preferences",
+            });
+          } else if (chunkData?.detail) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error",
+              message: chunkData.detail.message || chunkData.detail,
+            });
+          }
+
+          if (!conversationId) {
+            setConversationId(chunkData.conversation_id);
+          }
+
+          setMessages((previousMessages) => ({
+            [messageId]: {
+              ...previousMessages[messageId],
+              received: chunkData.message.content.parts[0],
+              receivedId: chunkData.message.id,
+            },
+            ...previousMessages,
+          }));
+          // Swallowing JSON.parse errors when streamed JSON is incomplete
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: "Something went wrong while making requests to OpenAI API",
+        message: error instanceof Error ? error.message : "Unknown error.",
       });
-
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    for await (const chunk of response.body) {
-      try {
-        const chunkData = JSON.parse(chunk.toString().replace("data: ", ""));
-        if (chunkData?.detail?.code === "token_expired") {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "API Key expired",
-            message: "Please update the OpenAI API Key in the extension preferences",
-          });
-        } else if (chunkData?.detail) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message: chunkData.detail.message || chunkData.detail,
-          });
-        }
-
-        if (!conversationId) {
-          setConversationId(chunkData.conversation_id);
-        }
-
-        setMessages((previousMessages) => ({
-          [messageId]: {
-            ...previousMessages[messageId],
-            received: chunkData.message.content.parts[0],
-            receivedId: chunkData.message.id,
-          },
-          ...previousMessages,
-        }));
-        // Swallowing JSON.parse errors when streamed JSON is incomplete
-        // eslint-disable-next-line no-empty
-      } catch (error) {}
-    }
-    setIsLoading(false);
   };
 
   const resetConversation = () => {
