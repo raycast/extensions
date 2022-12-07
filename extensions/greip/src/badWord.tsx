@@ -1,117 +1,68 @@
-import React, { useState } from "react";
 import {
   Toast,
   ActionPanel,
   Action,
   getPreferenceValues,
   Form,
-  Icon,
   showToast,
-  List,
   useNavigation,
   Detail,
   Color,
+  Icon,
 } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { FormValues } from "./types/form";
 import { Preferences } from "./types/preferences";
 import axios from "axios";
-
-interface ResultViewInputs {
-  text: string;
-  totalBadWords: number;
-  isSafe: boolean;
-  badWordsList: string[];
-  riskScore: number;
-}
+import { ResultViewInputs } from "./types/result";
+import { getGreipActions } from "./utils";
 
 function FormView() {
   const { push } = useNavigation();
-
   const preferences = getPreferenceValues<Preferences>();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>();
-  const [nameError, setNameError] = useState<string | undefined>();
 
-  function dropNameErrorIfNeeded() {
-    if (nameError && nameError.length > 0) {
-      setNameError(undefined);
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    async onSubmit(values) {
+      const nText = values.text.replace(/\n/g, " ");
 
-  const lookupText = async (text: string) => {
-    const nText = text.replace(/\n/g, " ");
-    if (nText.length < 1) {
-      setNameError("Required field!");
-      return false;
-    }
-    setLoading(true);
-    const res = await axios.get(
-      "https://gregeoip.com/badWords?key=" + preferences.apikey + "&text=" + nText + "&listBadWords=yes"
-    );
-    if (res?.data?.status == "success") {
-      setLoading(false);
-      push(<ResultView data={res?.data?.data} />);
-    } else {
-      setLoading(false);
-      setError(new Error(res?.data?.description));
-    }
-  };
-
-  React.useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "ERR:",
-        message: error.message,
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching result...",
       });
-    }
-  }, [error]);
 
-  return !loading ? (
+      const res = await axios.get(
+        `https://gregeoip.com/badWords?key=${preferences.apikey}&text=${nText}&listBadWords=yes`
+      );
+      if (res?.data?.status == "success") {
+        push(<ResultView data={res?.data?.data} />);
+        toast.style = Toast.Style.Success;
+        toast.title = "Result fetched successfully!";
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = res?.data?.description;
+      }
+    },
+    validation: {
+      text: FormValidation.Required,
+    },
+  });
+
+  return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Lookup text" onSubmit={(values) => lookupText(values.text)} />
-          <ActionPanel.Section title="Greip Pages">
-            <Action.OpenInBrowser
-              url="https://greip.io"
-              title="Greip Website"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
-            />
-            <Action.OpenInBrowser
-              url="https://greip.io/dashboard/Home"
-              title="Greip Dashboard"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
-            />
-            <Action.OpenInBrowser
-              url="https://docs.greip.io"
-              title="Greip Documentation"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
-            />
-          </ActionPanel.Section>
+          <Action.SubmitForm title="Lookup Text" icon={Icon.Snippets} onSubmit={handleSubmit} />
+          {getGreipActions()}
         </ActionPanel>
       }
     >
       <Form.TextArea
-        id="text"
-        autoFocus={true}
         storeValue={true}
         info="This text will be sent to Greip in order to check if it contains bad-words."
         placeholder="Type the text you want to lookup here.."
-        error={nameError}
-        onChange={dropNameErrorIfNeeded}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("Required field!");
-          } else {
-            dropNameErrorIfNeeded();
-          }
-        }}
+        {...itemProps.text}
       />
     </Form>
-  ) : (
-    <List>
-      <List.EmptyView icon={{ source: Icon.Hourglass }} title="Fetching the data.."></List.EmptyView>
-    </List>
   );
 }
 
@@ -126,11 +77,7 @@ function ResultView(props: { data: ResultViewInputs }) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Total bad-words"
-            text={
-              data.totalBadWords > 1
-                ? data.totalBadWords?.toString() + " words"
-                : data.totalBadWords?.toString() + " word"
-            }
+            text={`${data.totalBadWords?.toString()} word${data.totalBadWords > 1 ? "s" : ""}`}
           />
           <Detail.Metadata.TagList title="Safe?">
             <Detail.Metadata.TagList.Item
@@ -142,11 +89,7 @@ function ResultView(props: { data: ResultViewInputs }) {
             {data.badWordsList.map((item: string) => (
               <Detail.Metadata.TagList.Item key={item.toString() + Math.random()} text={item} color={Color.Red} />
             ))}
-            {data.badWordsList.length < 1 ? (
-              <Detail.Metadata.TagList.Item text="N/A" color={Color.SecondaryText} />
-            ) : (
-              <></>
-            )}
+            {data.badWordsList.length < 1 && <Detail.Metadata.TagList.Item text="N/A" color={Color.SecondaryText} />}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Rist Score" text={data.riskScore.toString()} />
           <Detail.Metadata.Separator />
@@ -164,23 +107,7 @@ function ResultView(props: { data: ResultViewInputs }) {
             <Action.CopyToClipboard title="Copy Filtered Text" content={data.text} />
             <Action.CopyToClipboard title="Copy Bad-Words List" content={data.badWordsList?.join(" ")} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Greip Pages">
-            <Action.OpenInBrowser
-              url="https://greip.io"
-              title="Greip Website"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
-            />
-            <Action.OpenInBrowser
-              url="https://greip.io/dashboard/Home"
-              title="Greip Dashboard"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
-            />
-            <Action.OpenInBrowser
-              url="https://docs.greip.io"
-              title="Greip Documentation"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
-            />
-          </ActionPanel.Section>
+          {getGreipActions()}
         </ActionPanel>
       }
     />

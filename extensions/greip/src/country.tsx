@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Toast, ActionPanel, Action, getPreferenceValues, List, Detail, showToast } from "@raycast/api";
+import { Toast, ActionPanel, Action, getPreferenceValues, List, Detail, showToast, Icon } from "@raycast/api";
 import { Preferences } from "./types/preferences";
 import countries from "./data/countries.json";
+import { getGreipActions } from "./utils";
 import axios from "axios";
 
 interface Country {
@@ -46,13 +47,7 @@ export default function Command() {
     setLoading(true);
     await axios
       .get(
-        "https://gregeoip.com/Country?key=" +
-          preferences.apikey +
-          "&CountryCode=" +
-          countryCode +
-          "&lang=" +
-          preferences.lang +
-          "&params=language,currency,timezone"
+        `https://gregeoip.com/Country?key=${preferences.apikey}&CountryCode=${countryCode}&lang=${preferences.lang}&params=language,currency,timezone`
       )
       .then((data) => {
         if (data?.data?.status == "success") {
@@ -71,7 +66,7 @@ export default function Command() {
     if (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "ERR:",
+        title: "Error",
         message: error.message,
       });
     }
@@ -94,7 +89,7 @@ export default function Command() {
             key={item.code}
             actions={
               <ActionPanel>
-                <Action title="Show Details" onAction={() => showDetails(item.code)} />
+                <Action title="Show Details" icon={Icon.AppWindowSidebarLeft} onAction={() => showDetails(item.code)} />
                 <ActionPanel.Section title="Copy result">
                   {/* <Action.CopyToClipboard content={data.ip} /> */}
                   <Action.CopyToClipboard
@@ -102,23 +97,7 @@ export default function Command() {
                     title="Copy full information (JSON)"
                   />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Greip Pages">
-                  <Action.OpenInBrowser
-                    url="https://greip.io"
-                    title="Greip Website"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
-                  />
-                  <Action.OpenInBrowser
-                    url="https://greip.io/dashboard/Home"
-                    title="Greip Dashboard"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
-                  />
-                  <Action.OpenInBrowser
-                    url="https://docs.greip.io"
-                    title="Greip Documentation"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
-                  />
-                </ActionPanel.Section>
+                {getGreipActions()}
               </ActionPanel>
             }
             detail={
