@@ -73,12 +73,16 @@ export default function Command() {
             {...props}
             actions={
               <ActionPanel>
-                <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
-                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+                <Action
+                  title="Toggle Details"
+                  icon={Icon.AppWindowSidebarLeft}
+                  onAction={() => setShowingDetail(!showingDetail)}
+                />
                 {phone && <Action.OpenInBrowser title="Call" url={`tel:${phone}`} icon={Icon.Phone} />}
                 {phone && <Action.OpenInBrowser title="Whatsapp" url={`https://wa.me/${phone}`} icon={Icon.Message} />}
                 {email && <Action.OpenInBrowser title="Send Email" url={`mailto:${email}`} />}
                 {website && <Action.OpenInBrowser title="Open Website" url={website} />}
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
