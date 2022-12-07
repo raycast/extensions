@@ -58,7 +58,7 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       issue_number: context.issue.number,
       owner: context.repo.owner,
       repo: context.repo.repo,
-      labels: ["extension fix / improvement", `extension: ${ext}`],
+      labels: ["extension fix / improvement", `extension: ${findExtensionName(ext)}`],
     });
 
     if (owners[0] === sender) {
@@ -103,6 +103,14 @@ function getCodeOwners() {
     prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
     return prev;
   }, {});
+}
+
+function findExtensionName(ext) {
+  const map = JSON.parse(fs.readFileSync(path.join(__dirname, "../.github/extensionName2Folder.json"), "utf8"));
+
+  const folder = ext.replace('/extensions/', '')
+
+  return Object.entries(map).find(([name, _folder]) => _folder === folder)?.0;
 }
 
 // Create a new comment or update the existing one
