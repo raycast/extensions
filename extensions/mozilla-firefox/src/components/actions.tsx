@@ -10,7 +10,8 @@ export const NewTabAction = ({ query }: { query?: string }) => (
 
 export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEntry }) => (
   <ActionPanel title={title}>
-    <Action.OpenInBrowser title="Open in Tab" url={url} />
+    <Action.OpenInBrowser title="Open in Firefox" url={url} />
+    <Action.OpenInBrowser title="Open in Default Browser" url={url} shortcut={{ modifiers: ["opt"], key: "enter" }} />
     <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
   </ActionPanel>
 );
