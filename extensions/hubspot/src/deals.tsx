@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { useDeals } from "./hooks/useDeals";
 import { Deal } from "./types/deal";
@@ -64,8 +64,12 @@ export default function Command() {
             {...props}
             actions={
               <ActionPanel>
-                <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
-                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+                <Action
+                  title="Toggle Detail"
+                  icon={Icon.AppWindowSidebarLeft}
+                  onAction={() => setShowingDetail(!showingDetail)}
+                />
+                <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
