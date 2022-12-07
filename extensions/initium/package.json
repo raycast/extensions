@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
     "node-html-markdown": "^1.2.2",
     "rss-parser": "^3.12.0"
   },

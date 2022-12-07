@@ -2,21 +2,16 @@ import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Parser from "rss-parser";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-
-const parser = new Parser({
-    customFields: {
-        item: [["content:encoded", "fullContent"]],
-    },
-});
+import { useFetch } from "@raycast/utils";
 
 interface Item extends Parser.Item {
     fullContent?: string;
 }
 
 const isBriefing = (title: string) => !!title.match(/^(早|晚)報：/);
-
-const Briefing = ({ markdown }: { markdown: string }) => <Detail markdown={markdown} />;
-
+const Briefing = ({ title, markdown }: { title: string | undefined; markdown: string }) => (
+    <Detail navigationTitle={title} markdown={markdown} />
+);
 const PostListItem = ({ item }: { item: Item }) => {
     const getMarkdown = () => {
         if (!item.fullContent) {
@@ -59,7 +54,7 @@ const PostListItem = ({ item }: { item: Item }) => {
                 {
                     <Action.Push
                         title="Read in Raycast"
-                        target={<Briefing markdown={getMarkdown()} />}
+                        target={<Briefing title={item.title} markdown={getMarkdown()} />}
                         icon={Icon.Star}
                     />
                 }
@@ -82,29 +77,32 @@ const PostListItem = ({ item }: { item: Item }) => {
 };
 
 const Command = () => {
-    const [items, setItems] = useState<Item[]>();
-    const [error, setError] = useState<Error>();
     const [filter, setFilter] = useState<string>("all");
 
-    const fetchPosts = async () => {
-        const initiumFeedURL = "https://theinitium.com/newsfeed/";
+    const { isLoading, data } = useFetch("https://theinitium.com/newsfeed/", {
+        async parseResponse(response) {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
 
-        try {
-            const feed = await parser.parseURL(initiumFeedURL);
-            setItems(feed.items);
-        } catch (error) {
-            setError(error instanceof Error ? error : undefined);
-            console.log(error);
-        }
-    };
+            const data = await response.text();
+            if (data !== undefined) {
+                const parser: Parser = new Parser({
+                    customFields: {
+                        item: [["content:encoded", "fullContent"]],
+                    },
+                });
+                const feed = await parser.parseString(data as string);
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
+                return { items: feed.items as Item[] };
+            }
+            return { items: [] };
+        },
+    });
 
     return (
         <List
-            isLoading={!items && !error}
+            isLoading={isLoading}
             searchBarAccessory={
                 <List.Dropdown tooltip="Show posts filter" onChange={(newValue) => setFilter(newValue)}>
                     <List.Dropdown.Item title="All" value="all" />
@@ -114,16 +112,15 @@ const Command = () => {
             }
             searchBarPlaceholder="Posts on Initium Media"
         >
-            {items
-                ?.filter((item) => {
-                    if (!item.title) return false;
-                    if (filter === "all") return true;
+            {data &&
+                data.items
+                    .filter((item) => {
+                        if (!item.title) return false;
+                        if (filter === "all") return true;
 
-                    return (filter === "briefing") === isBriefing(item.title);
-                })
-                .map((item) => (
-                    <PostListItem key={item.guid} item={item} />
-                ))}
+                        return (filter === "briefing") === isBriefing(item.title);
+                    })
+                    .map((item) => <PostListItem key={item.guid} item={item} />)}
         </List>
     );
 };
