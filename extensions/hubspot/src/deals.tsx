@@ -65,7 +65,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Toggle Detail"
+                  title="Toggle Details"
                   icon={Icon.AppWindowSidebarLeft}
                   onAction={() => setShowingDetail(!showingDetail)}
                 />
