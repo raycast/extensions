@@ -11,10 +11,10 @@ import {
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import crypto from "crypto";
-import fetch from "node-fetch";
+import { ChatGPTAPI } from "chatgpt";
 
 type Preferences = {
-  OpenAIAPIKey: string;
+  ChatGPTSessionToken: string;
 };
 
 type Message = {
@@ -24,22 +24,18 @@ type Message = {
 };
 
 export default function Command() {
-  const { OpenAIAPIKey } = getPreferenceValues<Preferences>();
+  const { ChatGPTSessionToken } = getPreferenceValues<Preferences>();
 
   const [messageValue, setMessageValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useCachedState<Record<string, Message>>("messages", {});
-  const [conversationId, setConversationId] = useState<string | null>();
+  const [conversationId, setConversationId] = useState<string | undefined>();
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
 
   const sendMessage = async () => {
     try {
       setIsLoading(true);
       const messageId = crypto.randomUUID();
-      const allMessages = Object.entries(messages);
-      const previousMessageId = allMessages.length
-        ? allMessages[allMessages.length - 1][1].receivedId
-        : crypto.randomUUID();
 
       setMessages({
         [messageId]: {
@@ -50,67 +46,39 @@ export default function Command() {
       setMessageValue("");
       setSelectedItemId(messageId);
 
-      const response = await fetch("https://chat.openai.com/backend-api/conversation", {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${OpenAIAPIKey}`,
-          "content-type": "application/json",
-        },
-        referrer: "https://chat.openai.com/chat",
-        referrerPolicy: "strict-origin-when-cross-origin",
-        body: JSON.stringify({
-          action: "next",
-          messages: [
-            {
-              id: messageId,
-              role: "user",
-              content: { content_type: "text", parts: [messageValue] },
-            },
-          ],
-          ...(conversationId ? { conversation_id: conversationId } : {}),
-          parent_message_id: previousMessageId,
-          model: "text-davinci-002-render",
-        }),
+      const api = new ChatGPTAPI({
+        sessionToken: ChatGPTSessionToken,
       });
 
-      if (!response.ok || response.body === null) {
-        throw Error(response.statusText)
-      }
+      await api.ensureAuth();
 
-      for await (const chunk of response.body) {
-        try {
-          const chunkData = JSON.parse(chunk.toString().replace("data: ", ""));
-          if (chunkData?.detail?.code === "token_expired") {
-            showToast({
-              style: Toast.Style.Failure,
-              title: "API Key expired",
-              message: "Please update the OpenAI API Key in the extension preferences",
-            });
-          } else if (chunkData?.detail) {
-            showToast({
-              style: Toast.Style.Failure,
-              title: "Error",
-              message: chunkData.detail.message || chunkData.detail,
-            });
-          }
-
+      const allMessages = Object.entries(messages);
+      await api.sendMessage(messageValue, {
+        conversationId,
+        parentMessageId: allMessages[allMessages.length - 1]?.[1].receivedId,
+        onConversationResponse: (conversationResponse) => {
           if (!conversationId) {
-            setConversationId(chunkData.conversation_id);
+            setConversationId(conversationResponse.conversation_id);
+            setMessages((previousMessages) => ({
+              [messageId]: {
+                ...previousMessages[messageId],
+                receivedId: conversationResponse.message?.id,
+              },
+              ...previousMessages,
+            }));
           }
-
+        },
+        onProgress: (progressResponse) => {
+          console.log(progressResponse);
           setMessages((previousMessages) => ({
             [messageId]: {
               ...previousMessages[messageId],
-              received: chunkData.message.content.parts[0],
-              receivedId: chunkData.message.id,
+              received: progressResponse,
             },
             ...previousMessages,
           }));
-          // Swallowing JSON.parse errors when streamed JSON is incomplete
-        } catch (error) {
-          console.error(error);
-        }
-      }
+        },
+      });
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -123,7 +91,7 @@ export default function Command() {
   };
 
   const resetConversation = () => {
-    setConversationId(null);
+    setConversationId(undefined);
     setMessages({});
     setSelectedItemId(undefined);
   };
@@ -141,7 +109,7 @@ export default function Command() {
           <Action title="Change OpenAI API Key" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
-      isShowingDetail={true}
+      isShowingDetail={!!Object.entries(messages).length}
     >
       {Object.entries(messages).length ? (
         Object.entries(messages).map(([messageId, message]) => (

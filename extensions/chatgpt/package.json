@@ -14,8 +14,8 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "OpenAIAPIKey",
-      "title": "OpenAI API Key",
+      "name": "ChatGPTSessionToken",
+      "title": "ChatGPT Session Token",
       "description": "Click About This Extension to learn how to obtain it",
       "type": "password",
       "required": true
@@ -33,9 +33,7 @@
   "dependencies": {
     "@raycast/api": "^1.44.0",
     "@raycast/utils": "^1.4.11",
-    "@types/node-fetch": "^2.6.2",
-    "node-fetch": "^3.3.0",
-    "stream-json": "^1.7.5"
+    "chatgpt": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
