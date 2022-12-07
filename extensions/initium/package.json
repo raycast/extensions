@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Show Latest Posts",
+      "subtitle": "Initium",
       "description": "Retrieve posts from official RSS feed",
       "mode": "view"
     }
