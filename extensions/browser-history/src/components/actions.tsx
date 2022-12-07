@@ -3,7 +3,7 @@ import { openNewChromeTab, openNewFirefoxTab, openNewSafariTab } from "../action
 import { HistoryEntry } from "../interfaces";
 
 export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEntry }) => (
-  <ActionPanel title={title}>
+  <ActionPanel>
     <Action.OpenInBrowser title="Open in Default Browser" url={url} />
     <ActionPanel.Section title={"Copy"}>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
