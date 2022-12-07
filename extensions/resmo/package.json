@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "resmo",
   "title": "Resmo",
-  "description": "Make SQL queries and search all your resources",
+  "description": "Search all resources across Cloud and SaaS",
   "icon": "logo.png",
   "author": "ozgunarslantas",
   "categories": [
