@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "./lending-rates";
-import Bitfinex from "./api";
+import Bitfinex from "./lib/api";
 import useSWR, { mutate } from "swr";
-import { getCurrency, getPreferenceValues } from "./preference";
+import { getCurrency, getPreferenceValues } from "./lib/preference";
 ("swr");
 
 function OfferListItem({ offer, canUpdate, canCancel }: { offer: any; canUpdate?: boolean; canCancel?: boolean }) {

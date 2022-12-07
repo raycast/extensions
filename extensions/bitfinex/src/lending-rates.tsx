@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import useSWR from "swr";
 import fetch from "node-fetch";
 import * as asciichart from "asciichart";
-import { getCurrency, getPreferenceValues } from "./preference";
+import { getCurrency, getPreferenceValues } from "./lib/preference";
 
 // ['1m', '5m', '15m', '30m', '1h', '3h', '6h', '12h', '1D', '1W', '14D', '1M']
 const tfOptions = [

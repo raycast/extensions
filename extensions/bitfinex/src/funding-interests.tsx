@@ -1,8 +1,8 @@
 import { Icon, List } from "@raycast/api";
 import { useMemo } from "react";
-import Bitfinex from "./api";
+import Bitfinex from "./lib/api";
 import useSWR from "swr";
-("swr");
+
 
 export default function FundingOffers() {
   const rest = Bitfinex.rest();
