@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hubspot",
+  "title": "Search and Manage Hubspot",
+  "description": "Search Hubspot Contacts and Deals",
+  "icon": "extension_icon.png",
+  "author": "harisvsulaiman",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Communication",
+    "Other"
+  ],
+  "access": "public",
+  "keywords": [
+    "hubspot",
+    "crm"
+  ],
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Hubspot AccessToken",
+      "description": "Hubspot AccessToken",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "contacts",
+      "title": "Search Hubspot Contacts",
+      "description": "Search Hubspot Contacts",
+      "mode": "view"
+    },
+    {
+      "name": "deals",
+      "title": "Search Hubspot Deals",
+      "description": "Search Hubspot Deals",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
