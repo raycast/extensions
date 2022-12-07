@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix crash] - 2022-12-07
+
+- Fix crash which happens when cache is corrupted
+
 ## [Todos Menu Bar] - 2022-12-06
 
 - Add Todos menu bar command
