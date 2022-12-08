@@ -5,6 +5,9 @@
   "description": "Show IP Address information using greip.io",
   "icon": "greip.png",
   "author": "ghadeer",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Security",
     "Data",
@@ -88,6 +91,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.43.2",
+    "@raycast/utils": "^1.4.11",
     "axios": "^1.2.0",
     "gre-geoip": "^1.2.8"
   },
