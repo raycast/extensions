@@ -7,6 +7,7 @@ import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
 import { capitalizeFirstLetter, showErrorToast } from "../utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
   let result = "";
@@ -122,6 +123,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
             <CloseTodoAction todo={todo} finished={props.refreshData} />
             <CloseAllTodoAction finished={props.refreshData} />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

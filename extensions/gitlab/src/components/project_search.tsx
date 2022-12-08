@@ -18,7 +18,7 @@ import {
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -62,9 +62,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
             <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Cache">
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

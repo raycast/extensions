@@ -20,7 +20,7 @@ import {
 } from "./project_actions";
 import { getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
   return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
@@ -64,9 +64,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
             <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Cache">
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
