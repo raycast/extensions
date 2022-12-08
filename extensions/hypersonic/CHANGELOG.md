@@ -1,5 +1,18 @@
 # Hypersonic Changelog
 
+## [2.0.1] - 2022-12-08
+
+#### New
+
+- Added an action that lets users share a task after creating it.
+- Added an action that lets users to open a task after creating it.
+
+#### Updated
+
+- Changed toast feedback to hud feedback after a successful work sharing action.
+- Fixed a bug that caused the extension to crash when the assigned user didn't exist in the workspace.
+- Fixed a bug that caused the database fetch to crash when a database lacked a title property.
+
 ## [2.0.0] - 2022-12-01
 
 #### New
