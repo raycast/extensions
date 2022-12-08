@@ -27,6 +27,14 @@
       "subtitle": "Bitfinex",
       "description": "Show Lending Rate History on Bitfinex",
       "mode": "view"
+    },
+    {
+      "name": "check-funding-rates",
+      "title": "Check Funding Rates",
+      "subtitle": "Bitfinex",
+      "description": "Detect high funding rates on Bitfinex",
+      "mode": "no-view",
+      "interval": "15m"
     }
   ],
   "preferences": [
@@ -1323,6 +1331,72 @@
           "value": "ZRX"
         }
       ]
+    },
+    {
+      "title": "Default notification sound",
+      "name": "sound",
+      "description": "The default notification sound to use",
+      "type": "dropdown",
+      "default": "Tink",
+      "required": false,
+      "data": [
+        {
+          "title": "Basso",
+          "value": "Basso"
+        },
+        {
+          "title": "Blow",
+          "value": "Blow"
+        },
+        {
+          "title": "Bottle",
+          "value": "Bottle"
+        },
+        {
+          "title": "Frog",
+          "value": "Frog"
+        },
+        {
+          "title": "Funk",
+          "value": "Funk"
+        },
+        {
+          "title": "Glass",
+          "value": "Glass"
+        },
+        {
+          "title": "Hero",
+          "value": "Hero"
+        },
+        {
+          "title": "Morse",
+          "value": "Morse"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        },
+        {
+          "title": "Pop",
+          "value": "Pop"
+        },
+        {
+          "title": "Purr",
+          "value": "Purr"
+        },
+        {
+          "title": "Sosumi",
+          "value": "Sosumi"
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -1330,7 +1404,8 @@
     "@raycast/utils": "^1.4.11",
     "asciichart": "^1.5.25",
     "bfx-api-node-models": "^1.6.3",
-    "bitfinex-api-node": "^5.0.4"
+    "bitfinex-api-node": "^5.0.4",
+    "display-notification": "^3.0.0"
   },
   "devDependencies": {
     "@types/asciichart": "^1.5.6",

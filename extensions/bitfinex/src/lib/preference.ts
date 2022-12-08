@@ -5,8 +5,10 @@ export type Preference = {
   api_secret: string;
   f_currency: string;
   default_rate_view: "list" | "chart";
+  sound: string;
 };
 
 export const getPreferenceValues = () => _getPreferenceValues<Preference>();
 
 export const getCurrency = () => `f${getPreferenceValues().f_currency}`;
+export const getSound = () => getPreferenceValues().sound;
