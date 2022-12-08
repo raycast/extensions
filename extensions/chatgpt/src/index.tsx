@@ -38,10 +38,10 @@ export default function Command() {
       const messageId = crypto.randomUUID();
 
       setMessages({
+        ...messages,
         [messageId]: {
           sent: inputValue,
         },
-        ...messages,
       });
       setInputValue("");
       setSelectedItemId(messageId);
@@ -106,13 +106,13 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
-          <Action title="Change OpenAI API Key" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
+          <Action title="Change ChatGPT Session Token" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
         </ActionPanel>
       }
       isShowingDetail={!!Object.entries(messages).length}
     >
       {Object.entries(messages).length ? (
-        Object.entries(messages).map(([messageId, message]) => (
+        Object.entries(messages).reverse().map(([messageId, message]) => (
           <List.Item
             key={messageId}
             id={messageId}
@@ -126,7 +126,7 @@ export default function Command() {
               <ActionPanel>
                 <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
                 <Action title="Reset Conversation" icon={Icon.Repeat} onAction={resetConversation} />
-                <Action title="Change OpenAI API Key" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
+                <Action title="Change ChatGPT Session Token" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
               </ActionPanel>
             }
           />
