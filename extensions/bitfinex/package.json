@@ -1333,6 +1333,14 @@
       ]
     },
     {
+      "title": "High rate notification threshold",
+      "name": "high_rate_threshold",
+      "description": "The threshold for high rate notifications. Would send a notification if the 15m average rate is higher than this value",
+      "type": "textfield",
+      "default": "24",
+      "required": false
+    },
+    {
       "title": "Default notification sound",
       "name": "sound",
       "description": "The default notification sound to use",

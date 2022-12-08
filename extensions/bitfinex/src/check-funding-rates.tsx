@@ -1,7 +1,7 @@
 import displayNotification from "display-notification";
 import fetch from "cross-fetch";
 import { candlesTimeFrame } from "./lib/lendingRatesUtils";
-import { getCurrency, getSound } from "./lib/preference";
+import { getCurrency, getHighRateThreshold, getSound } from "./lib/preference";
 
 export default async function run() {
   const _15mCandels = candlesTimeFrame["15m"];
@@ -14,7 +14,8 @@ export default async function run() {
 
   const averageRate = rawAverageRate * 365 * 100;
 
-  if (averageRate < 24) {
+  const threshold = getHighRateThreshold();
+  if (averageRate <= threshold) {
     return;
   }
 
