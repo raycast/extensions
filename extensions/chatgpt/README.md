@@ -4,6 +4,8 @@
 
 Prompt OpenAI [ChatGPT](https://chat.openai.com/) using Raycast. Extension uses unofficial API. It can stop working anytime and it may be breaking OpenAI ChatGPT Terms of Service. Use at your own risk.
 
+<img src="assets/demo.gif">
+
 ## Authorization
 
 **This extension requires a valid session token from ChatGPT to access it's unofficial REST API.**
