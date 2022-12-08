@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "greip",
-  "title": "Greip - IP Geolocation",
-  "description": "Show IP Address information using greip.io",
+  "title": "Greip",
+  "description": "Use endpoint from greip.io directly from Raycast",
   "icon": "greip.png",
   "author": "ghadeer",
   "contributors": [
