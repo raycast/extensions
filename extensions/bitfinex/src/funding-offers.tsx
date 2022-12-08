@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useMemo } from "react";
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "./lending-rates";
 import Bitfinex from "./lib/api";
@@ -213,8 +214,30 @@ export default function FundingOffers() {
   } = useFundingOffers(currency);
   const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
 
+  const totalAmount = useMemo(() => {
+    const offers = data?.filter((offer) => !offer.hidden);
+
+    return offers.reduce((acc, offer) => acc + offer.amount, 0);
+  }, [data]);
+
+  const averageRateByOffers = useMemo(() => {
+    const offers = data?.filter((offer) => !offer.hidden);
+
+    if (!offers || offers.length === 0) {
+      return 0;
+    }
+
+    const averageRate = offers.reduce((acc, offer) => acc + offer.rate * offer.amount, 0) / totalAmount;
+
+    return averageRate;
+  }, [data]);
+
+  const estimatedDailyInterest = useMemo(() => {
+    return totalAmount * averageRateByOffers;
+  }, [totalAmount, averageRateByOffers]);
+
   return (
-    <List isLoading={isLoading || activeOfferLoading || isBalanceLoading}>
+    <List isLoading={isLoading || activeOfferLoading || isBalanceLoading} filtering={false}>
       {balanceInfo && (
         <List.Section title="Available Funding">
           <List.Item
@@ -231,6 +254,31 @@ export default function FundingOffers() {
                 />
               </ActionPanel>
             }
+          />
+        </List.Section>
+      )}
+
+      {averageRateByOffers > 0 && (
+        <List.Section title="Average Rate and Interest">
+          <List.Item
+            title="Average Daily Rate"
+            icon={Icon.LineChart}
+            accessories={[
+              {
+                text: `${formatToYearlyRate(averageRateByOffers)}%`,
+              },
+            ]}
+          />
+
+          <List.Item
+            title={"Estimated Daily Interest"}
+            subtitle="May vary based on actual rate"
+            icon={Icon.Coin}
+            accessories={[
+              {
+                text: `${estimatedDailyInterest.toFixed(4)} ${f_currency}`,
+              },
+            ]}
           />
         </List.Section>
       )}
