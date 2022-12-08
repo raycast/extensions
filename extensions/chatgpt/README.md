@@ -4,7 +4,7 @@
 
 Prompt OpenAI [ChatGPT](https://chat.openai.com/) using Raycast. Extension uses unofficial API. It can stop working anytime and it may be breaking OpenAI ChatGPT Terms of Service. Use at your own risk.
 
-<img src="assets/demo.gif">
+<img src="demo.gif">
 
 ## Authorization
 
@@ -15,7 +15,7 @@ To get a session token:
 1. Go to https://chat.openai.com/chat and log in or sign up.
 2. Open dev tools.
 3. Open `Application` > `Cookies`.
-   ![ChatGPT cookies](assets/session-token.png)
+   ![ChatGPT cookies](session-token.png)
 4. Copy the value for `__Secure-next-auth.session-token` and save it to your environment.
 
 ## Credits
