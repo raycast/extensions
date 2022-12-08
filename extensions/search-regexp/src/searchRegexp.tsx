@@ -5,7 +5,7 @@ import CategoriesDropdown from "./components/CategoriesDropdown";
 import ZipCodesList from "./components/ZipCodeList";
 import { iconsMap } from "./icons";
 import { MappedExpression } from "./types";
-import { flatExpressions } from "./utilities";
+import { ellipsis, flatExpressions } from "./utilities";
 
 interface ExpressionItemActionsProps {
   regexp: string;
@@ -86,7 +86,7 @@ export default function Command() {
           key={item.id}
           title={item.name}
           icon={iconsMap.get(item.category)}
-          subtitle={item.regexp}
+          subtitle={ellipsis(item.regexp!)}
           accessories={[{ text: item.displayName, tooltip: item.displayName }]}
           actions={
             item.category !== "zipcode" ? (

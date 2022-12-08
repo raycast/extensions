@@ -9,6 +9,10 @@ export function capitalizeSentence(sentence: string): string {
   return sentence.split(" ").map(capitalize).join(" ");
 }
 
+export function ellipsis(str: string, maxLength = 15): string {
+  return (str ?? "").length >= maxLength ? `${str.slice(0, maxLength)}...` : str;
+}
+
 function processExpressionVariations(expressionItem: ExpressionItem): MappedExpression[] {
   return expressionItem.variations.map(({ name, regexp, link }) => ({
     name,
