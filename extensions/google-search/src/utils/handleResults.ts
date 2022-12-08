@@ -2,6 +2,7 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { Preferences, SearchResult } from "./types";
 import fetch from "node-fetch";
+import iconv from "iconv-lite";
 
 export async function getSearchHistory(): Promise<SearchResult[]> {
   const { rememberSearchHistory } = getPreferenceValues<Preferences>();
@@ -37,7 +38,7 @@ export function getStaticResult(searchText: string): SearchResult[] {
   return result;
 }
 
-export async function getAutoSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+export async function getAutoSearchResults(searchText: string, signal: any): Promise<SearchResult[]> {
   const response = await fetch(
     `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
@@ -54,8 +55,7 @@ export async function getAutoSearchResults(searchText: string, signal: AbortSign
   }
 
   const buffer = await response.arrayBuffer();
-  const decoder = new TextDecoder("iso-8859-1");
-  const text = decoder.decode(buffer);
+  const text = iconv.decode(Buffer.from(buffer), "iso-8859-1");
   const json = JSON.parse(text);
 
   const results: SearchResult[] = [];

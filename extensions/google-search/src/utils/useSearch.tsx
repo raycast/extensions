@@ -28,11 +28,11 @@ export function useSearch() {
     setStaticResults(getStaticResult(searchText));
   }, [searchText]);
 
-    // Static result and filter history
-    useEffect(() => {
-      const lowerSearchText = searchText.toLowerCase();
-      setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
-    }, [searchText, history]);
+  // Static result and filter history
+  useEffect(() => {
+    const lowerSearchText = searchText.toLowerCase();
+    setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
+  }, [searchText, history]);
 
   // Autosuggestions
   useEffect(() => {
@@ -47,7 +47,7 @@ export function useSearch() {
           const autoSearchResult = await getAutoSearchResults(searchText, cancelRef.current.signal);
           setAutoResults(autoSearchResult);
         } else {
-          setAutoResults([])
+          setAutoResults([]);
         }
 
         setIsLoading(false);
