@@ -1,22 +1,15 @@
-import { ActionPanel, closeMainWindow, CopyToClipboardAction, Icon, List } from "@raycast/api";
+import { ActionPanel, closeMainWindow, CopyToClipboardAction, Icon, List, open } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
-import open from "open";
 import { SearchResult } from "./utils/types";
 
 export default function Command() {
-  const { isLoading, history, results, searchText, search, addHistory, deleteAllHistory, deleteHistoryItem } =
-    useSearch();
+  const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
 
-  const listItems: SearchResult[] = searchText.length === 0 ? history : results;
+  const listItems: SearchResult[] = results;
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search Google or type a URL..."
-      throttle
-    >
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Google or enter a URL...">
       <List.Section title="Results" subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
@@ -38,6 +31,7 @@ export default function Command() {
                   />
 
                   <CopyToClipboardAction title="Copy URL to Clipboard" content={item.url} />
+                  <CopyToClipboardAction title="Copy query to Clipboard" content={item.query} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
