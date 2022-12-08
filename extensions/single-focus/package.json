@@ -22,15 +22,7 @@
       "name": "set-focus",
       "title": "Set Focus",
       "description": "Set current focus",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "title",
-          "placeholder": "Title",
-          "required": false,
-          "type": "text"
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "current-focus",

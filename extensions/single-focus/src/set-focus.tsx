@@ -3,14 +3,7 @@ import { Action, Form, ActionPanel, Icon } from "@raycast/api";
 
 const icons: Exclude<Focus["icon"], undefined>[] = ["task", "browser", "email"];
 
-export default function SetFocus(props: { arguments: { title: string } }) {
-  if (props?.arguments?.title) {
-    showFocus({
-      text: props.arguments.title,
-    });
-    return null;
-  }
-
+export default function SetFocus() {
   const focus = getFocus();
 
   return (
