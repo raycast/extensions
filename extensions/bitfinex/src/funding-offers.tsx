@@ -4,6 +4,7 @@ import LendingRates from "./lending-rates";
 import Bitfinex from "./lib/api";
 import { getCurrency, getPreferenceValues } from "./lib/preference";
 import { useFundingBalanceInfo, useFundingCredits, useFundingOffers } from "./lib/hooks";
+import { formatToDailyRate, formatToYearlyRate } from "./lib/utils";
 
 function OfferListItem({
   offer,
@@ -21,8 +22,8 @@ function OfferListItem({
   const rest = Bitfinex.rest();
   const symbol = offer.symbol.slice(1);
   const amount = Number(offer.amount).toFixed(2);
-  const yearlyRate = Number(offer.rate * 365 * 100).toFixed(2);
-  const dayRate = Number(offer.rate * 100).toFixed(5);
+  const yearlyRate = formatToYearlyRate(offer.rate);
+  const dayRate = formatToDailyRate(offer.rate);
   const period = offer.period;
 
   const isOpened = !!offer.mtsOpening;
@@ -221,7 +222,13 @@ export default function FundingOffers() {
             icon={Icon.Coin}
             actions={
               <ActionPanel>
-                <Action.Push icon={Icon.PlusCircle} title="Create Offer" target={<CreateOfferForm />} />
+                <Action.Push
+                  icon={Icon.PlusCircle}
+                  title="Create Offer"
+                  target={
+                    <CreateOfferForm mutateBalanceInfo={mutateBalanceInfo} mutateFundingInfo={mutateFundingInfo} />
+                  }
+                />
               </ActionPanel>
             }
           />
