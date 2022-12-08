@@ -112,25 +112,33 @@ export default function Command() {
       isShowingDetail={!!Object.entries(messages).length}
     >
       {Object.entries(messages).length ? (
-        Object.entries(messages).reverse().map(([messageId, message]) => (
-          <List.Item
-            key={messageId}
-            id={messageId}
-            title={message.sent}
-            detail={
-              <List.Item.Detail
-                markdown={`**You:**\n${message.sent}${message.received ? `\n\n**ChatGPT:**\n${message.received}` : ""}`}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
-                <Action title="Reset Conversation" icon={Icon.Repeat} onAction={resetConversation} />
-                <Action title="Change ChatGPT Session Token" icon={Icon.Gear} onAction={() => openCommandPreferences()} />
-              </ActionPanel>
-            }
-          />
-        ))
+        Object.entries(messages)
+          .reverse()
+          .map(([messageId, message]) => (
+            <List.Item
+              key={messageId}
+              id={messageId}
+              title={message.sent}
+              detail={
+                <List.Item.Detail
+                  markdown={`**You:**\n${message.sent}${
+                    message.received ? `\n\n**ChatGPT:**\n${message.received}` : ""
+                  }`}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action title="Send" icon={Icon.Message} onAction={sendMessage} />
+                  <Action title="Reset Conversation" icon={Icon.Repeat} onAction={resetConversation} />
+                  <Action
+                    title="Change ChatGPT Session Token"
+                    icon={Icon.Gear}
+                    onAction={() => openCommandPreferences()}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
       ) : (
         <List.EmptyView icon={Icon.Message} title="No messages" />
       )}
