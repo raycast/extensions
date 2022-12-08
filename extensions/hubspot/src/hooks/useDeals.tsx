@@ -2,11 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Data } from "../types/deal";
 
-export function useDeals({ search = "" }: { search?: string }): {
-  isLoading: boolean;
-  data: Data;
-  revalidate: () => void;
-} {
+export function useDeals({ search = "" }: { search?: string }) {
   const preferences = getPreferenceValues();
   const accessToken = preferences?.accessToken;
 
@@ -25,7 +21,5 @@ export function useDeals({ search = "" }: { search?: string }): {
     keepPreviousData: true,
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   return { isLoading, data, revalidate };
 }

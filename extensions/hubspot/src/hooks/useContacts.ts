@@ -2,15 +2,11 @@ import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Data } from "../types/contact";
 
-export function useContacts({ search = "" }: { search?: string }): {
-  isLoading: boolean;
-  data: Data;
-  revalidate: () => void;
-} {
+export function useContacts({ search = "" }: { search?: string }) {
   const preferences = getPreferenceValues();
   const accessToken = preferences?.accessToken;
 
-  const { isLoading, data, revalidate } = useFetch(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
+  const { isLoading, data, revalidate } = useFetch<Data>(`https://api.hubapi.com/crm/v3/objects/contacts/search`, {
     method: "post",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -25,7 +21,5 @@ export function useContacts({ search = "" }: { search?: string }): {
     keepPreviousData: true,
   });
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   return { isLoading, data, revalidate };
 }
