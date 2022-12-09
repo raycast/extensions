@@ -11,63 +11,79 @@ import { useState } from "react";
 import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function SSM() {
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const { data: parameters, error, isLoading, revalidate } = useCachedPromise(fetchParameters);
+  const [search, setSearch] = useState<string>("");
+  const { data: parameters, error, isLoading, revalidate } = useCachedPromise(fetchParameters, [search]);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter parameters by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
-      onSelectionChange={setSelectedItem}
+      onSearchTextChange={setSearch}
+      throttle
     >
-      {error ? (
+      {search.length < 4 ? (
+        <List.EmptyView
+          title="Missing Search Query"
+          icon={Icon.MagnifyingGlass}
+          description="The search will begin when at least 4 characters are provided."
+        />
+      ) : error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        parameters?.map((parameter) => (
-          <Parameter key={parameter.Name} parameter={parameter} isSelected={parameter.Name === selectedItem} />
-        ))
+        parameters?.map((parameter) => <Parameter key={parameter.Name} parameter={parameter} />)
       )}
     </List>
   );
 }
 
-function Parameter({ parameter, isSelected }: { parameter: ParameterMetadata; isSelected: boolean }) {
-  const { data: parameterDetails } = useCachedPromise(fetchParameter, [isSelected ? parameter.Name : undefined]);
+function Parameter({ parameter }: { parameter: ParameterMetadata }) {
+  const [showValue, setShowValue] = useState<boolean>(false);
+  const { data: parameterDetails } = useCachedPromise(fetchParameter, [parameter.Name]);
 
   return (
     <List.Item
       id={parameter.Name || ""}
       icon={Icon.Bookmark}
-      title={parameter.Name || ""}
-      subtitle={parameter.Version?.toString()}
+      title={showValue ? parameterDetails?.Value || "" : parameter.Name || ""}
       actions={
         <ActionPanel>
+          <Action.SubmitForm
+            title={showValue ? "Hide Value" : "Show Value"}
+            onSubmit={() => setShowValue(!showValue)}
+          />
+          <Action.CopyToClipboard title="Copy Value" content={parameterDetails?.Value || ""} />
           <Action.OpenInBrowser
             title="Open Parameter"
             url={`${AWS_URL_BASE}/systems-manager/parameters/${parameter.Name}/description?region=${process.env.AWS_REGION}`}
           />
-          <Action.CopyToClipboard title="Copy Value" content={parameterDetails?.Value || ""} />
           <Action.CopyToClipboard title="Copy Name" content={parameter.Name || ""} />
         </ActionPanel>
       }
-      accessories={[
-        { text: isSelected ? parameterDetails?.Value || "..." : parameter.DataType },
-        { icon: isSelected ? Icon.Eye : Icon.EyeDisabled },
-      ]}
+      accessories={[{ icon: showValue ? Icon.Eye : Icon.EyeDisabled }]}
     />
   );
 }
 
-async function fetchParameters(token?: string, accParameters?: ParameterMetadata[]): Promise<ParameterMetadata[]> {
+async function fetchParameters(
+  search: string,
+  token?: string,
+  accParameters?: ParameterMetadata[]
+): Promise<ParameterMetadata[]> {
+  if (search.length < 4) return [];
   if (!process.env.AWS_PROFILE) return [];
 
-  const { NextToken, Parameters } = await new SSMClient({}).send(new DescribeParametersCommand({ NextToken: token }));
+  const { NextToken, Parameters } = await new SSMClient({}).send(
+    new DescribeParametersCommand({
+      NextToken: token,
+      ParameterFilters: [{ Key: "Name", Option: "Contains", Values: [search] }],
+    })
+  );
 
   const combinedLogGroups = [...(accParameters || []), ...(Parameters || [])];
 
   if (NextToken) {
-    return fetchParameters(NextToken, combinedLogGroups);
+    return fetchParameters(search, NextToken, combinedLogGroups);
   }
 
   return combinedLogGroups;
