@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, CopyToClipboardAction, Icon, List, open } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
 import { SearchResult } from "./utils/types";
@@ -30,13 +30,13 @@ export default function Command() {
                     icon={{ source: Icon.ArrowRight }}
                   />
 
-                  <CopyToClipboardAction title="Copy URL to Clipboard" content={item.url} />
-                  <CopyToClipboardAction title="Copy query to Clipboard" content={item.query} />
+                  <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
+                  <Action.CopyToClipboard title="Copy suggestion to Clipboard" content={item.query} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
                   {item.isHistory && (
-                    <ActionPanel.Item
+                    <Action
                       title="Remove From History"
                       onAction={async () => {
                         await deleteHistoryItem(item);
@@ -46,7 +46,7 @@ export default function Command() {
                     />
                   )}
 
-                  <ActionPanel.Item
+                  <Action
                     title="Clear All History"
                     onAction={async () => {
                       await deleteAllHistory();
