@@ -5,6 +5,9 @@
   "description": "Search Hubspot Contacts and Deals",
   "icon": "extension_icon.png",
   "author": "harisvsulaiman",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": [
     "Applications",
