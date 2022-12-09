@@ -39,12 +39,12 @@ export default function Command() {
       },
       minutes: (value) => {
         if (value && isNaN(parseInt(value, 10))) {
-          return "minutes must be a number";
+          return "Minutes must be a number";
         }
       },
       seconds: (value) => {
         if (value && isNaN(parseInt(value, 10))) {
-          return "seconds must be a number";
+          return "Seconds must be a number";
         }
       },
     },
