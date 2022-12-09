@@ -32,6 +32,13 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
             title="Open in Browser"
             url={`${AWS_URL_BASE}/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
           />
+          <Action.OpenInBrowser
+            icon={Icon.Document}
+            title="Open CloudWatch log group"
+            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
+              process.env.AWS_REGION
+            }#logsV2:log-groups/log-group/${encodeURIComponent(`/aws/lambda/${func.FunctionName}`)}`}
+          />
           <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
           <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
         </ActionPanel>
