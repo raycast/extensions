@@ -33,7 +33,7 @@ export default function Command() {
   const [search, setSearch] = useState("");
   const { isLoading, data } = useContacts({ search });
 
-  const contacts: Contact[] = data?.results;
+  const contacts: Contact[] | undefined = data?.results;
 
   return (
     <List
@@ -45,7 +45,7 @@ export default function Command() {
         setSearch(search);
       }}
     >
-      <List.EmptyView title="No Contacts Found" icon="noview.svg" />
+      <List.EmptyView title="No Contacts Found" icon="noview.png" />
       {contacts?.map((contact) => {
         const firstname = contact?.properties?.firstname;
         const lastname = contact?.properties?.lastname;

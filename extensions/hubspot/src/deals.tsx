@@ -28,7 +28,7 @@ export default function Command() {
   const [search, setSearch] = useState("");
   const { isLoading, data } = useDeals({ search });
 
-  const deals: Deal[] = data?.results;
+  const deals: Deal[] | undefined = data?.results;
 
   return (
     <List
@@ -40,7 +40,7 @@ export default function Command() {
         setSearch(search);
       }}
     >
-      <List.EmptyView title="No Deals Found" icon="noview.svg" />
+      <List.EmptyView title="No Deals Found" icon="noview.png" />
       {deals?.map((deal) => {
         const dealname = deal?.properties?.dealname;
         const dealstage = deal?.properties?.dealstage;

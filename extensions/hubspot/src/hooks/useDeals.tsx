@@ -6,7 +6,7 @@ export function useDeals({ search = "" }: { search?: string }) {
   const preferences = getPreferenceValues();
   const accessToken = preferences?.accessToken;
 
-  const { isLoading, data, revalidate } = useFetch(`https://api.hubapi.com/crm/v3/objects/deals/search`, {
+  const { isLoading, data, revalidate } = useFetch<Data>(`https://api.hubapi.com/crm/v3/objects/deals/search`, {
     method: "post",
     headers: {
       Authorization: `Bearer ${accessToken}`,
