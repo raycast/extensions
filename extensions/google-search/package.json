@@ -23,7 +23,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Remember search history?",
+      "label": "Remember Search History",
       "description": "Enable this checkbox to locally store Google search history."
     }
   ],
