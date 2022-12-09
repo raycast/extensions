@@ -13,18 +13,18 @@ const Detail = ({ contact }: { contact: Contact }) => {
   const email = contact?.properties?.email;
 
   return (
-    <List.Item.Detail
-      metadata={
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="First Name" text={firstname} />
-          {lastname && <List.Item.Detail.Metadata.Label title="Last Name" text={lastname} />}
-          {company && <List.Item.Detail.Metadata.Label title="Company" text={company} />}
-          {website && <List.Item.Detail.Metadata.Link title="Website" text={website} target={website} />}
-          {phone && <List.Item.Detail.Metadata.Link title="Phone" text={phone} target={`tel:${phone}`} />}
-          {email && <List.Item.Detail.Metadata.Link title="Email" text={email} target={`mailto:${email}`} />}
-        </List.Item.Detail.Metadata>
-      }
-    />
+      <List.Item.Detail
+        metadata={
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="First Name" text={firstname} />
+            {lastname && <List.Item.Detail.Metadata.Label title="Last Name" text={lastname} />}
+            {company && <List.Item.Detail.Metadata.Label title="Company" text={company} />}
+            {website && <List.Item.Detail.Metadata.Link title="Website" text={website} target={website} />}
+            {phone && <List.Item.Detail.Metadata.Link title="Phone" text={phone} target={`tel:${phone}`} />}
+            {email && <List.Item.Detail.Metadata.Link title="Email" text={email} target={`mailto:${email}`} />}
+          </List.Item.Detail.Metadata>
+        }
+      />
   );
 };
 

@@ -42,11 +42,27 @@
       "subtitle": "HubSpot",
       "description": "Search HubSpot Deals",
       "mode": "view"
+    },
+    {
+      "name": "calls",
+      "title": "List Calls",
+      "subtitle": "HubSpot",
+      "description": "List HubSpot Calls",
+      "mode": "view"
+    },
+    {
+      "name": "communications",
+      "title": "List Communications",
+      "subtitle": "HubSpot",
+      "description": "List HubSpot Communications",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11"
+    "@raycast/utils": "^1.4.11",
+    "@types/lodash": "^4.14.191",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
