@@ -8,9 +8,9 @@ export default function Command() {
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Google or enter a URL...">
       <List.Section title="Results" subtitle={results.length + ""}>
-        {results.map((item, i) => (
+        {results.map((item) => (
           <List.Item
-            key={i}
+            key={item.id}
             title={item.query}
             subtitle={item.description}
             icon={getIcon(item)}
