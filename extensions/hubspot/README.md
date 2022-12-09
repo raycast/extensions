@@ -1,4 +1,4 @@
-# Hubspot®
+# HubSpot®
 
 ### Disclaimer
 
@@ -6,7 +6,7 @@
 
 ### To configure your Hubspot accessToken, follow these steps:
 
-- Go to the Hubspot website and log in to your account.
+- Go to the HubSpot website and log in to your account.
 - Click on the settings icon.
 - In the left sidebar, click on "Integrations" and then on "Private apps".
 - Under "Private apps" , click on create Private App
@@ -21,12 +21,12 @@
   - `media_bridge.read`
   - `crm.objects.deals.read `
 
-Copy the AccessTokeny that is generated. This is your Hubspot accessToken.
+Copy the AccessTokeny that is generated. This is your HubSpot accessToken.
 
-In your extension's preferences, paste the accessToken under "Hubspot AccessToken".
+In your extension's preferences, paste the accessToken under "HubSpot AccessToken".
 
-Now you can use the accessToken to access the Hubspot API and integrate it with your extension.
+Now you can use the accessToken to access the HubSpot API and integrate it with your extension.
 
-### Refer Hubspot® for Acceptable Usage Policy
+### Refer HubSpot® for Acceptable Usage Policy
 
 https://legal.hubspot.com/acceptable-use

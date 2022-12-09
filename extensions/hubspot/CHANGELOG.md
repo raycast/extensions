@@ -1,4 +1,4 @@
-# Hubspot Changelog
+# HubSpot Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
