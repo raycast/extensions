@@ -39,7 +39,15 @@ export function CreateOfferForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Offer" onSubmit={onSubmit} icon={Icon.PlusCircle} />
-          <Action.Push title="Show Lending Rates" target={<LendingRates />} icon={Icon.LineChart} />
+          <Action.Push
+            title="Show Lending Rates"
+            target={<LendingRates />}
+            icon={Icon.LineChart}
+            shortcut={{
+              key: "l",
+              modifiers: ["cmd", "shift"],
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -50,7 +58,7 @@ export function CreateOfferForm({
         id="rate"
         title="Rate (in APR)"
         defaultValue="18"
-        info="You can lookup lending rates for reference"
+        info="Press CMD+Shift+L to see recent lending rates."
       />
       <Form.TextField id="period" title="Period (in days)" defaultValue="7" />
     </Form>
