@@ -59,7 +59,7 @@ export default function Command() {
       }
     >
       <Form.TextField title="Hours" {...itemProps.hours} />
-      <Form.TextField title="Miutes" {...itemProps.minutes} />
+      <Form.TextField title="Minutes" {...itemProps.minutes} />
       <Form.TextField title="Seconds" {...itemProps.seconds} />
     </Form>
   );
