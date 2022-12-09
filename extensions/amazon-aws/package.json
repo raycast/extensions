@@ -72,10 +72,17 @@
       "title": "S3 Buckets",
       "description": "Find and open a bucket and its content (or download it)",
       "mode": "view"
+    },
+    {
+      "name": "cloudwatch",
+      "title": "CloudWatch Log Groups",
+      "description": "Find and open a log group",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.216.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codepipeline": "^3.216.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
