@@ -1,12 +1,12 @@
 import displayNotification from "display-notification";
 import fetch from "cross-fetch";
-import { candlesTimeFrame } from "./lib/lendingRatesUtils";
-import { getCurrency, getHighRateThreshold, getSound } from "./lib/preference";
+import { candlesTimeFrame } from "../lendingRatesUtils";
+import { getCurrency, getHighRateThreshold, getSound } from "../preference";
 
-export default async function run() {
-  const _15mCandels = candlesTimeFrame["15m"];
+export default async function checkLendingRates() {
+  const _15mCandles = candlesTimeFrame["15m"];
 
-  const data = await fetch(_15mCandels).then((r) => r.json());
+  const data = await fetch(_15mCandles).then((r) => r.json());
 
   const [dateString, , rawAverageRate] = data[0];
 

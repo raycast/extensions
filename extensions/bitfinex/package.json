@@ -29,10 +29,10 @@
       "mode": "view"
     },
     {
-      "name": "check-funding-rates",
-      "title": "Check Funding Rates",
+      "name": "cron-task",
+      "title": "Check Funding Rates and Offers",
       "subtitle": "Bitfinex",
-      "description": "Detect high funding rates on Bitfinex",
+      "description": "Detect high funding rates on Bitfinex, or maintain funding offers",
       "mode": "no-view",
       "interval": "15m"
     }
