@@ -20,7 +20,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Result">
-                  <ActionPanel.Item
+                  <Action
                     title="Open in Browser"
                     onAction={async () => {
                       await addHistory(item);
@@ -31,7 +31,7 @@ export default function Command() {
                   />
 
                   <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
-                  <Action.CopyToClipboard title="Copy suggestion to Clipboard" content={item.query} />
+                  <Action.CopyToClipboard title="Copy Suggestion to Clipboard" content={item.query} />
                 </ActionPanel.Section>
 
                 <ActionPanel.Section title="History">
