@@ -1,7 +1,7 @@
 import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -24,22 +24,19 @@ export default function Lambda() {
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
-      icon="lambda.png"
+      icon={Icon.CodeBlock}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://${process.env.AWS_REGION}.console.aws.amazon.com/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
+            url={`${AWS_URL_BASE}/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
           />
-          <Action.CopyToClipboard title="Copy ARN" content={func.FunctionArn || ""} />
-          <Action.CopyToClipboard title="Copy Name" content={func.FunctionName || ""} />
+          <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
+          <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
         </ActionPanel>
       }
-      accessories={[
-        { date: func.LastModified ? new Date(func.LastModified) : undefined },
-        { icon: getRuntimeIcon(func.Runtime), tooltip: func.Runtime || "" },
-      ]}
+      accessories={[{ text: func.Runtime || "" }, { icon: getRuntimeIcon(func.Runtime) }]}
     />
   );
 }
@@ -48,6 +45,7 @@ async function fetchFunctions(
   nextMarker?: string,
   functions?: FunctionConfiguration[]
 ): Promise<FunctionConfiguration[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];
