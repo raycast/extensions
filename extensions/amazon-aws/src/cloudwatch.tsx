@@ -13,8 +13,8 @@ export default function CloudWatch() {
       isLoading={isLoading}
       searchBarPlaceholder="Filter log groups by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
-      searchText={search}
       onSearchTextChange={setSearch}
+      throttle
     >
       {search.length < 4 ? (
         <List.EmptyView
