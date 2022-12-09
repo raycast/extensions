@@ -11,7 +11,7 @@ export default function FundingOffers() {
 
   const currency = getCurrency();
 
-  const { data = [], isLoading } = useFundingCredits(currency);
+  const { data: offers = [], isLoading } = useFundingCredits(currency);
   const {
     data: activeOffers = [],
     isLoading: activeOfferLoading,
@@ -20,14 +20,10 @@ export default function FundingOffers() {
   const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
 
   const totalAmount = useMemo(() => {
-    const offers = data?.filter((offer) => !offer.hidden);
-
     return offers.reduce((acc, offer) => acc + offer.amount, 0);
-  }, [data]);
+  }, [offers]);
 
   const averageRateByOffers = useMemo(() => {
-    const offers = data?.filter((offer) => !offer.hidden);
-
     if (!offers || offers.length === 0) {
       return 0;
     }
@@ -36,7 +32,7 @@ export default function FundingOffers() {
 
     // 20% for the fee
     return averageRate * 0.8;
-  }, [data]);
+  }, [offers]);
 
   const estimatedDailyInterest = useMemo(() => {
     return totalAmount * averageRateByOffers;
@@ -110,18 +106,16 @@ export default function FundingOffers() {
       </List.Section>
 
       <List.Section title="Provided Offers">
-        {data
-          ?.filter((offer) => !offer.hidden)
-          .map((offer) => {
-            return (
-              <OfferListItem
-                key={offer.id}
-                offer={offer}
-                mutateBalanceInfo={mutateBalanceInfo}
-                mutateFundingInfo={mutateFundingInfo}
-              />
-            );
-          })}
+        {offers.map((offer) => {
+          return (
+            <OfferListItem
+              key={offer.id}
+              offer={offer}
+              mutateBalanceInfo={mutateBalanceInfo}
+              mutateFundingInfo={mutateFundingInfo}
+            />
+          );
+        })}
       </List.Section>
     </List>
   );

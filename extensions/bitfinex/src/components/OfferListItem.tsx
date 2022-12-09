@@ -48,17 +48,20 @@ export function OfferListItem({
       title={`${symbol} ${amount}`}
       icon={Icon.Coins}
       subtitle={daysLeftText}
-      accessories={[
-        {
-          text: `${yearlyRate}%`,
-          tooltip: `${dayRate}% per day`,
-        },
-        {
-          icon: Icon.Calendar,
-          date: new Date(offer.mtsCreate),
-          tooltip: "Created at",
-        },
-      ]}
+      accessories={
+        [
+          offer?.hidden ? { icon: Icon.EyeDisabled, tooltip: "Hidden" } : null,
+          {
+            text: `${yearlyRate}%`,
+            tooltip: `${dayRate}% per day`,
+          },
+          {
+            icon: Icon.Calendar,
+            date: new Date(offer.mtsCreate),
+            tooltip: "Created at",
+          },
+        ].filter(Boolean) as List.Item.Accessory[]
+      }
       actions={
         <ActionPanel>
           {canUpdate && (
