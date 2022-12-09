@@ -229,7 +229,8 @@ export default function FundingOffers() {
 
     const averageRate = offers.reduce((acc, offer) => acc + offer.rate * offer.amount, 0) / totalAmount;
 
-    return averageRate;
+    // 20% for the fee
+    return averageRate * 0.8;
   }, [data]);
 
   const estimatedDailyInterest = useMemo(() => {
@@ -238,11 +239,16 @@ export default function FundingOffers() {
 
   return (
     <List isLoading={isLoading || activeOfferLoading || isBalanceLoading} filtering={false}>
-      {balanceInfo && (
-        <List.Section title="Available Funding">
+      <List.Section title="Summary">
+        {balanceInfo && (
           <List.Item
-            title={`${Math.abs(balanceInfo[0])} ${f_currency}`}
+            title={"Available Funding"}
             icon={Icon.Coin}
+            accessories={[
+              {
+                text: `${Math.abs(balanceInfo[0])} ${f_currency}`,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -255,33 +261,33 @@ export default function FundingOffers() {
               </ActionPanel>
             }
           />
-        </List.Section>
-      )}
+        )}
 
-      {averageRateByOffers > 0 && (
-        <List.Section title="Average Rate and Interest">
-          <List.Item
-            title="Average Daily Rate"
-            icon={Icon.LineChart}
-            accessories={[
-              {
-                text: `${formatToYearlyRate(averageRateByOffers)}%`,
-              },
-            ]}
-          />
+        {averageRateByOffers > 0 && (
+          <>
+            <List.Item
+              title="Average Daily Rate"
+              icon={Icon.LineChart}
+              accessories={[
+                {
+                  text: `${formatToYearlyRate(averageRateByOffers)}%`,
+                },
+              ]}
+            />
 
-          <List.Item
-            title={"Estimated Daily Interest"}
-            subtitle="May vary based on actual rate"
-            icon={Icon.Coin}
-            accessories={[
-              {
-                text: `${estimatedDailyInterest.toFixed(4)} ${f_currency}`,
-              },
-            ]}
-          />
-        </List.Section>
-      )}
+            <List.Item
+              title={"Estimated Daily Interest"}
+              subtitle="May vary based on actual rate"
+              icon={Icon.Coin}
+              accessories={[
+                {
+                  text: `${estimatedDailyInterest.toFixed(4)} ${f_currency}`,
+                },
+              ]}
+            />
+          </>
+        )}
+      </List.Section>
 
       <List.Section title="Pending Offers">
         {activeOffers?.map((offer) => {
