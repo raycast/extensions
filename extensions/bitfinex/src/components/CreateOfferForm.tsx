@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "../lending-rates";
-import Bitfinex from "../lib/api";
+import Bitfinex, { handleAPIError } from "../lib/api";
 import { getCurrency } from "../lib/preference";
 
 export function CreateOfferForm({
@@ -24,12 +24,8 @@ export function CreateOfferForm({
         period: parseInt(values.period, 10),
       });
       await rest.submitFundingOffer(newOffer);
-    } catch (e) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Create Offer Failed",
-        message: String(e),
-      });
+    } catch (e: any) {
+      handleAPIError("Create offer failed", e);
     }
 
     mutateFundingInfo();

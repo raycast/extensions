@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
-import Bitfinex from "../lib/api";
+import Bitfinex, { handleAPIError } from "../lib/api";
 
 export function EditOfferForm(props: { offer: any; mutateFundingInfo: () => void; mutateBalanceInfo: () => void }) {
   const defaultRate = Number(props.offer.rate * 365 * 100).toFixed(3);
@@ -24,11 +24,7 @@ export function EditOfferForm(props: { offer: any; mutateFundingInfo: () => void
 
       pop();
     } catch (e) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Update Offer Failed",
-        message: String(e),
-      });
+      handleAPIError("Updateoffer failed", e);
     }
   };
 
