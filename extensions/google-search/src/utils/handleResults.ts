@@ -71,14 +71,14 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
         description: `Open URL for '${item}'`,
         url: item,
         isNavigation: true,
-      })
+      });
     } else if (type === "QUERY") {
       results.push({
         id: nanoid(),
         query: item,
         description: `Search Google for '${item}'`,
         url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
-      })
+      });
     }
   });
 
