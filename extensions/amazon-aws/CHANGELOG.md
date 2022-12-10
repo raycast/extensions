@@ -2,8 +2,8 @@
 
 ## [CloudWatch & SSM Command] - 2022-12-10
 
-- Add "CloudWatch Log Groups" command
-- Add "SSM Parameters" command
+- Add "CloudWatch Log Groups" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+- Add "SSM Parameters" command ([#3843](https://github.com/raycast/extensions/pull/3843))
 
 ## [UI/UX Tweaks & Fixes] - 2022-12-09
 
