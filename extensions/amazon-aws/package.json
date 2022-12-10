@@ -82,7 +82,7 @@
     {
       "name": "ssm",
       "title": "SSM Parameters",
-      "description": "Find and open a parameter",
+      "description": "Find, view and copy a parameter value",
       "mode": "view"
     }
   ],

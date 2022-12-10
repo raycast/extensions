@@ -1,11 +1,16 @@
 # Amazon AWS Changelog
 
-## [UI/UX Tweaks & Fixes] - 2022-12-02
+## [CloudWatch & SSM Command] - 2022-12-10
 
-- Simplify UI/UX using Raycast icons, consistent actions, and more
-- Cleanup codebase and improve code readability
-- Fix two minor bugs related to data fetching
-- Update readme, screenshots and copy
+- Add "CloudWatch Log Groups" command
+- Add "SSM Parameters" command
+
+## [UI/UX Tweaks & Fixes] - 2022-12-09
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Cleanup codebase and improve code readability ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Fix two minor bugs related to data fetching ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Update readme, screenshots and copy ([#3770](https://github.com/raycast/extensions/pull/3770))
 
 ## [Support AWS Profile Switch] - 2022-11-30
 
