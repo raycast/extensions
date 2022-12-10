@@ -31,9 +31,14 @@ export default function Command() {
   const [messages, setMessages] = useCachedState<Record<string, Message>>("messages", {});
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
+  const [abortController, setAbortController] = useState<AbortController>();
 
   const sendMessage = async () => {
     try {
+      abortController?.abort();
+      const abortControllerInstance = new AbortController();
+      setAbortController(abortControllerInstance);
+      
       setIsLoading(true);
       const messageId = crypto.randomUUID();
 
@@ -43,6 +48,7 @@ export default function Command() {
           sent: inputValue,
         },
       });
+
       setInputValue("");
       setSelectedItemId(messageId);
 
@@ -57,18 +63,28 @@ export default function Command() {
         conversationId,
         parentMessageId: allMessages[allMessages.length - 1]?.[1].receivedId,
         onConversationResponse: (conversationResponse) => {
+          if (abortControllerInstance.signal.aborted) {
+            // abort doesn't really stop server from sending events, this just stops storing them
+            return;
+          }
           if (!conversationId) {
             setConversationId(conversationResponse.conversation_id);
-            setMessages((previousMessages) => ({
+          }
+          setMessages((previousMessages) => {
+            return {
               ...previousMessages,
               [messageId]: {
                 ...previousMessages[messageId],
                 receivedId: conversationResponse.message?.id,
               },
-            }));
-          }
+            };
+          });
         },
         onProgress: (progressResponse) => {
+          if (abortControllerInstance.signal.aborted) {
+            // abort doesn't really stop server from sending events, this just stops storing them
+            return;
+          }
           setMessages((previousMessages) => ({
             ...previousMessages,
             [messageId]: {
@@ -77,23 +93,34 @@ export default function Command() {
             },
           }));
         },
+        abortSignal: abortControllerInstance.signal,
       });
+
+      setIsLoading(false);
+      setAbortController(undefined);
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        // AbortError is expected, don't do anything
+        return;
+      }
+
       console.error(error);
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
         message: error instanceof Error ? error.message : "Unknown error.",
       });
-    } finally {
       setIsLoading(false);
+      setAbortController(undefined);
     }
   };
 
   const resetConversation = () => {
+    abortController?.abort();
     setConversationId(undefined);
     setMessages({});
     setSelectedItemId(undefined);
+    setIsLoading(false);
   };
 
   return (
