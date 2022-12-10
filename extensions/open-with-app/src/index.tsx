@@ -8,10 +8,9 @@ import {
   showHUD,
   getSelectedFinderItems,
   Action,
+  open,
 } from "@raycast/api";
-
 import { useState, useEffect } from "react";
-import { execSync } from "child_process";
 
 export default function ApplicationsList() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -50,7 +49,7 @@ function ApplicationsListItem(props: { application: Application }) {
                 const selectedItems = await getSelectedFinderItems();
                 if (selectedItems.length != 0) {
                   selectedItems.forEach((item) => {
-                    execSync(`open -b ${application.bundleId} "${item.path.replace(/"/g, '\\"')}"`);
+                    open(item.path.replace(/"/g, '\\"'), application.bundleId);
                   });
                 } else {
                   await showHUD("⚠️  No Finder selection to open.");
