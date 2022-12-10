@@ -44,6 +44,12 @@ export function CreateOfferForm({
       pop();
     },
     validation: basicFieldValidations,
+    initialValues: {
+      symbol: getCurrency(),
+      amount: "150",
+      rate: "18",
+      period: "7",
+    },
   });
 
   return (
@@ -63,16 +69,10 @@ export function CreateOfferForm({
         </ActionPanel>
       }
     >
-      <Form.TextField title="Symbol" defaultValue={getCurrency()} {...itemProps.symbol} />
-
-      <Form.TextField title="Amount" defaultValue="150" {...itemProps.amount} />
-      <Form.TextField
-        title="Rate (in APR)"
-        defaultValue="18"
-        info="Press CMD+Shift+L to see recent lending rates."
-        {...itemProps.rate}
-      />
-      <Form.TextField title="Period (in days)" defaultValue="7" {...itemProps.period} />
+      <Form.TextField title="Symbol" {...itemProps.symbol} />
+      <Form.TextField title="Amount" {...itemProps.amount} />
+      <Form.TextField title="Rate (in APR)" info="Press CMD+Shift+L to see recent lending rates." {...itemProps.rate} />
+      <Form.TextField title="Period (in days)" {...itemProps.period} />
     </Form>
   );
 }

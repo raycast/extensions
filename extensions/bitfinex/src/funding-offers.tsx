@@ -2,9 +2,10 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo } from "react";
 import { getCurrency, getPreferenceValues } from "./lib/preference";
 import { useFundingBalanceInfo, useFundingCredits, useFundingOffers } from "./lib/hooks";
-import { formatToYearlyRate } from "./lib/utils";
+import { formatToYearlyRate, getOfferClosedDate } from "./lib/utils";
 import { OfferListItem } from "./components/OfferListItem";
 import { CreateOfferForm } from "./components/CreateOfferForm";
+import { BatchCreateOfferForm } from "./components/BatchCreateOfferForm";
 
 export default function FundingOffers() {
   const { f_currency } = getPreferenceValues();
@@ -38,6 +39,14 @@ export default function FundingOffers() {
     return totalAmount * averageRateByOffers;
   }, [totalAmount, averageRateByOffers]);
 
+  const availableFunding = useMemo(() => {
+    if (balanceInfo) {
+      return Math.abs(balanceInfo[0]);
+    } else {
+      return 0;
+    }
+  }, [balanceInfo]);
+
   return (
     <List isLoading={isLoading || activeOfferLoading || isBalanceLoading} filtering={false}>
       <List.Section title="Summary">
@@ -47,7 +56,7 @@ export default function FundingOffers() {
             icon={Icon.Coin}
             accessories={[
               {
-                text: `${Math.abs(balanceInfo[0])} ${f_currency}`,
+                text: `${availableFunding} ${f_currency}`,
               },
             ]}
             actions={
@@ -59,6 +68,20 @@ export default function FundingOffers() {
                     <CreateOfferForm mutateBalanceInfo={mutateBalanceInfo} mutateFundingInfo={mutateFundingInfo} />
                   }
                 />
+
+                {availableFunding > 0 && (
+                  <Action.Push
+                    icon={Icon.PlusCircleFilled}
+                    title="Batch Create Offers"
+                    target={
+                      <BatchCreateOfferForm
+                        mutateBalanceInfo={mutateBalanceInfo}
+                        mutateFundingInfo={mutateFundingInfo}
+                        availableFunding={availableFunding}
+                      />
+                    }
+                  />
+                )}
               </ActionPanel>
             }
           />
@@ -106,16 +129,18 @@ export default function FundingOffers() {
       </List.Section>
 
       <List.Section title="Provided Offers">
-        {offers.map((offer) => {
-          return (
-            <OfferListItem
-              key={offer.id}
-              offer={offer}
-              mutateBalanceInfo={mutateBalanceInfo}
-              mutateFundingInfo={mutateFundingInfo}
-            />
-          );
-        })}
+        {offers
+          .sort((a, b) => getOfferClosedDate(a) - getOfferClosedDate(b))
+          .map((offer) => {
+            return (
+              <OfferListItem
+                key={offer.id}
+                offer={offer}
+                mutateBalanceInfo={mutateBalanceInfo}
+                mutateFundingInfo={mutateFundingInfo}
+              />
+            );
+          })}
       </List.Section>
     </List>
   );

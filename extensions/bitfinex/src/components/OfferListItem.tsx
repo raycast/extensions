@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Bitfinex from "../lib/api";
-import { formatToDailyRate, formatToYearlyRate } from "../lib/utils";
+import { formatToDailyRate, formatToYearlyRate, getOfferClosedDate } from "../lib/utils";
 import { CreateOfferForm } from "./CreateOfferForm";
 import { EditOfferForm } from "./EditOfferForm";
 
@@ -28,19 +28,17 @@ export function OfferListItem({
 
   let daysLeftText;
   if (isOpened) {
-    const opened = new Date(offer.mtsOpening);
-    const closedDate = opened.getTime() + period * 24 * 60 * 60 * 1000;
-
+    const closedDate = getOfferClosedDate(offer);
     const daysLeft = (closedDate - new Date().getTime()) / (24 * 60 * 60 * 1000);
 
-    if (daysLeft < 1) {
+    if (daysLeft < 1.5) {
       const hoursLeft = daysLeft * 24;
-      daysLeftText = `${hoursLeft.toFixed(0)}h/${period}d left`;
+      daysLeftText = `in ${hoursLeft.toFixed(0)} hours`;
     } else {
-      daysLeftText = `${Math.floor(daysLeft)}/${period} days left`;
+      daysLeftText = `in ${Math.floor(daysLeft)} days`;
     }
   } else {
-    daysLeftText = `${period} days`;
+    daysLeftText = "";
   }
 
   return (
@@ -51,6 +49,11 @@ export function OfferListItem({
       accessories={
         [
           offer?.hidden ? { icon: Icon.EyeDisabled, tooltip: "Hidden" } : null,
+          {
+            icon: Icon.Clock,
+            text: `${period} days`,
+            tooltip: "Period",
+          },
           {
             text: `${yearlyRate}%`,
             tooltip: `${dayRate}% per day`,
