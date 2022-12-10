@@ -7,7 +7,8 @@
   "author": "mooxl",
   "contributors": [
     "bibixx",
-    "GastroGeek"
+    "GastroGeek",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -33,14 +34,15 @@
       "mode": "view"
     },
     {
-      "name": "caffeinationStatus",
-      "title": "Caffeination Status",
+      "name": "index",
+      "title": "Caffeinate Status Menubar",
       "subtitle": "Coffee",
-      "description": "Get the status of the current caffeination",
-      "mode": "no-view"
+      "description": "Get the status of the current caffeination in your menubar",
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
-      "name": "toggleCaffeinate",
+      "name": "caffeinateToggle",
       "title": "Toggle Caffeinate",
       "subtitle": "Coffee",
       "description": "Toggle caffeination",
@@ -54,8 +56,41 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "preventDisplay",
+      "description": "Prevent the display from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent Display Sleep",
+      "label": "Prevent Display Sleep"
+    },
+    {
+      "name": "preventSystem",
+      "description": "Prevent the system from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent System Sleep",
+      "label": "Prevent System Sleep"
+    },
+    {
+      "name": "preventDisk",
+      "description": "Prevent the disc from sleeping",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Options",
+      "placeholder": "Prevent Disk Sleep",
+      "label": "Prevent Disk Sleep"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -70,6 +105,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

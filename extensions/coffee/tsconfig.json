@@ -3,14 +3,15 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["es2021"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "es2021",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "resolveJsonModule": true
   }
 }
