@@ -95,7 +95,7 @@ export function BatchCreateOfferForm({
   const previewAmounts = useMemo(() => {
     const amountRaw = parseFloat(values.amount);
 
-    if (isNaN(amountRaw)) {
+    if (isNaN(amountRaw) || amountRaw <= 0) {
       return [];
     }
 
