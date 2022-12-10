@@ -1,0 +1,3 @@
+[submodule "extensions/chatgpt"]
+	path = extensions/chatgpt
+	url = https://github.com/abielzulio/chatgpt-raycast
