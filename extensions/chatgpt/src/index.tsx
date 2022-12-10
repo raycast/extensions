@@ -38,7 +38,7 @@ export default function Command() {
       abortController?.abort();
       const abortControllerInstance = new AbortController();
       setAbortController(abortControllerInstance);
-      
+
       setIsLoading(true);
       const messageId = crypto.randomUUID();
 
