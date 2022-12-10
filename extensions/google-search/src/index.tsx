@@ -1,17 +1,14 @@
 import { ActionPanel, closeMainWindow, Action, Icon, List, open } from "@raycast/api";
 import { getIcon } from "./utils/resultUtils";
 import { useSearch } from "./utils/useSearch";
-import { SearchResult } from "./utils/types";
 
 export default function Command() {
   const { isLoading, results, search, addHistory, deleteAllHistory, deleteHistoryItem } = useSearch();
 
-  const listItems: SearchResult[] = results;
-
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Google or enter a URL...">
-      <List.Section title="Results" subtitle={listItems.length + ""}>
-        {listItems.map((item) => (
+      <List.Section title="Results" subtitle={results.length + ""}>
+        {results.map((item) => (
           <List.Item
             key={item.id}
             title={item.query}

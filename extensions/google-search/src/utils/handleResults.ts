@@ -65,20 +65,20 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
     const description = json[2][i];
 
     if (type === "NAVIGATION") {
-      results[i] = {
+      results.push({
         id: nanoid(),
         query: description.length > 0 ? description : item,
         description: `Open URL for '${item}'`,
         url: item,
         isNavigation: true,
-      };
+      });
     } else if (type === "QUERY") {
-      results[i] = {
+      results.push({
         id: nanoid(),
         query: item,
         description: `Search Google for '${item}'`,
         url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
-      };
+      });
     }
   });
 
