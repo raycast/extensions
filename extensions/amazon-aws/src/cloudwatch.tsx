@@ -39,7 +39,7 @@ function LogGroup({ logGroup }: { logGroup: LogGroup }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open CloudWatch log group"
+            title="Open CloudWatch Log Group"
             url={`${AWS_URL_BASE}/cloudwatch/home?region=${
               process.env.AWS_REGION
             }#logsV2:log-groups/log-group/${encodeURIComponent(logGroup.logGroupName || "")}`}
