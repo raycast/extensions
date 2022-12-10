@@ -5,7 +5,9 @@
   "description": "Choose an application to open the selected Finder items.",
   "icon": "extension-icon.png",
   "author": "fturcheti",
-  "contributors":["omarshahine"],
+  "contributors": [
+    "omarshahine"
+  ],
   "license": "MIT",
   "commands": [
     {
