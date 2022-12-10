@@ -1,15 +1,16 @@
 import {
   List,
   ActionPanel,
-  ActionPanelItem,
   Application,
   getApplications,
   closeMainWindow,
   popToRoot,
   showHUD,
+  getSelectedFinderItems,
+  Action,
 } from "@raycast/api";
+
 import { useState, useEffect } from "react";
-import { runAppleScript } from "run-applescript";
 import { execSync } from "child_process";
 
 export default function ApplicationsList() {
@@ -32,29 +33,6 @@ export default function ApplicationsList() {
   );
 }
 
-async function getFinderSelection(): Promise<string[]> {
-  // The applescript below returns a string with a list of the items
-  // selected in Finder separated by return characters
-  const applescript = `
-  tell application "Finder"
-    set theItems to selection
-  end tell
-
-  set itemsPaths to ""
-
-  repeat with itemRef in theItems
-    set theItem to POSIX path of (itemRef as string)
-    set itemsPaths to itemsPaths & theItem & return
-  end repeat
-
-  return itemsPaths
-  `;
-
-  const response = await runAppleScript(applescript);
-
-  return response === "" ? [] : response.split("\r");
-}
-
 function ApplicationsListItem(props: { application: Application }) {
   const application = props.application;
 
@@ -65,16 +43,20 @@ function ApplicationsListItem(props: { application: Application }) {
       icon={{ fileIcon: application.path }}
       actions={
         <ActionPanel>
-          <ActionPanelItem
+          <Action
             title={`Open with ${application.name}`}
             onAction={async () => {
-              const selectedItems = await getFinderSelection();
-              if (selectedItems.length === 0) {
-                await showHUD(`⚠️  No Finder selection to open.`);
-              } else {
-                selectedItems.forEach((item) => {
-                  execSync(`open -b ${application.bundleId} "${item.replace(/"/g, '\\"')}"`);
-                });
+              try {
+                const selectedItems = await getSelectedFinderItems();
+                if (selectedItems.length != 0) {
+                  selectedItems.forEach((item) => {
+                    execSync(`open -b ${application.bundleId} "${item.path.replace(/"/g, '\\"')}"`);
+                  });
+                } else {
+                  await showHUD("⚠️  No Finder selection to open.");
+                }
+              } catch (error) {
+                await showHUD("⚠️  No Finder selection to open.");
               }
               closeMainWindow();
               popToRoot({ clearSearchBar: true });
