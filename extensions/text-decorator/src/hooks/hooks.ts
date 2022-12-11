@@ -48,12 +48,12 @@ export const getInputItem = (refresh: number) => {
 
 //get if show detail
 export const getIsShowDetail = (refreshDetail: number) => {
-  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [showDetail, setShowDetail] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    const localStorage = await LocalStorage.getItem<boolean>(LocalStorageKey.DETAIL_KEY);
-    const _showDetailKey = typeof localStorage === "undefined" ? false : localStorage;
+    const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.DETAIL_KEY);
+    const _showDetailKey = typeof localStorage === "undefined" ? true : (JSON.parse(localStorage) as boolean);
     setShowDetail(_showDetailKey);
     setLoading(false);
   }, [refreshDetail]);

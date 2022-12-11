@@ -1,8 +1,19 @@
-import { ActionPanel, Color, Detail, Icon, showToast, Action, Image, Keyboard, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  showToast,
+  Action,
+  Image,
+  Keyboard,
+  Toast,
+  Environment,
+  environment,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import useInterval from "use-interval";
 import { Game, GameScore, Move } from "../lib/game";
-import { getUserTextSize, TextSize } from "../lib/text";
 
 function CursorAction(props: {
   game: Game;
@@ -21,18 +32,13 @@ function CursorAction(props: {
   );
 }
 
+export type TextSize = Environment["textSize"];
+
 export function SnakeGame(): JSX.Element {
   const [error, setError] = useState<string>();
   const [pause, setPause] = useState<boolean>(false);
-  const [textSize, setTextSize] = useState<TextSize>();
+  const textSize: TextSize = environment.textSize;
 
-  useEffect(() => {
-    const getSetting = async () => {
-      const ts = await getUserTextSize();
-      setTextSize(ts);
-    };
-    getSetting();
-  }, []);
   const { field, game, score, message, restart } = useGame(setError, textSize);
   const speedMs = error || message ? null : game.getSpeedMs();
 
@@ -126,7 +132,7 @@ export function SnakeGame(): JSX.Element {
 
 function useGame(
   setError: React.Dispatch<React.SetStateAction<string | undefined>>,
-  textSize: TextSize | undefined
+  textSize: TextSize
 ): {
   field: string;
   game: Game;
@@ -140,7 +146,7 @@ function useGame(
   const [game] = useState<Game>(new Game(setField, setError, setScore, setMessage));
 
   const restart = () => {
-    game.start(textSize || TextSize.Medium);
+    game.start(textSize);
     game.flush();
     setMessage(undefined);
   };

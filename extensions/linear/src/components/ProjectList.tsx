@@ -13,8 +13,8 @@ import Project from "./Project";
 
 export default function ProjectList() {
   const { teamsWithProjects, isLoadingTeams } = useTeams();
-  const [selectedTeam, setSelectedTeam] = useState<string | undefined>(
-    teamsWithProjects && teamsWithProjects.length === 1 ? teamsWithProjects[0].id : undefined
+  const [selectedTeam, setSelectedTeam] = useState<string>(
+    teamsWithProjects && teamsWithProjects.length === 1 ? teamsWithProjects[0].id : ""
   );
   const { milestones, projectsByMilestoneId, upcomingProjects, isLoadingProjects, mutateProjects } =
     useProjects(selectedTeam);
@@ -29,14 +29,19 @@ export default function ProjectList() {
         ? {
             searchBarAccessory: (
               <List.Dropdown tooltip="Change Team" onChange={setSelectedTeam} storeValue>
-                {teamsWithProjects?.map((team) => (
-                  <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
-                ))}
+                <List.Dropdown.Item value="" title="All teams" />
+
+                <List.Dropdown.Section>
+                  {teamsWithProjects?.map((team) => (
+                    <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+                  ))}
+                </List.Dropdown.Section>
               </List.Dropdown>
             ),
           }
         : {})}
       searchBarPlaceholder="Filter by project title, lead, status, or milestone name"
+      filtering={{ keepSectionOrder: true }}
     >
       {milestones.map((milestone) => (
         <List.Section title={milestone.name} key={milestone.id}>

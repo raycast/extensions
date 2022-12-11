@@ -16,16 +16,12 @@ export default function SearchIpGeolocation() {
       {ipGeolocation.map((value, index) => (
         <List.Item
           key={index}
-          icon={{ source: { light: myIpListIcons[index].light, dark: myIpListIcons[index].dark } }}
+          icon={myIpListIcons[index]}
           title={value[0]}
           subtitle={value[1]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                icon={{ source: { light: myIpListIcons[index].light, dark: myIpListIcons[index].dark } }}
-                title={`Copy ${value[0]}`}
-                content={value[1]}
-              />
+              <Action.CopyToClipboard icon={myIpListIcons[index]} title={`Copy ${value[0]}`} content={value[1]} />
               <Action.CopyToClipboard
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}

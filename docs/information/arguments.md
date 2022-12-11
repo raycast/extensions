@@ -9,8 +9,9 @@ Arguments are configured in the [manifest](./manifest.md#argument-properties) pe
 {% hint style="info" %}
 
 - **Maximum number of arguments:** 3 (if you have a use case that requires more, please let us know via feedback or in the [Slack community](https://www.raycast.com/community))
-- The order of the arguments specified in the manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before optional ones.
-  {% endhint %}
+- The order of the arguments specified in the manifest is important and is reflected by the fields shown in Root Search. To provide a better UX, put the required arguments before the optional ones.
+
+{% endhint %}
 
 ## Example
 
@@ -82,7 +83,7 @@ export default function Todoist(props: { arguments: TodoArguments }) {
 
 ## Top-level `arguments` prop
 
-A command receives the values of its arguments via a top-level prop named `arguments`. It is an object with the arguments' `name` as keys and their values as the property values.
+A command receives the values of its arguments via a top-level prop named `arguments`. It is an object with the arguments' `name` as keys and their values as the property's values.
 
 Depending on the `type` of the argument, the type of its value will be different.
 

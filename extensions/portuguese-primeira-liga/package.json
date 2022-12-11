@@ -18,6 +18,13 @@
       "mode": "view"
     },
     {
+      "name": "topScorers",
+      "title": "View Top Scorers",
+      "subtitle": "Portuguese Primeira Liga",
+      "description": "View Portuguese Primeira Liga top scorers.",
+      "mode": "view"
+    },
+    {
       "name": "newspapers",
       "title": "View Newspapers",
       "subtitle": "Portuguese Primeira Liga",

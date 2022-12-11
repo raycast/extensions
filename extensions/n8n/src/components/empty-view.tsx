@@ -6,7 +6,7 @@ export function EmptyView(props: { title: string; extensionPreferences: boolean 
   return (
     <List.EmptyView
       title={title}
-      icon={"list-icon.svg"}
+      icon={"empty-icon.png"}
       actions={<ActionPanel>{extensionPreferences && <ActionOpenPreferences />}</ActionPanel>}
     />
   );

@@ -65,8 +65,7 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
-  const abortable = useRef<AbortController>();
+export default function Command() {
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -90,7 +89,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Promise Argument dependent on List search text
@@ -101,15 +100,17 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 
 ```tsx
 import { useState } from "react";
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+type Item = { id: string; title: string };
+
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result = await response.text();
+      const result: Item[] = await response.json();
       return result;
     },
     ["https://api.example"],
@@ -121,12 +122,12 @@ const Demo = () => {
 
   return (
     <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {(data || []).map((item) => (
+      {data?.map((item) => (
         <List.Item key={item.id} title={item.title} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -141,7 +142,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
@@ -173,7 +174,9 @@ const Demo = () => {
       // the data will automatically be rolled back to its previous value
       toast.style = Toast.Style.Failure;
       toast.title = "Could not append Foo";
-      toast.message = err.message;
+      if (err instanceof Error) {
+        toast.message = err.message;
+      }
     }
   };
 
@@ -188,7 +191,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types

@@ -1,5 +1,28 @@
 # Linear Changelog
 
+## [Added right click support to menubar] - 2022-12-05
+
+- Added right click support to menubar which mark the issue as read.
+
+## [Copy Formatted Issue URL Action] - 2022-12-23
+
+- Add a new "Copy Formatted Issue URL" Action
+
+## [Add all teams option in "Search Projects" command] - 2022-11-21
+
+- Add an `All teams` option in `Search Projects` command allowing users to see all projects in a Linear workspace
+
+## [Create issue customization] - 2022-10-13
+
+- Add a preference to select the toast copy action after creating the issue
+- Add a preference to automatically the title field or not
+- Fix a bug where the sections were not ordered when searching
+- Refactor the project and issue edition to use `useForm`
+
+## [Support emojis for projects] - 2022-09-20
+
+- Add support for emojis in projects
+
 ## [Various improvements] - 2022-08-11
 
 - Add "Add Comment" action from the issue list

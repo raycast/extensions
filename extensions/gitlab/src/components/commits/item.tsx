@@ -1,6 +1,6 @@
 import { Color, List, ActionPanel, Image } from "@raycast/api";
 import { GitLabIcons } from "../../icons";
-import { toDateString } from "../../utils";
+import { capitalizeFirstLetter, toDateString } from "../../utils";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { getCIJobStatusIcon } from "../jobs";
 import { Commit } from "./list";
@@ -18,8 +18,11 @@ export function CommitListItem(props: { commit: Commit; projectID: number }): JS
     <List.Item
       key={commit.id}
       title={commit.title}
-      icon={icon}
-      accessories={[{ text: toDateString(commit.created_at) }, { icon: statusIcon }]}
+      icon={{ value: icon, tooltip: `Author: ${commit.author_name}` }}
+      accessories={[
+        { date: new Date(commit.created_at), tooltip: `Created: ${new Date(commit.created_at).toLocaleString()}` },
+        { icon: statusIcon, tooltip: status?.status ? `Status: ${capitalizeFirstLetter(status.status)}` : undefined },
+      ]}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={commit.web_url} />

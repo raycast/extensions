@@ -4,9 +4,9 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { showErrorToast } from "../utils";
+import { capitalizeFirstLetter, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -26,8 +26,11 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessories={[{ icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle } }]}
-      icon={icon}
+      subtitle={`&${epic.iid}`}
+      accessories={[
+        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
+      ]}
+      icon={{ value: icon, tooltip: epic.state ? `Status: ${capitalizeFirstLetter(epic.state)}` : "" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -37,9 +40,7 @@ export function EpicListItem(props: { epic: any }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

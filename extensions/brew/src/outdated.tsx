@@ -1,51 +1,22 @@
 import { Color, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { showFailureToast } from "./utils";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
-import { InstallableFilterDropdown, InstallableFilterType } from "./components/filter";
+import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
 import { preferences } from "./preferences";
 
-interface State {
-  outdated?: OutdatedResults;
-  isLoading: boolean;
-  filter: InstallableFilterType;
-}
-
 export default function Main(): JSX.Element {
-  const [state, setState] = useState<State>({ isLoading: true, filter: InstallableFilterType.all });
-
-  useEffect(() => {
-    if (!state.isLoading) {
-      return;
-    }
-    brewFetchOutdated(preferences.greedyUpgrades)
-      .then((outdated) => {
-        setState((oldState) => ({ ...oldState, outdated: outdated, isLoading: false }));
-      })
-      .catch((err) => {
-        showFailureToast("Brew outdated failed", err);
-        setState((oldState) => ({ ...oldState, isLoading: false }));
-      });
-  }, [state]);
+  const [filter, setFilter] = useState(InstallableFilterType.all);
+  const { isLoading, data, revalidate } = useCachedPromise(() => brewFetchOutdated(preferences.greedyUpgrades));
 
   return (
     <OutdatedList
-      outdated={state.outdated}
-      isLoading={state.isLoading}
-      filterType={state.filter}
-      searchBarAccessory={
-        <InstallableFilterDropdown
-          onSelect={(filterType) => {
-            if (state.filter != filterType) {
-              setState((oldState) => ({ ...oldState, filter: filterType }));
-            }
-          }}
-        />
-      }
-      onAction={() => {
-        setState((oldState) => ({ ...oldState, isLoading: true }));
-      }}
+      outdated={data}
+      isLoading={isLoading}
+      filterType={filter}
+      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
+      onAction={() => revalidate()}
     />
   );
 }
@@ -98,7 +69,7 @@ function OutdatedList(props: OutdatedListProps) {
 
   return (
     <List
-      searchBarPlaceholder={"Filter formulae by name" + String.ellipsis}
+      searchBarPlaceholder={placeholder(props.filterType)}
       searchBarAccessory={props.searchBarAccessory}
       isLoading={props.isLoading}
     >

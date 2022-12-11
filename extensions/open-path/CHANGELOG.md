@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Update Raycast API] - 2022-12-05
+
+- Update Raycast API version to 1.44.0
+
 ## [Add File Operation preference] - 2022-05-25
 
 - Add File Operation preference

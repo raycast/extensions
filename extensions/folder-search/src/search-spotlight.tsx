@@ -14,23 +14,36 @@ const folderSpotlightSearchAttributes = [
   "kMDItemContentModificationDate",
   "kMDItemKind",
   "kMDItemLastUsedDate",
+  "kMDItemUseCount",
 ];
 
 const searchSpotlight = (
   search: string,
   searchScope: string,
-  searchFilter: string,
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
   callback: (result: SpotlightSearchResult) => void
 ): Promise<void> => {
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
 
+  const isExactSearch = search.startsWith("[") && search.endsWith("]");
+
   return new Promise((resolve, reject) => {
     const spotlightSearchAttributes: string[] = folderSpotlightSearchAttributes;
+    const searchFilter = isExactSearch
+      ? ["kMDItemKind==Folder", `kMDItemDisplayName == '${search.replace(/[[|\]]/gi, "")}'`]
+      : ["kind:folder"];
+
     let resultsCount = 0;
 
     // folder hard-coded into search
-    spotlight(search, safeSearchScope(searchScope), searchFilter, spotlightSearchAttributes as [], abortable)
+    spotlight(
+      search,
+      isExactSearch,
+      safeSearchScope(searchScope),
+      searchFilter,
+      spotlightSearchAttributes as [],
+      abortable
+    )
       .on("data", (result: SpotlightSearchResult) => {
         if (resultsCount < maxResults) {
           // keep emitting the match and

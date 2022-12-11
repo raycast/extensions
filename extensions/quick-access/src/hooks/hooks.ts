@@ -9,7 +9,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { copyFileByPath, getOpenFinderWindowPath } from "../utils/applescript-utils";
 import { getFileContent } from "../utils/get-file-preview";
 import { FileContentInfo, fileContentInfoInit } from "../types/file-content-info";
@@ -152,12 +152,7 @@ export const copyLatestFile = (autoCopyLatestFile: boolean, pinnedDirectoryConte
         return value.files.length != 0;
       });
       if (noEmptyDirectoryContent.length > 0) {
-        const copyResult = await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
-        if (isEmpty(copyResult)) {
-          await showToast(Toast.Style.Success, `${noEmptyDirectoryContent[0].files[0].name} is copied to clipboard!`);
-        } else {
-          await showToast(Toast.Style.Failure, copyResult + ".");
-        }
+        await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
       }
       setIsCopy(true);
     }

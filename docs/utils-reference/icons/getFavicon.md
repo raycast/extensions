@@ -14,6 +14,7 @@ function getFavicon(
   options?: {
     fallback?: Image.Fallback;
     size?: boolean;
+    mask?: Image.Mask;
   }
 ): Image.ImageLike;
 ```
@@ -21,6 +22,7 @@ function getFavicon(
 - `name` is a string of the subject's name.
 - `options.fallback` is a [Image.Fallback](../../api-reference/user-interface/icons-and-images.md#image.fallback) icon in case the Favicon is not found. By default, the fallback will be `Icon.Link`.
 - `options.size` is the size of the returned favicon. By default, it is 64 pixels.
+- `options.mask` is the size of the [Image.Mask](../../api-reference/user-interface/icons-and-images.md#image.mask) to apply to the favicon.
 
 Returns an [Image.ImageLike](../../api-reference/user-interface/icons-and-images.md) that can be used where Raycast expects them.
 

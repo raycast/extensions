@@ -42,24 +42,44 @@
           ]
         },
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the font items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the font items. (Only works with Grid layout)",
           "required": false,
-          "title": "Font Item Size",
-          "default": "small",
+          "title": "Font Item Coloums",
+          "default": "8",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         }
@@ -87,7 +107,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.44.0",
     "unicode-text-decorator": "^0.1.1"
   },
   "devDependencies": {

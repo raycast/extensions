@@ -1,7 +1,7 @@
 import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } from "@raycast/api";
 
 import { getOpenVaultTarget, useObsidianVaults } from "./utils/utils";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { ShowVaultInFinderAction } from "./utils/actions";
 
 export default function Command() {

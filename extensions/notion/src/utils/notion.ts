@@ -59,8 +59,8 @@ export async function authorize(): Promise<void> {
   alreadyAuthorizing = new Promise((resolve, reject) => {
     async function run() {
       const authRequest = await client.authorizationRequest({
-        endpoint: "https://raycast-notion-pkce-proxy.herokuapp.com/authorize",
-        clientId: clientId,
+        endpoint: "https://notion.oauth-proxy.raycast.com/authorize",
+        clientId,
         scope: "",
         extraParameters: { owner: "user" },
       });
@@ -81,7 +81,7 @@ export async function authorize(): Promise<void> {
 }
 
 export async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://raycast-notion-pkce-proxy.herokuapp.com/token", {
+  const response = await fetch("https://notion.oauth-proxy.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

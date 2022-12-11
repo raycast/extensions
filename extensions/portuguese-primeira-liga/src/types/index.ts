@@ -30,3 +30,13 @@ export interface Newspaper {
   url: string | undefined;
   name: string | undefined;
 }
+
+export interface Player {
+  name: string;
+}
+
+export interface TopScorer {
+  player: Player;
+  team: Team;
+  goals: number;
+}

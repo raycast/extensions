@@ -11,6 +11,7 @@ export class AppleDeveloperDocumentationService {
    * The host URL
    */
   private static hostUrl = "https://developer.apple.com";
+
   /**
    * Search Developer Documentation
    * @param query The search query
@@ -27,7 +28,6 @@ export class AppleDeveloperDocumentationService {
     url.pathname = "search/search_data.php";
     url.searchParams.append("q", query);
     url.searchParams.append("results", "500");
-    url.searchParams.append("group", "documentation");
     // Fetch Documentation Response
     const response = await fetch(url.toString(), {
       method: "GET",

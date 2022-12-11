@@ -1,5 +1,25 @@
 # Todoist Changelog
 
+## [Migrate to Todoist REST API v2]
+
+- Refactor the extension to use Todoist's REST API v2
+- Support view style for projects (either list or board)
+- Add new command called `Quick Add Task` replacing `Create Task in Inbox`: this new command allows users to add more info to their newly created tasks
+
+## [Bunch of improvements] - 2022-09-22
+
+- Upgrade the dependencies
+- Improve destructive actions: apply styling and added descriptions for alerts.
+- Move the specific commands preferences (today's group by options, projects group by options) in the command's preferences
+- Use `@raycast/utils` data fetching hooks instead of `swr` enabling caching by default for every call in the extension 🚀 
+- Add "Open in Todoist app" action
+- Add new "Create Task in Inbox" command
+- Refactor "Create Task" and "Create Form" to use `useForm`
+- Add validations to "Create Task" and "Create Form"
+- Add draft values to "Create Task" command
+- Add tooltips to task accessories
+- Add "add new comment" action on task list
+
 ## [New tasks from projects and task actions in detail] - 2022-05-13
 
 - Added the ability to add a new task from a project

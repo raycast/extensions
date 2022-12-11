@@ -11,30 +11,6 @@ import { getPreferences } from "../shared/get-preferences";
  */
 export class XcodeProjectService {
   /**
-   * Retrieve the excluded Xcode Project paths
-   * which are configured via the Raycast Preferences
-   */
-  private static excludedXcodeProjectPaths(): string[] {
-    // Retrieve the excluded Xcode Project paths string from preference values
-    const excludedXcodeProjectPathsString = getPreferences().excludedXcodeProjectPaths;
-    // Check if excluded Xcode Project path string is falsy
-    if (!excludedXcodeProjectPathsString) {
-      // Return an empty array
-      return [];
-    }
-    // Return excluded Xcode Project paths
-    return (
-      excludedXcodeProjectPathsString
-        // Split by comma
-        .split(",")
-        // Trim each path
-        .map((path) => path.trim())
-        // Untildify each path
-        .map((path) => untildify(path))
-    );
-  }
-
-  /**
    * Retrieve XcodeProjects
    */
   static async xcodeProjects(): Promise<XcodeProject[]> {
@@ -68,7 +44,7 @@ export class XcodeProjectService {
       // Decode each Xcode Project Path
       .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
       // Filter out null values
-      .filter((xcodeProject) => !!xcodeProject) as XcodeProject[];
+      .filter(Boolean) as XcodeProject[];
     // Return XcodeProjects
     return xcodeProjects;
   }
@@ -120,7 +96,31 @@ export class XcodeProjectService {
         // Decode each Xcode Project Path
         .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
         // Filter out null values
-        .filter((xcodeProject) => !!xcodeProject) as XcodeProject[]
+        .filter(Boolean) as XcodeProject[]
+    );
+  }
+
+  /**
+   * Retrieve the excluded Xcode Project paths
+   * which are configured via the Raycast Preferences
+   */
+  private static excludedXcodeProjectPaths(): string[] {
+    // Retrieve the excluded Xcode Project paths string from preference values
+    const excludedXcodeProjectPathsString = getPreferences().excludedXcodeProjectPaths;
+    // Check if excluded Xcode Project path string is falsy
+    if (!excludedXcodeProjectPathsString) {
+      // Return an empty array
+      return [];
+    }
+    // Return excluded Xcode Project paths
+    return (
+      excludedXcodeProjectPathsString
+        // Split by comma
+        .split(",")
+        // Trim each path
+        .map((path) => path.trim())
+        // Untildify each path
+        .map((path) => untildify(path))
     );
   }
 
@@ -169,6 +169,7 @@ export class XcodeProjectService {
     return {
       name: name,
       type: fileExtension,
+      directoryPath: Path.dirname(xcodeProjectPath),
       filePath: xcodeProjectPath,
       keywords: keywords.reverse(),
     };

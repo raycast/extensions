@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useRef, useState } from "react";
 import { Character, Dataset, getFilteredDataset } from "./dataset-manager";
 import { useRecentlyUsedItems } from "./use-recently-used-items";
@@ -68,12 +68,12 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <PasteAction
+                    <Action.Paste
                       title="Paste Character in Active App"
                       content={item.value}
                       onPaste={() => addToRecentlyUsedItems(item)}
                     />
-                    <CopyToClipboardAction
+                    <Action.CopyToClipboard
                       title="Copy Character to Clipboard"
                       content={item.value}
                       onCopy={() => addToRecentlyUsedItems(item)}

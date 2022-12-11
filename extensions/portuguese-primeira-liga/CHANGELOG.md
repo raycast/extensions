@@ -1,5 +1,10 @@
 # Portuguese Primeira Liga Changelog
 
+## [New Additions] - 2022-10-14
+
+- Added View Top Scorers command
+- Small UX improvements
+
 ## [Improvements] - 2022-07-01
 
 - Added cache mechanism

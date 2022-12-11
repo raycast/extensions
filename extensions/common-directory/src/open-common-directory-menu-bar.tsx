@@ -1,4 +1,4 @@
-import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, Icon, MenuBarExtra, open, openCommandPreferences, showInFinder } from "@raycast/api";
 import { LocalDirectoryKey } from "./types/directory-info";
 import React from "react";
 import { addDirectoryMenuBar } from "./utils/common-utils";
@@ -25,36 +25,50 @@ export default function OpenCommonDirectory() {
         },
       }}
     >
-      {commonDirectory.length !== 0 && <MenuBarExtra.Item title={"Common Directory"} />}
-      {!loading &&
-        commonDirectory.map((directory) => {
-          return (
-            <MenuBarExtra.Item
-              key={directory.id}
-              icon={{ fileIcon: directory.path }}
-              title={directory.name}
-              tooltip={directory.path}
-              onAction={async () => {
-                await open(directory.path);
-              }}
-            />
-          );
-        })}
+      {commonDirectory.length !== 0 && (
+        <MenuBarExtra.Section title={"Common Directory"}>
+          {!loading &&
+            commonDirectory.map((directory) => {
+              return (
+                <MenuBarExtra.Item
+                  key={directory.id}
+                  icon={{ fileIcon: directory.path }}
+                  title={directory.name}
+                  tooltip={directory.path}
+                  onAction={async (event: MenuBarExtra.ActionEvent) => {
+                    if (event.type == "left-click") {
+                      await open(directory.path);
+                    } else {
+                      await showInFinder(directory.path);
+                    }
+                  }}
+                />
+              );
+            })}
+        </MenuBarExtra.Section>
+      )}
       <MenuBarExtra.Separator />
-      {openDirectory.length !== 0 && <MenuBarExtra.Item title={"Open Directory"} />}
-      {openDirectory.map((directory) => {
-        return (
-          <MenuBarExtra.Item
-            key={directory.path}
-            icon={{ fileIcon: directory.path }}
-            title={directory.name}
-            tooltip={directory.path}
-            onAction={async () => {
-              await open(directory.path);
-            }}
-          />
-        );
-      })}
+      {openDirectory.length !== 0 && (
+        <MenuBarExtra.Section title={"Open Directory"}>
+          {openDirectory.map((directory) => {
+            return (
+              <MenuBarExtra.Item
+                key={directory.path}
+                icon={{ fileIcon: directory.path }}
+                title={directory.name}
+                tooltip={directory.path}
+                onAction={async (event: MenuBarExtra.ActionEvent) => {
+                  if (event.type == "left-click") {
+                    await open(directory.path);
+                  } else {
+                    await showInFinder(directory.path);
+                  }
+                }}
+              />
+            );
+          })}
+        </MenuBarExtra.Section>
+      )}
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
         title={"Add Directory"}
