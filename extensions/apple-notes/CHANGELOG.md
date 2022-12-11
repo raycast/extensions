@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Fix] - 2022-12-06
+## [Fix] - 2022-12-11
 
 - Correct issue where searching for notes with quotes in titles failed
 
