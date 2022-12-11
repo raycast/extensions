@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
+import { Icon, MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
 import { formatTime } from "./formatUtils";
@@ -79,6 +79,14 @@ export default function Command() {
         onAction={() => handleStartTimer(60 * 60 * 1.5, "90 Minute Timer")}
         key="90M"
       />
+
+      <MenuBarExtra.Section title="Custom Timer">
+        <MenuBarExtra.Item
+          title="Start Custom Timer"
+          onAction={async () => await launchCommand({ name: "startCustomTimer", type: LaunchType.UserInitiated })}
+          key="custom"
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }

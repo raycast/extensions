@@ -10,17 +10,16 @@ export async function getDatabases(): Promise<Database[]> {
   const databases = await notionClient.search({
     filter: { property: 'object', value: 'database' },
   })
-
   const normalizedDatabases = databases.results.map((database) => {
     const d = database as DatabaseObjectResponse
 
     return {
       id: d.id,
-      name: d.title[0].plain_text,
+      name: d.title[0]?.plain_text || 'Untitled',
       url: d.url,
       value: JSON.stringify({
         id: d.id,
-        name: d.title[0].plain_text,
+        name: d.title[0]?.plain_text || 'Untitled',
         url: d.url,
       }),
       image: normalizeImage(d.icon),

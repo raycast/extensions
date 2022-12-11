@@ -1,6 +1,14 @@
 # Amazon AWS Changelog
 
+## [UI/UX Tweaks & Fixes] - 2022-12-02
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more
+- Cleanup codebase and improve code readability
+- Fix two minor bugs related to data fetching
+- Update readme, screenshots and copy
+
 ## [Support AWS Profile Switch] - 2022-11-30
+
 Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
 
 ## [S3 Command] - 2022-11-18

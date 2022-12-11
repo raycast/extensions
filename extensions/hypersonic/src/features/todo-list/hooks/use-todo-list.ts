@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import {
-  Action,
   Alert,
   confirmAlert,
   Icon,
   showToast,
   Toast,
+  open as openBrowser,
+  Clipboard,
+  showHUD,
 } from '@raycast/api'
 import { Todo } from '@/types/todo'
 import { Tag } from '@/types/tag'
@@ -111,7 +113,7 @@ export function useTodoList() {
     }
   }
 
-  const handleCreate = async () => {
+  const handleCreate = async (action?: 'SHARE' | 'OPEN') => {
     try {
       if (!newTodo) return null
 
@@ -123,36 +125,55 @@ export function useTodoList() {
       setNewTodo(null)
       setSearchText('')
 
-      await mutate(createTodo(optimisticTodo, preferences.databaseId), {
-        optimisticUpdate(data) {
-          if (!data) return data
+      const createdTodo = await mutate(
+        createTodo(optimisticTodo, preferences.databaseId),
+        {
+          optimisticUpdate(data) {
+            if (!data) return data
 
-          if (
-            filterTodo.user &&
-            filterTodo.user.id !== optimisticTodo?.user?.id
-          ) {
-            return data
-          }
+            if (
+              filterTodo.user &&
+              filterTodo.user.id !== optimisticTodo?.user?.id
+            ) {
+              return data
+            }
 
-          if (
-            filterTodo.projectId &&
-            filterTodo.projectId !== optimisticTodo?.projectId
-          ) {
-            return data
-          }
+            if (
+              filterTodo.projectId &&
+              filterTodo.projectId !== optimisticTodo?.projectId
+            ) {
+              return data
+            }
 
-          if (filterTodo.tag && filterTodo.tag.id !== optimisticTodo?.tag?.id) {
-            return data
-          }
+            if (
+              filterTodo.tag &&
+              filterTodo.tag.id !== optimisticTodo?.tag?.id
+            ) {
+              return data
+            }
 
-          const todos = [optimisticTodo, ...data]
-          return optimisticSorting(todos)
-        },
-        shouldRevalidateAfter: true,
-      })
+            const todos = [optimisticTodo, ...data]
+            return optimisticSorting(todos)
+          },
+          shouldRevalidateAfter: true,
+        }
+      )
 
       showToast(Toast.Style.Success, 'Task Created')
       refreshMenuBar()
+
+      if (action === 'SHARE') {
+        await Clipboard.copy(createdTodo.shareUrl)
+        await showHUD('Copied to Clipboard')
+      }
+
+      if (action === 'OPEN') {
+        if (isNotionInstalled) {
+          await openBrowser(createdTodo.url)
+        } else {
+          await openBrowser(createdTodo.shareUrl)
+        }
+      }
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
     }
