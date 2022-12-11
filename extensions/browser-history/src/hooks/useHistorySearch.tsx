@@ -3,8 +3,14 @@ import fs from "fs";
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 import { useEffect, useRef, useState } from "react";
 import { environment, getPreferenceValues } from "@raycast/api";
-import { HistoryEntry, HistorySearchResults, Preferences, SupportedBrowsers } from "../interfaces";
-import { getHistoryDbPath, PermissionError } from "../util";
+import {
+  HistoryEntry,
+  HistoryQueryFunction,
+  HistorySearchResults,
+  Preferences,
+  SupportedBrowsers,
+} from "../interfaces";
+import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable, PermissionError } from "../util";
 
 const loadSql = async (): Promise<SqlJsStatic> => {
   const wasmBinary = await fs.promises.readFile(path.join(environment.assetsPath, "sql.wasm"));
@@ -38,9 +44,8 @@ const whereClauses = (table: string, terms: string[]) => {
     .join(" AND ");
 };
 
-const getSafariHistoryQuery = (table: string, date_field: string, terms: string[]) => {
-  return `
-  SELECT history_items.id, url, history_visits.title, datetime(${date_field}+978307200, "unixepoch", "localtime") as lastVisited
+const getSafariHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+  `SELECT history_items.id, url, history_visits.title, datetime(${date_field}+978307200, "unixepoch", "localtime") as lastVisited
   FROM ${table}
     INNER JOIN history_visits
     ON history_visits.history_item = history_items.id
@@ -49,15 +54,21 @@ const getSafariHistoryQuery = (table: string, date_field: string, terms: string[
   ORDER BY ${date_field} DESC
   LIMIT 30
   `;
-};
 
-const getChromeFirefoxHistoryQuery = (table: string, date_field: string, terms: string[]) => {
-  return `SELECT
+const getOtherHistoryQuery = (table: string, date_field: string, terms: string[]) => `SELECT
     id, url, title,
     datetime(${date_field} / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime')
   FROM ${table}
   WHERE ${whereClauses(table, terms)}
   ORDER BY ${date_field} DESC LIMIT 30;`;
+
+const getHistoryQuery = (browser: SupportedBrowsers): HistoryQueryFunction => {
+  switch (browser) {
+    case SupportedBrowsers.Safari:
+      return getSafariHistoryQuery;
+    default:
+      return getOtherHistoryQuery;
+  }
 };
 
 const searchHistory = async (
@@ -88,14 +99,29 @@ export function useHistorySearch(query: string | undefined): HistorySearchResult
   const [entriesChrome, setEntriesChrome] = useState<HistoryEntry[]>([]);
   const [entriesFirefox, setEntriesFirefox] = useState<HistoryEntry[]>([]);
   const [entriesSafari, setEntriesSafari] = useState<HistoryEntry[]>([]);
+  const [entriesEdge, setEntriesEdge] = useState<HistoryEntry[]>([]);
+  const [entriesBrave, setEntriesBrave] = useState<HistoryEntry[]>([]);
+  const [entriesVivaldi, setEntriesVivaldi] = useState<HistoryEntry[]>([]);
   const [error, setError] = useState<unknown>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dbRefChrome = useRef<Database>();
   const dbRefFirefox = useRef<Database>();
   const dbRefSafari = useRef<Database>();
+  const dbRefEdge = useRef<Database>();
+  const dbRefBrave = useRef<Database>();
+  const dbRefVivaldi = useRef<Database>();
   const sqlRef = useRef<SqlJsStatic>();
 
   let cancel = false;
+
+  const dbRefs = {
+    [SupportedBrowsers.Chrome]: { ref: dbRefChrome, setter: setEntriesChrome },
+    [SupportedBrowsers.Firefox]: { ref: dbRefFirefox, setter: setEntriesFirefox },
+    [SupportedBrowsers.Safari]: { ref: dbRefSafari, setter: setEntriesSafari },
+    [SupportedBrowsers.Edge]: { ref: dbRefEdge, setter: setEntriesEdge },
+    [SupportedBrowsers.Brave]: { ref: dbRefBrave, setter: setEntriesBrave },
+    [SupportedBrowsers.Vivaldi]: { ref: dbRefVivaldi, setter: setEntriesVivaldi },
+  };
 
   useEffect(() => {
     async function getHistory() {
@@ -103,66 +129,42 @@ export function useHistorySearch(query: string | undefined): HistorySearchResult
         return;
       }
       try {
+        setError(undefined);
+
         if (!sqlRef.current) {
           sqlRef.current = await loadSql();
         }
 
-        if (preferences.enableChrome) {
-          if (!dbRefChrome.current) {
-            dbRefChrome.current = await loadDb(sqlRef.current, SupportedBrowsers.Chrome);
-          }
-        }
+        await Promise.all(
+          Object.entries(preferences)
+            .filter(([key, val]) => key.startsWith("enable") && val)
+            .map(async ([key]) => {
+              const browser = key.replace("enable", "") as SupportedBrowsers;
+              if (!dbRefs[browser].ref.current) {
+                dbRefs[browser].ref.current = await loadDb(sqlRef.current!, browser);
+              }
+            })
+        );
 
-        if (preferences.enableFirefox) {
-          if (!dbRefFirefox.current) {
-            dbRefFirefox.current = await loadDb(sqlRef.current, SupportedBrowsers.Firefox);
-          }
-        }
-
-        if (preferences.enableSafari) {
-          if (!dbRefSafari.current) {
-            dbRefSafari.current = await loadDb(sqlRef.current, SupportedBrowsers.Safari);
-          }
-        }
-
-        setError(undefined);
-        // const entries = [];
-        if (preferences.enableChrome) {
-          setEntriesChrome(
-            await searchHistory(
-              SupportedBrowsers.Chrome,
-              dbRefChrome.current!,
-              "urls",
-              "last_visit_time",
-              getChromeFirefoxHistoryQuery,
-              query
-            )
-          );
-        }
-        if (preferences.enableFirefox) {
-          setEntriesFirefox(
-            await searchHistory(
-              SupportedBrowsers.Firefox,
-              dbRefFirefox.current!,
-              "moz_places",
-              "last_visit_date",
-              getChromeFirefoxHistoryQuery,
-              query
-            )
-          );
-        }
-        if (preferences.enableSafari) {
-          setEntriesSafari(
-            await searchHistory(
-              SupportedBrowsers.Safari,
-              dbRefSafari.current!,
-              "history_items",
-              "visit_time",
-              getSafariHistoryQuery,
-              query
-            )
-          );
-        }
+        await Promise.all(
+          Object.entries(preferences)
+            .filter(([key, val]) => key.startsWith("enable") && val)
+            .map(async ([key]) => {
+              const browser = key.replace("enable", "") as SupportedBrowsers;
+              const db = dbRefs[browser].ref.current!;
+              const setter = dbRefs[browser].setter;
+              setter(
+                await searchHistory(
+                  browser,
+                  db,
+                  getHistoryTable(browser),
+                  getHistoryDateColumn(browser),
+                  getHistoryQuery(browser),
+                  query
+                )
+              );
+            })
+        );
       } catch (e) {
         if (!cancel) {
           if (e instanceof Error && e.message.includes("operation not permitted")) {
@@ -176,21 +178,19 @@ export function useHistorySearch(query: string | undefined): HistorySearchResult
       }
     }
 
-    getHistory();
+    getHistory().then();
 
     return () => {
       cancel = true;
     };
   }, [query]);
 
-  // Dispose of the database
+  // Dispose of the databases when the component unmounts
   useEffect(() => {
     return () => {
-      dbRefChrome.current?.close();
-      dbRefFirefox.current?.close();
-      dbRefSafari.current?.close();
+      Object.values(dbRefs).forEach((browser) => browser.ref?.current?.close());
     };
   }, []);
 
-  return { entriesChrome, entriesFirefox, entriesSafari, error, isLoading };
+  return { entriesChrome, entriesFirefox, entriesSafari, entriesEdge, entriesBrave, entriesVivaldi, error, isLoading };
 }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-history",
   "title": "Browser History",
-  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge or Brave.",
+  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave or Vivaldi.",
   "icon": "icon.png",
   "author": "crisboarna",
   "categories": [
@@ -38,6 +38,18 @@
             {
               "title": "Safari",
               "value": "Safari"
+            },
+            {
+              "title": "Microsoft Edge",
+              "value": "Edge"
+            },
+            {
+              "title": "Brave",
+              "value": "Brave"
+            },
+            {
+              "title": "Vivaldi",
+              "value": "Vivaldi"
             }
           ]
         },
@@ -65,6 +77,30 @@
           "description": "Enable Safari history to show up in results",
           "default": false,
           "label": "Safari"
+        },
+        {
+          "name": "enableEdge",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Edge history to show up in results",
+          "default": false,
+          "label": "Edge"
+        },
+        {
+          "name": "enableBrave",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Brave history to show up in results",
+          "default": false,
+          "label": "Brave"
+        },
+        {
+          "name": "enableVivaldi",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Vivaldi history to show up in results",
+          "default": false,
+          "label": "Vivaldi"
         }
       ]
     }

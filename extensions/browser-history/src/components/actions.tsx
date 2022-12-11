@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, openCommandPreferences } from "@raycast/api";
-import { openNewChromeTab, openNewFirefoxTab, openNewSafariTab } from "../actions";
-import { HistoryEntry } from "../interfaces";
+import { openNewFirefoxTab, openNewTab } from "../actions";
+import { HistoryEntry, SupportedBrowsers } from "../interfaces";
 
 export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEntry }) => (
   <ActionPanel>
@@ -9,9 +9,32 @@ export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEnt
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel.Section>
     <ActionPanel.Section title={"Open In"}>
-      <ActionPanel.Item title={"Open in Chrome"} icon={"chrome-logo.png"} onAction={() => openNewChromeTab(url)} />
+      <ActionPanel.Item
+        title={"Open in Chrome"}
+        icon={"chrome-logo.png"}
+        onAction={() => openNewTab(SupportedBrowsers.Chrome, url)}
+      />
       <ActionPanel.Item title={"Open in Firefox"} icon={"firefox-logo.png"} onAction={() => openNewFirefoxTab(url)} />
-      <ActionPanel.Item title={"Open in Safari"} icon={"safari-logo.png"} onAction={() => openNewSafariTab(url)} />
+      <ActionPanel.Item
+        title={"Open in Safari"}
+        icon={"safari-logo.png"}
+        onAction={() => openNewTab(SupportedBrowsers.Safari, url)}
+      />
+      <ActionPanel.Item
+        title={"Open in Edge"}
+        icon={"edge-logo.png"}
+        onAction={() => openNewTab(SupportedBrowsers.Edge, url)}
+      />
+      <ActionPanel.Item
+        title={"Open in Brave"}
+        icon={"brave-logo.png"}
+        onAction={() => openNewTab(SupportedBrowsers.Brave, url)}
+      />
+      <ActionPanel.Item
+        title={"Open in Vivaldi"}
+        icon={"vivaldi-logo.png"}
+        onAction={() => openNewTab(SupportedBrowsers.Vivaldi, url)}
+      />
     </ActionPanel.Section>
   </ActionPanel>
 );

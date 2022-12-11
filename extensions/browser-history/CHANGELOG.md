@@ -2,4 +2,4 @@
 
 ## [Initial Version] - 2022-12-04
 
-- Added Chrome, Firefox, and Safari history search support
+- Added Chrome, Firefox, Safari, Edge, Brave and Vivaldi history search support.

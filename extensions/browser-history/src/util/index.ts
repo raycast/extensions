@@ -38,8 +38,43 @@ export const getHistoryDbPath = async (browser: SupportedBrowsers) => {
       return path.join(profilePath, profileName, "places.sqlite");
     case SupportedBrowsers.Safari:
       return path.join(userDataDirectory, "Safari", "History.db");
+    case SupportedBrowsers.Edge:
+      return path.join(userDataDirectory, "Application Support", "Microsoft Edge", "Default", "History");
+    case SupportedBrowsers.Brave:
+      return path.join(
+        userDataDirectory,
+        "Application Support",
+        "BraveSoftware",
+        "Brave-Browser",
+        "Default",
+        "History"
+      );
+    case SupportedBrowsers.Vivaldi:
+      return path.join(userDataDirectory, "Application Support", "Vivaldi", "Default", "History");
     default:
       throw new Error("Unsupported browser.");
+  }
+};
+
+export const getHistoryTable = (browser: SupportedBrowsers): string => {
+  switch (browser) {
+    case SupportedBrowsers.Firefox:
+      return "moz_places";
+    case SupportedBrowsers.Safari:
+      return "history_items";
+    default:
+      return "urls";
+  }
+};
+
+export const getHistoryDateColumn = (browser: SupportedBrowsers): string => {
+  switch (browser) {
+    case SupportedBrowsers.Firefox:
+      return "last_visit_date";
+    case SupportedBrowsers.Safari:
+      return "visit_time";
+    default:
+      return "last_visit_time";
   }
 };
 

@@ -1,15 +1,39 @@
 import { closeMainWindow, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { SupportedBrowsers } from "../interfaces";
 
-export async function openNewChromeTab(url: string): Promise<boolean | string> {
+export async function openNewTab(browser: SupportedBrowsers, url: string): Promise<boolean | string> {
+  let appName = "";
+  switch (browser) {
+    case SupportedBrowsers.Chrome:
+      appName = "Google Chrome";
+      break;
+    case SupportedBrowsers.Safari:
+      appName = "Safari";
+      break;
+    case SupportedBrowsers.Edge:
+      appName = "Microsoft Edge";
+      break;
+    case SupportedBrowsers.Brave:
+      appName = "Brave Browser";
+      break;
+    case SupportedBrowsers.Vivaldi:
+      appName = "Vivaldi";
+      break;
+    default:
+      throw new Error(`Unsupported browser: ${browser}`);
+  }
+
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Google Chrome"
+    tell application "${appName}"
       activate
       tell window 1
-          set newTab to make new tab with properties {URL:"${url}"}
+          set ${
+            browser === SupportedBrowsers.Safari ? "current tab" : "newTab"
+          } to make new tab with properties {URL:"${url}"}
       end tell
     end tell
   `;
@@ -34,21 +58,6 @@ export async function openNewFirefoxTab(url: string): Promise<boolean | string> 
            key code 51
            keystroke "${url}"
            key code 36
-      end tell
-    end tell
-  `;
-
-  return await runAppleScript(script);
-}
-
-export async function openNewSafariTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "Safari"
-      tell window 1
-          set current tab to (make new tab with properties {URL:"${url}"})
       end tell
     end tell
   `;

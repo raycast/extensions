@@ -6,11 +6,42 @@ import { Preferences, SupportedBrowsers } from "./interfaces";
 import { ActionOpenPreferences, PermissionErrorDetail } from "./components/actions";
 import { isPermissionError } from "./util";
 
+const arrangeEntries = (entries: ReactElement[], firstInResults: string) => {
+  let firstEntries: ReactElement[] = [];
+
+  switch (firstInResults) {
+    case SupportedBrowsers.Firefox:
+      firstEntries = entries.splice(1, 1);
+      break;
+    case SupportedBrowsers.Safari:
+      firstEntries = entries.splice(2, 1);
+      break;
+    case SupportedBrowsers.Edge:
+      firstEntries = entries.splice(3, 1);
+      break;
+    case SupportedBrowsers.Brave:
+      firstEntries = entries.splice(4, 1);
+      break;
+    case SupportedBrowsers.Vivaldi:
+      firstEntries = entries.splice(5, 1);
+      break;
+  }
+  entries.unshift(firstEntries[0]);
+  return entries;
+};
+
 export default function Command(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
-  const enabled = preferences.enableChrome || preferences.enableFirefox || preferences.enableSafari;
+  const enabled =
+    preferences.enableChrome ||
+    preferences.enableFirefox ||
+    preferences.enableSafari ||
+    preferences.enableEdge ||
+    preferences.enableBrave ||
+    preferences.enableVivaldi;
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entriesChrome, entriesFirefox, entriesSafari } = useHistorySearch(searchText);
+  const { isLoading, error, entriesChrome, entriesFirefox, entriesSafari, entriesEdge, entriesBrave, entriesVivaldi } =
+    useHistorySearch(searchText);
 
   if (error) {
     if (isPermissionError(error)) {
@@ -24,33 +55,22 @@ export default function Command(): ReactElement {
     }
   }
 
-  const entries = [
-    <List.Section title={"Chrome"} key={"chrome"}>
-      {entriesChrome?.map((e) => (
+  let entries = [
+    { name: "Chrome", entries: entriesChrome },
+    { name: "Firefox", entries: entriesFirefox },
+    { name: "Safari", entries: entriesSafari },
+    { name: "Edge", entries: entriesEdge },
+    { name: "Brave", entries: entriesBrave },
+    { name: "Vivaldi", entries: entriesVivaldi },
+  ].map((entry) => (
+    <List.Section title={entry.name} key={entry.name}>
+      {entry.entries?.map((e) => (
         <ListEntries.HistoryEntry entry={e} key={e.id} />
       ))}
-    </List.Section>,
-    <List.Section title={"Firefox"} key={"firefox"}>
-      {entriesFirefox?.map((e) => (
-        <ListEntries.HistoryEntry entry={e} key={e.id} />
-      ))}
-    </List.Section>,
-    <List.Section title={"Safari"} key={"safari"}>
-      {entriesSafari?.map((e) => (
-        <ListEntries.HistoryEntry entry={e} key={e.id} />
-      ))}
-    </List.Section>,
-  ];
+    </List.Section>
+  ));
 
-  if (preferences.firstInResults === SupportedBrowsers.Firefox) {
-    const frontEntries = entries.splice(1, 1);
-    entries.unshift(frontEntries[0]);
-  }
-
-  if (preferences.firstInResults === SupportedBrowsers.Safari) {
-    const frontEntries = entries.splice(2, 1);
-    entries.unshift(frontEntries[0]);
-  }
+  entries = arrangeEntries(entries, preferences.firstInResults);
 
   return (
     <List
