@@ -20,11 +20,19 @@ export default function FundingOffers() {
   } = useFundingOffers(currency);
   const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
 
+  const availableFunding = useMemo(() => {
+    if (balanceInfo) {
+      return Math.abs(balanceInfo[0]);
+    } else {
+      return 0;
+    }
+  }, [balanceInfo]);
+
   const totalAmount = useMemo(() => {
     const offerAmount = offers.reduce((acc, offer) => acc + offer.amount, 0);
     const pendingOffersAmount = activeOffers.reduce((acc, offer) => acc + offer.amount, 0);
 
-    return offerAmount + pendingOffersAmount;
+    return offerAmount + pendingOffersAmount + availableFunding;
   }, [offers]);
 
   const averageRateByOffers = useMemo(() => {
@@ -41,14 +49,6 @@ export default function FundingOffers() {
   const estimatedDailyInterest = useMemo(() => {
     return totalAmount * averageRateByOffers;
   }, [totalAmount, averageRateByOffers]);
-
-  const availableFunding = useMemo(() => {
-    if (balanceInfo) {
-      return Math.abs(balanceInfo[0]);
-    } else {
-      return 0;
-    }
-  }, [balanceInfo]);
 
   return (
     <List isLoading={isLoading || activeOfferLoading || isBalanceLoading} filtering={false}>
