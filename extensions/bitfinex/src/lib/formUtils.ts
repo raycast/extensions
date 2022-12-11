@@ -1,4 +1,5 @@
 import { FormValidation } from "@raycast/utils";
+import { MINIMUM_OFFER_AMOUNT } from "./contants";
 
 export const basicFieldValidations = {
   symbol: FormValidation.Required,
@@ -11,8 +12,8 @@ export const basicFieldValidations = {
     if (isNaN(amount)) {
       return "Amount must be a number";
     }
-    if (amount < 150) {
-      return "Amount must be greater than 150";
+    if (amount < MINIMUM_OFFER_AMOUNT) {
+      return `Amount must be greater than ${MINIMUM_OFFER_AMOUNT}`;
     }
   },
   rate: (value?: string) => {

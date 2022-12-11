@@ -5,6 +5,7 @@ import Bitfinex, { handleAPIError } from "../lib/api";
 import { getCurrency } from "../lib/preference";
 import { useForm } from "@raycast/utils";
 import { basicFieldValidations } from "../lib/formUtils";
+import { MINIMUM_OFFER_AMOUNT } from "../lib/contants";
 
 type CreateOfferFormValues = {
   symbol: string;
@@ -46,9 +47,9 @@ export function CreateOfferForm({
     validation: basicFieldValidations,
     initialValues: {
       symbol: getCurrency(),
-      amount: "150",
+      amount: MINIMUM_OFFER_AMOUNT.toString(),
       rate: "18",
-      period: "7",
+      period: "30",
     },
   });
 

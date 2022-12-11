@@ -6,6 +6,7 @@ import Bitfinex, { handleAPIError } from "../lib/api";
 import { getCurrency } from "../lib/preference";
 import { useForm } from "@raycast/utils";
 import { basicFieldValidations } from "../lib/formUtils";
+import { MINIMUM_OFFER_AMOUNT } from "../lib/contants";
 
 type BatchCreateOfferFormValues = {
   symbol: string;
@@ -18,7 +19,7 @@ const calculateBatchAmountGroups = (availableFunding: number, amount: number) =>
   const remainder = availableFunding % amount;
   const groupsLength = Math.floor(availableFunding / amount);
 
-  if (remainder < 150) {
+  if (remainder < MINIMUM_OFFER_AMOUNT) {
     return [...new Array(groupsLength - 1).fill(amount), Math.floor(amount + remainder)];
   } else {
     return new Array(groupsLength).fill(amount);
@@ -53,8 +54,8 @@ export function BatchCreateOfferForm({
         return "Amount is greater than available funding";
       }
 
-      if (amount < 150) {
-        return "Minimum amount is 150";
+      if (amount < MINIMUM_OFFER_AMOUNT) {
+        return `Minimum amount is ${MINIMUM_OFFER_AMOUNT}`;
       }
     },
     [availableFunding]
@@ -94,9 +95,9 @@ export function BatchCreateOfferForm({
     },
     initialValues: {
       symbol: getCurrency(),
-      amount: "150",
+      amount: MINIMUM_OFFER_AMOUNT.toString(),
       rate: "18",
-      period: "7",
+      period: "30",
     },
   });
 
