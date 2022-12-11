@@ -7,6 +7,9 @@ export type Preference = {
   default_rate_view: "list" | "chart";
   high_rate_threshold: string;
   sound: string;
+  auto_renew: boolean;
+  notify_available: boolean;
+  notify_high_rate: boolean;
 };
 
 export const getPreferenceValues = () => _getPreferenceValues<Preference>();

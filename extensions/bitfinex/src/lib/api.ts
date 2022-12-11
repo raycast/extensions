@@ -10,7 +10,7 @@ export const Bitfinex = new BFX({
   transform: true,
 });
 
-const rest = Bitfinex.rest();
+export const rest = Bitfinex.rest();
 
 export default Bitfinex;
 
@@ -26,4 +26,8 @@ export function handleAPIError(title: string, e: any) {
 
 export function calcAvailableBalance(currency: string): Promise<any> {
   return rest.calcAvailableBalance(currency, 0, 0, "FUNDING");
+}
+
+export function getFundingOffers(currency: string) {
+  return rest.fundingOffers(currency) as Promise<any[]>;
 }

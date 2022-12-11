@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
-import { checkLendingRates, checkAvailableFunding } from "./lib/tasks";
+import { checkLendingRates, checkAvailableFunding, autoRenewOrders } from "./lib/tasks";
+import { getPreferenceValues } from "./lib/preference";
 
 const runTask = async (title: string, task: () => Promise<void>) => {
   try {
@@ -16,6 +17,17 @@ const runTask = async (title: string, task: () => Promise<void>) => {
 };
 
 export default async function run() {
-  await runTask("Check Lending Rates", checkLendingRates);
-  await runTask("Check Available Funding", checkAvailableFunding);
+  const { auto_renew, notify_available, notify_high_rate } = getPreferenceValues();
+
+  if (notify_high_rate) {
+    await runTask("Check Lending Rates", checkLendingRates);
+  }
+
+  if (notify_available) {
+    await runTask("Check Available Funding", checkAvailableFunding);
+  }
+
+  if (auto_renew) {
+    await runTask("Auto Renew Orders", autoRenewOrders);
+  }
 }

@@ -53,6 +53,41 @@
       "description": "Bitfinex API Secret"
     },
     {
+      "title": "Auto renew active offers",
+      "name": "auto_renew",
+      "required": false,
+      "type": "checkbox",
+      "description": "The active got cancelled sometimes, turn this on to auto renew it",
+      "default": false,
+      "label": "Auto-renew"
+    },
+    {
+      "title": "Notify available funding",
+      "name": "notify_available",
+      "required": false,
+      "type": "checkbox",
+      "description": "Notify when there is available funding greater than 150 USD",
+      "default": false,
+      "label": "Notify available funding"
+    },
+    {
+      "title": "Notify high rate",
+      "name": "notify_high_rate",
+      "required": false,
+      "type": "checkbox",
+      "description": "Notify when the 15m average rate is higher than the threshold",
+      "default": false,
+      "label": "Notify high rate"
+    },
+    {
+      "title": "High rate notification threshold",
+      "name": "high_rate_threshold",
+      "description": "The threshold for high rate notifications. Would send a notification if the 15m average rate is higher than this value",
+      "type": "textfield",
+      "default": "24",
+      "required": false
+    },
+    {
       "title": "Default Rate View",
       "name": "default_rate_view",
       "type": "dropdown",
@@ -1331,14 +1366,6 @@
           "value": "ZRX"
         }
       ]
-    },
-    {
-      "title": "High rate notification threshold",
-      "name": "high_rate_threshold",
-      "description": "The threshold for high rate notifications. Would send a notification if the 15m average rate is higher than this value",
-      "type": "textfield",
-      "default": "24",
-      "required": false
     },
     {
       "title": "Default notification sound",

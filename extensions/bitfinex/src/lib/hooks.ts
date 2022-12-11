@@ -1,5 +1,5 @@
 import { useCachedPromise, useCachedState, useFetch } from "@raycast/utils";
-import Bitfinex, { calcAvailableBalance } from "./api";
+import Bitfinex, { calcAvailableBalance, getFundingOffers } from "./api";
 import { ACTIVE_OFFERS_CACHE_KEY, CACHE_NAMESPACE } from "./constants";
 
 const rest = Bitfinex.rest();
@@ -22,7 +22,7 @@ export const useFundingCredits = (currency: string) => {
 };
 
 export const useFundingOffers = (currency: string) => {
-  return useCachedPromise((currency) => rest.fundingOffers(currency) as Promise<any[]>, [currency]);
+  return useCachedPromise((currency) => getFundingOffers(currency), [currency]);
 };
 
 export const useFundingBalanceInfo = (currency: string) => {
