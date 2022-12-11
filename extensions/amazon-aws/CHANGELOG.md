@@ -1,8 +1,35 @@
 # Amazon AWS Changelog
 
+## [UI/UX Tweaks & Fixes] - 2022-12-02
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more
+- Cleanup codebase and improve code readability
+- Fix two minor bugs related to data fetching
+- Update readme, screenshots and copy
+
+## [Support AWS Profile Switch] - 2022-11-30
+
+Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
+## [S3 Command] - 2022-11-18
+
+Added a new command to list S3 buckets and objects ([#3589](https://github.com/raycast/extensions/pull/3589))
+
+## [Lambda Command] - 2022-11-15
+
+Added a new command to list Lambda functions ([#3525](https://github.com/raycast/extensions/pull/3525))
+
+## [Improve Data Fetching] - 2022-11-14
+
+Use Raycast's API for all data fetching ([#3421](https://github.com/raycast/extensions/pull/3421))
+
+## [Add SQS Queue Purge Action] - 2022-10-26
+
+Add purge action to queue list item ([#3299](https://github.com/raycast/extensions/pull/3299))
+
 ## [Improve icon usage] - 2022-08-01
 
-- Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
+Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
 
 ## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-15
 
@@ -17,11 +44,11 @@
 
 ## [DynamoDB tables command] - 2022-05-10
 
-- Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
+Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
 
 ## [Improvement] - 2022-04-07
 
-- Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
+Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
 
 ## [Full list of resources] - 2022-04-06
 

@@ -26,7 +26,7 @@ export default function SearchPlaceholderImages() {
             icon={{
               source: prefix + value.id + "/64/64",
               mask: Mask.RoundedRectangle,
-              fallback: { light: "picsum-icon.svg", dark: "picsum-icon@dark.svg" },
+              fallback: { light: "picsum-icon.png", dark: "picsum-icon@dark.png" },
             }}
             title={{ value: value.author, tooltip: "Author" }}
             detail={
@@ -54,7 +54,7 @@ export default function SearchPlaceholderImages() {
       })}
     </List>
   ) : (
-    <Grid itemSize={preferences.itemSize as Grid.ItemSize} isLoading={isLoading} searchBarPlaceholder={"Search images"}>
+    <Grid columns={parseInt(preferences.columns)} isLoading={isLoading} searchBarPlaceholder={"Search images"}>
       <PlaceholderEmptyView layout={preferences.layout} />
 
       {picsumImages.map((value) => {
@@ -62,7 +62,7 @@ export default function SearchPlaceholderImages() {
           <Grid.Item
             key={value.download_url}
             content={{
-              value: buildGridContentImageURL(preferences.itemSize as Grid.ItemSize, value.id),
+              value: buildGridContentImageURL(parseInt(preferences.columns), value.id),
               tooltip: value.width + " ✕ " + value.height,
             }}
             title={value.author}
@@ -77,16 +77,12 @@ export default function SearchPlaceholderImages() {
 }
 
 const prefix = "https://picsum.photos/id/";
-const buildGridContentImageURL = (itemSize: Grid.ItemSize, id: string) => {
-  switch (itemSize) {
-    case Grid.ItemSize.Large: {
-      return prefix + id + "/500";
-    }
-    case Grid.ItemSize.Medium: {
-      return prefix + id + "/300";
-    }
-    case Grid.ItemSize.Small: {
-      return prefix + id + "/200";
-    }
+const buildGridContentImageURL = (coloums: number, id: string) => {
+  if (coloums <= 3) {
+    return prefix + id + "/500";
+  } else if (coloums <= 6) {
+    return prefix + id + "/300";
+  } else {
+    return prefix + id + "/200";
   }
 };

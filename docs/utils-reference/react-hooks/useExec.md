@@ -118,21 +118,24 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { List, ActionPanel, Action } from "@raycast/api";
+import { useMemo } from "react";
+import { List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 
-const Demo = () => {
+type Item = { id: string; name: string };
+
+export default function Command() {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
+  const results = useMemo<Item[]>(() => JSON.parse(data || "[]"), [data]);
 
   return (
     <List isLoading={isLoading}>
-      {(data || []).map((item) => (
+      {results.map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Argument dependent on user input
@@ -143,15 +146,15 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 
 ```tsx
 import { useState } from "react";
-import { Detail, ActionPanel, Action } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Detail } from "@raycast/api";
+import { useExec } from "@raycast/utils";
 
-const Demo = () => {
-  const [searchText, setSearchText] = useState("");
-  const { isLoading, data } = useExec("brew", ["info", searchText]);
+export default function Command() {
+  const [searchText, setSearchText] = useState("raycast");
+  const { isLoading, data } = useExec("brew", ["search", searchText]);
 
   return <Detail isLoading={isLoading} markdown={data} />;
-};
+}
 ```
 
 {% hint style="info" %}
@@ -170,7 +173,7 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
@@ -215,7 +218,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types

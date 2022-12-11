@@ -7,7 +7,8 @@
   "author": "fuksman",
   "license": "MIT",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "pomdtr"
   ],
   "commands": [
     {
@@ -34,8 +35,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.0",
+    "@raycast/utils": "^1.4.11",
     "javascript-time-ago": "^2.3.9",
+    "nanoid": "^4.0.0",
     "node-fetch": "^3.0.0",
+    "node-html-markdown": "^1.2.0",
     "rss-parser": "^3.12.0"
   },
   "devDependencies": {

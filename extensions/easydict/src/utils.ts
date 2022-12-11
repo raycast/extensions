@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-04 12:28
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-02 23:11
+ * @lastEditTime: 2022-10-11 22:44
  * @fileName: utils.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -10,6 +10,7 @@
 
 import { Clipboard, getApplications, LocalStorage, showToast, Toast } from "@raycast/api";
 import { AxiosError } from "axios";
+import CryptoJS from "crypto-js";
 import { clipboardQueryTextKey } from "./consts";
 import { LanguageDetectType } from "./detectLanauge/types";
 import { LingueeListItemType } from "./dictionary/linguee/types";
@@ -18,7 +19,7 @@ import { myPreferences } from "./preferences";
 import { Easydict } from "./releaseVersion/versionInfo";
 import {
   DicionaryType,
-  ListItemDisplayType,
+  ListDisplayItem,
   QueryRecoredItem,
   QueryType,
   RequestErrorInfo,
@@ -141,15 +142,16 @@ export function getEnabledDictionaryServices(): DicionaryType[] {
  * Show error toast according to errorInfo.
  */
 export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
-  if (!errorInfo) {
+  if (!errorInfo?.type) {
+    console.warn(`showErrorToast, errorInfo type is undefined: ${JSON.stringify(errorInfo, null, 4)}`);
     return;
   }
 
-  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 2)}`);
+  console.error(`show error toast: ${JSON.stringify(errorInfo, null, 4)}`);
   const type = errorInfo.type.toString();
   showToast({
     style: Toast.Style.Failure,
-    title: `${type} Error: ${errorInfo.code || ""}`,
+    title: `${type} Error` + `${errorInfo.code ? `: ${errorInfo.code}` : ""}`,
     message: errorInfo.message,
   });
 }
@@ -157,7 +159,7 @@ export function showErrorToast(errorInfo: RequestErrorInfo | undefined) {
 /**
  * Get request error info.
  */
-export function getTypeErrorInfo(type: QueryType, error: AxiosError) {
+export function getTypeErrorInfo(type: RequestType, error: AxiosError): RequestErrorInfo {
   const errorCode = error.response?.status;
   const errorMessage = error.message || error.response?.statusText || "something error 😭";
   const errorInfo: RequestErrorInfo = {
@@ -227,8 +229,12 @@ export function checkIsLanguageDetectType(type: RequestType): boolean {
 /**
  * check type is YoudaoDictionaryListItem type.
  */
-export function checkIsYoudaoDictionaryListItemType(type: ListItemDisplayType): boolean {
-  if (Object.values(YoudaoDictionaryListItemType).includes(type as YoudaoDictionaryListItemType)) {
+export function checkIsYoudaoDictionaryListItem(listItem: ListDisplayItem): boolean {
+  const { queryType, displayType } = listItem;
+  if (
+    queryType === DicionaryType.Youdao &&
+    Object.values(YoudaoDictionaryListItemType).includes(displayType as YoudaoDictionaryListItemType)
+  ) {
     return true;
   }
   return false;
@@ -237,9 +243,21 @@ export function checkIsYoudaoDictionaryListItemType(type: ListItemDisplayType): 
 /**
  * check type is LingueeListItem type.
  */
-export function checkIsLingueeListItemType(type: ListItemDisplayType): boolean {
-  if (Object.values(LingueeListItemType).includes(type as LingueeListItemType)) {
+export function checkIsLingueeListItem(listItem: ListDisplayItem): boolean {
+  const { queryType, displayType } = listItem;
+  if (
+    queryType === DicionaryType.Linguee &&
+    Object.values(LingueeListItemType).includes(displayType as LingueeListItemType)
+  ) {
     return true;
   }
   return false;
+}
+
+export function md5(text: string): string {
+  return CryptoJS.MD5(text).toString();
+}
+
+export function printObject(name: string, obj: unknown, space = 4) {
+  console.log(`${name}: ${JSON.stringify(obj, null, space)}`);
 }

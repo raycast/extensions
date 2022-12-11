@@ -1,16 +1,18 @@
 import { Action, ActionPanel, Icon, Image } from "@raycast/api";
 import { TracksList } from "../searchTracks";
 import { getAlbumTracks, play, playShuffled } from "../spotify/client";
+import { useSpotify } from "../utils/context";
 
-export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplified; spotifyInstalled: boolean }) {
-  const album = props.album;
-  const spotifyInstalled = props.spotifyInstalled;
+export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplified }) {
+  const { installed } = useSpotify();
+
+  const { album } = props;
+
+  const title = album.name;
   const icon: Image.ImageLike = {
     source: album.images[album.images.length - 1]?.url,
     mask: Image.Mask.Circle,
   };
-
-  const title = album.name;
 
   return (
     <ActionPanel title={title}>
@@ -36,13 +38,13 @@ export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplifi
       />
       <Action.OpenInBrowser
         title={`Show Album (${album.name.trim()})`}
-        url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}
+        url={installed ? `spotify:album:${album.id}` : album.external_urls.spotify}
         icon={icon}
         shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
       />
       <Action.OpenInBrowser
         title="Show Artist"
-        url={spotifyInstalled ? `spotify:artist:${album.artists[0].id}` : album.artists[0].external_urls.spotify}
+        url={installed ? `spotify:artist:${album.artists[0].id}` : album.artists[0].external_urls.spotify}
         shortcut={{ modifiers: ["cmd", "ctrl"], key: "a" }}
       />
       <Action.CopyToClipboard

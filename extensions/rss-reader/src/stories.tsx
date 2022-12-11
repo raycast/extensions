@@ -1,17 +1,22 @@
-import { ActionPanel, Color, Icon, List, randomId, showToast, Action, Image, LocalStorage, Toast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, showToast, Action, Image, LocalStorage, Toast, Detail } from "@raycast/api";
 import { Feed, getFeeds } from "./feeds";
 import AddFeedForm from "./subscription-form";
 import Parser from "rss-parser";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { useEffect, useState } from "react";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { nanoid } from "nanoid";
+import { useCachedPromise } from "@raycast/utils";
+import React from "react";
 
 const parser = new Parser({});
 
 interface Story {
   guid: string;
   title: string;
+  subtitle: string;
   link?: string;
+  content?: string;
   icon: Image.ImageLike;
   isNew: boolean;
   date: number;
@@ -25,12 +30,24 @@ type FeedLastViewed = {
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-function StoryListItem(props: { item: Story }) {
+function StoryListItem(props: { item: Story; refresh: () => void }) {
   return (
     <List.Item
-      title={props.item.title}
       icon={props.item.icon}
-      actions={<Actions item={props.item} />}
+      title={props.item.title}
+      subtitle={props.item.subtitle}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <OpenStory item={props.item} />
+            <ReadStory item={props.item} />
+            <CopyStory item={props.item} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action title="Refresh Stories" icon={Icon.ArrowClockwise} onAction={props.refresh} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
       accessories={[
         {
           text: timeAgo.format(props.item.date) as string,
@@ -41,29 +58,30 @@ function StoryListItem(props: { item: Story }) {
   );
 }
 
-function Actions(props: { item: Story }) {
-  return (
-    <ActionPanel title={props.item.title}>
-      <ActionPanel.Section>{props.item.link && <Action.OpenInBrowser url={props.item.link} />}</ActionPanel.Section>
-      <ActionPanel.Section>
-        {props.item.link && (
-          <Action.CopyToClipboard
-            content={props.item.link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
-  );
+function ReadStory(props: { item: Story }) {
+  return props.item.content ? (
+    <Action.Push icon={Icon.Book} title="Read Story" target={<StoryDetail item={props.item} />} />
+  ) : null;
+}
+
+function OpenStory(props: { item: Story }) {
+  return props.item.link ? <Action.OpenInBrowser url={props.item.link} /> : null;
+}
+
+function CopyStory(props: { item: Story }) {
+  return props.item.link ? (
+    <Action.CopyToClipboard content={props.item.link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
+  ) : null;
 }
 
 function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
   const date = item.pubDate ? Date.parse(item.pubDate) : 0;
   return {
-    guid: item.guid || randomId(),
+    guid: item.guid || nanoid(),
     title: item.title || "No title",
+    subtitle: feed.title,
     link: item.link,
+    content: item.content,
     isNew: date > lastViewed,
     date,
     icon: feed.icon,
@@ -103,55 +121,67 @@ async function getStories(feeds: Feed[]) {
 }
 
 export function StoriesList(props: { feeds?: Feed[] }) {
-  const [feeds, setFeeds] = useState<Feed[]>([] as Feed[]);
-  const [stories, setStories] = useState<Story[]>([] as Story[]);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchFeeds() {
-    if (props?.feeds) {
-      setFeeds(props.feeds);
-    } else {
-      setFeeds(await getFeeds());
+  async function fetchStories(feeds?: Feed[]) {
+    if (typeof feeds == "undefined") {
+      feeds = await getFeeds();
     }
+
+    return { feeds, stories: await getStories(feeds) };
   }
-
-  async function fetchStories() {
-    if (feeds.length === 0) {
-      return;
-    }
-    setLoading(true);
-    setStories(await getStories(feeds));
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    fetchFeeds();
-  }, []);
-
-  useEffect(() => {
-    fetchStories();
-  }, [feeds]);
+  const { data, isLoading, revalidate } = useCachedPromise(fetchStories, [props.feeds]);
+  const [filter, setFilter] = React.useState("all");
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
+      searchBarAccessory={
+        data?.feeds.length && data.feeds.length > 1 ? (
+          <List.Dropdown onChange={setFilter} tooltip="Subscription">
+            <List.Dropdown.Section>
+              <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section>
+              {data?.feeds.map((feed) => (
+                <List.Dropdown.Item key={feed.url} icon={feed.icon} title={feed.title} value={feed.url} />
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        ) : null
+      }
       actions={
         !props?.feeds && (
           <ActionPanel>
             <Action.Push
               title="Add Feed"
-              target={<AddFeedForm callback={setFeeds} />}
-              icon={{ source: Icon.Plus, tintColor: Color.Green }}
+              target={<AddFeedForm />}
+              icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
           </ActionPanel>
         )
       }
     >
-      {stories.map((story) => (
-        <StoryListItem key={story.guid} item={story} />
-      ))}
+      {data?.stories
+        .filter((story) => filter === "all" || story.fromFeed === filter)
+        .map((story) => (
+          <StoryListItem key={story.guid} item={story} refresh={revalidate} />
+        ))}
     </List>
+  );
+}
+
+function StoryDetail(props: { item: Story }) {
+  return (
+    <Detail
+      navigationTitle={props.item.title}
+      markdown={NodeHtmlMarkdown.translate(props.item.content || "")}
+      actions={
+        <ActionPanel>
+          <OpenStory item={props.item} />
+          <CopyStory item={props.item} />
+        </ActionPanel>
+      }
+    />
   );
 }
 

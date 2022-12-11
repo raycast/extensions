@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { fetchItemInput, ItemInput } from "../utils/input-utils";
 import { Alert, confirmAlert, getApplications, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { boardsSort } from "../utils/open-link-utils";
-import { suggestApps } from "../utils/constants";
-import { ItemType, LocalStorageKey, OpenLinkApplication } from "../types/types";
+import { CacheKey, suggestApps } from "../utils/constants";
+import { ItemType, OpenLinkApplication } from "../types/types";
 
 export const getItemInput = (refresh: number) => {
   const [itemInput, setItemInput] = useState<ItemInput>(new ItemInput());
@@ -36,9 +36,8 @@ export const getOpenLinkApp = (itemInput: ItemInput, refresh: number) => {
     const allApplications = await getApplications();
 
     //custom apps
-    const localBrowsers = await LocalStorage.getItem<string>(LocalStorageKey.CUSTOM_APPS);
+    const localBrowsers = await LocalStorage.getItem<string>(CacheKey.PREFERRED_APP);
     const _customApps: OpenLinkApplication[] = typeof localBrowsers == "string" ? JSON.parse(localBrowsers) : [];
-
     const _customAppPaths = _customApps.map((value) => value.path);
     const _buildInPaths = suggestApps.map((value) => value.path);
 

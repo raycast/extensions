@@ -1,5 +1,5 @@
-import { ActionPanel, List } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Action, List } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { prettyBytes } from "../utils";
 import { GetConnections } from "./client/ws";
 import { ConnectionT } from "./types";
@@ -20,7 +20,7 @@ function renderSubTitle(mode: boolean, connection: ConnectionT): string {
 
 function renderAccessoryTitle(mode: boolean, connection: ConnectionT): string {
   if (mode) {
-    return `${prettyBytes(connection.download)}/s ↓ ${prettyBytes(connection.upload)}/s ↑`;
+    return `${prettyBytes(connection.download)} ↓ ${prettyBytes(connection.upload)} ↑`;
   } else {
     return `${connection.metadata.type}(${connection.metadata.network})`;
   }
@@ -29,8 +29,24 @@ function renderAccessoryTitle(mode: boolean, connection: ConnectionT): string {
 export default function Conns(): JSX.Element {
   const [connectionsUrl, connections] = GetConnections();
   const [mode, setMode] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const [filteredList, filterList] = useState(connections.connections);
+
+  useEffect(() => {
+    filterList(
+      connectionsUrl
+        ? connections.connections.filter(
+            (item: ConnectionT) =>
+              item.metadata.host.includes(searchText) ||
+              item.metadata.destinationIP.includes(searchText) ||
+              item.metadata.destinationPort.includes(searchText)
+          )
+        : ([] as Array<ConnectionT>)
+    );
+  }, [searchText, connections.connections.length]);
+
   return (
-    <List>
+    <List enableFiltering={false} onSearchTextChange={setSearchText}>
       {connectionsUrl ? (
         <>
           <List.Item
@@ -40,7 +56,7 @@ export default function Conns(): JSX.Element {
             accessoryTitle={`${mode ? "Overview" : "Detail"} Mode`}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   title="Switch Mode"
                   onAction={() => {
                     setMode((oldMode) => !oldMode);
@@ -49,13 +65,23 @@ export default function Conns(): JSX.Element {
               </ActionPanel>
             }
           />
-          {connections.connections.map((connection: ConnectionT, index) => {
+          {filteredList.map((connection: ConnectionT, index) => {
             return (
               <List.Item
                 key={index}
                 title={renderTitle(mode, connection)}
                 subtitle={renderSubTitle(mode, connection)}
                 accessoryTitle={renderAccessoryTitle(mode, connection)}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Switch Mode"
+                      onAction={() => {
+                        setMode((oldMode) => !oldMode);
+                      }}
+                    />
+                  </ActionPanel>
+                }
               />
             );
           })}

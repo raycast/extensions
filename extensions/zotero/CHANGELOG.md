@@ -1,5 +1,7 @@
 # Zotero Changelog
 
+## [Added screenshots] - 2022-11-17
+
 ## [Features] - 2022-06-08
 
 - Add additional CSL formats

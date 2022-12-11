@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { Note } from "../utils/interfaces";
+import { Note, Vault } from "../utils/interfaces";
 
 //--------------------------------------------------------------------------------
 // All toasts for all commands should be defined here.
@@ -51,5 +51,13 @@ export function noteUnpinnedToast(note: Note) {
     title: "Note Unpinned",
     message: "'" + note.title + "' unpinned successfully.",
     style: Toast.Style.Success,
+  });
+}
+
+export function vaultsWithoutAdvancedURIToast(vaultsWithoutPlugin: Vault[]) {
+  showToast({
+    title: "Vaults without Advanced URI plugin:",
+    message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
+    style: Toast.Style.Failure,
   });
 }

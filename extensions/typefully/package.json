@@ -5,12 +5,23 @@
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
   "icon": "icon.png",
   "author": "danielferguson",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "command-bar-menu",
+      "title": "Open Command Bar Menu",
+      "subtitle": "Typefully",
+      "description": "See your upcoming scheduled posts at a glance, and quickly navigate to Typefully.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
     {
       "name": "create-draft",
       "title": "Create Draft Tweet",
@@ -84,7 +95,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.43.0",
+    "@raycast/utils": "^1.4.10",
     "dayjs": "^1.11.3",
     "got": "^12.1.0"
   },

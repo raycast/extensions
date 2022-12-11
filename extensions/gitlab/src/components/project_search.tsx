@@ -18,7 +18,7 @@ import {
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -26,7 +26,11 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
   if (project.archived) {
     accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
   }
-  accessories.push({ text: project.star_count.toString(), icon: Icon.Star });
+  accessories.push({
+    text: project.star_count.toString(),
+    icon: { source: Icon.Star, tintColor: Color.Yellow },
+    tooltip: `Number of stars: ${project.star_count}`,
+  });
   return (
     <List.Item
       id={project.id.toString()}
@@ -58,9 +62,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
             <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Cache">
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

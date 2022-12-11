@@ -11,7 +11,7 @@ Because its API tries to stick as closely to [List](list.md#list)'s as possible,
 - renaming all [List.Item](list.md#list.item)s' h`icon` prop to `content`
 - removing all [List.Item](list.md#list.item)s' `accessories`, `accessoryIcon` and `accessoryTitle props; [Grid.Item](#grid.item) does not _currently_ support accessories
 - finally, replacing all usages of `List` with `Grid`.
-{% endhint %}
+  {% endhint %}
 
 ![](../../.gitbook/assets/grid.png)
 
@@ -21,8 +21,8 @@ The search bar allows users to interact quickly with grid items. By default, [Gr
 
 ### Custom filtering
 
-Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `enableFiltering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
-Note that `enableFiltering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `enableFiltering` to true.
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `Grid`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -43,9 +43,9 @@ export default function Command() {
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Medium}
+      columns={5}
       inset={Grid.Inset.Large}
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Emoji"
       searchBarPlaceholder="Search your favorite emoji"
@@ -65,7 +65,7 @@ Other times, you may want the content of the search bar to be updated by the ext
 To do so, you can use the `searchText` [prop](#props).
 
 ```typescript
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Grid } from "@raycast/api";
 
 const items = [
@@ -115,7 +115,7 @@ import { Grid } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Grid itemSize={Grid.ItemSize.Small} inset={Grid.Inset.Large}>
+    <Grid columns={8} inset={Grid.Inset.Large}>
       <Grid.Item content="🥳" />
       <Grid.Item content="🙈" />
     </Grid>
@@ -183,6 +183,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 
@@ -206,7 +207,7 @@ export default function CommandWithCustomEmptyView() {
 
 ### Grid
 
-Displays [Grid.Section](#grid.section) or [Grid.Item](#grid.item).
+Displays [Grid.Section](#grid.section)s or [Grid.Item](#grid.item)s.
 
 The grid uses built-in filtering by indexing the title & keywords of its items.
 
@@ -223,7 +224,7 @@ const items = [
 export default function Command() {
   return (
     <Grid
-      itemSize={Grid.ItemSize.Medium}
+      columns={5}
       inset={Grid.Inset.Large}
       navigationTitle="Search Emoji"
       searchBarPlaceholder="Search your favorite emoji"
@@ -278,7 +279,7 @@ export default function Command() {
       }
     >
       {(items[type] || []).map((item) => (
-        <Grid.Item content={item.content} keywords={item.keywords} />
+        <Grid.Item key={`${item.content}`} content={item.content} keywords={item.keywords} />
       ))}
     </Grid>
   );
@@ -380,6 +381,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 
@@ -430,7 +432,14 @@ A group of related [Grid.Item](#grid.item).
 
 Sections are a great way to structure your grid. For example, you can group photos taken in the same place or in the same day. This way, the user can quickly access what is most relevant.
 
+Sections can specify their own `columns`, `fit`, `aspectRatio` and `inset` props, separate from what is defined on the main [Grid](#grid) component.
+
 #### Example
+
+![](../../.gitbook/assets/grid-styled-sections.png)
+
+{% tabs %}
+{% tab title="GridWithSection.tsx" %}
 
 ```typescript
 import { Grid } from "@raycast/api";
@@ -449,6 +458,37 @@ export default function Command() {
 }
 ```
 
+{% endtab %}
+{% tab title="GridWithStyledSection.tsx" %}
+
+```typescript
+import { Grid, Color } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Grid columns={6}>
+      <Grid.Section aspectRatio="2/3" title="Movies">
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+        <Grid.Item content="https://api.lorem.space/image/movie?w=150&h=220" />
+      </Grid.Section>
+      <Grid.Section columns={8} title="Colors">
+        {Object.entries(Color).map(([key, value]) => (
+          <Grid.Item key={key} content={{ color: value }} title={key} />
+        ))}
+      </Grid.Section>
+    </Grid>
+  );
+}
+```
+
+{% endtab %}
+
+{% endtabs %}
+
 #### Props
 
 <PropsTableFromJSDoc component="Grid.Section" />
@@ -457,7 +497,7 @@ export default function Command() {
 
 ### Grid.Inset
 
-An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s `itemSize` prop.
+An enum representing the amount of space there should be between a Grid Item's content and its borders. The absolute value depends on the value of [Grid](#grid)'s or [Grid.Section](#grid.section)'s `columns` prop.
 
 #### Enumeration members
 
@@ -467,7 +507,7 @@ An enum representing the amount of space there should be between a Grid Item's c
 | Medium | Medium insets |
 | Large  | Large insets  |
 
-### Grid.ItemSize
+### Grid.ItemSize (deprecated)
 
 An enum representing the size of the Grid's child [Grid.Item](#grid.item)s.
 
@@ -478,3 +518,14 @@ An enum representing the size of the Grid's child [Grid.Item](#grid.item)s.
 | Small  | Fits 8 items per row. |
 | Medium | Fits 5 items per row. |
 | Large  | Fits 3 items per row. |
+
+### Grid.Fit
+
+An enum representing how [Grid.Item](#grid.item)'s content should be fit.
+
+#### Enumeration members
+
+| Name    | Description                                                                                                                     |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Contain | The content will be contained within the grid cell, with vertical/horizontal bars if its aspect ratio differs from the cell's.  |
+| Fill    | The content will be scaled proportionally so that it fill the entire cell; parts of the content could end up being cropped out. |

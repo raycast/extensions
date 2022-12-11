@@ -4,7 +4,7 @@ Search for folders on your Mac
 
 ## Plugins
 
-You can add your own custom `ActionScript` plugins to Folder Search. These appear as actions, under the sub-heading 'Plugins' within Folder Search.
+You can add your own custom `AppleScript` plugins to Folder Search. These appear as actions, under the sub-heading 'Plugins' within Folder Search.
 
 The steps are as follows:
 
@@ -38,14 +38,14 @@ exports.FolderSearchPlugin = {
   // the `Icon` name without the Icon enum prefix.
   icon: 'Link',
 
-  // a function which takes the result that was selected at the time of execution and returns a valid ActionScript. This ActionScript is what gets executed.
+  // a function which takes the result that was selected at the time of execution and returns a valid AppleScript. This AppleScript is what gets executed.
   appleScript: (result) => {
     return `do shell script "open ${result.path}"`
   }
 }
 ```
 
-For reference, the `result` argument passed into the actionScript function is as follows (based on mdfind properties)
+For reference, the `result` argument passed into the `appleScript` function is as follows (based on mdfind properties)
 
 ```js
 {

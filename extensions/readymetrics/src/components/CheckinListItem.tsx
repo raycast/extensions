@@ -44,7 +44,7 @@ export default function CheckinListItem({ checkin }: CheckinListItemProps) {
       ]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={"https://www.readymetrics.com/employee/checkin/" + checkin.id} />
+          <Action.OpenInBrowser url={"https://ready.app/employee/checkin/" + checkin.id} />
         </ActionPanel>
       }
     ></List.Item>

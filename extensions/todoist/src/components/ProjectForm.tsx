@@ -1,141 +1,181 @@
-import { useState, useRef } from "react";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
-import { AddProjectArgs, colors, Project } from "@doist/todoist-api-typescript";
-import useSWR, { mutate } from "swr";
-import { SWRKeys } from "../types";
+import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
 import { handleError, todoist } from "../api";
+import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import View from "./View";
+import Project from "./Project";
 
 interface ProjectFormProps {
-  project?: Project;
+  project?: TProject;
+  mutate?: MutatePromise<TProject[] | undefined>;
 }
 
-export default function ProjectForm({ project }: ProjectFormProps) {
-  const { pop } = useNavigation();
+type ProjectFormValues = {
+  name: string;
+  isFavorite: boolean;
+  color: string;
+  parentId: string;
+  viewStyle: string;
+};
 
-  const [name, setName] = useState(project ? project.name : "");
-  const [parentId, setParentId] = useState<string>();
-  const [favorite, setFavorite] = useState<boolean>(project ? project.favorite : false);
-  const [colorId, setColorId] = useState<string>(project ? String(project.color) : "");
+export default function ProjectForm({ project, mutate }: ProjectFormProps) {
+  const { push, pop } = useNavigation();
 
-  const titleField = useRef<Form.TextField>(null);
-  const isCreatingProject = !project;
-
-  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data, error, isLoading } = useCachedPromise(() => todoist.getProjects());
 
   if (error) {
     handleError({ error, title: "Unable to get projects" });
   }
 
-  const projects = data?.filter((project) => !project.inboxProject);
+  const isCreatingProject = !project;
 
-  function clear() {
-    setName("");
-    setParentId("");
-    setColorId(String(colors[0].id));
-    setFavorite(false);
-  }
+  const projects = data?.filter((project) => !project.isInboxProject);
 
-  async function update() {
-    if (!project) {
-      return;
-    }
+  const initialValues = {
+    name: project ? project.name : "",
+    parentId: "",
+    isFavorite: project ? project.isFavorite : false,
+    color: project ? project.color : "",
+    viewStyle: project ? project.viewStyle : "list",
+  };
 
-    const body: AddProjectArgs = { name, favorite };
+  const { handleSubmit, itemProps, focus, reset } = useForm<ProjectFormValues>({
+    async onSubmit({ name, isFavorite, color, parentId, viewStyle }) {
+      async function create() {
+        const body: AddProjectArgs = { name, isFavorite };
 
-    if (!body.name) {
-      await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
-      return;
-    }
+        if (!body.name) {
+          await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
+          return;
+        }
 
-    if (colorId) {
-      body.color = parseInt(colorId);
-    }
+        if (parentId) {
+          body.parentId = parentId;
+        }
 
-    await showToast({ style: Toast.Style.Animated, title: "Updating project" });
+        if (color) {
+          body.color = color;
+        }
 
-    try {
-      await todoist.updateProject(project.id, body);
-      await showToast({ style: Toast.Style.Success, title: "Project updated" });
-      mutate(SWRKeys.projects);
-      pop();
-    } catch (error) {
-      handleError({ error, title: "Unable to create project" });
-    }
-  }
+        if (viewStyle) {
+          body.viewStyle = viewStyle as ProjectViewStyle;
+        }
 
-  async function create() {
-    const body: AddProjectArgs = { name, favorite };
+        const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
+        await toast.show();
 
-    if (!body.name) {
-      await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
-      return;
-    }
+        try {
+          const project = await todoist.addProject(body);
+          toast.style = Toast.Style.Success;
+          toast.title = "Project created";
+          toast.primaryAction = {
+            title: "Open Project",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => push(<Project project={project} />),
+          };
+          toast.secondaryAction = {
+            title: `Open Project ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: async () => {
+              open(isTodoistInstalled ? `todoist://project?id=${project.id}` : project.url);
+            },
+          };
 
-    if (parentId) {
-      body.parentId = parseInt(parentId);
-    }
+          reset(initialValues);
+          focus("name");
+        } catch (error) {
+          console.error(error);
+          handleError({ error, title: "Unable to create project" });
+        }
+      }
 
-    if (colorId) {
-      body.color = parseInt(colorId);
-    }
+      async function update() {
+        if (!project) {
+          return;
+        }
 
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
-    await toast.show();
+        const body: AddProjectArgs = { name, isFavorite };
 
-    try {
-      const { url } = await todoist.addProject(body);
-      toast.style = Toast.Style.Success;
-      toast.title = "Project created";
-      toast.primaryAction = {
-        title: "Open in browser",
-        shortcut: { modifiers: ["cmd"], key: "o" },
-        onAction: () => open(url),
-      };
-      clear();
-      titleField.current?.focus();
-    } catch (error) {
-      handleError({ error, title: "Unable to create project" });
-    }
-  }
+        if (!body.name) {
+          await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
+          return;
+        }
+
+        if (color) {
+          body.color = color;
+        }
+
+        if (viewStyle) {
+          body.viewStyle = viewStyle as ProjectViewStyle;
+        }
+
+        await showToast({ style: Toast.Style.Animated, title: "Updating project" });
+
+        try {
+          await todoist.updateProject(project.id, body);
+          await showToast({ style: Toast.Style.Success, title: "Project updated" });
+          if (mutate) {
+            mutate();
+          }
+          pop();
+        } catch (error) {
+          handleError({ error, title: "Unable to update project" });
+        }
+      }
+
+      return isCreatingProject ? create() : update();
+    },
+    initialValues,
+    validation: {
+      name: FormValidation.Required,
+    },
+  });
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title={isCreatingProject ? "Create Project" : "Edit Project"}
-            onSubmit={isCreatingProject ? create : update}
-            icon={isCreatingProject ? Icon.Plus : Icon.Pencil}
-          />
-        </ActionPanel>
-      }
-      isLoading={!data && !error}
-    >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="My project"
-        value={name}
-        onChange={setName}
-        ref={titleField}
-      />
+    <View>
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title={isCreatingProject ? "Create Project" : "Edit Project"}
+              icon={isCreatingProject ? Icon.Plus : Icon.Pencil}
+              onSubmit={handleSubmit}
+            />
+          </ActionPanel>
+        }
+        isLoading={isLoading}
+      >
+        <Form.TextField {...itemProps.name} title="Name" placeholder="My project" />
 
-      <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId}>
-        {colors.map(({ name, id, value }) => (
-          <Form.Dropdown.Item value={String(id)} title={name} key={id} icon={{ source: Icon.Dot, tintColor: value }} />
-        ))}
-      </Form.Dropdown>
-
-      {isCreatingProject && projects && projects.length > 0 ? (
-        <Form.Dropdown id="parent_id" title="Parent project" value={parentId} onChange={setParentId}>
-          <Form.Dropdown.Item value="" title="None" />
-          {projects.map(({ id, name }) => (
-            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+        <Form.Dropdown {...itemProps.color} title="Color">
+          {colors.map(({ key, displayName, hexValue }) => (
+            <Form.Dropdown.Item
+              value={key}
+              title={displayName}
+              key={key}
+              icon={{ source: Icon.CircleFilled, tintColor: hexValue }}
+            />
           ))}
         </Form.Dropdown>
-      ) : null}
 
-      <Form.Checkbox id="favorite" label="Mark as favorite?" value={favorite} onChange={setFavorite} />
-    </Form>
+        {isCreatingProject && projects && projects.length > 0 ? (
+          <Form.Dropdown {...itemProps.parentId} title="Parent project">
+            <Form.Dropdown.Item value="" title="None" />
+            {projects.map(({ id, name }) => (
+              <Form.Dropdown.Item value={id} title={name} key={id} />
+            ))}
+          </Form.Dropdown>
+        ) : null}
+
+        <Form.Checkbox {...itemProps.isFavorite} label="Mark as favorite?" />
+
+        <Form.Dropdown {...itemProps.viewStyle} title="View Style">
+          <Form.Dropdown.Item value="list" title="List" icon={Icon.List} />
+
+          <Form.Dropdown.Item value="board" title="Board" icon={Icon.BarChart} />
+        </Form.Dropdown>
+      </Form>
+    </View>
   );
 }

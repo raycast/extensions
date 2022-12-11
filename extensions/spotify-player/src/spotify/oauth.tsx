@@ -6,7 +6,7 @@ const clientId = "7bbb789c01ff44ed842907b7a80c404f";
 const scope = "user-library-modify user-modify-playback-state";
 //
 // user-read-currently-playing
-export const oauthClient = new OAuth.PKCEClient({
+const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Spotify",
   providerIcon: "icon.png",
@@ -23,13 +23,15 @@ export async function isAuthorized(): Promise<boolean> {
   return false;
 }
 
-export async function authorize(): Promise<void> {
+export async function authorize(): Promise<string> {
   const tokenSet = await oauthClient.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await oauthClient.setTokens(await refreshTokens(tokenSet.refreshToken));
+      const tokens = await refreshTokens(tokenSet.refreshToken);
+      await oauthClient.setTokens(tokens);
+      return tokens.access_token;
     }
-    return;
+    return tokenSet.accessToken;
   }
 
   const authRequest = await oauthClient.authorizationRequest({
@@ -40,6 +42,8 @@ export async function authorize(): Promise<void> {
   const { authorizationCode } = await oauthClient.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode);
   await oauthClient.setTokens(tokens);
+
+  return tokens.access_token;
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {

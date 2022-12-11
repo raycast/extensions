@@ -22,7 +22,7 @@ export default async function TurnOffAllLights() {
       return;
     }
     const response = await SetLightState("all", body, config);
-    await showHUD("Succses");
+    await showHUD("Turned off all lights");
   } catch (error) {
     console.info(error);
     if (error instanceof Error) {

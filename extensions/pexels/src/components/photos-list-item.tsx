@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import React from "react";
 import { Photo } from "pexels";
 import { PexelsPhoto } from "../types/types";
@@ -15,7 +15,7 @@ export function PhotosListItem(props: { pexelsPhoto: Photo; index: number }) {
       title={pexelsPhoto.photographer}
       accessories={[
         {
-          icon: { source: "solid-circle.png", tintColor: (pexelsPhoto as PexelsPhoto).avg_color },
+          icon: { source: Icon.CircleFilled, tintColor: (pexelsPhoto as PexelsPhoto).avg_color },
           tooltip: `${(pexelsPhoto as PexelsPhoto).avg_color}`,
         },
       ]}

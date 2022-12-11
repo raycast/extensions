@@ -11,7 +11,7 @@ export default function () {
   useEffect(() => {
     async function getQueryInfo() {
       const response = await fetchRequestTimeout(
-        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?topItems=20&auth=${API_TOKEN}`
+        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?topItems=25&auth=${API_TOKEN}`
       );
       if (response == "query-aborted" || response == undefined) {
         updateTimeoutInfo("query-aborted");
@@ -24,6 +24,8 @@ export default function () {
             domainURL: Object.keys(top_queries)[i],
             blockCount: Object.values(top_queries)[i].toString(),
           } as domainDetails);
+        }
+        for (let i = 0; i < Object.keys(top_ads).length; i++) {
           top_ads_array.push({
             domainURL: Object.keys(top_ads)[i],
             blockCount: Object.values(top_ads)[i].toString(),
