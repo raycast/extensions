@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Enhancement] - 2022-12-10
+
+- Added custom timer option to menubar
+
 ## [Faster menubar] - 2022-11-01
 
 - Now updating every ten seconds instead of every minute.

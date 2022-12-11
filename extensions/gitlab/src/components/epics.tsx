@@ -6,7 +6,7 @@ import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -40,9 +40,7 @@ export function EpicListItem(props: { epic: any }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

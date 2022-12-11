@@ -180,6 +180,9 @@ export function hashRecord(rec: Record<string, any>, prefix?: string | undefined
 }
 
 export function capitalizeFirstLetter(name: string): string {
+  if (!name || name.length <= 0) {
+    return name;
+  }
   return name.replace(/^./, name[0].toUpperCase());
 }
 

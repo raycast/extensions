@@ -6,6 +6,7 @@ import { dataToProject, Group, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons, useImage } from "../icons";
 import { hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
@@ -36,7 +37,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
     <List.Item
       id={`${group.id}`}
       title={group.full_name}
-      icon={localImageFilepath || getTextIcon(group.name[0].toUpperCase())}
+      icon={localImageFilepath || getTextIcon((group.name ? group.name[0] : "?").toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -92,6 +93,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
               url={webUrl(props.group, "-/edit")}
             />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

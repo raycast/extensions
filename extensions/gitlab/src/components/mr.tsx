@@ -22,6 +22,7 @@ import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 import { userIcon } from "./users";
 import { useCachedState } from "@raycast/utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -424,6 +425,7 @@ export function MRListItem(props: {
             <MRItemActions mr={mr} onDataChange={props.refreshData} />
           </ActionPanel.Section>
           <ActionPanel.Section>{props.action ?? props.action}</ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
