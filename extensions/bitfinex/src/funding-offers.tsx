@@ -21,7 +21,10 @@ export default function FundingOffers() {
   const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
 
   const totalAmount = useMemo(() => {
-    return offers.reduce((acc, offer) => acc + offer.amount, 0);
+    const offerAmount = offers.reduce((acc, offer) => acc + offer.amount, 0);
+    const pendingOffersAmount = activeOffers.reduce((acc, offer) => acc + offer.amount, 0);
+
+    return offerAmount + pendingOffersAmount;
   }, [offers]);
 
   const averageRateByOffers = useMemo(() => {
