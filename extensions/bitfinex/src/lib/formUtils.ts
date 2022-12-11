@@ -1,5 +1,5 @@
 import { FormValidation } from "@raycast/utils";
-import { MINIMUM_OFFER_AMOUNT } from "./contants";
+import { MINIMUM_OFFER_AMOUNT } from "./constants";
 
 export const basicFieldValidations = {
   symbol: FormValidation.Required,

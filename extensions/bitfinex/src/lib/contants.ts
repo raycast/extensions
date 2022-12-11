@@ -1,1 +1,0 @@
-export const MINIMUM_OFFER_AMOUNT = 150;

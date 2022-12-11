@@ -5,7 +5,7 @@ import Bitfinex, { handleAPIError } from "../lib/api";
 import { getCurrency } from "../lib/preference";
 import { useForm } from "@raycast/utils";
 import { basicFieldValidations } from "../lib/formUtils";
-import { MINIMUM_OFFER_AMOUNT } from "../lib/contants";
+import { MINIMUM_OFFER_AMOUNT } from "../lib/constants";
 
 type CreateOfferFormValues = {
   symbol: string;
