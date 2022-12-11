@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { getCurrency, getPreferenceValues } from "./lib/preference";
-import { useFundingBalanceInfo, useFundingCredits, useFundingOffers } from "./lib/hooks";
+import { useCachedActiveOffers, useFundingBalanceInfo, useFundingCredits, useFundingOffers } from "./lib/hooks";
 import { formatToYearlyRate, getOfferClosedDate } from "./lib/utils";
 import { OfferListItem } from "./components/OfferListItem";
 import { CreateOfferForm } from "./components/CreateOfferForm";
@@ -19,6 +19,12 @@ export default function FundingOffers() {
     mutate: mutateFundingInfo,
   } = useFundingOffers(currency);
   const { data: balanceInfo, isLoading: isBalanceLoading, mutate: mutateBalanceInfo } = useFundingBalanceInfo(currency);
+
+  const [, setCachedActiveOffers] = useCachedActiveOffers(activeOffers);
+
+  useEffect(() => {
+    setCachedActiveOffers(activeOffers);
+  }, [activeOffers]);
 
   const availableFunding = useMemo(() => {
     if (balanceInfo) {
