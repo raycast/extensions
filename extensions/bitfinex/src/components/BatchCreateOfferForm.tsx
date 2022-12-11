@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FundingOffer } from "bfx-api-node-models";
 import LendingRates from "../lending-rates";
@@ -16,12 +16,11 @@ type BatchCreateOfferFormValues = {
 
 const calculateBatchAmountGroups = (availableFunding: number, amount: number) => {
   const remainder = availableFunding % amount;
+  const groupsLength = Math.floor(availableFunding / amount);
 
   if (remainder < 150) {
-    const groupsLength = Math.floor(availableFunding / amount) - 1;
-    return [...new Array(groupsLength).fill(amount), Math.floor(amount + remainder)];
+    return [...new Array(groupsLength - 1).fill(amount), Math.floor(amount + remainder)];
   } else {
-    const groupsLength = Math.floor(availableFunding / amount);
     return new Array(groupsLength).fill(amount);
   }
 };
@@ -37,6 +36,29 @@ export function BatchCreateOfferForm({
 }) {
   const rest = Bitfinex.rest();
   const { pop } = useNavigation();
+
+  const validateAmount = useCallback(
+    (value?: string) => {
+      if (!value) {
+        return "Amount is required";
+      }
+
+      const amount = parseInt(value);
+
+      if (isNaN(amount)) {
+        return "Amount is not a number";
+      }
+
+      if (amount > availableFunding) {
+        return "Amount is greater than available funding";
+      }
+
+      if (amount < 150) {
+        return "Minimum amount is 150";
+      }
+    },
+    [availableFunding]
+  );
 
   const { handleSubmit, itemProps, values } = useForm<BatchCreateOfferFormValues>({
     async onSubmit(values) {
@@ -68,21 +90,7 @@ export function BatchCreateOfferForm({
       period: basicFieldValidations.period,
       rate: basicFieldValidations.rate,
       symbol: basicFieldValidations.symbol,
-      amount: (value) => {
-        if (!value) {
-          return "Amount is required";
-        }
-
-        const amount = parseFloat(value);
-
-        if (isNaN(amount)) {
-          return "Amount is not a number";
-        }
-
-        if (amount > availableFunding) {
-          return "Amount is greater than available funding";
-        }
-      },
+      amount: validateAmount,
     },
     initialValues: {
       symbol: getCurrency(),
@@ -109,8 +117,9 @@ export function BatchCreateOfferForm({
   }, [availableFunding, values]);
 
   const previewAmountsDescription = useMemo(() => {
-    if (itemProps.amount.error || previewAmounts?.length === 0) {
-      return null;
+    const errorMessage = validateAmount(values.amount);
+    if (itemProps.amount.error || previewAmounts?.length === 0 || errorMessage) {
+      return errorMessage || "Fix the amount to see the preview";
     }
 
     return `The amount will be adjusted if available funding cannot be split evenly. 
@@ -118,7 +127,7 @@ export function BatchCreateOfferForm({
 ${previewAmounts.length} offers will be created with the following amounts:
   
 ${previewAmounts.join(", ")}`;
-  }, [previewAmounts]);
+  }, [previewAmounts, itemProps.amount.error, validateAmount, values.amount]);
 
   return (
     <Form
@@ -142,7 +151,7 @@ ${previewAmounts.join(", ")}`;
         text="Batch create offers for the same symbol, amount, rate and period. The amount will be adjusted if available funding cannot be split evenly."
       />
 
-      {previewAmountsDescription && <Form.Description title="Preview" text={previewAmountsDescription} />}
+      <Form.Description title="Preview" text={previewAmountsDescription} />
 
       <Form.TextField title="Symbol" {...itemProps.symbol} />
 
