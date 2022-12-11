@@ -3,7 +3,7 @@ import fetch from "cross-fetch";
 import { candlesTimeFrame } from "../lendingRatesUtils";
 import { getCurrency, getHighRateThreshold, getSound } from "../preference";
 
-export default async function checkLendingRates() {
+export async function checkLendingRates() {
   const _15mCandles = candlesTimeFrame["15m"];
 
   const data = await fetch(_15mCandles).then((r) => r.json());

@@ -1,16 +1,21 @@
 import { showToast, Toast } from "@raycast/api";
-import checkLendingRates from "./lib/task/checkLendingRates";
+import { checkLendingRates, checkAvailableFunding } from "./lib/tasks";
 
-export default async function run() {
+const runTask = async (title: string, task: () => Promise<void>) => {
   try {
-    await checkLendingRates();
+    await task();
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
 
     showToast({
-      title: "Check Lending Rates Failed",
+      title: `${title} Failed`,
       style: Toast.Style.Failure,
       message,
     });
   }
+};
+
+export default async function run() {
+  await runTask("Check Lending Rates", checkLendingRates);
+  await runTask("Check Available Funding", checkAvailableFunding);
 }
