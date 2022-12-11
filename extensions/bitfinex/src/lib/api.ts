@@ -4,11 +4,15 @@ import { getPreferenceValues } from "./preference";
 
 const { api_key: apiKey, api_secret: apiSecret } = getPreferenceValues();
 
-export default new BFX({
+export const Bitfinex = new BFX({
   apiKey,
   apiSecret,
   transform: true,
 });
+
+const rest = Bitfinex.rest();
+
+export default Bitfinex;
 
 export function handleAPIError(title: string, e: any) {
   const [type, errorCode, message] = e.error;
@@ -18,4 +22,8 @@ export function handleAPIError(title: string, e: any) {
     title,
     message: `${type} (${errorCode}): ${message}`,
   });
+}
+
+export function calcAvailableBalance(currency: string): Promise<any> {
+  return rest.calcAvailableBalance(currency, 0, 0, "FUNDING");
 }
