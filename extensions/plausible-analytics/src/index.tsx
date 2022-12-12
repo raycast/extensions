@@ -108,7 +108,7 @@ function SiteList() {
       })}
       <List.Item
         key="add-site"
-        title="Add website from Plausible"
+        title="Add Website from Plausible"
         icon={Icon.Plus}
         actions={
           <ActionPanel>
