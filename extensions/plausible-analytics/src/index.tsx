@@ -94,6 +94,7 @@ function SiteList() {
                 <Action.OpenInBrowser title="Show in Plausible" url={`https://plausible.io/${domain}`} />
                 <Action
                   title={`Remove ${domain}`}
+                  style={Action.Style.Destructive}
                   onAction={async () => {
                     await Storage.removeDomain(domain);
                     showToast(Toast.Style.Success, "Website successfully removed");
