@@ -59,13 +59,13 @@ import { useForm, FormValidation } from "@raycast/utils";
 interface SignUpFormValues {
   firstName: string;
   lastName: string;
-  birthday: Date | null;
+  birthday: Date;
   password: string;
   number: string;
   hobbies: string[];
 }
 
-export default function Command() {
+export default function Main() {
   const { handleSubmit, itemProps } = useForm<SignUpFormValues>({
     onSubmit(values) {
       showToast({
