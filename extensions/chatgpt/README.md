@@ -50,9 +50,32 @@ To get a session token:
 
 4. Copy the value for `__Secure-next-auth.session-token` and paste in the initialization set-up!
 
-![Looking through the question history](/metadata/6.png)
+### Update December 11, 2022
 
-> Session token will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
+Today, OpenAI added additional Cloudflare protections that make it more difficult to access the unofficial API. Here's some additional steps that you need to follow:
+
+2. Copy the value of the `cf_clearance` cookie and store it in a `CLEARANCE_TOKEN` environment variable in addition to your `SESSION_TOKEN`.
+
+![ChatGPT user agent](media/clearance.png)
+
+3. Copy your browser's `user-agent` header from any request in your browser's network tab.
+
+![ChatGPT user agent](media/user-agent.png)
+
+Restrictions on this method:
+
+- Cloudflare `cf_clearance` **tokens expire after 2 hours**, so right now you'll have to manually log in and extract it by hand every so often
+- Your `user-agent` and `IP address` **must match** from the real browser window you're logged in with to the one you're using for `ChatGPTAPI`.
+  - This means that you currently can't log in with your laptop and then run the bot on a server or proxy somewhere.
+- You should not be using this account while the extension is already running, because that browser window may refresh one of your tokens and invalidate the bot's session.
+
+We're working hard in [this issue](https://github.com/transitive-bullshit/chatgpt-api/issues/96) to make this process easier and more automated.
+
+# Initialization set-up
+
+![Initial set-up](metadata/6.png)
+
+> All the preferences value will be stored locally using [Preferences API](https://developers.raycast.com/api-reference/preferences)
 
 ---
 
