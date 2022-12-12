@@ -1,5 +1,5 @@
 import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
@@ -31,6 +31,13 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
           <Action.OpenInBrowser
             title="Open in Browser"
             url={`${AWS_URL_BASE}/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
+          />
+          <Action.OpenInBrowser
+            icon={Icon.Document}
+            title="Open CloudWatch Log Group"
+            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
+              process.env.AWS_REGION
+            }#logsV2:log-groups/log-group/${encodeURIComponent(`/aws/lambda/${func.FunctionName}`)}`}
           />
           <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
           <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
