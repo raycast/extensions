@@ -35,7 +35,7 @@ export default function Command() {
       markdown={`# ${joke.replaceAll(/\n/g, "\n# ")}`}
       actions={
         <ActionPanel>
-          <Action title="New Joke" onAction={revalidate} />
+          <Action title="New Advice Slip" onAction={revalidate} />
         </ActionPanel>
       }
     />
