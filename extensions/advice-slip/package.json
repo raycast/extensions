@@ -5,6 +5,9 @@
   "description": "Get a random advice slip",
   "icon": "advice.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "andreaselia"
+  ],
   "categories": [
     "Fun"
   ],
