@@ -163,7 +163,15 @@ export default function ChatGPT() {
       sessionToken: string;
     }>().sessionToken;
 
-    return new ChatGPTAPI({ sessionToken });
+    const clearanceToken = getPreferenceValues<{
+      clearanceToken: string;
+    }>().clearanceToken;
+
+    const userAgent = getPreferenceValues<{
+      userAgent: string;
+    }>().userAgent;
+
+    return new ChatGPTAPI({ sessionToken, clearanceToken, userAgent });
   });
 
   async function getAnswer(question: string) {
@@ -178,9 +186,10 @@ export default function ChatGPT() {
 
     if (!isAuthenticated) {
       await confirmAlert({
-        title: "Your session token is invalid",
+        title: "Your preferences value is invalid",
         icon: Icon.Gear,
-        message: "Please go to the preferences and enter a new valid session token.",
+        message:
+          "Please go to the preferences and enter a new valid session token, clearance token, or user agent value.",
         primaryAction: {
           title: "Open preferences",
           style: Alert.ActionStyle.Destructive,
