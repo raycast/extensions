@@ -28,11 +28,11 @@ export default function Command() {
     },
   });
 
-  const joke = !isLoading && data?.slip?.advice ? data?.slip?.advice : "Loading...";
+  const advice = !isLoading && data?.slip?.advice ? data?.slip?.advice : "Loading...";
   return (
     <Detail
       isLoading={isLoading}
-      markdown={`# ${joke.replaceAll(/\n/g, "\n# ")}`}
+      markdown={`# ${advice.replaceAll(/\n/g, "\n# ")}`}
       actions={
         <ActionPanel>
           <Action title="New Advice Slip" onAction={revalidate} />
