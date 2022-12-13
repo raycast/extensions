@@ -276,6 +276,7 @@
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
+/extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/guitar-chords                            @GastroGeek
 /extensions/hacker-news                              @thomaspaulmann @GastroGeek @sxn
 /extensions/hackmd                                   @Yukaii
