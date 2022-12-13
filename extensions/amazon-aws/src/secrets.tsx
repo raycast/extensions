@@ -68,14 +68,14 @@ function Secret({
               <List.Item.Detail.Metadata.Label title="Creation Date" text={secret.CreatedDate?.toLocaleString()} />
               <List.Item.Detail.Metadata.Label title="Last Accessed" text={secret.LastAccessedDate?.toLocaleString()} />
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Rotation" text={`${secret.RotationEnabled ? "true" : "false"}`} />
+              <List.Item.Detail.Metadata.Label title="Rotation" text={secret.RotationEnabled ? "true" : "false"} />
             </List.Item.Detail.Metadata>
           }
         />
       }
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={showValue ? "Hide Value" : "Show Value"} onSubmit={() => setShowValue()} />
+          <Action title={showValue ? "Hide Value" : "Show Value"} onAction={() => setShowValue()} />
           <Action.CopyToClipboard title="Copy Value" content={secretDetails?.SecretString || ""} />
           <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
           <Action.OpenInBrowser
