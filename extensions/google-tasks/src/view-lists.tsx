@@ -5,6 +5,7 @@ import {
   showToast,
   ActionPanel,
   Action,
+  Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import ListView from "./components/ListView";
@@ -46,6 +47,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   title="Show List"
+                  icon={Icon.List}
                   target={<ListView listId={list.id} />}
                 />
               </ActionPanel>

@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { useCallback } from "react";
 import { Task } from "../types";
 
@@ -26,7 +26,7 @@ export default function EditTaskForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Task" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit Task" icon={Icon.Pencil} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

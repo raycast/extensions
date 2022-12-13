@@ -53,14 +53,21 @@ export default function TaskItem(props: {
       }
       actions={
         <ActionPanel>
-          <Action title="Toggle Task" onAction={props.onToggle} />
+          <Action
+            title="Complete Task"
+            icon={Icon.CheckCircle}
+            onAction={props.onToggle}
+          />
           <Action
             title="Delete Task"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
             shortcut={{ modifiers: ["cmd"], key: "backspace" }}
             onAction={props.onDelete}
           />
           <Action.Push
             title="Create Task"
+            icon={Icon.NewDocument}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={
               <CreateTaskForm listId={props.listId} onCreate={props.onCreate} />
@@ -68,6 +75,7 @@ export default function TaskItem(props: {
           />
           <Action.Push
             title="Edit Task"
+            icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
             target={
               <EditTaskForm
