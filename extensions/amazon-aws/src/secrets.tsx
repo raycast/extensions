@@ -59,7 +59,7 @@ function Secret({
       title={secret.Name || ""}
       detail={
         <List.Item.Detail
-          markdown={secretDetails?.SecretString || secretDetails?.SecretBinary.toString() || ""}
+          markdown={secretDetails?.SecretString || secretDetails?.SecretBinary?.toString() || ""}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Description" text={secret.Description} />
@@ -76,11 +76,11 @@ function Secret({
       actions={
         <ActionPanel>
           <Action.SubmitForm title={showValue ? "Hide Value" : "Show Value"} onSubmit={() => setShowValue()} />
-          <Action.CopyToClipboard title="Copy Value" content={secretDetails.SecretString || ""} />
+          <Action.CopyToClipboard title="Copy Value" content={secretDetails?.SecretString || ""} />
           <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
           <Action.OpenInBrowser
             title="Open Secret"
-            url={`${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(secret.Name)}&region=${
+            url={`${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(secret.Name || "")}&region=${
               process.env.AWS_REGION
             }`}
           />
@@ -116,7 +116,7 @@ async function fetchSecrets(
   return combinedLogGroups;
 }
 
-async function fetchSecret(arn?: string): Promise<{ SecretString: string; SecretBinary: Uint8Array } | undefined> {
+async function fetchSecret(arn?: string): Promise<{ SecretString?: string; SecretBinary?: Uint8Array } | undefined> {
   if (!arn) return;
   const { SecretString, SecretBinary } = await new SecretsManagerClient({}).send(
     new GetSecretValueCommand({ SecretId: arn })
