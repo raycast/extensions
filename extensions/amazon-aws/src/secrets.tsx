@@ -77,6 +77,7 @@ function Secret({
         <ActionPanel>
           <Action.SubmitForm title={showValue ? "Hide Value" : "Show Value"} onSubmit={() => setShowValue()} />
           <Action.CopyToClipboard title="Copy Value" content={secretDetails.SecretString || ""} />
+          <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
           <Action.OpenInBrowser
             title="Open Secret"
             url={`${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(secret.Name)}&region=${
