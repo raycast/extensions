@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Secrets Manager Command] - 2022-12-13
+
+- Add "Secrets Manager" command ([#3865](https://github.com/raycast/extensions/pull/3843))
+
 ## [CloudWatch & SSM Command] - 2022-12-10
 
 - Add "CloudWatch Log Groups" command ([#3843](https://github.com/raycast/extensions/pull/3843))
