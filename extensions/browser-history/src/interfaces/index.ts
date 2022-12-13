@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface Preferences {
   readonly enableChrome: boolean;
   readonly enableFirefox: boolean;
@@ -8,22 +10,17 @@ export interface Preferences {
   readonly firstInResults: string;
 }
 
+export interface SearchResult {
+  readonly browser: SupportedBrowsers;
+  readonly isLoading: boolean;
+  readonly permissionView?: ReactNode;
+  readonly data?: HistoryEntry[] | undefined;
+}
 export interface HistoryEntry {
   readonly id: string;
   readonly url: string;
   readonly title: string;
   readonly lastVisited: Date;
-}
-
-export interface HistorySearchResults {
-  readonly entriesChrome: HistoryEntry[];
-  readonly entriesFirefox: HistoryEntry[];
-  readonly entriesSafari: HistoryEntry[];
-  readonly entriesEdge: HistoryEntry[];
-  readonly entriesBrave: HistoryEntry[];
-  readonly entriesVivaldi: HistoryEntry[];
-  readonly error?: unknown;
-  readonly isLoading: boolean;
 }
 
 export enum SupportedBrowsers {

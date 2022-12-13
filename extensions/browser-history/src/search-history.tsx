@@ -1,10 +1,9 @@
-import { ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
-import { useState, ReactElement } from "react";
-import { ListEntries } from "./components";
+import { ReactElement, useState } from "react";
 import { Preferences, SupportedBrowsers } from "./interfaces";
-import { ActionOpenPreferences, PermissionErrorDetail } from "./components/actions";
-import { isPermissionError } from "./util";
+import { ListEntries } from "./components";
+import { ActionOpenPreferences } from "./components/actions";
 
 const arrangeEntries = (entries: ReactElement[], firstInResults: string) => {
   let firstEntries: ReactElement[] = [];
@@ -40,35 +39,34 @@ export default function Command(): ReactElement {
     preferences.enableBrave ||
     preferences.enableVivaldi;
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entriesChrome, entriesFirefox, entriesSafari, entriesEdge, entriesBrave, entriesVivaldi } =
-    useHistorySearch(searchText);
 
-  if (error) {
-    if (isPermissionError(error)) {
-      return <PermissionErrorDetail />;
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Cannot search history",
-        message: error instanceof Error ? error.message : undefined,
-      });
-    }
+  const isLoading: boolean[] = [];
+  const permissionView: any[] = [];
+
+  let entries = Object.entries(preferences)
+    .filter(([key, val]) => key.startsWith("enable") && val)
+    .map(([key]) => {
+      const browser = key.replace("enable", "") as SupportedBrowsers;
+      return useHistorySearch(browser, searchText);
+    })
+    .map((entry) => {
+      if (entry.permissionView) {
+        permissionView.push(entry.permissionView);
+      }
+      isLoading.push(entry.isLoading);
+
+      return (
+        <List.Section title={entry.browser || ""} key={entry.browser}>
+          {entry.data?.map((e) => (
+            <ListEntries.HistoryEntry entry={e} key={e.id} />
+          ))}
+        </List.Section>
+      );
+    });
+
+  if (permissionView.length > 0) {
+    return permissionView[0];
   }
-
-  let entries = [
-    { name: "Chrome", entries: entriesChrome },
-    { name: "Firefox", entries: entriesFirefox },
-    { name: "Safari", entries: entriesSafari },
-    { name: "Edge", entries: entriesEdge },
-    { name: "Brave", entries: entriesBrave },
-    { name: "Vivaldi", entries: entriesVivaldi },
-  ].map((entry) => (
-    <List.Section title={entry.name} key={entry.name}>
-      {entry.entries?.map((e) => (
-        <ListEntries.HistoryEntry entry={e} key={e.id} />
-      ))}
-    </List.Section>
-  ));
 
   entries = arrangeEntries(entries, preferences.firstInResults);
 
@@ -77,7 +75,7 @@ export default function Command(): ReactElement {
       onSearchTextChange={function (query) {
         setSearchText(query);
       }}
-      isLoading={isLoading}
+      isLoading={isLoading.some((e) => e)}
       throttle={false}
     >
       {!enabled ? (
