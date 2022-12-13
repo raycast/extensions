@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Fix bug] - 2022-12-13
 
 - Fix the bug of pop-up Toast error when refreshing in the background
 
