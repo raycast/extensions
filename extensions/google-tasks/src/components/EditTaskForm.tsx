@@ -15,7 +15,7 @@ export default function EditTaskForm(props: {
         ...props.task,
         title: values.title,
         notes: values.notes,
-        due: values.due,
+        due: values.due, 
       });
       pop();
     },
