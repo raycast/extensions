@@ -20,7 +20,7 @@ export default () => {
   const list = results.data?.list || [];
 
   return (
-    <Grid isLoading={isLoading} onSearchTextChange={setSearch} throttle>
+    <Grid isLoading={isLoading} onSearchTextChange={setSearch} inset={Grid.Inset.Medium} columns={8} throttle>
       {displayResults({ search, list, error: auth.error })}
     </Grid>
   );
