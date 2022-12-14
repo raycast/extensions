@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import Times from "./times";
 
 const TALLINN_STOP_ID = "64-5354-93";
@@ -14,6 +14,7 @@ export default function Command() {
           <ActionPanel>
             <Action.Push
               title="Show Times"
+              icon={Icon.Train}
               target={
                 <Times
                   originStopAreaId={TALLINN_STOP_ID}
@@ -32,6 +33,7 @@ export default function Command() {
           <ActionPanel>
             <Action.Push
               title="Show Times"
+              icon={Icon.Train}
               target={
                 <Times
                   originStopAreaId={TARTU_STOP_ID}
