@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [ECS Command] - 2022-12-14
+- Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
+- Added support for viewing Lambda logs from within Raycast or the browser
+
 ## [Secrets Manager Command] - 2022-12-13
 
 - Add "Secrets Manager" command ([#3865](https://github.com/raycast/extensions/pull/3843))

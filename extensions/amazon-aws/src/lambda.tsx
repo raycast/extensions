@@ -1,7 +1,11 @@
 import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
+import { getActionPush } from "./util";
+import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
+import { getTaskCWLogsGroupUrl } from "./actions";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -24,7 +28,7 @@ export default function Lambda() {
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
-      icon={Icon.CodeBlock}
+      icon={"aws-icons/lam.png"}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
@@ -35,12 +39,19 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
           <Action.OpenInBrowser
             icon={Icon.Document}
             title="Open CloudWatch Log Group"
-            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
-              process.env.AWS_REGION
-            }#logsV2:log-groups/log-group/${encodeURIComponent(`/aws/lambda/${func.FunctionName}`)}`}
+            url={getTaskCWLogsGroupUrl(encodeURIComponent(`/aws/lambda/${func.FunctionName}`))}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
-          <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
-          <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
+          {getActionPush({
+            title: "View Log Streams",
+            component: CloudwatchLogStreams,
+            logGroupName: `/aws/lambda/${func.FunctionName}`,
+            shortcut: { modifiers: ["opt"], key: "l" },
+          })}
+          <ActionPanel.Section title={"Copy"}>
+            <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
+            <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[{ text: func.Runtime || "" }, { icon: getRuntimeIcon(func.Runtime) }]}
