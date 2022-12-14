@@ -5,6 +5,9 @@
   "description": "Quickly find the most common JS regular expressions.",
   "icon": "command-icon.png",
   "author": "musienkoyuriy",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"

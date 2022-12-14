@@ -9,7 +9,7 @@ export function capitalizeSentence(sentence: string): string {
   return sentence.split(" ").map(capitalize).join(" ");
 }
 
-export function ellipsis(str: string, maxLength = 15): string {
+export function ellipsis(str: string, maxLength = 25): string {
   return (str ?? "").length >= maxLength ? `${str.slice(0, maxLength)}...` : str;
 }
 
