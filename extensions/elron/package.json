@@ -5,6 +5,9 @@
   "description": "Fetch train times for Elron train times",
   "icon": "elron-icon.png",
   "author": "raimond",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Other"
   ],
