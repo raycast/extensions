@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Detail } from "@raycast/api";
+import { Action, ActionPanel, List, Detail, Icon } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { format, formatDuration, intervalToDuration } from "date-fns";
@@ -101,6 +101,7 @@ There was an error fetching the train times. Please try again later.
                   <ActionPanel>
                     <Action.Push
                       title="Show Stops"
+                      icon={Icon.Train}
                       target={<Stops tripId={trip.id} title={`${route}: Show Stops`} />}
                     />
                   </ActionPanel>
