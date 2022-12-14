@@ -11,7 +11,7 @@ export function partitionTasksWithOverdue(tasks: Task[]) {
 export function getSectionsWithDueDates(tasks: Task[]) {
   const [overdue, upcoming] = partitionTasksWithOverdue(tasks);
 
-  const allDueDates = [...new Set(tasks.map((task) => task.due?.date))] as string[];
+  const allDueDates = [...new Set(upcoming.map((task) => task.due?.date))] as string[];
   allDueDates.sort((dateA, dateB) => compareAsc(new Date(dateA), new Date(dateB)));
 
   const sections = allDueDates.map((date) => ({
