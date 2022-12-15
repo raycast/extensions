@@ -4,12 +4,12 @@
 
 ### Fixed
 
-- 修复项目打开次数无法更新
+- Repair item open times cannot be updated
 
 ### Change
 
-- 新增选择应用 icon
-- 去除列表防抖
+- Added selection app icon
+- Remove list stabilization
 
 ## [1.0.0] - 2022-11-09
 
