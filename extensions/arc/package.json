@@ -24,7 +24,7 @@
     },
     {
       "name": "new-window",
-      "title": "New Window",
+      "title": "Open New Window",
       "description": "Creates a new window",
       "mode": "no-view",
       "subtitle": "Arc",
