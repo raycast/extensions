@@ -25,7 +25,10 @@ export default function Command() {
           })}
         </List.Section>
       ))}
-      <List.EmptyView icon="icon.png" title="Whoops! We did not find any matches for your search." />
+      <List.EmptyView
+        icon={{ source: { light: "empty-view.png", dark: "empty-view@dark.png" } }}
+        title="Whoops! We did not find any matches for your search."
+      />
     </List>
   );
 }
