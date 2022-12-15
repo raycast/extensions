@@ -6,8 +6,7 @@ import { FetchHeaders, getFetchDeploymentsURL } from "../../vercel";
 import { useFetch } from "@raycast/utils";
 import MenuBarTeamAccessory from "../search-projects/team-switch-menubar-accessory";
 
-interface StateStyles
-  extends Record<DeploymentState, { icon: string; color: string }> {
+interface StateStyles extends Record<DeploymentState, { icon: string; color: string }> {
   undefined: { icon: string; color: string };
 }
 
@@ -59,9 +58,7 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
     // TODO: why can't I `{ headers: FetchHeaders }` here?
   }>(url, {
     // @ts-expect-error Type 'null' is not assignable to type 'string'.
-    headers: FetchHeaders.get("Authorization")
-      ? [["Authorization", FetchHeaders.get("Authorization")]]
-      : [[]],
+    headers: FetchHeaders.get("Authorization") ? [["Authorization", FetchHeaders.get("Authorization")]] : [[]],
   });
 
   const deployments = data?.deployments;
@@ -90,9 +87,7 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
           const deploymentName = !projectId ? `${deployment.name}` : "";
           const commitMessage = getCommitMessage(deployment);
           const commitMessageTruncated = truncator(commitMessage, 40);
-          const deploymentDateFromNow = deployment.createdAt
-            ? fromNow(deployment.createdAt, new Date())
-            : "";
+          const deploymentDateFromNow = deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : "";
           return (
             <MenuBarExtra.Item
               title={commitMessageTruncated}
@@ -138,11 +133,7 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
         </MenuBarExtra.Submenu>
       </MenuBarExtra.Section>
       <MenuBarExtra.Section> */}
-        <MenuBarExtra.Item
-          title="Refresh"
-          onAction={revalidate}
-          icon={Icon.RotateClockwise}
-        />
+        <MenuBarExtra.Item title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
