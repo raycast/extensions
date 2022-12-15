@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "name": "cheetah",
   "title": "Cheetah",
   "description": "Search for a local Git project and open it with the specified application.",
