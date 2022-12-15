@@ -3,7 +3,7 @@
   "author": "shubham",
   "commands": [
     {
-      "description": "Browser Feedly articles and collections via Raycast",
+      "description": "Browse Feedly articles and collections via Raycast",
       "mode": "view",
       "name": "feedly",
       "title": "Feedly"
