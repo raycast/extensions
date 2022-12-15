@@ -1,5 +1,9 @@
 # Folder Search Changelog
 
+## [New Features] - 2022-12-15
+
+- **added** Can take selected Finder item(s) and allow you to move them to a selected folder via a new Action menu entry
+
 ## [New Features] - 2022-11-01
 
 - **added** Sorting of results by `Last used` to bring most recently used (opened) to the top of repeated searches.

@@ -13,6 +13,10 @@ import {
   environment,
   popToRoot,
   showToast,
+  showHUD,
+  confirmAlert,
+  open,
+  getSelectedFinderItems,
 } from "@raycast/api";
 
 import { usePromise } from "@raycast/utils";
@@ -32,6 +36,9 @@ import {
   maybeMoveResultToTrash,
   lastUsedSort,
 } from "./utils";
+
+import fse from "fs-extra";
+import path = require("node:path");
 
 // allow string indexing on Icons
 interface IconDictionary {
@@ -266,6 +273,61 @@ export default function Command() {
                   title="Show in Finder"
                   path={result.path}
                   onShow={() => popToRoot({ clearSearchBar: true })}
+                />
+                <Action
+                  title="Send Finder selection to Folder"
+                  icon={Icon.Folder}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  onAction={async () => {
+                    const selectedItems = await getSelectedFinderItems();
+
+                    if (selectedItems.length === 0) {
+                      await showHUD(`⚠️  No Finder selection to send.`);
+                    } else {
+                      for (const item of selectedItems) {
+                        // Source path = item
+                        // Source file name = path.basename(item)
+                        //
+                        // Destination folder = result.path
+                        // Destination file = result.path + '/' + path.basename(item)
+
+                        const sourceFileName = path.basename(item.path);
+                        const destinationFolder = result.path;
+                        const destinationFile = result.path + "/" + path.basename(item.path);
+
+                        try {
+                          const exists = await fse.pathExists(destinationFile);
+                          if (exists) {
+                            const overwrite = await confirmAlert({
+                              title: "Ooverwrite the existing file?",
+                              message: sourceFileName + " already exists in " + destinationFolder,
+                            });
+
+                            if (overwrite) {
+                              if (item.path == destinationFile) {
+                                await showHUD("The source and destination file are the same");
+                              }
+                              fse.moveSync(item.path, destinationFile, { overwrite: true });
+                              await showHUD("Moved file " + path.basename(item.path) + " to " + destinationFolder);
+                            } else {
+                              await showHUD("Cancelling move");
+                            }
+                          } else {
+                            fse.moveSync(item.path, destinationFile);
+                            await showHUD("Moved file " + sourceFileName + " to " + destinationFolder);
+                          }
+
+                          open(result.path);
+                        } catch (e) {
+                          console.error("ERROR " + String(e));
+                          await showToast(Toast.Style.Failure, "Error moving file " + String(e));
+                        }
+                      }
+                    }
+
+                    closeMainWindow();
+                    popToRoot({ clearSearchBar: true });
+                  }}
                 />
                 <Action.OpenWith
                   title="Open With..."
