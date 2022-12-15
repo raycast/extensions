@@ -158,6 +158,7 @@
 /extensions/dbt-documentation                        @b-per
 /extensions/dbtCloud                                 @zsombor-flds
 /extensions/debank                                   @Yukaii
+/extensions/deduplicator                             @lryong
 /extensions/deepcast                                 @mooxl @mooxl
 /extensions/defichain-dobby                          @adrian-schnell
 /extensions/defichain-lottery                        @adrian-schnell @pernielsentikaer

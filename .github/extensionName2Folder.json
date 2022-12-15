@@ -157,6 +157,7 @@
   "dbt-documentation": "dbt-documentation",
   "dbtcloud": "dbtCloud",
   "debank": "debank",
+  "deduplicator": "deduplicator",
   "deepcast": "deepcast",
   "defichain-dobby": "defichain-dobby",
   "defichain-lottery": "defichain-lottery",
