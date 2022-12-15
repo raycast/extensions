@@ -7,3 +7,4 @@ asana
 typefully
 supabase-docs
 cal-com-share-meeting-links
+supernotes

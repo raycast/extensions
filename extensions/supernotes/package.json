@@ -5,12 +5,17 @@
   "description": "Interact with the Supernotes platform in Raycast.",
   "icon": "supernotes-icon.png",
   "author": "acnebs",
+  "owner": "supernotes",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Applications",
     "Data",
     "Productivity"
   ],
+  "contributors": [
+    "peduarte"
+],
   "commands": [
     {
       "name": "create",
