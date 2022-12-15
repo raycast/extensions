@@ -21,7 +21,7 @@ const MenuBarTeamAccessory = ({ onTeamChange }: { onTeamChange: () => void }) =>
             source: Icon.Person,
             tintColor: user.username == selectedID ? Color.Green : Color.PrimaryText,
           }}
-          onAction={(newValue) => onChange(user.username)}
+          onAction={() => onChange(user.username)}
         />
       )}
       {teams?.length && <MenuBarExtra.Item title="Teams" />}
@@ -33,7 +33,7 @@ const MenuBarTeamAccessory = ({ onTeamChange }: { onTeamChange: () => void }) =>
             source: Icon.TwoPeople,
             tintColor: team.id == selectedID ? Color.Green : Color.PrimaryText,
           }}
-          onAction={(newValue) => onChange(team.id)}
+          onAction={() => onChange(team.id)}
         />
       ))}
     </MenuBarExtra.Submenu>
