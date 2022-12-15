@@ -2,4 +2,5 @@ linear
 github
 google-workspace
 zoom
+hypersonic
 asana
