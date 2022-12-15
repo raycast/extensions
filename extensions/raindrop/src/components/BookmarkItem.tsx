@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { Bookmark } from "../types";
-import { faviconUrl } from "../utils";
+import { faviconUrl } from "../helpers/favicon";
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);

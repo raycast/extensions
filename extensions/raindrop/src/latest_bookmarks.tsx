@@ -1,18 +1,28 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import BookmarkItem from "./components/BookmarkItem";
-import { useLatestBookmarks } from "./utils";
+import CollectionsDropdown from "./components/CollectionsDropdown";
 import { Bookmark } from "./types";
+import { useRequest } from "./hooks/useRequest";
 
 export default function LatestBookmarks() {
-  const { response, error, isLoading } = useLatestBookmarks();
+  const [collection, setCollection] = useCachedState<string>("selected-collection", "0");
 
-  if (error) {
-    showToast(Toast.Style.Failure, "Cannot search bookmark", error);
-  }
+  const { isLoading, bookmarks, collections } = useRequest({ collection });
+
+  const onCollectionChange = (value: string) => {
+    if (collection !== value) {
+      setCollection(value);
+    }
+  };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter bookmarks by title...">
-      {response?.items?.map((bookmark: Bookmark) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter bookmarks by title..."
+      searchBarAccessory={<CollectionsDropdown isLoading={isLoading} handleChange={onCollectionChange} collections={collections} />}
+    >
+      {bookmarks?.items?.map((bookmark: Bookmark) => (
         <BookmarkItem key={bookmark._id} bookmark={bookmark} />
       ))}
     </List>
