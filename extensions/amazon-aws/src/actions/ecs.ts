@@ -34,7 +34,7 @@ export async function fetchServices(clusterArn: string): Promise<Service[]> {
     serviceChunks.map((chunk) => ecsClient.send(new DescribeServicesCommand({ cluster: clusterArn, services: chunk })))
   );
 
-  return [...(services.map((entry) => entry.services!).flat(2) || [])];
+  return [...(services.map((entry) => entry.services || []).flat(2) || [])];
 }
 
 export async function fetchTasks(clusterArn: string, serviceName: string): Promise<Task[]> {
@@ -47,7 +47,7 @@ export async function fetchTasks(clusterArn: string, serviceName: string): Promi
     taskChunks.map((chunk) => ecsClient.send(new DescribeTasksCommand({ cluster: clusterArn, tasks: chunk })))
   );
 
-  return [...(tasks.map((entry) => entry.tasks!).flat(2) || [])];
+  return [...(tasks.map((entry) => entry.tasks || []).flat(2) || [])];
 }
 
 export async function fetchTaskContainers(taskDefArn: string): Promise<ContainerDefinition[]> {

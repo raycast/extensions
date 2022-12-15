@@ -16,8 +16,10 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
     const actionViewInApp = getActionPush({
       title: "View Logs",
       component: CloudwatchLogs,
-      logGroupName: container.logConfiguration?.options!["awslogs-group"]!,
-      logGroupStreamPrefix: container.logConfiguration?.options!["awslogs-stream-prefix"]!,
+      logGroupName: container.logConfiguration?.options ? container.logConfiguration?.options["awslogs-group"] : "",
+      logGroupStreamPrefix: container.logConfiguration?.options
+        ? container.logConfiguration?.options["awslogs-stream-prefix"]
+        : "",
     });
     const actionViewInBrowser = getActionOpenInBrowser(getTaskContainerUrl(taskDefinitionArn));
 

@@ -15,7 +15,7 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
       title: "View Logs",
       component: CloudwatchLogs,
       logGroupName,
-      logStreamNames: stream.logStreamName!,
+      logStreamNames: stream.logStreamName ?? undefined,
     });
     const actionViewInBrowser = getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName));
 
@@ -46,7 +46,10 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
               </ActionPanel>
             }
             accessories={[
-              { text: new Date(s.lastEventTimestamp!).toLocaleString() || "", tooltip: "Last Event Timestamp" },
+              {
+                text: s.lastEventTimestamp ? new Date(s.lastEventTimestamp).toLocaleString() : "",
+                tooltip: "Last Event Timestamp",
+              },
             ]}
           />
         ))

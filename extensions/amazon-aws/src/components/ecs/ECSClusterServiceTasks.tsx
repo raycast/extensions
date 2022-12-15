@@ -8,15 +8,19 @@ import ECSClusterServiceTaskContainers from "./ECSClusterServiceTaskContainers";
 
 function ECSClusterServiceTasks({ service }: { service: Service }) {
   const { defaultAction } = getPreferenceValues<Preferences>();
-  const { data: tasks, isLoading } = useCachedPromise(fetchTasks, [service.clusterArn!, service.serviceName!], {
-    keepPreviousData: true,
-  });
+  const { data: tasks, isLoading } = useCachedPromise(
+    fetchTasks,
+    [service.clusterArn || "", service.serviceName || ""],
+    {
+      keepPreviousData: true,
+    }
+  );
 
   const getActions = (task: Task) => {
     const actionViewInApp = getActionPush({
       title: "View Containers",
       component: ECSClusterServiceTaskContainers,
-      taskDefinitionArn: task.taskDefinitionArn!,
+      taskDefinitionArn: task.taskDefinitionArn || "",
     });
     const actionViewInBrowser = getActionOpenInBrowser(getTaskUrl(task));
 

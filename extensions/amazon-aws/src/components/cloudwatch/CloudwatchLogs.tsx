@@ -21,7 +21,10 @@ function CloudwatchLogs({
 
   return (
     <Detail
-      markdown={logs?.reduce((acc, cur) => `${new Date(cur.timestamp!).toLocaleString()}-${cur.message}\n\n${acc}`, "")}
+      markdown={logs?.reduce(
+        (acc, cur) => `${cur.timestamp ? new Date(cur.timestamp).toLocaleString() : ""}-${cur.message}\n\n${acc}`,
+        ""
+      )}
       isLoading={isLoading}
       actions={
         <ActionPanel>

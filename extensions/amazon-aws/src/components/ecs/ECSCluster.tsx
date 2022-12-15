@@ -1,5 +1,5 @@
 import { Cluster } from "@aws-sdk/client-ecs";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { DefaultAction, Preferences } from "../../interfaces";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getClusterUrl } from "../../actions";
@@ -9,7 +9,7 @@ import { useEffect } from "react";
 
 function ECSCluster({ cluster, setIsLoading }: { cluster: Cluster; setIsLoading: (isLoading: boolean) => void }) {
   const { defaultAction } = getPreferenceValues<Preferences>();
-  const { data: services, isLoading } = useCachedPromise(fetchServices, [cluster.clusterArn!], {
+  const { data: services, isLoading } = useCachedPromise(fetchServices, [cluster.clusterArn ?? ""], {
     keepPreviousData: true,
   });
 
@@ -21,7 +21,7 @@ function ECSCluster({ cluster, setIsLoading }: { cluster: Cluster; setIsLoading:
     const actionViewInApp = getActionPush({
       title: "View Services",
       component: ECSClusterServices,
-      clusterArn: cluster.clusterArn!,
+      clusterArn: cluster.clusterArn ?? undefined,
     });
     const actionViewInBrowser = getActionOpenInBrowser(getClusterUrl(cluster));
 
@@ -44,7 +44,7 @@ function ECSCluster({ cluster, setIsLoading }: { cluster: Cluster; setIsLoading:
               {services?.map((s) => (
                 <List.Item.Detail.Metadata.Label
                   key={s.serviceName}
-                  title={s.serviceName!}
+                  title={s.serviceName || ""}
                   text={`${s.runningCount} / ${s.pendingCount}`}
                 />
               ))}
