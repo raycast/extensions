@@ -49,6 +49,8 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
       );
     case SupportedBrowsers.Vivaldi:
       return path.join(userDataDirectory, "Application Support", "Vivaldi", "Default", "History");
+    case SupportedBrowsers.Arc:
+      return path.join(userDataDirectory, "Application Support", "Arc", "User Data", "Default", "History");
     default:
       throw new Error("Unsupported browser.");
   }

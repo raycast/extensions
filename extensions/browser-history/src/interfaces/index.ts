@@ -7,6 +7,7 @@ export interface Preferences {
   readonly enableEdge: boolean;
   readonly enableBrave: boolean;
   readonly enableVivaldi: boolean;
+  readonly enableArc: boolean;
   readonly firstInResults: string;
 }
 
@@ -30,6 +31,7 @@ export enum SupportedBrowsers {
   Edge = "Edge",
   Brave = "Brave",
   Vivaldi = "Vivaldi",
+  Arc = "Arc",
 }
 
 export type HistoryQueryFunction = (table: string, date_field: string, terms: string[]) => string;

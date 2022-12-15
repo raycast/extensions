@@ -20,6 +20,9 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Vivaldi:
       appName = "Vivaldi";
       break;
+    case SupportedBrowsers.Arc:
+      appName = "Arc";
+      break;
     default:
       throw new Error(`Unsupported browser: ${browser}`);
   }

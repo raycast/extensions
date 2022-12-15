@@ -24,6 +24,9 @@ const arrangeEntries = (entries: ReactElement[], firstInResults: string) => {
     case SupportedBrowsers.Vivaldi:
       firstEntries = entries.splice(5, 1);
       break;
+    case SupportedBrowsers.Arc:
+      firstEntries = entries.splice(6, 1);
+      break;
   }
   entries.unshift(firstEntries[0]);
   return entries;
@@ -37,7 +40,8 @@ export default function Command(): ReactElement {
     preferences.enableSafari ||
     preferences.enableEdge ||
     preferences.enableBrave ||
-    preferences.enableVivaldi;
+    preferences.enableVivaldi ||
+    preferences.enableArc;
   const [searchText, setSearchText] = useState<string>();
 
   const isLoading: boolean[] = [];
