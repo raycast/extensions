@@ -24,7 +24,6 @@ export default function Command() {
     <List>
       <List.Item title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
       <List.Item title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
-      <List.Item title="Brown" icon={{ source: Icon.Circle, tintColor: Color.Brown }} />
       <List.Item title="Magenta" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />
       <List.Item title="Orange" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />
       <List.Item title="Purple" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
@@ -42,7 +41,6 @@ export default function Command() {
 | Name          | Dark Theme                                               | Light Theme                                         |
 | :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
 | Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
-| Brown         | ![](../../.gitbook/assets/color-dark-brown.png)          | ![](../../.gitbook/assets/color-brown.png)          |
 | Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
 | Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
 | Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |

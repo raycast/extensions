@@ -95,11 +95,7 @@ function validatePassword(value: string): boolean {
 
 ## Drafts
 
-Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the top-level props `draftValues`.
-
-| Property | Description | Type |
-| :--- | :--- | :--- |
-| draftValues | When a user enters the command via a draft, this object will contain the user inputs that were saved as a draft. Use its values to populate the initial state for your Form. | <code>[Form.Values](form.md#form.values)</code> |
+Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when an end-user exits the command. To enable this mechanism, set the `enableDrafts` prop on your Form and populate the initial values of the Form with the [top-level prop `draftValues`](../../information/lifecycle/README.md#launchprops).
 
 ![](../../.gitbook/assets/form-drafts.png)
 
@@ -118,7 +114,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 {% tab title="Uncontrolled Form" %}
 
 ```typescript
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, LaunchProps } from "@raycast/api";
 
 interface TodoValues {
   title: string;
@@ -126,13 +122,8 @@ interface TodoValues {
   dueDate?: Date;
 }
 
-export default function Command(props: { draftValues?: TodoValues }) {
+export default function Command(props: LaunchProps<{ draftValues: TodoValues }>) {
   const { draftValues } = props;
-
-  function handleSubmit(values: TodoValues) {
-    console.log("onSubmit", values);
-    popToRoot();
-  }
 
   return (
     <Form
@@ -141,7 +132,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values: TodoValues) => {
-              handleSubmit(values);
+              console.log("onSubmit", values);
               popToRoot();
             }}
           />
@@ -161,7 +152,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
 {% tab title="Controlled Form" %}
 
 ```typescript
-import { Form, ActionPanel, Action, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 
 interface TodoValues {
@@ -170,17 +161,12 @@ interface TodoValues {
   dueDate?: Date;
 }
 
-export default function Command(props: { draftValues?: TodoValues }) {
+export default function Command(props: LaunchProps<{ draftValues: TodoValues }>) {
   const { draftValues } = props;
 
   const [title, setTitle] = useState<string>(draftValues?.title || "");
   const [description, setDescription] = useState<string>(draftValues?.description || "");
   const [dueDate, setDueDate] = useState<Date | null>(draftValues?.dueDate || null);
-
-  function handleSubmit(values: TodoValues) {
-    console.log("onSubmit", values);
-    popToRoot();
-  }
 
   return (
     <Form
@@ -189,7 +175,7 @@ export default function Command(props: { draftValues?: TodoValues }) {
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values: TodoValues) => {
-              handleSubmit(values);
+              console.log("onSubmit", values);
               popToRoot();
             }}
           />
@@ -717,6 +703,7 @@ export default function Command() {
 | filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | info | An optional info message to describe the form item. It appears on the right side of the item with an info icon. When the icon is hovered, the info message is shown. | <code>string</code> | - |
 | isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
 | storeValue | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. | <code>boolean</code> | - |
 | throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
 | title | The title displayed on the left side of the item. | <code>string</code> | - |

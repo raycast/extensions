@@ -138,7 +138,7 @@ export default function Main() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item. | <code>string</code> | - |
+| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color: [Color](colors.md#color); value: string }</code> | - |
 
 ### Detail.Metadata.Link
 

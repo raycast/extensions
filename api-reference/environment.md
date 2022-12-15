@@ -41,7 +41,6 @@ export default async function Command() {
 | supportPath<mark style="color:red;">*</mark> | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. | <code>string</code> |
 | textSize<mark style="color:red;">*</mark> | The text size used by the Raycast application. | <code>"medium"</code> or <code>"large"</code> |
 | theme<mark style="color:red;">*</mark> | The theme used by the Raycast application. | <code>"light"</code> or <code>"dark"</code> |
-| launchContext | Any custom context values passed from a programmatic command launch via `launchCommand`. | <code>[LaunchContext](environment.md#launchcontext)</code> |
 
 ### getSelectedFinderItems
 
@@ -74,7 +73,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the [selected file system items](#filesystemitem).
+A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
 ### getSelectedText
 
@@ -108,7 +107,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the selected text.
+A Promise that resolves with the selected text. If no text is selected in the frontmost application, the promise will be rejected.
 
 ## Types
 
@@ -132,7 +131,3 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
-
-### LaunchContext
-
-Represents the passed context object of programmatic command launches.

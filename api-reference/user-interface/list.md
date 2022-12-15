@@ -732,7 +732,7 @@ export default function Metadata() {
 | :--- | :--- | :--- | :--- |
 | title<mark style="color:red;">*</mark> | The title of the item. | <code>string</code> | - |
 | icon | An icon to illustrate the value of the item. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | - |
-| text | The text value of the item. | <code>string</code> | - |
+| text | The text value of the item. Specifying `color` will display the text in the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>{ color: [Color](colors.md#color); value: string }</code> | - |
 
 ### List.Item.Detail.Metadata.Link
 
@@ -908,15 +908,16 @@ An interface describing an accessory view in a `List.Item`.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| text | An optional text that will be used as the label. | <code>string</code> or <code>null</code> |
-| date | An optional Date that will be used as the label. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). | <code>Date</code> or <code>null</code> |
+| tag<mark style="color:red;">*</mark> | A string or Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color and sets a transparent background with the same color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>Date</code> or <code>undefined</code> or <code>null</code> or <code>{ color: [Color](colors.md#color); value: string</code> or <code>Date</code> or <code>undefined</code> or <code>null }</code> |
+| text | An optional text that will be used as the label, optionally colored. Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>string</code> or <code>null</code> or <code>{ color: [Color](colors.md#color); value: string</code> or <code>undefined</code> or <code>null }</code> |
+| date | An optional Date that will be used as the label, optionally colored. The date is formatted relatively to the current time (for example `new Date()` will be displayed as `"now"`, yesterday's Date will be displayed as "1d", etc.). Color changes the text color to the provided color. Defaults to [Color.SecondaryText](colors.md#color). | <code>Date</code> or <code>null</code> or <code>{ color: [Color](colors.md#color); value: Date</code> or <code>undefined</code> or <code>null }</code> |
 | icon | An optional [Image.ImageLike](icons-and-images.md#image.imagelike) that will be used as the icon. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> or <code>null</code> |
 | tooltip | An optional tooltip shown when the accessory is hovered. | <code>string</code> or <code>null</code> |
 
 #### Example
 
 ```typescript
-import { Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -925,9 +926,13 @@ export default function Command() {
         title="An Item with Accessories"
         accessories={[
           { text: `An Accessory Text`, icon: Icon.Hammer },
+          { text: { value: `A Colored Accessory Text`, color: Color.Orange }, icon: Icon.Hammer },
           { icon: Icon.Person, tooltip: "A person" },
           { text: "Just Do It!" },
           { date: new Date() },
+          { tag: new Date() },
+          { tag: { value: new Date(), color: Color.Magenta } },
+          { tag: { value: "User", color: Color.Magenta }, tooltip: "Tag with tooltip" },
         ]}
       />
     </List>
