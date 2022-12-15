@@ -1,10 +1,10 @@
 # Raindrop.io Extension Changelog
 
-## [Adds Collections filter] - 2022-02-15
+## [Add collections filter] - 2022-12-15
 
-- Adds Raindrop icon if bookmark has no favicon
+- Adds a filter in the bookmarks list to be able to limit results to only in the selected collection
 
-## [Add fallback icon] - 2022-08-02
+## [Add fallback icon] - 2022-08-03
 
 - Adds Raindrop icon if bookmark has no favicon
 
