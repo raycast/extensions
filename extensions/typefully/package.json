@@ -3,7 +3,7 @@
   "name": "typefully",
   "title": "Typefully",
   "description": "The Typefully extension to help you schedule tweets and reach your audience.",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "danielferguson",
   "owner": "typefully",
   "access": "public",
