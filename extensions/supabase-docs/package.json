@@ -5,6 +5,8 @@
   "description": "Quickly search Supabase documentation and open it in the browser",
   "icon": "supabase-logo.png",
   "author": "Isaiah-Hamilton",
+  "owner": "supabase",
+  "access": "public",
   "categories": [
     "Documentation",
     "Developer Tools"
