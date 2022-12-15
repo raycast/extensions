@@ -1,15 +1,20 @@
 import { Color } from "@raycast/api";
-import { Device, RawDeviceData } from "../../../types";
+import { Device, RawDeviceData } from "src/types";
 
 function populate(device: Device, deviceData: RawDeviceData) {
   // Extract properties for easier access
   const deviceProperties = deviceData[device.name];
 
+  // Prepare structure for accessories battery icons
+  const batteryIcons: { main: string } = {
+    main: "",
+  };
+
   // Populate icon and model
   switch (device.productId) {
-    case MagicMouse.Models[1]:
-    case MagicMouse.Models[2]:
-      device.icon = { source: "icons/devices/apple/magic-mouse.svg" };
+    case UgreenProducts.Models.HiTuneX6:
+      device.icon = { source: "icons/devices/ugreen/hitune.x6.svg" };
+      batteryIcons.main = "icons/bolt.svg";
       break;
   }
 
@@ -19,7 +24,7 @@ function populate(device: Device, deviceData: RawDeviceData) {
     if (mainBatteryLevel) {
       device.accessories.push({
         text: mainBatteryLevel,
-        icon: { source: "icons/bolt.svg", tintColor: Color.PrimaryText },
+        icon: { source: batteryIcons.main, tintColor: Color.PrimaryText },
       });
     }
   }
@@ -28,12 +33,11 @@ function populate(device: Device, deviceData: RawDeviceData) {
   return device;
 }
 
-const MagicMouse = {
+const UgreenProducts = {
   Models: {
-    1: "0x030D",
-    2: "0x0269",
+    HiTuneX6: "0x223B",
   },
   populate,
 };
 
-export default MagicMouse;
+export default UgreenProducts;

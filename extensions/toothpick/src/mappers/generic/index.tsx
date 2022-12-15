@@ -1,6 +1,6 @@
 import { Action, Clipboard, Color, Icon } from "@raycast/api";
 import { connectDevice, disconnectDevice } from "src/helpers/device-actions";
-import { Device, RawDeviceData } from "../../libs/types";
+import { Device, RawDeviceData } from "../../types";
 
 export default function mapGenericDevice(deviceData: RawDeviceData): Device {
   // Extract useful data

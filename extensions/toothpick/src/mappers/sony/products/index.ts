@@ -1,5 +1,5 @@
 import { Color } from "@raycast/api";
-import { Device, RawDeviceData } from "../../../types";
+import { Device, RawDeviceData } from "src/types";
 
 function populate(device: Device, deviceData: RawDeviceData) {
   // Extract properties for easier access
@@ -7,9 +7,9 @@ function populate(device: Device, deviceData: RawDeviceData) {
 
   // Populate icon and model
   switch (device.productId) {
-    case MagicMouse.Models[1]:
-    case MagicMouse.Models[2]:
-      device.icon = { source: "icons/devices/apple/magic-mouse.svg" };
+    case SonyProducts.Models.WH1000XM3:
+    case SonyProducts.Models.WH1000XM4:
+      // device.icon = { source: "icons/devices/apple/airpods.svg" };
       break;
   }
 
@@ -28,12 +28,12 @@ function populate(device: Device, deviceData: RawDeviceData) {
   return device;
 }
 
-const MagicMouse = {
+const SonyProducts = {
   Models: {
-    1: "0x030D",
-    2: "0x0269",
+    WH1000XM4: "0x0D58",
+    WH1000XM3: "0x0CD3",
   },
   populate,
 };
 
-export default MagicMouse;
+export default SonyProducts;
