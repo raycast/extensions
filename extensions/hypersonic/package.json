@@ -3,7 +3,7 @@
   "name": "hypersonic",
   "title": "Hypersonic",
   "description": "Fastest Notion to-do app ever",
-  "icon": "icon-purple.png",
+  "icon": "extension-icon.png",
   "author": "reboot.studio",
   "owner": "reboot",
   "access": "public",
