@@ -3,3 +3,4 @@ github
 google-workspace
 zoom
 asana
+reboot
