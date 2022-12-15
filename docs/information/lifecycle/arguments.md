@@ -2,9 +2,9 @@
 
 Raycast supports arguments for your commands so that users can enter values right from Root Search before opening the command.
 
-![](../.gitbook/assets/arguments.png)
+![](../../.gitbook/assets/arguments.png)
 
-Arguments are configured in the [manifest](./manifest.md#argument-properties) per command.
+Arguments are configured in the [manifest](../manifest.md#argument-properties) per command.
 
 {% hint style="info" %}
 
@@ -61,14 +61,14 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
 The command itself will receive the arguments' values via the `arguments` prop:
 
 ```typescript
-import { Form } from "@raycast/api";
+import { Form, LaunchProps } from "@raycast/api";
 
 interface TodoArguments {
   title: string;
   subtitle?: string;
 }
 
-export default function Todoist(props: { arguments: TodoArguments }) {
+export default function Todoist(props: LaunchProps<{ arguments: TodoArguments }>) {
   const { title, subtitle } = props.arguments;
   console.log(`title: ${title}, subtitle: ${subtitle}`);
 
@@ -81,7 +81,9 @@ export default function Todoist(props: { arguments: TodoArguments }) {
 }
 ```
 
-## Top-level `arguments` prop
+## Types
+
+### Arguments
 
 A command receives the values of its arguments via a top-level prop named `arguments`. It is an object with the arguments' `name` as keys and their values as the property's values.
 

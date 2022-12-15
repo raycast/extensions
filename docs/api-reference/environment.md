@@ -62,7 +62,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the [selected file system items](#filesystemitem).
+A Promise that resolves with the [selected file system items](#filesystemitem). If Finder is not the frontmost application, the promise will be rejected.
 
 ### getSelectedText
 
@@ -96,7 +96,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the selected text.
+A Promise that resolves with the selected text. If no text is selected in the frontmost application, the promise will be rejected.
 
 ## Types
 
@@ -118,7 +118,3 @@ Indicates the type of command launch. Use this to detect whether the command has
 | :------------ | :--------------------------------------------------------- |
 | UserInitiated | A regular launch through user interaction                  |
 | Background    | Scheduled through an interval and launched from background |
-
-### LaunchContext
-
-Represents the passed context object of programmatic command launches.
