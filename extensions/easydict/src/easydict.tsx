@@ -1,17 +1,17 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
- * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-26 21:47
+ * @lastEditor: Tisfeng
+ * @lastEditTime: 2022-12-16 17:02
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { getSelectedText, Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
-import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
+import { ListActionPanel, checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
@@ -27,7 +27,7 @@ interface EasydictArguments {
   queryText?: string;
 }
 
-export default function (props: { arguments: EasydictArguments }) {
+export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
@@ -133,7 +133,10 @@ export default function (props: { arguments: EasydictArguments }) {
       }
     } else {
       if (trimQueryText?.length) {
-        updateInputTextAndQueryText(trimQueryText, false);
+        // !!!: It seems Raycast API bug, if not use setTimeout, the `searchText` will not be updated when value is from arguments.
+        setTimeout(() => {
+          updateInputTextAndQueryText(trimQueryText, false);
+        }, 20);
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         querySelecedtText().then(() => {
           console.log(`after query selected text`);
