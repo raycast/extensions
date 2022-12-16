@@ -1,8 +1,10 @@
 import { ActionPanel, List, Action, Grid } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
+import { isDeepStrictEqual } from "util";
 import { preferences, layout } from "./preferences";
 import {
   Filters,
@@ -22,8 +24,7 @@ import {
   ListOrGridDropdownItem,
   ListOrGridSection,
 } from "./grid-or-list";
-import { getPinnedEntries, getPinnedMovement, PinnedActions } from "./pinned";
-import { useState, useEffect } from "react";
+import { getPinnedEntries, getPinnedMovement, PinnedActions, removePinnedEntry } from "./pinned";
 
 export default function Command() {
   const { data, isLoading } = useRecentEntries();
@@ -102,7 +103,14 @@ export default function Command() {
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
+          <Action.Trash
+            paths={[path]}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            onTrash={() => {
+              removePinnedEntry(props.entry);
+              refreshPinned();
+            }}
+          />
         </ActionPanel.Section>
         <PinnedActions
           {...props}
@@ -173,9 +181,11 @@ export default function Command() {
         ))}
       </ListOrGridSection>
       <ListOrGridSection title="Recent Projects">
-        {data?.filter(Filters[type]).map((entry: EntryLike, index: number) => (
-          <Entry key={index} entry={entry} />
-        ))}
+        {data
+          ?.filter((a) => Filters[type](a) && pinnedEntries.find((b) => isDeepStrictEqual(a, b)) === undefined)
+          .map((entry: EntryLike, index: number) => (
+            <Entry key={index} entry={entry} />
+          ))}
       </ListOrGridSection>
     </ListOrGrid>
   );
