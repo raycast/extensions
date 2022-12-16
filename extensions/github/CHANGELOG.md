@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Add text colors and tags] - 2022-12-16
+
+- Add colors to review decisions and remove icons to avoid confusion with CI checks
+- Change primary language and workflow's head branches from texts to tags
+
 ## [Issue and Pull Requests from repos] - 2022-11-21
 
 - Add actions to show pull requests and issues directly from a repository
