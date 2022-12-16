@@ -20,24 +20,44 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Size",
-          "default": "medium",
+          "title": "Photo Item Coloums",
+          "default": "5",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         }
@@ -51,24 +71,44 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Size",
-          "default": "medium",
+          "title": "Photo Item Coloums",
+          "default": "5",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         }
@@ -82,24 +122,44 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "itemSize",
+          "name": "columns",
           "type": "dropdown",
-          "description": "Set the size of the photo items. (Only works with Grid layout)",
+          "description": "Set the number of columns of the photo items. (Only works with Grid layout)",
           "required": false,
-          "title": "Photo Item Size",
-          "default": "medium",
+          "title": "Photo Item Coloums",
+          "default": "5",
           "data": [
             {
-              "title": "Small",
-              "value": "small"
+              "title": "1",
+              "value": "1"
             },
             {
-              "title": "Medium",
-              "value": "medium"
+              "title": "2",
+              "value": "2"
             },
             {
-              "title": "Large",
-              "value": "large"
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
             }
           ]
         },
@@ -213,10 +273,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
-    "fs-extra": "^10.0.1",
-    "node-fetch": "^3.2.3",
-    "pexels": "^1.3.0",
+    "@raycast/api": "^1.44.0",
+    "fs-extra": "^10.1.0",
+    "node-fetch": "^3.3.0",
+    "pexels": "^1.4.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

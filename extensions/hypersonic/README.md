@@ -1,42 +1,60 @@
 <p align="center">
-<img width=180 src="https://user-images.githubusercontent.com/44324243/173033946-4a33687f-d9a7-457a-a938-7db164aedc5e.png">
+<img width=180 src="https://user-images.githubusercontent.com/42417619/203419063-8281b9d0-6fba-4c6c-b381-cdf59ee42e18.png">
 </p>
 
 <h1 align="center">Hypersonic</h1>
 
-<p align="center">
-Fastest Notion to-do app ever
-</p>
+<h4 align="center">
+Fastest Notion task manager
+</h4>
 
-## 🚣‍♂️ Onboarding
+## Introducing Hypersonic for Teams
 
-The **onboarding** process is easy to complete! Just follow the steps below:
+**[Watch video presentation](https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494)**
 
-<img width="1920" src="https://user-images.githubusercontent.com/44324243/173044027-062e2681-7728-4820-8da8-642d2255437b.png">
+![Hypersonic interface](/metadata/hypersonic-1.png)
 
-### ✨ Plug & Play with Notion
+### Connect any Notion database
 
-1. Duplicate **[Hypersonic Notion template](https://reboot-studio.notion.site/b7dcfb65bd7f4dfc82e3f0d61a6232cb?v=c532a2852d3e40eb9226b744ff526e55)** into your workspace.
-2. Sign in with your Notion account
-3. Select the Hypersonic template 
+Sign in with your Notion account and connect your project and task databases.
 
-All done! You can now start creating to-do's.
+We automatically detect the right properties in your database to display on Hypersonic. You can also configure additional properties as labels, users or related databases.
 
-<img width="1920" src="https://user-images.githubusercontent.com/44324243/173045743-e52f871a-dc24-4754-af38-ef23813fce45.png">
+![Notion connection](/metadata/hypersonic-5.png)
+
+### Create and assign tasks using natural language
+
+You can manage your tasks faster than ever in Hypersonic. We use natural language recognition to separate the task from its metadata, so you just need to type.
+
+![Natural language](/metadata/hypersonic-2.png)
+
+### Multi-filtering to cut through the noise
+
+You can filter your task by user, project or label. Combining multiple filter you will increase your focus and productivity.
+
+![Smart filtering](/metadata/hypersonic-3.png)
 
 ### List of commands
 
-  - Press `↵` to complete a to-do or create a new one.
-  - Press `⌘ + ↵` to set a reminder for a to-do.
-  - Press `⌘ + L` to add a label. You will need to create the labels first on Notion.
-  - Press `⌘ + E` to open a external link.
-  - Press `⌘ + B` to copy a to-do to the clipboard.
-  - Press `⌘ + O` to open the to-do in Notion.
-  - Press `⌘ + U` to undo the to-do mark action.
-  - Press `⌘ + ⌫` to delete a to-do.
-  - Press `⌘ + ↑` to move up a to-do.
-  - Press `⌘ + ↓` to move up a to-do.
- 
+- Press `↵` to complete a task or create a new one.
+- Press `⌘ + ↵` to mark a task as in progress.
+- Press `⌘ + ↵` to mark a task as not started.
+- Press `⌘ + F` to filter your tasks.
+- Press `⌘ + D` to add a due date.
+- Press `⌘ + L` to add a label.
+- Press `⌘ + U` to add a user.
+- Press `⌘ + P` to add a project.
+- Press `⌘ + E` to open a external link.
+- Press `⌘ + ⇧ + C` to copy a task to the clipboard.
+- Press `⌘ + ⇧ + S` to share a task.
+- Press `⌘ + O` to open the task in Notion.
+- Press `⌘ + ⌫` to delete a task.
+- Press `⌘ + T` to share your work.
+- Press `⌘ + N` to open Notion database.
+- Press `⌘ + ⇧ + A` to authorize Hypersonic with Notion.
+- Press `⌘ + ⇧ + ,` to open database settings.
+- Press `⌘ + ,` to open extension preferences.
+- Press `⌘ + ⇧ + M` to contact us.
 
 ---
 

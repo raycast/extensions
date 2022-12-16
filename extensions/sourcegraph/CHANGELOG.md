@@ -1,5 +1,17 @@
 # Changelog
 
+[Improved support for some new API capabilities] - 2022-12-05
+
+- **search**: Improved support for some new API capabilities.
+- **internal**: Various dependency updates.
+
+## [Updated iconography, search improvements](https://github.com/raycast/extensions/pull/2430) - 2022-08-04
+
+- **all**: Iconography has been updated throughout the extension.
+- **search**: Add support for lucky suggestions.
+- **search**: Improve items for suggested filters.
+- **search**: Improve when branch information gets rendered.
+
 ## [Bug fix](https://github.com/raycast/extensions/pull/2210) - 2022-07-07
 
 - **search**: Fix issue where search results with lengthy details can cause Raycast to crash.

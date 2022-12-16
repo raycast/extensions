@@ -1,4 +1,4 @@
-import { Action, getPreferenceValues, Icon, Color } from "@raycast/api";
+import { Action, getPreferenceValues, Icon, Color, List, ActionPanel } from "@raycast/api";
 
 import React, { useState } from "react";
 
@@ -7,16 +7,28 @@ import { EditNote } from "../components/EditNote";
 import { SearchNotePreferences, Note, Vault } from "./interfaces";
 import { isNotePinned, pinNote, unpinNote } from "./pinNoteUtils";
 import { NoteQuickLook } from "../components/NoteQuickLook";
-import { deleteNote, appendSelectedTextTo } from "./utils";
-import { NoteAction, PrimaryAction } from "./constants";
+import {
+  deleteNote,
+  appendSelectedTextTo,
+  getOpenPathInObsidianTarget,
+  vaultPluginCheck,
+  getCodeBlocks,
+} from "./utils";
+import { NoteAction, ObsidianIconDynamicBold, PrimaryAction } from "./constants";
+import { NoteList } from "../components/NoteList/NoteList";
+import { useNotes } from "./cache";
 
-export function ShowNoteInFinderAction(props: { note: Note }) {
-  const { note } = props;
+//--------------------------------------------------------------------------------
+// All actions for all commands should be defined here.
+//--------------------------------------------------------------------------------
+
+export function ShowPathInFinderAction(props: { path: string }) {
+  const { path } = props;
   return (
     <Action.ShowInFinder
       title="Show in Finder"
       icon={Icon.Finder}
-      path={note.path}
+      path={path}
       shortcut={{ modifiers: ["opt"], key: "enter" }}
     />
   );
@@ -81,12 +93,12 @@ export function PasteNoteAction(props: { note: Note }) {
 
 export function CopyMarkdownLinkAction(props: { note: Note }) {
   const { note } = props;
-  const URIEncodedPath = encodeURIComponent(note.path);
+
   return (
     <Action.CopyToClipboard
       title="Copy Markdown Link"
       icon={Icon.Link}
-      content={`[${note.title}](obsidian://open?path=${URIEncodedPath})`}
+      content={`[${note.title}](${getOpenPathInObsidianTarget(note.path)})`}
       shortcut={{ modifiers: ["opt"], key: "l" }}
     />
   );
@@ -94,12 +106,12 @@ export function CopyMarkdownLinkAction(props: { note: Note }) {
 
 export function CopyObsidianURIAction(props: { note: Note }) {
   const { note } = props;
-  const URIEncodedPath = encodeURIComponent(note.path);
+
   return (
     <Action.CopyToClipboard
       title="Copy Obsidian URI"
       icon={Icon.Link}
-      content={`obsidian://open?path=${URIEncodedPath}`}
+      content={getOpenPathInObsidianTarget(note.path)}
       shortcut={{ modifiers: ["opt"], key: "u" }}
     />
   );
@@ -123,7 +135,7 @@ export function PinNoteAction(props: { note: Note; vault: Vault; actionCallback:
           actionCallback(NoteAction.Pin);
         }
       }}
-      icon={pinned ? Icon.XmarkCircle : Icon.Pin}
+      icon={pinned ? Icon.XMarkCircle : Icon.Pin}
     />
   );
 }
@@ -145,24 +157,45 @@ export function DeleteNoteAction(props: { note: Note; vault: Vault; actionCallba
   );
 }
 
-export function QuickLookAction(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const { note, vault, actionCallback } = props;
+export function QuickLookAction(props: {
+  note: Note;
+  notes: Note[];
+  vault: Vault;
+  actionCallback: (action: NoteAction) => void;
+}) {
+  const { note, notes, vault, actionCallback } = props;
   return (
     <Action.Push
       title="Quick Look"
-      target={<NoteQuickLook note={note} vault={vault} showTitle={true} actionCallback={actionCallback} />}
+      target={
+        <NoteQuickLook note={note} notes={notes} vault={vault} showTitle={true} actionCallback={actionCallback} />
+      }
       icon={Icon.Eye}
     />
   );
 }
 
-export function OpenInObsidianAction(props: { note: Note }) {
-  const { note } = props;
+export function OpenPathInObsidianAction(props: { path: string }) {
+  const { path } = props;
+  return (
+    <Action.Open title="Open in Obsidian" target={getOpenPathInObsidianTarget(path)} icon={ObsidianIconDynamicBold} />
+  );
+}
+
+export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Vault }) {
+  const { note, vault } = props;
+
   return (
     <Action.Open
-      title="Open in Obsidian"
-      target={"obsidian://open?path=" + encodeURIComponent(note.path)}
-      icon={Icon.TextDocument}
+      title="Open in new Pane"
+      target={
+        "obsidian://advanced-uri?vault=" +
+        encodeURIComponent(vault.name) +
+        "&filepath=" +
+        encodeURIComponent(note.path.replace(vault.path, "")) +
+        "&newpane=true"
+      }
+      icon={ObsidianIconDynamicBold}
     />
   );
 }
@@ -172,12 +205,88 @@ export function ShowVaultInFinderAction(props: { vault: Vault }) {
   return <Action.ShowInFinder title="Show in Finder" icon={Icon.Finder} path={vault.path} />;
 }
 
-export function NoteActions(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const { note, vault, actionCallback } = props;
+export function ShowMentioningNotesAction(props: { vault: Vault; str: string; notes: Note[] }) {
+  const { vault, str, notes } = props;
+  const filteredNotes = notes.filter((note: Note) => note.content.includes(str));
+  const count = filteredNotes.length;
+  if (count > 0) {
+    const list = (
+      <NoteList
+        vault={vault}
+        notes={filteredNotes}
+        searchArguments={{ searchArgument: "", tagArgument: "" }}
+        title={`${count} notes mentioning "${str}"`}
+        action={(note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => {
+          return (
+            <React.Fragment>
+              <OpenNoteActions note={note} notes={notes} vault={vault} actionCallback={actionCallback} />
+              <NoteActions note={note} notes={notes} vault={vault} actionCallback={actionCallback} />
+            </React.Fragment>
+          );
+        }}
+      />
+    );
+    return <Action.Push title={`Show Mentioning Notes (${count})`} target={list} icon={Icon.Megaphone} />;
+  } else {
+    return <React.Fragment></React.Fragment>;
+  }
+}
+
+export function CopyCodeAction(props: { note: Note }) {
+  const { note } = props;
+  const codeBlocks = getCodeBlocks(note.content);
+
+  if (codeBlocks.length === 1) {
+    const codeBlock = codeBlocks[0];
+    return (
+      <React.Fragment>
+        <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
+        <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+      </React.Fragment>
+    );
+  } else if (codeBlocks.length > 1) {
+    return (
+      <Action.Push
+        title="Copy Code"
+        icon={Icon.Code}
+        target={
+          <List isShowingDetail={true}>
+            {codeBlocks?.map((codeBlock) => (
+              <List.Item
+                title={codeBlock.code}
+                detail={<List.Item.Detail markdown={"```\n" + codeBlock.code + "```"} />}
+                subtitle={codeBlock.language}
+                key={codeBlock.code}
+                actions={
+                  <ActionPanel>
+                    <Action.Paste title="Paste Code" icon={Icon.Code} content={codeBlock.code} />
+                    <Action.CopyToClipboard title="Copy Code" icon={Icon.Code} content={codeBlock.code} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List>
+        }
+      />
+    );
+  } else {
+    return <React.Fragment></React.Fragment>;
+  }
+}
+
+export function NoteActions(props: {
+  notes: Note[];
+  note: Note;
+  vault: Vault;
+  actionCallback: (action: NoteAction) => void;
+}) {
+  const { notes, note, vault, actionCallback } = props;
 
   return (
     <React.Fragment>
-      <ShowNoteInFinderAction note={note} />
+      <ShowPathInFinderAction path={note.path} />
+      <ShowMentioningNotesAction vault={vault} str={note.title} notes={notes} />
+      <CopyCodeAction note={note} />
       <EditNoteAction note={note} vault={vault} actionCallback={actionCallback} />
       <AppendToNoteAction note={note} actionCallback={actionCallback} />
       <AppendSelectedTextToNoteAction note={note} actionCallback={actionCallback} />
@@ -191,23 +300,43 @@ export function NoteActions(props: { note: Note; vault: Vault; actionCallback: (
   );
 }
 
-export function OpenNoteActions(props: { note: Note; vault: Vault; actionCallback: (action: NoteAction) => void }) {
-  const { note, vault, actionCallback } = props;
+export function OpenNoteActions(props: {
+  note: Note;
+  notes: Note[];
+  vault: Vault;
+  actionCallback: (action: NoteAction) => void;
+}) {
+  const { note, notes, vault, actionCallback } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
-  const quicklook = <QuickLookAction note={note} vault={vault} actionCallback={actionCallback} />;
-  const obsidian = <OpenInObsidianAction note={note} />;
+  const [vaultsWithPlugin, _] = vaultPluginCheck([vault], "obsidian-advanced-uri");
+
+  const quicklook = <QuickLookAction note={note} notes={notes} vault={vault} actionCallback={actionCallback} />;
+  const obsidian = <OpenPathInObsidianAction path={note.path} />;
+  const obsidianNewPane = vaultsWithPlugin.includes(vault) ? (
+    <OpenNoteInObsidianNewPaneAction note={note} vault={vault} />
+  ) : null;
 
   if (primaryAction == PrimaryAction.QuickLook) {
     return (
       <React.Fragment>
         {quicklook}
         {obsidian}
+        {obsidianNewPane}
       </React.Fragment>
     );
   } else if (primaryAction == PrimaryAction.OpenInObsidian) {
     return (
       <React.Fragment>
+        {obsidian}
+        {obsidianNewPane}
+        {quicklook}
+      </React.Fragment>
+    );
+  } else if (primaryAction == PrimaryAction.OpenInObsidianNewPane) {
+    return (
+      <React.Fragment>
+        {obsidianNewPane}
         {obsidian}
         {quicklook}
       </React.Fragment>
@@ -215,8 +344,9 @@ export function OpenNoteActions(props: { note: Note; vault: Vault; actionCallbac
   } else {
     return (
       <React.Fragment>
-        {quicklook}
         {obsidian}
+        {obsidianNewPane}
+        {quicklook}
       </React.Fragment>
     );
   }

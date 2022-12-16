@@ -1,5 +1,10 @@
 # NBA Game Viewer Changelog
 
+## [Improvements] - 2022-08-15
+
+- Added Cache APIs to speed up the commands.
+- Visual changes to actions and lists.
+
 ## [New Feature] - 2022-06-06
 
 - New command to view NBA headlines / news

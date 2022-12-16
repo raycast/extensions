@@ -1,11 +1,11 @@
-import { useNavigation } from "@raycast/api";
+import { useNavigation, Toast } from "@raycast/api";
 import { useState, useRef } from "react";
 import { Duration } from "luxon";
 
 import { Sourcegraph } from "../sourcegraph";
 import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 
-import ExpandableErrorToast from "../components/ExpandableErrorToast";
+import ExpandableToast from "../components/ExpandableToast";
 
 export interface SearchState {
   /**
@@ -103,7 +103,13 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
           }));
         },
         onAlert: (alert) => {
-          ExpandableErrorToast(push, "Alert", alert.title, alert.description || "").show();
+          const toast = ExpandableToast(push, "Alert", alert.title, alert.description || "");
+          switch (alert.kind) {
+            case "smart-search-additional-results":
+            case "smart-search-pure-results":
+              toast.style = Toast.Style.Success;
+          }
+          toast.show();
         },
         onProgress: ({ durationMs, matchCount, skipped }) => {
           const duration = Duration.fromMillis(durationMs)
@@ -120,7 +126,7 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
         },
       });
     } catch (error) {
-      ExpandableErrorToast(push, "Unexpected error", "Search failed", String(error)).show();
+      ExpandableToast(push, "Unexpected error", "Search failed", String(error)).show();
     } finally {
       setState((oldState) => ({
         ...oldState,

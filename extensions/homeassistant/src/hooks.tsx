@@ -10,7 +10,7 @@ export function useHAStates(): {
 } {
   const [states, setStates] = useState<State[]>();
   const [error, setError] = useState<Error>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const hawsRef = useRef<Connection>();
 
   useEffect(() => {
@@ -36,9 +36,14 @@ export function useHAStates(): {
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
             if (!didUnmount) {
               console.log("set new entities");
-              setStates(haStates);
+              if (haStates.length > 0) {
+                // Home Assistant often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
+                setStates(haStates);
+                setIsLoading(false);
+              } else {
+                console.log("ignore empty states callback");
+              }
             }
-            setIsLoading(false);
           });
           hawsRef.current = con;
         } else {

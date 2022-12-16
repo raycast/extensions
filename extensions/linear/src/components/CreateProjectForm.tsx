@@ -1,5 +1,5 @@
-import { Action, ActionPanel, Form, Icon, open, Toast } from "@raycast/api";
-import { useState, useRef } from "react";
+import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
@@ -20,94 +20,82 @@ export type CreateProjectValues = {
   leadId: string;
   memberIds: string[];
   milestoneId: string;
-  startDate: Date;
-  targetDate: Date;
+  startDate: Date | null;
+  targetDate: Date | null;
 };
 
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
   const { linearClient } = getLinearClient();
 
-  const teamsField = useRef<Form.TextField>(null);
-
   const { teams, isLoadingTeams } = useTeams();
   const { users, isLoadingUsers } = useUsers();
   const { milestones, isLoadingMilestones } = useMilestones();
 
-  const [teamIds, setTeamsIds] = useState<string[]>(draftValues?.teamIds || []);
-  const [name, setName] = useState(draftValues?.name);
-  const [description, setDescription] = useState(draftValues?.description);
-  const [state, setState] = useState(draftValues?.state);
-  const [leadId, setLeadId] = useState(draftValues?.leadId);
-  const [memberIds, setMemberIds] = useState<string[]>(draftValues?.memberIds || []);
-  const [milestoneId, setMilestoneId] = useState(draftValues?.milestoneId);
-  const [startDate, setStartDate] = useState(draftValues?.startDate);
-  const [targetDate, setTargetDate] = useState(draftValues?.targetDate);
+  const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
-  const [teamError, setTeamError] = useState<string | undefined>();
-  const [nameError, setNameError] = useState<string | undefined>();
+      try {
+        const { success, project } = await linearClient.projectCreate({
+          teamIds: values.teamIds,
+          name: values.name,
+          description: values.description,
+          state: values.state,
+          ...(values.leadId ? { leadId: values.leadId } : {}),
+          memberIds: values.memberIds,
+          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
+          ...(values.startDate ? { startDate: values.startDate } : {}),
+          ...(values.targetDate ? { targetDate: values.targetDate } : {}),
+        });
 
-  async function createProject() {
-    if (!name || teamIds.length === 0) {
-      return;
-    }
+        const projectResult = await project;
 
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
-    await toast.show();
+        if (success && projectResult) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Created Project`;
 
-    try {
-      const { success, project } = await linearClient.projectCreate({
-        teamIds,
-        name,
-        description,
-        state,
-        ...(leadId ? { leadId } : {}),
-        memberIds,
-        ...(milestoneId ? { milestoneId } : {}),
-        ...(startDate ? { startDate } : {}),
-        ...(targetDate ? { targetDate } : {}),
-      });
+          toast.primaryAction = {
+            title: isLinearInstalled ? "Open Project in Linear" : "Open Project in Browser",
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: () => {
+              isLinearInstalled ? open(projectResult.url, "Linear") : open(projectResult.url);
+            },
+          };
 
-      const projectResult = await project;
-
-      if (success && projectResult) {
-        toast.style = Toast.Style.Success;
-        toast.title = `Created Project`;
-
-        toast.primaryAction = {
-          title: isLinearInstalled ? "Open Project in Linear" : "Open Project in Browser",
-          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-          onAction: () => {
-            isLinearInstalled ? open(projectResult.url, "Linear") : open(projectResult.url);
-          },
-        };
-
-        setName("");
-        setTeamsIds([]);
-        setDescription("");
-        setMemberIds([]);
-        setStartDate(undefined);
-        setTargetDate(undefined);
-
-        teamsField.current?.focus();
+          reset({
+            teamIds: [],
+            name: "",
+            description: "",
+            leadId: "",
+            memberIds: [],
+            milestoneId: "",
+            startDate: null,
+            targetDate: null,
+          });
+          focus("teamIds");
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create project";
+        toast.message = getErrorMessage(error);
       }
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create project";
-      toast.message = getErrorMessage(error);
-    }
-  }
-
-  function dropTeamErrorIfNeeded() {
-    if (teamError && teamError.length > 0) {
-      setTeamError(undefined);
-    }
-  }
-
-  function dropNameErrorIfNeeded() {
-    if (nameError && nameError.length > 0) {
-      setNameError(undefined);
-    }
-  }
+    },
+    validation: {
+      teamIds: FormValidation.Required,
+      name: FormValidation.Required,
+    },
+    initialValues: {
+      teamIds: draftValues?.teamIds || [],
+      name: draftValues?.name,
+      description: draftValues?.description,
+      state: draftValues?.state,
+      leadId: draftValues?.leadId,
+      memberIds: draftValues?.memberIds || [],
+      milestoneId: draftValues?.milestoneId,
+      startDate: draftValues?.startDate,
+      targetDate: draftValues?.targetDate,
+    },
+  });
 
   return (
     <Form
@@ -115,29 +103,11 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       isLoading={isLoadingTeams || isLoadingUsers || isLoadingMilestones}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Project" onSubmit={createProject} />
+          <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TagPicker
-        id="teamIds"
-        title="Team(s)"
-        ref={teamsField}
-        value={teamIds}
-        error={teamError}
-        onChange={(teamIds) => {
-          setTeamsIds(teamIds);
-          dropNameErrorIfNeeded();
-        }}
-        placeholder="Add team"
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setTeamError("A project must belong to at least one team");
-          } else {
-            dropTeamErrorIfNeeded();
-          }
-        }}
-      >
+      <Form.TagPicker title="Team(s)" placeholder="Add team" {...itemProps.teamIds}>
         {teams?.map((team) => (
           <Form.TagPicker.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
         ))}
@@ -145,36 +115,17 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
       <Form.Separator />
 
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Project name"
-        value={name}
-        error={nameError}
-        onChange={(title) => {
-          setName(title);
-          dropNameErrorIfNeeded();
-        }}
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setNameError("The name is required");
-          } else {
-            dropNameErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextField title="Name" placeholder="Project name" {...itemProps.name} />
 
       <Form.TextArea
-        id="description"
         title="Description"
         placeholder="Add some details (supports Markdown, e.g. **bold**)"
-        value={description}
-        onChange={setDescription}
+        {...itemProps.description}
       />
 
       <Form.Separator />
 
-      <Form.Dropdown id="state" title="Status" value={state} onChange={setState} storeValue>
+      <Form.Dropdown title="Status" storeValue {...itemProps.state}>
         {projectStatuses.map((status) => (
           <Form.Dropdown.Item
             key={status}
@@ -186,7 +137,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       </Form.Dropdown>
 
       {users && users.length > 0 ? (
-        <Form.Dropdown id="leadId" title="Lead" value={leadId} onChange={setLeadId} storeValue>
+        <Form.Dropdown title="Lead" storeValue {...itemProps.leadId}>
           <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
           {users?.map((user) => {
@@ -196,13 +147,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       ) : null}
 
       {users && users.length > 0 ? (
-        <Form.TagPicker
-          id="memberIds"
-          title="Members"
-          value={memberIds}
-          onChange={setMemberIds}
-          placeholder="Add members"
-        >
+        <Form.TagPicker title="Members" placeholder="Add members" {...itemProps.memberIds}>
           {users?.map((user) => (
             <Form.TagPicker.Item key={user.id} value={user.id} title={user.name} icon={getUserIcon(user)} />
           ))}
@@ -210,7 +155,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       ) : null}
 
       {milestones && milestones.length > 0 ? (
-        <Form.Dropdown id="milestoneId" title="Milestone" value={milestoneId} onChange={setMilestoneId} storeValue>
+        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
           <Form.Dropdown.Item title="Upcoming" value="" icon={Icon.Map} />
 
           {milestones?.map((milestone) => {
@@ -221,21 +166,9 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
         </Form.Dropdown>
       ) : null}
 
-      <Form.DatePicker
-        id="startDate"
-        title="Start Date"
-        value={startDate}
-        onChange={setStartDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.startDate} />
 
-      <Form.DatePicker
-        id="targetDate"
-        title="Target Date"
-        value={targetDate}
-        onChange={setTargetDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Target Date" type={Form.DatePicker.Type.Date} {...itemProps.targetDate} />
     </Form>
   );
 }

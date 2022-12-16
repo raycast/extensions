@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Add collections filter] - 2022-12-15
+## [Add collections filter] - 2022-12-16
 
 - Adds a filter in the bookmarks list to be able to limit results to only in the selected collection
 

@@ -1,5 +1,36 @@
 # Spotify Player Changelog
 
+## [Feature] - 2022-12-06
+
+- Change background refresh interval to keep the menu bar in a more updated state
+
+## [Feature] - 2022-11-17
+
+- Add preference to show ellipsis when menu bar title is truncated.
+
+## [Fix] - 2022-11-14
+
+- Fixed a bug that caused `Like Current Song` and `Dislike Current Song` to not function properly.
+
+## [Fix] - 2022-10-28
+
+- Fixed a bug that caused the menubar command to not function properly.
+
+## [Feature] - 2022-10-07
+
+- Implemented add track to queue, can be located in Search Tracks view
+
+## [Feature] - 2022-09-12
+
+- Introduce new command "Dislike Current Song"
+- Added dislike action for menu bar
+
+## [Feature] - 2022-08-08
+
+- Introduce new command "Now Playing" to view the current track inside Raycast (and renamed the existing menu bar command to "Now Playing Menu Bar")
+- Introduce new command "Featured Playlists"
+- Introduce new command "Browse All"
+
 ## [Bug Fixes] - 2022-08-01
 
 - Properly handled states for unauthorized state in menu bar and no-view commands

@@ -1,34 +1,38 @@
 import { List, getPreferenceValues, ActionPanel, Action } from "@raycast/api";
-import TaskList from "./TaskList";
-import useSWR from "swr";
+import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
-import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
-import { todoist, handleError } from "../api";
-import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers";
+import TaskList from "./TaskList";
+import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
+import { todoist } from "../api";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
 import CreateTask from "../create-task";
+import { Project as TProject } from "@doist/todoist-api-typescript";
 
 interface ProjectProps {
-  projectId: number;
+  project: TProject;
 }
 
-function Project({ projectId }: ProjectProps): JSX.Element {
-  const { data: tasks } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ projectId }));
-  const { data: allSections } = useSWR(SWRKeys.sections, () => todoist.getSections(projectId));
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+function Project({ project }: ProjectProps): JSX.Element {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    mutate: mutateTasks,
+  } = useCachedPromise((projectId) => todoist.getTasks({ projectId }), [project.id]);
+  const { data: allSections, isLoading: isLoadingSections } = useCachedPromise(
+    (projectId) => todoist.getSections(projectId),
+    [project.id]
+  );
+  const { data: labels, isLoading: isLoadingLabels } = useCachedPromise(() => todoist.getLabels());
 
   const preferences = getPreferenceValues();
 
   let sections: SectionWithTasks[] = [];
 
-  if (getLabelsError) {
-    handleError({ error: getLabelsError, title: "Unable to get labels" });
-  }
-
   if (preferences.projectGroupBy === ProjectGroupBy.default) {
     sections = [
       {
         name: "No section",
-        tasks: tasks?.filter((task) => task.sectionId === 0) || [],
+        tasks: tasks?.filter((task) => !task.sectionId) || [],
       },
     ];
 
@@ -62,7 +66,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
   }
 
   return tasks?.length === 0 ? (
-    <List isLoading={!tasks}>
+    <List isLoading={isLoadingTasks || isLoadingSections || isLoadingLabels} navigationTitle={project.name}>
       <List.EmptyView
         title="No tasks in this project."
         description="How about creating one?"
@@ -70,7 +74,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
           <ActionPanel>
             <Action.Push
               title="Create Task"
-              target={<CreateTask fromProjectId={projectId} />}
+              target={<CreateTask fromProjectId={project.id} mutateTasks={mutateTasks} />}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
           </ActionPanel>
@@ -78,7 +82,12 @@ function Project({ projectId }: ProjectProps): JSX.Element {
       />
     </List>
   ) : (
-    <TaskList mode={ViewMode.project} sections={sections} isLoading={!tasks || !allSections} />
+    <TaskList
+      mode={ViewMode.project}
+      sections={sections}
+      isLoading={!tasks || !allSections}
+      mutateTasks={mutateTasks}
+    />
   );
 }
 

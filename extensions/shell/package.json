@@ -32,6 +32,27 @@
       "description": "Decide if you want to run commands inside raycast or inside a terminal application",
       "default": false,
       "label": "Use Terminal/iTerm"
+    },
+    {
+      "name": "arguments_terminal_type",
+      "type": "dropdown",
+      "required": false,
+      "title": "Decide which Terminal Application you want to use",
+      "description": "If iTerm or Warp is available, you can use them instead of Terminal.",
+      "data": [{
+        "title": "Terminal",
+        "value": "Terminal"
+      },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        }
+      ],
+      "default": "Terminal"
     }
   ],
   "dependencies": {

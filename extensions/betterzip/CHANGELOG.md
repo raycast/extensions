@@ -1,5 +1,9 @@
 # BetterZip Changelog
 
+## [Support for Setapp BetterZip] - 2022-11-09
+
+- Added support for Setapp version of BetterZip
+
 ## [Update] - 2022-08-02
 
 - Added support for .nupkg packages

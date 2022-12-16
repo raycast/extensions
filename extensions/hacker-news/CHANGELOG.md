@@ -1,5 +1,9 @@
 # Hacker News Changelog
 
+## [🐛 Fixes] - (2022-08-16)
+
+- Use custom User Agent + cache responses for each topic for 5 minutes to avoid being rate limited
+
 ## [🎉 Added all of the RSS feeds] - (2022-03-21)
 
 - Merge `Show HN` and `Front Page` commands into a single command + adds the following new [HNRSS](https://hnrss.github.io/) feeds:

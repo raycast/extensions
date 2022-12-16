@@ -6,18 +6,20 @@ type SetLabelActionProps = {
   todo: Todo
   tags: Tag[]
   onSetLabel: (todo: Todo, tag: Tag | null) => void
+  allowCreate?: boolean
 }
 
 export function SetLabelAction({
   todo,
   tags,
   onSetLabel,
+  allowCreate = false,
 }: SetLabelActionProps) {
   return (
     <ActionPanel.Submenu
-      title="Set Label"
+      title="Add Label"
       icon={{
-        source: 'label.png',
+        source: Icon.Tag,
         tintColor: Color.PrimaryText,
       }}
       shortcut={{ modifiers: ['cmd'], key: 'l' }}
@@ -25,6 +27,7 @@ export function SetLabelAction({
       {tags.map((tag) => (
         <Action
           key={tag.id}
+          autoFocus={tag.id === todo.tag?.id}
           icon={{
             source: 'dot.png',
             tintColor: tag.color,
@@ -33,7 +36,9 @@ export function SetLabelAction({
           onAction={() => onSetLabel(todo, tag)}
         />
       ))}
-      <Action.OpenInBrowser title="Create" icon={Icon.Plus} url={todo.url} />
+      {allowCreate && (
+        <Action.OpenInBrowser title="Create" icon={Icon.Plus} url={todo.url} />
+      )}
     </ActionPanel.Submenu>
   )
 }

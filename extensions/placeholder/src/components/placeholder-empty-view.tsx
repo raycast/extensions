@@ -6,7 +6,7 @@ export function PlaceholderEmptyView(props: { layout: string }) {
   const { layout } = props;
   return layout === "List" ? (
     <List.EmptyView
-      icon={{ source: { light: "picsum-icon.svg", dark: "picsum-icon@dark.svg" } }}
+      icon={{ source: { light: "picsum-icon.png", dark: "picsum-icon@dark.png" } }}
       title={"No images"}
       actions={
         <ActionPanel>
@@ -16,7 +16,7 @@ export function PlaceholderEmptyView(props: { layout: string }) {
     />
   ) : (
     <Grid.EmptyView
-      icon={{ source: { light: "picsum-icon.svg", dark: "picsum-icon@dark.svg" } }}
+      icon={{ source: { light: "picsum-icon.png", dark: "picsum-icon@dark.png" } }}
       title={"No images"}
       actions={
         <ActionPanel>

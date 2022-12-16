@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { loadFront } from "yaml-front-matter";
 import { useEffect, useState } from "react";
 
@@ -30,7 +30,15 @@ const TopicDetail = (props: { topic: TopicType }) => {
 
   return (
     <>
-      <Detail navigationTitle={props.topic.title} markdown={mark} />
+      <Detail
+        navigationTitle={props.topic.title}
+        markdown={mark}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={`https://nextjs.org/docs/${props.topic.filepath}`} />
+          </ActionPanel>
+        }
+      />
     </>
   );
 };

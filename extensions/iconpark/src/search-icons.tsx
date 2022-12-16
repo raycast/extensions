@@ -21,10 +21,10 @@ export default function SearchIcons() {
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       inset={Grid.Inset.Medium}
       isLoading={iconLoading || configLoading}
-      searchBarPlaceholder={"Search 2657 icons"}
+      searchBarPlaceholder={`Search ${iconInfos.length} icons`}
       searchBarAccessory={
         <Grid.Dropdown onChange={setCategory} tooltip={"Category"} storeValue={false}>
           {iconParkCategory.map((value) => {
@@ -89,7 +89,7 @@ export default function SearchIcons() {
                             content={svgCode}
                           />
                           <Action.Push
-                            icon={Icon.MemoryChip}
+                            icon={Icon.StarCircle}
                             title={"Config SVG Icon"}
                             shortcut={{ modifiers: ["ctrl"], key: "a" }}
                             target={<ConfigIcon iconConfig={iconConfig} setRefresh={setRefresh} />}

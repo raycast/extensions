@@ -1,5 +1,29 @@
 # GitLab Changelog
 
+## [Fix crash] - 2022-12-07
+
+- Fix crash which happens when cache is corrupted
+- Add `Clear Local Extension Cache` action to most list items to be able to reset the local cache
+
+## [Todos Menu Bar] - 2022-12-06
+
+- Add Todos menu bar command
+- Add tooltips to most command view
+- Use modern raycast feature to display data
+- Fix some bugs
+
+## [Update] - 2022-10-11
+
+- Add Open in Browser option in project navigation
+
+## [Archive Indicator] - 2022-09-08
+
+- Add an archived status indicator.
+
+## [MR Details] - 2022-08-04
+
+- Add date to list view MR details.
+
 ## [MR Details] - 2022-07-28
 
 - Add a new setting to show details in merge request list via a metadata view.

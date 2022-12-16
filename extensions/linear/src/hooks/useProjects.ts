@@ -6,7 +6,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 export default function useProjects(teamId?: string, config?: { execute?: boolean }) {
   const { data, error, isLoading, mutate } = useCachedPromise(getProjects, [teamId], {
-    execute: config?.execute !== false && !!teamId,
+    execute: config?.execute !== false,
   });
 
   const { upcomingProjects, projectsByMilestoneId, milestones } = useMemo(() => {

@@ -1,21 +1,21 @@
 import { List, Icon, Image, Color, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import CompetitionDropdown, {
-  competitions,
-} from "./components/competition_dropdown";
+import CompetitionDropdown from "./components/competition_dropdown";
 import { getStandings } from "./api";
 import { Standing } from "./types";
 
 export default function GetTables() {
   const [standing, setStandings] = useState<Standing[]>();
-  const [competition, setCompetition] = useState<string>(competitions[0].value);
+  const [competition, setCompetition] = useState<string>("");
   const [showStats, setShowStats] = useState<boolean>(false);
 
   useEffect(() => {
-    setStandings(undefined);
-    getStandings(competition).then((data) => {
-      setStandings(data);
-    });
+    if (competition) {
+      setStandings(undefined);
+      getStandings(competition).then((data) => {
+        setStandings(data);
+      });
+    }
   }, [competition]);
 
   return (

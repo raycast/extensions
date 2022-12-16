@@ -1,10 +1,10 @@
-import { TokenProvider } from './contexts/token-context'
-import { Body } from './views/body'
+import { AuthProvider } from '@/features/auth/auth-context'
+import { AuthRouter } from '@/features/auth/auth-router'
 
 export default function App() {
   return (
-    <TokenProvider>
-      <Body />
-    </TokenProvider>
+    <AuthProvider>
+      <AuthRouter />
+    </AuthProvider>
   )
 }

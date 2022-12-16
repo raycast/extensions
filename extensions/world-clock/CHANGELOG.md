@@ -1,8 +1,12 @@
 # World Clock Changelog
 
-## [Update List layout] - 2022-06-27
+## [Update Raycast API] - 2022-12-02
 
-- Update List layout: Add clock image in List Detail
+- Update Raycast API version to 1.44.0
+
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command: Query World Time
 
 ## [Add Grid layout] - 2022-06-22
 

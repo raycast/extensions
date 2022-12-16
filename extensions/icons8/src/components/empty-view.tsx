@@ -6,7 +6,7 @@ export const EmptyView = (): JSX.Element => {
 
 export const InvalidAPIKey = (): JSX.Element => {
   return (
-    <Grid>
+    <Grid searchBarPlaceholder="Search Icons">
       <Grid.EmptyView
         title="Invalid API Key"
         description="Get Valid Api Key From Icons8 Developers."

@@ -154,6 +154,7 @@ export function JobList(props: {
   projectFullPath: string;
   pipelineID: string;
   pipelineIID?: string | undefined;
+  navigationTitle?: string;
 }): JSX.Element {
   const { stages, error, isLoading, refresh } = useSearch(
     "",
@@ -168,10 +169,10 @@ export function JobList(props: {
     showErrorToast(error, "Cannot search Pipelines");
   }
   if (!stages) {
-    return <List isLoading={isLoading} navigationTitle="Jobs" />;
+    return <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Jobs"} />;
   }
   return (
-    <List isLoading={isLoading} navigationTitle="Jobs">
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Jobs"}>
       {Object.keys(stages).map((stagekey) => (
         <List.Section key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (

@@ -69,6 +69,7 @@
     "@raycast/api": "^1.31.0",
     "dayjs": "^1.11.0",
     "edn-data": "^0.2.0",
+    "logseq-dateutils": "0.0.22",
     "minisearch": "^4.0.3",
     "ramda": "^0.28.0",
     "untildify": "^4.0.0"

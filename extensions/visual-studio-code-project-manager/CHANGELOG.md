@@ -1,5 +1,13 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Fixes] - 2022-11-25
+
+- This commit filters out duplicate entries
+
+## [Added screenshots] - 2022-11-17
+
+## [Support ssh remote projects] - 2022-08-24
+
 ## [Add VSCodium option] - 2022-07-28
 
 ## [Add filtering by tag functionality] - 2022-07-27
