@@ -1,6 +1,17 @@
 import fs from "fs";
 import path from "path";
-import { SupportedBrowsers } from "../interfaces";
+import { Preferences, SupportedBrowsers } from "../interfaces";
+import { getPreferenceValues } from "@raycast/api";
+import {
+  defaultProfilePathArc,
+  defaultProfilePathBrave,
+  defaultProfilePathChrome,
+  defaultProfilePathEdge,
+  defaultProfilePathFirefox,
+  defaultProfilePathOpera,
+  defaultProfilePathSafari,
+  defaultProfilePathVivaldi,
+} from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -22,35 +33,57 @@ const getProfileName = (userDirectoryPath: string, browser: SupportedBrowsers) =
 };
 
 export const getHistoryDbPath = (browser: SupportedBrowsers) => {
+  const {
+    profilePathChrome,
+    profilePathFirefox,
+    profilePathSafari,
+    profilePathEdge,
+    profilePathBrave,
+    profilePathVivaldi,
+    profilePathArc,
+    profilePathOpera,
+  } = getPreferenceValues<Preferences>();
   const userDataDirectory = userLibraryDirectoryPath();
   let profilePath, profileName;
 
   switch (browser) {
     case SupportedBrowsers.Chrome:
-      profilePath = path.join(userDataDirectory, "Application Support", "Google", "Chrome");
-      profileName = getProfileName(profilePath, browser);
-      return path.join(profilePath, profileName, "History");
+      return profilePathChrome
+        ? path.join(profilePathChrome, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathChrome);
     case SupportedBrowsers.Firefox:
-      profilePath = path.join(userDataDirectory, "Application Support", "Firefox", "Profiles");
-      profileName = getProfileName(profilePath, browser);
-      return path.join(profilePath, profileName, "places.sqlite");
+      if (profilePathFirefox) {
+        profilePath = profilePathFirefox;
+      } else {
+        profilePath = path.join(userDataDirectory, ...defaultProfilePathFirefox);
+        profileName = getProfileName(profilePath, browser);
+        profilePath = path.join(profilePath, profileName);
+      }
+      return path.join(profilePath, "places.sqlite");
     case SupportedBrowsers.Safari:
-      return path.join(userDataDirectory, "Safari", "History.db");
+      return profilePathSafari
+        ? path.join(profilePathSafari, "History.db")
+        : path.join(userDataDirectory, ...defaultProfilePathSafari);
     case SupportedBrowsers.Edge:
-      return path.join(userDataDirectory, "Application Support", "Microsoft Edge", "Default", "History");
+      return profilePathEdge
+        ? path.join(profilePathEdge, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathEdge);
     case SupportedBrowsers.Brave:
-      return path.join(
-        userDataDirectory,
-        "Application Support",
-        "BraveSoftware",
-        "Brave-Browser",
-        "Default",
-        "History"
-      );
+      return profilePathBrave
+        ? path.join(profilePathBrave, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathBrave);
     case SupportedBrowsers.Vivaldi:
-      return path.join(userDataDirectory, "Application Support", "Vivaldi", "Default", "History");
+      return profilePathVivaldi
+        ? path.join(profilePathVivaldi, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathVivaldi);
     case SupportedBrowsers.Arc:
-      return path.join(userDataDirectory, "Application Support", "Arc", "User Data", "Default", "History");
+      return profilePathArc
+        ? path.join(profilePathArc, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathArc);
+    case SupportedBrowsers.Opera:
+      return profilePathOpera
+        ? path.join(profilePathOpera, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathOpera);
     default:
       throw new Error("Unsupported browser.");
   }
