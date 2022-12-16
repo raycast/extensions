@@ -20,9 +20,6 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Vivaldi:
       appName = "Vivaldi";
       break;
-    case SupportedBrowsers.Arc:
-      appName = "Arc";
-      break;
     default:
       throw new Error(`Unsupported browser: ${browser}`);
   }
@@ -39,6 +36,18 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
           } to make new tab with properties {URL:"${url}"}
       end tell
     end tell
+    return
+  `;
+
+  return await runAppleScript(script);
+}
+
+export async function openNewArcTab(url: string): Promise<boolean | string> {
+  popToRoot();
+  closeMainWindow({ clearRootSearch: true });
+
+  const script = `
+    return do shell script "open -a Arc ${url}"
   `;
 
   return await runAppleScript(script);

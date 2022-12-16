@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, openCommandPreferences } from "@raycast/api";
-import { openNewFirefoxTab, openNewTab } from "../actions";
+import { openNewArcTab, openNewFirefoxTab, openNewTab } from "../actions";
 import { HistoryEntry, SupportedBrowsers } from "../interfaces";
 
-export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEntry }) => (
+export const HistoryItemAction = ({ entry: { url } }: { entry: HistoryEntry }) => (
   <ActionPanel>
     <Action.OpenInBrowser title="Open in Default Browser" url={url} />
     <ActionPanel.Section title={"Copy"}>
@@ -35,11 +35,7 @@ export const HistoryItemAction = ({ entry: { title, url } }: { entry: HistoryEnt
         icon={"vivaldi-logo.png"}
         onAction={() => openNewTab(SupportedBrowsers.Vivaldi, url)}
       />
-      <ActionPanel.Item
-        title={"Open in Arc"}
-        icon={"arc-logo.svg"}
-        onAction={() => openNewTab(SupportedBrowsers.Arc, url)}
-      />
+      <ActionPanel.Item title={"Open in Arc"} icon={"arc-logo.svg"} onAction={() => openNewArcTab(url)} />
     </ActionPanel.Section>
   </ActionPanel>
 );
