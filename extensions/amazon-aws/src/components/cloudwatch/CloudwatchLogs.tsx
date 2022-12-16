@@ -2,18 +2,22 @@ import { ActionPanel, Detail } from "@raycast/api";
 import { fetchLogs, getTaskCWLogsGroupUrl } from "../../actions";
 import { usePromise } from "@raycast/utils";
 import { getActionOpenInBrowser, getExportResponse } from "../../util";
+import { LogStartTimes } from "../../interfaces";
 
 function CloudwatchLogs({
   logGroupName,
+  startTime,
   logGroupStreamPrefix,
   logGroupStreamName,
 }: {
   logGroupName: string;
+  startTime: LogStartTimes;
   logGroupStreamPrefix?: string;
   logGroupStreamName?: string;
 }) {
   const { data: logs, isLoading } = usePromise(fetchLogs, [
     logGroupName,
+    startTime,
     logGroupStreamPrefix,
     logGroupStreamName ? [logGroupStreamName] : undefined,
   ]);
