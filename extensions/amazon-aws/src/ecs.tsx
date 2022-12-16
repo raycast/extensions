@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchClusters } from "./actions";
-import AWSProfileDropdown from "./components/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getFilterPlaceholder } from "./util";
 import ECSCluster from "./components/ecs/ECSCluster";
 import { useState } from "react";

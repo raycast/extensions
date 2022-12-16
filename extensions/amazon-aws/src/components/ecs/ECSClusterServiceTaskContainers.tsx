@@ -1,13 +1,16 @@
 import { ContainerDefinition } from "@aws-sdk/client-ecs";
-import { DefaultAction, Preferences } from "../../interfaces";
+import { DefaultAction, LogStartTimes, Preferences } from "../../interfaces";
 import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { fetchTaskContainers, getTaskContainerUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
 import { useCachedPromise } from "@raycast/utils";
 import CloudwatchLogs from "../cloudwatch/CloudwatchLogs";
+import { useState } from "react";
+import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
 
 function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinitionArn: string }) {
   const { defaultAction } = getPreferenceValues<Preferences>();
+  const [logStartTime, setLogStartTime] = useState<LogStartTimes>(LogStartTimes.OneHour);
   const { data: containers, isLoading } = useCachedPromise(fetchTaskContainers, [taskDefinitionArn], {
     keepPreviousData: true,
   });
@@ -17,6 +20,7 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
       title: "View Logs",
       component: CloudwatchLogs,
       logGroupName: container.logConfiguration?.options ? container.logConfiguration?.options["awslogs-group"] : "",
+      startTime: logStartTime,
       logGroupStreamPrefix: container.logConfiguration?.options
         ? container.logConfiguration?.options["awslogs-stream-prefix"]
         : "",
@@ -35,7 +39,12 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={getFilterPlaceholder("containers")} isShowingDetail={true}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={getFilterPlaceholder("containers")}
+      isShowingDetail={true}
+      searchBarAccessory={<CloudwatchLogsTimeDropdown onChange={setLogStartTime} />}
+    >
       {containers ? (
         containers.map((container) => (
           <List.Item

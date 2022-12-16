@@ -8,7 +8,7 @@ import {
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import AWSProfileDropdown from "./components/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
 
 export default function SSM() {

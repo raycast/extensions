@@ -1,7 +1,7 @@
 import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./components/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
 import { getActionPush } from "./util";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";

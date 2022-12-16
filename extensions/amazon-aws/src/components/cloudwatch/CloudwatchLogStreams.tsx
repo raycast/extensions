@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchLogStreams, getTaskCWLogsGroupUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getFilterPlaceholder } from "../../util";
-import { DefaultAction, Preferences } from "../../interfaces";
+import { DefaultAction, LogStartTimes, Preferences } from "../../interfaces";
 import CloudwatchLogs from "./CloudwatchLogs";
 import { LogStream } from "@aws-sdk/client-cloudwatch-logs";
+import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
 
 function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
   const { defaultAction } = getPreferenceValues<Preferences>();
+  const [logStartTime, setLogStartTime] = useState<LogStartTimes>(LogStartTimes.OneHour);
   const { data: streams, isLoading } = useCachedPromise(fetchLogStreams, [logGroupName], { keepPreviousData: true });
 
   const getActions = (stream: LogStream) => {
@@ -15,6 +18,7 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
       title: "View Logs",
       component: CloudwatchLogs,
       logGroupName,
+      startTime: logStartTime,
       logStreamNames: stream.logStreamName ?? undefined,
     });
     const actionViewInBrowser = getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName));
@@ -25,7 +29,11 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={getFilterPlaceholder("stream")}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={getFilterPlaceholder("stream")}
+      searchBarAccessory={<CloudwatchLogsTimeDropdown onChange={setLogStartTime} />}
+    >
       {streams ? (
         streams.map((s) => (
           <List.Item

@@ -1,7 +1,7 @@
 import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-ec2";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./components/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
 
 export default function EC2() {
