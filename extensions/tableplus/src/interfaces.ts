@@ -22,6 +22,7 @@ export type Group = {
 
 export interface Preferences {
   path?: string;
+  showConnectionDriver?: boolean;
 }
 
 type Environment = Connection["Environment"];
