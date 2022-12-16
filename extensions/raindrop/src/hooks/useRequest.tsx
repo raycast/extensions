@@ -20,14 +20,11 @@ export function useRequest({ collection = "0", search = "" }: BookmarksParams) {
 
     if (!isLoading) {
       if (userData?.result && collectionsData?.result) {
-        const tree = buildCollectionsOptions(
-          userData,
-          collectionsData
-        );
+        const tree = buildCollectionsOptions(userData, collectionsData);
         setCollections(tree);
       }
     }
   }, [isLoadingUserData, isLoadingBookmarks, isLoadingCollections]);
 
   return { isLoading, bookmarks, collections };
-};
+}

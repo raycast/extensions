@@ -14,7 +14,7 @@ export function useCollections() {
       keepPreviousData: true,
       onError: () => {
         showToast(Toast.Style.Failure, "Cannot fetch collections");
-      }
+      },
     }
   );
 

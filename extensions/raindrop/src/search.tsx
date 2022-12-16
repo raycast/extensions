@@ -22,7 +22,13 @@ export default function Main(): ReactElement {
   return (
     <List
       searchBarPlaceholder="Search bookmarks using Raindrop.io operators..."
-      searchBarAccessory={<CollectionsDropdown isLoading={isLoading} handleChange={onCollectionChange} collections={collections} />}
+      searchBarAccessory={
+        <CollectionsDropdown
+          isLoading={isLoading}
+          handleChange={onCollectionChange}
+          collections={collections}
+        />
+      }
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle

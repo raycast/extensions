@@ -5,19 +5,18 @@ import { Preferences, BookmarksParams, BookmarksResponse } from "../types";
 export function useBookmarks({ collection = "0", search = "" }: BookmarksParams) {
   const preferences: Preferences = getPreferenceValues();
 
-  const url = `https://api.raindrop.io/rest/v1/raindrops/${collection}?sort=-created&search=${encodeURIComponent(search) ?? ""}`;
-  const { isLoading, data, revalidate } = useFetch<BookmarksResponse>(
-    url,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.token}`,
-      },
-      keepPreviousData: true,
-      onError: () => {
-        showToast(Toast.Style.Failure, "Cannot search bookmark");
-      }
-    }
-  );
+  const url = `https://api.raindrop.io/rest/v1/raindrops/${collection}?sort=-created&search=${
+    encodeURIComponent(search) ?? ""
+  }`;
+  const { isLoading, data, revalidate } = useFetch<BookmarksResponse>(url, {
+    headers: {
+      Authorization: `Bearer ${preferences.token}`,
+    },
+    keepPreviousData: true,
+    onError: () => {
+      showToast(Toast.Style.Failure, "Cannot search bookmark");
+    },
+  });
 
   return { isLoading, data, revalidate };
 }

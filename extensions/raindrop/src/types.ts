@@ -29,7 +29,7 @@ export type Bookmark = {
 
 type CollectionParent = {
   $id: number;
-}
+};
 
 export type Collection = {
   _id: number;
@@ -89,4 +89,4 @@ export interface CollectionItem {
 export type BookmarksParams = {
   collection: string;
   search?: string;
-}
+};

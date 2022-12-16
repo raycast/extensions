@@ -16,8 +16,8 @@ function buildCollectionTree(treeObject: Collection[], sourceArray: Collection[]
   }
 }
 
-type OrderCollectionItem = ([string|null, number]);
-type OrderedCollections = ([string|null, number, Collection | undefined])[];
+type OrderCollectionItem = [string | null, number];
+type OrderedCollections = [string | null, number, Collection | undefined][];
 
 function buildGroupsAndOrder(groups: Group[]) {
   const output: OrderCollectionItem[] = [];
@@ -46,7 +46,6 @@ function orderCollections(tree: Collection[], orderedCollections: OrderCollectio
 }
 
 const flatChildCollections = (childColls: Collection[], prefix = "") => {
-
   for (let i = 0; i < childColls.length; i++) {
     const elem = childColls[i];
     const title = `${prefix} > ${elem.title}`;

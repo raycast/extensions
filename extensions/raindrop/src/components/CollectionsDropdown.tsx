@@ -6,9 +6,13 @@ type CollectionsDropdownProps = {
   isLoading: boolean;
   handleChange: (v: string) => void;
   collections: CollectionItem[];
-}
+};
 
-const CollectionsDropdown = React.memo(function CollectionsDropdown({ isLoading, handleChange, collections }: CollectionsDropdownProps) {
+const CollectionsDropdown = React.memo(function CollectionsDropdown({
+  isLoading,
+  handleChange,
+  collections,
+}: CollectionsDropdownProps) {
   if (isLoading) return null;
 
   return (

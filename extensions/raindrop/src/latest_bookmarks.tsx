@@ -20,7 +20,13 @@ export default function LatestBookmarks() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter bookmarks by title..."
-      searchBarAccessory={<CollectionsDropdown isLoading={isLoading} handleChange={onCollectionChange} collections={collections} />}
+      searchBarAccessory={
+        <CollectionsDropdown
+          isLoading={isLoading}
+          handleChange={onCollectionChange}
+          collections={collections}
+        />
+      }
     >
       {bookmarks?.items?.map((bookmark: Bookmark) => (
         <BookmarkItem key={bookmark._id} bookmark={bookmark} />
