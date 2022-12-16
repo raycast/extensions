@@ -49,7 +49,7 @@ const Feed = ({ id }: { id: IFeed['id'] }) => {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    title="Opedn"
+                    title="Open"
                     target={
                       <Detail
                         markdown={new NodeHtmlMarkdown().translate(
