@@ -59,7 +59,7 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action title="Reload" onAction={() => revalidate()} />
+          <Action title="Reload" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
           <Action.OpenInBrowser title="Open PurpleAir Map" url="https://map.purpleair.com" />
           <Action title="Change Station ID" icon={Icon.Key} onAction={() => openCommandPreferences()} />
         </ActionPanel>
