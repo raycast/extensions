@@ -3,7 +3,13 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { openNewHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { Tab } from "../interfaces";
 
-export function NewTabActions({ query }: { query?: string }): ReactElement {
+export class IridiumActions {
+  public static NewTab = NewTabActions;
+  public static TabList = TabListItemActions;
+  public static TabHistory = HistoryItemActions;
+}
+
+function NewTabActions({ query }: { query?: string }): ReactElement {
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item
@@ -16,7 +22,7 @@ export function NewTabActions({ query }: { query?: string }): ReactElement {
   );
 }
 
-export function TabListItemActions({ tab }: { tab: Tab }) {
+function TabListItemActions({ tab }: { tab: Tab }) {
   return (
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
@@ -25,7 +31,7 @@ export function TabListItemActions({ tab }: { tab: Tab }) {
   );
 }
 
-export function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
+function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
   return (
     <ActionPanel title={title}>
       <ActionPanel.Item

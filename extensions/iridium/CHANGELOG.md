@@ -5,3 +5,4 @@
 - Add Iridium Open Tab action
 - Add Iridium Search Tabs action
 - Add Iridium Search History action
+- Add Iridium Search Bookmarks action
