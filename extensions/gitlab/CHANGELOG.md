@@ -1,5 +1,11 @@
 # GitLab Changelog
 
+## [Add Todo Tags] - 2022-12-17
+
+- Upgrade to Raycast 1.45
+- Add Todo Tag to present the todo-reason
+- Add ⚠️ to merge request when there is a kind of conflict
+
 ## [Fix crash] - 2022-12-07
 
 - Fix crash which happens when cache is corrupted
