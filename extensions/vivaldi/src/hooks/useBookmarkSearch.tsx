@@ -33,7 +33,7 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
   return bookmarks;
 };
 
-const getBookmarksFromEdge = async (): Promise<HistoryEntry[]> => {
+const getBookmarks = async (): Promise<HistoryEntry[]> => {
   const bookmarksFilePath = getBookmarksFilePath();
   const fileBuffer = await fsReadFileAsync(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
@@ -45,7 +45,7 @@ export function useBookmarkSearch(query?: string): { error?: string; isLoading: 
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    getBookmarksFromEdge()
+    getBookmarks()
       .then((bookmarks) => {
         setBookmarks(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
         setIsLoading(false);

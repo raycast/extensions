@@ -47,7 +47,6 @@ export class Tab {
   }
 }
 
-
 type BookmarkNodeType = "folder" | "url";
 
 export interface BookmarkDirectory {
