@@ -4,7 +4,12 @@ import { getFavicon } from "@raycast/utils";
 import { List } from "@raycast/api";
 import { VivaldiActions } from ".";
 
-export function HistoryItem({ entry: { url, title, id } }: { entry: HistoryEntry }): ReactElement {
+export class VivaldiListsItems {
+  public static TabList = TabListItem;
+  public static TabHistory = HistoryItem;
+}
+
+function HistoryItem({ entry: { url, title, id } }: { entry: HistoryEntry }): ReactElement {
   return (
     <List.Item
       id={id.toString()}
@@ -16,7 +21,7 @@ export function HistoryItem({ entry: { url, title, id } }: { entry: HistoryEntry
   );
 }
 
-export function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
   return (
     <List.Item
       title={props.tab.title}
