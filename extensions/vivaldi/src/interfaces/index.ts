@@ -46,3 +46,27 @@ export class Tab {
     return getFavicon(this.url);
   }
 }
+
+
+type BookmarkNodeType = "folder" | "url";
+
+export interface BookmarkDirectory {
+  date_added: string;
+  children: BookmarkDirectory[];
+  type: BookmarkNodeType;
+  id: string;
+  guid: string;
+  source?: string;
+  url?: string;
+  name: string;
+  [key: string]: unknown;
+}
+
+export interface RawBookmarkRoot {
+  [key: string]: BookmarkDirectory;
+}
+
+export interface RawBookmarks {
+  roots: RawBookmarkRoot;
+  [key: string]: unknown;
+}

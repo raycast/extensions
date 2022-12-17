@@ -2,11 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vivaldi",
   "title": "Vivaldi",
-  "description": "Search and open tabs and history in Vivaldi.",
+  "description": "Search open tabs, bookmarks and history in Vivaldi.",
   "icon": "vivaldi-logo.png",
   "author": "crisboarna",
   "license": "MIT",
   "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Vivaldi",
+      "description": "Open a new Vivaldi tab.",
+      "mode": "view"
+    },
     {
       "name": "go-to-tab",
       "title": "Search Tabs",
@@ -22,10 +29,10 @@
       "mode": "view"
     },
     {
-      "name": "new-tab",
-      "title": "New Tab",
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
       "subtitle": "Vivaldi",
-      "description": "Open a new Vivaldi tab.",
+      "description": "Search browser bookmarks.",
       "mode": "view"
     }
   ],

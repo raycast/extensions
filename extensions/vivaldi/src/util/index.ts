@@ -1,4 +1,5 @@
 import path from "path";
+import { defaultVivaldiProfilePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -8,7 +9,7 @@ const userLibraryDirectoryPath = () => {
   return path.join(process.env.HOME, "Library");
 };
 
-export const getHistoryDbPath = () => {
-  const userDataDirectory = userLibraryDirectoryPath();
-  return path.join(userDataDirectory, "Application Support", "Vivaldi", "Default", "History");
-};
+export const getHistoryDbPath = () => path.join(userLibraryDirectoryPath(), ...defaultVivaldiProfilePath, "History");
+
+export const getBookmarksFilePath = () =>
+  path.join(userLibraryDirectoryPath(), ...defaultVivaldiProfilePath, "Bookmarks");
