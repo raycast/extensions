@@ -2,7 +2,12 @@ import { Action, ActionPanel, getPreferenceValues, Icon, openCommandPreferences 
 import { openNewArcTab, openNewFirefoxTab, openNewTab } from "../actions";
 import { HistoryEntry, Preferences, SupportedBrowsers } from "../interfaces";
 
-export const HistoryItemAction = ({ entry: { url } }: { entry: HistoryEntry }) => {
+export class BrowserHistoryActions {
+  public static HistoryItem = HistoryItemAction;
+  public static OpenPreferences = ActionOpenPreferences;
+}
+
+function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
   const { defaultBrowser } = getPreferenceValues<Preferences>();
   const actions = {
     [SupportedBrowsers.Chrome]: (
@@ -93,9 +98,9 @@ export const HistoryItemAction = ({ entry: { url } }: { entry: HistoryEntry }) =
       </ActionPanel.Section>
     </ActionPanel>
   );
-};
+}
 
-export function ActionOpenPreferences() {
+function ActionOpenPreferences() {
   return (
     <ActionPanel.Section>
       <Action

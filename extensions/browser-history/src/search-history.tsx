@@ -2,8 +2,7 @@ import { ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { ReactElement, useState } from "react";
 import { Preferences, SupportedBrowsers } from "./interfaces";
-import { ListEntries } from "./components";
-import { ActionOpenPreferences } from "./components/actions";
+import { BrowserHistoryActions, ListEntries } from "./components";
 
 export default function Command(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
@@ -64,7 +63,7 @@ export default function Command(): ReactElement {
           icon={"icon-small.png"}
           actions={
             <ActionPanel>
-              <ActionOpenPreferences />
+              <BrowserHistoryActions.OpenPreferences />
             </ActionPanel>
           }
         />

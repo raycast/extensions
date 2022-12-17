@@ -6,3 +6,4 @@ export const defaultProfilePathBrave = ["Application Support", "BraveSoftware", 
 export const defaultProfilePathVivaldi = ["Application Support", "Vivaldi", "Default", "History"];
 export const defaultProfilePathArc = ["Application Support", "Arc", "User Data", "Default", "History"];
 export const defaultProfilePathOpera = ["Application Support", "com.operasoftware.Opera", "History"];
+export const defaultProfilePathIridium = ["Application Support", "Iridium", "Default", "History"];
