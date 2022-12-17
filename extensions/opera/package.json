@@ -2,11 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "opera",
   "title": "Opera",
-  "description": "Search and open tabs and history in Opera.",
+  "description": "Search open tabs, bookmarks and history in Opera.",
   "icon": "opera-logo.png",
   "author": "crisboarna",
   "license": "MIT",
   "commands": [
+    {
+      "name": "new-tab",
+      "title": "New Tab",
+      "subtitle": "Opera",
+      "description": "Open a new Opera tab.",
+      "mode": "view"
+    },
     {
       "name": "go-to-tab",
       "title": "Search Tabs",
@@ -22,10 +29,10 @@
       "mode": "view"
     },
     {
-      "name": "new-tab",
-      "title": "New Tab",
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
       "subtitle": "Opera",
-      "description": "Open a new Opera tab.",
+      "description": "Search bookmarks.",
       "mode": "view"
     }
   ],
