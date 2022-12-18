@@ -2,7 +2,8 @@
 
 ## Updated - 2022-12-18
 
-- Sync latest locale list
+- Sync latest locale list with [MDN Web Docs Localization
+](https://developer.mozilla.org/en-US/docs/MDN/Community/Contributing/Translated_content)
 
 ## Updated - 2022-10-05
 
