@@ -1,23 +1,18 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Tab } from "./interfaces";
-import { getOpenTabs } from "./actions";
 import { IridiumListsItems } from "./components";
+import { useTabSearch } from "./hooks/useTabSearch";
 
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
-  const [tabs, setTabs] = useState<Tab[]>([]);
+  const { data, isLoading, errorView } = useTabSearch();
 
-  useEffect(() => {
-    async function getTabs() {
-      setTabs(await getOpenTabs(useOriginalFavicon));
-    }
-    getTabs().then();
-  }, []);
+  if (errorView) {
+    return errorView;
+  }
 
   return (
-    <List isLoading={tabs.length === 0}>
-      {tabs.map((tab) => (
+    <List isLoading={isLoading}>
+      {data?.map((tab) => (
         <IridiumListsItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
       ))}
     </List>

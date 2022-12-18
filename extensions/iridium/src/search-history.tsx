@@ -22,10 +22,10 @@ const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, permissionView, data } = useHistorySearch(searchText);
+  const { data, isLoading, errorView } = useHistorySearch(searchText);
 
-  if (permissionView) {
-    return permissionView as ReactElement;
+  if (errorView) {
+    return errorView as ReactElement;
   }
 
   const groupedEntries = groupEntries(data);

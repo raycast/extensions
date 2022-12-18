@@ -1,43 +1,22 @@
-import { useEffect, useState, ReactElement } from "react";
+import { useState } from "react";
 import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
-import { Tab } from "./interfaces";
-import { getOpenTabs } from "./actions";
 import { IridiumActions, IridiumListsItems } from "./components";
+import { useTabSearch } from "./hooks/useTabSearch";
 
-export default function Command(): ReactElement {
-  const [tabsLoading, setTabsLoading] = useState<boolean>(true);
+export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const [tabs, setTabs] = useState<Tab[]>([]);
-  const { isLoading, permissionView, data } = useHistorySearch(searchText);
+  const { data: dataHistory, isLoading: isLoadingHistory, errorView: errorViewHistory } = useHistorySearch(searchText);
+  const { data: dataTab, isLoading: isLoadingTab, errorView: errorViewTab } = useTabSearch();
 
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
 
-  async function getTabs(query?: string) {
-    let tabs = await getOpenTabs(useOriginalFavicon);
-
-    if (query) {
-      tabs = tabs.filter(function (tab) {
-        return (
-          tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-        );
-      });
-    }
-    setTabs(tabs);
-  }
-
-  useEffect(() => {
-    setTabsLoading(true);
-    getTabs().then(() => setTabsLoading(false));
-  }, [searchText]);
-
-  if (permissionView) {
-    return permissionView as ReactElement;
+  if (errorViewHistory || errorViewTab) {
+    return errorViewHistory || errorViewTab;
   }
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading || tabsLoading}>
+    <List onSearchTextChange={setSearchText} isLoading={isLoadingTab || isLoadingHistory}>
       <List.Section key={"new-tab"} title={"New Tab"}>
         <List.Item
           title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
@@ -46,12 +25,12 @@ export default function Command(): ReactElement {
         />
       </List.Section>
       <List.Section key={"open-tabs"} title={"Open Tabs"}>
-        {tabs.map((tab) => (
+        {dataTab?.map((tab) => (
           <IridiumListsItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
         ))}
       </List.Section>
       <List.Section key={"history"} title={"Recently Closed"}>
-        {data?.map((e) => (
+        {dataHistory?.map((e) => (
           <IridiumListsItems.TabHistory entry={e} key={e.id} />
         ))}
       </List.Section>
