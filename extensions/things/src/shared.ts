@@ -62,8 +62,10 @@ export const executeJxa = async (script: string) => {
 
 export const thingsNotRunningError = `
   ## Things Not Running
-
   Please make sure Things is installed and running before using this extension.
+  
+  ### But my Things app is running!
+  If Things is running, you may need to grant Raycast access to Things in *System Settings > Privacy & Security > Automation > Raycast > Things*
 `;
 
 export enum ListName {
