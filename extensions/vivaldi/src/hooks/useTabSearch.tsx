@@ -3,7 +3,7 @@ import { getOpenTabs } from "../actions";
 import { SearchResult, Tab } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
-import { NotInstalled, UnknownError } from "../components";
+import { NotInstalledError, UnknownError } from "../components";
 
 export function useTabSearch(query?: string): SearchResult<Tab> {
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
@@ -30,7 +30,7 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
       .then(() => setIsLoading(false))
       .catch((e) => {
         if (e.message === NOT_INSTALLED_MESSAGE) {
-          setErrorView(<NotInstalled />);
+          setErrorView(<NotInstalledError />);
         } else {
           setErrorView(<UnknownError />);
         }
