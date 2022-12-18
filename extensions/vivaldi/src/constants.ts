@@ -11,6 +11,10 @@ export const DownloadVivaldiText = `
   [![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/logos/vivaldi_logo_dark.png)]()
 `;
 
+export const NoVivaldiBookmarksText = `# 🚨Error 
+Vivaldi browser has no bookmarks. Please add some bookmarks to continue using this command.`;
+
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const VIVALDI_NOT_INSTALLED_MESSAGE = "Vivaldi not installed";
+export const VIVALDI_NO_BOOKMARKS_MESSAGE = /^ENOENT.*Bookmarks'$/;
