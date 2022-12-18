@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pomodoro-timer",
+  "title": "Pomodoro Timer",
+  "description": "Extensible pomodoro timer to pace your work and take proper rest during your work day.",
+  "icon": "extension-icon-2.png",
+  "author": "frankdilo",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Pomodoro Timer",
+      "subtitle": "Timer",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "work-duration",
+      "title": "Work Duration (minutes)",
+      "description": "The length of the work duration in minutes",
+      "type": "textfield",
+      "default": "25",
+      "required": true
+    },
+    {
+      "name": "short-rest-duration",
+      "title": "Short Rest Duration (minutes)",
+      "description": "The length of the short rest duration in minutes",
+      "type": "textfield",
+      "default": "5",
+      "required": true
+    },
+    {
+      "name": "long-rest-duration",
+      "title": "Long Rest Duration (minutes)",
+      "description": "The length of the long rest duration in minutes",
+      "type": "textfield",
+      "default": "20",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "superjson": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
