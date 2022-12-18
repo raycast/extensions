@@ -1,12 +1,15 @@
 import { runAppleScript } from "run-applescript";
 import { closeMainWindow, popToRoot } from "@raycast/api";
 import { Tab } from "../interfaces";
+import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
     : '""';
+
+  await checkAppInstalled();
 
   const openTabs = await runAppleScript(`
       set _output to ""
@@ -50,6 +53,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
     end tell
     return true
   `;
+  await checkAppInstalled();
 
   return await runAppleScript(script);
 }
@@ -81,3 +85,17 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     return true
   `);
 }
+
+const checkAppInstalled = async () => {
+  const appInstalled = await runAppleScript(`
+set isInstalled to false
+try
+    do shell script "osascript -e 'exists application \\"Opera\\"'"
+    set isInstalled to true
+end try
+
+return isInstalled`);
+  if (appInstalled === "false") {
+    throw new Error(NOT_INSTALLED_MESSAGE);
+  }
+};

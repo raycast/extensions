@@ -4,7 +4,7 @@ import { getFavicon } from "@raycast/utils";
 import { List } from "@raycast/api";
 import { OperaActions } from ".";
 
-export class OperaListsItems {
+export class OperaListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
 }

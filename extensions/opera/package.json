@@ -15,7 +15,7 @@
       "mode": "view"
     },
     {
-      "name": "go-to-tab",
+      "name": "search-tab",
       "title": "Search Tabs",
       "subtitle": "Opera",
       "description": "List all tabs and go to the selected.",
