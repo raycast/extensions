@@ -10,6 +10,11 @@ export const DownloadIridiumText = `
   [![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/logos/vivaldi_logo_dark.png)]()
 `;
 
+export const NoBookmarksText = `# 🚨Error 
+Iridium browser has no bookmarks. Please add some bookmarks to continue using this command.`;
+
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const IRIDIUM_NOT_INSTALLED_MESSAGE = "Iridium not installed";
+
+export const IRIDIUM_NO_BOOKMARKS_MESSAGE = /^ENOENT.*Bookmarks'$/;
