@@ -6,10 +6,10 @@ import { Page } from "../core/dm"
 import { DONATION_URL } from "../config"
 
 export type SaveToLastProps = {
-    saver: Saver,
-    copiedText: string,
-    lastSelectedPage: LastSelectedPage,
-    raycastAdapter: RaycastAdapter,
+    saver: Saver
+    copiedText: string
+    lastSelectedPage: LastSelectedPage
+    raycastAdapter: RaycastAdapter
 }
 
 export type LastSelectedPage = Page | Error | undefined
@@ -40,9 +40,17 @@ export function SaveToLast(props: SaveToLastProps) {
         lastPageSection = (
             <>
                 <Form.Separator />
-                <Form.Description title={"Save to"} text={
-                    props.lastSelectedPage.icon + " " + props.lastSelectedPage.title + "\n" + "(last selected page)" + "\n"
-                } />
+                <Form.Description
+                    title={"Save to"}
+                    text={
+                        props.lastSelectedPage.icon +
+                        " " +
+                        props.lastSelectedPage.title +
+                        "\n" +
+                        "(last selected page)" +
+                        "\n"
+                    }
+                />
             </>
         )
     } else {
@@ -57,8 +65,7 @@ export function SaveToLast(props: SaveToLastProps) {
     const actions = (
         <ActionPanel>
             <ActionPanel.Section>
-                <Action title="Save" onAction={() => handleSave(props.lastSelectedPage, text)}
-                        icon="notion_icon.png" />
+                <Action title="Save" onAction={() => handleSave(props.lastSelectedPage, text)} icon="notion_icon.png" />
             </ActionPanel.Section>
 
             <ActionPanel.Section>
@@ -66,7 +73,6 @@ export function SaveToLast(props: SaveToLastProps) {
             </ActionPanel.Section>
         </ActionPanel>
     )
-
 
     return (
         <Form actions={actions}>

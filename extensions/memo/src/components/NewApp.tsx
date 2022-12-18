@@ -13,7 +13,7 @@ import { LastSelectedPage, SaveToLast } from "./SaveToLast"
 
 export enum BootstrapFlow {
     SelectCustomPage,
-    SelectLastPage
+    SelectLastPage,
 }
 
 export type BootstrapProps = {
@@ -39,8 +39,8 @@ export default function NewApp(props: BootstrapProps) {
     const authService = new AuthService(raycastAdapter, webAdapter)
 
     useEffect(() => {
-        (async () => {
-            if(notionToken) {
+        ;(async () => {
+            if (notionToken) {
                 console.info("notion already authorized")
                 return
             }
@@ -68,7 +68,7 @@ export default function NewApp(props: BootstrapProps) {
 
     useEffect(() => {
         async function getCopiedText() {
-            if(!saver) {
+            if (!saver) {
                 return
             }
 
@@ -94,7 +94,7 @@ export default function NewApp(props: BootstrapProps) {
 
     useEffect(() => {
         async function doGet() {
-            if(props.flow != BootstrapFlow.SelectLastPage) {
+            if (props.flow != BootstrapFlow.SelectLastPage) {
                 return
             }
 
@@ -141,10 +141,15 @@ export default function NewApp(props: BootstrapProps) {
         return <Detail markdown={"Authorizing...⏳"} />
     }
 
-    if(props.flow === BootstrapFlow.SelectLastPage && lastSelectedPage) {
-        return <SaveToLast saver={saver} copiedText={text} lastSelectedPage={lastSelectedPage} raycastAdapter={raycastAdapter}/>
+    if (props.flow === BootstrapFlow.SelectLastPage && lastSelectedPage) {
+        return (
+            <SaveToLast
+                saver={saver}
+                copiedText={text}
+                lastSelectedPage={lastSelectedPage}
+                raycastAdapter={raycastAdapter}
+            />
+        )
     }
-    return (
-        <SaveToPage copiedText={text} saver={saver} setErr={setErr} raycastAdapter={raycastAdapter} />
-    )
+    return <SaveToPage copiedText={text} saver={saver} setErr={setErr} raycastAdapter={raycastAdapter} />
 }

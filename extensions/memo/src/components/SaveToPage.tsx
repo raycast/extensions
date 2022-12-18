@@ -6,14 +6,14 @@ import { DONATION_URL } from "../config"
 import { RaycastAdapter } from "../adapters/raycast/adapter"
 
 export type HomeProps = {
-    copiedText: string,
-    setErr: (err: Error) => void,
-    saver: Saver,
-    raycastAdapter: RaycastAdapter,
+    copiedText: string
+    setErr: (err: Error) => void
+    saver: Saver
+    raycastAdapter: RaycastAdapter
 }
 
 export function SaveToPage(props: HomeProps) {
-    const [urlTitle, setURLTitle] = useState<string>('')
+    const [urlTitle, setURLTitle] = useState<string>("")
     const [isParsingText, setIsParsingText] = useState<boolean>()
     const [text, setText] = useState<string>(props.copiedText)
 
@@ -44,39 +44,45 @@ export function SaveToPage(props: HomeProps) {
 
     const actions = (
         <ActionPanel>
-            <ActionPanel.Section title={'Save to'}>
-                <Action.Push title="Save to Notion..."
-                             target={<PageSearch saver={props.saver} raycastAdapter={props.raycastAdapter} copiedText={text} pageTitle={urlTitle}/>} icon={"notion_icon.png"}/>
+            <ActionPanel.Section title={"Save to"}>
+                <Action.Push
+                    title="Save to Notion..."
+                    target={
+                        <PageSearch
+                            saver={props.saver}
+                            raycastAdapter={props.raycastAdapter}
+                            copiedText={text}
+                            pageTitle={urlTitle}
+                        />
+                    }
+                    icon={"notion_icon.png"}
+                />
             </ActionPanel.Section>
 
             <ActionPanel.Section>
-                <Action.OpenInBrowser url={DONATION_URL} title={"Buy us a coffee"} icon="bmcbrand/bmc-logo.svg"/>
+                <Action.OpenInBrowser url={DONATION_URL} title={"Buy us a coffee"} icon="bmcbrand/bmc-logo.svg" />
             </ActionPanel.Section>
         </ActionPanel>
     )
 
     return (
-        <Form
-            isLoading={isParsingText}
-            actions={actions}
-        >
-            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText}/>
+        <Form isLoading={isParsingText} actions={actions}>
+            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} />
 
-            <Form.Separator/>
+            <Form.Separator />
 
-            {
-                isParsingText ? (
-                    <Form.Description text={"Parsing... ⏳"}/>
-                ) : (
-                    <Form.TextArea
-                        autoFocus={true}
-                        title={'Page Title'}
-                        value={urlTitle || ""}
-                        placeholder={"Untitled"}
-                        onChange={setURLTitle}
-                        id={"url_title"}/>
-                )
-            }
+            {isParsingText ? (
+                <Form.Description text={"Parsing... ⏳"} />
+            ) : (
+                <Form.TextArea
+                    autoFocus={true}
+                    title={"Page Title"}
+                    value={urlTitle || ""}
+                    placeholder={"Untitled"}
+                    onChange={setURLTitle}
+                    id={"url_title"}
+                />
+            )}
 
             <Form.Separator />
 
@@ -84,7 +90,6 @@ export function SaveToPage(props: HomeProps) {
                 text="If you like this extension, consider buying us a coffee by clicking <Actions> below.
 Thank you 🤝"
             />
-
         </Form>
     )
 }

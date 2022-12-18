@@ -1,54 +1,54 @@
-import validator from "validator";
+import validator from "validator"
 
 export class URL {
-    private readonly _text: string;
+    private readonly _text: string
 
     private constructor(text: string) {
-        this._text = text;
+        this._text = text
     }
 
     get text(): string {
-        return this._text;
+        return this._text
     }
 
     static fromString(s: string): URL | Error {
         if (!validator.isURL(s)) {
-            return new Error(`not a URL:${s}`);
+            return new Error(`not a URL:${s}`)
         }
 
-        return new URL(s);
+        return new URL(s)
     }
 }
 
 export class URLMetadata {
-    private readonly _title: string;
+    private readonly _title: string
 
     constructor(title: string) {
-        this._title = title;
+        this._title = title
     }
 
     get title(): string {
-        return this._title;
+        return this._title
     }
 }
 
 /** Standard response of Token Exchange step in OAuth **/
 export type OAuthTokenResponse = {
-    accessToken: string;
+    accessToken: string
     /**
      * An optional refresh token returned by an OAuth token request.
      */
-    refreshToken?: string;
+    refreshToken?: string
     /**
      * An optional id token returned by an identity request (e.g. /me, Open ID Connect).
      */
-    idToken?: string;
+    idToken?: string
     /**
      * An optional expires value (in seconds) returned by an OAuth token request.
      */
-    expiresIn?: number;
+    expiresIn?: number
     /**
      * The optional scope value returned by an OAuth token request.
      */
-    scope?: string;
+    scope?: string
 }

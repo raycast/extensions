@@ -1,5 +1,5 @@
-import parser, { Metadata } from "html-metadata-parser";
-import fetch, { Response } from "node-fetch";
+import parser, { Metadata } from "html-metadata-parser"
+import fetch, { Response } from "node-fetch"
 
 export class Api {
     getMetadata(url: string): Promise<Metadata | Error> {
@@ -15,14 +15,16 @@ export class Api {
 
         return fetch(url, {
             method: "POST",
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
-        }).then((res) => {
-            console.log(`POST response, url=${url}, body=${body}, response=${res}`)
-            return res
-        }).catch((err) => {
-            console.error(`POST response, url=${url}, body=${body}`)
-            return new Error(`${err}:POST request`)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
         })
+            .then((res) => {
+                console.log(`POST response, url=${url}, body=${body}, response=${res}`)
+                return res
+            })
+            .catch((err) => {
+                console.error(`POST response, url=${url}, body=${body}`)
+                return new Error(`${err}:POST request`)
+            })
     }
 }

@@ -2,9 +2,10 @@ import { Api as RaycastApi } from "../../raycast/api"
 import { DeserializedPage, Page } from "../../core/dm"
 import {
     NOTION_OAUTH_AUTHORIZE_URL,
-    NOTION_OAUTH_CLIENT_ID, NOTION_OAUTH_PROXY_REDIRECT_URL,
+    NOTION_OAUTH_CLIENT_ID,
+    NOTION_OAUTH_PROXY_REDIRECT_URL,
     NOTION_OAUTH_SCOPE,
-    NOTION_RECENT_PAGE_PERSISTENCE_KEY
+    NOTION_RECENT_PAGE_PERSISTENCE_KEY,
 } from "../../config"
 import { OAuthClient, RaycastAdapter } from "./adapter"
 import { OAuthAuthorizeResponse, Toast, TokenInfo } from "./dm"
@@ -55,26 +56,31 @@ class OAuthClientImpl implements OAuthClient {
     }
 
     private getOAuthRequestForNotion(): Promise<OAuth.AuthorizationRequest | Error> {
-        return this._raycastClient.authorizationRequest({
-            endpoint: NOTION_OAUTH_AUTHORIZE_URL,
-            clientId: NOTION_OAUTH_CLIENT_ID,
-            scope: NOTION_OAUTH_SCOPE,
-            extraParameters: {
-                "owner": "user"
-            }
-        }).catch((err) => {
-            console.error(err)
-            return new Error(`${err}:get notion auth request`)
-        })
+        return this._raycastClient
+            .authorizationRequest({
+                endpoint: NOTION_OAUTH_AUTHORIZE_URL,
+                clientId: NOTION_OAUTH_CLIENT_ID,
+                scope: NOTION_OAUTH_SCOPE,
+                extraParameters: {
+                    owner: "user",
+                },
+            })
+            .catch((err) => {
+                console.error(err)
+                return new Error(`${err}:get notion auth request`)
+            })
     }
 
     private sendAuthorizeRequest(request: OAuth.AuthorizationRequest): Promise<OAuthAuthorizeResponse | Error> {
-        return this._raycastClient.authorize(request).then((response) => {
-            return { authorizationCode: response.authorizationCode, redirectURI: NOTION_OAUTH_PROXY_REDIRECT_URL }
-        }).catch((err) => {
-            console.error(err)
-            return new Error(`${err}:send auth request`)
-        })
+        return this._raycastClient
+            .authorize(request)
+            .then((response) => {
+                return { authorizationCode: response.authorizationCode, redirectURI: NOTION_OAUTH_PROXY_REDIRECT_URL }
+            })
+            .catch((err) => {
+                console.error(err)
+                return new Error(`${err}:send auth request`)
+            })
     }
 }
 

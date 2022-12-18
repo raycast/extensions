@@ -56,9 +56,9 @@ test("integration_test_notion_adapter_create_page", async () => {
     expect((dbPageSearch as Page[]).length).toBeGreaterThan(0)
     const dbPage = (dbPageSearch as Page[])[0]
 
-    const result = await getNotionAdapter().addPage(dbPage, (new Date()).toLocaleString(), {
+    const result = await getNotionAdapter().addPage(dbPage, new Date().toLocaleString(), {
         text: "integration test",
-        isURL: false
+        isURL: false,
     })
     expect(result instanceof Error).toBeFalsy()
 })
@@ -71,10 +71,10 @@ test("integration_test_notion_adapter_append_paragraph", async () => {
     expect((pageSearch as Page[]).length).toBeGreaterThan(0)
     const page = (pageSearch as Page[])[0]
 
-    const content = `${(new Date()).toLocaleString()}: integration test`
+    const content = `${new Date().toLocaleString()}: integration test`
     const result = await getNotionAdapter().addContent(page, {
         text: content,
-        isURL: false
+        isURL: false,
     })
     expect(result instanceof Error).toBeFalsy()
 })
@@ -82,7 +82,9 @@ test("integration_test_notion_adapter_append_paragraph", async () => {
 test("integration_test_web_adapter_get_metadata", async () => {
     const adapter = getWebAdapter()
 
-    const metadata = await adapter.getMetadata(URL.fromString("https://www.npmjs.com/package/html-metadata-parser") as URL)
+    const metadata = await adapter.getMetadata(
+        URL.fromString("https://www.npmjs.com/package/html-metadata-parser") as URL
+    )
 
     expect(metadata instanceof Error).toBeFalsy()
     expect((metadata as URLMetadata).title).toContain("html-metadata-parser")

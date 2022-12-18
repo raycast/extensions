@@ -1,8 +1,8 @@
-import {Page, PageType} from "./dm";
-import {NotionAdapter} from "./adapters";
-import {RaycastAdapter} from "../adapters/raycast/adapter";
-import { WebAdapter } from "../adapters/web/adapter";
-import { URL } from "../adapters/web/dm";
+import { Page, PageType } from "./dm"
+import { NotionAdapter } from "./adapters"
+import { RaycastAdapter } from "../adapters/raycast/adapter"
+import { WebAdapter } from "../adapters/web/adapter"
+import { URL } from "../adapters/web/dm"
 
 export class Saver {
     private readonly notionAdapter: NotionAdapter
@@ -10,9 +10,9 @@ export class Saver {
     private readonly webAdapter: WebAdapter
 
     constructor(notionAdapter: NotionAdapter, raycastAdapter: RaycastAdapter, webAdapter: WebAdapter) {
-        this.notionAdapter = notionAdapter;
-        this.raycastAdapter = raycastAdapter;
-        this.webAdapter = webAdapter;
+        this.notionAdapter = notionAdapter
+        this.raycastAdapter = raycastAdapter
+        this.webAdapter = webAdapter
     }
 
     getPages(query: string): Promise<Page[] | Error> {

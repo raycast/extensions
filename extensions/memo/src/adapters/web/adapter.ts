@@ -5,4 +5,3 @@ export interface WebAdapter {
 
     sendHTTPBasicAuthRequest(tokenUrl: string, code: string, redirectUri: string): Promise<any | Error>
 }
-
