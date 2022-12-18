@@ -1,5 +1,9 @@
 # Changelog
 
+## Updated - 2022-12-18
+
+- Sync latest locale list
+
 ## Updated - 2022-10-05
 
 - Support `Read Document` from GitHub
