@@ -26,6 +26,9 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Iridium:
       appName = "Iridium";
       break;
+    case SupportedBrowsers.Orion:
+      appName = "Orion";
+      break;
     default:
       throw new Error(`Unsupported browser: ${browser}`);
   }

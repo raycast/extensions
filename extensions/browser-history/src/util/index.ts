@@ -12,6 +12,7 @@ import {
   defaultProfilePathOpera,
   defaultProfilePathSafari,
   defaultProfilePathVivaldi,
+  defaultProfilePathOrion,
 } from "../constants";
 
 const userLibraryDirectoryPath = () => {
@@ -44,6 +45,7 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
     profilePathArc,
     profilePathOpera,
     profilePathIridium,
+    profilePathOrion,
   } = getPreferenceValues<Preferences>();
   const userDataDirectory = userLibraryDirectoryPath();
   let profilePath, profileName;
@@ -90,6 +92,10 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
       return profilePathIridium
         ? path.join(profilePathIridium, "History")
         : path.join(userDataDirectory, ...defaultProfilePathIridium);
+    case SupportedBrowsers.Orion:
+      return profilePathOrion
+        ? path.join(profilePathOrion, "history")
+        : path.join(userDataDirectory, ...defaultProfilePathOrion);
     default:
       throw new Error("Unsupported browser.");
   }
@@ -100,6 +106,7 @@ export const getHistoryTable = (browser: SupportedBrowsers): string => {
     case SupportedBrowsers.Firefox:
       return "moz_places";
     case SupportedBrowsers.Safari:
+    case SupportedBrowsers.Orion:
       return "history_items";
     default:
       return "urls";
@@ -112,6 +119,8 @@ export const getHistoryDateColumn = (browser: SupportedBrowsers): string => {
       return "last_visit_date";
     case SupportedBrowsers.Safari:
       return "visit_time";
+    case SupportedBrowsers.Orion:
+      return "LAST_VISIT_TIME";
     default:
       return "last_visit_time";
   }

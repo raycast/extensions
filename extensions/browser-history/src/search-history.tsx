@@ -6,14 +6,7 @@ import { BrowserHistoryActions, ListEntries } from "./components";
 
 export default function Command(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
-  const enabled =
-    preferences.enableChrome ||
-    preferences.enableFirefox ||
-    preferences.enableSafari ||
-    preferences.enableEdge ||
-    preferences.enableBrave ||
-    preferences.enableVivaldi ||
-    preferences.enableArc;
+  const enabled = Object.entries(preferences).filter(([key, value]) => key.startsWith("enable") && value).length > 0;
   const [searchText, setSearchText] = useState<string>();
 
   const isLoading: boolean[] = [];

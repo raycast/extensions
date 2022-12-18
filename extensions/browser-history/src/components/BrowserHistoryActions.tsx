@@ -61,7 +61,7 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
     [SupportedBrowsers.Arc]: (
       <ActionPanel.Item
         title={"Open in Arc"}
-        icon={"arc-logo.png"}
+        icon={"arc-logo.svg"}
         shortcut={{ modifiers: ["cmd"], key: "a" }}
         onAction={() => openNewArcTab(url)}
       />
@@ -72,6 +72,22 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
         icon={"opera-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "o" }}
         onAction={() => openNewTab(SupportedBrowsers.Opera, url)}
+      />
+    ),
+    [SupportedBrowsers.Iridium]: (
+      <ActionPanel.Item
+        title={"Open in Iridium"}
+        icon={"iridium-logo.png"}
+        shortcut={{ modifiers: ["cmd"], key: "i" }}
+        onAction={() => openNewTab(SupportedBrowsers.Iridium, url)}
+      />
+    ),
+    [SupportedBrowsers.Orion]: (
+      <ActionPanel.Item
+        title={"Open in Orion"}
+        icon={"orion-logo.png"}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={() => openNewTab(SupportedBrowsers.Orion, url)}
       />
     ),
   };
@@ -95,6 +111,8 @@ function HistoryItemAction({ entry: { url } }: { entry: HistoryEntry }) {
         {actions[SupportedBrowsers.Vivaldi]}
         {actions[SupportedBrowsers.Arc]}
         {actions[SupportedBrowsers.Opera]}
+        {actions[SupportedBrowsers.Iridium]}
+        {actions[SupportedBrowsers.Orion]}
       </ActionPanel.Section>
     </ActionPanel>
   );
