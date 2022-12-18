@@ -19,7 +19,7 @@
       "mode": "view"
     },
     {
-      "name": "go-to-tab",
+      "name": "search-tab",
       "title": "Search Tabs",
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",

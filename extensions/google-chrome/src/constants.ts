@@ -1,6 +1,6 @@
 export const defaultChromeProfilePath = ["Application Support", "Google", "Chrome", "Default"];
 
-export const DownloadChromeText = `
+export const DownloadText = `
   # 🚨Error: Google Chrome browser is not installed
   ## This extension depends on Google Chrome browser. You must install it to continue.
   
@@ -10,10 +10,16 @@ export const DownloadChromeText = `
   [![Google Chrome](https://www.google.com/chrome/static/images/chrome-logo-m100.svg)]()
 `;
 
-export const NoChromeBookmarksText = `# 🚨Error 
+export const NoBookmarksText = `# 🚨Error 
 Google Chrome browser has no bookmarks. Please add some bookmarks to continue using this command.`;
+
+export const UnknownErrorText = `
+  # 🚨Error: Something happened while trying to run your command
+  
+  [![Google Chrome](https://www.google.com/chrome/static/images/chrome-logo-m100.svg)]()
+`;
 
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
-export const CHROME_NOT_INSTALLED_MESSAGE = "Google Chrome not installed";
-export const CHROME_NO_BOOKMARKS_MESSAGE = /^ENOENT.*Bookmarks'$/;
+export const NOT_INSTALLED_MESSAGE = "Google Chrome not installed";
+export const NO_BOOKMARKS_MESSAGE = "Google Chrome has no bookmarks.";
