@@ -54,6 +54,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.29.1",
+    "airplayer": "^2.0.0",
+    "apple-system-profiler": "^1.1.0",
     "execa": "^6.0.0",
     "macos-audio-devices": "^1.4.0",
     "macos-version": "^5.2.1",
