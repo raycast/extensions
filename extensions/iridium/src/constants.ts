@@ -15,9 +15,8 @@ export const UnknownErrorText = `
   [![Iridium](https://iridiumbrowser.de/assets/images/logos/iridium-logo_large.svg)]()
 `;
 
-export const NoBookmarksText = `# 🚨Error 
-
-Iridium browser has no bookmarks. Please add some bookmarks to continue using this command.
+export const NoBookmarksText = `
+# 🚨Error: Iridium browser has no bookmarks. Please add some bookmarks to continue using this command.
 
 [![Iridium](https://iridiumbrowser.de/assets/images/logos/iridium-logo_large.svg)]()
 `;

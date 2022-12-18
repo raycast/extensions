@@ -1,3 +1,3 @@
-export * from "./NotInstalled";
-export * from "./NoBookmarks";
+export * from "./NotInstalledError";
+export * from "./NoBookmarksError";
 export * from "./UnknownError";
