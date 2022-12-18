@@ -23,7 +23,7 @@
       "mode": "view"
     },
     {
-      "name": "go-to-tab",
+      "name": "search-tab",
       "title": "Search Brave Tabs",
       "subtitle": "Brave",
       "description": "List all tabs and go to the selected.",

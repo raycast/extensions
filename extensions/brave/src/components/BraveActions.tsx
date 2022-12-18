@@ -3,7 +3,7 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { openNewHistoryTab, openNewTab, setActiveTab } from "../actions";
 import { Tab } from "../interfaces";
 
-export class ChromeActions {
+export class BraveActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
