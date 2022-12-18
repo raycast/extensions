@@ -1,2 +1,3 @@
 # Quick Event Changelog
-## [Extension Preference for Focus on Calendar on completion.] - 2022-12-17
+
+## [Extension Preference for Focus on Calendar on completion] - 2022-12-17
