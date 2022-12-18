@@ -10,6 +10,10 @@ export const DownloadChromeText = `
   [![Google Chrome](https://www.google.com/chrome/static/images/chrome-logo-m100.svg)]()
 `;
 
+export const NoChromeBookmarksText = `# 🚨Error 
+Google Chrome browser has no bookmarks. Please add some bookmarks to continue using this command.`;
+
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
 
 export const CHROME_NOT_INSTALLED_MESSAGE = "Google Chrome not installed";
+export const CHROME_NO_BOOKMARKS_MESSAGE = /^ENOENT.*Bookmarks'$/;
