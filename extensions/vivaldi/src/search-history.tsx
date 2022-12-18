@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useState, ReactElement } from "react";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { GroupedEntries, HistoryEntry } from "./interfaces";
-import { VivaldiListsItems } from "./components";
+import { VivaldiListItems } from "./components";
 
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
@@ -22,10 +22,10 @@ const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, permissionView, data } = useHistorySearch(searchText);
+  const { data, isLoading, errorView } = useHistorySearch(searchText);
 
-  if (permissionView) {
-    return permissionView as ReactElement;
+  if (errorView) {
+    return errorView as ReactElement;
   }
 
   const groupedEntries = groupEntries(data);
@@ -36,7 +36,7 @@ export default function Command(): ReactElement {
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <VivaldiListsItems.TabHistory entry={e} key={e.id} />
+            <VivaldiListItems.TabHistory entry={e} key={e.id} />
           ))}
         </List.Section>
       ))}

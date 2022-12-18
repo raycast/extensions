@@ -4,7 +4,7 @@ import { getFavicon } from "@raycast/utils";
 import { List } from "@raycast/api";
 import { VivaldiActions } from ".";
 
-export class VivaldiListsItems {
+export class VivaldiListItems {
   public static TabList = TabListItem;
   public static TabHistory = HistoryItem;
 }

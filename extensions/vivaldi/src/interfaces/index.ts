@@ -2,10 +2,10 @@ import { ReactNode } from "react";
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
-export interface SearchResult {
+export interface SearchResult<T> {
   readonly isLoading: boolean;
-  readonly permissionView?: ReactNode;
-  readonly data?: HistoryEntry[] | undefined;
+  readonly errorView?: ReactNode;
+  readonly data?: T[];
 }
 
 export interface HistoryEntry {
