@@ -4,7 +4,7 @@ import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../
 import { getBookmarksFilePath } from "../util";
 import { ReactNode, useEffect, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
-import { NoBookmarks, NotInstalled, UnknownError } from "../components";
+import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
 const fsReadFileAsync = promisify(readFile);
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
@@ -58,9 +58,9 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
       })
       .catch((e) => {
         if (e.message === NOT_INSTALLED_MESSAGE) {
-          setErrorView(<NotInstalled />);
+          setErrorView(<NotInstalledError />);
         } else if (e.message === NO_BOOKMARKS_MESSAGE) {
-          setErrorView(<NoBookmarks />);
+          setErrorView(<NoBookmarksError />);
         } else {
           setErrorView(<UnknownError />);
         }

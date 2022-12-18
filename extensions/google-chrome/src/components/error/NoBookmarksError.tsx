@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { NoBookmarksText } from "../../constants";
 
-export function NoBookmarks() {
+export function NoBookmarksError() {
   return <Detail markdown={NoBookmarksText} />;
 }
