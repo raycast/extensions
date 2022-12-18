@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mozilla-firefox",
   "title": "Mozilla Firefox",
-  "description": "Search and open tabs and history in Mozilla Firefox.",
+  "description": "Search open tabs, bookmarks and history in Mozilla Firefox.",
   "icon": "firefox-logo.png",
   "author": "crisboarna",
   "categories": [
@@ -14,24 +14,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "firefox-go-to-tab",
-      "title": "Search Tabs",
-      "subtitle": "Mozilla Firefox",
-      "description": "List all tabs and go to the selected.",
-      "mode": "view"
-    },
-    {
-      "name": "firefox-search-history",
-      "title": "Search History",
-      "subtitle": "Mozilla Firefox",
-      "description": "Search browser history.",
-      "mode": "view"
-    },
-    {
-      "name": "firefox-new-tab",
+      "name": "new-tab",
       "title": "New Tab",
       "subtitle": "Mozilla Firefox",
-      "description": "Open a new Google Chrome tab.",
+      "description": "Open a new Mozilla Firefox tab.",
       "mode": "view",
       "preferences": [
         {
@@ -65,13 +51,43 @@
           ]
         }
       ]
+    },
+    {
+      "name": "search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Mozilla Firefox",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Mozilla Firefox",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Mozilla Firefox",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "tabSessionManagerId",
+      "type": "textfield",
+      "required": false,
+      "title": "Tab Session Manager Extension ID",
+      "description": "Enable Tab Session Manager support for searching opened tabs instead of Firefox default session file.",
+      "label": "Enable Tab Session Manager support by providing the extension ID."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.8",
-    "run-applescript": "6.0.0",
-    "sql.js": "1.8.0"
+    "@raycast/utils": "^1.4.13",
+    "run-applescript": "6.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

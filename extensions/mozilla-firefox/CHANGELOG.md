@@ -2,7 +2,8 @@
 
 ## [Initial Version] - 2022-12-04
 
-- Add New Tab from search query, Open Tabs and History
-- Add Search Open Tabs
-- Add Search History
+- Open new tabs in Mozilla Firefox
+- Search and jump to currently open tabs in Mozilla Firefox Browser
+- Search and open Mozilla Firefox tabs from search query based on browser history.
+- Search and open Mozilla Firefox tabs from search query based on bookmarks.
 - Add Search from Google, DuckDuckGo, Bing, Brave and Baidu

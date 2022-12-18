@@ -9,19 +9,36 @@ const userDataDirectoryPath = () => {
   return path.join(process.env.HOME, "Library", "Application Support", "Firefox", "Profiles");
 };
 
-const getProfileName = async (userDirectoryPath: string) => {
-  const profiles = await fs.promises.readdir(userDirectoryPath);
+const getProfileName = (userDirectoryPath: string) => {
+  const profiles = fs.readdirSync(userDirectoryPath);
   return profiles.filter((profile) => profile.endsWith(".default-release"))[0];
 };
 
-export const getHistoryDbPath = async () => {
+export const getHistoryDbPath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, await getProfileName(userDirectoryPath), "places.sqlite");
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "places.sqlite");
+};
+
+export const getBookmarksDirectoryPath = (): string => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "bookmarkbackups");
+};
+
+export const getSessionManagerExtensionPath = (extensionId: string) => {
+  const userDirectoryPath = userDataDirectoryPath();
+  return path.join(
+    userDirectoryPath,
+    getProfileName(userDirectoryPath),
+    "storage",
+    "default",
+    `moz-extension+++${extensionId}`,
+    "idb"
+  );
 };
 
 export const getSessionInactivePath = async () => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(userDirectoryPath, await getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
 };
 
 export const getSessionActivePath = async () => {
@@ -34,7 +51,22 @@ export const getSessionActivePath = async () => {
   );
 };
 
-export function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
+export function decodeLZ4(buffer: Buffer) {
+  const u8sz = buffer.slice(8, 12);
+  const origLen = u8sz[0] + u8sz[1] * 256 + u8sz[2] * 256 * 256 + u8sz[3] * 256 * 256 * 256;
+  // Extract compressed data (past mozilla jsonlz4 header of 12 bytes)
+  const jsonStart = 12;
+  const u8Comp = buffer.slice(jsonStart);
+  // Create LZ4 buffer
+  const comp = Buffer.from(u8Comp);
+  const orig = Buffer.alloc(origLen);
+  // perform lz4 decompression
+  const decompressedLen = decodeBlock(comp, orig);
+  const data = orig.subarray(0, decompressedLen);
+  return JSON.parse(data.toString());
+}
+
+function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
   sIdx = sIdx || 0;
   eIdx = eIdx || input.length - sIdx;
   let a;

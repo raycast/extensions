@@ -1,7 +1,7 @@
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Preferences, Tab } from "../interfaces";
-import { SEARCH_ENGINE } from "../util/constants";
+import { SEARCH_ENGINE } from "../constants";
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
   popToRoot();

@@ -2,7 +2,8 @@ import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 export interface Preferences {
-  searchEngine: string;
+  readonly searchEngine: string;
+  readonly tabSessionManagerId: boolean;
 }
 
 export class Tab {
@@ -30,6 +31,6 @@ export interface HistoryEntry {
 
 export interface HistorySearchResults {
   entries?: HistoryEntry[];
-  error?: string;
+  error?: any;
   isLoading: boolean;
 }
