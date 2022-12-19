@@ -5,6 +5,9 @@
   "description": "Manage Google Tasks from Raycast.",
   "icon": "google-tasks.png",
   "author": "elliotdes",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity"
   ],
