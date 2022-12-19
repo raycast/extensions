@@ -6,7 +6,6 @@ import { Api as WebApi } from "../web/api"
 import { WebAdapter } from "../adapters/web/adapter"
 import { URL, URLMetadata } from "../adapters/web/dm"
 import { NewWebAdapter } from "../adapters/web/impl"
-import { AuthService } from "../domain/services/auth"
 import { RaycastAdapter } from "../adapters/raycast/adapter"
 import { Api as RaycastApi } from "../raycast/api"
 import { NewRaycastAdapter } from "../adapters/raycast/impl"
@@ -58,7 +57,7 @@ test("integration_test_notion_adapter_create_page", async () => {
 
     const result = await getNotionAdapter().addPage(dbPage, new Date().toLocaleString(), {
         text: "integration test",
-        isURL: false,
+        isURL: false
     })
     expect(result instanceof Error).toBeFalsy()
 })
@@ -74,7 +73,7 @@ test("integration_test_notion_adapter_append_paragraph", async () => {
     const content = `${new Date().toLocaleString()}: integration test`
     const result = await getNotionAdapter().addContent(page, {
         text: content,
-        isURL: false,
+        isURL: false
     })
     expect(result instanceof Error).toBeFalsy()
 })

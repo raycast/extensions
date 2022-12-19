@@ -5,6 +5,7 @@ import { OAuth } from "@raycast/api"
 
 export interface OAuthClient {
     authorize(): Promise<OAuthAuthorizeResponse | Error>
+
     getUnderlyingClient(): OAuth.PKCEClient
 }
 

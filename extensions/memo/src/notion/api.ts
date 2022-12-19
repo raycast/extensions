@@ -5,7 +5,7 @@ import {
     PageObjectResponse,
     PartialDatabaseObjectResponse,
     PartialPageObjectResponse,
-    RichTextItemResponse,
+    RichTextItemResponse
 } from "@notionhq/client/build/src/api-endpoints"
 import { NOTION_SEARCH_RETRY } from "../config"
 
@@ -128,11 +128,11 @@ export class ApiImpl implements Api {
                     title: [
                         {
                             text: {
-                                content: title,
-                            },
-                        },
-                    ],
-                },
+                                content: title
+                            }
+                        }
+                    ]
+                }
             },
             children: [
                 {
@@ -142,22 +142,22 @@ export class ApiImpl implements Api {
                             {
                                 text: {
                                     content: content.text,
-                                    link: link,
-                                },
-                            },
-                        ],
-                    },
+                                    link: link
+                                }
+                            }
+                        ]
+                    }
                 },
                 ...(link
                     ? [
-                          {
-                              bookmark: {
-                                  url: link.url,
-                              },
-                          },
-                      ]
-                    : []),
-            ],
+                        {
+                            bookmark: {
+                                url: link.url
+                            }
+                        }
+                    ]
+                    : [])
+            ]
         })
 
         return request
@@ -177,9 +177,9 @@ export class ApiImpl implements Api {
                 query: query,
                 sort: {
                     direction: "descending",
-                    timestamp: "last_edited_time",
+                    timestamp: "last_edited_time"
                 },
-                page_size: 10,
+                page_size: 10
             })
             .then((response) => {
                 if (!response) {
@@ -224,13 +224,13 @@ export class ApiImpl implements Api {
                             {
                                 text: {
                                     content: content.text,
-                                    link: link,
-                                },
-                            },
-                        ],
-                    },
-                },
-            ],
+                                    link: link
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
         })
 
         return request

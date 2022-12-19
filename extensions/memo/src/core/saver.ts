@@ -24,7 +24,7 @@ export class Saver {
         const url = URL.fromString(trimmed)
         const content = {
             text: trimmed,
-            isURL: url instanceof URL,
+            isURL: url instanceof URL
         }
 
         if (to.type == PageType.NotionPage) {

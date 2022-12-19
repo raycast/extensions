@@ -30,7 +30,7 @@ class WebAdapterImpl implements WebAdapter {
             .sendPOST(tokenUrl, {
                 grant_type: "authorization_code",
                 code: code,
-                redirect_uri: redirectUri,
+                redirect_uri: redirectUri
             })
             .then((res) => {
                 if (res instanceof Error) {

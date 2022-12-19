@@ -49,7 +49,7 @@ export class AuthService {
             return new Error(`${response}:get Notion OAuth token`)
         }
         return {
-            accessToken: response.accessToken ?? response.access_token,
+            accessToken: response.accessToken ?? response.access_token
         }
     }
 }

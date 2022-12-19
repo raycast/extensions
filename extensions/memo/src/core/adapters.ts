@@ -41,7 +41,7 @@ export class NotionAdapter {
         const parent = new Block(to.id, to.title, pageType)
         return this.notionApi.createPage(parent, title, {
             text: content.text,
-            url: content.isURL ? content.text : undefined,
+            url: content.isURL ? content.text : undefined
         })
     }
 
@@ -54,7 +54,7 @@ export class NotionAdapter {
         const parent = new Block(to.id, to.title, pageType)
         return this.notionApi.appendParagraph(parent, {
             text: content.text,
-            url: content.isURL ? content.text : undefined,
+            url: content.isURL ? content.text : undefined
         })
     }
 }
