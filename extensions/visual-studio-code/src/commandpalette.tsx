@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List, showHUD, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showHUD, popToRoot, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fileExists, getErrorMessage, openURIinVSCode, waitForFileExists } from "./utils";
+import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, waitForFileExists } from "./utils";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
@@ -66,7 +66,12 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
       title={title(c)}
       actions={
         <ActionPanel>
-          <Action title="Run Command" onAction={handle} />
+          <Action title="Run Command" onAction={handle} icon={{ source: Icon.Terminal }} />
+          <Action.CopyToClipboard title="Copy Command ID" content={c.command} />
+          <Action.CreateQuicklink
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: c.title }}
+          />
         </ActionPanel>
       }
     />
@@ -77,10 +82,10 @@ function InstallRaycastForVSCodeAction(): JSX.Element {
   return (
     <Action.OpenInBrowser
       title="Install Raycast for VSCode"
-      url="https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast"
+      url="vscode:extension/tonka3000.raycast"
       onOpen={() => {
         popToRoot();
-        showHUD("Open VSCode Marketplace");
+        showHUD("Open VSCode Extension");
       }}
     />
   );
@@ -92,7 +97,10 @@ export default function CommandPaletteCommand(): JSX.Element {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={isLoading === true ? "Load Commands from VSCode" : "Search Commands"}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={isLoading === true ? "Load Commands from VSCode" : "Search Commands"}
+    >
       {commands?.map((c) => (
         <CommandListItem key={c.command} command={c} />
       ))}

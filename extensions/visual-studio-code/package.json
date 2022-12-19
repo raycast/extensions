@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "commandpalette",
-      "title": "Command Palette",
+      "title": "Commands",
       "description": "Show Commands of the command palette",
       "mode": "view"
     }
