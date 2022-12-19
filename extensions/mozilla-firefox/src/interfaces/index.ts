@@ -4,7 +4,6 @@ import { ReactElement } from "react";
 
 export interface Preferences {
   readonly searchEngine: string;
-  readonly tabSessionManagerId: boolean;
 }
 
 export class Tab {

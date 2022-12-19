@@ -79,7 +79,7 @@ const checkAppInstalled = async () => {
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
-    do shell script "osascript -e 'exists application \\"Iridium\\"'"
+    do shell script "osascript -e 'exists application \\"Firefox\\"'"
     set isInstalled to true
 end try
 
