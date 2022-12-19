@@ -1,5 +1,9 @@
 # Menubar Weather Changelog
 
+## [Fix bug] - 2022-12-13
+
+- Fix the bug of pop-up Toast error when refreshing in the background
+
 ## [Add Preferences] - 2022-12-01
 
 - Add Preferences **Wind Speed Units**: Km/h, m/s, Mph, Knots

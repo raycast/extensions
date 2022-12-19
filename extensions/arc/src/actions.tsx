@@ -1,11 +1,21 @@
-import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getApplications,
+  Icon,
+  open,
+  showToast,
+  Toast,
+  showHUD,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execSync } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
 import { Tab } from "./types";
-import { getOpenTabs, setActiveTab } from "./utils";
+import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils";
 
 const execAsync = promisify(execSync);
 
@@ -31,6 +41,30 @@ export function OpenInArcAction(props: { url: string }) {
   }, []);
 
   return <Action icon={Icon.Globe} title="Open in Arc" onAction={handleAction} />;
+}
+export function OpenInNewWindow(props: { url: string }) {
+  async function handleAction() {
+    try {
+      await closeMainWindow();
+      await createNewArcWindow();
+      await execAsync(`open -a Arc "${props.url}"`);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening link in new window",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return (
+    <Action
+      icon={Icon.Globe}
+      title="Open in New Window"
+      onAction={handleAction}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+    />
+  );
 }
 
 export function OpenInLittleArc(props: { url: string }) {

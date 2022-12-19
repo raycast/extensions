@@ -46,16 +46,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
-    "axios": "^0.26.1",
+    "axios": "^1.2.1",
     "cheerio": "^1.0.0-rc.10",
-    "node-html-parser": "^5.3.3"
+    "node-html-parser": "^6.1.4"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react-hooks": "^4.4.0",
     "prettier": "^2.5.1",
@@ -63,7 +63,7 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "update-bible-versions && ray build -e dist",
+    "build": "npm run update-bible-versions && ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

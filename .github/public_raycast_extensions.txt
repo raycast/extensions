@@ -2,4 +2,13 @@ linear
 github
 google-workspace
 zoom
+hypersonic
 asana
+typefully
+supabase-docs
+cal-com-share-meeting-links
+supernotes
+resmo
+ploi
+vercast
+ohdear

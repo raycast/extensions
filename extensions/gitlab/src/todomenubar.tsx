@@ -9,9 +9,8 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { gitlab } from "./common";
-import { getTodoIcon } from "./components/todo";
+import { getTodoIcon, getPrettyTodoActionName } from "./components/todo";
 import { useTodos } from "./components/todo/utils";
-import { capitalizeFirstLetter } from "./utils";
 
 function launchTodosCommand() {
   launchCommand({ name: "todos", type: LaunchType.UserInitiated });
@@ -109,7 +108,7 @@ export default function TodosMenuBarCommand(): JSX.Element | null {
           <MenuBarExtra.Item
             key={t.id}
             title={t.title}
-            subtitle={capitalizeFirstLetter(t.action_name.replaceAll("_", " "))}
+            subtitle={getPrettyTodoActionName(t)}
             icon={getTodoIcon(t, "#000000")}
             tooltip={t.project_with_namespace}
             onAction={() => (t.target_url ? open(t.target_url) : launchTodosCommand())}

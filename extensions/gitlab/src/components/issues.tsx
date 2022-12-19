@@ -17,6 +17,7 @@ import {
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { userIcon } from "./users";
+import { CacheActionPanelSection } from "./cache_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -225,6 +226,7 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
           <ActionPanel.Section>
             <IssueItemActions issue={issue} onDataChange={props.refreshData} />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

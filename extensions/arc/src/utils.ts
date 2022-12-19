@@ -91,3 +91,12 @@ export class PermissionError extends Error {
 export const isPermissionError = (error: unknown) => {
   return error instanceof Error && error.name === "PermissionError";
 };
+
+export async function createNewArcWindow() {
+  await runAppleScript(`
+    tell application "Arc"
+      make new window
+      activate
+    end tell
+  `);
+}

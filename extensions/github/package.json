@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "github-beta",
-  "title": "GitHub Beta",
+  "name": "github",
+  "title": "GitHub",
   "description": "Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications",
   "icon": "icon.png",
   "access": "public",

@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCurWeather } from "../utils/weather-utils";
-import { Cache, environment, LaunchType, showToast, Toast } from "@raycast/api";
+import { Cache, environment, LaunchType } from "@raycast/api";
 import { CacheKey, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
-import { AxiosError } from "axios";
 import { GeoLocation, OpenMeteoWeather } from "../types/types";
 
 export const getCurrentWeather = () => {
@@ -48,12 +47,6 @@ export const getCurrentWeather = () => {
       } catch (e) {
         setWeather(undefined);
         console.error(e);
-        const error = e as AxiosError;
-        await showToast({
-          title: `${error.name}`,
-          message: `${error.message}`,
-          style: Toast.Style.Failure,
-        });
       }
     }
     setLoading(false);

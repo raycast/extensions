@@ -6,7 +6,8 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { showErrorToast } from "../utils";
+import { capitalizeFirstLetter, showErrorToast } from "../utils";
+import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
   let result = "";
@@ -93,16 +94,25 @@ export function TodoList(): JSX.Element {
   );
 }
 
+export function getPrettyTodoActionName(todo: Todo): string {
+  return capitalizeFirstLetter(todo.action_name.replaceAll("_", " "));
+}
+
 export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
+  const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;
   return (
     <List.Item
       id={todo.id.toString()}
       title={todo.title}
       subtitle={subtitle}
-      accessories={[{ text: todo.action_name }, { icon: userToIcon(todo.author), tooltip: todo.author?.name }]}
-      icon={getTodoIcon(todo)}
+      accessories={[
+        { text: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
+        { date: updatedAt, tooltip: updatedAt ? `Updated: ${updatedAt.toLocaleString()}` : undefined },
+        { icon: userToIcon(todo.author), tooltip: todo.author?.name },
+      ]}
+      icon={{ value: getTodoIcon(todo), tooltip: todo.target_type }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -113,6 +123,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
             <CloseTodoAction todo={todo} finished={props.refreshData} />
             <CloseAllTodoAction finished={props.refreshData} />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />

@@ -1,10 +1,14 @@
 # Linear Changelog
 
+## [Add new accessories in issue list] - 2022-12-12
+
+- Add cycle, project, label, and estimate accessories in the issue list if any
+
 ## [Added right click support to menubar] - 2022-12-05
 
 - Added right click support to menubar which mark the issue as read.
 
-## [Copy Formatted Issue URL Action] - 2022-12-23
+## [Copy Formatted Issue URL Action] - 2022-11-23
 
 - Add a new "Copy Formatted Issue URL" Action
 

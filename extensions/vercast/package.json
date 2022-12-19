@@ -4,8 +4,9 @@
   "title": "Vercel",
   "description": "View and modify your Vercel projects and deployments.",
   "icon": "icon.png",
-  "author": "MaxLeiter",
   "license": "MIT",
+  "author": "MaxLeiter",
+  "owner": "vercel",
   "access": "public",
   "contributors": [
     "matt",

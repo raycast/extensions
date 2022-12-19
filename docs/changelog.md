@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.45.0 - 2022-12-14
+
+### ✨ New
+
+- **Fallback commands**: All commands (except menu-bar commands and commands with more than one required argument) can now be used as [fallback commands](https://manual.raycast.com/fallback-commands)! They should all work out of the box (e.g. a command that renders a List will receive `onSearchTextChange` with the fallback text on its first render, etc.) but you can customize the user experience with a new top-level prop `fallbackText`.
+- **List Accessories:** `date` and `text` accessories can now be colored.
+- **List Accessories:** We’ve added a new accessory type: `tag`.
+- **Metadata:** Label text can now also be colored.
+- **Proxy Support**: Extensions using popular networking libraries such as node-fetch/cross-fetch, got, Axios, or our useFetch hook are compatible with proxies if the user has turned on the new proxy preference in Raycast.
+
+### 💎 Improvements
+
+- **Background refresh**: when a command misses a required preference, instead of showing the error screen, the user is directed to the preference onboarding screen again.
+
+### 🐞 Fixes
+
+- Fixed a bug where entered characters could be “swallowed” in controlled form components or the controlled search bar.
+- Fixed the `launchContext` not being propagated to menu-bar and background launches when using the `launchCommand` API.
+- Fixed a multi-monitor [bug](https://github.com/raycast/extensions/issues/2975) where menu bar extra text would be unreadable on the inactive screen.
+- Fixed a bug where menu bar extra icon tinting would change based on Raycast’s appearance instead of the system’s.
+- Fixed some memory leaks when using Form components
+
 ## 1.44.0 – 2022-11-23
 
 ### ✨ New

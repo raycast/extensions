@@ -508,7 +508,10 @@
       "value": "^",
       "code": 94,
       "name": "CIRCUMFLEX ACCENT",
-      "aliases": []
+      "aliases": [
+        "control",
+        "ctrl"
+      ]
     },
     {
       "value": "_",

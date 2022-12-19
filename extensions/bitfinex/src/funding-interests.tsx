@@ -1,19 +1,9 @@
 import { Icon, List } from "@raycast/api";
 import { useMemo } from "react";
-import Bitfinex from "./api";
-import useSWR from "swr";
-("swr");
+import { useFundingInterests } from "./lib/hooks";
 
 export default function FundingOffers() {
-  const rest = Bitfinex.rest();
-
-  const { data = [], isValidating } = useSWR(
-    "/api/funding-credits",
-    () =>
-      rest.ledgers({
-        category: 28, // Margin funding interests
-      }) as Promise<any[]>
-  );
+  const { data = [], isLoading } = useFundingInterests();
 
   const totalInterest = useMemo(() => {
     return data.reduce((total, interest) => {
@@ -26,7 +16,7 @@ export default function FundingOffers() {
   }, [data]);
 
   return (
-    <List isLoading={isValidating} enableFiltering={false}>
+    <List isLoading={isLoading} filtering={false}>
       <List.Section title="Interests Summary">
         <List.Item title="Total Interests" accessories={[{ text: `${totalInterest.toFixed(2)} USD` }]} />
         <List.Item title="Balance" accessories={[{ text: `${currentBalance} USD` }]} />

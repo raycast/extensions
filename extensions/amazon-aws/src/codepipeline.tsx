@@ -6,7 +6,7 @@ import {
 } from "@aws-sdk/client-codepipeline";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
 
 export default function CodePipeline() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -14,7 +14,7 @@ export default function CodePipeline() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter codepipelines by name..."
+      searchBarPlaceholder="Filter pipelines by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
       {error ? (
@@ -35,27 +35,18 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
     <List.Item
       id={pipeline.name}
       key={pipeline.name}
-      title={pipeline.name || "Unknown pipeline name"}
-      subtitle={status}
-      icon={iconMap[status]}
+      title={pipeline.name || ""}
+      icon={Icon.List}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://console.aws.amazon.com/codesuite/codepipeline/pipelines/" +
-              pipeline.name +
-              "/view?region=" +
-              process.env.AWS_REGION
-            }
+            url={`${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${pipeline.name}/view?region=${process.env.AWS_REGION}`}
           />
+          <Action.CopyToClipboard title="Copy Pipeline Name" content={pipeline.name || ""} />
         </ActionPanel>
       }
-      accessories={[
-        {
-          text: pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined,
-        },
-      ]}
+      accessories={[{ text: status }, { icon: iconMap[status] }]}
     />
   );
 }
@@ -69,6 +60,7 @@ const iconMap: { [key: string]: Icon } = {
 };
 
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { nextToken, pipelines } = await new CodePipelineClient({}).send(
     new ListPipelinesCommand({ nextToken: token })
   );

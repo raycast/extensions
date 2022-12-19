@@ -27,6 +27,14 @@
       "subtitle": "Bitfinex",
       "description": "Show Lending Rate History on Bitfinex",
       "mode": "view"
+    },
+    {
+      "name": "cron-task",
+      "title": "Check Funding Rates and Offers",
+      "subtitle": "Bitfinex",
+      "description": "Detect high funding rates on Bitfinex, or maintain funding offers",
+      "mode": "no-view",
+      "interval": "15m"
     }
   ],
   "preferences": [
@@ -43,6 +51,41 @@
       "required": true,
       "type": "password",
       "description": "Bitfinex API Secret"
+    },
+    {
+      "title": "Auto renew active offers",
+      "name": "auto_renew",
+      "required": false,
+      "type": "checkbox",
+      "description": "The active got cancelled sometimes, turn this on to auto renew it",
+      "default": false,
+      "label": "Auto-renew"
+    },
+    {
+      "title": "Notify available funding",
+      "name": "notify_available",
+      "required": false,
+      "type": "checkbox",
+      "description": "Notify when there is available funding greater than 150 USD",
+      "default": false,
+      "label": "Notify available funding"
+    },
+    {
+      "title": "Notify high rate",
+      "name": "notify_high_rate",
+      "required": false,
+      "type": "checkbox",
+      "description": "Notify when the 15m average rate is higher than the threshold",
+      "default": false,
+      "label": "Notify high rate"
+    },
+    {
+      "title": "High rate notification threshold",
+      "name": "high_rate_threshold",
+      "description": "The threshold for high rate notifications. Would send a notification if the 15m average rate is higher than this value",
+      "type": "textfield",
+      "default": "24",
+      "required": false
     },
     {
       "title": "Default Rate View",
@@ -1323,15 +1366,81 @@
           "value": "ZRX"
         }
       ]
+    },
+    {
+      "title": "Default notification sound",
+      "name": "sound",
+      "description": "The default notification sound to use",
+      "type": "dropdown",
+      "default": "Tink",
+      "required": false,
+      "data": [
+        {
+          "title": "Basso",
+          "value": "Basso"
+        },
+        {
+          "title": "Blow",
+          "value": "Blow"
+        },
+        {
+          "title": "Bottle",
+          "value": "Bottle"
+        },
+        {
+          "title": "Frog",
+          "value": "Frog"
+        },
+        {
+          "title": "Funk",
+          "value": "Funk"
+        },
+        {
+          "title": "Glass",
+          "value": "Glass"
+        },
+        {
+          "title": "Hero",
+          "value": "Hero"
+        },
+        {
+          "title": "Morse",
+          "value": "Morse"
+        },
+        {
+          "title": "Ping",
+          "value": "Ping"
+        },
+        {
+          "title": "Pop",
+          "value": "Pop"
+        },
+        {
+          "title": "Purr",
+          "value": "Purr"
+        },
+        {
+          "title": "Sosumi",
+          "value": "Sosumi"
+        },
+        {
+          "title": "Submarine",
+          "value": "Submarine"
+        },
+        {
+          "title": "Tink",
+          "value": "Tink"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.0",
+    "@raycast/utils": "^1.4.11",
     "asciichart": "^1.5.25",
     "bfx-api-node-models": "^1.6.3",
     "bitfinex-api-node": "^5.0.4",
-    "node-fetch": "^3.2.6",
-    "swr": "^1.3.0"
+    "display-notification": "^3.0.0"
   },
   "devDependencies": {
     "@types/asciichart": "^1.5.6",
