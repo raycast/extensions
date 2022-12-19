@@ -5,6 +5,12 @@
   "description": "Search open tabs, bookmarks and history in Vivaldi.",
   "icon": "vivaldi-logo.png",
   "author": "crisboarna",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Web",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
