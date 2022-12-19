@@ -32,7 +32,7 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
     <List
       isLoading={isLoading}
       searchBarPlaceholder={getFilterPlaceholder("stream")}
-      searchBarAccessory={<CloudwatchLogsTimeDropdown onChange={setLogStartTime} />}
+      searchBarAccessory={<CloudwatchLogsTimeDropdown logStartTime={logStartTime} onChange={setLogStartTime} />}
     >
       {streams ? (
         streams.map((s) => (
