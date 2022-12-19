@@ -31,21 +31,12 @@ export default function TaskItem(props: {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
-                title={
-                  props.task.due === undefined
-                    ? ""
-                    : new Date(props.task.due).toLocaleDateString()
-                }
+                title={props.task.due === undefined ? "" : new Date(props.task.due).toLocaleDateString()}
                 icon={Icon.Calendar}
               />
               <List.Item.Detail.Metadata.Separator />
               {getChildren(props.task, props.tasks).map((child) => {
-                return (
-                  <List.Item.Detail.Metadata.Label
-                    title={child.title}
-                    icon={getIcon(child)}
-                  />
-                );
+                return <List.Item.Detail.Metadata.Label title={child.title} icon={getIcon(child)} />;
               })}
             </List.Item.Detail.Metadata>
           }
@@ -53,11 +44,7 @@ export default function TaskItem(props: {
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Complete Task"
-            icon={Icon.CheckCircle}
-            onAction={props.onToggle}
-          />
+          <Action title="Complete Task" icon={Icon.CheckCircle} onAction={props.onToggle} />
           <Action
             title="Delete Task"
             icon={Icon.Trash}
@@ -69,21 +56,13 @@ export default function TaskItem(props: {
             title="Create Task"
             icon={Icon.NewDocument}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={
-              <CreateTaskForm listId={props.listId} onCreate={props.onCreate} />
-            }
+            target={<CreateTaskForm listId={props.listId} onCreate={props.onCreate} />}
           />
           <Action.Push
             title="Edit Task"
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
-            target={
-              <EditTaskForm
-                listId={props.listId}
-                task={props.task}
-                onEdit={props.onEdit}
-              />
-            }
+            target={<EditTaskForm listId={props.listId} task={props.task} onEdit={props.onEdit} />}
           />
         </ActionPanel>
       }

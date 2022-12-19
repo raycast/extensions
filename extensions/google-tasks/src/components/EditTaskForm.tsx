@@ -15,7 +15,7 @@ export default function EditTaskForm(props: {
         ...props.task,
         title: values.title,
         notes: values.notes,
-        due: values.due, 
+        due: values.due,
       });
       pop();
     },
@@ -30,22 +30,12 @@ export default function EditTaskForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        defaultValue={props.task.title}
-      />
-      <Form.TextArea
-        id="notes"
-        title="Details"
-        defaultValue={props.task.notes}
-      />
+      <Form.TextField id="title" title="Title" defaultValue={props.task.title} />
+      <Form.TextArea id="notes" title="Details" defaultValue={props.task.notes} />
       <Form.DatePicker
         id="due"
         title="Due Date"
-        defaultValue={
-          props.task.due === undefined ? undefined : new Date(props.task.due)
-        }
+        defaultValue={props.task.due === undefined ? undefined : new Date(props.task.due)}
       />
     </Form>
   );

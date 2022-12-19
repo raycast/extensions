@@ -1,12 +1,4 @@
-import {
-  List,
-  Detail,
-  Toast,
-  showToast,
-  ActionPanel,
-  Action,
-  Icon,
-} from "@raycast/api";
+import { List, Detail, Toast, showToast, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
 import ListView from "./components/ListView";
 import * as google from "./api/oauth";
@@ -45,11 +37,7 @@ export default function Command() {
             title={list.title}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show List"
-                  icon={Icon.List}
-                  target={<ListView listId={list.id} />}
-                />
+                <Action.Push title="Show List" icon={Icon.List} target={<ListView listId={list.id} />} />
               </ActionPanel>
             }
           />

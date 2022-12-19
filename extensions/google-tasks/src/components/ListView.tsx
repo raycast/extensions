@@ -1,13 +1,7 @@
 import { List, Toast, showToast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import * as google from "../api/oauth";
-import {
-  createTask,
-  deleteTask,
-  editTask,
-  fetchList,
-  toggleTask,
-} from "../api/endpoints";
+import { createTask, deleteTask, editTask, fetchList, toggleTask } from "../api/endpoints";
 import { Filter, Task, TaskForm } from "../types";
 import TaskItem from "./TaskItem";
 import EmptyView from "./EmtpyView";

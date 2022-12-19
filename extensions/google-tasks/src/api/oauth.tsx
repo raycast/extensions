@@ -34,10 +34,7 @@ export async function authorize(): Promise<void> {
   await client.setTokens(await fetchTokens(authRequest, authorizationCode));
 }
 
-async function fetchTokens(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string
-): Promise<OAuth.TokenResponse> {
+async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("code", authCode);
@@ -56,9 +53,7 @@ async function fetchTokens(
   return (await response.json()) as OAuth.TokenResponse;
 }
 
-async function refreshTokens(
-  refreshToken: string
-): Promise<OAuth.TokenResponse> {
+async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
   params.append("refresh_token", refreshToken);

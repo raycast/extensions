@@ -1,12 +1,4 @@
-import {
-  Detail,
-  Toast,
-  showToast,
-  Form,
-  ActionPanel,
-  Action,
-  useNavigation,
-} from "@raycast/api";
+import { Detail, Toast, showToast, Form, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as google from "../api/oauth";
 import { fetchLists } from "../api/endpoints";
@@ -80,13 +72,7 @@ export default function CreateTaskForm(props: {
       <Form.DatePicker title="Due Date" {...itemProps.due} />
       <Form.Dropdown title="Task List" {...itemProps.listId}>
         {lists.map((list) => {
-          return (
-            <Form.Dropdown.Item
-              value={list.id}
-              title={list.title}
-              key={list.id}
-            />
-          );
+          return <Form.Dropdown.Item value={list.id} title={list.title} key={list.id} />;
         })}
       </Form.Dropdown>
     </Form>

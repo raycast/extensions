@@ -20,13 +20,7 @@ export default function EmptyView(props: {
             <Action.Push
               title="Create Task"
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={
-                <CreateTaskForm
-                  listId={props.listId}
-                  title={props.searchText}
-                  onCreate={props.onCreate}
-                />
-              }
+              target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
             />
           </ActionPanel>
         }
@@ -45,26 +39,14 @@ export default function EmptyView(props: {
               <Action.Push
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={
-                  <CreateTaskForm
-                    listId={props.listId}
-                    title={props.searchText}
-                    onCreate={props.onCreate}
-                  />
-                }
+                target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
               />
             </ActionPanel>
           }
         />
       );
     case Filter.Completed:
-      return (
-        <List.EmptyView
-          icon="😢"
-          title="No Tasks Completed"
-          description="No tasks complete."
-        />
-      );
+      return <List.EmptyView icon="😢" title="No Tasks Completed" description="No tasks complete." />;
 
     case Filter.All:
     default:
@@ -78,13 +60,7 @@ export default function EmptyView(props: {
               <Action.Push
                 title="Create Task"
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={
-                  <CreateTaskForm
-                    listId={props.listId}
-                    title={props.searchText}
-                    onCreate={props.onCreate}
-                  />
-                }
+                target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
               />
             </ActionPanel>
           }
