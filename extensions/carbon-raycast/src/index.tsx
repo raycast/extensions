@@ -1,5 +1,5 @@
 import { open, Form, ActionPanel, Action, showToast, showHUD } from "@raycast/api";
-import puppeteer, {BoundingBox, ElementHandle} from "puppeteer";
+import puppeteer, { BoundingBox, ElementHandle } from "puppeteer";
 import { tmpdir } from "os";
 import { ulid } from "ulid";
 import { useState } from "react";
@@ -51,8 +51,8 @@ export default function Command() {
 
     const downloadPath = tmpdir() + "/" + ulid() + ".png";
 
-    const container: ElementHandle = await page.waitForSelector("#export-container") as ElementHandle;
-    const bounds: BoundingBox = await container?.boundingBox() as BoundingBox;
+    const container: ElementHandle = (await page.waitForSelector("#export-container")) as ElementHandle;
+    const bounds: BoundingBox = (await container?.boundingBox()) as BoundingBox;
 
     await container.screenshot({
       path: downloadPath,
@@ -100,17 +100,17 @@ export default function Command() {
       <Form.Separator />
       <Form.Dropdown id="language" title="Programming language">
         {Object.entries(definition.languages).map((value, key) => {
-          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]}  />;
+          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
       </Form.Dropdown>
       <Form.Dropdown id="theme" title="Syntax theme">
         {Object.entries(definition.theme).map((value, key) => {
-          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]}  />;
+          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
       </Form.Dropdown>
       <Form.Dropdown id="font" title="Font family">
         {Object.entries(definition.font).map((value, key) => {
-          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]}  />;
+          return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
       </Form.Dropdown>
     </Form>

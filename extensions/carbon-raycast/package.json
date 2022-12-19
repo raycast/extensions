@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "carbon-code-screenshot-for-raycast",
-  "title": "Carbon screenshot for Raycast",
+  "title": "Carbon Screenshot for Raycast",
   "description": "Uses the carbon.now.sh to create beautiful screenshot you can share online or with your team",
   "icon": "icon.png",
   "author": "adelowo",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create screenshot",
+      "title": "Create Screenshot",
       "description": "Create screenshots you can share",
       "mode": "view"
     }
