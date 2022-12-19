@@ -24,23 +24,31 @@
       "title": "TablePlus data directory",
       "placeholder": "Leave blank for default location",
       "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    },
+    {
+      "name": "showConnectionDriver",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Show Connection Driver",
+      "description": "Show Connection Driver",
+      "label": "Show Connection Driver in List"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.45.0",
     "plist": "^3.0.4"
   },
   "devDependencies": {
     "@types/expand-tilde": "^2.0.0",
-    "@types/node": "~16.10.0",
+    "@types/node": "^18.8.3",
     "@types/plist": "^3.0.2",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
     "expand-tilde": "^2.0.2",
+    "prettier": "^2.5.1",
     "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
