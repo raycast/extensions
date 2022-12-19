@@ -5,6 +5,12 @@
   "description": "Search open tabs, bookmarks and history in Opera.",
   "icon": "opera-logo.png",
   "author": "crisboarna",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Web",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
