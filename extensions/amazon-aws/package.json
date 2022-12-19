@@ -30,27 +30,7 @@
       "name": "ecs",
       "title": "ECS Clusters",
       "description": "Find and open a cluster",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "defaultAction",
-          "type": "dropdown",
-          "required": false,
-          "title": "Default Action",
-          "description": "Choose between opening in browser or viewing details the app",
-          "default": "browser",
-          "data": [
-            {
-              "title": "Open in Browser",
-              "value": "browser"
-            },
-            {
-              "title": "View Details",
-              "value": "details"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "sqs",
@@ -80,27 +60,7 @@
       "name": "lambda",
       "title": "Lambda Functions",
       "description": "Find and open a function",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "defaultAction",
-          "type": "dropdown",
-          "required": false,
-          "title": "Default Action",
-          "description": "Choose between opening in browser or viewing details the app",
-          "default": "browser",
-          "data": [
-            {
-              "title": "Open in Browser",
-              "value": "browser"
-            },
-            {
-              "title": "View Details",
-              "value": "details"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "dynamodb",

@@ -1,23 +1,12 @@
 import { Service } from "@aws-sdk/client-ecs";
-import { DefaultAction, Preferences } from "../../interfaces";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getServiceUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTasks from "./ECSClusterServiceTasks";
 
 function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
-  const { defaultAction } = getPreferenceValues<Preferences>();
   const { data: services, isLoading } = useCachedPromise(fetchServices, [clusterArn], { keepPreviousData: true });
-
-  const getActions = (service: Service) => {
-    const actionViewInApp = getActionPush({ title: "View Tasks", component: ECSClusterServiceTasks, service });
-    const actionViewInBrowser = getActionOpenInBrowser(getServiceUrl(service));
-
-    return defaultAction === DefaultAction.OpenInBrowser
-      ? [actionViewInBrowser, actionViewInApp]
-      : [actionViewInApp, actionViewInBrowser];
-  };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={getFilterPlaceholder("services")} isShowingDetail={true}>
@@ -70,7 +59,10 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
             }
             actions={
               <ActionPanel>
-                {getActions(service)}
+                {[
+                  getActionPush({ title: "View Tasks", component: ECSClusterServiceTasks, service }),
+                  getActionOpenInBrowser(getServiceUrl(service)),
+                ]}
                 {getActionCopySection(service)}
               </ActionPanel>
             }

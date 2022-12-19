@@ -1,12 +1,3 @@
-export interface Preferences {
-  readonly defaultAction: DefaultAction;
-}
-
-export enum DefaultAction {
-  OpenInBrowser = "browser",
-  ViewDetails = "details",
-}
-
 export enum LogStartTimes {
   FiveMinutes = "5m",
   OneHour = "1H",

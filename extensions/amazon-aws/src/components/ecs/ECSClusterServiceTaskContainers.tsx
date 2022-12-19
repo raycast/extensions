@@ -1,6 +1,6 @@
 import { ContainerDefinition } from "@aws-sdk/client-ecs";
-import { DefaultAction, LogStartTimes, Preferences } from "../../interfaces";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { LogStartTimes } from "../../interfaces";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { fetchTaskContainers, getTaskContainerUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
 import { useCachedPromise } from "@raycast/utils";
@@ -9,7 +9,6 @@ import { useState } from "react";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
 
 function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinitionArn: string }) {
-  const { defaultAction } = getPreferenceValues<Preferences>();
   const [logStartTime, setLogStartTime] = useState<LogStartTimes>(LogStartTimes.OneHour);
   const { data: containers, isLoading } = useCachedPromise(fetchTaskContainers, [taskDefinitionArn], {
     keepPreviousData: true,
@@ -27,10 +26,7 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
     });
     const actionViewInBrowser = getActionOpenInBrowser(getTaskContainerUrl(taskDefinitionArn));
 
-    let containerActions =
-      defaultAction === DefaultAction.OpenInBrowser
-        ? [actionViewInBrowser, actionViewInApp]
-        : [actionViewInApp, actionViewInBrowser];
+    let containerActions = [actionViewInApp, actionViewInBrowser];
 
     if (container.logConfiguration?.logDriver !== "awslogs") {
       containerActions = containerActions.filter((action) => action.key !== "logs");
@@ -43,7 +39,7 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
       isLoading={isLoading}
       searchBarPlaceholder={getFilterPlaceholder("containers")}
       isShowingDetail={true}
-      searchBarAccessory={<CloudwatchLogsTimeDropdown onChange={setLogStartTime} />}
+      searchBarAccessory={<CloudwatchLogsTimeDropdown logStartTime={logStartTime} onChange={setLogStartTime} />}
     >
       {containers ? (
         containers.map((container) => (

@@ -1,29 +1,14 @@
 import { Cluster } from "@aws-sdk/client-ecs";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
-import { DefaultAction, Preferences } from "../../interfaces";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getClusterUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getExportResponse } from "../../util";
 import ECSClusterServices from "./ECSClusterServices";
 
 function ECSCluster({ cluster }: { cluster: Cluster }) {
-  const { defaultAction } = getPreferenceValues<Preferences>();
   const { data: services, isLoading } = useCachedPromise(fetchServices, [cluster.clusterArn ?? ""], {
     keepPreviousData: true,
   });
-
-  const getActions = () => {
-    const actionViewInApp = getActionPush({
-      title: "View Services",
-      component: ECSClusterServices,
-      clusterArn: cluster.clusterArn ?? undefined,
-    });
-    const actionViewInBrowser = getActionOpenInBrowser(getClusterUrl(cluster));
-
-    return defaultAction === DefaultAction.OpenInBrowser
-      ? [actionViewInBrowser, actionViewInApp]
-      : [actionViewInApp, actionViewInBrowser];
-  };
 
   return (
     <List.Item
@@ -49,7 +34,14 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
       }
       actions={
         <ActionPanel>
-          {getActions()}
+          {[
+            getActionPush({
+              title: "View Services",
+              component: ECSClusterServices,
+              clusterArn: cluster.clusterArn ?? undefined,
+            }),
+            getActionOpenInBrowser(getClusterUrl(cluster)),
+          ]}
           <ActionPanel.Section title="Copy">
             {getExportResponse(cluster)}
             <Action.CopyToClipboard

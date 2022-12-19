@@ -4,7 +4,6 @@ import { fetchClusters } from "./actions";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getFilterPlaceholder } from "./util";
 import ECSCluster from "./components/ecs/ECSCluster";
-import { useState } from "react";
 
 export default function ECS() {
   const {

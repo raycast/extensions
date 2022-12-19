@@ -1,13 +1,11 @@
-import { Service, Task } from "@aws-sdk/client-ecs";
-import { DefaultAction, Preferences } from "../../interfaces";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Service } from "@aws-sdk/client-ecs";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { fetchTasks, getTaskUrl } from "../../actions";
 import { useCachedPromise } from "@raycast/utils";
 import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTaskContainers from "./ECSClusterServiceTaskContainers";
 
 function ECSClusterServiceTasks({ service }: { service: Service }) {
-  const { defaultAction } = getPreferenceValues<Preferences>();
   const { data: tasks, isLoading } = useCachedPromise(
     fetchTasks,
     [service.clusterArn || "", service.serviceName || ""],
@@ -15,19 +13,6 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
       keepPreviousData: true,
     }
   );
-
-  const getActions = (task: Task) => {
-    const actionViewInApp = getActionPush({
-      title: "View Containers",
-      component: ECSClusterServiceTaskContainers,
-      taskDefinitionArn: task.taskDefinitionArn || "",
-    });
-    const actionViewInBrowser = getActionOpenInBrowser(getTaskUrl(task));
-
-    return defaultAction === DefaultAction.OpenInBrowser
-      ? [actionViewInBrowser, actionViewInApp]
-      : [actionViewInApp, actionViewInBrowser];
-  };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={getFilterPlaceholder("tasks", "id")} isShowingDetail={true}>
@@ -61,7 +46,14 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
             }
             actions={
               <ActionPanel>
-                {getActions(task)}
+                {[
+                  getActionPush({
+                    title: "View Containers",
+                    component: ECSClusterServiceTaskContainers,
+                    taskDefinitionArn: task.taskDefinitionArn || "",
+                  }),
+                  getActionOpenInBrowser(getTaskUrl(task)),
+                ]}
                 <ActionPanel.Section title="Copy">
                   {getExportResponse(task)}
                   <Action.CopyToClipboard
