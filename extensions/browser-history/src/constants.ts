@@ -127,7 +127,7 @@ export const INSTALL_COMMAND = {
   [SupportedBrowsers.Arc]: undefined,
   [SupportedBrowsers.Opera]: "brew cask install opera",
   [SupportedBrowsers.Iridium]: undefined,
-  [SupportedBrowsers.Orion]: undefined,
+  [SupportedBrowsers.Orion]: "brew cask install opera",
 };
 
 export const UnknownErrorText = `
