@@ -44,6 +44,7 @@ const charCodeToAliases: CharAlias = {
   8984: ["cmd", "command"],
   9166: ["enter"],
   9003: ["delete"],
+  94: ["control", "ctrl"],
 };
 
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
