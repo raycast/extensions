@@ -7,7 +7,6 @@ import ECSCluster from "./components/ecs/ECSCluster";
 import { useState } from "react";
 
 export default function ECS() {
-  const [isServicesLoading, setServicesLoading] = useState<boolean>(false);
   const {
     data: clusters,
     error,
@@ -16,17 +15,21 @@ export default function ECS() {
   } = useCachedPromise(fetchClusters, [], { keepPreviousData: true });
 
   if (error) {
-    return <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />;
+    return (
+      <List>
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      </List>
+    );
   }
 
   return (
     <List
-      isLoading={isLoading || isServicesLoading}
+      isLoading={isLoading}
       searchBarPlaceholder={getFilterPlaceholder("clusters")}
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {clusters ? (
-        clusters.map((c) => <ECSCluster key={c.clusterArn} cluster={c} setIsLoading={setServicesLoading} />)
+      {clusters && clusters.length > 0 ? (
+        clusters.map((c) => <ECSCluster key={c.clusterArn} cluster={c} />)
       ) : (
         <List.EmptyView title="No clusters found" />
       )}

@@ -1,21 +1,16 @@
 import { Cluster } from "@aws-sdk/client-ecs";
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { DefaultAction, Preferences } from "../../interfaces";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getClusterUrl } from "../../actions";
 import { getActionOpenInBrowser, getActionPush, getExportResponse } from "../../util";
 import ECSClusterServices from "./ECSClusterServices";
-import { useEffect } from "react";
 
-function ECSCluster({ cluster, setIsLoading }: { cluster: Cluster; setIsLoading: (isLoading: boolean) => void }) {
+function ECSCluster({ cluster }: { cluster: Cluster }) {
   const { defaultAction } = getPreferenceValues<Preferences>();
   const { data: services, isLoading } = useCachedPromise(fetchServices, [cluster.clusterArn ?? ""], {
     keepPreviousData: true,
   });
-
-  useEffect(() => {
-    setIsLoading(isLoading);
-  }, [isLoading]);
 
   const getActions = () => {
     const actionViewInApp = getActionPush({
@@ -35,7 +30,7 @@ function ECSCluster({ cluster, setIsLoading }: { cluster: Cluster; setIsLoading:
       id={cluster.clusterArn}
       key={cluster.clusterArn}
       title={cluster.clusterName || ""}
-      icon={"aws-icons/ecs.png"}
+      icon={isLoading ? Icon.CircleProgress : "aws-icons/ecs.png"}
       detail={
         <List.Item.Detail
           metadata={
