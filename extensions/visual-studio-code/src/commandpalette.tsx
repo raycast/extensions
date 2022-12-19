@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List, open, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getErrorMessage } from "./utils";
+import { fileExists, getErrorMessage, openURIinVSCode, waitForFileExists } from "./utils";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
@@ -34,8 +34,14 @@ async function getCommandFromVSCode() {
       2
     )
   );
-  const cmds = await readCommandsFile(responseFilename);
-  return cmds;
+  if (await fileExists(responseFilename)) {
+    await afs.rm(responseFilename);
+  }
+  if (await waitForFileExists(responseFilename)) {
+    const cmds = await readCommandsFile(responseFilename);
+    return cmds;
+  }
+  throw new Error("Could not get VSCode commands");
 }
 
 function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
@@ -49,10 +55,10 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
   };
   const handle = async () => {
     try {
-      await open(`vscode://tonka3000.raycast/runcommand?cmd=${c.command}`);
+      await openURIinVSCode(`runcommand?cmd=${c.command}`);
       popToRoot();
     } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Could not start Command", message: getErrorMessage(error) });
+      showToast({ style: Toast.Style.Failure, title: "Could not run Command", message: getErrorMessage(error) });
     }
   };
   return (
@@ -68,12 +74,16 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
 }
 
 export default function CommandPaletteCommand(): JSX.Element {
-  const { isLoading, commands } = useCommands();
+  const { isLoading, commands, error } = useCommands();
+  if (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: error });
+  }
   return (
     <List isLoading={isLoading}>
       {commands?.map((c) => (
         <CommandListItem key={c.command} command={c} />
       ))}
+      <List.EmptyView title="Could not get Command from VS Code.Make sure the Raycast VSCode extension is installed an running" />
     </List>
   );
 }
@@ -81,6 +91,7 @@ export default function CommandPaletteCommand(): JSX.Element {
 async function readCommandsFile(filename: string): Promise<CommandMetadata[] | undefined> {
   const data = await afs.readFile(filename, "utf-8");
   const result = JSON.parse(data) as CommandMetadata[] | undefined;
+  await afs.rm(filename);
   return result;
 }
 
