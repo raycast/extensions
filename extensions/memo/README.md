@@ -3,6 +3,7 @@
 ## Commands
 
 This extension provides 2 commands:
+
 1. Save copied text in Notion
 2. Save copied text in most recent page you worked on
 

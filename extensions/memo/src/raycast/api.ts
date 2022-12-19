@@ -74,7 +74,7 @@ export class Api {
             redirectMethod: OAuth.RedirectMethod.Web,
             providerName: provider,
             providerIcon: icon,
-            description: desc
+            description: desc,
         })
     }
 

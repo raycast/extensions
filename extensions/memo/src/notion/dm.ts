@@ -3,7 +3,7 @@ import {
     PageObjectResponse,
     PartialDatabaseObjectResponse,
     PartialPageObjectResponse,
-    RichTextItemResponse
+    RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints"
 
 export type NotionEmoji = string

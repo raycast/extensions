@@ -8,11 +8,11 @@ import { OAuthTokenResponse } from "../../adapters/web/dm"
 const mockOAuthClient = new MockOAuthClient({
     authorize: () => {
         return Promise.resolve({ authorizationCode: "code", redirectURI: "raycast.com" })
-    }
+    },
 })
 
 const mockTokenInfo: TokenInfo = {
-    accessToken: "abc"
+    accessToken: "abc",
 }
 const getMockRaycastAdapter = () =>
     new MockRaycastAdapter({
@@ -21,14 +21,14 @@ const getMockRaycastAdapter = () =>
         },
         getPersistedOAuthToken: (client) => {
             return Promise.resolve(new TokenNotFoundError())
-        }
+        },
     })
 const mockWebAdapter = new MockWebAdapter({
     sendHTTPBasicAuthRequest: (tokenUrl, code, redirectUri) => {
         return Promise.resolve({
-            accessToken: mockTokenInfo.accessToken
+            accessToken: mockTokenInfo.accessToken,
         })
-    }
+    },
 })
 
 test("test_auth_service_authorize_success", async () => {
@@ -64,7 +64,7 @@ test("test_auth_service_authorize_get_code_error", async () => {
     const mockOAuthClient = new MockOAuthClient({
         authorize: () => {
             return Promise.resolve(new Error("no code"))
-        }
+        },
     })
     const mockRaycastAdapter = getMockRaycastAdapter()
     mockRaycastAdapter.getOAuthClient = () => mockOAuthClient
@@ -80,7 +80,7 @@ test("test_auth_service_authorize_get_token_error", async () => {
     const mockWebAdapter = new MockWebAdapter({
         sendHTTPBasicAuthRequest: (tokenUrl, code, redirectUri) => {
             return Promise.resolve(new Error("no token"))
-        }
+        },
     })
 
     const service = new AuthService(getMockRaycastAdapter(), mockWebAdapter)

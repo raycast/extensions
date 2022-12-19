@@ -5,7 +5,7 @@ import {
     NOTION_OAUTH_CLIENT_ID,
     NOTION_OAUTH_PROXY_REDIRECT_URL,
     NOTION_OAUTH_SCOPE,
-    NOTION_RECENT_PAGE_PERSISTENCE_KEY
+    NOTION_RECENT_PAGE_PERSISTENCE_KEY,
 } from "../../config"
 import { OAuthClient, RaycastAdapter } from "./adapter"
 import { OAuthAuthorizeResponse, Toast, TokenInfo } from "./dm"
@@ -62,8 +62,8 @@ class OAuthClientImpl implements OAuthClient {
                 clientId: NOTION_OAUTH_CLIENT_ID,
                 scope: NOTION_OAUTH_SCOPE,
                 extraParameters: {
-                    owner: "user"
-                }
+                    owner: "user",
+                },
             })
             .catch((err) => {
                 console.error(err)
