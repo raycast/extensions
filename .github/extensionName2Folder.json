@@ -250,6 +250,7 @@
   "gitee": "gitee",
   "gitfox": "gitfox",
   "github": "github",
+  "github-cli-manual": "github-cli-manual",
   "github-codespaces": "github-codespaces",
   "github-for-enterprise": "github-for-enterprise",
   "github-gist": "github-gist",
