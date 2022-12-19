@@ -1,7 +1,7 @@
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { Preferences, Tab } from "../interfaces";
-import { SEARCH_ENGINE } from "../constants";
+import { NOT_INSTALLED_MESSAGE, SEARCH_ENGINE } from "../constants";
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
   popToRoot();
@@ -27,6 +27,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
       end tell
     end tell
   `;
+  await checkAppInstalled();
 
   return await runAppleScript(script);
 }
@@ -73,3 +74,17 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     end tell
   `);
 }
+
+const checkAppInstalled = async () => {
+  const appInstalled = await runAppleScript(`
+set isInstalled to false
+try
+    do shell script "osascript -e 'exists application \\"Iridium\\"'"
+    set isInstalled to true
+end try
+
+return isInstalled`);
+  if (appInstalled === "false") {
+    throw new Error(NOT_INSTALLED_MESSAGE);
+  }
+};

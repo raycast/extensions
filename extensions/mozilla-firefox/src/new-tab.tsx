@@ -1,25 +1,16 @@
-import { List, showToast, Toast } from "@raycast/api";
-import { useHistorySearch } from "./hooks/useHistorySearch";
 import { useState, ReactElement } from "react";
+import { List } from "@raycast/api";
+import { useHistorySearch } from "./hooks/useHistorySearch";
 import { useTabSearch } from "./hooks/useTabSearch";
 import { FirefoxListEntries } from "./components";
-import { DEFAULT_ERROR_TITLE, NOT_INSTALLED_MESSAGE } from "./constants";
-import { NotInstalled } from "./components/NotInstalled";
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading: isLoadingHistory, error: errorHistory, entries: entriesHistory } = useHistorySearch(searchText);
-  const { isLoading: isLoadingTabs, error: errorTabs, entries: entriesTabs } = useTabSearch(searchText);
+  const { isLoading: isLoadingHistory, errorView: errorHistory, data: entriesHistory } = useHistorySearch(searchText);
+  const { isLoading: isLoadingTabs, errorView: errorTabs, data: entriesTabs } = useTabSearch(searchText);
 
-  if (errorTabs) {
-    if (errorTabs === NOT_INSTALLED_MESSAGE) {
-      return <NotInstalled />;
-    }
-    showToast(Toast.Style.Failure, DEFAULT_ERROR_TITLE, errorTabs?.toString());
-  }
-
-  if (errorHistory) {
-    return errorHistory;
+  if (errorHistory || errorTabs) {
+    return errorHistory || errorTabs!;
   }
 
   return (

@@ -1,5 +1,6 @@
 import { Image } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+import { ReactElement } from "react";
 
 export interface Preferences {
   readonly searchEngine: string;
@@ -29,8 +30,10 @@ export interface HistoryEntry {
   lastVisited: Date;
 }
 
-export interface HistorySearchResults {
-  entries?: HistoryEntry[];
-  error?: any;
+export interface SearchResult<T> {
+  data?: T[];
+  errorView?: ReactElement;
   isLoading: boolean;
 }
+
+export type GroupedEntries = Map<string, HistoryEntry[]>;

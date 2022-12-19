@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { DEFAULT_ERROR_TITLE, DownloadText } from "../constants";
+import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
 
-export function NotInstalled() {
+export function NotInstalledError() {
   const [isLoading, setIsLoading] = useState(false);
   return (
     <Detail

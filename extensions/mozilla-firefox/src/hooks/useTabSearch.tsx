@@ -1,73 +1,64 @@
-import fs from "fs";
-import { useEffect, useState } from "react";
+import { existsSync, promises } from "fs";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, Tab } from "../interfaces";
+import { Preferences, SearchResult, Tab } from "../interfaces";
 import { decodeLZ4, getSessionActivePath, getSessionInactivePath } from "../util";
+import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { NotInstalledError, UnknownError } from "../components";
 
 const decompressSession = async (): Promise<any> => {
   let sessionPath = await getSessionInactivePath();
-  if (!fs.existsSync(sessionPath)) {
+  if (existsSync(sessionPath)) {
     sessionPath = await getSessionActivePath();
   }
-  if (!fs.existsSync(sessionPath)) {
+  if (existsSync(sessionPath)) {
     throw new Error("No profile session file found.");
   }
-  const fileBuffer = await fs.promises.readFile(sessionPath);
+  const fileBuffer = await promises.readFile(sessionPath);
   return decodeLZ4(fileBuffer);
 };
 
-export function useTabSearch(query: string | undefined) {
+export function useTabSearch(query?: string): SearchResult<Tab> {
   const { tabSessionManagerId } = getPreferenceValues<Preferences>();
-  const [entries, setEntries] = useState<Tab[]>();
-  const [error, setError] = useState<string>();
+  const [data, setData] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [errorView, setErrorView] = useState<ReactNode | undefined>();
 
-  let cancel = false;
+  const getTabs = useCallback(async () => {
+    let tabs: Tab[] = [];
 
-  useEffect(() => {
-    async function getTabs() {
-      if (cancel) {
-        return;
-      }
-
-      try {
-        let tabs: Tab[] = [];
-
-        if (tabSessionManagerId) {
-        } else {
-          const session = await decompressSession();
-          tabs = session.windows
-            .map((w: any) => w.tabs.map((t: any) => t.entries.map((e: any) => ({ url: e.url, title: e.title }))[0]))
-            .flat(2)
-            .filter((t: Tab) => t.url !== "about:newtab")
-            .map((e: any) => Tab.parse(e));
-        }
-
-        if (query) {
-          tabs = tabs.filter((tab) => {
-            return (
-              tab.title.toLowerCase().includes(query.toLowerCase()) ||
-              tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-            );
-          });
-        }
-
-        setEntries(tabs);
-      } catch (e) {
-        setError((e as Error).message);
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
+    if (tabSessionManagerId) {
+    } else {
+      const session = await decompressSession();
+      tabs = session.windows
+        .map((w: any) => w.tabs.map((t: any) => t.entries.map((e: any) => ({ url: e.url, title: e.title }))[0]))
+        .flat(2)
+        .filter((t: Tab) => t.url !== "about:newtab")
+        .map((e: any) => Tab.parse(e));
     }
 
-    getTabs();
-
-    return () => {
-      cancel = true;
-    };
+    if (query) {
+      tabs = tabs.filter(
+        (tab) =>
+          tab.title.toLowerCase().includes(query.toLowerCase()) ||
+          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+      );
+    }
+    setData(tabs);
   }, [query]);
 
-  return { entries, error, isLoading };
+  useEffect(() => {
+    getTabs()
+      .then(() => setIsLoading(false))
+      .catch((e) => {
+        if (e.message === NOT_INSTALLED_MESSAGE) {
+          setErrorView(<NotInstalledError />);
+        } else {
+          setErrorView(<UnknownError />);
+        }
+        setIsLoading(false);
+      });
+  }, [query]);
+
+  return { data, isLoading, errorView };
 }
