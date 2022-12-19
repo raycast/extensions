@@ -60,29 +60,37 @@ export default function Command() {
     <List isLoading={!addToRecentlyUsedItems || !list.length} onSearchTextChange={handleSearchTextChange}>
       {list.map((section) => (
         <List.Section key={section.sectionTitle} title={section.sectionTitle}>
-          {section.items.map((item) => (
-            <List.Item
-              key={item.name}
-              title={item.value}
-              subtitle={upperCaseFirst(item.name)}
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section>
-                    <Action.Paste
-                      title="Paste Character in Active App"
-                      content={item.value}
-                      onPaste={() => addToRecentlyUsedItems(item)}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Character to Clipboard"
-                      content={item.value}
-                      onCopy={() => addToRecentlyUsedItems(item)}
-                    />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-            />
-          ))}
+          {section.items.map((item) => {
+            const accessories = [];
+            if (item.aliases?.length) {
+              accessories.push({ icon: "⌨️", text: `${item.aliases.join(", ")}` });
+            }
+
+            return (
+              <List.Item
+                key={item.name}
+                title={item.value}
+                subtitle={upperCaseFirst(item.name)}
+                accessories={accessories}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section>
+                      <Action.Paste
+                        title="Paste Character in Active App"
+                        content={item.value}
+                        onPaste={() => addToRecentlyUsedItems(item)}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Character to Clipboard"
+                        content={item.value}
+                        onCopy={() => addToRecentlyUsedItems(item)}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>
