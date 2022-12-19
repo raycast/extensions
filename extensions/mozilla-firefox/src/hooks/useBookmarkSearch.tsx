@@ -24,7 +24,7 @@ function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: any): HistoryEn
 }
 
 async function extractBookmarks(): Promise<HistoryEntry[]> {
-  let bookmarksPath = getBookmarksDirectoryPath();
+  const bookmarksPath = getBookmarksDirectoryPath();
   if (!existsSync(bookmarksPath)) {
     throw new Error(NO_BOOKMARKS_MESSAGE);
   }
