@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showHUD, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fileExists, getErrorMessage, openURIinVSCode, waitForFileExists } from "./utils";
 import * as afs from "fs/promises";
@@ -73,17 +73,40 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
   );
 }
 
+function InstallRaycastForVSCodeAction(): JSX.Element {
+  return (
+    <Action.OpenInBrowser
+      title="Install Raycast for VSCode"
+      url="https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast"
+      onOpen={() => {
+        popToRoot();
+        showHUD("Open VSCode Marketplace");
+      }}
+    />
+  );
+}
+
 export default function CommandPaletteCommand(): JSX.Element {
   const { isLoading, commands, error } = useCommands();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder={isLoading === true ? "Load Commands from VSCode" : "Search Commands"}>
       {commands?.map((c) => (
         <CommandListItem key={c.command} command={c} />
       ))}
-      <List.EmptyView title="Could not get Command from VS Code.Make sure the Raycast VSCode extension is installed an running" />
+      {error && (
+        <List.EmptyView
+          title="No Response from Raycast for VSCode extension"
+          icon="⚠️"
+          actions={
+            <ActionPanel>
+              <InstallRaycastForVSCodeAction />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }
