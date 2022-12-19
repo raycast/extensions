@@ -95,6 +95,15 @@ const DownloadTextIridium = `
   [![Iridium](https://iridiumbrowser.de/assets/images/logos/iridium-logo_large.svg)]()
 `;
 
+const DownloadTextOrion = `
+  # 🚨Error: Orion browser is not installed
+  ## This extension depends on Orion browser. You must install it to continue.
+  
+  [Click here](https://browser.kagi.com/) if you want to download manually.
+  
+  [![Orion](https://browser.kagi.com/public/images/orion-circle.png)]()
+`;
+
 export const DOWNLOAD_TEXT = {
   [SupportedBrowsers.Chrome]: DownloadTextChrome,
   [SupportedBrowsers.Firefox]: DownloadTextFirefox,
@@ -105,6 +114,20 @@ export const DOWNLOAD_TEXT = {
   [SupportedBrowsers.Arc]: DownloadTextArc,
   [SupportedBrowsers.Opera]: DownloadTextOpera,
   [SupportedBrowsers.Iridium]: DownloadTextIridium,
+  [SupportedBrowsers.Orion]: DownloadTextOrion,
+};
+
+export const INSTALL_COMMAND = {
+  [SupportedBrowsers.Chrome]: "brew cask install google-chrome",
+  [SupportedBrowsers.Firefox]: "brew cask install firefox",
+  [SupportedBrowsers.Safari]: undefined,
+  [SupportedBrowsers.Edge]: "brew cask install microsoft-edge",
+  [SupportedBrowsers.Brave]: "brew cask install brave-browser",
+  [SupportedBrowsers.Vivaldi]: "brew cask install vivaldi",
+  [SupportedBrowsers.Arc]: undefined,
+  [SupportedBrowsers.Opera]: "brew cask install opera",
+  [SupportedBrowsers.Iridium]: undefined,
+  [SupportedBrowsers.Orion]: undefined,
 };
 
 export const UnknownErrorText = `
