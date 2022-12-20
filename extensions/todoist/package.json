@@ -171,6 +171,14 @@
           "required": false,
           "title": "View",
           "description": "Indicates which view you want to see in your menubar."
+        },
+        {
+          "name": "upcomingDays",
+          "type": "textfield",
+          "default": "7",
+          "required": false,
+          "title": "Number of days for Upcoming",
+          "description": "Indicates the number of days you want in the upcoming view of the menubar."
         }
       ],
       "interval": "10m"
