@@ -43,8 +43,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
-  const cancelRef = useRef<AbortController | null>(null);
+  const [state, setState] =
+    useState < SearchState > { results: [], isLoading: true };
+  const cancelRef = (useRef < AbortController) | (null > null);
 
   const search = useCallback(
     async function search(searchText: string) {
@@ -55,7 +56,10 @@ function useSearch() {
         isLoading: true,
       }));
       try {
-        const results = await performSearch(searchText, cancelRef.current.signal);
+        const results = await performSearch(
+          searchText,
+          cancelRef.current.signal
+        );
         setState((oldState) => ({
           ...oldState,
           results: results,
@@ -72,7 +76,11 @@ function useSearch() {
         }
 
         console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not perform search",
+          message: String(error),
+        });
       }
     },
     [cancelRef, setState]
@@ -91,35 +99,47 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-    const params = new URLSearchParams();
-    params.append("q", searchText);
-  
-    const response = await fetch("https://search.brave.com/api/suggest" + "?" + params.toString(), {
+async function performSearch(
+  searchText: string,
+  signal: AbortSignal
+): Promise<SearchResult[]> {
+  const params = new URLSearchParams();
+  params.append("q", searchText);
+
+  const response = await fetch(
+    "https://search.brave.com/api/suggest" + "?" + params.toString(),
+    {
       method: "get",
-    });
-  
-    const json = await response.json();
-  
-    if (!response.ok || !Array.isArray(json)) {
-      throw new Error(response.statusText);
     }
-  
-    try {
-      const [query, suggestions = []] = json;
-      return searchText
-        ? [
-            { name: searchText, url: "https://search.brave.com/search?q=" + searchText },
-            ...suggestions
-            .map((suggestion: string) => ({ name: suggestion, url: "https://search.brave.com/search?q=" + suggestion }))
+  );
+
+  const json = await response.json();
+
+  if (!response.ok || !Array.isArray(json)) {
+    throw new Error(response.statusText);
+  }
+
+  try {
+    const [query, suggestions = []] = json;
+    return searchText
+      ? [
+          {
+            name: searchText,
+            url: "https://search.brave.com/search?q=" + searchText,
+          },
+          ...suggestions
+            .map((suggestion: string) => ({
+              name: suggestion,
+              url: "https://search.brave.com/search?q=" + suggestion,
+            }))
             .filter((suggestion: string) => suggestion !== searchText),
-          ]
-        : [];
-    } catch (error) {
-      console.error(error);
-      throw new Error("An error occurred while parsing the search results.");
-    }
-  }    
+        ]
+      : [];
+  } catch (error) {
+    console.error(error);
+    throw new Error("An error occurred while parsing the search results.");
+  }
+}
 
 interface SearchState {
   results: SearchResult[];
