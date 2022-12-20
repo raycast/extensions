@@ -17,6 +17,7 @@ function NewTabActions({ query }: { query?: string }): ReactElement {
           openNewTab(query);
         }}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
+        icon={Icon.Globe}
       />
     </ActionPanel>
   );
