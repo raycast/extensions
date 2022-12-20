@@ -6,7 +6,8 @@
   "icon": "wikipedia.png",
   "author": "vimtor",
   "contributors": [
-    "shubzkothekar"
+    "shubzkothekar",
+    "JonathanWbn"
   ],
   "license": "MIT",
   "commands": [

@@ -1,5 +1,10 @@
 # Wikipedia Changelog
 
+## [Multi Language Support] - 2022-12-20
+
+- Added a language dropdown for different Wikipedia editions
+- Refactored data fetching
+
 ## [Update] - 2022-08-29
 
 - Added show details view and action for wikipedia page
