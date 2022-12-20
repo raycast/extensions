@@ -9,7 +9,8 @@ import {
   PopToRootType,
 } from "@raycast/api";
 import { PurpleAir } from "./purpleAir";
-import { useFetch } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
+import { useRef } from "react";
 
 interface Preferences {
   sensor_index: string;
@@ -21,15 +22,22 @@ export default function Command() {
 
   const preferences = getPreferenceValues<Preferences>();
   const url = `https://api.purpleair.com/v1/sensors/${preferences.sensor_index}/?api_key=${preferences.api_key}`;
-  const { isLoading, data, revalidate } = useFetch(url, {
-    async parseResponse(response) {
+
+  const abortable = useRef<AbortController>();
+  const { isLoading, data, revalidate } = usePromise(
+    async (url: string) => {
+      const response = await fetch(url, { signal: abortable.current?.signal });
       if (!response.ok) {
         throw new Error(response.statusText);
       }
 
       return new PurpleAir(await response.text());
     },
-  });
+    [url],
+    {
+      abortable,
+    }
+  );
 
   if (!isLoading && data === undefined) {
     return (
