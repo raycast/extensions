@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, getPreferenceValues, Icon, openCommandPreferences } from "@raycast/api";
+import { ActionPanel, Action, Detail, getPreferenceValues, Icon, openCommandPreferences, showHUD } from "@raycast/api";
 import { useRef } from "react";
 import { PurpleAir } from "./purpleAir";
 import { usePromise } from "@raycast/utils";
@@ -20,6 +20,11 @@ export default function Command() {
   const { isLoading, data, revalidate } = usePromise(
     async (url: string) => {
       const response = await fetch(url, { signal: abortable.current?.signal });
+      if (response.status == 403) {
+        showHUD("API key incorrect. Please update it in extension preferences and try again.");
+        openCommandPreferences();
+        throw new Error("API key incorrect.");
+      }
       const result = new PurpleAir(await response.text());
       return result;
     },
@@ -32,9 +37,6 @@ export default function Command() {
   if (data != null) {
     markdown = data?.getAirQualitySummary();
     markdown += "\n\n";
-  }
-
-  if (data?.currentAQI != undefined) {
     markdown += data?.currentAQI.LongDescription;
   }
 

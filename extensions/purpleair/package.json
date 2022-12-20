@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "PurpleAIr",
+      "title": "PurpleAir",
       "subtitle": "Check the Air Quality",
       "description": "Check the Air Quality with PurpleAir Sensor",
       "mode": "view",
