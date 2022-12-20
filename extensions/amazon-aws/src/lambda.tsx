@@ -3,7 +3,6 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
-import { getActionPush } from "./util";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
 import { getTaskCWLogsGroupUrl } from "./actions";
 
@@ -42,12 +41,12 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
             url={getTaskCWLogsGroupUrl(encodeURIComponent(`/aws/lambda/${func.FunctionName}`))}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
-          {getActionPush({
-            title: "View Log Streams",
-            component: CloudwatchLogStreams,
-            logGroupName: `/aws/lambda/${func.FunctionName}`,
-            shortcut: { modifiers: ["opt"], key: "l" },
-          })}
+          <Action.Push
+            title={"View Log Streams"}
+            icon={Icon.Eye}
+            shortcut={{ modifiers: ["opt"], key: "l" }}
+            target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+          />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
             <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />

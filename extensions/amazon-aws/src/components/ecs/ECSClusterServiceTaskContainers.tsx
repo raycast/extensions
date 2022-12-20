@@ -1,11 +1,10 @@
-import { ContainerDefinition } from "@aws-sdk/client-ecs";
-import { LogStartTimes } from "../../interfaces";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { fetchTaskContainers, getTaskContainerUrl } from "../../actions";
-import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
-import { useCachedPromise } from "@raycast/utils";
-import CloudwatchLogs from "../cloudwatch/CloudwatchLogs";
 import { useState } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { LogStartTimes } from "../../interfaces";
+import { fetchTaskContainers, getTaskContainerUrl } from "../../actions";
+import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
+import CloudwatchLogs from "../cloudwatch/CloudwatchLogs";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
 
 function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinitionArn: string }) {
@@ -13,26 +12,6 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
   const { data: containers, isLoading } = useCachedPromise(fetchTaskContainers, [taskDefinitionArn], {
     keepPreviousData: true,
   });
-
-  const getActions = (container: ContainerDefinition) => {
-    const actionViewInApp = getActionPush({
-      title: "View Logs",
-      component: CloudwatchLogs,
-      logGroupName: container.logConfiguration?.options ? container.logConfiguration?.options["awslogs-group"] : "",
-      startTime: logStartTime,
-      logGroupStreamPrefix: container.logConfiguration?.options
-        ? container.logConfiguration?.options["awslogs-stream-prefix"]
-        : "",
-    });
-    const actionViewInBrowser = getActionOpenInBrowser(getTaskContainerUrl(taskDefinitionArn));
-
-    let containerActions = [actionViewInApp, actionViewInBrowser];
-
-    if (container.logConfiguration?.logDriver !== "awslogs") {
-      containerActions = containerActions.filter((action) => action.key !== "logs");
-    }
-    return containerActions;
-  };
 
   return (
     <List
