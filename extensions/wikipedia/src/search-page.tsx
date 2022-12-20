@@ -1,24 +1,39 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import ShowDetailsPage from "./show-details-page";
 import { findPagesByTitle, getPageData } from "./wikipedia";
 
 export default function SearchPage() {
   const [search, setSearch] = useState("");
-  const { data: titles, isLoading } = usePromise(findPagesByTitle, [search]);
+  const [language, setLanguage] = useCachedState("language", "en");
+  const { data, isLoading } = usePromise(findPagesByTitle, [search, language]);
 
   return (
-    <List throttle isLoading={isLoading} onSearchTextChange={setSearch} searchBarPlaceholder="Search pages by name...">
-      {titles?.map((title) => (
-        <PageItem key={title} title={title} />
-      ))}
+    <List
+      throttle
+      isLoading={isLoading}
+      onSearchTextChange={setSearch}
+      searchBarPlaceholder="Search pages by name..."
+      searchBarAccessory={
+        <List.Dropdown tooltip="Language" value={language} onChange={setLanguage}>
+          <List.Dropdown.Item title="English" value="en" />
+          <List.Dropdown.Item title="German" value="de" />
+          <List.Dropdown.Item title="French" value="fr" />
+          <List.Dropdown.Item title="Japanese" value="ja" />
+          <List.Dropdown.Item title="Spanish" value="es" />
+          <List.Dropdown.Item title="Russian" value="ru" />
+        </List.Dropdown>
+      }
+    >
+      {data?.language === language &&
+        data?.results.map((title) => <PageItem key={title} title={title} language={language} />)}
     </List>
   );
 }
 
-function PageItem({ title }: { title: string }) {
-  const { data: page } = usePromise(getPageData, [title]);
+function PageItem({ title, language }: { title: string; language: string }) {
+  const { data: page } = usePromise(getPageData, [title, language]);
 
   return (
     <List.Item

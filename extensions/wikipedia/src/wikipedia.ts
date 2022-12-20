@@ -14,13 +14,10 @@ export interface PageSummary {
   };
 }
 
-const client = got.extend({
-  prefixUrl: "https://en.wikipedia.org/",
-  responseType: "json",
-});
+const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
 
 export async function getRandomPageUrl() {
-  const response = await client.get("api/rest_v1/page/random/summary").json<PageSummary>();
+  const response = await got.get(`${getApiUrl()}api/rest_v1/page/random/summary`).json<PageSummary>();
   return response.content_urls.desktop.page;
 }
 
@@ -29,16 +26,18 @@ export async function getTodayFeaturedPageUrl() {
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
-  const response = await client.get(`api/rest_v1/feed/featured/${year}/${month}/${day}`).json<{ tfa: PageSummary }>();
+  const response = await got
+    .get(`${getApiUrl()}api/rest_v1/feed/featured/${year}/${month}/${day}`)
+    .json<{ tfa: PageSummary }>();
   return response.tfa.content_urls.desktop.page;
 }
 
-export async function findPagesByTitle(search: string) {
+export async function findPagesByTitle(search: string, language: string) {
   if (!search) {
-    return [];
+    return { language, results: [] };
   }
-  const response = await client
-    .get("w/api.php", {
+  const response = await got
+    .get(`${getApiUrl(language)}w/api.php`, {
       searchParams: {
         action: "query",
         list: "prefixsearch",
@@ -48,10 +47,12 @@ export async function findPagesByTitle(search: string) {
       },
     })
     .json<{ query: { prefixsearch: { title: string }[] } }>();
-  return response.query.prefixsearch.map((result) => result.title);
+  return { language, results: response.query.prefixsearch.map((result) => result.title) };
 }
 
-export async function getPageData(title: string) {
-  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<PageSummary>();
+export async function getPageData(title: string, language: string) {
+  const response = await got
+    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`)
+    .json<PageSummary>();
   return response;
 }
