@@ -8,19 +8,19 @@ If you have [Homebrew](https://brew.sh/) installed then press ⏎ (Enter Key) to
 
 [Click here](https://vivaldi.com/download/) if you want to download manually.
   
-[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/logos/vivaldi_logo_dark.png)]()
+[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/icons/viv_icon.png)]()
 `;
 
 export const NoBookmarksText = `
 # 🚨Error: Vivaldi browser has no bookmarks. Please add some bookmarks to continue using this command.
 
-[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/logos/vivaldi_logo_dark.png)]()
+[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/icons/viv_icon.png)]()
 `;
 
 export const UnknownErrorText = `
 # 🚨Error: Something happened while trying to run your command
   
-[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/logos/vivaldi_logo_dark.png)]()
+[![Vivaldi](https://vivaldi.com/wp-content/themes/vivaldicom-theme/img/press/icons/viv_icon.png)]()
 `;
 
 export const DEFAULT_ERROR_TITLE = "An Error Occurred";
