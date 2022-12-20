@@ -35,7 +35,7 @@
     {
       "description": "Feedly Access Token",
       "name": "feedlyAccessToken",
-      "placeholder": "Feedly Access Token",
+      "placeholder": "Find here: https://feedly.com/v3/auth/dev",
       "required": true,
       "title": "Feedly Access Token",
       "type": "password"
