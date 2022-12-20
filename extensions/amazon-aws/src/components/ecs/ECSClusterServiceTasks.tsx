@@ -2,7 +2,7 @@ import { Service } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { fetchTasks, getTaskUrl } from "../../actions";
 import { useCachedPromise } from "@raycast/utils";
-import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
+import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTaskContainers from "./ECSClusterServiceTaskContainers";
 
 function ECSClusterServiceTasks({ service }: { service: Service }) {
@@ -46,14 +46,17 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
             }
             actions={
               <ActionPanel>
-                {[
-                  getActionPush({
-                    title: "View Containers",
-                    component: ECSClusterServiceTaskContainers,
-                    taskDefinitionArn: task.taskDefinitionArn || "",
-                  }),
-                  getActionOpenInBrowser(getTaskUrl(task)),
-                ]}
+                <Action.Push
+                  key={"view"}
+                  title={"View Containers"}
+                  icon={Icon.Eye}
+                  target={
+                    <ECSClusterServiceTaskContainers
+                      taskDefinitionArn={task.taskDefinitionArn || ""}
+                    ></ECSClusterServiceTaskContainers>
+                  }
+                />
+                {getActionOpenInBrowser(getTaskUrl(task))}
                 <ActionPanel.Section title="Copy">
                   {getExportResponse(task)}
                   <Action.CopyToClipboard

@@ -13,21 +13,15 @@ export default function ECS() {
     revalidate,
   } = useCachedPromise(fetchClusters, [], { keepPreviousData: true });
 
-  if (error) {
-    return (
-      <List>
-        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
-      </List>
-    );
-  }
-
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder={getFilterPlaceholder("clusters")}
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
-      {clusters && clusters.length > 0 ? (
+      {error ? (
+        <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
+      ) : clusters && clusters.length > 0 ? (
         clusters.map((c) => <ECSCluster key={c.clusterArn} cluster={c} />)
       ) : (
         <List.EmptyView title="No clusters found" />

@@ -2,7 +2,7 @@ import { Cluster } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getClusterUrl } from "../../actions";
-import { getActionOpenInBrowser, getActionPush, getExportResponse } from "../../util";
+import { getActionOpenInBrowser, getExportResponse } from "../../util";
 import ECSClusterServices from "./ECSClusterServices";
 
 function ECSCluster({ cluster }: { cluster: Cluster }) {
@@ -34,14 +34,13 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
       }
       actions={
         <ActionPanel>
-          {[
-            getActionPush({
-              title: "View Services",
-              component: ECSClusterServices,
-              clusterArn: cluster.clusterArn ?? undefined,
-            }),
-            getActionOpenInBrowser(getClusterUrl(cluster)),
-          ]}
+          <Action.Push
+            key={"view"}
+            title={"View Services"}
+            icon={Icon.Eye}
+            target={<ECSClusterServices clusterArn={cluster.clusterArn || ""}></ECSClusterServices>}
+          />
+          {getActionOpenInBrowser(getClusterUrl(cluster))}
           <ActionPanel.Section title="Copy">
             {getExportResponse(cluster)}
             <Action.CopyToClipboard

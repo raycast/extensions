@@ -2,7 +2,7 @@ import { Service } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getServiceUrl } from "../../actions";
-import { getActionOpenInBrowser, getActionPush, getExportResponse, getFilterPlaceholder } from "../../util";
+import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTasks from "./ECSClusterServiceTasks";
 
 function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
@@ -59,10 +59,13 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
             }
             actions={
               <ActionPanel>
-                {[
-                  getActionPush({ title: "View Tasks", component: ECSClusterServiceTasks, service }),
-                  getActionOpenInBrowser(getServiceUrl(service)),
-                ]}
+                <Action.Push
+                  key={"view"}
+                  title={"View Tasks"}
+                  icon={Icon.Eye}
+                  target={<ECSClusterServiceTasks service={service}></ECSClusterServiceTasks>}
+                />
+                {getActionOpenInBrowser(getServiceUrl(service))}
                 {getActionCopySection(service)}
               </ActionPanel>
             }

@@ -19,20 +19,24 @@ export async function fetchLogs(
   return await fetchAllLogs(logGroupName, startTime, logStreamNamePrefix, logStreamNames);
 }
 
-export async function fetchLogStreams(logGroupName: string): Promise<LogStream[]> {
+export async function fetchLogStreams(
+  logGroupName: string,
+  token?: string,
+  accEvents?: LogStream[]
+): Promise<LogStream[]> {
   if (!process.env.AWS_PROFILE) return [];
-  return await fetchAllLogStreams(logGroupName);
-}
-
-async function fetchAllLogStreams(logGroupName: string, token?: string, accEvents?: LogStream[]): Promise<LogStream[]> {
   const { logStreams, nextToken } = await cloudWatchLogsClient.send(
     new DescribeLogStreamsCommand({ logGroupName, nextToken: token })
   );
 
   const combinedEvents = [...(accEvents || []), ...(logStreams || [])];
 
+  if (combinedEvents.length > 300) {
+    return combinedEvents;
+  }
+
   if (nextToken) {
-    return fetchAllLogStreams(logGroupName, nextToken, combinedEvents);
+    return fetchLogStreams(logGroupName, nextToken, combinedEvents);
   }
 
   return combinedEvents;

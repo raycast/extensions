@@ -86,7 +86,29 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
             }
             actions={
               <ActionPanel>
-                {getActions(container)}
+                {container.logConfiguration?.logDriver === "awslogs" && (
+                  <Action.Push
+                    key={"view"}
+                    title={"View Services"}
+                    icon={Icon.Eye}
+                    target={
+                      <CloudwatchLogs
+                        logGroupName={
+                          container.logConfiguration?.options
+                            ? container.logConfiguration?.options["awslogs-group"]
+                            : ""
+                        }
+                        startTime={logStartTime}
+                        logGroupStreamPrefix={
+                          container.logConfiguration?.options
+                            ? container.logConfiguration?.options["awslogs-stream-prefix"]
+                            : ""
+                        }
+                      ></CloudwatchLogs>
+                    }
+                  />
+                )}
+                {getActionOpenInBrowser(getTaskContainerUrl(taskDefinitionArn))}
                 <ActionPanel.Section title="Copy">
                   {getExportResponse(container)}
                   <Action.CopyToClipboard

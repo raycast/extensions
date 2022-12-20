@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchLogStreams, getTaskCWLogsGroupUrl } from "../../actions";
-import { getActionOpenInBrowser, getActionPush, getFilterPlaceholder } from "../../util";
+import { getActionOpenInBrowser, getFilterPlaceholder } from "../../util";
 import { LogStartTimes } from "../../interfaces";
 import CloudwatchLogs from "./CloudwatchLogs";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
@@ -26,16 +26,19 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
             icon={"aws-icons/cw.png"}
             actions={
               <ActionPanel>
-                {[
-                  getActionPush({
-                    title: "View Logs",
-                    component: CloudwatchLogs,
-                    logGroupName,
-                    startTime: logStartTime,
-                    logStreamNames: s.logStreamName ?? undefined,
-                  }),
-                  getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName)),
-                ]}
+                <Action.Push
+                  key={"view"}
+                  title={"View Logs"}
+                  icon={Icon.Eye}
+                  target={
+                    <CloudwatchLogs
+                      logGroupName={logGroupName}
+                      startTime={logStartTime}
+                      logGroupStreamName={s.logStreamName || ""}
+                    ></CloudwatchLogs>
+                  }
+                />
+                {getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName))}
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
                     title="Copy Stream ARN"
