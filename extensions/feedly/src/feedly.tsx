@@ -53,7 +53,7 @@ const Feedly = () => {
                         <Action.Push
                           title="Open"
                           icon={Icon.List}
-                          target={<Feed feed={feed} />}
+                          target={<Feed id={feed.id} title={feed.title} />}
                         />
                       </ActionPanel>
                     }

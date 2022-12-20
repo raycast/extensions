@@ -10,9 +10,9 @@ import { useFetch } from '@raycast/utils';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Feed as IFeed } from '../types/feed.types';
 
-const Feed = ({ feed }: { feed: IFeed }) => {
+const Feed = ({ id, title }: { id: IFeed['id']; title: IFeed['title'] }) => {
   const { isLoading, data } = useFetch<IFeed>(
-    `https://cloud.feedly.com/v3/streams/contents?streamId=${feed.id}`,
+    `https://cloud.feedly.com/v3/streams/contents?streamId=${id}`,
     {
       keepPreviousData: true,
       headers: {
@@ -24,8 +24,8 @@ const Feed = ({ feed }: { feed: IFeed }) => {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={`Search in ${feed.title}...`}
-      navigationTitle={`Feedly: ${feed.title}`}
+      searchBarPlaceholder={`Search in ${title}...`}
+      navigationTitle={`Feedly: ${title}`}
     >
       {data?.items
         ?.sort?.((a, b) => b.published - a.published)
