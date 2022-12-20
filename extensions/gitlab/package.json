@@ -277,7 +277,7 @@
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.42.0",
+    "@raycast/api": "^1.45.0",
     "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
