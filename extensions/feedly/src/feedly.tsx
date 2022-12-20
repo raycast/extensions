@@ -6,31 +6,24 @@ import {
   Image,
   List
 } from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
+import { useFetch } from '@raycast/utils';
 import Feed from './components/Feed';
 import { Collection } from './types/collection.types';
 
 const Feedly = () => {
-  const { data: collections, isLoading } = useCachedPromise(fetchContent, [], {
-    keepPreviousData: true
-  });
-
-  async function fetchContent() {
-    const data: Collection[] = await fetch(
-      'https://cloud.feedly.com/v3/collections',
-      {
-        headers: {
-          Authorization: getPreferenceValues().feedlyAccessToken
-        }
+  const { isLoading, data } = useFetch<Collection[]>(
+    'https://cloud.feedly.com/v3/collections',
+    {
+      keepPreviousData: true,
+      headers: {
+        Authorization: getPreferenceValues().feedlyAccessToken
       }
-    ).then((response) => response.json());
-
-    return data;
-  }
+    }
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search for feeds...">
-      {collections?.map?.((collection) => {
+      {data?.map?.((collection) => {
         return (
           <List.Section
             key={collection.id}
@@ -40,6 +33,7 @@ const Feedly = () => {
             {collection?.feeds
               ?.sort((a, b) => b.updated - a.updated)
               ?.map((feed) => {
+                console.log(feed);
                 return (
                   <List.Item
                     key={feed.id}
@@ -58,7 +52,8 @@ const Feedly = () => {
                       <ActionPanel>
                         <Action.Push
                           title="Open"
-                          target={<Feed id={feed?.id} />}
+                          icon={Icon.List}
+                          target={<Feed feed={feed} />}
                         />
                       </ActionPanel>
                     }

@@ -6,29 +6,28 @@ import {
   Icon,
   List
 } from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
+import { useFetch } from '@raycast/utils';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 import { Feed as IFeed } from '../types/feed.types';
 
-const Feed = ({ id }: { id: IFeed['id'] }) => {
-  const { data: feed, isLoading } = useCachedPromise(fetchContent, [id]);
-
-  async function fetchContent(id: string) {
-    const data: IFeed = await fetch(
-      `https://cloud.feedly.com/v3/streams/contents?streamId=${id}`,
-      {
-        headers: {
-          Authorization: getPreferenceValues().feedlyAccessToken
-        }
+const Feed = ({ feed }: { feed: IFeed }) => {
+  const { isLoading, data } = useFetch<IFeed>(
+    `https://cloud.feedly.com/v3/streams/contents?streamId=${feed.id}`,
+    {
+      keepPreviousData: true,
+      headers: {
+        Authorization: getPreferenceValues().feedlyAccessToken
       }
-    ).then((response) => response.json());
-
-    return data;
-  }
+    }
+  );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search for feed">
-      {feed?.items
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder={`Search in ${feed.title}...`}
+      navigationTitle={`Feedly: ${feed.title}`}
+    >
+      {data?.items
         ?.sort?.((a, b) => b.published - a.published)
         .map?.((item) => {
           return (
@@ -50,6 +49,7 @@ const Feed = ({ id }: { id: IFeed['id'] }) => {
                 <ActionPanel>
                   <Action.Push
                     title="Open"
+                    icon={Icon.List}
                     target={
                       <Detail
                         markdown={new NodeHtmlMarkdown().translate(

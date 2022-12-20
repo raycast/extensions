@@ -1,6 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "author": "shubham",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "commands": [
     {
       "description": "Browse Feedly articles and collections via Raycast",
