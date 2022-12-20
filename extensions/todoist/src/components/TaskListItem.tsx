@@ -2,6 +2,7 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
+import removeMarkdown from "remove-markdown";
 import { ViewMode } from "../types";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
 import { priorities } from "../constants";
@@ -81,7 +82,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
 
   return (
     <List.Item
-      title={task.content}
+      title={removeMarkdown(task.content)}
       subtitle={task.description}
       {...additionalListItemProps}
       actions={
