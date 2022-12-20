@@ -5,7 +5,7 @@
   "description": "Search all your design tokens and assets, copy and paste them in your favorite tools: Notion pages, Pitch presentations, Slack discussions, etc.",
   "icon": "specify-icon.png",
   "author": "AllanM",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "categories": [
     "Design Tools",
     "Developer Tools",
@@ -46,7 +46,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.1",
+    "@raycast/api": "^1.44.0",
     "axios": "^0.27.2",
     "js-base64": "^3.7.2",
     "react-use": "^17.4.0",
