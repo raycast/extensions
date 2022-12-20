@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "devutils",
   "title": "DevUtils",
-  "description": "All-in-one Toolbox for Developers",
+  "description": "Navigate DevUtils faster with this All-in-one Toolbox for Developers",
   "icon": "devutils.png",
   "author": "vietanhlehuu",
   "categories": [
