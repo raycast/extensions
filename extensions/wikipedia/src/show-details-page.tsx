@@ -1,30 +1,30 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import { encodeTitle } from "./wikipedia";
+import { PageSummary } from "./wikipedia";
 
-function ShowDetailsPage(props: { title: string; extract: string | undefined; description: string | undefined }) {
+function ShowDetailsPage({ page }: { page: PageSummary }) {
   const markdown = `
   
-  # ${props.title}
+  # ${page.title}
   
-  ###### ${props.description ? props.description : ""}
+  ###### ${page.description ? page.description : ""}
 
   ---
 
-  ${props.extract} [read more](https://wikipedia.org/wiki/${encodeTitle(props.title)})
+  ${page.extract} [read more](${page.content_urls.desktop.page})
 
   `;
 
   return (
     <Detail
-      navigationTitle={props.title}
+      navigationTitle={page.title}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`} />
+          <Action.OpenInBrowser url={page.content_urls.desktop.page} />
           <Action.CopyToClipboard
             shortcut={{ modifiers: ["cmd"], key: "." }}
             title="Copy URL"
-            content={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`}
+            content={page.content_urls.desktop.page}
           />
         </ActionPanel>
       }

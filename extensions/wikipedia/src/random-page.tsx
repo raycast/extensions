@@ -1,8 +1,8 @@
 import { closeMainWindow, open } from "@raycast/api";
-import { encodeTitle, getRandomPageTitle } from "./wikipedia";
+import { getRandomPageUrl } from "./wikipedia";
 
 export default async function () {
-  const pageTitle = await getRandomPageTitle();
-  await open(`https://wikipedia.org/wiki/${encodeTitle(pageTitle)}`);
+  const randomPageUrl = await getRandomPageUrl();
+  await open(randomPageUrl);
   await closeMainWindow({ clearRootSearch: true });
 }
