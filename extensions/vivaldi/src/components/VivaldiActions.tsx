@@ -17,6 +17,7 @@ function NewTabActions({ query }: { query?: string }): ReactElement {
           openNewTab(query);
         }}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
+        icon={Icon.Globe}
       />
     </ActionPanel>
   );
@@ -39,6 +40,7 @@ function HistoryItemActions({ title, url }: { title: string; url: string }): Rea
           openNewHistoryTab(url);
         }}
         title={"Open in Tab"}
+        icon={Icon.Globe}
       />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </ActionPanel>
