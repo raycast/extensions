@@ -13,21 +13,21 @@
   "commands": [
     {
       "name": "pick-emoji",
-      "title": "Pick random emoji",
+      "title": "Pick Random Emoji",
       "subtitle": "Draw an emoji and copy it",
       "description": "This command choose a random emoji and copy it in your clipboard",
       "mode": "no-view"
     },
     {
       "name": "pick-character",
-      "title": "Pick random character",
+      "title": "Pick Random Character",
       "subtitle": "Draw a character and copy it",
       "description": "This command choose a random characters and copy it in your clipboard",
       "mode": "no-view"
     },
     {
       "name": "pick-figure",
-      "title": "Pick random number between 0 and 9",
+      "title": "Pick Random Number Between 0 And 9",
       "subtitle": "Draw a figure and copy it",
       "description": "This command choose a random figure and copy it in your clipboard",
       "mode": "no-view"
