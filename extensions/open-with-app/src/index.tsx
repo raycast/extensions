@@ -9,6 +9,7 @@ import {
   getSelectedFinderItems,
   Action,
   open,
+  PopToRootType,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
@@ -47,10 +48,11 @@ function ApplicationsListItem(props: { application: Application }) {
             onAction={async () => {
               try {
                 const selectedItems = await getSelectedFinderItems();
+                await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
                 if (selectedItems.length != 0) {
-                  selectedItems.forEach((item) => {
-                    open(item.path.replace(/"/g, '\\"'), application.bundleId);
-                  });
+                  for (let i = 0; i < selectedItems.length; i++) {
+                    await open(selectedItems[i].path.replace(/"/g, '\\"'), application.bundleId);
+                  }
                 } else {
                   await showHUD("⚠️  No Finder selection to open.");
                 }
