@@ -67,7 +67,6 @@ function ECSClusterServiceTaskContainers({ taskDefinitionArn }: { taskDefinition
               <ActionPanel>
                 {container.logConfiguration?.logDriver === "awslogs" && (
                   <Action.Push
-                    key={"view"}
                     title={"View Services"}
                     icon={Icon.Eye}
                     target={

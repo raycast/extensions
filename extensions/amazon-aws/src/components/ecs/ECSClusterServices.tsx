@@ -60,7 +60,6 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
             actions={
               <ActionPanel>
                 <Action.Push
-                  key={"view"}
                   title={"View Tasks"}
                   icon={Icon.Eye}
                   target={<ECSClusterServiceTasks service={service}></ECSClusterServiceTasks>}

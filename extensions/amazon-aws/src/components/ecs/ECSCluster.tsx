@@ -35,7 +35,6 @@ function ECSCluster({ cluster }: { cluster: Cluster }) {
       actions={
         <ActionPanel>
           <Action.Push
-            key={"view"}
             title={"View Services"}
             icon={Icon.Eye}
             target={<ECSClusterServices clusterArn={cluster.clusterArn || ""}></ECSClusterServices>}

@@ -47,7 +47,6 @@ function ECSClusterServiceTasks({ service }: { service: Service }) {
             actions={
               <ActionPanel>
                 <Action.Push
-                  key={"view"}
                   title={"View Containers"}
                   icon={Icon.Eye}
                   target={
