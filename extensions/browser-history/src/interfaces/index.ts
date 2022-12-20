@@ -7,7 +7,22 @@ export interface Preferences {
   readonly enableEdge: boolean;
   readonly enableBrave: boolean;
   readonly enableVivaldi: boolean;
-  readonly firstInResults: string;
+  readonly enableArc: boolean;
+  readonly enableOpera: boolean;
+  readonly enableIridium: boolean;
+  readonly enableOrion: boolean;
+  readonly profilePathChrome?: string;
+  readonly profilePathFirefox?: string;
+  readonly profilePathSafari?: string;
+  readonly profilePathEdge?: string;
+  readonly profilePathBrave?: string;
+  readonly profilePathVivaldi?: string;
+  readonly profilePathArc?: string;
+  readonly profilePathOpera?: string;
+  readonly profilePathIridium?: string;
+  readonly profilePathOrion?: string;
+  readonly firstInResults: SupportedBrowsers;
+  readonly defaultBrowser?: SupportedBrowsers & "Default";
 }
 
 export interface SearchResult {
@@ -30,6 +45,10 @@ export enum SupportedBrowsers {
   Edge = "Edge",
   Brave = "Brave",
   Vivaldi = "Vivaldi",
+  Arc = "Arc",
+  Opera = "Opera",
+  Iridium = "Iridium",
+  Orion = "Orion",
 }
 
 export type HistoryQueryFunction = (table: string, date_field: string, terms: string[]) => string;
