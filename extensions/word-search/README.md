@@ -3,7 +3,7 @@
 ![logo](./assets/command-icon.png)
 
 
-Search for synonyms, antonyms, adjectives, rhymes, and words with missing letters using Raycast!
+Search for synonyms, antonyms, spellings, adjectives, rhymes, and words with missing letters using Raycast!
 
 ### How to search using Word Search
 Once you've entered your text, just hit `return` on your keyboard to insert it in the foremost as well as copy it ot your clipboard.

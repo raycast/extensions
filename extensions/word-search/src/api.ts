@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { SearchType, Word } from "./types";
 import { showToast, Toast } from "@raycast/api";
+import { URL, URLSearchParams } from "url";
 
 export async function searchWords(wordToSearch: string, type: SearchType): Promise<Word[]> {
   const searchParams = new URLSearchParams({
