@@ -1,4 +1,4 @@
-// vendored from https://github.com/leodr/generate-emoji-list
+// vendored from https://github.com/leodr/generate-emoji-list and modified to read emoji data from the `assets/` folder.
 import { environment } from "@raycast/api";
 import { readFileSync } from "node:fs";
 import path from "node:path";
