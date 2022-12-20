@@ -1,7 +1,6 @@
-import { Image } from "@raycast/api";
+import { Image, environment } from "@raycast/api";
 import emojis from "node-emoji";
 import fs from "fs";
-import path from "path";
 
 type GetIconParams = {
   icon?: string;
@@ -22,7 +21,7 @@ export function getIcon({ icon, color, fallbackIcon }: GetIconParams) {
   }
 
   // Linear can add new icons from time to time so some icons may not be in the file system
-  const filePath = path.resolve(__dirname, `assets/linear-icons/${icon.toLowerCase()}.svg`);
+  const filePath = `${environment.assetsPath}/linear-icons/${icon.toLowerCase()}.svg`;
   if (fs.existsSync(filePath)) {
     return { source: filePath, tintColor: color };
   }
