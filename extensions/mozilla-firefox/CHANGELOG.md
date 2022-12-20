@@ -1,6 +1,6 @@
 # Mozilla Firefox Changelog
 
-## [Initial Version] - 2022-12-04
+## [Initial Version] - 2022-12-20
 
 - Open new tabs in Mozilla Firefox
 - Search and jump to currently open tabs in Mozilla Firefox Browser
