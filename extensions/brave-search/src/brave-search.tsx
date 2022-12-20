@@ -58,10 +58,7 @@ function useSearch() {
         isLoading: true,
       }));
       try {
-        const results = await performSearch(
-          searchText,
-          cancelRef.current.signal
-        );
+        const results = await performSearch(searchText, cancelRef.current.signal);
         setState((oldState) => ({
           ...oldState,
           results: results,
@@ -101,19 +98,13 @@ function useSearch() {
   };
 }
 
-async function performSearch(
-  searchText: string,
-  signal: AbortSignal
-): Promise<SearchResult[]> {
+async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const params = new URLSearchParams();
   params.append("q", searchText);
 
-  const response = await fetch(
-    "https://search.brave.com/api/suggest" + "?" + params.toString(),
-    {
-      method: "get",
-    }
-  );
+  const response = await fetch("https://search.brave.com/api/suggest" + "?" + params.toString(), {
+    method: "get",
+  });
 
   const json = await response.json();
 
@@ -133,9 +124,7 @@ async function performSearch(
           ...suggestions
             .map((suggestion: string) => ({
               name: suggestion,
-              url:
-                "https://search.brave.com/search?q=" +
-                encodeURIComponent(suggestion),
+              url: "https://search.brave.com/search?q=" + encodeURIComponent(suggestion),
             }))
             .filter((suggestion: string) => suggestion !== searchText),
         ]
