@@ -1,7 +1,8 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { CloudFormationClient, ListStacksCommand, StackStatus, StackSummary } from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -26,7 +27,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
-      icon={Icon.AppWindowGrid3x3}
+      icon={"aws-icons/cfo.png"}
       title={stack.StackName || ""}
       actions={
         <ActionPanel>
