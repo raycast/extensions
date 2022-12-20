@@ -8,8 +8,6 @@
 // match the expected interface, even if the JSON is valid.
 // https://app.quicktype.io
 
-import { debug } from "console";
-
 export interface PurpleSensor {
   api_version: string;
   time_stamp: number;
