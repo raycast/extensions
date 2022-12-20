@@ -10,7 +10,8 @@
     "Productivity"
   ],
   "contributors": [
-    "AnishDe12020"
+    "AnishDe12020",
+    "kud"
   ],
   "commands": [
     {
@@ -173,6 +174,13 @@
         }
       ],
       "interval": "10m"
+    },
+    {
+      "name": "unfocus-current-task",
+      "title": "Unfocus Current Task",
+      "subtitle": "Todoist",
+      "description": "Unfocus the current Todoist task.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -183,12 +191,20 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "focusFeatureWidth",
+      "type": "textfield",
+      "required": false,
+      "default": "40",
+      "title": "Max width of Focused Task",
+      "description": "Maximum width on the text in the Menu Bar."
     }
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
     "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/utils": "1.4.14",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
     "remove-markdown": "^0.5.0"
