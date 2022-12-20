@@ -1,5 +1,5 @@
-import useSWR from "swr";
 import got from "got";
+import useSWR from "swr";
 
 interface WikipediaPageDataResponse {
   title: string;

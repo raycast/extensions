@@ -1,7 +1,7 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { encodeTitle, useWikipediaPageData, useWikipediaSearch } from "./wikipedia";
 import ShowDetailsPage from "./show-details-page";
+import { encodeTitle, useWikipediaPageData, useWikipediaSearch } from "./wikipedia";
 
 export default function SearchPage() {
   const [search, setSearch] = useState("");
@@ -33,13 +33,13 @@ function PageItem({ title }: { title: string }) {
       subtitle={data?.description}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${encodeTitle(title)}`} />
-          <PushAction
+          <Action.OpenInBrowser url={`https://wikipedia.org/wiki/${encodeTitle(title)}`} />
+          <Action.Push
             icon={Icon.Window}
             title={"Show Details"}
             target={<ShowDetailsPage title={title} extract={data?.extract} description={data?.description} />}
           />
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             shortcut={{ modifiers: ["cmd"], key: "." }}
             title="Copy URL"
             content={`https://wikipedia.org/wiki/${encodeTitle(title)}`}

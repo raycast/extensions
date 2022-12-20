@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { encodeTitle } from "./wikipedia";
 
 function ShowDetailsPage(props: { title: string; extract: string | undefined; description: string | undefined }) {
@@ -20,8 +20,8 @@ function ShowDetailsPage(props: { title: string; extract: string | undefined; de
       markdown={markdown}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`} />
-          <CopyToClipboardAction
+          <Action.OpenInBrowser url={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`} />
+          <Action.CopyToClipboard
             shortcut={{ modifiers: ["cmd"], key: "." }}
             title="Copy URL"
             content={`https://wikipedia.org/wiki/${encodeTitle(props.title)}`}

@@ -1,5 +1,5 @@
-import { encodeTitle, getRandomPageTitle } from "./wikipedia";
 import { closeMainWindow, open } from "@raycast/api";
+import { encodeTitle, getRandomPageTitle } from "./wikipedia";
 
 export default async function () {
   const pageTitle = await getRandomPageTitle();
