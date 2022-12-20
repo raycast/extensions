@@ -69,3 +69,9 @@ export interface RawBookmarks {
   roots: RawBookmarkRoot;
   [key: string]: unknown;
 }
+
+export interface ExecError extends Error {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
