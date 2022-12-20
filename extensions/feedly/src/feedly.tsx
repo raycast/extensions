@@ -33,7 +33,6 @@ const Feedly = () => {
             {collection?.feeds
               ?.sort((a, b) => b.updated - a.updated)
               ?.map((feed) => {
-                console.log(feed);
                 return (
                   <List.Item
                     key={feed.id}
