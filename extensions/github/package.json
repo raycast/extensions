@@ -20,7 +20,7 @@
     {
       "name": "my-pull-requests",
       "title": "My Pull Requests",
-      "description": "List pull requests you created, particpated or you were mentioned.",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
       "mode": "view"
     },
     {
