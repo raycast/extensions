@@ -37,7 +37,7 @@ function FormatAction() {
     popToRoot();
   }
 
-  return <Action.SubmitForm icon={Icon.Checkmark} title="Escape special characters" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm icon={Icon.Checkmark} title="Escape Special Characters" onSubmit={handleSubmit} />;
 }
 
 function escapeString(originalText: string) {
