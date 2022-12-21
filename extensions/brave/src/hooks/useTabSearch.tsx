@@ -15,12 +15,11 @@ export function useTabSearch(query?: string): SearchResult<Tab> {
     let tabs = await getOpenTabs(useOriginalFavicon);
 
     if (query) {
-      tabs = tabs.filter(function (tab) {
-        return (
+      tabs = tabs.filter(
+        (tab) =>
           tab.title.toLowerCase().includes(query.toLowerCase()) ||
           tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-        );
-      });
+      );
     }
     setData(tabs);
   }, [query]);

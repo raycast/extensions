@@ -13,7 +13,8 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   const openTabs = await runAppleScript(`
       set _output to ""
-      tell application "Brave"
+      tell application "Brave Browser"
+        activate
         set _window_index to 1
         repeat with w in windows
           set _tab_index to 1
@@ -43,7 +44,7 @@ export async function openNewTab(queryText: string | null | undefined): Promise<
 
   const script =
     `
-    tell application "Brave"
+    tell application "Brave Browser"
       activate
       tell window 1
           set newTab to make new tab ` +
@@ -63,7 +64,7 @@ export async function openNewHistoryTab(url: string): Promise<boolean | string> 
   closeMainWindow({ clearRootSearch: true });
 
   const script = `
-    tell application "Brave"
+    tell application "Brave Browser"
       activate
       tell window 1
           set newTab to make new tab with properties {URL:"${url}"}
@@ -77,7 +78,7 @@ export async function openNewHistoryTab(url: string): Promise<boolean | string> 
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
-    tell application "Brave"
+    tell application "Brave Browser"
       activate
       set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
@@ -90,7 +91,7 @@ const checkAppInstalled = async () => {
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
-    do shell script "osascript -e 'exists application \\"Brave\\"'"
+    do shell script "osascript -e 'exists application \\"Brave Browser\\"'"
     set isInstalled to true
 end try
 
