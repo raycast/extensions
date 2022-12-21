@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useCachedState, usePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import ShowDetailsPage from "./show-details-page";
 import { findPagesByTitle, getPageData } from "./wikipedia";
 
 export default function SearchPage() {
   const [search, setSearch] = useState("");
-  const [language, setLanguage] = useCachedState("language", "en");
+  const [language, setLanguage] = useState("en");
   const { data, isLoading } = usePromise(findPagesByTitle, [search, language]);
 
   return (
@@ -16,7 +16,7 @@ export default function SearchPage() {
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Language" value={language} onChange={setLanguage}>
+        <List.Dropdown tooltip="Language" storeValue onChange={setLanguage}>
           <List.Dropdown.Item title="English" value="en" />
           <List.Dropdown.Item title="German" value="de" />
           <List.Dropdown.Item title="French" value="fr" />
