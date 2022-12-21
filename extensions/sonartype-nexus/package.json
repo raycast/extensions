@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sonartype-nexus",
+  "title": "Sonartype Nexus",
+  "description": "Search components in sonartype nexus",
+  "icon": "nexus.png",
+  "author": "vimsucks",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search_components",
+      "title": "Search Components",
+      "description": "Search components in your Nexus instance",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultSearchFormat",
+          "type": "textfield",
+          "required": false,
+          "title": "Default Search Format",
+          "description": "Default search specific format only",
+          "placeholder": "e.g. maven2"
+        },
+        {
+          "name": "fetchAllPage",
+          "type": "checkbox",
+          "required": false,
+          "title": "Fetch All Page",
+          "description": "Whether to fetch all search result",
+          "label": "Yes"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Nexus URL",
+      "description": "URL of your Nexus instance",
+      "placeholder": "URL of your Nexus instance e.g. https://nexus.foobar.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.8",
+    "lodash.uniq": "^4.5.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/lodash.uniq": "^4.5.7",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
