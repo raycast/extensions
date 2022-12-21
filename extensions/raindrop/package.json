@@ -32,6 +32,15 @@
       "description": "Your Raindrop.io Test Access Token.",
       "link": "https://developer.raindrop.io/v1/authentication/token",
       "placeholder": "Enter your Randrop.io Test Access token."
+    },
+    {
+      "name": "useLastCollection",
+      "type": "checkbox",
+      "required": false,
+      "title": "Collections",
+      "description": "Always use the last selected collection instead of All Bookmarks.",
+      "default": false,
+      "label": "Use always the last selected collection"
     }
   ],
   "dependencies": {

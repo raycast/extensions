@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { Preferences, BookmarksParams, BookmarksResponse } from "../types";
 
-export function useBookmarks({ collection = "0", search = "" }: BookmarksParams) {
+export function useBookmarks({ collection, search = "" }: BookmarksParams) {
   const preferences: Preferences = getPreferenceValues();
 
   const url = `https://api.raindrop.io/rest/v1/raindrops/${collection}?sort=-created&search=${
