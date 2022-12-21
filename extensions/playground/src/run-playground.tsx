@@ -13,7 +13,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TagPicker id="test" title="tag picker testsawdw" storeValue>
+      <Form.TagPicker id="test" title="tag picker testsawdwasdsd" storeValue>
         <Form.TagPicker.Item
           value="orange"
           title="orange"
