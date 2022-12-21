@@ -14,7 +14,10 @@ export default function Command() {
     revalidate: refreshSearch,
   } = useCachedPromise<(text: string) => Promise<Location[]>>(
     async (text: string) => {
-      if (!isValidPostcode(searchText)) {
+      if (text.toUpperCase() != text) {
+        setSearchText(text.toUpperCase());
+        return [];
+      } else if (!isValidPostcode(searchText)) {
         return [];
       } else {
         return findLocationsByPostcode(text);
@@ -24,7 +27,12 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Enter your postcode" throttle>
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Enter your postcode"
+    >
       <List.Section title="Locations" subtitle={locations && locations.length + ""}>
         {locations &&
           locations.map((location) => (
