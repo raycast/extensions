@@ -137,8 +137,7 @@ export default function Command() {
     <List
       onSearchTextChange={handleOnTextChange}
       enableFiltering={false}
-      navigationTitle="Convert everything"
-      searchBarPlaceholder="Type your unit here... (eg.: 22px)"
+      searchBarPlaceholder="Type your unit here... (eg.: 22px or #006699)"
     >
       <List.Section>
         {rem && (
