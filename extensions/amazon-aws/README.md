@@ -5,3 +5,5 @@
 - Easily switch between account profiles
 - Zero configuration required
 - Quick access to all services in the AWS Console
+- Quick drill-down to ECS Services, ECS Service Tasks, ECS Task Definitions, ECS Task Containers and ECS Task Containers Logs
+- Quick access to Lambda Logs

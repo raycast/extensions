@@ -108,6 +108,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     sha: mr.sha,
     milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
     draft: mr.draft,
+    has_conflicts: mr.has_conflicts === true || false,
   };
 }
 
@@ -244,6 +245,7 @@ export class MergeRequest {
   public sha = "";
   public milestone?: Milestone;
   public draft = false;
+  public has_conflicts = false;
 }
 
 export interface TodoGroup {

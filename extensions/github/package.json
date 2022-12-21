@@ -20,7 +20,7 @@
     {
       "name": "my-pull-requests",
       "title": "My Pull Requests",
-      "description": "List pull requests you created, particpated or you were mentioned.",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
       "mode": "view"
     },
     {
@@ -124,8 +124,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.45.0",
+    "@raycast/utils": "^1.4.11",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",
