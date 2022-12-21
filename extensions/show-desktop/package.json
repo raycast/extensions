@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "show-desktop",
-  "title": "Minimize all windows",
-  "description": "Minimize all windows.",
+  "title": "Minimize All Windows",
+  "description": "Minimize all windows is just one line",
   "icon": "icon.png",
   "author": "PeterZ",
   "categories": [
