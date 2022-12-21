@@ -26,7 +26,7 @@ export function WorkflowRunListItem({ workflowRun, repository, mutateList }: Wor
 
   if (workflowRun.head_branch) {
     accessories.unshift({
-      text: workflowRun.head_branch,
+      tag: workflowRun.head_branch,
     });
 
     keywords.push(workflowRun.head_branch);

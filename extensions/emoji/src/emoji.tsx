@@ -1,8 +1,7 @@
 import { ActionPanel, List, getPreferenceValues, Action } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
-import { createEmojiList } from "generate-emoji-list";
-import { UnicodeVersion } from "generate-emoji-list/dist/createEmojiList";
+import { createEmojiList, UnicodeVersion } from "./vendor/generate-emoji-list/createEmojiList";
 // @ts-expect-error no types available
 import emojiKeywords from "emojilib";
 import Fuse from "fuse.js";

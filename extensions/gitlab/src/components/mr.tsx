@@ -389,6 +389,7 @@ export function MRListItem(props: {
   const accessories: List.Item.Accessory[] = [];
   if (!getListDetailsPreference()) {
     accessories.push(
+      { icon: mr.has_conflicts ? "⚠️" : undefined, tooltip: mr.has_conflicts ? "Has Conflict" : undefined },
       { text: mr.milestone?.title },
       { date: new Date(mr.updated_at), tooltip: `Updated: ${toLongDateString(mr.updated_at)}` }
     );

@@ -38,7 +38,7 @@ export const useSpecifyHttpApi = () => {
         {
           name: 'pick',
           options: {
-            keys: ['name', 'value', 'id'],
+            keys: ['name', 'value', 'id', 'description'],
           },
         },
       ],

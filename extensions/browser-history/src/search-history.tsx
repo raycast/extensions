@@ -2,42 +2,11 @@ import { ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { ReactElement, useState } from "react";
 import { Preferences, SupportedBrowsers } from "./interfaces";
-import { ListEntries } from "./components";
-import { ActionOpenPreferences } from "./components/actions";
-
-const arrangeEntries = (entries: ReactElement[], firstInResults: string) => {
-  let firstEntries: ReactElement[] = [];
-
-  switch (firstInResults) {
-    case SupportedBrowsers.Firefox:
-      firstEntries = entries.splice(1, 1);
-      break;
-    case SupportedBrowsers.Safari:
-      firstEntries = entries.splice(2, 1);
-      break;
-    case SupportedBrowsers.Edge:
-      firstEntries = entries.splice(3, 1);
-      break;
-    case SupportedBrowsers.Brave:
-      firstEntries = entries.splice(4, 1);
-      break;
-    case SupportedBrowsers.Vivaldi:
-      firstEntries = entries.splice(5, 1);
-      break;
-  }
-  entries.unshift(firstEntries[0]);
-  return entries;
-};
+import { BrowserHistoryActions, ListEntries } from "./components";
 
 export default function Command(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
-  const enabled =
-    preferences.enableChrome ||
-    preferences.enableFirefox ||
-    preferences.enableSafari ||
-    preferences.enableEdge ||
-    preferences.enableBrave ||
-    preferences.enableVivaldi;
+  const enabled = Object.entries(preferences).filter(([key, value]) => key.startsWith("enable") && value).length > 0;
   const [searchText, setSearchText] = useState<string>();
 
   const isLoading: boolean[] = [];
@@ -45,10 +14,7 @@ export default function Command(): ReactElement {
 
   let entries = Object.entries(preferences)
     .filter(([key, val]) => key.startsWith("enable") && val)
-    .map(([key]) => {
-      const browser = key.replace("enable", "") as SupportedBrowsers;
-      return useHistorySearch(browser, searchText);
-    })
+    .map(([key], idx) => useHistorySearch(key.replace("enable", "") as SupportedBrowsers, searchText))
     .map((entry) => {
       if (entry.permissionView) {
         permissionView.push(entry.permissionView);
@@ -68,7 +34,12 @@ export default function Command(): ReactElement {
     return permissionView[0];
   }
 
-  entries = arrangeEntries(entries, preferences.firstInResults);
+  entries.sort((a, b) => a.props.title.localeCompare(b.props.title));
+
+  if (preferences.firstInResults) {
+    const firstEntry = entries.filter((e) => e.props.title === preferences.firstInResults);
+    entries = [firstEntry[0], ...entries.filter((e) => e.props.title !== preferences.firstInResults)];
+  }
 
   return (
     <List
@@ -85,7 +56,7 @@ export default function Command(): ReactElement {
           icon={"icon-small.png"}
           actions={
             <ActionPanel>
-              <ActionOpenPreferences />
+              <BrowserHistoryActions.OpenPreferences />
             </ActionPanel>
           }
         />

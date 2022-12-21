@@ -12,7 +12,8 @@ import {
   _Object,
   GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -35,7 +36,7 @@ export default function S3() {
 function S3Bucket({ bucket }: { bucket: Bucket }) {
   return (
     <List.Item
-      icon={Icon.Folder}
+      icon={"aws-icons/s3.png"}
       title={bucket.Name || ""}
       actions={
         <ActionPanel>

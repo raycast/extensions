@@ -11,3 +11,4 @@ Converts everything web related:
 - rgba
 - hsl
 - hsla
+and the shows closest Tailwind CSS color.

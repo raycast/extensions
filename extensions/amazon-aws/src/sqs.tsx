@@ -1,7 +1,8 @@
 import { GetQueueAttributesCommand, ListQueuesCommand, PurgeQueueCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function SQS() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -53,7 +54,7 @@ function SQSQueue({ queue }: { queue: string }) {
       id={queue}
       key={queue}
       title={queue.slice(queue.lastIndexOf("/") + 1)}
-      icon={Icon.Forward}
+      icon={"aws-icons/sqs.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

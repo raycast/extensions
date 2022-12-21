@@ -11,7 +11,7 @@ export type Project = {
 };
 
 export type ProjectFiles = {
-  files: File[];
+  files?: File[];
   name: string;
 };
 
