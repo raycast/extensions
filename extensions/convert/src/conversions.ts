@@ -1,11 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export interface Preferences {
-  basePixel?: number;
+  basePixel?: string;
 }
 
 const loadBasePixelsFromPreferences = () => {
-  const basePixel = Number(getPreferenceValues<Preferences>().basePixel);
+  const basePixel =
+    getPreferenceValues<Preferences>().basePixel === "" ? 16 : Number(getPreferenceValues<Preferences>().basePixel);
   if (isNaN(basePixel)) {
     return 16;
   }

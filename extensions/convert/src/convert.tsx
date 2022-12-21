@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
+import { findClosestColor } from "./colors";
 
 import {
   REMtoPX,
@@ -32,6 +33,8 @@ export default function Command() {
   const [rgba, setRGBA] = useState<number[] | null>(null);
   const [hsl, setHSL] = useState<number[] | null>(null);
   const [hsla, setHSLA] = useState<number[] | null>(null);
+  const [closestColor, setClosestColor] = useState<{ name: string; hex: string } | null>(null);
+  const [input, setInput] = useState("");
 
   const handleOnTextChange = (value = "") => {
     setPX(null);
@@ -43,7 +46,9 @@ export default function Command() {
     setRGBA(null);
     setHSL(null);
     setHSLA(null);
+    setClosestColor(null);
     if (value === "") return;
+    setInput(value);
     // check what input is
 
     // check if input is rem
@@ -55,7 +60,7 @@ export default function Command() {
     }
 
     // check if input is px
-    const pxMatch = value.match(/(\d+)(\spx|px)/);
+    const pxMatch = value.match(/(\d+|^.\d+|^,\d+|^\d+,\d+|^\d+.\d+)(\spx|px)/);
     if (pxMatch) {
       console.log("its a px");
       setREM(PXtoREM(Number(pxMatch[1])));
@@ -81,8 +86,10 @@ export default function Command() {
         setHSLA(HEXtoHSLA(value));
         setHSL(HEXtoHSL(hexMatch[1]));
       } else {
-        setRGB(HEXtoRGB(value));
+        const hexToRgbResult = HEXtoRGB(value);
+        setRGB(hexToRgbResult);
         setHSL(HEXtoHSL(value));
+        setClosestColor(findClosestColor(hexToRgbResult[0], hexToRgbResult[1], hexToRgbResult[2]));
       }
     }
 
@@ -127,25 +134,28 @@ export default function Command() {
     <List
       onSearchTextChange={handleOnTextChange}
       enableFiltering={false}
-      searchBarPlaceholder="Type your unit here... (eg.: 22px)"
+      navigationTitle="Convert everything"
+      searchBarPlaceholder="Type your unit here..."
     >
       <List.Section>
         {rem && (
           <List.Item
             title={`${rem}rem`}
+            accessories={[{ text: "to rem" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`${rem}rem`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`${rem}rem`} />
               </ActionPanel>
             }
           />
         )}
-        {px && (
+        {pt && (
           <List.Item
             title={`${px}px`}
+            accessories={[{ text: "to px" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`${px}px`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`${px}px`} />
               </ActionPanel>
             }
           />
@@ -153,9 +163,10 @@ export default function Command() {
         {pt && (
           <List.Item
             title={`${pt}pt`}
+            accessories={[{ text: "to pt" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`${pt}pt`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`${pt}pt`} />
               </ActionPanel>
             }
           />
@@ -164,9 +175,10 @@ export default function Command() {
           <List.Item
             title={hex}
             icon={{ source: Icon.CircleFilled, tintColor: hex }}
+            accessories={[{ text: "to hex" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={hex} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={hex} />
               </ActionPanel>
             }
           />
@@ -175,9 +187,10 @@ export default function Command() {
           <List.Item
             title={hexa}
             icon={{ source: Icon.CircleFilled, tintColor: hexa }}
+            accessories={[{ text: "to hexa" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={hexa} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={hexa} />
               </ActionPanel>
             }
           />
@@ -186,9 +199,10 @@ export default function Command() {
           <List.Item
             title={`rgb(${rgb.join(", ")})`}
             icon={{ source: Icon.CircleFilled, tintColor: `rgb(${rgb.join(", ")})` }}
+            accessories={[{ text: "to rgb" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`rgb(${rgb.join(", ")})`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`rgb(${rgb.join(", ")})`} />
               </ActionPanel>
             }
           />
@@ -197,9 +211,10 @@ export default function Command() {
           <List.Item
             title={`rgba(${rgba.join(", ")})`}
             icon={{ source: Icon.CircleFilled, tintColor: `rgba(${rgba.join(", ")})` }}
+            accessories={[{ text: "to rgba" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`rgba(${rgba.join(", ")})`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`rgba(${rgba.join(", ")})`} />
               </ActionPanel>
             }
           />
@@ -208,9 +223,10 @@ export default function Command() {
           <List.Item
             title={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`}
             icon={{ source: Icon.CircleFilled, tintColor: `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)` }}
+            accessories={[{ text: "to hsl" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`} />
+                <Action.CopyToClipboard title="Copy to clipboard" content={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`} />
               </ActionPanel>
             }
           />
@@ -219,9 +235,29 @@ export default function Command() {
           <List.Item
             title={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
             icon={{ source: Icon.CircleFilled, tintColor: `hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})` }}
+            accessories={[{ text: "to hsla" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`} />
+                <Action.CopyToClipboard
+                  title="Copy to clipboard"
+                  content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+        {closestColor && (
+          <List.Item
+            title={input !== closestColor.hex ? closestColor.hex : closestColor.name}
+            subtitle={input !== closestColor.hex ? closestColor.name : ""}
+            icon={{ source: Icon.CircleFilled, tintColor: closestColor.hex }}
+            accessories={[{ text: input !== closestColor.hex ? "closest Tailwind color" : "Tailwind color" }]}
+            actions={
+              <ActionPanel title="Copy">
+                <Action.CopyToClipboard
+                  title="Copy to clipboard"
+                  content={input !== closestColor.hex ? closestColor.hex : closestColor.name}
+                />
               </ActionPanel>
             }
           />
