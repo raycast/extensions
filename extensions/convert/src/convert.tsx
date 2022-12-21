@@ -144,18 +144,18 @@ export default function Command() {
             accessories={[{ text: "to rem" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`${rem}rem`} />
+                <Action.CopyToClipboard content={`${rem}rem`} />
               </ActionPanel>
             }
           />
         )}
-        {pt && (
+        {px && (
           <List.Item
             title={`${px}px`}
             accessories={[{ text: "to px" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`${px}px`} />
+                <Action.CopyToClipboard content={`${px}px`} />
               </ActionPanel>
             }
           />
@@ -166,7 +166,7 @@ export default function Command() {
             accessories={[{ text: "to pt" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`${pt}pt`} />
+                <Action.CopyToClipboard content={`${pt}pt`} />
               </ActionPanel>
             }
           />
@@ -178,7 +178,7 @@ export default function Command() {
             accessories={[{ text: "to hex" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={hex} />
+                <Action.CopyToClipboard content={hex} />
               </ActionPanel>
             }
           />
@@ -190,7 +190,7 @@ export default function Command() {
             accessories={[{ text: "to hexa" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={hexa} />
+                <Action.CopyToClipboard content={hexa} />
               </ActionPanel>
             }
           />
@@ -202,7 +202,7 @@ export default function Command() {
             accessories={[{ text: "to rgb" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`rgb(${rgb.join(", ")})`} />
+                <Action.CopyToClipboard content={`rgb(${rgb.join(", ")})`} />
               </ActionPanel>
             }
           />
@@ -214,7 +214,7 @@ export default function Command() {
             accessories={[{ text: "to rgba" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`rgba(${rgba.join(", ")})`} />
+                <Action.CopyToClipboard content={`rgba(${rgba.join(", ")})`} />
               </ActionPanel>
             }
           />
@@ -226,7 +226,7 @@ export default function Command() {
             accessories={[{ text: "to hsl" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy to clipboard" content={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`} />
+                <Action.CopyToClipboard content={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`} />
               </ActionPanel>
             }
           />
@@ -239,7 +239,6 @@ export default function Command() {
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard
-                  title="Copy to clipboard"
                   content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
                 />
               </ActionPanel>
@@ -255,7 +254,6 @@ export default function Command() {
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard
-                  title="Copy to clipboard"
                   content={input !== closestColor.hex ? closestColor.hex : closestColor.name}
                 />
               </ActionPanel>
