@@ -14,7 +14,6 @@
     {
       "name": "escape-regexp-characters",
       "title": "Escape RegExp Characters",
-      "subtitle": "escape-string-regexp",
       "description": "Escape RegExp special characters.",
       "mode": "view"
     }
