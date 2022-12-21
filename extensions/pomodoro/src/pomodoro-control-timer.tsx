@@ -55,7 +55,7 @@ const ActionsList = () => {
             icon={Icon.Stop}
             actions={
               <ActionPanel>
-                <Action onAction={createAction(resetInterval)} title={"Stop"} />
+                <Action onAction={createAction(resetInterval)} title={"Reset"} />
               </ActionPanel>
             }
           />
