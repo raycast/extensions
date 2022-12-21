@@ -21,9 +21,7 @@
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "@raycast/utils": "^1.4.8",
-    "axios": "^1.2.1",
-    "url-join": "^5.0.0",
-    "vkbeautify": "^0.99.3"
+    "axios": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
