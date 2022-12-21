@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast, Color } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Detail, useNavigation, Toast, Color, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -24,7 +24,13 @@ export default function Command() {
 
   return (
     <Form
-      actions={text && <ActionPanel>{<Action.SubmitForm onSubmit={handleSubmit} title="Check Email" />}</ActionPanel>}
+      actions={
+        text && (
+          <ActionPanel>
+            {<Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Envelope} title="Check Email" />}
+          </ActionPanel>
+        )
+      }
     >
       <Form.TextArea
         id="text"
@@ -38,7 +44,6 @@ export default function Command() {
 }
 
 const Details: React.FC<Result> = (r) => {
-  const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [markdown, setMarkdown] = useState("");
   const [jsonString, setJsonString] = useState("");
@@ -69,18 +74,18 @@ const Details: React.FC<Result> = (r) => {
     <Detail
       markdown={markdown}
       isLoading={isLoading}
-      navigationTitle="Check Email"
+      navigationTitle="Email Result"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Go Back" onSubmit={pop} />
           <Action.CopyToClipboard title="Copy JSON Result" content={jsonString} />
+          <Action.OpenInBrowser title="Sponsor Project" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="JSON format result"
-            text={{ color: Color.Blue, value: "provided, see more in Actions Panel" }}
+            text={{ color: Color.Blue, value: "Provided, see more in Actions Panel" }}
           />
           <Detail.Metadata.Link
             title="API"
@@ -91,12 +96,6 @@ const Details: React.FC<Result> = (r) => {
             title="Acknowledgement"
             target="https://github.com/AfterShip/email-verifier"
             text="Aftership/email-verifier"
-          />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="❤️ Sponsor this project"
-            target="https://ko-fi.com/herbertlu"
-            text="ko-fi.com/herbertlu"
           />
         </Detail.Metadata>
       }
