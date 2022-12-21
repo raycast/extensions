@@ -108,6 +108,7 @@ export default function Command() {
       } else {
         setHEX(RGBtoHEX([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
         setHSL(RGBtoHSL([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
+        setClosestColor(findClosestColor(+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]));
       }
     }
 
@@ -116,7 +117,7 @@ export default function Command() {
       /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
     );
     if (hslMatch) {
-      console.log("its a hsl", hslMatch);
+      console.log("its a hsl");
       // if hsl color has alpha
       if (hslMatch.groups && hslMatch.groups.alpha) {
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
@@ -124,8 +125,10 @@ export default function Command() {
         setRGB(HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
         setRGBA(HSLtoRGBA([+hslMatch[2], +hslMatch[4], +hslMatch[7], +hslMatch.groups.alpha]));
       } else {
+        const hslToRgbResult = HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
-        setRGB(HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
+        setRGB(hslToRgbResult);
+        setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
       }
     }
   };
@@ -245,10 +248,15 @@ export default function Command() {
         )}
         {closestColor && (
           <List.Item
-            title={input !== closestColor.hex ? closestColor.hex : closestColor.name}
-            subtitle={input !== closestColor.hex ? closestColor.name : ""}
+            title={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.hex : closestColor.name}
+            subtitle={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.name : ""}
             icon={{ source: Icon.CircleFilled, tintColor: closestColor.hex }}
-            accessories={[{ text: input !== closestColor.hex ? "closest Tailwind color" : "Tailwind color" }]}
+            accessories={[
+              {
+                text:
+                  input !== closestColor.hex && hex !== closestColor.hex ? "closest Tailwind color" : "Tailwind color",
+              },
+            ]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={input !== closestColor.hex ? closestColor.hex : closestColor.name} />
