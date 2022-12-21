@@ -48,6 +48,14 @@
       "description": "KeepassXC.app",
       "placeholder": "Select KeepassXC.app",
       "default": "/Applications/KeePassXC.app"
+    },
+    {
+      "name": "yubikey",
+      "type": "textfield",
+      "required": false,
+      "title": "Yubikey Slot",
+      "description": "Yubikey slot and optional serial used to",
+      "placeholder": "slot[:serial]"
     }
   ],
   "dependencies": {

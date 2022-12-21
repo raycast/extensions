@@ -13,6 +13,7 @@ interface Preference {
   database: string;
   dbPassword: string;
   keyFile: string;
+  yubikey: string;
 }
 
 const getKeepassXCVersion = () =>
@@ -38,17 +39,22 @@ const database = preferences.database;
 const dbPassword = preferences.dbPassword;
 // Key File for keepass database
 const keyFile = preferences.keyFile;
+// Yubikey Slot for keepass database
+const yubikey = preferences.yubikey;
 // keepass-cli executable path
 const keepassxcCli = path.join(preferences.keepassxcRootPath.path, "Contents/MacOS/keepassxc-cli");
 // search entry command, since version 2.7 command 'locate' has been renamed to 'search'
 const getSearchEntryCommand = async () => ((await getKeepassXCVersion()) >= 2.7 ? "search" : "locate");
 const keyFileOption = keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
+const yubikeyOption = yubikey != "" && yubikey != null ? ["-y", `${yubikey}`] : [];
 // cli options
-const cliOptions = [...keyFileOption, "-q", "-a"];
+const cliOptions = [...keyFileOption,...yubikeyOption, "-q", "-a"];
 const entryFilter = (entryStr: string) => {
   return entryStr
     .split("\n")
     .map((f: string) => f.trim())
+    // remove first character if it's '/' of each entry
+    .map((f: string) => f.replace(/^\//, ""))
     .filter(
       (f: string) =>
         f !== undefined &&
@@ -67,8 +73,8 @@ const loadEntries = () =>
   getSearchEntryCommand().then(
     (cmd) =>
       new Promise<string[]>((resolve, reject) => {
-        const search_keywrod = cmd === "search" ? "" : "/";
-        const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, "-q", `${database}`, search_keywrod]);
+        const search_keyword = cmd === "search" ? "" : "/";
+        const cli = spawn(`${keepassxcCli}`, [cmd, ...keyFileOption, ...yubikeyOption, "-q", `${database}`, search_keyword]);
         cli.stdin.write(`${dbPassword}\n`);
         cli.stdin.end();
         cli.on("error", reject);
@@ -80,7 +86,7 @@ const loadEntries = () =>
         // finish when all chunck has been collected
         cli.stdout.on("end", () => {
           resolve(entryFilter(chuncks.join("").toString()));
-        });
+        }); 
       })
   );
 
@@ -93,7 +99,7 @@ const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
 
 const getPassword = (entry: string) =>
   new Promise<string>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`, `${entry}`]);
+    const cli = spawn(`${keepassxcCli}`, ["show", ...cliOptions, "Password", `${database}`,`${entry}`]);
     cli.stdin.write(`${dbPassword}\n`);
     cli.stdin.end();
     cli.on("error", reject);
@@ -135,7 +141,7 @@ const pastePassword = async (entry: string) => {
 };
 
 const copyPassword = async (entry: string) =>
-  getPassword(entry).then((password) => {
+getPassword(entry).then((password) => {
     showHUD("Password has been Copied to Clipboard");
     return protectedCopy(password).then(() => password);
   });
