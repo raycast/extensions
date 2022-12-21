@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "screenshot",
-  "title": "Screen Shot",
+  "title": "Screenshot",
   "description": "Capture your screen with macOS native tools",
   "icon": "command-icon.png",
   "author": "Aayush9029",
@@ -10,7 +10,7 @@
     {
       "name": "all-in-one",
       "title": "All in One",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture and Crop All in One",
       "icon": "all-in-one.png",
       "mode": "no-view"
@@ -18,7 +18,7 @@
     {
       "name": "capture-area",
       "title": "Capture Area",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture Area of Screen",
       "icon": "capture-area.png",
       "mode": "no-view"
@@ -26,7 +26,7 @@
     {
       "name": "capture-window",
       "title": "Capture Window",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture App Window",
       "icon": "capture-window.png",
       "mode": "no-view"
@@ -34,7 +34,7 @@
     {
       "name": "capture-screen",
       "title": "Capture Screen",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture Screen",
       "icon": "capture-fullscreen.png",
       "mode": "no-view"
@@ -42,7 +42,7 @@
     {
       "name": "capture-timer",
       "title": "Capture Timer",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture Screen after a Timer (default 5 seconds)",
       "icon": "capture-timer.png",
       "mode": "no-view",
@@ -58,7 +58,7 @@
     {
       "name": "capture-to-clipboard",
       "title": "Capture to Clipboard",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture Screen to Clipboard",
       "icon": "clipboard.png",
       "mode": "no-view"
@@ -66,7 +66,7 @@
     {
       "name": "annotate",
       "title": "Capture and Annotate",
-      "subtitle": "Screen Shot",
+      "subtitle": "Screenshot",
       "description": "Capture Screen and Annotate",
       "icon": "annotate.png",
       "mode": "no-view"
