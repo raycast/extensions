@@ -51,7 +51,7 @@ function ApplicationsListItem(props: { application: Application }) {
                 await closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Suspended });
                 if (selectedItems.length != 0) {
                   for (let i = 0; i < selectedItems.length; i++) {
-                    await open(selectedItems[i].path.replace(/"/g, '\\"'), application.bundleId);
+                    await open(selectedItems[i].path, application.bundleId);
                   }
                 } else {
                   await showHUD("⚠️  No Finder selection to open.");
