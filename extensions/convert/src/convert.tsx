@@ -135,7 +135,7 @@ export default function Command() {
       onSearchTextChange={handleOnTextChange}
       enableFiltering={false}
       navigationTitle="Convert everything"
-      searchBarPlaceholder="Type your unit here..."
+      searchBarPlaceholder="Type your unit here... (eg.: 22px)"
     >
       <List.Section>
         {rem && (
@@ -238,9 +238,7 @@ export default function Command() {
             accessories={[{ text: "to hsla" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard
-                  content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
-                />
+                <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`} />
               </ActionPanel>
             }
           />
@@ -253,9 +251,7 @@ export default function Command() {
             accessories={[{ text: input !== closestColor.hex ? "closest Tailwind color" : "Tailwind color" }]}
             actions={
               <ActionPanel title="Copy">
-                <Action.CopyToClipboard
-                  content={input !== closestColor.hex ? closestColor.hex : closestColor.name}
-                />
+                <Action.CopyToClipboard content={input !== closestColor.hex ? closestColor.hex : closestColor.name} />
               </ActionPanel>
             }
           />
