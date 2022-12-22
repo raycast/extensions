@@ -53,7 +53,7 @@ export function SaveToLast(props: SaveToLastProps) {
             </ActionPanel.Section>
 
             <ActionPanel.Section>
-                <Action.OpenInBrowser url={DONATION_URL} title={"Buy us a coffee"} icon="bmcbrand/bmc-logo.svg" />
+                <Action.OpenInBrowser url={DONATION_URL} title={"Buy Us a Coffee"} icon="bmcbrand/bmc-logo.svg" />
             </ActionPanel.Section>
         </ActionPanel>
     )
@@ -63,12 +63,6 @@ export function SaveToLast(props: SaveToLastProps) {
             <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} />
 
             {lastPageSection}
-
-            <Form.Separator />
-            <Form.Description
-                text="If you like this extension, consider buying us a coffee by clicking <Actions> below.
-Thank you 🤝"
-            />
         </Form>
     )
 }

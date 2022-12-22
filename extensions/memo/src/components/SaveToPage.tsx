@@ -61,7 +61,7 @@ export function SaveToPage(props: HomeProps) {
             </ActionPanel.Section>
 
             <ActionPanel.Section>
-                <Action.OpenInBrowser url={DONATION_URL} title={"Buy us a coffee"} icon="bmcbrand/bmc-logo.svg" />
+                <Action.OpenInBrowser url={DONATION_URL} title={"Buy Us a Coffee"} icon="bmcbrand/bmc-logo.svg" />
             </ActionPanel.Section>
         </ActionPanel>
     )
@@ -91,13 +91,6 @@ export function SaveToPage(props: HomeProps) {
                     id={"url_title"}
                 />
             )}
-
-            <Form.Separator />
-
-            <Form.Description
-                text="If you like this extension, consider buying us a coffee by clicking <Actions> below.
-Thank you 🤝"
-            />
         </Form>
     )
 }
