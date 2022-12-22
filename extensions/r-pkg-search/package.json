@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "r-pkg-search",
-  "title": "Search for R Packages on r-pkg.org",
-  "description": "Search for and lookup information about R packages using r-pkg.org.",
+  "title": "Search R Packages",
+  "description": "Search and lookup information about R packages using r-pkg.org.",
   "subtitle": "r-pkg.org",
   "icon": "r-pkg.png",
   "author": "grrrck",
