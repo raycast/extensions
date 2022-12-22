@@ -15,4 +15,7 @@ rsync -av "$SCRIPT_DIR"/. "$FORK_DIR"/ \
   --exclude .fleet \
   --exclude node_modules
 
+rm -rf "$FORK_DIR/package.json"
+mv "$FORK_DIR"/package.live.json "$FORK_DIR"/package.json
+
 echo "DONE"

@@ -9,7 +9,9 @@ import { Detail } from "@raycast/api"
 import { ApiImpl as NotionApi } from "../notion/api"
 import { NotionAdapter } from "../core/adapters"
 import { SaveToPage } from "./SaveToPage"
-import { LastSelectedPage, SaveToLast } from "./SaveToLast"
+import { SaveToLast } from "./SaveToLast"
+import { Empty } from "./Empty"
+import { Page } from "../core/dm"
 
 export enum BootstrapFlow {
     SelectCustomPage,
@@ -21,17 +23,33 @@ export type BootstrapProps = {
 }
 
 /**
+ * if === undefined: initializing
+ * if typeof 'string': load finished
+ */
+type CopiedTextState = undefined | string
+
+/**
+ * if === undefined: initializing
+ * if instanceof NotionApiToken: authorized
+ * if instanceof Error: not authorized
+ */
+type NotionTokenState = undefined | NotionApiToken | Error
+
+/**
+ * undefined: initializing
+ * LastSelectedPage: the page exists
+ * null: no last selected page
+ */
+type LastSelectedPageState = undefined | Page | null
+
+/**
  * NewApp is a constructor. It set up services and data to be ready
  * to construct the extension main pages.
  */
 export default function NewApp(props: BootstrapProps) {
-    const [isLoadingText, setIsLoadingText] = useState<boolean>()
-    const [isLoadingOAuth, setIsLoadingOAuth] = useState<boolean>()
-    const [text, setText] = useState<string>("")
-    const [notionToken, setNotionToken] = useState<NotionApiToken>()
-    const [isGettingLastSelectedPage, setIsGettingLastSelectedPage] = useState<boolean>()
-    const [lastSelectedPage, setLastSelectedPage] = useState<LastSelectedPage>()
-    const [err, setErr] = useState<Error>()
+    const [copiedText, setCopiedText] = useState<CopiedTextState>(undefined)
+    const [notionToken, setNotionToken] = useState<NotionTokenState>(undefined)
+    const [lastSelectedPage, setLastSelectedPage] = useState<LastSelectedPageState>(undefined)
 
     const raycastApi = new RaycastApi()
     const raycastAdapter = NewRaycastAdapter(raycastApi)
@@ -40,26 +58,19 @@ export default function NewApp(props: BootstrapProps) {
 
     useEffect(() => {
         ;(async () => {
-            if (notionToken) {
-                console.info("notion already authorized")
-                return
-            }
-
+            console.debug("authorizing")
             const toast = await raycastAdapter.showLoading("authorizing")
-            setIsLoadingOAuth(true)
 
             const token = await authService.authorizeNotion()
-            setIsLoadingOAuth(false)
             if (token instanceof Error) {
                 console.error(token)
-                setErr(token)
                 raycastAdapter.setToastError(toast, token)
             } else {
                 console.info("notion authorization successful")
-
-                setNotionToken(token)
                 raycastAdapter.setToastSuccess(toast, "")
             }
+
+            setNotionToken(token)
         })()
     }, [])
 
@@ -71,21 +82,19 @@ export default function NewApp(props: BootstrapProps) {
             if (!saver) {
                 return
             }
+            console.debug("getting copied text")
 
-            setIsLoadingText(true)
             const toast = await raycastAdapter.showLoading("getting copied content")
 
             const text = await saver.getCopiedText()
             if (text instanceof Error) {
                 console.error(text)
-                setErr(text)
-                setIsLoadingText(false)
                 await raycastAdapter.setToastError(toast, text)
+                setCopiedText("")
                 return
             }
 
-            setText(text)
-            setIsLoadingText(false)
+            setCopiedText(text)
             await raycastAdapter.setToastSuccess(toast, "")
         }
 
@@ -95,22 +104,22 @@ export default function NewApp(props: BootstrapProps) {
     useEffect(() => {
         async function doGet() {
             if (props.flow != BootstrapFlow.SelectLastPage) {
+                setLastSelectedPage(null)
                 return
             }
+            console.debug("getting last selected page")
 
             const toast = await raycastAdapter.showLoading("getting last selected page")
-            setIsGettingLastSelectedPage(true)
 
             const page = await raycastAdapter.getPersistedLastSelectedPage()
             if (page instanceof Error) {
                 console.error(`${page}: save_to_last`)
                 await raycastAdapter.setToastError(toast, new Error("last selected page not found"))
-                setIsGettingLastSelectedPage(false)
+                setLastSelectedPage(null)
                 return
             }
 
             setLastSelectedPage(page)
-            setIsGettingLastSelectedPage(false)
             await raycastAdapter.setToastSuccess(toast, "")
         }
 
@@ -124,32 +133,36 @@ export default function NewApp(props: BootstrapProps) {
     // throw error:
     // "Rendered more hooks than during the previous render."
 
-    if (!notionToken) {
+    if(notionToken === undefined) {
+        return <Empty/>
+    } else if (notionToken instanceof Error) {
         return <Detail markdown={"Not authorized for Notion. Please try again."} />
     }
+
     const notionApi = new NotionApi(notionToken)
     const notionAdapter = new NotionAdapter(notionApi)
     saver = new Saver(notionAdapter, raycastAdapter, webAdapter)
 
-    if (err) {
-        return <Detail markdown={`${err}`} />
-    }
-    if (isLoadingText || isGettingLastSelectedPage) {
-        return <Detail markdown={"Please wait...⏳"} />
-    }
-    if (isLoadingOAuth) {
-        return <Detail markdown={"Authorizing...⏳"} />
+    if(copiedText === undefined) {
+        return <Empty/>
     }
 
-    if (props.flow === BootstrapFlow.SelectLastPage && lastSelectedPage) {
+    if(lastSelectedPage === undefined) {
+        return <Empty/>
+    }
+
+    if (props.flow === BootstrapFlow.SelectLastPage && lastSelectedPage instanceof Page) {
+        console.info("flow: ", BootstrapFlow.SelectLastPage)
         return (
             <SaveToLast
                 saver={saver}
-                copiedText={text}
+                copiedText={copiedText}
                 lastSelectedPage={lastSelectedPage}
                 raycastAdapter={raycastAdapter}
             />
         )
     }
-    return <SaveToPage copiedText={text} saver={saver} setErr={setErr} raycastAdapter={raycastAdapter} />
+
+    console.info("flow: ", BootstrapFlow.SelectCustomPage)
+    return <SaveToPage copiedText={copiedText} saver={saver} raycastAdapter={raycastAdapter} />
 }

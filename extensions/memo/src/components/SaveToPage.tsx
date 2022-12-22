@@ -7,23 +7,24 @@ import { RaycastAdapter } from "../adapters/raycast/adapter"
 
 export type HomeProps = {
     copiedText: string
-    setErr: (err: Error) => void
     saver: Saver
     raycastAdapter: RaycastAdapter
 }
 
 export function SaveToPage(props: HomeProps) {
     const [urlTitle, setURLTitle] = useState<string>("")
-    const [isParsingText, setIsParsingText] = useState<boolean>()
+    const [isParsingText, setIsParsingText] = useState<boolean>(true)
     const [text, setText] = useState<string>(props.copiedText)
 
     useEffect(() => {
         async function parse() {
+            setIsParsingText(true)
+
             if (!text) {
+                setIsParsingText(false)
                 return
             }
 
-            setIsParsingText(true)
             const toast = await props.raycastAdapter.showLoading("parsing")
 
             const url = await props.saver.getURLTitle(text)
@@ -67,12 +68,19 @@ export function SaveToPage(props: HomeProps) {
 
     return (
         <Form isLoading={isParsingText} actions={actions}>
-            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} />
+            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} autoFocus={false}/>
 
             <Form.Separator />
 
+
             {isParsingText ? (
-                <Form.Description text={"Parsing... ⏳"} />
+                <Form.TextArea
+                    autoFocus={true}
+                    title={"Page Title"}
+                    value={urlTitle}
+                    placeholder={"Untitled"}
+                    id={"url_title"}
+                />
             ) : (
                 <Form.TextArea
                     autoFocus={true}
