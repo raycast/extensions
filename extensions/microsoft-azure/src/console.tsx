@@ -15,9 +15,9 @@ export default function Console() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter services by name...">
       {data &&
-        Object.entries(data).map(([category, services]) => (
+        Object.keys(data).map((category) => (
           <List.Section key={category} title={category}>
-            {services.map((service: AzureService, idx: number) => (
+            {data[category].map((service: AzureService, idx: number) => (
               <List.Item
                 key={`${service.name}${idx}`}
                 title={service.name}
