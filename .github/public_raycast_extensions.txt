@@ -12,3 +12,4 @@ resmo
 ploi
 vercast
 ohdear
+devutils
