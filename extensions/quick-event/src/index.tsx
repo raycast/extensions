@@ -18,7 +18,7 @@ export default function Command() {
     `;
 
     if (focusOnComplete) {
-      script += `Calendar.viewCalendar({at: date})`
+      script += `Calendar.viewCalendar({at: date})`;
     }
 
     executeJxa(`
