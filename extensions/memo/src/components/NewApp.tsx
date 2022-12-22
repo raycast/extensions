@@ -133,8 +133,8 @@ export default function NewApp(props: BootstrapProps) {
     // throw error:
     // "Rendered more hooks than during the previous render."
 
-    if(notionToken === undefined) {
-        return <Empty/>
+    if (notionToken === undefined) {
+        return <Empty />
     } else if (notionToken instanceof Error) {
         return <Detail markdown={"Not authorized for Notion. Please try again."} />
     }
@@ -143,12 +143,12 @@ export default function NewApp(props: BootstrapProps) {
     const notionAdapter = new NotionAdapter(notionApi)
     saver = new Saver(notionAdapter, raycastAdapter, webAdapter)
 
-    if(copiedText === undefined) {
-        return <Empty/>
+    if (copiedText === undefined) {
+        return <Empty />
     }
 
-    if(lastSelectedPage === undefined) {
-        return <Empty/>
+    if (lastSelectedPage === undefined) {
+        return <Empty />
     }
 
     if (props.flow === BootstrapFlow.SelectLastPage && lastSelectedPage instanceof Page) {

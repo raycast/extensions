@@ -68,10 +68,9 @@ export function SaveToPage(props: HomeProps) {
 
     return (
         <Form isLoading={isParsingText} actions={actions}>
-            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} autoFocus={false}/>
+            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} autoFocus={false} />
 
             <Form.Separator />
-
 
             {isParsingText ? (
                 <Form.TextArea
