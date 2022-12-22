@@ -45,7 +45,7 @@ const stateStyles: StateStyles = {
   },
 };
 
-const seperator = " · ";
+const seperator = "·";
 const newline = "\n";
 const numShow = 12;
 
@@ -92,7 +92,7 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
           return (
             <MenuBarExtra.Item
               title={commitMessageTruncated}
-              subtitle={seperator + deploymentDateFromNow + newline + deploymentName + seperator + branchName}
+              subtitle={`${seperator} ${deploymentDateFromNow}${newline}${deploymentName} ${seperator} ${branchName}`}
               shortcut={
                 index < 9
                   ? {
