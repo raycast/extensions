@@ -1,5 +1,47 @@
 # Hypersonic Changelog
 
+## [2.0.1] - 2022-12-08
+
+#### New
+
+- Added an action that lets users share a task after creating it.
+- Added an action that lets users to open a task after creating it.
+
+#### Updated
+
+- Changed toast feedback to hud feedback after a successful work sharing action.
+- Fixed a bug that caused the extension to crash when the assigned user didn't exist in the workspace.
+- Fixed a bug that caused the database fetch to crash when a database lacked a title property.
+
+## [2.0.0] - 2022-12-01
+
+#### New
+
+- You can now create todos with natural language. Including tags, projects, assignees.
+- Support for multiple database relationships.
+- Database settings view to improve set up.
+- Combine filters by projects, tags and assignees.
+- Added instant refresh to menu bar command.
+- Copy Task URL action.
+- Mark as not started action.
+- Add Project to a task action.
+- Assign user to a task action.
+
+#### Updated
+
+- Modify task date using natural language.
+- Replaced 'Remind me' action for 'Due Date'.
+- Menu bar command to work with filters.
+- Menu bar command background fetch time from 1 to 5 minutes.
+- Share your work action to work with filters.
+- Conditional Open detail action if Notion is installed.
+- Conditional Open Notion database action if Notion is installed.
+- Hypersonic icon.
+
+#### Deprecated
+
+- Move command
+
 ## [0.0.3] - 2022-09-15
 
 - Update Raycast to "@raycast/api": "1.39.2"

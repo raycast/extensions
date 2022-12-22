@@ -1,6 +1,6 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
-import { cityName, latitude, longitude, showForecast, showLocation, showSun } from "./weather-utils";
+import { cityName, latitude, longitude, showForecast, showLocation, showSun, windSpeedUnits } from "./weather-utils";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Open-Meteo Weather",
@@ -20,12 +20,34 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export function getUnits() {
   let tempUint: string;
-  const windUint = "Km/h";
+  let windUint: string;
   const { tempUnits } = getPreferenceValues<Preferences>();
   if (tempUnits === "celsius") {
     tempUint = "℃";
   } else {
     tempUint = "℉";
+  }
+  switch (windSpeedUnits) {
+    case "kmh": {
+      windUint = "Km/h";
+      break;
+    }
+    case "ms": {
+      windUint = "m/s";
+      break;
+    }
+    case "mph": {
+      windUint = "Mph";
+      break;
+    }
+    case "kn": {
+      windUint = "Knots";
+      break;
+    }
+    default: {
+      windUint = "Km/h";
+      break;
+    }
   }
 
   return { tempUnit: tempUint, windUint: windUint };

@@ -2,6 +2,11 @@
 
 ## [Enhancements] - 2022-11-24
 
+- Fix live results for simultaneous matches
+- Remove loading indicator for goals
+
+## [Enhancements] - 2022-11-24
+
 - Show live time and score for current match
 - Reversed the list for previous matches
 - Added animated GIF for empty view

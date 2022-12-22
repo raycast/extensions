@@ -1,5 +1,29 @@
 # Amazon AWS Changelog
 
+## [ECS Command] - 2022-12-14
+- Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
+- Added support for viewing Lambda logs from within Raycast or the browser
+
+## [Secrets Manager Command] - 2022-12-13
+
+- Add "Secrets Manager" command ([#3865](https://github.com/raycast/extensions/pull/3843))
+
+## [CloudWatch & SSM Command] - 2022-12-10
+
+- Add "CloudWatch Log Groups" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+- Add "SSM Parameters" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+
+## [UI/UX Tweaks & Fixes] - 2022-12-09
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Cleanup codebase and improve code readability ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Fix two minor bugs related to data fetching ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Update readme, screenshots and copy ([#3770](https://github.com/raycast/extensions/pull/3770))
+
+## [Support AWS Profile Switch] - 2022-11-30
+
+Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
 ## [S3 Command] - 2022-11-18
 
 Added a new command to list S3 buckets and objects ([#3589](https://github.com/raycast/extensions/pull/3589))

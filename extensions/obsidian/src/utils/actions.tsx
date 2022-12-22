@@ -214,6 +214,7 @@ export function ShowMentioningNotesAction(props: { vault: Vault; str: string; no
       <NoteList
         vault={vault}
         notes={filteredNotes}
+        searchArguments={{ searchArgument: "", tagArgument: "" }}
         title={`${count} notes mentioning "${str}"`}
         action={(note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => {
           return (

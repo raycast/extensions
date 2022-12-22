@@ -50,8 +50,10 @@ export default function SearchPhotos() {
     </List>
   ) : (
     <Grid
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={parseInt(preferences.columns)}
       isLoading={loading}
+      aspectRatio={"3/2"}
+      fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search photos"}
       onSearchTextChange={(newValue) => {
         setSearchRequest({ searchContent: newValue, page: 1 });

@@ -17,7 +17,9 @@ export function CuratedPhotosGrid(props: {
   return (
     <Grid
       isLoading={loading}
-      itemSize={preferences.itemSize as Grid.ItemSize}
+      columns={parseInt(preferences.columns)}
+      aspectRatio={"2/3"}
+      fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search photographers"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined") {

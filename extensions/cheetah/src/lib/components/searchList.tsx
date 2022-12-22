@@ -19,8 +19,6 @@ export default (command: COMMAND, appPath: string, forced = false) => {
       isLoading={loading}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your project..."
-      throttle
-      enableFiltering={false}
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((searchResult, index) => (

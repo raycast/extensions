@@ -1,5 +1,5 @@
 import { Color } from "@raycast/api";
-import { Device, RawDeviceData } from "../../../libs/types";
+import { Device, RawDeviceData } from "../../../types";
 
 function populate(device: Device, deviceData: RawDeviceData) {
   // Extract properties for easier access

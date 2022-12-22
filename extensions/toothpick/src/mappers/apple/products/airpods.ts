@@ -1,5 +1,5 @@
 import { Color } from "@raycast/api";
-import { Device, RawDeviceData } from "src/libs/types";
+import { Device, RawDeviceData } from "src/types";
 
 function populate(device: Device, deviceData: RawDeviceData) {
   // Extract properties for easier access
@@ -29,6 +29,7 @@ function populate(device: Device, deviceData: RawDeviceData) {
       batteryIcons.right = "icons/devices/apple/extra/airpods.gen3.right.svg";
       break;
     case Airpods.Models.Pro:
+    case Airpods.Models.Pro2:
       device.icon = { source: "icons/devices/apple/airpods.pro.svg" };
       batteryIcons.case = "icons/devices/apple/extra/airpods.pro.case.svg";
       batteryIcons.left = "icons/devices/apple/extra/airpods.pro.left.svg";
@@ -82,6 +83,7 @@ const Airpods = {
     2: "0x200F",
     3: "0x2013",
     Pro: "0x200E",
+    Pro2: "0x2014",
     Max: "0x200A",
   },
   populate,

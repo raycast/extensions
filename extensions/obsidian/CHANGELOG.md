@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix | Version 1.10.1] - 2022-11-29
+
+- Fixed a bug where command executed with shortcut was not working
+
 ## [Append to Daily Note Command | Version 1.10.0] - 2022-11-23
 
 - Add `Append to Daily Note Command` which can append text to a daily note. Text can be appended to the end of the note or to a specific heading. It supports all templates. Contributed by @iancanderson.

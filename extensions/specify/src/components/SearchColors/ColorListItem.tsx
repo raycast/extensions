@@ -23,6 +23,7 @@ export default ({ color, namespace, repositoryName }: ColorListItemProps) => {
       key={color.id}
       title={color.name}
       accessories={[{ text: colorInstance.toHexString() }]}
+      subtitle={color.description}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy HEX" content={colorInstance.toHexString()} />

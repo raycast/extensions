@@ -6,18 +6,16 @@ export function NoteListDropdown(props: {
   allNotes?: Note[];
   setNotes?: (notes: Note[]) => void;
   tags: string[];
-  searchArguments?: SearchArguments;
+  searchArguments: SearchArguments;
 }) {
   const { setNotes, allNotes, tags, searchArguments } = props;
 
   function defaultTagValue() {
-    if (searchArguments) {
-      if (searchArguments.tagArgument != "" && searchArguments.tagArgument) {
-        if (searchArguments.tagArgument.startsWith("#")) {
-          return searchArguments.tagArgument;
-        } else {
-          return "#" + searchArguments.tagArgument;
-        }
+    if (searchArguments.tagArgument) {
+      if (searchArguments.tagArgument.startsWith("#")) {
+        return searchArguments.tagArgument;
+      } else {
+        return "#" + searchArguments.tagArgument;
       }
     }
   }

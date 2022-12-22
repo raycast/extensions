@@ -1,6 +1,6 @@
 export interface Preferences {
   itemLayout: string;
-  itemSize: string;
+  columns: string;
   showClock: boolean;
   rememberTag: boolean;
   hour24: boolean;

@@ -27,8 +27,8 @@ export function NoteListObsidian(props: { vault: Vault; showTitle: boolean; sear
         setAllNotes(_notes);
       } catch (error) {
         showToast({
-          title: "The path set in preferences doesn't exist",
-          message: "Please set a valid path in preferences",
+          title: "Path Error",
+          message: "Please set a valid path in preferences or allow full-disk access in macOS settings.",
           style: Toast.Style.Failure,
         });
       }

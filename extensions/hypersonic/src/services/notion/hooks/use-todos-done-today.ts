@@ -1,19 +1,20 @@
 import { parseTodosToDoneWorkString } from '@/features/todo-list/utils/parse-to-do-to-done-work-string'
-import { loadDatabase } from '@/services/storage'
+import { loadPreferences } from '@/services/storage'
+import { Filter } from '@/types/filter'
 import { useCachedPromise } from '@raycast/utils'
 import { getDoneToday } from '../operations/get-done-today'
 
-export function useTodosDoneToday() {
+export function useTodosDoneToday(filter: Filter) {
   const { data, error, isLoading } = useCachedPromise(
     async () => {
-      const database = await loadDatabase()
-      const databaseId = database.databaseId
+      const preferences = await loadPreferences()
+      const databaseId = preferences.databaseId
 
       if (!databaseId) {
         return '## Nothing for today'
       }
 
-      const data = await getDoneToday(databaseId)
+      const data = await getDoneToday(databaseId, filter)
       const doneWorkString = parseTodosToDoneWorkString(data)
 
       const markdown = doneWorkString

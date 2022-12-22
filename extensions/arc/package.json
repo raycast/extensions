@@ -11,6 +11,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "contributors": [
+    "zach"
+  ],
   "commands": [
     {
       "name": "search-history",
@@ -18,12 +21,20 @@
       "subtitle": "Arc",
       "description": "Search your browsing history.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "description": "Creates a new window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "icon": "icon-dark.png"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.39.0",
     "@raycast/utils": "^1.4.0",
-    "run-applescript": "^6.0.0",
+    "run-applescript": "^6.1.0",
     "run-jxa": "^3.0.0",
     "sql.js": "^1.8.0"
   },

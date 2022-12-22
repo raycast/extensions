@@ -4,7 +4,7 @@ import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 
 import { SUPERNOTES_API_URL } from "utils/defines";
-import { ICardCollection, SupernotesErrorPayload } from "utils/types";
+import { ICardCollection, StandardError } from "utils/types";
 
 const useSearch = (callback: (cards?: ICardCollection) => void) => {
   const { apiKey } = getPreferenceValues();
@@ -44,9 +44,7 @@ const useSearch = (callback: (cards?: ICardCollection) => void) => {
         });
         const jsonData = await res.json();
         setLoading(false);
-        if (res.status !== 200) {
-          throw new Error((jsonData as SupernotesErrorPayload).detail);
-        }
+        if (res.status !== 200) throw new Error((jsonData as StandardError).detail);
         callback(jsonData as ICardCollection);
       } catch (error) {
         if (error instanceof AbortError) {

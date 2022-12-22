@@ -9,7 +9,7 @@ export function MavenEmptyView(props: { title: string }) {
   return (
     <List.EmptyView
       title={title}
-      icon={"empty-view-icon.svg"}
+      icon={"empty-view-icon.png"}
       actions={
         <ActionPanel>
           <ActionToAdvancedSearchOptions />

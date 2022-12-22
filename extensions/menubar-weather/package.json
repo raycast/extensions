@@ -61,6 +61,32 @@
       ]
     },
     {
+      "name": "windSpeedUnits",
+      "type": "dropdown",
+      "title": "Wind Speed Unit",
+      "description": "Units of wind speed",
+      "required": true,
+      "default": "",
+      "data": [
+        {
+          "title": "Km/h",
+          "value": "kmh"
+        },
+        {
+          "title": "m/s",
+          "value": "ms"
+        },
+        {
+          "title": "Mph",
+          "value": "mph"
+        },
+        {
+          "title": "Knots",
+          "value": "kn"
+        }
+      ]
+    },
+    {
       "name": "precipitationUnits",
       "type": "dropdown",
       "title": "Precipitation Unit",

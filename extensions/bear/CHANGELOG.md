@@ -1,5 +1,9 @@
 # Bear Changelog
 
+## [Fix crash] - 2022-11-29
+
+- Fix a crash that occurred when a note's text is `null`.
+
 ## [Note preview in list view] - 2022-11-24
 
 - Show a preview of the note's content and metadata in the note list view.

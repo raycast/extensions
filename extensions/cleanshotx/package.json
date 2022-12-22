@@ -5,6 +5,9 @@
     "description": "Capture and record your screen!",
     "icon": "command-icon.png",
     "author": "Aayush9029",
+    "contributors": [
+        "thomaslombart"
+    ],
     "license": "MIT",
     "commands": [
         {
@@ -80,12 +83,13 @@
             "mode": "no-view"
         },
         {
-            "name": "text-recognition",
-            "title": "Text Recognition",
+            "name": "capture-text",
+            "title": "Capture Text (OCR)",
             "subtitle": "CleanShot X",
-            "description": "Text Recognition Using Ocr",
+            "description": "Capture text using OCR",
             "icon": "capture-text.png",
-            "mode": "no-view"
+            "mode": "no-view",
+            "keywords": ["text recognition"]
         },
         {
             "name": "annotate",
