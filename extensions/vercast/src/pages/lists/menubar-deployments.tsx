@@ -71,6 +71,7 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
 
   return (
     <MenuBarExtra
+      title=""
       icon={{
         source: "../assets/vercel.svg",
         tintColor:
@@ -86,17 +87,17 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
           const branchName = getCommitDeploymentBranch(deployment);
           const deploymentName = !projectId ? `${deployment.name}` : "";
           const commitMessage = getCommitMessage(deployment);
-          const commitMessageTruncated = truncator(commitMessage, 40);
+          const commitMessageTruncated = truncator(commitMessage, 30);
           const deploymentDateFromNow = deployment.createdAt ? fromNow(deployment.createdAt, new Date()) : "";
           return (
             <MenuBarExtra.Item
               title={commitMessageTruncated}
-              subtitle={newline + deploymentName + newline + branchName + seperator + deploymentDateFromNow}
+              subtitle={seperator + deploymentDateFromNow + newline + deploymentName + seperator + branchName}
               shortcut={
                 index < 9
                   ? {
                       modifiers: ["cmd"],
-                      key: ((index + 1).toString() as Keyboard.KeyEquivalent) || undefined,
+                      key: (index + 1).toString() as Keyboard.KeyEquivalent,
                     }
                   : undefined
               }
