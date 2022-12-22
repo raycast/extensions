@@ -1,7 +1,8 @@
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -25,7 +26,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
       title={tableName || ""}
-      icon={Icon.HardDrive}
+      icon={"aws-icons/ddb.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser

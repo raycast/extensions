@@ -7,7 +7,8 @@ import {
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function Secrets() {
   const [search, setSearch] = useState<string>("");
@@ -55,7 +56,7 @@ function Secret({
   return (
     <List.Item
       id={secret.Name || ""}
-      icon={Icon.Bookmark}
+      icon={"aws-icons/secretsmanager.png"}
       title={secret.Name || ""}
       detail={
         <List.Item.Detail

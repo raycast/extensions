@@ -6,7 +6,8 @@ import {
 } from "@aws-sdk/client-codepipeline";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function CodePipeline() {
   const { data: pipelines, error, isLoading, revalidate } = useCachedPromise(fetchPipelines);
@@ -36,7 +37,7 @@ function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
       id={pipeline.name}
       key={pipeline.name}
       title={pipeline.name || ""}
-      icon={Icon.List}
+      icon={"aws-icons/cp.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
