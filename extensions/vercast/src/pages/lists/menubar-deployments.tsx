@@ -71,7 +71,6 @@ const MenuBarDeployments = ({ projectId }: { projectId?: string }) => {
 
   return (
     <MenuBarExtra
-      title=""
       icon={{
         source: "../assets/vercel.svg",
         tintColor:
