@@ -17,7 +17,7 @@ export default function Console() {
       {data &&
         Object.entries(data).map(([category, services]) => (
           <List.Section key={category} title={category}>
-            {services.map((service: AzureService, idx) => (
+            {services.map((service: AzureService, idx: number) => (
               <List.Item
                 key={`${service.name}${idx}`}
                 title={service.name}
@@ -26,7 +26,7 @@ export default function Console() {
                   <ActionPanel>
                     <Action.OpenInBrowser
                       url={`${
-                        service.href.startsWith("https") ? service.href : `${AZURE_PORTAL_URL_BASE}${service.href}`
+                        service.href.startsWith("https") ? service.href : `${AZURE_PORTAL_URL_BASE}/${service.href}`
                       }`}
                     />
                   </ActionPanel>
