@@ -1,3 +1,5 @@
+import { Icon } from "@raycast/api";
+
 export interface Timer {
   name: string;
   secondsSet: number;
@@ -54,4 +56,10 @@ export interface RayFormEvent {
   target: {
     value?: string | undefined;
   };
+}
+
+export interface SoundData {
+  title: string;
+  icon: Icon;
+  value: string;
 }

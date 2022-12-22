@@ -1,5 +1,11 @@
 # Timers Changelog
 
+## [Minor fixes, alert sound preview command] - 2022-12-21
+
+- Added a 2 minute preset
+- Show timer name in alert notification
+- Add command to preview alert sound effects
+
 ## [Enhancement] - 2022-12-10
 
 - Added custom timer option to menubar
