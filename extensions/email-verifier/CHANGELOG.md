@@ -1,3 +1,3 @@
 # Email Verifier Changelog
 
-## [Initial Version] - 2022-12-18
+## [Initial Version] - 2022-12-22
