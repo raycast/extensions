@@ -46,6 +46,7 @@ export type Group = {
 };
 export interface Preferences {
   token: string;
+  useLastCollection?: boolean;
 }
 
 export interface CollectionsResponse {

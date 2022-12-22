@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Add preference setting] - 2022-12-21
+
+- Adds a preference checkbox to always use the last used collection in filter
+
 ## [Add collections filter] - 2022-12-16
 
 - Adds a filter in the bookmarks list to be able to limit results to only in the selected collection

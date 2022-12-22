@@ -1,5 +1,9 @@
 # Bitfinex Changelog
 
+## [Bug fixes] - 2022-12-22
+
+- Fix the sending of unnecessary notifications in the cron job
+
 ## [Auto-renew offers and improvements] - 2022-12-11
 
 - Send notification when there's high lending rates. You can also configure the threshold in the preferences.

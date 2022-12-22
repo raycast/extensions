@@ -6,17 +6,19 @@ type CollectionsDropdownProps = {
   isLoading: boolean;
   handleChange: (v: string) => void;
   collections: CollectionItem[];
+  defaultValue?: string;
 };
 
 const CollectionsDropdown = React.memo(function CollectionsDropdown({
   isLoading,
   handleChange,
   collections,
+  defaultValue,
 }: CollectionsDropdownProps) {
   if (isLoading) return null;
 
   return (
-    <List.Dropdown onChange={handleChange} tooltip="Select Collection">
+    <List.Dropdown onChange={handleChange} tooltip="Select Collection" defaultValue={defaultValue}>
       <List.Dropdown.Item title="All bookmarks" value="0" />
       <List.Dropdown.Item title="Unsorted" value="-1" />
       {collections?.map((collection: CollectionItem) => (
