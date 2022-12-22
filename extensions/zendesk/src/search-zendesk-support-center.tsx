@@ -42,7 +42,7 @@ export default function ZendeskSearch() {
         return setLocales(
           data.locales.map((locale) => ({
             name: locale.name,
-            locale: locale.locale,
+            locale: locale.locale.toLowerCase(),
           }))
         );
       }
