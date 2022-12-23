@@ -36,18 +36,19 @@ export default function Command() {
     return map;
   }, [sites]);
 
-  useEffect(() => {
-    async function fetchSites() {
-      try {
-        const sites = await service.getSites();
-        setSites(sites);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
+  async function fetchSites(query = '') {
+    setLoading(true);
+    try {
+      const sites = await service.getSites(query);
+      setSites(sites);
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      handleNetworkError(e);
     }
+  }
 
+  useEffect(() => {
     fetchSites();
   }, []);
 
@@ -55,7 +56,9 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail
+      onSearchTextChange={(query) => fetchSites(query)}
       searchBarPlaceholder="Search by site name..."
+      throttle
     >
       {Object.keys(siteMap).map((team) => (
         <List.Section key={team} title={teams[team]}>
