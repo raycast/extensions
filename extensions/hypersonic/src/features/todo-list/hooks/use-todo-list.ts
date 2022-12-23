@@ -163,7 +163,7 @@ export function useTodoList() {
       refreshMenuBar()
 
       if (action === 'SHARE') {
-        await Clipboard.copy(`Added to Hypersonic: ${createdTodo.shareUrl}`)
+        await Clipboard.copy(createdTodo.shareUrl)
         await showHUD('Copied to Clipboard')
       }
 
