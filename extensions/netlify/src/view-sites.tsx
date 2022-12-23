@@ -1,27 +1,27 @@
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import Api from './api';
+import api from './api';
 import { Site, Team } from './interfaces';
-import { formatDate, getToken, handleNetworkError } from './utils';
+import { formatDate, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
 
 const STAR_ICON = [
   {
     icon: { source: Icon.Star, tintColor: Color.Yellow },
-    tooltip: 'Favorite',
+    tooltip: 'Favorite (⌘F)',
   },
 ];
 
-const api = new Api(getToken());
-
 export default function Command() {
+  const [isLoading, setLoading] = useState<boolean>(true);
+
   const [sites, setSites] = useState<Site[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
   const [query, setQuery] = useState<string>('');
   const [teamFilter, setTeamFilter] = useState<string>('');
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [isLoading, setLoading] = useState<boolean>(true);
 
   async function fetchSites(query = '', team?: string) {
     setLoading(true);
@@ -202,7 +202,7 @@ const SiteActions = ({
     )}
     <Action.OpenInBrowser
       icon={Icon.Link}
-      shortcut={{ key: 'p', modifiers: ['cmd'] }}
+      shortcut={{ key: 'u', modifiers: ['cmd'] }}
       title="Go to Production URL"
       url={site.ssl_url}
     />
