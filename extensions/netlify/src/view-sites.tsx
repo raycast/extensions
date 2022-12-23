@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import Api from './api';
 import { Site } from './interfaces';
-import { formatDate, getSiteUrl, getToken, handleNetworkError } from './utils';
+import { formatDate, getToken, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
 
 const api = new Api(getToken());
@@ -98,7 +98,7 @@ export default function Command() {
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
-                        title="Repo URL"
+                        title="Repository"
                         text={site.build_settings.repo_url || 'N/A'}
                       />
                       <List.Item.Detail.Metadata.Separator />
@@ -124,68 +124,46 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    icon={Icon.Hammer}
+                    icon={Icon.Rocket}
                     title="Show Deploys"
                     target={
                       <DeployListView siteId={site.id} siteName={site.name} />
                     }
                   />
-                  <Action.Push
-                    icon={Icon.Text}
-                    title="Show Environment Variables"
-                    target={
-                      <EnvVariableView
-                        value={site.build_settings.env}
-                        siteName={site.name}
-                      />
-                    }
-                  />
                   <Action.OpenInBrowser
                     title="Open on Netlify"
-                    url={getSiteUrl(site.name)}
-                    shortcut={{ key: 'n', modifiers: ['cmd'] }}
+                    url={site.admin_url}
                   />
+                  <Action.CopyToClipboard
+                    content={site.id}
+                    shortcut={{ key: 'i', modifiers: ['cmd'] }}
+                    title="Copy Site ID"
+                  />
+                  {site.build_settings.repo_url && (
+                    <Action.OpenInBrowser
+                      icon={Icon.CodeBlock}
+                      shortcut={{ key: 'r', modifiers: ['cmd'] }}
+                      title="Go to Repository"
+                      url={site.build_settings.repo_url}
+                    />
+                  )}
                   <Action.OpenInBrowser
-                    title="Open Site"
+                    icon={Icon.Link}
+                    shortcut={{ key: 'p', modifiers: ['cmd'] }}
+                    title="Go to Production URL"
                     url={site.ssl_url}
-                    shortcut={{ key: 's', modifiers: ['cmd'] }}
                   />
                   <Action.OpenInBrowser
-                    title="Open Repository"
-                    url={site.build_settings.repo_url}
-                    shortcut={{ key: 'g', modifiers: ['cmd'] }}
+                    icon={Icon.Gear}
+                    shortcut={{ key: 's', modifiers: ['cmd'] }}
+                    title="Go to Site Settings"
+                    url={`${site.admin_url}/settings`}
                   />
                 </ActionPanel>
               }
             />
           ))}
         </List.Section>
-      ))}
-    </List>
-  );
-}
-
-interface EnvVariableProps {
-  siteName: string;
-  value: Record<string, string>;
-}
-
-function EnvVariableView(props: EnvVariableProps) {
-  const { value, siteName } = props;
-
-  return (
-    <List navigationTitle={`Variables: ${siteName}`}>
-      {Object.entries(value).map(([key, value]) => (
-        <List.Item
-          key={key}
-          title={key}
-          subtitle={value}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard content={`${key}=${value}`} />
-            </ActionPanel>
-          }
-        />
       ))}
     </List>
   );

@@ -149,7 +149,7 @@ export function DeployListView(props: Props) {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Open on Netlify"
+                title="View Deploy Logs"
                 url={getDeployUrl(siteName, deploy.id)}
               />
             </ActionPanel>
