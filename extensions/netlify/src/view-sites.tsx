@@ -82,7 +82,7 @@ export default function Command() {
     <List.Dropdown
       onChange={setTeamFilter}
       placeholder="Filter teams"
-      storeValue
+      // storeValue
       tooltip="Scope search to selected team"
     >
       <List.Dropdown.Item title="Search across all teams" value="" />
