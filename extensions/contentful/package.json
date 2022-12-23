@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Contentful",
-      "description": "Search for Contentful entries",
+      "name": "search",
+      "title": "Search Content",
+      "description": "Search Contentful content library",
       "mode": "view"
     }
   ],
