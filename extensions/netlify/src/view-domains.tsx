@@ -1,6 +1,7 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import Service, { Domain } from './service';
+import { Domain } from './interfaces';
+import Service from './service';
 import { getDomainUrl, getToken, handleNetworkError } from './utils';
 
 const service = new Service(getToken());
@@ -12,11 +13,11 @@ export default function Command() {
   const domainMap = useMemo(() => {
     const map: Record<string, string[]> = {};
     for (const domain of domains) {
-      const { value, team } = domain;
-      if (!map[team.id]) {
-        map[team.id] = [];
+      const { name, account_slug: teamId } = domain;
+      if (!map[teamId]) {
+        map[teamId] = [];
       }
-      map[team.id].push(value);
+      map[teamId].push(name);
     }
     return map;
   }, [domains]);
@@ -24,7 +25,7 @@ export default function Command() {
   const teams = useMemo(() => {
     const map: Record<string, string> = {};
     for (const domain of domains) {
-      const { id, name } = domain.team;
+      const { account_slug: id, account_name: name } = domain;
       if (map[id]) {
         continue;
       }
