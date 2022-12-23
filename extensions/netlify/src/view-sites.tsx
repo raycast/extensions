@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 
 import Api from './api';
@@ -10,6 +10,7 @@ const api = new Api(getToken());
 
 export default function Command() {
   const [sites, setSites] = useState<Site[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const siteMap = useMemo(() => {
@@ -48,8 +49,18 @@ export default function Command() {
     }
   }
 
+  async function fetchUser() {
+    try {
+      const user = await api.getUser();
+      setFavorites(user.favorite_sites);
+    } catch (e) {
+      // ignore silently
+    }
+  }
+
   useEffect(() => {
     fetchSites();
+    fetchUser();
   }, []);
 
   return (
@@ -66,12 +77,16 @@ export default function Command() {
             <List.Item
               key={site.id}
               title={site.name}
-              // accessories={[
-              //   {
-              //     icon: { source: Icon.Star, tintColor: Color.Yellow },
-              //     tooltip: 'Favorite',
-              //   },
-              // ]}
+              accessories={
+                favorites.includes(site.id)
+                  ? [
+                      {
+                        icon: { source: Icon.Star, tintColor: Color.Yellow },
+                        tooltip: 'Favorite',
+                      },
+                    ]
+                  : undefined
+              }
               detail={
                 <List.Item.Detail
                   markdown={`![${site.name}](${site.screenshot_url})`}
