@@ -1,8 +1,8 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
+import Api from './api';
 import { Deploy } from './interfaces';
-import Service from './service';
 import {
   formatDate,
   getDeployUrl,
@@ -11,7 +11,7 @@ import {
   handleNetworkError,
 } from './utils';
 
-const service = new Service(getToken());
+const service = new Api(getToken());
 
 interface Props {
   siteId: string;
