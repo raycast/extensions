@@ -1,10 +1,10 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import { Domain } from './interfaces';
-import Service from './service';
+import Api from './api';
 import { getDomainUrl, getToken, handleNetworkError } from './utils';
 
-const service = new Service(getToken());
+const api = new Api(getToken());
 
 export default function Command() {
   const [domains, setDomains] = useState<Domain[]>([]);
@@ -37,7 +37,7 @@ export default function Command() {
   useEffect(() => {
     async function fetchDomains() {
       try {
-        const domains = await service.getDomains();
+        const domains = await api.getDomains();
         setDomains(domains);
         setLoading(false);
       } catch (e) {

@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 import { Deploy, Domain, Member, Site, Team } from './interfaces';
 
-class Service {
+class Api {
   client: AxiosInstance;
 
   constructor(apiToken: string) {
@@ -15,13 +15,6 @@ class Service {
     });
   }
 
-  async getSites(query: string): Promise<Site[]> {
-    const { data } = await this.client.get<Site[]>(
-      `/sites?name=${query}&filter=all&sort_by=updated_at&include_favorites=true`,
-    );
-    return data;
-  }
-
   async getDeploys(site: string): Promise<Deploy[]> {
     const { data } = await this.client.get<Deploy[]>(`/sites/${site}/deploys`);
     return data;
@@ -32,15 +25,22 @@ class Service {
     return data;
   }
 
-  async getTeams(): Promise<Team[]> {
-    const { data } = await this.client.get<Team[]>(`/accounts`);
-    return data;
-  }
-
   async getMembers(team: string): Promise<Member[]> {
     const { data } = await this.client.get<Member[]>(`/${team}/members`);
     return data;
   }
+
+  async getSites(query: string): Promise<Site[]> {
+    const { data } = await this.client.get<Site[]>(
+      `/sites?name=${query}&filter=all&sort_by=updated_at&include_favorites=true`,
+    );
+    return data;
+  }
+
+  async getTeams(): Promise<Team[]> {
+    const { data } = await this.client.get<Team[]>(`/accounts`);
+    return data;
+  }
 }
 
-export default Service;
+export default Api;
