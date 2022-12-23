@@ -1,6 +1,7 @@
 import { List } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import Service, { Member, Team } from './service';
+import { Member, Team } from './interfaces';
+import Service from './service';
 import { getToken, handleNetworkError } from './utils';
 
 const service = new Service(getToken());
@@ -17,8 +18,8 @@ export default function Command() {
 
         const members: Record<string, Member[]> = {};
         for (const team of teams) {
-          const teamMembers = await service.getMembers(team.id);
-          members[team.id] = teamMembers;
+          const teamMembers = await service.getMembers(team.slug);
+          members[team.slug] = teamMembers;
         }
         setMembers(members);
         setTeams(teams);
@@ -36,11 +37,11 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {teams.map((team) => (
-        <List.Section key={team.id} title={team.name}>
-          {members[team.id].map((member) => (
+        <List.Section key={team.slug} title={team.name}>
+          {members[team.slug].map((member) => (
             <List.Item
               key={member.id}
-              title={member.name || member.email}
+              title={member.full_name || member.email}
               subtitle={member.role}
             />
           ))}
