@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
 
 export default function Command() {
-  return <Detail markdown="# Hello World 2" />;
+  return <Detail markdown="# Hello World 3" />;
 }
