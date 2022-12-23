@@ -2,7 +2,7 @@ import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 
 import Api from './api';
-import { Site } from './interfaces';
+import { Site, Team } from './interfaces';
 import { formatDate, getToken, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
 
@@ -10,6 +10,9 @@ const api = new Api(getToken());
 
 export default function Command() {
   const [sites, setSites] = useState<Site[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [query, setQuery] = useState<string>('');
+  const [teamFilter, setTeamFilter] = useState<string>('');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
@@ -25,7 +28,7 @@ export default function Command() {
     return map;
   }, [sites]);
 
-  const teams = useMemo(() => {
+  const knownTeams = useMemo(() => {
     const map: Record<string, string> = {};
     for (const site of sites) {
       const { account_slug: id, account_name: name } = site;
@@ -37,15 +40,24 @@ export default function Command() {
     return map;
   }, [sites]);
 
-  async function fetchSites(query = '') {
+  async function fetchSites(query = '', team?: string) {
     setLoading(true);
     try {
-      const sites = await api.getSites(query);
+      const sites = await api.getSites(query, team);
       setSites(sites);
       setLoading(false);
     } catch (e) {
       setLoading(false);
       handleNetworkError(e);
+    }
+  }
+
+  async function fetchTeams() {
+    try {
+      const teams = await api.getTeams();
+      setTeams(teams);
+    } catch (e) {
+      // ignore silently
     }
   }
 
@@ -75,19 +87,53 @@ export default function Command() {
 
   useEffect(() => {
     fetchSites();
+    fetchTeams();
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    fetchSites(query, teamFilter);
+  }, [query, teamFilter]);
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
-      onSearchTextChange={(query) => fetchSites(query)}
+      onSearchTextChange={setQuery}
+      searchText={query}
+      searchBarAccessory={
+        <List.Dropdown
+          onChange={setTeamFilter}
+          placeholder="Filter teams"
+          storeValue
+          tooltip="Scope search to selected team"
+        >
+          <List.Dropdown.Item title="Search across all teams" value="" />
+          <List.Dropdown.Section>
+            {teams
+              .sort((a, b) =>
+                a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1,
+              )
+              .map((team) => (
+                <List.Dropdown.Item
+                  key={team.slug}
+                  icon={{
+                    source: team.team_logo_url
+                      ? team.team_logo_url
+                      : 'icon.png',
+                  }}
+                  title={team.name}
+                  value={team.slug}
+                />
+              ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       searchBarPlaceholder="Search by site name..."
       throttle
     >
       {Object.keys(siteMap).map((team) => (
-        <List.Section key={team} title={teams[team]}>
+        <List.Section key={team} title={knownTeams[team]}>
           {siteMap[team].map((site) => (
             <List.Item
               key={site.id}
