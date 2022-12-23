@@ -1,15 +1,16 @@
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
 import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
 
 export async function createTodo(
   todo: Todo,
   databaseId: string
-): Promise<boolean> {
+): Promise<Todo> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
 
-  await notionClient.pages.create({
+  const data = await notionClient.pages.create({
     parent: { database_id: databaseId },
     properties: {
       [preferences.properties.title]: {
@@ -48,5 +49,11 @@ export async function createTodo(
     },
   })
 
-  return true
+  const normalizedTodo = normalizeTodo({
+    page: data,
+    preferences: preferences.properties,
+    inProgressId: preferences.properties.status.inProgressId,
+  })
+
+  return normalizedTodo
 }

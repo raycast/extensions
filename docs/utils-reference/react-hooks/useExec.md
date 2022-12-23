@@ -118,24 +118,21 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 ## Example
 
 ```tsx
-import { useMemo } from "react";
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 
-type Item = { id: string; name: string };
-
-export default function Command() {
+const Demo = () => {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
-  const results = useMemo<Item[]>(() => JSON.parse(data || "[]"), [data]);
+  const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
   return (
     <List isLoading={isLoading}>
-      {results.map((item) => (
+      {(data || []).map((item) => (
         <List.Item key={item.id} title={item.name} />
       ))}
     </List>
   );
-}
+};
 ```
 
 ## Argument dependent on user input
@@ -146,15 +143,15 @@ This behaviour can cause some flickering (initial data -> fetched data -> argume
 
 ```tsx
 import { useState } from "react";
-import { Detail } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
-export default function Command() {
-  const [searchText, setSearchText] = useState("raycast");
-  const { isLoading, data } = useExec("brew", ["search", searchText]);
+const Demo = () => {
+  const [searchText, setSearchText] = useState("");
+  const { isLoading, data } = useExec("brew", ["info", searchText]);
 
   return <Detail isLoading={isLoading} markdown={data} />;
-}
+};
 ```
 
 {% hint style="info" %}
@@ -173,11 +170,11 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-export default function Command() {
+const Demo = () => {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
-  const InstallFoo = async () => {
+  const installFoo = async () => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Installing Foo" });
     try {
       await mutate(
@@ -211,14 +208,14 @@ export default function Command() {
           title={item.name}
           actions={
             <ActionPanel>
-              <Action title="Append Foo" onAction={() => appendFoo()} />
+              <Action title="Install Foo" onAction={() => installFoo()} />
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
-}
+};
 ```
 
 ## Types

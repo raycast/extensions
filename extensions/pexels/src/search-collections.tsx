@@ -58,8 +58,10 @@ export default function SearchCollections() {
     </List>
   ) : (
     <Grid
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       isLoading={loading}
+      aspectRatio={"3/2"}
+      fit={Grid.Fit.Fill}
       searchBarPlaceholder={"Search collections"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined") {

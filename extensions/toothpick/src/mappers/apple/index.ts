@@ -1,4 +1,4 @@
-import { Device, RawDeviceData } from "../../libs/types";
+import { Device, RawDeviceData } from "../../types";
 import Airpods from "./products/airpods";
 import Beats from "./products/beats";
 import MagicKeyboard from "./products/magic-keyboard";

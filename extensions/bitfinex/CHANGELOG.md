@@ -1,5 +1,17 @@
 # Bitfinex Changelog
 
+## [Bug fixes] - 2022-12-22
+
+- Fix the sending of unnecessary notifications in the cron job
+
+## [Auto-renew offers and improvements] - 2022-12-11
+
+- Send notification when there's high lending rates. You can also configure the threshold in the preferences.
+- Notify you when your funding it not fully used.
+- Auto-renew offers when they are cancelled by the system or elsewhere.
+- The notification is sent by Apple Script. You can add Script Editor to App whitelist in Do Not Disturb mode. Check README for more details.
+- Fix some bugs and improve the layout
+
 ## [New Iconography and improvements] - 2022-07-27
 
 - Adjust the height of lending chart

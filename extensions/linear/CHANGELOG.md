@@ -1,6 +1,20 @@
 # Linear Changelog
 
-## [Copy Formatted Issue URL Action] - 2022-12-23
+## [Fix icons] - 2022-20-12
+
+- Fix a bug where Linear icons would not show up in the list's accessories for projects
+- Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist
+- Add new predefined icons
+
+## [Add new accessories in issue list] - 2022-12-12
+
+- Add cycle, project, label, and estimate accessories in the issue list if any
+
+## [Added right click support to menubar] - 2022-12-05
+
+- Added right click support to menubar which mark the issue as read.
+
+## [Copy Formatted Issue URL Action] - 2022-11-23
 
 - Add a new "Copy Formatted Issue URL" Action
 

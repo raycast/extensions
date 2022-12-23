@@ -82,6 +82,17 @@ export function TodoList() {
                 title="Create Task"
                 onAction={handleCreate}
               />
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Copy URL"
+                onAction={() => handleCreate('SHARE')}
+              />
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Open in Notion"
+                onAction={() => handleCreate('OPEN')}
+                shortcut={{ modifiers: ['cmd'], key: 'o' }}
+              />
               <GeneralActions
                 mutatePreferences={mutatePreferences}
                 notionDbUrl={notionDbUrl}

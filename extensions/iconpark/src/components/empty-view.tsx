@@ -6,7 +6,7 @@ export function EmptyView() {
   return (
     <Grid.EmptyView
       title={"No Icon"}
-      icon={{ source: "empty-icon.svg" }}
+      icon={{ source: "empty-icon.png" }}
       actions={
         <ActionPanel>
           <ActionOpenPreferences />

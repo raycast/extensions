@@ -1,7 +1,10 @@
 import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
+import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
+import { getTaskCWLogsGroupUrl } from "./actions";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -24,22 +27,33 @@ export default function Lambda() {
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
-      icon="lambda.png"
+      icon={"aws-icons/lam.png"}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`https://${process.env.AWS_REGION}.console.aws.amazon.com/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
+            url={`${AWS_URL_BASE}/lambda/home?region=${process.env.AWS_REGION}#/functions/${func.FunctionName}?tab=monitoring`}
           />
-          <Action.CopyToClipboard title="Copy ARN" content={func.FunctionArn || ""} />
-          <Action.CopyToClipboard title="Copy Name" content={func.FunctionName || ""} />
+          <Action.OpenInBrowser
+            icon={Icon.Document}
+            title="Open CloudWatch Log Group"
+            url={getTaskCWLogsGroupUrl(encodeURIComponent(`/aws/lambda/${func.FunctionName}`))}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+          />
+          <Action.Push
+            title={"View Log Streams"}
+            icon={Icon.Eye}
+            shortcut={{ modifiers: ["opt"], key: "l" }}
+            target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+          />
+          <ActionPanel.Section title={"Copy"}>
+            <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
+            <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
-      accessories={[
-        { date: func.LastModified ? new Date(func.LastModified) : undefined },
-        { icon: getRuntimeIcon(func.Runtime), tooltip: func.Runtime || "" },
-      ]}
+      accessories={[{ text: func.Runtime || "" }, { icon: getRuntimeIcon(func.Runtime) }]}
     />
   );
 }
@@ -48,6 +62,7 @@ async function fetchFunctions(
   nextMarker?: string,
   functions?: FunctionConfiguration[]
 ): Promise<FunctionConfiguration[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];

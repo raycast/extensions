@@ -28,7 +28,7 @@ export function UserListItem(props: { user: User }): JSX.Element {
     <List.Item
       id={user.id.toString()}
       title={user.name}
-      subtitle={"#" + user.username}
+      subtitle={user.username}
       icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
