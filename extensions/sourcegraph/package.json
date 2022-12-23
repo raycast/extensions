@@ -104,7 +104,7 @@
       "name": "searchHistoryDotCom",
       "title": "Code Search History",
       "subtitle": "Sourcegraph.com",
-      "description": "Browse and launch recent searches in Search Code.",
+      "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
@@ -119,7 +119,7 @@
       "icon": "logo-bw.png",
       "title": "Code Search History",
       "subtitle": "Sourcegraph Instance",
-      "description": "Browse and launch recent searches in Search Code.",
+      "description": "Browse and launch recent code searches.",
       "mode": "view",
       "keywords": [
         "sourcegraph",
