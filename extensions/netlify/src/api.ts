@@ -30,10 +30,17 @@ class Api {
     return data;
   }
 
-  async getSites(query: string): Promise<Site[]> {
-    const { data } = await this.client.get<Site[]>(
-      `/sites?name=${query}&filter=all&sort_by=updated_at&include_favorites=true`,
-    );
+  async getSites(query: string, team?: string): Promise<Site[]> {
+    const params = [
+      `name=${query}`,
+      `filter=all`,
+      `sort_by=updated_at`,
+      `include_favorites=true`,
+    ];
+    const path = [team && `/${team}`, `/sites?${params.join('&')}`]
+      .filter(Boolean)
+      .join('');
+    const { data } = await this.client.get<Site[]>(path);
     return data;
   }
 
