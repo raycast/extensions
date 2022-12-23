@@ -69,7 +69,6 @@ export default function Command() {
   }
 
   useEffect(() => {
-    fetchSites();
     fetchTeams();
     fetchUser();
   }, []);
