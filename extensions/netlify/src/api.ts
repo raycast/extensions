@@ -46,6 +46,13 @@ class Api {
     const { data } = await this.client.get<User>(`/user`);
     return data;
   }
+
+  async saveFavorites(favorites: string[]): Promise<User> {
+    const { data } = await this.client.put<User>(`/user`, {
+      favorite_sites: favorites,
+    });
+    return data;
+  }
 }
 
 export default Api;
