@@ -14,9 +14,9 @@ class Service {
     });
   }
 
-  async getSites(): Promise<Site[]> {
+  async getSites(query: string): Promise<Site[]> {
     const { data } = await this.client.get<Site[]>(
-      '/sites?filter=all&sort_by=updated_at&include_favorites=true',
+      `/sites?name=${query}&filter=all&sort_by=updated_at&include_favorites=true`,
     );
     return data;
   }
