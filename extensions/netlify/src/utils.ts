@@ -14,10 +14,6 @@ export function getToken() {
   return token;
 }
 
-export function getSiteUrl(name: string) {
-  return `https://app.netlify.com/sites/${name}`;
-}
-
 export function getDeployUrl(siteName: string, id: string) {
   return `https://app.netlify.com/sites/${siteName}/deploys/${id}`;
 }
@@ -29,15 +25,6 @@ export function getDomainUrl(team: string, name: string) {
 export function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
-export function formatDeployDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

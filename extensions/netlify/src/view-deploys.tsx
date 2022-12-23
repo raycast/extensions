@@ -77,7 +77,7 @@ export function DeployListView(props: Props) {
     <List
       isLoading={isLoading}
       isShowingDetail={filteredDeploys.length > 0}
-      navigationTitle={`Deploys: ${siteName}`}
+      navigationTitle={`Sites / ${siteName} / Deploys`}
       onSearchTextChange={setQuery}
       searchText={query}
       searchBarAccessory={ContextDropdown}
