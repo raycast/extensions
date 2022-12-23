@@ -22,7 +22,7 @@ export type DeployState =
   | 'ready';
 
 export interface Deploy {
-  branch: string;
+  branch?: string;
   commit_ref?: string;
   commit_url?: string;
   committer?: string;
@@ -36,11 +36,12 @@ export interface Deploy {
     branch?: string;
     permalink: string;
   };
-  review_id: number;
-  review_url: string;
+  review_id?: number;
+  review_url?: string;
   site_id: string;
   state: DeployState;
   title?: string;
+  updated_at: string;
   url: string;
 }
 
