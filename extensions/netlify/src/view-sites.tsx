@@ -58,6 +58,21 @@ export default function Command() {
     }
   }
 
+  async function toggleFavorite(siteId: string) {
+    setLoading(true);
+    const ids = favorites.includes(siteId)
+      ? favorites.filter((id) => id !== siteId)
+      : favorites.concat(siteId);
+    try {
+      const user = await api.saveFavorites(ids);
+      setFavorites(user.favorite_sites);
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      handleNetworkError(e);
+    }
+  }
+
   useEffect(() => {
     fetchSites();
     fetchUser();
@@ -133,6 +148,20 @@ export default function Command() {
                   <Action.OpenInBrowser
                     title="Open on Netlify"
                     url={site.admin_url}
+                  />
+                  <Action
+                    icon={
+                      favorites.includes(site.id)
+                        ? Icon.StarDisabled
+                        : Icon.Star
+                    }
+                    shortcut={{ key: 'f', modifiers: ['cmd'] }}
+                    title={
+                      favorites.includes(site.id)
+                        ? 'Remove Favorite'
+                        : 'Add Favorite'
+                    }
+                    onAction={() => toggleFavorite(site.id)}
                   />
                   <Action.CopyToClipboard
                     content={site.id}
