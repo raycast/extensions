@@ -36,6 +36,8 @@ class Api {
       `name=${query}`,
       `filter=all`,
       `sort_by=updated_at`,
+      `page=1`,
+      `per_page=30`,
       `include_favorites=true`,
     ];
     const path = [team && `/${team}`, `/sites?${params.join('&')}`]
