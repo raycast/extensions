@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from './api';
-import { Deploy, DeployContext } from './interfaces';
+import { Deploy } from './interfaces';
 import {
   formatDate,
   getDeployUrl,
@@ -18,6 +18,8 @@ interface Props {
 export function DeployListView(props: Props) {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [deploys, setDeploys] = useState<Deploy[]>([]);
+
+  const [query, setQuery] = useState<string>('');
   const [context, setContext] = useState<string>('');
 
   const { siteId, siteName } = props;
@@ -43,7 +45,7 @@ export function DeployListView(props: Props) {
       storeValue
       tooltip="Fliter by deploy context"
     >
-      <List.Dropdown.Item title="All deploy contexts" value="" />
+      <List.Dropdown.Item title="Any deploy context" value="" />
       <List.Dropdown.Section>
         <List.Dropdown.Item title="Production Deploys" value="production" />
         <List.Dropdown.Item title="Deploy Previews" value="deploy-preview" />
@@ -52,29 +54,48 @@ export function DeployListView(props: Props) {
     </List.Dropdown>
   );
 
+  const filteredDeploys = deploys.filter((deploy) => {
+    const conditions = [];
+    if (query) {
+      const keywords = [
+        deploy.title || '',
+        deploy.id || '',
+        deploy.branch || '',
+        deploy.committer || '',
+        String(deploy.review_id) || '',
+        String(deploy.commit_ref) || '',
+      ];
+      conditions.push(keywords.some((keyword) => keyword.includes(query)));
+    }
+    if (context) {
+      conditions.push(deploy.context === context);
+    }
+    return conditions.every((condition) => !!condition);
+  });
+
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={filteredDeploys.length > 0}
       navigationTitle={`Deploys: ${siteName}`}
+      onSearchTextChange={setQuery}
+      searchText={query}
       searchBarAccessory={ContextDropdown}
       searchBarPlaceholder="Filter recent deploys..."
     >
-      {deploys
-        .filter((deploy) => (context ? deploy.context === context : true))
+      {filteredDeploys.length === 0 && (
+        <List.EmptyView
+          title="No deploys found"
+          description="Try changing your filters."
+        />
+      )}
+      {filteredDeploys
         .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
         .map((deploy) => (
           <List.Item
             key={deploy.id}
             icon={getStatusIcon(deploy.state)}
             title={deploy.title || deploy.commit_ref || deploy.id}
-            keywords={[
-              deploy.id,
-              deploy.branch || '',
-              deploy.committer || '',
-              String(deploy.review_id),
-              String(deploy.commit_ref),
-            ]}
             detail={<DeployMetadata deploy={deploy} />}
             actions={<DeployActions deploy={deploy} siteName={siteName} />}
           />
@@ -99,34 +120,40 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
             <List.Item.Detail.Metadata.Separator />
           </>
         )}
-        <List.Item.Detail.Metadata.Label
-          title={deploy.review_url ? 'Pull request title' : 'Commit message'}
-          text={deploy.title || deploy.commit_ref || deploy.id}
-        />
-        {deploy.review_url ? (
-          <List.Item.Detail.Metadata.Label
-            title="Pull request URL"
-            text={deploy.review_url}
-          />
-        ) : (
-          <List.Item.Detail.Metadata.Label
-            title="Commit URL"
-            text={deploy.commit_url || ''}
-          />
+        {!deploy.manual_deploy && (
+          <>
+            <List.Item.Detail.Metadata.Label
+              title={
+                deploy.review_url ? 'Pull request title' : 'Commit message'
+              }
+              text={deploy.title || deploy.commit_ref || deploy.id}
+            />
+            {deploy.review_url ? (
+              <List.Item.Detail.Metadata.Label
+                title="Pull request URL"
+                text={deploy.review_url}
+              />
+            ) : (
+              <List.Item.Detail.Metadata.Label
+                title="Commit URL"
+                text={deploy.commit_url || ''}
+              />
+            )}
+            {deploy.committer && (
+              <List.Item.Detail.Metadata.Label
+                title="Author"
+                text={deploy.committer}
+              />
+            )}
+            {deploy.commit_ref && (
+              <List.Item.Detail.Metadata.Label
+                title="Git ref"
+                text={`${deploy.branch}@${deploy.commit_ref.substr(0, 7)}`}
+              />
+            )}
+            <List.Item.Detail.Metadata.Separator />
+          </>
         )}
-        {deploy.committer && (
-          <List.Item.Detail.Metadata.Label
-            title="Author"
-            text={deploy.committer}
-          />
-        )}
-        {deploy.commit_ref && (
-          <List.Item.Detail.Metadata.Label
-            title="Git ref"
-            text={`${deploy.branch}@${deploy.commit_ref.substr(0, 7)}`}
-          />
-        )}
-        <List.Item.Detail.Metadata.Separator />
         {deploy.context && (
           <List.Item.Detail.Metadata.Label
             title="Deploy context"
@@ -135,9 +162,7 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
         )}
         <List.Item.Detail.Metadata.Label title="Deploy ID" text={deploy.id} />
         <List.Item.Detail.Metadata.Label
-          title={
-            deploy.context === 'deploy-preview' ? 'Deploy Preview' : 'Permalink'
-          }
+          title="URL"
           text={
             deploy.context === 'deploy-preview'
               ? deploy.deploy_ssl_url
@@ -180,11 +205,7 @@ const DeployActions = ({
     <Action.OpenInBrowser
       icon={Icon.Link}
       shortcut={{ key: 'u', modifiers: ['cmd'] }}
-      title={
-        deploy.context === 'deploy-preview'
-          ? 'Go to Deploy Preview'
-          : 'Go to Permalink'
-      }
+      title="Go to URL"
       url={
         deploy.context === 'production'
           ? deploy.links.permalink

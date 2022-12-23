@@ -38,6 +38,7 @@ export interface Deploy {
     branch?: string;
     permalink: string;
   };
+  manual_deploy: boolean;
   review_id?: number;
   review_url?: string;
   site_id: string;
