@@ -40,7 +40,7 @@ export default function Command() {
           {members[team.id].map((member) => (
             <List.Item
               key={member.id}
-              title={member.name}
+              title={member.name || member.email}
               subtitle={member.role}
             />
           ))}
