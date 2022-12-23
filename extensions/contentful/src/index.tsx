@@ -76,7 +76,8 @@ export const ColorMapping: Record<ContentfulEntryStatus, Color> = {
 
 export default function ContentfulSearch() {
   const preferences = getPreferenceValues();
-  const { token, space, environment = "master" } = preferences;
+  const { token, space } = preferences;
+  const environment = preferences.environment || "master";
 
   const [contentType, setContentType] = useState<string>("__all__");
 
