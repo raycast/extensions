@@ -10,7 +10,8 @@
     "macbookandrew",
     "cy-98",
     "immint023",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "elijahs"
   ],
   "keywords": [
     "vscode"
@@ -41,6 +42,10 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     },
