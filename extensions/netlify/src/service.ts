@@ -1,82 +1,63 @@
 import axios, { AxiosInstance } from 'axios';
 
 export interface Site {
-  id: string;
-  name: string;
-  ssl_url: string;
-  screenshot_url: string;
-  account_slug: string;
   account_name: string;
+  account_slug: string;
   build_settings: {
     repo_url: string;
     stop_builds: boolean;
     env: Record<string, string>;
   };
+  created_at: string;
+  id: string;
+  name: string;
   published_deploy: {
     published_at: string;
   };
-  created_at: string;
+  screenshot_url: string;
+  ssl_url: string;
 }
 
-interface DeployItemResponse {
-  id: string;
-  title: string;
-  site_id: string;
-  error_message?: string;
-  skipped?: boolean;
-}
-
-export type DeployStatus = 'ok' | 'skipped' | 'error';
-
-export interface DeployItem {
-  id: string;
-  name: string;
-  siteId: string;
-  status: DeployStatus;
-}
-
-interface DeploySummaryMessage {
-  type: string;
-  title: string;
-  description: string;
-  details: string;
-}
-
-type DeploySummary = DeploySummaryMessage[];
-
-interface DeployResponse {
-  id: string;
-  name: string;
-  title?: string;
-  site_id: string;
-  url: string;
-  created_at: string;
-  committer?: string;
-  commit_url: string;
-  error_message?: string;
-  skipped?: boolean;
-  summary: {
-    messages: DeploySummary;
-  };
-  links: {
-    permalink: string;
-  };
-}
+export type DeployState =
+  | 'retrying' // 0
+  | 'new' // 0
+  | 'pending_review' // 0
+  | 'accepted' // 0
+  | 'enqueued' // 0
+  | 'building' // 25
+  | 'uploading' // 50
+  | 'uploaded' // 50
+  | 'preparing' // 75
+  | 'prepared' // 75
+  | 'processing' // 100
+  | 'error' // cross
+  | 'rejected' // cross
+  | 'skipped' // cross
+  | 'cancelled' // cross
+  | 'deleted' // cross
+  | 'ready'; // check
 
 export interface Deploy {
+  branch: string;
+  commit_ref?: string;
+  commit_url?: string;
+  committer?: string;
+  context: 'production' | 'deploy-preview' | 'branch-deploy';
+  created_at: string;
+  deploy_time: number;
+  deploy_ssl_url: string;
   id: string;
-  name: string;
-  site: {
-    id: string;
-    name: string;
+  links: {
+    alias: string;
+    branch?: string;
+    permalink: string;
   };
+  review_id: number;
+  review_url: string;
+  site_id: string;
+  state: DeployState;
+  title?: string;
   url: string;
-  author?: string;
-  publishDate: Date;
-  status: DeployStatus;
-  summary: DeploySummary;
-  siteUrl: string;
-  commitUrl: string;
 }
 
 interface DnsResponse {
@@ -130,44 +111,15 @@ class Service {
   }
 
   async getSites(): Promise<Site[]> {
-    const { data } = await this.client.get<Site[]>('/sites');
+    const { data } = await this.client.get<Site[]>(
+      '/sites?filter=all&sort_by=updated_at&include_favorites=true',
+    );
     return data;
   }
 
-  async getDeploys(site: string): Promise<DeployItem[]> {
-    const response = await this.client.get<DeployItemResponse[]>(
-      `/sites/${site}/deploys`,
-    );
-    return response.data.map((item) => {
-      return {
-        id: item.id,
-        name: item.title || 'No deploy message',
-        siteId: item.site_id,
-        status: getDeployStatus(item.error_message, item.skipped),
-      };
-    });
-  }
-
-  async getDeploy(siteId: string, deployId: string): Promise<Deploy> {
-    const { data } = await this.client.get<DeployResponse>(
-      `/sites/${siteId}/deploys/${deployId}`,
-    );
-
-    return {
-      id: deployId,
-      name: data.title || 'No deploy message',
-      site: {
-        id: data.site_id,
-        name: data.name,
-      },
-      url: data.url,
-      author: data.committer,
-      publishDate: new Date(data.created_at),
-      status: getDeployStatus(data.error_message, data.skipped),
-      summary: data.summary.messages,
-      siteUrl: data.links.permalink,
-      commitUrl: data.commit_url,
-    };
+  async getDeploys(site: string): Promise<Deploy[]> {
+    const { data } = await this.client.get<Deploy[]>(`/sites/${site}/deploys`);
+    return data;
   }
 
   async getDomains(): Promise<Domain[]> {
@@ -209,10 +161,6 @@ class Service {
       };
     });
   }
-}
-
-function getDeployStatus(error?: string, skipped?: boolean): DeployStatus {
-  return !error ? 'ok' : skipped ? 'skipped' : 'error';
 }
 
 export default Service;
