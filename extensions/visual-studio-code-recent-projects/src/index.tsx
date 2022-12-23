@@ -1,11 +1,11 @@
-import { ActionPanel, List, Action, Grid } from "@raycast/api";
+import { ActionPanel, List, Action, Grid, PreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
 import { useRecentEntries } from "./db";
 import { isDeepStrictEqual } from "util";
-import { preferences, layout } from "./preferences";
+import { preferences, layout, getBundleIdentifier } from "./preferences";
 import {
   Filters,
   EntryLike,
@@ -15,7 +15,6 @@ import {
   isRemoteEntry,
   isWorkspaceEntry,
   RemoteEntry,
-  VSCodeBuild,
 } from "./types";
 import {
   ListOrGrid,
@@ -80,7 +79,7 @@ export default function Command() {
     const prettyPath = tildify(path);
     const subtitle = dirname(prettyPath);
     const keywords = path.split("/");
-    const appKey = preferences.build === VSCodeBuild.Code ? "com.microsoft.VSCode" : "com.microsoft.VSCodeInsiders";
+    const appKey = getBundleIdentifier();
 
     const Actions = (): JSX.Element => (
       <ActionPanel>
