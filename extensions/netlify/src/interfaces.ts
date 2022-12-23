@@ -79,6 +79,7 @@ export interface Site {
 export interface Team {
   name: string;
   slug: string;
+  team_logo_url?: string;
 }
 
 export interface User {
