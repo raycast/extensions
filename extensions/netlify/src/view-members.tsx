@@ -1,10 +1,10 @@
 import { List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { Member, Team } from './interfaces';
-import Service from './service';
+import Api from './api';
 import { getToken, handleNetworkError } from './utils';
 
-const service = new Service(getToken());
+const api = new Api(getToken());
 
 export default function Command() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -14,11 +14,11 @@ export default function Command() {
   useEffect(() => {
     async function fetchTeams() {
       try {
-        const teams = await service.getTeams();
+        const teams = await api.getTeams();
 
         const members: Record<string, Member[]> = {};
         for (const team of teams) {
-          const teamMembers = await service.getMembers(team.slug);
+          const teamMembers = await api.getMembers(team.slug);
           members[team.slug] = teamMembers;
         }
         setMembers(members);
