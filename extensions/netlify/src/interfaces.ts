@@ -67,8 +67,6 @@ export interface Site {
   admin_url: string;
   build_settings: {
     repo_url: string;
-    stop_builds: boolean;
-    env: Record<string, string>;
   };
   created_at: string;
   id: string;
@@ -87,7 +85,5 @@ export interface Team {
 }
 
 export interface User {
-  email: string;
   favorite_sites: string[];
-  full_name: string;
 }
