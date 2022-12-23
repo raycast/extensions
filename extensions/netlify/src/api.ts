@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { Deploy, Domain, Member, Site, Team } from './interfaces';
+import { Deploy, Domain, Member, Site, Team, User } from './interfaces';
 
 class Api {
   client: AxiosInstance;
@@ -39,6 +39,11 @@ class Api {
 
   async getTeams(): Promise<Team[]> {
     const { data } = await this.client.get<Team[]>(`/accounts`);
+    return data;
+  }
+
+  async getUser(): Promise<User> {
+    const { data } = await this.client.get<User>(`/user`);
     return data;
   }
 }
