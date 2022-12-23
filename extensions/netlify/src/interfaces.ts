@@ -60,6 +60,7 @@ export interface Member {
 export interface Site {
   account_name: string;
   account_slug: string;
+  admin_url: string;
   build_settings: {
     repo_url: string;
     stop_builds: boolean;
