@@ -5,7 +5,7 @@ import TimeAgo from "javascript-time-ago";
 
 const preferences: Preferences = getPreferenceValues();
 export const gridSize: Grid.ItemSize = preferences.gridSize as Grid.ItemSize;
-export const numRecent: number = preferences.numRecent;
+export const numRecent = preferences.numRecentRows * (gridSize === Grid.ItemSize.Small ? 8 : 5);
 export const previewSize = gridSize === "small" ? "128" : "256";
 
 TimeAgo.addDefaultLocale(en);
