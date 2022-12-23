@@ -1,12 +1,6 @@
 import { ActionPanel, Detail, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import Service, {
-  Deploy,
-  DeployItem,
-  DeployStatus,
-  Site,
-  SiteItem,
-} from './service';
+import Service, { Deploy, DeployItem, DeployStatus, Site } from './service';
 import {
   formatDate,
   formatDeployDate,
@@ -20,13 +14,13 @@ import {
 const service = new Service(getToken());
 
 export default function Command() {
-  const [sites, setSites] = useState<SiteItem[]>([]);
+  const [sites, setSites] = useState<Site[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const siteMap = useMemo(() => {
-    const map: Record<string, SiteItem[]> = {};
+    const map: Record<string, Site[]> = {};
     for (const site of sites) {
-      const { id } = site.team;
+      const { account_slug: id } = site;
       if (!map[id]) {
         map[id] = [];
       }
@@ -38,7 +32,7 @@ export default function Command() {
   const teams = useMemo(() => {
     const map: Record<string, string> = {};
     for (const site of sites) {
-      const { id, name } = site.team;
+      const { account_slug: id, account_name: name } = site;
       if (map[id]) {
         continue;
       }
@@ -51,6 +45,7 @@ export default function Command() {
     async function fetchSites() {
       try {
         const sites = await service.getSites();
+        console.log(sites[0]);
         setSites(sites);
         setLoading(false);
       } catch (e) {
@@ -63,26 +58,65 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail>
       {Object.keys(siteMap).map((team) => (
         <List.Section key={team} title={teams[team]}>
           {siteMap[team].map((site) => (
             <List.Item
               key={site.id}
               title={site.name}
-              subtitle={site.siteUrl}
+              // subtitle={site.siteUrl}
+              detail={
+                <List.Item.Detail
+                  markdown={`![${site.name}](${site.screenshot_url})`}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="Site ID"
+                        text={site.id}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Production URL"
+                        text={site.ssl_url}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Repo URL"
+                        text={site.build_settings.repo_url || 'N/A'}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Last published"
+                        text={
+                          site.published_deploy?.published_at
+                            ? formatDate(
+                                new Date(site.published_deploy?.published_at),
+                              )
+                            : 'Never'
+                        }
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
               actions={
                 <ActionPanel>
-                  <Action.Push
-                    icon={Icon.BlankDocument}
-                    title="Show Details"
-                    target={<SiteView id={site.id} />}
-                  />
                   <Action.Push
                     icon={Icon.Hammer}
                     title="Show Deploys"
                     target={
                       <DeployListView siteId={site.id} siteName={site.name} />
+                    }
+                  />
+                  <Action.Push
+                    icon={Icon.Text}
+                    title="Show Environment Variables"
+                    target={
+                      <EnvVariableView
+                        value={site.build_settings.env}
+                        siteName={site.name}
+                      />
                     }
                   />
                   <Action.OpenInBrowser
@@ -92,12 +126,12 @@ export default function Command() {
                   />
                   <Action.OpenInBrowser
                     title="Open Site"
-                    url={site.siteUrl}
+                    url={site.url}
                     shortcut={{ key: 's', modifiers: ['cmd'] }}
                   />
                   <Action.OpenInBrowser
                     title="Open Repository"
-                    url={site.repositoryUrl}
+                    url={site.build_settings.repo_url}
                     shortcut={{ key: 'g', modifiers: ['cmd'] }}
                   />
                 </ActionPanel>
@@ -108,10 +142,6 @@ export default function Command() {
       ))}
     </List>
   );
-}
-
-interface SiteProps {
-  id: string;
 }
 
 interface DeployListProps {
@@ -127,94 +157,6 @@ interface DeployProps {
 interface EnvVariableProps {
   siteName: string;
   value: Record<string, string>;
-}
-
-function SiteView(props: SiteProps) {
-  const [site, setSite] = useState<Site | null>(null);
-  const [isLoading, setLoading] = useState<boolean>(true);
-
-  const { id } = props;
-
-  useEffect(() => {
-    async function fetchSite() {
-      try {
-        const site = await service.getSite(id);
-        setSite(site);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    fetchSite();
-  }, []);
-
-  if (!site) {
-    return <Detail isLoading={isLoading} />;
-  }
-  const {
-    name,
-    publishDate,
-    createDate,
-    isAutoPublishEnabled,
-    environmentVariables,
-  } = site;
-
-  const markdown = `
-  # ${name}
-
-  ## Autopublish
-
-  ${isAutoPublishEnabled ? 'enabled' : 'disabled'}
-
-  ## Last publish date
-
-  ${formatDate(publishDate)}
-  
-  ## Creation date
-
-  ${formatDate(createDate)}
-  `;
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      navigationTitle={`Site: ${site.name}`}
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action.Push
-            icon={Icon.Hammer}
-            title="Show Deploys"
-            target={<DeployListView siteId={id} siteName={name} />}
-          />
-          <Action.Push
-            icon={Icon.Text}
-            title="Show Environment Variables"
-            target={
-              <EnvVariableView value={environmentVariables} siteName={name} />
-            }
-          />
-          <Action.OpenInBrowser
-            title="Open on Netlify"
-            url={getSiteUrl(site.name)}
-            shortcut={{ key: 'n', modifiers: ['cmd'] }}
-          />
-          <Action.OpenInBrowser
-            title="Open Site"
-            url={site.siteUrl}
-            shortcut={{ key: 's', modifiers: ['cmd'] }}
-          />
-          <Action.OpenInBrowser
-            title="Open Repository"
-            url={site.repositoryUrl}
-            shortcut={{ key: 'g', modifiers: ['cmd'] }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
 }
 
 function DeployListView(props: DeployListProps) {
