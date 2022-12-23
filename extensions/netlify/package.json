@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netlify",
   "title": "Netlify",
-  "description": "View your Netlify sites, domains, and team members",
+  "description": "Search your Netlify sites, domains, and team members",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
@@ -17,23 +17,23 @@
   "commands": [
     {
       "name": "view-sites",
-      "title": "View Sites",
+      "title": "Search Sites",
       "subtitle": "Netlify",
-      "description": "View your sites",
+      "description": "Search your sites",
       "mode": "view"
     },
     {
       "name": "view-domains",
-      "title": "View Domains",
+      "title": "List Domains",
       "subtitle": "Netlify",
-      "description": "View your domains",
+      "description": "List your domains",
       "mode": "view"
     },
     {
       "name": "view-members",
-      "title": "View Members",
+      "title": "List Members",
       "subtitle": "Netlify",
-      "description": "View team members",
+      "description": "List team members",
       "mode": "view"
     }
   ],
