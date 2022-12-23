@@ -14,8 +14,8 @@ import { execSync } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
-import { Tab } from "./types";
-import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils";
+import { Tab } from "./utils/types";
+import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils/utils";
 
 const execAsync = promisify(execSync);
 

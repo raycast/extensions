@@ -10,6 +10,16 @@ import wasmBinary from "sql.js/dist/sql-wasm.wasm";
 
 export const databasePath = join(homedir(), "Library", "Application Support", "Arc", "User Data", "Default", "History");
 
+export const topSitesPath = join(
+  homedir(),
+  "Library",
+  "Application Support",
+  "Arc",
+  "User Data",
+  "Default",
+  "Top Sites"
+);
+
 export function getQuery(searchText?: string) {
   const whereClause = searchText
     ? searchText
@@ -28,6 +38,27 @@ export function getQuery(searchText?: string) {
     ${whereClause ? `WHERE ${whereClause}` : ""}
     GROUP BY url
     ORDER BY last_visit_time DESC
+    LIMIT 100;
+  `;
+}
+
+export function getTopSites(searchText?: string) {
+  const whereClause = searchText
+    ? searchText
+        .split(" ")
+        .filter((word) => word.length > 0)
+        .map((term) => `(url LIKE "%${term}%" OR title LIKE "%${term}%")`)
+        .join(" AND ")
+    : undefined;
+
+  return `
+    SELECT url,
+           title,
+           url_rank
+    FROM top_sites
+    ${whereClause ? `WHERE ${whereClause}` : ""}
+    GROUP BY url
+    ORDER BY url_rank
     LIMIT 100;
   `;
 }

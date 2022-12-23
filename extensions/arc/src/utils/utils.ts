@@ -100,3 +100,20 @@ export async function createNewArcWindow() {
     end tell
   `);
 }
+
+export const match = (a: string, b: string) => {
+  return a.toLowerCase().includes(b.toLowerCase());
+};
+
+export const getHexColor = (r: number, g: number, b: number): string => {
+  return (
+    "#" +
+    [r, g, b]
+      .map((x) =>
+        Math.round(x * 128 + 128)
+          .toString(16)
+          .padStart(2, "0")
+      )
+      .join("")
+  );
+};

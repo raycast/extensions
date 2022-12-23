@@ -2,13 +2,13 @@ import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@rayc
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import { OpenInLittleArc, OpenInNewWindow, OpenInOtherBrowserAction } from "./actions";
-import { databasePath, getQuery, useSQL } from "./utils/sql";
-import { HistoryEntry } from "./utils/types";
-import { getDomain, getLastVisitedAt, isPermissionError } from "./utils/utils";
+import { topSitesPath, getTopSites, useSQL } from "./utils/sql";
+import { TopSite } from "./utils/types";
+import { getDomain, isPermissionError } from "./utils/utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const { data, isLoading, error } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
+  const { data, isLoading, error } = useSQL<TopSite>(topSitesPath, getTopSites(searchText));
 
   if (error) {
     if (isPermissionError(error)) {
@@ -23,15 +23,14 @@ export default function Command() {
   }
 
   return (
-    <List searchBarPlaceholder="Search history" isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List searchBarPlaceholder="Top Sites" isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.EmptyView title="Not Found" />
-      {data?.map((entry) => (
+      {data?.map((entry: TopSite, index: number) => (
         <List.Item
-          key={entry.id}
+          key={index}
           icon={getFavicon(entry.url)}
           title={entry.title}
           subtitle={getDomain(entry.url)}
-          accessories={[getLastVisitedAt(entry)]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>

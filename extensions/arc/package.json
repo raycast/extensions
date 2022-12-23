@@ -27,8 +27,21 @@
       "title": "Open New Window",
       "description": "Creates a new window",
       "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "top-sites",
+      "title": "Top Sites",
       "subtitle": "Arc",
-      "icon": "icon-dark.png"
+      "description": "Search your top sites.",
+      "mode": "view"
+    },
+    {
+      "name": "sidebar",
+      "title": "Search Sidebar",
+      "subtitle": "Arc",
+      "description": "Search your current sidebar.",
+      "mode": "view"
     }
   ],
   "dependencies": {
