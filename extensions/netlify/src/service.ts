@@ -10,6 +10,7 @@ class Service {
       baseURL: 'https://api.netlify.com/api/v1',
       headers: {
         Authorization: `Bearer ${apiToken}`,
+        'User-Agent': 'netlify-raycast-extension',
       },
     });
   }
