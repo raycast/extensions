@@ -51,7 +51,7 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
 export enum VSCodeBuild {
   Code = "Code",
   Insiders = "Code - Insiders",
-  VSCodium = "VSCodium"
+  VSCodium = "VSCodium",
 }
 
 export interface Preferences {
