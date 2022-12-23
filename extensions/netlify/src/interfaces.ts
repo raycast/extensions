@@ -2,6 +2,8 @@ export interface Preferences {
   token: string;
 }
 
+export type DeployContext = 'production' | 'deploy-preview' | 'branch-deploy';
+
 export type DeployState =
   | 'retrying'
   | 'new'
@@ -26,7 +28,7 @@ export interface Deploy {
   commit_ref?: string;
   commit_url?: string;
   committer?: string;
-  context: 'production' | 'deploy-preview' | 'branch-deploy';
+  context: DeployContext;
   created_at: string;
   deploy_time: number;
   deploy_ssl_url: string;
