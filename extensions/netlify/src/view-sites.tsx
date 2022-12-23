@@ -1,10 +1,8 @@
-import { ActionPanel, Detail, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import Service, { Deploy, DeployItem, DeployStatus, Site } from './service';
+import Service, { Deploy, DeployState, Site } from './service';
 import {
   formatDate,
-  formatDeployDate,
-  formatDeployStatus,
   getDeployUrl,
   getSiteUrl,
   getToken,
@@ -45,7 +43,6 @@ export default function Command() {
     async function fetchSites() {
       try {
         const sites = await service.getSites();
-        console.log(sites[0]);
         setSites(sites);
         setLoading(false);
       } catch (e) {
@@ -58,7 +55,11 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarPlaceholder="Search by site name..."
+    >
       {Object.keys(siteMap).map((team) => (
         <List.Section key={team} title={teams[team]}>
           {siteMap[team].map((site) => (
@@ -77,13 +78,13 @@ export default function Command() {
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
-                        title="Production URL"
-                        text={site.ssl_url}
+                        title="Repo URL"
+                        text={site.build_settings.repo_url || 'N/A'}
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
-                        title="Repo URL"
-                        text={site.build_settings.repo_url || 'N/A'}
+                        title="Production URL"
+                        text={site.ssl_url}
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
@@ -126,7 +127,7 @@ export default function Command() {
                   />
                   <Action.OpenInBrowser
                     title="Open Site"
-                    url={site.url}
+                    url={site.ssl_url}
                     shortcut={{ key: 's', modifiers: ['cmd'] }}
                   />
                   <Action.OpenInBrowser
@@ -149,24 +150,14 @@ interface DeployListProps {
   siteName: string;
 }
 
-interface DeployProps {
-  siteId: string;
-  id: string;
-}
-
-interface EnvVariableProps {
-  siteName: string;
-  value: Record<string, string>;
-}
-
 function DeployListView(props: DeployListProps) {
-  const [deploys, setDeploys] = useState<DeployItem[]>([]);
+  const [deploys, setDeploys] = useState<Deploy[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const { siteId, siteName } = props;
 
   useEffect(() => {
-    async function fetchSite() {
+    async function fetchDeploys() {
       try {
         const deploys = await service.getDeploys(siteId);
         setDeploys(deploys);
@@ -177,34 +168,141 @@ function DeployListView(props: DeployListProps) {
       }
     }
 
-    fetchSite();
+    fetchDeploys();
   }, []);
 
-  function getStatusIcon(status: DeployStatus): Icon {
-    switch (status) {
-      case 'ok':
-        return Icon.Checkmark;
-      case 'error':
-        return Icon.XMarkCircle;
-      case 'skipped':
-        return Icon.Circle;
-    }
+  function getStatus(state: DeployState): { icon: Icon; color: string } {
+    const deployStateMap = {
+      retrying: { icon: Icon.Circle, color: '#7a4804' },
+      new: { icon: Icon.Circle, color: '#7a4804' },
+      pending_review: { icon: Icon.Circle, color: '#7a4804' },
+      accepted: { icon: Icon.Circle, color: '#7a4804' },
+      enqueued: { icon: Icon.Circle, color: '#7a4804' },
+      building: { icon: Icon.CircleProgress25, color: '#7a4804' },
+      uploading: { icon: Icon.CircleProgress50, color: '#7a4804' },
+      uploaded: { icon: Icon.CircleProgress50, color: '#7a4804' },
+      preparing: { icon: Icon.CircleProgress75, color: '#7a4804' },
+      prepared: { icon: Icon.CircleProgress75, color: '#7a4804' },
+      processing: { icon: Icon.CircleProgress100, color: '#7a4804' },
+      error: { icon: Icon.XMarkCircle, color: '#7a122d' },
+      rejected: { icon: Icon.XMarkCircle, color: '#7a122d' },
+      deleted: { icon: Icon.CheckCircle, color: '#7a122d' },
+      skipped: { icon: Icon.MinusCircle, color: '#151b1e' },
+      cancelled: { icon: Icon.MinusCircle, color: '#151b1e' },
+      ready: { icon: Icon.CheckCircle, color: '#064860' },
+    };
+    return deployStateMap[state] || { icon: Icon.Circle, color: '#064860' };
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Deploys: ${siteName}`}>
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      navigationTitle={`Deploys: ${siteName}`}
+      searchBarPlaceholder="Filter recent deploys by id, title, author, number, branch, sha..."
+    >
       {deploys.map((deploy) => (
         <List.Item
           key={deploy.id}
-          icon={getStatusIcon(deploy.status)}
-          title={deploy.name}
+          icon={getStatus(deploy.state).icon}
+          title={deploy.title || deploy.commit_ref || deploy.id}
+          keywords={[
+            deploy.id,
+            deploy.branch,
+            deploy.committer || '',
+            String(deploy.review_id),
+            String(deploy.commit_ref),
+          ]}
+          detail={
+            <List.Item.Detail
+              // markdown={`![${site.name}](${site.screenshot_url})`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label
+                    title={
+                      deploy.review_url
+                        ? 'Pull request title'
+                        : 'Commit message'
+                    }
+                    text={deploy.title || deploy.commit_ref || deploy.id}
+                  />
+                  {deploy.review_url ? (
+                    <List.Item.Detail.Metadata.Label
+                      title="Pull request URL"
+                      text={deploy.review_url}
+                    />
+                  ) : (
+                    <List.Item.Detail.Metadata.Label
+                      title="Commit URL"
+                      text={deploy.commit_url}
+                    />
+                  )}
+                  {deploy.committer && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Author"
+                      text={deploy.committer}
+                    />
+                  )}
+                  {deploy.commit_ref && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Git ref"
+                      text={`${deploy.branch}@${deploy.commit_ref.substr(
+                        0,
+                        7,
+                      )}`}
+                    />
+                  )}
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.TagList title="Deploy state">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={deploy.state.toUpperCase()}
+                      color={getStatus(deploy.state).color}
+                      // icon={getStatus(deploy.state).icon}
+                    />
+                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="Deploy ID"
+                    text={deploy.id}
+                  />
+                  {deploy.deploy_ssl_url && (
+                    <List.Item.Detail.Metadata.Label
+                      title={
+                        deploy.context === 'production'
+                          ? 'URL'
+                          : 'Deploy Preview'
+                      }
+                      text={deploy.deploy_ssl_url}
+                    />
+                  )}
+                  {deploy.links.branch && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Branch deploy"
+                      text={deploy.links.branch}
+                    />
+                  )}
+                  {deploy.links.permalink && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Permalink"
+                      text={deploy.links.permalink}
+                    />
+                  )}
+                  {deploy.deploy_time && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Deploy time"
+                      text={`${deploy.deploy_time} seconds`}
+                    />
+                  )}
+                  <List.Item.Detail.Metadata.Label
+                    title="Created at"
+                    text={formatDate(new Date(deploy.created_at))}
+                  />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
-              <Action.Push
-                icon={Icon.BlankDocument}
-                title="Show Details"
-                target={<DeployView siteId={siteId} id={deploy.id} />}
-              />
               <Action.OpenInBrowser
                 title="Open on Netlify"
                 url={getDeployUrl(siteName, deploy.id)}
@@ -217,70 +315,9 @@ function DeployListView(props: DeployListProps) {
   );
 }
 
-function DeployView(props: DeployProps) {
-  const [deploy, setDeploy] = useState<Deploy | null>(null);
-  const [isLoading, setLoading] = useState<boolean>(true);
-
-  const { siteId, id } = props;
-
-  useEffect(() => {
-    async function fetchSite() {
-      try {
-        const deploy = await service.getDeploy(siteId, id);
-        setDeploy(deploy);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    fetchSite();
-  }, []);
-
-  if (!deploy) {
-    return <Detail isLoading={isLoading} navigationTitle="Deploy" />;
-  }
-  const { name, site, siteUrl, publishDate, commitUrl, status } = deploy;
-
-  const markdown = `
-  # ${name}
-
-  ## Date
-
-  ${formatDeployDate(publishDate)}
-
-  ## Status
-
-  ${formatDeployStatus(status)}
-  `;
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      navigationTitle="Deploy"
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open on Netlify"
-            url={getDeployUrl(site.name, id)}
-            shortcut={{ key: 'n', modifiers: ['cmd'] }}
-          />
-          <Action.OpenInBrowser
-            title="Open Site"
-            url={siteUrl}
-            shortcut={{ key: 's', modifiers: ['cmd'] }}
-          />
-          <Action.OpenInBrowser
-            title="Open Commit"
-            url={commitUrl}
-            shortcut={{ key: 'g', modifiers: ['cmd'] }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
+interface EnvVariableProps {
+  siteName: string;
+  value: Record<string, string>;
 }
 
 function EnvVariableView(props: EnvVariableProps) {
