@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from './api';
-import { Deploy } from './interfaces';
+import { Deploy, DeployContext } from './interfaces';
 import {
   formatDate,
   getDeployUrl,
@@ -16,8 +16,9 @@ interface Props {
 }
 
 export function DeployListView(props: Props) {
-  const [deploys, setDeploys] = useState<Deploy[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [deploys, setDeploys] = useState<Deploy[]>([]);
+  const [context, setContext] = useState<string>('');
 
   const { siteId, siteName } = props;
 
@@ -36,29 +37,48 @@ export function DeployListView(props: Props) {
     fetchDeploys();
   }, []);
 
+  const ContextDropdown = (
+    <List.Dropdown
+      onChange={setContext}
+      storeValue
+      tooltip="Fliter by deploy context"
+    >
+      <List.Dropdown.Item title="All deploy contexts" value="" />
+      <List.Dropdown.Section>
+        <List.Dropdown.Item title="Production Deploys" value="production" />
+        <List.Dropdown.Item title="Deploy Previews" value="deploy-preview" />
+        <List.Dropdown.Item title="Branch Deploys" value="branch-deploy" />
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
       navigationTitle={`Deploys: ${siteName}`}
-      searchBarPlaceholder="Filter recent deploys by id, title, author, number, branch, sha..."
+      searchBarAccessory={ContextDropdown}
+      searchBarPlaceholder="Filter recent deploys..."
     >
-      {deploys.map((deploy) => (
-        <List.Item
-          key={deploy.id}
-          icon={getStatusIcon(deploy.state)}
-          title={deploy.title || deploy.commit_ref || deploy.id}
-          keywords={[
-            deploy.id,
-            deploy.branch || '',
-            deploy.committer || '',
-            String(deploy.review_id),
-            String(deploy.commit_ref),
-          ]}
-          detail={<DeployMetadata deploy={deploy} />}
-          actions={<DeployActions deploy={deploy} siteName={siteName} />}
-        />
-      ))}
+      {deploys
+        .filter((deploy) => (context ? deploy.context === context : true))
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+        .map((deploy) => (
+          <List.Item
+            key={deploy.id}
+            icon={getStatusIcon(deploy.state)}
+            title={deploy.title || deploy.commit_ref || deploy.id}
+            keywords={[
+              deploy.id,
+              deploy.branch || '',
+              deploy.committer || '',
+              String(deploy.review_id),
+              String(deploy.commit_ref),
+            ]}
+            detail={<DeployMetadata deploy={deploy} />}
+            actions={<DeployActions deploy={deploy} siteName={siteName} />}
+          />
+        ))}
     </List>
   );
 }
@@ -126,7 +146,7 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
         />
         <List.Item.Detail.Metadata.Label
           title="Deployed at"
-          text={formatDate(new Date(deploy.updated_at))}
+          text={formatDate(new Date(deploy.created_at))}
         />
         {deploy.deploy_time && (
           <List.Item.Detail.Metadata.Label
