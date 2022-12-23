@@ -22,17 +22,24 @@ export class SearchHistory {
   }
 
   /**
-   * Adds a query to the instance's search history record.
+   * Adds a query to the instance's search history record. If the query looks like it may
+   * be a progression of the most recent query - i.e. the previous query may be a query
+   * that was still being composed - we will replace the previous entry with this a new
+   * one.
    */
   static async addSearch(src: Sourcegraph, query: string) {
     const searchHistoryData = await LocalStorage.getItem<string>(this.localStorageKey(src));
     const searchHistory = searchHistoryData ? (JSON.parse(searchHistoryData) as SearchHistoryItem[]) : [];
 
     const previous = searchHistory.length > 0 ? searchHistory[0] : undefined;
-    if (previous && query.startsWith(previous.query)) {
-      // Remove previous search if it is an exact prefix of this search - since we
-      // search-as-we-type, this prevents partial queries from persisting to history.
-      searchHistory.shift();
+    if (previous) {
+      // Remove previous search if it is an exact prefix or exact suffix of this search -
+      // adding to the start and end of a query is the most common way to update a query
+      // in a way that indicates the previous query was just a query that is still being
+      // composed.
+      if (query.startsWith(previous.query) || query.endsWith(previous.query)) {
+        searchHistory.shift();
+      }
     }
 
     // Push this search to top

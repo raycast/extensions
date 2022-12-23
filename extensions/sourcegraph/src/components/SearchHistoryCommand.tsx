@@ -1,7 +1,6 @@
 import { List, Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { DateTime } from "luxon";
-import { nanoid } from "nanoid";
 import { useState } from "react";
 import { SearchHistory } from "../searchHistory";
 
@@ -15,6 +14,8 @@ const link = new LinkBuilder("search-history");
 function getQueryURL(src: Sourcegraph, query: string) {
   return link.new(src, "/search", new URLSearchParams({ q: query }));
 }
+
+const OLD_ITEM_THRESHOLD_MINUTES = 30;
 
 export default function SearchHistoryCommand({ src }: { src: Sourcegraph }) {
   const state = usePromise(async (src: Sourcegraph) => SearchHistory.loadHistory(src), [src]);
@@ -56,65 +57,71 @@ export default function SearchHistoryCommand({ src }: { src: Sourcegraph }) {
       {!state.data?.length ? (
         <List.EmptyView title="Press 'Enter' to start a new code search!" />
       ) : (
-        state.data?.map((item) => (
-          <List.Item
-            key={nanoid()}
-            icon={{
-              source: Icon.MagnifyingGlass,
-              tintColor: ColorDefault,
-            }}
-            title={item.query}
-            accessories={[
-              {
-                date: DateTime.fromMillis(item.timestamp).toJSDate(),
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={Icon.Rocket}
-                  title="Launch Code Search"
-                  onAction={async () => SearchHistory.launchSearch(src, item)}
-                />
-                <Action.OpenInBrowser
-                  icon={Icon.Globe}
-                  title="Open Query in Browser"
-                  url={getQueryURL(src, item.query)}
-                  shortcut={secondaryActionShortcut}
-                />
-                <Action.CopyToClipboard
-                  icon={Icon.Clipboard}
-                  title="Copy Query"
-                  content={item.query}
-                  shortcut={copyShortcut}
-                />
+        state.data?.map((item, index) => {
+          const time = DateTime.fromMillis(item.timestamp);
 
-                <Action
-                  icon={Icon.Trash}
-                  title="Remove Item"
-                  style={Action.Style.Destructive}
-                  onAction={async () => {
-                    await SearchHistory.removeItem(src, item);
-                    await state.revalidate();
-                  }}
-                  shortcut={deleteShortcut}
-                />
+          return (
+            <List.Item
+              key={`search-history-item-${index}`}
+              icon={{
+                source: Icon.MagnifyingGlass,
+                tintColor:
+                  Math.abs(time.diffNow().as("minutes")) < OLD_ITEM_THRESHOLD_MINUTES ? ColorDefault : undefined,
+              }}
+              title={item.query}
+              accessories={[
+                {
+                  date: time.toJSDate(),
+                  tooltip: time.toLocaleString(DateTime.DATETIME_MED),
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    icon={Icon.Rocket}
+                    title="Launch Code Search"
+                    onAction={async () => SearchHistory.launchSearch(src, item)}
+                  />
+                  <Action.OpenInBrowser
+                    icon={Icon.Globe}
+                    title="Open Query in Browser"
+                    url={getQueryURL(src, item.query)}
+                    shortcut={secondaryActionShortcut}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Query"
+                    content={item.query}
+                    shortcut={copyShortcut}
+                  />
 
-                {newSearchAction}
+                  <Action
+                    icon={Icon.Trash}
+                    title="Remove Item"
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      await SearchHistory.removeItem(src, item);
+                      await state.revalidate();
+                    }}
+                    shortcut={deleteShortcut}
+                  />
 
-                <Action
-                  icon={Icon.Trash}
-                  title="Clear Search History"
-                  style={Action.Style.Destructive}
-                  onAction={async () => {
-                    await SearchHistory.clearHistory(src);
-                    await state.revalidate();
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+                  {newSearchAction}
+
+                  <Action
+                    icon={Icon.Trash}
+                    title="Clear Search History"
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      await SearchHistory.clearHistory(src);
+                      await state.revalidate();
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );

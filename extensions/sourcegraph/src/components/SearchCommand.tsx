@@ -86,15 +86,6 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
 
           <Fragment>
             <List.Item
-              title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
-              icon={{ source: Icon.Window }}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
-                </ActionPanel>
-              }
-            />
-            <List.Item
               title="View recent searches"
               icon={{ source: Icon.List }}
               actions={
@@ -108,6 +99,15 @@ export default function SearchCommand({ src, props }: { src: Sourcegraph; props?
                       })
                     }
                   />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
+              icon={{ source: Icon.Window }}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
                 </ActionPanel>
               }
             />
