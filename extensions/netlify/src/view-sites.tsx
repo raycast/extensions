@@ -1,12 +1,12 @@
 import { ActionPanel, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 
+import Api from './api';
 import { Site } from './interfaces';
-import Service from './service';
 import { formatDate, getSiteUrl, getToken, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
 
-const service = new Service(getToken());
+const api = new Api(getToken());
 
 export default function Command() {
   const [sites, setSites] = useState<Site[]>([]);
@@ -39,7 +39,7 @@ export default function Command() {
   async function fetchSites(query = '') {
     setLoading(true);
     try {
-      const sites = await service.getSites(query);
+      const sites = await api.getSites(query);
       setSites(sites);
       setLoading(false);
     } catch (e) {
