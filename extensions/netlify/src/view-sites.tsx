@@ -1,6 +1,8 @@
-import { ActionPanel, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import Service, { Deploy, DeployState, Site } from './service';
+
+import { Deploy, DeployState, Site } from './interfaces';
+import Service from './service';
 import {
   formatDate,
   getDeployUrl,
@@ -66,7 +68,12 @@ export default function Command() {
             <List.Item
               key={site.id}
               title={site.name}
-              // subtitle={site.siteUrl}
+              // accessories={[
+              //   {
+              //     icon: { source: Icon.Star, tintColor: Color.Yellow },
+              //     tooltip: 'Favorite',
+              //   },
+              // ]}
               detail={
                 <List.Item.Detail
                   markdown={`![${site.name}](${site.screenshot_url})`}
@@ -171,27 +178,32 @@ function DeployListView(props: DeployListProps) {
     fetchDeploys();
   }, []);
 
-  function getStatus(state: DeployState): { icon: Icon; color: string } {
+  function getStatusIcon(state: DeployState): {
+    source: Icon;
+    tintColor: Color;
+  } {
     const deployStateMap = {
-      retrying: { icon: Icon.Circle, color: '#7a4804' },
-      new: { icon: Icon.Circle, color: '#7a4804' },
-      pending_review: { icon: Icon.Circle, color: '#7a4804' },
-      accepted: { icon: Icon.Circle, color: '#7a4804' },
-      enqueued: { icon: Icon.Circle, color: '#7a4804' },
-      building: { icon: Icon.CircleProgress25, color: '#7a4804' },
-      uploading: { icon: Icon.CircleProgress50, color: '#7a4804' },
-      uploaded: { icon: Icon.CircleProgress50, color: '#7a4804' },
-      preparing: { icon: Icon.CircleProgress75, color: '#7a4804' },
-      prepared: { icon: Icon.CircleProgress75, color: '#7a4804' },
-      processing: { icon: Icon.CircleProgress100, color: '#7a4804' },
-      error: { icon: Icon.XMarkCircle, color: '#7a122d' },
-      rejected: { icon: Icon.XMarkCircle, color: '#7a122d' },
-      deleted: { icon: Icon.CheckCircle, color: '#7a122d' },
-      skipped: { icon: Icon.MinusCircle, color: '#151b1e' },
-      cancelled: { icon: Icon.MinusCircle, color: '#151b1e' },
-      ready: { icon: Icon.CheckCircle, color: '#064860' },
+      retrying: { source: Icon.Circle, tintColor: Color.Yellow },
+      new: { source: Icon.Circle, tintColor: Color.Yellow },
+      pending_review: { source: Icon.Circle, tintColor: Color.Yellow },
+      accepted: { source: Icon.Circle, tintColor: Color.Yellow },
+      enqueued: { source: Icon.Circle, tintColor: Color.Yellow },
+      building: { source: Icon.CircleProgress25, tintColor: Color.Orange },
+      uploading: { source: Icon.CircleProgress50, tintColor: Color.Orange },
+      uploaded: { source: Icon.CircleProgress50, tintColor: Color.Orange },
+      preparing: { source: Icon.CircleProgress75, tintColor: Color.Orange },
+      prepared: { source: Icon.CircleProgress75, tintColor: Color.Orange },
+      processing: { source: Icon.CircleProgress100, tintColor: Color.Orange },
+      error: { source: Icon.XMarkCircle, tintColor: Color.Red },
+      rejected: { source: Icon.XMarkCircle, tintColor: Color.Red },
+      deleted: { source: Icon.CheckCircle, tintColor: Color.Red },
+      skipped: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+      cancelled: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+      ready: { source: Icon.CheckCircle, tintColor: Color.Green },
     };
-    return deployStateMap[state] || { icon: Icon.Circle, color: '#064860' };
+    return (
+      deployStateMap[state] || { source: Icon.Circle, tintColor: Color.Green }
+    );
   }
 
   return (
@@ -204,7 +216,7 @@ function DeployListView(props: DeployListProps) {
       {deploys.map((deploy) => (
         <List.Item
           key={deploy.id}
-          icon={getStatus(deploy.state).icon}
+          icon={getStatusIcon(deploy.state)}
           title={deploy.title || deploy.commit_ref || deploy.id}
           keywords={[
             deploy.id,
@@ -256,8 +268,8 @@ function DeployListView(props: DeployListProps) {
                   <List.Item.Detail.Metadata.TagList title="Deploy state">
                     <List.Item.Detail.Metadata.TagList.Item
                       text={deploy.state.toUpperCase()}
-                      color={getStatus(deploy.state).color}
-                      // icon={getStatus(deploy.state).icon}
+                      color={getStatusIcon(deploy.state).tintColor}
+                      // icon={getStatusIcon(deploy.state).icon}
                     />
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
