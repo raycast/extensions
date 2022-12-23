@@ -1,3 +1,7 @@
+export interface Preferences {
+  token: string;
+}
+
 export interface Site {
   account_name: string;
   account_slug: string;
@@ -17,23 +21,23 @@ export interface Site {
 }
 
 export type DeployState =
-  | 'retrying' // 0
-  | 'new' // 0
-  | 'pending_review' // 0
-  | 'accepted' // 0
-  | 'enqueued' // 0
-  | 'building' // 25
-  | 'uploading' // 50
-  | 'uploaded' // 50
-  | 'preparing' // 75
-  | 'prepared' // 75
-  | 'processing' // 100
-  | 'error' // cross
-  | 'rejected' // cross
-  | 'skipped' // cross
-  | 'cancelled' // cross
-  | 'deleted' // cross
-  | 'ready'; // check
+  | 'retrying'
+  | 'new'
+  | 'pending_review'
+  | 'accepted'
+  | 'enqueued'
+  | 'building'
+  | 'uploading'
+  | 'uploaded'
+  | 'preparing'
+  | 'prepared'
+  | 'processing'
+  | 'error'
+  | 'rejected'
+  | 'skipped'
+  | 'cancelled'
+  | 'deleted'
+  | 'ready';
 
 export interface Deploy {
   branch: string;
@@ -59,9 +63,9 @@ export interface Deploy {
 }
 
 export interface Domain {
-  name: string;
-  account_slug: string;
   account_name: string;
+  account_slug: string;
+  name: string;
 }
 
 export interface Team {
