@@ -11,7 +11,7 @@ import { useEffect } from "react";
 
 import checkAuthEffect from "../hooks/checkAuthEffect";
 import { bold } from "../markdown";
-import { sourcegraphInstance, Sourcegraph } from "../sourcegraph";
+import { sourcegraphInstance, Sourcegraph, instanceName } from "../sourcegraph";
 
 /**
  * InstanceCommand wraps the given command with the configuration for a specific
@@ -78,7 +78,7 @@ export default function InstanceCommand({
 
   updateCommandMetadata({
     // We've already checked this URL is valid, so we can reliably use it here.
-    subtitle: new URL(src.instance).host,
+    subtitle: instanceName(src),
   });
 
   if (!src.token) {
