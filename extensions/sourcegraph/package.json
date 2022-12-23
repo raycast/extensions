@@ -63,6 +63,7 @@
         "sourcegraph",
         "search",
         "code",
+        "code search",
         "src"
       ],
       "preferences": [
@@ -87,6 +88,7 @@
         "sourcegraph",
         "search",
         "code",
+        "code search",
         "src"
       ],
       "preferences": [
@@ -110,6 +112,7 @@
         "sourcegraph",
         "search",
         "code",
+        "search code",
         "history",
         "recent"
       ]
@@ -125,6 +128,7 @@
         "sourcegraph",
         "search",
         "code",
+        "search code",
         "history",
         "recent"
       ]
