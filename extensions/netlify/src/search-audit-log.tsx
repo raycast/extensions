@@ -76,7 +76,9 @@ export default function Command() {
       log.payload.actor_name || '',
       JSON.stringify(log.payload.traits || {}),
     ];
-    return keywords.some((keyword) => keyword.includes(query));
+    return keywords.some((keyword) =>
+      keyword.toLowerCase().includes(query.toLowerCase()),
+    );
   });
 
   return (
