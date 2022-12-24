@@ -1,0 +1,82 @@
+import { Form, ActionPanel, Action, Icon } from "@raycast/api";
+import { useEffect, useState } from "react";
+import jsonToYaml from "./utils/json-to-yaml";
+import jsonToGo from "./utils/json-to-go";
+import jsonToTs from "./utils/json-to-ts";
+
+const ErrorInvalidJSON = "Invalid JSON";
+const ErrorIvalidFilterExpression = "Invalid filter expression";
+
+export default function Command() {
+  const [text, setText] = useState("");
+  const [pattern, setPattern] = useState("");
+  const [result, setResult] = useState("");
+  const [jsonObj, setJsonObj] = useState({});
+
+  useEffect(() => {
+    const [result, object] = filterJSONByPattern(text, pattern);
+    setResult(result);
+    setJsonObj(object);
+  }, [text, pattern]);
+
+  return (
+    <Form
+      actions={
+        text &&
+        jsonObj && (
+          <ActionPanel>
+            {<Action.CopyToClipboard content={result} title="Copy Result" />}
+            {<Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />}
+            {<Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />}
+            {<Action.CopyToClipboard content={jsonToTs(result)} title="Convert Result to Typescript definition" />}
+            {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go type definition" />}
+            {<Action.OpenInBrowser title="Sponsor Project ♥️" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />}
+          </ActionPanel>
+        )
+      }
+    >
+      <Form.TextArea id="input" title="Input" placeholder="Paste JSON here..." value={text} onChange={setText} />
+      <Form.TextField
+        id="pattern"
+        title="this"
+        placeholder='JS filter; e.g. ".key.subkey", "[0][1]", ".map(x=>x.val)"'
+        value={pattern}
+        onChange={setPattern}
+      />
+      <Form.Separator />
+      <Form.TextArea id="output" title="Result" value={result} />
+    </Form>
+  );
+}
+
+function filterJSONByPattern(input: string, pattern: string) {
+  let obj = undefined;
+
+  if (input.trim() == "") {
+    return ["", undefined];
+  }
+
+  try {
+    obj = JSON.parse(input);
+  } catch (err) {
+    return [ErrorInvalidJSON, undefined];
+  }
+
+  if (pattern) {
+    const expr = `
+        if  (obj${pattern} == null || obj${pattern} === null || obj${pattern} === 'undefined' || (typeof obj${pattern} === 'function')){
+            obj = undefined
+        } else {
+          obj = obj${pattern}
+        }
+        `;
+    try {
+      eval(expr);
+    } catch (err) {
+      return [ErrorIvalidFilterExpression, undefined];
+    }
+  }
+
+  const ret = JSON.stringify(obj, null, 2);
+  return [ret, obj];
+}
