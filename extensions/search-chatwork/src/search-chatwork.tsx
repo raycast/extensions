@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
-import { CWMessageMgr } from "./components/CWMessageMgr";
+import { CWMessageMgr } from "./model/CWMessageMgr";
 import { DetailOfChat } from "./components/DetailOfChat";
 import { useEffect, useState } from "react";
 import { getRooms, getMessagesOfAllRooms } from "./utils/chatwork-api";

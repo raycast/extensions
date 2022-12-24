@@ -1,7 +1,7 @@
-import { CWTextNodeSurrounded } from "./CWTextNodeSurrounded.tsx";
-import { CWTextNode } from "./CWTextNode.tsx";
-import { PARSER_STATE } from "./enumParser.tsx";
-import { CWTextNodeSelfClosed } from "./CWTextNodeSelfClosed.tsx";
+import { CWTextNodeSurrounded } from "./CWTextNodeSurrounded";
+import { CWTextNode } from "./CWTextNode";
+import { PARSER_STATE } from "./enumParser";
+import { CWTextNodeSelfClosed } from "./CWTextNodeSelfClosed";
 export class CWTextNodeFactory {
   /**
    * this factory produce CWText Instance that suits the pattern of raw_text

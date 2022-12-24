@@ -1,7 +1,7 @@
-import { ICWChatParser } from "./ICWChatParser.tsx";
-import { CWTextNode } from "./CWTextNode.tsx";
-import { CWTextNodeFactory } from "./CWTextNodeFactory.tsx";
-import { PARSER_STATE } from "./enumParser.tsx";
+import { ICWChatParser } from "./ICWChatParser";
+import { CWTextNode } from "./CWTextNode";
+import { CWTextNodeFactory } from "./CWTextNodeFactory";
+import { PARSER_STATE } from "./enumParser";
 
 /**
  * this class is to parse raw test provided by CW.

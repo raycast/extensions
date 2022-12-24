@@ -1,10 +1,10 @@
 import fetch, { Headers } from "node-fetch";
 import { authorize } from "./oauth";
-import { CWMessage } from "../components/CWMessage";
-import { CWChatParserV1 } from "../components/CWChatParserV1";
-import { CWRoom } from "../components/CWRoom";
-import { CMRoomOwner } from "../components/CMRoomOwner";
-import { CWMessageMgr } from "../components/CWMessageMgr";
+import { CWMessage } from "../model/CWMessage";
+import { CWChatParserV1 } from "../model/CWChatParserV1";
+import { CWRoom } from "../model/CWRoom";
+import { CMRoomOwner } from "../model/CMRoomOwner";
+import { CWMessageMgr } from "../model/CWMessageMgr";
 import { Constants } from "../utils/constants";
 
 let headers = new Headers({
