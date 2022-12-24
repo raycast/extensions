@@ -61,7 +61,11 @@ export function DeployListView(props: Props) {
         String(deploy.review_id) || '',
         String(deploy.commit_ref) || '',
       ];
-      conditions.push(keywords.some((keyword) => keyword.includes(query)));
+      conditions.push(
+        keywords.some((keyword) =>
+          keyword.toLowerCase().includes(query.toLowerCase()),
+        ),
+      );
     }
     if (context) {
       conditions.push(deploy.context === context);
