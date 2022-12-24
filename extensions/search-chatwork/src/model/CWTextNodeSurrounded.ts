@@ -1,20 +1,20 @@
 import { CWTextNode } from "./CWTextNode";
 export class CWTextNodeSurrounded extends CWTextNode {
-  protected _openTag: string;
+  protected _openTag = "";
   public get openTag(): string {
     return this._openTag;
   }
   public set openTag(value: string) {
     this._openTag = value;
   }
-  protected _closeTag: string;
+  protected _closeTag = "";
   public get closeTag(): string {
     return this._closeTag;
   }
   public set closeTag(value: string) {
     this._closeTag = value;
   }
-  constructor(parent: CWTextNode, txt: string) {
+  constructor(parent: CWTextNode | undefined, txt: string) {
     super(parent, txt);
   }
   public override mergeChildNode(text: string) {

@@ -23,7 +23,7 @@ export class CWChatParserV1 implements ICWChatParser {
     const root = new CWTextNode(undefined, "");
     let state = this.checkState(raw_text);
     let parsed = raw_text;
-    let currNode = root;
+    let currNode: CWTextNode | undefined = root;
     while (state !== PARSER_STATE.END) {
       const re = this.getReGex(state);
       const ret = this.getToken(parsed, re);
@@ -89,7 +89,9 @@ export class CWChatParserV1 implements ICWChatParser {
 
     if (node.next !== undefined) {
       const nxt = this.getNextNode(node);
-      ret += this.mergeNodes(nxt);
+      if (nxt !== undefined) {
+        ret += this.mergeNodes(nxt);
+      }
     }
 
     return ret;

@@ -1,22 +1,22 @@
 export class CWTextNode {
-  parent: CWTextNode;
+  parent: CWTextNode | undefined;
   protected static cnter = 0;
   protected _id: number;
   public get id(): number {
     return this._id;
   }
-  protected _fstChild: CWTextNode;
-  public get fstChild(): CWTextNode {
+  protected _fstChild: CWTextNode | undefined;
+  public get fstChild(): CWTextNode | undefined {
     return this._fstChild;
   }
-  public set fstChild(value: CWTextNode) {
+  public set fstChild(value: CWTextNode | undefined) {
     this._fstChild = value;
   }
-  protected _next: CWTextNode;
-  public get next(): CWTextNode {
+  protected _next: CWTextNode | undefined;
+  public get next(): CWTextNode | undefined {
     return this._next;
   }
-  public set next(value: CWTextNode) {
+  public set next(value: CWTextNode | undefined) {
     this._next = value;
   }
   protected _txt: string;
@@ -26,7 +26,7 @@ export class CWTextNode {
   public set txt(value: string) {
     this._txt = value;
   }
-  constructor(parent: CWTextNode, txt: string) {
+  constructor(parent: CWTextNode | undefined, txt: string) {
     CWTextNode.cnter++;
     this._id = CWTextNode.cnter;
     this.parent = parent;

@@ -1,9 +1,14 @@
 import { CWTextNode } from "./CWTextNode";
+
+type dicTagValueType = {
+  [key: string]: string;
+};
 export class CWTextNodeSelfClosed extends CWTextNode {
   private readonly supportedTags: string[] = ["hr", "To", "rp"];
-  private readonly dicTagValue = { hr: "\n***\n", To: "Dear", rp: "Reply: " };
 
-  constructor(parent: CWTextNode, txt: string) {
+  private readonly dicTagValue: dicTagValueType = { hr: "\n***\n", To: "Dear", rp: "Reply: " };
+
+  constructor(parent: CWTextNode | undefined, txt: string) {
     super(parent, "");
 
     this.txt = this.mergeChildNode(txt);

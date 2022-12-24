@@ -9,7 +9,7 @@ export class CWTextNodeFactory {
    * @param raw_text
    * @returns
    */
-  public createCwText(value: string, current: CWTextNode, state: PARSER_STATE) {
+  public createCwText(value: string, current: CWTextNode | undefined, state: PARSER_STATE): CWTextNode | undefined {
     let child;
     console.log(`${state} ${value}`);
     switch (state) {
@@ -27,7 +27,7 @@ export class CWTextNodeFactory {
         if (current instanceof CWTextNodeSurrounded) {
           current.closeTag = value;
         }
-        return current.parent;
+        return current?.parent;
       default:
         return current;
     }
