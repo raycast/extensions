@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import api from './api';
 import { Site, Team } from './interfaces';
-import { getFramework, getGitProvider } from './helpers';
+import { getFramework, getGitProviderIcon } from './helpers';
 import { formatDate, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
 
@@ -143,15 +143,13 @@ export default function Command() {
 
 const SiteMetadata = ({ site }: { site: Site }) => {
   const framework = getFramework(site.published_deploy?.framework);
-  const gitProvider = getGitProvider(site.build_settings.repo_url);
+  const gitProvider = getGitProviderIcon(site.build_settings.provider);
   const publishedAt = site.published_deploy?.published_at;
   return (
     <List.Item.Detail
       markdown={`![${site.name}](${site.screenshot_url})`}
       metadata={
         <List.Item.Detail.Metadata>
-          {/*<List.Item.Detail.Metadata.Label title="Site ID" text={site.id} />*/}
-          {/*<List.Item.Detail.Metadata.Separator />*/}
           <List.Item.Detail.Metadata.Label
             title="Production URL"
             text={site.ssl_url}
@@ -160,7 +158,7 @@ const SiteMetadata = ({ site }: { site: Site }) => {
           <List.Item.Detail.Metadata.Label
             title="Repository"
             icon={gitProvider}
-            text={gitProvider?.repo || 'Not linked'}
+            text={site.build_settings.repo_path || 'Not linked'}
           />
           <List.Item.Detail.Metadata.Separator />
           {framework.slug !== 'unknown' && (
