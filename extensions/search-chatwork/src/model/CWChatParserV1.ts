@@ -11,7 +11,7 @@ import { PARSER_STATE } from "./enumParser";
 export class CWChatParserV1 implements ICWChatParser {
   private readonly notSupported = ["[dtext"];
   private readonly _RegExpLeft = /([^[]+?(?=\[))|^(?!.*\[).+$/gm;
-  private readonly _RegExpOpen = /\[[^/]*?(info|code|title|qt)\]/gm;
+  private readonly _RegExpOpen = /\[(info|code|title|qt)\]/gm;
   private readonly _RegExpSelfClosed = /\[[^/]*?\]/gm;
   private readonly _RegExpClose = /\[\/.+?\]/gm;
   private cWTextNodeFactory: CWTextNodeFactory = new CWTextNodeFactory();
@@ -24,7 +24,7 @@ export class CWChatParserV1 implements ICWChatParser {
     let state = this.checkState(raw_text);
     let parsed = raw_text;
     let currNode: CWTextNode | undefined = root;
-    while (state !== PARSER_STATE.END) {
+    while (state !== PARSER_STATE.END) { 
       const re = this.getReGex(state);
       const ret = this.getToken(parsed, re);
       parsed = ret.tkn.trimed;

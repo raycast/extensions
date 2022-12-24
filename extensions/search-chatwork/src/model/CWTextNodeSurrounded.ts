@@ -25,7 +25,7 @@ export class CWTextNodeSurrounded extends CWTextNode {
     } else if (this.openTag === "[title]") {
       return `**${text}**`;
     } else if (this.openTag === "[qt]") {
-      return `>${text}\n`;
+      return `> ${text} \n\n `;
     } else {
       return text;
     }
