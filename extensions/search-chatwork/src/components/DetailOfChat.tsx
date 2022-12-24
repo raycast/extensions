@@ -3,8 +3,8 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 export function DetailOfChat(props: { roomName: string; contents: string; link: string }) {
   function buildMarkDown(roomName: string, contents: string) {
     return `
-# ${props.roomName}
-${props.contents}
+# room: ${roomName}
+${contents}
 `;
   }
   return (

@@ -67,16 +67,22 @@ export async function getMessages(roomId: string, isForce = true): Promise<CWMes
       headers: headers,
     });
 
-    if (response.status !== 200) {
+    if (response.status !== 200 && response.status !== 204) {
       throw new Error(`fetch is failed. ${response.status}: ${response.statusText}`);
     }
 
-    const messages: any = await response.json();
     const messages_obj: CWMessage[] = [];
+    if (response.status === 204) {
+      return messages_obj;
+    }
+
+    const messages: any = await response.json();
     messages.forEach((message: any) => {
       const cwmsg: CWMessage = new CWMessage(new CWChatParserV1());
       cwmsg.copyValueFromJson(message as CWMessage);
-      messages_obj.push(cwmsg);
+      if (cwmsg.body !== "") {
+        messages_obj.push(cwmsg);
+      }
     });
 
     return messages_obj;
