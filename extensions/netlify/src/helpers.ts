@@ -68,41 +68,29 @@ export function getFramework(slug: Framework): {
   };
 }
 
-export function getGitProvider(repoUrl: string):
+export function getGitProviderIcon(slug: GitProvider):
   | {
-      name: string;
-      slug: GitProvider;
-      repo: string;
       source: string;
       tintColor?: Color;
     }
   | undefined {
-  if (!repoUrl || !/^https?:\/\//.test(repoUrl)) {
+  if (!slug) {
     return;
   }
-  const url = new URL(repoUrl);
-  const providers = ['azure', 'bitbucket', 'github', 'gitlab'];
-  const slug =
-    providers.find((provider) => url.hostname.includes(provider)) || 'unknown';
 
   const source = `vcs/${slug}.svg`;
   const gitProviderMap = {
-    azure: { name: 'Azure DevOps', tintColor: Color.Blue },
-    bitbucket: { name: 'Bitbucket', tintColor: Color.Blue },
-    github: { name: 'GitHub', tintColor: Color.PrimaryText },
-    gitlab: { name: 'GitLab' },
+    'azure-devops': { tintColor: Color.Blue },
+    bitbucket: { tintColor: Color.Blue },
+    github: { tintColor: Color.PrimaryText },
+    github_enterprise: { tintColor: Color.PrimaryText },
+    gitlab: {},
+    gitlab_self_hosted: {},
     unknown: {
       source: '',
-      name: capitalize(slug),
       tintColor: Color.PrimaryText,
     },
   };
 
-  const gitProvider = gitProviderMap[slug];
-  return {
-    slug,
-    source,
-    repo: url.pathname.slice(1, url.pathname.length),
-    ...gitProvider,
-  };
+  return { source, ...gitProviderMap[slug] };
 }
