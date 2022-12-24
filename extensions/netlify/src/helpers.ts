@@ -78,19 +78,21 @@ export function getGitProviderIcon(slug: GitProvider):
     return;
   }
 
-  const source = `vcs/${slug}.svg`;
   const gitProviderMap = {
-    'azure-devops': { tintColor: Color.Blue },
-    bitbucket: { tintColor: Color.Blue },
-    github: { tintColor: Color.PrimaryText },
-    github_enterprise: { tintColor: Color.PrimaryText },
-    gitlab: {},
-    gitlab_self_hosted: {},
+    'azure-devops': { source: 'vcs/azure.svg', tintColor: Color.Blue },
+    bitbucket: { source: 'vcs/bitbucket.svg', tintColor: Color.Blue },
+    github: { source: 'vcs/github.svg', tintColor: Color.PrimaryText },
+    github_enterprise: {
+      source: 'vcs/github.svg',
+      tintColor: Color.PrimaryText,
+    },
+    gitlab: { source: 'vcs/gitlab.svg' },
+    gitlab_self_hosted: { source: 'vcs/gitlab.svg' },
     unknown: {
       source: '',
       tintColor: Color.PrimaryText,
     },
   };
 
-  return { source, ...gitProviderMap[slug] };
+  return gitProviderMap[slug];
 }
