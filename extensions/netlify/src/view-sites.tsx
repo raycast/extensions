@@ -1,4 +1,5 @@
 import { ActionPanel, Color, Icon, Image, List, Action } from '@raycast/api';
+import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './api';
@@ -15,7 +16,10 @@ export default function Command() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const [query, setQuery] = useState<string>('');
-  const [teamFilter, setTeamFilter] = useState<string>('');
+  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
+    'selectedTeam',
+    '',
+  );
 
   async function fetchSites(query = '', team?: string) {
     setLoading(true);
@@ -68,15 +72,15 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    fetchSites(query, teamFilter);
-  }, [query, teamFilter]);
+    fetchSites(query, selectedTeam);
+  }, [query, selectedTeam]);
 
   const TeamDropdown = (
     <List.Dropdown
-      onChange={setTeamFilter}
+      onChange={setSelectedTeam}
       placeholder="Filter teams"
-      // storeValue
       tooltip="Scope search to selected team"
+      value={selectedTeam}
     >
       <List.Dropdown.Item title="Search across all teams" value="" />
       <List.Dropdown.Section>
