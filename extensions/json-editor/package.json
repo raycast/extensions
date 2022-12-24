@@ -19,8 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "vkbeautify": "^0.99.3"
+    "@raycast/api": "^1.45.2"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
