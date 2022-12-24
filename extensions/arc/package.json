@@ -5,6 +5,8 @@
   "description": "Search and quickly navigate Arc's history and open tabs.",
   "icon": "icon-dark.png",
   "author": "thomas",
+  "owner": "the-browser-company",
+  "access": "public",
   "categories": [
     "Web",
     "Applications",
