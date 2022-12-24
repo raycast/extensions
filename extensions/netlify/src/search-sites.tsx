@@ -1,12 +1,14 @@
-import { ActionPanel, Color, Icon, Image, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
-import api from './api';
-import { Site, Team } from './interfaces';
-import { getFramework, getGitProviderIcon } from './helpers';
-import { formatDate, handleNetworkError } from './utils';
-import { DeployListView } from './view-deploys';
+import api from './utils/api';
+import { Site, Team } from './utils/interfaces';
+import { getFramework, getGitProviderIcon } from './utils/helpers';
+import { formatDate, handleNetworkError } from './utils/utils';
+
+import DeployListView from './components/deploys';
+import TeamDropdown from './components/team-dropdown';
 
 export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -75,32 +77,12 @@ export default function Command() {
     fetchSites(query, selectedTeam);
   }, [query, selectedTeam]);
 
-  const TeamDropdown = (
-    <List.Dropdown
-      onChange={setSelectedTeam}
-      placeholder="Filter teams"
-      tooltip="Scope search to selected team"
-      value={selectedTeam}
-    >
-      <List.Dropdown.Item title="Search across all teams" value="" />
-      <List.Dropdown.Section>
-        {teams
-          .sort((a, b) =>
-            a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1,
-          )
-          .map((team) => (
-            <List.Dropdown.Item
-              key={team.slug}
-              icon={{
-                source: team.team_logo_url ? team.team_logo_url : 'icon.png',
-                mask: Image.Mask.RoundedRectangle,
-              }}
-              title={team.name}
-              value={team.slug}
-            />
-          ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
+  const teamDropdown = (
+    <TeamDropdown
+      selectedTeam={selectedTeam}
+      setSelectedTeam={setSelectedTeam}
+      teams={teams}
+    />
   );
 
   return (
@@ -109,7 +91,7 @@ export default function Command() {
       isShowingDetail
       onSearchTextChange={setQuery}
       searchText={query}
-      searchBarAccessory={teams.length > 1 ? TeamDropdown : undefined}
+      searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Search by site name..."
       throttle
     >
@@ -173,7 +155,7 @@ const SiteMetadata = ({ site }: { site: Site }) => {
           )}
           <List.Item.Detail.Metadata.Label
             title="Last published"
-            text={publishedAt ? formatDate(new Date(publishedAt)) : 'Never'}
+            text={publishedAt ? formatDate(publishedAt) : 'Never'}
           />
         </List.Item.Detail.Metadata>
       }

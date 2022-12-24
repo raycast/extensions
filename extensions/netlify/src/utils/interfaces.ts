@@ -2,6 +2,18 @@ export interface Preferences {
   token: string;
 }
 
+export interface AuditLog {
+  id: string;
+  payload: {
+    actor_name: string;
+    action: string;
+    log_type: 'team' | 'site' | 'split_test';
+    timestamp: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    traits: any;
+  };
+}
+
 export type DeployContext = 'production' | 'deploy-preview' | 'branch-deploy';
 
 export type DeployState =
@@ -113,4 +125,5 @@ export interface Team {
 
 export interface User {
   favorite_sites: string[];
+  preferred_account_id: string;
 }

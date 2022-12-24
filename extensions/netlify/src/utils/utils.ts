@@ -7,7 +7,8 @@ export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substr(1);
 }
 
-export function formatDate(date: Date) {
+export function formatDate(timestamp: string) {
+  const date = new Date(timestamp);
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
