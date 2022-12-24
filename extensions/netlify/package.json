@@ -16,21 +16,28 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-sites",
+      "name": "search-sites",
       "title": "Search Sites",
       "subtitle": "Netlify",
       "description": "Search your sites",
       "mode": "view"
     },
     {
-      "name": "view-domains",
+      "name": "search-audit-log",
+      "title": "Search Audit Log",
+      "subtitle": "Netlify",
+      "description": "Search your team's audit log",
+      "mode": "view"
+    },
+    {
+      "name": "list-domains",
       "title": "List Domains",
       "subtitle": "Netlify",
       "description": "List your domains",
       "mode": "view"
     },
     {
-      "name": "view-members",
+      "name": "list-members",
       "title": "List Members",
       "subtitle": "Netlify",
       "description": "List team members",
