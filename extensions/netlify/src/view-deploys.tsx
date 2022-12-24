@@ -85,17 +85,19 @@ export function DeployListView(props: Props) {
           description="Try changing your filters."
         />
       )}
-      {filteredDeploys
-        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-        .map((deploy) => (
-          <List.Item
-            key={deploy.id}
-            icon={getStatusIcon(deploy.state)}
-            title={deploy.title || deploy.commit_ref || deploy.id}
-            detail={<DeployMetadata deploy={deploy} />}
-            actions={<DeployActions deploy={deploy} siteName={siteName} />}
-          />
-        ))}
+      <List.Section title="Recent deploys">
+        {filteredDeploys
+          .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+          .map((deploy) => (
+            <List.Item
+              key={deploy.id}
+              icon={getStatusIcon(deploy.state)}
+              title={deploy.title || deploy.commit_ref || deploy.id}
+              detail={<DeployMetadata deploy={deploy} />}
+              actions={<DeployActions deploy={deploy} siteName={siteName} />}
+            />
+          ))}
+      </List.Section>
     </List>
   );
 }
