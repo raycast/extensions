@@ -7,7 +7,7 @@ import {
 } from '@raycast/api';
 import { AxiosError } from 'axios';
 
-import { DeployState, Preferences } from './interfaces';
+import { DeployState, Framework, Preferences } from './interfaces';
 
 export function getToken() {
   const { token } = getPreferenceValues<Preferences>();
@@ -61,6 +61,44 @@ export function getStatusIcon(state: DeployState): {
       tintColor: Color.SecondaryText,
     }
   );
+}
+
+function capitalize(s: string): string {
+  return s[0].toUpperCase() + s.substr(1);
+}
+
+export function getFramework(slug: Framework): {
+  name: string;
+  slug: Framework;
+  source: string;
+  tintColor?: Color;
+} {
+  slug = slug || 'unknown';
+  const source = `frameworks/${slug}.svg`;
+  const frameworkMap = {
+    angular: { name: 'Angular', tintColor: Color.Red },
+    astro: { name: 'Astro', tintColor: Color.PrimaryText },
+    eleventy: { name: 'Eleventy', tintColor: Color.SecondaryText },
+    gatsby: { name: 'Gatsby', tintColor: Color.Purple },
+    hugo: { name: 'Hugo', tintColor: Color.Magenta },
+    hydrogen: { name: 'Hydrogen' },
+    next: { name: 'Next.js', tintColor: Color.PrimaryText },
+    nuxt: { name: 'Nuxt.js' },
+    remix: { name: 'Remix', tintColor: Color.PrimaryText },
+    solid: { name: 'Solid.js', tintColor: Color.Blue },
+    unknown: {
+      source: '',
+      name: capitalize(slug),
+      tintColor: Color.PrimaryText,
+    },
+  };
+
+  const framework = frameworkMap[slug];
+  return {
+    slug,
+    source,
+    ...framework,
+  };
 }
 
 export function handleNetworkError(e: unknown): void {
