@@ -120,22 +120,20 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
         )}
         {!deploy.manual_deploy && (
           <>
-            <List.Item.Detail.Metadata.Label
-              title={
-                deploy.review_url ? 'Pull request title' : 'Commit message'
-              }
-              text={deploy.title || deploy.commit_ref || deploy.id}
-            />
             {deploy.review_url ? (
               <List.Item.Detail.Metadata.Label
-                title="Pull request URL"
-                text={deploy.review_url}
+                title="Pull request"
+                text={`${deploy.title || deploy.commit_ref || ''} (#${
+                  deploy.review_id
+                })`}
               />
             ) : (
-              <List.Item.Detail.Metadata.Label
-                title="Commit URL"
-                text={deploy.commit_url || ''}
-              />
+              deploy.commit_url && (
+                <List.Item.Detail.Metadata.Label
+                  title="Commit message"
+                  text={deploy.title || deploy.commit_ref || ''}
+                />
+              )
             )}
             {deploy.committer && (
               <List.Item.Detail.Metadata.Label
@@ -158,7 +156,6 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
             text={deploy.context}
           />
         )}
-        <List.Item.Detail.Metadata.Label title="Deploy ID" text={deploy.id} />
         <List.Item.Detail.Metadata.Label
           title="URL"
           text={

@@ -70,10 +70,12 @@ export type Framework =
   | undefined;
 
 export type GitProvider =
-  | 'azure'
+  | 'azure-devops'
   | 'bitbucket'
   | 'github'
+  | 'github_enterprise'
   | 'gitlab'
+  | 'gitlab_self_hosted'
   | 'unknown';
 
 export interface Member {
@@ -88,6 +90,8 @@ export interface Site {
   account_slug: string;
   admin_url: string;
   build_settings: {
+    provider: GitProvider;
+    repo_path: string;
     repo_url: string;
   };
   created_at: string;
