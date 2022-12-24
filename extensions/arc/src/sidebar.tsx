@@ -69,14 +69,14 @@ export const Item = ({ item }: { item: SideBarItem }) => {
     return (
       <List.Item
         title={item.tabs.map((tab: SideBarTab) => tab.title).join("  ⎪  ")}
-        icon={{ source: "../assets/split-view.svg", tintColor: item.color }}
+        icon={{ source: "../assets/split-view.png", tintColor: item.color }}
       />
     );
   } else {
     return (
       <List.Item
         title={item.title}
-        icon={{ source: item.type === "notes" ? Icon.Document : Icon.Highlight, tintColor: item.color }}
+        icon={{ source: item.type === "notes" ? "../assets/note.png" : "../assets/easel.png" }}
       />
     );
   }
@@ -171,7 +171,7 @@ const Folder = ({ folder }: { folder: SideBarFolder }) => {
   return (
     <List.Item
       title={folder.title}
-      icon={{ source: Icon.Folder, tintColor: folder.color }}
+      icon={{ source: "../assets/folder.svg", tintColor: folder.color }}
       actions={
         <ActionPanel>
           <Action.Push

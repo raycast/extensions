@@ -34,10 +34,12 @@ const getSpaceIcon = (space: any, color: string): Image.ImageLike => {
   return { source: Icon.AppWindowGrid3x3, tintColor: color };
 };
 
-const getTabIcon = (tab: any, color?: string): Image.ImageLike => {
+const getTabIcon = (tab: any): Image.ImageLike => {
   const icon = getIcon(tab);
   if (icon) return icon;
-  return getFavicon(tab["savedURL"], { fallback: Icon.Link });
+  const favicon: Image = getFavicon(tab["savedURL"], { fallback: Icon.Link }) as Image;
+  favicon.mask = Image.Mask.RoundedRectangle; 
+  return favicon;
 };
 
 const mapItemToTab = (id: string, itemMap: { [key: string]: any }, color: string): SideBarItem => {
@@ -75,7 +77,7 @@ const mapItemToTab = (id: string, itemMap: { [key: string]: any }, color: string
       id: item["id"],
       title: item["title"] ? item["title"] : tab["savedTitle"],
       url: tab["savedURL"],
-      icon: getTabIcon(tab, color),
+      icon: getTabIcon(tab),
     };
   }
 };
