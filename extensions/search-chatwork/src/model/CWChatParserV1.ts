@@ -24,7 +24,7 @@ export class CWChatParserV1 implements ICWChatParser {
     let state = this.checkState(raw_text);
     let parsed = raw_text;
     let currNode: CWTextNode | undefined = root;
-    while (state !== PARSER_STATE.END) { 
+    while (state !== PARSER_STATE.END) {
       const re = this.getReGex(state);
       const ret = this.getToken(parsed, re);
       parsed = ret.tkn.trimed;
