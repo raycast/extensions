@@ -1,6 +1,14 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { Deploy, Domain, Member, Site, Team, User } from './interfaces';
+import {
+  AuditLog,
+  Deploy,
+  Domain,
+  Member,
+  Site,
+  Team,
+  User,
+} from './interfaces';
 import { getToken } from './utils';
 
 class Api {
@@ -14,6 +22,13 @@ class Api {
         'User-Agent': 'netlify-raycast-extension',
       },
     });
+  }
+
+  async getAuditLog(team: string): Promise<AuditLog[]> {
+    const { data } = await this.client.get<AuditLog[]>(
+      `/accounts/${team}/audit?page=1&per_page=200`,
+    );
+    return data;
   }
 
   async getDeploys(site: string): Promise<Deploy[]> {

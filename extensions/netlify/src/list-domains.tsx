@@ -1,8 +1,9 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import { Domain } from './interfaces';
-import api from './api';
-import { getDomainUrl, handleNetworkError } from './utils';
+
+import api from './utils/api';
+import { Domain } from './utils/interfaces';
+import { getDomainUrl, handleNetworkError } from './utils/utils';
 
 export default function Command() {
   const [domains, setDomains] = useState<Domain[]>([]);
