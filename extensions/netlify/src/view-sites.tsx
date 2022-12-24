@@ -113,28 +113,30 @@ export default function Command() {
       searchBarPlaceholder="Search by site name..."
       throttle
     >
-      {sites.map((site) => (
-        <List.Item
-          key={site.id}
-          title={site.name}
-          subtitle={site.account_name}
-          // @ts-expect-error due to .filter(Boolean)
-          accessories={[
-            favorites.includes(site.id) && {
-              icon: { source: Icon.Star, tintColor: Color.Yellow },
-              tooltip: 'Favorite (⌘F)',
-            },
-          ].filter(Boolean)}
-          detail={<SiteMetadata site={site} />}
-          actions={
-            <SiteActions
-              favorites={favorites}
-              site={site}
-              toggleFavorite={toggleFavorite}
-            />
-          }
-        />
-      ))}
+      <List.Section title="Search results">
+        {sites.map((site) => (
+          <List.Item
+            key={site.id}
+            title={site.name}
+            subtitle={site.account_name}
+            // @ts-expect-error due to .filter(Boolean)
+            accessories={[
+              favorites.includes(site.id) && {
+                icon: { source: Icon.Star, tintColor: Color.Yellow },
+                tooltip: 'Favorite (⌘F)',
+              },
+            ].filter(Boolean)}
+            detail={<SiteMetadata site={site} />}
+            actions={
+              <SiteActions
+                favorites={favorites}
+                site={site}
+                toggleFavorite={toggleFavorite}
+              />
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
