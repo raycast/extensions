@@ -69,6 +69,13 @@ export type Framework =
   | null
   | undefined;
 
+export type GitProvider =
+  | 'azure'
+  | 'bitbucket'
+  | 'github'
+  | 'gitlab'
+  | 'unknown';
+
 export interface Member {
   email: string;
   id: string;
