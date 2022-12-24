@@ -54,6 +54,21 @@ export interface Domain {
   name: string;
 }
 
+export type Framework =
+  | 'angular'
+  | 'astro'
+  | 'eleventy'
+  | 'gatsby'
+  | 'hugo'
+  | 'hydrogen'
+  | 'next'
+  | 'nuxt'
+  | 'remix'
+  | 'solid'
+  | 'unknown'
+  | null
+  | undefined;
+
 export interface Member {
   email: string;
   id: string;
@@ -71,7 +86,8 @@ export interface Site {
   created_at: string;
   id: string;
   name: string;
-  published_deploy: {
+  published_deploy?: {
+    framework?: Framework;
     published_at: string;
   };
   screenshot_url: string;

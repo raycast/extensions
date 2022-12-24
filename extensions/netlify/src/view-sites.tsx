@@ -1,17 +1,10 @@
-import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Color, Icon, Image, List, Action } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from './api';
 import { Site, Team } from './interfaces';
-import { formatDate, handleNetworkError } from './utils';
+import { formatDate, getFramework, handleNetworkError } from './utils';
 import { DeployListView } from './view-deploys';
-
-const STAR_ICON = [
-  {
-    icon: { source: Icon.Star, tintColor: Color.Yellow },
-    tooltip: 'Favorite (⌘F)',
-  },
-];
 
 export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -95,6 +88,7 @@ export default function Command() {
               key={team.slug}
               icon={{
                 source: team.team_logo_url ? team.team_logo_url : 'icon.png',
+                mask: Image.Mask.RoundedRectangle,
               }}
               title={team.name}
               value={team.slug}
@@ -119,7 +113,13 @@ export default function Command() {
           key={site.id}
           title={site.name}
           subtitle={site.account_name}
-          accessories={favorites.includes(site.id) ? STAR_ICON : undefined}
+          // @ts-expect-error due to .filter(Boolean)
+          accessories={[
+            favorites.includes(site.id) && {
+              icon: { source: Icon.Star, tintColor: Color.Yellow },
+              tooltip: 'Favorite (⌘F)',
+            },
+          ].filter(Boolean)}
           detail={<SiteMetadata site={site} />}
           actions={
             <SiteActions
@@ -134,35 +134,45 @@ export default function Command() {
   );
 }
 
-const SiteMetadata = ({ site }: { site: Site }) => (
-  <List.Item.Detail
-    markdown={`![${site.name}](${site.screenshot_url})`}
-    metadata={
-      <List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="Site ID" text={site.id} />
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label
-          title="Repository"
-          text={site.build_settings.repo_url || 'N/A'}
-        />
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label
-          title="Production URL"
-          text={site.ssl_url}
-        />
-        <List.Item.Detail.Metadata.Separator />
-        <List.Item.Detail.Metadata.Label
-          title="Last published"
-          text={
-            site.published_deploy?.published_at
-              ? formatDate(new Date(site.published_deploy?.published_at))
-              : 'Never'
-          }
-        />
-      </List.Item.Detail.Metadata>
-    }
-  />
-);
+const SiteMetadata = ({ site }: { site: Site }) => {
+  const framework = getFramework(site.published_deploy?.framework);
+  const publishedAt = site.published_deploy?.published_at;
+  return (
+    <List.Item.Detail
+      markdown={`![${site.name}](${site.screenshot_url})`}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Site ID" text={site.id} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Production URL"
+            text={site.ssl_url}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="Repository"
+            text={site.build_settings.repo_url || 'N/A'}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          {framework.slug !== 'unknown' && (
+            <>
+              <List.Item.Detail.Metadata.Label
+                title="Framework"
+                icon={framework}
+                text={framework.name}
+              />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
+          <List.Item.Detail.Metadata.Label
+            title="Last published"
+            text={publishedAt ? formatDate(new Date(publishedAt)) : 'Never'}
+          />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+};
 
 const SiteActions = ({
   favorites,
@@ -191,6 +201,12 @@ const SiteActions = ({
       shortcut={{ key: 'i', modifiers: ['cmd'] }}
       title="Copy Site ID"
     />
+    <Action.OpenInBrowser
+      icon={Icon.Link}
+      shortcut={{ key: 'u', modifiers: ['cmd'] }}
+      title="Go to Production URL"
+      url={site.ssl_url}
+    />
     {site.build_settings.repo_url && (
       <Action.OpenInBrowser
         icon={Icon.CodeBlock}
@@ -199,12 +215,6 @@ const SiteActions = ({
         url={site.build_settings.repo_url}
       />
     )}
-    <Action.OpenInBrowser
-      icon={Icon.Link}
-      shortcut={{ key: 'u', modifiers: ['cmd'] }}
-      title="Go to Production URL"
-      url={site.ssl_url}
-    />
     <Action.OpenInBrowser
       icon={Icon.Gear}
       shortcut={{ key: 's', modifiers: ['cmd'] }}
