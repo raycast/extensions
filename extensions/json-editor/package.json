@@ -19,7 +19,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2"
+    "@raycast/api": "^1.45.2",
+    "json-ts": "^1.6.4"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
