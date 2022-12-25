@@ -48,6 +48,7 @@ export interface LibgenPreferences {
   copySearchContentFromClipboard: boolean;
   downloadGateway: LibgenDownloadGateway;
   downloadPath: string;
+  alwaysAskWhereToSave: boolean;
   searchPriority: SearchPriority;
   preferredLanguages: string;
   preferredFormats: string;
