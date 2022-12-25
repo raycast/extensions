@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       paths:
-        description: 'Extensions to update (space-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
+        description: 'Extensions to update (comma-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
         required: true
       command:
         description: "Ray CLI command to run (build | publish)"

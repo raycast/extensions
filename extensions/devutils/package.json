@@ -5,6 +5,8 @@
   "description": "Navigate DevUtils faster with this All-in-one Toolbox for Developers",
   "icon": "devutils.png",
   "author": "vietanhlehuu",
+  "owner": "devutils",
+  "access": "public",
   "categories": [
     "Applications",
     "Developer Tools",

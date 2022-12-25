@@ -49,7 +49,7 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       await comment({
         github,
         context,
-        comment: `Congratulation on your new Raycast extension! :rocket:\n\nWe will review it shortly. Once the PR is approved and merged, the extension will be available on the Store.`,
+        comment: `Congratulation on your new Raycast extension! :rocket:\n\nThe team is on holidays, we'll review it once everyone is back. :christmas_tree:\n\nOnce the PR is approved and merged, the extension will be available on the Store.`,
       });
       return;
     }
@@ -86,7 +86,9 @@ module.exports = async ({ github, context, core, changedFiles }) => {
       comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:\n\n🔔 ${owners
         .filter((x) => x !== sender)
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.`,
+        .join(
+          " "
+        )} you might want to have a look.\n\nThe team is on holidays, we'll review it once everyone is back. :christmas_tree:`,
     });
 
     return;
