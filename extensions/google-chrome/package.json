@@ -41,6 +41,24 @@
       "required": false,
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "profileName",
+      "title": "Profile Name",
+      "label": "Name of the Chrome profile to be used",
+      "description": "Name of the Chrome profile to be used",
+      "required": true,
+      "type": "textfield",
+      "default": "Default"
+    },
+    {
+      "name": "userDataPath",
+      "title": "User Data Path",
+      "label": "Path to the Chrome User Data folder",
+      "description": "Path to the Chrome User Data folder.",
+      "required": true,
+      "type": "directory",
+      "default": "~/Library/Application Support/Google/Chrome"
     }
   ],
   "dependencies": {
