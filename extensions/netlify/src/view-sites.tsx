@@ -191,42 +191,52 @@ const SiteActions = ({
   toggleFavorite: (siteId: string) => void;
 }) => (
   <ActionPanel>
-    <Action.Push
-      icon={Icon.Rocket}
-      title="Show Deploys"
-      target={<DeployListView siteId={site.id} siteName={site.name} />}
-    />
-    <Action.OpenInBrowser title="Open on Netlify" url={site.admin_url} />
-    <Action
-      icon={favorites.includes(site.id) ? Icon.StarDisabled : Icon.Star}
-      shortcut={{ key: 'f', modifiers: ['cmd'] }}
-      title={favorites.includes(site.id) ? 'Remove Favorite' : 'Add Favorite'}
-      onAction={() => toggleFavorite(site.id)}
-    />
-    <Action.CopyToClipboard
-      content={site.id}
-      shortcut={{ key: 'i', modifiers: ['cmd'] }}
-      title="Copy Site ID"
-    />
-    <Action.OpenInBrowser
-      icon={Icon.Link}
-      shortcut={{ key: 'u', modifiers: ['cmd'] }}
-      title="Go to Production URL"
-      url={site.ssl_url}
-    />
-    {site.build_settings.repo_url && (
-      <Action.OpenInBrowser
-        icon={Icon.CodeBlock}
-        shortcut={{ key: 'r', modifiers: ['cmd'] }}
-        title="Go to Repository"
-        url={site.build_settings.repo_url}
+    <ActionPanel.Section>
+      <Action.Push
+        icon={Icon.Rocket}
+        title="Show Deploys"
+        target={<DeployListView siteId={site.id} siteName={site.name} />}
       />
-    )}
-    <Action.OpenInBrowser
-      icon={Icon.Gear}
-      shortcut={{ key: 's', modifiers: ['cmd'] }}
-      title="Go to Site Settings"
-      url={`${site.admin_url}/settings`}
-    />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.OpenInBrowser
+        shortcut={{ key: 'n', modifiers: ['cmd'] }}
+        title="Open on Netlify"
+        url={site.admin_url}
+      />
+      <Action.OpenInBrowser
+        icon={Icon.Link}
+        shortcut={{ key: 'u', modifiers: ['cmd'] }}
+        title="Go to Production URL"
+        url={site.ssl_url}
+      />
+      {site.build_settings.repo_url && (
+        <Action.OpenInBrowser
+          icon={Icon.CodeBlock}
+          shortcut={{ key: 'r', modifiers: ['cmd'] }}
+          title="Go to Repository"
+          url={site.build_settings.repo_url}
+        />
+      )}
+      <Action.OpenInBrowser
+        icon={Icon.Gear}
+        shortcut={{ key: 's', modifiers: ['cmd'] }}
+        title="Go to Site Settings"
+        url={`${site.admin_url}/settings`}
+      />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.CopyToClipboard
+        content={site.id}
+        shortcut={{ key: 'i', modifiers: ['cmd'] }}
+        title="Copy Site ID"
+      />
+      <Action
+        icon={favorites.includes(site.id) ? Icon.StarDisabled : Icon.Star}
+        shortcut={{ key: 'f', modifiers: ['cmd'] }}
+        title={favorites.includes(site.id) ? 'Remove Favorite' : 'Add Favorite'}
+        onAction={() => toggleFavorite(site.id)}
+      />
+    </ActionPanel.Section>
   </ActionPanel>
 );
