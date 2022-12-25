@@ -84,12 +84,11 @@ export function useChromeHistorySearch(profilePath: string, query: string | unde
         return;
       }
 
-      if (!dbRef.current) {
-        dbRef.current = await loadDb(profilePath);
-      }
-
       setError(undefined);
       try {
+        if (!dbRef.current) {
+          dbRef.current = await loadDb(profilePath);
+        }
         const dbEntries = await searchHistory(dbRef.current, query);
         setEntries(dbEntries);
       } catch (e) {
