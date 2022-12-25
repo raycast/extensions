@@ -12,7 +12,7 @@
 A [Raycast](https://raycast.com/) extension that lets you search books on Library Genesis and allows you to quickly view them and directly download them.
 
 <p align="center">
-   <video src="https://user-images.githubusercontent.com/24559576/209475380-ca1e90b7-924d-4470-9e08-db8632db5833.mp4" />
+   <video src="https://user-images.githubusercontent.com/24559576/209476646-8c9fc1c7-e035-4ab1-b7e3-ebbe54c9c5b4.mp4" />
 </p>
 
 ## Features
