@@ -2,12 +2,14 @@
   <strong>JSON Editor</strong>
 </h1>
 
-###  All JSON operations in one editor. 
+### All JSON operations in one editor.
 
 #### Features Provided
+
 - Edit JSON directly, like filter operation
 - Format JSON
 - Minify JSON
+- Escape JSON
 - Convert JSON to Typescript definition
 - Convert JSON to Go type definition
 

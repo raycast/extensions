@@ -27,6 +27,7 @@ export default function Command() {
           <ActionPanel>
             {<Action.CopyToClipboard content={result} title="Copy Result" />}
             {<Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />}
+            {<Action.CopyToClipboard content={escapeJsonText(jsonObj)} title="Escape Result" />}
             {<Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />}
             {<Action.CopyToClipboard content={jsonToTs(result)} title="Convert Result to Typescript definition" />}
             {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go type definition" />}
@@ -44,7 +45,7 @@ export default function Command() {
         onChange={setPattern}
       />
       <Form.Separator />
-      <Form.TextArea id="output" title="Result" value={result} />
+      <Form.TextArea id="output" title="Result" value={result} onChange={setResult} />
     </Form>
   );
 }
@@ -57,8 +58,21 @@ function filterJSONByPattern(input: string, pattern: string) {
   }
 
   try {
-    obj = JSON.parse(input);
+    // try unescaping input first
+    const unescapedInput = input
+      .replace(/(\\n)/g, "")
+      .replace(/(\\r)/g, "")
+      .replace(/(\\t)/g, "")
+      .replace(/(\\f)/g, "")
+      .replace(/(\\b)/g, "")
+      .replace(/("{)/g, "{")
+      .replace(/(}")/g, "}")
+      .replace(/(\\)/g, "")
+      .replace(/(\/)/g, "/");
+
+    obj = JSON.parse(unescapedInput);
   } catch (err) {
+    console.log("1", err);
     return [ErrorInvalidJSON, undefined];
   }
 
@@ -77,6 +91,15 @@ function filterJSONByPattern(input: string, pattern: string) {
     }
   }
 
+  if (obj == undefined) {
+    return [ErrorIvalidFilterExpression, undefined];
+  }
+
   const ret = JSON.stringify(obj, null, 2);
   return [ret, obj];
+}
+
+function escapeJsonText(input: object) {
+  const minifiedjson = JSON.stringify(input);
+  return JSON.stringify(minifiedjson).replace(/^"/g, "").replace(/"$/g, "");
 }
