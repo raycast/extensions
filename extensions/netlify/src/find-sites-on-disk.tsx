@@ -26,9 +26,7 @@ export default function Command() {
   useEffect(() => {
     async function getTextEditor() {
       const defaultTextEditor = await getDefaultTextEditor();
-      if (defaultTextEditor) {
-        setTextEditor(defaultTextEditor);
-      }
+      setTextEditor(defaultTextEditor);
     }
     getTextEditor();
   }, []);
@@ -48,43 +46,51 @@ export default function Command() {
       <List.Section
         title={`${data?.dirs?.length || 0} sites found in local directories`}
       >
-        {data?.dirs?.map((dirs) => (
+        {data?.dirs?.map((dir) => (
           <List.Item
-            key={dirs.fullPath}
-            id={dirs.fullPath}
-            title={dirs.name}
+            key={dir.fullPath}
+            id={dir.fullPath}
+            title={dir.name}
             icon={Icon.Folder}
-            subtitle={tildifyPath(dirs.fullPath)}
-            accessories={[{ text: formatDate(dirs.lastModified) }]}
+            subtitle={tildifyPath(dir.fullPath)}
+            accessories={[{ text: formatDate(dir.lastModified) }]}
             actions={
               <ActionPanel>
                 {textEditor && (
                   <Action.Open
                     application={textEditor.bundleId}
                     icon={{ fileIcon: textEditor.path }}
-                    target={dirs.fullPath}
+                    target={dir.fullPath}
                     title={`Open in ${snakeCaseToTitleCase(textEditor.name)}`}
                   />
                 )}
-                <Action.ShowInFinder path={dirs.fullPath} />
-                {dirs.siteId && (
-                  <Action.OpenInBrowser
-                    title="Open on Netlify"
-                    url={`https://app.netlify.com/site-redirect/${dirs.siteId}`}
+                <ActionPanel.Section>
+                  {dir.siteId && (
+                    <Action.OpenInBrowser
+                      shortcut={{ modifiers: ['cmd'], key: 'n' }}
+                      title="Open on Netlify"
+                      url={`https://app.netlify.com/site-redirect/${dir.siteId}`}
+                    />
+                  )}
+                  {dir.remotes[0] && (
+                    <Action.OpenInBrowser
+                      shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                      title="Open Repository"
+                      url={dir.remotes[0].url}
+                    />
+                  )}
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action.ShowInFinder
+                    path={dir.fullPath}
+                    shortcut={{ modifiers: ['cmd'], key: 'return' }}
                   />
-                )}
-                {dirs.remotes.map((remote) => (
-                  <Action.OpenInBrowser
-                    key={`open remote ${remote.name}`}
-                    title="Open Repository"
-                    url={remote.url}
+                  <Action.CopyToClipboard
+                    title={'Copy Path to Clipboard'}
+                    content={dir.fullPath}
+                    shortcut={{ modifiers: ['cmd'], key: '.' }}
                   />
-                ))}
-                <Action.CopyToClipboard
-                  title={'Copy Path to Clipboard'}
-                  content={dirs.fullPath}
-                  shortcut={{ modifiers: ['cmd'], key: '.' }}
-                />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

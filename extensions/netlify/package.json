@@ -63,10 +63,10 @@
     {
       "name": "scanPath",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "",
-      "title": "Path to scan for Netlify directories",
-      "description": "Path to scan for Netlify directories. ~/ is expanded. Use : to seperate multiple paths"
+      "title": "Path to scan to find sites on disk",
+      "description": "Path to scan for finding sites on disk. Use : to separate multiple paths."
     }
   ],
   "dependencies": {

@@ -25,15 +25,19 @@ const CACHE_FILE = path.join(
 );
 const SCAN_DEPTH = 4;
 
-export async function getDefaultTextEditor(): Promise<Application> {
+export async function getDefaultTextEditor(): Promise<Application | null> {
   const exampleFile = path.join(environment.supportPath, 'blank.js');
   try {
     fs.accessSync(exampleFile, fs.constants.R_OK);
   } catch (err) {
     fs.writeFileSync(exampleFile, '// used to determine default text editor');
   }
-  const defaultTextEditor = await getDefaultApplication(exampleFile);
-  return defaultTextEditor;
+  try {
+    const defaultTextEditor = await getDefaultApplication(exampleFile);
+    return defaultTextEditor;
+  } catch (err) {
+    return null;
+  }
 }
 
 function readJSONSync(filepath: string) {
@@ -49,7 +53,7 @@ function readJSONSync(filepath: string) {
   return {};
 }
 
-export class Cache {
+class Cache {
   version = 1;
   dirs: Directory[];
 
@@ -78,7 +82,7 @@ export class Cache {
   }
 }
 
-export function resolvePath(filepath: string): string {
+function resolvePath(filepath: string): string {
   if (filepath.length > 0 && filepath[0] === '~') {
     return path.join(homedir(), filepath.slice(1));
   }
@@ -185,7 +189,7 @@ function getSiteId(fullPath: string): string {
   return siteId || '';
 }
 
-export async function findDirs(paths: string[]): Promise<Directory[]> {
+async function findDirs(paths: string[]): Promise<Directory[]> {
   const cache = new Cache();
   let foundDirs: Directory[] = [];
   await Promise.allSettled(
@@ -236,8 +240,8 @@ export function useDiskCache(query: string | undefined): {
 
       try {
         const preferences = getPreferences();
-        if (preferences.scanPath.length == 0) {
-          setError('Directories to scan has not been defined in settings');
+        if (!preferences.scanPath) {
+          setError('Path to scan has not been defined in settings');
           return;
         }
         const [dirPaths, unresolvedPaths] = parsePath(preferences.scanPath);

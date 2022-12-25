@@ -1,6 +1,6 @@
 export interface Preferences {
   token: string;
-  scanPath: string;
+  scanPath?: string;
 }
 
 export interface AuditLog {
