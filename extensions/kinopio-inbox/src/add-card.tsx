@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, Toast, showToast, getPreferenceValues, open, LaunchProps, Preferences } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Toast,
+  showToast,
+  getPreferenceValues,
+  open,
+  LaunchProps,
+  Preferences,
+} from "@raycast/api";
 import { useState, useRef } from "react";
 import got from "got";
 
@@ -39,7 +49,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "must-revalidate, no-store, no-cache, private",
-          'Authorization': `${preferences.apiKey}`,
+          Authorization: `${preferences.apiKey}`,
         },
         json: { name: values.name },
         responseType: "json",
