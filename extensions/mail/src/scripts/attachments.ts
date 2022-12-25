@@ -38,7 +38,7 @@ export const getMessageAttachments = async (message: Message, mailbox: string): 
     const attachments: Attachment[] = response.map((line: string) => {
       const [id, name, size] = line.split("$break");
       const type = getMIMEtype(name.split(".").pop());
-      return { id, name, type, size: formatFileSize(size) };
+      return { id, name, type, size: formatFileSize(parseInt(size)) };
     });
     return attachments;
   } catch (error) {

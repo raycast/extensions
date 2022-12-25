@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mail",
-  "title": "Mail",
+  "title": "Apple Mail",
   "description": "Extension for Apple Mail.",
   "icon": "mail.png",
   "author": "yug2005",
@@ -93,9 +93,8 @@
     {
       "name": "check-for-mail",
       "title": "Check For New Mail",
-      "description": "Check for new mail for all accounts. Uses background refresh to cache information.",
-      "mode": "no-view",
-      "interval": "1d"
+      "description": "Check for new mail for all accounts.",
+      "mode": "no-view"
     },
     {
       "name": "new-message",

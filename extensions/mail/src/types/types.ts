@@ -31,11 +31,12 @@ export type Message = {
 
 export type OutgoingMessageForm = {
   account: string;
-  to: string[] | string;
-  cc: string[] | string;
-  bcc: string[] | string;
+  to: string;
+  cc: string;
+  bcc: string;
   subject: string;
   content: string;
+  attachments: string[]
 };
 
 export type OutgoingMessage = {

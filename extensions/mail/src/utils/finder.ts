@@ -23,9 +23,9 @@ export const getDirectoryItems = async (dir: string): Promise<{ files: string[];
   return { files, subDirectories };
 };
 
-export const formatFileSize = (size: string): string => {
+export const formatFileSize = (size: number): string => {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
-  let i = parseInt(size);
+  let i = size;
   if (i < 0) return "0";
   let j = 0;
   while (i > 1024) {
@@ -54,11 +54,6 @@ export const getSize = async (paths: string[]): Promise<number> => {
   const sizes = await Promise.all(promises);
   const size = sizes.reduce((a: number, b: number) => a + b, 0);
   return size;
-};
-
-export const validateSize = async (paths: string[]): Promise<boolean> => {
-  const size = await getSize(paths);
-  return size < maximumFileSize.value;
 };
 
 const maximumRecursionDepth = 4;
