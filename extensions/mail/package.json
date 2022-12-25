@@ -129,7 +129,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3",
+    "@raycast/api": "^1.45.2",
     "clean-text-utils": "^1.1.17",
     "email-regex": "^5.0.0",
     "javascript-time-ago": "^2.5.7",
