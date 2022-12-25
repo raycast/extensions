@@ -2,7 +2,7 @@
 
 ## [CloudFormation Resources List] - 2022-12-25
 
-- Added support for viewing CloudFormation resources from within Raycast
+- Added support for viewing CloudFormation resources from within Raycast ([#4054](https://github.com/raycast/extensions/pull/4054))
 
 ## [ECS Command] - 2022-12-14
 
