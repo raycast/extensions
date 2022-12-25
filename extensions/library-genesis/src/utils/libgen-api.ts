@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import cheerio = require("cheerio");
 import { extractNumber } from "./common-utils";
 import { getPreferenceValues } from "@raycast/api";
+import { LibgenPreferences } from "../types";
 
 export const getLibgenUrl = async () => {
   const urlString = await libgen.mirror();
@@ -52,6 +53,7 @@ export const getLibgenSearchResultsLibgenAPI = async (searchContent: string) => 
 export const getLibgenSearchResults = async (searchContent: string, results = 100) => {
   const { preferredLibgenMirror } = getPreferenceValues<LibgenPreferences>();
   const books: BookEntry[] = [];
+
   const libgenUrl =
     preferredLibgenMirror || (await libgen.mirror().then((url: string) => url.replace("http", "https")));
 
