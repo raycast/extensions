@@ -12,7 +12,7 @@ import { tildifyPath, useDiskCache } from './utils/disk';
 import { formatDate, getPreferences } from './utils/helpers';
 
 export default function Command(): ReactElement {
-  const { textEditor } = getPreferences();
+  const { scanPath, textEditor } = getPreferences();
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useDiskCache(searchText);
 
@@ -22,7 +22,15 @@ export default function Command(): ReactElement {
 
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoading}>
-      <List.Section title={`${data?.dirs?.length || 0} directories found`}>
+      {data?.dirs?.length === 0 && (
+        <List.EmptyView
+          title={`No Netlify directories found in ${scanPath}`}
+          description="Run `netlify link` from a local repo to link a directory to a site."
+        />
+      )}
+      <List.Section
+        title={`${data?.dirs?.length || 0} sites found in local directories`}
+      >
         {data?.dirs?.map((dirs) => (
           <List.Item
             key={dirs.fullPath}

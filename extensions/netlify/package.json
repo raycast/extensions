@@ -26,7 +26,7 @@
       "name": "find-sites-on-disk",
       "title": "Find Sites on Disk",
       "subtitle": "Netlify",
-      "description": "Find your Netlify sites you have locally",
+      "description": "Find your Netlify sites that you have saved locally",
       "mode": "view"
     },
     {
