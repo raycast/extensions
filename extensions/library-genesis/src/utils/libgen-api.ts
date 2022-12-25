@@ -3,6 +3,7 @@ import libgen = require("libgen");
 import fetch from "node-fetch";
 import cheerio = require("cheerio");
 import { extractNumber } from "./common-utils";
+import { getPreferenceValues } from "@raycast/api";
 
 export const getLibgenUrl = async () => {
   const urlString = await libgen.mirror();
@@ -49,10 +50,12 @@ export const getLibgenSearchResultsLibgenAPI = async (searchContent: string) => 
 };
 
 export const getLibgenSearchResults = async (searchContent: string, results = 100) => {
+  const { preferredLibgenMirror } = getPreferenceValues<LibgenPreferences>();
   const books: BookEntry[] = [];
+  const libgenUrl =
+    preferredLibgenMirror || (await libgen.mirror().then((url: string) => url.replace("http", "https")));
 
-  const libgenUrl = await libgen.mirror().then((url: string) => url.replace("http", "https"));
-
+  console.log("Libgen Mirror URL: " + libgenUrl);
   const queryUrl =
     libgenUrl +
     "/search.php?" +

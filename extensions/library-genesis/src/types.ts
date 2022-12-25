@@ -46,6 +46,7 @@ export enum SearchPriority {
 export interface LibgenPreferences {
   primaryAction: BookAction;
   copySearchContentFromClipboard: boolean;
+  preferredLibgenMirror: string;
   downloadGateway: LibgenDownloadGateway;
   downloadPath: string;
   alwaysAskWhereToSave: boolean;

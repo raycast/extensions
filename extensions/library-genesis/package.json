@@ -51,6 +51,15 @@
       "required": true
     },
     {
+      "name": "preferredLibgenMirror",
+      "title": "Preferred Libgen Mirror",
+      "description": "Force query from the specified mirror.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "https://libgen.li",
+      "required": false
+    },
+    {
       "name": "downloadGateway",
       "title": "Download Gateway",
       "description": "Choosing the default download gateway.",
