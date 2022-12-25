@@ -4,9 +4,9 @@
 
 ### All JSON operations in one editor.
 
-#### Features Provided
+#### Features 
 
-- Edit JSON directly, like filter operation
+- Edit JSON directly, like filter data
 - Format JSON
 - Minify JSON
 - Escape JSON
@@ -15,7 +15,7 @@
 
 ---
 
-<p align="center"> ♥️ If you enjoy using Deduplicator and/or want to support me to develop, you can buy me a coffee ☕!</p>
+<p align="center"> ♥️ If you enjoy using JSON Editor and/or want to support me to develop, you can buy me a coffee ☕!</p>
 
 <p align="center">
   <a title="Support me on Kofi" href="https://ko-fi.com/Y8Y5GVVNA">
