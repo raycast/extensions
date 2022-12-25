@@ -2,8 +2,8 @@ import { List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
+import { handleNetworkError } from './utils/helpers';
 import { Member, Team } from './utils/interfaces';
-import { handleNetworkError } from './utils/utils';
 
 export default function Command() {
   const [teams, setTeams] = useState<Team[]>([]);

@@ -1,5 +1,12 @@
 export interface Preferences {
   token: string;
+  scanPath: string;
+  scanDepth?: number;
+  textEditor: {
+    bundleId: string;
+    name: string;
+    path: string;
+  };
 }
 
 export interface AuditLog {
@@ -60,6 +67,14 @@ export interface Deploy {
   url: string;
 }
 
+export interface Directory {
+  fullPath: string;
+  lastModified: number;
+  name: string;
+  remotes: Remote[];
+  siteId: string;
+}
+
 export interface Domain {
   account_name: string;
   account_slug: string;
@@ -95,6 +110,12 @@ export interface Member {
   id: string;
   full_name: string;
   role: string;
+}
+
+export interface Remote {
+  host: string;
+  name: string;
+  url: string;
 }
 
 export interface Site {

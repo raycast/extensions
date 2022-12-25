@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 
 import api from '../utils/api';
 import { Deploy } from '../utils/interfaces';
-import { getStatusIcon } from '../utils/helpers';
-import { formatDate, getDeployUrl, handleNetworkError } from '../utils/utils';
+import { formatDate, getDeployUrl, handleNetworkError } from '../utils/helpers';
+import { getStatusIcon } from '../utils/icons';
 
 interface Props {
   siteId: string;

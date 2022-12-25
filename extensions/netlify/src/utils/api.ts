@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+import { getPreferences } from './helpers';
 import {
   AuditLog,
   Deploy,
@@ -9,7 +10,6 @@ import {
   Team,
   User,
 } from './interfaces';
-import { getToken } from './utils';
 
 class Api {
   client: AxiosInstance;
@@ -80,6 +80,7 @@ class Api {
   }
 }
 
-const api = new Api(getToken());
+const { token } = getPreferences();
+const api = new Api(token);
 
 export default api;
