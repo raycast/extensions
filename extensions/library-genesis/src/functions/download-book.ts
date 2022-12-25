@@ -4,21 +4,20 @@ import { getUrlFromDownloadPage } from "../utils/libgen-api";
 import { downloadBookToDefaultDirectory, downloadBookToLocation } from "../utils/common-utils";
 import Style = Toast.Style;
 
-export const downloadBook = async ({ downloadUrl, title, author, year, extension }: BookEntry) => {
+export const downloadBook = async (book: BookEntry) => {
   const { downloadGateway, alwaysAskWhereToSave } = getPreferenceValues<LibgenPreferences>();
-  const fileName = `${author} - ${title}${year && " (" + year + ")"}`.replace(/\//g, ""); // remove slashes
-  const fileNameWithExtension = `${author} - ${title}${year && " (" + year + ")"}.${extension.toLowerCase()}`.replace(
-    /\//g,
-    ""
-  ); // remove slashes
+
   await showToast(Style.Animated, "Fetching URL...");
   try {
-    const url = await getUrlFromDownloadPage(downloadUrl, downloadGateway);
+    const url = await getUrlFromDownloadPage(book.downloadUrl, downloadGateway);
 
-    if (alwaysAskWhereToSave) {
-      downloadBookToLocation(url, fileNameWithExtension);
-    } else {
-      downloadBookToDefaultDirectory(url, extension, fileName);
+    switch (alwaysAskWhereToSave) {
+      case true:
+        downloadBookToLocation(url, book);
+        break;
+      case false:
+        downloadBookToDefaultDirectory(url, book);
+        break;
     }
   } catch (err) {
     console.error(err);

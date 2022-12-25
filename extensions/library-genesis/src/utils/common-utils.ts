@@ -111,6 +111,15 @@ export const sortBooksByPreferredFileFormats = (books: BookEntry[], preferredFor
   return books;
 };
 
+export const fileNameFromBookEntry = ({ title, author, year }: BookEntry) => {
+  return `${author} - ${title}${year && " (" + year + ")"}`.replace(/\//g, ""); // remove slashes
+};
+
+export const fileNameWithExtensionFromBookEntry = (book: BookEntry) => {
+  const fileName = fileNameFromBookEntry(book);
+  return fileName + "." + book.extension.toLowerCase();
+};
+
 export function buildFileName(path: string, name: string, extension: string) {
   const directoryExists = fse.existsSync(path + name + "." + extension);
   if (!directoryExists) {
@@ -129,8 +138,10 @@ export function buildFileName(path: string, name: string, extension: string) {
   }
 }
 
-export async function downloadBookToDefaultDirectory(url = "", extension = "", name = "") {
+export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) {
   const { downloadPath } = getPreferenceValues<LibgenPreferences>();
+  const name = fileNameFromBookEntry(book);
+  const extension = book.extension.toLowerCase();
 
   const toast = await showToast(Style.Animated, "Downloading...");
   try {
@@ -169,7 +180,8 @@ export async function downloadBookToDefaultDirectory(url = "", extension = "", n
   }
 }
 
-export async function downloadBookToLocation(url?: string, fileName?: string) {
+export async function downloadBookToLocation(url = "", book: BookEntry) {
+  const fileName = fileNameWithExtensionFromBookEntry(book);
   await showToast(Style.Animated, "Please pick a folder...");
   try {
     await runAppleScript(`
@@ -182,7 +194,6 @@ export async function downloadBookToLocation(url?: string, fileName?: string) {
     await showHUD("Download Complete.");
   } catch (err) {
     console.error(err);
-
     await showHUD("Download Failed. Try with a different download gateway.");
   }
 }
