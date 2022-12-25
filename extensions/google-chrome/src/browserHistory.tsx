@@ -20,21 +20,9 @@ export interface ChromeHistorySearch {
   isLoading: boolean;
 }
 
-const userDataDirectoryPath = () => {
-  if (!process.env.HOME) {
-    throw new Error("$HOME environment variable is not set.");
-  }
-
-  return path.join(process.env.HOME, "Library", "Application Support", "Google", "Chrome");
-};
-
-const historyDbPath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "History");
-
-const getProfileName = () => "Default";
-
-const loadDb = async (profileName: string): Promise<Database> => {
-  const dbPath = historyDbPath(profileName);
-  const fileBuffer = await fsReadFile(dbPath);
+const loadDb = async (profilePath: string): Promise<Database> => {
+  const historyDbPath = path.join(profilePath, "History");
+  const fileBuffer = await fsReadFile(historyDbPath);
   const wasmBinary = await fsReadFile(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
   return new SQL.Database(fileBuffer);
@@ -82,7 +70,7 @@ const searchHistory = async (db: Database, query: string | undefined): Promise<H
   }));
 };
 
-export function useChromeHistorySearch(query: string | undefined): ChromeHistorySearch {
+export function useChromeHistorySearch(profilePath: string, query: string | undefined): ChromeHistorySearch {
   const [entries, setEntries] = useState<HistoryEntry[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -97,8 +85,7 @@ export function useChromeHistorySearch(query: string | undefined): ChromeHistory
       }
 
       if (!dbRef.current) {
-        const profileName = getProfileName();
-        dbRef.current = await loadDb(profileName);
+        dbRef.current = await loadDb(profilePath);
       }
 
       setError(undefined);
