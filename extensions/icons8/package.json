@@ -51,9 +51,13 @@
       "title": "Number of Results",
       "description": "Maximum number of results to show.",
       "type": "dropdown",
-      "default": "1024",
+      "default": "512",
       "required": false,
       "data": [
+        {
+          "value": "256",
+          "title": "256"
+        },
         {
           "value": "512",
           "title": "512"
@@ -65,10 +69,6 @@
         {
           "value": "2048",
           "title": "2048"
-        },
-        {
-          "value": "4096",
-          "title": "4096"
         }
       ]
     },
