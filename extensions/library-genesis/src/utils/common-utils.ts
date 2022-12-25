@@ -4,6 +4,7 @@ import { languages } from "./constants";
 import { join } from "path";
 import { homedir } from "os";
 import { runAppleScript } from "run-applescript";
+import { LibgenPreferences } from "../types";
 
 import {
   Clipboard,
@@ -128,7 +129,7 @@ export function buildFileName(path: string, name: string, extension: string) {
   }
 }
 
-export async function downloadBookToDefaultDirectory(url?: string, extension: string, name: string) {
+export async function downloadBookToDefaultDirectory(url = "", extension = "", name = "") {
   const { downloadPath } = getPreferenceValues<LibgenPreferences>();
 
   const toast = await showToast(Style.Animated, "Downloading...");
