@@ -1,20 +1,37 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Icon,
   List,
   showToast,
   Toast,
 } from '@raycast/api';
+import { useEffect, useState } from 'react';
 
-import { useState, ReactElement } from 'react';
-import { tildifyPath, useDiskCache } from './utils/disk';
-import { formatDate, getPreferences } from './utils/helpers';
+import { getDefaultTextEditor, tildifyPath, useDiskCache } from './utils/disk';
+import {
+  formatDate,
+  getPreferences,
+  snakeCaseToTitleCase,
+} from './utils/helpers';
 
-export default function Command(): ReactElement {
-  const { scanPath, textEditor } = getPreferences();
+export default function Command() {
+  const { scanPath } = getPreferences();
+
   const [searchText, setSearchText] = useState<string>();
+  const [textEditor, setTextEditor] = useState<Application | null>(null);
   const { data, error, isLoading } = useDiskCache(searchText);
+
+  useEffect(() => {
+    async function getTextEditor() {
+      const defaultTextEditor = await getDefaultTextEditor();
+      if (defaultTextEditor) {
+        setTextEditor(defaultTextEditor);
+      }
+    }
+    getTextEditor();
+  }, []);
 
   if (error) {
     showToast(Toast.Style.Failure, '', error);
@@ -41,12 +58,14 @@ export default function Command(): ReactElement {
             accessories={[{ text: formatDate(dirs.lastModified) }]}
             actions={
               <ActionPanel>
-                <Action.Open
-                  application={textEditor.bundleId}
-                  icon={{ fileIcon: textEditor.path }}
-                  target={dirs.fullPath}
-                  title={`Open in ${textEditor.name}`}
-                />
+                {textEditor && (
+                  <Action.Open
+                    application={textEditor.bundleId}
+                    icon={{ fileIcon: textEditor.path }}
+                    target={dirs.fullPath}
+                    title={`Open in ${snakeCaseToTitleCase(textEditor.name)}`}
+                  />
+                )}
                 <Action.ShowInFinder path={dirs.fullPath} />
                 {dirs.siteId && (
                   <Action.OpenInBrowser

@@ -11,6 +11,13 @@ export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substr(1);
 }
 
+export function snakeCaseToTitleCase(s: string): string {
+  return s
+    .split('_')
+    .map((word) => capitalize(word))
+    .join(' ');
+}
+
 export function formatDate(timestamp: string | number) {
   const date = new Date(timestamp);
   return date.toLocaleDateString('en-US', {

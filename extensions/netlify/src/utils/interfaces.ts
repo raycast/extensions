@@ -1,12 +1,6 @@
 export interface Preferences {
   token: string;
   scanPath: string;
-  scanDepth?: number;
-  textEditor: {
-    bundleId: string;
-    name: string;
-    path: string;
-  };
 }
 
 export interface AuditLog {

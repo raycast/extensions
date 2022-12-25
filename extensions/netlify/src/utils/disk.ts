@@ -1,4 +1,10 @@
-import { environment, showToast, Toast } from '@raycast/api';
+import {
+  Application,
+  environment,
+  getDefaultApplication,
+  showToast,
+  Toast,
+} from '@raycast/api';
 
 import { useEffect, useState } from 'react';
 import { homedir } from 'os';
@@ -13,7 +19,22 @@ import parseGithubURL = require('parse-github-url');
 import { getPreferences } from './helpers';
 import { Directory, Remote } from './interfaces';
 
-const CacheFile = path.join(environment.supportPath, 'cache.json');
+const CACHE_FILE = path.join(
+  environment.supportPath,
+  'find-sites-on-disk.json',
+);
+const SCAN_DEPTH = 4;
+
+export async function getDefaultTextEditor(): Promise<Application> {
+  const exampleFile = path.join(environment.supportPath, 'blank.js');
+  try {
+    fs.accessSync(exampleFile, fs.constants.R_OK);
+  } catch (err) {
+    fs.writeFileSync(exampleFile, '// used to determine default text editor');
+  }
+  const defaultTextEditor = await getDefaultApplication(exampleFile);
+  return defaultTextEditor;
+}
 
 function readJSONSync(filepath: string) {
   try {
@@ -36,7 +57,7 @@ export class Cache {
     // make support path
     fs.mkdirSync(environment.supportPath, { recursive: true });
     this.dirs = [];
-    const cache: Cache = readJSONSync(CacheFile);
+    const cache: Cache = readJSONSync(CACHE_FILE);
     if (cache.version === this.version) {
       this.dirs = cache.dirs;
     }
@@ -44,7 +65,7 @@ export class Cache {
 
   save(): void {
     const jsonData = JSON.stringify(this, null, 2) + '\n';
-    fs.writeFileSync(CacheFile, jsonData);
+    fs.writeFileSync(CACHE_FILE, jsonData);
   }
 
   setDirs(dirs: Directory[]): void {
@@ -164,15 +185,12 @@ function getSiteId(fullPath: string): string {
   return siteId || '';
 }
 
-export async function findDirs(
-  paths: string[],
-  maxDepth: number,
-): Promise<Directory[]> {
+export async function findDirs(paths: string[]): Promise<Directory[]> {
   const cache = new Cache();
   let foundDirs: Directory[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .netlify -type d`;
+      const findCmd = `find -L ${path} -maxdepth ${SCAN_DEPTH} -name .netlify -type d`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
         showToast(Toast.Style.Failure, 'Find Failed', stderr);
@@ -224,13 +242,9 @@ export function useDiskCache(query: string | undefined): {
         }
         const [dirPaths, unresolvedPaths] = parsePath(preferences.scanPath);
         if (unresolvedPaths.length > 0) {
-          setError(
-            `Director${
-              unresolvedPaths.length === 1 ? 'y' : 'ies'
-            } not found: ${unresolvedPaths}`,
-          );
+          setError(`Could not find ${unresolvedPaths}`);
         }
-        const dirs = await findDirs(dirPaths, preferences.scanDepth ?? 3);
+        const dirs = await findDirs(dirPaths);
 
         if (!cancel) {
           let filteredDirs = dirs;
@@ -254,9 +268,11 @@ export function useDiskCache(query: string | undefined): {
     if (query && query.length > 0) {
       dirs = filterDirs(dirs, query);
     }
+
     if (cache.dirs.length > 0) {
       setData({ dirs });
     }
+
     if (!fetched) {
       fetchDirs();
     }
