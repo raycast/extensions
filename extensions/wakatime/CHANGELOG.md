@@ -1,5 +1,11 @@
 # WakaTime Changelog
 
+## [Update API Regex] - 2022-12-26
+
+### Fixed
+
+- Update Regex to validate API keys
+
 ## [Added screenshots] - 2022-11-17
 
 ## [New Features and Fixes] - 2022-08-06
