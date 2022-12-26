@@ -13,7 +13,7 @@ interface HandleErrorArgs {
 export function handleError({ error, title }: HandleErrorArgs) {
   if (environment.commandMode === "menu-bar") {
     if (environment.launchType === LaunchType.UserInitiated) {
-      showHUD(title);
+      return showHUD(title);
     } else {
       return;
     }
