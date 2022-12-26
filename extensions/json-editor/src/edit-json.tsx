@@ -58,22 +58,16 @@ function filterJSONByPattern(input: string, pattern: string) {
   }
 
   try {
-    // try unescaping input first
-    const unescapedInput = input
-      .replace(/(\\n)/g, "")
-      .replace(/(\\r)/g, "")
-      .replace(/(\\t)/g, "")
-      .replace(/(\\f)/g, "")
-      .replace(/(\\b)/g, "")
-      .replace(/("{)/g, "{")
-      .replace(/(}")/g, "}")
-      .replace(/(\\)/g, "")
-      .replace(/(\/)/g, "/");
-
-    obj = JSON.parse(unescapedInput);
+    obj = JSON.parse(input);
   } catch (err) {
-    console.log("1", err);
-    return [ErrorInvalidJSON, undefined];
+    try {
+      // try unescaping input
+      const unescapedInput = '"'.concat(input).concat('"');
+      const objText = JSON.parse(unescapedInput);
+      obj = JSON.parse(objText);
+    } catch (e) {
+      return [ErrorInvalidJSON, undefined];
+    }
   }
 
   if (pattern) {
@@ -101,5 +95,5 @@ function filterJSONByPattern(input: string, pattern: string) {
 
 function escapeJsonText(input: object) {
   const minifiedjson = JSON.stringify(input);
-  return JSON.stringify(minifiedjson).replace(/^"/g, "").replace(/"$/g, "");
+  return JSON.stringify(minifiedjson).slice(1, -1);
 }
