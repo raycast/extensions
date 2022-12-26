@@ -12,23 +12,22 @@ import useJotobaAsync from "./useJotobaAsync";
  * The main command for Raycast Jotoba
  */
 export default function Command(props: { arguments: SearchArguments }) {
-  const [searchText, setSearchText] = useState("");
   const { term: argumentSearchTerm } = props.arguments;
+  const [searchText, setSearchText] = useState(argumentSearchTerm ?? "");
   const { state, search } = useSearch();
-  const { showDetailsInList } = getPreferenceValues<Preferences>();
+  const { showDetailsInList, commonWordsFirst } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    if (argumentSearchTerm && argumentSearchTerm.length > 0) {
-      setSearchText(argumentSearchTerm);
-      search(argumentSearchTerm);
+    if (searchText.trim().length > 0) {
+      void search(searchText);
     }
-  }, [argumentSearchTerm]);
+  }, [searchText]);
 
   return (
     <List
       searchText={searchText}
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Jotoba"
       throttle
       isShowingDetail={showDetailsInList === "list" && state.searchText !== ""}
@@ -36,11 +35,15 @@ export default function Command(props: { arguments: SearchArguments }) {
       {state.searchText !== "" && (
         <>
           <List.Section title="Words" subtitle={state.results.words.length + ""}>
-            {state.results.words
-              .sort((wordResult) => (wordResult.common ? -1 : 0))
-              .map((wordResult) => (
-                <WordListItem key={wordResult.id} wordResult={wordResult} />
-              ))}
+            {(commonWordsFirst
+              ? [
+                  ...state.results.words.filter((word) => word.common),
+                  ...state.results.words.filter((word) => !word.common),
+                ]
+              : state.results.words
+            ).map((word) => (
+              <WordListItem key={word.id} wordResult={word} />
+            ))}
           </List.Section>
           <List.Section title="Kanji" subtitle={state.results.kanji.length + ""}>
             {state.results.kanji.map((kanjiResult) => (
