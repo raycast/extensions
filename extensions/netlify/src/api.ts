@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { Cache } from '@raycast/api';
 
 import { Deploy, Domain, Member, Site, Team, User } from './interfaces';
 import { getToken } from './utils';
 
-const cache = new Cache({ namespace: 'api.client.v1' });
+const cache = new Cache({ namespace: 'api.netlify.v1' });
 
 function getCacheKey(path: string): string {
   const ttl = 1; // keep LRU cache for a ttl (1 minute default)
@@ -14,15 +14,15 @@ function getCacheKey(path: string): string {
 }
 
 class Api {
-  client: {
-    axios: AxiosInstance;
+  netlify: {
+    _axios: AxiosInstance;
     get: (path: string) => Promise<any>;
     put: (path: string, body: any) => Promise<any>;
   };
 
   constructor(token: string) {
-    this.client = {
-      axios: Axios.create({
+    this.netlify = {
+      _axios: axios.create({
         baseURL: 'https://api.netlify.com/api/v1',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -36,7 +36,7 @@ class Api {
           return JSON.parse(cache.get(key) || '[]');
         }
         // console.log('cache miss', key);
-        const { status, data } = await this.axios.get(path);
+        const { status, data } = await this._axios.get(path);
         if (status === 200) {
           // console.log('cache save', key);
           cache.set(key, JSON.stringify(data));
@@ -44,7 +44,7 @@ class Api {
         return data;
       },
       async put(path: string, body: unknown) {
-        const { status, data } = await this.axios.put(path, body);
+        const { status, data } = await this._axios.put(path, body);
         if (status === 200) {
           const key = getCacheKey(path);
           // console.log('cache save', key);
@@ -56,15 +56,15 @@ class Api {
   }
 
   getDeploys(site: string): Promise<Deploy[]> {
-    return this.client.get(`/sites/${site}/deploys`);
+    return this.netlify.get(`/sites/${site}/deploys`);
   }
 
   getDomains(): Promise<Domain[]> {
-    return this.client.get('/dns_zones');
+    return this.netlify.get('/dns_zones');
   }
 
   getMembers(team: string): Promise<Member[]> {
-    return this.client.get(`/${team}/members`);
+    return this.netlify.get(`/${team}/members`);
   }
 
   getSites(query: string, team?: string): Promise<Site[]> {
@@ -79,19 +79,19 @@ class Api {
     const path = [team && `/${team}`, `/sites?${params.join('&')}`]
       .filter(Boolean)
       .join('');
-    return this.client.get(path);
+    return this.netlify.get(path);
   }
 
   getTeams(): Promise<Team[]> {
-    return this.client.get(`/accounts`);
+    return this.netlify.get(`/accounts`);
   }
 
   getUser(): Promise<User> {
-    return this.client.get(`/user`);
+    return this.netlify.get(`/user`);
   }
 
   saveFavorites(favorites: string[]): Promise<User> {
-    return this.client.put(`/user`, {
+    return this.netlify.put(`/user`, {
       favorite_sites: favorites,
     });
   }
