@@ -2,6 +2,21 @@ export interface Preferences {
   token: string;
 }
 
+export interface AlgoliaHit {
+  content?: string;
+  hierarchy: {
+    lvl0: 'In the docs' | 'On our blog' | 'On our site';
+    lvl1: string;
+    lvl2?: string;
+    lvl3?: string;
+    lvl4?: string;
+    lvl5?: string;
+    lvl6?: string;
+  };
+  objectID: string;
+  url: string;
+}
+
 export type DeployContext = 'production' | 'deploy-preview' | 'branch-deploy';
 
 export type DeployState =

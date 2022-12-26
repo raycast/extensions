@@ -16,6 +16,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "subtitle": "Netlify",
+      "description": "Search Netlify's official documentation",
+      "mode": "view"
+    },
+    {
       "name": "view-sites",
       "title": "Search Sites",
       "subtitle": "Netlify",
