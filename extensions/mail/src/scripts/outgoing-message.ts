@@ -1,7 +1,8 @@
-import { Color, Icon, Image, showToast, Toast } from "@raycast/api";
+import { Icon, Image, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { OutgoingMessage } from "../types/types";
 import emailRegex from "email-regex";
+import { MailIcons } from "../utils/presets";
 
 export enum OutgoingMessageAction {
   Compose = "Send Message",
@@ -12,7 +13,7 @@ export enum OutgoingMessageAction {
 }
 
 export const OutgoingMessageIcons: { [key: string]: Image.ImageLike } = {
-  [OutgoingMessageAction.Compose]: { source: "../assets/icons/sent.svg", tintColor: Color.PrimaryText },
+  [OutgoingMessageAction.Compose]: MailIcons.Sent,
   [OutgoingMessageAction.Reply]: Icon.Reply,
   [OutgoingMessageAction.ReplyAll]: Icon.Reply,
   [OutgoingMessageAction.Forward]: Icon.ArrowUpCircle,
@@ -36,7 +37,7 @@ export const newOutgoingMessage = async (
   }
   let attachments = message.attachments && message.attachments.length > 0 ? message.attachments : [];
   attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
-  let actionScript = (() => {
+  const actionScript = (() => {
     switch (action) {
       case OutgoingMessageAction.Compose:
         return "send";

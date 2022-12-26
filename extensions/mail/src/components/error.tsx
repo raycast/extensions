@@ -1,13 +1,20 @@
-import { List, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 
-export const ErrorView = (props: { error?: string; icon?: Icon | string }): JSX.Element => {
+type ErrorProps = List.EmptyView.Props & {
+  error: string;
+};
+
+export const ErrorView = (props: ErrorProps): JSX.Element => {
   return (
-    <List>
-      <List.EmptyView
-        title={props.error ? props.error : "Error"}
-        description="You are in no man's land."
-        icon={props.icon ? props.icon : "../assets/error.svg"}
-      />
+    <List
+      navigationTitle={props.title}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Error" content={props.error} />
+        </ActionPanel>
+      }
+    >
+      <List.EmptyView {...props} icon={props.icon || Icon.Warning} />
     </List>
   );
 };

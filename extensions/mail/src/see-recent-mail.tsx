@@ -1,33 +1,15 @@
 import { List } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { EmptyView } from "./components/empty-view";
 import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
 import { Account, Message } from "./types/types";
 
 export default function SeeRecentMail() {
+  const [account, setAccount] = useState<Account>();
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
-  const [numUnread, setNumUnread] = useState<number | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const getAccounts = async () => {
-    let accounts = await getMailAccounts();
-    if (accounts) {
-      const promises = accounts.map((account: Account) => {
-        return getAccountMessages(account, "recent", "All Mail", 25, true);
-      });
-      const messages = await Promise.all(promises);
-      accounts = accounts.map((account: Account, index: number) => {
-        account.messages = messages[index];
-        return account;
-      });
-      setNumUnread(
-        accounts.reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0)
-      );
-      setAccounts(accounts);
-    }
-    setIsLoading(false);
-  };
 
   const setMessage = (account: Account, message: Message) => {
     setAccounts(
@@ -47,35 +29,71 @@ export default function SeeRecentMail() {
   };
 
   useEffect(() => {
-    getAccounts();
+    (async () => {
+      const accounts = await getMailAccounts();
+      if (accounts) {
+        const messages = await Promise.all(
+          accounts.map((account: Account) => {
+            return getAccountMessages(account, "recent", "All Mail", 25, true);
+          })
+        );
+        setAccounts(
+          accounts.map((account: Account, index: number) => {
+            account.messages = messages[index];
+            return account;
+          })
+        );
+      }
+      setIsLoading(false);
+    })();
     return () => {
       setAccounts([]);
     };
   }, []);
 
+  const numMessages = accounts
+    ?.filter((a: Account) => account === undefined || a.id === account.id)
+    .reduce((a: number, account: Account) => a + (account.messages ? account.messages.length : 0), 0);
+
   return (
-    <List isLoading={isLoading}>
-      {numUnread && numUnread > 0 ? (
-        accounts?.map((account: Account, index: number) => (
-          <List.Section key={index} title={account.name} subtitle={account.email}>
-            {account.messages?.map((message: Message, index: number) => (
-              <MessageListItem
-                key={index}
-                id="recent"
-                account={account}
-                message={message}
-                setMessage={setMessage}
-                deleteMessage={deleteMessage}
-              />
+    <List
+      isLoading={isLoading}
+      navigationTitle={`${account?.name || "All Accounts"} - Recent Mail`}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Choose Account"
+          onChange={(value: string) => {
+            setAccount(accounts?.find((a) => a.id === value));
+          }}
+        >
+          <List.Dropdown.Item title="All Accounts" value="" />
+          <List.Dropdown.Section>
+            {accounts?.map((account: Account) => (
+              <List.Dropdown.Item key={account.id} title={account.name} value={account.id} />
             ))}
-          </List.Section>
-        ))
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      {numMessages && numMessages > 0 ? (
+        accounts
+          ?.filter((a: Account) => account === undefined || a.id === account.id)
+          .map((account: Account) => (
+            <List.Section key={account.id} title={account.name} subtitle={account.email}>
+              {account.messages?.map((message: Message) => (
+                <MessageListItem
+                  key={message.id}
+                  mailbox={"recent"}
+                  account={account}
+                  message={message}
+                  setMessage={setMessage}
+                  deleteMessage={deleteMessage}
+                />
+              ))}
+            </List.Section>
+          ))
       ) : (
-        <List.EmptyView
-          title="No Recent Unread Messages"
-          description="You're all caught up..."
-          icon={"../assets/caught-up.svg"}
-        />
+        <EmptyView title={"No Recent Unread Messages"} description={"You're all caught up..."} />
       )}
     </List>
   );

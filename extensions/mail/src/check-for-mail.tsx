@@ -1,4 +1,4 @@
-import { showHUD, LaunchType, LocalStorage, environment } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async function CheckForMail() {

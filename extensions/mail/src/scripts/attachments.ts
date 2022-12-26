@@ -48,19 +48,30 @@ export const getMessageAttachments = async (message: Message, mailbox: string): 
   }
 };
 
-export const saveAttachment = async (message: Message, mailbox: string, attachment: Attachment, name?: string) => {
+export const saveAttachment = async (message: Message, mailbox: string, attachment?: Attachment, name?: string) => {
+  let attachmentName: string;
+  if (attachment) {
+    attachmentName = attachment.name;
+  } else {
+    attachmentName = await tellMessage(message, mailbox, "tell msg to get name of first mail attachment");
+    console.log("attachmentName:", attachmentName);
+    if (attachmentName === "missing value") {
+      await showToast(Toast.Style.Failure, "No Attachments Found");
+      return;
+    }
+  }
   if (name) {
-    const extension = attachment.name.split(".").pop();
+    const extension = attachmentName.split(".").pop();
     if (extension && !name.endsWith(extension)) {
-      name = name + "." + extension;
+      name = `${name}.${extension}`;
     }
   } else {
-    name = attachment.name;
+    name = attachmentName;
   }
   const script = `
     set attachmentsFolder to "${downloadDirectory}"
     tell msg
-      set selectedAttachment to (first mail attachment whose id is "${attachment.id}")
+      set selectedAttachment to (first mail attachment${attachment ? ` whose id is "${attachment.id}"` : ""})
       set attachmentName to "${name}"
       set attachmentPath to attachmentsFolder & ":" & attachmentName
       save selectedAttachment in attachmentPath
@@ -69,7 +80,7 @@ export const saveAttachment = async (message: Message, mailbox: string, attachme
   try {
     await tellMessage(message, mailbox, script);
     const options: Toast.Options = {
-      title: `Saved Attachment ${name}`,
+      title: `Saved Attachment "${name}"`,
       style: Toast.Style.Success,
       primaryAction: {
         title: "Open Attachment",

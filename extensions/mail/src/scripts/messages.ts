@@ -5,7 +5,10 @@ import { Account, Message } from "../types/types";
 import * as cache from "../utils/cache";
 
 export const tellMessage = async (message: Message, mailbox: string, script: string): Promise<string> => {
-  if (!script.includes("msg")) throw "Script must include msg";
+  if (!script.includes("msg")) {
+    console.error("Script must include msg");
+    return "missing value";
+  }
   return await runAppleScript(`
     tell application "Mail"
       set acc to (first account whose id is "${message.account}")
@@ -49,7 +52,7 @@ export const deleteMessage = async (message: Message, mailbox: string): Promise<
   }
 };
 
-export const getRecipients = async (message: Message): Promise<Message> => {
+export const getRecipients = async (message: Message): Promise<string[]> => {
   const script = `
     set output to ""
     tell application "Mail"
@@ -75,10 +78,10 @@ export const getRecipients = async (message: Message): Promise<Message> => {
         recipientAddresses.push(address);
       }
     }
-    return { ...message, recipientNames, recipientAddresses };
+    return [message.senderAddress, ...recipientAddresses];
   } catch (error) {
     console.error(error);
-    return message;
+    return [message.senderAddress];
   }
 };
 
@@ -139,13 +142,13 @@ export const getAccountMessages = async (
   return messages;
 };
 
-export const getMessageContent = async (message: Message, mailbox: string): Promise<Message> => {
+export const getMessageContent = async (message: Message, mailbox: string): Promise<string> => {
   try {
     const content = await tellMessage(message, mailbox, "tell msg to return content");
-    return { ...message, content };
+    return content;
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Getting Message Content");
     console.error(error);
-    return message;
+    return "";
   }
 };

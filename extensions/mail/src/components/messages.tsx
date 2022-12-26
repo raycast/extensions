@@ -1,30 +1,13 @@
-import {
-  List,
-  Detail,
-  Icon,
-  Action,
-  ActionPanel,
-  Color,
-  closeMainWindow,
-  showToast,
-  Toast,
-  useNavigation,
-  confirmAlert,
-  getPreferenceValues,
-} from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { List, Icon } from "@raycast/api";
 import * as messageScripts from "../scripts/messages";
-import { OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
-import { saveAllAttachments } from "../scripts/attachments";
-import { ComposeMessage } from "./compose";
-import { Attachments } from "./attachments";
-import { shortenText, formatDate, formatMarkdown } from "../utils/utils";
+import { shortenText, formatDate } from "../utils/utils";
+import { Message, Account, MessageProps } from "../types/types";
 import { Mailboxes, MailIcons } from "../utils/presets";
-import { Message, Account } from "../types/types";
+import { MessageActions } from "./message-actions";
 
-const { primaryAction } = getPreferenceValues();
-
-export const Messages = (props: { account: Account; id: string }): JSX.Element => {
+export const Messages = (props: { account: Account; mailbox: string }): JSX.Element => {
+  const [mailbox, setMailbox] = useState<string>(props.mailbox);
   const [messages, setMessages] = useState<Message[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -36,18 +19,29 @@ export const Messages = (props: { account: Account; id: string }): JSX.Element =
   };
 
   useEffect(() => {
-    const getMessages = async () => {
-      setMessages(await messageScripts.getAccountMessages(props.account, props.id, Mailboxes[props.id].mailbox, 100));
+    (async () => {
+      setIsLoading(true);
+      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 100));
       setIsLoading(false);
-    };
-    getMessages();
+    })();
     return () => {
       setMessages([]);
     };
-  }, []);
+  }, [mailbox]);
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      searchBarPlaceholder="Search for emails"
+      isLoading={isLoading}
+      navigationTitle={`${props.account.name} - ${Mailboxes[mailbox].title}`}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Mailbox" defaultValue={mailbox} onChange={setMailbox}>
+          {Object.entries(Mailboxes).map(([id, mailbox]) => (
+            <List.Dropdown.Item key={id} title={mailbox.title} value={id} />
+          ))}
+        </List.Dropdown>
+      }
+    >
       {messages?.map((message: Message, index: number) => (
         <MessageListItem
           key={index}
@@ -61,16 +55,9 @@ export const Messages = (props: { account: Account; id: string }): JSX.Element =
   );
 };
 
-type MessageProps = {
-  id: string;
-  account: Account;
-  message: Message;
-  setMessage: (account: Account, message: Message) => void;
-  deleteMessage: (account: Account, message: Message) => void;
-};
-
 export const MessageListItem = (props: MessageProps): JSX.Element => {
   const message = props.message;
+  const attachments = `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`;
 
   return (
     <List.Item
@@ -79,198 +66,9 @@ export const MessageListItem = (props: MessageProps): JSX.Element => {
       accessories={[
         { text: formatDate(message.date), icon: Icon.Calendar },
         { text: shortenText(message.senderName, 20), icon: Icon.Person },
-        message.numAttachments > 0
-          ? {
-              text: `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`,
-              icon: Icon.Paperclip,
-            }
-          : {},
+        message.numAttachments === 0 ? {} : { text: attachments, icon: Icon.Paperclip },
       ]}
       actions={<MessageActions {...props} />}
     />
-  );
-};
-
-export const MailMessage = (props: MessageProps): JSX.Element => {
-  const [content, setContent] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  let message = props.message;
-
-  useEffect(() => {
-    const getContent = async () => {
-      console.log(message.account);
-      console.log(message.id);
-      message = await messageScripts.getMessageContent(message, Mailboxes[props.id].mailbox);
-      setContent(message.content);
-      setIsLoading(false);
-    };
-    getContent();
-    return () => {
-      setContent(undefined);
-    };
-  }, []);
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={!isLoading ? formatMarkdown(message.subject, content) : undefined}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="From" text={message.senderName} icon={Icon.Person} />
-          <Detail.Metadata.Label title="Received" text={formatDate(message.date)} icon={Icon.Calendar} />
-        </Detail.Metadata>
-      }
-      actions={<MessageActions {...props} inMessageView={true} />}
-    />
-  );
-};
-
-const MessageActions = (props: MessageProps & { inMessageView?: boolean }): JSX.Element => {
-  const message = props.message;
-  const navigation = useNavigation();
-  const pop = props.inMessageView
-    ? navigation.pop
-    : () => {
-        return;
-      };
-
-  const PrimaryActions = (): JSX.Element => {
-    return primaryAction === "openMessage" ? (
-      <React.Fragment>
-        <Action
-          title="See in Mail"
-          icon={Icon.AppWindow}
-          onAction={async () => {
-            try {
-              await messageScripts.openMessage(message, Mailboxes[props.id].mailbox);
-              await closeMainWindow();
-            } catch (error) {
-              await showToast(Toast.Style.Failure, "Failed To Open In Mail");
-              console.error(error);
-            }
-          }}
-        />
-        {!props.inMessageView && (
-          <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<MailMessage {...props} />} />
-        )}
-      </React.Fragment>
-    ) : (
-      <React.Fragment>
-        {!props.inMessageView && (
-          <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<MailMessage {...props} />} />
-        )}
-        <Action
-          title="See in Mail"
-          icon={Icon.AppWindow}
-          onAction={async () => {
-            try {
-              await messageScripts.openMessage(message, Mailboxes[props.id].mailbox);
-              await closeMainWindow();
-            } catch (error) {
-              await showToast(Toast.Style.Failure, "Failed To Open In Mail");
-              console.error(error);
-            }
-          }}
-        />
-      </React.Fragment>
-    );
-  };
-
-  return (
-    <ActionPanel>
-      <PrimaryActions />
-      <ActionPanel.Section>
-        <Action.Push
-          title={OutgoingMessageAction.Reply}
-          icon={OutgoingMessageIcons[OutgoingMessageAction.Reply]}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          target={<ComposeMessage {...props} action={OutgoingMessageAction.Reply} />}
-        />
-        <Action.Push
-          title={OutgoingMessageAction.ReplyAll}
-          icon={OutgoingMessageIcons[OutgoingMessageAction.ReplyAll]}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-          target={<ComposeMessage {...props} action={OutgoingMessageAction.ReplyAll} />}
-        />
-        <Action.Push
-          title={OutgoingMessageAction.Forward}
-          icon={OutgoingMessageIcons[OutgoingMessageAction.Forward]}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-          target={<ComposeMessage {...props} action={OutgoingMessageAction.Forward} />}
-        />
-        <Action.Push
-          title={OutgoingMessageAction.Redirect}
-          icon={OutgoingMessageIcons[OutgoingMessageAction.Redirect]}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
-          target={<ComposeMessage {...props} action={OutgoingMessageAction.Redirect} />}
-        />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action
-          title={message.read ? "Mark as Unread" : "Mark as Read"}
-          shortcut={{ modifiers: ["cmd"], key: "m" }}
-          icon={message.read ? MailIcons.Unread : Icon.CheckCircle}
-          onAction={async () => {
-            try {
-              props.setMessage(props.account, { ...message, read: !message.read });
-              await messageScripts.toggleMessageRead(message, Mailboxes[props.id].mailbox);
-              await showToast(Toast.Style.Success, `Message Marked as ${message.read ? "Unread" : "Read"}`);
-            } catch (error) {
-              await showToast(Toast.Style.Failure, `Failed To Mark Message as ${message.read ? "Unread" : "Read"}`);
-              console.error(error);
-            }
-          }}
-        />
-        {message.numAttachments > 0 && (
-          <React.Fragment>
-            <Action.Push
-              icon={Icon.Paperclip}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-              title={`See ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
-              target={<Attachments {...props} />}
-            />
-            <Action
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
-              title={`Save ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
-              onAction={async () => {
-                await saveAllAttachments(message, Mailboxes[props.id].mailbox);
-              }}
-            />
-          </React.Fragment>
-        )}
-        {props.id !== "junk" && (
-          <Action
-            title="Move to Junk"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-            icon={{ source: "../assets/icons/junk.svg", tintColor: Color.PrimaryText }}
-            onAction={async () => {
-              props.deleteMessage(props.account, message);
-              await messageScripts.moveToJunk(message, Mailboxes[props.id].mailbox);
-              pop();
-            }}
-          />
-        )}
-        <Action
-          title="Delete Message"
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          icon={{ source: "../assets/icons/trash.svg", tintColor: Color.Red }}
-          onAction={async () => {
-            if (props.id === "trash") {
-              const confirm = await confirmAlert({
-                title: "Delete message?",
-                message: "This message will be permanently deleted.",
-                icon: { source: "../assets/icons/trash.svg", tintColor: Color.Red },
-              });
-              if (!confirm) return;
-            }
-            props.deleteMessage(props.account, message);
-            await messageScripts.deleteMessage(message, Mailboxes[props.id].mailbox);
-            pop();
-          }}
-        />
-      </ActionPanel.Section>
-    </ActionPanel>
   );
 };

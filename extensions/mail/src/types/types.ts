@@ -29,6 +29,14 @@ export type Message = {
   redirected?: boolean;
 };
 
+export type MessageProps = {
+  mailbox: string;
+  account: Account;
+  message: Message;
+  setMessage: (account: Account, message: Message) => void;
+  deleteMessage: (account: Account, message: Message) => void;
+};
+
 export type OutgoingMessageForm = {
   account: string;
   to: string;
@@ -36,7 +44,7 @@ export type OutgoingMessageForm = {
   bcc: string;
   subject: string;
   content: string;
-  attachments: string[]
+  attachments: string[];
 };
 
 export type OutgoingMessage = {

@@ -6,17 +6,18 @@ import { Message, Attachment } from "../types/types";
 import { Mailboxes } from "../utils/presets";
 
 interface AttachmentProps {
-  id: string;
+  mailbox: string;
   message: Message;
 }
 
 export const Attachments = (props: AttachmentProps): JSX.Element => {
+  const { mailbox, message } = props;
   const [attachments, setAttachments] = useState<Attachment[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const getAttachments = async () => {
-      setAttachments(await attachmentUtils.getMessageAttachments(props.message, Mailboxes[props.id].mailbox));
+      setAttachments(await attachmentUtils.getMessageAttachments(message, Mailboxes[mailbox].mailbox));
       setIsLoading(false);
     };
     getAttachments();
@@ -40,16 +41,18 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
                 title="Save Attachment"
                 icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
                 onAction={async () => {
-                  await attachmentUtils.saveAttachment(props.message, Mailboxes[props.id].mailbox, attachment);
+                  await attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment);
                 }}
               />
-              <Action
-                title="Save All Attachments"
-                icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
-                onAction={async () => {
-                  await attachmentUtils.saveAllAttachments(props.message, Mailboxes[props.id].mailbox);
-                }}
-              />
+              {attachments.length > 1 && (
+                <Action
+                  title="Save All Attachments"
+                  icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
+                  onAction={async () => {
+                    await attachmentUtils.saveAllAttachments(message, Mailboxes[mailbox].mailbox);
+                  }}
+                />
+              )}
               <Action.Push
                 title="Save Attachment As..."
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
@@ -64,7 +67,9 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
   );
 };
 
-export const SaveAttachment = (props: AttachmentProps & { attachment: Attachment }): JSX.Element => {
+type SaveAttachmentProps = AttachmentProps & { attachment: Attachment };
+
+export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps): JSX.Element => {
   return (
     <Form
       actions={
@@ -72,13 +77,13 @@ export const SaveAttachment = (props: AttachmentProps & { attachment: Attachment
           <Action.SubmitForm
             title="Save Attachment"
             onSubmit={async (values: { name: string }) => {
-              attachmentUtils.saveAttachment(props.message, Mailboxes[props.id].mailbox, props.attachment, values.name);
+              attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment, values.name);
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Save As" autoFocus={true} placeholder={props.attachment.name} />
+      <Form.TextField id="name" title="Save As" autoFocus={true} placeholder={attachment.name} />
     </Form>
   );
 };

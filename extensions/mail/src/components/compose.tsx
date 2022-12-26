@@ -16,6 +16,8 @@ type ComposeMessageProps = {
 };
 
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
+  const { account, message, attachments, action } = props;
+
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -23,16 +25,11 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
 
   const getAccounts = async () => {
     setAccounts(await getMailAccounts());
-    if (props.message) {
-      if (props.action === OutgoingMessageAction.Reply) {
-        setRecipients([props.message.senderAddress]);
-      } else if (props.action === OutgoingMessageAction.ReplyAll) {
-        const message = await getRecipients(props.message);
-        if (message.recipientAddresses) {
-          setRecipients([message.senderAddress, ...message.recipientAddresses]);
-        } else {
-          setRecipients([message.senderAddress]);
-        }
+    if (message) {
+      if (action === OutgoingMessageAction.Reply) {
+        setRecipients([message.senderAddress]);
+      } else if (action === OutgoingMessageAction.ReplyAll) {
+        setRecipients(await getRecipients(message));
       }
     }
     setIsLoading(false);
@@ -66,17 +63,15 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={props.action ? props.action : OutgoingMessageAction.Compose}
-            icon={
-              props.action ? OutgoingMessageIcons[props.action] : OutgoingMessageIcons[OutgoingMessageAction.Compose]
-            }
+            title={action ? action : OutgoingMessageAction.Compose}
+            icon={action ? OutgoingMessageIcons[action] : OutgoingMessageIcons[OutgoingMessageAction.Compose]}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="account" title="From" value={props.account ? props.account.email : undefined}>
-        {(props.account ? [props.account] : accounts)?.map((account: Account, index: number) => (
+      <Form.Dropdown id="account" title="From" defaultValue={account ? account.email : undefined}>
+        {(account ? [account] : accounts)?.map((account: Account, index: number) => (
           <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
         ))}
       </Form.Dropdown>
@@ -91,7 +86,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         allowMultipleSelection
         canChooseFiles
         canChooseDirectories
-        defaultValue={props.attachments}
+        defaultValue={attachments}
         error={error}
         onChange={async (attachements: string[]) => {
           const size = await getSize(attachements);
