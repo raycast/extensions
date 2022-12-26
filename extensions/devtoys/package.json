@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devtoys",
+  "title": "DevToys",
+  "description": "A Swiss Army knife for developers",
+  "icon": "icon.png",
+  "author": "tuanp-dev",
+  "version": "0.0.1",
+  "categories": [
+    "Developer Tools",
+    "Data",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "text-case-converter",
+      "title": "Text Case Converter",
+      "subtitle": "DevToys - Text",
+      "description": "Convert text to a different case",
+      "mode": "view",
+      "icon": "text-case-icon.png",
+      "keywords": [
+        "text",
+        "case",
+        "converter"
+      ]
+    },
+    {
+      "name": "html-encoder-decoder",
+      "title": "HTML Encoder / Decoder",
+      "subtitle": "DevToys - Encoders / Decoders",
+      "description": "Encode or decode all the applicable characters to their corresponding HTML entities",
+      "mode": "view",
+      "icon": "decode-icon.png",
+      "keywords": [
+        "html",
+        "encoder",
+        "decoder"
+      ]
+    },
+    {
+      "name": "url-encoder-decoder",
+      "title": "URL Encoder / Decoder",
+      "subtitle": "DevToys - Encoders / Decoders",
+      "description": "Encode or decode all the applicable characters to their corresponding URL entities",
+      "mode": "view",
+      "icon": "decode-icon.png",
+      "keywords": [
+        "url",
+        "encoder",
+        "decoder"
+      ]
+    },
+    {
+      "name": "base64-encoder-decoder",
+      "title": "Base64 Encoder / Decoder",
+      "subtitle": "DevToys - Encoders / Decoders",
+      "description": "Encode or decode Base64 text data",
+      "mode": "view",
+      "icon": "decode-icon.png",
+      "keywords": [
+        "url",
+        "encoder",
+        "decoder"
+      ]
+    },
+    {
+      "name": "number-base-converter",
+      "title": "Number Base Converter",
+      "subtitle": "DevToys - Converters",
+      "description": "Convert numbers from one base to another",
+      "mode": "view",
+      "icon": "number-icon.png",
+      "keywords": [
+        "number",
+        "base",
+        "converter",
+        "binary",
+        "octal",
+        "decimal",
+        "heximal"
+      ]
+    },
+    {
+      "name": "svg-data-uri-converter",
+      "title": "SVG to Data URI Converter",
+      "subtitle": "DevToys - Converters",
+      "description": "Convert SVG image into URL-encoded format",
+      "mode": "view",
+      "icon": "svg-icon.png",
+      "keywords": [
+        "svg",
+        "image",
+        "converter",
+        "data uri"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "html-escaper": "^3.0.3",
+    "text-case": "^1.0.9"
+  },
+  "devDependencies": {
+    "@types/html-escaper": "^3.0.0",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
