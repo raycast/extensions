@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory";
+import { getProfilePath } from "./preferences";
 import { useEffect, useState, ReactElement } from "react";
 import { getFavicon } from "@raycast/utils";
 
@@ -112,8 +113,9 @@ interface State {
 }
 
 export default function Command(): ReactElement {
+  const profilePath = getProfilePath();
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entries } = useChromeHistorySearch(searchText);
+  const { isLoading, error, entries } = useChromeHistorySearch(profilePath, searchText);
 
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
   const [state, setState] = useState<State>({});

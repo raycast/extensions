@@ -1,4 +1,3 @@
-import path from "path";
 import {
   List,
   ToastStyle,
@@ -7,23 +6,13 @@ import {
   ActionPanel,
   OpenInBrowserAction,
   CopyToClipboardAction,
-  getPreferenceValues,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState, ReactElement } from "react";
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory";
-
-interface Preferences {
-  userDataPath: string;
-  profileName: string;
-}
+import { getProfilePath } from "./preferences";
 
 type GroupedEntries = Map<string, HistoryEntry[]>;
-
-const getProfilePath = (): string => {
-  const { userDataPath, profileName } = getPreferenceValues<Preferences>();
-  return path.join(userDataPath, profileName);
-};
 
 export default function Command(): ReactElement {
   const profilePath = getProfilePath();
