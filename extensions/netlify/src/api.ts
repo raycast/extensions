@@ -1,37 +1,73 @@
-import axios, { AxiosInstance } from 'axios';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Axios, { AxiosInstance } from 'axios';
+import { Cache } from '@raycast/api';
 
 import { Deploy, Domain, Member, Site, Team, User } from './interfaces';
 import { getToken } from './utils';
 
+const cache = new Cache({ namespace: 'api.client.v1' });
+
+function getCacheKey(path: string): string {
+  const ttl = 1; // keep LRU cache for a ttl (1 minute default)
+  const minute = Math.floor(new Date().getTime() / 1000 / 60 / ttl);
+  return `${minute}:${path}`;
+}
+
 class Api {
-  client: AxiosInstance;
+  client: {
+    axios: AxiosInstance;
+    get: (path: string) => Promise<any>;
+    put: (path: string, body: any) => Promise<any>;
+  };
 
-  constructor(apiToken: string) {
-    this.client = axios.create({
-      baseURL: 'https://api.netlify.com/api/v1',
-      headers: {
-        Authorization: `Bearer ${apiToken}`,
-        'User-Agent': 'netlify-raycast-extension',
+  constructor(token: string) {
+    this.client = {
+      axios: Axios.create({
+        baseURL: 'https://api.netlify.com/api/v1',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'netlify-raycast-extension',
+        },
+      }),
+      async get(path: string) {
+        const key = getCacheKey(path);
+        if (cache.has(key)) {
+          console.log('cache hit!', key);
+          return JSON.parse(cache.get(key) || '[]');
+        }
+        console.log('cache miss', key);
+        const { status, data } = await this.axios.get(path);
+        if (status === 200) {
+          console.log('cache save', key);
+          cache.set(key, JSON.stringify(data));
+        }
+        return data;
       },
-    });
+      async put(path: string, body: unknown) {
+        const { status, data } = await this.axios.put(path, body);
+        if (status === 200) {
+          const key = getCacheKey(path);
+          console.log('cache save', key);
+          cache.set(key, JSON.stringify(data));
+        }
+        return data;
+      },
+    };
   }
 
-  async getDeploys(site: string): Promise<Deploy[]> {
-    const { data } = await this.client.get<Deploy[]>(`/sites/${site}/deploys`);
-    return data;
+  getDeploys(site: string): Promise<Deploy[]> {
+    return this.client.get(`/sites/${site}/deploys`);
   }
 
-  async getDomains(): Promise<Domain[]> {
-    const { data } = await this.client.get<Domain[]>('/dns_zones');
-    return data;
+  getDomains(): Promise<Domain[]> {
+    return this.client.get('/dns_zones');
   }
 
-  async getMembers(team: string): Promise<Member[]> {
-    const { data } = await this.client.get<Member[]>(`/${team}/members`);
-    return data;
+  getMembers(team: string): Promise<Member[]> {
+    return this.client.get(`/${team}/members`);
   }
 
-  async getSites(query: string, team?: string): Promise<Site[]> {
+  getSites(query: string, team?: string): Promise<Site[]> {
     const params = [
       `name=${query}`,
       `filter=all`,
@@ -43,25 +79,21 @@ class Api {
     const path = [team && `/${team}`, `/sites?${params.join('&')}`]
       .filter(Boolean)
       .join('');
-    const { data } = await this.client.get<Site[]>(path);
-    return data;
+    return this.client.get(path);
   }
 
-  async getTeams(): Promise<Team[]> {
-    const { data } = await this.client.get<Team[]>(`/accounts`);
-    return data;
+  getTeams(): Promise<Team[]> {
+    return this.client.get(`/accounts`);
   }
 
-  async getUser(): Promise<User> {
-    const { data } = await this.client.get<User>(`/user`);
-    return data;
+  getUser(): Promise<User> {
+    return this.client.get(`/user`);
   }
 
-  async saveFavorites(favorites: string[]): Promise<User> {
-    const { data } = await this.client.put<User>(`/user`, {
+  saveFavorites(favorites: string[]): Promise<User> {
+    return this.client.put(`/user`, {
       favorite_sites: favorites,
     });
-    return data;
   }
 }
 
