@@ -32,13 +32,13 @@ class Api {
       async get(path: string) {
         const key = getCacheKey(path);
         if (cache.has(key)) {
-          console.log('cache hit!', key);
+          // console.log('cache hit!', key);
           return JSON.parse(cache.get(key) || '[]');
         }
-        console.log('cache miss', key);
+        // console.log('cache miss', key);
         const { status, data } = await this.axios.get(path);
         if (status === 200) {
-          console.log('cache save', key);
+          // console.log('cache save', key);
           cache.set(key, JSON.stringify(data));
         }
         return data;
@@ -47,7 +47,7 @@ class Api {
         const { status, data } = await this.axios.put(path, body);
         if (status === 200) {
           const key = getCacheKey(path);
-          console.log('cache save', key);
+          // console.log('cache save', key);
           cache.set(key, JSON.stringify(data));
         }
         return data;

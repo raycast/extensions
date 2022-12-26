@@ -157,7 +157,10 @@ const SiteMetadata = ({ site }: { site: Site }) => {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Repository"
-            icon={gitProvider}
+            icon={{
+              source: gitProvider?.source || '',
+              tintColor: gitProvider?.tintColor,
+            }}
             text={site.build_settings.repo_path || 'Not linked'}
           />
           <List.Item.Detail.Metadata.Separator />
@@ -165,7 +168,10 @@ const SiteMetadata = ({ site }: { site: Site }) => {
             <>
               <List.Item.Detail.Metadata.Label
                 title="Framework"
-                icon={framework}
+                icon={{
+                  source: framework.source,
+                  tintColor: framework.tintColor,
+                }}
                 text={framework.name}
               />
               <List.Item.Detail.Metadata.Separator />
