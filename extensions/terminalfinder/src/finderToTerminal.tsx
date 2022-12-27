@@ -12,7 +12,7 @@ export default async () => {
         end if
 
         tell application "Finder"
-        set pathList to (quoted form of POSIX path of (folder of the front window as alias))
+            set pathList to (quoted form of POSIX path of (folder of the front window as alias))
         end tell
     `;
 
@@ -28,7 +28,7 @@ export default async () => {
                     activate
                     set hasNoWindows to ((count of windows) is 0)
                     if isRunning and hasNoWindows then
-                    create window with default profile
+                        create window with default profile
                     end if
                     select first window
             
@@ -36,7 +36,7 @@ export default async () => {
                     if isRunning and hasNoWindows is false then
                         create tab with default profile
                     end if
-                    tell current session to write text command
+                    tell current session to write text "clear; cd " & pathList
                     end tell
                 end tell
             `;
@@ -73,6 +73,6 @@ export default async () => {
         const result = await runAppleScript(script);
         await showToast(Toast.Style.Success, "Done", result);
     } catch (err) {
-        await showToast(Toast.Style.Failure, "Finder is not running");
+        await showToast(Toast.Style.Failure, "Something went wrong");
     }
 };

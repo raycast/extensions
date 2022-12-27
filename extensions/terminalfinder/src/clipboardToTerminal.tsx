@@ -31,7 +31,7 @@ export default async () => {
                     create tab with default profile
                     end if
                     set pathList to "${directory}"
-                    set command to "cd " & pathList
+                    set command to "clear; cd " & pathList
                     tell current session to write text command
                     end tell
                 end tell
