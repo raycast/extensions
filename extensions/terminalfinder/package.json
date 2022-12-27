@@ -8,42 +8,21 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "ft",
+      "name": "finderToTerminal",
       "title": "Finder → Terminal",
       "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
     },
     {
-      "name": "tf",
+      "name": "terminalToFinder",
       "title": "Terminal → Finder",
       "subtitle": "Open Path",
       "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
-      "name": "fi",
-      "title": "Finder → iTerm",
-      "subtitle": "Open Path",
-      "description": "Open current Finder directory in iTerm",
-      "mode": "no-view"
-    },
-    {
-      "name": "if",
-      "title": "iTerm → Finder",
-      "subtitle": "Open Path",
-      "description": "Open current iTerm directory in Finder",
-      "mode": "no-view"
-    },
-    {
-      "name": "ci",
-      "title": "Clipboard → iTerm",
-      "subtitle": "Open Path",
-      "description": "Open directory in clipboard in iTerm",
-      "mode": "no-view"
-    },
-    {
-      "name": "ct",
+      "name": "clipboardToTerminal",
       "title": "Clipboard → Terminal",
       "subtitle": "Open Path",
       "description": "Open directory in clipboard in Terminal",
@@ -64,6 +43,30 @@
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
+  "preferences": [
+    {
+      "name": "preferedTerminalApp",
+      "title": "Prefered Terminal App",
+      "description": "Terminal App you want to use",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Default Terminal App",
+          "value": "terminal"
+        },
+        {
+          "title": "Iterm / ITerm2",
+          "value": "iTerm"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
+        }
+      ],
+      "default": "terminal",
+      "required": true
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
