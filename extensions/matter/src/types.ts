@@ -1,3 +1,3 @@
 export interface Preferences {
-    matterToken: string;
+  matterToken: string;
 }
