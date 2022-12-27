@@ -32,13 +32,13 @@ async function fetchFromCache(
 ): Promise<any> {
   const key = getCacheKey([path, options?.qs || ''].join('&'), options?.ttl);
   if (!options?.writeOnly && cache.has(key)) {
-    console.log('cache hit!', key);
+    // console.log('cache hit!', key);
     return JSON.parse(cache.get(key) || '[]');
   }
-  console.log('cache miss', key);
+  // console.log('cache miss', key);
   const { status, data } = await request(path, options?.body);
   if (status === 200) {
-    console.log('cache save', key);
+    // console.log('cache save', key);
     cache.set(key, JSON.stringify(data));
   }
   return data;
