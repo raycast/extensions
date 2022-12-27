@@ -16,16 +16,39 @@ import { getToken } from './utils';
 const ALGOLIA_APP_ID = '4RTNPM1QF9';
 const ALGOLIA_PUBLIC_API_KEY = '260466eb2466a36278b2fdbcc56ad7ba';
 const ALGOLIA_INDEX_NAME = 'docs-manual';
+
 const cache = new Cache({ namespace: 'api.netlify.v1' });
 
-function getCacheKey(path: string): string {
-  const ttl = 1; // keep LRU cache for a ttl (1 minute default)
+// keep LRU cache for a ttl (1 minute default)
+function getCacheKey(path: string, ttl = 1): string {
   const minute = Math.floor(new Date().getTime() / 1000 / 60 / ttl);
   return `${minute}:${path}`;
 }
 
+async function fetchFromCache(
+  request: (path: string, body?: any) => Promise<any>,
+  path: string,
+  options?: { body?: any; qs?: string; ttl?: number; writeOnly?: boolean },
+): Promise<any> {
+  const key = getCacheKey([path, options?.qs || ''].join('&'), options?.ttl);
+  if (!options?.writeOnly && cache.has(key)) {
+    console.log('cache hit!', key);
+    return JSON.parse(cache.get(key) || '[]');
+  }
+  console.log('cache miss', key);
+  const { status, data } = await request(path, options?.body);
+  if (status === 200) {
+    console.log('cache save', key);
+    cache.set(key, JSON.stringify(data));
+  }
+  return data;
+}
+
 class Api {
-  algolia: AxiosInstance;
+  algolia: {
+    _axios: AxiosInstance;
+    post: (path: string, body: any) => Promise<any>;
+  };
   netlify: {
     _axios: AxiosInstance;
     get: (path: string) => Promise<any>;
@@ -33,13 +56,22 @@ class Api {
   };
 
   constructor(token: string) {
-    this.algolia = axios.create({
-      baseURL: `https://${ALGOLIA_APP_ID.toLowerCase()}-dsn.algolia.net/1`,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'netlify-raycast-extension',
+    this.algolia = {
+      _axios: axios.create({
+        baseURL: `https://${ALGOLIA_APP_ID.toLowerCase()}-dsn.algolia.net/1`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'netlify-raycast-extension',
+        },
+      }),
+      post(path: string, body: any) {
+        return fetchFromCache(this._axios.post, path, {
+          body: JSON.stringify({ requests: [body] }),
+          qs: body.params,
+          ttl: 60,
+        });
       },
-    });
+    };
     this.netlify = {
       _axios: axios.create({
         baseURL: 'https://api.netlify.com/api/v1',
@@ -48,28 +80,11 @@ class Api {
           'User-Agent': 'netlify-raycast-extension',
         },
       }),
-      async get(path: string) {
-        const key = getCacheKey(path);
-        if (cache.has(key)) {
-          // console.log('cache hit!', key);
-          return JSON.parse(cache.get(key) || '[]');
-        }
-        // console.log('cache miss', key);
-        const { status, data } = await this._axios.get(path);
-        if (status === 200) {
-          // console.log('cache save', key);
-          cache.set(key, JSON.stringify(data));
-        }
-        return data;
+      get(path: string) {
+        return fetchFromCache(this._axios.get, path);
       },
-      async put(path: string, body: unknown) {
-        const { status, data } = await this._axios.put(path, body);
-        if (status === 200) {
-          const key = getCacheKey(path);
-          // console.log('cache save', key);
-          cache.set(key, JSON.stringify(data));
-        }
-        return data;
+      put(path: string, body: any) {
+        return fetchFromCache(this._axios.put, path, { body, writeOnly: true });
       },
     };
   }
@@ -115,23 +130,16 @@ class Api {
     });
   }
 
-  async searchDocs(query: string): Promise<AlgoliaHit[]> {
+  async searchDocs(query: string, limit = 20): Promise<AlgoliaHit[]> {
     const params = [
       `x-algolia-application-id=${ALGOLIA_APP_ID}`,
       `x-algolia-api-key=${ALGOLIA_PUBLIC_API_KEY}`,
     ].join('&');
-    const body = JSON.stringify({
-      requests: [
-        {
-          indexName: ALGOLIA_INDEX_NAME,
-          params: `query=in+the+docs+${query}&hitsPerPage=20`,
-        },
-      ],
-    });
-    const { data } = await this.algolia.post(
-      `/indexes/*/queries?${params}`,
-      body,
-    );
+    const body = {
+      indexName: ALGOLIA_INDEX_NAME,
+      params: `query=in+the+docs+${query}&hitsPerPage=${limit}`,
+    };
+    const data = await this.algolia.post(`/indexes/*/queries?${params}`, body);
     return data.results[0].hits;
   }
 }
