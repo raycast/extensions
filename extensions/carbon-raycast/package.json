@@ -17,6 +17,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "paste",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Let the extension automatically post your most recent text from the Clipboard",
+      "label": "Paste from clipboard automatically",
+      "title": "Paste from Clipboard"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "execa": "^6.1.0",

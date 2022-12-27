@@ -1,8 +1,8 @@
-import { open, Form, ActionPanel, Action, showToast, showHUD } from "@raycast/api";
+import { open, Form, ActionPanel, Action, showToast, showHUD, getPreferenceValues, Clipboard } from "@raycast/api";
 import puppeteer, { BoundingBox, ElementHandle } from "puppeteer";
 import { tmpdir } from "os";
 import { ulid } from "ulid";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { execa } from "execa";
 import definition from "../assets/map.json";
 
@@ -14,13 +14,46 @@ type Values = {
   font: string;
 };
 
+interface Preferences {
+  paste: string;
+}
+
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
 
+  const codeFieldRef = useRef<Form.TextArea>(null);
+
   const baseURL = "https://carbon.now.sh";
+
+  const preferences = getPreferenceValues<Preferences>();
+  const [code, setCode] = useState<string>("");
+  const [codeError, setCodeError] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!preferences.paste) {
+      return;
+    }
+
+    const text = Clipboard.readText();
+    text
+      .then((val: string | undefined) => {
+        if (val === undefined) {
+          return;
+        }
+
+        setCode(val as string);
+      })
+      .catch(console.log);
+  });
 
   async function handleSubmit(values: Values) {
     setIsLoading(true);
+
+    if (values.code.trim().length === 0) {
+      setCodeError("This field is required");
+      setIsLoading(false);
+      return;
+    }
 
     let queryParam = "?";
     for (const [key, value] of Object.entries(values)) {
@@ -65,6 +98,8 @@ export default function Command() {
 
     await browser.close();
 
+    codeFieldRef.current?.reset();
+
     if (values.copy) {
       // https://www.noodlesoft.com/forums/viewtopic.php?f=4&t=4394
       await execa(`osascript -e 'tell app "Finder" to set the clipboard to ( POSIX file "${downloadPath}" )'`, [], {
@@ -94,7 +129,14 @@ export default function Command() {
       isLoading={isLoading}
     >
       <Form.Description text="This form creates a beautiful screenshot using carbon..now.sh service" />
-      <Form.TextArea id="code" title="Code" placeholder="Paste codebase here" />
+      <Form.TextArea
+        error={codeError}
+        id="code"
+        title="Code"
+        placeholder="Paste codebase here"
+        ref={codeFieldRef}
+        value={code}
+      />
       <Form.Separator />
       <Form.Checkbox id="copy" label="Copy image to clipboard instead" />
       <Form.Separator />
