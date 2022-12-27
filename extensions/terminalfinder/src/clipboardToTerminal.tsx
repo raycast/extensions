@@ -1,18 +1,16 @@
 import { Clipboard, Toast, showToast, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-
 export default async () => {
+  const preferences = getPreferenceValues();
+  const selectedTerminal = preferences.preferedTerminalApp;
 
-    const preferences = getPreferenceValues();
-    const selectedTerminal = preferences.preferedTerminalApp;
+  const directory = await Clipboard.readText();
 
-    const directory = await Clipboard.readText();
-
-    var script: string;
-    switch (selectedTerminal) {
-        case "iTerm":
-            script = `
+  let script: string;
+  switch (selectedTerminal) {
+    case "iTerm":
+      script = `
                 tell application "System Events"
                 -- some versions might identify as "iTerm2" instead of "iTerm"
                 set isRunning to (exists (processes where name is "iTerm")) or (exists (processes where name is "iTerm2"))
@@ -36,16 +34,15 @@ export default async () => {
                     end tell
                 end tell
             `;
-            break;
-        case "warp":
-            console.log("jo")
-            script = `
+      break;
+    case "warp":
+      script = `
                 set command to "open -a /Applications/Warp.app " & "${directory}"
                 do shell script command
             `;
-            break;
-        default:
-            script = `
+      break;
+    default:
+      script = `
                 tell application "System Events"
                 set pathList to "${directory}"
                 if not (exists (processes where name is "Terminal")) then
@@ -64,11 +61,11 @@ export default async () => {
                 end if
                 end tell
             `;
-    }
-    try {
-        const result = await runAppleScript(script);
-        await showToast(Toast.Style.Success, "Done", result);
-    } catch (err) {
-        await showToast(Toast.Style.Failure, "Something went wrong");
-    }
+  }
+  try {
+    const result = await runAppleScript(script);
+    await showToast(Toast.Style.Success, "Done", result);
+  } catch (err) {
+    await showToast(Toast.Style.Failure, "Something went wrong");
+  }
 };
