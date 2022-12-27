@@ -1,4 +1,3 @@
-// Fix this later
 import { Toast, LaunchProps } from "@raycast/api";
 import { getInstallStatus, startFocusCustom } from "./utils";
 
@@ -13,7 +12,7 @@ export default async function (props: LaunchProps<{ arguments: FocusArguments }>
     style: Toast.Style.Animated,
   });
   toast.show();
-  
+
   const { hours, minutes } = props.arguments;
 
   if (!(await getInstallStatus())) {

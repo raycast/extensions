@@ -21,7 +21,7 @@
     },
     {
       "name": "start-focus-25",
-      "title": "Focus (25 minutes)",
+      "title": "Focus (25 Minutes)",
       "subtitle": "Focus",
       "description": "Start a 25 minutes focus session.",
       "keywords": ["start"],
@@ -51,7 +51,7 @@
     },
     {
       "name": "take-break-5",
-      "title": "Take break (5 minutes)",
+      "title": "Take Break (5 Minutes)",
       "subtitle": "Focus",
       "description": "Take a 5 minutes break",
       "keywords": ["break"],
@@ -59,7 +59,7 @@
     },
     {
       "name": "take-break-custom",
-      "title": "Take break (Custom Duration)",
+      "title": "Take Break (Custom Duration)",
       "subtitle": "Focus",
       "description": "Take a break with custom duration",
       "keywords": ["break", "custom-break"],
@@ -75,7 +75,7 @@
     },
     {
       "name": "stop-break",
-      "title": "Stop break",
+      "title": "Stop Break",
       "subtitle": "Focus",
       "description": "Stop break and continue the current focus session.",
       "keywords": ["stop-break"],
@@ -99,8 +99,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.45.0",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",
