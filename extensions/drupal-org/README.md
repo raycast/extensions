@@ -6,8 +6,6 @@ Easily access information from drupal.org to speed up development.
 
 ### Search for Drupal Change Records
 
-![Search for Drupal Change Records](metadata/drupal-org-1.png)
-
 This command lets you search for Drupal Change Records. It will return the first page of results from the [change records](https://www.drupal.org/list-changes/drupal) and also search based on keywords. You can open the change record in the browser by pressing Enter.
 
 ## Future commands
