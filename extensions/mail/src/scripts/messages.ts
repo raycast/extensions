@@ -113,7 +113,7 @@ export const getAccountMessages = async (
   numMessages: number,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
-  let messages: Message[] = []; //cache.getMessages(account.id, cacheMailbox);
+  let messages: Message[] = cache.getMessages(account.id, cacheMailbox);
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
     set output to ""

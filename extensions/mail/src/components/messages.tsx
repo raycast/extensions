@@ -21,7 +21,7 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 25));
+      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 100));
       setIsLoading(false);
     })();
     return () => {
