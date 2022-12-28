@@ -57,12 +57,15 @@ export function FromScreen(props: { onSubmit: (values: Values) => void; shouldEs
       />
       <Form.TextField title="Target Port" placeholder="Enter target port" {...itemProps.remotePort} />
       <Form.Separator />
-      {/* <Form.Checkbox id="proxy" title="Proxy(WIP)" label="Use Proxy" storeValue /> */}
       <Form.Dropdown id="type" title="Tunnel Type">
         <Form.Dropdown.Item value={TunnelType.Local} title="Local" />
         <Form.Dropdown.Item value={TunnelType.Remote} title="Remote" />
       </Form.Dropdown>
-      <Form.FilePicker title="Identity File" allowMultipleSelection={false} {...itemProps.identityFile}></Form.FilePicker>
+      <Form.FilePicker
+        title="Identity File"
+        allowMultipleSelection={false}
+        {...itemProps.identityFile}
+      ></Form.FilePicker>
     </Form>
   );
 }
