@@ -1,9 +1,9 @@
-import { List, Action, ActionPanel, Form, Color } from "@raycast/api";
+import { List, Action, ActionPanel, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as attachmentUtils from "../scripts/attachments";
 import { getAttachmentIcon } from "../utils/utils";
 import { Message, Attachment } from "../types/types";
-import { Mailboxes } from "../utils/presets";
+import { Mailboxes, MailIcons } from "../utils/presets";
 
 interface AttachmentProps {
   mailbox: string;
@@ -16,11 +16,10 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const getAttachments = async () => {
+    (async () => {
       setAttachments(await attachmentUtils.getMessageAttachments(message, Mailboxes[mailbox].mailbox));
       setIsLoading(false);
-    };
-    getAttachments();
+    })();
     return () => {
       setAttachments([]);
     };
@@ -28,35 +27,35 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
 
   return (
     <List isLoading={isLoading} navigationTitle="Message Attachments">
-      {attachments?.map((attachment: Attachment, index: number) => (
+      {attachments?.map((attachment: Attachment) => (
         <List.Item
-          key={index}
-          id={index.toString()}
+          key={attachment.id}
+          id={attachment.id}
           title={attachment.name}
           accessories={[{ text: attachment.size }]}
           icon={getAttachmentIcon(attachment.type)}
           actions={
             <ActionPanel>
               <Action
-                title="Save Attachment"
-                icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
+                title={"Save Attachment"}
+                icon={MailIcons.Save}
                 onAction={async () => {
                   await attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment);
                 }}
               />
               {attachments.length > 1 && (
                 <Action
-                  title="Save All Attachments"
-                  icon={{ source: "../assets/icons/save.png", tintColor: Color.PrimaryText }}
+                  title={"Save All Attachments"}
+                  icon={MailIcons.Save}
                   onAction={async () => {
                     await attachmentUtils.saveAllAttachments(message, Mailboxes[mailbox].mailbox);
                   }}
                 />
               )}
               <Action.Push
-                title="Save Attachment As..."
+                title={"Save Attachment As..."}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
-                icon={{ source: "../assets/icons/save-as.png", tintColor: Color.PrimaryText }}
+                icon={MailIcons.SaveAs}
                 target={<SaveAttachment {...props} attachment={attachment} />}
               />
             </ActionPanel>
@@ -75,7 +74,8 @@ export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentP
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save Attachment"
+            title={"Save Attachment"}
+            icon={MailIcons.Save}
             onSubmit={async (values: { name: string }) => {
               attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment, values.name);
             }}

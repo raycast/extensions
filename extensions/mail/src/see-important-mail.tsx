@@ -1,6 +1,5 @@
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { EmptyView } from "./components/empty-view";
 import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
@@ -43,6 +42,8 @@ export default function SeeImportantMail() {
             return account;
           })
         );
+      } else {
+        showToast(Toast.Style.Failure, "Could not get important messages from accounts");
       }
       setIsLoading(false);
     })();
@@ -93,7 +94,7 @@ export default function SeeImportantMail() {
             </List.Section>
           ))
       ) : (
-        <EmptyView title={"No Important Messages"} description={"You don't have any important messages..."} />
+        <List.EmptyView title={"No Important Messages"} description={"You don't have any important messages..."} />
       )}
     </List>
   );

@@ -5,26 +5,27 @@ import { getMailAccounts } from "./scripts/account";
 import { Account } from "./types/types";
 
 export default function MailAccounts() {
-  const [accounts, setAccounts] = useState<Account[] | undefined>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const getAccounts = async () => {
-    setAccounts(await getMailAccounts());
-    setIsLoading(false);
-  };
+  const [accounts, setAccounts] = useState<Account[]>();
 
   useEffect(() => {
-    getAccounts();
+    (async () => {
+      setAccounts(await getMailAccounts());
+    })();
     return () => {
-      setAccounts([]);
+      setAccounts(undefined);
     };
   }, []);
 
   return (
-    <List isLoading={isLoading}>
-      {accounts?.map((account: Account, index: number) => (
-        <MailAccount key={index} {...account} />
-      ))}
+    <List isLoading={accounts === undefined}>
+      {accounts && accounts.length > 0 ? (
+        accounts?.map((account: Account) => <MailAccount key={account.id} {...account} />)
+      ) : (
+        <List.EmptyView
+          title={"No Mail Accounts Found"}
+          description={"Check again to make sure you are signed in..."}
+        />
+      )}
     </List>
   );
 }

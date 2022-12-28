@@ -4,9 +4,9 @@ import { newOutgoingMessage, OutgoingMessageAction, OutgoingMessageIcons } from 
 import { Account, Message, OutgoingMessage, OutgoingMessageForm } from "../types/types";
 import { getRecipients } from "../scripts/messages";
 import { getMailAccounts } from "../scripts/account";
+import { formatFileSize, getSize, maximumFileSize } from "../utils/finder";
 import { titleCase } from "../utils/utils";
 import emailRegex from "email-regex";
-import { formatFileSize, getSize, maximumFileSize } from "../utils/finder";
 
 type ComposeMessageProps = {
   account?: Account;
@@ -18,25 +18,32 @@ type ComposeMessageProps = {
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const { account, message, attachments, action } = props;
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [accounts, setAccounts] = useState<Account[] | undefined>([]);
   const [recipients, setRecipients] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const getAccounts = async () => {
-    setAccounts(await getMailAccounts());
-    if (message) {
-      if (action === OutgoingMessageAction.Reply) {
-        setRecipients([message.senderAddress]);
-      } else if (action === OutgoingMessageAction.ReplyAll) {
-        setRecipients(await getRecipients(message));
-      }
-    }
-    setIsLoading(false);
-  };
+  const sizeErrorMessage = (size: number) =>
+    `Total file size is ${formatFileSize(size)} which exceeds the maximum file size of ${maximumFileSize.label}`;
 
   useEffect(() => {
-    getAccounts();
+    (async () => {
+      setAccounts(await getMailAccounts());
+      if (message) {
+        if (action === OutgoingMessageAction.Reply) {
+          setRecipients([message.senderAddress]);
+        } else if (action === OutgoingMessageAction.ReplyAll) {
+          setRecipients(await getRecipients(message));
+        }
+      }
+      setIsLoading(false);
+      if (attachments) {
+        const size = await getSize(attachments);
+        if (size > maximumFileSize.value) {
+          setError(sizeErrorMessage(size));
+        }
+      }
+    })();
     return () => {
       setAccounts([]);
     };
@@ -56,7 +63,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   };
 
   return isLoading ? (
-    <Form isLoading={isLoading}></Form>
+    <Form isLoading={true}></Form>
   ) : (
     <Form
       isLoading={isLoading}
@@ -70,7 +77,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="account" title="From" defaultValue={account ? account.email : undefined}>
+      <Form.Dropdown id="account" title="From" placeholder="Select Account">
         {(account ? [account] : accounts)?.map((account: Account, index: number) => (
           <Form.Dropdown.Item key={index} value={account.email} title={account.email} />
         ))}
@@ -88,14 +95,12 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
         canChooseDirectories
         defaultValue={attachments}
         error={error}
-        onChange={async (attachements: string[]) => {
-          const size = await getSize(attachements);
+        onChange={async (attachments: string[]) => {
+          const size = await getSize(attachments);
           if (size > maximumFileSize.value) {
-            setError(
-              `Total file size is ${formatFileSize(size)} which exceeds the maximum file size of ${
-                maximumFileSize.label
-              }`
-            );
+            setError(sizeErrorMessage(size));
+          } else {
+            setError(undefined);
           }
         }}
       />

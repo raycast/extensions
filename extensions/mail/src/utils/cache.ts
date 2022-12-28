@@ -39,7 +39,7 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
     const response = messages.get(key);
     if (response) {
       const { time, data } = JSON.parse(response);
-      if (!isCacheExpired(time, ExpirationTime.Hour)) {
+      if (!isCacheExpired(time)) {
         return data;
       }
     }

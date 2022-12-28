@@ -9,15 +9,16 @@ export const tellMessage = async (message: Message, mailbox: string, script: str
     console.error("Script must include msg");
     return "missing value";
   }
-  return await runAppleScript(`
-    tell application "Mail"
-      set acc to (first account whose id is "${message.account}")
-      tell acc
-        set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
-        ${script.trim()}
-      end tell
+  const appleScript = `
+  tell application "Mail"
+    set acc to (first account whose id is "${message.account}")
+    tell acc
+      set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
+      ${script.trim()}
     end tell
-  `);
+  end tell
+  `;
+  return await runAppleScript(appleScript);
 };
 
 export const openMessage = async (message: Message, mailbox: string): Promise<void> => {
@@ -42,9 +43,29 @@ export const moveToJunk = async (message: Message, mailbox: string): Promise<voi
   }
 };
 
-export const deleteMessage = async (message: Message, mailbox: string): Promise<void> => {
+export const moveToTrash = async (message: Message, mailbox: string): Promise<void> => {
+  if (mailbox === "Trash") return;
   try {
     await moveMessage(message, mailbox, "Trash");
+    await showToast(Toast.Style.Success, "Moved Message to Trash");
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error Moving Message To Trash");
+    console.error(error);
+  }
+};
+
+export const deleteMessage = async (message: Message, mailbox: string): Promise<void> => {
+  if (mailbox !== "Trash") return;
+  try {
+    await tellMessage(
+      message,
+      mailbox,
+      `
+      open msg
+      activate
+      delay 0.5
+		  tell application "System Events" to key code 51`
+    );
     await showToast(Toast.Style.Success, "Message Deleted");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Deleting Message");
@@ -92,7 +113,7 @@ export const getAccountMessages = async (
   numMessages: number,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
-  let messages = cache.getMessages(account.id, cacheMailbox);
+  let messages: Message[] = []; //cache.getMessages(account.id, cacheMailbox);
   const first = messages.length > 0 ? messages[0].id : undefined;
   const script = `
     set output to ""

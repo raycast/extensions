@@ -1,6 +1,5 @@
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { EmptyView } from "./components/empty-view";
 import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
@@ -43,6 +42,8 @@ export default function SeeRecentMail() {
             return account;
           })
         );
+      } else {
+        showToast(Toast.Style.Failure, "Could not get recent messages from accounts");
       }
       setIsLoading(false);
     })();
@@ -93,7 +94,7 @@ export default function SeeRecentMail() {
             </List.Section>
           ))
       ) : (
-        <EmptyView title={"No Recent Unread Messages"} description={"You're all caught up..."} />
+        <List.EmptyView title={"No Recent Unread Messages"} description={"You're all caught up..."} />
       )}
     </List>
   );

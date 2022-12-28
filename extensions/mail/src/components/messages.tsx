@@ -21,7 +21,7 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 100));
+      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 25));
       setIsLoading(false);
     })();
     return () => {
@@ -31,22 +31,23 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
 
   return (
     <List
-      searchBarPlaceholder="Search for emails"
       isLoading={isLoading}
+      searchBarPlaceholder={"Search for emails"}
       navigationTitle={`${props.account.name} - ${Mailboxes[mailbox].title}`}
       searchBarAccessory={
         <List.Dropdown tooltip="Mailbox" defaultValue={mailbox} onChange={setMailbox}>
           {Object.entries(Mailboxes).map(([id, mailbox]) => (
-            <List.Dropdown.Item key={id} title={mailbox.title} value={id} />
+            <List.Dropdown.Item key={id} title={mailbox.title} value={id} icon={mailbox.icon} />
           ))}
         </List.Dropdown>
       }
     >
-      {messages?.map((message: Message, index: number) => (
+      {messages?.map((message: Message) => (
         <MessageListItem
-          key={index}
-          {...props}
+          key={message.id}
+          mailbox={mailbox}
           message={message}
+          account={props.account}
           setMessage={setMessage}
           deleteMessage={deleteMessage}
         />
@@ -56,7 +57,7 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
 };
 
 export const MessageListItem = (props: MessageProps): JSX.Element => {
-  const message = props.message;
+  const { message } = props;
   const attachments = `${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`;
 
   return (

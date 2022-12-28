@@ -29,8 +29,8 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
 
   const SeeInMail = () => (
     <Action
-      title="See in Mail"
-      icon={Icon.AppWindow}
+      title={"See in Mail"}
+      icon={MailIcons.MailApp}
       onAction={async () => {
         try {
           await messageScripts.openMessage(message, Mailboxes[mailbox].mailbox);
@@ -44,7 +44,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
   );
 
   const SeeMessage = () => (
-    <Action.Push title="See Message" icon={Icon.QuoteBlock} target={<ViewMessage {...props} />} />
+    <Action.Push title={"See Message"} icon={Icon.QuoteBlock} target={<ViewMessage {...props} />} />
   );
 
   return (
@@ -123,7 +123,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
         )}
         {mailbox !== "junk" && (
           <Action
-            title="Move to Junk"
+            title={"Move to Junk"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
             icon={MailIcons.Junk}
             onAction={async () => {
@@ -133,24 +133,36 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
             }}
           />
         )}
-        <Action
-          title="Delete Message"
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          icon={MailIcons.Trash}
-          onAction={async () => {
-            if (mailbox === "trash") {
+        {mailbox !== "trash" ? (
+          <Action
+            title={"Move to Trash"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            icon={MailIcons.Trash}
+            onAction={async () => {
+              deleteMessage(account, message);
+              await messageScripts.moveToTrash(message, Mailboxes[mailbox].mailbox);
+              if (inMessageView) navigation.pop();
+            }}
+          />
+        ) : (
+          <Action
+            title={"Delete Message"}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
+            icon={MailIcons.TrashRed}
+            onAction={async () => {
               const confirm = await confirmAlert({
                 title: "Delete message?",
                 message: "This message will be permanently deleted.",
-                icon: MailIcons.Trash,
+                icon: MailIcons.TrashRed,
               });
-              if (!confirm) return;
-            }
-            deleteMessage(account, message);
-            await messageScripts.deleteMessage(message, Mailboxes[mailbox].mailbox);
-            if (inMessageView) navigation.pop();
-          }}
-        />
+              if (confirm) {
+                deleteMessage(account, message);
+                await messageScripts.deleteMessage(message, Mailboxes[mailbox].mailbox);
+                if (inMessageView) navigation.pop();
+              }
+            }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
