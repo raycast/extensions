@@ -55,6 +55,7 @@
     "nanoid": "^3.2.0",
     "node-fetch": "^3.0.0",
     "node-localstorage": "^2.2.1",
+    "random-hex-color-generator": "^1.0.12",
     "swr": "^1.1.2-beta.0",
     "ynab": "^1.32.0"
   },
