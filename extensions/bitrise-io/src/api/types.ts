@@ -60,12 +60,12 @@ export interface BuildsByStatus {
 }
 
 export interface BuildParams {
-  branch?: string,
-  workflow_id: string,
-  commit_message?: string
+  branch?: string;
+  workflow_id: string;
+  commit_message?: string;
 }
 
 export interface BuildTriggerResponse {
-  build_number: number,
-  build_url: string,
+  build_number: number;
+  build_url: string;
 }

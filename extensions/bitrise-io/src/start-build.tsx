@@ -103,7 +103,7 @@ function StartBuildAction() {
       workflow_id: values.workflow,
       branch: values.branch,
       commit_message: values.message,
-     });
+    });
 
     toast.style = Toast.Style.Success;
     toast.title = `Build #${response.build_number} started`;

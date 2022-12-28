@@ -42,21 +42,21 @@ export async function startBuild(appSlug: AppSlug, params: BuildParams): Promise
   const response = await fetch(`https://api.bitrise.io/v0.1/apps/${appSlug}/builds`, {
     method: "POST",
     body: JSON.stringify({
-      "build_params": params,
-      "hook_info": {
-        "type": "bitrise"
-      }
+      build_params: params,
+      hook_info: {
+        type: "bitrise",
+      },
     }),
     headers: {
       Authorization: getToken(),
     },
   });
   if (!response.ok) {
-    const body = await response.text()
+    const body = await response.text();
     throw new Error(`HTTP ${response.status}: ${body}`);
   }
 
-  const apiResponse = await (response.json()) as BuildTriggerResponse
+  const apiResponse = (await response.json()) as BuildTriggerResponse;
 
   return apiResponse;
 }
