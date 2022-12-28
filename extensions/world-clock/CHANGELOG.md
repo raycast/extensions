@@ -1,5 +1,9 @@
 # World Clock Changelog
 
+## [Update Date Format] - {PR_MERGE_DATE}
+
+- Add more date formats
+
 ## [Update Raycast API] - 2022-12-02
 
 - Update Raycast API version to 1.44.0
