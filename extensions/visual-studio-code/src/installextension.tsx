@@ -1,8 +1,28 @@
-import { Color, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, List, showToast, Toast, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
+import * as child_process from "child_process";
+import { getErrorMessage } from "./utils";
+
+function InstallExtensionAction(props: { extension: GalleryExtension }): JSX.Element {
+  const handle = async () => {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Install Extension" });
+      child_process.execFileSync("/usr/local/bin/code", [
+        "--install-extension",
+        getFullExtensionID(props.extension),
+        "--force",
+      ]);
+      await showToast({ style: Toast.Style.Success, title: "Installation Successful" });
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+    }
+  };
+  return <Action onAction={handle} title="Install Extension" />;
+  //return <Action.Open title="Install Extension" application={"com.microsoft.VSCode"} target={`--install-extension ${props.extension.extensionName} --force`} />
+}
 
 export interface GalleryQueryResult {
   results: Result[];
@@ -62,6 +82,10 @@ export interface ResultMetadaum {
   metadataItems: MetadataItem[];
 }
 
+function getFullExtensionID(extension: GalleryExtension): string {
+  return `${extension.publisher.publisherName}.${extension.extensionName}`;
+}
+
 export interface MetadataItem {
   name: string;
   count: number;
@@ -87,7 +111,7 @@ function GalleryExtensionListItem(props: {
   const version = newstVersion ? newstVersion.version : undefined;
   const lastUpdated = newstVersion ? new Date(newstVersion.lastUpdated) : undefined;
   const installedIDs = ie ? ie.map((ext) => ext.id) : [];
-  const alreadyInstalled = installedIDs.includes(`${e.publisher.publisherName}.${e.extensionName}`);
+  const alreadyInstalled = installedIDs.includes(getFullExtensionID(e));
   return (
     <List.Item
       title={{ value: e.displayName, tooltip: e.shortDescription }}
@@ -97,6 +121,13 @@ function GalleryExtensionListItem(props: {
         { tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "" },
         { tag: version, tooltip: lastUpdated ? `Last Update: ${lastUpdated?.toLocaleString()}` : "" },
       ]}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <InstallExtensionAction extension={e} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     />
   );
 }
