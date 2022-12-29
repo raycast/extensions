@@ -35,6 +35,13 @@
       "subtitle": "Netlify",
       "description": "List team members",
       "mode": "view"
+    },
+    {
+      "name": "invite-members",
+      "title": "Invite Team Members",
+      "subtitle": "Netlify",
+      "description": "Invite people to join your team",
+      "mode": "view"
     }
   ],
   "preferences": [

@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { Cache } from '@raycast/api';
 
-import { Deploy, Domain, Member, Site, Team, User } from './interfaces';
+import { Deploy, Domain, Member, Role, Site, Team, User } from './interfaces';
 import { getToken } from './utils';
 
 const cache = new Cache({ namespace: 'api.netlify.v1' });
@@ -17,6 +17,7 @@ class Api {
   netlify: {
     _axios: AxiosInstance;
     get: (path: string) => Promise<any>;
+    post: (path: string, body: any) => Promise<any>;
     put: (path: string, body: any) => Promise<any>;
   };
 
@@ -38,6 +39,15 @@ class Api {
         // console.log('cache miss', key);
         const { status, data } = await this._axios.get(path);
         if (status === 200) {
+          // console.log('cache save', key);
+          cache.set(key, JSON.stringify(data));
+        }
+        return data;
+      },
+      async post(path: string, body: unknown) {
+        const { status, data } = await this._axios.post(path, body);
+        if (status === 200) {
+          const key = getCacheKey(path);
           // console.log('cache save', key);
           cache.set(key, JSON.stringify(data));
         }
@@ -65,6 +75,17 @@ class Api {
 
   getMembers(team: string): Promise<Member[]> {
     return this.netlify.get(`/${team}/members`);
+  }
+
+  addMember(payload: {
+    email: string;
+    role: Role;
+    site_access: 'all' | 'selected';
+    site_ids: string[];
+    team: string;
+  }): Promise<Member[]> {
+    const { team, ...rest } = payload;
+    return this.netlify.post(`/${team}/members`, rest);
   }
 
   getSites(query: string, team?: string): Promise<Site[]> {

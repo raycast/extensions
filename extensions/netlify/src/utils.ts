@@ -3,9 +3,14 @@ import { AxiosError } from 'axios';
 
 import { Preferences } from './interfaces';
 
+const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
+
 export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substr(1);
 }
+
+export const isValidEmail = (email?: string | null): boolean =>
+  VALID_EMAIL.test(email || '');
 
 export function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', {
