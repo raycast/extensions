@@ -130,6 +130,7 @@ function DocListItem(props: DocListItemProps) {
   const { lvl1, lvl2, lvl3, lvl4 } = hit.hierarchy;
   const levels = [lvl2, lvl3, lvl4].filter((b) => !!b);
   const breadcrumbs = levels.slice(0, levels.length - 1).join(' > ');
+  const subtitle = breadcrumbs || hit.content || (title !== lvl1 ? lvl1 : '');
   const isBookmarked = bookmarks
     .map((b) => prefix(b.objectID))
     .includes(prefix(hit.objectID));
@@ -150,8 +151,8 @@ function DocListItem(props: DocListItemProps) {
     <List.Item
       key={hit.objectID}
       icon={title === lvl1 ? Icon.Book : Icon.Document}
-      title={title}
-      subtitle={hit.content || breadcrumbs || title !== lvl1 ? lvl1 : ''}
+      title={title.replace(/[\s]{2,}/g, ' ')}
+      subtitle={subtitle.replace(/[\s]{2,}/g, ' ')}
       // @ts-expect-error due to .filter(Boolean)
       accessories={[
         isBookmarked && {
