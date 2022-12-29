@@ -4,6 +4,7 @@ import {
   Form,
   Icon,
   Image,
+  List,
   popToRoot,
   Toast,
   showHUD,
@@ -98,7 +99,7 @@ export default function Command() {
   }
 
   async function handleSubmit(form: FormValues) {
-    console.log('onSubmit', form);
+    // console.log('onSubmit', form);
     const isValid = validateEmail({ target: { value: form.email } });
     if (!isValid) {
       return false;
@@ -145,6 +146,27 @@ export default function Command() {
   const s = numInvites === 1 ? '' : 's';
   const submitButtonLabel =
     numInvites > 0 ? `Invite ${numInvites} ${role}${s}` : 'Send Invites';
+
+  if (!isLoading && invitableTeams.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="You're not allowed to invite team members"
+          description="Sorry, you don't have sufficient permissions on your existing teams."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Create a New Team"
+                url="https://app.netlify.com/teams/new"
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
     <Form
       // enableDrafts
