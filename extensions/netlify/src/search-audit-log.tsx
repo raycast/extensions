@@ -109,8 +109,7 @@ export default function Command() {
               subtitle={log.payload.actor_name}
               accessories={[
                 {
-                  tag: new Date(log.payload.timestamp),
-                  tooltip: formatDate(log.payload.timestamp),
+                  text: formatDate(log.payload.timestamp),
                 },
               ]}
               actions={
