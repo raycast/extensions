@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, List } from '@raycast/api';
+import { ActionPanel, Action, Detail, Icon, List } from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
@@ -6,6 +6,46 @@ import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
 import { AuditLog, Team } from './utils/interfaces';
 import { formatDate, handleNetworkError } from './utils/utils';
+
+function getIconForPayload({
+  action,
+  log_type,
+}: {
+  action: string;
+  log_type: 'team' | 'site';
+}) {
+  if (/collaborative deploy preview/i.test(action)) {
+    return Icon.SpeechBubbleActive;
+  }
+  if (/plugin/i.test(action)) {
+    return Icon.Plug;
+  }
+  if (/password/i.test(action) || /protection/i.test(action)) {
+    return Icon.Lock;
+  }
+  if (/env/i.test(action)) {
+    return Icon.Key;
+  }
+  if (/stop/i.test(action) || /start/i.test(action)) {
+    return Icon.Power;
+  }
+  if (/setting/i.test(action)) {
+    return Icon.Cog;
+  }
+  if (/deleted/i.test(action)) {
+    return Icon.Trash;
+  }
+  if (/created/i.test(action)) {
+    return Icon.Stars;
+  }
+  if (log_type === 'team') {
+    return Icon.TwoPeople;
+  }
+  if (log_type === 'site') {
+    return Icon.AppWindowList;
+  }
+  return Icon.Info;
+}
 
 export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -73,6 +113,7 @@ export default function Command() {
 
   const filteredAuditLog = auditLog.filter((log) => {
     const keywords = [
+      log.payload.action || '',
       log.payload.actor_name || '',
       JSON.stringify(log.payload.traits || {}),
     ];
@@ -105,6 +146,7 @@ export default function Command() {
           .map((log) => (
             <List.Item
               key={log.id}
+              icon={getIconForPayload(log.payload)}
               title={log.payload.action}
               subtitle={log.payload.actor_name}
               accessories={[
