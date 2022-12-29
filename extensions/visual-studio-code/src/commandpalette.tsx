@@ -16,6 +16,17 @@ function transitFolder(): string {
   return ts;
 }
 
+function CreateCommandQuickLinkAction(props: { command: CommandMetadata }): JSX.Element {
+  const c = props.command;
+  const title = c.category ? `${c.category}: ${c.title}` : c.title;
+  return (
+    <Action.CreateQuicklink
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: `VSCode - ${title}` }}
+    />
+  );
+}
+
 async function getCommandFromVSCode() {
   const tsFolder = transitFolder();
   await afs.mkdir(tsFolder, { recursive: true });
@@ -68,10 +79,7 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
         <ActionPanel>
           <Action title="Run Command" onAction={handle} icon={{ source: Icon.Terminal }} />
           <Action.CopyToClipboard title="Copy Command ID" content={c.command} />
-          <Action.CreateQuicklink
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-            quicklink={{ link: raycastForVSCodeURI(`runcommand?cmd=${c.command}`), name: c.title }}
-          />
+          <CreateCommandQuickLinkAction command={c} />
         </ActionPanel>
       }
     />
@@ -101,9 +109,11 @@ export default function CommandPaletteCommand(): JSX.Element {
       isLoading={isLoading}
       searchBarPlaceholder={isLoading === true ? "Load Commands from VSCode" : "Search Commands"}
     >
-      {commands?.map((c) => (
-        <CommandListItem key={c.command} command={c} />
-      ))}
+      <List.Section title="Commands" subtitle={`${commands?.length}`}>
+        {commands?.map((c) => (
+          <CommandListItem key={c.command} command={c} />
+        ))}
+      </List.Section>
       {error && (
         <List.EmptyView
           title="No Response from Raycast for VSCode extension"
