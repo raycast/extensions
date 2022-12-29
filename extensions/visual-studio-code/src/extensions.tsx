@@ -93,7 +93,7 @@ export default function ExtensionsRootCommand(): JSX.Element {
   );
 }
 
-function useLocalExtensions(): {
+export function useLocalExtensions(): {
   extensions: Extension[] | undefined;
   isLoading?: boolean;
   error?: string;

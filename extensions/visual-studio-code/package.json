@@ -18,13 +18,20 @@
     },
     {
       "name": "extensions",
-      "title": "Extensions",
+      "title": "Show Installed Extensions",
       "description": "Manage Extensions",
+      "mode": "view"
+    },
+    {
+      "name": "installextension",
+      "title": "Install Extension",
+      "description": "Install Extensions",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1"
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.14"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
