@@ -91,10 +91,18 @@ export type GitProvider =
   | 'unknown';
 
 export interface Member {
+  avatar: string;
+  connected_accounts: {
+    bitbucket?: string;
+    github?: string;
+    gitlab?: string;
+  };
   email: string;
   id: string;
   full_name: string;
+  pending?: boolean;
   role: string;
+  site_access: 'all' | 'selected' | 'none';
 }
 
 export interface Site {
