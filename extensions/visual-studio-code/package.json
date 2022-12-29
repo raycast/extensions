@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
   "title": "Visual Studio Code",
-  "description": "Trigger Commands from Visual Studio Code",
+  "description": "Trigger Commands, Manage Extensions from Visual Studio Code",
   "icon": "icon.png",
   "author": "tonka3000",
   "categories": [
@@ -14,6 +14,12 @@
       "name": "commandpalette",
       "title": "Commands",
       "description": "Show Commands of the command palette",
+      "mode": "view"
+    },
+    {
+      "name": "extensions",
+      "title": "Extensions",
+      "description": "Manage Extensions",
       "mode": "view"
     }
   ],
