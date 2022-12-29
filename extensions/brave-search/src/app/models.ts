@@ -2,10 +2,10 @@ export const HISTORY_KEY = "history";
 
 export interface BraveResult {
   is_entity: boolean;
-  q: string
+  q: string;
   name?: string;
   desc?: string;
-  img?: string
+  img?: string;
 }
 
 export interface SearchResult {
@@ -14,7 +14,7 @@ export interface SearchResult {
   query: string;
   url: string;
   isNavigation?: boolean;
-  isHistory?: boolean;  
+  isHistory?: boolean;
 }
 
 export interface Preferences {

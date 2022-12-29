@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { BraveResult, Preferences, SearchResult } from "./models";
@@ -54,7 +55,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
 
   const results: SearchResult[] = [];
 
-  const braveResults = await response.json() as any;
+  const braveResults = (await response.json()) as any;
   braveResults[1].map((item: BraveResult) => {
     results.push({
       id: nanoid(),
@@ -62,7 +63,7 @@ export async function getAutoSearchResults(searchText: string, signal: any): Pro
       description: `Search Brave for '${item.q}'`,
       url: `https://search.brave.com/search?q=${encodeURIComponent(item.q)}&source=raycast`,
     });
-  })
+  });
 
   return results;
 }
