@@ -63,7 +63,7 @@
     {
       "name": "scanPath",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "default": "",
       "title": "Path to scan to find sites on disk",
       "description": "Path to scan for finding sites on disk. Use : to separate multiple paths."
