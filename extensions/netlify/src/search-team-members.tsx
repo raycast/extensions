@@ -107,10 +107,28 @@ export default function Command() {
               ].filter(Boolean)}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Manage Membership"
-                    url={`https://app.netlify.com/teams/${selectedTeam}/members`}
-                  />
+                  <ActionPanel.Section>
+                    <Action.OpenInBrowser
+                      title="Manage Membership"
+                      url={`https://app.netlify.com/teams/${selectedTeam}/members`}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    {member.connected_accounts.github && (
+                      <Action.OpenInBrowser
+                        icon="vcs/github.svg"
+                        title="Open GitHub Profile"
+                        url={`https://github.com/${member.connected_accounts.github}`}
+                      />
+                    )}
+                    {member.connected_accounts.gitlab && (
+                      <Action.OpenInBrowser
+                        icon="vcs/gitlab.svg"
+                        title="Open GitLab Profile"
+                        url={`https://gitlab.com/${member.connected_accounts.gitlab}`}
+                      />
+                    )}
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
