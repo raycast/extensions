@@ -1,3 +1,3 @@
-# visual-studio-code Changelog
+# Visual Studio Code Changelog
 
-## [Initial Version] - 2022-12-18
+## [Initial Version] - 2022-12-30
