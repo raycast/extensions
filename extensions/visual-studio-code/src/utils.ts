@@ -39,3 +39,9 @@ export function raycastForVSCodeURI(uri: string) {
 export async function openURIinVSCode(uri: string) {
   await open(raycastForVSCodeURI(uri));
 }
+
+const fmt = new Intl.NumberFormat("en", { notation: "compact" });
+
+export function compactNumberFormat(num: number): string {
+  return fmt.format(num);
+}

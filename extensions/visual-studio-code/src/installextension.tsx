@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import {
@@ -9,6 +9,7 @@ import {
 } from "./components/actions";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
+import { compactNumberFormat } from "./utils";
 
 function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
   return (
@@ -35,6 +36,11 @@ export interface Result {
   resultMetadata: ResultMetadaum[];
 }
 
+export interface StatisticItem {
+  statisticName: string;
+  value: number;
+}
+
 export interface GalleryExtension {
   publisher: Publisher;
   extensionId: string;
@@ -47,6 +53,7 @@ export interface GalleryExtension {
   shortDescription?: string;
   versions: Version[];
   deploymentType: number;
+  statistics?: StatisticItem[];
 }
 
 export interface Publisher {
@@ -109,6 +116,11 @@ function GalleryExtensionListItem(props: {
       return file.source;
     }
   };
+  const getInstallCount = (): number | undefined => {
+    const item = e.statistics?.find((s) => s.statisticName === "install");
+    return item?.value;
+  };
+  const installCount = getInstallCount();
   const newstVersion = e.versions && e.versions.length > 0 ? e.versions[0] : undefined;
   const version = newstVersion ? newstVersion.version : undefined;
   const lastUpdated = newstVersion ? new Date(newstVersion.lastUpdated) : undefined;
@@ -123,6 +135,11 @@ function GalleryExtensionListItem(props: {
         {
           tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "",
           tooltip: alreadyInstalled ? "Already Installed" : "",
+        },
+        {
+          icon: installCount !== undefined ? Icon.Download : undefined,
+          text: installCount !== undefined ? compactNumberFormat(installCount) : undefined,
+          tooltip: installCount !== undefined ? `${compactNumberFormat(installCount)} Installs` : undefined,
         },
         { tag: version, tooltip: lastUpdated ? `Last Update: ${lastUpdated?.toLocaleString()}` : "" },
       ]}
