@@ -113,6 +113,13 @@ export interface Member {
   site_access: 'all' | 'selected' | 'none';
 }
 
+export interface Reviewer {
+  email: string;
+  full_name?: string;
+  id: string;
+  state: 'pending' | 'approved';
+}
+
 export interface Site {
   account_name: string;
   account_slug: string;
