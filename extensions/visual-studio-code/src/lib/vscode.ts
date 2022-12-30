@@ -2,6 +2,7 @@ import { fileExists } from "../utils";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
+import * as child_process from "child_process";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
@@ -62,6 +63,27 @@ function getNLSVariable(text: string | undefined): string | undefined {
   if (m) {
     return m[1];
   }
+}
+
+export function getVSCodeCLIFilename(): string {
+  return "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code";
+}
+
+export class VSCodeCLI {
+  private cliFilename: string;
+  constructor(cliFilename: string) {
+    this.cliFilename = cliFilename;
+  }
+  installExtensionByIDSync(id: string) {
+    child_process.execFileSync(this.cliFilename, ["--install-extension", id, "--force"]);
+  }
+  uninstallExtensionByIDSync(id: string) {
+    child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"]);
+  }
+}
+
+export function getVSCodeCLI(): VSCodeCLI {
+  return new VSCodeCLI(getVSCodeCLIFilename());
 }
 
 async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | undefined> {

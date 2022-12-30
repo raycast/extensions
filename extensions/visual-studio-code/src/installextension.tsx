@@ -1,27 +1,28 @@
-import { Action, ActionPanel, Color, List, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import {
+  InstallExtensionByIDAction,
+  OpenExtensionByIDInBrowserAction,
+  OpenExtensionByIDInVSCodeAction,
+  UninstallExtensionByIDAction,
+} from "./components/actions";
 import { useLocalExtensions } from "./extensions";
 import { Extension } from "./lib/vscode";
-import * as child_process from "child_process";
-import { getErrorMessage } from "./utils";
 
-function InstallExtensionAction(props: { extension: GalleryExtension }): JSX.Element {
-  const handle = async () => {
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Install Extension" });
-      child_process.execFileSync("/usr/local/bin/code", [
-        "--install-extension",
-        getFullExtensionID(props.extension),
-        "--force",
-      ]);
-      await showToast({ style: Toast.Style.Success, title: "Installation Successful" });
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
-    }
-  };
-  return <Action onAction={handle} title="Install Extension" />;
-  //return <Action.Open title="Install Extension" application={"com.microsoft.VSCode"} target={`--install-extension ${props.extension.extensionName} --force`} />
+function InstallExtensionAction(props: { extension: GalleryExtension; afterInstall?: () => void }): JSX.Element {
+  return (
+    <InstallExtensionByIDAction extensionID={getFullExtensionID(props.extension)} afterInstall={props.afterInstall} />
+  );
+}
+
+function UninstallExtensionAction(props: { extension: GalleryExtension; afterUninstall?: () => void }): JSX.Element {
+  return (
+    <UninstallExtensionByIDAction
+      extensionID={getFullExtensionID(props.extension)}
+      afterUninstall={props.afterUninstall}
+    />
+  );
 }
 
 export interface GalleryQueryResult {
@@ -94,6 +95,7 @@ export interface MetadataItem {
 function GalleryExtensionListItem(props: {
   extension: GalleryExtension;
   installedExtensions: Extension[] | undefined;
+  reloadLocalExtensions: () => void;
 }): JSX.Element {
   const e = props.extension;
   const ie = props.installedExtensions;
@@ -110,8 +112,8 @@ function GalleryExtensionListItem(props: {
   const newstVersion = e.versions && e.versions.length > 0 ? e.versions[0] : undefined;
   const version = newstVersion ? newstVersion.version : undefined;
   const lastUpdated = newstVersion ? new Date(newstVersion.lastUpdated) : undefined;
-  const installedIDs = ie ? ie.map((ext) => ext.id) : [];
-  const alreadyInstalled = installedIDs.includes(getFullExtensionID(e));
+  const installedIDs = ie ? ie.map((ext) => ext.id.toLocaleLowerCase()) : [];
+  const alreadyInstalled = installedIDs.includes(getFullExtensionID(e).toLocaleLowerCase());
   return (
     <List.Item
       title={{ value: e.displayName, tooltip: e.shortDescription }}
@@ -124,7 +126,16 @@ function GalleryExtensionListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <InstallExtensionAction extension={e} />
+            {alreadyInstalled ? (
+              <UninstallExtensionAction extension={e} afterUninstall={props.reloadLocalExtensions} />
+            ) : (
+              <InstallExtensionAction extension={e} afterInstall={props.reloadLocalExtensions} />
+            )}
+            <OpenExtensionByIDInVSCodeAction extensionID={getFullExtensionID(e)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />
+            <Action.CopyToClipboard content={getFullExtensionID(e)} title="Copy Extension ID" />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -134,7 +145,7 @@ function GalleryExtensionListItem(props: {
 
 export default function InstallExtensionRootCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const { extensions: installExtensions } = useLocalExtensions();
+  const { extensions: installExtensions, refresh } = useLocalExtensions();
   const { isLoading, error, data } = useGalleryQuery(searchText);
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
@@ -149,7 +160,12 @@ export default function InstallExtensionRootCommand(): JSX.Element {
     >
       <List.Section title="Found Extensions" subtitle={`${extensions?.length}`}>
         {extensions?.map((e) => (
-          <GalleryExtensionListItem key={e.extensionId} extension={e} installedExtensions={installExtensions} />
+          <GalleryExtensionListItem
+            key={e.extensionId}
+            extension={e}
+            installedExtensions={installExtensions}
+            reloadLocalExtensions={refresh}
+          />
         ))}
       </List.Section>
     </List>

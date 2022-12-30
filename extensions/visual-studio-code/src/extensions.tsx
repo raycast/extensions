@@ -2,38 +2,21 @@ import { Action, ActionPanel, Color, List, popToRoot, showHUD, showToast, Toast 
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
 import { Extension, getLocalExtensions } from "./lib/vscode";
+import {
+  OpenExtensionByIDInBrowserAction,
+  OpenExtensionByIDInVSCodeAction,
+  UninstallExtensionByIDAction,
+} from "./components/actions";
 
 function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
-  const e = props.extension;
-  return (
-    <Action.OpenInBrowser
-      title="Open in VSCode"
-      url={`vscode:extension/${e.id}`}
-      icon={"icon.png"}
-      onOpen={() => {
-        popToRoot();
-        showHUD("Open VSCode Extension");
-      }}
-    />
-  );
+  return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
 }
 
 function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
-  const e = props.extension;
-  const url = `https://marketplace.visualstudio.com/items?itemName=${e.id}`;
-  return (
-    <Action.OpenInBrowser
-      title="Open in Browser"
-      url={url}
-      onOpen={() => {
-        popToRoot();
-        showHUD("Open VSCode Extension in Browser");
-      }}
-    />
-  );
+  return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
 }
 
-function ExtensionListItem(props: { extension: Extension }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
   const e = props.extension;
   return (
     <List.Item
@@ -43,7 +26,7 @@ function ExtensionListItem(props: { extension: Extension }): JSX.Element {
       accessories={[
         { tag: e.preview === true ? { color: Color.Red, value: "Preview" } : "" },
         {
-          text: e.version,
+          tag: e.version,
           tooltip: e.installedTimestamp ? `Installed:  ${new Date(e.installedTimestamp).toLocaleString()}` : "",
         },
       ]}
@@ -70,6 +53,9 @@ function ExtensionListItem(props: { extension: Extension }): JSX.Element {
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <UninstallExtensionByIDAction extensionID={e.id} afterUninstall={props.reloadExtension} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -77,16 +63,16 @@ function ExtensionListItem(props: { extension: Extension }): JSX.Element {
 }
 
 export default function ExtensionsRootCommand(): JSX.Element {
-  const { extensions, isLoading, error } = useLocalExtensions();
+  const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   const extensionsSorted = extensions?.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search Installed Extensions">
       <List.Section title="Installed Extensions" subtitle={`${extensionsSorted?.length}`}>
         {extensionsSorted?.map((e) => (
-          <ExtensionListItem key={e.id} extension={e} />
+          <ExtensionListItem key={e.id} extension={e} reloadExtension={refresh} />
         ))}
       </List.Section>
     </List>
@@ -97,10 +83,16 @@ export function useLocalExtensions(): {
   extensions: Extension[] | undefined;
   isLoading?: boolean;
   error?: string;
+  refresh: () => void;
 } {
   const [isLoading, setIsLoading] = useState(true);
   const [extensions, setExtensions] = useState<Extension[]>();
   const [error, setError] = useState<string>();
+  const [date, setDate] = useState(new Date());
+
+  const refresh = () => {
+    setDate(new Date());
+  };
 
   useEffect(() => {
     let didUnmount = false;
@@ -129,7 +121,7 @@ export function useLocalExtensions(): {
     return () => {
       didUnmount = true;
     };
-  }, []);
+  }, [date]);
 
-  return { extensions: extensions, isLoading, error };
+  return { extensions: extensions, isLoading, error, refresh };
 }
