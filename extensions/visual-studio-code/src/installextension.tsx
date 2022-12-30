@@ -143,6 +143,20 @@ function GalleryExtensionListItem(props: {
   );
 }
 
+function getTotalResultCount(data: GalleryQueryResult | undefined): number | undefined {
+  if (!data || !data?.results || data.results.length <= 0) {
+    return;
+  }
+  const result = data.results[0];
+  const resultCountObject = result.resultMetadata?.find((e) => e.metadataType === "ResultCount");
+  if (resultCountObject) {
+    const totalCountObject = resultCountObject.metadataItems.find((e) => e.name === "TotalCount");
+    if (totalCountObject) {
+      return totalCountObject.count;
+    }
+  }
+}
+
 export default function InstallExtensionRootCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
   const { extensions: installExtensions, refresh } = useLocalExtensions();
@@ -151,6 +165,7 @@ export default function InstallExtensionRootCommand(): JSX.Element {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
   const extensions = data?.results ? data?.results[0].extensions : undefined;
+  const totalExtensionCount = getTotalResultCount(data);
   return (
     <List
       isLoading={isLoading}
@@ -158,7 +173,12 @@ export default function InstallExtensionRootCommand(): JSX.Element {
       onSearchTextChange={setSearchText}
       throttle
     >
-      <List.Section title="Found Extensions" subtitle={`${extensions?.length}`}>
+      <List.Section
+        title="Found Extensions"
+        subtitle={
+          totalExtensionCount !== undefined ? `${extensions?.length}/${totalExtensionCount}` : `${extensions?.length}`
+        }
+      >
         {extensions?.map((e) => (
           <GalleryExtensionListItem
             key={e.extensionId}
