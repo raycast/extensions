@@ -1,18 +1,18 @@
 import { Icon, List, Action, ActionPanel } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as mongoose from "mongoose";
-import { Whitepaper } from "./types"
-import whitepaperModel from "./schemas/whitepaper"
-import { mongoDB, mongoURL, showSystemWhitepaper } from "./assets/preferences"
-import { docUrlGoToWhitepaper, cloudflowWhitepaperUrl } from "./assets/globals"
+import { Whitepaper } from "./types";
+import whitepaperModel from "./schemas/whitepaper";
+import { mongoDB, mongoURL, showSystemWhitepaper } from "./assets/preferences";
+import { docUrlGoToWhitepaper, cloudflowWhitepaperUrl } from "./assets/globals";
 
 async function getWhitepapers() {
   const whitepaperList: Whitepaper[] = [];
-  mongoose.set('strictQuery', false);
+  mongoose.set("strictQuery", false);
   await mongoose.connect(`${mongoURL}/${mongoDB}`);
   const whitepapers = await whitepaperModel.find();
 
-  mongoose.disconnect()
+  mongoose.disconnect();
 
   whitepapers.forEach((flow) => {
     if (flow.name?.includes("Step Approval")) return;
@@ -67,7 +67,7 @@ export default function Command() {
           id={whitepaper.name + `-${idx}`}
           key={whitepaper.name + `-${idx}`}
           title={whitepaper.name ?? "Undefined"}
-          icon='../assets/quantumcast-extension-icon.png'
+          icon="../assets/quantumcast-extension-icon.png"
           accessories={[
             {
               text: whitepaper.system === false ? "Custom" : "System",
@@ -76,9 +76,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel title="Quantumcast - Whitepaper">
-              <Action.OpenInBrowser
-                url={`${cloudflowWhitepaperUrl}${encodeURIComponent(whitepaper.name)}`}
-              />
+              <Action.OpenInBrowser url={`${cloudflowWhitepaperUrl}${encodeURIComponent(whitepaper.name)}`} />
               <Action.OpenInBrowser title="Open Documentation" url={docUrlGoToWhitepaper} />
             </ActionPanel>
           }

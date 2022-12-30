@@ -3,7 +3,7 @@ import { showToast, Toast, open } from "@raycast/api";
 import { mongoDB, mongoURL } from "./assets/preferences";
 import customobjectSchema from "./schemas/customobject";
 import { CustomCollection } from "./types";
-import { cloudflowCollectionsUrl} from "./assets/globals"
+import { cloudflowCollectionsUrl } from "./assets/globals";
 //import open from "open";
 
 export default async function Command(props: { arguments: CustomCollection }) {

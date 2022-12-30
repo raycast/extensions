@@ -8,7 +8,7 @@ import { docUrlGoToCollection, cloudflowCollectionsUrl } from "./assets/globals"
 // List collections of the database
 async function getCollections() {
   const collectionList: Collection[] = [];
-  mongoose.set('strictQuery', false);
+  mongoose.set("strictQuery", false);
   await mongoose.connect(`${mongoURL}/${mongoDB}`);
 
   const collections = await mongoose.connection.db.listCollections().toArray();
@@ -63,14 +63,23 @@ export default function Command() {
               <Action.OpenInBrowser url={`${cloudflowCollectionsUrl}${encodeURIComponent(collection.name)}`} />
               <Action.OpenInBrowser title="Open Documentation" url={docUrlGoToCollection} />
               {collection.type === "Custom" && (
-                <Action title="Delete Custom Object" shortcut={{ modifiers: ["cmd"], key: "d" }} icon={Icon.Trash} onAction={async () => {
-                  if (await confirmAlert({ title: `Are you sure that you want to delete the "${collection.name}" collection?` })) {
-                    mongoose.connection.dropCollection(collection.name)
-                    await showToast({ title: "Custom Object Deletion", message: "Done!" });
-                  } else {
-                    await showToast({ title: "Custom Object Deletion", message: "Canceled!" });
-                  }
-                }} />
+                <Action
+                  title="Delete Custom Object"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  icon={Icon.Trash}
+                  onAction={async () => {
+                    if (
+                      await confirmAlert({
+                        title: `Are you sure that you want to delete the "${collection.name}" collection?`,
+                      })
+                    ) {
+                      mongoose.connection.dropCollection(collection.name);
+                      await showToast({ title: "Custom Object Deletion", message: "Done!" });
+                    } else {
+                      await showToast({ title: "Custom Object Deletion", message: "Canceled!" });
+                    }
+                  }}
+                />
               )}
             </ActionPanel>
           }

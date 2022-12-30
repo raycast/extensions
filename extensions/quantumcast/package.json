@@ -5,10 +5,14 @@
   "description": "Tailored for the work with Cloudflow and Packz",
   "icon": "quantumcast-extension-icon.png",
   "author": "jcgerhard",
-  "owner": "jcgerhard",
   "categories": [
     "Developer Tools",
     "Productivity"
+  ],
+  "keywords": [
+    "Packz",
+    "Cloudflow",
+    "Hybrid"
   ],
   "license": "MIT",
   "commands": [

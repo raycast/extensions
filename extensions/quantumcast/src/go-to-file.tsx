@@ -30,12 +30,11 @@ async function getFiles() {
   cache.set("files", JSON.stringify(await fileModel.find()));
 
   mongoose.disconnect();
-  
+
   const cached = cache.get("files");
   const cachedFiles: File[] = cached ? JSON.parse(cached) : [];
 
   // ----------------------------------------------------------------------------------
-
 
   cachedFiles.forEach((file) => {
     filesList.push({

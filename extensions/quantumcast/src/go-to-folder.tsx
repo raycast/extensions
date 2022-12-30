@@ -12,12 +12,12 @@ async function getFolders() {
   const filestoreMappings = await getFilestoreMappings(framePresetsUrl);
 
   const folderList: Folder[] = [];
-  mongoose.set('strictQuery', false);
+  mongoose.set("strictQuery", false);
   await mongoose.connect(`${mongoURL}/${mongoDB}`);
 
   const folders = await folderModel.find();
 
-  mongoose.disconnect()
+  mongoose.disconnect();
 
   folders.forEach((folder) => {
     folderList.push({
@@ -25,7 +25,9 @@ async function getFolders() {
         folder: folder.cloudflow?.folder ?? "",
         enclosing_folder: folder.cloudflow?.enclosing_folder ?? "",
       },
-      url: decodeURIComponent(`${filestoreMappings[folder.path[0]]}${folder.cloudflow?.folder?.replace(`cloudflow://${folder.path[0]}`, "")}`),
+      url: decodeURIComponent(
+        `${filestoreMappings[folder.path[0]]}${folder.cloudflow?.folder?.replace(`cloudflow://${folder.path[0]}`, "")}`
+      ),
       path: folder.path,
       depth: folder.depth ?? 0,
       name: folder.name ?? "Untitled",

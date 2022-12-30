@@ -11,7 +11,7 @@ async function getApps() {
   mongoose.set("strictQuery", false);
   await mongoose.connect(`${mongoURL}/${mongoDB}`);
   const apps = await marsappModel.find();
-  mongoose.disconnect()
+  mongoose.disconnect();
 
   apps.forEach((app) => {
     appsList.push({
@@ -91,11 +91,11 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Documentation" text={app.documentation} />
                   <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Link
-                        title="Details Page"
-                        target={`${cloudflowAppDetailsUrl}/${app.name}`}
-                        text="Open in browser"
-                      />
+                  <List.Item.Detail.Metadata.Link
+                    title="Details Page"
+                    target={`${cloudflowAppDetailsUrl}/${app.name}`}
+                    text="Open in browser"
+                  />
                   {app.landingPage !== undefined && (
                     <>
                       <List.Item.Detail.Metadata.Separator />

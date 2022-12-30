@@ -18,14 +18,14 @@ export const docUrlOpenAppBuilder = `${docBaseUrl}/manual/commands/open-appbuild
 export const cloudflowCollectionsUrl = `${cloudflowBaseUrl}/mongoCloud/mongoCloud_nebula.html?collection=`;
 export const cloudflowWhitepaperUrl = `${cloudflowBaseUrl}/portal.cgi?quantum&whitepaperName=`;
 export const cloudflowAssetUrl = `${cloudflowBaseUrl}/portal.cgi?asset=`;
-export const cloudflowAppBuilderUrl = `${cloudflowBaseUrl}/appnavigator/index.html?cfappName=`
-export const cloudflowAppDetailsUrl = `${cloudflowBaseUrl}/appsnebula/index.html#/details`
+export const cloudflowAppBuilderUrl = `${cloudflowBaseUrl}/appnavigator/index.html?cfappName=`;
+export const cloudflowAppDetailsUrl = `${cloudflowBaseUrl}/appsnebula/index.html#/details`;
 export const cloudflowApiJsonUrl = `${cloudflowBaseUrl}/portal.cgi?api=json`;
 export const cloudflowApiDocUrl = `${cloudflowBaseUrl}/?api=getJavaScriptDocumentation`;
 export const cloudflowApiWebServiceUrl = `${cloudflowBaseUrl}/portal.cgi?api=getWebServiceDocumentation`;
-export const cloudflowManualUrl = `${cloudflowBaseUrl}/manual/manual.html`
-export const cloudflowProofscopeUrl = `${cloudflowBaseUrl}/portal.cgi?proofscope&topbar=true&url=`
-export const cloudflowProofscopeFileTypes = [".pdf", ".jpg", ".bmp", ".cf2"]
+export const cloudflowManualUrl = `${cloudflowBaseUrl}/manual/manual.html`;
+export const cloudflowProofscopeUrl = `${cloudflowBaseUrl}/portal.cgi?proofscope&topbar=true&url=`;
+export const cloudflowProofscopeFileTypes = [".pdf", ".jpg", ".bmp", ".cf2"];
 //export const cloudflowWhereAreTheNodes = `/Applications/Cloudflow/220902_cloudflow_mac_lts_b45297/workers/Resource/WhereAreTheNodes.json`
 
 /**
@@ -42,10 +42,10 @@ export const packzFileTypes = [".pdf", ".ai", ".tiff", ".tif", ".jpg", ".png", "
  */
 // export const framePresetsUrl = `${userHomeDir}/Documents/NiXPS/FrameWorkstationSetup.json`;
 // New location from 22.12 on...
-export const framePresetsUrl = `${userHomeDir}/Library/Application Support/Hybrid/FrameWorkstationSetup.json`
+export const framePresetsUrl = `${userHomeDir}/Library/Application Support/Hybrid/FrameWorkstationSetup.json`;
 
 /**
  * TRAC globals
  */
-export const tracBaseUrl = "https://trac.hybridsoftware.com/hybrid"
-export const tracQueryUrl = `${tracBaseUrl}/query`
+export const tracBaseUrl = "https://trac.hybridsoftware.com/hybrid";
+export const tracQueryUrl = `${tracBaseUrl}/query`;
