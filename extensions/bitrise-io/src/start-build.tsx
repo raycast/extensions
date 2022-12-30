@@ -77,7 +77,7 @@ export default function Command() {
         ))}
       </Form.Dropdown>
       <Form.TextField id="branch" title="Branch" placeholder="Enter git branch (optional)" />
-      <Form.TextArea id="message" title="Message" defaultValue="Triggered with Bitrise Raycast extension" />
+      <Form.TextArea id="message" title="Message" placeholder="Enter message (optional)" />
     </Form>
   );
 }
