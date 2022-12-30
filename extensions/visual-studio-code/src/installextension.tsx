@@ -155,7 +155,11 @@ function GalleryExtensionListItem(props: {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenExtensionByIDInBrowserAction extensionID={getFullExtensionID(e)} />
-            <Action.CopyToClipboard content={getFullExtensionID(e)} title="Copy Extension ID" />
+            <Action.CopyToClipboard
+              content={getFullExtensionID(e)}
+              title="Copy Extension ID"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -189,7 +193,7 @@ export default function InstallExtensionRootCommand(): JSX.Element {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search in VS Code Marketplace"
+      searchBarPlaceholder="Search by Name or ID in VS Code Marketplace"
       onSearchTextChange={setSearchText}
       throttle
     >
