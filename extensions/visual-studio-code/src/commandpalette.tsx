@@ -108,7 +108,7 @@ function InstallRaycastForVSCodeAction(): JSX.Element {
 }
 
 export default function CommandPaletteCommand(): JSX.Element {
-  const { isLoading, commands, error } = useCommands();
+  const { isLoading, commands, error, refresh } = useCommands();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });
   }
@@ -128,6 +128,12 @@ export default function CommandPaletteCommand(): JSX.Element {
           icon="⚠️"
           actions={
             <ActionPanel>
+              <Action
+                title="Reload"
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={refresh}
+              />
               <InstallRaycastForVSCodeAction />
             </ActionPanel>
           }
@@ -148,10 +154,16 @@ function useCommands(): {
   commands: CommandMetadata[] | undefined;
   isLoading?: boolean;
   error?: string;
+  refresh?: () => void;
 } {
   const [isLoading, setIsLoading] = useState(true);
   const [commands, setCommands] = useState<CommandMetadata[]>();
   const [error, setError] = useState<string>();
+  const [date, setDate] = useState(new Date());
+
+  const refresh = () => {
+    setDate(new Date());
+  };
 
   useEffect(() => {
     let didUnmount = false;
@@ -180,7 +192,7 @@ function useCommands(): {
     return () => {
       didUnmount = true;
     };
-  }, []);
+  }, [date]);
 
-  return { commands, isLoading, error };
+  return { commands, isLoading, error, refresh };
 }
