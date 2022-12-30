@@ -26,6 +26,7 @@ export interface Collection {
  * Interface definition for File
  */
 export interface File {
+  _id?: string,
   cloudflow: {
     file: string;
     enclosing_folder: string;

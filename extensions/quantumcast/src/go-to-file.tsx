@@ -25,14 +25,32 @@ async function getFiles() {
   // Caching test - Capacity is set to 100MB (100000000 Bytes) - Default is 10MB
   // ----------------------------------------------------------------------------------
 
-  const cache = new Cache({ capacity: 100000000, namespace: environment.commandName });
+  const cache = new Cache({ capacity: 100000000, namespace: environment.commandName })
 
-  cache.set("files", JSON.stringify(await fileModel.find()));
+  const pageLimit = 500
+  const maxCount = await fileModel.find().count()
+  const maxIterations = Math.floor(maxCount/pageLimit)
+  // const lastID = await fileModel.findOne({}, {_id: 1})
+  let lastID = "000000000000000000000000"
+  console.log(maxCount)
+  console.log(lastID)
+  console.log(maxIterations)
+  
+  for (let idx = 0; idx <= maxIterations; idx++) {
+    const filesChunk: File[] = await fileModel.find<File>({ _id: { $gt: lastID } }).limit(pageLimit);
+    lastID = filesChunk[filesChunk.length-1]._id ?? ''
+    console.log("Index: " + idx + " - _id: " + lastID)
+    console.log("Read: " + filesChunk.length)
+  }
+
+
+  // cache.set("files", JSON.stringify(await fileModel.find()));
+  //cache.set("files", JSON.stringify(filesChunk));
+  const cached = cache.get("files")
 
   mongoose.disconnect();
-
-  const cached = cache.get("files");
-  const cachedFiles: File[] = cached ? JSON.parse(cached) : [];
+  
+  const cachedFiles: File[] = cached ? JSON.parse(finalCache) : [];
 
   // ----------------------------------------------------------------------------------
 
