@@ -1,0 +1,413 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quantumcast",
+  "title": "Quantumcast",
+  "description": "Tailored for the work with Cloudflow and Packz",
+  "icon": "quantumcast-extension-icon.png",
+  "author": "jcgerhard",
+  "owner": "jcgerhard",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "go-to-collection",
+      "title": "Go To Collection",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open a Cloudflow collection in your browser.",
+      "mode": "view"
+    },
+    {
+      "name": "open-appbuilder",
+      "title": "Open AppBuilder",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open AppBuilder for an installed MARS app",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-whitepaper",
+      "title": "Go To Whitepaper",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open a Cloudflow whitepaper in your browser.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showSystemWhitepaper",
+          "type": "checkbox",
+          "label": "Include system flows in listing",
+          "required": false,
+          "title": "Show system whitepapers?",
+          "description": "Decide if you want to list system flows.",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "create-custom-object",
+      "title": "Create Custom Object",
+      "subtitle": "Quantumcast - MongoDB",
+      "description": "Create an empty ready-to-use custom object",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "collectionName",
+          "placeholder": "Custom Object Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "go-to-folder",
+      "title": "Go To Folder",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open a specific folder in Cloudflow",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-file",
+      "title": "Go To File",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open a file in Cloudflow",
+      "mode": "view"
+    },
+    {
+      "name": "go-to-workspace",
+      "title": "Go To Workspace",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open a workspace in Cloudflow",
+      "mode": "view"
+    },
+    {
+      "name": "open-packz-manual",
+      "title": "Open Packz Manual",
+      "subtitle": "Quantumcast - Packz",
+      "description": "Open the latest installed Packz manual in your browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "packzManualLanguage",
+          "type": "dropdown",
+          "required": false,
+          "title": "Packz Manual Language",
+          "data": [
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "German",
+              "value": "de"
+            },
+            {
+              "title": "Spanish",
+              "value": "es"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Italian",
+              "value": "it"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            }
+          ],
+          "description": "Choose the your favorite language for the Packz manual",
+          "default": "English"
+        }
+      ]
+    },
+    {
+      "name": "open-cloudflow-manual",
+      "title": "Open Cloudflow Manual",
+      "subtitle": "Quantumcast - Cloudflow",
+      "description": "Open the currently running Cloudflow manual in your browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-quantumcast-docs",
+      "title": "Open Quantumcast Documentation",
+      "subtitle": "Quantumcast - Quantumcast",
+      "description": "Open Quantumcast documentation in your browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "go-to-trac",
+      "title": "Go To TRAC",
+      "subtitle": "Quantumcast - TRAC",
+      "description": "Open TRAC in browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "tracColumns",
+          "type": "textfield",
+          "required": true,
+          "title": "What columns you like to see?",
+          "description": "Define what columns you like to see in TRAC. Allowed keywords see Quantumcast documentation.",
+          "default": "id, summary, project"
+        },
+        {
+          "name": "tracOrderColumn",
+          "type": "dropdown",
+          "required": false,
+          "title": "What column to use for ordering?",
+          "data": [
+            {
+              "title": "Ticket",
+              "value": "id"
+            },
+            {
+              "title": "Summary",
+              "value": "summary"
+            },
+            {
+              "title": "Reporter",
+              "value": "reporter"
+            },
+            {
+              "title": "Owner",
+              "value": "owner"
+            },
+            {
+              "title": "Type",
+              "value": "type"
+            },
+            {
+              "title": "Status",
+              "value": "status"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Milestone",
+              "value": "milestone"
+            },
+            {
+              "title": "Component",
+              "value": "component"
+            },
+            {
+              "title": "Resolution",
+              "value": "resolution"
+            },
+            {
+              "title": "Created",
+              "value": "time"
+            },
+            {
+              "title": "Modified",
+              "value": "changetime"
+            },
+            {
+              "title": "Project",
+              "value": "project"
+            },
+            {
+              "title": "Customer",
+              "value": "customer"
+            },
+            {
+              "title": "Contact",
+              "value": "contact"
+            },
+            {
+              "title": "Platform",
+              "value": "platform"
+            },
+            {
+              "title": "Link to similar tickets",
+              "value": "similartickets"
+            },
+            {
+              "title": "External Reference",
+              "value": "extreference"
+            },
+            {
+              "title": "Reported in version",
+              "value": "reportedversion"
+            },
+            {
+              "title": "Reported in build",
+              "value": "reportedbuild"
+            },
+            {
+              "title": "Fixed in build",
+              "value": "fixedbuild"
+            },
+            {
+              "title": "Released in version",
+              "value": "releasedversion"
+            },
+            {
+              "title": "Backport to version",
+              "value": "backportto"
+            },
+            {
+              "title": "Update documentation",
+              "value": "documentation"
+            },
+            {
+              "title": "Add to PACKZflow",
+              "value": "packzflow"
+            },
+            {
+              "title": "OTRS",
+              "value": "otrs"
+            },
+            {
+              "title": "Parent Issue",
+              "value": "parentissue"
+            },
+            {
+              "title": "Keywords",
+              "value": "keywords"
+            },
+            {
+              "title": "CC",
+              "value": "cc"
+            }
+          ],
+          "description": "Define one existing column to use for the ordering of the table.",
+          "default": "id"
+        },
+        {
+          "name": "tracOrderColumnDescending",
+          "label": "Descending",
+          "type": "checkbox",
+          "required": false,
+          "title": "Order type?",
+          "description": "Enable this if you like a descending order based on the order column defined above.",
+          "default": true
+        },
+        {
+          "name": "tracStates",
+          "type": "textfield",
+          "required": false,
+          "title": "What states you like to see?",
+          "description": "Define what states you like to see in TRAC. Allowed keywords see Quantumcast documentation.",
+          "default": "all"
+        },
+        {
+          "name": "tracGrouping",
+          "type": "dropdown",
+          "required": false,
+          "title": "Group results by:",
+          "data": [
+            {
+              "title": "Add to PACKZflow",
+              "value": "packzflow"
+            },
+            {
+              "title": "Component",
+              "value": "component"
+            },
+            {
+              "title": "Milestone",
+              "value": "milestone"
+            },
+            {
+              "title": "Owner",
+              "value": "owner"
+            },
+            {
+              "title": "Priority",
+              "value": "priority"
+            },
+            {
+              "title": "Project",
+              "value": "project"
+            },
+            {
+              "title": "Reporter",
+              "value": "reporter"
+            },
+            {
+              "title": "Resolution",
+              "value": "resolution"
+            },
+            {
+              "title": "Status",
+              "value": "status"
+            },
+            {
+              "title": "Type",
+              "value": "type"
+            },
+            {
+              "title": "Update Documentation",
+              "value": "documentation"
+            }
+          ],
+          "description": "Choose how you want to group your TRAC view.",
+          "default": "project"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "userEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "User Email",
+      "description": "Enter your HYBRID email address here..."
+    },
+    {
+      "name": "mongoURL",
+      "type": "textfield",
+      "required": true,
+      "title": "MongoDB Server URL",
+      "description": "Enter MongoDB URL here...",
+      "default": "mongodb://127.0.0.1:27017"
+    },
+    {
+      "name": "mongoDB",
+      "type": "textfield",
+      "required": true,
+      "title": "MongoDB Database",
+      "description": "Enter MongoDB name here...",
+      "default": "nucleus"
+    },
+    {
+      "name": "cloudflowURL",
+      "type": "textfield",
+      "required": true,
+      "title": "Cloudflow Server URL",
+      "description": "Enter Cloudflow URL here...",
+      "default": "http://127.0.0.1:9090"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.2",
+    "mongoose": "^6.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
