@@ -1,17 +1,17 @@
-import { AxiosError } from "axios"
-import { List, Icon, Action, ActionPanel } from "@raycast/api"
-import { getFavicon } from "@raycast/utils"
+import { AxiosError } from "axios";
+import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 
-import { CheckerResponse } from "@type"
+import { CheckerResponse } from "@type";
 
-type ErrorCode = "ECONNABORTED" | "ERR_BAD_RESPONSE" | "ECONNRESET" | "ENETDOWN" | "ENOTFOUND"
+type ErrorCode = "ECONNABORTED" | "ERR_BAD_RESPONSE" | "ECONNRESET" | "ENETDOWN" | "ENOTFOUND";
 
 function getErrorMessage(errorCode: string | undefined) {
   if (!errorCode) {
     return {
       title: "Unexpected Error",
       description: "Unexpected error has occured. Please try again in a few minutes.",
-    }
+    };
   }
 
   const errorMessage: Record<ErrorCode, { title: string; description: string }> = {
@@ -40,23 +40,23 @@ function getErrorMessage(errorCode: string | undefined) {
       description:
         "It looks like your internet connection might be down. Please check your internet connection and try again.",
     },
-  }
+  };
 
   const { title, description } = errorMessage[errorCode as ErrorCode] || {
     title: "Unexpected Error",
     description: "Unexpected error has occured. Please try again in a few minutes.",
-  }
+  };
 
-  return { title, description }
+  return { title, description };
 }
 
 interface ErrorViewProps {
-  errorCode: string | undefined
-  revalidate: () => Promise<CheckerResponse[] | AxiosError<unknown, any>>
+  errorCode: string | undefined;
+  revalidate: () => Promise<CheckerResponse[] | AxiosError<unknown, any>>;
 }
 
 export default function ErrorView({ errorCode, revalidate }: ErrorViewProps) {
-  const { title, description } = getErrorMessage(errorCode)
+  const { title, description } = getErrorMessage(errorCode);
 
   return (
     <List>
@@ -80,5 +80,5 @@ export default function ErrorView({ errorCode, revalidate }: ErrorViewProps) {
         }
       />
     </List>
-  )
+  );
 }

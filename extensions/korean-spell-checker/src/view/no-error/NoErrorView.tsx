@@ -1,7 +1,7 @@
-import { List, Icon, Action, ActionPanel } from "@raycast/api"
+import { List, Icon, Action, ActionPanel } from "@raycast/api";
 
 interface NoErrorViewProps {
-  text: string
+  text: string;
 }
 
 export default function NoErrorView({ text }: NoErrorViewProps) {
@@ -27,5 +27,5 @@ export default function NoErrorView({ text }: NoErrorViewProps) {
         </ActionPanel>
       }
     />
-  )
+  );
 }

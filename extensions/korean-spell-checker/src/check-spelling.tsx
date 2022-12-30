@@ -1,65 +1,65 @@
-import { useState, useEffect } from "react"
-import { Form, ActionPanel, Action, useNavigation, getSelectedText } from "@raycast/api"
+import { useState, useEffect } from "react";
+import { Form, ActionPanel, Action, useNavigation, getSelectedText } from "@raycast/api";
 
-import { ResultView } from "@view/result"
+import { ResultView } from "@view/result";
 
 interface RootProps {
   draftValues: {
-    text: string
-  }
+    text: string;
+  };
 }
 
 export default function CheckSpellingRoot(props: RootProps) {
-  const draftText = props.draftValues?.text
-  const [text, setText] = useState(draftText || "")
+  const draftText = props.draftValues?.text;
+  const [text, setText] = useState(draftText || "");
   const [charCount, setCharCount] = useState(() => {
     if (draftText) {
-      return draftText.length.toString()
+      return draftText.length.toString();
     }
-    return "0"
-  })
-  const [textAreaError, setTextAreaError] = useState<string | undefined>()
+    return "0";
+  });
+  const [textAreaError, setTextAreaError] = useState<string | undefined>();
 
   useEffect(() => {
     if (text) {
-      return
+      return;
     }
 
     const setSelectedText = async () => {
-      let selectedText = ""
+      let selectedText = "";
 
       try {
-        selectedText = await getSelectedText()
+        selectedText = await getSelectedText();
       } catch (_error) {
-        return
+        return;
       }
 
       if (!selectedText) {
-        return
+        return;
       }
 
-      handleChange(selectedText)
-    }
+      handleChange(selectedText);
+    };
 
-    setSelectedText()
-  }, [])
+    setSelectedText();
+  }, []);
 
-  const { push } = useNavigation()
+  const { push } = useNavigation();
 
   function submitText(text: string) {
     if (text.length > 0) {
-      push(<ResultView text={text} />)
+      push(<ResultView text={text} />);
     } else {
-      setTextAreaError("This should not be empty")
+      setTextAreaError("This should not be empty");
     }
   }
 
   function handleChange(text: string) {
-    setText(text)
-    setCharCount(text.length.toString())
+    setText(text);
+    setCharCount(text.length.toString());
 
     if (text.length > 0) {
-      setTextAreaError(undefined)
+      setTextAreaError(undefined);
     }
   }
 
@@ -71,7 +71,7 @@ export default function CheckSpellingRoot(props: RootProps) {
           <Action.SubmitForm
             title="Submit Text"
             onSubmit={({ text }) => {
-              submitText(text)
+              submitText(text);
             }}
           />
         </ActionPanel>
@@ -89,5 +89,5 @@ export default function CheckSpellingRoot(props: RootProps) {
       />
       <Form.Description title="Characters:" text={charCount} />
     </Form>
-  )
+  );
 }

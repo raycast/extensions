@@ -1,3 +1,3 @@
-import NoErrorView from "./NoErrorView"
+import NoErrorView from "./NoErrorView";
 
-export { NoErrorView }
+export { NoErrorView };

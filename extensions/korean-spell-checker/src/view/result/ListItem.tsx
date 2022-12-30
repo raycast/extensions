@@ -1,33 +1,33 @@
-import { useState } from "react"
-import { List, Icon, ActionPanel, Action, Keyboard, showToast, Toast } from "@raycast/api"
-import { getFavicon } from "@raycast/utils"
+import { useState } from "react";
+import { List, Icon, ActionPanel, Action, Keyboard, showToast, Toast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 
-import { ErrInfo } from "@type"
-import ResultAction from "@view/result/ui/ResultAction"
-import { Formatter, ResultManager } from "@view/result"
+import { ErrInfo } from "@type";
+import ResultAction from "@view/result/ui/ResultAction";
+import { Formatter, ResultManager } from "@view/result";
 
 interface ListItemProps {
-  text: string
-  errInfo: ErrInfo
-  resultManager: ResultManager
+  text: string;
+  errInfo: ErrInfo;
+  resultManager: ResultManager;
 }
 
 export default function ListItem({ text, errInfo, resultManager }: ListItemProps) {
-  const formatter = new Formatter(text)
-  const [markdown, setMarkdown] = useState(formatter.formatText(text, errInfo))
+  const formatter = new Formatter(text);
+  const [markdown, setMarkdown] = useState(formatter.formatText(text, errInfo));
 
   async function setNewWord(errorIdx: number, newWord: string) {
-    setMarkdown(formatter.formatText(text, errInfo, newWord))
+    setMarkdown(formatter.formatText(text, errInfo, newWord));
 
-    resultManager.updateWordList(errorIdx, newWord)
+    resultManager.updateWordList(errorIdx, newWord);
 
-    const toastMessage = newWord === errInfo.orgStr ? "Word Unselected" : "New Word Selected"
+    const toastMessage = newWord === errInfo.orgStr ? "Word Unselected" : "New Word Selected";
 
     await showToast({
       style: Toast.Style.Success,
       title: toastMessage,
       message: `${errInfo.orgStr} -> ${newWord}`,
-    })
+    });
   }
 
   return (
@@ -84,5 +84,5 @@ export default function ListItem({ text, errInfo, resultManager }: ListItemProps
       }
       detail={<List.Item.Detail markdown={markdown}></List.Item.Detail>}
     />
-  )
+  );
 }
