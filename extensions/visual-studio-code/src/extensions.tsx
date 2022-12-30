@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "./utils";
 import { Extension, getLocalExtensions } from "./lib/vscode";
