@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 import {
   AuditLog,
+  Committer,
   Deploy,
   Domain,
   Member,
@@ -28,6 +29,11 @@ class Api {
     const { data } = await this.client.get<AuditLog[]>(
       `/accounts/${team}/audit?page=1&per_page=200`,
     );
+    return data;
+  }
+
+  async getCommitters(team: string): Promise<Committer[]> {
+    const { data } = await this.client.get<Committer[]>(`/${team}/committers`);
     return data;
   }
 

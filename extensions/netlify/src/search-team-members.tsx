@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
-import { Member, Team } from './utils/interfaces';
-import { handleNetworkError } from './utils/utils';
+import { Committer, Member, Team } from './utils/interfaces';
+import { formatDate, handleNetworkError } from './utils/utils';
 
 export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(true);
 
   const [members, setMembers] = useState<Member[]>([]);
+  const [committers, setCommitters] = useState<Committer[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useCachedState<string>(
     'selectedTeam',
@@ -35,14 +36,20 @@ export default function Command() {
   }
 
   async function fetchMembers(team: string) {
-    setLoading(true);
     try {
       const members = await api.getMembers(team);
       setMembers(members);
-      setLoading(false);
     } catch (e) {
       handleNetworkError(e);
-      setLoading(false);
+    }
+  }
+
+  async function fetchCommitters(team: string) {
+    try {
+      const committers = await api.getCommitters(team);
+      setCommitters(committers);
+    } catch (e) {
+      // ignore silently
     }
   }
 
@@ -51,7 +58,16 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    fetchMembers(selectedTeam);
+    async function reload() {
+      const promises = [
+        fetchMembers(selectedTeam),
+        fetchCommitters(selectedTeam),
+      ];
+      setLoading(true);
+      await Promise.all(promises);
+      setLoading(false);
+    }
+    reload();
   }, [selectedTeam]);
 
   function getMemberName(member: Member) {
@@ -64,9 +80,17 @@ export default function Command() {
       : -1;
   }
 
+  function filterCommitters(committer: Committer) {
+    const ONE_MONTH_AGO = 30 * 24 * 60 * 60 * 1000;
+    const now = new Date().getTime();
+    const lastSeen = new Date(committer.last_seen).getTime();
+    return !committer.member_id && now - lastSeen <= ONE_MONTH_AGO;
+  }
+
+  const relevantCommitters = committers.filter(filterCommitters);
   return (
     <List isLoading={isLoading} searchBarAccessory={teamDropdown}>
-      <List.Section title={`${members.length} team members`}>
+      <List.Section title={`${members.length} Team members`}>
         {members.sort(sortAlphabetically).map((member) => {
           const name = member.full_name || member.email;
           return (
@@ -126,6 +150,50 @@ export default function Command() {
                         icon="vcs/gitlab.svg"
                         title="Open GitLab Profile"
                         url={`https://gitlab.com/${member.connected_accounts.gitlab}`}
+                      />
+                    )}
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+      <List.Section title={`${relevantCommitters.length} Git contributors`}>
+        {relevantCommitters.map((committer) => {
+          return (
+            <List.Item
+              key={committer.id}
+              icon={`vcs/${committer.provider}.svg`}
+              title={committer.provider_slug}
+              // subtitle={member.email}
+              accessories={[
+                {
+                  text: formatDate(committer.last_seen),
+                  tooltip: 'Last active',
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.OpenInBrowser
+                      title="Manage Membership"
+                      url={`https://app.netlify.com/teams/${selectedTeam}/members`}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    {committer.provider === 'github' && (
+                      <Action.OpenInBrowser
+                        icon="vcs/github.svg"
+                        title="Open GitHub Profile"
+                        url={`https://github.com/${committer.provider_slug}`}
+                      />
+                    )}
+                    {committer.provider === 'gitlab' && (
+                      <Action.OpenInBrowser
+                        icon="vcs/gitlab.svg"
+                        title="Open GitLab Profile"
+                        url={`https://gitlab.com/${committer.provider_slug}`}
                       />
                     )}
                   </ActionPanel.Section>

@@ -14,6 +14,14 @@ export interface AuditLog {
   };
 }
 
+export interface Committer {
+  id: string;
+  last_seen: string;
+  member_id?: string;
+  provider: 'github' | 'gitlab' | 'bitbucket';
+  provider_slug: string;
+}
+
 export type DeployContext = 'production' | 'deploy-preview' | 'branch-deploy';
 
 export type DeployState =
