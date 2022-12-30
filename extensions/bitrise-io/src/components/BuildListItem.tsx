@@ -2,14 +2,14 @@ import { List, Color, Icon, ActionPanel, Action, Image } from "@raycast/api";
 import { ReactNode } from "react";
 import { Build, BuildStatus } from "../api/types";
 
-export function BuildListItem(props: { build: Build }) {
+export function BuildListItem(props: { build: Build; displayRepoTitle: boolean }) {
   return (
     <List.Item
       id={props.build.slug}
       icon={buildIcon(props.build.status)}
       title={buildTitle(props.build)}
       subtitle={buildSubtitle(props.build)}
-      accessories={buildAccessories(props.build)}
+      accessories={buildAccessories(props.build, props.displayRepoTitle)}
       actions={buildActions(props.build)}
     />
   );
@@ -61,8 +61,15 @@ function buildSubtitle(build: Build): string | undefined {
   }
 }
 
-function buildAccessories(build: Build): List.Item.Accessory[] {
+function buildAccessories(build: Build, displayRepoTitle: boolean): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
+
+  if (displayRepoTitle) {
+    accessories.push({
+      icon: build.repository?.avatar_url ?? Icon.Box,
+      text: build.repository?.title,
+    });
+  }
 
   accessories.push({
     text: build.triggered_workflow,
@@ -85,6 +92,10 @@ function buildAccessories(build: Build): List.Item.Accessory[] {
       },
     });
   }
+
+  accessories.push({
+    date: new Date(build.triggered_at),
+  });
 
   return accessories;
 }

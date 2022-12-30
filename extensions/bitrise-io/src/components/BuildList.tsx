@@ -7,6 +7,7 @@ export function BuildList(props: {
   builds?: BuildsByStatus;
   isLoading: boolean;
   searchBarAccessory?: ReactElement<List.Dropdown.Props>;
+  displayRepoTitle: boolean;
 }) {
   return (
     <List
@@ -16,12 +17,12 @@ export function BuildList(props: {
     >
       <List.Section title="In Progress" subtitle={props.builds?.inProgress?.length?.toString() ?? "0"}>
         {props.builds?.inProgress?.map((build) => (
-          <BuildListItem key={build.slug} build={build} />
+          <BuildListItem key={build.slug} build={build} displayRepoTitle={props.displayRepoTitle} />
         ))}
       </List.Section>
       <List.Section title="Completed">
         {props.builds?.completed?.map((build) => (
-          <BuildListItem key={build.slug} build={build} />
+          <BuildListItem key={build.slug} build={build} displayRepoTitle={props.displayRepoTitle} />
         ))}
       </List.Section>
     </List>

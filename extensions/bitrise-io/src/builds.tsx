@@ -82,6 +82,7 @@ export default function Command() {
             ))}
         </List.Dropdown>
       }
+      displayRepoTitle={selectedApp == "all"}
     />
   );
 }

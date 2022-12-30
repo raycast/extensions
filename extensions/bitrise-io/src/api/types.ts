@@ -33,6 +33,7 @@ export interface Build {
   abort_reason?: string;
   tag?: string;
   triggered_at: string;
+  repository?: App; // Missing when querying builds of one app
 }
 
 export interface App {
