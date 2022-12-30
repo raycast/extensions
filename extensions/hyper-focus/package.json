@@ -5,7 +5,7 @@
   "description": "Controls the hyper-focus command line daemon which blocks distracting websites and apps.",
   "icon": "command-icon.png",
   "author": "iloveitaly",
-  "owner": "iloveitaly@gmail.com",
+  "owner": "iloveitaly",
   "categories": [
     "Productivity"
   ],
