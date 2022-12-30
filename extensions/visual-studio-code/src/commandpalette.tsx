@@ -77,9 +77,17 @@ function CommandListItem(props: { command: CommandMetadata }): JSX.Element {
       title={title(c)}
       actions={
         <ActionPanel>
-          <Action title="Run Command" onAction={handle} icon={{ source: Icon.Terminal }} />
-          <Action.CopyToClipboard title="Copy Command ID" content={c.command} />
-          <CreateCommandQuickLinkAction command={c} />
+          <ActionPanel.Section>
+            <Action title="Run Command" onAction={handle} icon={{ source: Icon.Terminal }} />
+            <CreateCommandQuickLinkAction command={c} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              title="Copy Command ID"
+              content={c.command}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
