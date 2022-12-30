@@ -120,7 +120,10 @@ function GalleryExtensionListItem(props: {
       subtitle={e.publisher?.displayName}
       icon={iconURI() || "icon.png"}
       accessories={[
-        { tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "" },
+        {
+          tag: alreadyInstalled ? { value: "Installed", color: Color.Blue } : "",
+          tooltip: alreadyInstalled ? "Already Installed" : "",
+        },
         { tag: version, tooltip: lastUpdated ? `Last Update: ${lastUpdated?.toLocaleString()}` : "" },
       ]}
       actions={
