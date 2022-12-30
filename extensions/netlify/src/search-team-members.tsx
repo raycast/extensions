@@ -51,10 +51,10 @@ export default function Command() {
       ];
       try {
         const responses = await Promise.all(promises);
-        const [members, committers, reviewers] = responses;
-        setMembers(members as Member[]);
-        setCommitters(committers as Committer[]);
-        setReviewers(reviewers as Reviewer[]);
+        const [mems, coms, revs] = responses;
+        setMembers(mems as Member[]);
+        setCommitters(coms as Committer[]);
+        setReviewers(revs as Reviewer[]);
         setLoading(false);
       } catch (e) {
         handleNetworkError(e);
@@ -79,10 +79,9 @@ export default function Command() {
     return !committer.member_id && now - lastSeen <= ONE_MONTH_AGO;
   }
 
-  const relevantCommitters = committers.filter(filterCommitters);
   return (
     <List isLoading={isLoading} searchBarAccessory={teamDropdown}>
-      <List.Section title={`${members.length} Team members`}>
+      <List.Section title={`Team members`}>
         {members.sort(sortAlphabetically).map((member) => {
           const name = member.full_name || member.email;
           return (
@@ -133,8 +132,8 @@ export default function Command() {
           );
         })}
       </List.Section>
-      <List.Section title={`${relevantCommitters.length} Git contributors`}>
-        {relevantCommitters.map((committer) => {
+      <List.Section title={`Git contributors`}>
+        {committers.filter(filterCommitters).map((committer) => {
           return (
             <List.Item
               key={committer.id}
@@ -163,7 +162,7 @@ export default function Command() {
           );
         })}
       </List.Section>
-      <List.Section title={`${reviewers.length} Reviewers`}>
+      <List.Section title={`Reviewers`}>
         {reviewers.sort(sortAlphabetically).map((reviewer) => {
           const name = reviewer.full_name || reviewer.email;
           return (
