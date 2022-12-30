@@ -1,7 +1,7 @@
 import { XcodeCodeSnippet } from "../models/xcode-code-snippet/xcode-code-snippet.model";
 import Path from "path";
 import * as os from "os";
-import { readDirectoryAsync, readFileAsync, writeFileAsync } from "../shared/fs-async";
+import { existsAsync, makeDirectoryAsync, readDirectoryAsync, readFileAsync, writeFileAsync } from "../shared/fs-async";
 import { build as buildPlist, parse as parsePlist } from "plist";
 
 /**
@@ -16,6 +16,22 @@ export class XcodeCodeSnippetService {
   }
 
   /**
+   * Create directory path if needed
+   */
+  private static async createDirectoryPathIfNeeded() {
+    const directoryPath = XcodeCodeSnippetService.directoryPath;
+    try {
+      // Check if directory path does not exist
+      if (!(await existsAsync(directoryPath))) {
+        // Make directory
+        await makeDirectoryAsync(directoryPath);
+      }
+    } catch {
+      // Ignore any error
+    }
+  }
+
+  /**
    * Retrieve the file path of a Xcode Code Snippet
    * @param codeSnippet The Xcode Code Snippet
    */
@@ -27,6 +43,7 @@ export class XcodeCodeSnippetService {
    * Retrieve all Xcode Code Snippets
    */
   static async codeSnippets(): Promise<XcodeCodeSnippet[]> {
+    await XcodeCodeSnippetService.createDirectoryPathIfNeeded();
     return (
       (
         await Promise.allSettled(
@@ -54,6 +71,7 @@ export class XcodeCodeSnippetService {
    * @param codeSnippet The Xcode Code Snippet which should be saved
    */
   static async save(codeSnippet: XcodeCodeSnippet) {
+    await XcodeCodeSnippetService.createDirectoryPathIfNeeded();
     await writeFileAsync(
       XcodeCodeSnippetService.codeSnippetFilePath(codeSnippet),
       buildPlist({ ...codeSnippet }),
