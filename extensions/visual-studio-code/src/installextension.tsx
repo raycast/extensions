@@ -195,27 +195,71 @@ export default function InstallExtensionRootCommand(): JSX.Element {
   );
 }
 
+enum Flags {
+  None = 0x0,
+  IncludeVersions = 0x1,
+  IncludeFiles = 0x2,
+  IncludeCategoryAndTags = 0x4,
+  IncludeSharedAccounts = 0x8,
+  IncludeVersionProperties = 0x10,
+  ExcludeNonValidated = 0x20,
+  IncludeInstallationTargets = 0x40,
+  IncludeAssetUri = 0x80,
+  IncludeStatistics = 0x100,
+  IncludeLatestVersionOnly = 0x200,
+  Unpublished = 0x1000,
+}
+
+enum FilterType {
+  Tag = 1,
+  ExtensionId = 4,
+  Category = 5,
+  ExtensionName = 7,
+  Target = 8,
+  Featured = 9,
+  SearchText = 10,
+  ExcludeWithFlags = 12,
+}
+
+function flagsToString(...flags: Flags[]): string {
+  return String(flags.reduce((r, f) => r | f, 0));
+}
+
 function useGalleryQuery(searchText: string): {
   data: GalleryQueryResult | undefined;
   error: string | undefined;
   isLoading: boolean;
 } {
+  // reference for impl. https://github.com/microsoft/vscode/blob/12ae331012923024bedaf873ba4259a8c64db020/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
   const url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery?api-version=3.0-preview.1";
   const headers = {
     "content-type": "application/json",
     "accept-encoding": "gzip",
   };
+  const allFlags: Flags[] = [
+    Flags.IncludeAssetUri,
+    Flags.IncludeStatistics,
+    Flags.IncludeCategoryAndTags,
+    Flags.IncludeFiles,
+    Flags.IncludeVersionProperties,
+    Flags.ExcludeNonValidated,
+  ];
+  const flags = allFlags.reduce((r, f) => r | f, 0);
   const request = {
     filters: [
       {
         criteria: [
           {
-            filterType: 8,
+            filterType: FilterType.Target,
             value: "Microsoft.VisualStudio.Code",
           },
           {
-            filterType: 10,
+            filterType: FilterType.SearchText,
             value: searchText,
+          },
+          {
+            filterType: FilterType.ExcludeWithFlags,
+            value: flagsToString(Flags.Unpublished),
           },
         ],
         pageNumber: 1,
@@ -225,7 +269,7 @@ function useGalleryQuery(searchText: string): {
       },
     ],
     assetTypes: [],
-    flags: 0,
+    flags: flags,
   };
   const body = JSON.stringify(request);
   const execute = searchText.length > 0;
@@ -233,8 +277,12 @@ function useGalleryQuery(searchText: string): {
     headers: headers,
     body: body,
     method: "POST",
-    keepPreviousData: true,
+    keepPreviousData: false,
     execute: execute,
   });
-  return { isLoading: execute ? isLoading : false, error: error?.message, data };
+  return {
+    isLoading: execute ? isLoading : false,
+    error: error?.message,
+    data: searchText.length <= 0 ? undefined : data,
+  };
 }
