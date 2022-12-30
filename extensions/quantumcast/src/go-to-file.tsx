@@ -13,6 +13,7 @@ import {
 } from "./assets/globals";
 import { framePresetsUrl } from "./assets/globals";
 import getFilestoreMappings from "./io/getFrameMappings";
+import { readdir, readFile } from "fs/promises"
 
 async function getFiles() {
   const filestoreMappings = await getFilestoreMappings(framePresetsUrl);
@@ -22,35 +23,40 @@ async function getFiles() {
   await mongoose.connect(`${mongoURL}/${mongoDB}`);
 
   // ----------------------------------------------------------------------------------
-  // Caching test - Capacity is set to 100MB (100000000 Bytes) - Default is 10MB
+  // Caching test - Capacity is set to 500MB (500000000 Bytes) - Default is 10MB
   // ----------------------------------------------------------------------------------
 
-  const cache = new Cache({ capacity: 100000000, namespace: environment.commandName })
-
-  const pageLimit = 500
-  const maxCount = await fileModel.find().count()
-  const maxIterations = Math.floor(maxCount/pageLimit)
-  // const lastID = await fileModel.findOne({}, {_id: 1})
-  let lastID = "000000000000000000000000"
-  console.log(maxCount)
-  console.log(lastID)
-  console.log(maxIterations)
+  const cache = new Cache({ capacity: 500000000,  namespace: environment.commandName });
+  const cacheDir = `${environment.supportPath}/com.raycast.api.cache/${environment.commandName}`;
   
+  const pageLimit = 500;
+  const maxCount = await fileModel.find().count();
+  const maxIterations = Math.floor(maxCount / pageLimit);
+
+  // const lastID = await fileModel.findOne({}, {_id: 1})
+  let lastID = "000000000000000000000000";
+
   for (let idx = 0; idx <= maxIterations; idx++) {
     const filesChunk: File[] = await fileModel.find<File>({ _id: { $gt: lastID } }).limit(pageLimit);
-    lastID = filesChunk[filesChunk.length-1]._id ?? ''
-    console.log("Index: " + idx + " - _id: " + lastID)
-    console.log("Read: " + filesChunk.length)
+    lastID = filesChunk[filesChunk.length - 1]._id ?? "";
+    cache.set(`chunk${idx}`, JSON.stringify(filesChunk));
   }
-
-
-  // cache.set("files", JSON.stringify(await fileModel.find()));
-  //cache.set("files", JSON.stringify(filesChunk));
-  const cached = cache.get("files")
-
-  mongoose.disconnect();
   
-  const cachedFiles: File[] = cached ? JSON.parse(finalCache) : [];
+  mongoose.disconnect();
+
+  const cacheFiles = await readdir(cacheDir, "utf8")
+  const finalCacheString = cacheFiles.reduce( (acc: string, curr: string) => {
+    const temp = readFile(`${cacheDir}/${curr}`, "utf8")
+    console.log(temp)
+    return acc
+  }, "")
+
+  console.log(finalCacheString)
+
+  const cached = cache.get("files");
+
+  // const cachedFiles: File[] = cached ? JSON.parse(cached) : [];
+  const cachedFiles: File[] = cached ? [] : [];
 
   // ----------------------------------------------------------------------------------
 
