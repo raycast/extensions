@@ -48,6 +48,9 @@ Trigger Commands, Manage or Install extensions of Visual Studio Code directly fr
 For some command it is required to install [Raycast for VSCode](vscode:extension/tonka3000.raycast).
 The commands will also give you the possibility to install it directly from the command.
 
+Some commands/actions will trigger a URL schema of VSCode. You will get a prompt will from VSCode to inform you about that.
+You can configure VSCode to don't show this prompt again.
+
 ## Limitations
 
 VSCode does not provide aliases for all it's commands and therefore some commands are shown via ID and not it's internal alias.
