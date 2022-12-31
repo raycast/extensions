@@ -25,10 +25,7 @@ function SearchList(): JSX.Element {
   }
 
   return (
-    <List
-      isLoading={isValidating}
-      searchBarPlaceholder="Search by name..."
-    >
+    <List isLoading={isValidating} searchBarPlaceholder="Search by name...">
       <List.Section title="Repositories" subtitle={data?.length.toString()}>
         {data?.map(toRepository).map((repo: Repository) => (
           <SearchListItem key={repo.uuid} repo={repo} />
@@ -36,7 +33,7 @@ function SearchList(): JSX.Element {
       </List.Section>
     </List>
   );
-};
+}
 
 const SearchListLazy: React.FC = () => {
   const [query, setQuery] = useState("");
