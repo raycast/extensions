@@ -22,22 +22,20 @@ export default function Command() {
   const [searchResults, setSearchResults] = useState<ReactIcon[]>([]);
 
   useEffect(() => {
-    setLoading(true);
     if (gridDropdown) {
-      setPinnedIcons(getPinnedIcons(gridDropdown));
-      setRecentIcons(getRecentIcons(gridDropdown));
-      setCategory(loadCategory(gridDropdown));
-    } else {
-      setPinnedIcons([]);
-      setRecentIcons([]);
-      setCategory(undefined);
-      if (searchText && searchText.length >= 2) {
+      setLoading(true);
+      if (gridDropdown === "all") {
+        setPinnedIcons([]);
+        setRecentIcons([]);
+        setCategory({ id: "all", title: "All Categories", icons: [] });
         setSearchResults(searchIcons(searchText));
       } else {
-        setSearchResults([]);
+        setPinnedIcons(getPinnedIcons(gridDropdown));
+        setRecentIcons(getRecentIcons(gridDropdown));
+        setCategory(loadCategory(gridDropdown));
       }
+      setLoading(false);
     }
-    setLoading(false);
   }, [refresh, gridDropdown, searchText]);
 
   return (
@@ -50,7 +48,7 @@ export default function Command() {
       filtering={category !== undefined}
       searchBarAccessory={
         <Grid.Dropdown tooltip="React Icons Category" storeValue onChange={setGridDropdown}>
-          <Grid.Dropdown.Item title={"All Categories"} value={""} />
+          <Grid.Dropdown.Item title={"All Categories"} value={"all"} />
           <Grid.Dropdown.Section>
             {categories.map((category: string) => (
               <Grid.Dropdown.Item key={category} title={formatCategoryTitle(category)} value={category} />
@@ -80,24 +78,27 @@ export default function Command() {
           </Grid.Section>
         </React.Fragment>
       )}
-      {category ? (
-        <Grid.Section title={formatCategoryTitle(category.title)}>
-          {category.icons.map((icon: string) => (
-            <ReactIcon key={icon} icon={icon} category={category} refresh={refreshIcons} />
-          ))}
-        </Grid.Section>
-      ) : searchResults.length > 0 ? (
-        searchResults.map((reactIcon: ReactIcon, index: number) => (
-          <ReactIcon
-            key={index}
-            icon={reactIcon.icon}
-            category={{ id: reactIcon.category.id, title: reactIcon.category.title, icons: [] }}
-            refresh={refreshIcons}
-          />
-        ))
-      ) : (
-        <Grid.EmptyView title={"Search for all React Icons"} icon={"../assets/react-icons.svg"} />
-      )}
+      {category &&
+        (category.id === "all" ? (
+          searchResults.length > 0 ? (
+            searchResults.map((reactIcon: ReactIcon, index: number) => (
+              <ReactIcon
+                key={index}
+                icon={reactIcon.icon}
+                category={{ id: reactIcon.category.id, title: reactIcon.category.title, icons: [] }}
+                refresh={refreshIcons}
+              />
+            ))
+          ) : (
+            <Grid.EmptyView title={"Search for all React Icons"} icon={"../assets/react-icons.svg"} />
+          )
+        ) : (
+          <Grid.Section title={formatCategoryTitle(category.title)}>
+            {category.icons.map((icon: string) => (
+              <ReactIcon key={icon} icon={icon} category={category} refresh={refreshIcons} />
+            ))}
+          </Grid.Section>
+        ))}
     </Grid>
   );
 }
@@ -145,7 +146,7 @@ const ReactIcon = (props: IconProps) => {
             title={action === "Copy" ? "Copy SVG to Clipboard" : "Paste SVG"}
             shortcut={{ modifiers: ["cmd", "shift"], key: action === "Copy" ? "c" : "v" }}
             icon={Icon.CodeBlock}
-            onAction={async () => onAction(getSVG(path), "SVG")}
+            onAction={async () => onAction(await getSVG(path), "SVG")}
           />
           <IconStorageActions {...props} />
         </ActionPanel>

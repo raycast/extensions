@@ -1,5 +1,6 @@
 import { environment } from "@raycast/api";
 import { Category, ReactIcon } from "./types";
+import fetch from "node-fetch";
 import fs from "fs";
 
 export const categories: string[] = JSON.parse(
@@ -7,16 +8,19 @@ export const categories: string[] = JSON.parse(
 );
 
 export const loadCategory = (category: string): Category => {
-  const path = `${environment.assetsPath}/categories/${category}/icons.json`;
+  const path = `${environment.assetsPath}/icons/${category}.json`;
   return JSON.parse(fs.readFileSync(path, { encoding: "utf-8" }));
 };
 
 export const getPath = (icon: string, category: string): string => {
-  return `${environment.assetsPath}/categories/${category}/${icon}.svg`;
+  return encodeURI(
+    `https://raw.githubusercontent.com/yugtesh/react-icons/05c613b08465a76b2340baffb1c8614d0f30b761/${category}/${icon}.svg`
+  );
 };
 
-export const getSVG = (path: string): string => {
-  return fs.readFileSync(path, { encoding: "utf-8" });
+export const getSVG = async (path: string): Promise<string> => {
+  const response = await fetch(path);
+  return await response.text();
 };
 
 export const formatCategoryTitle = (title: string): string => {
@@ -24,17 +28,21 @@ export const formatCategoryTitle = (title: string): string => {
 };
 
 export const searchIcons = (searchText: string): ReactIcon[] => {
-  searchText = searchText.replaceAll(" ", "").toLowerCase();
-  const results: ReactIcon[] = [];
-  categories.forEach((categoryName) => {
-    const category = loadCategory(categoryName);
-    const id = category.id;
-    const title = category.title;
-    category.icons.forEach((icon) => {
-      if (icon.toLowerCase().includes(searchText)) {
-        results.push({ icon, category: { id, title } });
-      }
+  if (searchText.length >= 2) {
+    searchText = searchText.replaceAll(" ", "").toLowerCase();
+    const results: ReactIcon[] = [];
+    categories.forEach((categoryName) => {
+      const category = loadCategory(categoryName);
+      const id = category.id;
+      const title = category.title;
+      category.icons.forEach((icon) => {
+        if (icon.toLowerCase().includes(searchText)) {
+          results.push({ icon, category: { id, title } });
+        }
+      });
     });
-  });
-  return results;
+    return results;
+  } else {
+    return [];
+  }
 };

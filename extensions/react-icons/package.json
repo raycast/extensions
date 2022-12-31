@@ -40,7 +40,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.45.2",
-    "htmlparser": "^1.7.7"
+    "htmlparser": "^1.7.7",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
