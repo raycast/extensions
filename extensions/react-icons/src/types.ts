@@ -4,6 +4,14 @@ export type Category = {
   icons: string[];
 };
 
+export type ReactIcon = {
+  icon: string;
+  category: {
+    id: string;
+    title: string;
+  };
+};
+
 export type Preferences = {
   action: "Copy" | "Paste";
 };

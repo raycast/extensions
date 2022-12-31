@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { Category } from "./types";
+import { Category, ReactIcon } from "./types";
 import fs from "fs";
 
 export const categories: string[] = JSON.parse(
@@ -21,4 +21,20 @@ export const getSVG = (path: string): string => {
 
 export const formatCategoryTitle = (title: string): string => {
   return title.includes("Icons") ? title : `${title} Icons`;
+};
+
+export const searchIcons = (searchText: string): ReactIcon[] => {
+  searchText = searchText.replaceAll(" ", "").toLowerCase();
+  const results: ReactIcon[] = [];
+  categories.forEach((categoryName) => {
+    const category = loadCategory(categoryName);
+    const id = category.id;
+    const title = category.title;
+    category.icons.forEach((icon) => {
+      if (icon.toLowerCase().includes(searchText)) {
+        results.push({ icon, category: { id, title } });
+      }
+    });
+  });
+  return results;
 };

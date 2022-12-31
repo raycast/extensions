@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { ActionPanel, Action, Grid, Icon, Color, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { IconStorageActions, getPinnedIcons, getRecentIcons, getPinnedMovement, addRecentIcon } from "./storage";
-import { categories, loadCategory, getPath, getSVG, formatCategoryTitle } from "./utils";
-import { Category, IconProps, Preferences } from "./types";
+import { categories, loadCategory, getPath, getSVG, formatCategoryTitle, searchIcons } from "./utils";
+import { Category, IconProps, Preferences, ReactIcon } from "./types";
 
 const { action }: Preferences = getPreferenceValues();
 
 export default function Command() {
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchText, setSearchText] = useState<string>("");
 
-  const [dropdown, setDropdown] = useState<string>();
+  const [gridDropdown, setGridDropdown] = useState<string>();
   const [category, setCategory] = useState<Category>();
 
   const [pinnedIcons, setPinnedIcons] = useState<string[]>([]);
@@ -18,26 +19,43 @@ export default function Command() {
   const [refresh, setRefresh] = useState(false);
   const refreshIcons = () => setRefresh(!refresh);
 
+  const [searchResults, setSearchResults] = useState<ReactIcon[]>([]);
+
   useEffect(() => {
-    if (dropdown) {
-      setPinnedIcons(getPinnedIcons(dropdown));
-      setRecentIcons(getRecentIcons(dropdown));
-      setCategory(loadCategory(dropdown));
+    setLoading(true);
+    if (gridDropdown) {
+      setPinnedIcons(getPinnedIcons(gridDropdown));
+      setRecentIcons(getRecentIcons(gridDropdown));
+      setCategory(loadCategory(gridDropdown));
+    } else {
+      setPinnedIcons([]);
+      setRecentIcons([]);
+      setCategory(undefined);
+      if (searchText && searchText.length >= 2) {
+        setSearchResults(searchIcons(searchText));
+      } else {
+        setSearchResults([]);
+      }
     }
-  }, [refresh, dropdown]);
+    setLoading(false);
+  }, [refresh, gridDropdown, searchText]);
 
   return (
     <Grid
+      isLoading={loading}
       columns={8}
       inset={Grid.Inset.Medium}
-      isLoading={category === undefined}
       onSearchTextChange={setSearchText}
-      filtering={true}
+      searchBarPlaceholder={"Search for React Icons"}
+      filtering={category !== undefined}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="React Icons Category" storeValue onChange={setDropdown}>
-          {categories.map((category: string) => (
-            <Grid.Dropdown.Item key={category} title={formatCategoryTitle(category)} value={category} />
-          ))}
+        <Grid.Dropdown tooltip="React Icons Category" storeValue onChange={setGridDropdown}>
+          <Grid.Dropdown.Item title={"All Categories"} value={""} />
+          <Grid.Dropdown.Section>
+            {categories.map((category: string) => (
+              <Grid.Dropdown.Item key={category} title={formatCategoryTitle(category)} value={category} />
+            ))}
+          </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
     >
@@ -62,12 +80,23 @@ export default function Command() {
           </Grid.Section>
         </React.Fragment>
       )}
-      {category && (
+      {category ? (
         <Grid.Section title={formatCategoryTitle(category.title)}>
-          {category.icons.map((icon: string, index: number) => (
-            <ReactIcon key={index} icon={icon} category={category} refresh={refreshIcons} />
+          {category.icons.map((icon: string) => (
+            <ReactIcon key={icon} icon={icon} category={category} refresh={refreshIcons} />
           ))}
         </Grid.Section>
+      ) : searchResults.length > 0 ? (
+        searchResults.map((reactIcon: ReactIcon, index: number) => (
+          <ReactIcon
+            key={index}
+            icon={reactIcon.icon}
+            category={{ id: reactIcon.category.id, title: reactIcon.category.title, icons: [] }}
+            refresh={refreshIcons}
+          />
+        ))
+      ) : (
+        <Grid.EmptyView title={"Search for all React Icons"} icon={"../assets/react-icons.svg"} />
       )}
     </Grid>
   );
@@ -75,7 +104,7 @@ export default function Command() {
 
 const ReactIcon = (props: IconProps) => {
   const { icon, category, pinned, recent, refresh } = props;
-  const id = `${pinned && "pinned"}${recent && "recent"}${icon}}`;
+  const id = `${pinned ? "pinned-" : ""}${recent ? "recent-" : ""}${category.id}-${icon}}`;
   const path = getPath(icon, category.title);
 
   const onAction = async (content: string, message?: string) => {
