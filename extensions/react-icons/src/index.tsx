@@ -45,7 +45,7 @@ export default function Command() {
       inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={"Search for React Icons"}
-      filtering={category !== undefined}
+      filtering={category?.id !== "all"}
       searchBarAccessory={
         <Grid.Dropdown tooltip="React Icons Category" storeValue onChange={setGridDropdown}>
           <Grid.Dropdown.Item title={"All Categories"} value={"all"} />
