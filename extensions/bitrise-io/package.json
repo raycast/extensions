@@ -33,6 +33,12 @@
       "title": "Start Build",
       "description": "Start a new Bitrise build",
       "mode": "view"
+    },
+    {
+      "name": "steps",
+      "title": "Search Step Library",
+      "description": "Search Bitrise steps available in the Step Library",
+      "mode": "view"
     }
   ],
   "preferences": [

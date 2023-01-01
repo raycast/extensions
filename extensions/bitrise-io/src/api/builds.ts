@@ -46,7 +46,7 @@ export async function startBuild(appSlug: AppSlug, params: BuildParams): Promise
       hook_info: {
         type: "bitrise",
       },
-      triggered_by: "Bitrise Raycast extension"
+      triggered_by: "Bitrise Raycast extension",
     }),
     headers: {
       Authorization: getToken(),

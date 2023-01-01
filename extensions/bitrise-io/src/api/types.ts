@@ -1,5 +1,6 @@
 export type AppSlug = string;
 export type OwnerSlug = string;
+export type StepID = string;
 
 export enum BuildStatus {
   InProgress = 0,
@@ -69,4 +70,23 @@ export interface BuildParams {
 export interface BuildTriggerResponse {
   build_number: number;
   build_url: string;
+}
+
+export interface StepCollection {
+  updatedAt: Date;
+  steps: Step[];
+}
+
+export enum StepMaintainer {
+  Bitrise = "bitrise",
+  Community = "community",
+  Verified = "verified",
+}
+
+export interface Step {
+  id: StepID;
+  maintainer: StepMaintainer;
+  iconURL: string;
+  title: string;
+  publishedAt: Date;
 }
