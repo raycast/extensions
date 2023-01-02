@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simctl",
   "title": "Simulator Control",
-  "description": "Control apple simulator devices",
+  "description": "Control Apple Simulator devices",
   "icon": "command-icon.png",
   "author": "noppefoxwolf",
   "categories": [
