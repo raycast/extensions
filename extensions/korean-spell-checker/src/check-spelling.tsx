@@ -12,12 +12,6 @@ interface RootProps {
 export default function CheckSpellingRoot(props: RootProps) {
   const draftText = props.draftValues?.text;
   const [text, setText] = useState(draftText || "");
-  const [charCount, setCharCount] = useState(() => {
-    if (draftText) {
-      return draftText.length.toString();
-    }
-    return "0";
-  });
   const [textAreaError, setTextAreaError] = useState<string | undefined>();
 
   useEffect(() => {
@@ -56,7 +50,6 @@ export default function CheckSpellingRoot(props: RootProps) {
 
   function handleChange(text: string) {
     setText(text);
-    setCharCount(text.length.toString());
 
     if (text.length > 0) {
       setTextAreaError(undefined);
@@ -87,7 +80,7 @@ export default function CheckSpellingRoot(props: RootProps) {
         error={textAreaError}
         onChange={handleChange}
       />
-      <Form.Description title="Characters:" text={charCount} />
+      <Form.Description title="Characters:" text={text.length.toString()} />
     </Form>
   );
 }

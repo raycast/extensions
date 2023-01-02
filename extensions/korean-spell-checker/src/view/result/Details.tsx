@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 import { CheckerResponse } from "@type";
 import { ListItem, Formatter, ResultManager } from "@view/result";
 
@@ -27,9 +25,7 @@ function getFlattedErrInfos(data: CheckerResponse[]) {
 }
 
 export default function Details({ data }: DetailsProps) {
-  const errInfos = useMemo(() => {
-    return getFlattedErrInfos(data);
-  }, [data]);
+  const errInfos = getFlattedErrInfos(data);
 
   const combinedTextChunks = data.reduce((text, curr): string => {
     return text + curr.userText;
