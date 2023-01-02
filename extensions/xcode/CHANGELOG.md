@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Code Snippets] - 2022-12-30
+## [Code Snippets] - 2023-01-02
 
 - Added "Create Code Snippet" command to create a new Xcode Code Snippet.
 - Added "Search Code Snippets" command to search and edit your Xcode Code Snippets.
