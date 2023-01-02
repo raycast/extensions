@@ -62,6 +62,7 @@ export default function ProjectSubmenu({
         (projects || []).map((project) => (
           <Action
             key={project.id}
+            autoFocus={project.id === issue.project?.id}
             title={`${project.name} (${projectStatusText[project.state]})`}
             icon={getProjectIcon(project)}
             onAction={() => setProject(project)}

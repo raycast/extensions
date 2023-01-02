@@ -17,6 +17,7 @@ const CardSearch = () => {
     refreshRecents();
     setResultCards((prevCards) => {
       if (!prevCards) return;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [cardId]: _, ...keepCards } = prevCards;
       return keepCards;
     });

@@ -1,8 +1,28 @@
 import { PathLike } from "fs";
 import { stat } from "fs/promises";
 
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, getApplications, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+
+/**
+ * Check if Tim is installed
+ */
+export async function checkIfTimInstalled(): Promise<boolean> {
+  const apps = await getApplications();
+  const timInstalled = apps.find((app) => app.bundleId === "neat.software.Tim");
+
+  return timInstalled !== undefined;
+}
+
+/**
+ * Show not installed toast
+ */
+export async function showNotInstalledToast() {
+  showToast({
+    title: "Tim is not installed",
+    style: Toast.Style.Failure,
+  });
+}
 
 /**
  * Builds AppleScript to ensure Tim is running and then wraps the passed command(s).

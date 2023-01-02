@@ -64,8 +64,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2",
-    "fs-extra": "^10.0.1",
+    "@raycast/api": "^1.44.0",
+    "fs-extra": "^10.1.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

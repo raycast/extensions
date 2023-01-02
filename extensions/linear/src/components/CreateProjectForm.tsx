@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, open, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
 import useTeams from "../hooks/useTeams";
@@ -20,8 +20,8 @@ export type CreateProjectValues = {
   leadId: string;
   memberIds: string[];
   milestoneId: string;
-  startDate: Date;
-  targetDate: Date;
+  startDate: Date | null;
+  targetDate: Date | null;
 };
 
 export default function CreateProjectForm({ draftValues }: { draftValues?: CreateProjectValues }) {
@@ -33,8 +33,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
       try {
         const { success, project } = await linearClient.projectCreate({
@@ -70,8 +69,8 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
             leadId: "",
             memberIds: [],
             milestoneId: "",
-            startDate: undefined,
-            targetDate: undefined,
+            startDate: null,
+            targetDate: null,
           });
           focus("teamIds");
         }

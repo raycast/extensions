@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
- * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 00:53
+ * @lastEditor: Tisfeng
+ * @lastEditTime: 2022-10-30 23:12
  * @fileName: deepL.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -96,7 +96,9 @@ export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promi
                 .catch((err) => reject(err));
             });
           }
+          return;
         }
+
         if (errorCode === 403) {
           errorInfo.message = "Authorization failed"; // Authorization failed. Please supply a valid auth_key parameter.
         }

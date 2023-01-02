@@ -2,19 +2,10 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { AppContextProvider, useAppContext } from "./context";
 import RunningTimeEntry from "./components/RunningTimeEntry";
-import {
-  ActionPanel,
-  clearSearchBar,
-  Icon,
-  List,
-  PushAction,
-  showToast,
-  SubmitFormAction,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
-import { storage } from "./storage";
+import { storage, refreshStorage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 
@@ -33,7 +24,7 @@ function ListView() {
   }, [] as TimeEntry[]);
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
-    await showToast(ToastStyle.Animated, "Starting timer...");
+    await showToast(Toast.Style.Animated, "Starting timer...");
     try {
       await toggl.createTimeEntry({
         projectId: timeEntry.pid,
@@ -42,10 +33,10 @@ function ListView() {
         billable: timeEntry.billable,
       });
       await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, "Time entry resumed");
+      await showToast(Toast.Style.Success, "Time entry resumed");
       await clearSearchBar({ forceScrollToTop: true });
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to resume time entry");
+      await showToast(Toast.Style.Failure, "Failed to resume time entry");
     }
   }
 
@@ -61,7 +52,7 @@ function ListView() {
                 icon={"command-icon.png"}
                 actions={
                   <ActionPanel>
-                    <PushAction
+                    <Action.Push
                       title="Create Time Entry"
                       icon={{ source: Icon.Clock }}
                       target={
@@ -70,6 +61,14 @@ function ListView() {
                         </AppContextProvider>
                       }
                     />
+                    <ActionPanel.Section>
+                      <Action.SubmitForm
+                        title="Refresh"
+                        icon={{ source: Icon.RotateClockwise }}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onSubmit={refreshStorage}
+                      />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
@@ -87,10 +86,15 @@ function ListView() {
                     icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
                     actions={
                       <ActionPanel>
-                        <SubmitFormAction
+                        <Action.SubmitForm
                           title="Resume Time Entry"
                           onSubmit={() => resumeTimeEntry(timeEntry)}
                           icon={{ source: Icon.Clock }}
+                        />
+                        <Action.SubmitForm
+                          title="Refresh"
+                          icon={{ source: Icon.RotateClockwise }}
+                          onSubmit={refreshStorage}
                         />
                       </ActionPanel>
                     }

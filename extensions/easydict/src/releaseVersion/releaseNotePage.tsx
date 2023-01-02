@@ -10,7 +10,6 @@
 
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useState } from "react";
-import { releaseNote } from "./releaseNote";
 import { Easydict } from "./versionInfo";
 
 /**
@@ -19,10 +18,11 @@ import { Easydict } from "./versionInfo";
  * @fallbackMarkdown The placeholder markdown content before fetching from GitHub.
  */
 export default function ReleaseNotesPage(props: { fallbackMarkdown?: string }) {
-  const [releaseMarkdown, setReleaseMarkdown] = useState<string>(releaseNote);
-
   console.log(`call ReleaseDetail function`);
   const easydict = new Easydict();
+
+  const [releaseMarkdown, setReleaseMarkdown] = useState<string>(easydict.releaseMarkdown);
+
   easydict.fetchReleaseMarkdown().then((markdown) => {
     setReleaseMarkdown(markdown);
   });

@@ -1,4 +1,4 @@
-import { useEffect, useState, EffectCallback, DependencyList } from "react";
+import { DependencyList, EffectCallback, useEffect, useState } from "react";
 import { XcodeSwiftPackageMetadata } from "../../models/swift-package/xcode-swift-package-metadata.model";
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
 import { Action, ActionPanel, Clipboard, Form, showToast, Toast, useNavigation } from "@raycast/api";
@@ -11,7 +11,7 @@ export function XcodeAddSwiftPackageForm(): JSX.Element {
   // Use navigation
   const navigation = useNavigation();
   // Use Swift Package Url State
-  const [swiftPackageUrl, setSwiftPackageUrl] = useState<string>("");
+  const [swiftPackageUrl, setSwiftPackageUrl] = useState("");
   // Use Swift Package Url State
   const [swiftPackageMetadata, setSwiftPackageMetadata] = useState<XcodeSwiftPackageMetadata | undefined>(undefined);
   // Use Effect to read current Clipboard contents once

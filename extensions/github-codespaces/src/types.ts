@@ -7,11 +7,12 @@ export type Machines =
 export type Codespace = Codespaces["codespaces"][0];
 export type Machine = Machines["machines"][0];
 
-export type Client = "vscode" | "web";
+export type Client = "vscode" | "web" | "ssh";
 
 export const clientNames: {
   [key in Client]: string;
 } = {
   vscode: useInsiders ? "Visual Studio Code Insiders" : "Visual Studio Code",
   web: "web client",
+  ssh: "SSH",
 };

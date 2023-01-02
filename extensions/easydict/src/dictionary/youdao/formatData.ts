@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 00:02
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 21:56
+ * @lastEditTime: 2022-10-23 11:18
  * @fileName: formatData.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -132,8 +132,7 @@ export function updateYoudaoDictionaryDisplay(
   if (modernChineseDict?.length) {
     const modernChineseDictItems: ListDisplayItem[] = [];
     modernChineseDict.forEach((phoneticDict) => {
-      const word = phoneticDict.word;
-      const placeholder = `[${word}]`;
+      const placeholder = `~`;
       console.log(`forms: ${JSON.stringify(phoneticDict, null, 4)}`);
       const pinyin = phoneticDict.pinyin ? `${phoneticDict.pinyin}` : "";
       const accessoryItem = translationItem.accessoryItem;
@@ -563,7 +562,7 @@ export function formateYoudaoWebDictionaryModel(model: YoudaoWebDictionaryModel)
 /**
  * Get Youdao from to language.
  */
-export function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
+function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: string, to: string] {
   let from = chineseLanguageItem.youdaoLangCode;
   let to = chineseLanguageItem.youdaoLangCode;
   // * Note: guessLanguage may be incorrect, eg: 鶗鴂 --> eng
@@ -579,7 +578,7 @@ export function getFromToLanguage(model: YoudaoWebDictionaryModel): [from: strin
 /**
  * Get word phonetic display text. eg: gʊd --> / gʊd /
  */
-export function getPhoneticDisplayText(phonetic: string | undefined): string | undefined {
+function getPhoneticDisplayText(phonetic: string | undefined): string | undefined {
   const phoneticText = phonetic ? `/ ${phonetic} /` : undefined;
   return phoneticText;
 }
@@ -613,21 +612,21 @@ export function formatNewChineseDict(dataList: ModernChineseDataList[]): ModernC
 }
 
 /**
- * Remove html tag.
+ * Remove self html tag.
  */
-export function removeHtmlTag(text: string): string {
-  // return text.replaceAll(/<self>|<\/self>/g, "");
-  return text.replace(/<[^>]+>/g, "");
+function removeSelfHtmlTag(text: string): string {
+  // return text.replace(/<[^>]+>/g, "");
+  return text.replaceAll(/<self>|<\/self>/g, "");
 }
 
 /**
  * Remove examples html tag.
  */
-export function removeExamplesHtmlTag(examples: string[] | undefined): string[] {
+function removeExamplesHtmlTag(examples: string[] | undefined): string[] {
   const newExamples: string[] = [];
   if (examples?.length) {
     for (const example of examples) {
-      const newExmple = removeHtmlTag(example);
+      const newExmple = removeSelfHtmlTag(example);
       newExamples.push(newExmple);
     }
   }

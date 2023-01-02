@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
- * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-12 21:52
+ * @lastEditor: Tisfeng
+ * @lastEditTime: 2022-11-01 22:09
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -11,7 +11,6 @@
 import { LocalStorage } from "@raycast/api";
 import axios from "axios";
 import { requestCostTime } from "../axiosConfig";
-import { releaseNote } from "./releaseNote";
 
 const versionInfoKey = "EasydictVersionInfoKey";
 const githubUrl = "https://github.com";
@@ -26,14 +25,30 @@ export class Easydict {
   static author = "tisfeng";
   static repo = "Raycast-Easydict";
 
-  // new version info
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.5.0";
-  buildNumber = 15;
-  versionDate = "2022-10-12";
-  isNeedPrompt = true;
+  version = "2.6.2";
+  buildNumber = 18;
+  versionDate = "2022-11-02";
+  isNeedPrompt = false;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
-  releaseMarkdown = releaseNote;
+
+  releaseMarkdown = `
+## [v${this.version}] - ${this.versionDate}
+
+### 🐞 修复
+
+- 修复了 DeepL 翻译额度超支时会有错误提示问题。
+- 更新法语朗读声音。
+
+#### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
+
+---
+
+### 🐞 Fixes
+
+- Fixed the problem that an error prompt will appear when DeepL translation quota is exceeded.
+- Updated French say voice.
+`;
 
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

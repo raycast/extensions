@@ -1,23 +1,19 @@
-import { Action, getPreferenceValues, Icon, Color } from "@raycast/api";
-import React, { useState, useEffect, useMemo } from "react";
+import { Action, Icon, Color } from "@raycast/api";
+import React, { useState, useEffect } from "react";
 
-import { Note, SearchArguments, SearchNotePreferences, Vault } from "../../utils/interfaces";
+import { Note, SearchArguments, Vault } from "../../utils/interfaces";
 import { NoteList } from "./NoteList";
 import { getPinnedNotes, migratePinnedNotes, resetPinnedNotes } from "../../utils/pinNoteUtils";
-import { filterNotes } from "../../utils/search";
-import { MAX_RENDERED_NOTES, NoteAction } from "../../utils/constants";
 import { NoteActions, OpenNoteActions } from "../../utils/actions";
+import { NoteAction } from "../../utils/constants";
 
 export function NoteListPinned(props: { vault: Vault; showTitle: boolean; searchArguments: SearchArguments }) {
-  const { searchContent } = getPreferenceValues<SearchNotePreferences>();
   const { showTitle, vault, searchArguments } = props;
 
   migratePinnedNotes();
 
   const [pinnedNotes, setPinnedNotes] = useState<Note[]>([]);
   const [allNotes, setAllNotes] = useState<Note[]>([]);
-  const [input, setInput] = useState<string>(searchArguments.searchArgument || "");
-  const list = useMemo(() => filterNotes(pinnedNotes, input, searchContent), [pinnedNotes, input]);
 
   function onDelete(note: Note) {
     setPinnedNotes(pinnedNotes.filter((n) => n.path !== note.path));
@@ -41,8 +37,8 @@ export function NoteListPinned(props: { vault: Vault; showTitle: boolean; search
   function actions(note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) {
     return (
       <React.Fragment>
-        <OpenNoteActions note={note} vault={vault} actionCallback={actionCallback} />
-        <NoteActions note={note} vault={vault} actionCallback={actionCallback} />
+        <OpenNoteActions note={note} notes={allNotes} vault={vault} actionCallback={actionCallback} />
+        <NoteActions note={note} notes={allNotes} vault={vault} actionCallback={actionCallback} />
         {resetPinnedNotesAction()}
       </React.Fragment>
     );
@@ -58,7 +54,7 @@ export function NoteListPinned(props: { vault: Vault; showTitle: boolean; search
   return (
     <NoteList
       title={showTitle ? "Pinned Notes for " + vault.name : ""}
-      notes={list.slice(0, MAX_RENDERED_NOTES)}
+      notes={pinnedNotes}
       allNotes={allNotes}
       setNotes={setPinnedNotes}
       isLoading={pinnedNotes === undefined}
@@ -66,7 +62,6 @@ export function NoteListPinned(props: { vault: Vault; showTitle: boolean; search
       searchArguments={searchArguments}
       action={actions}
       onDelete={onDelete}
-      onSearchChange={setInput}
     />
   );
 }

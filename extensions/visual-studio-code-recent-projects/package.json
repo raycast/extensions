@@ -45,6 +45,24 @@
       ]
     },
     {
+      "name": "layout",
+      "title": "View Layout",
+      "type": "dropdown",
+      "required": false,
+      "default": "list",
+      "description": "Select the layout of the view",
+      "data": [
+        {
+          "value": "list",
+          "title": "List"
+        },
+        {
+          "value": "grid",
+          "title": "Grid"
+        }
+      ]
+    },
+    {
       "name": "keepSectionOrder",
       "type": "checkbox",
       "title": "Advanced",

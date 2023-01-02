@@ -61,6 +61,7 @@ function ActiveCycle() {
         : {})}
       isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
       searchBarPlaceholder="Filter by key, title, status, assignee or priority"
+      filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView
         title="No issues"

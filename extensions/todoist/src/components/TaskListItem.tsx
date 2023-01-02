@@ -2,6 +2,7 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
+import removeMarkdown from "remove-markdown";
 import { ViewMode } from "../types";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
 import { priorities } from "../constants";
@@ -57,10 +58,10 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
     });
   }
 
-  if (task.labelIds.length > 0) {
+  if (task.labels && task.labels.length > 0) {
     additionalListItemProps.accessories.push({
       icon: { source: "tag.svg", tintColor: Color.SecondaryText },
-      tooltip: `${task.labelIds.length} label${task.labelIds.length === 1 ? "" : "s"}`,
+      tooltip: `${task.labels.length} label${task.labels.length === 1 ? "" : "s"}`,
     });
   }
 
@@ -81,11 +82,11 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
 
   return (
     <List.Item
-      title={task.content}
+      title={removeMarkdown(task.content)}
       subtitle={task.description}
       {...additionalListItemProps}
       actions={
-        <ActionPanel>
+        <ActionPanel title={task.content}>
           <Action.Push
             title="Show Details"
             target={<TaskDetail taskId={task.id} mutateTasks={mutateTasks} />}

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readymetrics",
-  "title": "Readymetrics",
-  "description": "Lists upcoming and past check-ins in Readymetrics",
+  "title": "Ready",
+  "description": "Lists upcoming and past check-ins in Ready",
   "icon": "readymetrics-icon.png",
   "access": "public",
   "author": "cfeigenbutz",
@@ -14,8 +14,8 @@
     {
       "name": "list",
       "title": "List Check-ins",
-      "subtitle": "Readymetrics",
-      "description": "Show upcoming and past check-ins in Readymetrics.",
+      "subtitle": "Ready",
+      "description": "Show upcoming and past check-ins in Ready.",
       "mode": "view"
     }
   ],
@@ -25,9 +25,9 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Your Readymetrics API key.",
-      "link": "https://readymetrics.com",
-      "placeholder": "Enter your Readymetrics API key."
+      "description": "Your Ready API key.",
+      "link": "https://ready.app",
+      "placeholder": "Enter your Ready API key."
     }
   ],
   "dependencies": {

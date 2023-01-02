@@ -15,5 +15,16 @@ export const annotations = [
       },
     ],
   },
+  {
+    info: {
+      name: "Text Statistics",
+      id: "build_in_1666095794508",
+      icon: "line-chart-16",
+      source: "Build-in",
+      visibility: true,
+      tag: ["Annotation"],
+    },
+    tactions: [{ type: "Live Template", content: ["$STATISTICS$"] }],
+  },
 ];
 export const ANNOTATIONS_SHORTCUTS = JSON.stringify(annotations);

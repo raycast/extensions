@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scaleway",
+  "title": "Scaleway",
+  "description": "Quick access to your Scaleway services",
+  "icon": "scaleway.png",
+  "author": "flozdra",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "containers",
+      "title": "Containers",
+      "description": "Get information about containers",
+      "mode": "view",
+      "icon": "icons/containers.png"
+    },
+    {
+      "name": "instances",
+      "title": "Instances",
+      "description": "Get information about instances",
+      "mode": "view",
+      "icon": "icons/instances.png"
+    },
+    {
+      "name": "databases",
+      "title": "Databases",
+      "description": "Get information about databases",
+      "mode": "view",
+      "icon": "icons/databases.png"
+    },
+    {
+      "name": "redis",
+      "title": "Redis",
+      "description": "Get information about redis clusters",
+      "mode": "view",
+      "icon": "icons/redis.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.43.1",
+    "@raycast/utils": "^1.4.10",
+    "@scaleway/sdk": "^0.1.0-beta.22",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  },
+  "preferences": [
+    {
+      "name": "accessKey",
+      "title": "Access Key",
+      "description": "You need an access key and a secret key to connect to Scaleway API. \nGenerate your token at the following address: \nhttps://console.scaleway.com/project/credentials",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "secretKey",
+      "title": "Secret Key",
+      "description": "The secret key is the value that can be used to authenticate against the API (the value used in X-Auth-Token HTTP-header). \nThe secret key MUST remain secret and not given to anyone or published online.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultRegion",
+      "title": "Default region",
+      "description": "A region is represented as a geographical area such as France (Paris) or the Netherlands (Amsterdam).\nExamples: fr-par, nl-ams",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par"
+    },
+    {
+      "name": "defaultZone",
+      "title": "Default zone",
+      "description": "A region can be split into many availability zones (AZ).\nExamples: fr-par-1, nl-ams-1",
+      "type": "textfield",
+      "required": false,
+      "default": "fr-par-1"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

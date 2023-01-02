@@ -23,6 +23,7 @@ type SpotlightSearchResult = {
   kMDItemFSCreationDate: Date;
   kMDItemContentModificationDate: Date;
   kMDItemLastUsedDate: Date;
+  kMDItemUseCount: number;
 };
 
 export type { FolderSearchPlugin, SpotlightSearchPreferences, SpotlightSearchDefinition, SpotlightSearchResult };

@@ -1,13 +1,4 @@
-import {
-  useNavigation,
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  Icon,
-  showToast,
-  ToastStyle,
-  clearSearchBar,
-} from "@raycast/api";
+import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
 import { Project } from "../toggl/types";
@@ -29,13 +20,13 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         tags: selectedTags,
         billable,
       });
-      await showToast(ToastStyle.Animated, "Starting time entry...");
+      await showToast(Toast.Style.Animated, "Starting time entry...");
       await storage.runningTimeEntry.refresh();
-      await showToast(ToastStyle.Success, "Started time entry");
+      await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to start time entry");
+      await showToast(Toast.Style.Failure, "Failed to start time entry");
     }
   }
 
@@ -59,7 +50,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Time Entry" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

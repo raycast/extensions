@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
-import { getColor } from "@doist/todoist-api-typescript";
+import { getColorByKey } from "@doist/todoist-api-typescript";
 import View from "./components/View";
 
 function Search() {
@@ -38,7 +38,7 @@ function Search() {
       return [];
     }
 
-    return projectId ? tasks.filter((task) => task.projectId === parseInt(projectId)) : tasks;
+    return projectId ? tasks.filter((task) => task.projectId === projectId) : tasks;
   }, [tasks, projectId]);
 
   const searchBarAccessory = (
@@ -50,9 +50,11 @@ function Search() {
           <List.Dropdown.Item
             key={project.id}
             title={project.name}
-            value={String(project.id)}
+            value={project.id}
             icon={
-              project.inboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColor(project.color).value }
+              project.isInboxProject
+                ? Icon.Envelope
+                : { source: Icon.List, tintColor: getColorByKey(project.color).hexValue }
             }
           />
         );

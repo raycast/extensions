@@ -43,13 +43,13 @@ export default function TaskComments({ task }: TaskCommentsProps) {
   }
 
   return (
-    <List isShowingDetail isLoading={isLoading}>
+    <List isShowingDetail isLoading={isLoading} navigationTitle={`${task.content} - Comments`}>
       {data?.map((comment, index) => (
         <List.Item
           key={comment.id}
           keywords={removeMarkdown(comment.content).split(" ")}
           title={`Comment #${index + 1}`}
-          subtitle={formatDistanceToNow(new Date(comment.posted), { addSuffix: true })}
+          subtitle={formatDistanceToNow(new Date(comment.postedAt), { addSuffix: true })}
           detail={<List.Item.Detail markdown={comment.content} />}
           actions={
             <ActionPanel>

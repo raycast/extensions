@@ -12,11 +12,19 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "command",
+      "name": "search-records",
       "icon": "salesforce.png",
-      "title": "Search Records & Reports",
+      "title": "Search Records",
       "subtitle": "Salesforce",
-      "description": "Search for Salesforce objects like accounts and contacts and dashboards and reports.",
+      "description": "Search for Salesforce records like accounts, contacts and opportunities.",
+      "mode": "view"
+    },
+    {
+      "name": "search-reports",
+      "icon": "salesforce.png",
+      "title": "Search Dashboards & Reports",
+      "subtitle": "Salesforce",
+      "description": "Search for Salesforce dashboards and reports.",
       "mode": "view"
     }
   ],

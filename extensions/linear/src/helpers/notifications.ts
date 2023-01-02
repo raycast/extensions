@@ -57,13 +57,13 @@ export function getNotificationIcon(notification: NotificationResult) {
 }
 
 const notificationTitles: Record<string, string> = {
-  [IssueNotificationType.issueAssignedToYou]: "Assigned to you",
+  [IssueNotificationType.issueAssignedToYou]: "Assigned",
   [IssueNotificationType.issueCreated]: "New issue created",
   [IssueNotificationType.issuePriorityUrgent]: "Marked as urgent",
   [IssueNotificationType.issueBlocking]: "Marked as blocking",
   [IssueNotificationType.issueUnblocked]: "Marked as unblocked",
   [IssueNotificationType.issueNewComment]: "New comment",
-  [IssueNotificationType.issueCommentMention]: "Mentioned in a comment",
+  [IssueNotificationType.issueCommentMention]: "Mentioned",
   [IssueNotificationType.issueCommentReaction]: "Reaction to a comment",
   [IssueNotificationType.issueMention]: "Mentioned in the issue's description",
   [IssueNotificationType.issueDue]: "Due soon, due, or overdue",

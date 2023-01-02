@@ -1,5 +1,9 @@
 # Font Awesome Changelog
 
+## [Added action] - 2022-11-05
+
+- Added "Copy FA Slug" action
+
 ## [Initial Version] - 2022-10-16
 
 - Removed static icons files

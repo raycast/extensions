@@ -21,6 +21,7 @@ function CreatedIssues() {
     <List
       isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe || isLoadingUsers}
       searchBarPlaceholder="Filter by key, title, status, assignee or priority"
+      filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView
         title="No issues"

@@ -4,7 +4,7 @@ import { useObsidianVaults } from "./utils/utils";
 import { NoteListObsidian } from "./components/NoteList/NoteListObsidian";
 import { VaultSelection } from "./components/VaultSelection";
 import { Vault, SearchArguments } from "./utils/interfaces";
-import { NoVaultFoundMessage } from "./components/NoVaultFoundMessage";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
 
 export default function Command(props: { arguments: SearchArguments }) {

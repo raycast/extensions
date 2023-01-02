@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-12 18:38
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 16:43
+ * @lastEditTime: 2022-10-18 10:11
  * @fileName: types.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -28,4 +28,5 @@ export interface DetectedLangModel {
   confirmed: boolean;
   detectedLanguageArray?: [string, number][]; // [['ita', 1], ['fra', 0.6]]
   result?: QueryResponse;
+  prior?: boolean; // has higher priority than other detected languages, such as has two identical detected languages.
 }

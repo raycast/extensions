@@ -63,6 +63,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ## Extension Icon
 
+{% hint style="info" %}
+We made a new icon generator tool to ease the process of creating icons for your extensions. You can find it [here](https://icon.ray.so/).
+{% endhint %}
+
 - The published extension in the Store should have a 512x512px icon in `png` format
 - The icon should look good in both light and dark themes (you can switch the theme in Raycast Preferences → Appearance)
 - If you have separate light and dark icons, refer to the `package.json` [manifest](https://developers.raycast.com/information/manifest#extension-properties) documentation on how to configure them
@@ -74,7 +78,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ## Provide README if Additional Configuration Required
 
 - If your extension requires additional setup, such as getting an API access token, enabling some preferences in other applications, or has non-trivial use cases, please provide a README file at the root folder of your extension. When a README is provided, users will see the "About This Extension" button on the preferences onboarding screen.
-- Supporting README media: Put all linked media files in a top-level `metadata` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
+- Supporting README media: Put all linked media files in a top-level `media` folder inside your extension directory. (This is different from assets that are required at runtime in your extension: they go inside the assets folder and will be bundled into your extension.)
 
 ![Onboarding button linking to the README file](../.gitbook/assets/required-preference.png)
 

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-03 10:18
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-09-27 22:44
+ * @lastEditTime: 2022-10-17 20:33
  * @fileName: baiduAPI.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -51,8 +51,17 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
 
   const type = TranslationType.Baidu;
 
-  if (!hasBaiduAppKey()) {
-    console.warn(`Baidu AppId or AppSecret is empty`);
+  const { fromLanguage, toLanguage, word } = queryWordInfo;
+  const from = getBaiduLangCode(fromLanguage);
+  const to = getBaiduLangCode(toLanguage);
+
+  if (!hasBaiduAppKey() || !from || !to) {
+    if (!hasBaiduAppKey()) {
+      console.warn(`Baidu AppId or AppSecret is empty`);
+    } else {
+      console.warn(`Baidu translate not support langauge: ${fromLanguage} to ${toLanguage}`);
+    }
+
     const result: QueryTypeResult = {
       type: type,
       result: undefined,
@@ -64,10 +73,6 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
 
   const baiduAppId = AppKeyStore.baiduAppId;
   const baiduAppSecret = AppKeyStore.baiduAppSecret;
-
-  const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const from = getBaiduLangCode(fromLanguage);
-  const to = getBaiduLangCode(toLanguage);
 
   const salt = Math.round(new Date().getTime() / 1000);
   const md5Content = baiduAppId + word + salt + baiduAppSecret;
@@ -138,9 +143,16 @@ export function requestBaiduTextTranslate(queryWordInfo: QueryWordInfo): Promise
 export async function baiduLanguageDetect(text: string): Promise<DetectedLangModel> {
   console.log(`---> start request Baidu language detect`);
 
+  const fromLanguage = autoDetectLanguageItem.baiduLangCode;
+  const toLanguage = englishLanguageItem.baiduLangCode;
+  if (!fromLanguage || !toLanguage) {
+    console.warn(`Baidu detect language not support: ${fromLanguage}, ${toLanguage}`);
+    return Promise.reject(undefined);
+  }
+
   const queryWordInfo: QueryWordInfo = {
-    fromLanguage: autoDetectLanguageItem.baiduLangCode,
-    toLanguage: englishLanguageItem.baiduLangCode,
+    fromLanguage: fromLanguage,
+    toLanguage: toLanguage,
     word: text,
   };
 
@@ -212,8 +224,8 @@ export async function baiduWebDetect(text: string): Promise<DetectedLangModel> {
           const youdaoLanguageId = getYoudaoLangCodeFromBaiduCode(baiduLanaugeId);
           const isConfirmed = isValidLangCode(youdaoLanguageId);
 
-          console.warn(`---> Baidu detect langu cost: ${response.headers[requestCostTime]} ms`);
-          console.warn(`---> Baidu language detect: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
+          console.warn(`---> Baidu detect cost: ${response.headers[requestCostTime]} ms`);
+          console.warn(`---> Baidu detect language: ${baiduLanaugeId}, youdaoId: ${youdaoLanguageId}`);
 
           const detectedLanguageResult: DetectedLangModel = {
             type: type,

@@ -14,6 +14,7 @@ const folderSpotlightSearchAttributes = [
   "kMDItemContentModificationDate",
   "kMDItemKind",
   "kMDItemLastUsedDate",
+  "kMDItemUseCount",
 ];
 
 const searchSpotlight = (

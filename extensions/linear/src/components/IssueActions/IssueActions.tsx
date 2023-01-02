@@ -337,6 +337,7 @@ export default function IssueActions({
             {priorities.map((priority) => (
               <Action
                 key={priority.priority}
+                autoFocus={priority.priority === issue.priority}
                 title={priority.label}
                 icon={{ source: priorityIcons[priority.priority] }}
                 onAction={() => setPriority(priority)}
@@ -354,6 +355,7 @@ export default function IssueActions({
             {users.map((user) => (
               <Action
                 key={user.id}
+                autoFocus={user.id === issue.assignee?.id}
                 title={`${user.displayName} (${user.email})`}
                 icon={getUserIcon(user)}
                 onAction={() => setAssignee(user)}
@@ -378,7 +380,14 @@ export default function IssueActions({
             shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           >
             {scale.map(({ estimate, label }) => {
-              return <Action key={estimate} title={label} onAction={() => setEstimate({ estimate, label })} />;
+              return (
+                <Action
+                  key={estimate}
+                  autoFocus={estimate === issue.estimate}
+                  title={label}
+                  onAction={() => setEstimate({ estimate, label })}
+                />
+              );
             })}
           </ActionPanel.Submenu>
         ) : null}

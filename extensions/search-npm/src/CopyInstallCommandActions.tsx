@@ -9,19 +9,23 @@ interface Preferences {
 interface RegistryItem {
   name: string
   registry: Registries
+  installCommand: string
 }
 const registries: RegistryItem[] = [
   {
     name: 'Yarn',
     registry: 'yarn',
+    installCommand: 'add',
   },
   {
     name: 'npm',
     registry: 'npm',
+    installCommand: 'install',
   },
   {
     name: 'pnpm',
     registry: 'pnpm',
+    installCommand: 'install',
   },
 ]
 
@@ -55,7 +59,7 @@ export const CopyInstallCommandActions = ({
         return 1
       }
     })
-    .map(({ name, registry }) => {
+    .map(({ name, registry, installCommand }) => {
       const isPrimary = defaultCopyAction === registry
       const isSecondary = secondaryCopyAction === registry
       const title = `Copy ${name} Install Command`
@@ -67,7 +71,7 @@ export const CopyInstallCommandActions = ({
       return (
         <Action.CopyToClipboard
           title={title}
-          content={`${registry} install ${packageName}`}
+          content={`${registry} ${installCommand} ${packageName}`}
           shortcut={shortcut}
           key={registry}
         />

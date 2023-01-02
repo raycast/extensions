@@ -1,5 +1,5 @@
 import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
 import { authorize, oauthClient } from "./api/oauth";
 
 type Arguments = {
@@ -13,8 +13,7 @@ type Preferences = {
 };
 
 const command = async (props: { arguments: Arguments }) => {
-  const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-  await toast.show();
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
   try {
     const tokens = await oauthClient.getTokens();

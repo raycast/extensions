@@ -1,4 +1,4 @@
-import { Cache, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
+import { Cache, closeMainWindow, getPreferenceValues, open, PopToRootType, showHUD, showToast } from "@raycast/api";
 import {
   HistoriesCacheKey,
   LANG_LIST,
@@ -511,11 +511,10 @@ function fetchGoogleTransAPI(
     if (notSupport) resolve(notSupport);
     const fromLang = "auto";
     const preferences: IPreferences = getPreferenceValues<IPreferences>();
-    translate(
-      queryText,
-      { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD },
-      { timeout: 2500, retry: 0 }
-    )
+    const opt = Number(preferences.googleFreeTimeout)
+      ? { timeout: Number(preferences.googleFreeTimeout), retry: 0 }
+      : {};
+    translate(queryText, { to: targetLang.langId, from: fromLang, tld: preferences.googleFreeTLD }, opt)
       .then((res) => {
         const resDate: IGoogleTranslateResult = res;
         const transRes: ITranslateRes = {
@@ -924,6 +923,7 @@ function checkServiceNotSupportLang(
 
 export async function capture(closeWindow: boolean): Promise<string> {
   let capturePath = path.join(os.tmpdir(), TempOCRImgName);
+  closeWindow && (await closeMainWindow({ popToRootType: PopToRootType.Suspended }));
   closeWindow && (await showHUD("Capture the text you want to translate"));
   !closeWindow && (await showToast({ title: "Capture the text you want to translate" }));
   execSync(`/usr/sbin/screencapture -i  ${capturePath}`);

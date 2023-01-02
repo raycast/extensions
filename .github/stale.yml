@@ -1,13 +1,19 @@
-daysUntilStale: 50
-daysUntilClose: 10
+daysUntilStale: 999
+daysUntilClose: 999
 exemptLabels:
   - api
   - documentation
-  - dev tools
+  - "dev tools"
   - app
-staleLabel: wontfix
+  - "status: blocked by API"
+  - rename
+staleLabel: "status: stalled"
 markComment: >
-  This issue/pull request has been automatically marked as stale because it has not had
+  This pull request has been automatically marked as stale because it has not had
   recent activity. It will be closed if no further activity occurs in the next 7 days to
-  keep our backlog clean. Thanks for your contributions.
-closeComment: false
+  keep our backlog clean 😊
+closeComment: >
+  I'm closing this due to inactivity; feel free to comment in the thread when you're ready
+  to continue working on it 🙂
+
+  You can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss.

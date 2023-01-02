@@ -1,5 +1,7 @@
 # Cleanshot X Changelog
 
+## [Rename text recognition to Capture Text (OCR)] - 2022-11-30
+
 ## [Remove Dependency on Open Package] - 2022-09-02
 - Use raycast builtin open command
 

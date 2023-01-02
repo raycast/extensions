@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Joke = {
@@ -8,7 +8,7 @@ type Joke = {
 };
 
 export default function Command() {
-  const { isLoading, data } = useFetch<Joke>("https://icanhazdadjoke.com/", {
+  const { isLoading, data, revalidate } = useFetch<Joke>("https://icanhazdadjoke.com/", {
     keepPreviousData: false,
     headers: {
       Accept: "application/json",
@@ -16,5 +16,15 @@ export default function Command() {
   });
 
   const joke = !isLoading && data?.joke ? data.joke : "Loading...";
-  return <Detail isLoading={isLoading} markdown={joke} />;
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={`# ${joke.replaceAll(/\n/g, "\n# ")}`}
+      actions={
+        <ActionPanel>
+          <Action title="New Joke" onAction={revalidate} />
+        </ActionPanel>
+      }
+    />
+  );
 }

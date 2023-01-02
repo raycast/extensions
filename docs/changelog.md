@@ -1,5 +1,91 @@
 # Changelog
 
+## 1.45.0 - 2022-12-14
+
+### ✨ New
+
+- **Fallback commands**: All commands (except menu-bar commands and commands with more than one required argument) can now be used as [fallback commands](https://manual.raycast.com/fallback-commands)! They should all work out of the box (e.g. a command that renders a List will receive `onSearchTextChange` with the fallback text on its first render, etc.) but you can customize the user experience with a new top-level prop `fallbackText`.
+- **List Accessories:** `date` and `text` accessories can now be colored.
+- **List Accessories:** We’ve added a new accessory type: `tag`.
+- **Metadata:** Label text can now also be colored.
+- **Proxy Support**: Extensions using popular networking libraries such as node-fetch/cross-fetch, got, Axios, or our useFetch hook are compatible with proxies if the user has turned on the new proxy preference in Raycast.
+
+### 💎 Improvements
+
+- **Background refresh**: when a command misses a required preference, instead of showing the error screen, the user is directed to the preference onboarding screen again.
+
+### 🐞 Fixes
+
+- Fixed a bug where entered characters could be “swallowed” in controlled form components or the controlled search bar.
+- Fixed the `launchContext` not being propagated to menu-bar and background launches when using the `launchCommand` API.
+- Fixed a multi-monitor [bug](https://github.com/raycast/extensions/issues/2975) where menu bar extra text would be unreadable on the inactive screen.
+- Fixed a bug where menu bar extra icon tinting would change based on Raycast’s appearance instead of the system’s.
+- Fixed some memory leaks when using Form components
+
+## 1.44.0 – 2022-11-23
+
+### ✨ New
+
+- **Async Submenus and Dropdown**: Dropdowns and ActionPanel Submenus now also support the properties `onSearchTextChange, isLoading, throttle, filtering` – same as for List and Grid where you can perform custom logic when the user changes the search text.
+- **Application:** You can now get the current frontmost Application of the system with the top-level `getFrontmostApplication` method.
+- **File and Directory Preferences**: We’ve added two new preference types `“directory”` and `“file”`, supported via the manifest. Both types show a file picker component and let the user select directory or file paths.
+- **Environment:** You can now get the user’s text size via `environment.textSize`.
+
+### 💎 Improvements
+
+- **Pop To Root Behavior**: `closeMainWindow` accepts a new parameter `popToRootType` that lets you control when Raycast pops back to root: the default is as-is and respects the user’s “Pop to Root Search” preference in Raycast. `PopToRootType.Immediate` closes the window _and_ immediately pops back to root, regardless of the user’s setting (so you can get rid of an additional `popToRoot()` call). The new mode `PopToRootType.Suspended` temporarily prevents Raycast from automatically popping back to root; this is useful for situations where a command needs to interact with an external system utility and then return the user back to the launching command.
+- **Clipboard:** We added new options to copy and paste HTML content, which is useful for sharing formatted text, e.g. a link to a Notion page in Slack.
+- **Markdown**: Markdown in a `Detail` component now supports convenience image references for icons and asset folder files such as:
+  `![built-in icon](${Icon.AddPerson})` or `![local-assets-image](example.png)` (absolute URLs and user folder paths via `~` are also supported)
+- **OAuth**: The client’s `providerIcon` is now optional (extension icon as default) and accepts an `Image.ImageLike` type.
+- **List and Detail Metadata**: Now show tooltips when labels get truncated.
+- **Action.ToggleQuickLook**: Now also expands paths starting with `~`.
+
+### 🐞 Fixes
+
+- **Dropdown**: Fixed triggering a dropdown component’s `onChange` handler when navigating.
+- **Dropdown**: Fixed the missing `placeholder` property in the search bar dropdown.
+- **Forms**: Fixed submitting a form with marked text.
+
+## 1.43.0 - 2022-11-09
+
+### ✨ New
+
+- **Actions**: You can now specify an action to focus when opening the ActionPanel (and an ActionPanel.Submenu) by setting the `autoFocus` prop.
+- **Forms**: Introducing a new Form Item `Form.FilePicker` to select one or multiple files (or directories)
+
+### 💎 Improvements
+
+- **DX**: A warning will now be shown in the console when using async entry points for view and menu-bar commands.
+- **List/Grid**: Improved the keyword search algorithm to match intersecting keywords (for example, the search term ”black cat” matches keywords [”black”, “cat”]).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the sections' order is not changed based on items' ranking values; this can be useful for use cases where a small number of fixed sections should always appear in the same order when the user filters the grid. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- Fixed the Grid or List’s selection sometimes not being preserved when native filtering is disabled.
+- The `Image.Mask.RoundedRectangle` mask will be more consistent regardless of the size of the image.
+- Fixed an issue where the specified `searchText` property would not always be respected.
+
+## 1.42.0 - 2022-10-26
+
+### ✨ New
+
+- The Node runtime has been updated to [Node 18](https://nodejs.org/en/blog/announcements/v18-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- Commands can now launch other commands! Using the new `launchCommand` method, you can now trigger a background refresh of another command in the same extension - or even open another command. Some use cases are updating a menu bar command from a view command or, vice versa, launching a companion view command from the menu bar. (Note that for now we only support launches of other commands within the same extension.)
+
+### 💎 Improvements
+
+- **Grid** now supports two new aspect ratios: 4/3 and 3/4.
+- **Menu Bar** icon tinting is now theme-aware.
+- **Background Refresh:** The shortest interval available is now 10s instead of 1m (use cautiously and also see our [best practices guide](https://developers.raycast.com/information/background-refresh#best-practices)).
+- **Grid**: The grid supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
+
+### 🐞 Fixes
+
+- **List Item Metadata Link and Detail Metadata Link** styling should now be consistent with their respective **List Item Metadata Label** and **Detail Metadata Label** respectively.
+- Fixed a bug where `List.Item`’s accessories might not be aligned.
+- Fixed a bug where the last API call or log in a no-view command would not run before the command gets unloaded.
+
 ## 1.41.0 - 2022-10-12
 
 ### New
@@ -7,8 +93,8 @@
 - **Grid**: the `Grid` component accepts three new props that should give extension authors more flexibility: `columns`, `fit` and `aspectRatio`.
 
 ![](.gitbook/assets/grid-styled-sections.png)
-    
-- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now *also* accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
+
+- **Grid Sections** don’t all have to look the same anymore! The grid `Section` component now _also_ accepts the `columns`, `fit` and `aspectRatio` props. When specified, they will override the value of the parent `Grid` component’s prop.
 - **List**: The list supports a new property for configuring how sections are ordered. Setting `filtering={{ keepSectionOrder: true }}` ensures that the section order is not changed based on items’ ranking values; this can be useful for use cases where a small number of fix sections should always appear in the same order when the user filters the list. We are deprecating the `enableFiltering` property.
 - **Menu Bar Extra:** added a new `Section` component, which can be used to better group related `Item`s and/or `Submenu`s. The component has an optional title for the section. At the same time, we are deprecating the `Separator` component.
 - **Menu Bar Extra**: The `Item` component now accepts an optional `subtitle` prop.

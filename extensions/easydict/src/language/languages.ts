@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-08-05 10:54
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-13 00:27
+ * @lastEditTime: 2022-10-17 18:12
  * @fileName: languages.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -27,14 +27,14 @@ export function getLanguageItemFromYoudaoCode(youdaoLangCode: string): LanguageI
 }
 
 /**
- * Get Bing languagecodefrom youdao language code.
+ * Get Bing language code from youdao language code.
  */
 export function getBingLangCode(youdaoLangCode: string): string {
   const languageItem = getLanguageItemFromYoudaoCode(youdaoLangCode);
   return languageItem.bingLangCode;
 }
 /**
- * Get youdao languagecodefrom Bing language code.
+ * Get youdao language code from Bing language code.
  */
 export function getYoudaoLangCodeFromBingCode(bingLangCode: string): string {
   const bingLanguageItem = languageItemList.find((langItem) => langItem.bingLangCode === bingLangCode);
@@ -46,7 +46,7 @@ export function getYoudaoLangCodeFromBingCode(bingLangCode: string): string {
 }
 
 /**
- * Get Volcano languagecodefrom youdao language code.
+ * Get Volcano language code from youdao language code.
  */
 export function getVolcanoLangCode(youdaoLangCode: string): string {
   const languageItem = getLanguageItemFromYoudaoCode(youdaoLangCode);
@@ -54,7 +54,7 @@ export function getVolcanoLangCode(youdaoLangCode: string): string {
 }
 
 /**
- * Get Youdao languagecodefrom Volcano language code.
+ * Get Youdao language code from Volcano language code.
  */
 export function getYoudaoLangCodeFromVolcanoCode(volcanoLangCode: string): string {
   const volcanoLanguageItem = languageItemList.find((langItem) => langItem.volcanoLangCode === volcanoLangCode);
@@ -66,11 +66,11 @@ export function getYoudaoLangCodeFromVolcanoCode(volcanoLangCode: string): strin
 }
 
 /**
- * Get youdao languagecodefrom tencent language code.
+ * Get youdao language code from tencent language code.
  */
 export function getYoudaoLangCodeFromTencentCode(tencentLangCode: string): string {
   for (const langItem of languageItemList) {
-    const tencentDetectLangCode = langItem.tencentDetectId || langItem.tencentLangCode;
+    const tencentDetectLangCode = langItem.tencentDetectCode || langItem.tencentLangCode;
     if (tencentDetectLangCode === tencentLangCode) {
       return langItem.youdaoLangCode;
     }
@@ -79,7 +79,7 @@ export function getYoudaoLangCodeFromTencentCode(tencentLangCode: string): strin
 }
 
 /**
- * Get tencent languagecodefrom youdao language code.
+ * Get tencent language code from youdao language code.
  */
 export function getTencentLangCode(youdaoLangCode: string): string | undefined {
   const languageItem = getLanguageItemFromYoudaoCode(youdaoLangCode);
@@ -87,15 +87,15 @@ export function getTencentLangCode(youdaoLangCode: string): string | undefined {
 }
 
 /**
- * Get baidu languagecodefrom youdao language code.
+ * Get baidu language code from youdao language code.
  */
-export function getBaiduLangCode(youdaoLangCode: string): string {
+export function getBaiduLangCode(youdaoLangCode: string): string | undefined {
   const languageItem = getLanguageItemFromYoudaoCode(youdaoLangCode);
   return languageItem.baiduLangCode;
 }
 
 /**
- * Get youdao languagecodefrom baidu language code.
+ * Get youdao languagec ode from baidu language code.
  */
 export function getYoudaoLangCodeFromBaiduCode(baiduLangCode: string): string {
   for (const langItem of languageItemList) {
@@ -107,7 +107,7 @@ export function getYoudaoLangCodeFromBaiduCode(baiduLangCode: string): string {
 }
 
 /**
- * Get youdao languagecodefrom apple detect language code. this value is depend on the system language.
+ * Get youdao language code from apple detect language code. this value is depend on the system language.
  *
  * Example: if system language is English, then the value is "English", if system language is Chinese, then the value is "中文".
  *
@@ -138,7 +138,7 @@ export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): stri
  */
 export function getLanguageItemFromAppleChineseTitle(chineseTitle: string): LanguageItem | undefined {
   for (const langItem of languageItemList) {
-    if (langItem.appleDetectLangChineseName.includes(chineseTitle)) {
+    if (langItem.appleDetectLangChineseName?.includes(chineseTitle)) {
       return langItem;
     }
   }

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "word-search",
   "title": "Word Search",
-  "description": "Search for synonyms, antonyms, rhymes and more",
+  "description": "Search for synonyms, antonyms, spellings, rhymes and more",
   "icon": "command-icon.png",
   "author": "rishabswift",
   "contributors": [
@@ -32,6 +32,13 @@
       "title": "Search Word Rhyme",
       "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
+      "mode": "view"
+    },
+    {
+      "name": "word-spell",
+      "title": "Spell a Word",
+      "subtitle": "Datamuse",
+      "description": "Find the correct spelling for a word that sounds similar to the given word",
       "mode": "view"
     },
     {

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Copy Enhancement] - 2022-11-02
+
+- Copy passwords in a way that asks clipboard managers to not save it 
+
 ## [UI Enhancement] - 2022-09-21
 
 - Add so it's possible to see folder of items

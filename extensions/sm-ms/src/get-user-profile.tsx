@@ -25,7 +25,7 @@ export default function GetUserProfile() {
       {!loading && typeof userData.username !== "undefined" && (
         <>
           <List.Item
-            icon={Icon.Terminal}
+            icon={Icon.PersonCircle}
             title={"Username"}
             subtitle={userData.username}
             actions={
@@ -58,7 +58,7 @@ export default function GetUserProfile() {
             }
           />
           <List.Item
-            icon={Icon.MemoryChip}
+            icon={Icon.HardDrive}
             title={"Disk Usage"}
             subtitle={userData.disk_usage + " / " + userData.disk_limit}
             actions={

@@ -60,7 +60,7 @@ function ColorItem(props: { color: Color }) {
   return (
     <Grid.Item
       title={props.color.name}
-      subtitle={props.color.name}
+      subtitle={props.color.value}
       content={{
         color: {
           light: props.color.value,
@@ -70,7 +70,7 @@ function ColorItem(props: { color: Color }) {
       }}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={props.color.name} />
+          <Action.CopyToClipboard content={props.color.value} />
         </ActionPanel>
       }
     />
