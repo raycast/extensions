@@ -520,7 +520,7 @@
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
 /extensions/quick-access                             @koinzhang
-/extensions/quick-event                              @mblode
+/extensions/quick-event                              @mblode @bascomb
 /extensions/quick-open-project                       @zerowidth
 /extensions/quick-search                             @iwfan
 /extensions/quickfile                                @danielroe
