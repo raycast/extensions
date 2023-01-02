@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "title",
   "title": "Title",
-  "description": "\n",
+  "description": "Enter your title to get it capitalized properly according to the The Chicago Manual of Style",
   "icon": "command-icon.png",
   "author": "LukasPolak",
   "categories": [
@@ -12,17 +12,27 @@
   "commands": [
     {
       "name": "title",
-      "title": "title",
-      "description": "Capitalize the title properly according to the The Chicago Manual of Style",
-      "mode": "view"
+      "title": "Title",
+      "description": "Enter your title to get it capitalized properly according to the The Chicago Manual of Style",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2"
+    "@raycast/api": "^1.45.2",
+    "title": "^3.5.3"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/title": "^3.4.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
