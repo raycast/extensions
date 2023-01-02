@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Menu bar command bug fix] - 2023-01-02
+
+- Fixed an error that caused menu bar to throw an error
+
 ## [Menu bar command for tasks] - 2022-11-19
 
 - Upgrade `@raycast/api`
