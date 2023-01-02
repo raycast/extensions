@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "simctl",
-  "title": "simctl",
+  "name": "Simulator Control",
+  "title": "Simulator Control",
   "description": "Control apple simulator devices",
   "icon": "command-icon.png",
   "author": "noppefoxwolf",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "simctl",
+      "title": "Simulator Control",
       "description": "Control apple simulator devices",
       "mode": "view"
     }
