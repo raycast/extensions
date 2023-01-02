@@ -1,5 +1,7 @@
 # Timers Changelog
 
+## [Added missing 2 minute timer in README] - 2023-01-02
+
 ## [Minor fixes, alert sound preview command] - 2022-12-21
 
 - Added a 2 minute preset
