@@ -89,4 +89,5 @@ export interface Step {
   iconURL: string;
   title: string;
   publishedAt: Date;
+  sourceURL: string;
 }

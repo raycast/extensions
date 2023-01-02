@@ -18,6 +18,7 @@ export async function fetchSteps(): Promise<StepCollection> {
       iconURL: stepData["info"]?.["asset_urls"]?.["icon.svg"],
       title: latestVersion["title"],
       publishedAt: new Date(latestVersion["published_at"]),
+      sourceURL: latestVersion["source_code_url"],
     };
   });
 

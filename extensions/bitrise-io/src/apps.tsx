@@ -100,7 +100,7 @@ function BuildsByApp(props: { appSlug: string }) {
     handleError(state.error);
   }
 
-  return <BuildList builds={state.builds} isLoading={!state.builds && !state.error} />;
+  return <BuildList builds={state.builds} isLoading={!state.builds && !state.error} displayRepoTitle={false} />;
 }
 
 function appURL(app: App) {

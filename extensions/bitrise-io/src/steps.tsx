@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchSteps } from "./api/steps";
 import { Step, StepMaintainer } from "./api/types";
@@ -39,6 +39,16 @@ export default function Command() {
           title={step.title}
           icon={step.iconURL ?? Icon.Code}
           accessories={stepAccessories(step)}
+          actions={
+            <ActionPanel title={step.title}>
+              <Action.OpenInBrowser url={`https://bitrise.io/integrations/steps/${step.id}`} />
+              <Action.OpenInBrowser title="Open Source Repo in Browser" url={step.sourceURL} />
+              <ActionPanel.Section>
+                <Action.CopyToClipboard title="Copy Step ID" content={step.id} />
+                <Action.CopyToClipboard title="Copy Step Source URL" content={step.sourceURL} />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
         />
       ))}
     </List>
