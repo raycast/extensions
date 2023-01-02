@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Simctl",
+      "title": "Simulator Control",
       "description": "Control Apple Simulator devices",
       "mode": "view"
     }
