@@ -1,6 +1,6 @@
 # World Clock Changelog
 
-## [Update Date Format] - {PR_MERGE_DATE}
+## [Update Date Format] - 2023-01-02
 
 - Add more date formats
 
