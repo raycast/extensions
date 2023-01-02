@@ -109,7 +109,7 @@ export default function Command() {
               title={device.name}
               key={device.udid}
               accessories={[
-                { tag: { value: device.state, color: device.state === "Booted" ? Color.Green : Color.Red } },
+                { tag: { value: device.state, color: device.state === "Booted" ? Color.Green : Color.SecondaryText } },
               ]}
               actions={
                 <ActionPanel>
