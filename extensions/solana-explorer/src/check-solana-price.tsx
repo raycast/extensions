@@ -30,5 +30,18 @@ const fetchPrice = () => {
 export default function Command() {
   const { price, isLoading } = fetchPrice();
 
-  return <MenuBarExtra icon={{ source: "solana.svg" }} tooltip="gm" title={price} isLoading={isLoading}></MenuBarExtra>;
+  return (
+    <MenuBarExtra
+      icon={{
+        source: "solana.svg",
+        tintColor: {
+          light: "black",
+          dark: "white",
+        },
+      }}
+      tooltip="gm"
+      title={price}
+      isLoading={isLoading}
+    ></MenuBarExtra>
+  );
 }
