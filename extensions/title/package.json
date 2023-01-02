@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "title",
-      "title": "Title",
+      "title": "Capitalize",
       "description": "Enter your title to get it capitalized properly according to the The Chicago Manual of Style",
       "mode": "no-view",
       "arguments": [
         {
           "name": "title",
-          "placeholder": "Title",
+          "placeholder": "lorem ipsum",
           "type": "text",
           "required": true
         }
