@@ -32,7 +32,6 @@
       "type": "textfield",
       "title": "Workspace",
       "required": true,
-      "default": "my-organization",
       "description": "Bitbucket workspace",
       "placeholder": "my-organization"
     },
@@ -41,7 +40,6 @@
       "type": "textfield",
       "title": "Account Name",
       "required": true,
-      "default": "accountName",
       "description": "Bitbucket Account Name",
       "placeholder": "john_doe"
     },
@@ -50,9 +48,8 @@
       "type": "password",
       "title": "App Password",
       "required": true,
-      "default": "",
       "description": "Bitbucket App password",
-      "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
+      "placeholder": ""
     }
   ],
   "dependencies": {
