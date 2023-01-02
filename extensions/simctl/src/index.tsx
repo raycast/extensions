@@ -26,21 +26,6 @@ export default function Command() {
     fetchSimulators();
   }, []);
 
-  const openAction = (device: Device) => {
-    if (device.state !== "Booted") {
-      return null;
-    }
-    return (
-      <Action
-        title="Open"
-        icon={Icon.AppWindow}
-        onAction={() => {
-          exec(`open -a Simulator --args -CurrentDeviceUDID ${device.udid}`);
-        }}
-      />
-    );
-  };
-
   const bootAction = (device: Device) => {
     if (device.state === "Booted") {
       return null;
@@ -113,7 +98,6 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
                   <Action
