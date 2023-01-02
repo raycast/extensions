@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Simulator Control",
+      "title": "Control simulators",
       "description": "Control apple simulator devices",
       "mode": "view"
     }
