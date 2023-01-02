@@ -12,12 +12,23 @@
       "title": "Solana Explorer",
       "description": "Look up transactions and accounts on the various Solana clusters.",
       "mode": "view"
+    },
+    {
+      "name": "check-solana-price",
+      "title": "Check Solana Price",
+      "description": "Checks the price of Solana and displays it in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
+  "contributors": [
+    "stevedsimkins"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.45.2",
     "@solana/spl-token-registry": "^0.2.1720",
-    "@solana/web3.js": "^1.32.0"
+    "@solana/web3.js": "^1.32.0",
+    "axios": "^1.2.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
