@@ -18,7 +18,7 @@ export async function autoRenewOrders() {
 
   const canPlaceOffer = availableFunding > cachedAmount;
 
-  if (activeOffers.length === 0 && canPlaceOffer) {
+  if (activeOffers.length === 0 && canPlaceOffer && cachedActiveOffers.length > 0) {
     // batch submit existing offers
 
     const payloads = cachedActiveOffers.map((offer) => {

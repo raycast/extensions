@@ -4,6 +4,10 @@
 
 - Fixed an error that caused menu bar to throw an error
 
+## [Optimizing title] - 2022-12-21
+
+- Removed eventually markdown from titles.
+
 ## [Menu bar command for tasks] - 2022-11-19
 
 - Upgrade `@raycast/api`

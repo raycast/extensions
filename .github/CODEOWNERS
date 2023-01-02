@@ -68,7 +68,7 @@
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/bob                                      @ViGeng
 /extensions/brasileirao-serie-a                      @willianhf
-/extensions/brave                                    @ron-myers @rgomezcasas
+/extensions/brave                                    @ron-myers @rgomezcasas @crisboarna
 /extensions/brew                                     @nhojb @Aayush9029 @mathieudutour
 /extensions/brew-services                            @es183923
 /extensions/brightness-control                       @CaliCastle
@@ -204,6 +204,7 @@
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
 /extensions/elron                                    @raimondlume @pernielsentikaer
+/extensions/email-verifier                           @lryong
 /extensions/ember-api-documentation                  @tdwesten
 /extensions/emoji                                    @FezVrasta @kidonng @sxn
 /extensions/empty-screenshots                        @chanceaclark
@@ -213,6 +214,7 @@
 /extensions/envato                                   @Slllava
 /extensions/envoyer                                  @thijsdewitt
 /extensions/esa-search                               @kawamataryo
+/extensions/escape-regexp-characters                 @lryong
 /extensions/esse-actions                             @rben01
 /extensions/ethereum-gas-tracker                     @vinch
 /extensions/ethereum-price                           @peduarte
@@ -460,7 +462,7 @@
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
 /extensions/open-link-in-specific-browser            @koinzhang
 /extensions/open-path                                @koinzhang
-/extensions/open-with-app                            @fturcheti
+/extensions/open-with-app                            @fturcheti @omarshahine @pernielsentikaer
 /extensions/openai-gpt3                              @simicvm
 /extensions/openfortivpn                             @rafalpetryka
 /extensions/openstreetmap-search                     @crisboarna
@@ -504,12 +506,14 @@
 /extensions/podcasts                                 @ron-myers
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
+/extensions/pomodoro                                 @KELiON
 /extensions/port-manager                             @lucaschultz
 /extensions/portuguese-primeira-liga                 @danielsequeira
 /extensions/premier-league                           @anhthang
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
 /extensions/projects                                 @ajaypremshankar
+/extensions/purpleair                                @omarshahine
 /extensions/px-to-rem-converter                      @raulanatol
 /extensions/qbittorrent                              @J3n5en
 /extensions/qq-music-controls                        @jwickers
@@ -523,6 +527,7 @@
 /extensions/quicktime                                @pradeepb28
 /extensions/quicktype                                @Aayush9029
 /extensions/quit-applications                        @mackopes
+/extensions/r-pkg-search                             @gadenbuie
 /extensions/radix                                    @peduarte
 /extensions/railway                                  @coffee-cup
 /extensions/rain-radars                              @danieldbird @koinzhang
@@ -565,6 +570,7 @@
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer
 /extensions/scaleway                                 @flozdra
 /extensions/screen-saver                             @koinzhang
+/extensions/screenshot                               @Aayush9029
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
 /extensions/search-composer-packagist                @danyelkeddah @macbookandrew
@@ -654,7 +660,7 @@
 /extensions/tldr                                     @pomdtr
 /extensions/tmdb                                     @Aayush9029
 /extensions/todo-list                                @maggie-j-liu
-/extensions/todoist                                  @thomaslombart @AnishDe12020
+/extensions/todoist                                  @thomaslombart @AnishDe12020 @kud
 /extensions/toggl-track                              @franzwilhelm @bkeys818
 /extensions/toggle-desktop-visibility                @Haojen
 /extensions/toolbox                                  @kkange
@@ -724,7 +730,7 @@
 /extensions/youtrack                                 @tiulpin @tiulpin
 /extensions/youtube                                  @tonka3000
 /extensions/youtube-companion                        @sasivarnan
-/extensions/youtube-music                            @danieldbird @AlexStrNik
+/extensions/youtube-music                            @danieldbird @AlexStrNik @zach-fuller
 /extensions/youversion-suggest                       @caleb531
 /extensions/yubikey-code                             @yoyoyeti
 /extensions/zen-mode                                 @pradeepb28
