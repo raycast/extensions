@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Simctl",
-      "description": "Control apple simulator devices",
+      "description": "Control Apple Simulator devices",
       "mode": "view"
     }
   ],
