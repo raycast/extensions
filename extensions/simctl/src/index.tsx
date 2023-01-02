@@ -3,57 +3,78 @@ import { exec } from "child_process";
 import { useEffect, useState } from "react";
 
 export default function Command() {
-  const [state, setState] = useState<Device[]>([])
-  const [query, setQuery] = useState<string | undefined>(undefined)
+  const [state, setState] = useState<Device[]>([]);
+  const [query, setQuery] = useState<string | undefined>(undefined);
 
   const fetchSimulators = () => {
     exec(`xcrun simctl list --json devices`, (err, stdout) => {
       if (err != null) {
-        console.log(err)
+        console.log(err);
         return;
       }
-      const list: SimctlList = JSON.parse(stdout)
-      const devices = Object.keys(list.devices).map((key) => {
-        return list.devices[key]
-      }).flat()
-      setState(devices)
-    })
-  }
+      const list: SimctlList = JSON.parse(stdout);
+      const devices = Object.keys(list.devices)
+        .map((key) => {
+          return list.devices[key];
+        })
+        .flat();
+      setState(devices);
+    });
+  };
 
   useEffect(() => {
-    fetchSimulators()
-  }, [])
+    fetchSimulators();
+  }, []);
 
   const openAction = (device: Device) => {
     if (device.state !== "Booted") {
-      return null
+      return null;
     }
-    return <Action title="Open" icon={Icon.AppWindow} onAction={() => {
-      exec(`open -a Simulator --args -CurrentDeviceUDID ${device.udid}`)
-    }} />
-  }
+    return (
+      <Action
+        title="Open"
+        icon={Icon.AppWindow}
+        onAction={() => {
+          exec(`open -a Simulator --args -CurrentDeviceUDID ${device.udid}`);
+        }}
+      />
+    );
+  };
 
   const bootAction = (device: Device) => {
     if (device.state === "Booted") {
-      return null
+      return null;
     }
-    return <Action title="Boot" icon={Icon.Power} onAction={() => {
-      exec(`xcrun simctl boot ${device.udid}`, (err, stdout) => {
-        fetchSimulators()
-      })
-    }} />
-  }
+    return (
+      <Action
+        title="Boot"
+        icon={Icon.Power}
+        onAction={() => {
+          exec(`xcrun simctl boot ${device.udid}`, (err, stdout) => {
+            fetchSimulators();
+          });
+        }}
+      />
+    );
+  };
 
   const shutdownAction = (device: Device) => {
     if (device.state !== "Booted") {
-      return null
+      return null;
     }
-    return <Action title="Shutdown" icon={Icon.XMarkCircle} style={Action.Style.Destructive} onAction={() => {
-      exec(`xcrun simctl shutdown ${device.udid}`, (err, stdout) => {
-        fetchSimulators()
-      })
-    }} />
-  }
+    return (
+      <Action
+        title="Shutdown"
+        icon={Icon.XMarkCircle}
+        style={Action.Style.Destructive}
+        onAction={() => {
+          exec(`xcrun simctl shutdown ${device.udid}`, (err, stdout) => {
+            fetchSimulators();
+          });
+        }}
+      />
+    );
+  };
 
   return (
     <List
@@ -61,8 +82,7 @@ export default function Command() {
       searchBarPlaceholder="Filter by name..."
       onSearchTextChange={(query) => setQuery(query)}
     >
-      {
-        state
+      {state
         .filter((device) => {
           if (device.isAvailable == false) {
             return false;
@@ -72,7 +92,7 @@ export default function Command() {
             return true;
           }
           const nameMatches = device.name.toLowerCase().includes(query.toLowerCase());
-          return nameMatches
+          return nameMatches;
         })
         .sort((a, b) => {
           if (a.state === "Booted" && b.state !== "Booted") {
@@ -82,41 +102,48 @@ export default function Command() {
           }
           return 0;
         })
-        .map( (device) => {
+        .map((device) => {
           return (
             <List.Item
               id={device.udid}
               title={device.name}
               key={device.udid}
               accessories={[
-                { tag: {value: device.state, color: device.state === "Booted" ? Color.Green : Color.Red} },
+                { tag: { value: device.state, color: device.state === "Booted" ? Color.Green : Color.Red } },
               ]}
-              actions = {
+              actions={
                 <ActionPanel>
                   {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
-                  <Action title="Show Data" icon={Icon.Folder} onAction={() => {
-                    exec(`open ${device.dataPath}`)
-                  }} />
-                  <Action title="Show Logs" icon={Icon.Folder} onAction={() => {
-                    exec(`open ${device.logPath}`)
-                  }} />
+                  <Action
+                    title="Show Data"
+                    icon={Icon.Folder}
+                    onAction={() => {
+                      exec(`open ${device.dataPath}`);
+                    }}
+                  />
+                  <Action
+                    title="Show Logs"
+                    icon={Icon.Folder}
+                    onAction={() => {
+                      exec(`open ${device.logPath}`);
+                    }}
+                  />
                 </ActionPanel>
               }
             />
-          )
-        })
-      }
+          );
+        })}
     </List>
-  )
+  );
 }
 
 type SimctlList = {
   devices: {
-    [key: string]: Device[]
-  }
-}
+    [key: string]: Device[];
+  };
+};
 
 type Device = {
   lastBootedAt: Date;
@@ -129,4 +156,4 @@ type Device = {
   deviceTypeIdentifier: string;
   state: string; // "Booted" | "Shutdown"
   name: string;
-}
+};
