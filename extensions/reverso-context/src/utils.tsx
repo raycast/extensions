@@ -24,7 +24,7 @@ export const codeToLanguageDict: Record<LangCode, string> = {
   ["sv"]: "swedish",
   ["tr"]: "turkish",
   ["uk"]: "ukrainian",
-  ["zh"]: "chinese"
+  ["zh"]: "chinese",
 };
 
 export function clearTag(raw: string): string {
@@ -52,9 +52,9 @@ export function prefsToLangPair(prefs: { langFrom: LangCode; langTo: LangCode })
 }
 
 function fitsToAlphabet(text: string, language: LangCode): boolean {
-  const alphabet = getAlphabet(language)
+  const alphabet = getAlphabet(language);
 
-  return Array.from(text).every(c => alphabet.includes(c))
+  return Array.from(text).every((c) => alphabet.includes(c));
 }
 
 export function clarifyLangPairDirection(text: string, langPair: LangPair): LangPair {
