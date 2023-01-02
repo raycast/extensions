@@ -1,6 +1,6 @@
 # WakaTime Changelog
 
-## [Update API Regex] - 2022-12-26
+## [Update API Regex] - 2023-01-02
 
 ### Fixed
 
