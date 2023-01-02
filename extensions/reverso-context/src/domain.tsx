@@ -1,7 +1,4 @@
-export enum LangCode {
-  RU = "ru",
-  EN = "en",
-}
+export type LangCode = "ru" | "en" | "de" | "ar" | "es" | "fr" | "he" | "it" | "ja" | "nl" | "pl" | "pt" | "ro" | "sv" | "tr" | "uk" | "zh"
 
 export interface LangPair {
   from: LangCode;
