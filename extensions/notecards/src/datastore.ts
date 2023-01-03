@@ -2,10 +2,15 @@ import { environment } from "@raycast/api";
 export const CARDS_FILE = `${environment.supportPath}/cards.json`;
 import fs from "fs";
 
-export const getNoteCards = (): Record<string, string> => {
+export type Cards = Record<string, Card>;
+type Card = {
+  // TODO: Add more fields here for archive, sorting, etc
+  body: string;
+};
+export const getNoteCards = (): Cards => {
   try {
     const storedItemsBuffer = fs.readFileSync(CARDS_FILE);
-    return JSON.parse(storedItemsBuffer.toString()) as Record<string, string>;
+    return JSON.parse(storedItemsBuffer.toString()) as Cards;
   } catch (error) {
     fs.mkdirSync(environment.supportPath, { recursive: true });
   }
@@ -17,7 +22,7 @@ export const storeNewCard = async (title: string, body: string) => {
   fs.writeFileSync(
     CARDS_FILE,
     JSON.stringify({
-      [title]: body,
+      [title]: { body: body },
       ...currentCards,
     })
   );

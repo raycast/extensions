@@ -1,14 +1,14 @@
 import { List, useNavigation } from "@raycast/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CardList from "./card_list";
-import { deleteCard, getNoteCards, storeNewCard } from "./datastore";
+import { Cards, deleteCard, getNoteCards, storeNewCard } from "./datastore";
 import Form from "./edit_card_form";
 
 export default function MainView() {
   const { push } = useNavigation();
 
   const queryClient = useQueryClient();
-  const { data: cards, isLoading } = useQuery<Record<string, string>>({
+  const { data: cards, isLoading } = useQuery<Cards>({
     queryKey: ["cards"],
     queryFn: getNoteCards,
     refetchOnWindowFocus: false,
@@ -41,7 +41,7 @@ export default function MainView() {
         push(
           <Form
             title={title}
-            subtitle={cards?.[title] ?? ""}
+            subtitle={cards?.[title]?.body ?? ""}
             onSubmit={(noteData) => {
               storeNewCardMutation.mutate(noteData);
             }}

@@ -1,10 +1,11 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { Cards } from "./datastore";
 
 type Props = {
   onSelect: (title: string) => void;
   onDelete: (title: string) => void;
-  listItems: Record<string, string>;
+  listItems: Cards;
 };
 export default function CardList({ onDelete, onSelect, listItems }: Props) {
   const [searchText, setSearchText] = useState("");
@@ -43,7 +44,7 @@ export default function CardList({ onDelete, onSelect, listItems }: Props) {
               <Action title="Delete card" onAction={() => onDelete(item)} />
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={listItems[item]} />}
+          detail={<List.Item.Detail markdown={listItems[item].body} />}
         />
       ))}
     </List>
