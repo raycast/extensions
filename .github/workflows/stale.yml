@@ -35,3 +35,4 @@ jobs:
           days-before-pr-close: 7
 
           debug-only: true
+          operations-per-run: 500
