@@ -63,13 +63,17 @@ function useSearch() {
       } catch (error) {
         setState((oldState) => ({
           ...oldState,
-          isLoading: false
+          isLoading: false,
         }));
 
         console.error("search error", error);
 
-        if ((error as Error).message?.includes('no such file')) {
-          showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: 'Path to screen sharing not found' });
+        if ((error as Error).message?.includes("no such file")) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Could not perform search",
+            message: "Path to screen sharing not found",
+          });
         } else {
           showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
         }
