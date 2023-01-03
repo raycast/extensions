@@ -1,4 +1,4 @@
-import { open, Form, ActionPanel, Action, showToast, showHUD, getPreferenceValues, Clipboard } from "@raycast/api";
+import { open, Form, ActionPanel, Action, showToast, showHUD, getPreferenceValues, Clipboard, Icon } from "@raycast/api";
 import puppeteer, { BoundingBox, ElementHandle } from "puppeteer";
 import { tmpdir } from "os";
 import { ulid } from "ulid";
@@ -123,7 +123,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Snippets} onSubmit={handleSubmit} />
         </ActionPanel>
       }
       isLoading={isLoading}
