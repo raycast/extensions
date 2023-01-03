@@ -52,6 +52,7 @@ function useSearch() {
         ...oldState,
         isLoading: true,
       }));
+
       try {
         const results = await performSearch(searchText);
         setState((oldState) => ({
@@ -62,11 +63,16 @@ function useSearch() {
       } catch (error) {
         setState((oldState) => ({
           ...oldState,
-          isLoading: false,
+          isLoading: false
         }));
 
         console.error("search error", error);
-        showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+
+        if ((error as Error).message?.includes('no such file')) {
+          showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: 'Path to screen sharing not found' });
+        } else {
+          showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+        }
       }
     },
     [setState]
