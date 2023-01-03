@@ -19,24 +19,26 @@ jobs:
     steps:
       - uses: actions/stale@v6
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
 
           # Issues
-          stale-issue-message: "This issue has been automatically marked as stale because it has not had\nrecent activity. It will be closed if no further activity occurs in the next 10 days to\nkeep our backlog clean 😊"
-          close-issue-message: "I'm closing this due to inactivity; feel free to comment in the thread when you're ready\nto continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss."
+          stale-issue-message: "This issue has been automatically marked as stale because it has not had any recent activity.\n\nIt will be closed if no further activity occurs in the next 10 days to\nkeep our backlog clean 😊"
+          close-issue-message: "This issue has been automatically closed due to inactivity.\n\nFeel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
           exempt-issue-labels: "api, documentation, dev tools, app, status: blocked by API, rename"
           stale-issue-label: "status: stalled"
           days-before-issue-stale: 50
           days-before-issue-close: 10
 
-          # Prs
-          stale-pr-message: "This pull request has been automatically marked as stale because it has not had\nrecent activity. It will be closed if no further activity occurs in the next 7 days to\nkeep our backlog clean 😊"
-          close-pr-message: "I'm closing this due to inactivity; feel free to comment in the thread when you're ready\nto continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss."
+          # PRs
+          stale-pr-message: "This pull request has been automatically marked as stale because it has not had any recent activity.\n\nIt will be closed if no further activity occurs in the next 7 days to keep our backlog clean 😊"
+          close-pr-message: "This issue has been automatically closed due to inactivity.\n√Feel free to comment in the thread when you're ready to continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss this."
           exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename"
           stale-pr-label: "status: stalled"
           days-before-pr-stale: 14
           days-before-pr-close: 7
 
+          # Limiting
+          operations-per-run: 10
+
           # Debug
-          debug-only: true
-          #operations-per-run: 500
+          #debug-only: true
