@@ -7,11 +7,15 @@ name: Close stale issues and PRs
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/60 * * * *"
   pull_request_target:
     paths:
       - "extensions/**"
-    branches: [main, master]    
+    branches: [main, master]  
+  issues:
+    types: "edited"
+  issue_comment:
+    types: "edited"
 
 permissions:
   issues: write
