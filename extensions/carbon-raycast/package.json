@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create Screenshot",
+      "title": "Create Carbon Screenshot",
       "description": "Create screenshots you can share",
       "mode": "view"
     }
