@@ -4,9 +4,9 @@
   "title": "Scaleway",
   "description": "Quick access to your Scaleway services",
   "icon": "scaleway.png",
-  "author": "flozdra",
+  "author": "philibea",
   "contributors": [
-    "philibea"
+    "flozdra"
   ],
   "categories": [
     "Developer Tools"
