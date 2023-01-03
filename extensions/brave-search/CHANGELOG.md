@@ -1,3 +1,3 @@
 # Brave Search Changelog
 
-## [Initial Version] - 2022-12-20
+## [Initial Version] - 2023-01-03
