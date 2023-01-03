@@ -36,6 +36,13 @@
       "icon": "instances.webp"
     },
     {
+      "name": "iam",
+      "title": "IAM",
+      "description": "Get information about iam",
+      "mode": "view",
+      "icon": "iam.webp"
+    },
+    {
       "name": "databases",
       "title": "Databases",
       "description": "Get information about databases",

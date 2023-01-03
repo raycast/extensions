@@ -39,12 +39,12 @@ type APIContextValue = {
   k8sV1: K8S.v1.API
   loadbalancerV1: LB.v1.ZonedAPI
   mnqV1alpha1: MNQ.v1alpha1.API
+  privateNetworksV1: VPC.v1.API
+  publicGatewaysV1: VPCGW.v1.API
   redisV1: Redis.v1.API
   registryV1: Registry.v1.API
   relationalDatabaseV1: RDB.v1.API
   transactionalEmailV1alpha1: TransactionalEmail.v1alpha1.API
-  publicGatewaysV1: VPCGW.v1.API
-  privateNetworksV1: VPC.v1.API
 }
 
 const APIContext = createContext<APIContextValue | undefined>(undefined)
