@@ -3,7 +3,7 @@
 # You can adjust the behavior by modifying this file.
 # For more information, see:
 # https://github.com/actions/stale
-name: "Close stale issues and PRs"
+name: Close stale issues and PRs
 
 on:
   schedule:
@@ -20,6 +20,8 @@ jobs:
       - uses: actions/stale@v6
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Issues
           stale-issue-message: "This issue has been automatically marked as stale because it has not had\nrecent activity. It will be closed if no further activity occurs in the next 10 days to\nkeep our backlog clean 😊"
           close-issue-message: "I'm closing this due to inactivity; feel free to comment in the thread when you're ready\nto continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss."
           exempt-issue-labels: "api, documentation, dev tools, app, status: blocked by API, rename"
@@ -27,6 +29,7 @@ jobs:
           days-before-issue-stale: 50
           days-before-issue-close: 10
 
+          # Prs
           stale-pr-message: "This pull request has been automatically marked as stale because it has not had\nrecent activity. It will be closed if no further activity occurs in the next 7 days to\nkeep our backlog clean 😊"
           close-pr-message: "I'm closing this due to inactivity; feel free to comment in the thread when you're ready\nto continue working on it 🙂\n\nYou can also catch us in [Slack](https://www.raycast.com/community) if you want to discuss."
           exempt-pr-labels: "api, documentation, dev tools, app, status: blocked by API, rename"
@@ -34,5 +37,6 @@ jobs:
           days-before-pr-stale: 14
           days-before-pr-close: 7
 
+          # Debug
           debug-only: true
-          operations-per-run: 500
+          #operations-per-run: 500
