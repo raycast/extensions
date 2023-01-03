@@ -22,9 +22,22 @@ export default function main() {
   }
 
   function formatTime(time: string) {
-    const dTime = dayjs(time);
+    let dTime
+    if (!isNaN(Number(time))) {
+      if (time.length == 10) {
+        // is unix timestamp seconds
+        dTime = dayjs.unix(Number(time))
+      } else if (time.length == 13) {
+        // is unix timestamp milliseconds
+        dTime = dayjs(Number(time))
+      }
+    } else {
+      dTime = dayjs(time);
+    }
+
     return [
       dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
+      dTime.format("YYYY-MM-DD hh:mm:ss.SSS").toString(),
       dTime.format().toString(),
       dTime.valueOf().toString(),
       dTime.unix().toString(),
