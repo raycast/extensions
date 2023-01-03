@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notecards",
   "title": "NoteCards",
-  "description": "",
+  "description": "A list of notecards that contain content",
   "icon": "command-icon.png",
   "author": "quuu",
   "license": "MIT",
