@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+# [Menu bar improvements] - 2023-01-03
+
+- Add possibility to specify the number of days in Upcoming view for Menu Bar
+
 ## [Optimizing title] - 2022-12-21
 
 - Removed eventually markdown from titles.
