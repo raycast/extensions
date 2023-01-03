@@ -1,4 +1,14 @@
-import { open, Form, ActionPanel, Action, showToast, showHUD, getPreferenceValues, Clipboard, Icon } from "@raycast/api";
+import {
+  open,
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  showHUD,
+  getPreferenceValues,
+  Clipboard,
+  Icon,
+} from "@raycast/api";
 import puppeteer, { BoundingBox, ElementHandle } from "puppeteer";
 import { tmpdir } from "os";
 import { ulid } from "ulid";
