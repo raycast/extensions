@@ -150,17 +150,17 @@ export default function Command() {
       <Form.Separator />
       <Form.Checkbox id="copy" label="Copy image to clipboard instead" />
       <Form.Separator />
-      <Form.Dropdown id="language" title="Programming language">
+      <Form.Dropdown id="language" title="Programming Language">
         {Object.entries(definition.languages).map((value, key) => {
           return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="theme" title="Syntax theme">
+      <Form.Dropdown id="theme" title="Syntax Theme">
         {Object.entries(definition.theme).map((value, key) => {
           return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="font" title="Font family">
+      <Form.Dropdown id="font" title="Font Family">
         {Object.entries(definition.font).map((value, key) => {
           return <Form.Dropdown.Item key={key} value={value[1]} title={value[0]} />;
         })}
