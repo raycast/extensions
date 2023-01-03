@@ -34,7 +34,7 @@ export default function CardList({ onDelete, onSelect, listItems }: Props) {
         </ActionPanel>
       }
     >
-      {filteredList.map((item) => (
+      {(searchText == "" ? Object.keys(listItems) : filteredList).map((item) => (
         <List.Item
           key={item}
           title={item}
