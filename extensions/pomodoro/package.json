@@ -5,6 +5,9 @@
   "description": "Pomodoro extension with menu-bar timer",
   "icon": "icon.png",
   "author": "asubbotin",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "keywords": [
     "pomodoro",
     "timer"
