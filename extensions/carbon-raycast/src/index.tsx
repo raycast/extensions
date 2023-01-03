@@ -138,7 +138,7 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.Description text="This form creates a beautiful screenshot using carbon..now.sh service" />
+      <Form.Description text="This form creates a beautiful screenshot using carbon.now.sh service" />
       <Form.TextArea
         error={codeError}
         id="code"
@@ -148,7 +148,7 @@ export default function Command() {
         value={code}
       />
       <Form.Separator />
-      <Form.Checkbox id="copy" label="Copy image to clipboard instead" />
+      <Form.Checkbox id="copy" label="Copy Image to Clipboard Instead" />
       <Form.Separator />
       <Form.Dropdown id="language" title="Programming Language">
         {Object.entries(definition.languages).map((value, key) => {
