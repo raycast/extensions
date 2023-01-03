@@ -51,18 +51,17 @@ Compute:
 - AppleSilicon
 - Elastic Metal
 - Dedibox 🤞🏻 ( soon )
-- Kubernetes 🤞🏻 ( soon )
 
 Containers:
 
-- Kubernetes 🤞🏻 ( soon )
+- Kubernetes
 - Registry 🤞🏻 ( soon )
 
 Networks:
 
 - VPC 🤞🏻 ( soon )
-- Private Networks 🤞🏻 ( soon )
-- Public Gateways 🤞🏻 ( soon )
+- Private Networks
+- Public Gateways
 - Load Balancers
 - Domains
 
@@ -90,7 +89,7 @@ Managed Services:
 
 Security & Identity:
 
-- IAM Identity and Access Management  🤞🏻 ( soon )
+- IAM Identity and Access Management
 - Secrets  🤞🏻 ( soon )
 
 ## Showcases
@@ -110,5 +109,3 @@ Security & Identity:
 ### Instances
 
 ![list-redis-clusters](./media/instances.png)
-
-
