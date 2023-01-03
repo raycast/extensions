@@ -1,4 +1,16 @@
-import { ActionPanel, Icon, confirmAlert, showToast, Toast, Action, useNavigation, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  confirmAlert,
+  showToast,
+  Toast,
+  Action,
+  useNavigation,
+  Color,
+  showHUD,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { addDays } from "date-fns";
 import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
@@ -9,6 +21,7 @@ import TaskEdit from "./TaskEdit";
 import TaskComments from "./TaskComments";
 import TaskCommentForm from "./TaskCommentForm";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -33,6 +46,7 @@ export default function TaskActions({
   mutateComments,
 }: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
+  const { cachedFocusedTask, setCachedFocusedTask, clearCachedFocusedTask } = useCachedFocusedTask();
 
   async function mutate({ withPop = false } = {}) {
     if (mutateTasks) {
@@ -48,12 +62,42 @@ export default function TaskActions({
     }
   }
 
+  async function focusTask({ id, content }: Task) {
+    await showHUD(`🎯 Focus on "${content}"`);
+
+    setCachedFocusedTask({ id, content });
+
+    try {
+      launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      /* empty */
+    }
+  }
+
+  async function unfocusTask() {
+    await showHUD(`👋 No more focus`);
+
+    clearCachedFocusedTask();
+
+    try {
+      launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
+    } catch (error) {
+      /* empty */
+    }
+  }
+
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
 
     try {
       await todoist.closeTask(task.id);
       await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
+
+      if (cachedFocusedTask.id === task.id) {
+        clearCachedFocusedTask();
+        launchCommand({ name: "menubar", type: LaunchType.Background });
+      }
+
       mutate({ withPop: true });
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
@@ -107,6 +151,22 @@ export default function TaskActions({
       )}
 
       <ActionPanel.Section>
+        {cachedFocusedTask.id !== task.id ? (
+          <Action
+            title="Focus Task"
+            icon={Icon.Center}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={() => focusTask(task)}
+          />
+        ) : (
+          <Action
+            title="Unfocus Task"
+            icon={Icon.MinusCircle}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={() => unfocusTask()}
+          />
+        )}
+
         <Action.Push
           title="Edit Task"
           icon={Icon.Pencil}
