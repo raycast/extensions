@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "writersbrew",
   "title": "Writersbrew",
-  "description": "",
+  "description": "Meet the AI assistant that accelerates your reading & writing 2x faster & better",
   "icon": "writers-app-icon.png",
   "author": "pradeepb28",
   "license": "MIT",
@@ -10,61 +10,61 @@
     {
       "name": "index",
       "title": "Fix grammar",
-      "description": "Template for running a script without any view",
+      "description": "It fixes spelling and grammatical errors.",
       "mode": "no-view"
     },
     {
       "name": "explain-like-im-5",
       "title": "Explain like I'm 5",
-      "description": "Template for running a script without any view",
+      "description": "It explains words or paragraphs with simple words.",
       "mode": "no-view"
     },
     {
       "name": "improve-fluency",
       "title": "Improve fluency",
-      "description": "Template for running a script without any view",
+      "description": "It improves the fluency of words and paragraphs.",
       "mode": "no-view"
     },
     {
       "name": "continue-writing",
       "title": "Continue writing",
-      "description": "Template for running a script without any view",
+      "description": "It writes for you.",
       "mode": "no-view"
     },
     {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Template for running a script without any view",
+      "description": "It provides a short summary",
       "mode": "no-view"
     },
     {
       "name": "summarize-takeaways",
       "title": "Summarize & Takeaways",
-      "description": "Template for running a script without any view",
+      "description": "It provides a short summary and list of takeaways.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-french",
       "title": "Translate to french",
-      "description": "Template for running a script without any view",
+      "description": "Translates from any language to french.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-spanish",
       "title": "Translate to spanish",
-      "description": "Template for running a script without any view",
+      "description": "Translates from any language to spanish.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-english",
       "title": "Translate to english",
-      "description": "Template for running a script without any view",
+      "description": "Translates from any language to english.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-german",
       "title": "Translate to german",
-      "description": "Template for running a script without any view",
+      "description": "Translates from any language to german.",
       "mode": "no-view"
     }
   ],
