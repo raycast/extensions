@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "writersbrew",
+  "title": "Writersbrew",
+  "description": "",
+  "icon": "writers-app-icon.png",
+  "author": "pradeepb28",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Fix grammar",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "explain-like-im-5",
+      "title": "Explain like I'm 5",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "improve-fluency",
+      "title": "Improve fluency",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "continue-writing",
+      "title": "Continue writing",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "summarize-takeaways",
+      "title": "Summarize & Takeaways",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-french",
+      "title": "Translate to french",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-spanish",
+      "title": "Translate to spanish",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-english",
+      "title": "Translate to english",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-to-german",
+      "title": "Translate to german",
+      "description": "Template for running a script without any view",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.1",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
