@@ -48,7 +48,8 @@
       "type": "password",
       "title": "App Password",
       "required": true,
-      "description": "Generate an app password at https://bitbucket.org/account/settings/app-passwords"
+      "description": "Generate an app password at https://bitbucket.org/account/settings/app-passwords",
+      "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
     }
   ],
   "dependencies": {
