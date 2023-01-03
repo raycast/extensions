@@ -4,8 +4,6 @@ import axios from "axios";
 import { add, eachDayOfInterval, format, formatDuration, intervalToDuration, isToday, isTomorrow } from "date-fns";
 import Stops from "./stops";
 
-const DATE_FORMAT = "yyyy-MM-dd";
-
 interface Props {
   originStopAreaId: string;
   destinationStopAreaId: string;
@@ -15,13 +13,13 @@ interface Props {
 interface JourneysResult {
   data:
     | {
-    journeys: [
-      {
-        journey_name: string;
-        trips: Trip[];
+        journeys: [
+          {
+            journey_name: string;
+            trips: Trip[];
+          }
+        ];
       }
-    ];
-  }
     | undefined;
   error: boolean;
 }
@@ -31,6 +29,9 @@ interface Trip {
   departure_time: string;
   arrival_time: string;
 }
+
+const DATE_FORMAT = "yyyy-MM-dd";
+const TIMES_INITIAL_STATE = { data: undefined, error: false };
 
 const DayDropdown = (props: { onDayTypeChange: (newValue: string) => void }) => {
   const { onDayTypeChange } = props;
@@ -68,12 +69,12 @@ const DayDropdown = (props: { onDayTypeChange: (newValue: string) => void }) => 
   );
 };
 const Times: React.FC<Props> = ({ destinationStopAreaId, originStopAreaId, route }) => {
-  const [times, setTimes] = useState<JourneysResult>({ data: undefined, error: false });
+  const [times, setTimes] = useState<JourneysResult>(TIMES_INITIAL_STATE);
   const [day, setDay] = useState<string>(format(new Date(), DATE_FORMAT));
 
   useEffect(() => {
     const fetchTimes = async () => {
-      setTimes({ data: undefined, error: false }); // reset state
+      setTimes(TIMES_INITIAL_STATE);
       const response = await axios.put(`https://api.ridango.com/v2/64/intercity/stopareas/trips/direct`, {
         channel: "web",
         date: day,
