@@ -5,6 +5,8 @@
   "description": "Fastest Notion to-do app ever",
   "icon": "icon-purple.png",
   "author": "reboot.studio",
+  "owner": "reboot",
+  "access": "public",
   "version": "2.0.2",
   "categories": [
     "Developer Tools",
