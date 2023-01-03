@@ -50,11 +50,7 @@ export default function Command(props: { arguments: SearchArguments }) {
           </List.Section>
         </>
       ) : (
-        <List.EmptyView
-          icon={{ source: "JotoHead.svg" }}
-          title={"Type something to start your search."}
-          description={"The Jotoba Project is made possible by JojiiOfficial and Yukaru.\n Raycast extension by clnhs."}
-        />
+        <List.EmptyView icon={{ source: "JotoHead.svg" }} title={"Type something to start your search."} />
       )}
     </List>
   );
