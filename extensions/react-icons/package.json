@@ -20,6 +20,28 @@
   ],
   "preferences": [
     {
+      "name": "size",
+      "title": "Grid Size",
+      "description": "Display size of the grid.",
+      "type": "dropdown",
+      "default": "8",
+      "required": false,
+      "data": [
+        {
+          "title": "Small",
+          "value": "8"
+        },
+        {
+          "title": "Medium",
+          "value": "6"
+        },
+        {
+          "title": "Large",
+          "value": "5"
+        }
+      ]
+    },
+    {
       "name": "action",
       "title": "Default Action",
       "description": "Copy or paste the selected icon.",
@@ -36,6 +58,14 @@
           "value": "Paste"
         }
       ]
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "The directory to download SVG files.",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": false
     }
   ],
   "dependencies": {

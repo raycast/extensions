@@ -1,10 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Action, Grid, Icon, Color, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Grid,
+  Icon,
+  Color,
+  Clipboard,
+  Toast,
+  showToast,
+  showHUD,
+  getPreferenceValues,
+  open,
+  showInFinder,
+  closeMainWindow,
+} from "@raycast/api";
 import { IconStorageActions, getPinnedIcons, getRecentIcons, getPinnedMovement, addRecentIcon } from "./storage";
 import { categories, loadCategory, getPath, getSVG, formatCategoryTitle, searchIcons } from "./utils";
 import { Category, IconProps, Preferences, ReactIcon } from "./types";
+import { writeFileSync } from "fs";
 
-const { action }: Preferences = getPreferenceValues();
+const { action, size, downloadDirectory }: Preferences = getPreferenceValues();
 
 export default function Command() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,7 +56,7 @@ export default function Command() {
   return (
     <Grid
       isLoading={loading}
-      columns={8}
+      columns={parseInt(size)}
       inset={Grid.Inset.Medium}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder={"Search for React Icons"}
@@ -119,6 +134,35 @@ const ReactIcon = (props: IconProps) => {
     refresh();
   };
 
+  const onDownload = async () => {
+    const svg = await getSVG(path);
+    const file = `${downloadDirectory}/${icon}.svg`;
+    writeFileSync(file, svg);
+    const options: Toast.Options = {
+      style: Toast.Style.Success,
+      title: "SVG Icon Downloaded",
+      primaryAction: {
+        title: "Open Icon",
+        onAction: async (toast: Toast) => {
+          await open(file);
+          await toast.hide();
+          await closeMainWindow();
+        },
+      },
+      secondaryAction: {
+        title: "Show In Finder",
+        onAction: async (toast: Toast) => {
+          await showInFinder(file);
+          await toast.hide();
+          await closeMainWindow();
+        },
+      },
+    };
+    await showToast(options);
+    addRecentIcon(icon, category.title);
+    refresh();
+  };
+
   return (
     <Grid.Item
       id={id}
@@ -142,12 +186,20 @@ const ReactIcon = (props: IconProps) => {
             icon={Icon.Code}
             onAction={async () => onAction(`import { ${icon} } from "${category.id}";`)}
           />
-          <Action
-            title={action === "Copy" ? "Copy SVG to Clipboard" : "Paste SVG"}
-            shortcut={{ modifiers: ["cmd", "shift"], key: action === "Copy" ? "c" : "v" }}
-            icon={Icon.CodeBlock}
-            onAction={async () => onAction(await getSVG(path), "SVG")}
-          />
+          <ActionPanel.Section>
+            <Action
+              title={action === "Copy" ? "Copy SVG to Clipboard" : "Paste SVG"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: action === "Copy" ? "c" : "v" }}
+              icon={Icon.CodeBlock}
+              onAction={async () => onAction(await getSVG(path), "SVG")}
+            />
+            <Action
+              title={"Download SVG"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              icon={Icon.Download}
+              onAction={onDownload}
+            />
+          </ActionPanel.Section>
           <IconStorageActions {...props} />
         </ActionPanel>
       }
