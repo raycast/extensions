@@ -1,8 +1,10 @@
 import { Action, ActionPanel, List, Detail, Icon } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { format, formatDuration, intervalToDuration } from "date-fns";
+import { add, eachDayOfInterval, format, formatDuration, intervalToDuration, isToday, isTomorrow } from "date-fns";
 import Stops from "./stops";
+
+const DATE_FORMAT = "yyyy-MM-dd";
 
 interface Props {
   originStopAreaId: string;
@@ -13,13 +15,13 @@ interface Props {
 interface JourneysResult {
   data:
     | {
-        journeys: [
-          {
-            journey_name: string;
-            trips: Trip[];
-          }
-        ];
+    journeys: [
+      {
+        journey_name: string;
+        trips: Trip[];
       }
+    ];
+  }
     | undefined;
   error: boolean;
 }
@@ -30,14 +32,51 @@ interface Trip {
   arrival_time: string;
 }
 
+const DayDropdown = (props: { onDayTypeChange: (newValue: string) => void }) => {
+  const { onDayTypeChange } = props;
+
+  const dates = eachDayOfInterval({
+    start: new Date(),
+    end: add(new Date(), { days: 6 }),
+  }).map((date) => {
+    let title = format(date, "EEEE dd.MM");
+    if (isToday(date)) {
+      title = "Today";
+    } else if (isTomorrow(date)) {
+      title = "Tomorrow";
+    }
+    return {
+      title,
+      value: format(date, DATE_FORMAT),
+    };
+  });
+
+  return (
+    <List.Dropdown
+      tooltip="Select day"
+      defaultValue={dates[0].value}
+      onChange={(newValue) => {
+        onDayTypeChange(newValue);
+      }}
+    >
+      <List.Dropdown.Section title="Day">
+        {dates.map(({ title, value }) => (
+          <List.Dropdown.Item key={value} title={title} value={value} />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+};
 const Times: React.FC<Props> = ({ destinationStopAreaId, originStopAreaId, route }) => {
   const [times, setTimes] = useState<JourneysResult>({ data: undefined, error: false });
+  const [day, setDay] = useState<string>(format(new Date(), DATE_FORMAT));
 
   useEffect(() => {
     const fetchTimes = async () => {
+      setTimes({ data: undefined, error: false }); // reset state
       const response = await axios.put(`https://api.ridango.com/v2/64/intercity/stopareas/trips/direct`, {
         channel: "web",
-        date: format(new Date(), "yyyy-MM-dd"),
+        date: day,
         destination_stop_area_id: destinationStopAreaId,
         origin_stop_area_id: originStopAreaId,
       });
@@ -50,7 +89,7 @@ const Times: React.FC<Props> = ({ destinationStopAreaId, originStopAreaId, route
       setTimes({ data: response.data, error: false });
     };
     fetchTimes();
-  }, []);
+  }, [day]);
 
   const formatTitle = (trip: Trip) => {
     const { departure_time, arrival_time } = trip;
@@ -83,7 +122,11 @@ There was an error fetching the train times. Please try again later.
 
   return (
     <>
-      <List isLoading={!times.data && !times.error} navigationTitle={`${route}: Show Times`}>
+      <List
+        isLoading={!times.data && !times.error}
+        navigationTitle={`${route}: Show Times`}
+        searchBarAccessory={<DayDropdown onDayTypeChange={setDay} />}
+      >
         <List.EmptyView title={`No more departures today`} />
         {times?.data?.journeys
           .filter((journey) => {
