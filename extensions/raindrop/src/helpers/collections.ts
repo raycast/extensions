@@ -24,12 +24,12 @@ function buildGroupsAndOrder(groups: Group[]) {
 
   if (groups.length > 1) {
     groups.forEach((group) => {
-      group.collections.forEach((coll) => {
+      group.collections?.forEach((coll) => {
         output.push([group.title, coll]);
       });
     });
   } else {
-    groups[0].collections.forEach((coll) => {
+    groups[0]?.collections?.forEach((coll) => {
       output.push([null, coll]);
     });
   }
