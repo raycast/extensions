@@ -270,7 +270,7 @@
       "required": false,
       "title": "Exclude Todo Authors",
       "description": "Hide Todos Created By Someone",
-      "placeholder": "Username separated by comma (e.g., bot1,bot2)"
+      "placeholder": "e.g. bot1,bot2"
     }
   ],
   "categories": [
