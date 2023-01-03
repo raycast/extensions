@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "manage-clickup-tasks",
-  "title": "Tasks Explorer",
+  "title": "ClickUp - Tasks Explorer",
   "description": "Browse ClickUp tasks from Raycast",
   "icon": "clickup-icon.png",
   "author": "aparandeh",
@@ -12,13 +12,15 @@
   "commands": [
     {
       "name": "explore",
-      "title": "Clickup Tasks Explorer",
+      "title": "Tasks Explorer",
+      "subtitle": "ClickUp",
       "description": "Browse ClickUp tasks from Raycast",
       "mode": "view"
     },
     {
       "name": "capture",
-      "title": "Clickup Quick Capture",
+      "title": "Quick Capture",
+      "subtitle": "ClickUp",
       "description": "Quickly capture tasks to your default ClickUp list",
       "mode": "view"
     }
