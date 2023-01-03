@@ -1,7 +1,8 @@
 import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./util/aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -24,22 +25,15 @@ export default function DynamoDb() {
 function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
-      title={tableName || "Unknown Table name"}
-      icon="dynamodb.png"
+      title={tableName || ""}
+      icon={"aws-icons/ddb.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={
-              "https://" +
-              process.env.AWS_REGION +
-              ".console.aws.amazon.com/dynamodbv2/home?region=" +
-              process.env.AWS_REGION +
-              "#table?initialTagKey=&name=" +
-              tableName +
-              "&tab=overview"
-            }
+            url={resourceToConsoleLink(tableName, "AWS::DynamoDB::Table")}
           />
+          <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>
       }
     />
@@ -47,6 +41,7 @@ function DynamoDbTable({ tableName }: { tableName: string }) {
 }
 
 async function fetchTables(token?: string, accTables?: string[]): Promise<string[]> {
+  if (!process.env.AWS_PROFILE) return [];
   const { LastEvaluatedTableName, TableNames } = await new DynamoDBClient({}).send(
     new ListTablesCommand({ ExclusiveStartTableName: token })
   );

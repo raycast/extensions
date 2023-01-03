@@ -180,14 +180,14 @@
       "name": "issueCustomCopyAction",
       "type": "textfield",
       "title": "Issue Custom Copy Action",
-      "description": "Add a custom copy action to the issue's actions following the format you want.\nAvailable keys: {ISSUE_TITLE}, {ISSUE_KEY}, {ISSUE_URL}, {ISSUE_BRANCH_NAME}\nExample: '{ISSUE_ID}: {ISSUE_TITLE} ({ISSUE_URL})'",
+      "description": "Add a custom copy action to the issue's actions following the format you want.\nAvailable keys: {ISSUE_TITLE}, {ISSUE_ID}, {ISSUE_URL}, {ISSUE_BRANCH_NAME}\nExample: '{ISSUE_ID}: {ISSUE_TITLE} ({ISSUE_URL})'",
       "required": false
     }
   ],
   "dependencies": {
     "@linear/sdk": "^1.22.0",
-    "@raycast/api": "1.44.0",
-    "@raycast/utils": "^1.4.10",
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.13",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",

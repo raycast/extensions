@@ -1,5 +1,10 @@
 # Scaleway Changelog
 
+## [Improvement] - 2022-12-26
+
+- Add products: Apple Silicon, Elastic Metal, Transactional Email, LoadBalancer, IOT
+- Change assets
+
 ## [Improvement] - 2022-11-20
 
 - Use the Scaleway JS SDK instead of the REST API

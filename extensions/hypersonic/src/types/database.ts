@@ -34,5 +34,6 @@ export type Database = {
     project: TypeWithValue<Relation>[]
     assignee: OptionalColumn[]
     tags: OptionalColumn[]
+    url: OptionalColumn[]
   }
 }

@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-} from '@raycast/api'
+import { Action, ActionPanel, Detail, Icon, showHUD } from '@raycast/api'
 import { Clipboard } from '@raycast/api'
 import { useTodosDoneToday } from '@/services/notion/hooks/use-todos-done-today'
 import { useFilter } from '@/services/notion/hooks/use-filter'
@@ -16,7 +9,7 @@ export function DoneWork() {
 
   const handleCopyDoneWork = async () => {
     await Clipboard.copy(markdown)
-    showToast(Toast.Style.Success, 'Copied to clipboard')
+    await showHUD('Copied to clipboard')
   }
 
   return (

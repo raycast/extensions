@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
-import { GitLabIcons, useImage } from "../icons";
+import { getTextIcon, GitLabIcons, useImage } from "../icons";
 import { hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
@@ -31,12 +32,12 @@ function webUrl(group: Group, partial: string) {
 
 export function GroupListItem(props: { group: any }): JSX.Element {
   const group = props.group;
-  const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group), GitLabIcons.project);
+  const { localFilepath: localImageFilepath } = useImage(groupIconUrl(group));
   return (
     <List.Item
       id={`${group.id}`}
       title={group.full_name}
-      icon={localImageFilepath}
+      icon={localImageFilepath || getTextIcon((group.name ? group.name[0] : "?").toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -92,6 +93,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
               url={webUrl(props.group, "-/edit")}
             />
           </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -107,19 +109,18 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
     showErrorToast(error, "Cannot search Groups");
   }
 
-  if (isLoading === undefined) {
+  if (groupsinfo === undefined && error === undefined) {
     return <List isLoading={true} />;
   }
 
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
-
   return (
     <List searchBarPlaceholder="Filter Groups by name..." isLoading={isLoading} navigationTitle={navtitle}>
       {groupsinfo?.groups?.map((group) => (
         <GroupListItem key={group.id} group={group} />
       ))}
       {groupsinfo?.projects?.map((project) => (
-        <ProjectListItem project={project} />
+        <ProjectListItem key={project.id} project={project} />
       ))}
     </List>
   );

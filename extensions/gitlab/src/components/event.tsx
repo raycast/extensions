@@ -6,6 +6,7 @@ import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter, daysInSeconds, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
@@ -391,7 +392,12 @@ export function EventListItem(props: { event: Event }): JSX.Element {
       title={title || ""}
       icon={icon}
       accessories={[{ text: accessoryTitle }]}
-      actions={<ActionPanel>{actionElement && actionElement}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {actionElement && actionElement}
+          {actionElement && <CacheActionPanelSection />}
+        </ActionPanel>
+      }
     />
   );
 }

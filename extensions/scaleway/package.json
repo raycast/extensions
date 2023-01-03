@@ -4,53 +4,105 @@
   "title": "Scaleway",
   "description": "Quick access to your Scaleway services",
   "icon": "scaleway.png",
-  "author": "flozdra",
+  "author": "philibea",
+  "contributors": [
+    "flozdra"
+  ],
   "categories": [
     "Developer Tools"
   ],
   "license": "MIT",
+  "packageManager": "npm@9.2.0",
   "commands": [
+    {
+      "name": "appleSilicon",
+      "title": "Apple Silicon",
+      "icon": "appleSilicon.webp",
+      "description": "Apple Silicon",
+      "mode": "view"
+    },
     {
       "name": "containers",
       "title": "Containers",
       "description": "Get information about containers",
       "mode": "view",
-      "icon": "icons/containers.png"
+      "icon": "containers.webp"
     },
     {
       "name": "instances",
       "title": "Instances",
       "description": "Get information about instances",
       "mode": "view",
-      "icon": "icons/instances.png"
+      "icon": "instances.webp"
     },
     {
       "name": "databases",
       "title": "Databases",
       "description": "Get information about databases",
       "mode": "view",
-      "icon": "icons/databases.png"
+      "icon": "database.webp"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "description": "Get information about domains",
+      "mode": "view",
+      "icon": "domains.webp"
+    },
+    {
+      "name": "elasticMetal",
+      "title": "Elastic Metal",
+      "icon": "elasticMetal.webp",
+      "description": "Elastic Metal Servers",
+      "mode": "view"
+    },
+    {
+      "name": "iot",
+      "title": "IoT",
+      "icon": "iot.webp",
+      "description": "IOT hub management",
+      "mode": "view"
+    },
+    {
+      "name": "loadBalancer",
+      "title": "Load Balancer",
+      "icon": "loadBalancer.webp",
+      "description": "Load Balancer management",
+      "mode": "view"
     },
     {
       "name": "redis",
       "title": "Redis",
       "description": "Get information about redis clusters",
       "mode": "view",
-      "icon": "icons/redis.png"
+      "icon": "redis.webp"
+    },
+    {
+      "name": "transactionalEmail",
+      "title": "Transactional Email",
+      "description": "Get information about transactionalEmail domains",
+      "mode": "view",
+      "icon": "transactionalEmail.webp"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.43.1",
-    "@raycast/utils": "^1.4.10",
+    "@scaleway/configuration-loader": "^0.1.0-beta.5",
     "@scaleway/sdk": "^0.1.0-beta.22",
-    "node-fetch": "^3.2.10"
+    "@scaleway/use-dataloader": "^2.16.4",
+    "react": "^18.2.0"
   },
   "devDependencies": {
+    "@scaleway/eslint-config-react": "^3.13.0",
+    "@scaleway/tsconfig": "^1.1.0",
+    "@types/node": "^18.11.17",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "prettier": "^2.7.1",
+    "prop-types": "^15.8.1",
     "typescript": "^4.8.4"
   },
   "preferences": [
@@ -67,6 +119,13 @@
       "description": "The secret key is the value that can be used to authenticate against the API (the value used in X-Auth-Token HTTP-header). \nThe secret key MUST remain secret and not given to anyone or published online.",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "defaultOrganizationId",
+      "title": "Default Organization ID",
+      "description": "An organization ID",
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "defaultRegion",
@@ -86,9 +145,10 @@
     }
   ],
   "scripts": {
+    "lint": "ray lint",
+    "lint:fix": "eslint . --fix --quiet --debug",
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix"
   }
 }

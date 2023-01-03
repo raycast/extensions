@@ -18,6 +18,7 @@ import { CopyTaskLinkAction } from './components/copy-task-link'
 import { OpenInNotionAction } from './components/open-in-notion-action'
 import { OpenOnNotionAction } from './components/open-on-notion'
 import { NotStartedAction } from './components/not-started-action'
+import { OpenAttachedLink } from './components/open-attached-link'
 
 export function TodoList() {
   const {
@@ -67,10 +68,10 @@ export function TodoList() {
       onSearchTextChange={onSearchTextChange}
       searchBarPlaceholder="Search or create task"
     >
-      {newTodo && newTodo.title ? (
+      {newTodo && newTodo.previewTitle ? (
         <List.Item
           icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-          title={newTodo.title}
+          title={newTodo.previewTitle}
           accessories={createAccessoriesArray({
             todo: newTodo,
             projectsById,
@@ -81,6 +82,17 @@ export function TodoList() {
                 icon={Icon.Plus}
                 title="Create Task"
                 onAction={handleCreate}
+              />
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Copy URL"
+                onAction={() => handleCreate('SHARE')}
+              />
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Open in Notion"
+                onAction={() => handleCreate('OPEN')}
+                shortcut={{ modifiers: ['cmd'], key: 'o' }}
               />
               <GeneralActions
                 mutatePreferences={mutatePreferences}
@@ -149,6 +161,9 @@ export function TodoList() {
                   onSetFilter={handleSetFilter}
                 />
               ) : null}
+              {todo.contentUrl ? (
+                <OpenAttachedLink url={todo.contentUrl} />
+              ) : null}
               <ActionPanel.Section>
                 <RemindAction todo={todo} onSetDate={handleSetDate} />
                 {hasTagProperty && (
@@ -173,14 +188,6 @@ export function TodoList() {
                     onSetUser={handleSetUser}
                   />
                 )}
-                {todo.contentUrl ? (
-                  <Action.OpenInBrowser
-                    title="Open Content URL"
-                    icon={Icon.Link}
-                    url={todo.contentUrl}
-                    shortcut={{ modifiers: ['cmd'], key: 'e' }}
-                  />
-                ) : null}
                 <CopyToDoAction todo={todo} />
                 <CopyTaskLinkAction todo={todo} />
                 {isNotionInstalled ? (

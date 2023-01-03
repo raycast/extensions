@@ -10,17 +10,16 @@ export async function getDatabases(): Promise<Database[]> {
   const databases = await notionClient.search({
     filter: { property: 'object', value: 'database' },
   })
-
   const normalizedDatabases = databases.results.map((database) => {
     const d = database as DatabaseObjectResponse
 
     return {
       id: d.id,
-      name: d.title[0].plain_text,
+      name: d.title[0]?.plain_text || 'Untitled',
       url: d.url,
       value: JSON.stringify({
         id: d.id,
-        name: d.title[0].plain_text,
+        name: d.title[0]?.plain_text || 'Untitled',
         url: d.url,
       }),
       image: normalizeImage(d.icon),
@@ -54,6 +53,7 @@ const normalizeColumns = (
     project: [{ data: { databaseId: '', propertyName: 'None' }, value: '{}' }],
     assignee: [{ name: 'None', value: NONE_VALUE }],
     tags: [{ name: 'None', value: NONE_VALUE }],
+    url: [{ name: 'None', value: NONE_VALUE }],
   }
 
   propertiesValues.forEach((item) => {
@@ -110,6 +110,10 @@ const normalizeColumns = (
 
     if (item.type === 'select') {
       columns.tags.unshift({ name: item.name, value: item.name })
+    }
+
+    if (item.type === 'url') {
+      columns.url.unshift({ name: item.name, value: item.name })
     }
   })
 

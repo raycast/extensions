@@ -1,5 +1,7 @@
 # Unicode Symbols
 
+## [Added a few aliases] - 2022-12-06
+
 ## [Added screenshots] - 2022-11-17
 
 ## [Added some common symbols] - 2022-03-21
