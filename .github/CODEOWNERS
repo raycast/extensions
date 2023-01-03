@@ -58,7 +58,7 @@
 /extensions/bike                                     @SKaplanOfficial
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bing-wallpaper                           @koinzhang
-/extensions/bitbucket                                @Lp-Francois @esarmstrong
+/extensions/bitbucket                                @Lp-Francois @esarmstrong @itsrifat
 /extensions/bitbucket-search-self-hosted             @yuercl
 /extensions/bitcoin-price                            @futantan
 /extensions/bitfinex                                 @Yukaii
@@ -520,7 +520,7 @@
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
 /extensions/quick-access                             @koinzhang
-/extensions/quick-event                              @mblode
+/extensions/quick-event                              @mblode @bascomb
 /extensions/quick-open-project                       @zerowidth
 /extensions/quick-search                             @iwfan
 /extensions/quickfile                                @danielroe
@@ -710,7 +710,7 @@
 /extensions/whatsapp                                 @vimtor
 /extensions/wi-fi                                    @koinzhang
 /extensions/wiggle-text                              @PineappleRind
-/extensions/wikipedia                                @vimtor @shubzkothekar
+/extensions/wikipedia                                @vimtor @shubzkothekar @JonathanWbn
 /extensions/wistia                                   @ddoria921
 /extensions/wolfram-alpha                            @mathieudutour
 /extensions/word-count                               @itsmingjie

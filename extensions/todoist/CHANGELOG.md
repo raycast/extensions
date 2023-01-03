@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Menu bar command bug fix] - 2023-01-02
+
+- Fixed an error that caused menu bar to throw an error
+
 ## [Optimizing title] - 2022-12-21
 
 - Removed eventually markdown from titles.

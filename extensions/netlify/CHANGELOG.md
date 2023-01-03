@@ -1,8 +1,11 @@
 # Changelog
 
-## [Chore] - 2022-12-22
+## [Chore] - 2023-01-03
 
 - Bump `@raycast/api` from 1.28.0 to 1.42.0
+
+## [Fix] - 2023-01-02
+- Fixes a possible missing title value if a Netlify member's full_name is empty, falling back to their email address.
 
 ## [Fix] - 2022-07-27
 
