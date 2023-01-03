@@ -48,7 +48,7 @@ export const IconStorageActions = (props: IconProps) => {
           />
           <Action
             title="Clear All Pinned Icons"
-            icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
+            icon={{ source: Icon.PinDisabled, tintColor: Color.Red }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={() => {
               clearPinnedIcons(category.title);
@@ -83,7 +83,7 @@ export const IconStorageActions = (props: IconProps) => {
           />
           <Action
             title="Clear All Recent Icons"
-            icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={() => {
               clearRecentIcons(category.title);

@@ -123,10 +123,10 @@ const ReactIcon = (props: IconProps) => {
   const id = `${pinned ? "pinned-" : ""}${recent ? "recent-" : ""}${category.id}-${icon}}`;
   const path = getPath(icon, category.title);
 
-  const onAction = async (content: string, message?: string) => {
+  const onAction = async (content: string) => {
     if (action === "Copy") {
       await Clipboard.copy(content);
-      await showHUD(`Copied ${message ? message : content}`);
+      await showHUD(`Copied ${content}`);
     } else {
       await Clipboard.paste(content);
     }
@@ -170,31 +170,29 @@ const ReactIcon = (props: IconProps) => {
       content={{ value: { source: path, tintColor: Color.PrimaryText }, tooltip: icon }}
       actions={
         <ActionPanel title={icon}>
+          <Action title={`${action} Name`} icon={Icon.Clipboard} onAction={async () => onAction(icon)} />
+          <Action title={`${action} React Component`} icon={Icon.Code} onAction={async () => onAction(`<${icon} />`)} />
           <Action
-            title={action === "Copy" ? "Copy Name to Clipboard" : "Paste Name"}
-            icon={Icon.Clipboard}
-            onAction={async () => onAction(icon)}
-          />
-          <Action
-            title={action === "Copy" ? "Copy React Component to Clipboard" : "Paste React Component"}
-            icon={Icon.Code}
-            onAction={async () => onAction(`<${icon} />`)}
-          />
-          <Action
-            title={action === "Copy" ? "Copy Import Statement to Clipboard" : "Paste Import Statement"}
+            title={`${action} Import Statement`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
             icon={Icon.Code}
             onAction={async () => onAction(`import { ${icon} } from "${category.id}";`)}
           />
           <ActionPanel.Section>
             <Action
-              title={action === "Copy" ? "Copy SVG to Clipboard" : "Paste SVG"}
-              shortcut={{ modifiers: ["cmd", "shift"], key: action === "Copy" ? "c" : "v" }}
+              title={"Copy SVG of Icon"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               icon={Icon.CodeBlock}
-              onAction={async () => onAction(await getSVG(path), "SVG")}
+              onAction={async () => {
+                const svg = await getSVG(path);
+                await Clipboard.copy(svg);
+                await showHUD(`Copied SVG of Icon`);
+                addRecentIcon(icon, category.title);
+                refresh();
+              }}
             />
             <Action
-              title={"Download SVG"}
+              title={"Download SVG Icon"}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               icon={Icon.Download}
               onAction={onDownload}
