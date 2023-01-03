@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Grid, PreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Grid } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
