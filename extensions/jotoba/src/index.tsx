@@ -18,9 +18,7 @@ export default function Command(props: { arguments: SearchArguments }) {
   const { showDetailsInList, commonWordsFirst } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    if (searchText.trim().length > 0) {
-      void search(searchText);
-    }
+    void search(searchText);
   }, [searchText]);
 
   return (
@@ -32,7 +30,7 @@ export default function Command(props: { arguments: SearchArguments }) {
       throttle
       isShowingDetail={showDetailsInList === "list" && state.searchText !== ""}
     >
-      {state.searchText !== "" && (
+      {state.searchText !== "" ? (
         <>
           <List.Section title="Words" subtitle={state.results.words.length + ""}>
             {(commonWordsFirst
@@ -51,9 +49,12 @@ export default function Command(props: { arguments: SearchArguments }) {
             ))}
           </List.Section>
         </>
-      )}
-      {state.searchText === "" && (
-        <List.EmptyView icon={{ source: "JotoHead.svg" }} title="Type something to start your search." />
+      ) : (
+        <List.EmptyView
+          icon={{ source: "JotoHead.svg" }}
+          title={"Type something to start your search."}
+          description={"The Jotoba Project is made possible by JojiiOfficial and Yukaru.\n Raycast extension by clnhs."}
+        />
       )}
     </List>
   );
@@ -117,6 +118,8 @@ function useSearch() {
             })),
           },
         }));
+      } else {
+        setState((prevState) => ({ ...prevState, searchText: "", isLoading: false }));
       }
     } catch (error) {
       if (error instanceof AbortError) return;
