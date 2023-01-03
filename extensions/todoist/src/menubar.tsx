@@ -1,4 +1,4 @@
-import { MenuBarExtra, openCommandPreferences, getPreferenceValues } from "@raycast/api";
+import { MenuBarExtra, openCommandPreferences, getPreferenceValues, showHUD } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { handleError, todoist } from "./api";
 import { getSectionsWithDueDates } from "./helpers/sections";
@@ -6,8 +6,11 @@ import { checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { useEffect, useMemo } from "react";
 import MenubarTask from "./components/MenubarTask";
 import { Task } from "@doist/todoist-api-typescript";
+import { useCachedFocusedTask, getFocusFeatureWidth } from "./helpers/cachedFocusedTask";
+import { truncateMiddle } from "./helpers/texts";
 
 export default function Command() {
+  const { cachedFocusedTask, clearCachedFocusedTask } = useCachedFocusedTask();
   const isTodayView = getPreferenceValues().view === "today";
   const upcomingDays = getPreferenceValues().upcomingDays;
   const isUpcomingDaysView = upcomingDays !== "" && !isNaN(Number(upcomingDays));
@@ -27,23 +30,41 @@ export default function Command() {
     handleError({ error: tasksError, title: "Unable to get tasks" });
   }
 
+  async function unfocusTask() {
+    await showHUD(`👋 No more focus`);
+
+    clearCachedFocusedTask();
+  }
+
   useEffect(() => {
     checkTodoistApp();
   }, []);
 
-  const numOfTasksToday = useMemo(() => {
-    if (tasks?.length) {
-      if (isTodayView) {
-        const len = tasks.length;
+  useEffect(() => {
+    if (tasks) {
+      const currentTask = tasks.find((task) => task.id === cachedFocusedTask.id);
 
-        return len > 0 ? len.toString() : "🎉";
-      } else {
-        const len = tasks?.filter((task) => task.due?.date === new Date().toISOString().substring(0, 10)).length;
-
-        return len > 0 ? len.toString() : "🎉";
-      }
+      !currentTask && clearCachedFocusedTask();
     }
   }, [tasks]);
+
+  const numOfTasksToday = useMemo(() => {
+    if (tasks?.length) {
+      const len = isTodayView
+        ? tasks.length
+        : tasks?.filter((task) => task.due?.date === new Date().toISOString().substring(0, 10)).length;
+
+      return len > 0 ? len.toString() : "🎉";
+    }
+  }, [tasks]);
+
+  const menuBarExtraTitle = useMemo(() => {
+    if (cachedFocusedTask.id) {
+      return truncateMiddle(cachedFocusedTask.content, getFocusFeatureWidth());
+    } else {
+      return numOfTasksToday;
+    }
+  }, [numOfTasksToday, cachedFocusedTask.id]);
 
   return (
     <MenuBarExtra
@@ -51,12 +72,14 @@ export default function Command() {
         source: { light: "icon.png", dark: "icon@dark.png" },
       }}
       isLoading={isLoadingTasks}
-      title={numOfTasksToday}
+      title={menuBarExtraTitle}
     >
       {isTodayView
         ? tasks && <TodayView tasks={tasks} mutateTasks={mutateTasks} />
         : tasks && <UpcomingView tasks={tasks} mutateTasks={mutateTasks} />}
       <MenuBarExtra.Section>
+        {cachedFocusedTask.id !== "" && <MenuBarExtra.Item title="Unfocus the current task" onAction={unfocusTask} />}
+
         <MenuBarExtra.Item
           title="Configure Command"
           shortcut={{ modifiers: ["cmd"], key: "," }}
