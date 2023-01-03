@@ -12,24 +12,31 @@ export default function main() {
       if (dTime.isValid()) {
         push(ResultList(formatTime(time)));
       } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "An error occurred",
-          message: "This is not a time format.",
-        });
+        showError();
       }
     }
   }
 
+  function showError() {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "An error occurred",
+      message: "This is not a time format.",
+    });
+  }
+
   function formatTime(time: string) {
-    let dTime
+    let dTime;
     if (!isNaN(Number(time))) {
       if (time.length == 10) {
         // is unix timestamp seconds
-        dTime = dayjs.unix(Number(time))
+        dTime = dayjs.unix(Number(time));
       } else if (time.length == 13) {
         // is unix timestamp milliseconds
-        dTime = dayjs(Number(time))
+        dTime = dayjs(Number(time));
+      } else {
+        showError();
+        return [];
       }
     } else {
       dTime = dayjs(time);
