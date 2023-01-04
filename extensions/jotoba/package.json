@@ -180,18 +180,18 @@
           "required": false,
           "title": "Show \"On\"/\"Kun\" titles as...",
           "description": "Show \"On\"/\"Kun\" titles as...",
-          "default": "jp",
+          "default": "long",
           "data": [
             {
-              "title": "音読み・訓読み",
-              "value": "jp"
+              "title": "long form (e.g. \"on reading\")",
+              "value": "long"
             },
             {
-              "title": "オン・くん",
-              "value": "kana"
+              "title": "short form (e.g. \"on\")",
+              "value": "short"
             },
             {
-              "title": "onyomi・kunyomi",
+              "title": "romaji",
               "value": "romaji"
             }
           ]

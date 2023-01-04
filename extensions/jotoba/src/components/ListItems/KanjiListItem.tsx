@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, getPreferenceValues, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, getPreferenceValues } from "@raycast/api";
 import OpenInJotoba from "../../actions/OpenInJotoba";
 import KanjiDetailsView from "../Details/KanjiDetailsView";
 import { parseReadings } from "../../JotobaUtils";
@@ -10,15 +10,13 @@ import KanjiListItemDetail from "./ListItemDetail/KanjiListItemDetail";
 function KanjiListItem({ kanjiResult }: { kanjiResult: KanjiResult }) {
   const { kanjiDetailsTitleDisplayType, showDetailsInList } = getPreferenceValues<Preferences>();
   const { literal, stroke_count, grade, jlpt, onyomi, kunyomi } = kanjiResult;
-  const onTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "音読み" : kanjiDetailsTitleDisplayType === "kana" ? "オン" : "onyomi";
-  const kunTitle =
-    kanjiDetailsTitleDisplayType === "jp" ? "訓読み" : kanjiDetailsTitleDisplayType === "kana" ? "くん" : "kunyomi";
+  const onTitle = { short: "on", long: "on readings", romaji: "onyomi" }[kanjiDetailsTitleDisplayType] ?? "";
+  const kunTitle = { short: "kun", long: "kun readings", romaji: "kunyomi" }[kanjiDetailsTitleDisplayType] ?? "";
 
   const subtitle = (): string[] => {
     const subtitle: string[] = [];
-    if (onyomi) subtitle.push(`【${onTitle}】: ${parseReadings(onyomi)}`);
-    if (kunyomi) subtitle.push(`【${kunTitle}】: ${parseReadings(kunyomi)}`);
+    if (onyomi) subtitle.push(` ${onTitle.toUpperCase()}: ${parseReadings(onyomi)}`);
+    if (kunyomi) subtitle.push(` ${kunTitle.toUpperCase()}: ${parseReadings(kunyomi)}`);
     return subtitle;
   };
 
@@ -35,17 +33,17 @@ function KanjiListItem({ kanjiResult }: { kanjiResult: KanjiResult }) {
   return (
     <List.Item
       title={literal}
-      subtitle={!showDetailsInList ? subtitle().join("") : ""}
+      subtitle={showDetailsInList === "details" ? subtitle().join("") : ""}
       accessoryTitle={accessoryTitle().join("・")}
       detail={<KanjiListItemDetail kanjiResult={kanjiResult} />}
       actions={
         <ActionPanel>
-          <Action.Push
-            title={"View Details"}
-            icon={Icon.AppWindowList}
-            target={<KanjiDetailsView kanjiResult={kanjiResult} />}
-          />
-          <OpenInJotoba searchTerm={literal} />
+          <ActionPanel.Section>
+            <Action.Push title={"See more..."} target={<KanjiDetailsView kanjiResult={kanjiResult} />} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenInJotoba searchTerm={literal} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
