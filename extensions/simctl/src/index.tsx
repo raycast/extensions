@@ -32,6 +32,7 @@ export default function Command() {
     }
     return <Action
       title="Open"
+      icon={Icon.Window}
       onAction={() => {
         exec(`open -g -a Simulator`);
         const appleScript = `
