@@ -20,7 +20,7 @@ export class Checker {
     const formData = this.appendData(formattedUserText);
     const { data } = await axios.post<string>(this.PNU_SPELLER_URL.toString(), formData, {
       headers: formData.getHeaders(),
-      timeout: 10_000,
+      timeout: 15_000,
     });
     const parsedData = this.parseData(data);
     return parsedData;
