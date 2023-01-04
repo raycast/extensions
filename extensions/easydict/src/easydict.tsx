@@ -1,8 +1,8 @@
 /*
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
- * @lastEditor: Tisfeng
- * @lastEditTime: 2022-12-16 17:02
+ * @lastEditor: tisfeng
+ * @lastEditTime: 2023-01-04 19:13
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -18,6 +18,13 @@ import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
+
+if (process.env.NODE_ENV === "production") {
+  // Since too many logs will cause bugs, we need to disable the console.log in production. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+  console.log = function () {
+    // do nothing
+  };
+}
 
 console.log(`enter easydict.tsx`);
 
@@ -133,10 +140,7 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
       }
     } else {
       if (trimQueryText?.length) {
-        // !!!: It seems Raycast API bug, if not use setTimeout, the `searchText` will not be updated when value is from arguments.
-        setTimeout(() => {
-          updateInputTextAndQueryText(trimQueryText, false);
-        }, 20);
+        updateInputTextAndQueryText(trimQueryText, false);
       } else if (myPreferences.enableAutomaticQuerySelectedText) {
         querySelecedtText().then(() => {
           console.log(`after query selected text`);
