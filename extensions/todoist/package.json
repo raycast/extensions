@@ -179,9 +179,24 @@
           "required": false,
           "title": "Number of days for Upcoming",
           "description": "Indicates the number of days you want in the upcoming view of the menubar."
+        },
+        {
+          "name": "focusFeatureWidth",
+          "type": "textfield",
+          "required": false,
+          "default": "40",
+          "title": "Max width of Focused Task",
+          "description": "Maximum width of the focused task' text."
         }
       ],
       "interval": "10m"
+    },
+    {
+      "name": "unfocus-current-task",
+      "title": "Unfocus Current Task",
+      "subtitle": "Todoist",
+      "description": "Unfocus the current Todoist task.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -197,7 +212,7 @@
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
     "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/utils": "1.4.14",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
     "remove-markdown": "0.5.0"
