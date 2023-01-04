@@ -1,33 +1,31 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  ListItemProps,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api"
+import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api"
 import { useEffect, useState } from "react"
 import { ErrorText } from "./exception"
 
-export type ResultItem = ListItemProps & {
+export type ResultItem = List.Item.Props & {
   url: string
   linkText?: string
 }
-type SearchFunction = (query: string) => Promise<ResultItem[]>
+type SearchFunction = (query: string, filter?: string | null) => Promise<ResultItem[]>
 
 const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${item.url})`
 const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`
 
-export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
+export function SearchCommand(
+  search: SearchFunction,
+  searchBarPlaceholder?: string,
+  filter?: { tooltip: string; persist?: boolean; values: { name: string; value: string }[] }
+) {
   const [query, setQuery] = useState("")
+  const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? null : null)
   const [items, setItems] = useState<ResultItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ErrorText>()
   useEffect(() => {
+    console.log("currentFilter", currentFilter)
     setError(undefined)
     setIsLoading(true)
-    search(query)
+    search(query, currentFilter)
       .then((resultItems) => {
         setItems(resultItems)
         setIsLoading(false)
@@ -42,7 +40,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
       .finally(() => {
         setIsLoading(false)
       })
-  }, [query])
+  }, [query, currentFilter])
 
   const onSearchChange = (newSearch: string) => setQuery(newSearch)
   const buildItem = (item: ResultItem) => (
@@ -52,12 +50,12 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
       actions={
         <ActionPanel>
           <ActionPanel.Section title="URL">
-            <OpenInBrowserAction url={item.url} />
-            <CopyToClipboardAction content={item.url} title="Copy URL" />
+            <Action.OpenInBrowser url={item.url} />
+            <Action.CopyToClipboard content={item.url} title="Copy URL" />
           </ActionPanel.Section>
           <ActionPanel.Section title="Link">
-            <CopyToClipboardAction content={markdownLink(item)} title="Copy Markdown Link" />
-            <CopyToClipboardAction content={htmlLink(item)} title="Copy HTML Link" />
+            <Action.CopyToClipboard content={markdownLink(item)} title="Copy Markdown Link" />
+            <Action.CopyToClipboard content={htmlLink(item)} title="Copy HTML Link" />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -65,7 +63,11 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
   )
 
   if (error) {
-    showToast(ToastStyle.Failure, error.name, error.message)
+    showToast({
+      style: Toast.Style.Failure,
+      title: error.name,
+      message: error.message,
+    })
   }
 
   return (
@@ -74,6 +76,15 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder={searchBarPlaceholder}
       throttle
+      searchBarAccessory={
+        filter ? (
+          <List.Dropdown storeValue={!!filter.persist} tooltip={filter.tooltip} filtering onChange={setCurrentFilter}>
+            {filter.values.map((f) => (
+              <List.Dropdown.Item key={f.value} title={f.name} value={f.value} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       {items.map(buildItem)}
     </List>

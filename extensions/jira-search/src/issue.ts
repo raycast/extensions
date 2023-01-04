@@ -1,7 +1,7 @@
 import { jiraFetchObject, jiraUrl } from "./jira"
 import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
-import { Color, ColorLike, Icon, Image, ImageSource } from "@raycast/api"
+import { Color, Icon, Image } from "@raycast/api"
 import { ErrorText } from "./exception"
 
 interface IssueType {
@@ -34,7 +34,7 @@ interface Issues {
 const fields = "summary,issuetype,status"
 
 function statusIcon(status: IssueStatus): Image {
-  const icon = (source: ImageSource, tintColor?: ColorLike) => ({ source, tintColor })
+  const icon = (source: Image.Source, tintColor?: Color.ColorLike) => ({ source, tintColor })
   switch (status.statusCategory.key) {
     case "done":
       return icon(Icon.Checkmark, Color.Green)
@@ -60,6 +60,7 @@ function buildJql(query: string): string {
       .map((term) => term.substring(prefix.length))
   const projects = collectPrefixed("@", terms)
   const issueTypes = collectPrefixed("#", terms)
+  const assignees = collectPrefixed("~", terms)
   const unwantedTextTermChars = /[-+!*&]/
   const textTerms = terms
     .filter((term) => !"@#".includes(term[0]))
@@ -83,9 +84,19 @@ function jqlFor(query: string): string {
   return isIssueKey(query) ? `key=${query}` : buildJql(query)
 }
 
-export async function searchIssues(query: string): Promise<ResultItem[]> {
-  const jql = jqlFor(query)
+export async function searchIssues(query: string, filter?: string | null): Promise<ResultItem[]> {
+  const jqlFromQuery = jqlFor(query)
+
+  const jql = filter
+    ? filter === "myIssues"
+      ? query.trim() === ""
+        ? `assignee=currentUser() ${jqlFromQuery}`
+        : `assignee=currentUser() AND ${jqlFromQuery}`
+      : jqlFromQuery
+    : jqlFromQuery
+
   console.debug(jql)
+
   const result = await jiraFetchObject<Issues>(
     "/rest/api/3/search",
     { jql, fields },
@@ -105,5 +116,11 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
 }
 
 export default function SearchIssueCommand() {
-  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType")
+  return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
+    tooltip: "Filters",
+    values: [
+      { name: "All Issues", value: "all" },
+      { name: "Assigned to Me", value: "myIssues" },
+    ],
+  })
 }
