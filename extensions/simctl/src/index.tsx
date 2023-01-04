@@ -36,18 +36,18 @@ export default function Command() {
         exec(`open -g -a Simulator`);
         const appleScript = `
         if running of application "Simulator" then
-         tell application "System Events"
-          tell the application "Simulator"
-           activate
+          tell application "System Events"
+            set theWindows to windows of (processes whose name is "Simulator")
+            repeat with theWindow in (the first item of theWindows)
+              set theWindowName to name of theWindow
+              if theWindowName contains "${device.name}" then
+                perform action "AXRaise" of theWindow
+              end if
+            end repeat
           end tell
-          set theWindows to windows of (processes whose name is "Simulator")
-          repeat with theWindow in (the first item of theWindows)
-           set theWindowName to name of theWindow
-           if theWindowName contains "${device.name}" then
-            perform action "AXRaise" of theWindow
-           end if
-          end repeat
-         end tell
+          tell the application "Simulator"
+            activate
+          end tell
         end if
         `;
         exec(`osascript -e '${appleScript}'`);
