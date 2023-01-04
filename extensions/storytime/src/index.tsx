@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, getPreferenceValues, Detail, Icon } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import fetch from "node-fetch";
-import { useState } from 'react';
+import { useState } from "react";
 
 interface Preferences {
   openai_api_key: string;
@@ -16,10 +16,10 @@ type Values = {
 
 const storyTypes = {
   "children's": "Children's",
-  "horror": "Horror",
-  "romance": "Romance",
+  horror: "Horror",
+  romance: "Romance",
   "sci-fi": "Sci-Fi",
-  "thriller": "Thriller",
+  thriller: "Thriller",
 } as { [key: string]: string };
 
 export default function Command() {
@@ -31,20 +31,20 @@ export default function Command() {
       if (loading) {
         return;
       }
-  
+
       const preferences = getPreferenceValues<Preferences>();
-  
+
       setLoading(true);
       setValues(values);
-  
+
       await fetch("https://api.openai.com/v1/completions", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${preferences.openai_api_key}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: 'text-davinci-003',
+          model: "text-davinci-003",
           prompt: `Write a ${values.type} about ${values.theme}, which has a main character who is ${values.character} with the moral of the story being ${values.moral}.`,
           max_tokens: 500,
           temperature: 0.75,
@@ -54,7 +54,7 @@ export default function Command() {
         .then((data: any) => setStory(data.choices[0].text))
         .catch((error) => showToast({ title: "Error generating story", message: error.message }))
         .finally(() => setLoading(false));
-  
+
       showToast({ title: "Story generated" });
     },
     validation: {
@@ -65,11 +65,7 @@ export default function Command() {
   });
 
   if (story.length > 0) {
-    return <StoryView
-      story={story}
-      startAgain={() => setStory("")}
-      values={values as Values}
-    />;
+    return <StoryView story={story} startAgain={() => setStory("")} values={values as Values} />;
   }
 
   return (
@@ -86,19 +82,12 @@ export default function Command() {
           <Form.Dropdown.Item key={index} value={key} title={Object.values(storyTypes)[index]} />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        title="My story is about"
-        placeholder="two friends going on an adventure"
-        {...itemProps.theme}
-      />
-      <Form.TextField
-        title="My main character is"
-        placeholder="a dog named Spot"
-        {...itemProps.character}
-      />
+      <Form.TextField title="My story is about" placeholder="two friends going on an adventure" {...itemProps.theme} />
+      <Form.TextField title="My main character is" placeholder="a dog named Spot" {...itemProps.character} />
       <Form.TextField
         title="The moral of my story
-        is" placeholder="to always be kind"
+        is"
+        placeholder="to always be kind"
         {...itemProps.moral}
       />
     </Form>
