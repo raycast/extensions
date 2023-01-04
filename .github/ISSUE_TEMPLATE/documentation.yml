@@ -1,0 +1,18 @@
+name: "📚 Documentation Issue"
+description: Issues related to the documentation and guides
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this documentation issue!
+
+        Do not forget to update the title above to consisely describe the issue.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Please provide a clear and concise description of what the documentation issue is. Include screenshots if needed.
+    validations:
+      required: true

@@ -66,7 +66,7 @@ export default function Command() {
 
       {filteredFiles?.map((project) => (
         <Grid.Section key={project.name + "-project"} title={project.name}>
-          {project.files.map((file) => (
+          {(project.files || []).map((file) => (
             <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
           ))}
         </Grid.Section>

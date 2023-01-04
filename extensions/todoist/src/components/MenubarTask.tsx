@@ -1,9 +1,11 @@
 import { Task } from "@doist/todoist-api-typescript";
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
+import removeMarkdown from "remove-markdown";
 import { todoist } from "../api";
 import { priorities } from "../constants";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
 import View from "./View";
 
 interface MenubarTaskProps {
@@ -12,13 +14,27 @@ interface MenubarTaskProps {
 }
 
 const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
+  const { cachedFocusedTask, setCachedFocusedTask, clearCachedFocusedTask } = useCachedFocusedTask();
   const priority = priorities.find((p) => p.value === task.priority);
+
+  async function focusTask({ id, content }: Task) {
+    await showHUD(`🎯 Focus on "${content}"`);
+
+    setCachedFocusedTask({ id, content });
+  }
+
+  async function unfocusTask() {
+    await showHUD(`👋 No more focus`);
+
+    clearCachedFocusedTask();
+  }
 
   async function completeTask(task: Task) {
     await showHUD("⏰ Completing task");
     try {
       await todoist.closeTask(task.id);
       await showHUD("Task completed 🙌");
+      cachedFocusedTask.id === task.id && clearCachedFocusedTask();
       mutateTasks();
     } catch (error) {
       showHUD("Unable to complete task ❌");
@@ -76,9 +92,15 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
   return (
     <View>
       <MenuBarExtra.Submenu
-        title={task.content}
+        title={removeMarkdown(task.content)}
         icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
       >
+        {cachedFocusedTask.id !== task.id ? (
+          <MenuBarExtra.Item title="Focus Task" onAction={() => focusTask(task)} icon={Icon.Center} />
+        ) : (
+          <MenuBarExtra.Item title="Unfocus Task" onAction={() => unfocusTask()} icon={Icon.MinusCircle} />
+        )}
+
         <MenuBarExtra.Item title="Complete Task" onAction={() => completeTask(task)} icon={Icon.Checkmark} />
         <MenuBarExtra.Item
           title="Open in Todoist"

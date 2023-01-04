@@ -26,7 +26,7 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled") {
     writeFileSync(dismissFile, ".dismiss file for Timers");
     command += ` && while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`;
   }
-  command += ` && osascript -e 'display notification "'"Timer complete"'" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
+  command += ` && osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
   exec(command, (error, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);

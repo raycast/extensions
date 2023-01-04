@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "danieldbird",
   "contributors": [
-    "alexstrnik"
+    "alexstrnik",
+    "zach"
   ],
   "categories": [
     "Media",
@@ -25,17 +26,10 @@
   ],
   "commands": [
     {
-      "name": "play",
-      "title": "Play",
+      "name": "play-pause",
+      "title": "Toggle Play/Pause",
       "subtitle": "YouTube Music",
-      "description": "Plays current track in YouTube Music.",
-      "mode": "no-view"
-    },
-    {
-      "name": "pause",
-      "title": "Pause",
-      "subtitle": "YouTube Music",
-      "description": "Pause current track in YouTube Music.",
+      "description": "Toggles play or pause of the current track in YouTube Music.",
       "mode": "no-view"
     },
     {

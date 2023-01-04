@@ -2,7 +2,8 @@ import { CloudWatchLogsClient, DescribeLogGroupsCommand, LogGroup } from "@aws-s
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function CloudWatch() {
   const [search, setSearch] = useState<string>("");
@@ -25,24 +26,22 @@ export default function CloudWatch() {
       ) : error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        logGroups?.map((logGroup) => <LogGroup key={logGroup.logGroupName} logGroup={logGroup} />)
+        logGroups?.map((logGroup) => <LogGroupEntry key={logGroup.logGroupName} logGroup={logGroup} />)
       )}
     </List>
   );
 }
 
-function LogGroup({ logGroup }: { logGroup: LogGroup }) {
+function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
   return (
     <List.Item
-      icon={Icon.Document}
+      icon={"aws-icons/cw.png"}
       title={logGroup.logGroupName || ""}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open Log Group"
-            url={`${AWS_URL_BASE}/cloudwatch/home?region=${
-              process.env.AWS_REGION
-            }#logsV2:log-groups/log-group/${encodeURIComponent(logGroup.logGroupName || "")}`}
+            url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")}
           />
           <Action.CopyToClipboard title="Copy Log Group Name" content={logGroup.logGroupName || ""} />
         </ActionPanel>

@@ -8,7 +8,8 @@ import { getServerColor, useIsMounted } from "./helpers";
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
   const [siteData, setSiteData] = useState<LocalStorage.Values>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [noServers, setNoServers] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const isMounted = useIsMounted();
 
@@ -32,9 +33,12 @@ export const ServersList = () => {
   useEffect(() => {
     LocalStorage.allItems()
       .then((data) => {
-        if (!isMounted.current) return;
         const servers = data["forge-servers"];
         delete data["forge-servers"];
+        if (!isMounted.current || !servers?.length) {
+          setLoading(true);
+          return;
+        }
         const serverList = JSON.parse(servers?.toString() ?? "[]") as IServer[];
         setServers(serverList?.length ? serverList : []);
         setSiteData(data ?? {});
@@ -45,7 +49,10 @@ export const ServersList = () => {
           .then(async (servers: Array<IServer> | undefined) => {
             if (!isMounted.current) return;
             setLoading(false);
-            if (!servers?.length) return;
+            if (!servers?.length) {
+              setNoServers(true);
+              return;
+            }
             setServers(servers);
             // Add the server list to storage to avoid content flash
             await LocalStorage.setItem("forge-servers", JSON.stringify(servers));
@@ -60,7 +67,7 @@ export const ServersList = () => {
   if (loading) {
     return <EmptyView title="Fetching servers..." />;
   }
-  if (!servers.length) {
+  if (noServers) {
     return <EmptyView title="No servers found" />;
   }
 

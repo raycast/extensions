@@ -7,7 +7,8 @@ import {
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function Secrets() {
   const [search, setSearch] = useState<string>("");
@@ -55,7 +56,7 @@ function Secret({
   return (
     <List.Item
       id={secret.Name || ""}
-      icon={Icon.Bookmark}
+      icon={"aws-icons/secretsmanager.png"}
       title={secret.Name || ""}
       detail={
         <List.Item.Detail
@@ -80,9 +81,7 @@ function Secret({
           <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
           <Action.OpenInBrowser
             title="Open Secret"
-            url={`${AWS_URL_BASE}/secretsmanager/secret?name=${encodeURI(secret.Name || "")}&region=${
-              process.env.AWS_REGION
-            }`}
+            url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")}
           />
           <Action.CopyToClipboard title="Copy Name" content={secret.Name || ""} />
         </ActionPanel>
