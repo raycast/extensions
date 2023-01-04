@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate a Story",
+      "title": "Generate A Story",
       "description": "Generate a story using OpenAI and Upstash.",
       "mode": "view"
     }
