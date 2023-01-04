@@ -56,7 +56,7 @@ ${this.formatHelpString(errInfo.help)}
 
   private formatHelpString(help: string) {
     if (!help.includes("(예)")) {
-      return help;
+      return help.replaceAll(/<br\/>/g, "\r\n");
     }
 
     function replacer(match: string): string {
@@ -66,24 +66,23 @@ ${this.formatHelpString(errInfo.help)}
         .slice(0, -1);
 
       const formattedExamples = linesInExamples.map(
-        (line, index) => line.replace("->", "").trim() + (index % 2 === 0 ? "(X)" : "(O)\n")
+        (line, index) => line.replace(/->|-&gt;/, "").trim() + (index % 2 === 0 ? "(X)" : "(O)")
       );
 
       return `
 \`\`\`
 예:
-
 ${formattedExamples.join("\r\n")}
 \`\`\`
 `;
     }
 
     const formattedHelpString = help.replaceAll(
-      /\(예\).*?\([○XO×ox]\)(\d.)|\(예\).*?\([○XO×ox]\)$|\(예\).*\([○XO×ox]\)/g,
+      /\(예\).*?\([○XO×ox]\)(<br\/>){1,2}(\d.)|\(예\).*?\([○XO×ox]\)(<br\/>){1,2}$|\(예\).*\([○XO×ox]\)/g,
       replacer
     );
 
-    return formattedHelpString;
+    return formattedHelpString.replaceAll(/<br\/>/g, "\r\n");
   }
 
   private shouldAddDots(text: string) {
