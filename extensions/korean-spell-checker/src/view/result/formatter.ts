@@ -41,6 +41,10 @@ ${this.formatHelpString(errInfo.help)}
   }
 
   private suggestedWords(errInfo: ErrInfo, newWord: string) {
+    if (errInfo.candWords.length === 1 && errInfo.candWords[0].length === 0) {
+      return `${errInfo.orgStr} -> No suggestions`;
+    }
+
     const choices = errInfo.candWords.map((choice) => {
       if (choice === newWord) {
         return `${choice} [selected]`;
