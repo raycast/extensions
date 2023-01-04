@@ -30,12 +30,13 @@ export default function Command() {
     if (device.state !== "Booted") {
       return null;
     }
-    return <Action
-      title="Open"
-      icon={Icon.Window}
-      onAction={() => {
-        exec(`open -g -a Simulator`);
-        const appleScript = `
+    return (
+      <Action
+        title="Open"
+        icon={Icon.Window}
+        onAction={() => {
+          exec(`open -g -a Simulator`);
+          const appleScript = `
         if running of application "Simulator" then
           tell application "System Events"
             set theWindows to windows of (processes whose name is "Simulator")
@@ -51,9 +52,10 @@ export default function Command() {
           end tell
         end if
         `;
-        exec(`osascript -e '${appleScript}'`);
-      }}
-    />;
+          exec(`osascript -e '${appleScript}'`);
+        }}
+      />
+    );
   };
 
   const bootAction = (device: Device) => {
