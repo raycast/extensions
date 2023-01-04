@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-01-04 19:13
+ * @lastEditTime: 2023-01-04 23:17
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -19,8 +19,10 @@ import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
 
-if (process.env.NODE_ENV === "production") {
-  // Since too many logs will cause bugs, we need to disable the console.log in production. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+const disableConsoleLog = true;
+
+if (disableConsoleLog) {
+  // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
   console.log = function () {
     // do nothing
   };
