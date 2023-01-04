@@ -1,6 +1,6 @@
 # Raycast Jotoba Changelog
 
-## [Bug Fix and New Setting Option] - 2022-12-26
+## [Bug Fix and New Setting Option] - 2023-01-03
 - Fixed search term not erasing.
 - Fixed common words priority display order.
 - Added setting option (default) to toggle the displaying of common words first in search results. 
