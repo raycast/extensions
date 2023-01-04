@@ -6,11 +6,10 @@ Brave search with autosuggestions is an extension for [Raycast](https://www.rayc
 
 Check [Brave Search Terms](https://brave.com/terms-of-use/) for terms of usage of the search engine.
 
-## Author
+## Author(s)
 
-**Vishwas Shashidhar** (VishwasShashidhar)
-
-- [GitHub](https://www.github.com/VishwasShashidhar)
+- [Vishwas Shashidhar](https://www.github.com/VishwasShashidhar)
+- [Spl0itable](https://github.com/Spl0itable)
 
 ## Credits
 
