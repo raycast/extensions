@@ -137,7 +137,7 @@ ${
 }
 
 function getListItem(p: Page, copiedText: string, saver: Saver, handleItemSelected: (p: Page) => void): JSX.Element {
-    const actionName = p.type === PageType.NotionPage ? "Append to page" : "Save as new page"
+    const actionName = p.type === PageType.NotionPage ? "Append to Page" : "Save as New Page"
 
     return (
         <List.Item
