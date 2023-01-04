@@ -51,15 +51,16 @@ function getErrorMessage(errorCode: string | undefined) {
 }
 
 interface ErrorViewProps {
+  isLoading: boolean;
   errorCode: string | undefined;
   revalidate: () => Promise<CheckerResponse[] | AxiosError<unknown, any>>;
 }
 
-export default function ErrorView({ errorCode, revalidate }: ErrorViewProps) {
+export default function ErrorView({ isLoading, errorCode, revalidate }: ErrorViewProps) {
   const { title, description } = getErrorMessage(errorCode);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.EmptyView
         title={title}
         description={description}
@@ -69,7 +70,7 @@ export default function ErrorView({ errorCode, revalidate }: ErrorViewProps) {
         }}
         actions={
           <ActionPanel>
-            <Action title="Try Again" onAction={revalidate} />
+            <Action title="Try Again" onAction={() => revalidate()} />
 
             <Action.OpenInBrowser
               title="Open Original Website"

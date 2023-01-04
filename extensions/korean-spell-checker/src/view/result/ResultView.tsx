@@ -53,7 +53,7 @@ export default function ResultView({ text }: { text: string }) {
   });
 
   if (data instanceof AxiosError) {
-    return <ErrorView errorCode={data.code} revalidate={revalidate} />;
+    return <ErrorView isLoading={isLoading} errorCode={data.code} revalidate={revalidate} />;
   }
 
   return (
