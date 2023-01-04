@@ -5,6 +5,9 @@
   "description": "Brave search with autosuggestions",
   "icon": "command-icon.png",
   "author": "VishwasShashidhar",
+  "contributors": [
+    "Spl0itable"
+  ],
   "categories": [
     "Web"
   ],
