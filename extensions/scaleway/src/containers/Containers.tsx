@@ -51,8 +51,8 @@ export const Containers = () => {
           title={container.name}
           icon={{
             source: {
-              dark: 'icons/serverless-container@dark.svg',
-              light: 'icons/serverless-container@light.svg',
+              dark: 'icons/serverless-containers@dark.svg',
+              light: 'icons/serverless-containers@light.svg',
             },
           }}
           detail={<ContainerDetail container={container} />}

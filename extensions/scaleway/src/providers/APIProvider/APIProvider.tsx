@@ -1,4 +1,3 @@
-import { loadProfileFromConfigurationFile } from '@scaleway/configuration-loader'
 import {
   AppleSilicon,
   BareMetal,
@@ -17,14 +16,7 @@ import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
 import { getPreferenceUser } from './helpers'
 
-const profile = loadProfileFromConfigurationFile()
-const preferenceUser = getPreferenceUser()
-
-// Will take account if you already use CLI and allow surcharge from Raycast settings
-const clientSetting = {
-  ...profile,
-  ...preferenceUser,
-}
+const clientSetting = getPreferenceUser()
 
 type APIContextValue = {
   appleSiliconV1Alpha1: AppleSilicon.v1alpha1.API
