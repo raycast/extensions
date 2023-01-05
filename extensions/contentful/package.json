@@ -22,7 +22,7 @@
   "preferences": [
     {
       "name": "space",
-      "title": "Contentful space id",
+      "title": "Contentful Space ID",
       "description": "Contentful space id",
       "type": "textfield",
       "required": true
