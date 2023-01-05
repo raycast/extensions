@@ -78,6 +78,41 @@
       "icon": "redis.webp"
     },
     {
+      "name": "publicGateways",
+      "title": "Public Gateways",
+      "description": "Get information about Public Gateways",
+      "mode": "view",
+      "icon": "publicGateways.webp"
+    },
+    {
+      "name": "k8s",
+      "title": "Kubernetes",
+      "description": "Get information about Kubernetes",
+      "mode": "view",
+      "icon": "k8s.webp"
+    },
+    {
+      "name": "mnq",
+      "title": "Messaging & Queuing",
+      "description": "Get information about Messaging & Queuing",
+      "mode": "view",
+      "icon": "mnq.webp"
+    },
+    {
+      "name": "privateNetworks",
+      "title": "Private Networks",
+      "description": "Get information about Private Networks",
+      "mode": "view",
+      "icon": "privateNetworks.webp"
+    },
+    {
+      "name": "functions",
+      "title": "Serverless Functions",
+      "description": "Get information about Serverless Functions",
+      "mode": "view",
+      "icon": "functions.webp"
+    },
+    {
       "name": "transactionalEmail",
       "title": "Transactional Email",
       "description": "Get information about transactionalEmail domains",

@@ -55,7 +55,7 @@ export const Containers = () => {
               light: 'icons/serverless-containers@light.svg',
             },
           }}
-          detail={<ContainerDetail container={container} />}
+          detail={<ContainerDetail container={container} namespaces={namespaces} />}
           accessories={[
             {
               tooltip: container.status,

@@ -11,7 +11,7 @@ export const useAllRegionsDomainsQuery = (
     TransactionalEmail.v1alpha1.ListDomainsResponse['domains']
   > = {}
 ) => {
-  const { transactionalEmailV1Alpha1 } = useAPI()
+  const { transactionalEmailV1alpha1 } = useAPI()
 
   const regions = params.region ? [params.region] : TransactionalEmail.v1alpha1.API.LOCALITIES
 
@@ -22,7 +22,7 @@ export const useAllRegionsDomainsQuery = (
     () =>
       fetchAllRegions(
         regions,
-        (request) => transactionalEmailV1Alpha1.listDomains(request).all(),
+        (request) => transactionalEmailV1alpha1.listDomains(request).all(),
         params
       ),
     dataloaderOptions
