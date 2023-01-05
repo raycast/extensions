@@ -1,3 +1,3 @@
 # Screen Sharing Recents Changelog
 
-## [Initial Version] - 2022-09-28
+## [Initial Version] - 2023-01-05
