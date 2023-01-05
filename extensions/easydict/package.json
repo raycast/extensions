@@ -44,7 +44,7 @@
     "caiyun"
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
+    "@raycast/api": "^1.45.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "axios": "^0.25.0",
     "cheerio": "^1.0.0-rc.12",
@@ -67,7 +67,7 @@
     "@types/node": "18.8.3",
     "@types/play-sound": "^1.1.0",
     "@types/qs": "^6.9.7",
-    "@types/react": "18.0.9",
+    "@types/react": "18.0.25",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^7.32.0",

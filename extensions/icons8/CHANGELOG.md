@@ -1,5 +1,14 @@
 # Icons8 Changelog
 
+## [Minor Update] - 2023-01-03
+
+* Updated the names of the default styles
+* Increased the values for the maximum number of results preference
+* Changed number of recent icons to how many rows of recent icons to show in the grid view.
+* Works with both medium and small grid sizes
+* You have the options to now show any recent icons.
+* Updated @raycast/api to latest.
+
 ## [Minor Bug Fix] - 2022-08-18
 
 * Fixed bug with main window not closing when opening downloaded icons in desktop. 

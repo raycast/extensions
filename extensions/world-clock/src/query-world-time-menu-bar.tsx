@@ -1,4 +1,12 @@
-import { Clipboard, Icon, MenuBarExtra, openExtensionPreferences, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
 import { getStarTimezones } from "./hooks/hooks";
 import { buildDayAndNightIcon, calculateTimeInfoByOffset, isEmpty } from "./utils/common-utils";
 
@@ -78,15 +86,25 @@ export default function QueryWorldTime() {
           </MenuBarExtra.Submenu>
         );
       })}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={"Query World Time"}
+          icon={Icon.Clock}
+          shortcut={{ modifiers: ["cmd"], key: "k" }}
+          onAction={async () => {
+            await launchCommand({ name: "query-world-time", type: LaunchType.UserInitiated });
+          }}
+        />
+      </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title={"Preferences"}
           icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={() => {
             openExtensionPreferences().then();
           }}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

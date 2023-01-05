@@ -9,7 +9,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { resourceToConsoleLink } from "./util";
 
 export default function SSM() {
   const [search, setSearch] = useState<string>("");
@@ -49,14 +49,11 @@ function Parameter({ parameter }: { parameter: ParameterMetadata }) {
       title={showValue ? parameterDetails?.Value || "" : parameter.Name || ""}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={showValue ? "Hide Value" : "Show Value"}
-            onSubmit={() => setShowValue(!showValue)}
-          />
+          <Action title={showValue ? "Hide Value" : "Show Value"} onAction={() => setShowValue(!showValue)} />
           <Action.CopyToClipboard title="Copy Value" content={parameterDetails?.Value || ""} />
           <Action.OpenInBrowser
             title="Open Parameter"
-            url={`${AWS_URL_BASE}/systems-manager/parameters/${parameter.Name}/description?region=${process.env.AWS_REGION}`}
+            url={resourceToConsoleLink(parameter.Name, "AWS::SSM::Parameter")}
           />
           <Action.CopyToClipboard title="Copy Name" content={parameter.Name || ""} />
         </ActionPanel>

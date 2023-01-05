@@ -1,5 +1,23 @@
 # `Easydict` Changelog
 
+## [v2.7.0] - 2022-12-16
+
+### 💎 Improvement
+
+- Improved the display of word exam collection level, use tag label display.
+
+### 🐞 Fixes
+
+- Fixed the problem that the input text was not displayed when querying from arguments.
+
+## [v2.6.2] - 2022-11-02
+
+### 🐞 Fixes
+
+- Fixed unexpected error when DeepL translation quota is exceeded.
+
+## [v2.6.1] - 2022-10-26
+
 ### 💎 Improvement
 
 - Optimized code.
