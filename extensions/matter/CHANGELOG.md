@@ -1,6 +1,6 @@
 # Matter Changelog
 
-## [🎉 Initial release] - 2022-12-25
+## [🎉 Initial release] - 2023-01-05
 
 Features: 
 - showing saved for later articles
