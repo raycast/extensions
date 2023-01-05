@@ -1,3 +1,3 @@
 # Contentful Changelog
 
-## [Initial Version] - 2022-12-23
+## [Initial Version] - 2023-01-05
