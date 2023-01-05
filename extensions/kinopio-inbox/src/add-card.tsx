@@ -68,9 +68,7 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       console.error("🚒 handleSubmit", error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to save card";
-      // eslint-disable-next-line
-      if (error.message) {
-        // eslint-disable-next-line
+      if (error instanceof Error) {
         toast.message = error.message;
       }
     }
