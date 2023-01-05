@@ -251,7 +251,7 @@ export const ContentfulContentEntryDetail: FC<ContentfulContentEntryDetailProps>
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Fields:" />
+          <List.Item.Detail.Metadata.Label title="Fields" />
           {Object.keys(entry.fields).map((key) => {
             const field = entry.fields[key]["en-US"];
             return (
