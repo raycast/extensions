@@ -265,7 +265,7 @@ export const ContentfulContentEntryDetail: FC<ContentfulContentEntryDetailProps>
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Sys:" />
+          <List.Item.Detail.Metadata.Label title="Sys" />
 
           {Object.keys(entry.sys).map((key) => {
             const field = entry.sys[key as keyof ContentfulContentEntry["sys"]];
