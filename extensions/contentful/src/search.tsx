@@ -243,7 +243,7 @@ export const ContentfulContentEntryDetail: FC<ContentfulContentEntryDetailProps>
               color: Color.SecondaryText,
             }}
           />
-          <List.Item.Detail.Metadata.TagList title="type">
+          <List.Item.Detail.Metadata.TagList title="Type">
             <List.Item.Detail.Metadata.TagList.Item text={type} />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.TagList title="Status">
