@@ -14,7 +14,7 @@
     {
       "name": "edit-json",
       "title": "Edit JSON",
-      "description": "edit json object like filtering fields",
+      "description": "Edit JSON object like filtering fields",
       "mode": "view"
     }
   ],
