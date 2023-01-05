@@ -200,7 +200,7 @@ export const ContentfulContentEntryItem: FC<ContentfulContentEntryItemProps> = (
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={entryUrl} />
-          <Action title={showDetail ? "Hide Detail" : "Show Detail"} onAction={toggleDetail} />
+          <Action title={showDetail ? "Hide Detail" : "Show Detail"} icon={Icon.AppWindowSidebarLeft} onAction={toggleDetail} />
         </ActionPanel>
       }
       accessories={
