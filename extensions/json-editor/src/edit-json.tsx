@@ -29,8 +29,8 @@ export default function Command() {
             {<Action.CopyToClipboard content={JSON.stringify(jsonObj)} title="Copy Minified Result" />}
             {<Action.CopyToClipboard content={escapeJsonText(jsonObj)} title="Escape Result" />}
             {<Action.CopyToClipboard content={jsonToYaml(jsonObj)} title="Convert Result to YAML" />}
-            {<Action.CopyToClipboard content={jsonToTs(result)} title="Convert Result to Typescript definition" />}
-            {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go type definition" />}
+            {<Action.CopyToClipboard content={jsonToTs(result)} title="Convert Result to Typescript Definition" />}
+            {<Action.CopyToClipboard content={jsonToGo(result)} title="Convert Result to Go Type Definition" />}
             {<Action.OpenInBrowser title="Sponsor Project ♥️" icon={Icon.Heart} url="https://ko-fi.com/herbertlu" />}
           </ActionPanel>
         )
