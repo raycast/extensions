@@ -39,7 +39,7 @@ export default function Command() {
       <Form.TextArea id="input" title="Input" placeholder="Paste JSON here..." value={text} onChange={setText} />
       <Form.TextField
         id="pattern"
-        title="this"
+        title="Filter"
         placeholder='JS filter; e.g. ".key.subkey", "[0][1]", ".map(x=>x.val)"'
         value={pattern}
         onChange={setPattern}
