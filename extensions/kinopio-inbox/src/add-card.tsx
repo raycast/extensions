@@ -5,7 +5,6 @@ import {
   Toast,
   showToast,
   getPreferenceValues,
-  open,
   LaunchProps,
   Preferences,
 } from "@raycast/api";
@@ -16,8 +15,8 @@ const host = "https://api.kinopio.club";
 // const host = "http://kinopio.local:3000";
 
 type Values = {
-  name: string,
-  status: number
+  name: string;
+  status: number;
 };
 
 export default function Command(props: LaunchProps<{ draftValues: Values }>) {
@@ -44,29 +43,30 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       title: "Saving card",
     });
     try {
-      let data = { name: values.name, status: 200 }
+      let data = { name: values.name, status: 200 };
       const url = `${host}/card/to-inbox`;
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "must-revalidate, no-store, no-cache, private",
           Authorization: `${preferences.apiKey}`,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-      data = await response.json()
+      data = await response.json();
       console.log("🐸 response", url, response.status, data);
-      const errorStatus = [400, 401, 404, 500]
-      if (errorStatus.includes(response.status) || errorStatus.includes(data.status)) { throw data }
+      const errorStatus = [400, 401, 404, 500];
+      if (errorStatus.includes(response.status) || errorStatus.includes(data.status)) {
+        throw data;
+      }
       textFieldRef.current?.reset();
       toast.style = Toast.Style.Success;
       toast.title = "Saved card to your inbox";
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("🚒 handleSubmit", error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to save card";
-      let message = error.message
       if (error.message) {
         toast.message = error.message;
       }
