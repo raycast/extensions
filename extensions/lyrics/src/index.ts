@@ -52,7 +52,7 @@ export default async function main() {
       // TODO find a better solution to include features
       const strippedResult = result.replace(/ \([^)]*\)/g, "").replace(/ *\[[^)]*\]/g, "");
 
-      let searchURL = provider.replace("*", encodeURIComponent(strippedResult));
+      const searchURL = provider.replace("*", encodeURIComponent(strippedResult));
       await open(searchURL);
 
       await showHUD(`Searching lyrics for ${result}...`);
