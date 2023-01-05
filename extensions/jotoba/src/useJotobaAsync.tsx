@@ -22,7 +22,7 @@ const useJotobaAsync = (api = "words") => {
   }
   const sendRq = useFetchAsync(baseUrl);
 
-  const getJotobaResults = async (config: { bodyData: JotobaBodyData; signal?: AbortSignal }) => {
+  return async (config: { bodyData: JotobaBodyData; signal?: AbortSignal }) => {
     return sendRq(
       {
         method: "POST",
@@ -32,14 +32,14 @@ const useJotobaAsync = (api = "words") => {
       (results: JotobaResults) => {
         if (results) {
           if (api === "words") {
-            if (results.kanji.length > 0 || results.words.length > 0) Promise.resolve(results);
-          } else if (Object.entries(results).length > 0) Promise.resolve(results);
-        } else Promise.reject("Couldn't find results.");
+            if (results.kanji.length > 0 || results.words.length > 0) return Promise.resolve(results);
+          } else if (Object.entries(results).length > 0) return Promise.resolve(results);
+        }
+
+        return Promise.reject("Couldn't find results.");
       }
     );
   };
-
-  return getJotobaResults;
 };
 
 export default useJotobaAsync;
