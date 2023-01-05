@@ -29,7 +29,7 @@
     },
     {
       "name": "token",
-      "title": "Contentful management token",
+      "title": "Contentful Management Token",
       "description": "Contentful management token",
       "type": "password",
       "required": true
