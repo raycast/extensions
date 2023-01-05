@@ -235,8 +235,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
         <AddProjectSubmenu issue={issue} mutate={mutate} />
 
         <Action
-          style={linkedBranch ? Action.Style.Destructive : Action.Style.Regular}
-          title={linkedBranch?.ref?.name ? "Delete a branch" : "Create a branch"}
+          title={linkedBranch ? "Delete a branch" : "Create a branch"}
           icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
           onAction={() =>
