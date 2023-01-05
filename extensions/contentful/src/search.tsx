@@ -138,7 +138,7 @@ export default function ContentfulSearch() {
       throttle
       isShowingDetail={showDetail}
       searchBarAccessory={
-        <List.Dropdown tooltip="content type" isLoading={contentTypesLoading} onChange={setContentType}>
+        <List.Dropdown tooltip="Content Type" isLoading={contentTypesLoading} onChange={setContentType}>
           <List.Dropdown.Item icon={Icon.Layers} title="All" value="__all__" />
           {contentTypes?.items.map((contentType) => (
             <List.Dropdown.Item
