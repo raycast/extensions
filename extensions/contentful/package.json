@@ -36,7 +36,7 @@
     },
     {
       "name": "environment",
-      "title": "Contentful environment",
+      "title": "Contentful Environment",
       "description": "If not set, will be used 'master'",
       "type": "textfield",
       "required": false,
