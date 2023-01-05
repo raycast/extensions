@@ -63,7 +63,8 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       textFieldRef.current?.reset();
       toast.style = Toast.Style.Success;
       toast.title = "Saved card to your inbox";
-    } catch (error: unknown) {
+      // eslint-disable-next-line no-empty
+    } catch (error) {
       console.error("🚒 handleSubmit", error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to save card";
