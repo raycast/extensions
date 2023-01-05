@@ -4,6 +4,7 @@ import { fileExists, getErrorMessage, openURIinVSCode, raycastForVSCodeURI, wait
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
+import { getBuildNamePreference, getBuildScheme } from "./lib/vscode";
 
 interface CommandMetadata {
   command: string;
@@ -12,7 +13,11 @@ interface CommandMetadata {
 }
 
 function transitFolder(): string {
-  const ts = path.join(os.homedir(), "Library/Application Support/Code/User/globalStorage/tonka3000.raycast/transit");
+  const build = getBuildNamePreference();
+  const ts = path.join(
+    os.homedir(),
+    `Library/Application Support/${build}/User/globalStorage/tonka3000.raycast/transit`
+  );
   return ts;
 }
 
@@ -98,7 +103,7 @@ function InstallRaycastForVSCodeAction(): JSX.Element {
   return (
     <Action.OpenInBrowser
       title="Install Raycast for VSCode"
-      url="vscode:extension/tonka3000.raycast"
+      url={`${getBuildScheme()}:extension/tonka3000.raycast`}
       onOpen={() => {
         popToRoot();
         showHUD("Open VSCode Extension");

@@ -1,5 +1,6 @@
 import { open } from "@raycast/api";
 import * as fs from "fs";
+import { getBuildScheme } from "./lib/vscode";
 
 export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
@@ -33,7 +34,7 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
 }
 
 export function raycastForVSCodeURI(uri: string) {
-  return `vscode://tonka3000.raycast/${uri}`;
+  return `${getBuildScheme()}://tonka3000.raycast/${uri}`;
 }
 
 export async function openURIinVSCode(uri: string) {

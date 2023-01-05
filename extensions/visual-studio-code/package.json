@@ -29,6 +29,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code you wanna target",
+      "data": [
+        {
+          "value": "Code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "Code - Insiders",
+          "title": "Visual Studio Code - Insiders"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.45.1",
     "@raycast/utils": "^1.4.14"

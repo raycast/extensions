@@ -1,5 +1,5 @@
 import { showToast, Toast, Action, Icon, Color, confirmAlert, Alert, showHUD } from "@raycast/api";
-import { getVSCodeCLI } from "../lib/vscode";
+import { getVSCodeCLI, getBuildScheme } from "../lib/vscode";
 import { getErrorMessage } from "../utils";
 
 export function InstallExtensionByIDAction(props: { extensionID: string; afterInstall?: () => void }): JSX.Element {
@@ -51,7 +51,7 @@ export function OpenExtensionByIDInVSCodeAction(props: {
   return (
     <Action.OpenInBrowser
       title="Open in VSCode"
-      url={`vscode:extension/${props.extensionID}`}
+      url={`${getBuildScheme()}:extension/${props.extensionID}`}
       icon={"icon.png"}
       onOpen={(url) => {
         showHUD("Open VSCode Extension");

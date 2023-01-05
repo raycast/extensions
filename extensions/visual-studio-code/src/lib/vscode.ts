@@ -3,11 +3,12 @@ import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
 import * as child_process from "child_process";
+import { getPreferenceValues } from "@raycast/api";
 
 interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
   version: string;
-  location: ExtensionLocation;
+  location: ExtensionLocation | string;
   metadata: ExtensionMetadata;
 }
 
@@ -66,7 +67,7 @@ function getNLSVariable(text: string | undefined): string | undefined {
 }
 
 export function getVSCodeCLIFilename(): string {
-  return "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code";
+  return `/Applications/${getBuildAppName()}.app/Contents/Resources/app/bin/code`;
 }
 
 export class VSCodeCLI {
@@ -124,14 +125,17 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
-  const extensionsManifrestFilename = path.join(os.homedir(), ".vscode/extensions/extensions.json");
+  const extensionsRootFolder = path.join(os.homedir(), `.${getBuildScheme()}/extensions`);
+  const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
   if (await fileExists(extensionsManifrestFilename)) {
     const data = await afs.readFile(extensionsManifrestFilename, { encoding: "utf-8" });
     const extensions = JSON.parse(data) as ExtensionMetaRoot[] | undefined;
     if (extensions && extensions.length > 0) {
       const result: Extension[] = [];
       for (const e of extensions) {
-        const packageFilename = path.join(e.location.fsPath, "package.json");
+        const extFsPath =
+          typeof e.location === "string" ? path.join(extensionsRootFolder, e.location) : e.location.fsPath;
+        const packageFilename = path.join(extFsPath, "package.json");
         const pkgInfo = await getPackageJSONInfo(packageFilename);
         result.push({
           id: e.identifier.id,
@@ -140,7 +144,7 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
           preRelease: e.metadata?.preRelease,
           icon: pkgInfo?.icon,
           updated: e.metadata?.updated,
-          fsPath: e.location.fsPath,
+          fsPath: extFsPath,
           publisherId: e.metadata.publisherId,
           publisherDisplayName: e.metadata.publisherDisplayName,
           preview: pkgInfo?.preview,
@@ -151,4 +155,36 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
     }
   }
   return undefined;
+}
+
+export function getBuildNamePreference(): string {
+  const prefs = getPreferenceValues();
+  const build = prefs.build as string;
+  return build;
+}
+
+const buildSchemes: Record<string, string> = {
+  Code: "vscode",
+  "Code - Insiders": "vscode-insiders",
+};
+
+export function getBuildScheme(): string {
+  const scheme = buildSchemes[getBuildNamePreference()] as string | undefined;
+  if (!scheme || scheme.length <= 0) {
+    return buildSchemes.Code;
+  }
+  return scheme;
+}
+
+const buildAppNames: Record<string, string> = {
+  Code: "Visual Studio Code",
+  "Code - Insiders": "Visual Studio Code - Insiders",
+};
+
+function getBuildAppName(): string {
+  const name = buildAppNames[getBuildNamePreference()];
+  if (!name || name.length <= 0) {
+    return buildAppNames.Code;
+  }
+  return name;
 }
