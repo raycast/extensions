@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
-import { nanoid } from "nanoid";
 import { ActionPanel, Icon, List, LocalStorage, confirmAlert, Alert } from "@raycast/api";
 import { Language, CodeStash } from "./types";
-import { Preview, ViewAction, CreateAction, DeleteAction, EmptyView, CopyAction, ExportAction } from "./components";
+import {
+  Preview,
+  ViewAction,
+  CreateAction,
+  DeleteAction,
+  EmptyView,
+  CopyAction,
+  ExportAction,
+  EditAction,
+} from "./components";
 import { useCopy, useExport } from "./actions";
 
 type State = {
@@ -53,8 +61,8 @@ export default function Command() {
   }, [state.codeStashes]);
 
   const handleCreate = useCallback(
-    (title: string, code: string, language: string) => {
-      const newCodeStashes = [...state.codeStashes, { id: nanoid(), title, code, language }];
+    (title: string, code: string, language: string, id: string) => {
+      const newCodeStashes = [...state.codeStashes, { id, title, code, language }];
       setState((previous) => ({
         ...previous,
         codeStashes: newCodeStashes,
@@ -63,6 +71,23 @@ export default function Command() {
       }));
     },
     [state.codeStashes, setState]
+  );
+
+  const handleEdit = useCallback(
+    (title: string, code: string, language: string, id: string) => {
+      setState((prevState) => {
+        const newCodeStashes = [...prevState.codeStashes];
+        const index = newCodeStashes.findIndex((codeStash) => codeStash.id === id);
+        newCodeStashes[index] = { id, title, code, language };
+        return {
+          ...prevState,
+          codeStashes: newCodeStashes,
+          filter: Language.All,
+          searchText: "",
+        };
+      });
+    },
+    [setState]
   );
 
   const deleteAlertOptions: Alert.Options = {
@@ -129,6 +154,7 @@ export default function Command() {
                 <ViewAction codeStash={codeStash} />
                 <CopyAction onCopy={() => handleCopy(index, state.codeStashes)} />
                 <CreateAction onCreate={handleCreate} />
+                <EditAction codeStash={codeStash} onEdit={handleEdit} />
                 <DeleteAction onDelete={() => handleDelete(index)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
