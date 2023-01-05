@@ -1766,9 +1766,9 @@
             "icon": "./icons/Servers - Azure Arc.png"
         },
         {
-            "name": "PostgreSQL servers – Azure Arc",
+            "name": "PostgreSQL servers - Azure Arc",
             "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.AzureArcData%2FpostgresInstances",
-            "icon": "./icons/PostgreSQL servers – Azure Arc.png"
+            "icon": "./icons/PostgreSQL servers - Azure Arc.png"
         },
         {
             "name": "Kubernetes - Azure Arc",
@@ -1938,19 +1938,19 @@
             "icon": "./icons/Azure Native Dynatrace Service.png"
         },
         {
-            "name": "Azure Network Function Manager – Devices",
+            "name": "Azure Network Function Manager - Devices",
             "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2Fdevices",
-            "icon": "./icons/Azure Network Function Manager – Devices.png"
+            "icon": "./icons/Azure Network Function Manager - Devices.png"
         },
         {
-            "name": "Azure Network Function Manager – Network Functions",
+            "name": "Azure Network Function Manager - Network Functions",
             "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2FnetworkFunctions",
-            "icon": "./icons/Azure Network Function Manager – Network Functions.png"
+            "icon": "./icons/Azure Network Function Manager - Network Functions.png"
         },
         {
-            "name": "Azure Network Function Manager – Vendors",
+            "name": "Azure Network Function Manager - Vendors",
             "href": "#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.HybridNetwork%2Fvendors",
-            "icon": "./icons/Azure Network Function Manager – Vendors.png"
+            "icon": "./icons/Azure Network Function Manager - Vendors.png"
         },
         {
             "name": "Azure OpenAI",
