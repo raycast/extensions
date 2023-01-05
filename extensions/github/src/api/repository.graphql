@@ -1,5 +1,10 @@
 fragment ShortRepositoryFields on Repository {
   id
+  defaultBranchRef {
+    target {
+      oid
+    }
+  }
   nameWithOwner
   name
   owner {
