@@ -545,6 +545,8 @@ export type AddReactionPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The reaction object. */
   reaction?: Maybe<Reaction>;
+  /** The reaction groups for the subject. */
+  reactionGroups?: Maybe<Array<ReactionGroup>>;
   /** The reactable subject. */
   subject?: Maybe<Reactable>;
 };
@@ -9843,6 +9845,8 @@ export type Mutation = {
   rerequestCheckSuite?: Maybe<RerequestCheckSuitePayload>;
   /** Marks a review thread as resolved. */
   resolveReviewThread?: Maybe<ResolveReviewThreadPayload>;
+  /** Retire a published payment tier from your GitHub Sponsors profile so it cannot be used to start new sponsorships. */
+  retireSponsorsTier?: Maybe<RetireSponsorsTierPayload>;
   /** Revoke the migrator role to a user for all organizations under an enterprise account. */
   revokeEnterpriseOrganizationsMigratorRole?: Maybe<RevokeEnterpriseOrganizationsMigratorRolePayload>;
   /** Revoke the migrator role from a user or a team. */
@@ -10620,6 +10624,11 @@ export type MutationRerequestCheckSuiteArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationResolveReviewThreadArgs = {
   input: ResolveReviewThreadInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationRetireSponsorsTierArgs = {
+  input: RetireSponsorsTierInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -13001,6 +13010,7 @@ export type OrganizationSponsorshipNewslettersArgs = {
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type OrganizationSponsorshipsAsMaintainerArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -13011,6 +13021,7 @@ export type OrganizationSponsorshipsAsMaintainerArgs = {
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type OrganizationSponsorshipsAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -14342,6 +14353,11 @@ export type ProjectNext = Closable &
      */
     description?: Maybe<Scalars["String"]>;
     /**
+     * List of fields and their constraints in the project
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    fieldConstraints: ProjectNextFieldConfigurationConnection;
+    /**
      * List of fields in the project
      * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
      */
@@ -14405,6 +14421,14 @@ export type ProjectNext = Closable &
      */
     views: ProjectViewConnection;
   };
+
+/** New projects that manage issues, pull requests and drafts using tables and boards. */
+export type ProjectNextFieldConstraintsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
 
 /** New projects that manage issues, pull requests and drafts using tables and boards. */
 export type ProjectNextFieldsArgs = {
@@ -14541,6 +14565,31 @@ export type ProjectNextFieldCommon = {
    * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
    */
   updatedAt: Scalars["DateTime"];
+};
+
+/** Configurations for project next fields. */
+export type ProjectNextFieldConfiguration = ProjectNextField | ProjectNextIterationField | ProjectNextSingleSelectField;
+
+/** The connection type for ProjectNextFieldConfiguration. */
+export type ProjectNextFieldConfigurationConnection = {
+  __typename?: "ProjectNextFieldConfigurationConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<ProjectNextFieldConfigurationEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<ProjectNextFieldConfiguration>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type ProjectNextFieldConfigurationEdge = {
+  __typename?: "ProjectNextFieldConfigurationEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<ProjectNextFieldConfiguration>;
 };
 
 /** The connection type for ProjectNextField. */
@@ -14753,6 +14802,11 @@ export type ProjectNextItemFieldValue = Node & {
    */
   projectField: ProjectNextField;
   /**
+   * The project field that contains this value and it's constraint.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  projectFieldConstraint: ProjectNextFieldConfiguration;
+  /**
    * The project item that contains this value.
    * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
    */
@@ -14789,6 +14843,108 @@ export type ProjectNextItemFieldValueEdge = {
   cursor: Scalars["String"];
   /** The item at the end of the edge. */
   node?: Maybe<ProjectNextItemFieldValue>;
+};
+
+/** An iteration field inside a project. */
+export type ProjectNextIterationField = Node &
+  ProjectNextFieldCommon & {
+    __typename?: "ProjectNextIterationField";
+    /**
+     * Iteration configuration settings
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    configuration: ProjectNextIterationFieldConfiguration;
+    /**
+     * Identifies the date and time when the object was created.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    createdAt: Scalars["DateTime"];
+    /**
+     * The field's type.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    dataType: ProjectNextFieldType;
+    /**
+     * Identifies the primary key from the database.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    databaseId?: Maybe<Scalars["Int"]>;
+    id: Scalars["ID"];
+    /**
+     * The project field's name.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    name: Scalars["String"];
+    /**
+     * The project that contains this field.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    project: ProjectNext;
+    /**
+     * The field's settings.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    settings?: Maybe<Scalars["String"]>;
+    /**
+     * Identifies the date and time when the object was last updated.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    updatedAt: Scalars["DateTime"];
+  };
+
+/** Iteration field configuration for a project. */
+export type ProjectNextIterationFieldConfiguration = {
+  __typename?: "ProjectNextIterationFieldConfiguration";
+  /**
+   * The iteration's completed iterations
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  completedIterations: Array<ProjectNextIterationFieldIteration>;
+  /**
+   * The iteration's duration in days
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  duration: Scalars["Int"];
+  /**
+   * The iteration's iterations
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  iterations: Array<ProjectNextIterationFieldIteration>;
+  /**
+   * The iteration's start day of the week
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  startDay: Scalars["Int"];
+};
+
+/** Iteration field iteration settings for a project. */
+export type ProjectNextIterationFieldIteration = {
+  __typename?: "ProjectNextIterationFieldIteration";
+  /**
+   * The iteration's duration in days
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  duration: Scalars["Int"];
+  /**
+   * The iteration's ID.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  id: Scalars["String"];
+  /**
+   * The iteration's start date
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  startDate: Scalars["Date"];
+  /**
+   * The iteration's title.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  title: Scalars["String"];
+  /**
+   * The iteration's html title.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  titleHTML: Scalars["String"];
 };
 
 /** Properties by which the return project can be ordered. */
@@ -14843,6 +14999,73 @@ export type ProjectNextOwnerProjectsNextArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   query?: InputMaybe<Scalars["String"]>;
   sortBy?: InputMaybe<ProjectNextOrderField>;
+};
+
+/** A single select field inside a project. */
+export type ProjectNextSingleSelectField = Node &
+  ProjectNextFieldCommon & {
+    __typename?: "ProjectNextSingleSelectField";
+    /**
+     * Identifies the date and time when the object was created.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    createdAt: Scalars["DateTime"];
+    /**
+     * The field's type.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    dataType: ProjectNextFieldType;
+    /**
+     * Identifies the primary key from the database.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    databaseId?: Maybe<Scalars["Int"]>;
+    id: Scalars["ID"];
+    /**
+     * The project field's name.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    name: Scalars["String"];
+    /**
+     * Options for the single select field
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    options: Array<ProjectNextSingleSelectFieldOption>;
+    /**
+     * The project that contains this field.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    project: ProjectNext;
+    /**
+     * The field's settings.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    settings?: Maybe<Scalars["String"]>;
+    /**
+     * Identifies the date and time when the object was last updated.
+     * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+     */
+    updatedAt: Scalars["DateTime"];
+  };
+
+/** Single select field option for a configuration for a project. */
+export type ProjectNextSingleSelectFieldOption = {
+  __typename?: "ProjectNextSingleSelectFieldOption";
+  /**
+   * The option's ID.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  id: Scalars["String"];
+  /**
+   * The option's name.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  name: Scalars["String"];
+  /**
+   * The option's html name.
+   * @deprecated The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement. Removal on 2023-01-01 UTC.
+   */
+  nameHTML: Scalars["String"];
 };
 
 /** Ways in which lists of projects can be ordered upon return. */
@@ -18462,6 +18685,8 @@ export type RemoveReactionPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The reaction object. */
   reaction?: Maybe<Reaction>;
+  /** The reaction groups for the subject. */
+  reactionGroups?: Maybe<Array<ReactionGroup>>;
   /** The reactable subject. */
   subject?: Maybe<Reactable>;
 };
@@ -21185,6 +21410,23 @@ export type RestrictedContribution = Contribution & {
   user: User;
 };
 
+/** Autogenerated input type of RetireSponsorsTier */
+export type RetireSponsorsTierInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the published tier to retire. */
+  tierId: Scalars["ID"];
+};
+
+/** Autogenerated return type of RetireSponsorsTier */
+export type RetireSponsorsTierPayload = {
+  __typename?: "RetireSponsorsTierPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The tier that was retired. */
+  sponsorsTier?: Maybe<SponsorsTier>;
+};
+
 /** A user, team, or app who has the ability to dismiss a review on a protected branch. */
 export type ReviewDismissalAllowance = Node & {
   __typename?: "ReviewDismissalAllowance";
@@ -22018,6 +22260,7 @@ export type SponsorableSponsorshipNewslettersArgs = {
 
 /** Entities that can sponsor or be sponsored through GitHub Sponsors. */
 export type SponsorableSponsorshipsAsMaintainerArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -22028,6 +22271,7 @@ export type SponsorableSponsorshipsAsMaintainerArgs = {
 
 /** Entities that can sponsor or be sponsored through GitHub Sponsors. */
 export type SponsorableSponsorshipsAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -22681,6 +22925,8 @@ export type SponsorsListing = Node & {
   __typename?: "SponsorsListing";
   /** The current goal the maintainer is trying to reach with GitHub Sponsors, if any. */
   activeGoal?: Maybe<SponsorsGoal>;
+  /** The Stripe Connect account currently in use for payouts for this Sponsors listing, if any. Will only return a value when queried by the maintainer themselves, or by an admin of the sponsorable organization. */
+  activeStripeConnectAccount?: Maybe<StripeConnectAccount>;
   /** The name of the country or region with the maintainer's bank account or fiscal host. Will only return a value when queried by the maintainer themselves, or by an admin of the sponsorable organization. */
   billingCountryOrRegion?: Maybe<Scalars["String"]>;
   /** The email address used by GitHub to contact the sponsorable about their GitHub Sponsors profile. Will only return a value when queried by the maintainer themselves, or by an admin of the sponsorable organization. */
@@ -22917,6 +23163,8 @@ export type SponsorshipEdge = {
 /** An update sent to sponsors of a user or organization on GitHub Sponsors. */
 export type SponsorshipNewsletter = Node & {
   __typename?: "SponsorshipNewsletter";
+  /** The author of the newsletter. */
+  author?: Maybe<User>;
   /** The contents of the newsletter, the message the sponsorable wanted to give. */
   body: Scalars["String"];
   /** Identifies the date and time when the object was created. */
@@ -23293,6 +23541,23 @@ export enum StatusState {
   /** Status is successful. */
   Success = "SUCCESS",
 }
+
+/** A Stripe Connect account for receiving sponsorship funds from GitHub Sponsors. */
+export type StripeConnectAccount = {
+  __typename?: "StripeConnectAccount";
+  /** The account number used to identify this Stripe Connect account. */
+  accountId: Scalars["String"];
+  /** The name of the country or region of an external account, such as a bank account, tied to the Stripe Connect account. Will only return a value when queried by the maintainer of the associated GitHub Sponsors profile themselves, or by an admin of the sponsorable organization. */
+  billingCountryOrRegion?: Maybe<Scalars["String"]>;
+  /** The name of the country or region of the Stripe Connect account. Will only return a value when queried by the maintainer of the associated GitHub Sponsors profile themselves, or by an admin of the sponsorable organization. */
+  countryOrRegion?: Maybe<Scalars["String"]>;
+  /** Whether this Stripe Connect account is currently in use for the associated GitHub Sponsors profile. */
+  isActive: Scalars["Boolean"];
+  /** The GitHub Sponsors profile associated with this Stripe Connect account. */
+  sponsorsListing: SponsorsListing;
+  /** The URL to access this Stripe Connect account on Stripe's website. */
+  stripeDashboardUrl: Scalars["URI"];
+};
 
 /** Autogenerated input type of SubmitPullRequestReview */
 export type SubmitPullRequestReviewInput = {
@@ -25804,6 +26069,15 @@ export type UpdateProjectNextItemFieldInput = {
   /** A unique identifier for the client performing the mutation. */
   clientMutationId?: InputMaybe<Scalars["String"]>;
   /**
+   * The id of the field to be updated. Only supports custom fields and status for now.
+   *
+   * **Upcoming Change on 2023-01-01 UTC**
+   * **Description:** `fieldConstraintId` will be removed. Follow the ProjectV2 guide at https://github.blog/changelog/2022-06-23-the-new-github-issues-june-23rd-update/, to find a suitable replacement.
+   * **Reason:** The `ProjectNext` API is deprecated in favour of the more capable `ProjectV2` API.
+   *
+   */
+  fieldConstraintId?: InputMaybe<Scalars["ID"]>;
+  /**
    * The id of the field to be updated.
    *
    * **Upcoming Change on 2023-01-01 UTC**
@@ -25812,6 +26086,15 @@ export type UpdateProjectNextItemFieldInput = {
    *
    */
   fieldId?: InputMaybe<Scalars["ID"]>;
+  /**
+   * The id of the field to be updated. Only supports custom fields and status for now.
+   *
+   * **Upcoming Change on 2022-10-01 UTC**
+   * **Description:** `fieldWithSettingId` will be removed. Use `fieldConstraintId` instead
+   * **Reason:** Renamed to fieldConstraintId to improve naming consistency.
+   *
+   */
+  fieldWithSettingId?: InputMaybe<Scalars["ID"]>;
   /**
    * The id of the item to be updated. This field is required.
    *
@@ -26809,6 +27092,7 @@ export type UserSponsorshipNewslettersArgs = {
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type UserSponsorshipsAsMaintainerArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -26819,6 +27103,7 @@ export type UserSponsorshipsAsMaintainerArgs = {
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type UserSponsorshipsAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
@@ -27240,6 +27525,31 @@ export enum WorkflowRunOrderField {
   CreatedAt = "CREATED_AT",
 }
 
+export type CreateLinkedBranchMutationVariables = Exact<{
+  input: CreateLinkedBranchInput;
+}>;
+
+export type CreateLinkedBranchMutation = {
+  __typename?: "Mutation";
+  createLinkedBranch?: {
+    __typename?: "CreateLinkedBranchPayload";
+    clientMutationId?: string | null;
+    linkedBranch?: {
+      __typename?: "LinkedBranch";
+      ref?: { __typename?: "Ref"; id: string; name: string } | null;
+    } | null;
+  } | null;
+};
+
+export type DeleteLinkedBranchMutationVariables = Exact<{
+  input: DeleteLinkedBranchInput;
+}>;
+
+export type DeleteLinkedBranchMutation = {
+  __typename?: "Mutation";
+  deleteLinkedBranch?: { __typename?: "DeleteLinkedBranchPayload"; clientMutationId?: string | null } | null;
+};
+
 export type DiscussionFieldsFragment = {
   __typename?: "Discussion";
   id: string;
@@ -27257,6 +27567,15 @@ export type DiscussionFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27301,6 +27620,15 @@ export type SearchDiscussionsQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27346,6 +27674,15 @@ export type SearchDiscussionsQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27389,6 +27726,15 @@ export type IssueFieldsFragment = {
     | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
     | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
     | null;
+  linkedBranches: {
+    __typename?: "LinkedBranchConnection";
+    totalCount: number;
+    nodes?: Array<{
+      __typename?: "LinkedBranch";
+      id: string;
+      ref?: { __typename?: "Ref"; id: string; name: string } | null;
+    } | null> | null;
+  };
   milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
   repository: {
     __typename?: "Repository";
@@ -27399,6 +27745,15 @@ export type IssueFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27456,6 +27811,15 @@ export type SearchCreatedIssuesQuery = {
                 isViewer: boolean;
               }
             | null;
+          linkedBranches: {
+            __typename?: "LinkedBranchConnection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "LinkedBranch";
+              id: string;
+              ref?: { __typename?: "Ref"; id: string; name: string } | null;
+            } | null> | null;
+          };
           milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
           repository: {
             __typename?: "Repository";
@@ -27466,6 +27830,15 @@ export type SearchCreatedIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27521,6 +27894,15 @@ export type SearchCreatedIssuesQuery = {
                 isViewer: boolean;
               }
             | null;
+          linkedBranches: {
+            __typename?: "LinkedBranchConnection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "LinkedBranch";
+              id: string;
+              ref?: { __typename?: "Ref"; id: string; name: string } | null;
+            } | null> | null;
+          };
           milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
           repository: {
             __typename?: "Repository";
@@ -27531,6 +27913,15 @@ export type SearchCreatedIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27655,6 +28046,15 @@ export type SearchOpenIssuesQuery = {
                 isViewer: boolean;
               }
             | null;
+          linkedBranches: {
+            __typename?: "LinkedBranchConnection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "LinkedBranch";
+              id: string;
+              ref?: { __typename?: "Ref"; id: string; name: string } | null;
+            } | null> | null;
+          };
           milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
           repository: {
             __typename?: "Repository";
@@ -27665,6 +28065,15 @@ export type SearchOpenIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27720,6 +28129,15 @@ export type SearchOpenIssuesQuery = {
                 isViewer: boolean;
               }
             | null;
+          linkedBranches: {
+            __typename?: "LinkedBranchConnection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "LinkedBranch";
+              id: string;
+              ref?: { __typename?: "Ref"; id: string; name: string } | null;
+            } | null> | null;
+          };
           milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
           repository: {
             __typename?: "Repository";
@@ -27730,6 +28148,15 @@ export type SearchOpenIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27781,6 +28208,11 @@ export type IssueDetailFieldsFragment = {
     totalCount: number;
     nodes?: Array<{ __typename?: "Label"; id: string; name: string; color: string; isDefault: boolean } | null> | null;
   } | null;
+  linkedBranches: {
+    __typename?: "LinkedBranchConnection";
+    totalCount: number;
+    nodes?: Array<{ __typename?: "LinkedBranch"; ref?: { __typename?: "Ref"; name: string } | null } | null> | null;
+  };
   milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
   repository: {
     __typename?: "Repository";
@@ -27791,6 +28223,15 @@ export type IssueDetailFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -27913,6 +28354,14 @@ export type IssueDetailsQuery = {
             isDefault: boolean;
           } | null> | null;
         } | null;
+        linkedBranches: {
+          __typename?: "LinkedBranchConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "LinkedBranch";
+            ref?: { __typename?: "Ref"; name: string } | null;
+          } | null> | null;
+        };
         milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
         repository: {
           __typename?: "Repository";
@@ -27923,6 +28372,15 @@ export type IssueDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
+          defaultBranchRef?: {
+            __typename?: "Ref";
+            target?:
+              | { __typename?: "Blob"; oid: any }
+              | { __typename?: "Commit"; oid: any }
+              | { __typename?: "Tag"; oid: any }
+              | { __typename?: "Tree"; oid: any }
+              | null;
+          } | null;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28012,6 +28470,8 @@ export type IssueDetailsQuery = {
     | { __typename?: "ProjectNextField" }
     | { __typename?: "ProjectNextItem" }
     | { __typename?: "ProjectNextItemFieldValue" }
+    | { __typename?: "ProjectNextIterationField" }
+    | { __typename?: "ProjectNextSingleSelectField" }
     | { __typename?: "ProjectV2" }
     | { __typename?: "ProjectV2Field" }
     | { __typename?: "ProjectV2Item" }
@@ -28150,6 +28610,15 @@ export type SearchIssuesQuery = {
                 isViewer: boolean;
               }
             | null;
+          linkedBranches: {
+            __typename?: "LinkedBranchConnection";
+            totalCount: number;
+            nodes?: Array<{
+              __typename?: "LinkedBranch";
+              id: string;
+              ref?: { __typename?: "Ref"; id: string; name: string } | null;
+            } | null> | null;
+          };
           milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
           repository: {
             __typename?: "Repository";
@@ -28160,6 +28629,15 @@ export type SearchIssuesQuery = {
             mergeCommitAllowed: boolean;
             squashMergeAllowed: boolean;
             rebaseMergeAllowed: boolean;
+            defaultBranchRef?: {
+              __typename?: "Ref";
+              target?:
+                | { __typename?: "Blob"; oid: any }
+                | { __typename?: "Commit"; oid: any }
+                | { __typename?: "Tag"; oid: any }
+                | { __typename?: "Tree"; oid: any }
+                | null;
+            } | null;
             owner:
               | { __typename?: "Organization"; login: string; avatarUrl: any }
               | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28267,6 +28745,15 @@ export type CreateIssueMutation = {
         | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
         | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
         | null;
+      linkedBranches: {
+        __typename?: "LinkedBranchConnection";
+        totalCount: number;
+        nodes?: Array<{
+          __typename?: "LinkedBranch";
+          id: string;
+          ref?: { __typename?: "Ref"; id: string; name: string } | null;
+        } | null> | null;
+      };
       milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
       repository: {
         __typename?: "Repository";
@@ -28277,6 +28764,15 @@ export type CreateIssueMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
+        defaultBranchRef?: {
+          __typename?: "Ref";
+          target?:
+            | { __typename?: "Blob"; oid: any }
+            | { __typename?: "Commit"; oid: any }
+            | { __typename?: "Tag"; oid: any }
+            | { __typename?: "Tree"; oid: any }
+            | null;
+        } | null;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28321,6 +28817,15 @@ export type PullRequestFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28421,6 +28926,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28521,6 +29035,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28621,6 +29144,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28721,6 +29253,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28821,6 +29362,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -28921,6 +29471,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29021,6 +29580,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29121,6 +29689,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29221,6 +29798,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29321,6 +29907,15 @@ export type MyPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29430,6 +30025,15 @@ export type SearchPullRequestsQuery = {
               mergeCommitAllowed: boolean;
               squashMergeAllowed: boolean;
               rebaseMergeAllowed: boolean;
+              defaultBranchRef?: {
+                __typename?: "Ref";
+                target?:
+                  | { __typename?: "Blob"; oid: any }
+                  | { __typename?: "Commit"; oid: any }
+                  | { __typename?: "Tag"; oid: any }
+                  | { __typename?: "Tree"; oid: any }
+                  | null;
+              } | null;
               owner:
                 | { __typename?: "Organization"; login: string; avatarUrl: any }
                 | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29526,6 +30130,15 @@ export type PullRequestDetailsFieldsFragment = {
     mergeCommitAllowed: boolean;
     squashMergeAllowed: boolean;
     rebaseMergeAllowed: boolean;
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
     owner:
       | { __typename?: "Organization"; login: string; avatarUrl: any }
       | { __typename?: "User"; login: string; avatarUrl: any };
@@ -29729,6 +30342,8 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "ProjectNextField" }
     | { __typename?: "ProjectNextItem" }
     | { __typename?: "ProjectNextItemFieldValue" }
+    | { __typename?: "ProjectNextIterationField" }
+    | { __typename?: "ProjectNextSingleSelectField" }
     | { __typename?: "ProjectV2" }
     | { __typename?: "ProjectV2Field" }
     | { __typename?: "ProjectV2Item" }
@@ -29769,6 +30384,15 @@ export type PullRequestDetailsQuery = {
           mergeCommitAllowed: boolean;
           squashMergeAllowed: boolean;
           rebaseMergeAllowed: boolean;
+          defaultBranchRef?: {
+            __typename?: "Ref";
+            target?:
+              | { __typename?: "Blob"; oid: any }
+              | { __typename?: "Commit"; oid: any }
+              | { __typename?: "Tag"; oid: any }
+              | { __typename?: "Tree"; oid: any }
+              | null;
+          } | null;
           owner:
             | { __typename?: "Organization"; login: string; avatarUrl: any }
             | { __typename?: "User"; login: string; avatarUrl: any };
@@ -30153,6 +30777,8 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "ProjectNextField" }
     | { __typename?: "ProjectNextItem" }
     | { __typename?: "ProjectNextItemFieldValue" }
+    | { __typename?: "ProjectNextIterationField" }
+    | { __typename?: "ProjectNextSingleSelectField" }
     | { __typename?: "ProjectV2" }
     | { __typename?: "ProjectV2Field" }
     | { __typename?: "ProjectV2Item" }
@@ -30429,6 +31055,15 @@ export type InitPullRequestMutation = {
         mergeCommitAllowed: boolean;
         squashMergeAllowed: boolean;
         rebaseMergeAllowed: boolean;
+        defaultBranchRef?: {
+          __typename?: "Ref";
+          target?:
+            | { __typename?: "Blob"; oid: any }
+            | { __typename?: "Commit"; oid: any }
+            | { __typename?: "Tag"; oid: any }
+            | { __typename?: "Tree"; oid: any }
+            | null;
+        } | null;
         owner:
           | { __typename?: "Organization"; login: string; avatarUrl: any }
           | { __typename?: "User"; login: string; avatarUrl: any };
@@ -30490,6 +31125,15 @@ export type ShortRepositoryFieldsFragment = {
   mergeCommitAllowed: boolean;
   squashMergeAllowed: boolean;
   rebaseMergeAllowed: boolean;
+  defaultBranchRef?: {
+    __typename?: "Ref";
+    target?:
+      | { __typename?: "Blob"; oid: any }
+      | { __typename?: "Commit"; oid: any }
+      | { __typename?: "Tag"; oid: any }
+      | { __typename?: "Tree"; oid: any }
+      | null;
+  } | null;
   owner:
     | { __typename?: "Organization"; login: string; avatarUrl: any }
     | { __typename?: "User"; login: string; avatarUrl: any };
@@ -30669,6 +31313,95 @@ export type DataForRepositoryQuery = {
   } | null;
 };
 
+export type RepositoryIssuesQueryVariables = Exact<{
+  owner: Scalars["String"];
+  name: Scalars["String"];
+}>;
+
+export type RepositoryIssuesQuery = {
+  __typename?: "Query";
+  repository?: {
+    __typename?: "Repository";
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      id: string;
+      name: string;
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
+    issues: {
+      __typename?: "IssueConnection";
+      nodes?: Array<{
+        __typename?: "Issue";
+        id: string;
+        url: any;
+        title: string;
+        number: number;
+        closed: boolean;
+        state: IssueState;
+        stateReason?: IssueStateReason | null;
+        updatedAt: any;
+        author?:
+          | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | null;
+        linkedBranches: {
+          __typename?: "LinkedBranchConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "LinkedBranch";
+            id: string;
+            ref?: { __typename?: "Ref"; id: string; name: string } | null;
+          } | null> | null;
+        };
+        milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+        repository: {
+          __typename?: "Repository";
+          id: string;
+          nameWithOwner: string;
+          name: string;
+          url: any;
+          mergeCommitAllowed: boolean;
+          squashMergeAllowed: boolean;
+          rebaseMergeAllowed: boolean;
+          defaultBranchRef?: {
+            __typename?: "Ref";
+            target?:
+              | { __typename?: "Blob"; oid: any }
+              | { __typename?: "Commit"; oid: any }
+              | { __typename?: "Tag"; oid: any }
+              | { __typename?: "Tree"; oid: any }
+              | null;
+          } | null;
+          owner:
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any };
+        };
+        comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+        assignees: {
+          __typename?: "UserConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "User";
+            id: string;
+            avatarUrl: any;
+            name?: string | null;
+            login: string;
+            isViewer: boolean;
+          } | null> | null;
+        };
+      } | null> | null;
+    };
+  } | null;
+};
+
 export type ReleaseFieldsFragment = {
   __typename?: "Release";
   id: string;
@@ -30754,6 +31487,11 @@ export type GetViewerQuery = {
 export const ShortRepositoryFieldsFragmentDoc = gql`
   fragment ShortRepositoryFields on Repository {
     id
+    defaultBranchRef {
+      target {
+        oid
+      }
+    }
     nameWithOwner
     name
     owner {
@@ -30841,6 +31579,18 @@ export const IssueFieldsFragmentDoc = gql`
         avatarUrl(size: 64)
       }
     }
+    linkedBranches(first: 50) {
+      totalCount
+      nodes {
+        ... on LinkedBranch {
+          id
+          ref {
+            id
+            name
+          }
+        }
+      }
+    }
     milestone {
       id
       title
@@ -30908,6 +31658,16 @@ export const IssueDetailFieldsFragmentDoc = gql`
         name
         color
         isDefault
+      }
+    }
+    linkedBranches(first: 50) {
+      totalCount
+      nodes {
+        ... on LinkedBranch {
+          ref {
+            name
+          }
+        }
       }
     }
     milestone {
@@ -31241,6 +32001,26 @@ export const ReleaseFieldsFragmentDoc = gql`
     createdAt
     tagName
     url
+  }
+`;
+export const CreateLinkedBranchDocument = gql`
+  mutation createLinkedBranch($input: CreateLinkedBranchInput!) {
+    createLinkedBranch(input: $input) {
+      clientMutationId
+      linkedBranch {
+        ref {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+export const DeleteLinkedBranchDocument = gql`
+  mutation deleteLinkedBranch($input: DeleteLinkedBranchInput!) {
+    deleteLinkedBranch(input: $input) {
+      clientMutationId
+    }
   }
 `;
 export const SearchDiscussionsDocument = gql`
@@ -31798,6 +32578,25 @@ export const DataForRepositoryDocument = gql`
   ${CommitFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
+export const RepositoryIssuesDocument = gql`
+  query repositoryIssues($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef {
+        id
+        name
+        target {
+          oid
+        }
+      }
+      issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+        nodes {
+          ...IssueFields
+        }
+      }
+    }
+  }
+  ${IssueFieldsFragmentDoc}
+`;
 export const RepositoryReleasesDocument = gql`
   query repositoryReleases($name: String!, $owner: String!) {
     repository(name: $name, owner: $owner) {
@@ -31852,6 +32651,34 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    createLinkedBranch(
+      variables: CreateLinkedBranchMutationVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<CreateLinkedBranchMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CreateLinkedBranchMutation>(CreateLinkedBranchDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "createLinkedBranch",
+        "mutation"
+      );
+    },
+    deleteLinkedBranch(
+      variables: DeleteLinkedBranchMutationVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<DeleteLinkedBranchMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DeleteLinkedBranchMutation>(DeleteLinkedBranchDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "deleteLinkedBranch",
+        "mutation"
+      );
+    },
     searchDiscussions(
       variables: SearchDiscussionsQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"]
@@ -32298,6 +33125,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...wrappedRequestHeaders,
           }),
         "dataForRepository",
+        "query"
+      );
+    },
+    repositoryIssues(
+      variables: RepositoryIssuesQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<RepositoryIssuesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<RepositoryIssuesQuery>(RepositoryIssuesDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "repositoryIssues",
         "query"
       );
     },
