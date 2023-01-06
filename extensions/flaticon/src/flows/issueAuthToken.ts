@@ -1,4 +1,5 @@
 import { emptyToken, newToken, Token } from '../entities/Token';
+import fetch from 'cross-fetch';
 
 export const issueAuthToken = async (apikey: string): Promise<{ token: Token; error?: Error }> => {
   const response = await fetch(authURI, options(apikey));

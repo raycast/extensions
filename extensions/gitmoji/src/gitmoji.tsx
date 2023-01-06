@@ -1,10 +1,11 @@
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues, Color } from "@raycast/api";
 import { gitmojis as defaultGitmojis } from "gitmojis";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
 interface PreferenceValues {
-  copy: "emoji" | "code";
+  copy: "emoji" | "code" | "description-emoji" | "description-code";
+  action: "paste" | "copy";
 }
 
 type Gitmoji = {
@@ -59,16 +60,47 @@ const GitmojiListItem = (props: { gitmoji: Gitmoji }) => {
       key={gitmoji.name}
       title={gitmoji.description}
       icon={gitmoji.emoji}
-      accessoryTitle={gitmoji.code}
+      accessories={[{ tag: { value: gitmoji.code, color: Color.Yellow } }]}
       keywords={[gitmoji.code.replace(":", ""), gitmoji.name]}
       actions={
         <ActionPanel>
-          <Action.Paste content={gitmoji[copy]} />
-          <Action.CopyToClipboard content={gitmoji[copy]} />
+          {copy === "emoji" && <PrimaryAction content={gitmoji.emoji} />}
+          {copy === "code" && <PrimaryAction content={gitmoji.code} />}
+          {copy === "description-emoji" && <PrimaryAction content={`${gitmoji.emoji} ${gitmoji.description}`} />}
+          {copy === "description-code" && <PrimaryAction content={`${gitmoji.code} ${gitmoji.description}`} />}
+
+          <ActionPanel.Section>
+            <Action.CopyToClipboard content={gitmoji.emoji} title="Copy Emoji" />
+            <Action.CopyToClipboard content={gitmoji.code} title="Copy Code" />
+            <Action.CopyToClipboard
+              content={`${gitmoji.emoji} ${gitmoji.description}`}
+              title="Copy Emoji + Description"
+            />
+            <Action.CopyToClipboard
+              content={`${gitmoji.code} ${gitmoji.description}`}
+              title="Copy Code + Description"
+            />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            <Action.Paste content={gitmoji.emoji} title="Paste Emoji" />
+            <Action.Paste content={gitmoji.code} title="Paste Code" />
+            <Action.Paste content={`${gitmoji.emoji} ${gitmoji.description}`} title="Paste Emoji + Description" />
+            <Action.Paste content={`${gitmoji.code} ${gitmoji.description}`} title="Paste Code + Description" />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 };
+
+function PrimaryAction(props: { content: string }) {
+  const { action } = getPreferenceValues<PreferenceValues>();
+  if (action === "copy") {
+    return <Action.CopyToClipboard content={props.content} shortcut={{ modifiers: ["cmd"], key: "c" }} />;
+  } else {
+    return <Action.Paste content={props.content} shortcut={{ modifiers: ["cmd"], key: "p" }} />;
+  }
+}
 
 export default GitmojiList;

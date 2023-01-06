@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2023-01-02
+
+- Added a fix where some accounts with no collections or groups without collections failed to display results.
+
 ## [Add preference setting] - 2022-12-21
 
 - Adds a preference checkbox to always use the last used collection in filter

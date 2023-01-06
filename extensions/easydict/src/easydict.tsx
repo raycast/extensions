@@ -2,22 +2,31 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2022-10-26 21:47
+ * @lastEditTime: 2023-01-04 23:17
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { getSelectedText, Icon, List } from "@raycast/api";
+import { Icon, LaunchProps, List, getSelectedText } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { configAxiosProxy, delayGetSystemProxy } from "./axiosConfig";
-import { checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories, ListActionPanel } from "./components";
+import { ListActionPanel, checkIfPreferredLanguagesConflict, getListItemIcon, getWordAccessories } from "./components";
 import { DataManager } from "./dataManager/dataManager";
 import { QueryWordInfo } from "./dictionary/youdao/types";
 import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
+
+const disableConsoleLog = true;
+
+if (disableConsoleLog) {
+  // Since too many logs will cause bugs, we need to disable the console.log in development. Ref: https://github.com/raycast/extensions/pull/3917#issuecomment-1370771358
+  console.log = function () {
+    // do nothing
+  };
+}
 
 console.log(`enter easydict.tsx`);
 
@@ -27,7 +36,7 @@ interface EasydictArguments {
   queryText?: string;
 }
 
-export default function (props: { arguments: EasydictArguments }) {
+export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const isConflict = checkIfPreferredLanguagesConflict();
   if (isConflict) {
     return isConflict;
