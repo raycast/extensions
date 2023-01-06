@@ -120,6 +120,13 @@
       "icon": "functions.webp"
     },
     {
+      "name": "registry",
+      "title": "Registry",
+      "description": "Get information about Registry",
+      "mode": "view",
+      "icon": "registry.webp"
+    },
+    {
       "name": "transactionalEmail",
       "title": "Transactional Email",
       "description": "Get information about transactionalEmail domains",

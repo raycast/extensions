@@ -19,6 +19,7 @@ export const getPrivacyAccessory = (privacy: Container.v1beta1.ContainerPrivacy)
       return { icon: Icon.QuestionMarkCircle, tooltip: 'Unknown' }
   }
 }
+
 export const getImageName = (container: Container.v1beta1.Container) =>
   container.registryImage.split('/').pop()
 

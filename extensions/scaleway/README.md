@@ -55,7 +55,7 @@ Compute:
 Containers:
 
 - Kubernetes
-- Registry 🤞🏻 ( soon )
+- Registry
 
 Networks:
 
@@ -67,10 +67,10 @@ Networks:
 
 Serverless:
 
-- Functions 🤞🏻 ( soon )
+- Functions
 - Containers
 - Databases 🤞🏻 ( soon )
-- Messaging & Queing 🤞🏻 ( soon )
+- Messaging & Queing
 
 Storage:
 

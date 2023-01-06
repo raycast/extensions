@@ -18,6 +18,7 @@ import {
   VPC,
   VPCGW,
   createClient,
+  enableConsoleLogger,
 } from '@scaleway/sdk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
@@ -63,6 +64,8 @@ export const useAPI = () => {
 export const APIProvider = ({ children }: APIProviderProps) => {
   const apis = useMemo(() => {
     const client = createClient(clientSetting)
+
+    enableConsoleLogger('debug')
 
     return {
       accountV2alpha1: new Account.v2alpha1.API(client),
