@@ -15,7 +15,6 @@
     {
       "name": "index",
       "title": "Search Lyrics",
-      "subtitle": "Lyrics",
       "description": "Search for lyrics to the current playing song",
       "mode": "no-view"
     }
