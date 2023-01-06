@@ -5,6 +5,9 @@
   "description": "Generate a story using OpenAI and Upstash.",
   "icon": "command-icon.png",
   "author": "andreaselia",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Fun",
@@ -17,24 +20,22 @@
     {
       "name": "index",
       "title": "Generate A Story",
-      "description": "Generate a story using OpenAI and Upstash.",
+      "description": "Generate a story using OpenAI.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "openai_api_key",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "OpenAI API Key",
-      "description": "You'll need this in order to send calls to the OpenAI API."
+      "description": "You'll need this in order to send calls to the OpenAI."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.2",
     "@raycast/utils": "^1.4.14",
-    "@upstash/qstash": "^0.3.2",
-    "@upstash/redis": "^1.18.5",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
