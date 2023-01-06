@@ -84,11 +84,7 @@ export default function Command() {
       </Form.Dropdown>
       <Form.TextField title="My Story Is About" placeholder="Two friends going on an adventure" {...itemProps.theme} />
       <Form.TextField title="My Main Character Is" placeholder="A dog named Spot" {...itemProps.character} />
-      <Form.TextField
-        title="The Moral of My Story Is"
-        placeholder="To always be kind"
-        {...itemProps.moral}
-      />
+      <Form.TextField title="The Moral of My Story Is" placeholder="To always be kind" {...itemProps.moral} />
     </Form>
   );
 }
