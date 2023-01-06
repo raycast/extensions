@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Detail, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues, Detail, Icon, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import fetch from "node-fetch";
 import { useState } from "react";
@@ -51,11 +51,29 @@ export default function Command() {
         }),
       })
         .then((response) => response.json())
-        .then((data: any) => setStory(data.choices[0].text))
-        .catch((error) => showToast({ title: "Error generating story", message: error.message }))
-        .finally(() => setLoading(false));
+        .then((data: any) => {
+          if (data.error.message) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Error generating story",
+              message: data.error.message,
+            });
 
-      showToast({ title: "Story generated" });
+            return;
+          }
+
+          setStory(data.choices[0].text);
+
+          showToast({ title: "Story generated" });
+        })
+        .catch((error) => {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Error generating story",
+            message: error.message,
+          });
+        })
+        .finally(() => setLoading(false));
     },
     validation: {
       theme: FormValidation.Required,
