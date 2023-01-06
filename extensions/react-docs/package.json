@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "react-docs",
-  "title": "Documentation",
+  "title": "React Documentation",
   "description": "Quick links to the new React documentation",
   "icon": "icon.png",
   "author": "webdiego",
@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "React Docs",
+      "title": "Open Documentation",
+      "subtitle": "React",
       "description": "Quick links to the new React documentation",
       "mode": "view"
     }
