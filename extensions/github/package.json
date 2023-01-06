@@ -61,6 +61,12 @@
       "mode": "view"
     },
     {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
+      "mode": "view"
+    },
+    {
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search in your public or private repositories by name.",

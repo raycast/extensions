@@ -27531,7 +27531,14 @@ export type CreateLinkedBranchMutationVariables = Exact<{
 
 export type CreateLinkedBranchMutation = {
   __typename?: "Mutation";
-  createLinkedBranch?: { __typename?: "CreateLinkedBranchPayload"; clientMutationId?: string | null } | null;
+  createLinkedBranch?: {
+    __typename?: "CreateLinkedBranchPayload";
+    clientMutationId?: string | null;
+    linkedBranch?: {
+      __typename?: "LinkedBranch";
+      ref?: { __typename?: "Ref"; id: string; name: string } | null;
+    } | null;
+  } | null;
 };
 
 export type DeleteLinkedBranchMutationVariables = Exact<{
@@ -31306,6 +31313,95 @@ export type DataForRepositoryQuery = {
   } | null;
 };
 
+export type RepositoryIssuesQueryVariables = Exact<{
+  owner: Scalars["String"];
+  name: Scalars["String"];
+}>;
+
+export type RepositoryIssuesQuery = {
+  __typename?: "Query";
+  repository?: {
+    __typename?: "Repository";
+    defaultBranchRef?: {
+      __typename?: "Ref";
+      id: string;
+      name: string;
+      target?:
+        | { __typename?: "Blob"; oid: any }
+        | { __typename?: "Commit"; oid: any }
+        | { __typename?: "Tag"; oid: any }
+        | { __typename?: "Tree"; oid: any }
+        | null;
+    } | null;
+    issues: {
+      __typename?: "IssueConnection";
+      nodes?: Array<{
+        __typename?: "Issue";
+        id: string;
+        url: any;
+        title: string;
+        number: number;
+        closed: boolean;
+        state: IssueState;
+        stateReason?: IssueStateReason | null;
+        updatedAt: any;
+        author?:
+          | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | null;
+        linkedBranches: {
+          __typename?: "LinkedBranchConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "LinkedBranch";
+            id: string;
+            ref?: { __typename?: "Ref"; id: string; name: string } | null;
+          } | null> | null;
+        };
+        milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
+        repository: {
+          __typename?: "Repository";
+          id: string;
+          nameWithOwner: string;
+          name: string;
+          url: any;
+          mergeCommitAllowed: boolean;
+          squashMergeAllowed: boolean;
+          rebaseMergeAllowed: boolean;
+          defaultBranchRef?: {
+            __typename?: "Ref";
+            target?:
+              | { __typename?: "Blob"; oid: any }
+              | { __typename?: "Commit"; oid: any }
+              | { __typename?: "Tag"; oid: any }
+              | { __typename?: "Tree"; oid: any }
+              | null;
+          } | null;
+          owner:
+            | { __typename?: "Organization"; login: string; avatarUrl: any }
+            | { __typename?: "User"; login: string; avatarUrl: any };
+        };
+        comments: { __typename?: "IssueCommentConnection"; totalCount: number };
+        assignees: {
+          __typename?: "UserConnection";
+          totalCount: number;
+          nodes?: Array<{
+            __typename?: "User";
+            id: string;
+            avatarUrl: any;
+            name?: string | null;
+            login: string;
+            isViewer: boolean;
+          } | null> | null;
+        };
+      } | null> | null;
+    };
+  } | null;
+};
+
 export type ReleaseFieldsFragment = {
   __typename?: "Release";
   id: string;
@@ -31911,6 +32007,12 @@ export const CreateLinkedBranchDocument = gql`
   mutation createLinkedBranch($input: CreateLinkedBranchInput!) {
     createLinkedBranch(input: $input) {
       clientMutationId
+      linkedBranch {
+        ref {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -32476,6 +32578,25 @@ export const DataForRepositoryDocument = gql`
   ${CommitFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
+export const RepositoryIssuesDocument = gql`
+  query repositoryIssues($owner: String!, $name: String!) {
+    repository(owner: $owner, name: $name) {
+      defaultBranchRef {
+        id
+        name
+        target {
+          oid
+        }
+      }
+      issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+        nodes {
+          ...IssueFields
+        }
+      }
+    }
+  }
+  ${IssueFieldsFragmentDoc}
+`;
 export const RepositoryReleasesDocument = gql`
   query repositoryReleases($name: String!, $owner: String!) {
     repository(name: $name, owner: $owner) {
@@ -33004,6 +33125,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...wrappedRequestHeaders,
           }),
         "dataForRepository",
+        "query"
+      );
+    },
+    repositoryIssues(
+      variables: RepositoryIssuesQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<RepositoryIssuesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<RepositoryIssuesQuery>(RepositoryIssuesDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "repositoryIssues",
         "query"
       );
     },

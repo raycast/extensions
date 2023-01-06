@@ -136,6 +136,23 @@ query dataForRepository($owner: String!, $name: String!) {
   }
 }
 
+query repositoryIssues($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    defaultBranchRef {
+      id
+      name
+      target {
+        oid
+      }
+    }
+    issues(first: 50, states: OPEN, orderBy: { field: CREATED_AT, direction: DESC }) {
+      nodes {
+        ...IssueFields
+      }
+    }
+  }
+}
+
 fragment ReleaseFields on Release {
   id
   description
