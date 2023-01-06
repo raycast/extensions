@@ -52,7 +52,7 @@ export default function Command() {
       })
         .then((response) => response.json())
         .then((data: any) => {
-          if (data.error.message) {
+          if (data.error?.message) {
             showToast({
               style: Toast.Style.Failure,
               title: "Error generating story",
