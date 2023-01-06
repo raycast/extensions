@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate A Story",
+      "title": "Generate a Story",
       "description": "Generate a story using OpenAI.",
       "mode": "view"
     }
