@@ -82,12 +82,11 @@ export default function Command() {
           <Form.Dropdown.Item key={index} value={key} title={Object.values(storyTypes)[index]} />
         ))}
       </Form.Dropdown>
-      <Form.TextField title="My story is about" placeholder="two friends going on an adventure" {...itemProps.theme} />
-      <Form.TextField title="My main character is" placeholder="a dog named Spot" {...itemProps.character} />
+      <Form.TextField title="My Story Is About" placeholder="Two friends going on an adventure" {...itemProps.theme} />
+      <Form.TextField title="My Main Character Is" placeholder="A dog named Spot" {...itemProps.character} />
       <Form.TextField
-        title="The moral of my story
-        is"
-        placeholder="to always be kind"
+        title="The Moral of My Story Is"
+        placeholder="To always be kind"
         {...itemProps.moral}
       />
     </Form>
