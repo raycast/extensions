@@ -129,6 +129,7 @@
 /extensions/confluence-search                        @daviddkkim @lr1980
 /extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @Rawnly
+/extensions/contentful                               @ewgenius
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/convert                                  @nielsvanrijn
 /extensions/converter                                @koinzhang
@@ -395,6 +396,7 @@
 /extensions/logseq                                   @futantan @futantan
 /extensions/lorem-ipsum                              @AntonNiklasson @GastroGeek @enkia
 /extensions/lucide-icons                             @gBasil
+/extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
 /extensions/mailsy                                   @BalliAsghar
@@ -544,6 +546,7 @@
 /extensions/raycast-icons                            @PitNikola @peduarte
 /extensions/raycast-wallpaper                        @koinzhang
 /extensions/raynab                                   @gogocharli
+/extensions/react-docs                               @webdiego
 /extensions/react-icons                              @yug2005
 /extensions/readwise                                 @natterstefan
 /extensions/readymetrics                             @chadbutz
@@ -631,6 +634,7 @@
 /extensions/static-marks-bookmarks                   @aerobless @rudeayelo
 /extensions/steam                                    @KevinBatdorf
 /extensions/stock-lookup                             @jones-sam
+/extensions/storytime                                @andreaselia @pernielsentikaer
 /extensions/stretchly                                @skyran1278
 /extensions/stripe                                   @pradeepb28 @farisaziz12
 /extensions/supabase-docs                            @Isaiah-Hamilton
