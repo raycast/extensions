@@ -1,16 +1,19 @@
 import { useCallback, useState, useRef } from "react";
 import { Form, Action, ActionPanel, useNavigation, Toast, showToast } from "@raycast/api";
-import { Language } from "../types";
+import { Language, CodeStash } from "../types";
+import { nanoid } from "nanoid";
 
 import detectLang from "lang-detector";
 
-function CreateForm(props: {
+type Props = {
+  codeStash?: CodeStash;
   defaultTitle?: string;
-  onCreate: (title: string, code: string, language: string) => void;
-}) {
-  const { onCreate, defaultTitle = "" } = props;
+  onSave: (title: string, code: string, language: string, id: string) => void;
+};
+
+function CodeForm({ codeStash, defaultTitle, onSave }: Props) {
   const { pop } = useNavigation();
-  const [detectedLanguage, setDetectedLanguage] = useState<string>("JavaScript");
+  const [detectedLanguage, setDetectedLanguage] = useState<string>(codeStash?.language ?? "JavaScript");
   const dropdownRef = useRef<Form.Dropdown>(null);
 
   const handleValidationError = async () => {
@@ -30,10 +33,12 @@ function CreateForm(props: {
         return handleValidationError();
       }
 
-      onCreate(title, code, language);
+      const id = codeStash?.id ?? nanoid();
+
+      onSave(title, code, language, id);
       pop();
     },
-    [onCreate, pop]
+    [onSave, pop]
   );
 
   const handleCodeInput = (value: string) => {
@@ -45,16 +50,22 @@ function CreateForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" defaultValue={defaultTitle} title="Title" placeholder="Hello world" />
+      <Form.TextField
+        id="title"
+        defaultValue={codeStash?.title ?? defaultTitle}
+        title="Title"
+        placeholder="Hello world"
+      />
 
       <Form.TextArea
         id="code"
         title="Code"
         placeholder="console.log('Hello world')"
+        defaultValue={codeStash?.code}
         onChange={(value) => handleCodeInput(value)}
       />
 
@@ -76,4 +87,4 @@ function CreateForm(props: {
   );
 }
 
-export default CreateForm;
+export default CodeForm;
