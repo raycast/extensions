@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Image, Grid } from "@raycast/api";
+import { ActionPanel, Action, showToast, Toast, Image, Grid } from "@raycast/api";
 import { ListOrGrid, ListOrGridSection, ListOrGridItem } from "./list-or-grid";
 
 import { useState, useEffect } from "react";
