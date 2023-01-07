@@ -1,17 +1,17 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import api from './api';
-import { Deploy } from './interfaces';
-import { getStatusIcon } from './helpers';
-import { formatDate, getDeployUrl, handleNetworkError } from './utils';
+import api from '../utils/api';
+import { Deploy } from '../utils/interfaces';
+import { getStatusIcon } from '../utils/helpers';
+import { formatDate, getDeployUrl, handleNetworkError } from '../utils/utils';
 
 interface Props {
   siteId: string;
   siteName: string;
 }
 
-export function DeployListView(props: Props) {
+export default function DeployListView(props: Props) {
   const [isLoading, setLoading] = useState<boolean>(true);
   const [deploys, setDeploys] = useState<Deploy[]>([]);
 
@@ -170,7 +170,7 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
         />
         <List.Item.Detail.Metadata.Label
           title="Deployed at"
-          text={formatDate(new Date(deploy.created_at))}
+          text={formatDate(deploy.created_at)}
         />
         {deploy.deploy_time && (
           <List.Item.Detail.Metadata.Label

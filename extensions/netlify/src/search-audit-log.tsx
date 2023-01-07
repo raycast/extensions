@@ -1,0 +1,225 @@
+import { ActionPanel, Action, Detail, Icon, List } from '@raycast/api';
+import { useCachedState } from '@raycast/utils';
+import { useEffect, useState } from 'react';
+
+import TeamDropdown from './components/team-dropdown';
+import api from './utils/api';
+import { AuditLog, Team } from './utils/interfaces';
+import { formatDate, handleNetworkError } from './utils/utils';
+
+function getIconForPayload({
+  action,
+  log_type,
+}: {
+  action: string;
+  log_type: 'team' | 'site';
+}) {
+  if (/collaborative deploy preview/i.test(action)) {
+    return Icon.SpeechBubbleActive;
+  }
+  if (/plugin/i.test(action)) {
+    return Icon.Plug;
+  }
+  if (/password/i.test(action) || /protection/i.test(action)) {
+    return Icon.Lock;
+  }
+  if (/env/i.test(action)) {
+    return Icon.Key;
+  }
+  if (/stop/i.test(action) || /start/i.test(action)) {
+    return Icon.Power;
+  }
+  if (/setting/i.test(action)) {
+    return Icon.Cog;
+  }
+  if (/deleted/i.test(action)) {
+    return Icon.Trash;
+  }
+  if (/created/i.test(action)) {
+    return Icon.Stars;
+  }
+  if (log_type === 'team') {
+    return Icon.TwoPeople;
+  }
+  if (log_type === 'site') {
+    return Icon.AppWindowList;
+  }
+  return Icon.Info;
+}
+
+export default function Command() {
+  const [isLoading, setLoading] = useState<boolean>(true);
+
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
+
+  const [query, setQuery] = useState<string>('');
+  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
+    'selectedTeam',
+    '',
+  );
+
+  async function fetchAuditLog(team: string) {
+    setLoading(true);
+    try {
+      const auditLog = await api.getAuditLog(team);
+      setAuditLog(auditLog);
+      setLoading(false);
+    } catch (e) {
+      setLoading(false);
+      handleNetworkError(e);
+    }
+  }
+
+  async function fetchTeams() {
+    try {
+      const teams = await api.getTeams();
+      setTeams(teams);
+    } catch (e) {
+      // ignore silently
+    }
+  }
+
+  async function fetchUser() {
+    try {
+      const user = await api.getUser();
+      setSelectedTeam(user.preferred_account_id);
+    } catch (e) {
+      // ignore silently
+    }
+  }
+
+  useEffect(() => {
+    fetchTeams();
+    if (!selectedTeam) {
+      fetchUser();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedTeam) {
+      fetchAuditLog(selectedTeam);
+    }
+  }, [selectedTeam]);
+
+  const teamDropdown = (
+    <TeamDropdown
+      required
+      selectedTeam={selectedTeam}
+      setSelectedTeam={setSelectedTeam}
+      teams={teams}
+    />
+  );
+
+  const filteredAuditLog = auditLog.filter((log) => {
+    const keywords = [
+      log.payload.action || '',
+      log.payload.actor_name || '',
+      JSON.stringify(log.payload.traits || {}),
+    ];
+    return keywords.some((keyword) =>
+      keyword.toLowerCase().includes(query.toLowerCase()),
+    );
+  });
+
+  return (
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setQuery}
+      searchBarAccessory={teamDropdown}
+      searchBarPlaceholder="Filter recent audit log entries"
+      searchText={query}
+    >
+      {filteredAuditLog.length === 0 && (
+        <List.EmptyView
+          title="No audit log found"
+          description="Make sure you have selected a team."
+        />
+      )}
+      <List.Section title="Audit log">
+        {filteredAuditLog
+          .sort((a, b) =>
+            new Date(a.payload.timestamp) < new Date(b.payload.timestamp)
+              ? 1
+              : -1,
+          )
+          .map((log) => (
+            <List.Item
+              key={log.id}
+              icon={getIconForPayload(log.payload)}
+              title={log.payload.action}
+              subtitle={log.payload.actor_name}
+              accessories={[
+                {
+                  text: formatDate(log.payload.timestamp),
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    // icon={Icon.Rocket}
+                    title="Show Audit Log"
+                    target={
+                      <AuditLogDetail
+                        json={JSON.stringify(log.payload.traits, null, 2)}
+                        payload={log.payload}
+                        selectedTeam={selectedTeam}
+                      />
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List.Section>
+    </List>
+  );
+}
+
+const AuditLogDetail = ({
+  json,
+  payload,
+  selectedTeam,
+}: {
+  json: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  selectedTeam: string;
+}) => {
+  const markdown = `
+\`\`\`json
+${json}
+\`\`\`
+`;
+
+  const url = `https://app.netlify.com/teams/${selectedTeam}/log`;
+  return (
+    <Detail
+      navigationTitle={`${selectedTeam} / Audit log`}
+      markdown={markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Action" text={payload.action} />
+          {payload.actor_name && (
+            <Detail.Metadata.Label title="Actor" text={payload.actor_name} />
+          )}
+          <Detail.Metadata.Label
+            title="Date"
+            text={formatDate(payload.timestamp)}
+          />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="More details"
+            target={url}
+            text="Open Audit Log on Netlify"
+          />
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Open on Netlify" url={url} />
+        </ActionPanel>
+      }
+    />
+  );
+};
