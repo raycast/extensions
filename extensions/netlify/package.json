@@ -23,6 +23,13 @@
       "mode": "view"
     },
     {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "subtitle": "Netlify",
+      "description": "Search Netlify's official documentation",
+      "mode": "view"
+    },
+    {
       "name": "find-sites-on-disk",
       "title": "Find Sites on Disk",
       "subtitle": "Netlify",
@@ -48,6 +55,13 @@
       "title": "Search Team Members",
       "subtitle": "Netlify",
       "description": "Search team members",
+      "mode": "view"
+    },
+    {
+      "name": "view-domains",
+      "title": "List Domains",
+      "subtitle": "Netlify",
+      "description": "List your domains",
       "mode": "view"
     }
   ],
