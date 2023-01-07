@@ -34,14 +34,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0",
+    "@raycast/api": "^1.45.0",
     "@raycast/utils": "^1.4.0",
     "run-applescript": "^6.1.0",
     "run-jxa": "^3.0.0",
     "sql.js": "^1.8.0"
   },
   "devDependencies": {
-    "@types/node": "^18.7.13",
+    "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
     "@types/sql.js": "^1.4.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
