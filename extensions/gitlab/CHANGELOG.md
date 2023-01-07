@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [New Preference] - 2023-01-03
+
+- Added preference to hide annoying bot created todos in the todo command
+
 ## [Add Todo Tags] - 2022-12-17
 
 - Upgrade to Raycast 1.45

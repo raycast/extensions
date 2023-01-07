@@ -4,6 +4,7 @@ import { User } from './user'
 export interface Todo {
   id: string
   title: string
+  previewTitle?: string
   tag: Tag | null
   url: string
   shareUrl: string

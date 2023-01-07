@@ -6,6 +6,8 @@ const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensio
 const oldMatch =
   /# Extension – \[[^\]]*\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
+const closeIssueMatch = /@raycastbot close this issue/;
+
 module.exports = async ({ github, context, core }) => {
   const sender = context.payload.sender.login;
 
@@ -31,7 +33,7 @@ module.exports = async ({ github, context, core }) => {
     await comment({
       github,
       context,
-      comment: `We could not find the extension related to this issue. Please fill update the issue with the link to the extension.`,
+      comment: `We could not find the extension related to this issue. Please update the issue with the link to the extension.`,
     });
     await github.rest.issues.addLabels({
       issue_number: context.payload.issue.number,
@@ -48,7 +50,34 @@ module.exports = async ({ github, context, core }) => {
     codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
-    console.log(`cannot find existing extension ${ext}`);
+    await comment({
+      github,
+      context,
+      comment: `We could not find the extension related to this issue. Please update the issue with the correct link to the extension.`,
+    });
+    await github.rest.issues.addLabels({
+      issue_number: context.payload.issue.number,
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      labels: ["status: stalled"],
+    });
+    return;
+  }
+
+  if (context.payload.comment) {
+    // we don't want to label the issue here, only answer to a comment
+
+    // if the one who posts a comment is an owner of the extension related to the issue
+    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user) !== -1) {
+      if (closeIssueMatch.test(context.payload.comment.body)) {
+        await github.rest.issues.update({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          state: "closed",
+        });
+      }
+    }
     return;
   }
 
@@ -81,7 +110,9 @@ module.exports = async ({ github, context, core }) => {
     context,
     comment: `Thank you for opening this issue!\n\n🔔 ${toNotify
       .map((x) => `@${x}`)
-      .join(" ")} you might want to have a look.`,
+      .join(
+        " "
+      )} you might want to have a look.\n\n_PS: You can close this issue once resolved by posting \`@raycastbot close this issue\`._`,
   });
 };
 
