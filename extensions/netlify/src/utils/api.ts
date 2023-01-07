@@ -42,7 +42,7 @@ class Api {
 
   async getAuditLog(team: string): Promise<AuditLog[]> {
     const { data } = await this.netlify.get<AuditLog[]>(
-      `/accounts/${team}/audit?page=1&per_page=200`,
+      `/accounts/${team}/audit?page=1&per_page=100`,
     );
     return data;
   }

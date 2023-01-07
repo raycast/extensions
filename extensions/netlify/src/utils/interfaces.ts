@@ -1,13 +1,3 @@
-export interface Preferences {
-  token: string;
-  scanPath?: string;
-}
-
-export type BBError = {
-  code: number;
-  message: string;
-};
-
 export interface AlgoliaHit {
   content?: string;
   hierarchy: {
@@ -140,6 +130,11 @@ export interface Member {
   pending?: boolean;
   role: string;
   site_access: 'all' | 'selected' | 'none';
+}
+
+export interface Preferences {
+  token: string;
+  scanPath?: string;
 }
 
 export interface Reviewer {
