@@ -23,6 +23,13 @@
       "mode": "view"
     },
     {
+      "name": "invite-members",
+      "title": "Invite Team Members",
+      "subtitle": "Netlify",
+      "description": "Invite people to join your team",
+      "mode": "view"
+    },
+    {
       "name": "list-domains",
       "title": "List Domains",
       "subtitle": "Netlify",

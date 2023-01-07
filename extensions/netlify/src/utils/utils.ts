@@ -3,6 +3,11 @@ import { AxiosError } from 'axios';
 
 import { Preferences } from './interfaces';
 
+const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
+
+export const isValidEmail = (email?: string | null): boolean =>
+  VALID_EMAIL.test(email || '');
+
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
 }

@@ -3,6 +3,11 @@ export interface Preferences {
   scanPath?: string;
 }
 
+export type BBError = {
+  code: number;
+  message: string;
+};
+
 export interface AlgoliaHit {
   content?: string;
   hierarchy: {
@@ -150,6 +155,8 @@ export interface Remote {
   url: string;
 }
 
+export type Role = 'Owner' | 'Collaborator' | 'Controller';
+
 export interface Site {
   account_name: string;
   account_slug: string;
@@ -171,7 +178,11 @@ export interface Site {
 }
 
 export interface Team {
+  enforce_saml: 'not_enforced' | 'enforced_strict' | 'enforced_with_fallback';
   name: string;
+  org_saml_enabled: boolean;
+  role: Role;
+  roles_allowed: Role[];
   slug: string;
   team_logo_url?: string;
 }

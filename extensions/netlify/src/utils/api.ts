@@ -8,6 +8,7 @@ import {
   Domain,
   Member,
   Reviewer,
+  Role,
   Site,
   Team,
   User,
@@ -63,6 +64,18 @@ class Api {
 
   async getMembers(team: string): Promise<Member[]> {
     const { data } = await this.netlify.get<Member[]>(`/${team}/members`);
+    return data;
+  }
+
+  async addMember(payload: {
+    email: string;
+    role: Role;
+    site_access: 'all' | 'selected';
+    site_ids: string[];
+    team: string;
+  }): Promise<Member[]> {
+    const { team, ...rest } = payload;
+    const { data } = await this.netlify.post(`/${team}/members`, rest);
     return data;
   }
 
