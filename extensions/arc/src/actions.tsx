@@ -7,7 +7,7 @@ import { promisify } from "util";
 import { Tab } from "./types";
 import { openNewWindow } from "./utils";
 import { getOpenTabs, setActiveTab } from "./tabs";
-import { openTab, useSpaces } from "./spaces";
+import { createTabWithinSpace, focusSpace, useSpaces } from "./spaces";
 
 const execAsync = promisify(execSync);
 
@@ -87,7 +87,7 @@ export function OpenInSpaceAction(props: { url: string }) {
   async function openSpace(spaceId: string) {
     try {
       await closeMainWindow();
-      await openTab(props.url, spaceId);
+      await createTabWithinSpace(props.url, spaceId);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -110,6 +110,23 @@ export function OpenInSpaceAction(props: { url: string }) {
       ))}
     </ActionPanel.Submenu>
   );
+}
+
+export function OpenSpaceAction(props: { spaceId: string }) {
+  async function handleAction() {
+    try {
+      await closeMainWindow();
+      await focusSpace(props.spaceId);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening Space",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return <Action icon={Icon.Sidebar} title="Open Space" onAction={handleAction} />;
 }
 
 const browserBundleIds = new Set([

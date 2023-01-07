@@ -1,10 +1,10 @@
-import { PromiseOptions, usePromise } from "@raycast/utils";
+import { PromiseOptions, useCachedPromise } from "@raycast/utils";
 import { runAppleScript } from "run-applescript";
 import { Space } from "./types";
 
 // Spaces
 
-export async function openTab(url: string, spaceId: string) {
+export async function createTabWithinSpace(url: string, spaceId: string) {
   await runAppleScript(`
     tell application "Arc"
       tell front window      
@@ -13,6 +13,18 @@ export async function openTab(url: string, spaceId: string) {
         end tell
       end tell
 
+      activate
+    end tell
+  `);
+}
+
+export async function focusSpace(spaceId: string) {
+  await runAppleScript(`
+    tell application "Arc"
+      tell front window
+        tell space ${spaceId} to focus
+      end tell
+      
       activate
     end tell
   `);
@@ -48,5 +60,5 @@ export async function getSpaces() {
 }
 
 export function useSpaces(options: PromiseOptions<() => Promise<Space[]>> = {}) {
-  return usePromise(getSpaces, [], options);
+  return useCachedPromise(getSpaces, [], options);
 }

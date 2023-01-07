@@ -31,6 +31,13 @@
       "mode": "no-view",
       "subtitle": "Arc",
       "icon": "icon-dark.png"
+    },
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "subtitle": "Arc",
+      "description": "Search and focus your spaces.",
+      "mode": "view"
     }
   ],
   "dependencies": {
