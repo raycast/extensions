@@ -37,10 +37,10 @@
       "mode": "view"
     },
     {
-      "name": "list-members",
-      "title": "List Members",
+      "name": "search-team-members",
+      "title": "Search Team Members",
       "subtitle": "Netlify",
-      "description": "List team members",
+      "description": "Search team members",
       "mode": "view"
     }
   ],

@@ -2,9 +2,11 @@ import axios, { AxiosInstance } from 'axios';
 
 import {
   AuditLog,
+  Committer,
   Deploy,
   Domain,
   Member,
+  Reviewer,
   Site,
   Team,
   User,
@@ -31,6 +33,11 @@ class Api {
     return data;
   }
 
+  async getCommitters(team: string): Promise<Committer[]> {
+    const { data } = await this.client.get<Committer[]>(`/${team}/committers`);
+    return data;
+  }
+
   async getDeploys(site: string): Promise<Deploy[]> {
     const { data } = await this.client.get<Deploy[]>(`/sites/${site}/deploys`);
     return data;
@@ -43,6 +50,11 @@ class Api {
 
   async getMembers(team: string): Promise<Member[]> {
     const { data } = await this.client.get<Member[]>(`/${team}/members`);
+    return data;
+  }
+
+  async getReviewers(team: string): Promise<Reviewer[]> {
+    const { data } = await this.client.get<Reviewer[]>(`/${team}/reviewers`);
     return data;
   }
 

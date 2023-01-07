@@ -14,6 +14,14 @@ export interface AuditLog {
   };
 }
 
+export interface Committer {
+  id: string;
+  last_seen: string;
+  member_id?: string;
+  provider: 'github' | 'gitlab' | 'bitbucket';
+  provider_slug: string;
+}
+
 export type DeployContext = 'production' | 'deploy-preview' | 'branch-deploy';
 
 export type DeployState =
@@ -91,10 +99,25 @@ export type GitProvider =
   | 'unknown';
 
 export interface Member {
+  avatar: string;
+  connected_accounts: {
+    bitbucket?: string;
+    github?: string;
+    gitlab?: string;
+  };
   email: string;
   id: string;
   full_name: string;
+  pending?: boolean;
   role: string;
+  site_access: 'all' | 'selected' | 'none';
+}
+
+export interface Reviewer {
+  email: string;
+  full_name?: string;
+  id: string;
+  state: 'pending' | 'approved';
 }
 
 export interface Site {
