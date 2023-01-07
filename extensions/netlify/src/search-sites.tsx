@@ -3,8 +3,8 @@ import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
+import { getFramework, getGitProviderIcon } from './utils/icons';
 import { Site, Team } from './utils/interfaces';
-import { getFramework, getGitProviderIcon } from './utils/helpers';
 import { formatDate, handleNetworkError } from './utils/utils';
 
 import DeployListView from './components/deploys';

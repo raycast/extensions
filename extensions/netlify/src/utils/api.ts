@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+<<<<<<< HEAD
 import {
   AuditLog,
   Committer,
@@ -7,11 +8,22 @@ import {
   Domain,
   Member,
   Reviewer,
+=======
+import { getPreferences } from './helpers';
+import {
+  AuditLog,
+  Deploy,
+  Domain,
+  Member,
+>>>>>>> netlify/find-sites-on-disk
   Site,
   Team,
   User,
 } from './interfaces';
+<<<<<<< HEAD
 import { getToken } from './utils';
+=======
+>>>>>>> netlify/find-sites-on-disk
 
 class Api {
   client: AxiosInstance;
@@ -33,11 +45,14 @@ class Api {
     return data;
   }
 
+<<<<<<< HEAD
   async getCommitters(team: string): Promise<Committer[]> {
     const { data } = await this.client.get<Committer[]>(`/${team}/committers`);
     return data;
   }
 
+=======
+>>>>>>> netlify/find-sites-on-disk
   async getDeploys(site: string): Promise<Deploy[]> {
     const { data } = await this.client.get<Deploy[]>(`/sites/${site}/deploys`);
     return data;
@@ -53,11 +68,14 @@ class Api {
     return data;
   }
 
+<<<<<<< HEAD
   async getReviewers(team: string): Promise<Reviewer[]> {
     const { data } = await this.client.get<Reviewer[]>(`/${team}/reviewers`);
     return data;
   }
 
+=======
+>>>>>>> netlify/find-sites-on-disk
   async getSites(query: string, team?: string): Promise<Site[]> {
     const params = [
       `name=${query}`,
@@ -92,6 +110,11 @@ class Api {
   }
 }
 
+<<<<<<< HEAD
 const api = new Api(getToken());
+=======
+const { token } = getPreferences();
+const api = new Api(token);
+>>>>>>> netlify/find-sites-on-disk
 
 export default api;

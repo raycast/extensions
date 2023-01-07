@@ -23,6 +23,13 @@
       "mode": "view"
     },
     {
+      "name": "find-sites-on-disk",
+      "title": "Find Sites on Disk",
+      "subtitle": "Netlify",
+      "description": "Find your Netlify sites that you have saved locally",
+      "mode": "view"
+    },
+    {
       "name": "search-audit-log",
       "title": "Search Audit Log",
       "subtitle": "Netlify",
@@ -52,15 +59,27 @@
       "title": "API Token",
       "description": "Personal access token",
       "placeholder": "Your token"
+    },
+    {
+      "name": "scanPath",
+      "type": "textfield",
+      "required": true,
+      "default": "",
+      "title": "Path to scan to find sites on disk",
+      "description": "Path to scan for finding sites on disk. Use : to separate multiple paths."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.42.0",
     "@raycast/utils": "^1.4.14",
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "parse-git-config": "^3.0.0",
+    "parse-github-url": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",
+    "@types/parse-git-config": "^3.0.1",
+    "@types/parse-github-url": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

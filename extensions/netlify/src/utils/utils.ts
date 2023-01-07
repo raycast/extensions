@@ -1,13 +1,24 @@
-import { Toast, showToast, getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues, Toast, showToast } from '@raycast/api';
 import { AxiosError } from 'axios';
 
 import { Preferences } from './interfaces';
+
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
+}
 
 export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substr(1);
 }
 
-export function formatDate(timestamp: string) {
+export function snakeCaseToTitleCase(s: string): string {
+  return s
+    .split('_')
+    .map((word) => capitalize(word))
+    .join(' ');
+}
+
+export function formatDate(timestamp: string | number) {
   const date = new Date(timestamp);
   return date.toLocaleDateString('en-US', {
     year: 'numeric',

@@ -1,5 +1,6 @@
 export interface Preferences {
   token: string;
+  scanPath?: string;
 }
 
 export interface AuditLog {
@@ -7,7 +8,7 @@ export interface AuditLog {
   payload: {
     actor_name: string;
     action: string;
-    log_type: 'team' | 'site' | 'split_test';
+    log_type: 'team' | 'site';
     timestamp: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     traits: any;
@@ -68,6 +69,14 @@ export interface Deploy {
   url: string;
 }
 
+export interface Directory {
+  fullPath: string;
+  lastModified: number;
+  name: string;
+  remotes: Remote[];
+  siteId: string;
+}
+
 export interface Domain {
   account_name: string;
   account_slug: string;
@@ -118,6 +127,12 @@ export interface Reviewer {
   full_name?: string;
   id: string;
   state: 'pending' | 'approved';
+}
+
+export interface Remote {
+  host: string;
+  name: string;
+  url: string;
 }
 
 export interface Site {

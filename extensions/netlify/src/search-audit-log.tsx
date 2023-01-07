@@ -152,6 +152,7 @@ export default function Command() {
               accessories={[
                 {
                   text: formatDate(log.payload.timestamp),
+                  tooltip: formatDate(log.payload.timestamp),
                 },
               ]}
               actions={

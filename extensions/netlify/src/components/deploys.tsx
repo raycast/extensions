@@ -2,8 +2,8 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from '../utils/api';
+import { getStatusIcon } from '../utils/icons';
 import { Deploy } from '../utils/interfaces';
-import { getStatusIcon } from '../utils/helpers';
 import { formatDate, getDeployUrl, handleNetworkError } from '../utils/utils';
 
 interface Props {
