@@ -92,7 +92,7 @@ export const isPermissionError = (error: unknown) => {
   return error instanceof Error && error.name === "PermissionError";
 };
 
-export async function createNewArcWindow() {
+export async function openNewWindow() {
   await runAppleScript(`
     tell application "Arc"
       make new window

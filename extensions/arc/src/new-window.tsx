@@ -1,10 +1,10 @@
 import { showHUD } from "@raycast/api";
-import { createNewArcWindow } from "./utils";
+import { openNewWindow } from "./utils";
 
 export default async function Command() {
   try {
-    await createNewArcWindow();
+    await openNewWindow();
   } catch {
-    await showHUD("❌ Couldn't create window");
+    await showHUD("❌ Failed opening a new window");
   }
 }

@@ -1,21 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getApplications,
-  Icon,
-  open,
-  showToast,
-  Toast,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execSync } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
 import { Tab } from "./types";
-import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils";
+import { getOpenTabs, setActiveTab, openNewWindow } from "./utils";
 
 const execAsync = promisify(execSync);
 
@@ -42,11 +32,12 @@ export function OpenInArcAction(props: { url: string }) {
 
   return <Action icon={Icon.Globe} title="Open in Arc" onAction={handleAction} />;
 }
-export function OpenInNewWindow(props: { url: string }) {
+
+export function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      await createNewArcWindow();
+      await openNewWindow();
       await execAsync(`open -a Arc "${props.url}"`);
     } catch (e) {
       await showToast({
