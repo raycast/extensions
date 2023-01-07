@@ -61,8 +61,11 @@ export function OpenInNewWindowAction(props: { url: string }) {
 export function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
-      await closeMainWindow();
-      await execAsync(`open -na "Arc" --args --new-window "${props.url}"`);
+      await runAppleScript(`
+        tell application "Arc"
+          make new tab with properties {URL:"${props.url}"}
+        end tell
+      `);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
