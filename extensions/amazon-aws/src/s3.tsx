@@ -13,7 +13,7 @@ import {
   GetBucketLocationCommand,
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { AWS_URL_BASE } from "./constants";
+import { resourceToConsoleLink } from "./util";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -41,7 +41,7 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
       actions={
         <ActionPanel>
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
-          <Action.OpenInBrowser title="Open in Browser" url={`${AWS_URL_BASE}/s3/buckets/${bucket.Name}`} />
+          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
       }
@@ -66,12 +66,12 @@ function S3BucketObjects({ bucket }: { bucket: Bucket }) {
               <ActionPanel>
                 <Action.OpenInBrowser
                   title="Open in Browser"
-                  url={`${AWS_URL_BASE}/s3/object/${bucket.Name}?region=${process.env.AWS_REGION}&prefix=${object.Key}`}
+                  url={resourceToConsoleLink(`${bucket.Name}/${object.Key}`, "AWS::S3::Object")}
                 />
-                <Action.SubmitForm
+                <Action
                   title="Download"
                   icon={Icon.Download}
-                  onSubmit={async () => {
+                  onAction={async () => {
                     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
 
                     try {

@@ -1,8 +1,9 @@
-import { ActionPanel, Color, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import React, { useEffect, useState } from "react";
+import { ActionPanel, Color, List, showToast, Action, Image, Toast } from "@raycast/api";
 import useSWR, { SWRConfig } from "swr";
 import { Schema } from "bitbucket";
 
-import { getRepositories } from "../../queries";
+import { getRepositories, getRepositoriesLazy } from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
 import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
@@ -11,7 +12,7 @@ import { ShowPipelinesActions, ShowPullRequestsActions } from "./actions";
 export function SearchRepositories() {
   return (
     <SWRConfig value={cacheConfig}>
-      <SearchList />
+      <SearchListLazy />
     </SWRConfig>
   );
 }
@@ -20,7 +21,7 @@ function SearchList(): JSX.Element {
   const { data, error, isValidating } = useSWR(REPOSITORIES_CACHE_KEY, getRepositories);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", error.message);
+    showToast({ style: Toast.Style.Failure, title: "Failed loading repositories", message: error.message });
   }
 
   return (
@@ -33,6 +34,39 @@ function SearchList(): JSX.Element {
     </List>
   );
 }
+
+const SearchListLazy: React.FC = () => {
+  const [query, setQuery] = useState("");
+  const { data, error, isLoading, isValidating } = useSWR<Schema.Repository[]>(
+    `/repositories?query=${query}`,
+    getRepositoriesLazy
+  );
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading repositories",
+        message: error.message,
+      });
+    }
+  }, [error]);
+
+  return (
+    <List
+      isLoading={isLoading || isValidating}
+      searchBarPlaceholder="Search by name..."
+      onSearchTextChange={setQuery}
+      throttle
+    >
+      <List.Section title="Repositories" subtitle={data?.length.toString()}>
+        {data?.map(toRepository).map((repo: Repository) => (
+          <SearchListItem key={repo.uuid} repo={repo} />
+        ))}
+      </List.Section>
+    </List>
+  );
+};
 
 function toRepository(repo: Schema.Repository): Repository {
   return {
@@ -51,30 +85,33 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
     <List.Item
       title={repo.name}
       subtitle={repo.description}
-      icon={{ source: repo.avatarUrl, mask: ImageMask.RoundedRectangle }}
+      icon={{ source: repo.avatarUrl, mask: Image.Mask.RoundedRectangle }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Browser actions">
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Repository in Browser"
               url={repo.url}
               icon={{ source: icon.code, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Branches in Browser"
               url={repo.url + "/branches"}
               icon={{ source: icon.branch, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Pull Requests in Browser"
               url={repo.url + "/pull-requests"}
               icon={{ source: icon.pr, tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open Pipelines in Browser"
               url={repo.url + "/addon/pipelines/home"}
-              icon={{ source: icon.pipeline.self, tintColor: Color.PrimaryText }}
+              icon={{
+                source: icon.pipeline.self,
+                tintColor: Color.PrimaryText,
+              }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Details">

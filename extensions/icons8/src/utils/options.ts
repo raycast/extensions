@@ -1,6 +1,8 @@
-import { environment, LocalStorage } from "@raycast/api";
+import { environment, Cache } from "@raycast/api";
 import { Options } from "../types/types";
 import { homedir } from "os";
+
+const cache = new Cache();
 
 export const defaultOptions: Options = {
   path: `${homedir()}/Downloads`,
@@ -11,8 +13,8 @@ export const defaultOptions: Options = {
   format: "png",
 };
 
-export const getStoredOptions = async (): Promise<Options> => {
-  const options: string | undefined = await LocalStorage.getItem("options");
+export const getStoredOptions = (): Options => {
+  const options: string | undefined = cache.get("options");
   if (options) {
     return JSON.parse(options);
   } else {
@@ -20,6 +22,8 @@ export const getStoredOptions = async (): Promise<Options> => {
   }
 };
 
-export const setStoredOptions = async (options: Options) => {
-  await LocalStorage.setItem("options", JSON.stringify(options));
+export const setStoredOptions = (options: Options) => {
+  if (options) {
+    cache.set("options", JSON.stringify(options));
+  }
 };
