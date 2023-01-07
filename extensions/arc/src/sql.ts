@@ -3,7 +3,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { useRef, useState, useEffect } from "react";
 import initSqlJs, { Database } from "sql.js";
-import { PermissionError } from "./utils";
+import { PermissionError } from "./permissions";
 
 // @ts-expect-error importing a wasm is tricky :)
 import wasmBinary from "sql.js/dist/sql-wasm.wasm";

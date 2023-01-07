@@ -5,7 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
 import { Tab } from "./types";
-import { getOpenTabs, setActiveTab, openNewWindow } from "./utils";
+import { openNewWindow } from "./utils";
+import { getOpenTabs, setActiveTab } from "./tabs";
+import { openTab, useSpaces } from "./spaces";
 
 const execAsync = promisify(execSync);
 
@@ -52,8 +54,8 @@ export function OpenInNewWindowAction(props: { url: string }) {
     <Action
       icon={Icon.Globe}
       title="Open in New Window"
-      onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      onAction={handleAction}
     />
   );
 }
@@ -76,6 +78,38 @@ export function OpenInLittleArc(props: { url: string }) {
   }
 
   return <Action icon={Icon.Globe} title="Open in Little Arc" onAction={handleAction} />;
+}
+
+export function OpenInSpaceAction(props: { url: string }) {
+  const [open, setOpen] = useState(false);
+  const { data, isLoading } = useSpaces({ execute: open });
+
+  async function openSpace(spaceId: string) {
+    try {
+      await closeMainWindow();
+      await openTab(props.url, spaceId);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening link in Space",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu
+      icon={Icon.Sidebar}
+      title="Open in Space"
+      isLoading={isLoading}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+      onOpen={() => setOpen(true)}
+    >
+      {data?.map((space) => (
+        <Action key={space.id} title={space.title || `Space ${space.id}`} onAction={() => openSpace(space.id)} />
+      ))}
+    </ActionPanel.Submenu>
+  );
 }
 
 const browserBundleIds = new Set([
