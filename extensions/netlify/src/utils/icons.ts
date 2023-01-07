@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api';
 
 import { DeployState, Framework, GitProvider } from './interfaces';
-import { capitalize } from './helpers';
+import { capitalize } from './utils';
 
 export function getStatusIcon(state: DeployState): {
   source: Icon;

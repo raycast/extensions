@@ -16,8 +16,8 @@ const execp = promisify(exec);
 import parseGitConfig = require('parse-git-config');
 import parseGithubURL = require('parse-github-url');
 
-import { getPreferences } from './helpers';
 import { Directory, Remote } from './interfaces';
+import { getPreferences } from './utils';
 
 const CACHE_FILE = path.join(
   environment.supportPath,

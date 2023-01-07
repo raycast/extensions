@@ -14,7 +14,7 @@ import {
   formatDate,
   getPreferences,
   snakeCaseToTitleCase,
-} from './utils/helpers';
+} from './utils/utils';
 
 export default function Command() {
   const { scanPath } = getPreferences();
