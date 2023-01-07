@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Cards } from "./datastore";
+import { Cards, noteColors } from "./datastore";
 
 type Props = {
   onSelect: (title: string) => void;
@@ -44,7 +44,8 @@ export default function CardList({ onDelete, onSelect, listItems }: Props) {
               <Action title="Delete card" onAction={() => onDelete(item)} />
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={listItems[item].body} />}
+          icon={{ source: Icon.CircleFilled, tintColor: noteColors[listItems[item]?.color] }}
+          detail={<List.Item.Detail markdown={listItems[item]?.body} />}
         />
       ))}
     </List>

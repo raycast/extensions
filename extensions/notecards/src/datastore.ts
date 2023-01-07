@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { Color, environment } from "@raycast/api";
 export const CARDS_FILE = `${environment.supportPath}/cards.json`;
 import fs from "fs";
 
@@ -6,6 +6,13 @@ export type Cards = Record<string, Card>;
 type Card = {
   // TODO: Add more fields here for archive, sorting, etc
   body: string;
+  color: string;
+};
+export const noteColors: Record<string, Color> = {
+  Blue: Color.Blue,
+  Green: Color.Green,
+  Red: Color.Red,
+  Yellow: Color.Yellow,
 };
 export const getNoteCards = (): Cards => {
   try {
@@ -17,13 +24,13 @@ export const getNoteCards = (): Cards => {
   return {};
 };
 
-export const storeNewCard = async (title: string, body: string) => {
+export const storeNewCard = async (title: string, body: string, color: string) => {
   const currentCards = getNoteCards();
   fs.writeFileSync(
     CARDS_FILE,
     JSON.stringify({
-      [title]: { body: body },
       ...currentCards,
+      [title]: { body: body, color: color },
     })
   );
   return true;

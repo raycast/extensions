@@ -1,12 +1,20 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
+import { noteColors } from "./datastore";
 
 type Props = {
   title: string;
   subtitle: string;
-  onSubmit: ({ title, body }: { title: string; body: string }) => void;
+  color: string;
+  onSubmit: ({ title, body, color }: { title: string; body: string; color: string }) => void;
 };
-export default function EditCardForm({ title: initialTitle, subtitle: initialBody, onSubmit }: Props) {
+
+export default function EditCardForm({
+  title: initialTitle,
+  subtitle: initialBody,
+  color: initialColor,
+  onSubmit,
+}: Props) {
   const [title, setTitle] = useState<string | null>(initialTitle);
   const { pop } = useNavigation();
   const [body, setBody] = useState<string | null>(initialBody);
@@ -16,8 +24,9 @@ export default function EditCardForm({ title: initialTitle, subtitle: initialBod
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={(values: { titleField: string; bodyField: string }) => {
-              onSubmit({ title: values.titleField, body: values.bodyField });
+            onSubmit={(values: { titleField: string; bodyField: string; color: string }) => {
+              console.log(values);
+              onSubmit({ title: values.titleField, body: values.bodyField, color: values.color });
               pop();
             }}
           />
@@ -40,6 +49,18 @@ export default function EditCardForm({ title: initialTitle, subtitle: initialBod
         value={body ?? ""}
         onChange={(e) => setBody(e)}
       />
+      <Form.Dropdown id="color" title="Select card color" defaultValue={initialColor}>
+        {Object.keys(noteColors).map((color) => {
+          return (
+            <Form.Dropdown.Item
+              key={color}
+              value={color}
+              title={color}
+              icon={{ source: Icon.CircleFilled, tintColor: noteColors[color] }}
+            />
+          );
+        })}
+      </Form.Dropdown>
     </Form>
   );
 }

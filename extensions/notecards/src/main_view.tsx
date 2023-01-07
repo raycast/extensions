@@ -15,8 +15,8 @@ export default function MainView() {
   });
 
   const storeNewCardMutation = useMutation({
-    mutationFn: async ({ title, body }: { title: string; body: string }) => {
-      return storeNewCard(title, body);
+    mutationFn: async ({ title, body, color }: { title: string; body: string; color: string }) => {
+      return storeNewCard(title, body, color);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["cards"]);
@@ -42,6 +42,7 @@ export default function MainView() {
           <Form
             title={title}
             subtitle={cards?.[title]?.body ?? ""}
+            color={cards?.[title]?.color ?? ""}
             onSubmit={(noteData) => {
               storeNewCardMutation.mutate(noteData);
             }}
