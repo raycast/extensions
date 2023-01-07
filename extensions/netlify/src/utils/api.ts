@@ -128,9 +128,9 @@ class Api {
     };
     const { data } = await this.algolia.post(
       `/indexes/*/queries?${params}`,
-      body,
+      JSON.stringify({ requests: [body] }),
     );
-    return data.data.results[0].hits;
+    return data.results[0].hits;
   }
 }
 
