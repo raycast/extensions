@@ -14,8 +14,8 @@ import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
+import { isValidEmail, handleNetworkError } from './utils/helpers';
 import { Role, Site, Team } from './utils/interfaces';
-import { isValidEmail, handleNetworkError } from './utils/utils';
 
 interface FormValues {
   email: string;

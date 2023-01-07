@@ -33,7 +33,7 @@
       ]
     },
     {
-      "name": "invite-members",
+      "name": "invite-team-members",
       "title": "Invite Team Members",
       "subtitle": "Netlify",
       "description": "Invite new people to join your team.",

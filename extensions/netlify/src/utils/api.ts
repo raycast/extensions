@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
+import { getPreferences } from './helpers';
 import {
   AlgoliaHit,
   AuditLog,
@@ -13,7 +14,6 @@ import {
   Team,
   User,
 } from './interfaces';
-import { getPreferences } from './utils';
 
 const ALGOLIA_APP_ID = '4RTNPM1QF9';
 const ALGOLIA_PUBLIC_API_KEY = '260466eb2466a36278b2fdbcc56ad7ba';

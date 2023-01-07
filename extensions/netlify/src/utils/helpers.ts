@@ -5,22 +5,8 @@ import { Preferences } from './interfaces';
 
 const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
 
-export const isValidEmail = (email?: string | null): boolean =>
-  VALID_EMAIL.test(email || '');
-
-export function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export function capitalize(s: string): string {
   return s[0].toUpperCase() + s.substr(1);
-}
-
-export function snakeCaseToTitleCase(s: string): string {
-  return s
-    .split('_')
-    .map((word) => capitalize(word))
-    .join(' ');
 }
 
 export function formatDate(timestamp: string | number) {
@@ -42,9 +28,8 @@ export function getDomainUrl(team: string, name: string) {
   return `https://app.netlify.com/teams/${team}/dns/${name}`;
 }
 
-export function getToken() {
-  const { token } = getPreferenceValues<Preferences>();
-  return token;
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 export function handleNetworkError(e: unknown): void {
@@ -62,4 +47,14 @@ export function handleNetworkError(e: unknown): void {
   } else {
     showToast(Toast.Style.Failure, 'Network error', 'Please try again later.');
   }
+}
+
+export const isValidEmail = (email?: string | null): boolean =>
+  VALID_EMAIL.test(email || '');
+
+export function snakeCaseToTitleCase(s: string): string {
+  return s
+    .split('_')
+    .map((word) => capitalize(word))
+    .join(' ');
 }

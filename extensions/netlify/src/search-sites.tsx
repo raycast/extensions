@@ -3,9 +3,9 @@ import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
+import { formatDate, handleNetworkError } from './utils/helpers';
 import { getFramework, getGitProviderIcon } from './utils/icons';
 import { Site, Team } from './utils/interfaces';
-import { formatDate, handleNetworkError } from './utils/utils';
 
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';

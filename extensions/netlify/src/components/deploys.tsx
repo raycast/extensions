@@ -2,9 +2,9 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from '../utils/api';
+import { formatDate, getDeployUrl, handleNetworkError } from '../utils/helpers';
 import { getStatusIcon } from '../utils/icons';
 import { Deploy } from '../utils/interfaces';
-import { formatDate, getDeployUrl, handleNetworkError } from '../utils/utils';
 
 interface Props {
   siteId: string;

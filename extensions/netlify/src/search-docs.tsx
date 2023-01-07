@@ -9,8 +9,8 @@ import {
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
+import { handleNetworkError } from './utils/helpers';
 import { AlgoliaHit } from './utils/interfaces';
-import { handleNetworkError } from './utils/utils';
 
 const NAMESPACE = 'docs.bookmark.v1.';
 const prefix = (objectID: string) => `${NAMESPACE}${objectID}`;

@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api';
 
+import { capitalize } from './helpers';
 import { DeployState, Framework, GitProvider } from './interfaces';
-import { capitalize } from './utils';
 
 export function getStatusIcon(state: DeployState): {
   source: Icon;
@@ -95,4 +95,44 @@ export function getGitProviderIcon(slug: GitProvider):
   };
 
   return gitProviderMap[slug];
+}
+
+export function getIconForAuditLogPayload({
+  action,
+  log_type,
+}: {
+  action: string;
+  log_type: 'team' | 'site';
+}) {
+  if (/collaborative deploy preview/i.test(action)) {
+    return Icon.SpeechBubbleActive;
+  }
+  if (/plugin/i.test(action)) {
+    return Icon.Plug;
+  }
+  if (/password/i.test(action) || /protection/i.test(action)) {
+    return Icon.Lock;
+  }
+  if (/env/i.test(action)) {
+    return Icon.Key;
+  }
+  if (/stop/i.test(action) || /start/i.test(action)) {
+    return Icon.Power;
+  }
+  if (/setting/i.test(action)) {
+    return Icon.Cog;
+  }
+  if (/deleted/i.test(action)) {
+    return Icon.Trash;
+  }
+  if (/created/i.test(action)) {
+    return Icon.Stars;
+  }
+  if (log_type === 'team') {
+    return Icon.TwoPeople;
+  }
+  if (log_type === 'site') {
+    return Icon.AppWindowList;
+  }
+  return Icon.Info;
 }
