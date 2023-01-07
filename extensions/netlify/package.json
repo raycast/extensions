@@ -16,31 +16,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-sites",
-      "title": "Search Sites",
-      "subtitle": "Netlify",
-      "description": "Search your sites",
-      "mode": "view"
-    },
-    {
-      "name": "search-docs",
-      "title": "Search Docs",
-      "subtitle": "Netlify",
-      "description": "Search Netlify's official documentation",
-      "mode": "view"
-    },
-    {
       "name": "find-sites-on-disk",
       "title": "Find Sites on Disk",
       "subtitle": "Netlify",
       "description": "Find your Netlify sites that you have saved locally",
-      "mode": "view"
-    },
-    {
-      "name": "search-audit-log",
-      "title": "Search Audit Log",
-      "subtitle": "Netlify",
-      "description": "Search your team's audit log",
       "mode": "view"
     },
     {
@@ -51,17 +30,31 @@
       "mode": "view"
     },
     {
+      "name": "search-audit-log",
+      "title": "Search Audit Log",
+      "subtitle": "Netlify",
+      "description": "Search your team's audit log",
+      "mode": "view"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "subtitle": "Netlify",
+      "description": "Search Netlify's official documentation",
+      "mode": "view"
+    },
+    {
+      "name": "search-sites",
+      "title": "Search Sites",
+      "subtitle": "Netlify",
+      "description": "Search your sites",
+      "mode": "view"
+    },
+    {
       "name": "search-team-members",
       "title": "Search Team Members",
       "subtitle": "Netlify",
       "description": "Search team members",
-      "mode": "view"
-    },
-    {
-      "name": "view-domains",
-      "title": "List Domains",
-      "subtitle": "Netlify",
-      "description": "List your domains",
       "mode": "view"
     }
   ],
@@ -77,9 +70,9 @@
     {
       "name": "scanPath",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "default": "",
-      "title": "Path to scan to find sites on disk",
+      "title": "Path to find local Netlify sites",
       "description": "Path to scan for finding sites on disk. Use : to separate multiple paths."
     }
   ],

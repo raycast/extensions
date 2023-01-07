@@ -117,7 +117,7 @@ class Api {
       `/indexes/*/queries?${params}`,
       body,
     );
-    return data.results[0].hits;
+    return data.data.results[0].hits;
   }
 }
 
