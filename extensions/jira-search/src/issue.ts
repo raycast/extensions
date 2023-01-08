@@ -3,6 +3,7 @@ import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
 import { Color, Icon, Image } from "@raycast/api"
 import { ErrorText } from "./exception"
+import { IssueFilter, issueFilters } from "./types"
 
 interface IssueType {
   id: string
@@ -80,20 +81,28 @@ function buildJql(query: string): string {
   return jql + " order by lastViewed desc"
 }
 
-function jqlFor(query: string): string {
-  return isIssueKey(query) ? `key=${query}` : buildJql(query)
+function jqlFor(query: string, filter?: IssueFilter): string {
+  const jql = isIssueKey(query) ? `key=${query}` : buildJql(query)
+
+  if (!filter || filter === "allIssues") return jql
+  let extraJqlForFilter = ""
+
+  if (filter === "myIssues") {
+    extraJqlForFilter = "assignee=currentUser()"
+  }
+
+  const extraOperator = query ? "AND" : ""
+
+  return `${extraJqlForFilter} ${extraOperator} ${jql}`
 }
 
-export async function searchIssues(query: string, filter?: string | null): Promise<ResultItem[]> {
-  const jqlFromQuery = jqlFor(query)
+const isIssueFilter = (filter?: string): filter is IssueFilter => {
+  return !!(filter && (issueFilters.includes("allIssues") || issueFilters.includes("myIssues")))
+}
 
-  const jql = filter
-    ? filter === "myIssues"
-      ? query.trim() === ""
-        ? `assignee=currentUser() ${jqlFromQuery}`
-        : `assignee=currentUser() AND ${jqlFromQuery}`
-      : jqlFromQuery
-    : jqlFromQuery
+export async function searchIssues(query: string, filter?: string): Promise<ResultItem[]> {
+
+  const jql = jqlFor(query, isIssueFilter(filter) ? filter : undefined)
 
   console.debug(jql)
 
@@ -118,8 +127,9 @@ export async function searchIssues(query: string, filter?: string | null): Promi
 export default function SearchIssueCommand() {
   return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
     tooltip: "Filters",
+    persist:true,
     values: [
-      { name: "All Issues", value: "all" },
+      { name: "All Issues", value: "allIssues" },
       { name: "Assigned to Me", value: "myIssues" },
     ],
   })

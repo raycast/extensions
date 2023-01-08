@@ -6,18 +6,18 @@ export type ResultItem = List.Item.Props & {
   url: string
   linkText?: string
 }
-type SearchFunction = (query: string, filter?: string | null) => Promise<ResultItem[]>
+type SearchFunction<FilterType extends string> = (query: string, filter?: FilterType) => Promise<ResultItem[]>
 
 const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${item.url})`
 const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`
 
-export function SearchCommand(
-  search: SearchFunction,
+export function SearchCommand<FilterType extends string>(
+  search: SearchFunction<FilterType>,
   searchBarPlaceholder?: string,
-  filter?: { tooltip: string; persist?: boolean; values: { name: string; value: string }[] }
+  filter?: { tooltip: string; persist?: boolean; values: { name: string; value: FilterType }[] }
 ) {
   const [query, setQuery] = useState("")
-  const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? null : null)
+  const [currentFilter, setCurrentFilter] = useState(filter ? filter.values[0]?.value ?? undefined : undefined)
   const [items, setItems] = useState<ResultItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<ErrorText>()
@@ -70,21 +70,28 @@ export function SearchCommand(
     })
   }
 
+  const onFilterChange = (f: string) => {
+    setCurrentFilter(f as unknown as NonNullable<FilterType>)
+  }
+
+  let searchBarAccessory
+  if (filter) {
+    searchBarAccessory = (
+      <List.Dropdown storeValue={!!filter.persist} tooltip={filter.tooltip} filtering onChange={onFilterChange}>
+        {filter.values.map((f) => (
+          <List.Dropdown.Item key={f.value} title={f.name} value={f.value} />
+        ))}
+      </List.Dropdown>
+    )
+  }
+
   return (
     <List
       isLoading={isLoading}
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder={searchBarPlaceholder}
       throttle
-      searchBarAccessory={
-        filter ? (
-          <List.Dropdown storeValue={!!filter.persist} tooltip={filter.tooltip} filtering onChange={setCurrentFilter}>
-            {filter.values.map((f) => (
-              <List.Dropdown.Item key={f.value} title={f.name} value={f.value} />
-            ))}
-          </List.Dropdown>
-        ) : undefined
-      }
+      searchBarAccessory={searchBarAccessory}
     >
       {items.map(buildItem)}
     </List>
