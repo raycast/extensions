@@ -11,12 +11,12 @@ export default function Command() {
     useEffect(() => {
         loadAllAliases().then((response) => {
             setAliases(response);
-
         });
     }, []);
 
     useEffect(() => {
         setFilteredAlias(aliases);
+        console.log('length filtered: ' + filteredAlias?.length)
     }, [aliases]);
 
     function onDrinkTypeChange(newValue: string) {
@@ -52,7 +52,6 @@ export default function Command() {
                 style: Alert.ActionStyle.Destructive,
             }
         })) {
-            console.log("confirmed");
             deleteAlias(alias.id);
             showToast({
                 style: Toast.Style.Success,
@@ -77,20 +76,21 @@ export default function Command() {
 
     return (
         <List
-            isLoading={aliases.length === 0}
+            isLoading={filteredAlias === undefined}
             searchBarPlaceholder="Filter aliases by name..."
             isShowingDetail={filteredAlias != undefined && filteredAlias.length > 0}
             searchBarAccessory={
-                <List.Dropdown
-                    tooltip="Dropdown With Items"
-                    onChange={(newValue) => {
-                        onDrinkTypeChange(newValue);
-                    }}
-                >
-                    <List.Dropdown.Item title="show all" value="all" key="all" icon={Icon.Globe} />
-                    <List.Dropdown.Item title="show pinned" value="pinned" key="pinned" icon={Icon.Pin} />
-                    <List.Dropdown.Item title="show not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
-                </List.Dropdown>
+                <>{(filteredAlias != undefined && filteredAlias.length > 0) ? 
+                    <List.Dropdown
+                        tooltip="Filter Aliases"
+                        onChange={(newValue) => {
+                            onDrinkTypeChange(newValue);
+                        }}
+                    >
+                        <List.Dropdown.Item title="show all" value="all" key="all" icon={Icon.Globe} />
+                        <List.Dropdown.Item title="show pinned" value="pinned" key="pinned" icon={Icon.Pin} />
+                        <List.Dropdown.Item title="show not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
+                    </List.Dropdown> :''}</>
             }
         >
             <>
@@ -165,8 +165,8 @@ export default function Command() {
                                                     : <Action title="Pinn alias" onAction={() => updatePinnedStatus(alias, true)} icon={Icon.Pin} />
                                             }
                                         </>
-                                        <Action title="Delete alias" onAction={() => deleteAliasPrompt(alias)} icon={Icon.DeleteDocument} />
-                                        <Action title={alias.enabled ? 'Disable Alias' : 'enable Alias'} onAction={() => toggleAliasStatePrompt(alias, !alias.enabled)} icon={!alias.enabled ? Icon.Eye : Icon.EyeDisabled} />
+                                        <Action title="Delete alias" onAction={() => deleteAliasPrompt(alias)} icon={Icon.DeleteDocument} shortcut={{ modifiers: ["cmd"], key: "delete" }} />
+                                        <Action title={alias.enabled ? 'Disable Alias' : 'enable Alias'} onAction={() => toggleAliasStatePrompt(alias, !alias.enabled)} icon={!alias.enabled ? Icon.Eye : Icon.EyeDisabled} shortcut={{ modifiers: ["cmd"], key: "t" }} />
                                     </ActionPanel>
                                 }
                             />
