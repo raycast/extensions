@@ -97,7 +97,8 @@ function jqlFor(query: string, filter?: IssueFilter): string {
 }
 
 const isIssueFilter = (filter?: string): filter is IssueFilter => {
-  return !!(filter && (issueFilters.includes("allIssues") || issueFilters.includes("myIssues")))
+  const filters: readonly string[] = issueFilters;
+  return !!(filter && (filters.includes(filter) || filters.includes(filter)))
 }
 
 export async function searchIssues(query: string, filter?: string): Promise<ResultItem[]> {
