@@ -101,7 +101,6 @@ const isIssueFilter = (filter?: string): filter is IssueFilter => {
 }
 
 export async function searchIssues(query: string, filter?: string): Promise<ResultItem[]> {
-
   const jql = jqlFor(query, isIssueFilter(filter) ? filter : undefined)
 
   console.debug(jql)
@@ -127,7 +126,6 @@ export async function searchIssues(query: string, filter?: string): Promise<Resu
 export default function SearchIssueCommand() {
   return SearchCommand(searchIssues, "Search issues by text, @project and #issueType", {
     tooltip: "Filters",
-    persist:true,
     values: [
       { name: "All Issues", value: "allIssues" },
       { name: "Assigned to Me", value: "myIssues" },
