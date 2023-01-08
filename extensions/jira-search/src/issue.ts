@@ -97,7 +97,7 @@ function jqlFor(query: string, filter?: IssueFilter): string {
 }
 
 const isIssueFilter = (filter?: string): filter is IssueFilter => {
-  const filters: readonly string[] = issueFilters;
+  const filters: readonly string[] = issueFilters
   return !!(filter && (filters.includes(filter) || filters.includes(filter)))
 }
 
