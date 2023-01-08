@@ -83,7 +83,6 @@ export async function createAlias(values: ParamNewAlias): Promise<AliasResponse 
       },
     })
     .then((response) => {
-      console.log(response.data);
       return response.data as AliasResponse;
     })
     .catch((error) => {
@@ -100,12 +99,11 @@ export async function createRandomAlias(): Promise<AliasResponse | null> {
   const api_token = preferences.api_token;
   const app_url = preferences.app_url;
   const mode = preferences.mode;
-  console.log("mode: " + mode);
 
   return axios
     .post(
-      app_url + "/api/alias/random/new",
-      { mode: mode },
+      app_url + "/api/alias/random/new?mode=" + mode,
+      {},
       {
         headers: {
           Authentication: api_token,
@@ -145,7 +143,6 @@ export async function loadAllAliases(): Promise<AliasResponse[]> {
       currentPage++;
     }
   }
-  console.log("final result: " + allAliases);
   return allAliases as AliasResponse[];
 }
 
@@ -167,5 +164,67 @@ async function loadAliasesPage(page: number): Promise<LoadAllAliasResponse | nul
     })
     .catch((error) => {
       return null;
+    });
+}
+
+export async function updateAliasPinnedStatus(alias_id: number, pinned: boolean): Promise<boolean> {
+  const api_token = preferences.api_token;
+  const app_url = preferences.app_url;
+
+  return axios
+    .patch(
+      app_url + "/api/aliases/" + alias_id,
+      { pinned: pinned },
+      {
+        headers: {
+          Authentication: api_token,
+        },
+      }
+    )
+    .then((response) => {
+      return true;
+    })
+    .catch((error) => {
+      return false;
+    });
+}
+
+export async function deleteAlias(alias_id: number): Promise<boolean> {
+  const api_token = preferences.api_token;
+  const app_url = preferences.app_url;
+
+  return axios
+    .delete(app_url + "/api/aliases/" + alias_id, {
+      headers: {
+        Authentication: api_token,
+      },
+    })
+    .then((response) => {
+      return true;
+    })
+    .catch((error) => {
+      return false;
+    });
+}
+
+export async function toggleAliasState(alias_id: number, enabled: boolean): Promise<boolean> {
+  const api_token = preferences.api_token;
+  const app_url = preferences.app_url;
+
+  return axios
+    .post(
+      app_url + "/api/aliases/" + alias_id + "/toggle",
+      { enabled: enabled },
+      {
+        headers: {
+          Authentication: api_token,
+        },
+      }
+    )
+    .then((response) => {
+      return true;
+    })
+    .catch((error) => {
+      return false;
     });
 }
