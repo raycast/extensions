@@ -26,10 +26,10 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.7.0";
-  buildNumber = 19;
-  versionDate = "2022-12-16";
-  isNeedPrompt = false;
+  version = "2.7.1";
+  buildNumber = 20;
+  versionDate = "2023-01-08";
+  isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
@@ -37,11 +37,11 @@ export class Easydict {
 
 ### 💎 优化
 
-- 优化单词考试收录等级显示，改用 tag 标签显示。
+- 优化了系统代理的获取方式。
 
 ### 🐞 修复
 
-- 修复了 arguments 查询时，输入文本不显示问题。
+- 修复了一些已知问题。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -49,11 +49,11 @@ export class Easydict {
 
 ### 💎 Improvement
 
-- Improved the display of word exam collection level, use tag label display.
+- Improved the way to get the system proxy.
 
 ### 🐞 Fixes
 
-- Fixed the problem that the input text was not displayed when querying from arguments.
+- Fixed some known issues.
 `;
 
   getRepoUrl() {
