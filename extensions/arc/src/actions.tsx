@@ -14,14 +14,11 @@ const execAsync = promisify(execSync);
 export function OpenInArcAction(props: { url: string }) {
   const [openTabs, setOpenTabs] = useState<Tab[]>();
 
-  console.log("Open tabs", openTabs);
-
   async function handleAction() {
     const openTab = openTabs?.find((tab) => tab.url === props.url);
 
-    console.log("Open Tab", openTab);
-
     if (openTab) {
+      await closeMainWindow();
       await setActiveTab(openTab);
     } else {
       await open(props.url, "Arc");

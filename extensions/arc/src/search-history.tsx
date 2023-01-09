@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
-import { OpenInLittleArc, OpenInNewWindowAction, OpenInOtherBrowserAction, OpenInSpaceAction } from "./actions";
+import {
+  OpenInArcAction,
+  OpenInLittleArc,
+  OpenInNewWindowAction,
+  OpenInOtherBrowserAction,
+  OpenInSpaceAction,
+} from "./actions";
 import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
 import { getDomain, getLastVisitedAt } from "./utils";
@@ -36,7 +42,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser url={entry.url} />
+                <OpenInArcAction url={entry.url} />
                 <OpenInLittleArc url={entry.url} />
                 <OpenInSpaceAction url={entry.url} />
                 <OpenInNewWindowAction url={entry.url} />

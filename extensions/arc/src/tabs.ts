@@ -56,9 +56,11 @@ export function getOpenTabs() {
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Arc"
+      tell window (${tab.windowId} as number)
+        tell tab (${tab.tabId} as number) to select
+      end tell
+
       activate
-      set index of window (${tab.windowId} as number) to (${tab.windowId} as number)
-      set active tab index of window (${tab.windowId} as number) to (${tab.tabId} as number)
     end tell
   `);
 }
