@@ -6,6 +6,9 @@
   "icon": "command-icon.png",
   "author": "iloveitaly",
   "owner": "iloveitaly",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity"
   ],

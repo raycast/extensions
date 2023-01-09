@@ -2,8 +2,7 @@ import fetch from "node-fetch";
 import { homedir } from "os";
 import { join } from "path";
 import assert from "node:assert";
-
-import { Detail, ActionPanel, List, Action, popToRoot, showHUD, Icon } from "@raycast/api";
+import { ActionPanel, List, Action, popToRoot, showHUD, Icon, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 export interface FocusStatus {
@@ -213,41 +212,50 @@ export default function Command() {
   };
 
   if (!isLoading && error) {
-    return (
-      <Detail
-        markdown="
-# Hyper Focus Not Installed
-
-[Install the application.](https://github.com/iloveitaly/hyper-focus)
-"
-      />
-    );
+    showToast(Toast.Style.Failure, "Error", "Unable to connect to Hyper Focus");
   }
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && renderActions()}
-      <List.Item
-        icon={Icon.Pencil}
-        title="Override"
-        subtitle="schedule a temporary override"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Schedule Override" target={<ChooseOverride />} />
-          </ActionPanel>
-        }
-      />
-      <List.Item
-        icon={Icon.SaveDocument}
-        title="Configure"
-        subtitle="configure focus schedules"
-        actions={
-          <ActionPanel>
-            <Action.ShowInFinder title="Open Configuration" path={configPath()} />
-            <Action.Push title="Schedule Override" target={<ChooseOverride />} />
-          </ActionPanel>
-        }
-      />
+      {!isLoading && error && (
+        <List.EmptyView
+          icon="no-view.png"
+          title="Error"
+          description="Unable to connect to Hyper Focus
+Press ↵ to open the Hyper Focus website"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Open Hyper Focus Website" url="https://github.com/iloveitaly/hyper-focus" />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!isLoading && !error && (
+        <>
+          {renderActions()}
+          <List.Item
+            icon={Icon.Pencil}
+            title="Override"
+            subtitle="schedule a temporary override"
+            actions={
+              <ActionPanel>
+                <Action.Push title="Schedule Override" target={<ChooseOverride />} />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            icon={Icon.SaveDocument}
+            title="Configure"
+            subtitle="configure focus schedules"
+            actions={
+              <ActionPanel>
+                <Action.ShowInFinder title="Open Configuration" path={configPath()} />
+                <Action.Push title="Schedule Override" target={<ChooseOverride />} />
+              </ActionPanel>
+            }
+          />
+        </>
+      )}
     </List>
   );
 }
