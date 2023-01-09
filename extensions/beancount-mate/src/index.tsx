@@ -1,56 +1,86 @@
-import { Action, ActionPanel, List, Detail, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useState, useRef } from "react";
+import { Action, ActionPanel, List, Detail, Icon, showToast, Toast, openCommandPreferences } from "@raycast/api";
+import { useState } from "react";
 import costflow from "costflow";
+import { NParseResult } from "costflow/lib/interface";
+import fs from "fs-extra";
+import { preferences } from "./utils/preferences";
+import EmptyView from "./components/EmptyView";
+import ErrorView from "./components/ErrorView";
+import TransactionItem from "./components/TransactionItem";
 
+const costFlowConfig = fs.readJsonSync(preferences.costflowConfigFilePath);
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [parseResult, setParseResult] = useState<{ json: NParseResult.TransactionResult; data: NParseResult.Result }>();
 
-  const { isLoading, data } = usePromise(
-    async (text: string) => {
-      const result = await costflow.parse(text, {
-        mode: "beancount",
-        currency: "USD",
-        timezone: "America/Los_Angeles",
-        account: {
-          visa: "Liabilities:Visa",
-          music: "Expenses:Music",
-        },
-        formula: {
-          spotify: "@Spotify #music 15.98 USD visa > music",
-        },
+  const handleSearchTextChange = async (searchText: string) => {
+    const trimedSearchText = String.prototype.trim.call(searchText);
+    setSearchText(trimedSearchText);
+
+    if (trimedSearchText === "") {
+      setParseResult(undefined);
+      return;
+    }
+
+    const toast = await showToast({ title: "Parsing...", style: Toast.Style.Animated });
+    try {
+      const jsonParseResult = await costflow.parse(searchText, costFlowConfig, { mode: "json" });
+      const beancountParseResult = await costflow.parse(searchText, costFlowConfig, { mode: "beancount" });
+
+      if ((jsonParseResult as NParseResult.Error).error) {
+        throw new Error((jsonParseResult as NParseResult.Error).error);
+      }
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Costflow Parse Success";
+      setParseResult({
+        json: jsonParseResult as NParseResult.TransactionResult,
+        data: beancountParseResult as NParseResult.Result,
       });
-      return result
-    },
-    [searchText],
-  );
+    } catch (err) {
+      setParseResult(undefined);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Costflow Parse Failed";
+      if (err instanceof Error) {
+        toast.message = err.message;
+      }
+    }
+  };
 
   return (
     <List
-      isLoading={isLoading}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search npm packages..."
-      throttle
-      isShowingDetail
-    >
-
-      {searchText === "" ? (
-        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />)
-        : (
-          <List.Item
-            icon={Icon.Star}
-            title={searchText}
-            accessories={[{ text: "Germany" }]}
-            detail={
-              <List.Item.Detail markdown={(data as any)?.output}/>
+      onSearchTextChange={handleSearchTextChange}
+      searchBarPlaceholder="@Spotify 15.98 USD visa > subscription"
+      throttle={false}
+      isShowingDetail={searchText !== "" && parseResult != null}
+      navigationTitle="Beancount Meta"
+      actions={
+        <ActionPanel title="Beancount Meta">
+          {searchText !== "" && parseResult == null && (
+            <Action.OpenInBrowser title="Open Costflow Syntax Doc" url="https://www.costflow.io/docs/syntax/" />
+          )}
+          <Action.Push
+            title="Show Costflow Config"
+            icon={Icon.Code}
+            target={
+              <Detail
+                navigationTitle="Costflow Config"
+                markdown={"```json\n" + JSON.stringify(costFlowConfig, null, 2) + "\n```"}
+              />
             }
-            /* actions={ */
-            /*   <ActionPanel> */
-            /*     <Action.Push title="Show Details" target={<Detail markdown={(data as any)?.output} />} /> */
-            /*   </ActionPanel> */
-            /* } */
-          />)}
+          />
+          <Action
+            title="Show Beancount Mate Perferences"
+            icon={Icon.Cog}
+            onAction={openCommandPreferences}
+          />
+        </ActionPanel>
+      }
+    >
+      {searchText === "" && parseResult == null && <EmptyView />}
+      {searchText !== "" && parseResult == null && <ErrorView />}
+      {searchText !== "" && parseResult != null && <TransactionItem parseResult={parseResult} />}
     </List>
   );
 }
