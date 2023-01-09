@@ -6,6 +6,7 @@
   "icon": "swift.png",
   "author": "BProg",
   "license": "MIT",
+  "categories": ["Developer Tools", "Web"],
   "commands": [
     {
       "name": "index",

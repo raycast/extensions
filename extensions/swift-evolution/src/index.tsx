@@ -1,10 +1,9 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
+  Action,
   List,
-  OpenInBrowserAction,
   showToast,
-  ToastStyle,
+  Toast,
   Icon,
   useNavigation,
   Detail,
@@ -27,10 +26,7 @@ export type ProposalUISectionItem = {
   // swift version if implemented, schedule period if in review (Not yet implemented)
   subtitle: string | undefined;
   icon: { source: Icon; tintColor: Color } | string;
-  // Repo
-  accessoryTitle: string | undefined;
-  // repo icon
-  accessoryIcon: string | undefined;
+  accessories: List.Item.Accessory[]
   // status, id, summary, title
   keywords: string[];
   link: string;
@@ -71,15 +67,16 @@ function ArticleListItem(props: { proposal: ProposalUISectionItem }) {
   return (
     <List.Item
       {...proposal}
-      accessoryIcon={{ source: Icon.ArrowRight }}
+      // accessories={[{icon: Icon.ArrowRight}]}
       actions={
         <ActionPanel>
-          <ActionPanel.Item
+          <Action
             title="Details"
+            icon={"app-window-list-16"}
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
-          <OpenInBrowserAction url={proposal.link} />
-          <CopyToClipboardAction title="Copy URL" content={proposal.link} />
+          <Action.OpenInBrowser url={proposal.link} />
+          <Action.CopyToClipboard title="Copy URL" content={proposal.link} />
         </ActionPanel>
       }
     />
@@ -105,8 +102,8 @@ function ProposalGithubPage(props: { markdownUrl: string; prUrl: string }) {
       markdown={state.markdown}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={props.prUrl} />
-          <CopyToClipboardAction title="Copy URL" content={props.prUrl} />
+          <Action.OpenInBrowser url={props.prUrl} />
+          <Action.CopyToClipboard title="Copy URL" content={props.prUrl} />
         </ActionPanel>
       }
     />
@@ -117,7 +114,7 @@ async function getProposals(): Promise<ProposalUI> {
   try {
     return await fetchProposals();
   } catch (error) {
-    showToast(ToastStyle.Failure, "Failed", (error as Error).message);
+    showToast(Toast.Style.Failure, "Failed", (error as Error).message);
     return Promise.resolve({ sections: [] });
   }
 }

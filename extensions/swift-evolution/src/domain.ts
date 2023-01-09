@@ -1,68 +1,57 @@
 import { ProposalUI, ProposalUISectionItem } from "./index";
 import fetch from "node-fetch";
 import { Color, Icon } from "@raycast/api";
+import { ProposalJson, fetchProposals as fetchRemoteProposals, Status } from "./api";
 
-type DisplayableStatus = Pick<ProposalUISectionItem, "icon"> & { display: string; order: number };
+type DisplayableStatus = Pick<ProposalUISectionItem, "icon"> & { display: string };
 
-const displayableStatusMap: Record<string, DisplayableStatus> = {
-  ".awaitingReview": { display: "Awaiting Review", icon: { source: Icon.Clock, tintColor: Color.Orange }, order: 0 },
+const statusOrdering: Record<Status, number> = {
+  ".awaitingReview": 0,
+  ".scheduledForReview": 1,
+  ".activeReview": 2,
+  ".accepted": 3,
+  ".acceptedWithRevisions": 4,
+  ".previewing": 5,
+  ".implemented": 6,
+  ".returnedForRevision": 7,
+  ".deferred": 8,
+  ".rejected": 9,
+  ".withdrawn": 10,
+};
+
+const displayableStatusMap: Record<Status, DisplayableStatus> = {
+  ".awaitingReview": { display: "Awaiting Review", icon: { source: Icon.Clock, tintColor: Color.Orange } },
   ".scheduledForReview": {
     display: "Scheduled For Review",
     icon: { source: Icon.Calendar, tintColor: Color.Orange },
-    order: 1,
   },
-  ".activeReview": { display: "In Review", icon: { source: Icon.Bubble, tintColor: Color.Orange }, order: 2 },
-  ".accepted": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green }, order: 3 },
-  ".acceptedWithRevisions": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green }, order: 4 },
-  ".previewing": { display: "Previewing", icon: { source: Icon.Checkmark, tintColor: Color.Magenta }, order: 5 },
-  ".implemented": { display: "Implemented", icon: { source: Icon.Checkmark, tintColor: Color.Blue }, order: 6 },
+  ".activeReview": { display: "In Review", icon: { source: Icon.Bubble, tintColor: Color.Orange } },
+  ".accepted": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green } },
+  ".acceptedWithRevisions": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green } },
+  ".previewing": { display: "Previewing", icon: { source: Icon.Checkmark, tintColor: Color.Magenta } },
+  ".implemented": { display: "Implemented", icon: { source: Icon.Checkmark, tintColor: Color.Blue } },
   ".returnedForRevision": {
     display: "Returned",
     icon: { source: Icon.ArrowClockwise, tintColor: Color.Purple },
-    order: 7,
   },
-  ".deferred": { display: "Deferred", icon: { source: Icon.Calendar, tintColor: Color.Purple }, order: 8 },
-  ".rejected": { display: "Rejected", icon: { source: Icon.ExclamationMark, tintColor: Color.Red }, order: 9 },
-  ".withdrawn": { display: "Withdrawn", icon: { source: Icon.Trash, tintColor: Color.Red }, order: 10 },
-};
-
-type ProposalJson = {
-  id: string;
-  title: string;
-  summary: string;
-  status: {
-    end: string | undefined;
-    start: string | undefined;
-    state: string;
-    version: string | undefined;
-  };
-  sha: string;
-  reviewManager: { link: string; name: string };
-  link: string;
-  implementation:
-    | {
-        account: string;
-        id: string;
-        repository: string;
-        type: string;
-      }[]
-    | null;
-  authors: { link: string; name: string }[];
+  ".deferred": { display: "Deferred", icon: { source: Icon.Calendar, tintColor: Color.Purple } },
+  ".rejected": { display: "Rejected", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } },
+  ".withdrawn": { display: "Withdrawn", icon: { source: Icon.Trash, tintColor: Color.Red } },
 };
 
 export async function fetchProposals(): Promise<ProposalUI> {
   const toUI = (proposals: ProposalJson[]): ProposalUI => {
     const proposalUI = proposals.sort(compareStatus).reduce<ProposalUI>(
-      (prev, current) => {
+      (proposalsUI, current) => {
         const sectionTitle = getDisplayableStatus(current).display;
-        if (isNewSection(sectionTitle, prev.sections)) {
-          prev.sections.push({
+        if (isNewSection(sectionTitle, proposalsUI.sections)) {
+          proposalsUI.sections.push({
             title: sectionTitle,
             items: [],
           });
         }
-        prev.sections[prev.sections.length - 1].items.push(toItemUI(current));
-        return prev;
+        proposalsUI.sections[proposalsUI.sections.length - 1].items.push(toItemUI(current));
+        return proposalsUI;
       },
       { sections: [] }
     );
@@ -70,7 +59,7 @@ export async function fetchProposals(): Promise<ProposalUI> {
   };
 
   const compareStatus = (x: ProposalJson, y: ProposalJson) =>
-    getDisplayableStatus(x).order - getDisplayableStatus(y).order;
+    statusOrdering[x.status.state] - statusOrdering[y.status.state];
 
   const getDisplayableStatus = (proposal: ProposalJson): DisplayableStatus => {
     const jsonStatus = proposal.status.state;
@@ -79,7 +68,6 @@ export async function fetchProposals(): Promise<ProposalUI> {
       display = {
         display: jsonStatus,
         icon: "🚧",
-        order: -1,
       };
     }
     return display;
@@ -94,8 +82,7 @@ export async function fetchProposals(): Promise<ProposalUI> {
     const version = proposal.status.version ?? "";
     const title = proposal.title.trim();
     return {
-      accessoryIcon: "next.png",
-      accessoryTitle: getRepos(proposal),
+      accessories: [{text: getRepos(proposal)}, {icon: Icon.ArrowRight}],
       id,
       icon: getDisplayableStatus(proposal).icon,
       title,
@@ -129,8 +116,7 @@ export async function fetchProposals(): Promise<ProposalUI> {
   };
 
   try {
-    const response = await fetch("https://data.swift.org/swift-evolution/proposals");
-    const json = (await response.json()) as ProposalJson[];
+    const json = await fetchRemoteProposals();
     return toUI(json);
   } catch (error) {
     console.error(error);
