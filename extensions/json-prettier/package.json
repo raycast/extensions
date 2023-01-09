@@ -13,10 +13,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "json-prettier",
+      "name": "index",
       "title": "JSON Prettier",
       "description": "Convert JSON/JS Object to pretty JSON",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
