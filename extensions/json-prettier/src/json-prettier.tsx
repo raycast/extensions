@@ -1,4 +1,4 @@
-import { Clipboard, popToRoot, closeMainWindow, showToast, Toast } from '@raycast/api';
+import { Clipboard, popToRoot, closeMainWindow, showToast, Toast, showHUD } from '@raycast/api';
 import { useEffect } from 'react';
 
 export default () => {
@@ -13,13 +13,14 @@ export default () => {
           eval(`jsObject = ${trimmedText}`);
         }
         await Clipboard.paste(JSON.stringify(jsObject, null, 2));
+        showHUD('Pasted succesfully!');
         closeMainWindow();
         popToRoot();
       } catch (err) {
         showToast({
           style: Toast.Style.Failure,
           title: 'Invalid',
-          message: 'clipboard value is not valid JSON or JS Object',
+          message: 'Please copy a valid JSON/JS Object',
         });
         popToRoot();
       }
