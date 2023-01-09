@@ -10,29 +10,33 @@ import { PARSER_STATE } from "./enumParser";
  */
 export class CWChatParserV1 implements ICWChatParser {
   private readonly notSupported = ["[dtext"];
-  private readonly _RegExpLeft = /([^[]+?(?=\[))|^(?!.*\[).+$/gm;
+  private readonly _RegExpLeft = /([^[]+?(?=\[))|^(?!.*\[).+$/gs;
   private readonly _RegExpOpen = /\[(info|code|title|qt)\]/gm;
   private readonly _RegExpSelfClosed = /\[[^/]*?\]/gm;
   private readonly _RegExpClose = /\[\/.+?\]/gm;
+  private readonly _RegExpOnlyLineFeed = /\n{1,}/gm;
   private cWTextNodeFactory: CWTextNodeFactory = new CWTextNodeFactory();
-  parseText(raw_text: string): string {
-    if (this.isNotsurpported(raw_text, this.notSupported)) {
+  parseText(rawText: string): string {
+    // to mod break-line
+    // rawText = "test1\ntest2\n\ntest3\n\n\ntest4".replace(this._RegExpOnlyLineFeed,"\n\n")
+    rawText = rawText.replace(this._RegExpOnlyLineFeed, "\n\n");
+    if (this.isNotsurpported(rawText, this.notSupported)) {
       return "";
     }
 
     const root = new CWTextNode(undefined, "");
-    let state = this.checkState(raw_text);
-    let parsed = raw_text;
+    let state = this.checkState(rawText);
+    let leftToBeParsed = rawText;
     let currNode: CWTextNode | undefined = root;
     while (state !== PARSER_STATE.END) {
       const re = this.getReGex(state);
-      const ret = this.getToken(parsed, re);
-      parsed = ret.tkn.trimed;
+      const ret = this.getToken(leftToBeParsed, re);
+      leftToBeParsed = ret.tkn.trimed;
       currNode = this.cWTextNodeFactory.createCwText(ret.tkn.val, currNode, state);
-      state = this.checkState(parsed);
+      state = this.checkState(leftToBeParsed);
     }
-    const rett = this.mergeNodes(root);
-    return rett;
+    const parsedText = this.mergeNodes(root);
+    return parsedText;
   }
   checkState(param: string) {
     const selfClosedTag =
@@ -99,9 +103,9 @@ export class CWChatParserV1 implements ICWChatParser {
   getNextNode(node: CWTextNode) {
     return node.next;
   }
-  isNotsurpported(raw_text = "", notSupporteds: string[]): boolean {
+  isNotsurpported(rawText = "", notSupporteds: string[]): boolean {
     for (const notSupported of notSupporteds) {
-      if (raw_text.includes(notSupported)) {
+      if (rawText.includes(notSupported)) {
         return true;
       }
     }
