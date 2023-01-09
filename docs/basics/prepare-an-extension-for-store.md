@@ -112,7 +112,7 @@ We made a new icon generator tool to ease the process of creating icons for your
 
 ## Screenshots
 
-![An example of an extension with screenshot metadata](https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png)
+![An example of an extension with screenshot metadata](../.gitbook/assets/hn-store.png)
 
 - Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 - You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
