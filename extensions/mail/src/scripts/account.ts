@@ -4,20 +4,33 @@ import * as cache from "../utils/cache";
 
 export const getMailAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
-    set output to ""
-    tell application "Mail"
-      set mailAccounts to every account
-      repeat with mailAcc in mailAccounts
+  set output to ""
+  tell application "Mail"
+    set mailAccounts to every account
+    repeat with mailAcc in mailAccounts
+      repeat 1 times
+        if (count of every mailbox of mailAcc) is 0 then exit repeat
         set accId to id of mailAcc
         set accName to name of mailAcc
         set accUser to user name of mailAcc
         set fullName to full name of mailAcc
         set accEmail to email addresses of mailAcc
-        set numUnread to unread count of (first mailbox of mailAcc whose name is "All Mail")
+        try
+          set mainMailbox to (first mailbox of mailAcc whose name is "All Mail")
+          set numUnread to unread count of mainMailbox
+        on error
+          try
+            set mainMailbox to (first mailbox of mailAcc whose name is "INBOX")
+            set numUnread to unread count of mainMailbox
+          on error
+            set numUnread to 0
+          end try
+        end try
         set output to output & accId & "," & accName & "," & accUser & "," & fullName & "," & accEmail & "," & numUnread & "\n"
       end repeat
-    end tell
-    return output
+    end repeat
+  end tell
+  return output
   `;
   let accounts = cache.getAccounts();
   if (!accounts) {
