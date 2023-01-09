@@ -5,6 +5,9 @@
   "description": "View upcoming NBA games and NBA team standings",
   "icon": "command-icon.png",
   "author": "AbhinavPalacharla",
+  "contributors": [
+    "djpowers"
+  ],
   "categories": [
     "Fun"
   ],
