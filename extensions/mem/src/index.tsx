@@ -52,7 +52,7 @@ export default function Command() {
     >
       <Form.TextArea placeholder="Start typing your mem here..." {...itemProps.content} />
       <Form.Separator />
-      <Form.DatePicker title="Schedule for later?" {...itemProps.scheduledFor} />
+      <Form.DatePicker title="Schedule for Later?" {...itemProps.scheduledFor} />
       <Form.Checkbox title="Mark as read?" label="Read" {...itemProps.isRead} />
     </Form>
   );
