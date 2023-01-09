@@ -44,8 +44,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={item.url} />
-              <Action.CopyToClipboard title="Copy URL to clipboard" content={item.url} />
-              <Action.CopyToClipboard title="Copy title to clipboard" content={item.title} />
+              <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
+              <Action.CopyToClipboard title="Copy Title to Clipboard" content={item.title} />
             </ActionPanel>
           }
         />
