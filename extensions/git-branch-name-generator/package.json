@@ -5,7 +5,6 @@
   "description": "Convert a string into a branch name",
   "icon": "command-icon.png",
   "author": "mbonner",
-  "owner": "bootpack-digital",
   "categories": [
     "Developer Tools"
   ],
