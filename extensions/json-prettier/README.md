@@ -1,3 +1,5 @@
+![Alt text](assets/command-icon.png)
+
 # JSON Prettier
 
 Convert JSON/JS Object to pretty JSON
