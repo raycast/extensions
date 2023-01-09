@@ -1,6 +1,7 @@
 import { runAppleScript } from "run-applescript";
-import { Account } from "../types/types";
+import { Account, Mailbox } from "../types/types";
 import * as cache from "../utils/cache";
+import { getMailboxIcon } from "../utils/mailbox";
 
 export const getMailAccounts = async (): Promise<Account[] | undefined> => {
   const script = `
@@ -37,10 +38,20 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
     try {
       const response: string[] = (await runAppleScript(script)).split("\n");
       response.pop();
-      accounts = response.map((line: string) => {
-        const [id, name, userName, fullName, email, numUnread] = line.split(",");
-        return { id, name, userName, fullName, email, numUnread: parseInt(numUnread) };
-      });
+      accounts = await Promise.all(
+        response.map(async (line: string) => {
+          const [id, name, userName, fullName, email, numUnread] = line.split(",");
+          return {
+            id,
+            name,
+            userName,
+            fullName,
+            email,
+            numUnread: parseInt(numUnread),
+            mailboxes: await getMailboxes(name),
+          };
+        })
+      );
       if (accounts) {
         cache.setAccounts(accounts);
       }
@@ -50,4 +61,35 @@ export const getMailAccounts = async (): Promise<Account[] | undefined> => {
     }
   }
   return accounts;
+};
+
+export const getMailboxes = async (accountName: string): Promise<Mailbox[]> => {
+  const script = `
+    set output to ""
+    tell application "Mail"
+      set mailAcc to account "${accountName}"
+      set mbs to every mailbox of mailAcc
+      repeat with mb in mbs
+        tell mb 
+          set output to output & name & "," & unread count & "\n"
+        end tell
+      end repeat
+    end tell
+    return output
+  `;
+  try {
+    const response: string[] = (await runAppleScript(script)).split("\n");
+    response.pop();
+    const mailboxes: Mailbox[] = response.map((line: string) => {
+      const [name, unreadCount] = line.split(",");
+      return { name, unreadCount: parseInt(unreadCount) };
+    });
+    for (const mailbox of mailboxes) {
+      mailbox.icon = getMailboxIcon(mailbox.name);
+    }
+    return mailboxes;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 };

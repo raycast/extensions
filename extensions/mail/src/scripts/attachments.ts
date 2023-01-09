@@ -1,6 +1,6 @@
 import { showToast, Toast, open, showInFinder, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { Preferences, Attachment, Message } from "../types/types";
+import { Mailbox, Attachment, Message, Preferences } from "../types/types";
 import { tellMessage } from "./messages";
 import { formatFileSize, getMIMEtype } from "../utils/finder";
 import { existsSync } from "fs";
@@ -14,14 +14,14 @@ if (!existsSync(downloadDirectory)) {
 }
 downloadDirectory = "Macintosh HD" + downloadDirectory.replaceAll("/", ":");
 
-export const getMessageAttachments = async (message: Message, mailbox: string): Promise<Attachment[]> => {
+export const getMessageAttachments = async (message: Message, mailbox: Mailbox): Promise<Attachment[]> => {
   try {
     const script = `
       set output to ""
       tell application "Mail"
-        set acc to (first account whose id is "${message.account}")
+        set acc to account "${message.account}"
         tell acc
-          set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
+          set msg to (first message of mailbox "${mailbox.name}" whose id is "${message.id}")
           tell msg 
             repeat with a in mail attachments
               tell a 
@@ -48,13 +48,12 @@ export const getMessageAttachments = async (message: Message, mailbox: string): 
   }
 };
 
-export const saveAttachment = async (message: Message, mailbox: string, attachment?: Attachment, name?: string) => {
+export const saveAttachment = async (message: Message, mailbox: Mailbox, attachment?: Attachment, name?: string) => {
   let attachmentName: string;
   if (attachment) {
     attachmentName = attachment.name;
   } else {
     attachmentName = await tellMessage(message, mailbox, "tell msg to get name of first mail attachment");
-    console.log("attachmentName:", attachmentName);
     if (attachmentName === "missing value") {
       await showToast(Toast.Style.Failure, "No Attachments Found");
       return;
@@ -106,7 +105,7 @@ export const saveAttachment = async (message: Message, mailbox: string, attachme
   }
 };
 
-export const saveAllAttachments = async (message: Message, mailbox: string) => {
+export const saveAllAttachments = async (message: Message, mailbox: Mailbox) => {
   const script = `
     set attachmentsFolder to "${downloadDirectory}"
     tell msg 

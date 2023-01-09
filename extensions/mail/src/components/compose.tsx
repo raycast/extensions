@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Form, Action, ActionPanel } from "@raycast/api";
-import { newOutgoingMessage, OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
-import { Account, Message, OutgoingMessage, OutgoingMessageForm } from "../types/types";
+import { newOutgoingMessage } from "../scripts/outgoing-message";
+import {
+  Account,
+  OutgoingMessageAction,
+  ComposeMessageProps,
+  OutgoingMessage,
+  OutgoingMessageForm,
+} from "../types/types";
 import { getRecipients } from "../scripts/messages";
 import { getMailAccounts } from "../scripts/account";
+import { OutgoingMessageIcons } from "../utils/presets";
 import { formatFileSize, getSize, maximumFileSize } from "../utils/finder";
 import { titleCase } from "../utils/utils";
 import emailRegex from "email-regex";
-
-type ComposeMessageProps = {
-  account?: Account;
-  message?: Message;
-  attachments?: string[];
-  action?: OutgoingMessageAction;
-};
 
 export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
   const { account, message, attachments, action } = props;
@@ -59,7 +59,7 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       content: values.content,
       attachments: values.attachments,
     };
-    await newOutgoingMessage(message);
+    await newOutgoingMessage(message, props.action, props.message, props.mailbox);
   };
 
   return isLoading ? (
@@ -70,8 +70,8 @@ export const ComposeMessage = (props: ComposeMessageProps): JSX.Element => {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={action ? action : OutgoingMessageAction.Compose}
-            icon={action ? OutgoingMessageIcons[action] : OutgoingMessageIcons[OutgoingMessageAction.Compose]}
+            title={action ? action : OutgoingMessageAction.New}
+            icon={action ? OutgoingMessageIcons[action] : OutgoingMessageIcons[OutgoingMessageAction.New]}
             onSubmit={handleSubmit}
           />
         </ActionPanel>

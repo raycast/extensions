@@ -4,6 +4,7 @@ import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
 import { Account, Message } from "./types/types";
+import { isInbox } from "./utils/mailbox";
 
 export default function SeeRecentMail() {
   const [account, setAccount] = useState<Account>();
@@ -33,7 +34,12 @@ export default function SeeRecentMail() {
       if (accounts) {
         const messages = await Promise.all(
           accounts.map((account: Account) => {
-            return getAccountMessages(account, "recent", "All Mail", 25, true);
+            const mailbox = account.mailboxes.find((m) => isInbox(m));
+            if (mailbox) {
+              return getAccountMessages(account, mailbox, "recent", 25, true);
+            } else {
+              return [];
+            }
           })
         );
         setAccounts(
@@ -79,20 +85,23 @@ export default function SeeRecentMail() {
       {numMessages && numMessages > 0 ? (
         accounts
           ?.filter((a: Account) => account === undefined || a.id === account.id)
-          .map((account: Account) => (
-            <List.Section key={account.id} title={account.name} subtitle={account.email}>
-              {account.messages?.map((message: Message) => (
-                <MessageListItem
-                  key={message.id}
-                  mailbox={"recent"}
-                  account={account}
-                  message={message}
-                  setMessage={setMessage}
-                  deleteMessage={deleteMessage}
-                />
-              ))}
-            </List.Section>
-          ))
+          .map((account: Account) => {
+            const recentMailbox = account.mailboxes.find((m) => isInbox(m));
+            return recentMailbox ? (
+              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+                {account.messages?.map((message: Message) => (
+                  <MessageListItem
+                    key={message.id}
+                    mailbox={recentMailbox}
+                    account={account}
+                    message={message}
+                    setMessage={setMessage}
+                    deleteMessage={deleteMessage}
+                  />
+                ))}
+              </List.Section>
+            ) : undefined;
+          })
       ) : (
         <List.EmptyView title={"No Recent Unread Messages"} description={"You're all caught up..."} />
       )}

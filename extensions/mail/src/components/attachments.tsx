@@ -2,22 +2,19 @@ import { List, Action, ActionPanel, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as attachmentUtils from "../scripts/attachments";
 import { getAttachmentIcon } from "../utils/utils";
-import { Message, Attachment } from "../types/types";
-import { Mailboxes, MailIcons } from "../utils/presets";
+import { Mailbox, Message, Attachment } from "../types/types";
+import { MailIcons } from "../utils/presets";
 
-interface AttachmentProps {
-  mailbox: string;
-  message: Message;
-}
+type AttachmentsProps = { mailbox: Mailbox; message: Message };
 
-export const Attachments = (props: AttachmentProps): JSX.Element => {
+export const Attachments = (props: AttachmentsProps): JSX.Element => {
   const { mailbox, message } = props;
   const [attachments, setAttachments] = useState<Attachment[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
-      setAttachments(await attachmentUtils.getMessageAttachments(message, Mailboxes[mailbox].mailbox));
+      setAttachments(await attachmentUtils.getMessageAttachments(message, mailbox));
       setIsLoading(false);
     })();
     return () => {
@@ -40,7 +37,7 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
                 title={"Save Attachment"}
                 icon={MailIcons.Save}
                 onAction={async () => {
-                  await attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment);
+                  await attachmentUtils.saveAttachment(message, mailbox, attachment);
                 }}
               />
               {attachments.length > 1 && (
@@ -48,7 +45,7 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
                   title={"Save All Attachments"}
                   icon={MailIcons.Save}
                   onAction={async () => {
-                    await attachmentUtils.saveAllAttachments(message, Mailboxes[mailbox].mailbox);
+                    await attachmentUtils.saveAllAttachments(message, mailbox);
                   }}
                 />
               )}
@@ -66,7 +63,7 @@ export const Attachments = (props: AttachmentProps): JSX.Element => {
   );
 };
 
-type SaveAttachmentProps = AttachmentProps & { attachment: Attachment };
+type SaveAttachmentProps = { mailbox: Mailbox; message: Message; attachment: Attachment };
 
 export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentProps): JSX.Element => {
   return (
@@ -77,7 +74,7 @@ export const SaveAttachment = ({ mailbox, message, attachment }: SaveAttachmentP
             title={"Save Attachment"}
             icon={MailIcons.Save}
             onSubmit={async (values: { name: string }) => {
-              attachmentUtils.saveAttachment(message, Mailboxes[mailbox].mailbox, attachment, values.name);
+              attachmentUtils.saveAttachment(message, mailbox, attachment, values.name);
             }}
           />
         </ActionPanel>

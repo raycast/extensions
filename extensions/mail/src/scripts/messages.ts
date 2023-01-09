@@ -1,19 +1,19 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { constructDate } from "../utils/utils";
-import { Account, Message } from "../types/types";
+import { Account, Mailbox, Message } from "../types/types";
 import * as cache from "../utils/cache";
+import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 
-export const tellMessage = async (message: Message, mailbox: string, script: string): Promise<string> => {
+export const tellMessage = async (message: Message, mailbox: Mailbox, script: string): Promise<string> => {
   if (!script.includes("msg")) {
     console.error("Script must include msg");
     return "missing value";
   }
   const appleScript = `
   tell application "Mail"
-    set acc to (first account whose id is "${message.account}")
-    tell acc
-      set msg to (first message of (first mailbox whose name is "${mailbox}") whose id is "${message.id}")
+    tell account "${message.account}"
+      set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
       ${script.trim()}
     end tell
   end tell
@@ -21,47 +21,54 @@ export const tellMessage = async (message: Message, mailbox: string, script: str
   return await runAppleScript(appleScript);
 };
 
-export const openMessage = async (message: Message, mailbox: string): Promise<void> => {
+export const openMessage = async (message: Message, mailbox: Mailbox) => {
   await tellMessage(message, mailbox, "open msg\nactivate");
 };
 
-export const toggleMessageRead = async (message: Message, mailbox: string): Promise<void> => {
+export const toggleMessageRead = async (message: Message, mailbox: Mailbox) => {
   await tellMessage(message, mailbox, "tell msg to set read status to not read status");
 };
 
-export const moveMessage = async (message: Message, mailbox: string, target: string): Promise<void> => {
-  await tellMessage(message, mailbox, `set mailbox of msg to (first mailbox whose name is "${target}")`);
+export const moveMessage = async (message: Message, mailbox: Mailbox, target: Mailbox) => {
+  await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
 };
 
-export const moveToJunk = async (message: Message, mailbox: string): Promise<void> => {
+export const moveToJunk = async (message: Message, account: Account, mailbox: Mailbox) => {
   try {
-    await moveMessage(message, mailbox, "Spam");
-    await showToast(Toast.Style.Success, "Moved Message to Junk");
+    const junkMailbox = account.mailboxes.find((m) => isJunkMailbox(m));
+    if (junkMailbox) {
+      await moveMessage(message, mailbox, junkMailbox);
+      await showToast(Toast.Style.Success, "Moved Message to Junk");
+    } else {
+      await showToast(Toast.Style.Failure, "No Junk Mailbox Found");
+    }
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Moving Message To Junk");
     console.error(error);
   }
 };
 
-export const moveToTrash = async (message: Message, mailbox: string): Promise<void> => {
-  if (mailbox === "Trash") return;
+export const moveToTrash = async (message: Message, account: Account, mailbox: Mailbox) => {
   try {
-    await moveMessage(message, mailbox, "Trash");
-    await showToast(Toast.Style.Success, "Moved Message to Trash");
+    const trashMailbox = account.mailboxes.find((m) => isTrashMailbox(m));
+    if (trashMailbox) {
+      await moveMessage(message, mailbox, trashMailbox);
+      await showToast(Toast.Style.Success, "Moved Message to Trash");
+    } else {
+      await showToast(Toast.Style.Failure, "No Trash Mailbox Found");
+    }
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Moving Message To Trash");
     console.error(error);
   }
 };
 
-export const deleteMessage = async (message: Message, mailbox: string): Promise<void> => {
-  if (mailbox !== "Trash") return;
+export const deleteMessage = async (message: Message, mailbox: Mailbox) => {
   try {
     await tellMessage(
       message,
       mailbox,
-      `
-      open msg
+      `open msg
       activate
       delay 0.5
 		  tell application "System Events" to key code 51`
@@ -108,8 +115,8 @@ export const getRecipients = async (message: Message): Promise<string[]> => {
 
 export const getAccountMessages = async (
   account: Account,
+  mailbox: Mailbox,
   cacheMailbox: string,
-  mailbox: string,
   numMessages: number,
   unreadOnly = false
 ): Promise<Message[] | undefined> => {
@@ -118,20 +125,20 @@ export const getAccountMessages = async (
   const script = `
     set output to ""
     tell application "Mail"
-      set mailAccount to first account whose id is "${account.id}"
-      set box to (first mailbox of mailAccount whose name is "${mailbox}")
-        repeat with i from 1 to ${numMessages}
-          try 
-            set msg to message i of box
-            ${first ? `if id of msg is ${first} then exit repeat` : ""}
-            tell msg 
-              set senderName to extract name from sender
-              set senderAddress to extract address from sender
-              set numAttachments to count of mail attachments
-              set output to output & id & "$break" & subject & "$break" & senderName & "$break" & senderAddress & "$break" & date sent & "$break" & read status & "$break" & numAttachments & "$end"
-            end tell
-          end try
-        end repeat
+      set mailAccount to account "${account.name}"
+      tell mailAccount to set box to first mailbox whose name is "${mailbox.name}"
+      repeat with i from 1 to ${numMessages}
+        try
+          set msg to message i of box
+          ${first ? `if id of msg is ${first} then exit repeat` : ""}
+          tell msg 
+            set senderName to extract name from sender
+            set senderAddress to extract address from sender
+            set numAttachments to count of mail attachments
+            set output to output & id & "$break" & subject & "$break" & senderName & "$break" & senderAddress & "$break" & date sent & "$break" & read status & "$break" & numAttachments & "$end"
+          end tell
+        end try
+      end repeat
     end tell
     return output
   `;
@@ -143,10 +150,9 @@ export const getAccountMessages = async (
         const [id, subject, senderName, senderAddress, date, read, numAttachments] = line.split("$break");
         return {
           id,
-          account: account.id,
+          account: account.name,
           accountAddress: account.email,
           subject,
-          content: "",
           date: constructDate(date),
           read: read === "true",
           numAttachments: parseInt(numAttachments),
@@ -163,10 +169,9 @@ export const getAccountMessages = async (
   return messages;
 };
 
-export const getMessageContent = async (message: Message, mailbox: string): Promise<string> => {
+export const getMessageContent = async (message: Message, mailbox: Mailbox): Promise<string> => {
   try {
-    const content = await tellMessage(message, mailbox, "tell msg to return content");
-    return content;
+    return await tellMessage(message, mailbox, "tell msg to return content");
   } catch (error) {
     await showToast(Toast.Style.Failure, "Error Getting Message Content");
     console.error(error);

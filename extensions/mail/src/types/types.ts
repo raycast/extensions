@@ -7,6 +7,14 @@ export type Account = {
   fullName: string;
   email: string;
   numUnread: number;
+  mailboxes: Mailbox[];
+  messages?: Message[];
+};
+
+export type Mailbox = {
+  name: string;
+  unreadCount: number;
+  icon?: Image.ImageLike;
   messages?: Message[];
 };
 
@@ -15,7 +23,7 @@ export type Message = {
   account: string;
   accountAddress: string;
   subject: string;
-  content: string;
+  content?: string;
   numAttachments: number;
   date: Date;
   read: boolean;
@@ -30,11 +38,27 @@ export type Message = {
 };
 
 export type MessageProps = {
-  mailbox: string;
   account: Account;
+  mailbox: Mailbox;
   message: Message;
   setMessage: (account: Account, message: Message) => void;
   deleteMessage: (account: Account, message: Message) => void;
+};
+
+export enum OutgoingMessageAction {
+  New = "Send Message",
+  Reply = "Reply",
+  ReplyAll = "Reply All",
+  Forward = "Forward",
+  Redirect = "Redirect",
+}
+
+export type ComposeMessageProps = {
+  account?: Account;
+  message?: Message;
+  mailbox?: Mailbox;
+  attachments?: string[];
+  action?: OutgoingMessageAction;
 };
 
 export type OutgoingMessageForm = {
@@ -64,15 +88,7 @@ export type Attachment = {
   type?: string;
 };
 
-export type Mailbox = {
-  title: string;
-  mailbox: string;
-  icon: Image.ImageLike;
-};
-
 export type Preferences = {
   primaryAction: string;
-  primaryMailbox: string;
   saveDirectory: string;
-  selectDirectory: string;
 };

@@ -4,6 +4,7 @@ import { MessageListItem } from "./components/messages";
 import { getMailAccounts } from "./scripts/account";
 import { getAccountMessages } from "./scripts/messages";
 import { Account, Message } from "./types/types";
+import { isImportantMailbox } from "./utils/mailbox";
 
 export default function SeeImportantMail() {
   const [account, setAccount] = useState<Account>();
@@ -33,7 +34,12 @@ export default function SeeImportantMail() {
       if (accounts) {
         const messages = await Promise.all(
           accounts.map((account: Account) => {
-            return getAccountMessages(account, "important", "Important", 25);
+            const mailbox = account.mailboxes.find((m) => isImportantMailbox(m));
+            if (mailbox) {
+              return getAccountMessages(account, mailbox, mailbox.name, 25);
+            } else {
+              return [];
+            }
           })
         );
         setAccounts(
@@ -79,20 +85,23 @@ export default function SeeImportantMail() {
       {numMessages && numMessages > 0 ? (
         accounts
           ?.filter((a: Account) => account === undefined || a.id === account.id)
-          .map((account: Account) => (
-            <List.Section key={account.id} title={account.name} subtitle={account.email}>
-              {account.messages?.map((message: Message) => (
-                <MessageListItem
-                  key={message.id}
-                  mailbox={"important"}
-                  account={account}
-                  message={message}
-                  setMessage={setMessage}
-                  deleteMessage={deleteMessage}
-                />
-              ))}
-            </List.Section>
-          ))
+          .map((account: Account) => {
+            const importantMailbox = account.mailboxes.find((m) => isImportantMailbox(m));
+            return importantMailbox ? (
+              <List.Section key={account.id} title={account.name} subtitle={account.email}>
+                {account.messages?.map((message: Message) => (
+                  <MessageListItem
+                    key={message.id}
+                    mailbox={importantMailbox}
+                    account={account}
+                    message={message}
+                    setMessage={setMessage}
+                    deleteMessage={deleteMessage}
+                  />
+                ))}
+              </List.Section>
+            ) : undefined;
+          })
       ) : (
         <List.EmptyView title={"No Important Messages"} description={"You don't have any important messages..."} />
       )}

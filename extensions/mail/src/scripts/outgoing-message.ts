@@ -1,69 +1,60 @@
-import { Icon, Image, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { OutgoingMessage } from "../types/types";
+import { Mailbox, Message, OutgoingMessage, OutgoingMessageAction } from "../types/types";
 import emailRegex from "email-regex";
-import { MailIcons } from "../utils/presets";
-
-export enum OutgoingMessageAction {
-  Compose = "Send Message",
-  Reply = "Reply",
-  ReplyAll = "Reply All",
-  Forward = "Forward",
-  Redirect = "Redirect",
-}
-
-export const OutgoingMessageIcons: { [key: string]: Image.ImageLike } = {
-  [OutgoingMessageAction.Compose]: MailIcons.Sent,
-  [OutgoingMessageAction.Reply]: Icon.Reply,
-  [OutgoingMessageAction.ReplyAll]: Icon.Reply,
-  [OutgoingMessageAction.Forward]: Icon.ArrowUpCircle,
-  [OutgoingMessageAction.Redirect]: Icon.ArrowRightCircle,
-};
 
 export const newOutgoingMessage = async (
-  message: OutgoingMessage,
-  action = OutgoingMessageAction.Compose
-): Promise<void> => {
-  if (message.to.length === 0) {
+  outgoingMessage: OutgoingMessage,
+  action = OutgoingMessageAction.New,
+  message?: Message,
+  mailbox?: Mailbox
+) => {
+  if (outgoingMessage.to.length === 0) {
     await showToast(Toast.Style.Failure, "No Recipients Specified");
     return;
   }
-  console.log(message);
-  for (const recipient of message.to) {
+  for (const recipient of outgoingMessage.to) {
     if (!emailRegex({ exact: true }).test(recipient)) {
       await showToast(Toast.Style.Failure, "Invalid Email for Recipient");
       return;
     }
   }
-  let attachments = message.attachments && message.attachments.length > 0 ? message.attachments : [];
+  let attachments =
+    outgoingMessage.attachments && outgoingMessage.attachments.length > 0 ? outgoingMessage.attachments : [];
   attachments = attachments.map((attachment: string) => `Macintosh HD${attachment.replaceAll("/", ":")}`);
   const actionScript = (() => {
     switch (action) {
-      case OutgoingMessageAction.Compose:
-        return "send";
+      case OutgoingMessageAction.New:
+        return "make new outgoing message";
       case OutgoingMessageAction.Reply:
-        return "reply";
+        return "reply msg";
       case OutgoingMessageAction.ReplyAll:
-        return "reply all";
+        return "reply msg with properties {reply to all: true}";
       case OutgoingMessageAction.Forward:
-        return "forward";
+        return "forward msg";
       case OutgoingMessageAction.Redirect:
-        return "redirect";
+        return "redirect msg";
       default:
-        return "send";
+        return "make new outgoing message";
     }
   })();
   const script = `
     tell application "Mail"
-      set theTos to {"${message.to.join(`", "`)}"}
-      set theCcs to {"${message.cc.join(`", "`)}"}
-      set theBccs to {"${message.bcc.join(`", "`)}"}
+      ${
+        message && mailbox
+          ? `tell account "${message.account}"
+          set msg to (first message of (first mailbox whose name is "${mailbox.name}") whose id is "${message.id}")
+        end tell`
+          : ""
+      }
+      set theTos to {"${outgoingMessage.to.join(`", "`)}"}
+      set theCcs to {"${outgoingMessage.cc.join(`", "`)}"}
+      set theBccs to {"${outgoingMessage.bcc.join(`", "`)}"}
       set theAttachments to {"${attachments.join(`", "`)}"}
-      set attechmentDelay to 1
-      $
-      set newMessage to make new outgoing message with properties {sender: "${message.account}", subject: "${
-    message.subject
-  }", content: "${message.content}", visible: false}
+      set newMessage to ${actionScript}
+      set properties of newMessage to {sender: "${outgoingMessage.account}", subject: "${
+    outgoingMessage.subject
+  }", content: "${outgoingMessage.content}", visible: false}
       tell newMessage
         repeat with theTo in theTos
           make new recipient at end of to recipients with properties {address:theTo}
@@ -77,11 +68,11 @@ export const newOutgoingMessage = async (
         repeat with theAttachment in theAttachments
           try
             make new attachment with properties {file name:theAttachment as alias} at after last paragraph
-            delay attechmentDelay
+            delay 1
           end try
         end repeat
       end tell
-      ${actionScript} newMessage
+      send newMessage
     end tell  
   `;
   await runAppleScript(script);

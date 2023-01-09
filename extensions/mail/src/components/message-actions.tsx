@@ -11,15 +11,15 @@ import {
 } from "@raycast/api";
 import React from "react";
 import * as messageScripts from "../scripts/messages";
-import { OutgoingMessageAction, OutgoingMessageIcons } from "../scripts/outgoing-message";
 import { saveAllAttachments, saveAttachment } from "../scripts/attachments";
-import { Mailboxes, MailIcons } from "../utils/presets";
-import { MessageProps } from "../types/types";
+import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { MailIcons, OutgoingMessageIcons } from "../utils/presets";
+import { MessageProps, OutgoingMessageAction, Preferences } from "../types/types";
 import { Attachments } from "./attachments";
 import { ComposeMessage } from "./compose";
 import { ViewMessage } from "./view-message";
 
-const { primaryAction } = getPreferenceValues();
+const { primaryAction }: Preferences = getPreferenceValues();
 
 type MessageActionsProps = MessageProps & { inMessageView?: boolean };
 
@@ -33,7 +33,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
       icon={MailIcons.MailApp}
       onAction={async () => {
         try {
-          await messageScripts.openMessage(message, Mailboxes[mailbox].mailbox);
+          await messageScripts.openMessage(message, mailbox);
           await closeMainWindow();
         } catch (error) {
           await showToast(Toast.Style.Failure, "Failed To Open In Mail");
@@ -91,7 +91,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
           onAction={async () => {
             try {
               setMessage(account, { ...message, read: !message.read });
-              await messageScripts.toggleMessageRead(message, Mailboxes[mailbox].mailbox);
+              await messageScripts.toggleMessageRead(message, mailbox);
               await showToast(Toast.Style.Success, `Message Marked as ${message.read ? "Unread" : "Read"}`);
             } catch (error) {
               await showToast(Toast.Style.Failure, `Failed To Mark Message as ${message.read ? "Unread" : "Read"}`);
@@ -113,34 +113,34 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
               title={`Save ${message.numAttachments} Attachment${message.numAttachments > 1 ? "s" : ""}`}
               onAction={async () => {
                 if (message.numAttachments === 1) {
-                  await saveAttachment(message, Mailboxes[mailbox].mailbox);
+                  await saveAttachment(message, mailbox);
                 } else {
-                  await saveAllAttachments(message, Mailboxes[mailbox].mailbox);
+                  await saveAllAttachments(message, mailbox);
                 }
               }}
             />
           </React.Fragment>
         )}
-        {mailbox !== "junk" && (
+        {!isJunkMailbox(mailbox) && (
           <Action
             title={"Move to Junk"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
             icon={MailIcons.Junk}
             onAction={async () => {
               deleteMessage(account, message);
-              await messageScripts.moveToJunk(message, Mailboxes[mailbox].mailbox);
+              await messageScripts.moveToJunk(message, account, mailbox);
               if (inMessageView) navigation.pop();
             }}
           />
         )}
-        {mailbox !== "trash" ? (
+        {!isTrashMailbox(mailbox) ? (
           <Action
             title={"Move to Trash"}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             icon={MailIcons.Trash}
             onAction={async () => {
               deleteMessage(account, message);
-              await messageScripts.moveToTrash(message, Mailboxes[mailbox].mailbox);
+              await messageScripts.moveToTrash(message, account, mailbox);
               if (inMessageView) navigation.pop();
             }}
           />
@@ -157,7 +157,7 @@ export const MessageActions = (props: MessageActionsProps): JSX.Element => {
               });
               if (confirm) {
                 deleteMessage(account, message);
-                await messageScripts.deleteMessage(message, Mailboxes[mailbox].mailbox);
+                await messageScripts.deleteMessage(message, mailbox);
                 if (inMessageView) navigation.pop();
               }
             }}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { List, Icon } from "@raycast/api";
 import * as messageScripts from "../scripts/messages";
-import { shortenText, formatDate } from "../utils/utils";
-import { Message, Account, MessageProps } from "../types/types";
-import { Mailboxes, MailIcons } from "../utils/presets";
+import { shortenText, formatDate, titleCase } from "../utils/utils";
+import { Account, Mailbox, Message, MessageProps } from "../types/types";
+import { MailIcons } from "../utils/presets";
 import { MessageActions } from "./message-actions";
 
-export const Messages = (props: { account: Account; mailbox: string }): JSX.Element => {
-  const [mailbox, setMailbox] = useState<string>(props.mailbox);
+export const Messages = (props: { account: Account; mailbox: Mailbox }): JSX.Element => {
+  const [mailbox, setMailbox] = useState<Mailbox>(props.mailbox);
   const [messages, setMessages] = useState<Message[] | undefined>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -21,7 +21,7 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, Mailboxes[mailbox].mailbox, 100));
+      setMessages(await messageScripts.getAccountMessages(props.account, mailbox, mailbox.name, 100));
       setIsLoading(false);
     })();
     return () => {
@@ -33,18 +33,29 @@ export const Messages = (props: { account: Account; mailbox: string }): JSX.Elem
     <List
       isLoading={isLoading}
       searchBarPlaceholder={"Search for emails"}
-      navigationTitle={`${props.account.name} - ${Mailboxes[mailbox].title}`}
+      navigationTitle={`${props.account.name} - ${titleCase(mailbox.name)}`}
       searchBarAccessory={
-        <List.Dropdown tooltip="Mailbox" defaultValue={mailbox} onChange={setMailbox}>
-          {Object.entries(Mailboxes).map(([id, mailbox]) => (
-            <List.Dropdown.Item key={id} title={mailbox.title} value={id} icon={mailbox.icon} />
+        <List.Dropdown
+          tooltip="Mailbox"
+          defaultValue={mailbox.name}
+          onChange={(name: string) => {
+            setMailbox(props.account.mailboxes.find((mailbox) => mailbox.name === name) as Mailbox);
+          }}
+        >
+          {props.account.mailboxes.map((mailbox) => (
+            <List.Dropdown.Item
+              key={mailbox.name}
+              title={titleCase(mailbox.name)}
+              value={mailbox.name}
+              icon={mailbox.icon}
+            />
           ))}
         </List.Dropdown>
       }
     >
-      {messages?.map((message: Message) => (
+      {messages?.map((message: Message, index: number) => (
         <MessageListItem
-          key={message.id}
+          key={index}
           mailbox={mailbox}
           message={message}
           account={props.account}
@@ -66,7 +77,7 @@ export const MessageListItem = (props: MessageProps): JSX.Element => {
       icon={message.read ? MailIcons.Read : MailIcons.Unread}
       accessories={[
         { text: formatDate(message.date), icon: Icon.Calendar },
-        { text: shortenText(message.senderName, 20), icon: Icon.Person },
+        { text: shortenText(message.senderName, 20), icon: Icon.PersonCircle },
         message.numAttachments === 0 ? {} : { text: attachments, icon: Icon.Paperclip },
       ]}
       actions={<MessageActions {...props} />}

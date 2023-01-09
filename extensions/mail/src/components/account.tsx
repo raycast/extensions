@@ -1,9 +1,8 @@
-import { List, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { List, Icon, Action, ActionPanel } from "@raycast/api";
 import { Messages } from "./messages";
-import { Mailboxes, MailIcons } from "../utils/presets";
-import { Account, Mailbox, Preferences } from "../types/types";
-
-const { primaryMailbox }: Preferences = getPreferenceValues();
+import { MailIcons } from "../utils/presets";
+import { Account, Mailbox } from "../types/types";
+import { titleCase } from "../utils/utils";
 
 export const MailAccount = (account: Account): JSX.Element => {
   const unreadMessages =
@@ -11,12 +10,12 @@ export const MailAccount = (account: Account): JSX.Element => {
       ? "No Unread Messages"
       : `${account.numUnread} Unread Message${account.numUnread === 1 ? "" : "s"}`;
 
-  const MailboxAction = ({ id, mailbox }: { id: string; mailbox: Mailbox }) => {
+  const MailboxAction = ({ mailbox }: { mailbox: Mailbox }) => {
     return (
       <Action.Push
-        title={`See ${mailbox.title}`}
+        title={`See ${titleCase(mailbox.name)}`}
         icon={mailbox.icon}
-        target={<Messages mailbox={id} account={account} />}
+        target={<Messages mailbox={mailbox} account={account} />}
       />
     );
   };
@@ -27,14 +26,13 @@ export const MailAccount = (account: Account): JSX.Element => {
       title={account.name}
       subtitle={account.email}
       icon={account.numUnread > 0 ? MailIcons.Unread : MailIcons.Read}
-      accessories={[{ text: account.fullName, icon: Icon.Person }, { text: unreadMessages }]}
+      accessories={[{ text: account.fullName, icon: Icon.PersonCircle }, { text: unreadMessages }]}
       actions={
         <ActionPanel>
-          <MailboxAction id={primaryMailbox} mailbox={Mailboxes[primaryMailbox]} />
-          {Object.entries(Mailboxes)
-            .filter(([id, mailbox]) => id !== primaryMailbox)
-            .map(([id, mailbox]) => (
-              <MailboxAction key={id} id={id} mailbox={mailbox} />
+          {account.mailboxes
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((mailbox) => (
+              <MailboxAction key={mailbox.name} mailbox={mailbox} />
             ))}
         </ActionPanel>
       }

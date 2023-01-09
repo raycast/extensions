@@ -27,7 +27,7 @@ export const getAccounts = (): Account[] | undefined => {
   return undefined;
 };
 
-export const setAccounts = (data: Account[]): void => {
+export const setAccounts = (data: Account[]) => {
   accounts.set("accounts", JSON.stringify({ time: Date.now(), data: data }));
 };
 
@@ -47,7 +47,7 @@ export const getMessages = (account: string, mailbox: string): Message[] => {
   return [];
 };
 
-export const setMessages = (data: Message[], account: string, mailbox: string): void => {
+export const setMessages = (data: Message[], account: string, mailbox: string) => {
   const key = `${account}-${mailbox}`;
   messages.set(key, JSON.stringify({ time: Date.now(), data: data }));
 };
