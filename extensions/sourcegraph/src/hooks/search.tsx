@@ -4,6 +4,7 @@ import { Duration } from "luxon";
 
 import { Sourcegraph } from "../sourcegraph";
 import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
+import { SearchHistory } from "../searchHistory";
 
 import ExpandableToast from "../components/ExpandableToast";
 
@@ -77,6 +78,9 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
       // Cancel previous search
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
+
+      // Update search history
+      await SearchHistory.addSearch(src, searchText);
 
       // Do the search
       await performSearch(cancelRef.current.signal, src, searchText, pattern, {

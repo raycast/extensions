@@ -14,7 +14,7 @@ If you enjoy using Timers for Raycast and/or want to support further development
 
 ## Commands
 
-- [x] Start Timer (5, 10, 15, 25, 30, 45, 60, and 90 minute variations)
+- [x] Start Timer (2, 5, 10, 15, 25, 30, 45, 60, and 90 minute variations)
 - [x] Start Custom Timer (allows you to set a custom countdown and optionally save it for future use)
 - [x] Manage Timers (view/rename/start/stop running or preset countdown timers)
 - [x] Start Stopwatch

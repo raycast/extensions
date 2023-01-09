@@ -5,8 +5,14 @@
   "description": "View your Netlify sites, domains, and team members",
   "icon": "icon.png",
   "author": "destiner",
-  "contributors": ["jonohewitt"],
-  "categories": ["Developer Tools", "Web"],
+  "contributors": [
+    "jonohewitt",
+    "jasonbarry"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -42,12 +48,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.42.0",
     "axios": "^0.24.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

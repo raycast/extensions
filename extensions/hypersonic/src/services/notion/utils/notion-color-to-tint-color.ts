@@ -1,6 +1,8 @@
 import { Color } from '@raycast/api'
 
-export function notionColorToTintColor(notionColor: string | undefined): Color {
+export function notionColorToTintColor(
+  notionColor: string | undefined
+): string {
   const colorMapper = {
     default: Color.PrimaryText,
     gray: Color.PrimaryText,
@@ -12,10 +14,11 @@ export function notionColorToTintColor(notionColor: string | undefined): Color {
     orange: Color.Orange,
     purple: Color.Purple,
     pink: Color.Magenta,
-  } as Record<string, Color>
+  } as Record<string, any>
 
   if (notionColor === undefined) {
     return colorMapper['default']
   }
+
   return colorMapper[notionColor]
 }
