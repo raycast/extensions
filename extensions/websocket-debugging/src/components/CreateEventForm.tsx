@@ -1,15 +1,12 @@
 import { useCallback } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
 
-function CreateEventForm(props: { onCreate: (eventName: string, eventData: string|null) => void }) {
+function CreateEventForm(props: { onCreate: (eventName: string, eventData: string | null) => void }) {
   const { onCreate } = props;
   const { pop } = useNavigation();
 
   const handleSubmit = useCallback(
-    (values: {
-      eventName: string,
-      eventData: string|null
-    }) => {
+    (values: { eventName: string; eventData: string | null }) => {
       onCreate(values.eventName, values.eventData);
       pop();
     },

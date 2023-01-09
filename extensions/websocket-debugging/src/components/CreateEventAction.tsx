@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import { CreateEventForm } from "./index";
 
-function CreateEventAction(props: { onCreate: (eventName: string, eventData: string|null) => void }) {
+function CreateEventAction(props: { onCreate: (eventName: string, eventData: string | null) => void }) {
   return (
     <Action.Push
       icon={Icon.Pencil}

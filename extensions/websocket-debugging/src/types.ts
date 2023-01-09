@@ -21,7 +21,6 @@ type Log = {
   event: string;
   message: any;
   time: string;
-}
-
+};
 
 export type { Preferences, State, Log };

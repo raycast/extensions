@@ -13,6 +13,7 @@
     {
       "name": "PusherAppID",
       "title": "Pusher App ID",
+      "label": "Pusher App ID",
       "description": "Pusher App ID",
       "type": "textfield",
       "default": "",
@@ -21,6 +22,7 @@
     {
       "name": "PusherAppKey",
       "title": "Pusher App Key",
+      "label": "Pusher App Key",
       "description": "Pusher App Key",
       "type": "textfield",
       "default": "",
@@ -29,6 +31,7 @@
     {
       "name": "PusherAppSecret",
       "title": "Pusher App Secret",
+      "label": "Pusher App Secret",
       "description": "Pusher App Secret",
       "type": "textfield",
       "default": "",
@@ -37,6 +40,7 @@
     {
       "name": "PusherAppCluster",
       "title": "Pusher App Cluster",
+      "label": "Pusher App Cluster",
       "description": "Pusher Debuging",
       "type": "textfield",
       "default": "",
@@ -45,9 +49,11 @@
     {
       "name": "PusherAppEncrypted",
       "title": "Pusher App Encrypted",
+      "label": "Pusher App Encrypted",
       "description": "Pusher Encrypted",
       "type": "checkbox",
-      "default": false
+      "default": false,
+      "required": false
     }
   ],
   "commands": [
