@@ -67,7 +67,7 @@ export default function NewApp(props: BootstrapProps) {
                 raycastAdapter.setToastError(toast, token)
             } else {
                 console.info("notion authorization successful")
-                raycastAdapter.setToastSuccess(toast, "")
+                raycastAdapter.setToastSuccess(toast, "authorized")
             }
 
             setNotionToken(token)
@@ -95,7 +95,7 @@ export default function NewApp(props: BootstrapProps) {
             }
 
             setCopiedText(text)
-            await raycastAdapter.setToastSuccess(toast, "")
+            await raycastAdapter.setToastSuccess(toast, "received copied text")
         }
 
         getCopiedText()
@@ -120,7 +120,7 @@ export default function NewApp(props: BootstrapProps) {
             }
 
             setLastSelectedPage(page)
-            await raycastAdapter.setToastSuccess(toast, "")
+            await raycastAdapter.setToastSuccess(toast, "last selected page found")
         }
 
         doGet()

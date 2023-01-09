@@ -146,7 +146,7 @@ function getListItem(p: Page, copiedText: string, saver: Saver, handleItemSelect
             detail={getListDetail(p)}
             actions={
                 <ActionPanel>
-                    <Action title={actionName} onAction={() => handleItemSelected(p)} />
+                    <Action title={actionName} onAction={() => handleItemSelected(p)} icon="notion_icon.png" />
                 </ActionPanel>
             }
         />
