@@ -25,19 +25,15 @@ export function SaveToPage(props: HomeProps) {
                 return
             }
 
-            const toast = await props.raycastAdapter.showLoading("parsing text")
-
             const url = await props.saver.getURLTitle(text)
             if (url instanceof Error) {
                 console.info(url.message)
                 setIsParsingText(false)
-                await props.raycastAdapter.setToastSuccess(toast, "text parsed")
                 return
             }
 
             setURLTitle(url)
             setIsParsingText(false)
-            await props.raycastAdapter.setToastSuccess(toast, "text parsed")
         }
 
         parse()
