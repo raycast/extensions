@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-01-04 23:17
+ * @lastEditTime: 2023-01-08 17:26
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -148,9 +148,9 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
           console.log(`after query selected text`);
         });
       }
-
-      delayGetSystemProxy();
     }
+
+    delayGetSystemProxy();
 
     checkIfInstalledEudic().then((isInstalled) => {
       setIsInstalledEudic(isInstalled);
