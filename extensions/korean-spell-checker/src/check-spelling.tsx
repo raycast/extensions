@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Form, ActionPanel, Action, useNavigation, getSelectedText } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, getSelectedText, Icon } from "@raycast/api";
 
 import { ResultView } from "@view/result";
 
@@ -63,6 +63,7 @@ export default function CheckSpellingRoot(props: RootProps) {
         <ActionPanel>
           <Action.SubmitForm
             title="Submit Text"
+            icon={Icon.List}
             onSubmit={({ text }) => {
               submitText(text);
             }}

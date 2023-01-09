@@ -43,7 +43,7 @@ export default function ListItem({ text, errInfo, resultManager }: ListItemProps
       }}
       actions={
         <ActionPanel>
-          <ActionPanel.Submenu title={`Edit ${errInfo.orgStr}`}>
+          <ActionPanel.Submenu icon={Icon.Pencil} title={`Edit ${errInfo.orgStr}`}>
             {errInfo.candWords.map((word, idx) => (
               <Action
                 key={word}

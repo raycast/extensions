@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "korean-spell-checker",
   "title": "Korean Spell Checker",
-  "description": "It provides grammar/spelling suggestions for Korean",
+  "description": "Provides grammar/spelling suggestions for Korean language",
   "icon": "speller.png",
   "author": "jcha0713",
   "categories": [
