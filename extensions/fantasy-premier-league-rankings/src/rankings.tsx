@@ -5,14 +5,17 @@ import { useBootstrapStatic, useLeague, useUser, useUserTeamByGameweek } from ".
 export default function getUserRankings() {
   const userTeamId = getPreferenceValues().userTeamId;
   const bootstrapData = useBootstrapStatic();
-  const user = useUser(userTeamId);
+
+  const [selectedUser, setSelectedUser] = useState<string>(userTeamId);
+
+  const user = useUser(selectedUser);
+
   const userLeagues = user?.leagues?.classic.filter((league) => league.league_type === "x");
 
   const [selectedLeague, setSelectedLeague] = useState<string | undefined>(userLeagues?.[0]?.id.toString());
 
   const [showTeamSummary, setShowTeamSummary] = useState<boolean>(false);
 
-  const [selectedUser, setSelectedUser] = useState<string>(userTeamId);
 
   const league = useLeague(selectedLeague);
 
@@ -38,6 +41,7 @@ export default function getUserRankings() {
     [selectedUser, userTeamByGameweek]
   );
 
+
   return (
     <List
       throttle
@@ -52,7 +56,7 @@ export default function getUserRankings() {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      isLoading={!bootstrapData}
+      isLoading={!bootstrapData || !league}
     >
       {league?.standings?.results.map((result) => {
         let icon: Image.ImageLike = {
