@@ -81,28 +81,26 @@ function buildJql(query: string): string {
   return jql + " order by lastViewed desc"
 }
 
+function jqlForFilter(filter: IssueFilter) {
+  if(filter === 'issuesInOpenSprints') return 'sprint in openSprints()';
+  if(filter === 'myIssues') return "assignee=currentUser()";
+  if(filter === 'myIssuesInOpenSprints') return 'assignee=currentUser() AND sprint in openSprints()';
+  return ""
+}
+
 function jqlFor(query: string, filter?: IssueFilter): string {
   const jql = isIssueKey(query) ? `key=${query}` : buildJql(query)
 
-  if (!filter || filter === "allIssues") return jql
-  let extraJqlForFilter = ""
-
-  if (filter === "myIssues") {
-    extraJqlForFilter = "assignee=currentUser()"
-  }
+  if (!filter) return jql
+  const extraJqlForFilter = jqlForFilter(filter)
 
   const extraOperator = query ? "AND" : ""
 
   return `${extraJqlForFilter} ${extraOperator} ${jql}`
 }
 
-const isIssueFilter = (filter?: string): filter is IssueFilter => {
-  const filters: readonly string[] = issueFilters
-  return !!(filter && (filters.includes(filter) || filters.includes(filter)))
-}
-
-export async function searchIssues(query: string, filter?: string): Promise<ResultItem[]> {
-  const jql = jqlFor(query, isIssueFilter(filter) ? filter : undefined)
+export async function searchIssues(query: string, filter?: IssueFilter): Promise<ResultItem[]> {
+  const jql = jqlFor(query, filter)
 
   console.debug(jql)
 
@@ -129,7 +127,9 @@ export default function SearchIssueCommand() {
     tooltip: "Filters",
     values: [
       { name: "All Issues", value: "allIssues" },
+      { name: "Issues in Open sprints", value: "issuesInOpenSprints" },
       { name: "Assigned to Me", value: "myIssues" },
+      { name: "My Issues in Open sprints", value: "myIssuesInOpenSprints" },
     ],
   })
 }
