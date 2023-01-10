@@ -1,76 +1,19 @@
 import fetch from "node-fetch";
-import { ProposalJson, fetchProposals as fetchRemoteProposals, Status } from "./api";
+import { ProposalJson, fetchProposals as fetchRemoteProposals } from "./api";
 import { ProposalViewModel } from "./ProposalsList";
 
-type DisplayableStatus = { display: string };
-
-const displayableStatusMap: Record<Status, DisplayableStatus> = {
-  ".awaitingReview": { display: "Awaiting Review" },
-  ".scheduledForReview": { display: "Scheduled For Review" },
-  ".activeReview": { display: "In Review" },
-  ".accepted": { display: "Accepted" },
-  ".acceptedWithRevisions": { display: "Accepted" },
-  ".previewing": { display: "Previewing" },
-  ".implemented": { display: "Implemented" },
-  ".returnedForRevision": { display: "Returned" },
-  ".deferred": { display: "Deferred" },
-  ".rejected": { display: "Rejected" },
-  ".withdrawn": { display: "Withdrawn" },
-};
-
-function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
-  const proposalsViewModel: ProposalViewModel[] = proposals
-    .map((x) => {
-      return {
-        id: x.id,
-        authorName: x.authors.map((x) => x.name).join(","),
-        reviewManagerName: x.reviewManager.name,
-        link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + x.link,
-        markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + x.link,
-        keywords: getKeywords(x),
-        repos: getRepos(x),
-        status: getDisplayableStatus(x).display,
-        // statusColor: "red",
-        title: x.title.trim(),
-        swiftVersion: x.status.version,
-      };
-    })
-    .reverse();
-  return proposalsViewModel;
-}
-
-function getDisplayableStatus(proposal: ProposalJson): DisplayableStatus {
-  const jsonStatus = proposal.status.state;
-  let display = displayableStatusMap[jsonStatus];
-  if (display === undefined) {
-    display = {
-      display: jsonStatus,
-    };
-  }
-  return display;
-}
-
-function getRepos(proposal: ProposalJson): string | undefined {
-  const repos = (proposal.implementation ?? []).map((x) => x.repository);
-  return repos
-    .reduce((repos, repo) => {
-      if (repo === undefined) return repos;
-      if (repos.includes(repo)) return repos;
-      repos.push(repo);
-      return repos;
-    }, [] as string[])
-    .join("|");
-}
-
-function getKeywords(proposal: ProposalJson) {
-  const statusKeywords = getDisplayableStatus(proposal).display.split(" ");
-  const summaryKeywords = proposal.summary.trim().split(" ");
-  const titleKeywords = proposal.title.trim().split(" ");
-  const repoKeywords = getRepos(proposal)?.split("|");
-  const version = proposal.status.version?.trim();
-  return [proposal.id, proposal.status.version, statusKeywords, summaryKeywords, titleKeywords, repoKeywords, version]
-    .flat()
-    .filter((x) => x !== undefined) as string[];
+enum Status {
+  awaitingReview = ".awaitingReview",
+  scheduledForReview = ".scheduledForReview",
+  activeReview = ".activeReview",
+  accepted = ".accepted",
+  acceptedWithRevisions = ".acceptedWithRevisions",
+  previewing = ".previewing",
+  implemented = ".implemented",
+  returnedForRevision = ".returnedForRevision",
+  deferred = ".deferred",
+  rejected = ".rejected",
+  withdrawn = ".withdrawn",
 }
 
 export async function fetchProposals(): Promise<ProposalViewModel[]> {
@@ -90,4 +33,98 @@ export async function fetchMarkdown(url: string): Promise<string> {
   } catch (error) {
     throw Promise.resolve(error);
   }
+}
+
+const statusToViewModelMap = new Map<string, Pick<ProposalViewModel, "status" | "statusColor">>([
+  [Status.awaitingReview, { status: "Awaiting Review", statusColor: "orange" }],
+  [Status.scheduledForReview, { status: "Scheduled For Review", statusColor: "orange" }],
+  [Status.activeReview, { status: "In Review", statusColor: "orange" }],
+  [Status.accepted, { status: "Accepted", statusColor: "green" }],
+  [Status.acceptedWithRevisions, { status: "Accepted", statusColor: "green" }],
+  [Status.previewing, { status: "Previewing", statusColor: "green" }],
+  [Status.implemented, { status: "Implemented", statusColor: "blue" }],
+  [Status.returnedForRevision, { status: "Returned", statusColor: "purple" }],
+  [Status.deferred, { status: "Deferred", statusColor: "red" }],
+  [Status.rejected, { status: "Rejected", statusColor: "red" }],
+  [Status.withdrawn, { status: "Withdrawn", statusColor: "red" }],
+]);
+
+function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
+  const proposalsViewModel: ProposalViewModel[] = proposals
+    .map((json) => {
+      const viewModel: ProposalViewModel = {
+        id: json.id,
+        authorsName: json.authors.map((x) => x.name),
+        reviewManagerName: json.reviewManager.name,
+        reviewManagerProfileLink: json.reviewManager.link,
+        link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + json.link,
+        markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + json.link,
+        keywords: getKeywords(json),
+        repos: getRepos(json),
+        status: statusToViewModelMap.get(json.status.state)?.status ?? json.status.state,
+        statusColor: statusToViewModelMap.get(json.status.state)?.statusColor ?? "blue",
+        title: json.title.trim(),
+        swiftVersion: json.status.version,
+        scheduled:
+          json.status.start !== undefined && json.status.end !== undefined
+            ? convertStartEndToScheduled(json.status.start, json.status.end)
+            : undefined,
+      };
+      return viewModel;
+    })
+    .reverse();
+  return proposalsViewModel;
+}
+
+function getKeywords(proposal: ProposalJson) {
+  const statusKeywords = statusToViewModelMap.get(proposal.status.state)?.status;
+  const summaryKeywords = proposal.summary.trim().split(" ");
+  const titleKeywords = proposal.title.trim().split(" ");
+  const repoKeywords = getRepos(proposal);
+  const version = proposal.status.version?.trim();
+  return [
+    proposal.id,
+    proposal.status.version,
+    statusKeywords,
+    summaryKeywords,
+    titleKeywords,
+    repoKeywords,
+    version,
+    proposal.id,
+  ]
+    .flat()
+    .filter((x) => x !== undefined) as string[];
+}
+
+function getRepos(proposal: ProposalJson): string[] {
+  const repos = (proposal.implementation ?? []).map((x) => x.repository);
+  return repos.reduce((repos, repo) => {
+    if (repo === undefined) return repos;
+    if (repos.includes(repo)) return repos;
+    repos.push(repo);
+    return repos;
+  }, [] as string[]);
+}
+
+function convertStartEndToScheduled(startDate: string, endDate: string): string {
+  const month: { [x: number]: string } = {
+    0: "January",
+    1: "February",
+    2: "March",
+    3: "April",
+    4: "May",
+    5: "June",
+    6: "July",
+    7: "August",
+    8: "September",
+    9: "October",
+    10: "November",
+    11: "December",
+  };
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (start.getMonth() === end.getMonth()) {
+    return `${month[start.getMonth()]} ${start.getDate()} - ${end.getDate()}`
+  }
+  return `${month[start.getMonth()]} ${start.getDate()} - ${month[end.getMonth()]} ${end.getDate()}`;
 }

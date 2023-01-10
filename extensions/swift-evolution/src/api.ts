@@ -2,20 +2,6 @@ import fetch from "node-fetch";
 
 const SWIFT_EVOLUTION_PROPOSALS_ENDPOINT = "https://download.swift.org/swift-evolution/proposals.json";
 
-export enum Status {
-  awaitingReview = ".awaitingReview",
-  scheduledForReview = ".scheduledForReview",
-  activeReview = ".activeReview",
-  accepted = ".accepted",
-  acceptedWithRevisions = ".acceptedWithRevisions",
-  previewing = ".previewing",
-  implemented = ".implemented",
-  returnedForRevision = ".returnedForRevision",
-  deferred = ".deferred",
-  rejected = ".rejected",
-  withdrawn = ".withdrawn",
-}
-
 export type ProposalJson = {
   id: string;
   title: string;
@@ -23,7 +9,7 @@ export type ProposalJson = {
   status: {
     end: string | undefined;
     start: string | undefined;
-    state: Status;
+    state: string;
     version: string | undefined;
   };
   sha: string;
