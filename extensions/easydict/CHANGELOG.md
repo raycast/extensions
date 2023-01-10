@@ -1,5 +1,15 @@
 # `Easydict` Changelog
 
+## [v2.7.1] - 2023-01-08
+
+### 💎 Improvement
+
+- Improved the way to get the system proxy.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
 ## [v2.7.0] - 2022-12-16
 
 ### 💎 Improvement
