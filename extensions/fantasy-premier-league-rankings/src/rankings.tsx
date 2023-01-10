@@ -16,7 +16,6 @@ export default function getUserRankings() {
 
   const [showTeamSummary, setShowTeamSummary] = useState<boolean>(false);
 
-
   const league = useLeague(selectedLeague);
 
   const userTeamByGameweek = useUserTeamByGameweek(selectedUser, user?.current_event);
@@ -40,7 +39,6 @@ export default function getUserRankings() {
       }),
     [selectedUser, userTeamByGameweek]
   );
-
 
   return (
     <List
