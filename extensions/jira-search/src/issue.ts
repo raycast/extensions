@@ -82,9 +82,9 @@ function buildJql(query: string): string {
 }
 
 function jqlForFilter(filter: IssueFilter) {
-  if(filter === 'issuesInOpenSprints') return 'sprint in openSprints()';
-  if(filter === 'myIssues') return "assignee=currentUser()";
-  if(filter === 'myIssuesInOpenSprints') return 'assignee=currentUser() AND sprint in openSprints()';
+  if (filter === "issuesInOpenSprints") return "sprint in openSprints()"
+  if (filter === "myIssues") return "assignee=currentUser()"
+  if (filter === "myIssuesInOpenSprints") return "assignee=currentUser() AND sprint in openSprints()"
   return ""
 }
 
