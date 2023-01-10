@@ -1,17 +1,11 @@
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
-import {
-  OpenInArcAction,
-  OpenInLittleArc,
-  OpenInNewWindowAction,
-  OpenInOtherBrowserAction,
-  OpenInSpaceAction,
-} from "./actions";
+import Actions from "./actions";
 import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
 import { getDomain, getLastVisitedAt } from "./utils";
-import { isPermissionError } from "./permissions";
+import { isPermissionError, PermissionErrorView } from "./permissions";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -19,7 +13,7 @@ export default function Command() {
 
   if (error) {
     if (isPermissionError(error)) {
-      return <PermissionError />;
+      return <PermissionErrorView />;
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -39,65 +33,9 @@ export default function Command() {
           title={entry.title}
           subtitle={getDomain(entry.url)}
           accessories={[getLastVisitedAt(entry)]}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <OpenInArcAction url={entry.url} />
-                <OpenInLittleArc url={entry.url} />
-                <OpenInSpaceAction url={entry.url} />
-                <OpenInNewWindowAction url={entry.url} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <OpenInOtherBrowserAction url={entry.url} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action.CopyToClipboard
-                  title="Copy Page URL"
-                  content={entry.url}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Page Title"
-                  content={entry.title}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy URL as Markdown"
-                  content={`[${entry.title}](${entry.url})`}
-                  shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
+          actions={<Actions url={entry.url} title={entry.title} />}
         />
       ))}
     </List>
-  );
-}
-
-function PermissionError() {
-  const markdown = `## Raycast needs full disk access in order to display your Safari bookmarks.
-
-  ![Full Disk Access Preferences Pane](https://i.imgur.com/3SAUwrx.png)
-  
-  1. Open the **Security & Privacy** Preferences pane and select the **Privacy** tab
-  2. Select **Full Disk Access** from the list of services
-  3. Click the lock icon in the bottom left corner to unlock the interface
-  4. Enter your macOS administrator password
-  5. Drag and Drop the icon for the **Raycast** application into the list as seen above`;
-
-  return (
-    <Detail
-      markdown={markdown}
-      actions={
-        <ActionPanel>
-          <Action.Open
-            title="Open System Preferences"
-            icon={Icon.Gear}
-            target="x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"
-          />
-        </ActionPanel>
-      }
-    />
   );
 }

@@ -1,5 +1,4 @@
-import { runAppleScript } from "run-applescript";
-import { HistoryEntry } from "./types";
+import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
   try {
@@ -19,11 +18,33 @@ export function getLastVisitedAt(entry: HistoryEntry) {
   return { date, tooltip: `Last visited: ${date.toLocaleString()}` };
 }
 
-export async function openNewWindow() {
-  await runAppleScript(`
-    tell application "Arc"
-      make new window
-      activate
-    end tell
-  `);
+export function getSpaceTitle(space: Space) {
+  return space.title || `Space ${space.id}`;
+}
+
+export function getKey(tab: Tab) {
+  return `${tab.windowId}-${tab.tabId}`;
+}
+
+export function getOrderedLocations() {
+  return ["topApp", "pinned", "unpinned"] as TabLocation[];
+}
+
+export function getLocationTitle(location: TabLocation) {
+  switch (location) {
+    case "topApp":
+      return "Top";
+    case "pinned":
+      return "Pinned";
+    case "unpinned":
+      return "Unpinned";
+  }
+}
+
+export function getNumberOfTabs(tabs?: Tab[]) {
+  if (!tabs) {
+    return undefined;
+  }
+
+  return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }

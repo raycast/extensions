@@ -1,24 +1,27 @@
 import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { execSync } from "child_process";
 import { useCallback, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { promisify } from "util";
-import { openNewWindow } from "./utils";
-import { findOpenTab, setActiveTab } from "./tabs";
-import { createTabWithinSpace, focusSpace, useSpaces } from "./spaces";
-
-const execAsync = promisify(execSync);
+import {
+  findTab,
+  getSpaces,
+  makeNewLittleArcWindow,
+  makeNewTabWithinSpace,
+  makeNewWindow,
+  selectSpace,
+  selectTab,
+} from "./arc";
+import { Space } from "./types";
+import { getSpaceTitle } from "./utils";
 
 export function OpenInArcAction(props: { url: string }) {
   async function handleAction() {
     try {
-      const openTab = await findOpenTab(props.url);
-      console.log(openTab);
+      const openTab = await findTab(props.url);
 
       if (openTab) {
         await closeMainWindow();
-        await setActiveTab(openTab);
+        await selectTab(openTab);
       } else {
         await open(props.url, "Arc");
       }
@@ -36,8 +39,7 @@ export function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      await openNewWindow();
-      await execAsync(`open -a Arc "${props.url}"`);
+      await makeNewWindow({ url: props.url });
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -57,34 +59,54 @@ export function OpenInNewWindowAction(props: { url: string }) {
   );
 }
 
-export function OpenInLittleArc(props: { url: string }) {
+export function OpenInNewIncognitoWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
-      await runAppleScript(`
-        tell application "Arc"
-          make new tab with properties {URL:"${props.url}"}
-        end tell
-      `);
+      await closeMainWindow();
+      await makeNewWindow({ incognito: true, url: props.url });
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed opening link in Little Arc",
+        title: "Failed opening link in new incognito window",
         message: e instanceof Error ? e.message : String(e),
       });
     }
   }
 
-  return <Action icon={Icon.Globe} title="Open in Little Arc" onAction={handleAction} />;
+  return (
+    <Action
+      icon={Icon.Globe}
+      title="Open in Incognito Window"
+      shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "enter" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+export function OpenInLittleArc(props: { url: string }) {
+  async function handleAction() {
+    try {
+      makeNewLittleArcWindow(props.url);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening link in Little Arc window",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return <Action icon={Icon.Globe} title="Open in Little Arc Window" onAction={handleAction} />;
 }
 
 export function OpenInSpaceAction(props: { url: string }) {
   const [open, setOpen] = useState(false);
-  const { data, isLoading } = useSpaces({ execute: open });
+  const { data, isLoading } = useCachedPromise(getSpaces, [], { execute: open });
 
-  async function openSpace(spaceId: string) {
+  async function openSpace(space: Space) {
     try {
       await closeMainWindow();
-      await createTabWithinSpace(props.url, spaceId);
+      await makeNewTabWithinSpace(props.url, space);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -103,17 +125,17 @@ export function OpenInSpaceAction(props: { url: string }) {
       onOpen={() => setOpen(true)}
     >
       {data?.map((space) => (
-        <Action key={space.id} title={space.title || `Space ${space.id}`} onAction={() => openSpace(space.id)} />
+        <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />
       ))}
     </ActionPanel.Submenu>
   );
 }
 
-export function OpenSpaceAction(props: { spaceId: string }) {
+export function OpenSpaceAction(props: { space: Space }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      await focusSpace(props.spaceId);
+      await selectSpace(props.space);
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
@@ -196,4 +218,42 @@ export function SearchWithGoogleAction(props: { searchText?: string }) {
       onAction={handleAction}
     />
   ) : null;
+}
+
+export default function Actions(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <OpenInArcAction url={props.url} />
+        <OpenInLittleArc url={props.url} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <OpenInNewWindowAction url={props.url} />
+        <OpenInNewIncognitoWindowAction url={props.url} />
+        <OpenInSpaceAction url={props.url} />
+        <OpenInOtherBrowserAction url={props.url} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title="Copy URL"
+          content={props.url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
+        {props.title && (
+          <Action.CopyToClipboard
+            title="Copy Title"
+            content={props.title}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+        )}
+        {props.title && (
+          <Action.CopyToClipboard
+            title="Copy URL as Markdown"
+            content={`[${props.title}](${props.url})`}
+            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
+          />
+        )}
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
 }

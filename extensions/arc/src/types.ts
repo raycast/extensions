@@ -10,8 +10,10 @@ export type Tab = {
   tabId: number;
   url: string;
   title: string;
-  location: "topApp" | "pinned" | "unpinned";
+  location: TabLocation;
 };
+
+export type TabLocation = "topApp" | "pinned" | "unpinned";
 
 export type Space = {
   id: string;
