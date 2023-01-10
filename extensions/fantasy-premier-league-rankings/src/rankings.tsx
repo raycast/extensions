@@ -8,7 +8,7 @@ export default function getUserRankings() {
 
   const [selectedUser, setSelectedUser] = useState<string>(userTeamId);
 
-  const user = useUser(selectedUser);
+  const user = useUser(userTeamId);
 
   const userLeagues = user?.leagues?.classic.filter((league) => league.league_type === "x");
 
