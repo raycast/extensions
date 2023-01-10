@@ -1,6 +1,10 @@
 # Todoist Changelog
 
-# [Menu bar improvements] - 2023-01-03
+## [Menu bar fix] - 2023-01-10
+
+- Fix focused task when not listed in menubar
+
+## [Menu bar improvements] - 2023-01-03
 
 - Add possibility to specify the number of days in Upcoming view for Menu Bar
 
