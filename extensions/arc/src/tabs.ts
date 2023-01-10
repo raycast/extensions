@@ -64,3 +64,37 @@ export async function setActiveTab(tab: Tab): Promise<void> {
     end tell
   `);
 }
+
+export async function findOpenTab(link: string) {
+  const response = await runAppleScript(`
+    set _output to ""
+
+    tell application "Arc"
+      set _window_index to 1
+
+      repeat with _window in windows
+          set _tab_index to 1
+          
+          repeat with _tab in tabs of _window
+            set _url to get URL of _tab
+
+            if _url is equal "${link}" then
+              set _title to get title of _tab
+            
+              set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"windowId\\": " & _window_index & ", \\"tabId\\": " & _tab_index & " }")
+            
+              return _output
+            end if
+
+            set _tab_index to _tab_index + 1
+          end repeat
+          
+          set _window_index to _window_index + 1
+      end repeat
+    end tell
+
+    return _output
+  `);
+
+  return response ? (JSON.parse(response) as Tab) : undefined;
+}

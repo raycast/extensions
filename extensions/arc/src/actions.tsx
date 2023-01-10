@@ -1,33 +1,33 @@
 import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execSync } from "child_process";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
-import { Tab } from "./types";
 import { openNewWindow } from "./utils";
-import { getOpenTabs, setActiveTab } from "./tabs";
+import { findOpenTab, setActiveTab } from "./tabs";
 import { createTabWithinSpace, focusSpace, useSpaces } from "./spaces";
 
 const execAsync = promisify(execSync);
 
 export function OpenInArcAction(props: { url: string }) {
-  const [openTabs, setOpenTabs] = useState<Tab[]>();
-
   async function handleAction() {
-    const openTab = openTabs?.find((tab) => tab.url === props.url);
+    try {
+      const openTab = await findOpenTab(props.url);
+      console.log(openTab);
 
-    if (openTab) {
-      await closeMainWindow();
-      await setActiveTab(openTab);
-    } else {
+      if (openTab) {
+        await closeMainWindow();
+        await setActiveTab(openTab);
+      } else {
+        await open(props.url, "Arc");
+      }
+    } catch (e) {
+      console.error(e);
+
       await open(props.url, "Arc");
     }
   }
-
-  useEffect(() => {
-    getOpenTabs().then(setOpenTabs);
-  }, []);
 
   return <Action icon={Icon.Globe} title="Open in Arc" onAction={handleAction} />;
 }
