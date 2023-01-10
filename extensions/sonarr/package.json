@@ -45,6 +45,24 @@
       "default": ""
     },
     {
+      "name": "http",
+      "title": "Connection Type",
+      "required": true,
+      "description": "Change the connection type for the Sonarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
       "name": "apiKey",
       "title": "API Key",
       "required": true,
