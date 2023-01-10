@@ -5,6 +5,7 @@
 – Search your sidebar
 – Search spaces
 – Jump to open tabs
+– Open incognito windows
 
 ## [Initial Version] - 2022-11-21
 

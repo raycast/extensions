@@ -27,10 +27,9 @@
     {
       "name": "new-window",
       "title": "Open New Window",
-      "description": "Creates a new window",
+      "description": "Create and open a new window",
       "mode": "no-view",
-      "subtitle": "Arc",
-      "icon": "icon-dark.png"
+      "subtitle": "Arc"
     },
     {
       "name": "search-spaces",
@@ -45,6 +44,13 @@
       "subtitle": "Arc",
       "description": "Search and select your tabs.",
       "mode": "view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Open New Incognito Window",
+      "subtitle": "Arc",
+      "description": "Create and open a new incognito window",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

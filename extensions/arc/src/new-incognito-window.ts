@@ -1,11 +1,11 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { makeNewWindow } from "./arc";
 
-export default async function Command() {
+export default async function command() {
   try {
     await closeMainWindow();
-    await makeNewWindow();
+    await makeNewWindow({ incognito: true });
   } catch {
-    await showHUD("❌ Failed opening a new window");
+    await showHUD("❌ Failed opening a new incogntio window");
   }
 }
