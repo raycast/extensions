@@ -18,7 +18,7 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
 /extensions/alpinejs-doc-search                      @aurawindsurfing
-/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna
+/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92
 /extensions/amphetamine                              @gstvds
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
@@ -198,6 +198,7 @@
 /extensions/drafts                                   @FlohGro-dev
 /extensions/dribbble                                 @gebeto
 /extensions/dropbox                                  @chyroc
+/extensions/drupal-org                               @hussainweb
 /extensions/drupal-toolbox                           @emircanerkul @pernielsentikaer
 /extensions/eagle                                    @Yukaii
 /extensions/easy-new-file                            @koinzhang
@@ -363,6 +364,7 @@
 /extensions/keyboard-maestro                         @eluce2
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
+/extensions/korean-spell-checker                     @jcha0713
 /extensions/kubectx                                  @oktaysenkan
 /extensions/kubens                                   @ChristianKohler
 /extensions/kubernetes-docs                          @rpvsilva
@@ -436,7 +438,7 @@
 /extensions/nanoid                                   @roelvan
 /extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/nature-remo                              @uetchy
-/extensions/nba-game-viewer                          @AbhinavPalacharla
+/extensions/nba-game-viewer                          @AbhinavPalacharla @djpowers
 /extensions/netease-music                            @chyroc
 /extensions/netlify                                  @Destiner @jonohewitt @jasonbarry
 /extensions/network-diagnostics                      @hmarr
