@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-const SWIFT_EVOLUTION_PROPOSALS_ENDPOINT = "https://download.swift.org/swift-evolution/proposals.json"
+const SWIFT_EVOLUTION_PROPOSALS_ENDPOINT = "https://download.swift.org/swift-evolution/proposals.json";
 
 export enum Status {
   awaitingReview = ".awaitingReview",
@@ -13,7 +13,7 @@ export enum Status {
   returnedForRevision = ".returnedForRevision",
   deferred = ".deferred",
   rejected = ".rejected",
-  withdrawn = ".withdrawn"
+  withdrawn = ".withdrawn",
 }
 
 export type ProposalJson = {
@@ -45,4 +45,4 @@ export async function fetchProposals(): Promise<ProposalJson[]> {
   return (await response.json()) as ProposalJson[];
 }
 
-export {}
+export {};
