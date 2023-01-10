@@ -1,5 +1,6 @@
 import { getUserTeamByGameweek } from "./../api/index";
 import { useEffect, useState } from "react";
+import { Cache } from "@raycast/api";
 
 interface UserTeamByGameweek {
   entry_history: {
@@ -23,12 +24,32 @@ interface UserTeamByGameweek {
   }[];
 }
 
+const cache = new Cache({
+  capacity: 1024 * 1024,
+});
+
 const useUserTeamByGameweek = (id: string, gameweek: number | undefined) => {
   const [userTeamByGameweek, setUserTeamByGameweek] = useState<UserTeamByGameweek | null>(null);
 
   useEffect(() => {
     if (id && gameweek) {
-      getUserTeamByGameweek(id, gameweek).then((data) => setUserTeamByGameweek(data));
+      const cachedData = cache.get(`userTeamByGameweek-${id}-${gameweek}`);
+      if (cachedData) {
+        const { value, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < 3600 * 1000) {
+          setUserTeamByGameweek(value);
+        } else {
+          getUserTeamByGameweek(id, gameweek).then((data) => {
+            setUserTeamByGameweek(data);
+            cache.set(`userTeamByGameweek-${id}-${gameweek}`, JSON.stringify({ value: data, timestamp: Date.now() }));
+          });
+        }
+      } else {
+        getUserTeamByGameweek(id, gameweek).then((data) => {
+          setUserTeamByGameweek(data);
+          cache.set(`userTeamByGameweek-${id}-${gameweek}`, JSON.stringify({ value: data, timestamp: Date.now() }));
+        });
+      }
     }
   }, [id, gameweek]);
 

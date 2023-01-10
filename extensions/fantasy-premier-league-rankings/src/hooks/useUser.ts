@@ -1,3 +1,4 @@
+import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getUser } from "../api";
 
@@ -60,12 +61,28 @@ interface Classic {
   entry_last_rank: number;
 }
 
+const cache = new Cache({
+  capacity: 1024 * 1024,
+});
+
 const useUser = (id: string) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (id) {
-      getUser(id).then((data) => setUser(data));
+      const today = new Date();
+      const todayDayMonth = `${today.getDate()}=${today.getMonth()}`;
+
+      const cachedData = cache.get(`user-${id}-${todayDayMonth}`);
+      if (cachedData) {
+        const cachedUser = JSON.parse(cachedData);
+        setUser(cachedUser);
+      } else {
+        getUser(id).then((data) => {
+          setUser(data);
+          cache.set(`user-${id}-${todayDayMonth}`, JSON.stringify(data));
+        });
+      }
     }
   }, [id]);
 

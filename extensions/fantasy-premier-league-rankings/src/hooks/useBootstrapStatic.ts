@@ -269,7 +269,9 @@ interface ElementStat {
   name: string;
 }
 
-const cache = new Cache();
+const cache = new Cache({
+  capacity: 1024 * 1024,
+});
 
 const useBootstrapStatic = () => {
   const [bootstrapStatic, setBootstrapStatic] = useState<BootstrapStatic | null>(null);

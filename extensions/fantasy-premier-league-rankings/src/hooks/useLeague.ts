@@ -1,3 +1,4 @@
+import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getLeague } from "../api";
 
@@ -21,12 +22,32 @@ interface League {
   };
 }
 
+const cache = new Cache({
+  capacity: 1024 * 1024,
+});
+
 const useLeague = (leagueId: string | undefined) => {
   const [league, setLeague] = useState<League | null>(null);
 
   useEffect(() => {
     if (leagueId) {
-      getLeague(leagueId).then((data) => setLeague(data));
+      const cachedData = cache.get(`league-${leagueId}`);
+      if (cachedData) {
+        const { value, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < 3600 * 1000) {
+          setLeague(value);
+        } else {
+          getLeague(leagueId).then((data) => {
+            setLeague(data);
+            cache.set(`league-${leagueId}`, JSON.stringify({ value: data, timestamp: Date.now() }));
+          });
+        }
+      } else {
+        getLeague(leagueId).then((data) => {
+          setLeague(data);
+          cache.set(`league-${leagueId}`, JSON.stringify({ value: data, timestamp: Date.now() }));
+        });
+      }
     }
   }, [leagueId]);
 
