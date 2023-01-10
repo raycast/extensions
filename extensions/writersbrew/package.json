@@ -9,61 +9,71 @@
   "commands": [
     {
       "name": "index",
-      "title": "Fix grammar",
+      "title": "Fix Grammar",
+      "subtitle": "Writersbrew",
       "description": "It fixes spelling and grammatical errors.",
       "mode": "no-view"
     },
     {
       "name": "explain-like-im-5",
-      "title": "Explain like I'm 5",
+      "title": "Explain Like I'm 5",
+      "subtitle": "Writersbrew",
       "description": "It explains words or paragraphs with simple words.",
       "mode": "no-view"
     },
     {
       "name": "improve-fluency",
-      "title": "Improve fluency",
+      "title": "Improve Fluency",
+      "subtitle": "Writersbrew",
       "description": "It improves the fluency of words and paragraphs.",
       "mode": "no-view"
     },
     {
       "name": "continue-writing",
-      "title": "Continue writing",
+      "title": "Continue Writing",
+      "subtitle": "Writersbrew",
       "description": "It writes for you.",
       "mode": "no-view"
     },
     {
       "name": "summarize",
       "title": "Summarize",
+      "subtitle": "Writersbrew",
       "description": "It provides a short summary",
       "mode": "no-view"
     },
     {
       "name": "summarize-takeaways",
       "title": "Summarize & Takeaways",
+      "subtitle": "Writersbrew",
       "description": "It provides a short summary and list of takeaways.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-french",
-      "title": "Translate to french",
+      "title": "Translate to French",
+      "subtitle": "Writersbrew",
       "description": "Translates from any language to french.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-spanish",
-      "title": "Translate to spanish",
+      "title": "Translate to Spanish",
+      "subtitle": "Writersbrew",
       "description": "Translates from any language to spanish.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-english",
-      "title": "Translate to english",
+      "title": "Translate to English",
+      "subtitle": "Writersbrew",
       "description": "Translates from any language to english.",
       "mode": "no-view"
     },
     {
       "name": "translate-to-german",
-      "title": "Translate to german",
+      "title": "Translate to German",
+      "subtitle": "Writersbrew",
       "description": "Translates from any language to german.",
       "mode": "no-view"
     }
