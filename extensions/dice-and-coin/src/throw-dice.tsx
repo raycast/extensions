@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 
 export default async function Command() {
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Throwing die..." });
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Throwing dice..." });
   const result: string = Math.ceil(Math.random() * 6).toString();
   await wait(600);
   toast.style = Toast.Style.Success;
