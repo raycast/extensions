@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "random",
+  "name": "dice-and-coin",
   "title": "Dice & Coin",
   "description": "Quickly and easily make random decisions or generate a random number",
   "icon": "dice.png",
