@@ -1,3 +1,3 @@
-# Random Changelog
+# Dice & Coin Changelog
 
-## [Initial Version] - 2023-01-06
+## [Initial Version] - 2023-01-10
