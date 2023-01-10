@@ -279,7 +279,7 @@ const useBootstrapStatic = () => {
     const todayDayMonth = `${today.getDate()}=${today.getMonth()}`;
 
     const cachedData = cache.get(`bootstrapStatic-${todayDayMonth}`);
-    if (cachedData) {
+    if (cachedData && cachedData !== "[]") {
       const cachedBootstrap = JSON.parse(cachedData);
       setBootstrapStatic(cachedBootstrap);
     } else {
