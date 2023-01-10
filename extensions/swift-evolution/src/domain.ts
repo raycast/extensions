@@ -1,65 +1,41 @@
-import { ProposalUI, ProposalUISectionItem } from "./index";
+import { ProposalViewModel } from "./index";
 import fetch from "node-fetch";
-import { Color, Icon } from "@raycast/api";
 import { ProposalJson, fetchProposals as fetchRemoteProposals, Status } from "./api";
 
-type DisplayableStatus = Pick<ProposalUISectionItem, "icon"> & { display: string };
-
-const statusOrdering: Record<Status, number> = {
-  ".awaitingReview": 0,
-  ".scheduledForReview": 1,
-  ".activeReview": 2,
-  ".accepted": 3,
-  ".acceptedWithRevisions": 4,
-  ".previewing": 5,
-  ".implemented": 6,
-  ".returnedForRevision": 7,
-  ".deferred": 8,
-  ".rejected": 9,
-  ".withdrawn": 10,
-};
+type DisplayableStatus = { display: string };
 
 const displayableStatusMap: Record<Status, DisplayableStatus> = {
-  ".awaitingReview": { display: "Awaiting Review", icon: { source: Icon.Clock, tintColor: Color.Orange } },
-  ".scheduledForReview": {
-    display: "Scheduled For Review",
-    icon: { source: Icon.Calendar, tintColor: Color.Orange },
-  },
-  ".activeReview": { display: "In Review", icon: { source: Icon.Bubble, tintColor: Color.Orange } },
-  ".accepted": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green } },
-  ".acceptedWithRevisions": { display: "Accepted", icon: { source: Icon.Checkmark, tintColor: Color.Green } },
-  ".previewing": { display: "Previewing", icon: { source: Icon.Checkmark, tintColor: Color.Magenta } },
-  ".implemented": { display: "Implemented", icon: { source: Icon.Checkmark, tintColor: Color.Blue } },
-  ".returnedForRevision": {
-    display: "Returned",
-    icon: { source: Icon.ArrowClockwise, tintColor: Color.Purple },
-  },
-  ".deferred": { display: "Deferred", icon: { source: Icon.Calendar, tintColor: Color.Purple } },
-  ".rejected": { display: "Rejected", icon: { source: Icon.ExclamationMark, tintColor: Color.Red } },
-  ".withdrawn": { display: "Withdrawn", icon: { source: Icon.Trash, tintColor: Color.Red } },
+  ".awaitingReview": { display: "Awaiting Review" },
+  ".scheduledForReview": { display: "Scheduled For Review" },
+  ".activeReview": { display: "In Review" },
+  ".accepted": { display: "Accepted" },
+  ".acceptedWithRevisions": { display: "Accepted" },
+  ".previewing": { display: "Previewing" },
+  ".implemented": { display: "Implemented" },
+  ".returnedForRevision": { display: "Returned" },
+  ".deferred": { display: "Deferred" },
+  ".rejected": { display: "Rejected" },
+  ".withdrawn": { display: "Withdrawn" },
 };
 
-export async function fetchProposals(): Promise<ProposalUI> {
-  const toUI = (proposals: ProposalJson[]): ProposalUI => {
-    const proposalUI = proposals.sort(compareStatus).reduce<ProposalUI>(
-      (proposalsUI, current) => {
-        const sectionTitle = getDisplayableStatus(current).display;
-        if (isNewSection(sectionTitle, proposalsUI.sections)) {
-          proposalsUI.sections.push({
-            title: sectionTitle,
-            items: [],
-          });
-        }
-        proposalsUI.sections[proposalsUI.sections.length - 1].items.push(toItemUI(current));
-        return proposalsUI;
-      },
-      { sections: [] }
-    );
-    return proposalUI;
+export async function fetchProposals(): Promise<ProposalViewModel[]> {
+  const toUI = (proposals: ProposalJson[]): ProposalViewModel[] => {
+    const proposalsViewModel: ProposalViewModel[] = proposals.map((x) => {
+      return {
+        id: x.id,
+        authorName: x.authors.map(x => x.name).join(","),
+        reviewManagerName: x.reviewManager.name,
+        link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + x.link,
+        markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + x.link,
+        keywords: getKeywords(x),
+        repos: getRepos(x),
+        status: getDisplayableStatus(x).display,
+        title: x.title.trim(),
+        swiftVersion: x.status.version
+      };
+    }).reverse();
+    return proposalsViewModel;
   };
-
-  const compareStatus = (x: ProposalJson, y: ProposalJson) =>
-    statusOrdering[x.status.state] - statusOrdering[y.status.state];
 
   const getDisplayableStatus = (proposal: ProposalJson): DisplayableStatus => {
     const jsonStatus = proposal.status.state;
@@ -67,40 +43,19 @@ export async function fetchProposals(): Promise<ProposalUI> {
     if (display === undefined) {
       display = {
         display: jsonStatus,
-        icon: "🚧",
       };
     }
     return display;
   };
 
-  const isNewSection = (newSectionTitle: string, sections: ProposalUI["sections"]) => {
-    return sections.find((section) => section.title == newSectionTitle) === undefined;
-  };
-
-  const toItemUI = (proposal: ProposalJson): ProposalUISectionItem => {
-    const id = proposal.id;
-    const version = proposal.status.version ?? "";
-    const title = proposal.title.trim();
-    return {
-      accessories: [{text: getRepos(proposal)}, {icon: Icon.ArrowRight}],
-      id,
-      icon: getDisplayableStatus(proposal).icon,
-      title,
-      subtitle: version,
-      keywords: getKeywords(proposal),
-      link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + proposal.link,
-      markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + proposal.link,
-    };
-  };
-
   const getRepos = (proposal: ProposalJson) => {
     const repos = (proposal.implementation ?? []).map((x) => x.repository);
     return repos
-      .reduce((prev, current) => {
-        if (current === undefined) return prev;
-        if (prev.includes(current)) return prev;
-        prev.push(current);
-        return prev;
+      .reduce((repos, repo) => {
+        if (repo === undefined) return repos;
+        if (repos.includes(repo)) return repos;
+        repos.push(repo);
+        return repos;
       }, [] as string[])
       .join("|");
   };
@@ -110,7 +65,8 @@ export async function fetchProposals(): Promise<ProposalUI> {
     const summaryKeywords = proposal.summary.trim().split(" ");
     const titleKeywords = proposal.title.trim().split(" ");
     const repoKeywords = getRepos(proposal).split("|");
-    return [proposal.id, proposal.status.version, statusKeywords, summaryKeywords, titleKeywords, repoKeywords]
+    const version = proposal.status.version?.trim()
+    return [proposal.id, proposal.status.version, statusKeywords, summaryKeywords, titleKeywords, repoKeywords, version]
       .flat()
       .filter((x) => x !== undefined) as string[];
   };
