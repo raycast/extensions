@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, LaunchProps } from "@raycast/api";
 import { MemClient } from "@mem-labs/mem-node";
 import { useForm, FormValidation } from "@raycast/utils";
 
@@ -6,22 +6,24 @@ interface CreateMemValues {
   content: string;
   scheduledFor: Date | null;
   isRead: boolean;
+  isArchived: boolean;
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ draftValues: CreateMemValues }>) {
+  const { draftValues } = props;
   const memClient = new MemClient({
     apiAccessToken: getPreferenceValues().apiToken,
   });
 
   const { handleSubmit, itemProps } = useForm<CreateMemValues>({
     async onSubmit(values) {
-      console.log(values);
       showToast({ title: "Creating mem", style: Toast.Style.Animated });
       try {
         await memClient.createMem({
           content: values.content,
-          scheduledFor: values.scheduledFor?.toString(),
+          scheduledFor: values.scheduledFor?.toISOString(),
           isRead: values.isRead,
+          isArchived: values.isArchived,
         });
         showToast({ title: "Succesfully created mem", style: Toast.Style.Success });
       } catch (e: any) {
@@ -32,6 +34,7 @@ export default function Command() {
         });
       }
     },
+    initialValues: draftValues,
     validation: {
       content: FormValidation.Required,
       scheduledFor: (date) => {
@@ -44,6 +47,7 @@ export default function Command() {
 
   return (
     <Form
+      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create mem" />
@@ -54,6 +58,7 @@ export default function Command() {
       <Form.Separator />
       <Form.DatePicker title="Schedule for Later?" {...itemProps.scheduledFor} />
       <Form.Checkbox title="Mark as Read?" label="Read" {...itemProps.isRead} />
+      <Form.Checkbox title="Hide from Inbox?" label="Hide" {...itemProps.isArchived} />
     </Form>
   );
 }
