@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random",
   "title": "Random",
-  "description": "Helps you pick simple random values\n- Toss a coin\n- Throw a dice",
+  "description": "Quickly and easily make random decisions or generate a random number",
   "icon": "dice.png",
   "author": "yonbergman",
   "categories": [
