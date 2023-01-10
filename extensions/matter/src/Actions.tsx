@@ -36,7 +36,7 @@ export function Actions(props: any) {
         {/* FAVORITE ARTICLE */}
         {props.item.content.id && !isFavorited && (
           <Action
-            title="Add to favorites"
+            title="Add to Favorites"
             icon={Icon.Star}
             onAction={async () => {
               await showToast(Toast.Style.Animated, "Loading");
@@ -48,7 +48,7 @@ export function Actions(props: any) {
         {/* UNFAVORITE ARTICLE */}
         {props.item.content.id && isFavorited && (
           <Action
-            title="Remove from favorites"
+            title="Remove from Favorites"
             icon={Icon.StarDisabled}
             onAction={async () => {
               await showToast(Toast.Style.Animated, "Loading");
