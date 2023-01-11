@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -47,7 +47,8 @@ export function BranchForm({ draftValues }: BranchFormProps) {
           };
           toast.secondaryAction = {
             title: "Open in Browser",
-            onAction: () => console.log(`${repositoryUrl}/tree/${branchName}`),
+            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            onAction: async () => await open(`${repositoryUrl}/tree/${branchName}`),
           };
         }
       } catch (error) {
