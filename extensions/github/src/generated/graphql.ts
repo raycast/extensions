@@ -9859,6 +9859,8 @@ export type Mutation = {
   setRepositoryInteractionLimit?: Maybe<SetRepositoryInteractionLimitPayload>;
   /** Set a user level interaction limit for an user's public repositories. */
   setUserInteractionLimit?: Maybe<SetUserInteractionLimitPayload>;
+  /** Starts a GitHub Enterprise Importer organization migration. */
+  startOrganizationMigration?: Maybe<StartOrganizationMigrationPayload>;
   /** Starts a GitHub Enterprise Importer (GEI) repository migration. */
   startRepositoryMigration?: Maybe<StartRepositoryMigrationPayload>;
   /** Submits a pending pull request review. */
@@ -10659,6 +10661,11 @@ export type MutationSetRepositoryInteractionLimitArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationSetUserInteractionLimitArgs = {
   input: SetUserInteractionLimitInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationStartOrganizationMigrationArgs = {
+  input: StartOrganizationMigrationInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -12602,7 +12609,7 @@ export type Organization = Actor &
     ipAllowListEntries: IpAllowListEntryConnection;
     /** The setting value for whether the organization has IP allow list configuration for installed GitHub Apps enabled. */
     ipAllowListForInstalledAppsEnabledSetting: IpAllowListForInstalledAppsEnabledSettingValue;
-    /** Check if the given account is sponsoring this user/organization. */
+    /** Whether the given account is sponsoring this user/organization. */
     isSponsoredBy: Scalars["Boolean"];
     /** True if the viewer is sponsored by this user/organization. */
     isSponsoringViewer: Scalars["Boolean"];
@@ -12692,9 +12699,9 @@ export type Organization = Actor &
     sponsorsActivities: SponsorsActivityConnection;
     /** The GitHub Sponsors listing for this user or organization. */
     sponsorsListing?: Maybe<SponsorsListing>;
-    /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. Only returns a sponsorship if it is active. */
+    /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. */
     sponsorshipForViewerAsSponsor?: Maybe<Sponsorship>;
-    /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. Only returns a sponsorship if it is active. */
+    /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. */
     sponsorshipForViewerAsSponsorable?: Maybe<Sponsorship>;
     /** List of sponsorship updates sent from this sponsorable to sponsors. */
     sponsorshipNewsletters: SponsorshipNewsletterConnection;
@@ -12710,6 +12717,8 @@ export type Organization = Actor &
     teamsResourcePath: Scalars["URI"];
     /** The HTTP URL listing organization's teams */
     teamsUrl: Scalars["URI"];
+    /** The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization. */
+    totalSponsorshipAmountAsSponsorInCents?: Maybe<Scalars["Int"]>;
     /** The organization's Twitter username. */
     twitterUsername?: Maybe<Scalars["String"]>;
     /** Identifies the date and time when the object was last updated. */
@@ -13000,6 +13009,16 @@ export type OrganizationSponsorsActivitiesArgs = {
 };
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
+export type OrganizationSponsorshipForViewerAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** An account on GitHub, with one or more owners, that has repositories, members and teams. */
+export type OrganizationSponsorshipForViewerAsSponsorableArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type OrganizationSponsorshipNewslettersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -13048,6 +13067,13 @@ export type OrganizationTeamsArgs = {
   role?: InputMaybe<TeamRole>;
   rootTeamsOnly?: InputMaybe<Scalars["Boolean"]>;
   userLogins?: InputMaybe<Array<Scalars["String"]>>;
+};
+
+/** An account on GitHub, with one or more owners, that has repositories, members and teams. */
+export type OrganizationTotalSponsorshipAmountAsSponsorInCentsArgs = {
+  since?: InputMaybe<Scalars["DateTime"]>;
+  sponsorableLogins?: InputMaybe<Array<Scalars["String"]>>;
+  until?: InputMaybe<Scalars["DateTime"]>;
 };
 
 /** An audit entry in an organization audit log. */
@@ -13328,6 +13354,50 @@ export enum OrganizationMembersCanCreateRepositoriesSettingValue {
   Internal = "INTERNAL",
   /** Members will be able to create only private repositories. */
   Private = "PRIVATE",
+}
+
+/** A GitHub Enterprise Importer (GEI) organization migration. */
+export type OrganizationMigration = Node & {
+  __typename?: "OrganizationMigration";
+  /** Identifies the date and time when the object was created. */
+  createdAt: Scalars["DateTime"];
+  /** Identifies the primary key from the database. */
+  databaseId?: Maybe<Scalars["String"]>;
+  /** The reason the organization migration failed. */
+  failureReason?: Maybe<Scalars["String"]>;
+  id: Scalars["ID"];
+  /** The remaining amount of repos to be migrated. */
+  remainingRepositoriesCount?: Maybe<Scalars["Int"]>;
+  /** The name of the source organization to be migrated. */
+  sourceOrgName: Scalars["String"];
+  /** The URL of the source organization to migrate. */
+  sourceOrgUrl: Scalars["URI"];
+  /** The migration state. */
+  state: OrganizationMigrationState;
+  /** The name of the target organization. */
+  targetOrgName: Scalars["String"];
+  /** The total amount of repositories to be migrated. */
+  totalRepositoriesCount?: Maybe<Scalars["Int"]>;
+};
+
+/** The Octoshift Organization migration state. */
+export enum OrganizationMigrationState {
+  /** The Octoshift migration has failed. */
+  Failed = "FAILED",
+  /** The Octoshift migration is in progress. */
+  InProgress = "IN_PROGRESS",
+  /** The Octoshift migration has not started. */
+  NotStarted = "NOT_STARTED",
+  /** The Octoshift migration is performing post repository migrations. */
+  PostRepoMigration = "POST_REPO_MIGRATION",
+  /** The Octoshift migration is performing pre repository migrations. */
+  PreRepoMigration = "PRE_REPO_MIGRATION",
+  /** The Octoshift migration has been queued. */
+  Queued = "QUEUED",
+  /** The Octoshift org migration is performing repository migrations. */
+  RepoMigration = "REPO_MIGRATION",
+  /** The Octoshift migration has succeeded. */
+  Succeeded = "SUCCEEDED",
 }
 
 /** Used for argument of CreateProjectV2 mutation. */
@@ -22181,7 +22251,7 @@ export type Sponsorable = {
   estimatedNextSponsorsPayoutInCents: Scalars["Int"];
   /** True if this user/organization has a GitHub Sponsors listing. */
   hasSponsorsListing: Scalars["Boolean"];
-  /** Check if the given account is sponsoring this user/organization. */
+  /** Whether the given account is sponsoring this user/organization. */
   isSponsoredBy: Scalars["Boolean"];
   /** True if the viewer is sponsored by this user/organization. */
   isSponsoringViewer: Scalars["Boolean"];
@@ -22195,9 +22265,9 @@ export type Sponsorable = {
   sponsorsActivities: SponsorsActivityConnection;
   /** The GitHub Sponsors listing for this user or organization. */
   sponsorsListing?: Maybe<SponsorsListing>;
-  /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. Only returns a sponsorship if it is active. */
+  /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. */
   sponsorshipForViewerAsSponsor?: Maybe<Sponsorship>;
-  /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. Only returns a sponsorship if it is active. */
+  /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. */
   sponsorshipForViewerAsSponsorable?: Maybe<Sponsorship>;
   /** List of sponsorship updates sent from this sponsorable to sponsors. */
   sponsorshipNewsletters: SponsorshipNewsletterConnection;
@@ -22205,6 +22275,8 @@ export type Sponsorable = {
   sponsorshipsAsMaintainer: SponsorshipConnection;
   /** This object's sponsorships as the sponsor. */
   sponsorshipsAsSponsor: SponsorshipConnection;
+  /** The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization. */
+  totalSponsorshipAmountAsSponsorInCents?: Maybe<Scalars["Int"]>;
   /** Whether or not the viewer is able to sponsor this user/organization. */
   viewerCanSponsor: Scalars["Boolean"];
   /** True if the viewer is sponsoring this user/organization. */
@@ -22250,6 +22322,16 @@ export type SponsorableSponsorsActivitiesArgs = {
 };
 
 /** Entities that can sponsor or be sponsored through GitHub Sponsors. */
+export type SponsorableSponsorshipForViewerAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** Entities that can sponsor or be sponsored through GitHub Sponsors. */
+export type SponsorableSponsorshipForViewerAsSponsorableArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** Entities that can sponsor or be sponsored through GitHub Sponsors. */
 export type SponsorableSponsorshipNewslettersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -22278,6 +22360,13 @@ export type SponsorableSponsorshipsAsSponsorArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   maintainerLogins?: InputMaybe<Array<Scalars["String"]>>;
   orderBy?: InputMaybe<SponsorshipOrder>;
+};
+
+/** Entities that can sponsor or be sponsored through GitHub Sponsors. */
+export type SponsorableTotalSponsorshipAmountAsSponsorInCentsArgs = {
+  since?: InputMaybe<Scalars["DateTime"]>;
+  sponsorableLogins?: InputMaybe<Array<Scalars["String"]>>;
+  until?: InputMaybe<Scalars["DateTime"]>;
 };
 
 /** Entities that can be sponsored via GitHub Sponsors */
@@ -23108,9 +23197,11 @@ export type Sponsorship = Node & {
   /** Identifies the date and time when the object was created. */
   createdAt: Scalars["DateTime"];
   id: Scalars["ID"];
+  /** Whether the sponsorship is active. False implies the sponsor is a past sponsor of the maintainer, while true implies they are a current sponsor. */
+  isActive: Scalars["Boolean"];
   /** Whether this sponsorship represents a one-time payment versus a recurring sponsorship. */
   isOneTimePayment: Scalars["Boolean"];
-  /** Check if the sponsor has chosen to receive sponsorship update emails sent from the sponsorable. Only returns a non-null value when the viewer has permission to know this. */
+  /** Whether the sponsor has chosen to receive sponsorship update emails sent from the sponsorable. Only returns a non-null value when the viewer has permission to know this. */
   isSponsorOptedIntoEmail?: Maybe<Scalars["Boolean"]>;
   /**
    * The entity that is being sponsored
@@ -23360,6 +23451,29 @@ export type StarredRepositoryEdge = {
   node: Repository;
   /** Identifies when the item was starred. */
   starredAt: Scalars["DateTime"];
+};
+
+/** Autogenerated input type of StartOrganizationMigration */
+export type StartOrganizationMigrationInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The migration source access token. */
+  sourceAccessToken: Scalars["String"];
+  /** The URL of the organization to migrate. */
+  sourceOrgUrl: Scalars["URI"];
+  /** The ID of the enterprise the target organization belongs to. */
+  targetEnterpriseId: Scalars["ID"];
+  /** The name of the target organization. */
+  targetOrgName: Scalars["String"];
+};
+
+/** Autogenerated return type of StartOrganizationMigration */
+export type StartOrganizationMigrationPayload = {
+  __typename?: "StartOrganizationMigrationPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The new organization migration. */
+  orgMigration?: Maybe<OrganizationMigration>;
 };
 
 /** Autogenerated input type of StartRepositoryMigration */
@@ -26635,7 +26749,7 @@ export type User = Actor &
     isHireable: Scalars["Boolean"];
     /** Whether or not this user is a site administrator. */
     isSiteAdmin: Scalars["Boolean"];
-    /** Check if the given account is sponsoring this user/organization. */
+    /** Whether the given account is sponsoring this user/organization. */
     isSponsoredBy: Scalars["Boolean"];
     /** True if the viewer is sponsored by this user/organization. */
     isSponsoringViewer: Scalars["Boolean"];
@@ -26719,9 +26833,9 @@ export type User = Actor &
     sponsorsActivities: SponsorsActivityConnection;
     /** The GitHub Sponsors listing for this user or organization. */
     sponsorsListing?: Maybe<SponsorsListing>;
-    /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. Only returns a sponsorship if it is active. */
+    /** The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor. */
     sponsorshipForViewerAsSponsor?: Maybe<Sponsorship>;
-    /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. Only returns a sponsorship if it is active. */
+    /** The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving. */
     sponsorshipForViewerAsSponsorable?: Maybe<Sponsorship>;
     /** List of sponsorship updates sent from this sponsorable to sponsors. */
     sponsorshipNewsletters: SponsorshipNewsletterConnection;
@@ -26738,6 +26852,8 @@ export type User = Actor &
      *
      */
     topRepositories: RepositoryConnection;
+    /** The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization. */
+    totalSponsorshipAmountAsSponsorInCents?: Maybe<Scalars["Int"]>;
     /** The user's Twitter username. */
     twitterUsername?: Maybe<Scalars["String"]>;
     /** Identifies the date and time when the object was last updated. */
@@ -27082,6 +27198,16 @@ export type UserSponsorsActivitiesArgs = {
 };
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
+export type UserSponsorshipForViewerAsSponsorArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** A user is an individual's account on GitHub that owns repositories and can make new content. */
+export type UserSponsorshipForViewerAsSponsorableArgs = {
+  activeOnly?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** A user is an individual's account on GitHub that owns repositories and can make new content. */
 export type UserSponsorshipNewslettersArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -27130,6 +27256,13 @@ export type UserTopRepositoriesArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   orderBy: RepositoryOrder;
   since?: InputMaybe<Scalars["DateTime"]>;
+};
+
+/** A user is an individual's account on GitHub that owns repositories and can make new content. */
+export type UserTotalSponsorshipAmountAsSponsorInCentsArgs = {
+  since?: InputMaybe<Scalars["DateTime"]>;
+  sponsorableLogins?: InputMaybe<Array<Scalars["String"]>>;
+  until?: InputMaybe<Scalars["DateTime"]>;
 };
 
 /** A user is an individual's account on GitHub that owns repositories and can make new content. */
@@ -28454,6 +28587,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "Organization" }
     | { __typename?: "OrganizationIdentityProvider" }
     | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
     | { __typename?: "Package" }
     | { __typename?: "PackageFile" }
     | { __typename?: "PackageTag" }
@@ -30326,6 +30460,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "Organization" }
     | { __typename?: "OrganizationIdentityProvider" }
     | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
     | { __typename?: "Package" }
     | { __typename?: "PackageFile" }
     | { __typename?: "PackageTag" }
@@ -30761,6 +30896,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "Organization" }
     | { __typename?: "OrganizationIdentityProvider" }
     | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
     | { __typename?: "Package" }
     | { __typename?: "PackageFile" }
     | { __typename?: "PackageTag" }
@@ -31322,6 +31458,7 @@ export type RepositoryIssuesQuery = {
   __typename?: "Query";
   repository?: {
     __typename?: "Repository";
+    url: any;
     defaultBranchRef?: {
       __typename?: "Ref";
       id: string;
@@ -32581,6 +32718,7 @@ export const DataForRepositoryDocument = gql`
 export const RepositoryIssuesDocument = gql`
   query repositoryIssues($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
+      url
       defaultBranchRef {
         id
         name

@@ -138,6 +138,7 @@ query dataForRepository($owner: String!, $name: String!) {
 
 query repositoryIssues($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
+    url
     defaultBranchRef {
       id
       name
