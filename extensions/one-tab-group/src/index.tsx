@@ -212,7 +212,7 @@ function SessionFetcher(props: { license: string }) {
   const [state, setState] = useState<State>({
     license: null,
     sessionList: [],
-    loading: false,
+    loading: true,
   });
 
   useEffect(() => {
@@ -233,7 +233,6 @@ function SessionFetcher(props: { license: string }) {
 
     async function fetchLicense() {
       try {
-        setState({ license: null, sessionList: [], loading: true });
         const res = await validateLicense(props.license);
         const license = res.data;
         if (license?.account_id) {
