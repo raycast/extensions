@@ -9,10 +9,6 @@
     "Developer Tools",
     "Productivity"
   ],
-  "keywords": [
-    "Laravel",
-    "Valet"
-  ],
   "license": "MIT",
   "commands": [
     {
