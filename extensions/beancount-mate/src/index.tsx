@@ -54,7 +54,6 @@ export default function Command() {
       searchBarPlaceholder="@Spotify 15.98 USD visa > subscription"
       throttle={false}
       isShowingDetail={searchText !== "" && parseResult != null}
-      navigationTitle="Beancount Meta"
       actions={
         <ActionPanel title="Beancount Meta">
           {searchText !== "" && parseResult == null && (
@@ -71,7 +70,7 @@ export default function Command() {
             }
           />
           <Action
-            title="Show Beancount Mate Perferences"
+            title="Open Perferences"
             icon={Icon.Cog}
             onAction={openCommandPreferences}
           />
