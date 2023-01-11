@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showHUD, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showHUD, Clipboard, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getAliasOptions, createAlias, getMailboxes } from "./api/simplelogin_api";
 import { Suffix, ParamNewAlias } from "./models/alias_options";
@@ -24,6 +24,7 @@ export default function Command() {
         console.log(result.email);
         showHUD("Alias created and copied to clipboard");
         Clipboard.copy(result.email);
+        popToRoot({ clearSearchBar: true });
       }
     });
   }
