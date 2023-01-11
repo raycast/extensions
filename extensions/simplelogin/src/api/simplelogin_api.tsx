@@ -111,7 +111,6 @@ export async function createRandomAlias(): Promise<AliasResponse | null> {
       }
     )
     .then((response) => {
-      console.log(response.data);
       return response.data as AliasResponse;
     })
     .catch((error) => {
@@ -135,7 +134,6 @@ export async function loadAllAliases(): Promise<AliasResponse[]> {
 
   while (loopActive) {
     const result = await loadAliasesPage(currentPage);
-    console.log(result);
     if (result?.aliases?.length === 0 || result == null) {
       loopActive = false;
     } else {

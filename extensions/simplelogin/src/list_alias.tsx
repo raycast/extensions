@@ -7,6 +7,7 @@ import moment from "moment";
 export default function Command() {
   const [aliases, setAliases] = useState<AliasResponse[]>([]);
   const [filteredAlias, setFilteredAlias] = useState<AliasResponse[] | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadAllAliases().then((response) => {
@@ -16,7 +17,9 @@ export default function Command() {
 
   useEffect(() => {
     setFilteredAlias(aliases);
-    console.log("length filtered: " + filteredAlias?.length);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   }, [aliases]);
 
   function onDrinkTypeChange(newValue: string) {
@@ -78,7 +81,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={filteredAlias === undefined}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter aliases by name..."
       isShowingDetail={filteredAlias != undefined && filteredAlias.length > 0}
       searchBarAccessory={
@@ -155,7 +158,7 @@ export default function Command() {
                         <>
                           {alias.mailboxes.length > 0 &&
                             alias.mailboxes.map((mailbox) => (
-                              <List.Item.Detail.Metadata.Label title="E-mail" text={mailbox.email} />
+                              <List.Item.Detail.Metadata.Label title="E-mail" text={mailbox.email} key={mailbox.id} />
                             ))}
                         </>
                       </List.Item.Detail.Metadata>
@@ -183,8 +186,8 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                     />
                     <Action
-                      title="Delete Alias",
-                      style={Action.Style.Destructive},
+                      title="Delete Alias"
+                      style={Action.Style.Destructive}
                       onAction={() => deleteAliasPrompt(alias)}
                       icon={Icon.DeleteDocument}
                       shortcut={{ modifiers: ["cmd"], key: "delete" }}
@@ -195,7 +198,7 @@ export default function Command() {
             );
           })}
       </>
-      <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="No alias found" />
+      <List.EmptyView icon={{ source: "simplelogin_icon.png" }} title="No alias found" />
     </List>
   );
 }
