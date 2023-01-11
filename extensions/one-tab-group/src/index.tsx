@@ -115,7 +115,7 @@ function TabTreeRender(props: { id: string; sessionList: Session[] }) {
       filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Tabs/Tab Groups"
-      searchBarPlaceholder="Search Saved Tabs/Tab Groups"
+      searchBarPlaceholder="Search Saved Tabs/Tab Groups..."
     >
       {filteredList &&
         filteredList.map((item: any) => {
@@ -132,7 +132,7 @@ function TabTreeRender(props: { id: string; sessionList: Session[] }) {
                 hasGroup ? (
                   <ActionPanel>
                     <Action
-                      title="Explore Tabs In Tab Group"
+                      title="Explore Tabs in Tab Group"
                       onAction={() => push(<TabGroupRender group={item.children} />)}
                     />
                   </ActionPanel>
@@ -194,7 +194,7 @@ function SessionRender(props: { state: State }) {
             actions={
               <ActionPanel>
                 <Action
-                  title="Explore Tabs/Tab Groups"
+                  title="Explore Session"
                   onAction={() => push(<TabTreeRender id={session.id} sessionList={props.state.sessionList} />)}
                 />
               </ActionPanel>
