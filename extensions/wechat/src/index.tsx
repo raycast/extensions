@@ -66,16 +66,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action icon={Icon.Message} title="Chat" onAction={startWeChat} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               icon={Icon.Clipboard}
               title="Copy WeChat ID"
               content={searchResult.arg}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.OpenInBrowser
               title="Feature Request"
               url="https://github.com/raffeyang/wechat"
