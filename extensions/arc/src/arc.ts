@@ -92,7 +92,7 @@ export async function findTab(url: string) {
   return response ? (JSON.parse(response) as Tab) : undefined;
 }
 
-export async function selectTab(tab: Tab): Promise<void> {
+export async function selectTab(tab: Tab) {
   await runAppleScript(`
     tell application "Arc"
       tell window (${tab.windowId} as number)
@@ -100,6 +100,26 @@ export async function selectTab(tab: Tab): Promise<void> {
       end tell
 
       activate
+    end tell
+  `);
+}
+
+export async function closeTab(tab: Tab) {
+  await runAppleScript(`
+    tell application "Arc"
+      tell window (${tab.windowId} as number)
+        tell tab (${tab.tabId} as number) to close
+      end tell
+    end tell
+  `);
+}
+
+export async function reloadTab(tab: Tab) {
+  await runAppleScript(`
+    tell application "Arc"
+      tell window (${tab.windowId} as number)
+        tell tab (${tab.tabId} as number) to reload
+      end tell
     end tell
   `);
 }

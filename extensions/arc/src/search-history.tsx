@@ -1,7 +1,7 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
-import Actions from "./actions";
+import { CopyLinkActionSection, OpenLinkActionSections } from "./actions";
 import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
 import { getDomain, getLastVisitedAt } from "./utils";
@@ -33,7 +33,12 @@ export default function Command() {
           title={entry.title}
           subtitle={getDomain(entry.url)}
           accessories={[getLastVisitedAt(entry)]}
-          actions={<Actions url={entry.url} title={entry.title} />}
+          actions={
+            <ActionPanel>
+              <OpenLinkActionSections url={entry.url} />
+              <CopyLinkActionSection url={entry.url} title={entry.title} />
+            </ActionPanel>
+          }
         />
       ))}
     </List>

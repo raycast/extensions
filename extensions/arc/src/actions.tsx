@@ -1,20 +1,22 @@
 import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import {
+  closeTab,
   findTab,
   getSpaces,
   makeNewLittleArcWindow,
   makeNewTabWithinSpace,
   makeNewWindow,
+  reloadTab,
   selectSpace,
   selectTab,
 } from "./arc";
-import { Space } from "./types";
+import { Space, Tab } from "./types";
 import { getSpaceTitle } from "./utils";
 
-export function OpenInArcAction(props: { url: string }) {
+function OpenInArcAction(props: { url: string }) {
   async function handleAction() {
     try {
       const openTab = await findTab(props.url);
@@ -35,7 +37,7 @@ export function OpenInArcAction(props: { url: string }) {
   return <Action icon={Icon.Globe} title="Open in Arc" onAction={handleAction} />;
 }
 
-export function OpenInNewWindowAction(props: { url: string }) {
+function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
@@ -59,7 +61,7 @@ export function OpenInNewWindowAction(props: { url: string }) {
   );
 }
 
-export function OpenInNewIncognitoWindowAction(props: { url: string }) {
+function OpenInNewIncognitoWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
@@ -83,7 +85,7 @@ export function OpenInNewIncognitoWindowAction(props: { url: string }) {
   );
 }
 
-export function OpenInLittleArc(props: { url: string }) {
+function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
       makeNewLittleArcWindow(props.url);
@@ -99,7 +101,7 @@ export function OpenInLittleArc(props: { url: string }) {
   return <Action icon={Icon.Globe} title="Open in Little Arc Window" onAction={handleAction} />;
 }
 
-export function OpenInSpaceAction(props: { url: string }) {
+function OpenInSpaceAction(props: { url: string }) {
   const [open, setOpen] = useState(false);
   const { data, isLoading } = useCachedPromise(getSpaces, [], { execute: open });
 
@@ -110,7 +112,7 @@ export function OpenInSpaceAction(props: { url: string }) {
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed opening link in Space",
+        title: "Failed opening link in space",
         message: e instanceof Error ? e.message : String(e),
       });
     }
@@ -163,7 +165,7 @@ const browserBundleIds = new Set([
   "com.kagi.kagimacos", // Orion
 ]);
 
-export function OpenInOtherBrowserAction(props: { url: string }) {
+function OpenInOtherBrowserAction(props: { url: string }) {
   const [open, setOpen] = useState<boolean>();
   const { data } = useBrowsers({ execute: open });
 
@@ -220,9 +222,72 @@ export function SearchWithGoogleAction(props: { searchText?: string }) {
   ) : null;
 }
 
-export default function Actions(props: { url: string; title?: string }) {
+function ReloadTabAction(props: { tab: Tab }) {
+  async function handleAction() {
+    await showToast({ style: Toast.Style.Animated, title: "Reloading tab" });
+
+    try {
+      await reloadTab(props.tab);
+      await showToast({ style: Toast.Style.Success, title: "Reloaded tab" });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed reloading tab",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
   return (
-    <ActionPanel>
+    <Action
+      icon={Icon.ArrowClockwise}
+      title="Reload Tab"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+  async function handleAction() {
+    await showToast({ style: Toast.Style.Animated, title: "Closing tab" });
+
+    try {
+      await props.mutate(closeTab(props.tab), {
+        optimisticUpdate(data) {
+          if (!data) {
+            return;
+          }
+
+          return data.filter((t) => !(t.windowId === props.tab.windowId && t.tabId === props.tab.tabId));
+        },
+      });
+
+      await showToast({ style: Toast.Style.Success, title: "Closed tab" });
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed closing tab",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return (
+    <Action
+      icon={Icon.XMarkCircle}
+      title="Close Tab"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+// Sections
+
+export function OpenLinkActionSections(props: { url: string }) {
+  return (
+    <>
       <ActionPanel.Section>
         <OpenInArcAction url={props.url} />
         <OpenInLittleArc url={props.url} />
@@ -233,27 +298,41 @@ export default function Actions(props: { url: string; title?: string }) {
         <OpenInSpaceAction url={props.url} />
         <OpenInOtherBrowserAction url={props.url} />
       </ActionPanel.Section>
-      <ActionPanel.Section>
+    </>
+  );
+}
+
+export function CopyLinkActionSection(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action.CopyToClipboard
+        title="Copy URL"
+        content={props.url}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+      {props.title && (
         <Action.CopyToClipboard
-          title="Copy URL"
-          content={props.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          title="Copy Title"
+          content={props.title}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
-        {props.title && (
-          <Action.CopyToClipboard
-            title="Copy Title"
-            content={props.title}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-          />
-        )}
-        {props.title && (
-          <Action.CopyToClipboard
-            title="Copy URL as Markdown"
-            content={`[${props.title}](${props.url})`}
-            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
-          />
-        )}
-      </ActionPanel.Section>
-    </ActionPanel>
+      )}
+      {props.title && (
+        <Action.CopyToClipboard
+          title="Copy URL as Markdown"
+          content={`[${props.title}](${props.url})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
+}
+
+export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+  return (
+    <ActionPanel.Section>
+      <ReloadTabAction tab={props.tab} />
+      <CloseTabAction tab={props.tab} mutate={props.mutate} />
+    </ActionPanel.Section>
   );
 }
