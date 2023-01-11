@@ -114,8 +114,8 @@ function TabTreeRender(props: { id: string; sessionList: Session[] }) {
     <List
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Tabs/Tab Groups"
-      searchBarPlaceholder="Search Saved Tabs/Tab Groups..."
+      navigationTitle="Search Tabs & Tab Groups"
+      searchBarPlaceholder="Search Sessions"
     >
       {filteredList &&
         filteredList.map((item: any) => {
@@ -171,7 +171,6 @@ function SessionRender(props: { state: State }) {
     <List
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Sessions"
       searchBarPlaceholder="Search Saved Sessions"
       isLoading={loadingSession}
       searchBarAccessory={
@@ -182,6 +181,7 @@ function SessionRender(props: { state: State }) {
         </List.Dropdown>
       }
     >
+      <List.EmptyView icon="no-view.png" title="No Results Found" />
       {filteredList.map((session) => {
         const { tabs, tabGroups } = flattenTabs(session.tabTree);
         const createdtimeAgo = dayjs(Number(session.created_at)).fromNow();
