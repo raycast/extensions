@@ -18,8 +18,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     } else {
       return {
         character: c,
-        telephony: "",
-        pronunciation: "",
+        telephony: "     ",
+        pronunciation: "\r\n\r\n",
       };
     }
   });
@@ -37,7 +37,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     .join(" ");
 
   const markdown = `
-  ${as_telephony}  
+  ## Telephony
+  ${as_telephony}
+  ##
+
+  ## Pronunciation
   ${as_pronunciation}
   `;
 
