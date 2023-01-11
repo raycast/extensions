@@ -40,14 +40,6 @@ export default function Command() {
     checkTodoistApp();
   }, []);
 
-  useEffect(() => {
-    if (tasks) {
-      const currentTask = tasks.find((task) => task.id === cachedFocusedTask.id);
-
-      !currentTask && clearCachedFocusedTask();
-    }
-  }, [tasks]);
-
   const numOfTasksToday = useMemo(() => {
     if (tasks?.length) {
       const len = isTodayView
