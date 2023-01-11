@@ -168,22 +168,23 @@ export default function Command() {
                     <>
                       {alias.pinned ? (
                         <Action
-                          title="Unpinn alias"
+                          title="Unpin Alias"
                           onAction={() => updatePinnedStatus(alias, false)}
                           icon={Icon.PinDisabled}
                         />
                       ) : (
-                        <Action title="Pinn alias" onAction={() => updatePinnedStatus(alias, true)} icon={Icon.Pin} />
+                        <Action title="Pin Alias" onAction={() => updatePinnedStatus(alias, true)} icon={Icon.Pin} />
                       )}
                     </>
                     <Action
-                      title={alias.enabled ? "Disable Alias" : "enable Alias"}
+                      title={alias.enabled ? "Disable Alias" : "Enable Alias"}
                       onAction={() => toggleAliasStatePrompt(alias, !alias.enabled)}
                       icon={!alias.enabled ? Icon.Eye : Icon.EyeDisabled}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                     />
                     <Action
-                      title="Delete alias"
+                      title="Delete Alias",
+                      style={Action.Style.Destructive},
                       onAction={() => deleteAliasPrompt(alias)}
                       icon={Icon.DeleteDocument}
                       shortcut={{ modifiers: ["cmd"], key: "delete" }}
