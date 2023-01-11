@@ -124,7 +124,7 @@ function convertStartEndToScheduled(startDate: string, endDate: string): string 
   const start = new Date(startDate);
   const end = new Date(endDate);
   if (start.getMonth() === end.getMonth()) {
-    return `${month[start.getMonth()]} ${start.getDate()} - ${end.getDate()}`
+    return `${month[start.getMonth()]} ${start.getDate()} - ${end.getDate()}`;
   }
   return `${month[start.getMonth()]} ${start.getDate()} - ${month[end.getMonth()]} ${end.getDate()}`;
 }
