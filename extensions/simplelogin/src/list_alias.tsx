@@ -155,7 +155,7 @@ export default function Command() {
                         <>
                           {alias.mailboxes.length > 0 &&
                             alias.mailboxes.map((mailbox) => (
-                              <List.Item.Detail.Metadata.Label title="E-Mail" text={mailbox.email} />
+                              <List.Item.Detail.Metadata.Label title="E-mail" text={mailbox.email} />
                             ))}
                         </>
                       </List.Item.Detail.Metadata>
