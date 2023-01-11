@@ -124,8 +124,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.45.3",
+    "@raycast/utils": "^1.4.15",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",
