@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchMarkdown, fetchProposals } from "./domain";
+import { fetchProposals } from "./domain";
 import ProposalGithubPage from "./ProposalGithubPage";
 
 export type ViewModelStatusColor = "blue" | "orange" | "green" | "purple" | "red";
@@ -10,7 +10,10 @@ export type ProposalViewModel = {
   title: string;
   status: string;
   statusColor: ViewModelStatusColor;
-  authorsName: string[];
+  authors: {
+    name: string;
+    link: string;
+  }[];
   reviewManagerName: string;
   reviewManagerProfileLink: string;
   swiftVersion?: string;
@@ -77,18 +80,14 @@ export default function ProposalsList() {
 function SimpleProposalList(props: { proposal: ProposalViewModel; toggleDetails: () => void }) {
   const proposal = props.proposal;
   const { push } = useNavigation();
-  const accessories: any[] = [];
-  if (proposal.swiftVersion) {
-    accessories.push({ tag: `Swift ${proposal.swiftVersion}` });
-  }
-  if (proposal.scheduled) {
-    accessories.push({ tag: `${proposal.scheduled}` });
-  }
   return (
     <List.Item
-      title={proposal.status}
+      title={proposal.id}
       subtitle={proposal.title}
-      accessories={accessories}
+      accessories={[
+        { tag: { value: proposal.status, color: mapStatusColorToRaycastColor(proposal.statusColor) } },
+        { tag: { value: proposal.swiftVersion, color: Color.Orange } },
+      ]}
       keywords={proposal.keywords}
       actions={
         <ActionPanel>
@@ -115,7 +114,7 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
       keywords={proposal.keywords}
       actions={
         <ActionPanel>
-           <Action
+          <Action
             title="Read Proposal"
             icon={Icon.Airplane}
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
@@ -133,11 +132,18 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title={"Title"} text={proposal.title} />
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label
-                title={`Author${proposal.authorsName.length > 1 ? "s" : ""}`}
-                text={{ value: proposal.authorsName.join(","), color: Color.Yellow }}
-              />
-              <List.Item.Detail.Metadata.Separator />
+              {proposal.authors.map((author, index) => {
+                return (
+                  <>
+                    <List.Item.Detail.Metadata.Link
+                      title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
+                      target={author.link}
+                      text={author.name}
+                    />
+                  </>
+                );
+              })}
+              {proposal.authors.length > 0 ? <List.Item.Detail.Metadata.Separator /> : <></>}
               <List.Item.Detail.Metadata.Link
                 title={"Review Manager"}
                 target={proposal.reviewManagerProfileLink}
@@ -170,7 +176,7 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
                 <>
                   <List.Item.Detail.Metadata.TagList title={`Repo${proposal.repos.length > 1 ? "s" : ""}`}>
                     {proposal.repos.map((repo) => {
-                      return <List.Item.Detail.Metadata.TagList.Item text={repo} color={Color.Brown} key={repo}/>;
+                      return <List.Item.Detail.Metadata.TagList.Item text={repo} color={Color.Brown} key={repo} />;
                     })}
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />

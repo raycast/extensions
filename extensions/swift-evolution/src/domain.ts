@@ -54,7 +54,7 @@ function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
     .map((json) => {
       const viewModel: ProposalViewModel = {
         id: json.id,
-        authorsName: json.authors.map((x) => x.name),
+        authors: json.authors,
         reviewManagerName: json.reviewManager.name,
         reviewManagerProfileLink: json.reviewManager.link,
         link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + json.link,
