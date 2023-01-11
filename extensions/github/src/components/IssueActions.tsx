@@ -248,7 +248,7 @@ export default function IssueActions({ issue, mutateList, mutateDetail, children
 
         {!linkedBranch ? (
           <Action
-            title={"Create a branch"}
+            title={"Create Issue Branch"}
             icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
             onAction={() => createLinkedBranch()}

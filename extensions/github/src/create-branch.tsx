@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Image, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -23,6 +23,7 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   const { github } = getGitHubClient();
   const { data: repositories, isLoading: repositoriesIsLoading } = useMyRepositories();
   const [oid, setOid] = useState();
+  const [repositoryUrl, setRepositoryUrl] = useState();
 
   const { handleSubmit, itemProps, values } = useForm<BranchFormValues>({
     async onSubmit(values) {
@@ -43,6 +44,11 @@ export function BranchForm({ draftValues }: BranchFormProps) {
             title: "Copy Branch Name",
             shortcut: { modifiers: ["shift", "cmd"], key: "c" },
             onAction: () => Clipboard.copy(branchName),
+          };
+          toast.secondaryAction = {
+            title: "Open in Browser",
+            shortcut: { modifiers: ["shift", "cmd"], key: "o" },
+            onAction: async () => await open(`${repositoryUrl}/tree/${branchName}`),
           };
         }
       } catch (error) {
@@ -80,14 +86,19 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
 
   useEffect(() => {
-    data?.repository?.defaultBranchRef?.target?.oid && setOid(data?.repository?.defaultBranchRef?.target?.oid);
+    data?.repository?.defaultBranchRef?.target?.oid && setOid(data.repository.defaultBranchRef.target.oid);
+    data?.repository?.url && setRepositoryUrl(data.repository.url);
   }, [data]);
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Create Branch" />
+          <Action.SubmitForm
+            onSubmit={handleSubmit}
+            title="Create Branch"
+            icon={{ source: "branch.svg", tintColor: Color.PrimaryText }}
+          />
         </ActionPanel>
       }
       enableDrafts
