@@ -1,3 +1,5 @@
 # Laravel Valet Changelog
 
-## [Initial Version] - 2023-01-06
+## [Added Laravel Valet] - 2023-01-11
+
+Initial version code
