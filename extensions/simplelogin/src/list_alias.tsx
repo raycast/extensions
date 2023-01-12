@@ -1,6 +1,6 @@
 import { loadAllAliases, updateAliasPinnedStatus, deleteAlias, toggleAliasState } from "./api/simplelogin_api";
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert, Color } from "@raycast/api";
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
@@ -93,9 +93,9 @@ export default function Command() {
                 onDrinkTypeChange(newValue);
               }}
             >
-              <List.Dropdown.Item title="show all" value="all" key="all" icon={Icon.Globe} />
-              <List.Dropdown.Item title="show pinned" value="pinned" key="pinned" icon={Icon.Pin} />
-              <List.Dropdown.Item title="show not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
+              <List.Dropdown.Item title="Show All" value="all" key="all" icon={Icon.Globe} />
+              <List.Dropdown.Item title="Show Pinned" value="pinned" key="pinned" icon={Icon.Pin} />
+              <List.Dropdown.Item title="Show Not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
             </List.Dropdown>
           ) : (
             ""
@@ -111,7 +111,7 @@ export default function Command() {
               <List.Item
                 key={alias.id}
                 title={alias.email}
-                icon={Icon.Minus}
+                icon={{ source: Icon.Minus, tintColor: alias.pinned ? Color.Yellow : Color.PrimaryText }}
                 detail={
                   <List.Item.Detail
                     metadata={
@@ -125,12 +125,12 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Label title="Metadata" />
                         <List.Item.Detail.Metadata.Label
                           title="Pinned"
-                          text={alias.pinned ? "yes" : "no"}
+                          text={alias.pinned ? "Yes" : "No"}
                           icon={alias.pinned ? Icon.Pin : Icon.PinDisabled}
                         />
                         <List.Item.Detail.Metadata.Label
                           title="Enabled"
-                          text={alias.enabled ? "yes" : "no"}
+                          text={alias.enabled ? "Yes" : "No"}
                           icon={alias.enabled ? Icon.Checkmark : Icon.XMarkCircle}
                         />
                         <List.Item.Detail.Metadata.Label
