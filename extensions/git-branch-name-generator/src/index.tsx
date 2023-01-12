@@ -1,4 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Clipboard, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { useForm } from "@raycast/utils";
 
 type Values = {
   branch_name: string;
@@ -6,27 +7,34 @@ type Values = {
 };
 
 export default function Command() {
-  function handleSubmit(values: Values) {
-    const branchType = values.type_of_branch ? `${values.type_of_branch}/` : "";
-    const branchNameAsSlug = values.branch_name
-      ? values.branch_name
-          .toLowerCase()
-          // replace all but 0-9, a-z and / with a dash
-          .replace(/[^0-9a-z/]/g, "-")
-          // replace multiple dashes with a single dash
-          .replace(/[-]+/g, "-")
-          // trim dashes from the beginning
-          .replace(/^-+/, "")
-          // trim dashes from the end
-          .replace(/-+$/, "")
-          // only take the first 100 characters
-          .substring(0, 100)
-      : "";
-    const fullBranchName = `${branchType}${branchNameAsSlug}`;
-    Clipboard.copy(fullBranchName);
-    showToast({ title: "Copied to clipboard", message: `${fullBranchName}` });
-    popToRoot({ clearSearchBar: true });
-  }
+  const { handleSubmit, itemProps } = useForm<Values>({
+    onSubmit(values) {
+      const branchType = values.type_of_branch ? `${values.type_of_branch}/` : "";
+      const branchNameAsSlug = values.branch_name
+        ? values.branch_name
+            .toLowerCase()
+            // replace all but 0-9, a-z and / with a dash
+            .replace(/[^0-9a-z/]/g, "-")
+            // replace multiple dashes with a single dash
+            .replace(/[-]+/g, "-")
+            // trim dashes from the beginning
+            .replace(/^-+/, "")
+            // trim dashes from the end
+            .replace(/-+$/, "")
+            // only take the first 100 characters
+            .substring(0, 100)
+        : "";
+      const fullBranchName = `${branchType}${branchNameAsSlug}`;
+      Clipboard.copy(fullBranchName);
+      showToast({ style: Toast.Style.Success, title: "Copied to clipboard", message: `${fullBranchName}` });
+      popToRoot({ clearSearchBar: true });
+    },
+    validation: {
+      branch_name: (value) => {
+        if (!value) return "Please enter a branch name";
+      },
+    },
+  });
 
   return (
     <Form
@@ -36,13 +44,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="type_of_branch" title="Type of branch">
+      <Form.Dropdown title="Type of branch" {...itemProps.type_of_branch}>
         <Form.Dropdown.Item value="" title="" />
         <Form.Dropdown.Item value="bug" title="Bug" />
         <Form.Dropdown.Item value="chore" title="Chore" />
         <Form.Dropdown.Item value="feature" title="Feature" />
       </Form.Dropdown>
-      <Form.TextField id="branch_name" title="Branch name" placeholder="Change the photo" defaultValue="" />
+      <Form.TextField title="Branch name" placeholder="Change the photo" {...itemProps.branch_name} />
     </Form>
   );
 }
