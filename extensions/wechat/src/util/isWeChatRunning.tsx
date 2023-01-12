@@ -3,7 +3,7 @@ import { Alert, confirmAlert, open, closeMainWindow } from "@raycast/api"
 export const isWeChatRunning = async () => {
   const options: Alert.Options = {
     icon: { source: "wechat.png" },
-    title: "WeChat is Not Running",
+    title: "WeChat is not running",
     message:
       "WeChat is not running on your Mac. Please open WeChat to use this command.",
     primaryAction: {
