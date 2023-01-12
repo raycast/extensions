@@ -22,27 +22,23 @@ export default function QuickCapture() {
   const handleSubmit = async (formValues: FormValues) => {
     if (!formValues.name) return setTextErrorMessage("Required");
 
-    const data: Record<string, any> = { name: formValues.name };
-    if (formValues.description) {
-      data["description"] = formValues.description;
-    }
-    if (formValues.dueDate) {
-      data["due_date"] = new Date(formValues.dueDate).getTime();
-      console.log(data["due_date"]);
-    }
-    if (formValues.priority) {
-      data["priority"] = formValues.priority;
-    }
-
-    await ClickUpClient<TaskItem>(`/list/${preferences.listId}/task`, "POST", data)
-      .then(() => {
-        // Ensure the user sees root search when they re-open Raycast
-        popToRoot();
-      })
-      .catch((err) => {
-        console.log(err);
-        showToast({ title: "Something went wrong", message: "Please try again", style: Toast.Style.Failure });
+    try {
+      const res = await ClickUpClient<TaskItem>(`/list/${preferences.listId}/task`, "POST", {
+        name: formValues.name,
+        ...(formValues?.description && { description: formValues.description }),
+        ...(formValues?.dueDate && { due_date: new Date(formValues.dueDate).getTime() }),
+        ...(formValues?.priority && { priority: formValues.priority }),
       });
+
+      // Ensure the user sees root search when they re-open Raycast.
+      if (res.status != 200) {
+        throw new Error(`Failed to fetch with status code: ${res.status}`);
+      }
+      popToRoot();
+    } catch (error) {
+      console.log(error);
+      showToast({ title: "Something went wrong", message: "Please try again", style: Toast.Style.Failure });
+    }
   };
 
   return (
@@ -53,7 +49,12 @@ export default function QuickCapture() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" placeholder="Task..." error={textErrorMessage} onChange={clearTextErrorMessage} />
+      <Form.TextField
+        id="name"
+        placeholder="Buy toothpaste..."
+        error={textErrorMessage}
+        onChange={clearTextErrorMessage}
+      />
       <Form.Separator />
       <Form.TextArea
         id="description"
@@ -63,10 +64,10 @@ export default function QuickCapture() {
       />
       <Form.DatePicker title="Due Date" id="dueDate" />
       <Form.Dropdown id="priority" title="Priority" defaultValue="3">
-        <Form.Dropdown.Item value="1" title="Urgent" icon="🚨️" />
-        <Form.Dropdown.Item value="2" title="High" icon="⏫" />
-        <Form.Dropdown.Item value="3" title="Normal" icon="🟢" />
-        <Form.Dropdown.Item value="4" title="Low" icon="⏬" />
+        <Form.Dropdown.Item value="1" title="Urgent" icon="🔴" />
+        <Form.Dropdown.Item value="2" title="High" icon="🟠" />
+        <Form.Dropdown.Item value="3" title="Normal" icon="🟡" />
+        <Form.Dropdown.Item value="4" title="Low" icon="🟢" />
       </Form.Dropdown>
     </Form>
   );
