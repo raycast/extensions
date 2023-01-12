@@ -1,3 +1,3 @@
 # Writersbrew Changelog
 
-## [Initial Version] - 2022-12-21
+## [Initial Version] - 2023-01-12
