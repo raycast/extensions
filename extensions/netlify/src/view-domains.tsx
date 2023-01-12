@@ -1,7 +1,7 @@
-import { ActionPanel, List, ListItem, ListSection, OpenInBrowserAction } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import Service, { Domain } from "./service";
-import { getDomainUrl, getToken } from "./utils";
+import { ActionPanel, List, Action } from '@raycast/api';
+import { useEffect, useMemo, useState } from 'react';
+import Service, { Domain } from './service';
+import { getDomainUrl, getToken, handleNetworkError } from './utils';
 
 const service = new Service(getToken());
 
@@ -35,9 +35,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchDomains() {
-      const domains = await service.getDomains();
-      setDomains(domains);
-      setLoading(false);
+      try {
+        const domains = await service.getDomains();
+        setDomains(domains);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchDomains();
@@ -47,19 +52,22 @@ export default function Command() {
     <List isLoading={isLoading}>
       {Object.keys(domainMap).map((team) => {
         return (
-          <ListSection key={team} title={teams[team]}>
+          <List.Section key={team} title={teams[team]}>
             {domainMap[team].map((domain) => (
-              <ListItem
+              <List.Item
                 key={domain}
                 title={domain}
                 actions={
                   <ActionPanel>
-                    <OpenInBrowserAction title="Open in Netlify" url={getDomainUrl(domain)} />
+                    <Action.OpenInBrowser
+                      title="Open on Netlify"
+                      url={getDomainUrl(domain)}
+                    />
                   </ActionPanel>
                 }
               />
             ))}
-          </ListSection>
+          </List.Section>
         );
       })}
     </List>

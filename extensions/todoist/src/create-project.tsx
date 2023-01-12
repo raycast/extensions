@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { ActionPanel, Toast, Form, Icon, render, ToastStyle, showToast, open, SubmitFormAction } from "@raycast/api";
+import { ActionPanel, Action, Toast, Form, Icon, showToast, open } from "@raycast/api";
 import { AddProjectArgs, colors } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { SWRKeys } from "./types";
 import { handleError, todoist } from "./api";
 
-function CreateProject() {
+export default function CreateProject() {
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState<string>();
   const [favorite, setFavorite] = useState<boolean>(false);
@@ -29,7 +29,7 @@ function CreateProject() {
     const body: AddProjectArgs = { name, favorite };
 
     if (!body.name) {
-      await showToast(ToastStyle.Failure, "The project's name is required");
+      await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
       return;
     }
 
@@ -41,12 +41,12 @@ function CreateProject() {
       body.color = parseInt(colorId);
     }
 
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Creating project..." });
+    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project..." });
     await toast.show();
 
     try {
       const { url } = await todoist.addProject(body);
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Project created";
       toast.primaryAction = {
         title: "Open in browser",
@@ -63,7 +63,7 @@ function CreateProject() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Project" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Project" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
       isLoading={!data && !error}
@@ -89,5 +89,3 @@ function CreateProject() {
     </Form>
   );
 }
-
-render(<CreateProject />);

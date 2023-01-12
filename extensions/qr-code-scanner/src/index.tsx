@@ -10,8 +10,8 @@ import {
 import { exec } from "child_process";
 import open from "open";
 import { read as decodeImage } from "jimp";
-import qrcodeReader from "qrcode-reader";
 import { randomInt } from "crypto";
+import jsQR from "jsqr";
 
 function qrDecode(filepath: string, callback: (data: string | boolean) => void) {
   decodeImage(filepath, (err, image) => {
@@ -23,21 +23,16 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
       showToast(ToastStyle.Failure, "Image decoder error...");
       return;
     }
-    const decodeQR = new qrcodeReader();
-    decodeQR.callback = function (errorWhenDecodeQR, result) {
-      if (errorWhenDecodeQR) {
-        if (errorWhenDecodeQR.indexOf("Couldn't find enough finder patterns") > -1) {
-          callback(false);
-        } else {
-          showToast(ToastStyle.Failure, "Parser error...");
-          return;
-        }
-      } else {
-        callback(JSON.parse(JSON.stringify(result)).result);
-      }
-      exec("rm " + filepath);
-    };
-    decodeQR.decode(image.bitmap);
+    const result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), image.bitmap.width, image.bitmap.height, {
+      inversionAttempts: "attemptBoth",
+    });
+    if (result) {
+      const decoder = new TextDecoder("shift-jis");
+      const code = decoder.decode(Uint8Array.from(result?.binaryData).buffer);
+      callback(code);
+      return;
+    }
+    callback(false);
   });
 }
 

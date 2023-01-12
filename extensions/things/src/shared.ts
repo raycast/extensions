@@ -1,4 +1,4 @@
-import { ToastStyle, showToast } from '@raycast/api';
+import { showToast, Toast } from '@raycast/api';
 import osascript from 'osascript-tag';
 
 export const executeJxa = async (script: string) => {
@@ -9,9 +9,17 @@ export const executeJxa = async (script: string) => {
     if (typeof err === 'string') {
       const message = err.replace('execution error: Error: ', '');
       if (message.match(/Application can't be found/)) {
-        showToast(ToastStyle.Failure, 'Application not found', 'Things must be running');
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Application not found',
+          message: 'Things must be running',
+        });
       } else {
-        showToast(ToastStyle.Failure, 'Something went wrong', message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Something went wrong',
+          message: message,
+        });
       }
     }
   }

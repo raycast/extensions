@@ -29,6 +29,7 @@ jobs:
 
       - name: Update the docs in the main repo
         if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
+        id: commit
         env:
           API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
         run: |
@@ -57,14 +58,20 @@ jobs:
 
           cd raycast-macos
 
-          git checkout -b docs-sync-${{ github.sha }}
-          git add .
-          git commit -m 'API Docs: Update from the extensions repo'
-          git push origin docs-sync-${{ github.sha }}
+          if [[ $(git diff --stat) != '' ]]; then
+            git checkout -b docs-sync-${{ github.sha }}
+            git add .
+            git commit -m 'API Docs: Update from the extensions repo'
+            git push origin docs-sync-${{ github.sha }}
+            echo '::set-output name=has_commit::true'
+          else
+            echo 'No changes'
+            echo '::set-output name=has_commit::false'
+          fi
 
       - name: Open PR on the main repo
         uses: actions/github-script@v5
-        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
+        if: steps.commit.outputs.has_commit == 'true'
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |

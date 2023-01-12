@@ -42,15 +42,15 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default | Description                         |
-| :------- | :-------------------------------------------------------- | :------- | :------ | :---------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | The icon displayed for the action.  |
-| id       | <code>string</code>                                       | No       | -       | ID of the item.                     |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -       | The keyboard shortcut for the item. |
-| title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.   |
-| onAction | <code>() => void</code>                                   | No       | -       |                                     |
+| Prop     | Type                                                      | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                                      |
+| :------- | :-------------------------------------------------------- | :------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | The icon displayed for the action.                                                                                                                                                                                                                                                                                                                                                               |
+| id       | <code>string</code>                                       | No       | -       | ID of the item.                                                                                                                                                                                                                                                                                                                                                                                  |
+| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -       | <p>The keyboard shortcut for the item.</p> <p>The first and second action in an [Action Panel](./action-panel.md) become the primary and secondary action, so they automatically get the default keyboard shortcuts assigned. In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.</p>  |
+| title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.                                                                                                                                                                                                                                                                                                                                                                |
+| onAction | <code>() => void</code>                                   | No       | -       |                                                                                                                                                                                                                                                                                                                                                                                                  |
 
-### CopyToClipboard
+### Action.CopyToClipboard
 
 Action that copies the content to the clipboard.
 
@@ -88,7 +88,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
 | onCopy   | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
 
-### Open
+### Action.Open
 
 An action to open a file or folder with a specific application, just as if you had double-clicked the
 file's icon.
@@ -125,7 +125,7 @@ export default function Command() {
 | title       | <code>string</code>                                                            | Yes      | -                                         | The title for the action.                         |
 | onOpen      | <code>(target: string) => void</code>                                          | No       | -                                         |                                                   |
 
-### OpenInBrowser
+### Action.OpenInBrowser
 
 Action that opens a URL in the default browser.
 
@@ -160,7 +160,7 @@ export default function Command() {
 | url      | <code>string</code>                                       | Yes      | -                                        | The URL to open.                                 |
 | onOpen   | <code>(url: string) => void</code>                        | No       | -                                        |                                                  |
 
-### OpenWith
+### Action.OpenWith
 
 Action that opens a file or folder with a specific application.
 
@@ -199,7 +199,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | Open With                                 | The title for the action.             |
 | onOpen   | <code>(path: string) => void</code>                       | No       | -                                         |                                       |
 
-### Paste
+### Action.Paste
 
 Action that pastes the content to the front-most applications.
 
@@ -234,7 +234,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
 | onPaste  | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
 
-### Push
+### Action.Push
 
 Action that pushes a new view to the navigation stack.
 
@@ -275,7 +275,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.                            |
 | onPush   | <code>() => void</code>                                   | No       | -       |                                                              |
 
-### ShowInFinder
+### Action.ShowInFinder
 
 Action that shows a file or folder in the Finder.
 
@@ -313,7 +313,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | Show in Finder                            | An optional title for the action.       |
 | onShow   | <code>(path: PathLike) => void</code>                     | No       | -                                         |                                         |
 
-### SubmitForm
+### Action.SubmitForm
 
 Action that adds a submit handler for capturing form values.
 
@@ -349,7 +349,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -       | The title displayed for the item.     |
 | onSubmit | <code>(input: [Values](./form.md#values)) => void</code>  | No       | -       |                                       |
 
-### Trash
+### Action.Trash
 
 Action that moves a file or folder to the Trash.
 
@@ -384,3 +384,89 @@ export default function Command() {
 | shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                        | The optional keyboard shortcut for the action. |
 | title    | <code>string</code>                                       | No       | Move to Trash                            | An optional title for the action.              |
 | onTrash  | <code>(paths: PathLike \| PathLike[]) => void</code>      | No       | -                                        |                                                |
+
+### Action.CreateSnippet
+
+Action that navigates to the the Create Snippet command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out snippet creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateSnippet snippet={{ text: "DE75512108001245126199" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+| Prop     | Type                                                      | Required | Default                                  | Description                                    |
+| :------- | :-------------------------------------------------------- | :------- | :--------------------------------------- | :--------------------------------------------- |
+| snippet  | <code>[Snippet](#snippet)</code>                          | yes      | -                                        | The Snippet to create.                         |
+| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Link](./icons-and-images.md#icon)  | A optional icon displayed for the action.      |
+| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                        | The optional keyboard shortcut for the action. |
+| title    | <code>string</code>                                       | No       | Move to Trash                            | An optional title for the action.              |
+
+### Action.CreateQuicklink
+
+Action that navigates to the the Create Quicklink command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out quicklink creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+| Prop      | Type                                                      | Required | Default                                         | Description                                    |
+| :-------- | :-------------------------------------------------------- | :------- | ----------------------------------------------- | :--------------------------------------------- |
+| quicklink | <code>[Quicklink](#quicklink)</code>                      | Yes      | -                                               | The Quicklink to create.                       |
+| icon      | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.TextDocument](./icons-and-images.md#icon) | A optional icon displayed for the action.      |
+| shortcut  | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                               | The optional keyboard shortcut for the action. |
+| title     | <code>string</code>                                       | No       | Move to Trash                                   | An optional title for the action.              |
+
+## Types
+
+### Snippet
+
+#### Properties
+
+| Property  | Type                 | Required | Default  | Description                         |
+| :-------- | :------------------- | :------- | :------- | :---------------------------------- |
+| text      | <code>string</code>  | Yes      | -        | The snippet contents.               |
+| name      | <code>string</code>  | No       | -        | The snippet name.                   |
+| keyword   | <code>string</code>  | No       | -        | The keyword to trigger the snippet. |
+
+### Quicklink
+
+#### Properties
+
+| Property    | Type                                                                           | Required | Default  | Description                                                                                              |
+| :---------- | ------------------------------------------------------------------------------ | :------- | :------- | -------------------------------------------------------------------------------------------------------- |
+| link        | <code>string</code>                                                            | Yes      | -        | The URL or file path, optionally including placeholders such as in "https://google.com/search?q={Query}" |
+| name        | <code>string</code>                                                            | No       | -        | The quicklink name.                                                                                      |
+| application | <code>string</code> or <code>[Application](../utilities.md#application)</code> | No       | -        | The application that the quicklink should be opened in.                                                  |

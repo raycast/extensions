@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cloudflare",
+  "title": "Cloudflare",
+  "description": "Search and view your Cloudflare sites, pages, domains, and more",
+  "icon": "icon.png",
+  "author": "destiner",
+  "categories": ["Developer Tools", "Web"],
+  "license": "MIT",
+  "contributors": [
+    "niklaswa"
+  ],
+  "commands": [
+    {
+      "name": "view-sites",
+      "title": "View Sites",
+      "subtitle": "Cloudflare",
+      "description": "Lists your sites",
+      "mode": "view"
+    },
+    {
+      "name": "view-pages",
+      "title": "View Pages",
+      "subtitle": "Cloudflare",
+      "description": "Lists your page projects",
+      "mode": "view"
+    },
+    {
+      "name": "view-members",
+      "title": "View Members",
+      "subtitle": "Cloudflare",
+      "description": "Lists your team members",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Cloudflare account email",
+      "placeholder": "Your email"
+    },
+    {
+      "name": "key",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Global API Key",
+      "placeholder": "Your key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "axios": "^0.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

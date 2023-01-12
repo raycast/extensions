@@ -6,10 +6,12 @@ import {
   closeMainWindow,
   getPreferenceValues,
   Icon,
+  showToast,
+  ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { parse } from "date-format-parse";
+import { Date } from "sugar";
 
 interface Note {
   name: string;
@@ -27,6 +29,7 @@ interface State {
 interface Preferences {
   accounts: boolean;
   folders: boolean;
+  modificationDate: boolean;
 }
 
 export default function Command() {
@@ -34,6 +37,7 @@ export default function Command() {
     notes: [],
     loading: true,
   });
+
   function parseNotes(result: string) {
     const lines = result.split("\n");
 
@@ -61,7 +65,7 @@ export default function Command() {
           break;
         case "date":
           if (lastNote) {
-            lastNote.date = parse(value, "dddd, D MMMM YYYY at HH:mm:ss");
+            lastNote.date = parseDateString(value);
             lastNote.folder = lastFolder;
             lastNote.account = lastAccount;
             notes.push(lastNote);
@@ -73,12 +77,29 @@ export default function Command() {
     notes.sort((a, b) => (a.date && b.date && a.date < b.date ? 1 : -1));
     setState({ notes: notes, loading: false });
   }
+
   async function checkCachedNotes() {
     const cachedNotes = (await getLocalStorageItem("notes")) as string;
     if (cachedNotes) {
       parseNotes(cachedNotes);
     }
   }
+
+  function parseDateString(date: string): Date {
+    date = date.replace(/([0-9]+).([0-9]+).([0-9]+)$/, "$1:$2:$3"); // fix for time format
+
+    let parsedDate = Date.create(date);
+    if (!Date.isValid(parsedDate)) {
+      parsedDate = Date.create();
+
+      if (preferences.modificationDate) {
+        showToast(ToastStyle.Failure, "Invalid date format", `Date ${date} could not be parsed.`);
+      }
+    }
+
+    return parsedDate;
+  }
+
   async function fetchItems() {
     const result = await runAppleScript(
       'set output to ""\n' +
@@ -106,9 +127,7 @@ export default function Command() {
   }
   async function openNote(number: number) {
     await closeMainWindow();
-    await runAppleScript(
-      'tell application "Notes" \n' + 'show note "' + state.notes[number].name + '" \n' + "end tell"
-    );
+    await runAppleScript(`tell application "Notes" \nshow note "${state.notes[number].name}" \nend tell`);
   }
 
   useEffect(() => {
@@ -125,6 +144,7 @@ export default function Command() {
           key={i}
           icon="notes-icon.png"
           title={note.name}
+          subtitle={note.date && preferences.modificationDate ? Date(note.date).relative().raw : ""}
           accessoryTitle={
             preferences.accounts
               ? preferences.folders

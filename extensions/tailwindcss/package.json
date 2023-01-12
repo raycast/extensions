@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tailwindcss",
   "title": "Tailwind CSS Documentation",
   "description": "Quickly search Tailwind CSS documentation and open it in the browser",
@@ -13,6 +14,10 @@
       "description": "Search Tailwind CSS documentation and open it in the browser",
       "mode": "view"
     }
+  ],
+  "categories": [
+    "Documentation",
+    "Developer Tools"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",

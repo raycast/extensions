@@ -94,7 +94,7 @@ function formatConflicts(cask: Cask): string {
   }
 
   return `#### Conflicts With
-${cask.conflicts_with.join(", ")}
+${cask.conflicts_with.cask.join(", ")}
   `;
 }
 

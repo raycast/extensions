@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stripe",
+  "title": "Stripe Quicklinks",
+  "description": "This extension allows you to make an invoice, create a payment, add a new product, and start a new subscription.",
+  "icon": "stripe.png",
+  "author": "pradeepb28",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-a-new-invoice",
+      "title": "Create New Invoice",
+      "subtitle": "Stripe",
+      "description": "It creates an invoice for your business on your stripe account",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-payment",
+      "title": "Create New Payment",
+      "subtitle": "Stripe",
+      "description": "Send and accept payments",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-product",
+      "title": "Create New Product",
+      "subtitle": "Stripe",
+      "description": "Add a new offering to your stripe product catalog",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-a-new-subscription",
+      "title": "Create New Subscription",
+      "subtitle": "Stripe",
+      "description": "Create new subscription accounts for your customers",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.29.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

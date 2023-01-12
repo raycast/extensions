@@ -1,10 +1,16 @@
 # Toast
 
+When an asynchronous operation is happening or when an error is thrown, it's usually a good idea to keep the user informed about it. Toasts are made for that.
+
+Additionaly, Toasts can have some actions associated to the action they are about. For example, you could provide a way to cancel an asynchronous operation, undo an action, or copy the stack trace of an error.
+
+![](../../.gitbook/assets/toast.png)
+
 ## API Reference
 
 ### showToast
 
-Creates and shows a Toast with the given options.
+Creates and shows a Toast with the given [options](#toast.options).
 
 #### Signature
 
@@ -44,14 +50,17 @@ export default async () => {
     title: "Uploading image",
   });
 
-  await setTimeout(1000);
+  try {
+    // upload the image
+    await setTimeout(1000);
 
-  toast.style = ToastStyle.Success;
-  toast.title = "Uploaded image";
-
-  await setTimeout(500);
-
-  await toast.hide();
+    toast.style = Toast.Style.Success;
+    toast.title = "Uploaded image";
+  } catch (err) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to upload image";
+    toast.message = err.message;
+  }
 };
 ```
 
@@ -77,11 +86,11 @@ Use [showToast](#showtoast) to create and show a Toast.
 
 | Name            | Type                                                                               | Description                                                                                                        |
 | :-------------- | :--------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| title           | <code>string</code>                                                                | The title of a Toast. Displayed on the top.                                                                        |
 | message         | <code>undefined</code> or <code>string</code>                                      | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. |
+| style           | <code>[Toast.Style](#toast.style)</code>                                           | The style of a Toast.                                                                                              |
 | primaryAction   | <code>undefined</code> or <code>[Toast.ActionOptions](#toast.actionoptions)</code> | The primary Action the user can take when hovering on the Toast.                                                   |
 | secondaryAction | <code>undefined</code> or <code>[Toast.ActionOptions](#toast.actionoptions)</code> | The secondary Action the user can take when hovering on the Toast.                                                 |
-| style           | <code>[Toast.Style](#toast.style)</code>                                           | The style of a Toast.                                                                                              |
-| title           | <code>string</code>                                                                | The title of a Toast. Displayed on the top.                                                                        |
 
 #### Methods
 
@@ -97,7 +106,7 @@ The options to create a [Toast](#toast).
 #### Example
 
 ```typescript
-import { showToast, ToastOptions } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
   const options: Toast.Options = {
@@ -120,11 +129,11 @@ export default async () => {
 
 | Name            | Type                                                     | Required | Description                                                                                                        |
 | :-------------- | :------------------------------------------------------- | :------- | :----------------------------------------------------------------------------------------------------------------- |
+| title           | <code>string</code>                                      | Yes      | The title of a Toast. Displayed on the top.                                                                        |
+| style           | <code>[Toast.Style](#toast.style)</code>                 | No       | The style of a Toast. Defaults to `Toast.Style.Success`                                                            |
 | message         | <code>string</code>                                      | No       | An additional message for the Toast. Useful to show more information, e.g. an identifier of a newly created asset. |
 | primaryAction   | <code>[Toast.ActionOptions](#toast.actionoptions)</code> | No       | The primary Action the user can take when hovering on the Toast.                                                   |
 | secondaryAction | <code>[Toast.ActionOptions](#toast.actionoptions)</code> | No       | The secondary Action the user can take when hovering on the Toast.                                                 |
-| style           | <code>[Toast.Style](#toast.style)</code>                 | No       | The style of a Toast.                                                                                              |
-| title           | <code>string</code>                                      | Yes      | The title of a Toast. Displayed on the top.                                                                        |
 
 ### Toast.Style
 
@@ -136,11 +145,11 @@ You can hide it later by using [Toast.hide](#toast) or update the properties of 
 
 #### Enumeration members
 
-| Name     | Value      |
-| :------- | :--------- |
-| Animated | "ANIMATED" |
-| Failure  | "FAILURE"  |
-| Success  | "SUCCESS"  |
+| Name     | Value                                         |
+| :------- | :-------------------------------------------- |
+| Animated | ![](../../.gitbook/assets/toast-animated.png) |
+| Success  | ![](../../.gitbook/assets/toast-success.png)  |
+| Failure  | ![](../../.gitbook/assets/toast-failure.png)  |
 
 ### Toast.ActionOptions
 
@@ -150,6 +159,6 @@ The options to create a [Toast](#toast) Action.
 
 | Name     | Type                                                     | Required | Description                                                                                    |
 | :------- | :------------------------------------------------------- | :------- | :--------------------------------------------------------------------------------------------- |
-| shortcut | <code>[KeyboardShortcut](../keyboard.md#shortcut)</code> | No       | The keyboard shortcut for the action.                                                          |
 | title    | <code>string</code>                                      | Yes      | The title of the action.                                                                       |
 | onAction | <code>(toast: Toast) => void</code>                      | Yes      | A callback called when the action is triggered. It receives the current Toast as its argument. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#shortcut)</code> | No       | The keyboard shortcut for the action.                                                          |

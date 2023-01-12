@@ -1,19 +1,7 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  ToastStyle,
-  Icon,
-  useNavigation,
-  randomId,
-  ListItem,
-  Detail,
-  CopyToClipboardAction,
-  PushAction,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, List, Action, Icon, useNavigation, Detail, Toast } from "@raycast/api";
 import { useState, useRef, useEffect, Fragment } from "react";
 import { DateTime } from "luxon";
+import { nanoid } from "nanoid";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { findNotebooks, SearchNotebook } from "../sourcegraph/gql";
@@ -39,12 +27,12 @@ export default function FindNotebooksCommand(src: Sourcegraph) {
     >
       {!state.isLoading && !state.searchText ? (
         <List.Section title={"Suggestions"}>
-          <ListItem
+          <List.Item
             title="Create a search notebook"
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction title="Create in Browser" url={`${src.instance}/notebooks/new`} />
+                <Action.OpenInBrowser title="Create in Browser" url={`${src.instance}/notebooks/new`} />
               </ActionPanel>
             }
           />
@@ -58,7 +46,7 @@ export default function FindNotebooksCommand(src: Sourcegraph) {
         subtitle={`${state.notebooks.length} ${showStarred ? "notebooks" : "results"}`}
       >
         {state.notebooks.map((n, i) => (
-          <NotebookResultItem id={i === 0 ? "first-result" : undefined} key={randomId()} notebook={n} src={src} />
+          <NotebookResultItem id={i === 0 ? "first-result" : undefined} key={nanoid()} notebook={n} src={src} />
         ))}
       </List.Section>
     </List>
@@ -104,16 +92,16 @@ function NotebookResultItem({
       }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction key={randomId()} url={url} />
-          <PushAction
-            key={randomId()}
+          <Action.OpenInBrowser key={nanoid()} url={url} />
+          <Action.Push
+            key={nanoid()}
             title="Peek Search Notebook"
             icon={{ source: Icon.MagnifyingGlass }}
             target={<NotebookPeek notebook={notebook} src={src} />}
             shortcut={secondaryActionShortcut}
           />
-          <CopyToClipboardAction
-            key={randomId()}
+          <Action.CopyToClipboard
+            key={nanoid()}
             title="Copy Search Notebook URL"
             content={url}
             shortcut={copyShortcut}
@@ -169,8 +157,8 @@ ${
       navigationTitle={"Peek Search Notebook"}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={notebookURL} />
-          <CopyToClipboardAction title="Copy Link to Notebook" content={notebookURL} />
+          <Action.OpenInBrowser url={notebookURL} />
+          <Action.CopyToClipboard title="Copy Link to Notebook" content={notebookURL} />
         </ActionPanel>
       }
     />
@@ -216,7 +204,7 @@ function useNotebooks(src: Sourcegraph) {
       }));
     } catch (error) {
       new Toast({
-        style: ToastStyle.Failure,
+        style: Toast.Style.Failure,
         title: "Find notebooks failed",
         message: String(error),
         primaryAction: {

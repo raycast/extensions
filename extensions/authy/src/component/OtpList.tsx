@@ -5,42 +5,22 @@ import { AuthyApp, Services } from "../client/dto";
 import { decryptSeed, genTOTP } from "../util/utils";
 import { encode } from "hi-base32";
 import { generateTOTP } from "../util/totp";
+import { toId } from "../util/compare";
 import { getAuthyApps, getServices } from "../client/authy-client";
-import OtpListItem from "./OtpListItem";
+import { Otp } from "./OtpListItem";
+import OtpListItems from "./OtpListItems";
 
 const { preferCustomName } = getPreferenceValues<{ preferCustomName: boolean }>();
-
-export interface Otp {
-  name: string;
-  digits: number;
-  generate: () => string;
-  issuer?: string;
-  logo?: string;
-  accountType?: string;
-}
-
-function calculateTimeLeft(basis: number) {
-  return basis - (new Date().getSeconds() % basis);
-}
 
 interface OtpListState {
   apps: Otp[];
   services: Otp[];
 }
 
-interface TimeState {
-  timeLeft10: number;
-  timeLeft30: number;
-}
-
 export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
   const [{ apps, services }, setState] = useState<OtpListState>({
     apps: [],
     services: [],
-  });
-  const [{ timeLeft10, timeLeft30 }, setTimes] = useState<TimeState>({
-    timeLeft10: calculateTimeLeft(10),
-    timeLeft30: calculateTimeLeft(30),
   });
 
   async function refresh(): Promise<void> {
@@ -77,10 +57,12 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       }
       const servicesResponse: Services = await getFromCache(SERVICES_KEY);
       const appsResponse: AuthyApp = await getFromCache(APPS_KEY);
-      const { authyPassword } = getPreferenceValues<{ authyPassword: string }>();
-      const services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
+      const { authyPassword, excludeNames: excludeNamesCsv = "" } =
+        getPreferenceValues<{ authyPassword: string; excludeNames: string }>();
+      let services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
         const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
         return {
+          type: "service",
           name: preferCustomName ? i.name || i.original_name : i.original_name || i.name,
           accountType: i.account_type,
           issuer: i.issuer,
@@ -89,13 +71,21 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           generate: () => generateTOTP(seed, { digits: i.digits, period: 30 }),
         };
       });
-      const apps: Otp[] = appsResponse.apps.map((i) => {
+      let apps: Otp[] = appsResponse.apps.map((i) => {
         return {
+          type: "app",
           name: i.name,
           digits: i.digits,
           generate: () => generateTOTP(encode(Buffer.from(i.secret_seed, "hex")), { digits: i.digits, period: 10 }),
         };
       });
+
+      if (excludeNamesCsv) {
+        const excludeNames = excludeNamesCsv.split(",").map(toId).filter(Boolean);
+        const filterByName = ({ name }: { name: string }) => !excludeNames.includes(toId(name));
+        services = services.filter(filterByName);
+        apps = apps.filter(filterByName);
+      }
       setState({
         apps,
         services,
@@ -113,35 +103,12 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
     loadData();
   }, [props.isLogin]);
 
-  useEffect(() => {
-    // use 250ms to get closer to the start of the second
-    // and only update when we are close to the start of the second
-    const id = setInterval(
-      () =>
-        new Date().getMilliseconds() < 250 &&
-        setTimes({
-          timeLeft10: calculateTimeLeft(10),
-          timeLeft30: calculateTimeLeft(30),
-        }),
-      250
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  const isLoading = [...apps, ...services].length == 0;
+  const allItems = [...apps, ...services];
+  const isLoading = allItems.length === 0;
 
   return (
     <List searchBarPlaceholder="Search" isLoading={isLoading}>
-      <List.Section title="Apps">
-        {apps.map((item, index) => (
-          <OtpListItem key={index} item={item} basis={10} timeLeft={timeLeft10} refresh={refresh} />
-        ))}
-      </List.Section>
-      <List.Section title="Services">
-        {services.map((item, index) => (
-          <OtpListItem key={index} item={item} basis={30} timeLeft={timeLeft30} refresh={refresh} />
-        ))}
-      </List.Section>
+      <OtpListItems refresh={refresh} items={allItems} />
     </List>
   );
 }

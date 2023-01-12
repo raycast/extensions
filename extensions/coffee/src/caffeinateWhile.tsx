@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import Caffeinate from "./caffeinate";
@@ -34,8 +34,9 @@ const CaffeinateWhile = () => {
         <ActionPanel>
           <SubmitFormAction
             title="Caffeinate"
-            onSubmit={(data) => {
-              Caffeinate(" -w " + data.process);
+            onSubmit={async (data) => {
+              await Caffeinate(`-w ${data.process}`);
+              popToRoot();
             }}
           />
         </ActionPanel>

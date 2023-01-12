@@ -54,7 +54,7 @@ export default class Service {
   async getFunctionSignature(hash: string): Promise<string | undefined> {
     try {
       const signature = await this.fourByteClient.get<string>(
-        `/signatures/${hash}`
+        `/signatures/${hash}`,
       );
       return signature.data;
     } catch (e) {

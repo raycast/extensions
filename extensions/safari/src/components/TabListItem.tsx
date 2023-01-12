@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { Tab } from "../types";
 import { getTitle, getFaviconUrl, getTabUrl, getUrlDomain } from "../utils";
 import CloseLocalTabAction from "./CloseLocalTabAction";
@@ -16,6 +16,12 @@ const Actions = (props: { tab: Tab; refresh: () => void }) => (
       <CopyUrlAction url={props.tab.url} />
       <CopyTitleAction title={props.tab.title} />
       <CopyMarkdownLinkAction title={props.tab.title} url={props.tab.url} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.CreateQuicklink
+        quicklink={{ link: props.tab.url, name: props.tab.title }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CloseLocalTabAction tab={props.tab} refresh={props.refresh} />

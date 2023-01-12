@@ -1,4 +1,4 @@
-import { ActionPanel, Icon } from "@raycast/api";
+import { Icon, Action } from "@raycast/api";
 
 import { LocalTab, Tab } from "../types";
 import { executeJxa } from "../utils";
@@ -13,7 +13,7 @@ const closeLocalTab = async (tab: LocalTab) =>
 
 const CloseLocalTabAction = (props: { tab: Tab; refresh: () => void }) => {
   return props.tab.is_local ? (
-    <ActionPanel.Item
+    <Action
       title="Close Tab"
       icon={Icon.XmarkCircle}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}

@@ -1,10 +1,15 @@
-import { ActionPanel, Detail, List, ListItem, PushAction } from '@raycast/api';
+import { Action, ActionPanel, Detail, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service from './service';
-import { getSheets, stripFrontmatter, stripTemplateTags, formatTables } from './utils';
+import {
+  getSheets,
+  stripFrontmatter,
+  stripTemplateTags,
+  formatTables,
+} from './utils';
 
-function Action() {
+function Command() {
   const [sheets, setSheets] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(true);
 
@@ -22,10 +27,13 @@ function Action() {
   return (
     <List isLoading={isLoading}>
       {sheets.map((sheet) => (
-        <ListItem
+        <List.Item
           actions={
             <ActionPanel>
-              <PushAction title="Open Cheatsheet" target={<SheetView slug={sheet} />} />
+              <Action.Push
+                title="Open Cheatsheet"
+                target={<SheetView slug={sheet} />}
+              />
             </ActionPanel>
           }
           key={sheet}
@@ -47,7 +55,9 @@ function SheetView(props: SheetProps) {
   useEffect(() => {
     async function fetchSheet() {
       const sheetMarkdown = await Service.getSheet(props.slug);
-      const sheet = formatTables(stripTemplateTags(stripFrontmatter(sheetMarkdown)));
+      const sheet = formatTables(
+        stripTemplateTags(stripFrontmatter(sheetMarkdown)),
+      );
 
       setSheet(sheet);
       setLoading(false);
@@ -59,4 +69,4 @@ function SheetView(props: SheetProps) {
   return <Detail isLoading={isLoading} markdown={sheet} />;
 }
 
-export default Action;
+export default Command;

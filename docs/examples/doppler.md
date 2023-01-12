@@ -5,7 +5,7 @@ description: This example uses a simple form to collect data.
 # Doppler Share Secrets
 
 {% hint style="info" %}
-The full source code of the example can be found [here](../../examples/doppler-share-secrets). You can install the extension [here](https://www.raycast.com/thomas/doppler-share-secrets).
+The full source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/doppler-share-secrets#readme). You can install the extension [here](https://www.raycast.com/thomas/doppler-share-secrets).
 {% endhint %}
 
 In this example we use a form to collect inputs from a user. To make it interesting, we use [Doppler](http://share.doppler.com) which is a service to make it easy to securely share sensitive information such as API keys or passwords.
@@ -116,13 +116,13 @@ function ShareSecretAction() {
 
 Let's break this down:
 
-- The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#submitform).
-- The `handleSubmit()` gets called when the form is submitted with it's values.
-  - First we check if the user entered a secret. If not, we show a toast.
-  - Then we show a toast to hint that there is a network call in progress to share the secret.
-  - We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values
-    - If the network response succeds, we copy the authenticated URL to the clipboard and show a success toast.
-    - If the network response fails, we show a failure toast with additional information about the failure.
+* The `<ShareSecretAction>` returns an [`<Action.SubmitForm>`](../api-reference/user-interface/actions.md#submitform).
+* The `handleSubmit()` gets called when the form is submitted with it's values.
+  * First we check if the user entered a secret. If not, we show a toast.
+  * Then we show a toast to hint that there is a network call in progress to share the secret.
+  * We call [Doppler's API](https://docs.doppler.com/reference/share-secret) with the form values
+    * If the network response succeds, we copy the authenticated URL to the clipboard and show a success toast.
+    * If the network response fails, we show a failure toast with additional information about the failure.
 
 ### Wire it up
 

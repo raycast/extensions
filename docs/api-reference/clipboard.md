@@ -89,3 +89,28 @@ export default async () => {
 #### Return
 
 A Promise that resolves when the clipboard is cleared.
+
+### readText
+
+Reads the clipboard as plain text.
+
+#### Signature
+
+```typescript
+async function readText(): Promise<string | undefined>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async () => {
+  const text = await Clipboard.readText();
+  console.log(text);
+};
+```
+
+#### Return
+
+A promise that resolves when the clipboard content was read as plain text.

@@ -82,7 +82,9 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const url = `${src.instance}${getMatchUrl(match)}`;
+          const matchURL = `${src.instance}${getMatchUrl(match)}`;
+          // Do some pre-processing of results, since some of the API outputs are a bit
+          // confusing, to make it easier later on.
           switch (match.type) {
             case "commit":
               // Commit stuff comes already markdown-formatted?? so strip formatting
@@ -95,8 +97,16 @@ export async function performSearch(
               match.lineMatches.forEach((l) => {
                 l.lineNumber += 1;
               });
+              break;
+            case "symbol":
+              match.symbols.forEach((s) => {
+                // Trim out the path that we already have in matchURL so that we can just
+                // append it, similar to other match types where we append the line number
+                // of the match.
+                s.url = s.url.split("#").pop() || "";
+              });
           }
-          return { url, match };
+          return { url: matchURL, match };
         })
       );
     });

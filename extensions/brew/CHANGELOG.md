@@ -1,5 +1,11 @@
 # Brew Changelog
 
+## 2022.03.15
+
+- Improve search accuracy (now includes the description)
+- Fix an issue loading installed formulae where user has a large number installed
+- Upgrade to latest @raycast/api
+
 ## 2022.01.17
 
 - Improve reliability of `outdated` command

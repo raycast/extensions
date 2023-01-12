@@ -25,6 +25,16 @@ export enum GitLabIcons {
   comment = "book.png",
   wiki = "list.png",
   show_details = "sidebar-right-16",
+  tag = "tag.png",
+  status_success = "status_success.png",
+  status_failed = "status_failed.png",
+  status_running = "status_running.png",
+  status_notfound = "status_notfound.png",
+  status_pending = "status_pending.png",
+  status_created = "status_created.png",
+  status_canceled = "status_canceled.png",
+  status_skipped = "status_skipped.png",
+  status_scheduled = "status_scheduled.png",
 }
 
 async function getImageCacheDirectory(ensureDirectory = false): Promise<string> {

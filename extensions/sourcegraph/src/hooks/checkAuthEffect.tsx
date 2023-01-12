@@ -1,4 +1,4 @@
-import { ToastStyle, Detail, Toast, Navigation } from "@raycast/api";
+import { Detail, Toast, Navigation } from "@raycast/api";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { AuthError, checkAuth } from "../sourcegraph/gql";
@@ -19,12 +19,12 @@ export default function checkAuthEffect(src: Sourcegraph, { push }: Navigation) 
             ? new Toast({
                 title: `Failed to authenticate against ${srcName}`,
                 message: err.message,
-                style: ToastStyle.Failure,
+                style: Toast.Style.Failure,
               })
             : new Toast({
                 title: `Error authenticating against ${srcName}`,
                 message: JSON.stringify(err),
-                style: ToastStyle.Failure,
+                style: Toast.Style.Failure,
               });
         toast.primaryAction = {
           title: "View details",

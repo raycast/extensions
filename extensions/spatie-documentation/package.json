@@ -85,6 +85,99 @@
           ]
         }
       ]
+    },
+    {
+      "name": "laravel-medialibrary",
+      "title": "Laravel Medialibrary",
+      "subtitle": "Spatie",
+      "description": "Search Spatie Laravel Medialibrary",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spatieLaravelMedialibraryVersion",
+          "type": "dropdown",
+          "required": true,
+          "title": "Spatie Laravel Medialibrary Version",
+          "description": "Specify the Laravel Medialibrary version it will search the docs for.",
+          "default": "v10",
+          "data": [
+            {
+              "title": "v7",
+              "value": "v7"
+            },
+            {
+              "title": "v8",
+              "value": "v8"
+            },
+            {
+              "title": "v9",
+              "value": "v9"
+            },
+            {
+              "title": "v10",
+              "value": "v10"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "laravel-activitylog",
+      "title": "Laravel Activitylog",
+      "subtitle": "Spatie",
+      "description": "Search Spatie Laravel Activitylog",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spatieLaravelActivitylogVersion",
+          "type": "dropdown",
+          "required": true,
+          "title": "Spatie Laravel Activitylog Version",
+          "description": "Specify the Laravel Activitylog version it will search the docs for.",
+          "default": "v4",
+          "data": [
+            {
+              "title": "v4",
+              "value": "v4"
+            },
+            {
+              "title": "v3",
+              "value": "v3"
+            },
+            {
+              "title": "v2",
+              "value": "v2"
+            },
+            {
+              "title": "v1",
+              "value": "v1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "browsershot",
+      "title": "Browsershot",
+      "subtitle": "Spatie",
+      "description": "Search Spatie Browsershot",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "spatieBrowsershotVersion",
+          "type": "dropdown",
+          "required": false,
+          "title": "Spatie Browsershot Version",
+          "description": "Specify the Browsershot version it will search the docs for.",
+          "default": "v2",
+          "data": [
+            {
+              "title": "v2",
+              "value": "v2"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {

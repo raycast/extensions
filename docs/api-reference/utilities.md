@@ -1,6 +1,6 @@
 # Utilities
 
-This list of Utility APIs makes your life easier as a developer. They also expose some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deeplink into it.
+This list of Utility APIs makes your life easier as a developer. They also expose some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deep-link into it.
 
 ## API Reference
 

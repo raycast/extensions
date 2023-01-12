@@ -1,5 +1,7 @@
 # Detail
 
+![](../../.gitbook/assets/detail.png)
+
 ## API Reference
 
 ### Detail

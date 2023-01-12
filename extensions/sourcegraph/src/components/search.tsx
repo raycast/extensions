@@ -1,24 +1,19 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   List,
-  OpenInBrowserAction,
+  Action,
   showToast,
-  ToastStyle,
-  randomId,
-  PushAction,
   Detail,
   Icon,
-  ImageLike,
-  copyTextToClipboard,
-  ActionPanelItem,
+  Image,
+  Clipboard,
   Toast,
   useNavigation,
-  ListSection,
-  ListItem,
-  KeyboardShortcut,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useRef, Fragment, useEffect } from "react";
+import { nanoid } from "nanoid";
+
 import checkAuthEffect from "../hooks/checkAuthEffect";
 import { copyShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
 
@@ -47,7 +42,7 @@ export default function SearchCommand(src: Sourcegraph) {
       {!state.isLoading && state.results.length === 0 ? (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion) => (
-            <SuggestionItem key={randomId()} suggestion={suggestion} />
+            <SuggestionItem key={nanoid()} suggestion={suggestion} />
           ))}
 
           <Fragment>
@@ -56,7 +51,7 @@ export default function SearchCommand(src: Sourcegraph) {
               icon={{ source: Icon.MagnifyingGlass }}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={getQueryURL(src, state.searchText)} />
+                  <Action.OpenInBrowser url={getQueryURL(src, state.searchText)} />
                 </ActionPanel>
               }
             />
@@ -65,7 +60,7 @@ export default function SearchCommand(src: Sourcegraph) {
               icon={{ source: Icon.Globe }}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url="https://docs.sourcegraph.com/code_search/reference/queries" />
+                  <Action.OpenInBrowser url="https://docs.sourcegraph.com/code_search/reference/queries" />
                 </ActionPanel>
               }
             />
@@ -78,7 +73,7 @@ export default function SearchCommand(src: Sourcegraph) {
       {/* results */}
       <List.Section title="Results" subtitle={state.summary || ""}>
         {state.results.map((searchResult) => (
-          <SearchResultItem key={randomId()} searchResult={searchResult} searchText={state.searchText} src={src} />
+          <SearchResultItem key={nanoid()} searchResult={searchResult} searchText={state.searchText} src={src} />
         ))}
       </List.Section>
     </List>
@@ -95,17 +90,17 @@ function resultActions(url: string, customActions?: CustomResultActions) {
   if (customActions?.openAction) {
     actions.push(customActions.openAction);
   }
-  actions.push(<OpenInBrowserAction key={randomId()} title="Open Result in Browser" url={url} />);
+  actions.push(<Action.OpenInBrowser key={nanoid()} title="Open Result in Browser" url={url} />);
   if (customActions?.extraActions) {
     actions.push(...customActions.extraActions);
   }
   actions.push(
     // Can't seem to override the shortcut on this thing if it's the second action, so
     // add it as the third action instead.
-    <CopyToClipboardAction key={randomId()} title="Copy Link to Result" content={url} shortcut={copyShortcut} />
+    <Action.CopyToClipboard key={nanoid()} title="Copy Link to Result" content={url} shortcut={copyShortcut} />
   );
   return (
-    <ActionPanel.Section key={randomId()} title="Result Actions">
+    <ActionPanel.Section key={nanoid()} title="Result Actions">
       {...actions}
     </ActionPanel.Section>
   );
@@ -133,7 +128,7 @@ function SearchResultItem({
   let url = searchResult.url;
   let multiResult = false;
 
-  const icon: ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
+  const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   switch (match.type) {
     case "repo":
       if (match.fork) {
@@ -175,16 +170,16 @@ function SearchResultItem({
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
       if (match.symbols.length === 1) {
-        url = `${searchResult.url}${match.symbols[0].url}`;
+        url = `${searchResult.url}#${match.symbols[0].url}`;
       } else {
         multiResult = true;
       }
       break;
   }
 
-  const peekAction = (shortcut?: KeyboardShortcut) => (
-    <PushAction
-      key={randomId()}
+  const peekAction = (shortcut?: Keyboard.Shortcut) => (
+    <Action.Push
+      key={nanoid()}
       title="Peek Result Details"
       target={<PeekSearchResult searchResult={searchResult} />}
       shortcut={shortcut}
@@ -208,9 +203,9 @@ function SearchResultItem({
       actions={
         <ActionPanel>
           {resultActions(url, customActions)}
-          <ActionPanel.Section key={randomId()} title="Query Actions">
-            <OpenInBrowserAction title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
-            <CopyToClipboardAction title="Copy Link to Query" content={queryURL} />
+          <ActionPanel.Section key={nanoid()} title="Query Actions">
+            <Action.OpenInBrowser title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
+            <Action.CopyToClipboard title="Copy Link to Query" content={queryURL} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -228,33 +223,33 @@ function MultiResultPeek({ searchResult }: { searchResult: { url: string; match:
     case "content":
       return (
         <List navigationTitle={navigationTitle} searchBarPlaceholder="Filter matches">
-          <ListSection title={match.path} subtitle={matchTitle}>
+          <List.Section title={match.path} subtitle={matchTitle}>
             {match.lineMatches.map((l) => (
-              <ListItem
-                key={randomId()}
+              <List.Item
+                key={nanoid()}
                 title={l.line}
                 accessoryTitle={`L${l.lineNumber}`}
                 actions={<ActionPanel>{resultActions(`${searchResult.url}?L${l.lineNumber}`)}</ActionPanel>}
               />
             ))}
-          </ListSection>
+          </List.Section>
         </List>
       );
 
     case "symbol":
       return (
         <List navigationTitle={navigationTitle} searchBarPlaceholder="Filter symbols">
-          <ListSection title={match.path} subtitle={matchTitle}>
+          <List.Section title={match.path} subtitle={matchTitle}>
             {match.symbols.map((s) => (
-              <ListItem
-                key={randomId()}
+              <List.Item
+                key={nanoid()}
                 title={s.name}
                 subtitle={s.containerName}
                 accessoryTitle={s.kind.toLowerCase()}
-                actions={<ActionPanel>{resultActions(`${searchResult.url}${s.url}`)}</ActionPanel>}
+                actions={<ActionPanel>{resultActions(`${searchResult.url}#${s.url}`)}</ActionPanel>}
               />
             ))}
-          </ListSection>
+          </List.Section>
         </List>
       );
   }
@@ -327,18 +322,18 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
       actions={
         suggestion.query ? (
           <ActionPanel>
-            <ActionPanelItem
+            <Action
               title="Copy Suggestion"
               onAction={async () => {
-                await copyTextToClipboard(` ${suggestion.query}`);
-                showToast(ToastStyle.Success, "Suggestion copied - paste it to continue searching!");
+                await Clipboard.copy(` ${suggestion.query}`);
+                showToast(Toast.Style.Success, "Suggestion copied - paste it to continue searching!");
               }}
             />
           </ActionPanel>
         ) : (
           <ActionPanel>
-            <PushAction
-              key={randomId()}
+            <Action.Push
+              key={nanoid()}
               title="View Suggestion"
               target={
                 <Detail
@@ -412,7 +407,7 @@ function useSearch(src: Sourcegraph) {
         },
         onAlert: (alert) => {
           new Toast({
-            style: ToastStyle.Failure,
+            style: Toast.Style.Failure,
             title: alert.title,
             primaryAction: {
               title: "View details",
@@ -435,7 +430,7 @@ function useSearch(src: Sourcegraph) {
       }));
     } catch (error) {
       new Toast({
-        style: ToastStyle.Failure,
+        style: Toast.Style.Failure,
         title: "Search failed",
         message: String(error),
         primaryAction: {

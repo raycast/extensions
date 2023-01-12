@@ -80,7 +80,7 @@ async function fetchGHUsername(extension, raycastUsername) {
     const line = package.split("\n").findIndex((l) => l.indexOf(`"${raycastUsername}"`) !== -1);
     const commitHash = await new Promise((resolve, reject) =>
       exec(
-        // find commit that added the package.json
+        // find commit that added contributor to the package.json
         `cd "${extensionsDir}" && git blame --porcelain  -L ${line},${line} "${extension.name}/package.json"`,
         (err, stdout, stderr) => {
           if (err || stderr) {

@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { icondir } from "../constants";
 import { icon } from "../util/icon";
-import { Otp } from "./OtpList";
+import { compare } from "../util/compare";
 
 const { primaryActionIsCopy } = getPreferenceValues<{ primaryActionIsCopy: boolean }>();
 
@@ -29,6 +29,16 @@ function SecondaryAction({ pin }: { pin: string }) {
   );
 }
 
+export interface Otp {
+  name: string;
+  digits: number;
+  generate: () => string;
+  issuer?: string;
+  logo?: string;
+  accountType?: string;
+  type: "app" | "service";
+}
+
 interface OtpListItemProps {
   item: Otp;
   basis: number;
@@ -39,12 +49,14 @@ interface OtpListItemProps {
 export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListItemProps) {
   const otp = item.generate();
   const subtitle = item.issuer || item.accountType || "";
+  const subtitleDisplay = subtitle.match("authenticator") || !compare(subtitle, item.name) ? "" : subtitle;
   const pie = `pie-${basis === 30 ? timeLeft : timeLeft * 3}`;
+
   return (
     <List.Item
       title={item.name}
       accessoryTitle={`${otp}`}
-      subtitle={`${subtitle.match("authenticator") ? "" : subtitle}`}
+      subtitle={subtitleDisplay}
       accessoryIcon={{
         source: {
           light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,

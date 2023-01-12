@@ -1,8 +1,8 @@
-import { getLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { switchSettings } from "./displayplacer";
 
 export default async function loadPresetByIndex(index: number) {
-  const myFavs = await getLocalStorageItem("favorites");
+  const myFavs = await LocalStorage.getItem("favorites");
   if (!myFavs) return;
   const favorites: Favorite[] = JSON.parse(myFavs.toString());
   const fav = favorites[index];

@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { brewUpgradeCommand } from "./brew";
 import { preferences } from "./preferences";
 import { showActionToast, showFailureToast } from "./utils";
@@ -7,7 +7,7 @@ export default async (): Promise<void> => {
   try {
     const abort = showActionToast({ title: "Upgrading formula & casks" + String.ellipsis, cancelable: true });
     await brewUpgradeCommand(preferences.greedyUpgrades, true, abort);
-    showToast(ToastStyle.Success, "Upgrade completed");
+    showToast(Toast.Style.Success, "Upgrade completed");
   } catch (err) {
     await showFailureToast("Upgrade failed", err as Error);
     // Wait around until user has had chance to click the Toast action.

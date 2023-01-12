@@ -2,9 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 import TaskList from "./TaskList";
 import useSWR from "swr";
 import { partition } from "lodash";
+import { isBefore } from "date-fns";
 import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
-import { todoist } from "../api";
-import { getSectionsWithPriorities, getSectionsWithDueDates } from "../utils";
+import { todoist, handleError } from "../api";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../utils";
 
 interface ProjectProps {
   projectId: number;
@@ -13,6 +14,7 @@ interface ProjectProps {
 function Project({ projectId }: ProjectProps): JSX.Element {
   const { data: rawTasks } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ projectId }));
   const { data: allSections } = useSWR(SWRKeys.sections, () => todoist.getSections(projectId));
+  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   const preferences = getPreferenceValues();
 
@@ -20,6 +22,10 @@ function Project({ projectId }: ProjectProps): JSX.Element {
   const tasks = rawTasks?.filter((task) => !task.parentId) || [];
 
   let sections: SectionWithTasks[] = [];
+
+  if (getLabelsError) {
+    handleError({ error: getLabelsError, title: "Unable to get labels" });
+  }
 
   if (preferences.projectGroupBy === ProjectGroupBy.default) {
     sections = [
@@ -52,6 +58,10 @@ function Project({ projectId }: ProjectProps): JSX.Element {
       name: "No due date",
       tasks: noDueDatesTasks,
     });
+  }
+
+  if (preferences.todayGroupBy === ProjectGroupBy.label) {
+    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
   }
 
   return <TaskList mode={ViewMode.project} sections={sections} isLoading={!rawTasks || !allSections} />;

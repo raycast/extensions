@@ -28,9 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+        uses: raycast/github-actions/git-checkout@v1.6.0
+      # This makes sure that the problems found while validating the extensions are shown in the PR diff
+      - name: Register Problem Matcher for Ray CLI
+        run: echo "##[add-matcher].github/ray.matcher.json"
       - name: Run Ray CLI
         id: ray_cli
         uses: raycast/github-actions/ray@v1.6.0
@@ -56,4 +57,17 @@ jobs:
               { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
             ]
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ github.event_name == 'workflow_dispatch' && secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL || secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+      - name: Notify Success to Slack
+        if: success() && github.event_name == 'workflow_dispatch'
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":white_check_mark: ${env.GITHUB_WORKFLOW} has succeeded"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}

@@ -1,6 +1,10 @@
 # Changelog
 
-## [Feb 7, 2022](https://github.com/raycast/extensions/pull/833)
+## [Feb 15th, 2022](https://github.com/raycast/extensions/pull/919)
+
+- **search**: Fix URLs opened by `symbol` match results. ([#7](https://github.com/bobheadxi/raycast-sourcegraph/pull/7))
+
+## [Feb 7th, 2022](https://github.com/raycast/extensions/pull/833)
 
 - **search**: Fix off-by-one issue when opening `content` match results.
 - **search**: Migrate away from the [deprecated `/search/stream` endpoint](https://about.sourcegraph.com/blog/release/3.36/) in favour of `/.api/search/stream`.

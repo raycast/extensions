@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 
 import { ReadingListBookmark } from "../types";
 import { formatDate, getFaviconUrl } from "../utils";
@@ -9,12 +9,18 @@ import CopyUrlAction from "./CopyUrlAction";
 const Actions = (props: { bookmark: ReadingListBookmark }) => (
   <ActionPanel>
     <ActionPanel.Section>
-      <OpenInBrowserAction url={props.bookmark.url} />
+      <Action.OpenInBrowser url={props.bookmark.url} />
     </ActionPanel.Section>
     <ActionPanel.Section>
       <CopyUrlAction url={props.bookmark.url} />
       <CopyTitleAction title={props.bookmark.title} />
       <CopyMarkdownLinkAction title={props.bookmark.title} url={props.bookmark.url} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.CreateQuicklink
+        quicklink={{ link: props.bookmark.url, name: props.bookmark.title }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
     </ActionPanel.Section>
   </ActionPanel>
 );

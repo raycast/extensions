@@ -131,6 +131,21 @@ export const SitesSingleView = ({
               </ActionPanel>
             }
           />
+          <List.Item
+            id="open-in-ssh"
+            key="open-in-ssh"
+            title={`Open SSH Connection (${site.systemUser})`}
+            icon={Icon.Terminal}
+            accessoryTitle={`ssh://${site.systemUser}@${server.ipAddress}`}
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction
+                  title={`SSH In As User ${site.systemUser}`}
+                  url={`ssh://${site.systemUser}@${server.ipAddress}`}
+                />
+              </ActionPanel>
+            }
+          />
         </List.Section>
         <List.Section title="Site Information">
           <List.Item
@@ -225,4 +240,5 @@ export interface ISite {
   phpVersion: string;
   createdAt: string;
   domain: string;
+  systemUser: string;
 }

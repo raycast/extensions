@@ -1,5 +1,5 @@
-import { Task } from "@doist/todoist-api-typescript";
-import { addDays, format, formatISO, isToday, isThisYear, isTomorrow, isBefore, compareAsc } from "date-fns";
+import { Label, Task } from "@doist/todoist-api-typescript";
+import { addDays, format, formatISO, isThisYear, isBefore, compareAsc, isSameDay } from "date-fns";
 import { partition } from "lodash";
 import { priorities } from "./constants";
 
@@ -7,22 +7,44 @@ export function isRecurring(task: Task): boolean {
   return task.due?.recurring || false;
 }
 
+export function isExactTimeTask(task: Task): boolean {
+  return !!task.due?.timezone;
+}
+
+/**
+ * Returns today's date in user's timezone using the following format: YYYY-MM-DD
+ *
+ * Note that `format` from date-fns returns the date formatted to local time.
+ * If it's 20th February at 6 AM UTC:
+ * - This function will return 19th February at midnight UTC for Los Angeles timezone (GMT-8)
+ * - This function will return 20th February at midnight UTC for Paris timezone (GMT+1)
+ */
+export function getToday() {
+  return new Date(format(Date.now(), "yyyy-MM-dd"));
+}
+
+function isOverdue(date: Date) {
+  return isBefore(date, getToday());
+}
+
 export function displayDueDate(dateString: string): string {
   const date = new Date(dateString);
 
-  if (isBeforeToday(date)) {
+  if (isOverdue(date)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
 
-  if (isToday(date)) {
+  const today = getToday();
+
+  if (isSameDay(date, today)) {
     return "Today";
   }
 
-  if (isTomorrow(date)) {
+  if (isSameDay(date, addDays(today, 1))) {
     return "Tomorrow";
   }
 
-  const nextWeek = addDays(new Date(), 7);
+  const nextWeek = addDays(today, 7);
 
   if (isBefore(date, nextWeek)) {
     return format(date, "eeee");
@@ -39,14 +61,8 @@ export function getAPIDate(date: Date): string {
   return formatISO(date, { representation: "date" });
 }
 
-export function isBeforeToday(date: Date) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return isBefore(date, today);
-}
-
 export function partitionTasksWithOverdue(tasks: Task[]) {
-  return partition(tasks, (task: Task) => task.due?.date && isBeforeToday(new Date(task.due.date)));
+  return partition(tasks, (task: Task) => task.due?.date && isOverdue(new Date(task.due.date)));
 }
 
 export function getSectionsWithDueDates(tasks: Task[]) {
@@ -75,4 +91,25 @@ export function getSectionsWithPriorities(tasks: Task[]) {
     name,
     tasks: tasks?.filter((task) => task.priority === value) || [],
   }));
+}
+
+export function getSectionsWithLabels({ tasks, labels }: { tasks: Task[]; labels: Label[] }) {
+  const tasksWithoutLabels = tasks?.filter((task) => task.labelIds.length === 0);
+
+  const sections =
+    labels?.map((label) => {
+      return {
+        name: label.name,
+        tasks: tasks?.filter((task) => task.labelIds.includes(label.id)) || [],
+      };
+    }) || [];
+
+  if (tasksWithoutLabels) {
+    sections.push({
+      name: "No label",
+      tasks: tasksWithoutLabels,
+    });
+  }
+
+  return sections;
 }

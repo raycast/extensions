@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chakra-ui-docs",
+  "title": "Chakra UI Documentation",
+  "description": "Provide quick links to the Chakra UI component documentation.",
+  "icon": "chakra.png",
+  "author": "pgvr",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse Components",
+      "subtitle": "Chakra UI",
+      "description": "Show all Chakra UI Components",
+      "mode": "view",
+      "icon": "chakra.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

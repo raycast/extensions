@@ -5,7 +5,7 @@ description: This example show how to use lists in combination with forms.
 # Todo List
 
 {% hint style="info" %}
-The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/examples/todo-list).
+The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/examples/todo-list#readme).
 {% endhint %}
 
 What's an example section without a todo list?! Let's put one together in Raycast. This example will show how to render a list, navigate to a form to create a new element and update the list.

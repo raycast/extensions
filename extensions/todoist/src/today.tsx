@@ -1,15 +1,16 @@
-import { render, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import useSWR from "swr";
-import { partitionTasksWithOverdue, getSectionsWithPriorities } from "./utils";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./utils";
 import { todoist, handleError } from "./api";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 
-function Today() {
+export default function Today() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
     todoist.getTasks({ filter: "today|overdue" })
   );
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   const preferences = getPreferenceValues();
 
@@ -19,6 +20,10 @@ function Today() {
 
   if (getProjectsError) {
     handleError({ error: getProjectsError, title: "Unable to get tasks" });
+  }
+
+  if (getLabelsError) {
+    handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
 
   let sections: SectionWithTasks[] = [];
@@ -48,6 +53,10 @@ function Today() {
       })) || [];
   }
 
+  if (preferences.todayGroupBy === TodayGroupBy.label) {
+    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+  }
+
   return (
     <TaskList
       sections={sections}
@@ -56,5 +65,3 @@ function Today() {
     />
   );
 }
-
-render(<Today />);

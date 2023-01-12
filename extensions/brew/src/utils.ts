@@ -1,4 +1,4 @@
-import { copyTextToClipboard, environment, Toast, ToastStyle, ToastOptions } from "@raycast/api";
+import { Clipboard, environment, Toast } from "@raycast/api";
 import { join as path_join } from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
@@ -74,8 +74,8 @@ interface ActionToastOptions {
 }
 
 export function showActionToast(actionOptions: ActionToastOptions): AbortController | undefined {
-  const options: ToastOptions = {
-    style: ToastStyle.Animated,
+  const options: Toast.Options = {
+    style: Toast.Style.Animated,
     title: actionOptions.title,
     message: actionOptions.message,
   };
@@ -106,14 +106,14 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
 
   console.log(`${title}: ${error}`);
   const stderr = (error as ExecError).stderr?.trim() ?? "";
-  const options: ToastOptions = {
-    style: ToastStyle.Failure,
+  const options: Toast.Options = {
+    style: Toast.Style.Failure,
     title: title,
     message: stderr,
     primaryAction: {
       title: "Copy Error Log",
       onAction: () => {
-        copyTextToClipboard(stderr);
+        Clipboard.copy(stderr);
       },
     },
   };

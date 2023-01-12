@@ -143,6 +143,7 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
     `Ping: ${pingToString(r.ping)}`,
     `Download: ${speedToString(r.download)}`,
     `Upload: ${speedToString(r.upload)}`,
+    `Result: ${r.url || "?"}`,
   ];
   return <CopyToClipboardAction title="Copy Summary To Clipboard" content={parts.join("; ")} />;
 }
@@ -161,7 +162,24 @@ export default function SpeedtestList() {
       <PingListItem ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
       <DownloadListItem download={result.download} progress={resultProgress.download} summary={summaryAction} />
       <UploadListItem upload={result.upload} progress={resultProgress.upload} summary={summaryAction} />
+      <ResultListItem result={result} isLoading={isLoading} summary={summaryAction} />
     </List>
+  );
+}
+
+function ResultListItem(props: { result: Result; isLoading: boolean; summary: JSX.Element }): JSX.Element {
+  return (
+    <List.Item
+      title="Result Link"
+      accessoryTitle={props.isLoading ? "?" : `${props.result.url}`}
+      icon={{ source: "results.png", tintColor: Color.Blue }}
+      actions={
+        <ActionPanel>
+          {props.summary}
+          {!props.isLoading && <CopyToClipboardAction content={props.result?.url ?? ""} />}
+        </ActionPanel>
+      }
+    />
   );
 }
 
@@ -178,6 +196,7 @@ function useSpeedtest(): {
     download: undefined,
     upload: undefined,
     ping: undefined,
+    url: undefined,
   });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
