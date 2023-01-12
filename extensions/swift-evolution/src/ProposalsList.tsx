@@ -96,7 +96,7 @@ function SimpleProposalList(props: { proposal: ProposalViewModel; toggleDetails:
             icon={Icon.Airplane}
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
-          <Action title="Toggle details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
+          <Action title="Toggle Details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
           <Action.OpenInBrowser url={proposal.link} />
           <Action.CopyToClipboard title="Copy URL" content={proposal.link} />
         </ActionPanel>
@@ -119,7 +119,7 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
             icon={Icon.Airplane}
             onAction={() => push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />)}
           />
-          <Action title="Toggle details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
+          <Action title="Toggle Details" icon={Icon.AlignLeft} onAction={props.toggleDetails} />
           <Action.OpenInBrowser url={proposal.link} />
           <Action.CopyToClipboard title="Copy URL" content={proposal.link} />
         </ActionPanel>
@@ -129,7 +129,6 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={"ID"} text={proposal.id} />
-              <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title={"Title"} text={proposal.title} />
               <List.Item.Detail.Metadata.Separator />
               {proposal.authors.map((author, index) => {
@@ -139,11 +138,11 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
                       title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
                       target={author.link}
                       text={author.name}
+                      key={author.name}
                     />
                   </>
                 );
               })}
-              {proposal.authors.length > 0 ? <List.Item.Detail.Metadata.Separator /> : <></>}
               <List.Item.Detail.Metadata.Link
                 title={"Review Manager"}
                 target={proposal.reviewManagerProfileLink}
@@ -159,7 +158,6 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
               {proposal.scheduled ? (
                 <>
                   <List.Item.Detail.Metadata.Label title={"Scheduled"} text={proposal.scheduled} />
-                  <List.Item.Detail.Metadata.Separator />
                 </>
               ) : (
                 <></>
@@ -167,7 +165,6 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
               {proposal.swiftVersion ? (
                 <>
                   <List.Item.Detail.Metadata.Label title={"Implemented in"} text={`Swift ${proposal.swiftVersion}`} />
-                  <List.Item.Detail.Metadata.Separator />
                 </>
               ) : (
                 <></>
@@ -179,7 +176,6 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
                       return <List.Item.Detail.Metadata.TagList.Item text={repo} color={Color.Brown} key={repo} />;
                     })}
                   </List.Item.Detail.Metadata.TagList>
-                  <List.Item.Detail.Metadata.Separator />
                 </>
               ) : (
                 <></>
