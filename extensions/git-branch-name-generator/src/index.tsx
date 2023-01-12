@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Clipboard, popToRoot } from "@raycast/api";
 
 type Values = {
   branch_name: string;
@@ -25,6 +25,7 @@ export default function Command() {
     const fullBranchName = `${branchType}${branchNameAsSlug}`;
     Clipboard.copy(fullBranchName);
     showToast({ title: "Copied to clipboard", message: `${fullBranchName}` });
+    popToRoot({ clearSearchBar: true });
   }
 
   return (
