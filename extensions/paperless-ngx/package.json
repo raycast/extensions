@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperless-ngx",
+  "title": "Paperless-ngx",
+  "description": "Search Paperless-ngx for documents",
+  "icon": "command-icon.png",
+  "author": "oberfeld",
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find Documents",
+      "description": "Search your self-hosted Paperless-ngx instance for documents",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.3",
+    "axios": "^1.2.2",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "node-fetch": "^3.2.1",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "paperlessURL",
+      "title": "Paperless URL",
+      "description": "URL of your self-hosted instance of Paperless-ngx",
+      "type": "textfield",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Token to query the API of your Paperless-ngx instance (can be found in admin tools).",
+      "type": "password",
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "gridMode",
+      "title": "Grid Mode",
+      "description": "Display documents in Grid instead of List",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "label": "Enable Grid View"
+    },
+    {
+      "name": "dateFormat",
+      "title": "Date format",
+      "description": "Choose the date format",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "YYYY-MM-DD 12:mm",
+          "value": "YYYY-MM-DD HH:MM"
+        },
+        {
+          "title": "DD.MM.YYYY 24:mm",
+          "value": "DD.MM.YYYY HH:MM"
+        },
+        {
+          "title": "DD/MM/YYYY 24:mm",
+          "value": "DD/MM/YYYY HH:MM"
+        },
+        {
+          "title": "MM/DD/YYYY 12:mm",
+          "value": "MM/DD/YYYY  hh:MM"
+        }
+      ],
+      "default": false,
+      "required": true,
+      "label": "Choose the date format"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
