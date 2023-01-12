@@ -1,6 +1,6 @@
-import { WorkflowState } from "@linear/sdk";
 import { Image } from "@raycast/api";
 import { groupBy } from "lodash";
+import { IssueState } from "../api/getIssues";
 
 type IconAsset = {
   light: Image.Asset;
@@ -26,7 +26,7 @@ export const statusIcons: Record<string, IconAsset> = {
 };
 
 export function getOrderedStates(
-  states: WorkflowState[],
+  states: IssueState[],
   orderedStateTypes: StateType[] = [
     StateType.triage,
     StateType.backlog,

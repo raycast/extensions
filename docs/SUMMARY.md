@@ -34,12 +34,12 @@
 
 ## Information
 
-- [Arguments](information/arguments.md)
-- [Background Refresh ᵇᵉᵗᵃ](information/background-refresh.md)
 - [Best Practices](information/best-practices.md)
 - [CLI](information/cli.md)
 - [File Structure](information/file-structure.md)
-- [Lifecycle](information/lifecycle.md)
+- [Lifecycle](information/lifecycle/README.md)
+  - [Arguments](information/lifecycle/arguments.md)
+  - [Background Refresh](information/lifecycle/background-refresh.md)
 - [Manifest](information/manifest.md)
 - [Security](information/security.md)
 - [Terminology](information/terminology.md)
@@ -55,7 +55,7 @@
   - [HUD](api-reference/feedback/hud.md)
   - [Toast](api-reference/feedback/toast.md)
 - [Keyboard](api-reference/keyboard.md)
-- [Menu Bar Commands ᵇᵉᵗᵃ](api-reference/menu-bar-commands.md)
+- [Menu Bar Commands](api-reference/menu-bar-commands.md)
 - [OAuth](api-reference/oauth.md)
 - [Preferences](api-reference/preferences.md)
 - [Storage](api-reference/storage.md)

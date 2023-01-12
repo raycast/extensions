@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "arc",
+  "title": "Arc",
+  "description": "Search and quickly navigate Arc's history and open tabs.",
+  "icon": "icon-dark.png",
+  "author": "thomas",
+  "owner": "the-browser-company",
+  "access": "public",
+  "categories": [
+    "Web",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "zach"
+  ],
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Arc",
+      "description": "Search your browsing history.",
+      "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "description": "Creates a new window",
+      "mode": "no-view",
+      "subtitle": "Arc",
+      "icon": "icon-dark.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "@raycast/utils": "^1.4.0",
+    "run-applescript": "^6.1.0",
+    "run-jxa": "^3.0.0",
+    "sql.js": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.13",
+    "@types/react": "^18.0.17",
+    "@types/sql.js": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

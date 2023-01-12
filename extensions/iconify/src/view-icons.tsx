@@ -1,9 +1,25 @@
-import { Action, ActionPanel, Color, List } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Color,
+  List,
+  Cache,
+  getPreferenceValues,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Service, { Icon, Set } from './service';
-import { toBase64, toSvg } from './utils';
+import { toDataURI, toSvg, toURL } from './utils';
+
+const { primaryAction } =
+  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
 
 const service = new Service();
+const cache = new Cache({
+  capacity: 50 * 1e6,
+});
+
+const day = 24 * 60 * 60 * 1e3;
+const isExpired = (time: number) => Date.now() - time > day;
 
 function Command() {
   const [sets, setSets] = useState<Set[]>([]);
@@ -12,15 +28,26 @@ function Command() {
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
+    const cacheId = 'sets';
     async function fetchSets() {
       const sets = await service.listSets();
+      cache.set(cacheId, JSON.stringify({ time: Date.now(), data: sets }));
       setSets(sets);
+    }
+
+    if (cache.has(cacheId)) {
+      const { time, data } = JSON.parse(cache.get(cacheId)!);
+      if (!isExpired(time)) {
+        setSets(data);
+        return;
+      }
     }
 
     fetchSets();
   }, []);
 
   useEffect(() => {
+    const cacheId = `set-${activeSetId}`;
     async function fetchIcons() {
       if (!activeSetId) {
         return;
@@ -33,8 +60,18 @@ function Command() {
         return;
       }
       const icons = await service.listIcons(activeSetId, activeSet.name);
+      cache.set(cacheId, JSON.stringify({ time: Date.now(), data: icons }));
       setIcons(icons);
       setLoading(false);
+    }
+
+    if (cache.has(cacheId)) {
+      const { time, data } = JSON.parse(cache.get(cacheId)!);
+      if (!isExpired(time)) {
+        setIcons(data);
+        setLoading(false);
+        return;
+      }
     }
 
     fetchIcons();
@@ -45,7 +82,7 @@ function Command() {
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Select an icon set"
+          tooltip="Select Icon Set"
           storeValue={true}
           onChange={setActiveSetId}
         >
@@ -58,15 +95,43 @@ function Command() {
       {icons.map((icon) => {
         const { id, body, width, height } = icon;
         const svgIcon = toSvg(body, width, height);
-        const base64Icon = toBase64(svgIcon);
+        const dataURIIcon = toDataURI(svgIcon);
+
+        const paste = <Action.Paste title="Paste SVG" content={svgIcon} />;
+        const copy = (
+          <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
+        );
         return (
           <List.Item
-            icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
+            icon={{
+              source: dataURIIcon,
+              tintColor: body.includes('currentColor')
+                ? Color.PrimaryText // Monochrome icon
+                : null,
+            }}
             key={id}
             title={id}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={svgIcon} />
+                {primaryAction === 'paste' ? (
+                  <>
+                    {paste}
+                    {copy}
+                  </>
+                ) : (
+                  <>
+                    {copy}
+                    {paste}
+                  </>
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={`${activeSetId}:${id}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={toURL(activeSetId!, id)}
+                />
               </ActionPanel>
             }
           />

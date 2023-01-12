@@ -7,9 +7,14 @@ import { isEmpty } from "./utils/common-utils";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 import { Preferences } from "./types/preferences";
 
-export default function QueryIpGeolocation() {
+interface IpArgument {
+  ipAddress: string;
+}
+
+export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
+  const { ipAddress } = props.arguments;
   const { language } = getPreferenceValues<Preferences>();
-  const [searchContent, setSearchContent] = useState<string>("");
+  const [searchContent, setSearchContent] = useState<string>(ipAddress);
   const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim());
 
   const emptyViewTitle = () => {
@@ -34,16 +39,12 @@ export default function QueryIpGeolocation() {
       {ipGeolocation.map((value, index) => (
         <List.Item
           key={index}
-          icon={{ source: { light: listIcons[index].light, dark: listIcons[index].dark } }}
+          icon={listIcons[index]}
           title={value[0]}
           subtitle={value[1]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                icon={{ source: { light: listIcons[index].light, dark: listIcons[index].dark } }}
-                title={`Copy ${value[0]}`}
-                content={value[1]}
-              />
+              <Action.CopyToClipboard icon={listIcons[index]} title={`Copy ${value[0]}`} content={value[1]} />
               <Action.CopyToClipboard
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}

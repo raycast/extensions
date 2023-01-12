@@ -32,7 +32,7 @@ export function AvatarImageAction(props: {
         }}
       />
       <Action
-        icon={Icon.TwoArrowsClockwise}
+        icon={Icon.Repeat}
         title={"Random Seed"}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={() => {
@@ -43,7 +43,7 @@ export function AvatarImageAction(props: {
       />
       {advancedOptions && (
         <Action.Push
-          icon={Icon.MemoryChip}
+          icon={Icon.StarCircle}
           title={"Advanced Options"}
           shortcut={{ modifiers: ["ctrl"], key: "a" }}
           target={<AdvancedOptionsPage avatarOptions={avatarOptions} setAvatarOptions={setAvatarOptions} />}
@@ -52,7 +52,6 @@ export function AvatarImageAction(props: {
       <ActionPanel.Section>
         {!advancedOptions && (
           <Action.CopyToClipboard
-            icon={Icon.Terminal}
             title={"Copy SVG Code"}
             shortcut={{ modifiers: ["ctrl"], key: "c" }}
             content={avatarInfo.svgCode}

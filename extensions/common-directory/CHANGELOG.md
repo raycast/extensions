@@ -1,5 +1,21 @@
 # Common Directory Changelog
 
+## [Extension Optimization] - 2022-11-17
+
+- Some small optimizations
+
+## [Extension Optimization] - 2022-10-13
+
+- Some small optimizations
+
+## [Add actions to Menu Bar command] - 2022-09-28
+
+- Add new actions to menu bar commands: Open(Left click) and Show(Right click)
+
+## [Add Menu Bar command] - 2022-09-05
+
+- Add Menu Bar command: Open Command Directory
+
 ## [Add text field validation] - 2022-06-30
 
 - Add text field validation

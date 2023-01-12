@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lenscast",
+  "title": "Lenscast",
+  "description": "Web3 Social Raycast Extension built with Lens Protocol",
+  "icon": "icon.png",
+  "author": "peduarte",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "profiles",
+      "title": "Lenscast",
+      "subtitle": "Web3 Social",
+      "description": "Search for social profiles on the Lens Protocol.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.6.9",
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.1",
+    "@tanstack/react-query": "^4.3.9",
+    "cross-fetch": "^3.1.5",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

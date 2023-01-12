@@ -3,17 +3,10 @@ import { useEffect, useState } from "react";
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-
-import Preferences from "./interfaces/preferences";
+import { Draft } from "./interfaces/draft";
+import { Preferences } from "./interfaces/preferences";
 
 dayjs.extend(relativeTime);
-
-interface Draft {
-  id: number;
-  text_first_tweet: string;
-  num_tweets: number;
-  scheduled_date: Date;
-}
 
 interface State {
   drafts?: Draft[];

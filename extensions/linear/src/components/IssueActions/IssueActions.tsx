@@ -22,6 +22,7 @@ import ParentIssueSubmenu from "./ParentIssueSubmenu";
 import StateSubmenu from "./StateSubmenu";
 import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
+import IssueCommentForm from "../IssueCommentForm";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -336,6 +337,7 @@ export default function IssueActions({
             {priorities.map((priority) => (
               <Action
                 key={priority.priority}
+                autoFocus={priority.priority === issue.priority}
                 title={priority.label}
                 icon={{ source: priorityIcons[priority.priority] }}
                 onAction={() => setPriority(priority)}
@@ -353,6 +355,7 @@ export default function IssueActions({
             {users.map((user) => (
               <Action
                 key={user.id}
+                autoFocus={user.id === issue.assignee?.id}
                 title={`${user.displayName} (${user.email})`}
                 icon={getUserIcon(user)}
                 onAction={() => setAssignee(user)}
@@ -377,7 +380,14 @@ export default function IssueActions({
             shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
           >
             {scale.map(({ estimate, label }) => {
-              return <Action key={estimate} title={label} onAction={() => setEstimate({ estimate, label })} />;
+              return (
+                <Action
+                  key={estimate}
+                  autoFocus={estimate === issue.estimate}
+                  title={label}
+                  onAction={() => setEstimate({ estimate, label })}
+                />
+              );
             })}
           </ActionPanel.Submenu>
         ) : null}
@@ -405,6 +415,13 @@ export default function IssueActions({
           icon={Icon.List}
           target={<SubIssues issue={issue} mutateList={mutateList} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        />
+
+        <Action.Push
+          title="Add Comment"
+          icon={Icon.Plus}
+          target={<IssueCommentForm issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "n" }}
         />
 
         <Action.Push

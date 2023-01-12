@@ -34,6 +34,12 @@ export interface Item {
   card?: Card;
 }
 
+export interface Folder {
+  object: string;
+  id: string;
+  name: string;
+}
+
 export interface Identity {
   name: string;
   identity: string;

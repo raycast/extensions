@@ -19,11 +19,11 @@ async function getApplications(path?: PathLike): Promise<Application[]>;
 ```typescript
 import { getApplications } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const installedApplications = await getApplications();
   console.log("The following applications are installed on your Mac:");
   console.log(installedApplications.map((a) => a.name).join(", "));
-};
+}
 ```
 
 #### Parameters
@@ -49,10 +49,10 @@ async function getDefaultApplication(path: PathLike): Promise<Application>;
 ```typescript
 import { getDefaultApplication } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const defaultApplication = await getDefaultApplication(__filename);
   console.log(`Default application for JavaScript is: ${defaultApplication.name}`);
-};
+}
 ```
 
 #### Parameters
@@ -61,7 +61,32 @@ export default async () => {
 
 #### Return
 
-The default [Application](#application) that would open the file. Throws an error if no application was found.
+A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
+
+### getFrontmostApplication
+
+Returns the frontmost application.
+
+#### Signature
+
+```typescript
+async function getFrontmostApplication(): Promise<Application>;
+```
+
+#### Example
+
+```typescript
+import { getFrontmostApplication } from "@raycast/api";
+
+export default async function Command() => {
+  const defaultApplication = await getFrontmostApplication();
+  console.log(`The frontmost application is: ${frontmostApplication.name}`);
+};
+```
+
+#### Return
+
+A Promise that resolves with the frontmost [Application](#application). If no application was found, the promise will be rejected.
 
 ### showInFinder
 
@@ -80,7 +105,9 @@ import { showInFinder } from "@raycast/api";
 import { homedir } from "os";
 import { join } from "path";
 
-showInFinder(join(homedir(), "Downloads"));
+export default async function Command() {
+  await showInFinder(join(homedir(), "Downloads"));
+}
 ```
 
 #### Parameters
@@ -109,11 +136,11 @@ import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
-export default async () => {
+export default async function Command() {
   const file = join(homedir(), "Desktop", "yolo.txt");
   await writeFile(file, "I will be deleted soon!");
   await trash(file);
-};
+}
 ```
 
 #### Parameters
@@ -139,9 +166,9 @@ async function open(target: string, application?: Application | string): Promise
 ```typescript
 import { open } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await open("https://www.raycast.com", "com.google.Chrome");
-};
+}
 ```
 
 #### Parameters
@@ -151,6 +178,41 @@ export default async () => {
 #### Return
 
 A Promise that resolves when the target has been opened.
+
+### launchCommand
+
+Launches another command of the same extension.
+Use this method if your command needs to open another command based on user interaction,
+or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
+
+#### Signature
+
+```typescript
+async function launchCommand(options: {
+  name: string;
+  type: LaunchType;
+  arguments?: Arguments | null;
+  context?: LaunchContext | null;
+}): Promise<void>;
+```
+
+#### Example
+
+```typescript
+import { launchCommand, LaunchType } from "@raycast/api";
+
+export default async function Command() => {
+  await launchCommand({ name: "list", type: LaunchType.UserInitiated, context: { foo: "bar" } });
+};
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="launchCommand" />
+
+#### Return
+
+A Promise that resolves when the command has been launched. (Note that this does not indicate that the launched command has finished executing.)
 
 ## Types
 
@@ -172,3 +234,7 @@ PathLike: string | Buffer | URL;
 ```
 
 Supported path types.
+
+### LaunchContext
+
+Represents the passed context object of programmatic command launches.

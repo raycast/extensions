@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "downloads-manager",
+  "title": "Downloads Manager",
+  "description": "Search and organize your downloads",
+  "icon": "downloads.png",
+  "author": "thomas",
+  "contributors": [
+    "ron-myers",
+    "Kimcha"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-downloads",
+      "title": "Manage Downloads",
+      "description": "Search and organize your downloaded files",
+      "mode": "view"
+    },
+    {
+      "name": "open-latest-download",
+      "title": "Open Latest Download",
+      "description": "Opens the last downloaded file or folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-latest-download",
+      "title": "Copy Latest Download",
+      "description": "Copies the last downloaded file or folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.9",
+    "@types/react": "^18.0.17",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

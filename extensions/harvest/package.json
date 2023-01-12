@@ -80,22 +80,20 @@
       "name": "accountID",
       "title": "Harvest Account ID",
       "required": true,
-      "description": "Harvest Accoutn ID",
+      "description": "Harvest Account ID",
       "link": "https://id.getharvest.com/developers",
       "type": "textfield"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.40.1",
+    "@raycast/utils": "^1.3.1",
     "axios": "^0.23.0",
     "dayjs": "^1.10.7",
-    "lodash": "^4.17.21",
-    "swr": "^1.1.2"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.175",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

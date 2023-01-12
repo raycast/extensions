@@ -1,6 +1,6 @@
 {
   "name": "@raycast/migration",
-  "version": "1.38.2",
+  "version": "1.45.0",
   "description": "Tool to automate the migration to a newer version of the @raycast/api",
   "main": "index.js",
   "bin": "./bin/migrate.js",
@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "jscodeshift": "^0.13.1",
-    "semver": "^7.3.5"
+    "semver": "^7.3.8"
   },
   "devDependencies": {
-    "@types/jscodeshift": "^0.11.3"
+    "@types/jscodeshift": "^0.11.5"
   }
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { Form, ActionPanel, Action, Icon, Toast, useNavigation } from "@raycast/api";
+import { useEffect } from "react";
+import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
@@ -18,11 +19,12 @@ import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
 import { getCycleOptions } from "../helpers/cycles";
-import { projectStatusText } from "../helpers/projects";
+import { getProjectIcon, projectStatusText } from "../helpers/projects";
 import { getTeamIcon } from "../helpers/teams";
 
 import useIssueDetail from "../hooks/useIssueDetail";
 import { MutatePromise } from "@raycast/utils";
+import { CreateIssueValues } from "./CreateIssueForm";
 
 type EditIssueFormProps = {
   issue: IssueResult;
@@ -38,38 +40,89 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const { issue, isLoadingIssue, mutateDetail } = useIssueDetail(props.issue);
 
-  const titleField = useRef<Form.TextField>(null);
+  const { teams, isLoadingTeams } = useTeams();
+  const hasMoreThanOneTeam = teams && teams.length > 1;
 
-  const [teamId, setTeamId] = useState(props.issue.team.id);
-  const [title, setTitle] = useState(props.issue.title);
-  const [description, setDescription] = useState(issue.description);
-  const [stateId, setStateId] = useState(props.issue.state.id);
-  const [priority, setPriority] = useState(String(props.issue.priority));
-  const [labelIds, setLabelIds] = useState<string[]>(props.issue.labels.nodes.map((l) => l.id));
-  const [estimate, setEstimate] = useState(props.issue.estimate ? String(props.issue.estimate) : undefined);
-  const [assigneeId, setAssigneeId] = useState(props.issue.assignee?.id);
-  const [dueDate, setDueDate] = useState(issue.dueDate ? new Date(issue.dueDate) : undefined);
-  const [cycleId, setCycleId] = useState(props.issue.cycle?.id);
-  const [projectId, setProjectId] = useState(props.issue.project?.id);
-  const [parentId, setParentId] = useState(props.issue.parent?.id);
+  const { handleSubmit, itemProps, values, setValue } = useForm<CreateIssueValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Editing issue" });
+
+      try {
+        const payload: UpdateIssuePayload = {
+          teamId: values.teamId || props.issue.team.id,
+          title: values.title,
+          description: values.description,
+          stateId: values.stateId,
+          labelIds: values.labelIds,
+          dueDate: values.dueDate,
+          ...(scale && values.estimate ? { estimate: parseInt(values.estimate) } : {}),
+          ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
+          ...(values.cycleId ? { cycleId: values.cycleId } : {}),
+          ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.parentId ? { parentId: values.parentId } : {}),
+          priority: parseInt(values.priority),
+        };
+
+        const { success } = await updateIssue(issue.id, payload);
+
+        if (success) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Edited Issue • ${issue.identifier}`;
+
+          pop();
+
+          mutateDetail();
+
+          if (props.mutateList) {
+            props.mutateList();
+          }
+
+          if (props.mutateSubIssues) {
+            props.mutateSubIssues();
+          }
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to edit issue";
+        toast.message = getErrorMessage(error);
+      }
+    },
+    validation: {
+      teamId: hasMoreThanOneTeam ? FormValidation.Required : undefined,
+      title: FormValidation.Required,
+      stateId: FormValidation.Required,
+      priority: FormValidation.Required,
+    },
+    initialValues: {
+      teamId: props.issue.team.id,
+      title: props.issue.title,
+      description: issue.description,
+      priority: String(props.issue.priority),
+      stateId: props.issue.state.id,
+      estimate: props.issue.estimate ? String(props.issue.estimate) : undefined,
+      assigneeId: props.issue.assignee?.id,
+      labelIds: props.issue.labels.nodes.map((l) => l.id),
+      dueDate: issue.dueDate ? new Date(issue.dueDate) : null,
+      cycleId: props.issue.cycle?.id,
+      projectId: props.issue.project?.id,
+      parentId: props.issue.parent?.id,
+    },
+  });
 
   // The issue's detail (for description and due date) isn't returned
   // immediately, so the fields need to be properly updated once it's done
   useEffect(() => {
-    setDescription(issue.description);
-    setDueDate(issue.dueDate ? new Date(issue.dueDate) : undefined);
+    setValue("description", issue.description || "");
+    setValue("dueDate", issue.dueDate ? new Date(issue.dueDate) : null);
   }, [issue]);
 
-  const [titleError, setTitleError] = useState<string | undefined>();
-
-  const { teams, isLoadingTeams } = useTeams();
-  const { states } = useStates(teamId);
-  const { labels } = useLabels(teamId);
-  const { cycles } = useCycles(teamId);
+  const { states } = useStates(values.teamId);
+  const { labels } = useLabels(values.teamId);
+  const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
-  const { projects } = useProjects(teamId);
+  const { projects } = useProjects(values.teamId);
 
-  const team = teams?.find((team) => team.id === teamId);
+  const team = teams?.find((team) => team.id === values.teamId);
 
   const scale = team
     ? getEstimateScale({
@@ -81,7 +134,6 @@ export default function EditIssueForm(props: EditIssueFormProps) {
 
   const orderedStates = getOrderedStates(states || []);
 
-  const hasMoreThanOneTeam = teams && teams.length > 1;
   const hasStates = states && states.length > 0;
   const hasPriorities = props.priorities && props.priorities.length > 0;
   const hasUsers = props.users && props.users.length > 0;
@@ -89,62 +141,6 @@ export default function EditIssueForm(props: EditIssueFormProps) {
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
   const hasIssues = issues && issues.length > 0;
-
-  async function handleSubmit() {
-    if (!title || !teamId || !stateId || !priority) {
-      console.log("missing some content", { title, teamId, description, stateId, priority });
-      return;
-    }
-
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Editing issue" });
-    await toast.show();
-
-    try {
-      const payload: UpdateIssuePayload = {
-        teamId,
-        title,
-        description,
-        stateId,
-        labelIds,
-        dueDate,
-        ...(scale && estimate ? { estimate: parseInt(estimate) } : {}),
-        ...(assigneeId ? { assigneeId } : {}),
-        ...(cycleId ? { cycleId } : {}),
-        ...(projectId ? { projectId } : {}),
-        ...(parentId ? { parentId } : {}),
-        priority: parseInt(priority),
-      };
-
-      const { success } = await updateIssue(issue.id, payload);
-
-      if (success) {
-        toast.style = Toast.Style.Success;
-        toast.title = `Edited Issue • ${issue.identifier}`;
-
-        pop();
-
-        mutateDetail();
-
-        if (props.mutateList) {
-          props.mutateList();
-        }
-
-        if (props.mutateSubIssues) {
-          props.mutateSubIssues();
-        }
-      }
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to edit issue";
-      toast.message = getErrorMessage(error);
-    }
-  }
-
-  function dropTitleErrorIfNeeded() {
-    if (titleError && titleError.length > 0) {
-      setTitleError(undefined);
-    }
-  }
 
   return (
     <Form
@@ -157,16 +153,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
     >
       {hasMoreThanOneTeam ? (
         <>
-          <Form.Dropdown
-            id="teamId"
-            title="Team"
-            value={teamId}
-            onChange={(teamId) => {
-              setStateId("");
-              setTeamId(teamId);
-            }}
-            storeValue
-          >
+          <Form.Dropdown title="Team" {...itemProps.teamId}>
             {teams.map((team) => {
               return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
             })}
@@ -175,36 +162,15 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         </>
       ) : null}
 
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Issue title"
-        ref={titleField}
-        value={title}
-        error={titleError}
-        onChange={(title) => {
-          setTitle(title);
-          dropTitleErrorIfNeeded();
-        }}
-        autoFocus
-        onBlur={(event) => {
-          if (event.target.value?.length === 0) {
-            setTitleError("The title is required");
-          } else {
-            dropTitleErrorIfNeeded();
-          }
-        }}
-      />
+      <Form.TextField title="Title" placeholder="Issue title" autoFocus {...itemProps.title} />
 
       <Form.TextArea
-        id="description"
         title="Description"
         placeholder="Add some details (supports Markdown, e.g. **bold**)"
-        value={description}
-        onChange={setDescription}
+        {...itemProps.description}
       />
 
-      <Form.Dropdown id="stateId" title="Status" value={stateId} onChange={setStateId} storeValue>
+      <Form.Dropdown title="Status" {...itemProps.stateId}>
         {hasStates
           ? orderedStates.map((state) => {
               return (
@@ -219,7 +185,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority} storeValue>
+      <Form.Dropdown title="Priority" {...itemProps.priority}>
         {hasPriorities
           ? props.priorities?.map(({ priority, label }) => {
               return (
@@ -235,7 +201,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       </Form.Dropdown>
 
       {hasUsers ? (
-        <Form.Dropdown id="assigneeId" title="Assignee" value={assigneeId} onChange={setAssigneeId} storeValue>
+        <Form.Dropdown title="Assignee" {...itemProps.assigneeId}>
           <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 
           {props.users?.map((user) => {
@@ -244,7 +210,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.TagPicker id="labelIds" title="Labels" value={labelIds} onChange={setLabelIds} placeholder="Add label">
+      <Form.TagPicker title="Labels" {...itemProps.labelIds} placeholder="Add label">
         {hasLabels
           ? labels.map(({ id, name, color }) => (
               <Form.TagPicker.Item title={name} value={id} key={id} icon={{ source: Icon.Dot, tintColor: color }} />
@@ -253,7 +219,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       </Form.TagPicker>
 
       {scale ? (
-        <Form.Dropdown id="estimate" title="Estimate" value={estimate} onChange={setEstimate}>
+        <Form.Dropdown title="Estimate" {...itemProps.estimate}>
           <Form.Dropdown.Item
             title="No estimate"
             value=""
@@ -273,18 +239,12 @@ export default function EditIssueForm(props: EditIssueFormProps) {
         </Form.Dropdown>
       ) : null}
 
-      <Form.DatePicker
-        id="dueDate"
-        title="Due Date"
-        value={dueDate}
-        onChange={setDueDate}
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.dueDate} />
 
       {hasCycles || hasProjects || hasIssues ? <Form.Separator /> : null}
 
       {hasCycles ? (
-        <Form.Dropdown id="cycleId" title="Cycle" value={cycleId} onChange={setCycleId} storeValue>
+        <Form.Dropdown title="Cycle" {...itemProps.cycleId}>
           <Form.Dropdown.Item
             title="No Cycle"
             value=""
@@ -300,7 +260,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       ) : null}
 
       {hasProjects ? (
-        <Form.Dropdown id="projectId" title="Project" value={projectId} onChange={setProjectId} storeValue>
+        <Form.Dropdown title="Project" {...itemProps.projectId}>
           <Form.Dropdown.Item
             title="No Project"
             value=""
@@ -313,10 +273,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
                 title={`${project.name} (${projectStatusText[project.state]})`}
                 value={project.id}
                 key={project.id}
-                icon={{
-                  source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-                  tintColor: project.color,
-                }}
+                icon={getProjectIcon(project)}
               />
             );
           })}
@@ -324,7 +281,7 @@ export default function EditIssueForm(props: EditIssueFormProps) {
       ) : null}
 
       {hasIssues ? (
-        <Form.Dropdown id="parentId" title="Parent" value={parentId} onChange={setParentId}>
+        <Form.Dropdown title="Parent" {...itemProps.parentId}>
           <Form.Dropdown.Item
             title="No Issue"
             value=""

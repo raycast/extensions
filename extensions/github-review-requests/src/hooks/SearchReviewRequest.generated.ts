@@ -101,7 +101,7 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
       requestHeaders?: Dom.RequestInit["headers"]
     ): Promise<SearchReviewRequestQuery> {
       return withWrapper(
-        (wrappedRequestHeaders) =>
+        wrappedRequestHeaders =>
           client.request<SearchReviewRequestQuery>(SearchReviewRequestDocument, variables, {
             ...requestHeaders,
             ...wrappedRequestHeaders,

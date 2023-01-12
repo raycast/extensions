@@ -7,6 +7,7 @@ import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
 import { Album } from "./util/models";
+import { SFSymbols } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
@@ -75,8 +76,8 @@ export default function PlayLibraryAlbum() {
         <List.Item
           key={id}
           title={name ?? "--"}
-          subtitle={artist ?? "--"}
-          accessoryTitle={count ? `🎧 ${count}` : ""}
+          subtitle={SFSymbols.ARTIST + ` ${artist}` ?? "--"}
+          accessoryTitle={count ? SFSymbols.PLAYLIST + ` ${count}` : ""}
           icon={{ source: "../assets/icon.png" }}
           actions={<Actions name={name} pop={pop} />}
         />
@@ -86,14 +87,14 @@ export default function PlayLibraryAlbum() {
 }
 
 function Actions({ name, pop }: { name: string; pop: () => void }) {
-  const title = `Start Album "${name}"`;
+  const title = SFSymbols.PLAY + `  Start Album "${name}"`;
 
   const handleSubmit = (shuffle?: boolean) => async () => {
     await pipe(
       name,
       music.albums.play(shuffle),
       TE.map(() => closeMainWindow()),
-      handleTaskEitherError
+      handleTaskEitherError("Operation failed.")
     )();
 
     pop();
@@ -102,7 +103,7 @@ function Actions({ name, pop }: { name: string; pop: () => void }) {
   return (
     <ActionPanel>
       <Action title={title} onAction={handleSubmit(false)} />
-      <Action title={`Shuffle Album ${name}`} onAction={handleSubmit(true)} />
+      <Action title={SFSymbols.SHUFFLE + `  Shuffle Album ${name}`} onAction={handleSubmit(true)} />
     </ActionPanel>
   );
 }

@@ -1,5 +1,5 @@
-import { StatesList } from "./components/states";
+import { UpdatesList } from "./components/updates";
 
 export default function main(): JSX.Element {
-  return <StatesList domain="update" />;
+  return <UpdatesList />;
 }

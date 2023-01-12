@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Toast, showToast, Icon, Color, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Grid, Toast, Icon, Color, showToast, Cache } from "@raycast/api";
 import React from "react";
-import { Icon8 } from "../types/types";
-import { IconProps } from "../components/icon";
-import { getGridSize } from "./grid";
+import { Icon8, IconProps, PinnedMovement } from "../types/types";
+import { gridSize, numRecent } from "./utils";
+
+const cache = new Cache();
 
 export const IconStorageActions = (args: { props: IconProps; showMovement?: boolean }) => {
   const props = args.props;
@@ -16,8 +17,8 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
               title={`Move ${props.movement.left ? "Left" : "Up"} in Pinned`}
               shortcut={{ modifiers: ["cmd", "opt"], key: `arrow${props.movement.left ? "Left" : "Up"}` }}
               icon={props.movement.left ? Icon.ArrowLeft : Icon.ArrowUp}
-              onAction={async () => {
-                await moveUpPinnedIcon(props.icon.id);
+              onAction={() => {
+                moveUpPinnedIcon(props.icon.id);
                 props.refresh();
               }}
             />
@@ -27,8 +28,8 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
               title={`Move ${props.movement.right ? "Right" : "Down"} in Pinned`}
               shortcut={{ modifiers: ["cmd", "opt"], key: `arrow${props.movement.right ? "Right" : "Down"}` }}
               icon={props.movement.right ? Icon.ArrowRight : Icon.ArrowDown}
-              onAction={async () => {
-                await moveDownPinnedIcon(props.icon.id);
+              onAction={() => {
+                moveDownPinnedIcon(props.icon.id);
                 props.refresh();
               }}
             />
@@ -41,7 +42,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             title="Remove Pinned Icon"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             icon={Icon.PinDisabled}
-            onAction={async () => {
+            onAction={() => {
               removePinnedIcon(props.icon.id);
               props.refresh();
               showToast(Toast.Style.Success, "Removed Pinned Icon");
@@ -51,7 +52,7 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             title="Clear All Pinned Icons"
             icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            onAction={async () => {
+            onAction={() => {
               clearPinnedIcons(props.platform);
               props.refresh();
               showToast(Toast.Style.Success, "Pinned Icons Cleared");
@@ -63,8 +64,8 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
           title="Pin Icon"
           icon={Icon.Pin}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          onAction={async () => {
-            await appendPinnedIcon(props.icon);
+          onAction={() => {
+            appendPinnedIcon(props.icon);
             props.refresh();
             showToast(Toast.Style.Success, "Icon Pinned");
           }}
@@ -76,8 +77,8 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             title="Remove Recent Icon"
             icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={async () => {
-              await removeRecentIcon(props.icon.id);
+            onAction={() => {
+              removeRecentIcon(props.icon.id);
               props.refresh();
               showToast(Toast.Style.Success, "Removed Recent Icon");
             }}
@@ -86,8 +87,8 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
             title="Clear All Recent Icons"
             icon={{ source: Icon.XMarkCircleFilled, tintColor: Color.Red }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            onAction={async () => {
-              await clearRecentIcons(props.platform);
+            onAction={() => {
+              clearRecentIcons(props.platform);
               props.refresh();
               showToast(Toast.Style.Success, "Recent Icons Cleared");
             }}
@@ -98,87 +99,82 @@ export const IconStorageActions = (args: { props: IconProps; showMovement?: bool
   );
 };
 
-const getStoredIcons = async (key: string) => {
-  const json: string | undefined = await LocalStorage.getItem(key);
+const getStoredIcons = (key: string) => {
+  const json: string | undefined = cache.get(key);
   if (!json) return [];
   return JSON.parse(json);
 };
 
-export const getRecentIcons = async (): Promise<Icon8[]> => {
-  return await getStoredIcons("recent");
+export const getRecentIcons = (platform?: string): Icon8[] => {
+  const recent = getStoredIcons("recent");
+  return recent.filter((icon: Icon8) => !platform || icon.platform === platform).slice(0, numRecent);
 };
 
-export const getPinnedIcons = async (): Promise<Icon8[]> => {
-  return await getStoredIcons("pinned");
+export const getPinnedIcons = (platform?: string): Icon8[] => {
+  const pinned = getStoredIcons("pinned");
+  return pinned.filter((icon: Icon8) => !platform || icon.platform === platform);
 };
 
 const remove = (icons: Icon8[], id: string | undefined): Icon8[] => {
   return icons.filter((i) => i.id !== id);
 };
 
-const appendStoredIcons = async (key: string, icon: Icon8) => {
-  let icons = await getStoredIcons(key);
+const appendStoredIcons = (key: string, icon: Icon8) => {
+  let icons = getStoredIcons(key);
   icons = remove(icons, icon.id);
   icons.unshift(icon);
   if (icons.length > 1000) icons.pop();
-  await LocalStorage.setItem(key, JSON.stringify(icons));
+  cache.set(key, JSON.stringify(icons));
 };
 
-export const appendRecentIcon = async (icon: Icon8) => {
-  const pinned = await getPinnedIcons();
+export const appendRecentIcon = (icon: Icon8) => {
+  const pinned = getPinnedIcons();
   if (pinned.some((i) => i.id === icon.id)) return;
-  await appendStoredIcons("recent", icon);
+  appendStoredIcons("recent", icon);
 };
 
-const appendPinnedIcon = async (icon: Icon8) => {
-  await removeRecentIcon(icon.id);
-  await appendStoredIcons("pinned", icon);
+const appendPinnedIcon = (icon: Icon8) => {
+  removeRecentIcon(icon.id);
+  appendStoredIcons("pinned", icon);
 };
 
-const removeIcon = async (key: string, id: string | undefined) => {
-  let icons = await getStoredIcons(key);
+const removeIcon = (key: string, id: string | undefined) => {
+  let icons = getStoredIcons(key);
   icons = remove(icons, id);
-  await LocalStorage.setItem(key, JSON.stringify(icons));
+  cache.set(key, JSON.stringify(icons));
 };
 
-export const removeRecentIcon = async (id: string | undefined) => {
-  await removeIcon("recent", id);
+export const removeRecentIcon = (id: string | undefined) => {
+  removeIcon("recent", id);
 };
 
-export const removePinnedIcon = async (id: string | undefined) => {
-  await removeIcon("pinned", id);
+export const removePinnedIcon = (id: string | undefined) => {
+  removeIcon("pinned", id);
 };
 
-const clearRecentIcons = async (platform?: string) => {
+const clearRecentIcons = (platform?: string) => {
   if (platform) {
-    const recent = await getRecentIcons();
+    const recent = getRecentIcons();
     const filtered = recent.filter((i) => i.platform !== platform);
-    await LocalStorage.setItem("recent", JSON.stringify(filtered));
+    cache.set("recent", JSON.stringify(filtered));
   } else {
-    await LocalStorage.removeItem("recent");
+    cache.remove("recent");
   }
 };
 
-const clearPinnedIcons = async (platform?: string) => {
+const clearPinnedIcons = (platform?: string) => {
   if (platform) {
-    const pinned = await getPinnedIcons();
+    const pinned = getPinnedIcons();
     const filtered = pinned.filter((i) => i.platform !== platform);
-    await LocalStorage.setItem("pinned", JSON.stringify(filtered));
+    cache.set("pinned", JSON.stringify(filtered));
   } else {
-    await LocalStorage.removeItem("pinned");
+    cache.remove("pinned");
   }
 };
-
-export interface PinnedMovement {
-  up: boolean;
-  right: boolean;
-  down: boolean;
-  left: boolean;
-}
 
 export const getPinnedMovement = (icons: Icon8[], id: string): PinnedMovement => {
   const index = icons.findIndex((icon: Icon8) => icon.id === id);
-  const itemsPerRow = getGridSize() === "small" ? 8 : 5;
+  const itemsPerRow = gridSize === Grid.ItemSize.Small ? 8 : 5;
   const up = index >= itemsPerRow && index % itemsPerRow === 0;
   const down = index < Math.floor(icons.length / itemsPerRow) * itemsPerRow && (index + 1) % itemsPerRow === 0;
   const right = !down && index !== icons.length - 1;
@@ -191,16 +187,16 @@ export const getPinnedMovement = (icons: Icon8[], id: string): PinnedMovement =>
   };
 };
 
-const moveUpPinnedIcon = async (id: string | undefined) => {
-  const pinned = await getPinnedIcons();
+const moveUpPinnedIcon = (id: string | undefined) => {
+  const pinned = getPinnedIcons();
   const index = pinned.findIndex((i) => i.id === id);
   pinned.splice(index - 1, 2, pinned[index], pinned[index - 1]);
-  await LocalStorage.setItem("pinned", JSON.stringify(pinned));
+  cache.set("pinned", JSON.stringify(pinned));
 };
 
-const moveDownPinnedIcon = async (id: string | undefined) => {
-  const pinned = await getPinnedIcons();
+const moveDownPinnedIcon = (id: string | undefined) => {
+  const pinned = getPinnedIcons();
   const index = pinned.findIndex((i) => i.id === id);
   pinned.splice(index, 2, pinned[index + 1], pinned[index]);
-  await LocalStorage.setItem("pinned", JSON.stringify(pinned));
+  cache.set("pinned", JSON.stringify(pinned));
 };

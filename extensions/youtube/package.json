@@ -117,7 +117,7 @@
   "dependencies": {
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
-    "@raycast/api": "^1.36.1",
+    "@raycast/api": "^1.42.0",
     "duration-iso-8601": "^1.1.0",
     "he": "^1.2.0",
     "javascript-time-ago": "^2.3.10",
@@ -126,8 +126,7 @@
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.8.3",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

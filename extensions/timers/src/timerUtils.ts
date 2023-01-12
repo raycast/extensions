@@ -1,9 +1,10 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { extname } from "path";
 import { CustomTimer, Preferences, Timer } from "./types";
+import { formatTime } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 
@@ -13,13 +14,19 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled") {
   writeFileSync(masterName, timerName);
 
   const prefs = getPreferenceValues<Preferences>();
+  const selectedSoundPath = `${environment.assetsPath + "/" + prefs.selectedSound}`;
   let command = `sleep ${timeInSeconds} && if [ -f "${masterName}" ]; then `;
   if (prefs.selectedSound === "speak_timer_name") {
     command += `say "${timerName}"`;
   } else {
-    command += `afplay "${environment.assetsPath + "/" + prefs.selectedSound}"`;
+    command += `afplay "${selectedSoundPath}"`;
   }
-  command += ` && osascript -e 'display notification "'"Timer complete"'" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
+  if (prefs.ringContinuously) {
+    const dismissFile = `${masterName}`.replace(".timer", ".dismiss");
+    writeFileSync(dismissFile, ".dismiss file for Timers");
+    command += ` && while [ -f "${dismissFile}" ]; do afplay "${selectedSoundPath}"; done`;
+  }
+  command += ` && osascript -e 'display notification "Timer \\"${timerName}\\" complete" with title "Ding!"' && rm "${masterName}"; else echo "Timer deleted"; fi`;
   exec(command, (error, stderr) => {
     if (error) {
       console.log(`error: ${error.message}`);
@@ -30,14 +37,19 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled") {
       return;
     }
   });
+  popToRoot();
+  await showHUD(`Timer "${timerName}" started for ${formatTime(timeInSeconds)}! 🎉`);
 }
 
-async function stopTimer(timerFile: string) {
-  const command = `if [ -f "${timerFile}" ]; then rm "${timerFile}"; else echo "Timer deleted"; fi`;
-  execSync(command);
+function stopTimer(timerFile: string) {
+  const deleteTimerCmd = `if [ -f "${timerFile}" ]; then rm "${timerFile}"; else echo "Timer deleted"; fi`;
+  const dismissFile = timerFile.replace(".timer", ".dismiss");
+  const deleteDismissCmd = `if [ -f "${dismissFile}" ]; then rm "${dismissFile}"; else echo "Timer deleted"; fi`;
+  execSync(deleteTimerCmd);
+  execSync(deleteDismissCmd);
 }
 
-async function getTimers() {
+function getTimers() {
   const setOfTimers: Timer[] = [];
   const files = readdirSync(environment.supportPath);
   files.forEach((timerFile: string) => {
@@ -52,7 +64,10 @@ async function getTimers() {
       const timerFileParts = timerFile.split("---");
       timer.secondsSet = Number(timerFileParts[1].split(".")[0]);
       const timeStarted = timerFileParts[0].replace(/__/g, ":");
-      timer.timeLeft = Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000);
+      timer.timeLeft = Math.max(
+        0,
+        Math.round(timer.secondsSet - (new Date().getTime() - new Date(timeStarted).getTime()) / 1000)
+      );
       setOfTimers.push(timer);
     }
   });
@@ -62,39 +77,39 @@ async function getTimers() {
   return setOfTimers;
 }
 
-async function renameTimer(timerFile: string, newName: string) {
+function renameTimer(timerFile: string, newName: string) {
   const dataPath = environment.supportPath + "/" + timerFile;
   writeFileSync(dataPath, newName);
 }
 
-async function ensureCTFileExists() {
+function ensureCTFileExists() {
   if (!existsSync(DATAPATH)) {
     writeFileSync(DATAPATH, JSON.stringify({}));
   }
 }
 
-async function createCustomTimer(newTimer: CustomTimer) {
-  await ensureCTFileExists();
+function createCustomTimer(newTimer: CustomTimer) {
+  ensureCTFileExists();
   const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
   customTimers[randomUUID()] = newTimer;
   writeFileSync(DATAPATH, JSON.stringify(customTimers));
 }
 
-async function readCustomTimers() {
-  await ensureCTFileExists();
+function readCustomTimers() {
+  ensureCTFileExists();
   const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
   return customTimers;
 }
 
-async function renameCustomTimer(ctID: string, newName: string) {
-  await ensureCTFileExists();
+function renameCustomTimer(ctID: string, newName: string) {
+  ensureCTFileExists();
   const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
   customTimers[ctID].name = newName;
   writeFileSync(DATAPATH, JSON.stringify(customTimers));
 }
 
-async function deleteCustomTimer(ctID: string) {
-  await ensureCTFileExists();
+function deleteCustomTimer(ctID: string) {
+  ensureCTFileExists();
   const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
   delete customTimers[ctID];
   writeFileSync(DATAPATH, JSON.stringify(customTimers));

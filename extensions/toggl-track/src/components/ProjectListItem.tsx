@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, PushAction } from "@raycast/api";
+import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { AppContextProvider } from "../context";
 import { Project } from "../toggl/types";
 import CreateTimeEntryForm from "./CreateTimeEntryForm";
@@ -21,7 +21,7 @@ export default function ProjectListItem({
       keywords={subtitle?.split(" ") || []}
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             title="Create Time Entry"
             icon={Icon.Clock}
             target={

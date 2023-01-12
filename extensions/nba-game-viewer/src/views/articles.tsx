@@ -1,22 +1,16 @@
 import useNews from "../hooks/useNews";
-import { Toast, showToast, List } from "@raycast/api";
-import { Article } from "../types/news.types";
 import ArticleComponent from "../components/Article";
 import { useState } from "react";
+import { List } from "@raycast/api";
 
 const Articles = () => {
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
 
-  const data = useNews();
-
-  if (data.error) {
-    showToast(Toast.Style.Failure, "Failed to get news");
-    data.loading = false;
-  }
+  const { data, isLoading } = useNews();
 
   return (
-    <List isLoading={data.loading} isShowingDetail={isShowingDetail}>
-      {data.news.map((article: Article) => {
+    <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
+      {data?.map((article) => {
         return (
           <ArticleComponent
             key={article.title}

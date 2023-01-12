@@ -5,9 +5,23 @@
   "description": "Start, stop, and save countdown timers, directly in Raycast, with no external dependencies.",
   "icon": "command-icon.png",
   "author": "ThatNerd",
-  "categories": ["Productivity", "System"],
+  "contributors": [
+    "marcjulian",
+    "GastroGeek",
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "start2MinuteTimer",
+      "title": "Start 2 Minute Timer",
+      "description": "Set a countdown for 2 minutes.",
+      "mode": "no-view"
+    },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
@@ -60,12 +74,71 @@
       "name": "startCustomTimer",
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "hours",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "minutes",
+          "placeholder": "minutes",
+          "required": false,
+          "type": "text"
+        },
+        {
+          "name": "seconds",
+          "placeholder": "seconds",
+          "required": false,
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "manageTimers",
       "title": "Manage Timers",
       "description": "View, start, or stop existing countdown timers.",
+      "mode": "view"
+    },
+    {
+      "name": "timersMenuBar",
+      "title": "Timers Menu Bar",
+      "description": "View, start, or stop existing countdown timers from the Menu Bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "startStopwatch",
+      "title": "Start Stopwatch",
+      "description": "Start a stopwatch",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "stopwatch name",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "manageStopwatches",
+      "title": "Manage Stopwatches",
+      "description": "View, start, or stop existing stopwatches.",
+      "mode": "view"
+    },
+    {
+      "name": "dismissTimerAlert",
+      "title": "Dismiss Timer Alert",
+      "description": "Stop a ringing alert from a finished timer.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previewAlertSounds",
+      "title": "Preview Alert Sounds",
+      "description": "Play samples of different alert sound effects.",
       "mode": "view"
     }
   ],
@@ -78,39 +151,83 @@
       "description": "Sound played when a timer finishes.",
       "default": "Submarine",
       "data": [
-        {"title": "Alarm Clock", "value": "alarmClock.wav"},
-        {"title": "Dismembered Woodpecker", "value": "dismemberedWoodpecker.wav"},
-        {"title": "Flute Riff", "value": "fluteRiff.wav"},
-        {"title": "Level Up", "value": "levelUp.wav"},
-        {"title": "Piano Chime", "value": "pianoChime.wav"},
-        {"title": "Terminator", "value": "terminator.wav"},
-        {"title": "Speak Timer Name", "value": "speak_timer_name"}
+        {
+          "title": "Alarm Clock",
+          "value": "alarmClock.wav"
+        },
+        {
+          "title": "Dismembered Woodpecker",
+          "value": "dismemberedWoodpecker.wav"
+        },
+        {
+          "title": "Flute Riff",
+          "value": "fluteRiff.wav"
+        },
+        {
+          "title": "Level Up",
+          "value": "levelUp.wav"
+        },
+        {
+          "title": "Piano Chime",
+          "value": "pianoChime.wav"
+        },
+        {
+          "title": "Terminator",
+          "value": "terminator.wav"
+        },
+        {
+          "title": "Speak Timer Name",
+          "value": "speak_timer_name"
+        }
       ]
     },
     {
-        "name": "newTimerInputOrder",
-        "type": "dropdown",
-        "required": true,
-        "title": "New Timer Input Order",
-        "description": "Order for input fields in new timer form.",
-        "default": "Hours , Minutes, Seconds",
-        "data": [
-            {"title": "Hours, Minutes, Seconds", "value": "hhmmss"},
-            {"title": "Seconds, Minutes, Hours", "value": "ssmmhh"}
-        ]
+      "name": "newTimerInputOrder",
+      "type": "dropdown",
+      "required": true,
+      "title": "New Timer Input Order",
+      "description": "Order for input fields in new timer form.",
+      "default": "Hours , Minutes, Seconds",
+      "data": [
+        {
+          "title": "Hours, Minutes, Seconds",
+          "value": "hhmmss"
+        },
+        {
+          "title": "Seconds, Minutes, Hours",
+          "value": "ssmmhh"
+        }
+      ]
+    },
+    {
+      "name": "ringContinuously",
+      "type": "checkbox",
+      "required": true,
+      "title": "Timer Alert Type",
+      "description": "Whether or not to play the timer alert sound continuously until dismissed.",
+      "label": "Ring Continuously",
+      "default": false
+    },
+    {
+      "name": "copyOnSwStop",
+      "type": "checkbox",
+      "required": true,
+      "title": "Copy on Stopwatch Stop",
+      "description": "Whether or not to copy the elapsed time on a stopwatch when it is stopped.",
+      "label": "Copy elapsed time",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0"
+    "@raycast/api": "^1.44.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^17.0.48",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

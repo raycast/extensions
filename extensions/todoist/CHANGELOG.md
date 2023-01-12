@@ -1,5 +1,47 @@
 # Todoist Changelog
 
+## [Menu bar fix] - 2023-01-10
+
+- Fix focused task when not listed in menubar
+
+## [Menu bar improvements] - 2023-01-03
+
+- Add possibility to specify the number of days in Upcoming view for Menu Bar
+
+## [Menu bar command bug fix] - 2023-01-02
+
+- Fixed an error that caused menu bar to throw an error
+
+## [Optimizing title] - 2022-12-21
+
+- Removed eventually markdown from titles.
+
+## [Menu bar command for tasks] - 2022-11-19
+
+- Upgrade `@raycast/api`
+- Add a menu bar command that shows upcoming tasks/tasks for that day (can be changed via preferences)
+- User can complete task, change due date, change priority, open task in Todoist and delete task from the menu bar
+
+## [Migrate to Todoist REST API v2]
+
+- Refactor the extension to use Todoist's REST API v2
+- Support view style for projects (either list or board)
+- Add new command called `Quick Add Task` replacing `Create Task in Inbox`: this new command allows users to add more info to their newly created tasks
+
+## [Bunch of improvements] - 2022-09-22
+
+- Upgrade the dependencies
+- Improve destructive actions: apply styling and added descriptions for alerts.
+- Move the specific commands preferences (today's group by options, projects group by options) in the command's preferences
+- Use `@raycast/utils` data fetching hooks instead of `swr` enabling caching by default for every call in the extension 🚀
+- Add "Open in Todoist app" action
+- Add new "Create Task in Inbox" command
+- Refactor "Create Task" and "Create Form" to use `useForm`
+- Add validations to "Create Task" and "Create Form"
+- Add draft values to "Create Task" command
+- Add tooltips to task accessories
+- Add "add new comment" action on task list
+
 ## [New tasks from projects and task actions in detail] - 2022-05-13
 
 - Added the ability to add a new task from a project

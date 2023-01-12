@@ -65,6 +65,8 @@ export const IssueFragment = `
   }
 `;
 
+export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
+
 export type IssueResult = Pick<
   Issue,
   | "id"
@@ -80,7 +82,7 @@ export type IssueResult = Pick<
 > & {
   assignee?: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 } & {
-  state: Pick<WorkflowState, "id" | "name" | "type" | "color">;
+  state: IssueState;
 } & {
   labels: {
     nodes: LabelResult[];

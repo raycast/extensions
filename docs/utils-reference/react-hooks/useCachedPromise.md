@@ -22,6 +22,7 @@ function useCachedPromise<T, U>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;
+    onWillExecute?: (args: Parameters<T>) -> void;
   }
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
@@ -48,6 +49,7 @@ Including the [usePromise](./usePromise.md)'s options:
 - `options.execute` is a boolean to indicate whether to actually execute the function or not. This is useful for cases where one of the function's arguments depends on something that might not be available right away (for example, depends on some user inputs). Because React requires every hook to be defined on the render, this flag enables you to define the hook right away but wait until you have all the arguments ready to execute the function.
 - `options.onError` is a function called when an execution fails. By default, it will log the error and show a generic failure toast with an action to retry.
 - `options.onData` is a function called when an execution succeeds.
+- `options.onWillExecute` is a function called when an execution will start.
 
 ### Return
 
@@ -104,7 +106,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 const Demo = () => {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, mutate } = useCachedPromise(
+  const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
       const result = await response.text();

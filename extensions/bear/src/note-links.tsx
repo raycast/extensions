@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useState, useEffect } from "react";
 import { Note } from "./bear-db";
@@ -18,7 +18,7 @@ export default function NoteLinks({ note }: { note: Note }) {
   }, [db]);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Something went wrong", error.message);
+    showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
   return (

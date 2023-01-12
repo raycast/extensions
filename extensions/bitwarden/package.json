@@ -8,7 +8,8 @@
   "contributors": [
     "daniel-stoneuk",
     "jomifepe",
-    "andreaselia"
+    "andreaselia",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "keywords": [
@@ -109,7 +110,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.39.3",
     "execa": "^6.1.0"
   },
   "devDependencies": {

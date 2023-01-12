@@ -3,7 +3,6 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { getCreatedIssues } from "./api/getIssues";
 
 import useIssues from "./hooks/useIssues";
-import useStates from "./hooks/useStates";
 import usePriorities from "./hooks/usePriorities";
 import useMe from "./hooks/useMe";
 import useUsers from "./hooks/useUsers";
@@ -14,15 +13,15 @@ import View from "./components/View";
 
 function CreatedIssues() {
   const { issues, isLoadingIssues, mutateList } = useIssues(getCreatedIssues);
-  const { allStates, isLoadingAllStates } = useStates();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
 
   return (
     <List
-      isLoading={isLoadingIssues || isLoadingAllStates || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe || isLoadingUsers}
       searchBarPlaceholder="Filter by key, title, status, assignee or priority"
+      filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView
         title="No issues"
@@ -36,14 +35,7 @@ function CreatedIssues() {
           </ActionPanel>
         }
       />
-      <StateIssueList
-        mutateList={mutateList}
-        issues={issues}
-        states={allStates}
-        priorities={priorities}
-        users={users}
-        me={me}
-      />
+      <StateIssueList mutateList={mutateList} issues={issues} priorities={priorities} users={users} me={me} />
     </List>
   );
 }
