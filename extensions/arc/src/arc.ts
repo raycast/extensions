@@ -179,7 +179,7 @@ export async function selectSpace(space: Space) {
 }
 
 export async function getSpaces() {
-  const output = await runAppleScript(`
+  const response = await runAppleScript(`
     set _output to ""
 
     tell application "Arc"    
@@ -203,6 +203,5 @@ export async function getSpaces() {
     return "[\\n" & _output & "\\n]"
   `);
 
-  const spaces = JSON.parse(output);
-  return spaces as Space[];
+  return response ? (JSON.parse(response) as Space[]) : undefined;
 }
