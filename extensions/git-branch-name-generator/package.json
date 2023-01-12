@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Generate Git Branch Name",
-      "subtitle": "From type and string inputs",
+      "subtitle": "",
       "description": "Generate a git branch name using an opinionated structure",
       "mode": "view"
     }
