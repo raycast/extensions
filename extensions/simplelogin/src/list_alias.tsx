@@ -5,19 +5,15 @@ import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
 export default function Command() {
-  const [aliases, setAliases] = useState<AliasResponse[] | undefined>(undefined);
+  const [aliases, setAliases] = useState<AliasResponse[]>([]);
   const [filteredAlias, setFilteredAlias] = useState<AliasResponse[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    loadAllAliases()
-      .then((response) => {
-        setAliases(response);
-        setFilteredAlias(aliases);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    loadAllAliases().then((response) => {
+      setAliases(response);
+      setFilteredAlias(aliases);
+    });
   }, []);
 
   useEffect(() => {
@@ -32,9 +28,9 @@ export default function Command() {
     if (newValue == "all") {
       setFilteredAlias(aliases);
     } else if (newValue == "pinned") {
-      setFilteredAlias(aliases && aliases.filter((alias) => alias.pinned));
+      setFilteredAlias(aliases.filter((alias) => alias.pinned));
     } else if (newValue == "others") {
-      setFilteredAlias(aliases && aliases.filter((alias) => !alias.pinned));
+      setFilteredAlias(aliases.filter((alias) => !alias.pinned));
     }
   }
 
@@ -42,9 +38,7 @@ export default function Command() {
     updateAliasPinnedStatus(alias.id, pinned).then((response) => {
       if (response) {
         alias.pinned = pinned;
-        if (aliases != undefined) {
-          setAliases([...aliases]);
-        }
+        setAliases([...aliases]);
         showToast({
           style: Toast.Style.Success,
           title: pinned ? "Alias pinned" : "Alias unpinned",
@@ -78,9 +72,7 @@ export default function Command() {
     toggleAliasState(alias.id, enabled).then((response) => {
       if (response) {
         alias.enabled = !alias.enabled;
-        if (aliases != undefined) {
-          setAliases([...aliases]);
-        }
+        setAliases([...aliases]);
         showToast({
           style: Toast.Style.Success,
           title: alias.enabled ? "Alias enabled" : "Alias disabled",
@@ -195,9 +187,8 @@ export default function Command() {
     >
       <List.Section title="Pinned Aliases">
         <>
-          {aliases != undefined &&
-            filteredAlias != undefined &&
-            aliases.length > 0 &&
+          {filteredAlias != undefined &&
+            filteredAlias.length > 0 &&
             filteredAlias
               .filter((alias) => alias.pinned)
               .map((alias) => {
@@ -207,9 +198,8 @@ export default function Command() {
       </List.Section>
       <List.Section title="Not Pinned Aliases">
         <>
-          {aliases != undefined &&
-            filteredAlias != undefined &&
-            aliases.length > 0 &&
+          {filteredAlias != undefined &&
+            filteredAlias.length > 0 &&
             filteredAlias
               .filter((alias) => !alias.pinned)
               .map((alias) => {
