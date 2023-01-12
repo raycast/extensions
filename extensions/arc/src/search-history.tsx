@@ -6,8 +6,9 @@ import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
 import { getDomain, getLastVisitedAt } from "./utils";
 import { isPermissionError, PermissionErrorView } from "./permissions";
+import { VersionCheck } from "./version";
 
-export default function Command() {
+function SearchHistory() {
   const [searchText, setSearchText] = useState<string>();
   const { data, isLoading, error } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
 
@@ -42,5 +43,13 @@ export default function Command() {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <VersionCheck>
+      <SearchHistory />
+    </VersionCheck>
   );
 }

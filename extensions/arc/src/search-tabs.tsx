@@ -4,8 +4,9 @@ import { groupBy } from "lodash";
 import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections } from "./actions";
 import { getTabs } from "./arc";
 import { getDomain, getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
+import { VersionCheck } from "./version";
 
-export default function Command() {
+function SearchTabs() {
   const { data, isLoading, mutate } = useCachedPromise(getTabs);
 
   const orderedLocations = getOrderedLocations();
@@ -36,5 +37,13 @@ export default function Command() {
         );
       })}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <VersionCheck>
+      <SearchTabs />
+    </VersionCheck>
   );
 }

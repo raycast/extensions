@@ -205,3 +205,15 @@ export async function getSpaces() {
 
   return response ? (JSON.parse(response) as Space[]) : undefined;
 }
+
+// Utils
+
+export async function getVersion() {
+  const response = await runAppleScript(`
+    tell application "Arc"
+      return version
+    end tell
+  `);
+
+  return response;
+}

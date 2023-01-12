@@ -3,8 +3,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { OpenSpaceAction } from "./actions";
 import { getSpaces } from "./arc";
 import { getSpaceTitle } from "./utils";
+import { VersionCheck } from "./version";
 
-export default function Command() {
+function SearchSpaces() {
   const { data, isLoading } = useCachedPromise(getSpaces);
 
   return (
@@ -28,5 +29,13 @@ export default function Command() {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <VersionCheck>
+      <SearchSpaces />
+    </VersionCheck>
   );
 }
