@@ -3,7 +3,6 @@ import { jiraImage } from "./image"
 import { ResultItem, SearchCommand } from "./command"
 import { Color, Icon, Image } from "@raycast/api"
 import { ErrorText } from "./exception"
-import { IssueFilter, issueFilters } from "./types"
 
 interface IssueType {
   id: string
@@ -31,6 +30,8 @@ interface Issue {
 interface Issues {
   issues?: Issue[]
 }
+
+type IssueFilter = "allIssues" | "issuesInOpenSprints" | "myIssues" | "myIssuesInOpenSprints"
 
 const fields = "summary,issuetype,status"
 
@@ -82,10 +83,18 @@ function buildJql(query: string): string {
 }
 
 function jqlForFilter(filter: IssueFilter) {
-  if (filter === "issuesInOpenSprints") return "sprint in openSprints()"
-  if (filter === "myIssues") return "assignee=currentUser()"
-  if (filter === "myIssuesInOpenSprints") return "assignee=currentUser() AND sprint in openSprints()"
-  return ""
+  switch (filter) {
+    case "allIssues":
+      return ""
+    case "issuesInOpenSprints":
+      return "sprint in openSprints()"
+    case "myIssues":
+      return "assignee=currentUser()"
+    case "myIssuesInOpenSprints":
+      return "assignee=currentUser() AND sprint in openSprints()"
+    default:
+      throw new Error(`Unknown filter ${filter}`)
+  }
 }
 
 function jqlFor(query: string, filter?: IssueFilter): string {
