@@ -13,15 +13,13 @@ export default function Command() {
     loadAllAliases().then((response) => {
       setAliases(response);
       setFilteredAlias(aliases);
+    }).finally(() => {
+      setIsLoading(false);
     });
   }, []);
 
   useEffect(() => {
-    new Promise((resolve) => {
-      setFilteredAlias(aliases);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+    setFilteredAlias(aliases);
   }, [aliases]);
 
   function filterDropdownList(newValue: string) {
