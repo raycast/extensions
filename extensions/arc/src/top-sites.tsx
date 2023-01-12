@@ -3,7 +3,7 @@ import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import { OpenInLittleArc, OpenInNewWindow, OpenInOtherBrowserAction } from "./actions";
 import { topSitesPath, getTopSites, useSQL } from "./utils/sql";
-import { TopSite } from "./utils/types";
+import { TopSite } from "./types/types";
 import { getDomain, isPermissionError } from "./utils/utils";
 
 export default function Command() {

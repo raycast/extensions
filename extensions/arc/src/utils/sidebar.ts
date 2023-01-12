@@ -1,155 +1,145 @@
-import { Color, environment, Icon, Image } from "@raycast/api";
+import { Icon, Image, environment } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { SideBarSpace, SideBarFolder, SideBarTab, SideBarItem, SearchResult } from "./types";
+import { SideBarSpace, SideBarFolder, SideBarTab, SideBarItem, SearchResult } from "../types/types";
+import { ArcIcon, ArcItem, ArcSpace, ArcTab } from "../types/arc";
+import { match, getHexColor } from "./utils";
+import { ArcIcons } from "./icon";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
-import { match, getHexColor } from "./utils";
 
 export const sideBarPath = join(homedir(), "Library", "Application Support", "Arc", "StorableSidebar.json");
 
-const getColor = (space: any): string => {
-  const colorObject = space["customInfo"]["windowTheme"]["background"]["single"]["_0"]["style"]["color"]["_0"];
-  let color;
+const getColor = (space: ArcSpace): string => {
+  const colorObject = space.customInfo.windowTheme.background.single._0.style.color._0;
   if ("blendedSingleColor" in colorObject) {
-    color = colorObject["blendedSingleColor"]["_0"]["color"];
+    return getHexColor(colorObject.blendedSingleColor._0.color);
   } else if ("blendedGradient" in colorObject) {
-    color = colorObject["blendedGradient"]["_0"]["baseColors"][0];
+    return getHexColor(colorObject.blendedGradient._0.baseColors[0]);
   } else {
     return environment.theme === "light" ? "#000000" : "#ffffff";
   }
-  return getHexColor(color["red"], color["green"], color["blue"]);
 };
 
-const getIcon = (info: any): Image.ImageLike | undefined => {
-  if ("customInfo" in info && "iconType" in info["customInfo"] && "emoji_v2" in info["customInfo"]["iconType"]) {
-    return { source: info["customInfo"]["iconType"]["emoji_v2"] };
+const getIcon = (icon: ArcIcon | undefined): Image.ImageLike | undefined => {
+  if (icon && icon.emoji && icon.emoji_v2) {
+    return { source: icon.emoji_v2 };
   }
   return undefined;
 };
 
-const getSpaceIcon = (space: any, color: string): Image.ImageLike => {
-  const icon = getIcon(space);
+const getSpaceIcon = (space: ArcSpace, color: string): Image.ImageLike => {
+  const icon = getIcon(space.customInfo.iconType);
   if (icon) return icon;
-  return { source: Icon.AppWindowGrid3x3, tintColor: color };
+  return { ...ArcIcons.Space, tintColor: color };
 };
 
-const getTabIcon = (tab: any): Image.ImageLike => {
-  const icon = getIcon(tab);
+const getTabIcon = (tab: ArcTab): Image.ImageLike => {
+  const icon = getIcon(tab.customInfo?.iconType);
   if (icon) return icon;
-  const favicon: Image = getFavicon(tab["savedURL"], { fallback: Icon.Link }) as Image;
-  favicon.mask = Image.Mask.RoundedRectangle; 
+  const favicon: Image = getFavicon(tab.savedURL, { fallback: Icon.Link }) as Image;
+  favicon.mask = Image.Mask.RoundedRectangle;
   return favicon;
 };
 
-const mapItemToTab = (id: string, itemMap: { [key: string]: any }, color: string): SideBarItem => {
+const mapItemToTab = (id: string, itemMap: { [key: string]: ArcItem }, color: string): SideBarItem => {
   const item = itemMap[id];
-  if ("list" in item["data"]) {
+  if ("list" in item.data && item.title) {
     return {
-      id: item["id"],
-      title: item["title"],
-      children: item["childrenIds"].map((id: string) => mapItemToTab(id, itemMap, color)),
+      id: item.id,
+      title: item.title,
+      children: item.childrenIds.map((id) => mapItemToTab(id, itemMap, color)),
       color: color,
     };
-  } else if ("easel" in item["data"]) {
+  } else if ("tab" in item.data) {
+    return {
+      id: item.id,
+      title: item.title ? item.title : item.data.tab.savedTitle,
+      url: item.data.tab.savedURL,
+      icon: getTabIcon(item.data.tab),
+    };
+  } else if ("easel" in item.data) {
     return {
       type: "easel",
-      id: item["data"]["easel"]["easelID"],
-      title:item["data"]["easel"]["title"],
-      color: color
+      id: item.data.easel.easelID,
+      title: item.data.easel.title,
     };
-  } else if ("arcDocument" in item["data"]) {
+  } else if ("arcDocument" in item.data && item.title) {
     return {
-      type: "notes",
-      id: item["data"]["arcDocument"]["arcDocumentID"],
-      title: item["title"],
-      color: color
+      type: "document",
+      id: item.data.arcDocument.arcDocumentID,
+      title: item.title,
     };
-  } else if ("splitView" in item["data"]) {
+  } else if ("splitView" in item.data) {
     return {
-      id: item["id"],
-      tabs: item["childrenIds"].map((id: string) => mapItemToTab(id, itemMap, color)),
-      color: color
-    };
-  } else {
-    const tab = item["data"]["tab"];
-    return {
-      id: item["id"],
-      title: item["title"] ? item["title"] : tab["savedTitle"],
-      url: tab["savedURL"],
-      icon: getTabIcon(tab),
+      id: item.id,
+      tabs: item.childrenIds.map((id) => mapItemToTab(id, itemMap, color)) as SideBarTab[],
+      color: color,
     };
   }
+  return {} as SideBarItem;
 };
 
 export const getTopTabs = async (): Promise<SideBarTab[]> => {
-  try {
-    const json = await readFile(sideBarPath, "utf-8");
-    const response = JSON.parse(json);
-    const items = response["sidebar"]["containers"][1]["items"];
-    const itemMap: { [key: string]: any } = {};
-    for (const item of items.filter((_: any, i: number) => i % 2 === 1)) {
-      itemMap[item["id"]] = item;
-    }
-    const topAppIds: string[] = itemMap[response["sidebar"]["containers"][1]["topAppsContainerIDs"][1]]["childrenIds"];
-    return topAppIds.map((id: string) => {
-      const item = itemMap[id];
-      const tab = item["data"]["tab"];
-      return {
-        id: item["id"],
-        title: item["title"] ? item["title"] : tab["savedTitle"],
-        url: tab["savedURL"],
-        icon: getTabIcon(tab),
-      };
-    });
-  } catch {
-    console.error("Unable to get Top Apps");
-    return [];
+  const response = JSON.parse(await readFile(sideBarPath, "utf-8"));
+  const items = response["sidebar"]["containers"][1]["items"];
+  const itemMap: { [key: string]: ArcItem } = {};
+  for (let i = 0; i < items.length; i += 2) {
+    itemMap[items[i]] = items[i + 1];
   }
+  const topApps = [];
+  for (const id of itemMap[response["sidebar"]["containers"][1]["topAppsContainerIDs"][1]].childrenIds) {
+    const item = itemMap[id];
+    if ("tab" in item.data) {
+      topApps.push({
+        id: item.id,
+        title: item.title ? item.title : item.data.tab.savedTitle,
+        url: item.data.tab.savedURL,
+        icon: getTabIcon(item.data.tab),
+      });
+    }
+  }
+  return topApps;
 };
 
 export const getSpaces = async (): Promise<SideBarSpace[]> => {
-  try {
-    const json = await readFile(sideBarPath, "utf-8");
-    const response = JSON.parse(json);
-    const items = response["sidebar"]["containers"][1]["items"];
-    const itemMap: { [key: string]: any } = {};
-    for (const item of items.filter((_: any, i: number) => i % 2 === 1)) {
-      itemMap[item["id"]] = item;
-    }
-    const spaces = response["sidebar"]["containers"][1]["spaces"].filter((_: any, i: number) => i % 2 === 1);
-    return spaces.map((space: any) => {
-      const containerItems = space["containerIDs"];
-      const pinnedIndex = containerItems.findIndex((item: any) => item === "pinned");
-      const unpinnedIndex = containerItems.findIndex((item: any) => item === "unpinned");
-      let pinnedItems, unpinnedItems;
-      if (pinnedIndex < unpinnedIndex) {
-        pinnedItems = containerItems.slice(pinnedIndex + 1, unpinnedIndex);
-        unpinnedItems = containerItems.slice(unpinnedIndex + 1);
-      } else {
-        unpinnedItems = containerItems.slice(unpinnedIndex + 1, pinnedIndex);
-        pinnedItems = containerItems.slice(pinnedIndex + 1);
-      }
-      const color = getColor(space);
-      const pinned: SideBarItem[] = pinnedItems
-        .map((id: string) => itemMap[id]["childrenIds"].map((id: string) => mapItemToTab(id, itemMap, color)))
-        .flat();
-      const unpinned: SideBarItem[] = unpinnedItems
-        .map((id: string) => itemMap[id]["childrenIds"].map((id: string) => mapItemToTab(id, itemMap, color)))
-        .flat();
-      return {
-        id: space["id"],
-        title: space["title"],
-        icon: getSpaceIcon(space, color),
-        color,
-        pinned,
-        unpinned,
-      } as SideBarSpace;
-    });
-  } catch {
-    console.error("Unable to get Spaces");
-    return [];
+  const response = JSON.parse(await readFile(sideBarPath, "utf-8"));
+  const items = response["sidebar"]["containers"][1]["items"];
+  const itemMap: { [key: string]: ArcItem } = {};
+  for (let i = 0; i < items.length; i += 2) {
+    itemMap[items[i]] = items[i + 1];
   }
+  const spaces = response["sidebar"]["containers"][1]["spaces"].filter(
+    (_: string | ArcSpace, i: number) => i % 2 === 1
+  );
+  return spaces.map((space: ArcSpace) => {
+    const containerItems = space.containerIDs;
+    const a = containerItems.findIndex((i) => i === "pinned");
+    const b = containerItems.findIndex((i) => i === "unpinned");
+    let pinnedItems, unpinnedItems;
+    if (a < b) {
+      pinnedItems = containerItems.slice(a + 1, b);
+      unpinnedItems = containerItems.slice(b + 1);
+    } else {
+      unpinnedItems = containerItems.slice(b + 1, a);
+      pinnedItems = containerItems.slice(a + 1);
+    }
+    const color = getColor(space);
+    const pinned: SideBarItem[] = pinnedItems
+      .map((id) => itemMap[id].childrenIds.map((id) => mapItemToTab(id, itemMap, color)))
+      .flat();
+    const unpinned: SideBarItem[] = unpinnedItems
+      .map((id) => itemMap[id].childrenIds.map((id) => mapItemToTab(id, itemMap, color)))
+      .flat();
+    return {
+      id: space.id,
+      title: space.title,
+      icon: getSpaceIcon(space, color),
+      color,
+      pinned,
+      unpinned,
+    };
+  });
 };
 
 const addResult = (text: string, item: SideBarItem, results: SideBarItem[]) => {
@@ -163,7 +153,7 @@ const addResult = (text: string, item: SideBarItem, results: SideBarItem[]) => {
   } else if ("tabs" in item) {
     for (const tab of item.tabs) {
       if (match(tab.title, text) || match(tab.url, text)) {
-        results.push(item); 
+        results.push(item);
         break;
       }
     }

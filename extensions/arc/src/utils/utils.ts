@@ -1,5 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import { HistoryEntry, Tab } from "./types";
+import { HistoryEntry, Tab } from "../types/types";
+import { ArcColor } from "../types/arc";
 
 export function getDomain(url: string) {
   try {
@@ -81,6 +82,53 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function menuBarCommand(menubar: number, command: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Arc" to activate
+    delay 0.1
+    ignoring application responses
+      tell application "System Events" to tell process "Arc"
+        click menu bar item ${menubar} of menu bar 1
+      end tell
+    end ignoring
+    do shell script "killall System\\\\ Events"
+    delay 0.1
+    tell application "System Events" to tell process "Arc"
+      tell menu bar item ${menubar} of menu bar 1
+        click menu item "${command}" of menu 1
+      end tell
+    end tell
+  `);
+}
+
+export async function newFolder(): Promise<void> {
+  await menuBarCommand(7, "New Folder…");
+}
+
+export async function newNote(): Promise<void> {
+  await menuBarCommand(3, "New Note");
+}
+
+export async function newEasel(): Promise<void> {
+  await menuBarCommand(3, "New Easel");
+}
+
+export async function blackWindow(): Promise<void> {
+  await menuBarCommand(3, "Blank Window");
+}
+
+export async function incognitoWindow(): Promise<void> {
+  await menuBarCommand(3, "New Incognito Window");
+}
+
+export async function littleArcWindow(): Promise<void> {
+  await menuBarCommand(3, "New Little Arc Window");
+}
+
+export async function viewArchive(): Promise<void> {
+  await menuBarCommand(8, "View Archive");
+}
+
 export class PermissionError extends Error {
   constructor(message: string) {
     super(message);
@@ -105,10 +153,11 @@ export const match = (a: string, b: string) => {
   return a.toLowerCase().includes(b.toLowerCase());
 };
 
-export const getHexColor = (r: number, g: number, b: number): string => {
+export const getHexColor = (color: ArcColor): string => {
+  const { red, green, blue } = color;
   return (
     "#" +
-    [r, g, b]
+    [red, green, blue]
       .map((x) =>
         Math.round(x * 128 + 128)
           .toString(16)

@@ -23,13 +23,6 @@
       "mode": "view"
     },
     {
-      "name": "new-window",
-      "title": "Open New Window",
-      "description": "Creates a new window",
-      "mode": "no-view",
-      "subtitle": "Arc"
-    },
-    {
       "name": "top-sites",
       "title": "Top Sites",
       "subtitle": "Arc",
@@ -42,6 +35,62 @@
       "subtitle": "Arc",
       "description": "Search your current sidebar.",
       "mode": "view"
+    },
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "description": "Creates a new window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Creates a new blank window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Open New Incognito Window",
+      "description": "Creates a new incognito window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "little-arc-window",
+      "title": "New Little Arc Window",
+      "description": "Creates a new Little Arc window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-folder",
+      "title": "New Arc Folder",
+      "description": "Creates a new Arc folder",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-note",
+      "title": "New Arc Note",
+      "description": "Creates a new Arc note",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "new-easel",
+      "title": "New Arc Easel",
+      "description": "Creates a new Arc easel",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
+      "name": "view-archive",
+      "title": "View Archive",
+      "description": "Opens the Arc archive",
+      "mode": "no-view",
+      "subtitle": "Arc"
     }
   ],
   "dependencies": {

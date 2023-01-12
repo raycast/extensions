@@ -1,9 +1,19 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { OpenInLittleArc, OpenInNewWindow, OpenInOtherBrowserAction } from "./actions";
 import { getTopTabs, getSpaces, searchSpaces, searchSpace, searchFolder } from "./utils/sidebar";
-import { SideBarSpace, SideBarFolder, SideBarTab, SideBarItem, SearchResult } from "./utils/types";
+import {
+  SideBarSpace,
+  SideBarFolder,
+  SideBarTab,
+  SideBarItem,
+  SearchResult,
+  SideBarEasel,
+  SideBarDocument,
+  SideBarSplitView,
+} from "./types/types";
 import { getDomain, match } from "./utils/utils";
+import { ArcIcons } from "./utils/icon";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -66,19 +76,11 @@ export const Item = ({ item }: { item: SideBarItem }) => {
   } else if ("url" in item) {
     return <Tab tab={item} />;
   } else if ("tabs" in item) {
-    return (
-      <List.Item
-        title={item.tabs.map((tab: SideBarTab) => tab.title).join("  ⎪  ")}
-        icon={{ source: "../assets/split-view.png", tintColor: item.color }}
-      />
-    );
+    return <SplitView splitView={item} />;
+  } else if (item.type === "easel") {
+    return <Easel easel={item} />;
   } else {
-    return (
-      <List.Item
-        title={item.title}
-        icon={{ source: item.type === "notes" ? "../assets/note.png" : "../assets/easel.png" }}
-      />
-    );
+    return <Document document={item} />;
   }
 };
 
@@ -171,7 +173,7 @@ const Folder = ({ folder }: { folder: SideBarFolder }) => {
   return (
     <List.Item
       title={folder.title}
-      icon={{ source: "../assets/folder.svg", tintColor: folder.color }}
+      icon={{ ...ArcIcons.Folder, tintColor: folder.color }}
       actions={
         <ActionPanel>
           <Action.Push
@@ -195,4 +197,16 @@ const Folder = ({ folder }: { folder: SideBarFolder }) => {
       }
     ></List.Item>
   );
+};
+
+const Easel = ({ easel }: { easel: SideBarEasel }) => {
+  return <List.Item title={easel.title} icon={ArcIcons.Easel} />;
+};
+
+const Document = ({ document }: { document: SideBarDocument }) => {
+  return <List.Item title={document.title} icon={ArcIcons.Document} />;
+};
+
+const SplitView = ({ splitView }: { splitView: SideBarSplitView }) => {
+  return <List.Item title={splitView.tabs.map((tab) => tab.title).join("  ⎪  ")} icon={ArcIcons.SplitView} />;
 };

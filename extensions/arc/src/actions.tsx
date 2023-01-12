@@ -1,20 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getApplications,
-  Icon,
-  open,
-  showToast,
-  Toast,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { execSync } from "child_process";
 import { useCallback, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { promisify } from "util";
-import { Tab } from "./utils/types";
+import { Tab } from "./types/types";
 import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils/utils";
 
 const execAsync = promisify(execSync);
