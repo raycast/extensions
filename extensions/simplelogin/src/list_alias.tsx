@@ -10,12 +10,14 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    loadAllAliases().then((response) => {
-      setAliases(response);
-      setFilteredAlias(aliases);
-    }).finally(() => {
-      setIsLoading(false);
-    });
+    loadAllAliases()
+      .then((response) => {
+        setAliases(response);
+        setFilteredAlias(aliases);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
