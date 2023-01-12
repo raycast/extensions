@@ -25,12 +25,12 @@ function OpenInArcAction(props: { url: string }) {
         await closeMainWindow();
         await selectTab(openTab);
       } else {
-        await open(props.url, "Arc");
+        await open(props.url, "company.thebrowser.Browser");
       }
     } catch (e) {
       console.error(e);
 
-      await open(props.url, "Arc");
+      await open(props.url, "company.thebrowser.Browser");
     }
   }
 
