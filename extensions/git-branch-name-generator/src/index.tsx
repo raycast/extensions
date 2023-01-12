@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 type Values = {
@@ -8,7 +8,7 @@ type Values = {
 
 export default function Command() {
   const { handleSubmit, itemProps } = useForm<Values>({
-    onSubmit(values) {
+    async onSubmit(values) {
       const branchType = values.type_of_branch ? `${values.type_of_branch}/` : "";
       const branchNameAsSlug = values.branch_name
         ? values.branch_name
@@ -26,7 +26,7 @@ export default function Command() {
         : "";
       const fullBranchName = `${branchType}${branchNameAsSlug}`;
       Clipboard.copy(fullBranchName);
-      showToast({ style: Toast.Style.Success, title: "Copied to clipboard", message: `${fullBranchName}` });
+      await showHUD(`Copied to clipboard: ${fullBranchName}`);
       popToRoot({ clearSearchBar: true });
     },
     validation: {
