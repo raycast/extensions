@@ -18,27 +18,22 @@ export async function getTabs() {
 
     tell application "Arc"
       set _window_index to 1
+      set _tab_index to 1
       
-      repeat with _window in windows
-        set _tab_index to 1
+      repeat with _tab in tabs of first window
+        set _title to my escape_value(get title of _tab)
+        set _url to get URL of _tab
+        set _location to get location of _tab
         
-        repeat with _tab in tabs of _window
-          set _title to my escape_value(get title of _tab)
-          set _url to get URL of _tab
-          set _location to get location of _tab
-          
-          set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"windowId\\": " & _window_index & ", \\"tabId\\": " & _tab_index & " , \\"location\\": \\"" & _location & "\\" }")
-          
-          if _tab_index < (count tabs of _window) and _window_index < 3 then
-            set _output to (_output & ",\\n")
-          else
-            set _output to (_output & "\\n")
-          end if
-          
-          set _tab_index to _tab_index + 1
-        end repeat
+        set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"windowId\\": " & _window_index & ", \\"tabId\\": " & _tab_index & " , \\"location\\": \\"" & _location & "\\" }")
         
-        set _window_index to _window_index + 1
+        if _tab_index < (count tabs of first window) then
+          set _output to (_output & ",\\n")
+        else
+          set _output to (_output & "\\n")
+        end if
+        
+        set _tab_index to _tab_index + 1
       end repeat
     end tell
     
