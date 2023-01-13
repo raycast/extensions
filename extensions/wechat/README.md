@@ -5,8 +5,6 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 ![WeChat](./metadata/cover.png)
 ![WeChat Showcase](./metadata/showcase.png)
 
-https://user-images.githubusercontent.com/7557357/206844100-001fd7b5-6de5-4042-9adc-647152062091.mp4
-
 ## Requirement
 
 1. Install [WeChat for Mac](https://www.wechat.com) 
@@ -23,6 +21,7 @@ https://user-images.githubusercontent.com/7557357/206844100-001fd7b5-6de5-4042-9
 - [x] Fix some bug
 - [x] Upload to Raycast Store
 - [x] Detect if Wechat is installed
+- [ ] Support fuzzy query
 - [ ] Chat directly inside Rycast without opening WeChat
 - [ ] View WeChat History
 - [ ] Toggle WeChat Function
