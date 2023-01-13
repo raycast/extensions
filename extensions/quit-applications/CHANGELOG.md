@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Update] - 2023-01-05
+## [Update] - 2023-01-12
 
 - Use a toast instead of an HUD so that the Raycast remains open.
 
