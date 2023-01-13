@@ -71,12 +71,9 @@ export const useSQL = <Result>(path: string, query: string) => {
 
         statement.free();
       } catch (e) {
-        console.log("type", typeof e);
         if (error instanceof Error && error.message.includes("operation not permitted")) {
           setError(new PermissionError("You do not have permission to access the History database."));
         } else {
-          console.log("asdfasdf");
-
           setError(e);
         }
       } finally {
