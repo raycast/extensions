@@ -4,9 +4,7 @@ import path from "path";
 
 const bundleIds = ["com.lukilabs.lukiapp", "com.lukilabs.lukiapp-setapp"];
 const [craftDataRoot] = bundleIds
-  .map((id) => {
-    return path.join(homedir(), `/Library/Containers/${id}/Data/Library/Application Support/${id}`);
-  })
+  .map((id) => path.join(homedir(), `/Library/Containers/${id}/Data/Library/Application Support/${id}`))
   .filter(existsSync);
 const searchPath = path.join(craftDataRoot, "Search");
 
