@@ -92,8 +92,6 @@ function jqlForFilter(filter: IssueFilter) {
       return "assignee=currentUser()"
     case "myIssuesInOpenSprints":
       return "assignee=currentUser() AND sprint in openSprints()"
-    default:
-      throw new Error(`Unknown filter ${filter}`)
   }
 }
 
