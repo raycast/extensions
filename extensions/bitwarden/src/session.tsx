@@ -308,7 +308,7 @@ function UnlockForm(props: { onUnlock: (token: string, hash: string) => void; se
           showToast(
             Toast.Style.Failure,
             "Failed to unlock vault.",
-            `Please check your ${shouldShowServer && "Server URL, "}API Key and Secret.`
+            `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`
           );
           return;
         }
