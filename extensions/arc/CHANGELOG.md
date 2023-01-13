@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [New Features] - 2023-01-11
+## [New Features] - 2023-01-13
 
 – Search your sidebar
 – Search spaces
