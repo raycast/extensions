@@ -1,5 +1,6 @@
+import { Color } from '@raycast/api';
 import { CurrencyFormat } from '@srcTypes';
-import { utils } from 'ynab';
+import { TransactionDetail, utils } from 'ynab';
 
 export function formatToReadablePrice({
   amount,
@@ -53,5 +54,26 @@ function formatCurrencyPlacement(amount: string, symbol: string, symbol_first: b
     return shouldPrefixSymbol ? `-${symbol}${amount.substring(1)}` : `${symbol}${amount}`;
   } else {
     return `${amount}${symbol}`;
+  }
+}
+
+/**
+ * Match YNAB flag colors with Raycast colors
+ */
+export function getFlagColor(color: TransactionDetail.FlagColorEnum | null | undefined) {
+  const stringColor = color?.toString();
+  switch (stringColor) {
+    case 'red':
+      return Color.Red;
+    case 'green':
+      return Color.Green;
+    case 'purple':
+      return Color.Purple;
+    case 'orange':
+      return Color.Orange;
+    case 'blue':
+      return Color.Blue;
+    default:
+      return;
   }
 }

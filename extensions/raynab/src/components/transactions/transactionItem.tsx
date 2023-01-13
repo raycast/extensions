@@ -7,7 +7,7 @@ dayjs.extend(relativeTime);
 import { type TransactionDetail } from 'ynab';
 import { TransactionDetails } from './transactionDetails';
 import { useTransaction } from './transactionContext';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadablePrice, getFlagColor } from '@lib/utils';
 import {
   OpenInYnabAction,
   GroupBySubmenu,
@@ -68,25 +68,4 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       }
     />
   );
-}
-
-/**
- * Match YNAB flag colors with Raycast colors
- */
-function getFlagColor(color: TransactionDetail.FlagColorEnum | null | undefined) {
-  const stringColor = color?.toString();
-  switch (stringColor) {
-    case 'red':
-      return Color.Red;
-    case 'green':
-      return Color.Green;
-    case 'purple':
-      return Color.Purple;
-    case 'orange':
-      return Color.Orange;
-    case 'blue':
-      return Color.Blue;
-    default:
-      return;
-  }
 }

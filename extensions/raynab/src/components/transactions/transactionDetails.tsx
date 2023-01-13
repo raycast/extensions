@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Detail } from '@raycast/api';
+import { Action, ActionPanel, Color, Detail, Icon } from '@raycast/api';
 import { CurrencyFormat, TransactionDetail } from '@srcTypes';
 import dayjs from 'dayjs';
 
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.extend(localizedFormat);
 
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadablePrice, getFlagColor } from '@lib/utils';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { OpenInYnabAction } from '@components/actions';
 
@@ -15,7 +15,10 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
   const hasSubtransactions = transaction.subtransactions.length > 0;
 
   const markdown = `
-  # ${transaction.payee_name}
+  # ${transaction.transfer_account_id ? '' : transaction.amount > 0 ? 'Income from' : 'Outflow to'} ${
+    transaction.payee_name
+  }
+  ${transaction.memo ?? ''}
   `;
 
   return (
@@ -24,11 +27,11 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
       markdown={markdown}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Account" text={transaction.account_name} />
           <Detail.Metadata.Label
             title="Amount"
             text={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
           />
-          <Detail.Metadata.Label title="Account" text={transaction.account_name} />
           <Detail.Metadata.Label title="Date" text={dayjs(transaction.date).format('LL')} />
           <Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
             {hasSubtransactions ? (
@@ -42,6 +45,12 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
               <Detail.Metadata.TagList.Item text={transaction.category_name ?? 'Not Specified'} color={Color.Green} />
             )}
           </Detail.Metadata.TagList>
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Status" text={transaction.cleared ? 'Cleared' : 'Uncleared'} />
+          <Detail.Metadata.Label
+            title="Flag"
+            icon={{ source: Icon.Tag, tintColor: getFlagColor(transaction.flag_color) }}
+          />
         </Detail.Metadata>
       }
       actions={
