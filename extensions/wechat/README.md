@@ -4,7 +4,6 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 
 ![WeChat](./assets/cover.png)
 ![WeChat Showcase](./metadata/showcase.png)
-![Video](./assets/video.mp4)
 
 ## Requirement
 
@@ -22,6 +21,7 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - [x] Fix some bug
 - [x] Upload to Raycast Store
 - [x] Detect if Wechat is installed
+- [ ] Support fuzzy query
 - [ ] Chat directly inside Rycast without opening WeChat
 - [ ] View WeChat History
 - [ ] Toggle WeChat Function
