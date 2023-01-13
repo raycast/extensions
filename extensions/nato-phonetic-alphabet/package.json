@@ -17,9 +17,9 @@
       "mode": "view"
     },
     {
-      "name": "to-nato",
-      "title": "To Phonetic",
-      "description": "Transform a term into the NATO equivalent",
+      "name": "spell",
+      "title": "Spell",
+      "description": "Spell a term or sentence as in the NATO equivalent",
       "mode": "view",
       "arguments": [
         {

@@ -5,41 +5,39 @@ interface Arguments {
   Term: string;
 }
 
+const NEW_LINE = "\r\n\r\n";
+
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const term = props.arguments["Term"];
 
-  const as_nato = [...term].map((c: string) => {
-    if (c in DICTIONARY) {
+  const words = term.split(" ");
+
+  // Map over the word and then map of the characters of that word
+  const as_nato = words.map((w: string) => {
+    return [...w].map((c: string) => {
       return {
         character: c,
         telephony: DICTIONARY[c][0] as string,
         pronunciation: DICTIONARY[c][1] as string,
       };
-    } else {
-      return {
-        character: c,
-        telephony: "     ",
-        pronunciation: "\r\n\r\n",
-      };
-    }
+    });
   });
 
   const as_telephony = as_nato
-    .map((n) => {
-      return n.telephony;
+    .flatMap((n) => {
+      return n.map((m) => m.telephony).join(" ");
     })
-    .join(" ");
+    .join(NEW_LINE);
 
   const as_pronunciation = as_nato
-    .map((n) => {
-      return n.pronunciation;
+    .flatMap((n) => {
+      return n.map((m) => m.pronunciation).join(" ");
     })
-    .join(" ");
+    .join(NEW_LINE);
 
   const markdown = `
   ## Telephony
   ${as_telephony}
-  ##
 
   ## Pronunciation
   ${as_pronunciation}
