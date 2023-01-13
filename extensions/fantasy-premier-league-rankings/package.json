@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "rankings",
-      "title": "View My FPL Rankings",
+      "title": "View My Rankings",
       "subtitle": "Fantasy Premier League FPL",
       "description": "View your live ranking across all your leagues in Fantasy Premier League.",
       "mode": "view"
