@@ -3,7 +3,7 @@ import { homedir } from "os";
 import { join } from "path";
 import { useRef, useState, useEffect } from "react";
 import initSqlJs, { Database } from "sql.js";
-import { PermissionError } from "./utils";
+import { PermissionError } from "./permissions";
 
 // @ts-expect-error importing a wasm is tricky :)
 import wasmBinary from "sql.js/dist/sql-wasm.wasm";
@@ -71,14 +71,9 @@ export const useSQL = <Result>(path: string, query: string) => {
 
         statement.free();
       } catch (e) {
-        console.log("type", typeof e);
         if (error instanceof Error && error.message.includes("operation not permitted")) {
-          console.log("ERRRORROROR");
-
           setError(new PermissionError("You do not have permission to access the History database."));
         } else {
-          console.log("asdfasdf");
-
           setError(e);
         }
       } finally {
