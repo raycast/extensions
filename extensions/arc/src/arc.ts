@@ -119,6 +119,18 @@ export async function reloadTab(tab: Tab) {
   `);
 }
 
+export async function makeNewTab() {
+  await runAppleScript(`
+    tell application "Arc"
+      tell front window
+        make new tab with properties {URL:"https://google.com"}
+      end tell
+
+      activate
+    end tell
+  `);
+}
+
 // Windows
 
 export type MakeNewWindowOptions = {
@@ -141,6 +153,8 @@ export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`
     tell application "Arc"
       make new tab with properties {URL:"${url}"}
+
+      activate
     end tell
   `);
 }
