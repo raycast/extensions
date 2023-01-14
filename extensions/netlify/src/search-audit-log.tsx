@@ -2,6 +2,7 @@ import { ActionPanel, Action, Detail, List } from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
+import { OpenOnNetlify } from './components/actions';
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
 import { formatDate, handleNetworkError } from './utils/helpers';
@@ -172,7 +173,7 @@ ${json}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open on Netlify" url={url} />
+          <OpenOnNetlify url={url} />
         </ActionPanel>
       }
     />

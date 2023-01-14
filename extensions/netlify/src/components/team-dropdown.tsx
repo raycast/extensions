@@ -30,7 +30,9 @@ export default function TeamDropdown(props: Props) {
             <List.Dropdown.Item
               key={team.slug}
               icon={{
-                source: team.team_logo_url ? team.team_logo_url : 'icon.png',
+                source: team.team_logo_url
+                  ? team.team_logo_url
+                  : 'team-placeholder.png',
                 mask: Image.Mask.RoundedRectangle,
               }}
               title={team.name}

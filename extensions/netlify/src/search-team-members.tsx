@@ -2,10 +2,18 @@ import { ActionPanel, Action, Image, List } from '@raycast/api';
 import { getAvatarIcon, useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
+import { OpenGitProfile } from './components/actions';
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
 import { formatDate, handleNetworkError } from './utils/helpers';
-import { Committer, Member, Reviewer, Team } from './utils/interfaces';
+import { getGitProviderIcon } from './utils/icons';
+import {
+  Committer,
+  GitProvider,
+  Member,
+  Reviewer,
+  Team,
+} from './utils/interfaces';
 
 export default function Command() {
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -109,20 +117,13 @@ export default function Command() {
               }}
               title={name}
               subtitle={member.email}
-              // @ts-expect-error idk how to fix
               accessories={[
-                member.connected_accounts.github && {
-                  tooltip: member.connected_accounts.github,
-                  icon: 'vcs/github.svg',
-                },
-                member.connected_accounts.gitlab && {
-                  tooltip: member.connected_accounts.gitlab,
-                  icon: 'vcs/gitlab.svg',
-                },
-                // member.connected_accounts.bitbucket && {
-                //   tooltip: member.connected_accounts.bitbucket,
-                //   icon: 'vcs/bitbucket.svg',
-                // },
+                ...Object.entries(member.connected_accounts).map(
+                  ([provider, username]) => ({
+                    icon: getGitProviderIcon(provider as GitProvider),
+                    tooltip: username,
+                  }),
+                ),
                 member.pending
                   ? {
                       tag: 'Pending',
@@ -135,10 +136,9 @@ export default function Command() {
               ].filter(Boolean)}
               actions={
                 <MemberActions
-                  github={member.connected_accounts.github}
-                  gitlab={member.connected_accounts.gitlab}
                   selectedTeam={selectedTeam}
                   page="members"
+                  providers={member.connected_accounts}
                 />
               }
             />
@@ -150,7 +150,7 @@ export default function Command() {
           return (
             <List.Item
               key={committer.id}
-              icon={`vcs/${committer.provider}.svg`}
+              icon={getGitProviderIcon(committer.provider)}
               title={committer.provider_slug}
               // subtitle={member.email}
               accessories={[
@@ -161,14 +161,9 @@ export default function Command() {
               ]}
               actions={
                 <MemberActions
-                  github={
-                    committer.provider === 'github' && committer.provider_slug
-                  }
-                  gitlab={
-                    committer.provider === 'gitlab' && committer.provider_slug
-                  }
                   selectedTeam={selectedTeam}
                   page="contributors"
+                  providers={{ [committer.provider]: committer.provider_slug }}
                 />
               }
             />
@@ -210,38 +205,30 @@ export default function Command() {
 }
 
 const MemberActions = ({
-  github,
-  gitlab,
   page,
+  providers,
   selectedTeam,
 }: {
-  github?: string | false;
-  gitlab?: string | false;
   page: 'members' | 'contributors' | 'reviewers';
+  providers?: Record<string, string>;
   selectedTeam: string;
 }) => (
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser
+        icon="icon.png"
         title="Manage Membership"
         url={`https://app.netlify.com/teams/${selectedTeam}/${page}`}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>
-      {github && (
-        <Action.OpenInBrowser
-          icon="vcs/github.svg"
-          title="Open GitHub Profile"
-          url={`https://github.com/${github}`}
+      {Object.entries(providers || {}).map(([provider, username]) => (
+        <OpenGitProfile
+          key={provider}
+          provider={provider as GitProvider}
+          username={username}
         />
-      )}
-      {gitlab && (
-        <Action.OpenInBrowser
-          icon="vcs/gitlab.svg"
-          title="Open GitLab Profile"
-          url={`https://gitlab.com/${gitlab}`}
-        />
-      )}
+      ))}
     </ActionPanel.Section>
   </ActionPanel>
 );

@@ -9,6 +9,7 @@ import {
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
+import { OpenOnNetlify, OpenRepo } from './components/actions';
 import { getDefaultTextEditor, tildifyPath, useDiskCache } from './utils/disk';
 import {
   formatDate,
@@ -56,35 +57,31 @@ export default function Command() {
             accessories={[{ text: formatDate(dir.lastModified) }]}
             actions={
               <ActionPanel>
-                {textEditor && (
-                  <Action.Open
-                    application={textEditor.bundleId}
-                    icon={{ fileIcon: textEditor.path }}
-                    target={dir.fullPath}
-                    title={`Open in ${snakeCaseToTitleCase(textEditor.name)}`}
-                  />
-                )}
                 <ActionPanel.Section>
-                  {dir.siteId && (
-                    <Action.OpenInBrowser
-                      shortcut={{ modifiers: ['cmd'], key: 'n' }}
-                      title="Open on Netlify"
-                      url={`https://app.netlify.com/site-redirect/${dir.siteId}`}
+                  {textEditor && (
+                    <Action.Open
+                      application={textEditor.bundleId}
+                      icon={{ fileIcon: textEditor.path }}
+                      target={dir.fullPath}
+                      title={`Open in ${snakeCaseToTitleCase(textEditor.name)}`}
                     />
                   )}
-                  {dir.remotes[0] && (
-                    <Action.OpenInBrowser
-                      shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                      title="Open Repository"
-                      url={dir.remotes[0].url}
-                    />
-                  )}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
                   <Action.ShowInFinder
                     path={dir.fullPath}
                     shortcut={{ modifiers: ['cmd'], key: 'return' }}
                   />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  {dir.siteId && (
+                    <OpenOnNetlify
+                      url={`https://app.netlify.com/site-redirect/${dir.siteId}`}
+                    />
+                  )}
+                  {dir.remotes.map((remote) => (
+                    <OpenRepo url={remote.url} />
+                  ))}
+                </ActionPanel.Section>
+                <ActionPanel.Section>
                   <Action.CopyToClipboard
                     title={'Copy Path to Clipboard'}
                     content={dir.fullPath}

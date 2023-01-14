@@ -1,6 +1,7 @@
-import { ActionPanel, Icon, List, Action } from '@raycast/api';
+import { ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
+import { OpenOnNetlify } from './components/actions';
 import api from './utils/api';
 import { getDomainUrl, handleNetworkError } from './utils/helpers';
 import { formatDate } from './utils/helpers';
@@ -33,6 +34,7 @@ export default function Command() {
           icon={Icon.Globe}
           title={domain.name}
           subtitle={domain.account_name}
+          keywords={domain.account_slug.split('-')}
           accessories={[
             {
               text: formatDate(domain.created_at),
@@ -41,8 +43,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Open on Netlify"
+              <OpenOnNetlify
                 url={getDomainUrl(domain.account_slug, domain.name)}
               />
             </ActionPanel>

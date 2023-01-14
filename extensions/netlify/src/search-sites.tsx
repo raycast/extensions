@@ -7,6 +7,7 @@ import { formatDate, handleNetworkError } from './utils/helpers';
 import { getFramework, getGitProviderIcon } from './utils/icons';
 import { Site, Team } from './utils/interfaces';
 
+import { OpenOnNetlify, OpenRepo } from './components/actions';
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';
 
@@ -187,43 +188,28 @@ const SiteActions = ({
       />
     </ActionPanel.Section>
     <ActionPanel.Section>
-      <Action.OpenInBrowser
-        shortcut={{ key: 'n', modifiers: ['cmd'] }}
-        title="Open on Netlify"
-        url={site.admin_url}
-      />
-      <Action.OpenInBrowser
-        icon={Icon.Link}
-        shortcut={{ key: 'u', modifiers: ['cmd'] }}
-        title="Go to Production URL"
-        url={site.ssl_url}
-      />
+      <OpenOnNetlify url={site.admin_url} />
       {site.build_settings.repo_url && (
-        <Action.OpenInBrowser
-          icon={Icon.CodeBlock}
-          shortcut={{ key: 'r', modifiers: ['cmd'] }}
-          title="Go to Repository"
-          url={site.build_settings.repo_url}
-        />
+        <OpenRepo url={site.build_settings.repo_url} />
       )}
       <Action.OpenInBrowser
-        icon={Icon.Gear}
-        shortcut={{ key: 's', modifiers: ['cmd'] }}
-        title="Go to Site Settings"
-        url={`${site.admin_url}/settings`}
+        icon={Icon.Globe}
+        shortcut={{ key: 'u', modifiers: ['cmd'] }}
+        title="Open Production URL"
+        url={site.ssl_url}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>
-      <Action.CopyToClipboard
-        content={site.id}
-        shortcut={{ key: 'i', modifiers: ['cmd'] }}
-        title="Copy Site ID"
-      />
       <Action
         icon={favorites.includes(site.id) ? Icon.StarDisabled : Icon.Star}
         shortcut={{ key: 'f', modifiers: ['cmd'] }}
         title={favorites.includes(site.id) ? 'Remove Favorite' : 'Add Favorite'}
         onAction={() => toggleFavorite(site.id)}
+      />
+      <Action.CopyToClipboard
+        content={site.id}
+        shortcut={{ key: '.', modifiers: ['cmd'] }}
+        title="Copy Site ID"
       />
     </ActionPanel.Section>
   </ActionPanel>

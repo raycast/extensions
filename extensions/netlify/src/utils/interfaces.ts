@@ -29,7 +29,7 @@ export interface Committer {
   id: string;
   last_seen: string;
   member_id?: string;
-  provider: 'github' | 'gitlab' | 'bitbucket';
+  provider: GitProvider;
   provider_slug: string;
 }
 
@@ -111,6 +111,7 @@ export type Framework =
   | undefined;
 
 export type GitProvider =
+  | 'azure'
   | 'azure-devops'
   | 'bitbucket'
   | 'github'

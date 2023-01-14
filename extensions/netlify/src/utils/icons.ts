@@ -79,6 +79,7 @@ export function getGitProviderIcon(slug: GitProvider):
   }
 
   const gitProviderMap = {
+    azure: { source: 'vcs/azure.svg', tintColor: Color.Blue },
     'azure-devops': { source: 'vcs/azure.svg', tintColor: Color.Blue },
     bitbucket: { source: 'vcs/bitbucket.svg', tintColor: Color.Blue },
     github: { source: 'vcs/github.svg', tintColor: Color.PrimaryText },

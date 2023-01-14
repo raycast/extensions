@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import api from '../utils/api';
+import { OpenRepo } from '../components/actions';
 import { formatDate, getDeployUrl, handleNetworkError } from '../utils/helpers';
 import { getStatusIcon } from '../utils/icons';
 import { Deploy } from '../utils/interfaces';
@@ -191,33 +192,30 @@ const DeployActions = ({
   siteName: string;
 }) => (
   <ActionPanel>
-    <Action.OpenInBrowser
-      icon={Icon.AppWindowList}
-      title="View Deploy Logs"
-      url={getDeployUrl(siteName, deploy.id)}
-    />
-    <Action.CopyToClipboard
-      content={deploy.id}
-      shortcut={{ key: 'i', modifiers: ['cmd'] }}
-      title="Copy Deploy ID"
-    />
-    <Action.OpenInBrowser
-      icon={Icon.Link}
-      shortcut={{ key: 'u', modifiers: ['cmd'] }}
-      title="Go to URL"
-      url={
-        deploy.context === 'production'
-          ? deploy.links.permalink
-          : deploy.deploy_ssl_url
-      }
-    />
-    {deploy.review_url && (
+    <ActionPanel.Section>
       <Action.OpenInBrowser
-        icon={Icon.CodeBlock}
-        shortcut={{ key: 'r', modifiers: ['cmd'] }}
-        title="Go to Pull Request"
-        url={deploy.review_url}
+        icon="icon.png"
+        title="View Deploy Logs"
+        url={getDeployUrl(siteName, deploy.id)}
       />
-    )}
+      {deploy.review_url && <OpenRepo url={deploy.review_url} />}
+      <Action.OpenInBrowser
+        icon={Icon.Globe}
+        shortcut={{ key: 'u', modifiers: ['cmd'] }}
+        title="Open URL"
+        url={
+          deploy.context === 'production'
+            ? deploy.links.permalink
+            : deploy.deploy_ssl_url
+        }
+      />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.CopyToClipboard
+        content={deploy.id}
+        shortcut={{ key: '.', modifiers: ['cmd'] }}
+        title="Copy Deploy ID"
+      />
+    </ActionPanel.Section>
   </ActionPanel>
 );
