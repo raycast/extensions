@@ -1,7 +1,7 @@
 import { getPreferenceValues, Toast, showToast } from '@raycast/api';
 import { AxiosError } from 'axios';
 
-import { Preferences } from './interfaces';
+import { DeployState, Preferences } from './interfaces';
 
 const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
 
@@ -30,6 +30,13 @@ export function getDomainUrl(team: string, name: string) {
 
 export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
+}
+
+export function getStatusText(state: DeployState, errorMessage?: string) {
+  if (errorMessage && /cancell?ed/i.test(errorMessage)) {
+    state = 'cancelled';
+  }
+  return state.toUpperCase();
 }
 
 export function handleNetworkError(e: unknown): void {

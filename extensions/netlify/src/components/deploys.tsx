@@ -3,7 +3,12 @@ import { useEffect, useState } from 'react';
 
 import api from '../utils/api';
 import { OpenRepo } from '../components/actions';
-import { formatDate, getDeployUrl, handleNetworkError } from '../utils/helpers';
+import {
+  formatDate,
+  getDeployUrl,
+  getStatusText,
+  handleNetworkError,
+} from '../utils/helpers';
 import { getStatusIcon } from '../utils/icons';
 import { Deploy } from '../utils/interfaces';
 
@@ -59,6 +64,8 @@ export default function DeployListView(props: Props) {
         deploy.id || '',
         deploy.branch || '',
         deploy.committer || '',
+        deploy.error_message || '',
+        deploy.state || '',
         String(deploy.review_id) || '',
         String(deploy.commit_ref) || '',
       ];
@@ -96,7 +103,7 @@ export default function DeployListView(props: Props) {
           .map((deploy) => (
             <List.Item
               key={deploy.id}
-              icon={getStatusIcon(deploy.state)}
+              icon={getStatusIcon(deploy.state, deploy.error_message)}
               title={deploy.title || deploy.commit_ref || deploy.id}
               detail={<DeployMetadata deploy={deploy} />}
               actions={<DeployActions deploy={deploy} siteName={siteName} />}
@@ -109,14 +116,21 @@ export default function DeployListView(props: Props) {
 
 const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
   <List.Item.Detail
+    markdown={
+      deploy.error_message
+        ? `\`\`\`\n${deploy.error_message}\n\`\`\``
+        : undefined
+    }
     metadata={
       <List.Item.Detail.Metadata>
         {deploy.state && (
           <>
             <List.Item.Detail.Metadata.TagList title="Deploy state">
               <List.Item.Detail.Metadata.TagList.Item
-                text={deploy.state.toUpperCase()}
-                color={getStatusIcon(deploy.state).tintColor}
+                text={getStatusText(deploy.state, deploy.error_message)}
+                color={
+                  getStatusIcon(deploy.state, deploy.error_message).tintColor
+                }
                 // icon={getStatusIcon(deploy.state).icon}
               />
             </List.Item.Detail.Metadata.TagList>

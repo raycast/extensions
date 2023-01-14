@@ -63,6 +63,7 @@ export interface Deploy {
   created_at: string;
   deploy_time: number;
   deploy_ssl_url: string;
+  error_message?: string;
   id: string;
   links: {
     alias: string;

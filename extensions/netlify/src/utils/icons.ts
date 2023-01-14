@@ -3,7 +3,10 @@ import { Color, Icon } from '@raycast/api';
 import { capitalize } from './helpers';
 import { DeployState, Framework, GitProvider } from './interfaces';
 
-export function getStatusIcon(state: DeployState): {
+export function getStatusIcon(
+  state: DeployState,
+  errorMessage?: string,
+): {
   source: Icon;
   tintColor: Color;
 } {
@@ -26,6 +29,11 @@ export function getStatusIcon(state: DeployState): {
     cancelled: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
     ready: { source: Icon.CheckCircle, tintColor: Color.Green },
   };
+
+  if (errorMessage && /cancell?ed/i.test(errorMessage)) {
+    state = 'cancelled';
+  }
+
   return (
     deployStateMap[state] || {
       source: Icon.QuestionMarkCircle,
