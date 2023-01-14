@@ -90,7 +90,9 @@ export interface Directory {
 export interface Domain {
   account_name: string;
   account_slug: string;
+  created_at: string;
   name: string;
+  updated_at: string;
 }
 
 export type Framework =
