@@ -19,3 +19,6 @@ export type Space = {
   id: string;
   title?: string;
 };
+
+export type BookmarkTab = Record<string, string>; // { "url": "title"}
+export type UpdateBookmarks = (savedBookmarks: BookmarkTab, tab: Tab) => Promise<void>;

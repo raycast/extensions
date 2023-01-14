@@ -13,7 +13,7 @@ import {
   selectSpace,
   selectTab,
 } from "./arc";
-import { Space, Tab } from "./types";
+import { BookmarkTab, Space, Tab, UpdateBookmarks } from "./types";
 import { getSpaceTitle } from "./utils";
 
 function OpenInArcAction(props: { url: string }) {
@@ -283,6 +283,31 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
   );
 }
 
+function BookmarkTabAction(props: { tab: Tab; savedBookmarks: BookmarkTab; updateBookmarks: UpdateBookmarks }) {
+  const isTabBookmarked = props.savedBookmarks[props.tab.url];
+
+  async function handleAction() {
+    try {
+      await props.updateBookmarks(props.savedBookmarks, props.tab);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed updating bookmarks",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return (
+    <Action
+      icon={Icon.Bookmark}
+      title={isTabBookmarked ? "Remove Bookmark" : "Bookmark Tab"}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      onAction={handleAction}
+    />
+  );
+}
+
 // Sections
 
 export function OpenLinkActionSections(props: { url: string }) {
@@ -328,9 +353,19 @@ export function CopyLinkActionSection(props: { url: string; title?: string }) {
   );
 }
 
-export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+export function EditTabActionSection(props: {
+  tab: Tab;
+  mutate: MutatePromise<Tab[] | undefined>;
+  savedBookmarks: BookmarkTab;
+  updateBookmarks: UpdateBookmarks;
+}) {
   return (
     <ActionPanel.Section>
+      <BookmarkTabAction
+        tab={props.tab}
+        savedBookmarks={props.savedBookmarks}
+        updateBookmarks={props.updateBookmarks}
+      />
       <ReloadTabAction tab={props.tab} />
       <CloseTabAction tab={props.tab} mutate={props.mutate} />
     </ActionPanel.Section>

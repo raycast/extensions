@@ -3,17 +3,19 @@ import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { groupBy } from "lodash";
 import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections } from "./actions";
 import { getTabs } from "./arc";
+import { useBookmarks } from "./hooks/useBookmarks";
 import { getDomain, getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
 import { VersionCheck } from "./version";
 
 function SearchTabs() {
   const { data, isLoading, mutate } = useCachedPromise(getTabs);
+  const { isBookmarksLoading, savedBookmarks, updateBookmarks } = useBookmarks();
 
   const orderedLocations = getOrderedLocations();
   const groupedTabs = groupBy(data, (tab) => tab.location);
 
   return (
-    <List isLoading={isLoading} filtering={{ keepSectionOrder: true }}>
+    <List isLoading={isLoading || isBookmarksLoading} filtering={{ keepSectionOrder: true }}>
       {orderedLocations.map((location) => {
         const tabs = groupedTabs[location];
         return (
@@ -28,7 +30,12 @@ function SearchTabs() {
                   <ActionPanel>
                     <OpenLinkActionSections url={tab.url} />
                     <CopyLinkActionSection url={tab.url} title={tab.title} />
-                    <EditTabActionSection tab={tab} mutate={mutate} />
+                    <EditTabActionSection
+                      tab={tab}
+                      mutate={mutate}
+                      savedBookmarks={savedBookmarks}
+                      updateBookmarks={updateBookmarks}
+                    />
                   </ActionPanel>
                 }
               />

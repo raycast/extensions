@@ -58,6 +58,13 @@
       "subtitle": "Arc",
       "description": "Create and open a new tab in the current window",
       "mode": "no-view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Arc",
+      "description": "Search your bookmarked tabs",
+      "mode": "view"
     }
   ],
   "dependencies": {
