@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { lt } from "semver";
 import { getVersion } from "./arc";
 
-const REQUIRED_ARC_VERSION = "0.89.0";
+const REQUIRED_ARC_VERSION = "0.85.0";
 
 export function VersionCheck(props: { children: JSX.Element }) {
   const { data, isLoading } = useCachedPromise(getVersion);
