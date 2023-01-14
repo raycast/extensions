@@ -15,6 +15,12 @@
       "title": "Find Documents",
       "description": "Search your self-hosted Paperless-ngx instance for documents",
       "mode": "view"
+    },
+    {
+      "name": "documentForm",
+      "title": "Add Document",
+      "description": "Upload a document to your self-hosted Paperless-ngx instance",
+      "mode": "view"
     }
   ],
   "dependencies": {

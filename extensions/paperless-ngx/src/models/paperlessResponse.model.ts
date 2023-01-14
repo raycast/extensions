@@ -1,15 +1,13 @@
 export type paperlessFetchResponse = paperlessDocumentResponse;
 
-
-
 export interface paperlessDocumentResponse {
   count: number;
   next?: string;
   previous?: string;
-  results: paperlessDocumentResults[];
+  results: document[];
 }
 
-export interface paperlessDocumentResults {
+export interface document {
   id: number;
   correspondent?: number;
   document_type?: number;
@@ -31,48 +29,48 @@ export interface SearchHit {
   rank: number;
 }
 
-export interface paperlessDocumentTypesResponse {
+export interface documentTypesResponse {
   count: number;
   next?: string;
   previous?: string;
-  results: paperlessDocumentTypes[];
+  results: documentType[];
 }
-export interface paperlessDocumentTypes {
+export interface documentType {
   id: number;
   slug: string;
   name: string;
-  match: string;
-  matching_algorithm: number;
-  is_insensitive: boolean;
-  document_count: number;
+  match?: string;
+  matching_algorithm?: number;
+  is_insensitive?: boolean;
+  document_count?: number;
 }
 
-export interface paperlessCorrespondentsResponse {
+export interface correspondentsResponse {
   count: number;
   next?: string;
   previous?: string;
-  results: paperlessCorrespondentResults[];
+  results: correspondent[];
 }
 
-export interface paperlessCorrespondentResults {
+export interface correspondent {
   id: number;
   slug: string;
   name: string;
-  match: string;
-  matching_algorithm: number;
-  is_insensitive: boolean;
-  document_count: number;
-  last_correspondence: Date;
+  match?: string;
+  matching_algorithm?: number;
+  is_insensitive?: boolean;
+  document_count?: number;
+  last_correspondence?: Date;
 }
 
-export interface paperlessDocumentTagsResponse {
+export interface pocumentTagsResponse {
   count: number;
   next?: string;
   previous?: string;
-  results: paperlessDocumentTagsResults[];
+  results: documentTag[];
 }
 
-export interface paperlessDocumentTagsResults {
+export interface documentTag {
   id: number;
   slug: string;
   name: string;
