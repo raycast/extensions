@@ -283,7 +283,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
   );
 }
 
-function BookmarkTabAction(props: { tab: Tab; savedBookmarks: BookmarkTab; updateBookmarks: UpdateBookmarks }) {
+export function BookmarkTabAction(props: { tab: Tab; savedBookmarks: BookmarkTab; updateBookmarks: UpdateBookmarks }) {
   const isTabBookmarked = props.savedBookmarks[props.tab.url];
 
   async function handleAction() {
