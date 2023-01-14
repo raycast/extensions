@@ -1,10 +1,10 @@
 import {getPreferenceValues, Grid, List} from '@raycast/api';
 import {useState} from 'react';
 import {
-    paperlessCorrespondentsResponse,
-    paperlessDocumentResults,
-    paperlessDocumentTagsResponse,
-    paperlessDocumentTypesResponse,
+    correspondent,
+    document,
+    documentTag,
+    documentType,
     paperlessFetchResponse
 } from './models/paperlessResponse.model';
 import {fetchDocuments} from './utils/fetchDocuments';
@@ -15,43 +15,41 @@ import {fetchCorrespondents} from './utils/fetchCorrespondents';
 import {Preferences} from './models/preferences.model';
 import {DocGridItem} from './components/DocGridItem';
 
-export default function DocumentList() {
+export default function DocumentsView() {
 
     const {gridMode}: Preferences = getPreferenceValues();
 
     const [results, setResults] = useState<paperlessFetchResponse>();
-    const [tags, setTags] = useState<paperlessDocumentTagsResponse>();
-    const [types, setTypes] = useState<paperlessDocumentTypesResponse>();
-    const [correspondents, setCorrespondents] = useState<paperlessCorrespondentsResponse>();
+    const [tags, setTags] = useState<documentTag[]>();
+    const [types, setTypes] = useState<documentType[]>();
+    const [correspondents, setCorrespondents] = useState<correspondent[]>();
     const [loading, setLoading] = useState<boolean>(false);
 
     const onSearchTextChange = async (text: string) => {
         setLoading(true);
-        const response = await fetchDocuments(text.replace(/\s/g, '+'));
-        setResults(response);
         const documentResponse = await fetchDocuments(text.replace(/\s/g, '+'));
         setResults(documentResponse);
-        const documentTagsResponse = await fetchDocumentTags();
-        setTags(documentTagsResponse);
-        const documentTypesResponse = await fetchDocumentTypes();
-        setTypes(documentTypesResponse);
+        const documentTags = await fetchDocumentTags();
+        setTags(documentTags);
+        const documentTypes = await fetchDocumentTypes();
+        setTypes(documentTypes);
         const correspondentsResponse = await fetchCorrespondents();
-        setCorrespondents(correspondentsResponse);
+        setCorrespondents(correspondents);
         setLoading(false);
     };
 
-    const getCorrespondent = (doc: paperlessDocumentResults) => {
+    const getCorrespondent = (doc: document) => {
         if (correspondents) {
-            const correspondent = correspondents.results.find((correspondent) => correspondent.id === doc.correspondent);
+            const correspondent = correspondents.find((correspondent) => correspondent.id === doc.correspondent);
             return correspondent?.name;
         } else {
             return '';
         }
     };
 
-    const getDocumentType = (doc: paperlessDocumentResults) => {
+    const getDocumentType = (doc: document) => {
         if (types) {
-            const type = types.results.find((type) => type.id === doc.document_type);
+            const type = types.find((type) => type.id === doc.document_type);
             return type?.name;
         } else {
             return '';
@@ -59,11 +57,11 @@ export default function DocumentList() {
 
     };
 
-    const stringifyTags = (doc: paperlessDocumentResults) => {
+    const stringifyTags = (doc: document) => {
         // Returns a string of all tags for a document
         if (tags) {
             const tagNames = doc.tags.map((tag) => {
-                const tagName = tags.results.find((tagResult) => tagResult.id === tag);
+                const tagName = tags.find((tagResult) => tagResult.id === tag);
                 return tagName?.name;
             });
 
