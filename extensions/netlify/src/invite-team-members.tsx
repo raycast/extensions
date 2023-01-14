@@ -46,11 +46,14 @@ export default function Command() {
   const [validationError, setValidationError] = useState<string>('');
 
   async function fetchTeams() {
+    setLoading(true);
     try {
       const teams = await api.getTeams();
       setTeams(teams);
+      setLoading(false);
     } catch (e) {
-      // ignore silently
+      setLoading(false);
+      handleNetworkError(e);
     }
   }
 

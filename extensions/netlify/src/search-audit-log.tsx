@@ -33,28 +33,23 @@ export default function Command() {
   }
 
   async function fetchTeams() {
+    setLoading(true);
     try {
       const teams = await api.getTeams();
       setTeams(teams);
+      if (teams.length === 1 || !selectedTeam) {
+        const user = await api.getUser();
+        setSelectedTeam(user.preferred_account_id);
+      }
+      setLoading(false);
     } catch (e) {
-      // ignore silently
-    }
-  }
-
-  async function fetchUser() {
-    try {
-      const user = await api.getUser();
-      setSelectedTeam(user.preferred_account_id);
-    } catch (e) {
-      // ignore silently
+      setLoading(false);
+      handleNetworkError(e);
     }
   }
 
   useEffect(() => {
     fetchTeams();
-    if (!selectedTeam) {
-      fetchUser();
-    }
   }, []);
 
   useEffect(() => {
@@ -87,7 +82,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setQuery}
-      searchBarAccessory={teamDropdown}
+      searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Filter recent audit log entries"
       searchText={query}
     >

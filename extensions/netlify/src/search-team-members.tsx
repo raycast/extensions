@@ -8,7 +8,7 @@ import { formatDate, handleNetworkError } from './utils/helpers';
 import { Committer, Member, Reviewer, Team } from './utils/interfaces';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -22,6 +22,7 @@ export default function Command() {
 
   const teamDropdown = (
     <TeamDropdown
+      required
       selectedTeam={selectedTeam}
       setSelectedTeam={setSelectedTeam}
       teams={teams}
@@ -29,11 +30,18 @@ export default function Command() {
   );
 
   async function fetchTeams() {
+    setLoading(true);
     try {
       const teams = await api.getTeams();
       setTeams(teams);
+      if (teams.length === 1 || !selectedTeam) {
+        const user = await api.getUser();
+        setSelectedTeam(user.preferred_account_id);
+      }
+      setLoading(false);
     } catch (e) {
       handleNetworkError(e);
+      setLoading(false);
     }
   }
 
@@ -61,7 +69,9 @@ export default function Command() {
         setLoading(false);
       }
     }
-    reload();
+    if (selectedTeam) {
+      reload();
+    }
   }, [selectedTeam]);
 
   function getName(user: Member | Reviewer) {
@@ -80,7 +90,10 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={teamDropdown}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
+    >
       <List.Section title={`Team members`}>
         {members.sort(sortAlphabetically).map((member) => {
           const name = member.full_name || member.email;
@@ -155,7 +168,7 @@ export default function Command() {
                     committer.provider === 'gitlab' && committer.provider_slug
                   }
                   selectedTeam={selectedTeam}
-                  page="members"
+                  page="contributors"
                 />
               }
             />
@@ -182,7 +195,7 @@ export default function Command() {
                     }
                   : {
                       tag: 'Approved',
-                      tooltip: `Can collaborate on Deploy Previews`,
+                      tooltip: `Approved as a Reviewer`,
                     },
               ]}
               actions={
@@ -204,7 +217,7 @@ const MemberActions = ({
 }: {
   github?: string | false;
   gitlab?: string | false;
-  page: 'members' | 'reviewers';
+  page: 'members' | 'contributors' | 'reviewers';
   selectedTeam: string;
 }) => (
   <ActionPanel>

@@ -18,10 +18,9 @@ export default function TeamDropdown(props: Props) {
       tooltip="Scope search to selected team"
       value={selectedTeam}
     >
-      <List.Dropdown.Item
-        title={required ? 'Select a team to search' : 'Search across all teams'}
-        value=""
-      />
+      {!required && (
+        <List.Dropdown.Item title="Search across all teams" value="" />
+      )}
       <List.Dropdown.Section>
         {teams
           .sort((a, b) =>
