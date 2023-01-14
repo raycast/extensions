@@ -1,7 +1,7 @@
-import {paperlessDocumentResults} from './paperlessResponse.model';
+import {document} from './paperlessResponse.model';
 
 export interface DocItem {
-    document: paperlessDocumentResults;
+    document: document;
     tags?: string;
     correspondent?: string;
     type?: string;
