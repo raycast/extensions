@@ -3,14 +3,27 @@ import { useCachedPromise } from "@raycast/utils";
 import { lt } from "semver";
 import { getVersion } from "./arc";
 
-export function VersionCheck(props: { children: JSX.Element }) {
-  const { data } = useCachedPromise(getVersion);
+const REQUIRED_ARC_VERSION = "0.89.0";
 
-  if (!data) {
+export function VersionCheck(props: { children: JSX.Element }) {
+  const { data, isLoading } = useCachedPromise(getVersion);
+
+  if (isLoading) {
     return <Detail isLoading />;
-  } else if (lt("0.85.0", data)) {
+  } else if (!data) {
     return (
-      <Detail markdown="# Version Conflict\n\nThe extension requires Arc v0.85.0. Please update the app via Arc -> Check for Updates." />
+      <Detail
+        markdown={`**Something went wrong.**
+        We are unable to fetch Arc version. Please make sure Arc is correctly installed in the system.`}
+      />
+    );
+  } else if (lt(data, REQUIRED_ARC_VERSION)) {
+    return (
+      <Detail
+        markdown={`**Version Conflict**
+        The extension requires Arc v${REQUIRED_ARC_VERSION}.
+        Please update the app via Arc -> Check for Updates.`}
+      />
     );
   } else {
     return props.children;
