@@ -26,6 +26,7 @@
   "dependencies": {
     "@raycast/api": "^1.45.3",
     "axios": "^1.2.2",
+    "formdata-node": "^5.0.0",
     "moment": "^2.29.4"
   },
   "devDependencies": {
