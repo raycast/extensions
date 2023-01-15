@@ -133,8 +133,9 @@ const SiteMetadata = ({ site }: { site: Site }) => {
       markdown={`![${site.name}](${site.screenshot_url})`}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
+          <List.Item.Detail.Metadata.Link
             title="Production URL"
+            target={site.ssl_url}
             text={site.ssl_url}
           />
           <List.Item.Detail.Metadata.Separator />

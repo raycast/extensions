@@ -34,7 +34,7 @@ export function getPreferences(): Preferences {
 
 export function getStatusText(state: DeployState, errorMessage?: string) {
   if (errorMessage && /cancell?ed/i.test(errorMessage)) {
-    state = 'cancelled';
+    state = 'canceled';
   }
   return state.toUpperCase();
 }

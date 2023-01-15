@@ -57,8 +57,17 @@ class Api {
     return data;
   }
 
-  async getDomains(): Promise<Domain[]> {
-    const { data } = await this.netlify.get<Domain[]>('/dns_zones');
+  async getDomains(team?: string): Promise<Domain[]> {
+    const params = team ? `?account_slug=${team}` : '';
+    const { data } = await this.netlify.get<Domain[]>(`/dns_zones${params}`);
+    return data;
+  }
+
+  async searchDomains(query: string, team: string): Promise<Domain[]> {
+    const params = [`domain=${query}`, `account_id=${team}`];
+    const { data } = await this.netlify.get<Domain[]>(
+      `/domains-next/search/${params.join('&')}`,
+    );
     return data;
   }
 

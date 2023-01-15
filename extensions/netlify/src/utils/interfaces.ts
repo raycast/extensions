@@ -50,6 +50,7 @@ export type DeployState =
   | 'error'
   | 'rejected'
   | 'skipped'
+  | 'canceled'
   | 'cancelled'
   | 'deleted'
   | 'ready';
@@ -92,8 +93,22 @@ export interface Domain {
   account_name: string;
   account_slug: string;
   created_at: string;
+  domain?: {
+    auto_renew: boolean;
+    auto_renew_at: string;
+    expires_at: string;
+    renewal_price: string;
+  };
   name: string;
   updated_at: string;
+}
+
+export interface DomainSearch {
+  available: boolean;
+  delegated_domain?: string;
+  owned_by_account?: boolean;
+  price: string | null;
+  renewal_price: string | null;
 }
 
 export type Framework =

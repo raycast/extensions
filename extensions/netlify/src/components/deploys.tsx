@@ -140,16 +140,18 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
         {!deploy.manual_deploy && (
           <>
             {deploy.review_url ? (
-              <List.Item.Detail.Metadata.Label
+              <List.Item.Detail.Metadata.Link
                 title="Pull request"
+                target={deploy.review_url}
                 text={`${deploy.title || deploy.commit_ref || ''} (#${
                   deploy.review_id
                 })`}
               />
             ) : (
               deploy.commit_url && (
-                <List.Item.Detail.Metadata.Label
+                <List.Item.Detail.Metadata.Link
                   title="Commit message"
+                  target={deploy.commit_url}
                   text={deploy.title || deploy.commit_ref || ''}
                 />
               )
@@ -175,8 +177,13 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
             text={deploy.context}
           />
         )}
-        <List.Item.Detail.Metadata.Label
+        <List.Item.Detail.Metadata.Link
           title="URL"
+          target={
+            deploy.context === 'deploy-preview'
+              ? deploy.deploy_ssl_url
+              : deploy.links.permalink
+          }
           text={
             deploy.context === 'deploy-preview'
               ? deploy.deploy_ssl_url

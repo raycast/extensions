@@ -26,6 +26,7 @@ export function getStatusIcon(
     rejected: { source: Icon.XMarkCircle, tintColor: Color.Red },
     deleted: { source: Icon.CheckCircle, tintColor: Color.Red },
     skipped: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
+    canceled: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
     cancelled: { source: Icon.MinusCircle, tintColor: Color.SecondaryText },
     ready: { source: Icon.CheckCircle, tintColor: Color.Green },
   };
