@@ -106,6 +106,7 @@ export interface Domain {
 export interface DomainSearch {
   available: boolean;
   delegated_domain: string;
+  name: string; // see api.searchDomains()
   owned_by_account?: boolean;
   price: string | null;
   renewal_price: string | null;

@@ -74,6 +74,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       onSearchTextChange={setQuery}
+      searchBarPlaceholder="Search docs.netlify.com..."
       searchText={query}
       throttle
     >
@@ -153,13 +154,15 @@ function DocListItem(props: DocListItemProps) {
       icon={title === lvl1 ? Icon.Book : Icon.Document}
       title={title.replace(/[\s]{2,}/g, ' ')}
       subtitle={subtitle.replace(/[\s]{2,}/g, ' ')}
-      // @ts-expect-error due to .filter(Boolean)
-      accessories={[
-        isBookmarked && {
-          icon: { source: Icon.Bookmark, tintColor: Color.Red },
-          tooltip: 'Bookmarked (⌘B)',
-        },
-      ].filter(Boolean)}
+      accessories={
+        [
+          isBookmarked && {
+            icon: { source: Icon.Bookmark, tintColor: Color.Red },
+            tooltip: 'Bookmarked (⌘B)',
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ].filter(Boolean) as any[]
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>

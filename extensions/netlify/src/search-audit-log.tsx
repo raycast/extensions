@@ -87,7 +87,7 @@ export default function Command() {
       {filteredAuditLog.length === 0 && (
         <List.EmptyView
           title="No audit log found"
-          description="Make sure you have selected a team."
+          description="Your team's plan may not have audit log capabilities."
         />
       )}
       <List.Section title="Audit log">
@@ -111,7 +111,6 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    // icon={Icon.Rocket}
                     title="Show Audit Log"
                     target={
                       <AuditLogDetail

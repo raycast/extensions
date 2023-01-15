@@ -99,7 +99,6 @@ export default function Command() {
   }
 
   async function handleSubmit(form: FormValues) {
-    // console.log('onSubmit', form);
     const isValid = validateEmail({ target: { value: form.email } });
     if (!isValid) {
       return false;
@@ -169,7 +168,6 @@ export default function Command() {
 
   return (
     <Form
-      // enableDrafts
       isLoading={isLoading}
       actions={
         <ActionPanel>

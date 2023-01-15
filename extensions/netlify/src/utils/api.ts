@@ -77,8 +77,8 @@ class Api {
     });
     const responses = await Promise.all(promises);
     return responses.map(({ data }, i) => ({
-      delegated_domain: domains[i],
       ...data,
+      name: domains[i],
     }));
   }
 

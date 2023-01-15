@@ -95,13 +95,15 @@ export default function Command() {
             key={site.id}
             title={site.name}
             subtitle={site.account_name}
-            // @ts-expect-error due to .filter(Boolean)
-            accessories={[
-              favorites.includes(site.id) && {
-                icon: { source: Icon.Star, tintColor: Color.Yellow },
-                tooltip: 'Favorite (⌘F)',
-              },
-            ].filter(Boolean)}
+            accessories={
+              [
+                favorites.includes(site.id) && {
+                  icon: { source: Icon.Star, tintColor: Color.Yellow },
+                  tooltip: 'Favorite (⌘F)',
+                },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ].filter(Boolean) as any[]
+            }
             detail={<SiteMetadata site={site} />}
             actions={
               <SiteActions

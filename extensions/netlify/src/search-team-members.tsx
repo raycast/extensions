@@ -99,6 +99,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
+      searchBarPlaceholder="Search for team members..."
     >
       <List.Section title={`Team members`}>
         {members.sort(sortAlphabetically).map((member) => {
@@ -150,7 +151,6 @@ export default function Command() {
               key={committer.id}
               icon={getGitProviderIcon(committer.provider)}
               title={committer.provider_slug}
-              // subtitle={member.email}
               accessories={[
                 {
                   text: formatDate(committer.last_seen),

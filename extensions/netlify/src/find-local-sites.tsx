@@ -37,7 +37,11 @@ export default function Command() {
   }
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading}>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter local directories..."
+    >
       {data?.dirs?.length === 0 && (
         <List.EmptyView
           title={`No Netlify directories found in ${scanPath}`}
@@ -45,7 +49,9 @@ export default function Command() {
         />
       )}
       <List.Section
-        title={`${data?.dirs?.length || 0} sites found in local directories`}
+        title={`${data?.dirs?.length || 0} site${
+          data?.dirs?.length === 1 ? '' : 's'
+        } found in local directories`}
       >
         {data?.dirs?.map((dir) => (
           <List.Item

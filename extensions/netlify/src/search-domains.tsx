@@ -29,6 +29,10 @@ export default function Command() {
   const [query, setQuery] = useState<string>('');
   const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
+  const team = teams.find((team) => team.slug === teamSlug);
+  const teamName = team?.name;
+  const canBuyDomain = team?.user_capabilities?.billing?.c;
+
   async function fetchDomains(team: string) {
     setLoading(true);
     try {
@@ -88,16 +92,16 @@ export default function Command() {
   async function confirmBuyDomain(domain: DomainSearch) {
     const options: Alert.Options = {
       icon: Icon.BankNote,
-      title: `Register ${domain.delegated_domain} for $${domain.price}?`,
-      message: `Netlify will charge the credit card on file for ${teamSlug}. This transaction is non-refundable. This domain registration will auto-renew for $${domain.renewal_price} for the second year.`,
+      title: `Register ${domain.name} for $${domain.price}?`,
+      message: `Netlify will charge the credit card on file for ${teamName}. This transaction is non-refundable. This domain registration will auto-renew for $${domain.renewal_price} for the second year.`,
       primaryAction: {
         title: 'Register now',
         onAction: async () => {
           try {
-            await api.buyDomain(domain.delegated_domain, teamSlug);
+            await api.buyDomain(domain.name, teamSlug);
             showToast({
               style: Toast.Style.Success,
-              title: `${domain.delegated_domain} purchased!`,
+              title: `${domain.name} purchased!`,
             });
             setQuery('');
             fetchDomains(teamSlug);
@@ -119,8 +123,6 @@ export default function Command() {
     />
   );
 
-  const canBuyDomain = teams.find((team) => team.slug === teamSlug)
-    ?.user_capabilities?.billing?.c;
   return (
     <List
       isLoading={isLoading}
@@ -139,10 +141,9 @@ export default function Command() {
             title={domain.name}
             subtitle={domain.account_name}
             keywords={domain.account_slug.split('-')}
-            // @ts-expect-error idk how to fix
             accessories={
               domain.domain
-                ? [
+                ? ([
                     domain.domain?.auto_renew &&
                       domain.domain?.renewal_price && {
                         text: `$${domain.domain?.renewal_price}`,
@@ -167,7 +168,8 @@ export default function Command() {
                           domain.domain?.expires_at,
                         )}`,
                       },
-                  ].filter(Boolean)
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ].filter(Boolean) as any[])
                 : [
                     {
                       tag: { color: Color.SecondaryText, value: 'External' },
@@ -189,9 +191,9 @@ export default function Command() {
         <List.Section title="Search results">
           {searchedDomains.map((domain) => (
             <List.Item
-              key={domain.delegated_domain || query}
+              key={domain.delegated_domain || domain.name}
               icon={Icon.Globe}
-              title={domain.delegated_domain || query}
+              title={domain.delegated_domain || domain.name}
               subtitle={
                 domain.available
                   ? 'Available'
@@ -199,13 +201,15 @@ export default function Command() {
                   ? 'Registered by Team'
                   : 'Not Available'
               }
-              // @ts-expect-error idk how to fix
-              accessories={[
-                domain.available && {
-                  tag: { color: Color.Green, value: `$${domain.price}` },
-                  tooltip: `$${domain.price} for the first year, $${domain.renewal_price} to renew`,
-                },
-              ].filter(Boolean)}
+              accessories={
+                [
+                  domain.available && {
+                    tag: { color: Color.Green, value: `$${domain.price}` },
+                    tooltip: `$${domain.price} for the first year, $${domain.renewal_price} to renew`,
+                  },
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ].filter(Boolean) as any[]
+              }
               actions={
                 domain.available && canBuyDomain ? (
                   <ActionPanel>
@@ -221,6 +225,10 @@ export default function Command() {
           ))}
         </List.Section>
       )}
+      <List.EmptyView
+        title={`No domains found for ${teamName}`}
+        description="Search for a domain name to register it for this team."
+      />
     </List>
   );
 }
