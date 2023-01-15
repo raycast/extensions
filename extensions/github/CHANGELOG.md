@@ -2,7 +2,7 @@
 
 ## [Add linked branch actions] - 2023-01-11
 
-- Add `Create Issue Branch` command
+- Add `Create Branch` command
 - Add create, delete branch actions directly from an issue action panel
 
 ## [Add text colors and tags] - 2022-12-16

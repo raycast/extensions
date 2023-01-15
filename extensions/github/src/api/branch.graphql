@@ -2,8 +2,15 @@ input CreateLinkedBranchInput {
   clientMutationId: String
   issueId: ID!
   name: String
-  oid: GitObjectID
+  oid: GitObjectID!
   repositoryId: ID
+}
+
+input CreateRefInput {
+  clientMutationId: String
+  name: String!
+  oid: GitObjectID!
+  repositoryId: ID!
 }
 
 input DeleteLinkedBranchInput {
@@ -19,6 +26,16 @@ mutation createLinkedBranch($input: CreateLinkedBranchInput!) {
         id
         name
       }
+    }
+  }
+}
+
+mutation createRef($input: CreateRefInput!) {
+  createRef(input: $input) {
+    clientMutationId
+    ref {
+      id
+      name
     }
   }
 }

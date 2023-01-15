@@ -61,9 +61,9 @@
       "mode": "view"
     },
     {
-      "name": "create-issue-branch",
-      "title": "Create Issue Branch",
-      "description": "Create an issue branch in one of your GitHub repositories",
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
       "mode": "view"
     },
     {
