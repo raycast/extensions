@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Clipboard,
-  Icon,
-  getPreferenceValues,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
 import slugify from "slugify";
 
 enum DefaultActionPreference {
@@ -23,18 +16,11 @@ interface ActionsOpts {
 function _getActions({ value }: ActionsOpts) {
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
   const ACTIONS = [
-    <Action.CopyToClipboard
-      key={DefaultActionPreference.CopyToClipboard}
-      content={value}
-    />,
+    <Action.CopyToClipboard key={DefaultActionPreference.CopyToClipboard} content={value} />,
     <Action.Paste key={DefaultActionPreference.PasteInApp} content={value} />,
   ].filter(Boolean) as React.ReactElement[];
-  const defaultAction = ACTIONS.find(
-    (action) => action.key === defaultPreference
-  );
-  const otherActions = ACTIONS.filter(
-    (action) => action.key !== defaultPreference
-  );
+  const defaultAction = ACTIONS.find((action) => action.key === defaultPreference);
+  const otherActions = ACTIONS.filter((action) => action.key !== defaultPreference);
   return (
     <ActionPanel>
       <>
@@ -53,9 +39,7 @@ type Result = {
 };
 
 export default function Command() {
-  const [clipboardText, setClipboardText] = React.useState<string | undefined>(
-    undefined
-  );
+  const [clipboardText, setClipboardText] = React.useState<string | undefined>(undefined);
   const [input, setInput] = React.useState(clipboardText);
   const [result, setResult] = React.useState<Result | undefined>(undefined);
 
@@ -103,9 +87,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.QuestionMarkCircle}
           title={"Nothing to slugify"}
-          description={
-            "Copy some content to your clipboard, or start typing text to slugify."
-          }
+          description={"Copy some content to your clipboard, or start typing text to slugify."}
         />
       )}
     </List>
