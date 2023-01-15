@@ -27,11 +27,25 @@
       "mode": "view"
     },
     {
+      "name": "searchBookmarksByTags",
+      "title": "Search Bookmarks By Tags",
+      "subtitle": "Pinboard",
+      "description": "Searches your Pinboard bookmarks by tags.",
+      "mode": "view"
+    },
+    {
       "name": "searchBookmarksWithConstantTags",
       "title": "Search Bookmarks With Constant Tags",
       "subtitle": "Pinboard",
       "description": "Searches your Pinboard bookmarks by tags, but add one or more tags from preferences. Optional.",
       "mode": "view"
+    },
+    {
+      "name": "refreshCache",
+      "title": "Refresh Pinboard Cache",
+      "description": "Refreshes cache",
+      "mode": "no-view",
+      "interval": "10m"
     }
   ],
   "preferences": [
@@ -53,7 +67,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
+    "@raycast/api": "^1.45.3",
     "he": "^1.2.0",
     "node-fetch": "^3.2.0"
   },
