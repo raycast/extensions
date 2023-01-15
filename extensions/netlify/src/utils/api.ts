@@ -82,6 +82,12 @@ class Api {
     }));
   }
 
+  async buyDomain(domain: string, team: string): Promise<DomainSearch> {
+    const body = { domain, account_id: team };
+    const { data } = await this.netlify.post(`/domains-next`, body);
+    return data;
+  }
+
   async getMembers(team: string): Promise<Member[]> {
     const { data } = await this.netlify.get<Member[]>(`/${team}/members`);
     return data;

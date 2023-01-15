@@ -105,7 +105,7 @@ export interface Domain {
 
 export interface DomainSearch {
   available: boolean;
-  delegated_domain?: string;
+  delegated_domain: string;
   owned_by_account?: boolean;
   price: string | null;
   renewal_price: string | null;
@@ -199,6 +199,10 @@ export interface Team {
   roles_allowed: Role[];
   slug: string;
   team_logo_url?: string;
+  user_capabilities: {
+    billing: { c: boolean };
+    members: { c: boolean };
+  };
 }
 
 export interface User {

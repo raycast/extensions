@@ -68,7 +68,7 @@ export default function Command() {
 
   function canInvite(team: Team) {
     return (
-      team.role === 'Owner' &&
+      team.user_capabilities?.members?.c &&
       (!SAML_ENFORCED.includes(team.enforce_saml) || team.org_saml_enabled)
     );
   }

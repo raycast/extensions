@@ -1,4 +1,14 @@
-import { ActionPanel, Color, Icon, List } from '@raycast/api';
+import {
+  ActionPanel,
+  Action,
+  Alert,
+  Color,
+  Icon,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+} from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
@@ -75,6 +85,31 @@ export default function Command() {
     }
   }, [query]);
 
+  async function confirmBuyDomain(domain: DomainSearch) {
+    const options: Alert.Options = {
+      icon: Icon.BankNote,
+      title: `Register ${domain.delegated_domain} for $${domain.price}?`,
+      message: `Netlify will charge the credit card on file for ${teamSlug}. This transaction is non-refundable. This domain registration will auto-renew for $${domain.renewal_price} for the second year.`,
+      primaryAction: {
+        title: 'Register now',
+        onAction: async () => {
+          try {
+            await api.buyDomain(domain.delegated_domain, teamSlug);
+            showToast({
+              style: Toast.Style.Success,
+              title: `${domain.delegated_domain} purchased!`,
+            });
+            setQuery('');
+            fetchDomains(teamSlug);
+          } catch (e) {
+            handleNetworkError(e);
+          }
+        },
+      },
+    };
+    await confirmAlert(options);
+  }
+
   const teamDropdown = (
     <TeamDropdown
       required
@@ -84,6 +119,8 @@ export default function Command() {
     />
   );
 
+  const canBuyDomain = teams.find((team) => team.slug === teamSlug)
+    ?.user_capabilities?.billing?.c;
   return (
     <List
       isLoading={isLoading}
@@ -169,6 +206,17 @@ export default function Command() {
                   tooltip: `$${domain.price} for the first year, $${domain.renewal_price} to renew`,
                 },
               ].filter(Boolean)}
+              actions={
+                domain.available && canBuyDomain ? (
+                  <ActionPanel>
+                    <Action
+                      icon={Icon.BankNote}
+                      title="Register Domain"
+                      onAction={() => confirmBuyDomain(domain)}
+                    />
+                  </ActionPanel>
+                ) : undefined
+              }
             />
           ))}
         </List.Section>
