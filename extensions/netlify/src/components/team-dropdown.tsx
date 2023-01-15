@@ -4,19 +4,19 @@ import { Team } from '../utils/interfaces';
 
 interface Props {
   required?: boolean;
-  selectedTeam: string;
-  setSelectedTeam: (team: string) => void;
+  setTeamSlug: (team: string) => void;
   teams: Team[];
+  teamSlug: string;
 }
 
 export default function TeamDropdown(props: Props) {
-  const { required, teams, selectedTeam, setSelectedTeam } = props;
+  const { teamSlug, required, teams, setTeamSlug } = props;
   return (
     <List.Dropdown
-      onChange={setSelectedTeam}
+      onChange={setTeamSlug}
       placeholder="Filter teams"
       tooltip="Scope search to selected team"
-      value={selectedTeam}
+      value={teamSlug}
     >
       {!required && (
         <List.Dropdown.Item title="Search across all teams" value="" />

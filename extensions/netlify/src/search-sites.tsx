@@ -19,10 +19,7 @@ export default function Command() {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const [query, setQuery] = useState<string>('');
-  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
-    'selectedTeam',
-    '',
-  );
+  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
   async function fetchSites(query = '', team?: string) {
     setLoading(true);
@@ -75,15 +72,11 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    fetchSites(query, selectedTeam);
-  }, [query, selectedTeam]);
+    fetchSites(query, teamSlug);
+  }, [query, teamSlug]);
 
   const teamDropdown = (
-    <TeamDropdown
-      selectedTeam={selectedTeam}
-      setSelectedTeam={setSelectedTeam}
-      teams={teams}
-    />
+    <TeamDropdown teamSlug={teamSlug} setTeamSlug={setTeamSlug} teams={teams} />
   );
 
   return (

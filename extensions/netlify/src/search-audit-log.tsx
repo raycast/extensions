@@ -16,10 +16,7 @@ export default function Command() {
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
   const [query, setQuery] = useState<string>('');
-  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
-    'selectedTeam',
-    '',
-  );
+  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
   async function fetchAuditLog(team: string) {
     setLoading(true);
@@ -38,9 +35,9 @@ export default function Command() {
     try {
       const teams = await api.getTeams();
       setTeams(teams);
-      if (teams.length === 1 || !selectedTeam) {
+      if (teams.length === 1 || !teamSlug) {
         const user = await api.getUser();
-        setSelectedTeam(user.preferred_account_id);
+        setTeamSlug(user.preferred_account_id);
       }
       setLoading(false);
     } catch (e) {
@@ -54,16 +51,16 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    if (selectedTeam) {
-      fetchAuditLog(selectedTeam);
+    if (teamSlug) {
+      fetchAuditLog(teamSlug);
     }
-  }, [selectedTeam]);
+  }, [teamSlug]);
 
   const teamDropdown = (
     <TeamDropdown
       required
-      selectedTeam={selectedTeam}
-      setSelectedTeam={setSelectedTeam}
+      teamSlug={teamSlug}
+      setTeamSlug={setTeamSlug}
       teams={teams}
     />
   );
@@ -120,7 +117,7 @@ export default function Command() {
                       <AuditLogDetail
                         json={JSON.stringify(log.payload.traits, null, 2)}
                         payload={log.payload}
-                        selectedTeam={selectedTeam}
+                        teamSlug={teamSlug}
                       />
                     }
                   />
@@ -136,12 +133,12 @@ export default function Command() {
 const AuditLogDetail = ({
   json,
   payload,
-  selectedTeam,
+  teamSlug,
 }: {
   json: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
-  selectedTeam: string;
+  teamSlug: string;
 }) => {
   const markdown = `
 \`\`\`json
@@ -149,7 +146,7 @@ ${json}
 \`\`\`
 `;
 
-  const url = `https://app.netlify.com/teams/${selectedTeam}/log`;
+  const url = `https://app.netlify.com/teams/${teamSlug}/log`;
   return (
     <Detail
       markdown={markdown}

@@ -7,6 +7,7 @@ import {
   Committer,
   Deploy,
   Domain,
+  DomainSearch,
   Member,
   Reviewer,
   Role,
@@ -63,12 +64,22 @@ class Api {
     return data;
   }
 
-  async searchDomains(query: string, team: string): Promise<Domain[]> {
-    const params = [`domain=${query}`, `account_id=${team}`];
-    const { data } = await this.netlify.get<Domain[]>(
-      `/domains-next/search/${params.join('&')}`,
-    );
-    return data;
+  async searchDomains(query: string, team: string): Promise<DomainSearch[]> {
+    const TLDs = ['com', 'org', 'net', 'dev', 'io'];
+    const domains = query.includes('.')
+      ? [query]
+      : TLDs.map((tld) => `${query}.${tld}`);
+    const promises = domains.map((domain) => {
+      const params = [`account_id=${team}`, `domain=${domain}`];
+      return this.netlify.get<DomainSearch>(
+        `/domains-next/search?${params.join('&')}`,
+      );
+    });
+    const responses = await Promise.all(promises);
+    return responses.map(({ data }, i) => ({
+      delegated_domain: domains[i],
+      ...data,
+    }));
   }
 
   async getMembers(team: string): Promise<Member[]> {

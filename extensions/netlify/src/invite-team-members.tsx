@@ -34,10 +34,7 @@ export default function Command() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
 
-  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
-    'selectedTeam',
-    '',
-  );
+  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
   const [email, setEmail] = useState<string>('');
   const [role, setRole] = useState<Role>('Owner');
   const [checked, setChecked] = useState<boolean>(true);
@@ -140,9 +137,9 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    fetchSites('', selectedTeam);
+    fetchSites('', teamSlug);
     resetFormFields();
-  }, [selectedTeam]);
+  }, [teamSlug]);
 
   const invitableTeams = teams.filter(canInvite);
   const numInvites = email.trim().split(DELIMETER).filter(Boolean).length;
@@ -195,8 +192,8 @@ export default function Command() {
         id="team"
         info="Only team owners can invite new members. Teams with strict SAML enabled are filtered out."
         title="Add to team"
-        value={selectedTeam}
-        onChange={(team) => setSelectedTeam(team)}
+        value={teamSlug}
+        onChange={(team) => setTeamSlug(team)}
       >
         {invitableTeams
           .sort((a, b) => (a.name > b.name ? 1 : -1))
@@ -231,7 +228,7 @@ export default function Command() {
         value={role}
       >
         {(teams || [])
-          .find(({ slug }) => slug === selectedTeam)
+          .find(({ slug }) => slug === teamSlug)
           ?.roles_allowed.map((role) => (
             <Form.Dropdown.Item
               key={role}

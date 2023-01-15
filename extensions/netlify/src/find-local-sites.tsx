@@ -54,7 +54,9 @@ export default function Command() {
             title={dir.name}
             icon={Icon.Folder}
             subtitle={tildifyPath(dir.fullPath)}
-            accessories={[{ text: formatDate(dir.lastModified) }]}
+            accessories={[
+              { text: formatDate(dir.lastModified), tooltip: 'Last modified' },
+            ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>

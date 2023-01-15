@@ -14,25 +14,23 @@ import {
   Reviewer,
   Team,
 } from './utils/interfaces';
+import InviteTeamMembers from './invite-team-members';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(true);
 
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [committers, setCommitters] = useState<Committer[]>([]);
   const [reviewers, setReviewers] = useState<Reviewer[]>([]);
 
-  const [selectedTeam, setSelectedTeam] = useCachedState<string>(
-    'selectedTeam',
-    '',
-  );
+  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
   const teamDropdown = (
     <TeamDropdown
       required
-      selectedTeam={selectedTeam}
-      setSelectedTeam={setSelectedTeam}
+      teamSlug={teamSlug}
+      setTeamSlug={setTeamSlug}
       teams={teams}
     />
   );
@@ -42,9 +40,9 @@ export default function Command() {
     try {
       const teams = await api.getTeams();
       setTeams(teams);
-      if (teams.length === 1 || !selectedTeam) {
+      if (teams.length === 1 || !teamSlug) {
         const user = await api.getUser();
-        setSelectedTeam(user.preferred_account_id);
+        setTeamSlug(user.preferred_account_id);
       }
       setLoading(false);
     } catch (e) {
@@ -61,9 +59,9 @@ export default function Command() {
     async function reload() {
       setLoading(true);
       const promises = [
-        api.getMembers(selectedTeam),
-        api.getCommitters(selectedTeam),
-        api.getReviewers(selectedTeam),
+        api.getMembers(teamSlug),
+        api.getCommitters(teamSlug),
+        api.getReviewers(teamSlug),
       ];
       try {
         const responses = await Promise.all(promises);
@@ -77,10 +75,10 @@ export default function Command() {
         setLoading(false);
       }
     }
-    if (selectedTeam) {
+    if (teamSlug) {
       reload();
     }
-  }, [selectedTeam]);
+  }, [teamSlug]);
 
   function getName(user: Member | Reviewer) {
     return user.full_name || user.email || '';
@@ -136,7 +134,7 @@ export default function Command() {
               ].filter(Boolean)}
               actions={
                 <MemberActions
-                  selectedTeam={selectedTeam}
+                  teamSlug={teamSlug}
                   page="members"
                   providers={member.connected_accounts}
                 />
@@ -161,7 +159,7 @@ export default function Command() {
               ]}
               actions={
                 <MemberActions
-                  selectedTeam={selectedTeam}
+                  teamSlug={teamSlug}
                   page="contributors"
                   providers={{ [committer.provider]: committer.provider_slug }}
                 />
@@ -193,13 +191,23 @@ export default function Command() {
                       tooltip: `Approved as a Reviewer`,
                     },
               ]}
-              actions={
-                <MemberActions selectedTeam={selectedTeam} page="reviewers" />
-              }
+              actions={<MemberActions teamSlug={teamSlug} page="reviewers" />}
             />
           );
         })}
       </List.Section>
+      <List.EmptyView
+        title="No matching team members found"
+        description="Press the return key to invite new team members."
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Invite Team Members"
+              target={<InviteTeamMembers />}
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
@@ -207,18 +215,18 @@ export default function Command() {
 const MemberActions = ({
   page,
   providers,
-  selectedTeam,
+  teamSlug,
 }: {
   page: 'members' | 'contributors' | 'reviewers';
   providers?: Record<string, string>;
-  selectedTeam: string;
+  teamSlug: string;
 }) => (
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser
         icon="icon.png"
         title="Manage Membership"
-        url={`https://app.netlify.com/teams/${selectedTeam}/${page}`}
+        url={`https://app.netlify.com/teams/${teamSlug}/${page}`}
       />
     </ActionPanel.Section>
     <ActionPanel.Section>
