@@ -86,7 +86,7 @@ export default function Command() {
                     />
                   )}
                   {dir.remotes.map((remote) => (
-                    <OpenRepo url={remote.url} />
+                    <OpenRepo key={remote.url} url={remote.url} />
                   ))}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
