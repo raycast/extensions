@@ -64,7 +64,8 @@
       "name": "menu-bar",
       "title": "Menu Bar",
       "description": "Access your favorites and spaces from the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "10m"
     },
     {
       "name": "search",
