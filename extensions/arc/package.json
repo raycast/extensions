@@ -65,6 +65,12 @@
       "title": "Menu Bar",
       "description": "Access your favorites and spaces from the menu bar",
       "mode": "menu-bar"
+    },
+    {
+      "name": "search",
+      "title": "Search Arc",
+      "description": "Search tabs, history and search suggestions",
+      "mode": "view"
     }
   ],
   "dependencies": {

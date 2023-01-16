@@ -18,7 +18,7 @@ function SearchHistory() {
     } else {
       showToast({
         style: Toast.Style.Failure,
-        title: "Cannot search history",
+        title: "Failed searching history",
         message: error instanceof Error ? error.message : undefined,
       });
     }
