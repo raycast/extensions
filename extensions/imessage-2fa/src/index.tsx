@@ -21,6 +21,7 @@ export default function Command() {
       isLoading={isLoading}
       searchText={searchText}
       searchBarAccessory={<SearchTypeDropdown onChange={setSearchType} />}
+      isShowingDetail
       onSearchTextChange={setSearchText}
     >
       {data?.length ? (
@@ -35,7 +36,6 @@ export default function Command() {
               key={message.guid}
               icon={Icon.Message}
               title={code}
-              subtitle={message.text}
               detail={<Detail message={message} code={code} />}
               actions={<Actions message={message} code={code} />}
             />
@@ -65,7 +65,7 @@ function Detail(props: { message: Message; code: string }) {
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Code" text={props.code} />
           <List.Item.Detail.Metadata.Label title="From" text={props.message.sender} />
-          <List.Item.Detail.Metadata.Label title="Date" text={props.message.message_date} />
+          <List.Item.Detail.Metadata.Label title="Date" text={new Date(props.message.message_date).toLocaleString()} />
         </List.Item.Detail.Metadata>
       }
     />
