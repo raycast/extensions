@@ -3,10 +3,7 @@ import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 export function getDomain(url: string) {
   try {
     const urlObj = new URL(url);
-    return {
-      value: urlObj.hostname.replace("www.", ""),
-      tooltip: url,
-    };
+    return urlObj.hostname.replace("www.", "");
   } catch (e) {
     console.error(e);
     return undefined;

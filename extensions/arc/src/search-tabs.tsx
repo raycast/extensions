@@ -23,7 +23,10 @@ function SearchTabs() {
                 key={getKey(tab)}
                 icon={getFavicon(tab.url)}
                 title={tab.title}
-                subtitle={getDomain(tab.url)}
+                subtitle={{
+                  value: getDomain(tab.url),
+                  tooltip: tab.url,
+                }}
                 actions={
                   <ActionPanel>
                     <OpenLinkActionSections url={tab.url} />

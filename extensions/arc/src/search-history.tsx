@@ -32,7 +32,10 @@ function SearchHistory() {
           key={entry.id}
           icon={getFavicon(entry.url)}
           title={entry.title}
-          subtitle={getDomain(entry.url)}
+          subtitle={{
+            value: getDomain(entry.url),
+            tooltip: entry.url,
+          }}
           accessories={[getLastVisitedAt(entry)]}
           actions={
             <ActionPanel>

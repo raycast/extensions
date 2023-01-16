@@ -59,6 +59,12 @@
       "subtitle": "Arc",
       "description": "Create and open a new tab in the current window",
       "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "description": "Access your favorites and spaces from the menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
