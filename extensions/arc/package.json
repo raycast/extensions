@@ -58,7 +58,17 @@
       "title": "Open New Tab",
       "subtitle": "Arc",
       "description": "Create and open a new tab in the current window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        }
+      ]
     }
   ],
   "dependencies": {
