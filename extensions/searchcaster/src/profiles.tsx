@@ -1,9 +1,7 @@
 import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { Profile, ProfileActionsProps } from "./types";
-import { useProfileSearch, useFarcasterInstalled, truncateAddress } from "./utils";
+import { useProfileSearch, useFarcasterInstalled, truncateAddress, linkify } from "./utils";
 import { useState } from "react";
-import Linkify from "linkify-it";
-import tlds from "tlds";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -56,16 +54,9 @@ function Actions({ profile, farcasterInstalled }: ProfileActionsProps) {
 }
 
 function ProfileDetails({ profile }: { profile: Profile }) {
-  const linkify = Linkify();
-  linkify.tlds(tlds);
-
   // Find all links in bio and replace them with markdown links
   const bio = profile.body.bio;
-  const markdown = linkify.test(bio)
-    ? linkify.match(bio)?.reduce((acc, match) => {
-        return acc.replace(match.raw, `[${match.raw}](${match.url})`);
-      }, bio)
-    : bio;
+  const markdown = linkify(bio);
 
   return (
     <List.Item.Detail

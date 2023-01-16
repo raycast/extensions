@@ -2,6 +2,8 @@ import { getApplications } from "@raycast/api";
 import { CastResponse, ProfileResponse } from "./types";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import Linkify from "linkify-it";
+import tlds from "tlds";
 
 export function useCastSearch(query: string) {
   const searchParams = new URLSearchParams({ text: query, count: "100" });
@@ -44,4 +46,17 @@ export function useFarcasterInstalled() {
 
 export function truncateAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+const _linkify = Linkify().tlds(tlds);
+export function linkify(text: string): string {
+  const matches = _linkify.match(text);
+
+  if (!matches) {
+    return text;
+  }
+
+  return matches.reduce((acc, match) => {
+    return acc.replace(match.raw, `[${match.raw}](${match.url})`);
+  }, text);
 }

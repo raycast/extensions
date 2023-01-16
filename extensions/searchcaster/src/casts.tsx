@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { ActionsProps, Cast, CastDetailsProps } from "./types";
-import { useCastSearch, useFarcasterInstalled } from "./utils";
+import { useCastSearch, useFarcasterInstalled, linkify } from "./utils";
 import { useState } from "react";
 
 export default function Command() {
@@ -49,7 +49,7 @@ function Actions({ cast, farcasterInstalled }: ActionsProps) {
 }
 
 function CastDetails({ cast }: CastDetailsProps) {
-  const text = cast.body.data.text;
+  const text = linkify(cast.body.data.text);
 
   const image = cast.body.data.image;
   const imageMarkdown = image ? `![](${image})` : "";
