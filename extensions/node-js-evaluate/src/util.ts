@@ -23,7 +23,6 @@ export function doEval(state: State, long = false): State {
   type ||= toType(evalResult);
 
   if (!isPrimitive(evalResult as never)) {
-    console.log(evalResult);
     result = stringify(
       evalResult,
       (_, value) => {
