@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import useInterval from "@use-it/interval";
 import { useState } from "react";
 import { useMessages } from "./messages";
 import { Message, SearchType } from "./types";
@@ -7,7 +8,9 @@ import { extractCode } from "./utils";
 export default function Command() {
   const [searchType, setSearchType] = useState<SearchType>("code");
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, permissionView } = useMessages({ searchText, searchType });
+  const { isLoading, data, permissionView, revalidate } = useMessages({ searchText, searchType });
+
+  useInterval(revalidate, 1_000);
 
   if (permissionView) {
     return permissionView;
@@ -31,7 +34,7 @@ export default function Command() {
             <List.Item
               key={message.guid}
               icon={Icon.Message}
-              title={code ?? "No 2FA code"}
+              title={code}
               subtitle={message.text}
               detail={<Detail message={message} code={code} />}
               actions={<Actions message={message} code={code} />}
@@ -39,7 +42,7 @@ export default function Command() {
           );
         })
       ) : (
-        <List.EmptyView title="No two factor authentication codes found" />
+        <List.EmptyView title="No codes found" description="Keeps refreshing every second" />
       )}
     </List>
   );
