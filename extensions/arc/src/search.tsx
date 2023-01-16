@@ -17,6 +17,7 @@ import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { chain } from "lodash";
 import { getTabs } from "./arc";
+import { getDefaultSuggestion, useSuggestions } from "./suggestions";
 
 function SearchArc() {
   const [searchText, setSearchText] = useState("");
@@ -26,6 +27,7 @@ function SearchArc() {
     error: historyError,
   } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
+  const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
   if (historyError) {
     if (isPermissionError(historyError)) {
@@ -49,10 +51,12 @@ function SearchArc() {
     .groupBy((tab) => tab.location)
     .value();
 
+  const defaultSuggestion = getDefaultSuggestion(searchText);
+
   return (
     <List
       searchBarPlaceholder="Search history"
-      isLoading={isLoadingHistory || isLoadingTabs}
+      isLoading={isLoadingTabs || isLoadingHistory || isLoadingSuggestions}
       onSearchTextChange={setSearchText}
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
@@ -98,6 +102,35 @@ function SearchArc() {
               <ActionPanel>
                 <OpenLinkActionSections url={entry.url} />
                 <CopyLinkActionSection url={entry.url} title={entry.title} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title="Suggestions">
+        {defaultSuggestion && (
+          <List.Item
+            key={defaultSuggestion.id}
+            icon={getFavicon(defaultSuggestion.url)}
+            title={defaultSuggestion.query}
+            actions={
+              <ActionPanel>
+                <OpenLinkActionSections url={defaultSuggestion.url} />
+                <CopyLinkActionSection url={defaultSuggestion.url} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {suggestions?.map((suggestion) => (
+          <List.Item
+            key={suggestion.id}
+            icon={getFavicon(suggestion.url)}
+            title={suggestion.query}
+            actions={
+              <ActionPanel>
+                <OpenLinkActionSections url={suggestion.url} />
+                <CopyLinkActionSection url={suggestion.url} />
               </ActionPanel>
             }
           />

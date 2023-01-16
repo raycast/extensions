@@ -19,3 +19,9 @@ export type Space = {
   id: string;
   title?: string;
 };
+
+export type Suggestion = {
+  id: string;
+  query: string;
+  url: string;
+};
