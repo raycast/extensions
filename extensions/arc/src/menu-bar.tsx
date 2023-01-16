@@ -53,12 +53,12 @@ export default function Command() {
         <MenuBarExtra.Item
           title="View All Spaces"
           shortcut={{ modifiers: ["cmd"], key: "s" }}
-          onAction={() => launchCommand({ name: "search-spaces", type: LaunchType.UserInitiated })}
+          onAction={async () => await launchCommand({ name: "search-spaces", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           title="View All Tabs"
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => launchCommand({ name: "search-tabs", type: LaunchType.UserInitiated })}
+          onAction={async () => await launchCommand({ name: "search-tabs", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           key="preferences"
