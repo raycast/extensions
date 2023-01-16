@@ -1,6 +1,6 @@
 # Swift-evolution Changelog
 
-## [Major UI update] - 2023-01-11
+## [Major UI update] - 2023-01-16
 
 - Remove grouping by status
 - Add detailed pane to the right to see details like author, review manager, and other information
