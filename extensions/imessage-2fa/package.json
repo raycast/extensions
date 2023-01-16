@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imessage-2fa",
   "title": "iMessage 2FA",
-  "description": "View iMessage messages and Two Factor Authentication Code",
+  "description": "View messages and two factor authentication codes",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
   "categories": [
@@ -12,9 +12,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "View 2FA",
-      "subtitle": "iMessage",
-      "description": "View iMessage messages and Two Factor Authentication Code",
+      "title": "View 2FA Codes",
+      "subtitle": "Messages",
+      "description": "View messages and two factor authentication codes",
       "mode": "view"
     }
   ],
