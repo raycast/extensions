@@ -1,3 +1,4 @@
+import { Clipboard, environment, showToast, Toast } from "@raycast/api";
 import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
@@ -52,4 +53,28 @@ export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
   }
 
   return entries.length === 1 ? "1 entry" : `${entries.length} entries`;
+}
+
+export async function showFailureToast(error: unknown, options?: Omit<Toast.Options, "style">) {
+  if (!error) {
+    return;
+  }
+
+  if (environment.launchType === "background") {
+    return;
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: options?.title ?? "Something went wrong",
+    message: options?.message ?? (error instanceof Error ? error.message : String(error)),
+    primaryAction: {
+      title: "Copy Error",
+      async onAction(toast) {
+        const content = error instanceof Error ? error?.stack || error?.message || String(error) : String(error);
+        await Clipboard.copy(content);
+        await toast.hide();
+      },
+    },
+  });
 }

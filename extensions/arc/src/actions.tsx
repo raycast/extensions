@@ -14,7 +14,7 @@ import {
   selectTab,
 } from "./arc";
 import { Space, Tab } from "./types";
-import { getSpaceTitle } from "./utils";
+import { getSpaceTitle, showFailureToast } from "./utils";
 
 function OpenInArcAction(props: { url: string }) {
   async function handleAction() {
@@ -43,11 +43,7 @@ function OpenInNewWindowAction(props: { url: string }) {
       await closeMainWindow();
       await makeNewWindow({ url: props.url });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in new window",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in new window" });
     }
   }
 
@@ -67,11 +63,7 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
       await closeMainWindow();
       await makeNewWindow({ incognito: true, url: props.url });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in new incognito window",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in new incognito window" });
     }
   }
 
@@ -90,11 +82,7 @@ function OpenInLittleArc(props: { url: string }) {
     try {
       makeNewLittleArcWindow(props.url);
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in Little Arc window",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
     }
   }
 
@@ -110,11 +98,7 @@ function OpenInSpaceAction(props: { url: string }) {
       await closeMainWindow();
       await makeNewTabWithinSpace(props.url, space);
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in space",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in space" });
     }
   }
 
@@ -139,11 +123,7 @@ export function OpenSpaceAction(props: { space: Space }) {
       await closeMainWindow();
       await selectSpace(props.space);
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening Space",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening Space" });
     }
   }
 
@@ -211,11 +191,7 @@ export function SearchWithGoogleAction(props: { searchText?: string }) {
         end tell
       `);
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed searching with Google",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed searching with Google" });
     }
   }
 
@@ -237,11 +213,7 @@ function ReloadTabAction(props: { tab: Tab }) {
       await reloadTab(props.tab);
       await showToast({ style: Toast.Style.Success, title: "Reloaded tab" });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed reloading tab",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed reloading tab" });
     }
   }
 
@@ -272,11 +244,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 
       await showToast({ style: Toast.Style.Success, title: "Closed tab" });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed closing tab",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed closing tab" });
     }
   }
 
