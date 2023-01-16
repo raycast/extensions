@@ -19,7 +19,7 @@ export default function Command() {
           <MenuBarExtra.Item
             key={space.id}
             title={getSpaceTitle(space)}
-            shortcut={index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as Keyboard.KeyEquivalent } : undefined}
+            shortcut={index < 9 ? { modifiers: ["ctrl"], key: String(index + 1) as Keyboard.KeyEquivalent } : undefined}
             onAction={async () => await selectSpace(space)}
           />
         ))}
@@ -35,9 +35,7 @@ export default function Command() {
               title={tab.title}
               subtitle={getDomain(tab.url)}
               shortcut={
-                index < 9
-                  ? { modifiers: ["cmd", "shift"], key: String(index + 1) as Keyboard.KeyEquivalent }
-                  : undefined
+                index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as Keyboard.KeyEquivalent } : undefined
               }
               onAction={async () => {
                 const openTab = await findTab(tab.url);
