@@ -163,7 +163,6 @@ export default function Command() {
     );
   }
 
-  console.log("hi?");
   return (
     <List
       isLoading={isLoading}
