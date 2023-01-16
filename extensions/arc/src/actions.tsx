@@ -199,24 +199,31 @@ function useBrowsers(options?: { execute?: boolean }) {
   return useCachedPromise(fetchBrowsers, [], { execute: options?.execute });
 }
 
-// Unfortunately the AppleScript crashes Arc 😥
-// Waiting for a fix to add this to the empty view
 export function SearchWithGoogleAction(props: { searchText?: string }) {
   async function handleAction() {
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText ?? "")}`;
-    await runAppleScript(`
-      tell application "Arc"
-        activate
-        tell front window to make new tab at after (get active tab) with properties {URL:"${searchUrl}"}
-      end tell
-    `);
+    try {
+      await closeMainWindow();
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText ?? "")}`;
+      await runAppleScript(`
+        tell application "Arc"
+          activate
+          tell front window to make new tab at after (get active tab) with properties {URL:"${searchUrl}"}
+        end tell
+      `);
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed searching with Google",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
   }
 
   return props.searchText ? (
     <Action
       icon={Icon.MagnifyingGlass}
       title="Search with Google"
-      shortcut={{ modifiers: ["cmd"], key: "f" }}
+      shortcut={{ modifiers: ["ctrl"], key: "return" }}
       onAction={handleAction}
     />
   ) : null;
@@ -285,7 +292,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 
 // Sections
 
-export function OpenLinkActionSections(props: { url: string }) {
+export function OpenLinkActionSections(props: { url: string; searchText?: string }) {
   return (
     <>
       <ActionPanel.Section>
@@ -297,6 +304,7 @@ export function OpenLinkActionSections(props: { url: string }) {
         <OpenInNewIncognitoWindowAction url={props.url} />
         <OpenInSpaceAction url={props.url} />
         <OpenInOtherBrowserAction url={props.url} />
+        <SearchWithGoogleAction searchText={props.searchText} />
       </ActionPanel.Section>
     </>
   );

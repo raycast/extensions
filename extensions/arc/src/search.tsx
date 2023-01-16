@@ -25,7 +25,7 @@ function SearchArc() {
     data: history,
     isLoading: isLoadingHistory,
     error: historyError,
-  } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
+  } = useSQL<HistoryEntry>(databasePath, getQuery(searchText, 25));
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
@@ -74,7 +74,7 @@ function SearchArc() {
                 }}
                 actions={
                   <ActionPanel>
-                    <OpenLinkActionSections url={tab.url} />
+                    <OpenLinkActionSections url={tab.url} searchText={searchText} />
                     <CopyLinkActionSection url={tab.url} title={tab.title} />
                     <EditTabActionSection tab={tab} mutate={mutateTabs} />
                   </ActionPanel>
@@ -98,7 +98,7 @@ function SearchArc() {
             accessories={[getLastVisitedAt(entry)]}
             actions={
               <ActionPanel>
-                <OpenLinkActionSections url={entry.url} />
+                <OpenLinkActionSections url={entry.url} searchText={searchText} />
                 <CopyLinkActionSection url={entry.url} title={entry.title} />
               </ActionPanel>
             }
@@ -114,7 +114,7 @@ function SearchArc() {
             title={suggestion.query}
             actions={
               <ActionPanel>
-                <OpenLinkActionSections url={suggestion.url} />
+                <OpenLinkActionSections url={suggestion.url} searchText={searchText} />
                 <CopyLinkActionSection url={suggestion.url} />
               </ActionPanel>
             }

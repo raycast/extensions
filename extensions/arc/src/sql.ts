@@ -10,7 +10,7 @@ import wasmBinary from "sql.js/dist/sql-wasm.wasm";
 
 export const databasePath = join(homedir(), "Library", "Application Support", "Arc", "User Data", "Default", "History");
 
-export function getQuery(searchText?: string) {
+export function getQuery(searchText?: string, limit = 100) {
   const whereClause = searchText
     ? searchText
         .split(" ")
@@ -28,7 +28,7 @@ export function getQuery(searchText?: string) {
     ${whereClause ? `WHERE ${whereClause}` : ""}
     GROUP BY url
     ORDER BY last_visit_time DESC
-    LIMIT 100;
+    LIMIT ${limit};
   `;
 }
 
