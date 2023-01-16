@@ -14,10 +14,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search",
+      "name": "casts",
       "title": "Search Casts",
       "subtitle": "Farcaster",
       "description": "Search for casts by matching text",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Farcaster",
+      "description": "Search for profiles by name, username, or bio",
       "mode": "view"
     }
   ],

@@ -1,5 +1,5 @@
 import { getApplications } from "@raycast/api";
-import { Response } from "./types";
+import { CastResponse, ProfileResponse } from "./types";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -13,8 +13,14 @@ export function useCastSearch(query: string) {
     searchParams.set("text", query.replace(`from:${username}`, "").trim());
   }
 
-  const { data, isLoading } = useFetch<Response>("https://searchcaster.xyz/api/search?" + searchParams);
+  const { data, isLoading } = useFetch<CastResponse>("https://searchcaster.xyz/api/search?" + searchParams);
 
+  return { data, isLoading };
+}
+
+export function useProfileSearch(query: string) {
+  const searchParams = new URLSearchParams({ q: query });
+  const { data, isLoading } = useFetch<ProfileResponse>("https://searchcaster.xyz/api/profiles?" + searchParams);
   return { data, isLoading };
 }
 
@@ -34,4 +40,8 @@ export function useFarcasterInstalled() {
   }),
     [installed];
   return installed;
+}
+
+export function truncateAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
