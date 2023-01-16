@@ -4,7 +4,15 @@ import { useState } from "react";
 import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections } from "./actions";
 import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
-import { getDomain, getKey, getLastVisitedAt, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
+import {
+  getDomain,
+  getKey,
+  getLastVisitedAt,
+  getLocationTitle,
+  getNumberOfHistoryEntries,
+  getNumberOfTabs,
+  getOrderedLocations,
+} from "./utils";
 import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { chain } from "lodash";
@@ -75,7 +83,7 @@ function SearchArc() {
         );
       })}
 
-      <List.Section title="Visited Links">
+      <List.Section title="History" subtitle={getNumberOfHistoryEntries(history)}>
         {history?.map((entry) => (
           <List.Item
             key={entry.id}

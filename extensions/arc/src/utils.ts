@@ -30,11 +30,11 @@ export function getOrderedLocations() {
 export function getLocationTitle(location: TabLocation) {
   switch (location) {
     case "topApp":
-      return "Top";
+      return "Favorites";
     case "pinned":
-      return "Pinned";
+      return "Pinned Tabs";
     case "unpinned":
-      return "Unpinned";
+      return "Unpinned Tabs";
   }
 }
 
@@ -44,4 +44,12 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   }
 
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
+}
+
+export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
+  if (!entries) {
+    return undefined;
+  }
+
+  return entries.length === 1 ? "1 entry" : `${entries.length} entries`;
 }
