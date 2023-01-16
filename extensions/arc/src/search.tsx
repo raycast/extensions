@@ -17,7 +17,7 @@ import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { chain } from "lodash";
 import { getTabs } from "./arc";
-import { getDefaultSuggestion, useSuggestions } from "./suggestions";
+import { useSuggestions } from "./suggestions";
 
 function SearchArc() {
   const [searchText, setSearchText] = useState("");
@@ -50,8 +50,6 @@ function SearchArc() {
     )
     .groupBy((tab) => tab.location)
     .value();
-
-  const defaultSuggestion = getDefaultSuggestion(searchText);
 
   return (
     <List
@@ -109,19 +107,6 @@ function SearchArc() {
       </List.Section>
 
       <List.Section title="Suggestions">
-        {defaultSuggestion && (
-          <List.Item
-            key={defaultSuggestion.id}
-            icon={getFavicon(defaultSuggestion.url)}
-            title={defaultSuggestion.query}
-            actions={
-              <ActionPanel>
-                <OpenLinkActionSections url={defaultSuggestion.url} />
-                <CopyLinkActionSection url={defaultSuggestion.url} />
-              </ActionPanel>
-            }
-          />
-        )}
         {suggestions?.map((suggestion) => (
           <List.Item
             key={suggestion.id}

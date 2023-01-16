@@ -38,8 +38,18 @@ async function parseResponse(response: Response) {
   return suggestions;
 }
 
+function getDefaultSuggestion(searchText?: string) {
+  return searchText
+    ? {
+        id: nanoid(),
+        query: searchText,
+        url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+      }
+    : undefined;
+}
+
 export function useSuggestions(searchText: string) {
-  return useFetch(
+  const response = useFetch(
     `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
       headers: {
@@ -48,14 +58,11 @@ export function useSuggestions(searchText: string) {
       parseResponse,
     }
   );
-}
 
-export function getDefaultSuggestion(searchText?: string) {
-  return searchText
-    ? {
-        id: nanoid(),
-        query: searchText,
-        url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
-      }
-    : undefined;
+  const defaultSuggestion = getDefaultSuggestion(searchText);
+  if (defaultSuggestion) {
+    response.data = [defaultSuggestion, ...(response.data || [])];
+  }
+
+  return response;
 }
