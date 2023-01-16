@@ -193,7 +193,7 @@ export default function Command() {
             <AliasListItem key={alias.id} alias={alias} />
           ))}
       </List.Section>
-      <List.EmptyView icon={{ source: "simplelogin_icon.png" }} title="No alias found" />
+      <List.EmptyView icon={{ source: "simplelogin_icon.png" }} title="No Aliases Found" />
     </List>
   );
 }
