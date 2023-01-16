@@ -5,6 +5,9 @@
   "description": "View messages and two factor authentication codes",
   "icon": "iMessage-icon.png",
   "author": "yuercl",
+  "contributors": [
+    "thomaspaulmann"
+  ],
   "categories": [
     "Productivity"
   ],
