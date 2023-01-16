@@ -73,13 +73,7 @@ export default function Command() {
         <>
           <List.Section title={`Input: ${input || clipboardText}`}>
             {Object.entries(result).map(([key, value]) => (
-              <List.Item
-                key={key}
-                icon={Icon.CodeBlock}
-                title={"Slug"}
-                subtitle={value}
-                actions={result ? _getActions({ value }) : undefined}
-              />
+              <List.Item key={key} title={value} actions={result ? _getActions({ value }) : undefined} />
             ))}
           </List.Section>
         </>
