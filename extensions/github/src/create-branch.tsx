@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import View from "./components/View";
 import { getErrorMessage } from "./helpers/errors";
@@ -91,6 +91,13 @@ export function BranchForm({ draftValues }: BranchFormProps) {
       toast.message = getErrorMessage(error);
     }
   }
+
+  useEffect(() => {
+    if ((!!name.length && !!nameError?.length) || issue?.length) {
+      setNameError(undefined);
+    }
+    setName(name);
+  }, [issue]);
 
   return (
     <Form
