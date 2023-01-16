@@ -47,10 +47,7 @@ export default function Command() {
 
 function SearchTypeDropdown(props: { onChange: (searchType: SearchType) => void }) {
   return (
-    <List.Dropdown
-      tooltip="Filter 2FA Codes or Fetch All Messages"
-      onChange={(value) => props.onChange(value as SearchType)}
-    >
+    <List.Dropdown tooltip="Filter search type" storeValue onChange={(value) => props.onChange(value as SearchType)}>
       <List.Dropdown.Item title="2FA Codes" value="code" />
       <List.Dropdown.Item title="All Messages" value="all" />
     </List.Dropdown>
