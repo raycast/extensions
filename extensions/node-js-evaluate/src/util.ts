@@ -30,7 +30,7 @@ export function doEval(state: State, long = false): State {
         if (isPrimitive(value as never) && stringify(value) === "null") return value?.toString() ?? value;
         return value;
       },
-      long ? 2 : undefined
+      long ? 4 : undefined
     );
   }
 
