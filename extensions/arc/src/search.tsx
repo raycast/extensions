@@ -1,23 +1,15 @@
-import { ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections } from "./actions";
 import { databasePath, getQuery, useSQL } from "./sql";
 import { HistoryEntry } from "./types";
-import {
-  getDomain,
-  getKey,
-  getLastVisitedAt,
-  getLocationTitle,
-  getNumberOfHistoryEntries,
-  getNumberOfTabs,
-  getOrderedLocations,
-} from "./utils";
+import { getKey, getLocationTitle, getNumberOfHistoryEntries, getNumberOfTabs, getOrderedLocations } from "./utils";
 import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { chain } from "lodash";
 import { getTabs } from "./arc";
 import { useSuggestions } from "./suggestions";
+import { HistoryEntryListItem, SuggestionListItem, TabListItem } from "./list";
 
 function SearchArc() {
   const [searchText, setSearchText] = useState("");
@@ -64,22 +56,7 @@ function SearchArc() {
         return (
           <List.Section key={location} title={getLocationTitle(location)} subtitle={getNumberOfTabs(tabs)}>
             {tabs?.map((tab) => (
-              <List.Item
-                key={getKey(tab)}
-                icon={getFavicon(tab.url)}
-                title={tab.title}
-                subtitle={{
-                  value: getDomain(tab.url),
-                  tooltip: tab.url,
-                }}
-                actions={
-                  <ActionPanel>
-                    <OpenLinkActionSections url={tab.url} searchText={searchText} />
-                    <CopyLinkActionSection url={tab.url} title={tab.title} />
-                    <EditTabActionSection tab={tab} mutate={mutateTabs} />
-                  </ActionPanel>
-                }
-              />
+              <TabListItem key={getKey(tab)} tab={tab} mutate={mutateTabs} />
             ))}
           </List.Section>
         );
@@ -87,38 +64,13 @@ function SearchArc() {
 
       <List.Section title="History" subtitle={getNumberOfHistoryEntries(history)}>
         {history?.map((entry) => (
-          <List.Item
-            key={entry.id}
-            icon={getFavicon(entry.url)}
-            title={entry.title}
-            subtitle={{
-              value: getDomain(entry.url),
-              tooltip: entry.url,
-            }}
-            accessories={[getLastVisitedAt(entry)]}
-            actions={
-              <ActionPanel>
-                <OpenLinkActionSections url={entry.url} searchText={searchText} />
-                <CopyLinkActionSection url={entry.url} title={entry.title} />
-              </ActionPanel>
-            }
-          />
+          <HistoryEntryListItem key={entry.id} entry={entry} />
         ))}
       </List.Section>
 
       <List.Section title="Suggestions">
         {suggestions?.map((suggestion) => (
-          <List.Item
-            key={suggestion.id}
-            icon={getFavicon(suggestion.url)}
-            title={suggestion.query}
-            actions={
-              <ActionPanel>
-                <OpenLinkActionSections url={suggestion.url} searchText={searchText} />
-                <CopyLinkActionSection url={suggestion.url} />
-              </ActionPanel>
-            }
-          />
+          <SuggestionListItem key={suggestion.id} suggestion={suggestion} searchText={searchText} />
         ))}
       </List.Section>
     </List>
