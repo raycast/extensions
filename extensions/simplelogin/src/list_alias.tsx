@@ -1,38 +1,39 @@
 import { loadAllAliases, updateAliasPinnedStatus, deleteAlias, toggleAliasState } from "./api/simplelogin_api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
+type Filter = "all" | "" | "pinned" | "others";
+
 export default function Command() {
   const [aliases, setAliases] = useState<AliasResponse[]>([]);
-  const [filteredAlias, setFilteredAlias] = useState<AliasResponse[] | undefined>(undefined);
+  const [filter, setFilter] = useState<Filter>("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const filteredAliases = useMemo(() => {
+    switch (filter) {
+      case "all":
+        return aliases;
+      case "pinned":
+        return aliases.filter((alias) => alias.pinned);
+      case "others":
+        return aliases.filter((alias) => !alias.pinned);
+      default:
+        return [];
+    }
+  }, [aliases, filter]);
 
   useEffect(() => {
     loadAllAliases()
       .then((response) => {
         setAliases(response);
-        setFilteredAlias(aliases);
       })
       .finally(() => {
         setIsLoading(false);
       });
   }, []);
-
-  useEffect(() => {
-    setFilteredAlias(aliases);
-  }, [aliases]);
-
-  function filterDropdownList(newValue: string) {
-    if (newValue == "all") {
-      setFilteredAlias(aliases);
-    } else if (newValue == "pinned") {
-      setFilteredAlias(aliases.filter((alias) => alias.pinned));
-    } else if (newValue == "others") {
-      setFilteredAlias(aliases.filter((alias) => !alias.pinned));
-    }
-  }
 
   function updatePinnedStatus(alias: AliasResponse, pinned: boolean) {
     updateAliasPinnedStatus(alias.id, pinned).then((response) => {
@@ -81,10 +82,11 @@ export default function Command() {
     });
   }
 
-  function aliasListItem(alias: AliasResponse) {
+  function AliasListItem(props: { alias: AliasResponse }) {
+    const { alias } = props;
     return (
       <List.Item
-        key={alias.id}
+        id={`${alias.id}`}
         title={alias.email}
         icon={{ source: alias.pinned ? Icon.Pin : Icon.PinDisabled }}
         detail={
@@ -161,51 +163,36 @@ export default function Command() {
     );
   }
 
+  console.log("hi?");
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter aliases by name..."
-      isShowingDetail={filteredAlias != undefined && filteredAlias.length > 0}
+      isShowingDetail={filteredAliases.length >= 0 && selectedId !== null}
+      onSelectionChange={(selected) => {
+        setSelectedId(selected);
+      }}
       searchBarAccessory={
-        <>
-          {filteredAlias != undefined && filteredAlias.length > 0 ? (
-            <List.Dropdown
-              tooltip="Filter Aliases"
-              onChange={(newValue) => {
-                filterDropdownList(newValue);
-              }}
-            >
-              <List.Dropdown.Item title="Show All" value="all" key="all" icon={Icon.Globe} />
-              <List.Dropdown.Item title="Show Pinned" value="pinned" key="pinned" icon={Icon.Pin} />
-              <List.Dropdown.Item title="Show Not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
-            </List.Dropdown>
-          ) : (
-            ""
-          )}
-        </>
+        <List.Dropdown tooltip="Filter Aliases" value={filter} onChange={(newValue) => setFilter(newValue as Filter)}>
+          <List.Dropdown.Item title="Show All" value="all" key="all" icon={Icon.Globe} />
+          <List.Dropdown.Item title="Show Pinned" value="pinned" key="pinned" icon={Icon.Pin} />
+          <List.Dropdown.Item title="Show Not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
+        </List.Dropdown>
       }
     >
       <List.Section title="Pinned Aliases">
-        <>
-          {filteredAlias != undefined &&
-            filteredAlias.length > 0 &&
-            filteredAlias
-              .filter((alias) => alias.pinned)
-              .map((alias) => {
-                return aliasListItem(alias);
-              })}
-        </>
+        {filteredAliases
+          .filter((alias) => alias.pinned)
+          .map((alias) => (
+            <AliasListItem key={alias.id} alias={alias} />
+          ))}
       </List.Section>
       <List.Section title="Not Pinned Aliases">
-        <>
-          {filteredAlias != undefined &&
-            filteredAlias.length > 0 &&
-            filteredAlias
-              .filter((alias) => !alias.pinned)
-              .map((alias) => {
-                return aliasListItem(alias);
-              })}
-        </>
+        {filteredAliases
+          .filter((alias) => !alias.pinned)
+          .map((alias) => (
+            <AliasListItem key={alias.id} alias={alias} />
+          ))}
       </List.Section>
       <List.EmptyView icon={{ source: "simplelogin_icon.png" }} title="No alias found" />
     </List>
