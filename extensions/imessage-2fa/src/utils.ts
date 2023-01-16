@@ -66,4 +66,4 @@ export function extractCode(original: string) {
   }
 
   return code;
-};
+}
