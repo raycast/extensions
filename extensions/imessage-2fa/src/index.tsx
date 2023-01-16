@@ -5,12 +5,14 @@ import { useMessages } from "./messages";
 import { Message, SearchType } from "./types";
 import { extractCode } from "./utils";
 
+const POLLING_INTERVAL = 1_000;
+
 export default function Command() {
   const [searchType, setSearchType] = useState<SearchType>("code");
   const [searchText, setSearchText] = useState("");
   const { isLoading, data, permissionView, revalidate } = useMessages({ searchText, searchType });
 
-  useInterval(revalidate, 1_000);
+  useInterval(revalidate, POLLING_INTERVAL);
 
   if (permissionView) {
     return permissionView;
