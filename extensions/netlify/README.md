@@ -1,6 +1,6 @@
 # Netlify
 
-This extension allows to search your [Netlify](https://www.netlify.com) sites, deploys, team members, and more.
+This extension allows to search your [Netlify](https://www.netlify.com) sites, deploys, domains, team members, audit log, official documentation, and more.
 
 ## Getting started
 
@@ -22,9 +22,9 @@ You can drill down to open individual deploys in a detail view by pressing the <
 
 ### Find Local Sites
 
-This command is similar to the [Git Repos](https://github.com/raycast/extensions/tree/main/extensions/git-repos) extension, except that it finds local Netlify sites rather than local git repositories.
+This command is similar to the [Git Repos](https://github.com/raycast/extensions/tree/main/extensions/git-repos) extension, except that it finds local Netlify sites rather than local Git repositories.
 
-What is a local site, and how is it different than a local git repo? A local site is any directory that contains a `.netlify` directory. This directory gets created automatically when you use the [Netlify CLI](https://www.netlify.com/products/cli/) to run the `netlify link` command, which links your local directory to an associated site on Netlify. Linking your local sites lets you run useful commands like [`netlify dev`](https://github.com/netlify/cli/blob/main/docs/netlify-dev.md), and provides actions to conveniently open the site in Netlify from within a local directory.
+What is a local site, and how is it different than a local Git repo? A local site is any directory that contains a `.netlify` directory. This directory gets created automatically when you use the [Netlify CLI](https://www.netlify.com/products/cli/) to run the `netlify link` command, which links your local directory to an associated site on Netlify. Linking your local sites lets you run useful commands like [`netlify dev`](https://github.com/netlify/cli/blob/main/docs/netlify-dev.md), and provides actions to conveniently open the site in Netlify from within a local directory.
 
 The first time using this command, you'll be prompted to enter a _scan path_. This is the path of the directory that contains your local Netlify sites. For example, if you have multiple Netlify sites checked out within subdirectories of your home directory's Sites folder, you would enter `~/Sites` as your scan path. The scanning depth has a maximum of 4 levels from the path you provide, so if your directory tree is deeper than that, provide multiple paths by using the `:` character as a delimiter.
 
@@ -50,11 +50,13 @@ Read more about the [audit log in the docs](https://docs.netlify.com/accounts-an
 
 This command searches for domain names registered to your team. Each result will show if the domain is set to auto-renew, if it is expiring soon, if it has already expired, or if it has been registered externally.
 
-You can also search to see if a given domain name is available to register. If your team has a credit card on file, you can purchase a domain with this command. A confirmation dialog will prompt you to confirm your transaction before any payment is processed.
+You can also search to query if a given domain name is available to register. If your team has a credit card on file, you can purchase a domain with this command. A confirmation dialog will prompt you to confirm your transaction before any payment is processed.
+
+Read more about [domain registration in the docs](https://docs.netlify.com/domains-https/netlify-dns/domain-registration/). 
 
 ### Search Team Members
 
-Use this command to show the team members, git contributors, and reviewers for your team. If the Netlify user has connected to GitHub, GitLab, or Bitbucket, their handles for those services will show in a tooltip.
+Use this command to show the team members, Git contributors, and reviewers for your team. If the Netlify user has connected to GitHub, GitLab, or Bitbucket, their handles for those services will show in a tooltip.
 
 Learn more about [team member roles in the docs](https://docs.netlify.com/accounts-and-billing/team-management/team-member-roles/).
 

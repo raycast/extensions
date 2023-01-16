@@ -1,5 +1,16 @@
 # Changelog
 
+## [New Commands and Improvements] - 2023-01-16
+
+- Added `Find Local Sites` command.
+- Added `Invite Team Members` command.
+- Added `Search Audit Log` command.
+- Added `Search Docs` command.
+- Renamed `View Sites` -> `Search Sites`, and added site and deploy metadata in a detail view.
+- Renamed `View Domains` -> `Search Domains`, and added the ability to register a new domain.
+- Renamed `View Members` -> `Search Team Members`, and added Git contributors and reviewers to the list.
+- Expanded README to include screenshots and helpful instructions.
+
 ## [Chore] - 2023-01-03
 
 - Bump `@raycast/api` from 1.28.0 to 1.42.0

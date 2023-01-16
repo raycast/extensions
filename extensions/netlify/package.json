@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netlify",
   "title": "Netlify",
-  "description": "Search your Netlify sites, deploys, team members, and more.",
+  "description": "Search your Netlify sites, deploys, domains, team members, audit log, and official documentation.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
@@ -43,7 +43,7 @@
       "name": "search-domains",
       "title": "Search Domains",
       "subtitle": "Netlify",
-      "description": "Search your custom domains across all your teams.",
+      "description": "Search your team's domain names, and register new domains.",
       "mode": "view"
     },
     {
@@ -77,7 +77,7 @@
       "name": "search-team-members",
       "title": "Search Team Members",
       "subtitle": "Netlify",
-      "description": "Search team members",
+      "description": "Search your team's members, Git contributors, and reviewers.",
       "keywords": [
         "reviewers"
       ],
