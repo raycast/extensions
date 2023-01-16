@@ -65,6 +65,7 @@ export default function CreateTaskForm(props: {
           ...(values.projects && values.projects.length > 0 ? { projects: values.projects } : {}),
           ...(values.description ? { html_notes: htmlNotes } : {}),
           ...(values.assignee ? { assignee: values.assignee } : {}),
+          ...(values.start_date ? { start_on: format(values.start_date, "yyyy-MM-dd") } : {}),
           ...(values.due_date ? { due_on: format(values.due_date, "yyyy-MM-dd") } : {}),
         });
 
@@ -114,6 +115,7 @@ export default function CreateTaskForm(props: {
       name: props.draftValues?.name,
       description: props.draftValues?.description,
       assignee: props.draftValues?.assignee || props.assignee,
+      start_date: props.draftValues?.start_date,
       due_date: props.draftValues?.due_date,
     },
   });
@@ -189,7 +191,7 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
-
+      <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />
 
       {hasCustomFields
