@@ -44,7 +44,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type of branch" {...itemProps.type_of_branch}>
+      <Form.Dropdown title="Type of Branch" {...itemProps.type_of_branch}>
         <Form.Dropdown.Item value="" title="" />
         <Form.Dropdown.Item value="bug" title="Bug" />
         <Form.Dropdown.Item value="chore" title="Chore" />
