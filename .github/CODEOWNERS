@@ -31,7 +31,7 @@
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour
-/extensions/arc                                      @thomaspaulmann @zach-fuller
+/extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020
 /extensions/archiver                                 @404J
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
@@ -64,7 +64,7 @@
 /extensions/bitfinex                                 @Yukaii
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia @pernielsentikaer
+/extensions/bitwarden                                @jomifepe @daniel-stoneuk @pomdtr @andreaselia @pernielsentikaer
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/bob                                      @ViGeng
 /extensions/brasileirao-serie-a                      @willianhf
@@ -107,7 +107,7 @@
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029 @thomaslombart @lukaszmtw
 /extensions/clear-clipboard                          @d3caf
-/extensions/clickup                                  @Ali-Parandeh
+/extensions/clickup                                  @Ali-Parandeh @aesadde
 /extensions/clipboard-editor                         @pomdtr
 /extensions/clockify                                 @ismamz @sxn
 /extensions/clojuredocs-search                       @edblancas
@@ -256,10 +256,11 @@
 /extensions/get-favicon                              @vimtor
 /extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
+/extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
-/extensions/github                                   @thomaslombart @unnamedd @tonka3000
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy
@@ -413,6 +414,7 @@
 /extensions/material-icons                           @creasty
 /extensions/matter                                   @cernezan
 /extensions/maven-central-repository                 @koinzhang
+/extensions/mem                                      @brianfakhoury
 /extensions/meme-generator                           @timoransky
 /extensions/mempool                                  @dillionverma
 /extensions/menubar-weather                          @koinzhang
@@ -537,7 +539,7 @@
 /extensions/quickfile                                @danielroe
 /extensions/quicktime                                @pradeepb28
 /extensions/quicktype                                @Aayush9029
-/extensions/quit-applications                        @mackopes
+/extensions/quit-applications                        @mackopes @jrnxf
 /extensions/r-pkg-search                             @gadenbuie
 /extensions/radix                                    @peduarte
 /extensions/railway                                  @coffee-cup
@@ -612,6 +614,7 @@
 /extensions/simon                                    @andreaselia @pernielsentikaer
 /extensions/simple-youdao                            @xeric
 /extensions/simplebackups                            @zOxta
+/extensions/simplelogin                              @adrian-schnell
 /extensions/simpread                                 @Kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sip                                      @jamesjlyons
@@ -724,6 +727,7 @@
 /extensions/weather                                  @tonka3000
 /extensions/web3-profile                             @peduarte
 /extensions/webflow-sites                            @vurhd @pernielsentikaer
+/extensions/wechat                                   @raffeyang
 /extensions/whatsapp                                 @vimtor
 /extensions/wi-fi                                    @koinzhang
 /extensions/wiggle-text                              @PineappleRind

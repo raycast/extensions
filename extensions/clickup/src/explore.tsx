@@ -13,7 +13,10 @@ export default function Teams() {
           title={team.name}
           actions={
             <ActionPanel title="Team Actions">
-              <PushAction title="Projects Page" target={<TeamSpaces teamId={team?.id} teamName={team?.name} />} />
+              <PushAction
+                title="Projects Page"
+                target={<TeamSpaces teamId={team?.id ?? ""} teamName={team?.name ?? ""} />}
+              />
             </ActionPanel>
           }
         />
