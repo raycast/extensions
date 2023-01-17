@@ -86,7 +86,7 @@
     },
     {
       "name": "brew-writer",
-      "title": "Brew writer",
+      "title": "Brew Writer",
       "subtitle": "Writersbrew",
       "description": "Free form prompt writer to generate any text.",
       "mode": "no-view"
