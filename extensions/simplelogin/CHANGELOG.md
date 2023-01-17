@@ -1,6 +1,6 @@
 # SimpleLogin Changelog
 
-## [Initial Version] - 2023-01-04
+## [Initial Version] - 2023-01-17
 Initial version with the following features:
 
 - List all aliases with filter for pinned ones
