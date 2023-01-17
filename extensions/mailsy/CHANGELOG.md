@@ -1,6 +1,6 @@
 # Mailsy Changelog
 
-## [Changes] - 2023-01-12
+## [Changes] - 2023-01-17
  - The commands' titles have been changed.
  - Toasts are used in place of the HUD.
 
