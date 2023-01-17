@@ -256,6 +256,7 @@
 /extensions/get-favicon                              @vimtor
 /extensions/gh-pic                                   @xiangsanliu
 /extensions/gif-search                               @josephschmitt
+/extensions/git-branch-name-generator                @michaelbonner
 /extensions/git-repos                                @moored
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @L3K0V
