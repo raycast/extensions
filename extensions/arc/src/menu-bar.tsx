@@ -1,4 +1,13 @@
-import { Color, Keyboard, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  Image,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  open,
+  openCommandPreferences,
+} from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./arc";
 import { getDomain, getKey, getSpaceTitle } from "./utils";
@@ -31,7 +40,7 @@ export default function Command() {
           .map((tab, index) => (
             <MenuBarExtra.Item
               key={getKey(tab)}
-              icon={getFavicon(tab.url)}
+              icon={getFavicon(tab.url, { mask: Image.Mask.RoundedRectangle })}
               title={tab.title}
               subtitle={getDomain(tab.url)}
               shortcut={
