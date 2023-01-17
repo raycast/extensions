@@ -4,10 +4,10 @@
   "title": "Bitwarden Vault",
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
   "icon": "bitwarden-512.png",
-  "author": "pomdtr",
+  "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "jomifepe",
+    "pomdtr",
     "andreaselia",
     "pernielsentikaer"
   ],
