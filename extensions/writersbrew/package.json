@@ -76,11 +76,26 @@
       "subtitle": "Writersbrew",
       "description": "Translates from any language to german.",
       "mode": "no-view"
+    },
+    {
+      "name": "translate-to-dutch",
+      "title": "Translate to Dutch",
+      "subtitle": "Writersbrew",
+      "description": "Translates from any language to dutch.",
+      "mode": "no-view"
+    },
+    {
+      "name": "brew-writer",
+      "title": "Brew writer",
+      "subtitle": "Writersbrew",
+      "description": "Free form prompt writer to generate any text.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.1",
-    "open": "^8.4.0"
+    "open": "^8.4.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
