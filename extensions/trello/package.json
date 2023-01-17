@@ -27,6 +27,13 @@
       "subtitle": "Trello",
       "description": "Search all your open boards",
       "mode": "view"
+    },
+    {
+      "name": "createTodo",
+      "title": "Create a Todo",
+      "subtitle": "Trello",
+      "description": "Search all your open boards",
+      "mode": "view"
     }
   ],
   "preferences": [
