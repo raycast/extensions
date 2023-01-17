@@ -5,7 +5,6 @@ import { useBootstrapStatic, useLeague, useUser, useUserTeamByGameweek } from ".
 export default function getUserRankings() {
   const userTeamId = getPreferenceValues().userTeamId;
   const bootstrapData = useBootstrapStatic();
-
   const [selectedUser, setSelectedUser] = useState<string>(userTeamId);
 
   const user = useUser(userTeamId);
@@ -56,6 +55,15 @@ export default function getUserRankings() {
       }
       isLoading={!bootstrapData || !league}
     >
+      {league?.standings?.results.length === 0 ||
+        (league?.standings?.results === undefined && (
+          <List.EmptyView
+            title="League Data Unavailable"
+            description="Sorry, there is currently no league data available to display. Please check the status of the API by visiting fantasy.premierleague.com and try again later."
+            icon={Icon.SoccerBall}
+          />
+        ))}
+
       {league?.standings?.results.map((result) => {
         let icon: Image.ImageLike = {
           source: Icon.Dot,
@@ -84,6 +92,7 @@ export default function getUserRankings() {
           <List.Item
             key={result.entry}
             title={result.rank.toString()}
+            keywords={[result.entry_name, result.player_name]}
             subtitle={result.entry_name + " - " + result.player_name}
             accessories={[{ text: result.total.toString() }, { icon }]}
             detail={
