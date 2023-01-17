@@ -2,7 +2,7 @@ import { OAuth } from "@raycast/api";
 import { URLSearchParams } from "url";
 import fetch from "node-fetch";
 
-const dbxClientID = "v02dx7xhu86xn09"
+const dbxClientID = "v02dx7xhu86xn09";
 export const dbxAuthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Dropbox",
@@ -15,9 +15,9 @@ export async function authorize(): Promise<OAuth.TokenSet | undefined> {
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
       await dbxAuthClient.setTokens(await refreshTokens(tokenSet.refreshToken));
-      return dbxAuthClient.getTokens()
+      return dbxAuthClient.getTokens();
     }
-    return tokenSet
+    return tokenSet;
   }
 
   const authRequest = await dbxAuthClient.authorizationRequest({
@@ -28,7 +28,7 @@ export async function authorize(): Promise<OAuth.TokenSet | undefined> {
   });
   const { authorizationCode } = await dbxAuthClient.authorize(authRequest);
   await dbxAuthClient.setTokens(await getTokens(authRequest, authorizationCode));
-  return dbxAuthClient.getTokens()
+  return dbxAuthClient.getTokens();
 }
 
 async function getTokens(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<OAuth.TokenResponse> {
