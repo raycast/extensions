@@ -1,5 +1,8 @@
 # YouTube Changelog
 
+## [README update] - 2023-01-17
+- Fixed path to API
+
 ## [Fix Crash] - 2022-11-21
 - Fix crash when video title contain unusual characters
 

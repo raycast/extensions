@@ -79,3 +79,5 @@ function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, s
 }
 
 export { handleTaskEitherError };
+
+export const minMax = (min: number, max: number) => (value: number) => Math.max(Math.min(value, max), min);

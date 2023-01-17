@@ -4,10 +4,10 @@
   "title": "Bitwarden Vault",
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
   "icon": "bitwarden-512.png",
-  "author": "pomdtr",
+  "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "jomifepe",
+    "pomdtr",
     "andreaselia",
     "pernielsentikaer"
   ],
@@ -73,6 +73,23 @@
       "title": "Client Secret",
       "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
       "placeholder": "client_secret"
+    },
+    {
+      "name": "repromptIgnoreDuration",
+      "type": "dropdown",
+      "required": false,
+      "title": "Skip Reprompt",
+      "description": "Skip re-prompting for this long after entering the master password.",
+      "default": "60000",
+      "data": [
+        {"title": "Never", "value": "0"},
+        {"title": "1 Minute", "value": "60000"},
+        {"title": "5 Minutes", "value": "300000"},
+        {"title": "15 Minutes", "value": "900000"},
+        {"title": "1 Hour", "value": "3600000"},
+        {"title": "8 Hours", "value": "28800000"},
+        {"title": "1 Day", "value": "86400000"}
+      ]
     },
     {
       "name": "fetchFavicons",
