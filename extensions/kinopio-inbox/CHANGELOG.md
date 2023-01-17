@@ -1,3 +1,3 @@
 # Kinopio Inbox Changelog
 
-## [Initial Version] - 2022-12-24
+## [Initial Version] - 2023-01-17
