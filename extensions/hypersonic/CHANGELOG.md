@@ -1,5 +1,15 @@
 # Hypersonic Changelog
 
+## [2.0.2] - 2022-12-23
+
+#### New
+
+- Url optional parameter that lets users attach a url to a task and open it whenever they want.
+
+#### Updated
+
+- Tag style with the new tag property from raycast.
+
 ## [2.0.1] - 2022-12-08
 
 #### New

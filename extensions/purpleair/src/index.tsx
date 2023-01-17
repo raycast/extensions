@@ -11,6 +11,7 @@ import {
 import { PurpleAir } from "./purpleAir";
 import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
+import fetch from "cross-fetch";
 
 interface Preferences {
   sensor_index: string;
