@@ -138,6 +138,51 @@
         "track",
         "rating"
       ]
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Apple Music",
+      "description": "Set Music volume",
+      "mode": "view",
+      "keywords": [
+        "volume",
+        "sound"
+      ]
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "subtitle": "Apple Music",
+      "description": "Increase Music volume",
+      "mode": "no-view",
+      "keywords": [
+        "volume",
+        "volume-up",
+        "increase"
+      ]
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "subtitle": "Apple Music",
+      "description": "Decrease Music volume",
+      "mode": "no-view",
+      "keywords": [
+        "volume",
+        "volume-down",
+        "decrease"
+      ]
+    },
+    {
+      "name": "add-to-playlist",
+      "title": "Add to Playlist",
+      "subtitle": "Apple Music",
+      "description": "Add current track to playlist",
+      "mode": "view",
+      "keywords": [
+        "add-to-playlist"
+      ]
     }
   ],
   "dependencies": {

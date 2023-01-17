@@ -1,5 +1,11 @@
 # `Easydict` Changelog
 
+## [v2.7.2] - 2023-01-17
+
+### 🐞 Fixes
+
+- Fixed Bing translation failed.
+
 ## [v2.7.1] - 2023-01-08
 
 ### 💎 Improvement

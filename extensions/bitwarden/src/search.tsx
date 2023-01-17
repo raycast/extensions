@@ -10,42 +10,25 @@ import {
   Toast,
   Clipboard,
   Action,
-  LocalStorage,
 } from "@raycast/api";
-import { Item, Folder } from "./types";
+import { Item, Folder, Reprompt } from "./types";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
-import { SESSION_KEY } from "./const";
-import { CopyPasswordToClipboardAction, TroubleshootingGuide, UnlockForm } from "./components";
+import { TroubleshootingGuide } from "./components";
+import { SessionProvider, useSession } from "./session";
+import { CopyPasswordAction, PastePasswordAction } from "./actions";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
-
-function useSession() {
-  const [state, setState] = useState<{ isLoading: boolean; token?: string }>({ isLoading: true });
-
-  useEffect(() => {
-    LocalStorage.getItem<string>(SESSION_KEY).then((token) => setState({ isLoading: false, token }));
-  }, []);
-
-  return {
-    token: state.token,
-    active: !state.isLoading,
-    setToken: async (token: string) => {
-      await LocalStorage.setItem(SESSION_KEY, token);
-      setState({ isLoading: false, token });
-    },
-    deleteToken: async () => {
-      await LocalStorage.removeItem(SESSION_KEY);
-      setState({ isLoading: false });
-    },
-  };
-}
 
 export default function Search() {
   try {
     const api = new Bitwarden();
-    return <ItemList api={api} />;
+    return (
+      <SessionProvider api={api} unlock>
+        <ItemList api={api} />
+      </SessionProvider>
+    );
   } catch (e) {
     return <TroubleshootingGuide />;
   }
@@ -54,10 +37,9 @@ export default function Search() {
 export function ItemList(props: { api: Bitwarden }) {
   const bitwardenApi = props.api;
   const session = useSession();
-  const [state, setState] = useState<{ items: Item[]; folders: Folder[]; isLocked: boolean; isLoading: boolean }>({
+  const [state, setState] = useState<{ items: Item[]; folders: Folder[]; isLoading: boolean }>({
     items: [],
     folders: [],
-    isLocked: false,
     isLoading: true,
   });
 
@@ -70,7 +52,7 @@ export function ItemList(props: { api: Bitwarden }) {
 
       setState((previous) => ({ ...previous, isLoading: false, items, folders }));
     } catch (error) {
-      setState((previous) => ({ ...previous, isLocked: true }));
+      showToast(Toast.Style.Failure, "Failed to load vault.");
     }
   }
 
@@ -106,44 +88,18 @@ export function ItemList(props: { api: Bitwarden }) {
         await loadItems(session.token);
         await toast.hide();
       } catch (error) {
-        await bitwardenApi.logout();
-        await session.deleteToken();
+        await session.logout();
         toast.style = Toast.Style.Failure;
         toast.message = "Failed to sync. Please try logging in again.";
       }
     }
   }
 
-  async function lockVault() {
-    const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
-    await bitwardenApi.lock();
-    await session.deleteToken();
-    await toast.hide();
-  }
-
-  async function logoutVault() {
-    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
-    await bitwardenApi.logout();
-    await session.deleteToken();
-    await toast.hide();
-  }
-
-  if (state.isLocked) {
-    return (
-      <UnlockForm
-        bitwardenApi={bitwardenApi}
-        onUnlock={async (token) => {
-          await session.setToken(token);
-          setState((previous) => ({ ...previous, isLocked: false }));
-        }}
-      />
-    );
-  }
-
   const vaultEmpty = state.items.length == 0;
+  const vaultLoading = session.isLoading || state.isLoading;
 
   return (
-    <List isLoading={state.isLoading}>
+    <List isLoading={vaultLoading}>
       {state.items
         .sort((a, b) => {
           if (a.favorite && b.favorite) return 0;
@@ -157,14 +113,14 @@ export function ItemList(props: { api: Bitwarden }) {
               key={item.id}
               item={item}
               folder={folder}
-              lockVault={lockVault}
-              logoutVault={logoutVault}
+              lockVault={session.lock}
+              logoutVault={session.logout}
               syncItems={syncItems}
               copyTotp={copyTotp}
             />
           );
         })}
-      {state.isLoading ? (
+      {vaultLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
       ) : (
         <List.EmptyView
@@ -178,7 +134,7 @@ export function ItemList(props: { api: Bitwarden }) {
           actions={
             !state.isLoading && (
               <ActionPanel>
-                <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
+                <VaultActions syncItems={syncItems} lockVault={session.lock} logoutVault={session.logout} />
               </ActionPanel>
             )
           }
@@ -229,7 +185,7 @@ function BitwardenItem(props: {
         <ActionPanel>
           {login ? (
             <ActionPanel.Section>
-              {login.password ? <PasswordActions password={login.password} /> : null}
+              {login.password ? <PasswordActions password={login.password} item={item} /> : null}
               {login.totp ? (
                 <Action
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -312,9 +268,17 @@ function getAccessories(item: Item, folder: Folder | undefined) {
   return accessories;
 }
 
-function PasswordActions(props: { password: string }) {
-  const copyAction = <CopyPasswordToClipboardAction key="copy" title="Copy Password" content={props.password} />;
-  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
+function PasswordActions(props: { password: string; item: Item }) {
+  const session = useSession();
+  const { password, item } = props;
+  const actionProps = {
+    item,
+    session,
+    reprompt: item.reprompt === Reprompt.REQUIRED,
+  };
+
+  const copyAction = <CopyPasswordAction key="copy" content={password} {...actionProps} />;
+  const pasteAction = <PastePasswordAction key="paste" content={props.password} {...actionProps} />;
 
   return <Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</Fragment>;
 }

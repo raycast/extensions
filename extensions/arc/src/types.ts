@@ -20,8 +20,11 @@ export type Space = {
   title?: string;
 };
 
+export type NewTabPreferences = {
+  url: string;
+};
+
 export type Suggestion = {
   id: string;
   query: string;
-  url: string;
 };
