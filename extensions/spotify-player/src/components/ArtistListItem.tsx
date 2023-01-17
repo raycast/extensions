@@ -43,7 +43,7 @@ function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObj
         onAction={async () => {
           const artistId = artist.id.replace("spotify:artist:", "");
           await startPlaySimilar({ seed_artists: artistId });
-          showHUD(`♫ Playing Similar – ♫ ${artist.name}`);
+          showHUD(`♫ Playing Similar - ♫ ${artist.name}`);
         }}
       />
       <Action.OpenInBrowser
