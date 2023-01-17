@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Switch Layout",
-      "description": "The script changes layout of selected text. EN-RU supported only.\nFor eg:\n- руддщ -> hello\n- ghbdtn -> привет",
+      "description": "The script changes layout of selected text. EN-RU supported only. For eg: руддщ -> hello | ghbdtn -> привет",
       "mode": "no-view"
     }
   ],
