@@ -6,30 +6,36 @@ import { useState } from "react";
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
   const { data, isLoading } = useCastSearch(searchText || "");
-
   const hasFarcaster: boolean = useFarcasterInstalled();
 
   return (
-    <List enableFiltering={false} onSearchTextChange={setSearchText} isLoading={isLoading} isShowingDetail throttle>
-      {isLoading ? (
-        <List.EmptyView description="Reticulating splines..." />
-      ) : (
-        data?.casts.map((cast: Cast) => {
-          return (
-            <List.Item
-              key={cast.merkleRoot}
-              title={cast.body.data.text}
-              accessories={[
-                { date: new Date(cast.body.publishedAt) },
-                { icon: { source: cast.meta.avatar ?? Icon.PersonCircle, mask: Image.Mask.Circle } },
-              ]}
-              icon={cast.body.data.replyParentMerkleRoot ? Icon.Reply : Icon.Message}
-              detail={<CastDetails cast={cast} />}
-              actions={<Actions cast={cast} farcasterInstalled={hasFarcaster} />}
-            />
-          );
-        })
-      )}
+    <List
+      enableFiltering={false}
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      isShowingDetail={(data?.casts || []).length > 0}
+      throttle
+    >
+      <List.EmptyView
+        title={isLoading ? "Searching" : "No Results"}
+        icon="no-view.png"
+        description={isLoading ? "Reticulating splines..." : "Try change your search query"}
+      />
+      {data?.casts.map((cast: Cast) => {
+        return (
+          <List.Item
+            key={cast.merkleRoot}
+            title={cast.body.data.text}
+            accessories={[
+              { date: new Date(cast.body.publishedAt) },
+              { icon: { source: cast.meta.avatar ?? Icon.PersonCircle, mask: Image.Mask.Circle } },
+            ]}
+            icon={cast.body.data.replyParentMerkleRoot ? Icon.Reply : Icon.Message}
+            detail={<CastDetails cast={cast} />}
+            actions={<Actions cast={cast} farcasterInstalled={hasFarcaster} />}
+          />
+        );
+      })}
     </List>
   );
 }

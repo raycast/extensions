@@ -16,13 +16,19 @@ export function useCastSearch(query: string) {
   }
 
   const { data, isLoading } = useFetch<CastResponse>("https://searchcaster.xyz/api/search?" + searchParams);
-
   return { data, isLoading };
 }
 
 export function useProfileSearch(query: string) {
   const searchParams = new URLSearchParams({ q: query });
-  const { data, isLoading } = useFetch<ProfileResponse>("https://searchcaster.xyz/api/profiles?" + searchParams);
+  const { data, isLoading } = useFetch<ProfileResponse>("https://searchcaster.xyz/api/profiles?" + searchParams, {
+    execute: query.length > 0,
+  });
+
+  if (query.length === 0) {
+    return { data: { error: "No query" }, isLoading: false };
+  }
+
   return { data, isLoading };
 }
 

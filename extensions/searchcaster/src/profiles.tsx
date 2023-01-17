@@ -11,33 +11,43 @@ export default function Command() {
   if ((data as { error: string })?.error) {
     return (
       <List enableFiltering={false} onSearchTextChange={setSearchText} isLoading={isLoading}>
-        <List.EmptyView description="Search for profiles by name, username, or bio" />
+        <List.EmptyView
+          title="Type Query to Search"
+          description="Search for profiles by name, username, or bio"
+          icon="no-view.png"
+        />
       </List>
     );
   }
 
   return (
-    <List enableFiltering={false} onSearchTextChange={setSearchText} isLoading={isLoading} isShowingDetail>
-      {isLoading ? (
-        <List.EmptyView description="Reticulating splines..." />
-      ) : (
-        (data as Profile[])?.map((profile: Profile) => {
-          return (
-            <List.Item
-              key={profile.body.id}
-              title={profile.body.displayName}
-              accessories={[{ text: "@" + profile.body.username }]}
-              icon={{
-                source: profile.body.avatarUrl,
-                mask: Image.Mask.RoundedRectangle,
-                fallback: "https://explorer.farcaster.xyz/avatar.png",
-              }}
-              detail={<ProfileDetails profile={profile} />}
-              actions={<Actions profile={profile} farcasterInstalled={hasFarcaster} />}
-            />
-          );
-        })
-      )}
+    <List
+      enableFiltering={false}
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      isShowingDetail={Object.values(data || []).length > 0 && !isLoading}
+    >
+      <List.EmptyView
+        title={isLoading ? "Searching" : "No Results"}
+        icon="no-view.png"
+        description={isLoading ? "Reticulating splines..." : "Try change your search query"}
+      />
+      {(data as Profile[])?.map((profile: Profile) => {
+        return (
+          <List.Item
+            key={profile.body.id}
+            title={profile.body.displayName}
+            accessories={[{ text: "@" + profile.body.username }]}
+            icon={{
+              source: profile.body.avatarUrl,
+              mask: Image.Mask.RoundedRectangle,
+              fallback: "avatar.png",
+            }}
+            detail={<ProfileDetails profile={profile} />}
+            actions={<Actions profile={profile} farcasterInstalled={hasFarcaster} />}
+          />
+        );
+      })}
     </List>
   );
 }
