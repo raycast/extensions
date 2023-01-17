@@ -176,7 +176,7 @@
     },
     {
       "name": "add-to-playlist",
-      "title": "Add to playlist",
+      "title": "Add to Playlist",
       "subtitle": "Apple Music",
       "description": "Add current track to playlist",
       "mode": "view",
