@@ -19,6 +19,21 @@
       "description": "Specify the path to your notes graph location"
     },
     {
+      "name": "host",
+      "type": "textfield",
+      "placeholder": "127.0.0.1:12315",
+      "title": "Address of Logseq HTTP server",
+      "required": true,
+      "description": "Specify the path to your Logseq server address (required for fulltext search)"
+    },
+    {
+      "name": "token",
+      "type": "textfield",
+      "title": "Authorization token",
+      "required": true,
+      "description": "Specify the authorization token for your Logseq server (required for fulltext search)"
+    },
+    {
       "name": "insertTime",
       "label": "Add current time as the leading text",
       "type": "checkbox",
@@ -40,7 +55,7 @@
       "name": "smartSearch",
       "type": "checkbox",
       "default": true,
-      "title": "Smart Search Enabled?",
+      "title": "[LogSearch] Smart Search Enabled?",
       "required": true,
       "description": "Would you like to enable smart search or use simple search?",
       "label": "Smart Search"
@@ -58,7 +73,14 @@
       "name": "logsearch",
       "title": "LogSearch",
       "subtitle": "Logseq Search",
-      "description": "Search Your Logseq Database",
+      "description": "Search Your Logseq Database (filename search)",
+      "mode": "view"
+    },
+    {
+      "name": "fulltextsearch",
+      "title": "LogSearchFulltext",
+      "subtitle": "Logseq Fulltext Search",
+      "description": "Search Your Logseq Database (fulltext search)",
       "mode": "view"
     }
   ],
@@ -71,6 +93,7 @@
     "edn-data": "^0.2.0",
     "logseq-dateutils": "0.0.22",
     "minisearch": "^4.0.3",
+    "node-fetch": "^3.3.0",
     "ramda": "^0.28.0",
     "untildify": "^4.0.0"
   },
