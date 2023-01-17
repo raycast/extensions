@@ -1,7 +1,5 @@
 # Punto Switcher for Raycast
 
-![](metadata/example.png)
-
 Changes the layout of selected text to the opposite one and additionally changes the keyboard layout to a target one with the help of the [keyboardSwitcher](https://github.com/Lutzifer/keyboardSwitcher)
 
 
