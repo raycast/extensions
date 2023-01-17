@@ -1,25 +1,17 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { databasePath, getQuery, useSQL } from "./sql";
+import { databasePath, getQuery } from "./sql";
 import { HistoryEntry } from "./types";
-import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { HistoryEntryListItem } from "./list";
+import { useSQL } from "@raycast/utils";
 
 function SearchHistory() {
   const [searchText, setSearchText] = useState<string>();
-  const { data, isLoading, error } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
+  const { data, isLoading, permissionView } = useSQL<HistoryEntry>(databasePath, getQuery(searchText));
 
-  if (error) {
-    if (isPermissionError(error)) {
-      return <PermissionErrorView />;
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed searching history",
-        message: error instanceof Error ? error.message : undefined,
-      });
-    }
+  if (permissionView) {
+    return permissionView;
   }
 
   return (

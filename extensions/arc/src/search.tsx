@@ -1,10 +1,9 @@
-import { Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { useCachedPromise, useSQL } from "@raycast/utils";
 import { useState } from "react";
-import { databasePath, getQuery, useSQL } from "./sql";
+import { databasePath, getQuery } from "./sql";
 import { HistoryEntry } from "./types";
 import { getKey, getLocationTitle, getNumberOfHistoryEntries, getNumberOfTabs, getOrderedLocations } from "./utils";
-import { isPermissionError, PermissionErrorView } from "./permissions";
 import { VersionCheck } from "./version";
 import { chain } from "lodash";
 import { getTabs } from "./arc";
@@ -16,21 +15,13 @@ function SearchArc() {
   const {
     data: history,
     isLoading: isLoadingHistory,
-    error: historyError,
+    permissionView,
   } = useSQL<HistoryEntry>(databasePath, getQuery(searchText, 25));
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
-  if (historyError) {
-    if (isPermissionError(historyError)) {
-      return <PermissionErrorView />;
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed searching history",
-        message: historyError instanceof Error ? historyError.message : undefined,
-      });
-    }
+  if (permissionView) {
+    return permissionView;
   }
 
   const orderedLocations = getOrderedLocations();

@@ -1,12 +1,13 @@
 import { Detail, environment } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { join } from "path";
+import { ReactNode } from "react";
 import { lt } from "semver";
 import { getVersion } from "./arc";
 
 const MINIMUM_ARC_VERSION = "0.85.0";
 
-export function VersionCheck(props: { children: JSX.Element }) {
+export function VersionCheck(props: { children: ReactNode }) {
   const { data, isLoading } = useCachedPromise(getVersion);
 
   if (isLoading && !data) {
@@ -26,6 +27,6 @@ export function VersionCheck(props: { children: JSX.Element }) {
     return <Detail markdown={markdown} />;
   } else {
     // Finished loading, correct version
-    return props.children;
+    return <>{props.children}</>;
   }
 }
