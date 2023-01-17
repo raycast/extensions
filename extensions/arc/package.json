@@ -58,12 +58,23 @@
       "title": "Open New Tab",
       "subtitle": "Arc",
       "description": "Create and open a new tab in the current window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new tab",
+          "type": "textfield",
+          "required": false,
+          "default": "https://google.com"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.0",
     "@raycast/utils": "^1.4.0",
+    "is-url": "^1.2.4",
     "lodash": "^4.17.21",
     "run-applescript": "^6.1.0",
     "run-jxa": "^3.0.0",
@@ -71,6 +82,7 @@
     "sql.js": "^1.8.0"
   },
   "devDependencies": {
+    "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",

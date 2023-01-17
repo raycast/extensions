@@ -19,3 +19,7 @@ export type Space = {
   id: string;
   title?: string;
 };
+
+export type NewTabPreferences = {
+  url: string;
+};
