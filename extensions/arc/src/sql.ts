@@ -1,9 +1,17 @@
 import { homedir } from "os";
 import { join } from "path";
 
-export const databasePath = join(homedir(), "Library", "Application Support", "Arc", "User Data", "Default", "History");
+export const historyDatabasePath = join(
+  homedir(),
+  "Library",
+  "Application Support",
+  "Arc",
+  "User Data",
+  "Default",
+  "History"
+);
 
-export function getQuery(searchText?: string, limit = 100) {
+export function getHistoryQuery(searchText?: string, limit = 100) {
   const whereClause = searchText
     ? searchText
         .split(" ")

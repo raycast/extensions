@@ -1,7 +1,7 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise, useSQL } from "@raycast/utils";
 import { useState } from "react";
-import { databasePath, getQuery } from "./sql";
+import { historyDatabasePath, getHistoryQuery } from "./sql";
 import { HistoryEntry } from "./types";
 import { getKey, getLocationTitle, getNumberOfHistoryEntries, getNumberOfTabs, getOrderedLocations } from "./utils";
 import { VersionCheck } from "./version";
@@ -16,7 +16,7 @@ function SearchArc() {
     data: history,
     isLoading: isLoadingHistory,
     permissionView,
-  } = useSQL<HistoryEntry>(databasePath, getQuery(searchText, 25));
+  } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText, 25));
   const { data: tabs, isLoading: isLoadingTabs, mutate: mutateTabs } = useCachedPromise(getTabs);
   const { data: suggestions, isLoading: isLoadingSuggestions } = useSuggestions(searchText);
 
