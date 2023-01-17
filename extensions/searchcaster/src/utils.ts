@@ -20,7 +20,7 @@ export function useCastSearch(query: string) {
 }
 
 export function useProfileSearch(query: string) {
-  const searchParams = new URLSearchParams({ q: query });
+  const searchParams = new URLSearchParams({ q: query, count: "75" });
   const { data, isLoading } = useFetch<ProfileResponse>("https://searchcaster.xyz/api/profiles?" + searchParams, {
     execute: query.length > 0,
   });
