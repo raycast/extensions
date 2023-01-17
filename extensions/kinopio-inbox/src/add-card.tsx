@@ -9,6 +9,7 @@ import {
   Preferences,
 } from "@raycast/api";
 import { useState, useRef } from "react";
+import fetch from "cross-fetch";
 
 const cardLimit = 300;
 const host = "https://api.kinopio.club";
