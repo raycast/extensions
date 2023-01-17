@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, LaunchProps } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, LaunchProps, popToRoot } from "@raycast/api";
 import { MemClient } from "@mem-labs/mem-node";
 import { useForm, FormValidation } from "@raycast/utils";
 
@@ -26,6 +26,7 @@ export default function Command(props: LaunchProps<{ draftValues: CreateMemValue
           isArchived: values.isArchived,
         });
         showToast({ title: "Succesfully created mem", style: Toast.Style.Success });
+        popToRoot();
       } catch (e: any) {
         showToast({
           title: "Mem API replied with failure",
