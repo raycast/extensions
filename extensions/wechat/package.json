@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "WeChat",
-      "subtitle": "Search your WeChat contacts and chat",
+      "title": "Search Contacts and Chat",
+      "subtitle": "WeChat",
       "description": "A Raycast extension for WeChat  to quickly search your contacts and chat",
       "mode": "view"
     }

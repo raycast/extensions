@@ -14,7 +14,8 @@
   ],
   "license": "MIT",
   "contributors": [
-    "zach"
+    "zach",
+    "ankitchouhan1020"
   ],
   "commands": [
     {
@@ -50,6 +51,13 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-tab",
+      "title": "Open New Tab",
+      "subtitle": "Arc",
+      "description": "Create and open a new tab in the current window",
       "mode": "no-view"
     }
   ],

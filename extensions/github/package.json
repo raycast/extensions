@@ -9,7 +9,9 @@
   "owner": "raycast",
   "contributors": [
     "tholanda",
-    "tonka3000"
+    "tonka3000",
+    "khasbilegt",
+    "pernielsentikaer"
   ],
   "categories": [
     "Developer Tools",
@@ -57,6 +59,12 @@
       "name": "create-issue",
       "title": "Create Issue",
       "description": "Create an issue in one of your GitHub repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
       "mode": "view"
     },
     {

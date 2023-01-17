@@ -3,7 +3,7 @@ import { Alert, confirmAlert, open, closeMainWindow } from "@raycast/api"
 export const isWeChatTweakInstalledAlertDialog = async () => {
   const options: Alert.Options = {
     icon: { source: "wechat.png" },
-    title: "WeChatTweak is Not Installed",
+    title: "WeChatTweak is not installed",
     message:
       "WeChatTweak is not installed on your Mac. Please install WeChatTweak to use this command.",
     primaryAction: {
