@@ -1,9 +1,10 @@
-import { Cache, Clipboard, environment, Icon, showToast, Toast } from "@raycast/api";
+import { Cache, environment, Icon } from "@raycast/api";
 
 import { execFileSync } from "child_process";
+import { chmodSync, copyFileSync, existsSync } from "fs";
+import { useEffect, useState } from "react";
 
 import { CategoryName } from "./types";
-import { chmodSync, copyFileSync, existsSync } from "fs";
 
 const cache = new Cache();
 
@@ -13,34 +14,33 @@ export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
 export const PROFILE_CACHE_NAME = "@profile";
 
-export function op<T>(key: string, args: string[]): T | undefined {
-  if (cache.has(key)) {
-    return JSON.parse(cache.get(key) as string);
-  }
+export function useOp<T>(key: string, args: string[]) {
+  const [data, setData] = useState<T>();
+  const [error, setError] = useState<unknown>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  try {
-    if (!existsSync(CLI_PATH)) {
-      chmodSync(BINARY_PATH, 0o755);
-      copyFileSync(BINARY_PATH, CLI_PATH);
+  useEffect(() => {
+    if (cache.has(key)) {
+      setIsLoading(false);
+      return setData(JSON.parse(cache.get(key) as string));
     }
-    const stdout = execFileSync(CLI_PATH, [...args, "--format=json"]);
-    const items = stdout.toString();
-    cache.set(key, items);
-    return JSON.parse(items);
-  } catch (error: any) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Command failed",
-      message: error?.message,
-      primaryAction: {
-        title: "Copy logs",
-        onAction: async (toast) => {
-          await Clipboard.copy(error?.message);
-          toast.hide();
-        },
-      },
-    });
-  }
+    try {
+      if (!existsSync(CLI_PATH)) {
+        chmodSync(BINARY_PATH, 0o755);
+        copyFileSync(BINARY_PATH, CLI_PATH);
+      }
+      const stdout = execFileSync(CLI_PATH, [...args, "--format=json"]);
+      const items = stdout.toString();
+      cache.set(key, items);
+      setData(JSON.parse(items));
+    } catch (error: unknown) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [key]);
+
+  return { data, error, isLoading };
 }
 
 export function clearCache(key?: string) {

@@ -39,7 +39,6 @@ export function CopyToClipboard({
   shortcut: Keyboard.Shortcut;
   vault_id: string;
 }) {
-  console.log(shortcut);
   return (
     <Action
       icon={Icon.Clipboard}

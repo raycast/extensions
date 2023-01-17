@@ -4,13 +4,22 @@ import { useCachedState } from "@raycast/utils";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Item, Url, User } from "../types";
-import { op, getCategoryIcon, ITEMS_CACHE_NAME, PROFILE_CACHE_NAME } from "../utils";
+import { getCategoryIcon, ITEMS_CACHE_NAME, PROFILE_CACHE_NAME, useOp } from "../utils";
+import { Guide } from "../../guide-view";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
 
-  const items = op<Item[]>(ITEMS_CACHE_NAME, ["item", "list", "--long"]);
-  const profile = op<User>(PROFILE_CACHE_NAME, ["whoami"]);
+  const {
+    data: items,
+    error: itemsError,
+    isLoading: itemsIsLoading,
+  } = useOp<Item[]>(ITEMS_CACHE_NAME, ["item", "list", "--long"]);
+  const {
+    data: profile,
+    error: profileError,
+    isLoading: profileIsLoading,
+  } = useOp<User>(PROFILE_CACHE_NAME, ["whoami"]);
 
   const categoryItems =
     category === DEFAULT_CATEGORY
@@ -21,8 +30,12 @@ export function Items() {
     category !== newCategory && setCategory(newCategory);
   };
 
+  if (itemsError || profileError) return <Guide />;
   return (
-    <List searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}>
+    <List
+      searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
+      isLoading={itemsIsLoading || profileIsLoading}
+    >
       {categoryItems?.length ? (
         categoryItems
           .sort((a, b) => a.title.localeCompare(b.title))
@@ -61,13 +74,13 @@ export function Items() {
                         id={item.id}
                         vault_id={item.vault.id}
                         field="username"
-                        shortcut={{ modifiers: ["cmd"], key: "u" }}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <CopyToClipboard
                         id={item.id}
                         vault_id={item.vault.id}
                         field="password"
-                        shortcut={{ modifiers: ["cmd"], key: "p" }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                       />
                     </>
                   )}
