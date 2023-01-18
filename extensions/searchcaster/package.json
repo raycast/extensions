@@ -11,6 +11,9 @@
   ],
   "icon": "icon.png",
   "author": "gregskril",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
