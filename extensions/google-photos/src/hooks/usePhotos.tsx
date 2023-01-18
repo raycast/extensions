@@ -1,9 +1,10 @@
 import { getOAuthToken } from "../components/withGoogleAuth";
 import fetch from "node-fetch";
-import { ListResponse, MediaItem } from "../types/google";
+import { ListResponse, MediaItem, Error } from "../types/google";
 import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { URLSearchParams } from "url";
+import { isEmpty } from "../utils";
 const BASE_URL = "https://photoslibrary.googleapis.com/v1";
 
 const { pageSize } = getPreferenceValues();
@@ -11,7 +12,7 @@ const { pageSize } = getPreferenceValues();
 export const usePhotos = (type: string, nextpageToken: string) => {
   const [photos, setPhotos] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,9 +37,20 @@ export const usePhotos = (type: string, nextpageToken: string) => {
               },
             },
           }),
-        });
+        }).then((res) => res.json());
 
-        const data = (await response.json()) as ListResponse;
+        // check if response is empty
+        if (isEmpty(response as object)) {
+          setError({
+            type: "Empty Library",
+            message: "You have no photos in your library.",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const data = response as ListResponse;
+
         setPhotos(data.mediaItems);
         setNextPageToken(data.nextPageToken);
         setLoading(false);

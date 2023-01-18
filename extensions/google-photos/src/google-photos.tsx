@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Grid, ActionPanel, Action, Detail, Toast, showToast, Icon } from "@raycast/api";
+import { Grid, ActionPanel, Action, Detail, Toast, showToast, Icon, List } from "@raycast/api";
 import { withGoogleAuth } from "./components/withGoogleAuth";
 import { usePhotos } from "./hooks/usePhotos";
 import { usePhoto } from "./hooks/usePhoto";
@@ -18,7 +18,11 @@ const GooglePhotos: React.FunctionComponent = () => {
   const { photos, loading, error, nextPageToken } = usePhotos(type, nextPage);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Error", error);
+    return (
+      <List navigationTitle={error.type}>
+        <List.EmptyView title={error.message} />
+      </List>
+    );
   }
 
   const setTypeAndClearPageToken = (value: string) => {
