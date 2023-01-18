@@ -16,7 +16,6 @@ type Result = {
 };
 
 export default function ResultView({ result, curl }: { result: Result; curl: string }) {
-  const { pop } = useNavigation();
   const markdown = "### Response\n\n" + "```json\n" + JSON.stringify(result.response.data, null, 2) + "\n\n";
 
   return (

@@ -7,7 +7,7 @@ interface Header extends HeaderKey {
   value: string;
 }
 
-export const methods: string[] = ["GET", "POST", "PUT", "DELETE"];
+export const methods: string[] = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
 export const headerKeys: string[] = [
   "A-IM",
