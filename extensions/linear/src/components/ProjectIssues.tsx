@@ -20,7 +20,7 @@ export default function ProjectIssues({ projectId, teamId, priorities, me, users
   const { issues, isLoadingIssues, mutateList } = useIssues(getProjectIssues, [projectId]);
 
   return (
-    <List isLoading={isLoadingIssues} searchBarPlaceholder="Filter by key, title, status, assignee or priority">
+    <List isLoading={isLoadingIssues} searchBarPlaceholder="Filter by id, title, status, assignee or priority">
       <List.EmptyView
         title="No issues"
         description="There are no issues in the project."

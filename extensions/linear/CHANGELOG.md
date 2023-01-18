@@ -2,7 +2,7 @@
 
 ## [Quick Add Comment to Issue command] - 2023-01-18
 
-- Add a new command allowing you to quickly add a comment to an issue using its issue key.
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
 
 ## [Fix icons] - 2022-12-20
 

@@ -66,7 +66,7 @@ export type CreateIssueValues = {
 type Preferences = {
   signature: boolean;
   autofocusField: "teamId" | "title";
-  copyToastAction: "key" | "url" | "title";
+  copyToastAction: "id" | "url" | "title";
 };
 
 function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
@@ -78,7 +78,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
     return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
   }
 
-  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+  return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {

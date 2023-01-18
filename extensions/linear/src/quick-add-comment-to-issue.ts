@@ -4,7 +4,7 @@ import { authorize, oauthClient } from "./api/oauth";
 
 type Arguments = {
   comment: string;
-  issueKey: string;
+  issueId: string;
 };
 
 type Preferences = {
@@ -12,9 +12,11 @@ type Preferences = {
 };
 
 const command = async (props: { arguments: Arguments }) => {
+  const { issueId, comment } = props.arguments;
+
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: `Adding comment to ${props.arguments.issueKey}`,
+    title: `Adding comment to ${issueId}`,
   });
 
   const preferences: Preferences = getPreferenceValues();
@@ -29,34 +31,36 @@ const command = async (props: { arguments: Arguments }) => {
     }
 
     const payload = await linearClient.commentCreate({
-      body: props.arguments.comment,
-      issueId: props.arguments.issueKey,
+      body: comment,
+      issueId,
     });
 
-    const comment = await payload.comment;
+    const newComment = await payload.comment;
 
     if (!payload.success || !comment) {
       throw Error("Something went wrong");
     }
 
-    const successTitle = `Added comment to ${props.arguments.issueKey}`;
+    const successTitle = `Added comment to ${issueId}`;
 
     if (preferences.shouldCloseMainWindow) {
       showHUD(successTitle);
     } else {
       toast.style = Toast.Style.Success;
       toast.title = successTitle;
-      toast.primaryAction = {
-        title: "Open Comment",
-        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-        onAction: async () => {
-          await open(comment.url);
-          await toast.hide();
-        },
-      };
+      if (newComment) {
+        toast.primaryAction = {
+          title: "Open Comment",
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          onAction: async () => {
+            await open(newComment.url);
+            await toast.hide();
+          },
+        };
+      }
     }
   } catch (e) {
-    const failureTitle = `Failed adding comment to ${props.arguments.issueKey}`;
+    const failureTitle = `Failed adding comment to ${issueId}`;
 
     if (preferences.shouldCloseMainWindow) {
       showHUD(failureTitle);
