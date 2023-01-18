@@ -60,7 +60,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={title}
       subtitle={searchResult.subtitle}
-      accessoryTitle={searchResult.arg}
+      accessories={[{ text: searchResult.arg }]}
       icon={searchResult.icon.path}
       actions={
         <ActionPanel>

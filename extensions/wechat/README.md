@@ -28,10 +28,14 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 
 ## How to Use
 
-before I create the final version and release it to the Raycast Store,
-you can use it with:
+- Raycast Store
+<p align="center">
+<a href="https://www.raycast.com/raffeyang/wechat"><img src="https://www.raycast.com/raffeyang/wechat/install_button@2x.png" height="64" style="height: 64px;" alt=""></a>
+</p>
 
-`npm install && npm run dev`
+- Manual Install
+
+`npm install && npx ray develop`
 
 ## License
 
