@@ -2,22 +2,23 @@
 
 ## 1.46.0 - 2023-01-18
 
-⚠️️ **Global Fetch Deprecation**: We've removed the experimental support for global fetch in Node 18. The reason is that the feature is not stable yet (hence the warning on it being "experimental" in the dev console) and is not compatible with our new proxy feature in Raycast. We've scanned the public repository for extensions that make use of global fetch and replaced it with the _cross-fetch_ dependency via separate PRs. If we missed an extension, let us know - in most cases it should be a straightforward replacement.
+⚠️️ **Global Fetch Deprecation**: We've removed the experimental support for global fetch in Node 18. The reason is that the feature is not stable yet (hence the warning on it being "experimental" in the dev console) and is not compatible with our new proxy feature in Raycast. We've scanned the public repository for extensions that make use of global fetch and replaced it with the _cross-fetch_ dependency via separate PRs. If we missed an extension, let us know - in most cases, it should be a straightforward replacement.
 
 ### ✨ New
 
 - **Source maps** for production errors: source maps are now also enabled for production builds of an extension. When an exception occurs, you get cleaner stack traces with proper source locations in the TypeScript sources files (vs. the minified and unusable JavaScript locations). _Note_: An extension must be re-published to enable production source maps.
+- **Action.PickDate**: We are introducing a new Action to allow users to set a Date directly from the action panel.
 
 ### 💎 Improvements
 
-- **Dev Tools**: the "Start Development" command under "Manage Extensions" now starts development in iTerm if installed as default terminal.
-- In order to ensure date formatting & other internationalization functions work as expected, the NodeJS process is now started with the `LC_ALL` environment variable set to the user's current locale.
+- **Dev Tools**: the "Start Development" command under "Manage Extensions" now starts development in iTerm if installed as the default terminal.
+- In order to ensure that date formatting & other internationalization functions work as expected, the NodeJS process is now started with the `LC_ALL` environment variable set to the user's current locale.
 
 ### 🐞 Fixes
 
 - Fixed an issue where the first exec/spawn call for running a subprocess could be slower than subsequent calls.
 - Fixed menu bar icon padding when there's no text.
-- Fixed a problem where menu bar commands being are updated with a new required would not display the required preference screen.
+- Fixed a problem where menu bar commands updated with a new required preference would not display the required preference screen.
 - Fixed a rare bug with menu bar commands that could lead to Raycast hanging.
 - Fixed an issue where menu bar commands launching view commands would cause stacking in the navigation hierarchy.
 - Fixed an issue where fallback images in lists would flicker.
