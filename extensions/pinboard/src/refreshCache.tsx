@@ -1,5 +1,7 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
+import { refreshCache } from "./api";
 
 const { apiToken } = getPreferenceValues();
 
@@ -12,35 +14,7 @@ type LastUpdated = {
 };
 
 export default function RefreshCache() {
-  const pinboardCache = new Cache({
-    namespace: "pinboard",
-  });
-
-  const isFirstInit = pinboardCache.isEmpty;
-  console.debug({ isFirstInit })
-
-  // Get the last updated time from the server and from the cache. We always want these values.
-  const cachedLastUpdated = pinboardCache.get("lastUpdated");
-  const { data: serverLastUpdated } = useFetch<LastUpdated>(`${LAST_UPDATED_ENDPOINT}?${params.toString()}`);
-
-  const shouldRefresh = cachedLastUpdated !== serverLastUpdated?.update_time;
-  console.debug({shouldRefresh, cachedLastUpdated, serverLastUpdated})
-
-  const {
-    data: serverPosts,
-    isLoading,
-    error: serverPostsError,
-  } = useFetch(`${ALL_ENDPOINT}?${params.toString()}`, {
-    execute: isFirstInit || shouldRefresh,
-  });
-
-  if (!isLoading && shouldRefresh && serverPosts && serverLastUpdated && !serverPostsError) {
-    console.debug("Refreshing cache...")
-    pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
-    console.debug("Updated lastUpdated cache")
-    pinboardCache.set("posts", JSON.stringify(serverPosts));
-    console.debug("Updated posts cache")
-    return;
-  }
-  return;
+  useEffect(() => {
+    refreshCache();
+  })
 }

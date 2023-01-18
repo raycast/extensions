@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -24,6 +24,56 @@ export interface BookmarksState {
 export enum SearchKind {
   Constant,
   All,
+}
+
+type LastUpdated = {
+  update_time: string;
+};
+
+export async function refreshCache() {
+
+  const allPostsEndpoint = `${apiBasePath}/posts/all`;
+  const lastUpdatedEndpoint = `${apiBasePath}/posts/update`;
+
+  const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
+
+  const pinboardCache = new Cache({
+    namespace: "pinboard",
+  });
+
+  const isFirstInit = pinboardCache.isEmpty;
+  console.debug({ isFirstInit })
+
+  // Get the last updated time from the server and from the cache. We always want these values.
+  const cachedLastUpdated = pinboardCache.get("lastUpdated");
+  const serverLastUpdated = await fetch(`${lastUpdatedEndpoint}?${params.toString()}`).then((res) => {
+    if (!res.ok) {
+      return {update_time: "na"}
+    } else {
+      return res.json();
+    }
+  }) as LastUpdated;
+
+  const shouldRefresh = cachedLastUpdated !== serverLastUpdated?.update_time;
+  console.debug({shouldRefresh, cachedLastUpdated, serverLastUpdated})
+
+  const serverPosts = await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
+    if (!res.ok) {
+      return [];
+    } else {
+      return res.json();
+    }
+  }) as Bookmark[];
+
+  if (shouldRefresh && serverPosts && serverLastUpdated) {
+    console.debug("Refreshing cache...")
+    pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
+    console.debug("Updated lastUpdated cache")
+    pinboardCache.set("posts", JSON.stringify(serverPosts));
+    console.debug("Updated posts cache")
+    return;
+  }
+  return;
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
