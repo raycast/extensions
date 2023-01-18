@@ -12,19 +12,18 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 
 ## Todo
 
-- [x] Search Contact
-- [x] List Search Contact Numbers
-- [x] Open Contact
-- [x] List WeChat ID
-- [x] Copy WeChat ID
-- [x] Display Avatar
-- [x] Fix some bug
-- [x] Upload to Raycast Store
-- [x] Detect if Wechat is installed
-- [ ] Support fuzzy query
-- [ ] Chat directly inside Rycast without opening WeChat
-- [ ] View WeChat History
-- [ ] Toggle WeChat Function
+- [x] Search Contact / 搜索微信通讯录好友
+- [x] List Search Contact Numbers / 显示检索的好友数量
+- [x] Open Contact / 打开微信好友
+- [x] List WeChat ID / 显示好友微信ID
+- [x] Copy WeChat ID / 复制微信ID
+- [x] Display Avatar / 显示微信头像
+- [x] Upload to Raycast Store / 发布到Raycast商店
+- [x] Detect if Wechat & WeChatExtension is installed / 检测微信以及WeChatExtension是否安装
+- [ ] Support fuzzy query / 模糊查询
+- [ ] Chat directly inside Rycast without opening WeChat / 直接输入了聊天内容
+- [ ] View WeChat History / 查看聊天记录
+- [ ] Toggle WeChat Function / 调整微信功能
 
 ## How to Use
 
