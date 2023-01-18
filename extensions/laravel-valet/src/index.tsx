@@ -43,9 +43,9 @@ export default function Command() {
     >
       {!pathExists(configPath) && (
         <List.EmptyView
-          title="No valet config file was found"
-          description="Make sure Valet is installed and configured. Press enter to open the documentation."
-          icon={Icon.ExclamationMark}
+          title="No Valet Config File Found"
+          description={`Please make sure Valet is installed and configured.\n\nPress enter to open the documentation.`}
+          icon="no-view.png"
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
@@ -57,7 +57,7 @@ export default function Command() {
         />
       )}
       {pathExists(configPath) && (sites ?? []).length === 0 && (
-        <List.EmptyView title="No sites were found" description="Try searching for something else" />
+        <List.EmptyView title="No Sites Found" icon="no-view.png" description="Try searching for something else" />
       )}
       {(sites ?? []).map((site: site) => (
         <Site site={site} key={site.name} />

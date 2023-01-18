@@ -24,7 +24,7 @@ export function Site({ site: site }: SiteProps): JSX.Element {
           <Action.ShowInFinder path={site.path} />
           <Action.OpenWith path={site.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action.CopyToClipboard
-            title="Copy site Path"
+            title="Copy Site Path"
             content={site.path}
             shortcut={{ modifiers: ["cmd"], key: "p" }}
           />
