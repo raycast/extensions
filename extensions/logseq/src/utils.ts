@@ -8,7 +8,7 @@ import fs from "fs";
 import untildify from "untildify";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const noop = () => {};
+export const noop = () => { };
 export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
@@ -109,10 +109,11 @@ export const formatResult = (result: string) => {
   return title[title.length - 1];
 };
 
+const graphName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
+export const logseqUrl = encodeURI(`logseq://graph/${graphName}`);
+
 export const formatFilePath = (pageName: string) => {
-  const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
-  const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
-  return finalURL;
+  return encodeURI(`${logseqUrl}?file=${pageName}`);
 };
 
 const getCurrentTime = () => {
