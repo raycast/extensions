@@ -1,6 +1,6 @@
 import { Action, Clipboard, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { execFileSync } from "child_process";
-import { CLI_PATH } from "../utils";
+import { CLI_PATH, titleCaseWord } from "../utils";
 
 async function copyPassword(password: string): Promise<boolean> {
   const applescript = `
@@ -42,7 +42,7 @@ export function CopyToClipboard({
   return (
     <Action
       icon={Icon.Clipboard}
-      title={`Copy ${field}`}
+      title={`Copy ${titleCaseWord(field)}`}
       shortcut={shortcut}
       onAction={async () => {
         const toast = await showToast({
