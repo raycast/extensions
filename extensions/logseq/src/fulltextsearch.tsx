@@ -2,11 +2,7 @@ import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues } from
 import React, { useState, useEffect, useCallback } from "react";
 import fetch, { Headers, RequestInit } from "node-fetch";
 
-import {
-  showGraphPathInvalidToast,
-  validateUserConfigGraphPath,
-  logseqUrl
-} from "./utils";
+import { showGraphPathInvalidToast, validateUserConfigGraphPath, logseqUrl } from "./utils";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -24,30 +20,26 @@ export default function Command() {
       searchBarPlaceholder="Search Logseq Database..."
       throttle
     >
-
       <List.Section title="Pages" subtitle={state.results?.pages.length + ""}>
         {state.results?.pages.map((page) => {
           const res: SearchResult = {
-            "name": page,
-            "url": encodeURI(`${logseqUrl}?page=${page}`),
+            name: page,
+            url: encodeURI(`${logseqUrl}?page=${page}`),
           };
-          return <SearchListItem key={page} searchResult={res} />
+          return <SearchListItem key={page} searchResult={res} />;
         })}
       </List.Section>
 
-
       <List.Section title="Blocks" subtitle={state.results?.blocks.length + ""}>
-        {
-          state.results?.blocks.map((block) => {
-            const res: SearchResult = {
-              "name": block['pagename'],
-              "description": block["block/content"].replaceAll("\n", "\\n"),
-              "url": encodeURI(`${logseqUrl}?block-id=${block["block/uuid"]}`),
-            };
-            return <SearchListItem key={block["block/uuid"]} searchResult={res} />
-          })}
+        {state.results?.blocks.map((block) => {
+          const res: SearchResult = {
+            name: block["pagename"],
+            description: block["block/content"].replaceAll("\n", "\\n"),
+            url: encodeURI(`${logseqUrl}?block-id=${block["block/uuid"]}`),
+          };
+          return <SearchListItem key={block["block/uuid"]} searchResult={res} />;
+        })}
       </List.Section>
-
     </List>
   );
 }
@@ -121,22 +113,22 @@ function useSearch() {
 }
 
 interface Block {
-  "block/uuid": string,
-  "block/content": string,
-  "block/page": number,
-  "pagename": string,
+  "block/uuid": string;
+  "block/content": string;
+  "block/page": number;
+  pagename: string;
 }
 
 // Didn't understand what this is for yet
 interface PageContent {
-  "block/uuid": string,
-  "block/snippet": string,
+  "block/uuid": string;
+  "block/snippet": string;
 }
 
 interface SearchResponse {
-  blocks: Block[],
-  "pages-content": PageContent[]
-  pages: string[],
+  blocks: Block[];
+  "pages-content": PageContent[];
+  pages: string[];
   // files: string[],
 }
 
@@ -147,36 +139,31 @@ async function logseqReq(method: string, args: any[]): Promise<any> {
   myHeaders.append("Content-Type", "application/json");
 
   const raw = JSON.stringify({
-    "method": method,
-    "args": args
+    method: method,
+    args: args,
   });
 
   const requestOptions: RequestInit = {
-    method: 'POST',
+    method: "POST",
     headers: myHeaders,
     body: raw,
-    redirect: 'follow'
+    redirect: "follow",
   };
 
   const host = getPreferenceValues().host;
-  return fetch(`http://${host}/api`, requestOptions)
+  return fetch(`http://${host}/api`, requestOptions);
 }
 
 async function performSearch(searchText: string): Promise<SearchResponse> {
-  const resp = await logseqReq("logseq.search", [searchText])
-    .then(response => response.json()) as SearchResponse;
+  const resp = (await logseqReq("logseq.search", [searchText]).then((response) => response.json())) as SearchResponse;
   if (resp) {
     for (const block of resp.blocks) {
-      const meta = await logseqReq("logseq.Editor.getBlock", [block["block/uuid"]]).then(
-        response => response.json()
-      )
-      const page = await logseqReq("logseq.Editor.getPage", [meta["page"]['id']]).then(
-        response => response.json()
-      );
-      block.pagename = page["originalName"]
+      const meta = await logseqReq("logseq.Editor.getBlock", [block["block/uuid"]]).then((response) => response.json());
+      const page = await logseqReq("logseq.Editor.getPage", [meta["page"]["id"]]).then((response) => response.json());
+      block.pagename = page["originalName"];
     }
   } else {
-    console.error("null response")
+    console.error("null response");
   }
   return resp;
 }
