@@ -25,6 +25,11 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - [ ] View WeChat History / 查看微信聊天记录
 - [ ] Toggle WeChat Function / 调整微信功能
 
+## Shortcuts
+`Enter` Open WeChat Contact / 打开微信好友
+
+`Command + C`Copy WeChat Contact ID / 复制微信好友ID
+
 ## How to Use
 
 - Raycast Store
