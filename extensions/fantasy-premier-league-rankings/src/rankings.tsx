@@ -55,14 +55,13 @@ export default function getUserRankings() {
       }
       isLoading={!bootstrapData || !league}
     >
-      {league?.standings?.results.length === 0 ||
-        (league?.standings?.results === undefined && (
-          <List.EmptyView
-            title="League Data Unavailable"
-            description="Sorry, there is currently no league data available to display. Please check the status of the API by visiting fantasy.premierleague.com and try again later."
-            icon={Icon.SoccerBall}
-          />
-        ))}
+      {(!bootstrapData || !league) && (
+        <List.EmptyView
+          title="We are currently unable to retrieve your league data."
+          description="Sorry, there is currently no league data available to display. Please check the status of the API by visiting fantasy.premierleague.com and try again later."
+          icon={Icon.SoccerBall}
+        />
+      )}
 
       {league?.standings?.results.map((result) => {
         let icon: Image.ImageLike = {
