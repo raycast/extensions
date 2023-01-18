@@ -5,12 +5,12 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 ![WeChat](./assets/cover.png)
 ![WeChat Showcase](./metadata/showcase.png)
 
-## Requirement
+## Requirements
 
 1. Install [WeChat for Mac](https://www.wechat.com) 
 2. Install [WeChatTweak-macOS](https://github.com/Sunnyyoung/WeChatTweak-macOS) 
 
-## Todo
+## Features
 
 - [x] Search Contact / 搜索微信通讯录好友
 - [x] List Search Contact Numbers / 显示检索的好友数量
