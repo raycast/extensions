@@ -173,6 +173,37 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "quick-add-comment-to-issue",
+      "title": "Quick Add Comment to Issue",
+      "description": "Quickly add a comment to an issue using its key.", 
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "issueKey",
+          "placeholder": "Issue Key",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
