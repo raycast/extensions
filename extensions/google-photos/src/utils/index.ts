@@ -27,3 +27,7 @@ export const downloadMedia = async (url: string, filename: string, mimeType: str
 
   showToast(Toast.Style.Success, `Downloaded ${filename}`);
 };
+
+export const isEmpty = (obj: Object) => {
+  return Object.keys(obj).length === 0;
+};
