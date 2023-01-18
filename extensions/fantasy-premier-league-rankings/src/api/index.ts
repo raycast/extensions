@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import axios, { AxiosRequestConfig } from "axios";
 
-const endpoint = "https://proud-hen-sunbonnet.cyclic.app/fpl_api/";
+const endpoint = "https://hwbraycastfpl.azurewebsites.net/";
 const headers = {
   "user-agent": "Dalvik/2.1.0 (Linux; U; Android 6.0; Android SDK built for x86_64 Build/MASTER)",
 };
