@@ -4,7 +4,7 @@ import { ListResponse, MediaItem, Error } from "../types/google";
 import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import { URLSearchParams } from "url";
-import { isEmpty } from "../utils";
+import { isEmpty, categories } from "../utils";
 const BASE_URL = "https://photoslibrary.googleapis.com/v1";
 
 const { pageSize } = getPreferenceValues();
@@ -14,6 +14,8 @@ export const usePhotos = (type: string, nextpageToken: string) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+
+  const Category = categories.find((category) => category.value === type)?.value;
 
   useEffect(() => {
     async function fetchPhotos() {
@@ -33,7 +35,10 @@ export const usePhotos = (type: string, nextpageToken: string) => {
             pageSize,
             filters: {
               mediaTypeFilter: {
-                mediaTypes: [type],
+                mediaTypes: Category ? ["ALL_MEDIA"] : [type],
+              },
+              contentFilter: {
+                includedContentCategories: Category ? [Category] : ["NONE"],
               },
             },
           }),

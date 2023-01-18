@@ -3,47 +3,11 @@ import { Grid, ActionPanel, Action, Detail, Toast, showToast, Icon, List } from 
 import { withGoogleAuth } from "./components/withGoogleAuth";
 import { usePhotos } from "./hooks/usePhotos";
 import { usePhoto } from "./hooks/usePhoto";
-import { downloadMedia } from "./utils";
-
-const sorts = [
-  { id: "all", name: "All", value: "ALL_MEDIA", icon: Icon.House },
-  { id: "photos", name: "Photos", value: "PHOTO", icon: Icon.Image },
-  { id: "videos", name: "Videos", value: "VIDEO", icon: Icon.Video },
-];
-
-const categories = [
-  { id: "animals", name: "Animals", value: "ANIMALS" },
-  { id: "fashion", name: "Fashion", value: "FASHION" },
-  { id: "landmarks", name: "Landmarks", value: "LANDMARKS" },
-  { id: "receipts", name: "Receipts", value: "RECEIPTS" },
-  { id: "weddings", name: "Weddings", value: "WEDDINGS" },
-  { id: "arts", name: "Arts", value: "ARTS" },
-  { id: "flowers", name: "Flowers", value: "FLOWERS" },
-  { id: "landscapes", name: "Landscapes", value: "LANDSCAPES" },
-  { id: "screenshots", name: "Screenshots", value: "SCREENSHOTS" },
-  { id: "whiteboards", name: "Whiteboards", value: "WHITEBOARDS" },
-  { id: "birthdays", name: "Birthdays", value: "BIRTHDAYS" },
-  { id: "food", name: "Food", value: "FOOD" },
-  { id: "night", name: "Night", value: "NIGHT" },
-  { id: "selfies", name: "Selfies", value: "SELFIES" },
-  { id: "cityscapes", name: "Cityscapes", value: "CITYSCAPES" },
-  { id: "gardens", name: "Gardens", value: "GARDENS" },
-  { id: "people", name: "People", value: "PEOPLE" },
-  { id: "sport", name: "Sport", value: "SPORT" },
-  { id: "crafts", name: "Crafts", value: "CRAFTS" },
-  { id: "holidays", name: "Holidays", value: "HOLIDAYS" },
-  { id: "performances", name: "Performances", value: "PERFORMANCES" },
-  { id: "travel", name: "Travel", value: "TRAVEL" },
-  { id: "documents", name: "Documents", value: "DOCUMENTS" },
-  { id: "houses", name: "Houses", value: "HOUSES" },
-  { id: "pets", name: "Pets", value: "PETS" },
-  { id: "utility", name: "Utility", value: "UTILITY" },
-];
+import { categories, downloadMedia, sorts } from "./utils";
 
 const GooglePhotos: React.FunctionComponent = () => {
   const [type, setType] = useState<string>("ALL_MEDIA");
   const [nextPage, setNextPage] = useState<string>("");
-
   const { photos, loading, error, nextPageToken } = usePhotos(type, nextPage);
 
   if (error) {
