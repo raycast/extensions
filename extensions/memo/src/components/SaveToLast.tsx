@@ -16,12 +16,12 @@ export function SaveToLast(props: SaveToLastProps) {
     const [text, setText] = useState<string>(props.copiedText)
 
     async function handleSave(page: Page, text: string) {
-        const toast = await props.raycastAdapter.showLoading("saving...")
+        const toast = await props.raycastAdapter.showLoading("Saving...")
 
         const rs = await props.saver.save(page, text, "")
         if (rs instanceof Error) {
             console.error(`${rs}: save page`)
-            props.raycastAdapter.setToastError(toast, new Error("cannot save"))
+            props.raycastAdapter.setToastError(toast, new Error("Can't save"))
             return
         }
 
@@ -60,7 +60,7 @@ export function SaveToLast(props: SaveToLastProps) {
 
     return (
         <Form actions={actions}>
-            <Form.TextArea id="text" title={"Copied text"} value={text} onChange={setText} />
+            <Form.TextArea id="text" title={"Copied Text"} value={text} onChange={setText} />
 
             {lastPageSection}
         </Form>
