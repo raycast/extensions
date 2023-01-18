@@ -50,5 +50,10 @@ enum VideoProcessingStatus {
   " FAILED" = "FAILED",
 }
 
+interface Error {
+  type: string;
+  message: string;
+}
+
 export { VideoProcessingStatus };
-export type { ListResponse, MediaItem, MediaMetadata, ContributorInfo, Photo, Video };
+export type { ListResponse, MediaItem, MediaMetadata, ContributorInfo, Photo, Video, Error };
