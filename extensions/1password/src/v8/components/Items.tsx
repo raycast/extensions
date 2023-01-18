@@ -69,18 +69,20 @@ export function Items() {
                           url={(item.urls.find((url) => url.primary) as Url).href}
                         />
                       ) : null}
-                      <CopyToClipboard
-                        id={item.id}
-                        vault_id={item.vault.id}
-                        field="username"
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
-                      />
-                      <CopyToClipboard
-                        id={item.id}
-                        vault_id={item.vault.id}
-                        field="password"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                      />
+                      <ActionPanel.Section>
+                        <CopyToClipboard
+                          id={item.id}
+                          vault_id={item.vault.id}
+                          field="username"
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        />
+                        <CopyToClipboard
+                          id={item.id}
+                          vault_id={item.vault.id}
+                          field="password"
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                        />
+                      </ActionPanel.Section>
                     </>
                   )}
                 </ActionPanel>
