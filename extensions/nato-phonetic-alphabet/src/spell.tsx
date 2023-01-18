@@ -15,6 +15,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   // Map over the word and then map of the characters of that word
   const as_nato = words.map((w: string) => {
     return [...w].map((c: string) => {
+      c = c.toLowerCase();
+
       return {
         character: c,
         telephony: DICTIONARY[c][0] as string,
