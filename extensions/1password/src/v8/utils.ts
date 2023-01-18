@@ -29,11 +29,7 @@ export function useOp<T>(args: string[], cacheKey?: string) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("VIEW cache", cacheKey);
-    console.log("ARGS", args);
-
     if (cacheKey && cache.has(cacheKey)) {
-      console.log("GET cache", cacheKey);
       setIsLoading(false);
       return setData(JSON.parse(cache.get(cacheKey) as string));
     }
@@ -42,13 +38,11 @@ export function useOp<T>(args: string[], cacheKey?: string) {
       const items = op([...args, "--format=json"]);
 
       if (cacheKey) {
-        console.log("SET cache", cacheKey);
         cache.set(cacheKey, items);
         return setData(JSON.parse(cache.get(cacheKey) as string));
       }
       return setData(JSON.parse(items));
     } catch (error: unknown) {
-      console.log(error);
       setError(error);
     } finally {
       setIsLoading(false);

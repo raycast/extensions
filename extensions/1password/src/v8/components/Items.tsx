@@ -8,7 +8,6 @@ import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp } from "..
 import { Guide } from "./Guide";
 
 export function Items() {
-  console.log(">>>>>> RENDER <<<<<<<");
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
 
   const {
@@ -30,7 +29,7 @@ export function Items() {
     category !== newCategory && setCategory(newCategory);
   };
 
-  if (!itemsError || accountError) return <Guide />;
+  if (itemsError || accountError) return <Guide />;
   return (
     <List
       searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}

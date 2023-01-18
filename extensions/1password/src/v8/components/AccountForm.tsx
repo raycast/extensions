@@ -20,7 +20,6 @@ export function AccountForm() {
           <Action.SubmitForm
             title="Sign In"
             onSubmit={async (values) => {
-              console.log("Signing in...");
               const toast = await showToast({
                 style: Toast.Style.Animated,
                 title: "Signing in...",
