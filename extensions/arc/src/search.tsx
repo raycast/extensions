@@ -47,7 +47,7 @@ function SearchArc() {
         return (
           <List.Section key={location} title={getLocationTitle(location)} subtitle={getNumberOfTabs(tabs)}>
             {tabs?.map((tab) => (
-              <TabListItem key={getKey(tab)} tab={tab} mutate={mutateTabs} />
+              <TabListItem key={getKey(tab)} tab={tab} searchText={searchText} mutate={mutateTabs} />
             ))}
           </List.Section>
         );
@@ -55,7 +55,7 @@ function SearchArc() {
 
       <List.Section title="History" subtitle={getNumberOfHistoryEntries(history)}>
         {history?.map((entry) => (
-          <HistoryEntryListItem key={entry.id} entry={entry} />
+          <HistoryEntryListItem key={entry.id} searchText={searchText} entry={entry} />
         ))}
       </List.Section>
 

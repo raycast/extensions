@@ -1,12 +1,12 @@
 import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import { runAppleScript } from "run-applescript";
 import {
   closeTab,
   findTab,
   getSpaces,
   makeNewLittleArcWindow,
+  makeNewTab,
   makeNewTabWithinSpace,
   makeNewWindow,
   reloadTab,
@@ -179,17 +179,18 @@ function useBrowsers(options?: { execute?: boolean }) {
   return useCachedPromise(fetchBrowsers, [], { execute: options?.execute });
 }
 
-export function SearchWithGoogleAction(props: { searchText?: string }) {
+export function SearchWithGoogleAction(props: { searchText: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
       const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText ?? "")}`;
-      await runAppleScript(`
-        tell application "Arc"
-          activate
-          tell front window to make new tab at after (get active tab) with properties {URL:"${searchUrl}"}
-        end tell
-      `);
+      const openTab = await findTab(searchUrl);
+      if (openTab) {
+        await closeMainWindow();
+        await selectTab(openTab);
+      } else {
+        await makeNewTab(searchUrl);
+      }
     } catch (e) {
       await showFailureToast(e, { title: "Failed searching with Google" });
     }
@@ -260,7 +261,7 @@ function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefin
 
 // Sections
 
-export function OpenLinkActionSections(props: { url: string; searchText?: string }) {
+export function OpenLinkActionSections(props: { url: string; searchText: string }) {
   return (
     <>
       <ActionPanel.Section>

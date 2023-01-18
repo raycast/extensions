@@ -4,7 +4,7 @@ import { CopyLinkActionSection, EditTabActionSection, OpenLinkActionSections, Op
 import { HistoryEntry, Space, Suggestion, Tab } from "./types";
 import { getDomain, getLastVisitedAt, getSpaceTitle } from "./utils";
 
-export function HistoryEntryListItem(props: { entry: HistoryEntry }) {
+export function HistoryEntryListItem(props: { entry: HistoryEntry; searchText: string }) {
   return (
     <List.Item
       icon={getFavicon(props.entry.url, { mask: Image.Mask.RoundedRectangle })}
@@ -16,7 +16,7 @@ export function HistoryEntryListItem(props: { entry: HistoryEntry }) {
       accessories={[getLastVisitedAt(props.entry)]}
       actions={
         <ActionPanel>
-          <OpenLinkActionSections url={props.entry.url} />
+          <OpenLinkActionSections url={props.entry.url} searchText={props.searchText} />
           <CopyLinkActionSection url={props.entry.url} title={props.entry.title} />
         </ActionPanel>
       }
@@ -44,7 +44,7 @@ export function SpaceListItem(props: { space: Space }) {
   );
 }
 
-export function SuggestionListItem(props: { suggestion: Suggestion; searchText?: string }) {
+export function SuggestionListItem(props: { suggestion: Suggestion; searchText: string }) {
   return (
     <List.Item
       icon={getFavicon(props.suggestion.url, { mask: Image.Mask.RoundedRectangle })}
@@ -59,7 +59,7 @@ export function SuggestionListItem(props: { suggestion: Suggestion; searchText?:
   );
 }
 
-export function TabListItem(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+export function TabListItem(props: { tab: Tab; searchText: string; mutate: MutatePromise<Tab[] | undefined> }) {
   return (
     <List.Item
       icon={getFavicon(props.tab.url, { mask: Image.Mask.RoundedRectangle })}
@@ -70,7 +70,7 @@ export function TabListItem(props: { tab: Tab; mutate: MutatePromise<Tab[] | und
       }}
       actions={
         <ActionPanel>
-          <OpenLinkActionSections url={props.tab.url} />
+          <OpenLinkActionSections url={props.tab.url} searchText={props.searchText} />
           <CopyLinkActionSection url={props.tab.url} title={props.tab.title} />
           <EditTabActionSection tab={props.tab} mutate={props.mutate} />
         </ActionPanel>

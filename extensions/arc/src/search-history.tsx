@@ -7,7 +7,7 @@ import { HistoryEntryListItem } from "./list";
 import { useSQL } from "@raycast/utils";
 
 function SearchHistory() {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState("");
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText));
 
   if (permissionView) {
@@ -15,10 +15,15 @@ function SearchHistory() {
   }
 
   return (
-    <List searchBarPlaceholder="Search history" isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List
+      searchBarPlaceholder="Search history"
+      searchText={searchText}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+    >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
       {data?.map((entry) => (
-        <HistoryEntryListItem key={entry.id} entry={entry} />
+        <HistoryEntryListItem key={entry.id} entry={entry} searchText={searchText} />
       ))}
     </List>
   );

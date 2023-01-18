@@ -27,4 +27,5 @@ export type NewTabPreferences = {
 export type Suggestion = {
   id: string;
   query: string;
+  url: string;
 };
