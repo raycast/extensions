@@ -317,7 +317,7 @@ export default function Command() {
 | isShowingDetail | Whether the List should have an area on the right side of the items to show additional details about the selected item. | <code>boolean</code> | - |
 | navigationTitle | The main title for that view displayed in Raycast | <code>string</code> | Command title |
 | searchBarAccessory | [List.Dropdown](list.md#list.dropdown) that will be shown in the right-hand-side of the search bar. | <code>ReactElement&lt;[List.Dropdown.Props](list.md#props), string></code> | - |
-| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search value..."` |
+| searchBarPlaceholder | Placeholder text that will be shown in the search bar. | <code>string</code> | `"Search…"` |
 | searchText | The text that will be displayed in the search bar. | <code>string</code> | - |
 | selectedItemId | Selects the item with the specified id. | <code>string</code> | - |
 | throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
@@ -387,7 +387,7 @@ export default function Command() {
 | filtering | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter the items. When `false`, the extension needs to take care of the filtering. | <code>boolean</code> or <code>{ keepSectionOrder: boolean }</code> | `false` when `onSearchTextChange` is specified, `true` otherwise. |
 | id | ID of the dropdown. | <code>string</code> | - |
 | isLoading | Indicates whether a loading indicator should be shown or hidden next to the search bar | <code>boolean</code> | `false` |
-| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search..."` |
+| placeholder | Placeholder text that will be shown in the dropdown search field. | <code>string</code> | `"Search…"` |
 | storeValue | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered. | <code>boolean</code> | - |
 | throttle | Defines whether the `onSearchTextChange` handler will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). | <code>boolean</code> | `false` |
 | value | The currently value of the dropdown. | <code>string</code> | - |
