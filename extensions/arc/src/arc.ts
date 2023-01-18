@@ -119,11 +119,11 @@ export async function reloadTab(tab: Tab) {
   `);
 }
 
-export async function makeNewTab() {
+export async function makeNewTab(url: string) {
   await runAppleScript(`
     tell application "Arc"
       tell front window
-        make new tab with properties {URL:"https://google.com"}
+        make new tab with properties {URL:"${url}"}
       end tell
 
       activate
