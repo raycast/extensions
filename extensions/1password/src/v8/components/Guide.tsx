@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 const INSTRUCTION = `
 ## ✅ 1Password CLI 2
@@ -21,34 +21,14 @@ const INSTRUCTION = `
 You can also unlock 1Password CLI with your [Apple Watch](https://support.1password.com/apple-watch-mac/).
 `;
 
-const V7_INSTRUCTION = `
-## ✅ Spotlight and 3rd party app integrations is not enabled
-
-### To use this extension please enable the "Spotlight and 3rd party app integrations" in the 1Password 7 app:
-1. Make sure you have the right 1Password app version, it should be 7.
-2. Open and unlock 1Password.
-3. Choose 1Password > Preferences and click the Advanced icon.
-4. Turn on “Enable Spotlight and 3rd party app integrations”.
-5. Restart 1Password app.
-
-### This extension has no access to your passwords, only to the metadata:
-- title
-- description
-- URLs
-- vault name
-- item category
-- account name
-- vault identifier
-- item identifier
-`;
-
 export function Guide() {
   return (
     <Detail
-      markdown={getPreferenceValues().version == "v8" ? INSTRUCTION : V7_INSTRUCTION}
+      markdown={INSTRUCTION}
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
         </ActionPanel>
       }
     />

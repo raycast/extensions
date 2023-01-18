@@ -1,15 +1,22 @@
 import { showToast, Toast } from "@raycast/api";
-import { clearCache } from "./v8/utils";
+import { clearCache, op } from "./v8/utils";
 
 export default async function resetCache() {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Clearing cache...",
+  });
+
   try {
     clearCache();
-    await showToast({ title: "Cache is cleared" });
+    op(["signout", "--all"]);
+    toast.style = Toast.Style.Success;
+    toast.title = "Cleared cache";
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Falied",
-      message: error instanceof Error ? error.message : undefined,
-    });
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to clear cache";
+    if (error instanceof Error) {
+      toast.message = error.message;
+    }
   }
 }

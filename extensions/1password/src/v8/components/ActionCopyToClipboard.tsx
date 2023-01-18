@@ -47,7 +47,7 @@ export function CopyToClipboard({
       onAction={async () => {
         const toast = await showToast({
           style: Toast.Style.Animated,
-          title: `Copying ${field}`,
+          title: `Copying ${field}...`,
         });
 
         try {
@@ -56,17 +56,19 @@ export function CopyToClipboard({
 
           toast.style = Toast.Style.Success;
           toast.title = "Copied to clipboard";
-        } catch (error: any) {
+        } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to copy";
-          toast.message = error instanceof Error ? error.message : undefined;
-          toast.primaryAction = {
-            title: "Copy logs",
-            onAction: async (toast) => {
-              await Clipboard.copy(error?.message);
-              toast.hide();
-            },
-          };
+          if (error instanceof Error) {
+            toast.message = error.message;
+            toast.primaryAction = {
+              title: "Copy logs",
+              onAction: async (toast) => {
+                await Clipboard.copy((error as Error).message);
+                toast.hide();
+              },
+            };
+          }
         }
       }}
     />

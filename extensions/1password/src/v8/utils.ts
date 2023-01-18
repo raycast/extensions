@@ -6,39 +6,54 @@ import { useEffect, useState } from "react";
 
 import { CategoryName } from "./types";
 
-const cache = new Cache();
+export const cache = new Cache();
 
 export const BINARY_PATH = `${environment.assetsPath}/op`;
 export const CLI_PATH = `/usr/local/bin/op`;
 export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
-export const PROFILE_CACHE_NAME = "@profile";
+export const ACCOUNT_CACHE_NAME = "@account";
 
-export function useOp<T>(key: string, args: string[]) {
+export function op(args: string[]) {
+  if (!existsSync(CLI_PATH)) {
+    chmodSync(BINARY_PATH, 0o755);
+    copyFileSync(BINARY_PATH, CLI_PATH);
+  }
+  const stdout = execFileSync(CLI_PATH, args);
+  return stdout.toString();
+}
+
+export function useOp<T>(args: string[], cacheKey?: string) {
   const [data, setData] = useState<T>();
   const [error, setError] = useState<unknown>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (cache.has(key)) {
+    console.log("VIEW cache", cacheKey);
+    console.log("ARGS", args);
+
+    if (cacheKey && cache.has(cacheKey)) {
+      console.log("GET cache", cacheKey);
       setIsLoading(false);
-      return setData(JSON.parse(cache.get(key) as string));
+      return setData(JSON.parse(cache.get(cacheKey) as string));
     }
+
     try {
-      if (!existsSync(CLI_PATH)) {
-        chmodSync(BINARY_PATH, 0o755);
-        copyFileSync(BINARY_PATH, CLI_PATH);
+      const items = op([...args, "--format=json"]);
+
+      if (cacheKey) {
+        console.log("SET cache", cacheKey);
+        cache.set(cacheKey, items);
+        return setData(JSON.parse(cache.get(cacheKey) as string));
       }
-      const stdout = execFileSync(CLI_PATH, [...args, "--format=json"]);
-      const items = stdout.toString();
-      cache.set(key, items);
-      setData(JSON.parse(items));
+      return setData(JSON.parse(items));
     } catch (error: unknown) {
+      console.log(error);
       setError(error);
     } finally {
       setIsLoading(false);
     }
-  }, [key]);
+  }, [cacheKey]);
 
   return { data, error, isLoading };
 }
