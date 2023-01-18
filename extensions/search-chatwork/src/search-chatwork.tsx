@@ -51,7 +51,7 @@ export default function CommandToSearchChatWork() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        title="Read in Detail"
+                        title="Show Details"
                         icon={Icon.AppWindow}
                         target={
                           <DetailOfChat
