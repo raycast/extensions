@@ -30,7 +30,7 @@ export default function Command() {
       <List.EmptyView
         title={isLoading ? "Searching" : "No Results"}
         icon="no-view.png"
-        description={isLoading ? "Reticulating splines..." : "Try change your search query"}
+        description={isLoading ? "Reticulating splines..." : "Try changing your search query"}
       />
       {(data as Profile[])?.map((profile: Profile) => {
         return (
