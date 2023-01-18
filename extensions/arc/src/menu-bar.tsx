@@ -1,16 +1,7 @@
-import {
-  Color,
-  Image,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  open,
-  openCommandPreferences,
-} from "@raycast/api";
+import { Color, Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./arc";
-import { getDomain, getKey, getSpaceTitle } from "./utils";
+import { getDomain, getKey, getShortcut, getSpaceTitle } from "./utils";
 
 const LIMIT = 25;
 
@@ -28,7 +19,7 @@ export default function Command() {
           <MenuBarExtra.Item
             key={space.id}
             title={getSpaceTitle(space)}
-            shortcut={index < 9 ? { modifiers: ["ctrl"], key: String(index + 1) as Keyboard.KeyEquivalent } : undefined}
+            shortcut={getShortcut(["ctrl"], index)}
             onAction={async () => await selectSpace(space)}
           />
         ))}
@@ -43,9 +34,7 @@ export default function Command() {
               icon={getFavicon(tab.url, { mask: Image.Mask.RoundedRectangle })}
               title={tab.title}
               subtitle={getDomain(tab.url)}
-              shortcut={
-                index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as Keyboard.KeyEquivalent } : undefined
-              }
+              shortcut={getShortcut(["cmd"], index)}
               onAction={async () => {
                 const openTab = await findTab(tab.url);
 

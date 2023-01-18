@@ -1,4 +1,4 @@
-import { Clipboard, environment, showToast, Toast } from "@raycast/api";
+import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
 import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
@@ -37,6 +37,17 @@ export function getLocationTitle(location: TabLocation) {
     case "unpinned":
       return "Unpinned Tabs";
   }
+}
+
+export function getShortcut(modifiers: Keyboard.KeyModifier[], index: number) {
+  const key = index + 1;
+
+  let shortcut: Keyboard.Shortcut | undefined;
+  if (key >= 1 && key <= 9) {
+    shortcut = { modifiers: modifiers, key: String(key) as Keyboard.KeyEquivalent };
+  }
+
+  return shortcut;
 }
 
 export function getNumberOfTabs(tabs?: Tab[]) {
