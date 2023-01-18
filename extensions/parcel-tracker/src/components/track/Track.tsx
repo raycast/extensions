@@ -26,11 +26,11 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
     if (defaultTrackNumber !== undefined) search(trackNumber);
   }, [trackNumber]);
 
-  const search = (trackParameter: string) => {
+  const search = (invoiceNo: string) => {
     setLoading(true);
-    getTrackData(vendorKey, trackParameter)
+    getTrackData(vendorKey, invoiceNo)
       .then((response) => {
-        setTrackNumber(trackParameter);
+        setTrackNumber(invoiceNo);
         setTrackData(response.data);
         if (defaultTrackNumber) handleSave(response.data);
       })
@@ -52,6 +52,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   const handleSave = (data: ITrackData) => {
+    console.log(data);
     const value = `${data.itemName || "UNKNOWN"}//${data.completeYN}`;
     LocalStorage.setItem(`${vendorKey}-${trackNumber}`, value).then(() =>
       showToast({ style: Toast.Style.Success, title: "Saved." })
@@ -62,7 +63,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   function ListItems() {
-    const hasTrackingDetails = !hasError && trackData && trackData.details?.length > 0;
+    const hasTrackingDetails = !hasError && trackData && trackData.length > 0;
     if (!searchText && !defaultTrackNumber) {
       return <List.EmptyView icon="📦" title="Type your invoice number to get started" />;
     }
@@ -87,12 +88,12 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
             />
           </List.Section>
           <List.Section title="Delivery history">
-            {trackData.details.map((tracking, index) => {
+            {trackData.map((tracking, index) => {
               return (
                 <List.Item
                   key={index}
                   icon={Icon.Binoculars}
-                  title={tracking.trackingKind}
+                  title={tracking.trackingKind || tracking.trackingLevel || "UNKNOWN"}
                   subtitle={tracking.trackingWhere}
                   accessoryTitle={convertDate(tracking.trackingTimeString)}
                 />
