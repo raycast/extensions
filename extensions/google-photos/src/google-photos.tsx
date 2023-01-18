@@ -11,6 +11,35 @@ const sorts = [
   { id: "videos", name: "Videos", value: "VIDEO", icon: Icon.Video },
 ];
 
+const categories = [
+  { id: "animals", name: "Animals", value: "ANIMALS" },
+  { id: "fashion", name: "Fashion", value: "FASHION" },
+  { id: "landmarks", name: "Landmarks", value: "LANDMARKS" },
+  { id: "receipts", name: "Receipts", value: "RECEIPTS" },
+  { id: "weddings", name: "Weddings", value: "WEDDINGS" },
+  { id: "arts", name: "Arts", value: "ARTS" },
+  { id: "flowers", name: "Flowers", value: "FLOWERS" },
+  { id: "landscapes", name: "Landscapes", value: "LANDSCAPES" },
+  { id: "screenshots", name: "Screenshots", value: "SCREENSHOTS" },
+  { id: "whiteboards", name: "Whiteboards", value: "WHITEBOARDS" },
+  { id: "birthdays", name: "Birthdays", value: "BIRTHDAYS" },
+  { id: "food", name: "Food", value: "FOOD" },
+  { id: "night", name: "Night", value: "NIGHT" },
+  { id: "selfies", name: "Selfies", value: "SELFIES" },
+  { id: "cityscapes", name: "Cityscapes", value: "CITYSCAPES" },
+  { id: "gardens", name: "Gardens", value: "GARDENS" },
+  { id: "people", name: "People", value: "PEOPLE" },
+  { id: "sport", name: "Sport", value: "SPORT" },
+  { id: "crafts", name: "Crafts", value: "CRAFTS" },
+  { id: "holidays", name: "Holidays", value: "HOLIDAYS" },
+  { id: "performances", name: "Performances", value: "PERFORMANCES" },
+  { id: "travel", name: "Travel", value: "TRAVEL" },
+  { id: "documents", name: "Documents", value: "DOCUMENTS" },
+  { id: "houses", name: "Houses", value: "HOUSES" },
+  { id: "pets", name: "Pets", value: "PETS" },
+  { id: "utility", name: "Utility", value: "UTILITY" },
+];
+
 const GooglePhotos: React.FunctionComponent = () => {
   const [type, setType] = useState<string>("ALL_MEDIA");
   const [nextPage, setNextPage] = useState<string>("");
@@ -41,6 +70,11 @@ const GooglePhotos: React.FunctionComponent = () => {
           <Grid.Dropdown.Section title="Sort By">
             {sorts.map((type) => (
               <Grid.Dropdown.Item key={type.id} title={type.name} value={type.value} icon={{ source: type.icon }} />
+            ))}
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Categories">
+            {categories.map((type) => (
+              <Grid.Dropdown.Item key={type.id} title={type.name} value={type.value} />
             ))}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
