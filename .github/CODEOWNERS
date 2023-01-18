@@ -330,7 +330,7 @@
 /extensions/icons8                                   @yug2005
 /extensions/ihosts                                   @404J
 /extensions/imdb                                     @ryan-exe
-/extensions/imessage-2fa                             @yuercl
+/extensions/imessage-2fa                             @yuercl @thomaspaulmann
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/initium                                  @toto-minai
 /extensions/inkdrop                                  @yaeda
@@ -418,6 +418,7 @@
 /extensions/maven-central-repository                 @koinzhang
 /extensions/mem                                      @brianfakhoury
 /extensions/meme-generator                           @timoransky
+/extensions/memo                                     @mt40
 /extensions/mempool                                  @dillionverma
 /extensions/menubar-weather                          @koinzhang
 /extensions/microsoft-azure                          @crisboarna
@@ -593,6 +594,7 @@
 /extensions/screenshot                               @Aayush9029
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
+/extensions/search-chatwork                          @nagauta
 /extensions/search-composer-packagist                @danyelkeddah @macbookandrew
 /extensions/search-hexpm                             @jordelver
 /extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
@@ -600,7 +602,7 @@
 /extensions/search-npm                               @mrmartineau @reloadedhead
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
-/extensions/searchcaster                             @gskril
+/extensions/searchcaster                             @gskril @pernielsentikaer
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn @fankaidev @pernielsentikaer
 /extensions/sentry                                   @thomaspaulmann @mattisssa
