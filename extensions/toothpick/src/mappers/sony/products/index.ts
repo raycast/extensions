@@ -9,7 +9,9 @@ function populate(device: Device, deviceData: RawDeviceData) {
   switch (device.productId) {
     case SonyProducts.Models.WH1000XM3:
     case SonyProducts.Models.WH1000XM4:
-      // device.icon = { source: "icons/devices/apple/airpods.svg" };
+      break;
+    case SonyProducts.Models.WF1000XM4:
+      device.icon = { source: "icons/devices/sony/wf.1000xm4.svg" };
       break;
   }
 
@@ -32,6 +34,7 @@ const SonyProducts = {
   Models: {
     WH1000XM4: "0x0D58",
     WH1000XM3: "0x0CD3",
+    WF1000XM4: "0x0DE1",
   },
   populate,
 };

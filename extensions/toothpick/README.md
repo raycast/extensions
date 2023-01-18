@@ -27,10 +27,10 @@ After installing, follow the instructions on screen, and you should be good to g
 A lot of workarounds were used to implement many of the core functionalities. Not to mention that this extension was also a whim project. So, I would be happy to hear what you think of it and how it could be improved upon.
 
 <p align="center">
-  <a aria-label="Request Feature" href="https://github.com/raycast/extensions/issues/new?template=extension_feature_request.yml&extension-url=https%3A%2F%2Fraycast.com%2Fbriankosw%2Ftoothpick&title=%5BToothpick%5D+...">
+  <a aria-label="Request Feature" href="https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cfeature+request&template=extension_feature_request.yml&title=%5BToothpick%5D+...&extension-url=https://www.raycast.com/briankosw/toothpick">
     <img alt="" src="https://img.shields.io/badge/Request%20Feature-black.svg?style=for-the-badge">
   </a>
-  <a aria-label="Report Bug" href="https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&extension-url=https%3A%2F%2Fraycast.com%2Fbriankosw%2Ftoothpick&title=%5BToothpick%5D+...">
+  <a aria-label="Report Bug" href="https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BToothpick%5D+...&extension-url=https://www.raycast.com/briankosw/toothpick">
     <img alt="" src="https://img.shields.io/badge/Report%20Bug-black.svg?style=for-the-badge">
   </a>
 </p>
@@ -45,14 +45,13 @@ If you have any of the devices below <i>or</i> wish to have any unlisted device 
 2. Highlight your device
 3. Press 'Command + K'
 4. Run 'Copy Device Data' command
-5. Paste your data in an issue using [this template](https://github.com/raycast/extensions/issues/new?template=extension_feature_request.yml&extension-url=https%3A%2F%2Fraycast.com%2Fbriankosw%2Ftoothpick&description=%2A%2ADevice+brand+and+model%2A%2A%0A%0A%0A%0A%2A%2ADevice+data%2A%2A%0A%0A%0A%0A&title=%5BToothpick%5D+Device+support+form).
+5. Paste your data in an issue using [this template](https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cfeature+request&template=extension_feature_request.yml&title=%5BToothpick%5D+Device+Support+Form&extension-url=https://www.raycast.com/briankosw/toothpick&description=%3Cb%3EDevice%20brand%20and%20model%3C%2Fb%3E%0AReplace%20this%20line%20with%20your%20device%27s%20brand%20name%20and%20model%0A%0A%3Cb%3EDevice%20data%3C%2Fb%3E%0AReplace%20this%20line%20with%20the%20copied%20data).
 6. ???
 7. Profit
 
 ### Wanted devices
 
-- Sony WF-1000XM4
-- Sony WH-1000XM4
+- Sony WF-1000XM3
 - Beats X
 - Beats Solo 3
 - Beats Solo Pro
