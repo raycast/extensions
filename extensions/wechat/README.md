@@ -20,9 +20,9 @@ A [Raycast](https://www.raycast.com) extension for WeChat to quickly search your
 - [x] Display Avatar / 显示微信头像
 - [x] Upload to Raycast Store / 发布到Raycast商店
 - [x] Detect if Wechat & WeChatExtension is installed / 检测微信以及WeChatExtension是否安装
-- [ ] Support fuzzy query / 模糊查询
-- [ ] Chat directly inside Rycast without opening WeChat / 直接输入了聊天内容
-- [ ] View WeChat History / 查看聊天记录
+- [ ] Support fuzzy query / 微信通讯录模糊查询
+- [ ] Chat directly inside Rycast without opening WeChat / 直接输入微信聊天内容
+- [ ] View WeChat History / 查看微信聊天记录
 - [ ] Toggle WeChat Function / 调整微信功能
 
 ## How to Use
