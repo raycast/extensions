@@ -10,14 +10,6 @@ const GooglePhotos: React.FunctionComponent = () => {
   const [nextPage, setNextPage] = useState<string>("");
   const { photos, loading, error, nextPageToken } = usePhotos(type, nextPage);
 
-  if (error) {
-    return (
-      <List navigationTitle={error.type}>
-        <List.EmptyView title={error.message} />
-      </List>
-    );
-  }
-
   const setTypeAndClearPageToken = (value: string) => {
     setType(value);
     setNextPage("");
@@ -44,6 +36,7 @@ const GooglePhotos: React.FunctionComponent = () => {
         </Grid.Dropdown>
       }
     >
+      {error && <Grid.EmptyView title={error?.type} description={error?.message} />}
       {photos.map((photo) => (
         <Grid.Item
           key={photo.id}
