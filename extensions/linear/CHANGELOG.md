@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Add due date action] - 2023-01-19
+
+- Add a new action to set due dates on issues
+- Add due date accessory on issue list items
+
 ## [Quick Add Comment to Issue command] - 2023-01-18
 
 - Add a new command allowing you to quickly add a comment to an issue using its issue ID.
