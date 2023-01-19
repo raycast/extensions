@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const apiServer = "http://localhost:3000/api";
-// const apiServer = "https://api.delivery-tracker.kr/api";
+const apiServer = "https://api.delivery-tracker.kr/api";
 const apiKey = "e6ca43b303f454c467cf96790808049d82a5b31350ba77af1a6ee33c6d795423";
 const instance = axios.create({
   headers: {
@@ -29,9 +28,6 @@ export const getVendorByCode = (code: string) => {
 };
 
 export const getTrackData = (vendorCode: string, invoiceNo: string) => {
-  console.log(
-    `${apiServer}/tracking?vendorCode=${encodeURIComponent(vendorCode)}&invoiceNo=${encodeURIComponent(invoiceNo)}`
-  );
   return instance.get(
     `${apiServer}/tracking?vendorCode=${encodeURIComponent(vendorCode)}&invoiceNo=${encodeURIComponent(invoiceNo)}`
   );
