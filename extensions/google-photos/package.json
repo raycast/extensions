@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-photos",
   "title": "Google Photos",
-  "description": "Access, view and Download your Google Photos",
+  "description": "Access, view, download, and upload media to your Google Photos account.",
   "icon": "google-photos.png",
   "author": "BalliAsghar",
   "categories": [
@@ -12,9 +12,16 @@
   "commands": [
     {
       "name": "google-photos",
-      "title": "Google Photos",
+      "title": "Photos",
       "subtitle": "Google Photos",
       "description": "View Google Photos",
+      "mode": "view"
+    },
+    {
+      "name": "google-photos-upload",
+      "title": "Upload",
+      "subtitle": "Google Photos",
+      "description": "Upload a photo to Google Photos",
       "mode": "view"
     }
   ],
@@ -22,7 +29,7 @@
     {
       "name": "pageSize",
       "title": "Number of photos to fetch",
-      "required": true,
+      "required": false,
       "type": "dropdown",
       "default": "30",
       "description": "Number of photos to fetch",

@@ -2,7 +2,8 @@ import { homedir } from "os";
 import { join } from "path";
 import { Icon, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { writeFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
+import { getOAuthToken } from "../components/withGoogleAuth";
 
 export const downloadMedia = async (url: string, filename: string, mimeType: string) => {
   const type = mimeType.split("/")[0];
@@ -66,3 +67,76 @@ export const categories = [
   { id: "pets", name: "Pets", value: "PETS" },
   { id: "utility", name: "Utility", value: "UTILITY" },
 ];
+
+export const validMediaTypes = [
+  "bmp",
+  "gif",
+  "heic",
+  "ico",
+  "jpg",
+  "png",
+  "tiff",
+  "webp",
+  "3gp",
+  "3g2",
+  "asf",
+  "avi",
+  "divx",
+  "m2t",
+  "m2ts",
+  "m4v",
+  "mkv",
+  "mmv",
+  "mod",
+  "mov",
+  "mp4",
+  "mpg",
+  "mts",
+  "tod",
+  "wmv",
+];
+
+export const GetToken = async (path: string) => {
+  try {
+    const file = await readFile(path);
+
+    const response = await fetch("https://photoslibrary.googleapis.com/v1/uploads", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getOAuthToken()}`,
+        "Content-type": "application/octet-stream",
+        "X-Goog-Upload-Content-Type": "image/png",
+        "X-Goog-Upload-Protocol": "raw",
+      },
+      body: file,
+    }).then((res) => res.text());
+
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const createMediaItem = async (tokens: string[]) => {
+  try {
+    const response = await fetch("https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getOAuthToken()}`,
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        newMediaItems: tokens.map((token) => ({
+          description: "Uploaded from Raycast",
+          simpleMediaItem: {
+            uploadToken: token,
+          },
+        })),
+      }),
+    });
+
+    return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+};
