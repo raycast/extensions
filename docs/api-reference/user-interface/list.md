@@ -21,19 +21,14 @@ The search bar allows users to interact quickly with list items. By default, [Li
 
 ### Custom filtering
 
-Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `List`'s `enableFiltering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
-Note that `enableFiltering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `enableFiltering` to true.
+Sometimes, you may not want to rely on Raycast's filtering, but use/implement your own. If that's the case, you can set the `List`'s `filtering` [prop](#props) to false, and the items displayed will be independent of the search bar's text.
+Note that `filtering` is also implicitly set to false if an `onSearchTextChange` listener is specified. If you want to specify a change listener and _still_ take advantage of Raycast's built-in filtering, you can explicitly set `filtering` to true.
 
 ```typescript
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
 
-const items = [
-  "Augustiner Helles",
-  "Camden Hells",
-  "Leffe Blonde",
-  "Sierra Nevada IPA",
-];
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -45,7 +40,7 @@ export default function Command() {
 
   return (
     <List
-      enableFiltering={false}
+      filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Beers"
       searchBarPlaceholder="Search your favorite beer"
@@ -56,10 +51,7 @@ export default function Command() {
           title={item}
           actions={
             <ActionPanel>
-              <Action
-                title="Select"
-                onAction={() => console.log(`${item} selected`)}
-              />
+              <Action title="Select" onAction={() => console.log(`${item} selected`)} />
             </ActionPanel>
           }
         />
@@ -79,12 +71,7 @@ To do so, you can use the `searchText` [prop](#props).
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
 
-const items = [
-  "Augustiner Helles",
-  "Camden Hells",
-  "Leffe Blonde",
-  "Sierra Nevada IPA",
-];
+const items = ["Augustiner Helles", "Camden Hells", "Leffe Blonde", "Sierra Nevada IPA"];
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -185,18 +172,52 @@ export default function Command() {
 {% tab title="ListWithDetail.tsx" %}
 
 ```jsx
-import { ActionPanel, List } from "@raycast/api";
-import { usePokemons } from './utils'
+import { useState } from "react";
+import { Action, ActionPanel, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+interface Pokemon {
+  name: string;
+  height: number;
+  weight: number;
+  id: string;
+  types: string[];
+  abilities: Array<{ name: string; isMainSeries: boolean }>;
+}
+
+const pokemons: Pokemon[] = [
+  {
+    name: "bulbasaur",
+    height: 7,
+    weight: 69,
+    id: "001",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+  {
+    name: "ivysaur",
+    height: 10,
+    weight: 130,
+    id: "002",
+    types: ["Grass", "Poison"],
+    abilities: [
+      { name: "Chlorophyll", isMainSeries: true },
+      { name: "Overgrow", isMainSeries: true },
+    ],
+  },
+];
 
 export default function Command() {
   const [showingDetail, setShowingDetail] = useState(true);
-
-  const pokemons = usePokemons();
+  const { data, isLoading } = useCachedPromise(() => new Promise<Pokemon[]>((resolve) => resolve(pokemons)));
 
   return (
-    <List isLoading={!pokemons} isShowingDetail={showingDetail}>
-      {pokemons &&
-        pokemons.map((pokemon) => {
+    <List isLoading={isLoading} isShowingDetail={showingDetail}>
+      {data &&
+        data.map((pokemon) => {
           const props: Partial<List.Item.Props> = showingDetail
             ? {
                 detail: (
@@ -207,7 +228,7 @@ export default function Command() {
                   />
                 ),
               }
-            : { accessories: [ { text: pokemon.types.join(" ") } ] };
+            : { accessories: [{ text: pokemon.types.join(" ") }] };
           return (
             <List.Item
               key={pokemon.id}
@@ -224,7 +245,9 @@ export default function Command() {
           );
         })}
     </List>
+  );
 }
+
 ```
 
 {% endtab %}
@@ -232,7 +255,7 @@ export default function Command() {
 {% tab title="ListWithEmptyView.tsx" %}
 
 ```typescript
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 
 export default function CommandWithCustomEmptyView() {
@@ -243,16 +266,9 @@ export default function CommandWithCustomEmptyView() {
   }, [state.searchText]);
 
   return (
-    <List
-      onSearchTextChange={(newValue) =>
-        setState((previous) => ({ ...previous, searchText: newValue }))
-      }
-    >
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
       {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
       ) : (
         state.items.map((item) => <List.Item key={item} title={item} />)
       )}
@@ -280,10 +296,7 @@ import { List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List
-      navigationTitle="Search Beers"
-      searchBarPlaceholder="Search your favorite beer"
-    >
+    <List navigationTitle="Search Beers" searchBarPlaceholder="Search your favorite beer">
       <List.Item title="Augustiner Helles" />
       <List.Item title="Camden Hells" />
       <List.Item title="Leffe Blonde" />
@@ -295,21 +308,7 @@ export default function Command() {
 
 #### Props
 
-| Prop                 | Type                                                                                                                                                                                              | Required | Default                                                       | Description                                                                                                                                                                                                                                                                          |
-| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------- | :------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| actions              | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code>                                                                                                                    | No       | -                                                             | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when no items are selected (eg. when the List is empty or all items have been filtered out)..                                                                                                                     |
-| children             | <code>null</code> or <code>[List.Section](#list.section)</code> or <code>[List.Section](#list.section)[]</code> or <code>[List.Item](#list.item)</code> or <code>[List.Item](#list.item)[]</code> | No       | -                                                             | List sections or items. If [List.Item](#list.item) elements are specified, a default section is automatically created.                                                                                                                                                               |
-| enableFiltering      | <code>boolean</code>                                                                                                                                                                              | No       | false when `onSearchTextChange` is specified, true otherwise. | Toggles Raycast filtering. When `true`, Raycast will use the query in the search bar to filter list items. When `false`, the extension needs to take care of the filtering.                                                                                                          |
-| isLoading            | <code>boolean</code>                                                                                                                                                                              | No       | false                                                         | Indicates whether a loading bar should be shown or hidden below the search bar                                                                                                                                                                                                       |
-| isShowingDetail      | <code>boolean</code>                                                                                                                                                                              | No       | false                                                         | Whether the List should have an area on the right side of the items to show additional details about the selected item. When `true`, it is recommended not to show any accessories on the `List.Item` and instead bring those additional information in the `List.Item.Detail` view. |
-| navigationTitle      | <code>string</code>                                                                                                                                                                               | No       | Command title (as defined in the manifest)                    | The main title for that view displayed in Raycast                                                                                                                                                                                                                                    |
-| searchBarPlaceholder | <code>string</code>                                                                                                                                                                               | No       | Search value...                                               | Placeholder text that will be shown in the search bar.                                                                                                                                                                                                                               |
-| searchBarAccessory   | <code>null</code> or <code>[List.Dropdown](#list.dropdown)</code>                                                                                                                                 | No       | -                                                             | Dropdown shown in the right-hand-side of the search bar.                                                                                                                                                                                                                             |
-| searchText           | <code>string</code>                                                                                                                                                                               | No       | -                                                             | The text that will be displayed in the search bar.                                                                                                                                                                                                                                   |
-| selectedItemId       | <code>string</code>                                                                                                                                                                               | No       | -                                                             | Selects the item with the specified id.                                                                                                                                                                                                                                              |
-| throttle             | <code>boolean</code>                                                                                                                                                                              | No       | false                                                         | Defines whether the [List.Props.onSearchTextChange](#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests).            |
-| onSearchTextChange   | <code>(text: string) => void</code>                                                                                                                                                               | No       | -                                                             | Callback triggered when the search bar text changes. Note: Specifying this implicitly toggles `enableFiltering` to false. To enable native filtering when using `onSearchTextChange`, explicitly set `enableFiltering` to true.                                                      |
-| onSelectionChange    | <code>(id: string) => void</code>                                                                                                                                                                 | No       | -                                                             |                                                                                                                                                                                                                                                                                      |
+<PropsTableFromJSDoc component="List" />
 
 ### List.Dropdown
 
@@ -320,8 +319,10 @@ A dropdown menu that will be shown in the right-hand-side of the search bar.
 ```typescript
 import { List } from "@raycast/api";
 
-function DrinkDropdown(props: DrinkDropdownProps) {
-  const { isLoading = false, drinkTypes, onDrinkTypeChange } = props;
+type DrinkType = { id: string; name: string };
+
+function DrinkDropdown(props: { drinkTypes: DrinkType[]; onDrinkTypeChange: (newValue: string) => void }) {
+  const { drinkTypes, onDrinkTypeChange } = props;
   return (
     <List.Dropdown
       tooltip="Select Drink Type"
@@ -332,11 +333,7 @@ function DrinkDropdown(props: DrinkDropdownProps) {
     >
       <List.Dropdown.Section title="Alcoholic Beverages">
         {drinkTypes.map((drinkType) => (
-          <List.Dropdown.Item
-            key={drinkType.id}
-            title={drinkType.name}
-            value={drinkType.id}
-          />
+          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
@@ -344,23 +341,18 @@ function DrinkDropdown(props: DrinkDropdownProps) {
 }
 
 export default function Command() {
-  const drinkTypes = [
-    { id: 1, name: "Beer" },
-    { id: 2, name: "Wine" },
+  const drinkTypes: DrinkType[] = [
+    { id: "1", name: "Beer" },
+    { id: "2", name: "Wine" },
   ];
-  const onDrinkTypeChange = (newValue) => {
+  const onDrinkTypeChange = (newValue: string) => {
     console.log(newValue);
   };
   return (
     <List
       navigationTitle="Search Beers"
       searchBarPlaceholder="Search your favorite drink"
-      searchBarAccessory={
-        <DrinkDropdown
-          drinkTypes={drinkTypes}
-          onDrinkTypeChange={onDrinkTypeChange}
-        />
-      }
+      searchBarAccessory={<DrinkDropdown drinkTypes={drinkTypes} onDrinkTypeChange={onDrinkTypeChange} />}
     >
       <List.Item title="Augustiner Helles" />
       <List.Item title="Camden Hells" />
@@ -373,16 +365,7 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                                                                                                                                                                                                                     | Required | Default | Description                                                                                                                                                                                                           |
-| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| id           | <code>string</code>                                                                                                                                                                                                      | No       | -       | ID of the dropdown. Should be used in conjunction with `storeValue`. If not specified, a default value is used.                                                                                                       |
-| tooltip      | <code>string</code>                                                                                                                                                                                                      | Yes      | -       | Tooltip displayed when hovering the dropdown.                                                                                                                                                                         |
-| placeholder  | <code>string</code>                                                                                                                                                                                                      | Yes      | -       | Placeholder text that will be shown in the dropdown search field.                                                                                                                                                     |
-| storeValue   | <code>boolean</code>                                                                                                                                                                                                     | No       | false   | Indicates whether the value of the dropdown should be persisted after selection, and restored next time the dropdown is rendered.                                                                                     |
-| value        | <code>string</code>                                                                                                                                                                                                      | No       | -       | The current value of the dropdown.                                                                                                                                                                                    |
-| defaultValue | <code>string</code>                                                                                                                                                                                                      | No       | -       | The default value of the dropdown. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| children     | <code>null</code> or <code>[List.Dropdown.Section](#list.dropdown.section)</code> or <code>List.Dropdown.Section[]</code> or <code>[List.Dropdown.Item](#list.dropdown.item)</code> or <code>List.Dropdown.Item[]</code> | No       | -       | Sections or items. If [List.Dropdown.Item](#list.dropdown.item) elements are specified, a default section is automatically created.                                                                                   |
-| onChange     | <code>(newValue: string) => void</code>                                                                                                                                                                                  | No       | -       | Callback triggered when the list item selection changes.                                                                                                                                                              |
+<PropsTableFromJSDoc component="List.Dropdown" />
 
 ### List.Dropdown.Item
 
@@ -394,27 +377,25 @@ A dropdown item in a [List.Dropdown](#list.dropdown)
 import { List } from "@raycast/api";
 
 export default function Command() {
-    return (
-      <List searchBarAccessory={
+  return (
+    <List
+      searchBarAccessory={
         <List.Dropdown tooltip="Dropdown With Items">
           <List.Dropdown.Item title="One" value="one" />
           <List.Dropdown.Item title="Two" value="two" />
           <List.Dropdown.Item title="Three" value="three" />
         </List.Dropdown>
-      }>
-        <List.Item title="Item in the Main List">
-      </List>
+      }
+    >
+      <List.Item title="Item in the Main List" />
+    </List>
   );
 }
 ```
 
 #### Props
 
-| Prop  | Type                                                      | Required | Default | Description                                                                                                                   |
-| :---- | :-------------------------------------------------------- | :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------- |
-| icon  | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | A optional icon displayed for the item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
-| title | <code>string</code>                                       | Yes      | -       | The title displayed for the item.                                                                                             |
-| value | <code>string</code>                                       | Yes      | -       | Value of the dropdown item. Make sure to assign each unique value for each item.                                              |
+<PropsTableFromJSDoc component="List.Dropdown.Item" />
 
 ### List.Dropdown.Section
 
@@ -429,17 +410,19 @@ import { List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List searchBarAccessory={
-      <List.Dropdown tooltip="Dropdown With Sections">
-        <List.Dropdown.Section title="First Section">
-          <List.Dropdown.Item title="One" value="one" />
-        </List.Dropdown.Section>
-        <List.Dropdown.Section title="Second Section">
-          <List.Dropdown.Item title="Two" value="two" />
-        </List.Dropdown.Section>
-      </List.Dropdown>
-    }>
-      <List.Item title="Item in the Main List">
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Dropdown With Sections">
+          <List.Dropdown.Section title="First Section">
+            <List.Dropdown.Item title="One" value="one" />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Second Section">
+            <List.Dropdown.Item title="Two" value="two" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
+      <List.Item title="Item in the Main List" />
     </List>
   );
 }
@@ -447,10 +430,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                                                                                    | Required | Default | Description                       |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ | :-------------------------------- |
-| children | <code>null</code> or <code>[List.Dropdown.Item](#list.dropdown.item)</code> or <code>[List.Dropdown.Item](#list.dropdown.item)[]</code> | No       | -       | The item elements of the section. |
-| title    | <code>string</code>                                                                                                                     | No       | -       | Title displayed above the section |
+<PropsTableFromJSDoc component="List.Dropdown.Section" />
 
 ### List.EmptyView
 
@@ -468,7 +448,7 @@ Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` prope
 #### Example
 
 ```typescript
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 
 export default function CommandWithCustomEmptyView() {
@@ -479,16 +459,9 @@ export default function CommandWithCustomEmptyView() {
   }, [state.searchText]);
 
   return (
-    <List
-      onSearchTextChange={(newValue) =>
-        setState((previous) => ({ ...previous, searchText: newValue }))
-      }
-    >
+    <List onSearchTextChange={(newValue) => setState((previous) => ({ ...previous, searchText: newValue }))}>
       {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
+        <List.EmptyView icon={{ source: "https://placekitten.com/500/500" }} title="Type something to get started" />
       ) : (
         state.items.map((item) => <List.Item key={item} title={item} />)
       )}
@@ -499,12 +472,7 @@ export default function CommandWithCustomEmptyView() {
 
 #### Props
 
-| Prop        | Type                                                      | Required | Default                             | Description                                                                                                                                                                                                                                                                           |
-| :---------- | :-------------------------------------------------------- | :------- | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | Raycast's default `EmptyView` icon. | An icon displayed in the center of the EmptyView. If an SVG is used, its longest side will be 128 pixels. Other images will be up/downscaled proportionally so that the longest side is between 64 and 256 pixels. If not specified, Raycast's default `EmptyView` icon will be used. |
-| title       | <code>string</code>                                       | No       | -                                   | The main title displayed for the Empty View. Must fit in a single line.                                                                                                                                                                                                               |
-| description | <code>string</code>                                       | No       | -                                   | A description explaining why the empty view is shown. Can be up to three lines long.                                                                                                                                                                                                  |
-| actions     | <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -                                   | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the EmptyView is visible.                                                                                                                                                                                     |
+<PropsTableFromJSDoc component="List.EmptyView" />
 
 ### List.Item
 
@@ -522,12 +490,7 @@ import { Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        icon={Icon.Star}
-        title="Augustiner Helles"
-        subtitle="0,5 Liter"
-        accessories={[{ text: "Germany" }]}
-      />
+      <List.Item icon={Icon.Star} title="Augustiner Helles" subtitle="0,5 Liter" accessories={[{ text: "Germany" }]} />
     </List>
   );
 }
@@ -535,50 +498,7 @@ export default function Command() {
 
 #### Props
 
-| Prop        | Type                                                                           | Required | Default | Description                                                                                                                                                                                         |
-| :---------- | :----------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| title       | <code>string</code>                                                            | Yes      | -       | The main title displayed for that item.                                                                                                                                                             |
-| actions     | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -       | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the item is selected.                                                                                                       |
-| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | -       | A optional icon displayed for the list item.                                                                                                                                                        |
-| id          | <code>string</code>                                                            | No       | -       | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated.                                                                                                         |
-| keywords    | <code>string[]</code>                                                          | No       | -       | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
-| subtitle    | <code>string</code>                                                            | No       | -       | An optional subtitle displayed next to the main title.                                                                                                                                              |
-| accessories | <code>[List.Item.Accessory](#list.item.accessory)</code>                       | No       | -       | An optional array of accessory items displayed on the right side in the list item.                                                                                                                  |
-| detail      | <code>null</code> or <code>[List.Item.Detail](#list.item.detail)</code>        | No       | -       | The `List.Item.Detail` to be rendered in the right side area when the parent `List` is showing detail and the item is selected.                                                                     |
-
-### List.Item.Accessory
-
-An interface describing an accessory view in a `List.Item`.
-
-![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
-
-#### Props
-
-| Prop | Type                                                      | Required | Default            | Description                                                                                                               |
-| :--- | :-------------------------------------------------------- | :------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| text | <code>string</code>                                       | No       | <code>null</code>  | An optional text that will be used as the label.                                                                          |
-| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | <code>false</code> | An optional image that will be used as the icon. **The image will be shown in front of the text if `text` is specified.** |
-
-#### Example
-
-```typescript
-import { Icon, List } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <List>
-      <List.Item
-        title="An Item with Accessories"
-        accessories={[
-          { text: `An Accessory Text`, icon: Icon.Hammer },
-          { icon: Icon.Person },
-          { text: "Just Do It!" },
-        ]}
-      />
-    </List>
-  );
-}
-```
+<PropsTableFromJSDoc component="List.Item" />
 
 ### List.Item.Detail
 
@@ -591,7 +511,7 @@ When shown, it is recommended not to show any accessories on the `List.Item` and
 #### Example
 
 ```typescript
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -610,10 +530,266 @@ export default function Command() {
 
 #### Props
 
-| Prop      | Type                 | Required    | Default            | Description                                                                                                                   |
-| :-------- | :------------------- | :---------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| markdown  | <code>string         | null</code> | No                 | The CommonMark string to be rendered in the right side area when the parent List is showing details and the item is selected. |
-| isLoading | <code>boolean</code> | No          | <code>false</code> | Indicates whether a loading bar should be shown or hidden above the detail                                                    |
+<PropsTableFromJSDoc component="List.Item.Detail" />
+
+### List.Item.Detail.Metadata
+
+A Metadata view that will be shown in the bottom side of the `List.Item.Detail`.
+
+Use it to display additional structured data about the content of the `List.Item`.
+
+#### Example
+
+{% tabs %}
+
+{% tab title="Metadata + Markdown" %}
+
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-split.png)
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  const markdown = `
+![Illustration](https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png)
+There is a plant seed on its back right from the day this Pokémon is born. The seed slowly grows larger.
+`;
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            markdown={markdown}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Types" />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Chracteristics" />
+                <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Abilities" />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
+{% tab title="Metadata Standalone" %}
+
+![List Detail-metadata illustration](../../.gitbook/assets/list-detail-metadata-standalone.png)
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Types" />
+                <List.Item.Detail.Metadata.Label title="Grass" icon="pokemon_types/grass.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Poison" icon="pokemon_types/poison.svg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Chracteristics" />
+                <List.Item.Detail.Metadata.Label title="Height" text="70cm" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Weight" text="6.9 kg" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Abilities" />
+                <List.Item.Detail.Metadata.Label title="Chlorophyll" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Overgrow" text="Main Series" />
+                <List.Item.Detail.Metadata.Separator />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
+{% endtabs %}
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata" />
+
+### List.Item.Detail.Metadata.Label
+
+A title with, optionally, an icon and/or text to its right.
+
+![List Detail-metadata-label illustration](../../.gitbook/assets/list-detail-metadata-label.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.Label" />
+
+### List.Item.Detail.Metadata.Link
+
+An item to display a link.
+
+![List Detail-metadata-link illustration](../../.gitbook/assets/list-detail-metadata-link.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Link
+                  title="Evolution"
+                  target="https://www.pokemon.com/us/pokedex/pikachu"
+                  text="Raichu"
+                />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.Link" />
+
+### List.Item.Detail.Metadata.TagList
+
+A list of [`Tags`](list.md#list.item.detail.metadata.taglist.item) displayed in a row.
+
+![List Detail-metadata-tag-list illustration](../../.gitbook/assets/list-detail-metadata-tag-list.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.TagList title="Type">
+                  <List.Item.Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
+                </List.Item.Detail.Metadata.TagList>
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.TagList" />
+
+### List.Item.Detail.Metadata.TagList.Item
+
+A Tag in a `List.Item.Detail.Metadata.TagList`.
+
+#### Props
+
+<PropsTableFromJSDoc component="List.Item.Detail.Metadata.TagList.Item" />
+
+### List.Item.Detail.Metadata.Separator
+
+A metadata item that shows a separator line. Use it for grouping and visually separating metadata items.
+
+![List Detail-metadata-separator illustration](../../.gitbook/assets/list-detail-metadata-separator.png)
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Metadata() {
+  return (
+    <List isShowingDetail>
+      <List.Item
+        title="Bulbasaur"
+        detail={
+          <List.Item.Detail
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/grass.svg" text="Grass" />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Type" icon="pokemon_types/poison.svg" text="Poison" />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
+      />
+    </List>
+  );
+}
+```
 
 ### List.Section
 
@@ -643,9 +819,42 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                                                | Required | Default | Description                                                                                       |
-| :------- | :-------------------------------------------------------------------------------------------------- | :------- | :------ | :------------------------------------------------------------------------------------------------ |
-| children | <code>null</code> or <code>[List.Item](#list.item)</code> or <code>[List.Item](#list.item)[]</code> | No       | -       | The [List.Item](#list.item) elements of the section.                                              |
-| id       | <code>string</code>                                                                                 | No       | -       | ID of the section. Make sure to assign each section a unique ID or a UUID will be auto generated. |
-| subtitle | <code>string</code>                                                                                 | No       | -       | An optional subtitle displayed next to the title of the section.                                  |
-| title    | <code>string</code>                                                                                 | No       | -       | Title displayed above the section.                                                                |
+<PropsTableFromJSDoc component="List.Section" />
+
+## Types
+
+### List.Item.Accessory
+
+An interface describing an accessory view in a `List.Item`.
+
+![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="List.Item.Accessory" />
+
+#### Example
+
+```typescript
+import { Color, Icon, List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="An Item with Accessories"
+        accessories={[
+          { text: `An Accessory Text`, icon: Icon.Hammer },
+          { text: { value: `A Colored Accessory Text`, color: Color.Orange }, icon: Icon.Hammer },
+          { icon: Icon.Person, tooltip: "A person" },
+          { text: "Just Do It!" },
+          { date: new Date() },
+          { tag: new Date() },
+          { tag: { value: new Date(), color: Color.Magenta } },
+          { tag: { value: "User", color: Color.Magenta }, tooltip: "Tag with tooltip" },
+        ]}
+      />
+    </List>
+  );
+}
+```

@@ -1,39 +1,40 @@
-import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
+import { XcodeSimulator } from "../models/xcode-simulator/xcode-simulator.model";
 import { execAsync } from "../shared/exec-async";
-import { BehaviorSubject, Observable } from "rxjs";
-import { showToast, ToastStyle } from "@raycast/api";
+import { XcodeSimulatorGroup } from "../models/xcode-simulator/xcode-simulator-group.model";
+import { XcodeSimulatorState } from "../models/xcode-simulator/xcode-simulator-state.model";
+import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulator-app-action.model";
+import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
+import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
+import { groupBy } from "../shared/group-by";
 
 /**
  * XcodeSimulatorService
  */
 export class XcodeSimulatorService {
   /**
-   * The XcodeSimulators BehaviorSubject
+   * Retrieve all XcodeSimulatorGroups
    */
-  private xcodeSimulatorsSubject = new BehaviorSubject<XcodeSimulator[] | undefined>(undefined);
-
-  /**
-   * The XcodeSimulators Observable
-   */
-  get xcodeSimulators(): Observable<XcodeSimulator[] | undefined> {
-    // Refresh XcodeSimulators
-    this.refreshXcodeSimulators().then();
-    // Return Subject as Observable
-    return this.xcodeSimulatorsSubject.asObservable();
+  static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
+    const simulators = await XcodeSimulatorService.xcodeSimulators();
+    return groupBy(simulators, (simulator) => simulator.runtime)
+      .map((group) => {
+        return { runtime: group.key, simulators: group.values };
+      })
+      .sort((lhs, rhs) => lhs.runtime.localeCompare(rhs.runtime));
   }
 
   /**
    * Retrieve all installed XcodeSimulators
    */
-  async getXcodeSimulators(): Promise<XcodeSimulator[]> {
+  static async xcodeSimulators(): Promise<XcodeSimulator[]> {
     // Execute command
     const output = await execAsync("xcrun simctl list -j -v devices");
     // Parse stdout as JSON
     const devicesResponseJSON = JSON.parse(output.stdout);
     // Check if JSON or devices within the JSON are not available
     if (!devicesResponseJSON || !devicesResponseJSON.devices) {
-      // Throw Error
-      throw new Error("No Devices have been found");
+      // Return empty simulators array
+      throw [];
     }
     // Initialize XcodeSimulators
     const simulators: XcodeSimulator[] = [];
@@ -59,72 +60,76 @@ export class XcodeSimulatorService {
    * Boot XcodeSimulator
    * @param xcodeSimulator The XcodeSimulator to boot
    */
-  async boot(xcodeSimulator: XcodeSimulator): Promise<void> {
-    // Update to pending state
-    this.updateToPendingStateIfNeeded(xcodeSimulator);
-    // Boot Simulator
-    await execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`);
-    // Refresh XcodeSimulators
-    this.refreshXcodeSimulators().then();
+  static boot(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then(() => {
+      // Silently open Simulator application
+      execAsync("open -a simulator");
+    });
   }
 
   /**
    * Shutdown XcodeSimulator
    * @param xcodeSimulator The XcodeSimulator to shutdown
    */
-  async shutdown(xcodeSimulator: XcodeSimulator): Promise<void> {
-    // Update to pending state
-    this.updateToPendingStateIfNeeded(xcodeSimulator);
+  static shutdown(xcodeSimulator: XcodeSimulator): Promise<void> {
     // Shutdown Simulator
-    await execAsync(`xcrun simctl shutdown ${xcodeSimulator.udid}`);
-    // Refresh XcodeSimulators
-    this.refreshXcodeSimulators().then();
+    return execAsync(`xcrun simctl shutdown ${xcodeSimulator.udid}`).then();
   }
 
   /**
-   * Refresh XcodeSimulators
+   * Toggle XcodeSimulator
    */
-  private async refreshXcodeSimulators() {
-    try {
-      // Retrieve XcodeSimulators
-      const simulators = await this.getXcodeSimulators();
-      // Send XcodeSimulators to Subject
-      this.xcodeSimulatorsSubject.next(simulators);
-    } catch (error) {
-      // Send empty XcodeSimulators to Subject
-      this.xcodeSimulatorsSubject.next([]);
-      // Show failure Toast
-      await showToast(
-        ToastStyle.Failure,
-        "An error occurred while retrieving the Xcode Simulators",
-        (error as Error).message
-      );
+  static toggle(xcodeSimulator: XcodeSimulator): Promise<void> {
+    switch (xcodeSimulator.state) {
+      case XcodeSimulatorState.booted:
+        return XcodeSimulatorService.shutdown(xcodeSimulator);
+      case XcodeSimulatorState.shuttingDown:
+        return Promise.resolve();
+      case XcodeSimulatorState.shutdown:
+        return XcodeSimulatorService.boot(xcodeSimulator);
     }
   }
 
   /**
-   * Update a given XcodeSimulator to pending state if needed
+   * Perform a XcodeSimulator AppAction
+   * @param action The XcodeSimulatorAppAction
+   * @param bundleIdentifier The bundle identifier of the application
    * @param xcodeSimulator The XcodeSimulator
    */
-  private updateToPendingStateIfNeeded(xcodeSimulator: XcodeSimulator) {
-    // Retrieve the current XcodeSimulators
-    const xcodeSimulators = this.xcodeSimulatorsSubject.value;
-    // Check if XcodeSimulators are not available
-    if (!xcodeSimulators) {
-      // Return out of function
-      return;
-    }
-    // Emit updated XcodeSimulators
-    this.xcodeSimulatorsSubject.next(
-      xcodeSimulators.map((currentXcodeSimulator) => {
-        // Check if current XcodeSimulator matches the given XcodeSimulator
-        if (currentXcodeSimulator.udid === xcodeSimulator.udid) {
-          // Update state to pending
-          currentXcodeSimulator.state = "Pending";
-        }
-        // Return current XcodeSimulator
-        return currentXcodeSimulator;
-      })
-    );
+  static async app(
+    action: XcodeSimulatorAppAction,
+    bundleIdentifier: string,
+    xcodeSimulator: XcodeSimulator
+  ): Promise<void> {
+    try {
+      // Boot Xcode Simulator and ignore any errors
+      await XcodeSimulatorService.boot(xcodeSimulator);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    // Launch application by bundle identifier
+    return execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" ")).then();
+  }
+
+  /**
+   * Perform a XcodeSimulator AppPrivacyAction for a given AppPrivacyServiceType
+   * @param action The XcodeSimulatorAppPrivacyAction
+   * @param serviceType The XcodeSimulatorAppPrivacyServiceType
+   * @param bundleIdentifier The bundle identifier of the application
+   * @param xcodeSimulator The XcodeSimulator
+   */
+  static async appPrivacy(
+    action: XcodeSimulatorAppPrivacyAction,
+    serviceType: XcodeSimulatorAppPrivacyServiceType,
+    bundleIdentifier: string,
+    xcodeSimulator: XcodeSimulator
+  ): Promise<void> {
+    try {
+      // Boot Xcode Simulator and ignore any errors
+      await XcodeSimulatorService.boot(xcodeSimulator);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    return execAsync(
+      ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
+    ).then();
   }
 }

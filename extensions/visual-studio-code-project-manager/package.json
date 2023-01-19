@@ -5,6 +5,12 @@
   "description": "Search and open projects from Visual Studio Code Project Manager",
   "icon": "command-icon.png",
   "author": "MarkusLanger",
+  "contributors": [
+    "GastroGeek",
+    "4very",
+    "TobiasYin",
+    "yossizahn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -32,6 +38,15 @@
       "default": true,
       "label": "by tag",
       "description": "Groups projects by tag instead of just showing"
+    },
+    {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide projects...",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tag"
     },
     {
       "name": "terminalAppPath",
@@ -64,12 +79,16 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "1.33.2",
     "open": "^8.4.0",
     "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"

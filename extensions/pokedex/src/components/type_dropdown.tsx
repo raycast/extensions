@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Grid, List } from "@raycast/api";
 
 const types = [
   "Normal",
@@ -22,24 +22,28 @@ const types = [
 ];
 
 export default function TypeDropdown(props: {
+  type?: string;
   command: string;
   onSelectType: React.Dispatch<React.SetStateAction<string>>;
 }) {
+  const DropdownComponent =
+    props.type === "grid" ? Grid.Dropdown : List.Dropdown;
+
   return (
-    <List.Dropdown
+    <DropdownComponent
       tooltip={`${props.command} Type Filter`}
       onChange={props.onSelectType}
     >
-      <List.Dropdown.Item
+      <DropdownComponent.Item
         key="all"
         value="all"
         title="All Types"
         icon="pokeball.svg"
       />
-      <List.Dropdown.Section>
+      <DropdownComponent.Section>
         {types.map((type) => {
           return (
-            <List.Dropdown.Item
+            <DropdownComponent.Item
               key={type}
               value={type}
               title={type}
@@ -47,7 +51,7 @@ export default function TypeDropdown(props: {
             />
           );
         })}
-      </List.Dropdown.Section>
-    </List.Dropdown>
+      </DropdownComponent.Section>
+    </DropdownComponent>
   );
 }

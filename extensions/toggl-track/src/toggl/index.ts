@@ -34,15 +34,18 @@ const TogglAPI = function (apiToken: string) {
       projectId,
       description,
       tags,
+      billable,
     }: {
       projectId?: number;
       description: string;
       tags: string[];
+      billable: boolean;
     }) => {
       return api.post<{ data: TimeEntry }>(`/time_entries/start`, {
         time_entry: {
           description,
           pid: projectId !== -1 ? projectId : undefined,
+          billable,
           tags,
           created_with: "raycast-toggl-track",
         },

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redmine",
+  "title": "Redmine",
+  "description": "Integrate with the Redmine issue system (https://www.redmine.org/)",
+  "icon": "command-icon.png",
+  "author": "jwickers",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "issue",
+      "title": "Show My Issues",
+      "description": "Shows your currently assigned issues",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Redmine Domain",
+      "description": "Your Redmine domain or base URL path (e.g. 'mycompany.redmine.org' or 'http://mycompany.redmine.org:8080/redmine')",
+      "placeholder": "mycompany.redmine.org"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your API token as described at https://www.redmine.org/boards/2/topics/53956/"
+    },
+    {
+      "name": "redIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Red Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with a red dot (e.g. 'Critical, Urgent, High')",
+      "default": "Critical,Urgent"
+    },
+    {
+      "name": "orangeIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Orange Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with an orange dot (e.g. 'Urgent, High')",
+      "default": "High"
+    },
+    {
+      "name": "blueIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Blue Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with a blue dot (e.g. 'Low')",
+      "default": "Low"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -5,6 +5,10 @@
   "description": "Search Wikipedia articles and view them",
   "icon": "wikipedia.png",
   "author": "vimtor",
+  "contributors": [
+    "shubzkothekar",
+    "JonathanWbn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -34,9 +38,9 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
-    "swr": "^1.0.1",
-    "got": "^11.8.3"
+    "@raycast/api": "^1.45.1",
+    "@raycast/utils": "^1.4.14",
+    "got": "^12.5.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -45,7 +49,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -12,7 +12,7 @@ export interface Sourcegraph {
    */
   token?: string;
   /**
-   * Default search context when searching on Sourcegraph Cloud
+   * Default search context when searching on this Sourcegraph instance.
    */
   defaultContext?: string;
   /**
@@ -29,9 +29,9 @@ export interface Sourcegraph {
 const cloudURL = "https://sourcegraph.com";
 
 /**
- * isSourcegraphCloud returns true if this instance URL points to Sourcegraph Cloud.
+ * isSourcegraphDotCom returns true if this instance URL points to Sourcegraph.com.
  */
-export function isSourcegraphCloud(instance: string) {
+export function isSourcegraphDotCom(instance: string) {
   return instance === cloudURL;
 }
 
@@ -39,17 +39,17 @@ export function isSourcegraphCloud(instance: string) {
  * instanceName generates a name for the given instance.
  */
 export function instanceName(src: Sourcegraph) {
-  return `${isSourcegraphCloud(src.instance) ? "Sourcegraph Cloud" : new URL(src.instance).hostname}`;
+  return `${isSourcegraphDotCom(src.instance) ? "Sourcegraph.com" : new URL(src.instance).hostname}`;
 }
 
 interface Preferences {
-  // Preferences for Sourcegraph Cloud
+  // Preferences for Sourcegraph.com - it's still called Cloud to avoid breaking existing
+  // configuration.
 
   cloudToken?: string;
   cloudDefaultContext?: string;
 
-  // Fields for self-hosted are internally named "customInstance" for back-compat with
-  // older configuration.
+  // Configuration for custom instance commands.
 
   customInstance?: string;
   customInstanceToken?: string;
@@ -61,9 +61,9 @@ interface Preferences {
 }
 
 /**
- * sourcegraphCloud returns the user's configuration for connecting to Sourcegraph Cloud.
+ * sourcegraphDotCom returns the user's configuration for connecting to Sourcegraph.com.
  */
-export function sourcegraphCloud(): Sourcegraph {
+export function sourcegraphDotCom(): Sourcegraph {
   const prefs: Preferences = getPreferenceValues();
   const connect = {
     instance: cloudURL,
@@ -78,9 +78,9 @@ export function sourcegraphCloud(): Sourcegraph {
 }
 
 /**
- * sourcegraphSelfHosted returns the configured self-hosted Sourcegraph instance.
+ * sourcegraphSelfHosted returns the configured Sourcegraph instance.
  */
-export function sourcegraphSelfHosted(): Sourcegraph | null {
+export function sourcegraphInstance(): Sourcegraph | null {
   const prefs: Preferences = getPreferenceValues();
   if (!prefs.customInstance) {
     return null;
@@ -97,17 +97,26 @@ export function sourcegraphSelfHosted(): Sourcegraph | null {
   };
 }
 
-/**
- * newURL sets up a URL to the given path for this Sourcegraph instance, and adds some UTM
- * parameters.
- */
-export function newURL(src: Sourcegraph, path: string, params?: URLSearchParams): string {
-  const parsed = new URL(`${src.instance}${path.startsWith("/") ? path : `/${path}`}`);
-  parsed.searchParams.set("utm_source", "raycast-sourcegraph");
-  params?.forEach((v, k) => {
-    parsed.searchParams.set(k, v);
-  });
-  return parsed.toString();
+export class LinkBuilder {
+  private command: string;
+
+  constructor(command: string) {
+    this.command = command;
+  }
+
+  /**
+   * new sets up a URL to the given path for this Sourcegraph instance and command context,
+   * and adds some UTM parameters.
+   */
+  new(src: Sourcegraph, path: string, params?: URLSearchParams): string {
+    const parsed = new URL(`${src.instance}${path.startsWith("/") ? path : `/${path}`}`);
+    parsed.searchParams.set("utm_source", "raycast-sourcegraph");
+    parsed.searchParams.set("utm_campaign", this.command);
+    params?.forEach((v, k) => {
+      parsed.searchParams.set(k, v);
+    });
+    return parsed.toString();
+  }
 }
 
 interface ExtensionFeatureFlags {

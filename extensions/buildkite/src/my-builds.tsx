@@ -37,15 +37,15 @@ query {
 `;
 
 export default function MyBuilds() {
-  const state = useQuery<QueryResponse>([], {
+  const { data, isLoading } = useQuery<QueryResponse>({
     query: QUERY,
     errorMessage: "Could not load builds",
   });
 
-  const builds = state?.viewer.user.builds.edges ?? [];
+  const builds = data?.viewer.user.builds.edges ?? [];
 
   return (
-    <List isLoading={builds.length === 0} searchBarPlaceholder="Filter builds by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter builds by name...">
       {builds.map(({ node }) => (
         <BuildListItem key={node.id} build={node} />
       ))}

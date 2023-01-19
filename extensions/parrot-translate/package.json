@@ -264,6 +264,13 @@
             "default": "MIbu7DGsOPdbatL9KmgycGx0qDOzQWCM"
         },
         {
+            "title": "Open third-party dict apps",
+            "name": "openThirdPartyDict",
+            "type": "appPicker",
+            "description": "Open third-party we support dict apps",
+            "required": false
+        },
+        {
             "title": "Others",
             "name": "isAutomaticPaste",
             "type": "checkbox",
@@ -271,6 +278,31 @@
             "required": false,
             "default": true,
             "description": "When you copy automatic paste to focus"
+        },
+        {
+            "name": "isQuickSwitchLanguage",
+            "type": "checkbox",
+            "label": "Quick Switch Language",
+            "required": false,
+            "default": true,
+            "description": "Show quick switch Language in ActionPanel"
+        },
+        {
+            "name": "isPlayTTS",
+            "type": "checkbox",
+            "label": "Play TTS",
+            "required": false,
+            "default": true,
+            "description": "Show Play Text to Speech button in ActionPanel"
+        },
+        {
+            "title": "Delay Fetch Translate API Time",
+            "name": "delayFetchTranslateAPITime",
+            "type": "textfield",
+            "required": false,
+            "default": "400",
+            "description": "Delay fetch translate API",
+            "placeholder": "Range 50-600ms, default 400ms"
         }
     ],
     "dependencies": {

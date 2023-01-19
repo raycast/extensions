@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
-import { MRList, MRScope } from "./components/mr";
+import { SearchMyMergeRequests } from "./components/mr_search";
 
-render(<MRList scope={MRScope.created_by_me} />);
+export default function MyMergeRequestsSearchRoot(): JSX.Element {
+  return <SearchMyMergeRequests />;
+}

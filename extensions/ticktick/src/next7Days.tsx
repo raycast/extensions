@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getNext7Days } from "./service/osScript";
-import { getTaskDetailMarkdownContent, Section } from "./service/task";
+import { getTaskCopyContent, getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import useSearchTasks from "./hooks/useSearchTasks";
 import TaskItem from "./components/taskItem";
@@ -51,7 +51,9 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              tags={task.tags}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
+              copyContent={getTaskCopyContent(task)}
             />
           ))
         : sections?.map((section) => {
@@ -65,7 +67,9 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
+                    copyContent={getTaskCopyContent(task)}
                   />
                 ))}
               </List.Section>

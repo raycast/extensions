@@ -1,5 +1,20 @@
 # Weather Changelog
 
+## [Add MenuBar] - 2022-11-26
+
+- Add MenuBar command
+- Display data with modern raycast features
+- Add tooltips where possible
+
+## [Improved Error Message] - 2022-05-04
+
+- Show Error message in the view instead of toast message
+- Show icon for daily forecast
+
+## [Add icons] - 2022-05-02
+
+- Add icons for wind and humidity
+
 ## [Fix] - 2021-10-21
 
 Fix showing the temp unit instead of wind unit.

@@ -1,5 +1,6 @@
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
+import { URLSearchParams } from "url";
 
 const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
@@ -42,6 +43,35 @@ export async function getRepositories(key: string, page = 1, repositories = []):
   return repositories;
 }
 
+export async function getRepositoriesLazy(path: string) {
+  const params = new URLSearchParams(path.split("?")[1]);
+  const page = params.get("page") ?? "1";
+  const q = params.get("query");
+
+  const { data } = await bitbucket.repositories
+    .list({
+      ...defaults,
+      pagelen: 100,
+      sort: "-updated_on",
+      page,
+      ...(q ? { q: `name ~ "${q}" OR description ~ "${q}"` } : {}),
+      fields: [
+        "values.name",
+        "values.uuid",
+        "values.slug",
+        "values.full_name",
+        "values.links.avatar.href",
+        "values.description",
+        "next",
+      ].join(","),
+    })
+    .catch((e) => {
+      return { data: { values: [] as Schema.Repository[] }, status: 500 };
+    });
+
+  return data.values as Schema.Repository[];
+}
+
 export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
   return await bitbucket.pipelines.list({
     ...defaults,
@@ -60,6 +90,15 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
       "+page",
       "+size",
     ].join(","),
+  });
+}
+
+export async function pullRequestsGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
+  return await bitbucket.pullrequests.list({
+    ...defaults,
+    repo_slug: repoSlug,
+    pagelen: 20,
+    sort: "-created_on",
   });
 }
 

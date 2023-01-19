@@ -1,50 +1,28 @@
-import { showToast, setLocalStorageItem, getLocalStorageItem, ToastStyle } from '@raycast/api';
-import axios, { AxiosResponse } from 'axios';
-import { stringify } from 'querystring';
-import { API_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
+import { Toast, showToast, LocalStorage } from '@raycast/api';
+import got from 'got';
+import { preference } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-
-interface LarkSpaceResponse<D = unknown> {
-  code: number;
-  msg: string;
-  data: D;
-}
+import { cookieJar, getTenantPrefixUrl } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
 
 export const enum NodeType {
-  /**
-   * Wiki
-   */
+  /** Wiki */
   Wik = 16,
-  /**
-   * Docs
-   */
+  /** Docs */
   Doc = 2,
-  /**
-   * Docx
-   */
+  /** Docx */
   Dox = 22,
-  /**
-   * Sheet
-   */
+  /** Sheet */
   Sht = 3,
-  /**
-   * Bitable
-   */
+  /** Bitable */
   Bas = 8,
-  /**
-   * Slides
-   */
+  /** Slides */
   Sld = 15,
-  /**
-   * MindNotes
-   */
+  /** MindNotes */
   Bmn = 11,
-  /**
-   * Local files
-   */
+  /** Local files */
   Box = 12,
 }
 
@@ -113,9 +91,17 @@ export interface ObjEntity {
   subtype: string;
   user_edit_time: number;
   share_version: number;
-  wiki_infos: null;
+  wiki_infos: null | WikiEntity[];
   owner_type: number;
   container_type: number;
+}
+
+export interface WikiEntity {
+  main_path: string;
+  space_id: string;
+  wiki_token: string;
+  wiki_url: string;
+  wiki_version: string;
 }
 
 export interface RecentListResponse {
@@ -138,53 +124,64 @@ export interface SearchDocsResponse {
   };
 }
 
-const instance = axios.create({
-  baseURL: `${API_DOMAIN}/space/api/`,
-  headers: {
-    Cookie: `session=${preference.spaceSession}`,
+const client = got.extend({
+  cookieJar,
+  headers: { 'User-Agent': 'Raycast' },
+  responseType: 'json',
+  hooks: {
+    beforeRequest: [
+      (options) => {
+        options.headers.referer = getTenantPrefixUrl();
+        // remove `_csrf_token`
+        options.headers.cookie = String(options.headers.cookie)
+          .split('; ')
+          .filter((item) => !item.startsWith('_csrf_token='))
+          .join('; ');
+      },
+    ],
+    afterResponse: [
+      (response) => {
+        try {
+          const data = response.body as Record<string, unknown>;
+          if (data.code !== 0) {
+            if (data.code === 5) {
+              // Login Required
+              LocalStorage.clear();
+              showToast(Toast.Style.Failure, 'Session expired, please login again');
+            }
+            throw Error();
+          }
+          response.body = data.data;
+          return response;
+        } catch {
+          return response;
+        }
+      },
+    ],
   },
-  validateStatus: () => true,
-});
-
-instance.interceptors.request.use((config) => {
-  config.headers = {
-    ...config.headers,
-    Referer: API_DOMAIN,
-  };
-
-  return config;
-});
-
-instance.interceptors.response.use((response) => {
-  const { data } = response as AxiosResponse<LarkSpaceResponse<unknown>>;
-
-  if (data?.code !== 0) {
-    throw Error(data?.msg || 'Unknown error');
-  }
-  response.data = data.data;
-
-  return response;
 });
 
 export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEntity {
   return 'obj_token' in entity;
 }
 
+function prependUrl(url: string) {
+  return `${getTenantPrefixUrl()}/space/api/${url}`;
+}
+
 export async function fetchRecentList(length = preference.recentListCount): Promise<RecentListResponse> {
   try {
-    const { data } = await instance.get<RecentListResponse>('explorer/recent/list', {
-      params: { length },
+    const { body } = await client.get<RecentListResponse>(prependUrl('explorer/recent/list/'), {
+      searchParams: { length },
     });
-    return data;
+    return body;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not load recent documents';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -205,28 +202,27 @@ export interface SearchDocsParams {
 
 export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsResponse> {
   try {
-    const { data } = await instance.get<SearchDocsResponse>('search/refine_search', {
-      params: { offset: 0, count: 15, ...params },
+    const { body } = await client.get<SearchDocsResponse>(prependUrl('search/refine_search/'), {
+      searchParams: { offset: 0, count: 15, ...params },
     });
-    Object.keys(data.entities.objs).forEach((key) => {
-      const objEntity = data.entities.objs[key];
-      data.entities.objs[key] = {
+    Object.keys(body.entities.objs).forEach((key) => {
+      const objEntity = body.entities.objs[key];
+      body.entities.objs[key] = {
         ...objEntity,
         title: trimTagsAndDecodeEntities(objEntity.title),
         preview: trimTagsAndDecodeEntities(objEntity.preview),
         url: computeRedirectedUrl(objEntity),
+        type: computeType(objEntity),
       };
     });
-    return data;
+    return body;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not search documents';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
       has_more: false,
       total: 0,
@@ -240,6 +236,14 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
 }
 
 const computeRedirectedUrl = (objEntity: ObjEntity) => {
+  if (!objEntity.url) {
+    if (!objEntity.wiki_infos) {
+      return '';
+    }
+
+    return objEntity.wiki_infos[0].wiki_url;
+  }
+
   return objEntity.url
     .replace(/\/space\/doc\//, '/docs/')
     .replace(/\/space\/sheet\//, '/sheets/')
@@ -248,39 +252,30 @@ const computeRedirectedUrl = (objEntity: ObjEntity) => {
     .replace(/\/space\//, '/');
 };
 
-const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
-
-export function setRecentListCache(recentList: RecentListResponse): Promise<void> {
-  return setLocalStorageItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
-}
-
-export async function getRecentListCache(): Promise<RecentListResponse | null> {
-  const cache = await getLocalStorageItem(CACHE_DOCS_RECENT_LIST);
-  if (typeof cache === 'string') {
-    return JSON.parse(cache) as RecentListResponse;
+const computeType = (objEntity: ObjEntity) => {
+  if (objEntity.wiki_infos) {
+    return NodeType.Wik;
   }
-  return null;
-}
+
+  return objEntity.type;
+};
 
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {
-    await instance.post(
-      `${INTERNAL_API_DOMAIN}/space/api/explorer/recent/delete/`,
-      stringify({
+    await client.post(prependUrl('explorer/recent/delete/'), {
+      form: {
         obj_token: objToken,
-      })
-    );
+      },
+    });
 
     return true;
   } catch (error) {
-    console.error(error);
-
     let errorMessage = 'Could not remove the document from recent list';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
 
-    showToast(ToastStyle.Failure, errorMessage);
+    showToast(Toast.Style.Failure, errorMessage);
     return false;
   }
 }

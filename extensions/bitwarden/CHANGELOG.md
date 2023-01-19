@@ -1,5 +1,42 @@
 # Bitwarden Changelog
 
+## [Enhancements] - 2023-01-17
+
+- Added master password re-prompt feature.
+- Cleans up the clipboard password copy code
+- Added re-prompt feature and a setting for temporarily disabling re-prompt dialogs for a specified period of time after entering the master password.
+
+## [Copy Enhancement] - 2022-11-02
+
+- Copy passwords in a way that asks clipboard managers to not save it 
+
+## [UI Enhancement] - 2022-09-21
+
+- Add so it's possible to see folder of items
+
+## [Fixes] - 2022-07-01
+
+- Fixes an existing bug that prevented users from writing on the password generator inputs, getting stuck while writing.
+- Added new validation
+
+## [Self-hosted Server] - 2022-04-23
+
+- Added the option to use a self-hosted Bitwarden server
+- Support self-signed certificates for self-hosted server
+
+## [Isolate Extension] - 2022-04-18
+
+- Stop the Bitwarden extension from interfering with the Bitwarden CLI
+
+## [Quick Copy] - 2022-04-08
+
+- Allow copying item properties without using a dropdown
+
+## [Logout] - 2022-04-06
+
+- Added `Logout` action
+- Vault Status shown while unlocking vault
+
 ## [Login Fix] - 2022-04-01
 
 - Fix vault constantly locking
@@ -49,7 +86,7 @@
 
 - Add `Lock Vault` command
 - Show favorites at the top
-- Automatically find Brew CLI in multiple brew directories (support Apple Silicon)
+- Automatically find Bitwarden CLI in multiple brew directories (support Apple Silicon)
 
 ## [Added Bitwarden] - 2021-10-25
 

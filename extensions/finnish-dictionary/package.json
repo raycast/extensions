@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finnish-dictionary",
+  "title": "Finnish Dictionary",
+  "description": "MacOS has a great dictionary, but it's not available for Finnish. This extension adds a Finnish dictionary at your fingertips.",
+  "icon": "flag.png",
+  "author": "albertoxamin",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fe",
+      "title": "Finnish to English",
+      "subtitle": "Define a finnish word to english",
+      "description": "Define a finnish word to english",
+      "mode": "view"
+    },
+    {
+      "name": "ef",
+      "title": "English to Finnish",
+      "subtitle": "Define an english word to finnish",
+      "description": "Define a finnish word to english",
+      "mode": "view"
+    },
+    {
+      "name": "general-lookup",
+      "title": "Language to Language",
+      "subtitle": "Define a word to from any language",
+      "description": "Define a word from any language to any language",
+      "mode": "view",
+      "icon": "translation.png"
+    }
+  ],
+  "categories": [
+    "Other",
+    "Web"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "axios": "^0.26.1",
+    "utf8": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

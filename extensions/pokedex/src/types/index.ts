@@ -128,5 +128,6 @@ export interface PokemonV2Pokemontype {
 }
 
 export interface PokemonV2Type {
+  name: string;
   pokemon_v2_typenames: PokemonV2Name[];
 }

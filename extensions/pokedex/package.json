@@ -36,11 +36,19 @@
     {
       "name": "language",
       "title": "Language",
-      "description": "Your prefered language",
+      "description": "Your prefered language. Supporting Pokémon command only.",
       "required": false,
       "type": "dropdown",
       "default": "9",
       "data": [
+        {
+          "title": "Chinese (Simplified)",
+          "value": "12"
+        },
+        {
+          "title": "Chinese (Traditional)",
+          "value": "4"
+        },
         {
           "title": "English",
           "value": "9"
@@ -70,20 +78,11 @@
           "value": "7"
         }
       ]
-    },
-    {
-      "name": "showPreview",
-      "title": "Preview",
-      "description": "Show preview in the right side of the Pokémon list",
-      "label": "Show preview",
-      "required": false,
-      "type": "checkbox",
-      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "axios": "^0.26.0",
+    "@raycast/api": "^1.36.0",
+    "axios": "^0.27.2",
     "json2md": "^1.12.0",
     "lodash.groupby": "^4.6.0"
   },

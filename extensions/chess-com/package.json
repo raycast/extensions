@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chess-com",
+  "title": "Chess.com",
+  "description": "Quickly start games on Chess.com",
+  "icon": "command-icon.png",
+  "author": "joshfarrant",
+  "categories": [
+    "Fun",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-1-min",
+      "title": "Play 1 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 1 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-1-1",
+      "title": "Play 1 | 1",
+      "subtitle": "Chess.com",
+      "description": "Play a 1 | 1 game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-2-1",
+      "title": "Play 2 | 1",
+      "subtitle": "Chess.com",
+      "description": "Play a 2 | 1 game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-3-min",
+      "title": "Play 3 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 3 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-3-2",
+      "title": "Play 3 | 2",
+      "subtitle": "Chess.com",
+      "description": "Play a 3 | 2 game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-5-min",
+      "title": "Play 5 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 5 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-10-min",
+      "title": "Play 10 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 10 min game on Chess.com",
+      "mode": "no-view"
+    },
+    {
+      "name": "play-30-min",
+      "title": "Play 30 Min",
+      "subtitle": "Chess.com",
+      "description": "Play a 30 min game on Chess.com",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.35.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

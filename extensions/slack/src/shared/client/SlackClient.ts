@@ -1,5 +1,5 @@
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { slackWebClient } from "./WebClient";
+import { SlackConversation, SlackMember, slackWebClient } from "./WebClient";
 
 interface Item {
   id: string;
@@ -10,6 +10,7 @@ interface Item {
 
 export interface User extends Item {
   username: string;
+  conversationId: string | undefined;
 }
 
 export type Channel = Item;
@@ -19,6 +20,16 @@ export type PresenceStatus = "online" | "offline" | "forced-offline";
 export interface SnoozeStatus {
   nextDndEnd: Date | undefined;
   snoozeEnd: Date | undefined;
+}
+
+export interface Message {
+  receivedAt: Date;
+  message: string;
+  senderId: string;
+}
+export interface UnreadChannelInfo {
+  conversationId: string;
+  messageHistory: Message[];
 }
 
 const sortNames = (a: string, b: string) => {
@@ -35,7 +46,7 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
   await showToast({
     style: Toast.Style.Failure,
     title: "Slack API Error",
-    message: "Your Slack token might be invalid",
+    message: "Try again after checking your Slack token and permission scopes.",
   });
 
   if (props?.exitExtension) {
@@ -45,10 +56,26 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
 
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
-    const userList = await slackWebClient.users.list();
+    const slackMembers: SlackMember[] = [];
+
+    let cursor: string | undefined;
+    do {
+      try {
+        const response = await slackWebClient.users.list({
+          limit: 1000,
+          cursor,
+        });
+        slackMembers.push(...(response.members ?? []));
+        cursor = response.response_metadata?.next_cursor;
+      } catch (e) {
+        break;
+      }
+    } while (cursor);
+
+    const dmConversations = await SlackClient.getConversations("im");
 
     const users =
-      userList.members
+      slackMembers
         ?.filter(
           ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
         )
@@ -61,42 +88,65 @@ export class SlackClient {
             (x): x is string => !!x?.trim()
           );
 
+          const conversation = dmConversations.find((c) => c.user === id);
+
           return {
             id,
             name: displayName,
             icon: profile?.image_24,
             teamId: team_id,
             username,
+            conversationId: conversation?.id,
           };
         })
-        .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))
+        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users ?? [];
   }
 
-  public static async getChannels(): Promise<Channel[]> {
-    const publicChannels = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "public_channel",
-      limit: 1000,
-    });
-    const privateChannels = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "private_channel",
-      limit: 1000,
-    });
+  private static async getConversations(
+    type: "public_channel" | "private_channel" | "mpim" | "im"
+  ): Promise<SlackConversation[]> {
+    const conversations: SlackConversation[] = [];
 
-    const publicAndPrivateChannels = [...(publicChannels.channels ?? []), ...(privateChannels.channels ?? [])];
+    let cursor: string | undefined;
+    do {
+      try {
+        const response = await slackWebClient.conversations.list({
+          exclude_archived: true,
+          types: type,
+          limit: 1000,
+          cursor,
+        });
+        conversations.push(...(response.channels ?? []));
+        cursor = response.response_metadata?.next_cursor;
+      } catch (e) {
+        break;
+      }
+    } while (cursor);
+
+    return conversations;
+  }
+
+  public static async getChannels(): Promise<Channel[]> {
+    const publicChannels = await SlackClient.getConversations("public_channel");
+    const privateChannels = await SlackClient.getConversations("private_channel");
+
+    const publicAndPrivateChannels = [...publicChannels, ...privateChannels];
 
     const channels: Channel[] =
       publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids, is_private }) => {
-          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
+        ?.map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
+          const teamIds = [
+            ...(internal_team_ids ?? []),
+            ...(shared_team_ids ?? []),
+            ...(context_team_id ? [context_team_id] : []),
+          ];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
           return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
-        .filter((i): i is Channel => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return channels ?? [];
@@ -105,14 +155,10 @@ export class SlackClient {
   public static async getGroups(): Promise<Group[]> {
     const users = await SlackClient.getUsers();
 
-    const conversations = await slackWebClient.conversations.list({
-      exclude_archived: true,
-      types: "mpim",
-      limit: 1000,
-    });
+    const conversations = await SlackClient.getConversations("mpim");
 
     const groups: Group[] =
-      conversations.channels
+      conversations
         ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
           const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
@@ -125,7 +171,7 @@ export class SlackClient {
 
           return { id, name: displayName, teamId, icon: "channel-private.png" };
         })
-        .filter((i): i is Group => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups ?? [];
@@ -160,5 +206,57 @@ export class SlackClient {
 
   public static async endSnooze(): Promise<void> {
     await slackWebClient.dnd.endSnooze();
+  }
+
+  public static async getUnreadConversations(conversationIds: string[]): Promise<UnreadChannelInfo[]> {
+    if (conversationIds.length > 30) {
+      throw new Error("Too many conversations");
+    }
+
+    if (conversationIds.length === 0) {
+      return [];
+    }
+
+    const conversationInfos = await Promise.all(
+      conversationIds.map((id) => slackWebClient.conversations.info({ channel: id }))
+    );
+
+    const conversationHistories = await Promise.all(
+      conversationInfos.map((conversationInfo) =>
+        slackWebClient.conversations.history({
+          channel: conversationInfo.channel!.id!,
+          oldest:
+            parseFloat(conversationInfo.channel!.last_read || "0") !== 0
+              ? conversationInfo.channel!.last_read
+              : undefined,
+        })
+      )
+    );
+
+    const unreadConversations = conversationHistories
+      .map(({ messages }, index) => ({
+        conversationId: conversationInfos[index].channel!.id!,
+        messageHistory: messages
+          ?.map((message) => ({
+            receivedAt: message.ts ? new Date(parseFloat(message.ts) * 1000) : undefined,
+            message:
+              message.text && message.text !== "This content can't be displayed."
+                ? message.text
+                : message.blocks?.map((block) => block.text?.text).join("\n\n\n\n\n\n\n\n"),
+            senderId: message.user ?? message.bot_id,
+          }))
+          .filter((x): x is Message => !!x.receivedAt && !!x.message && !!x.senderId),
+      }))
+      .filter((channel): channel is UnreadChannelInfo => !!channel.messageHistory && channel.messageHistory.length > 0)
+      .sort(
+        (a, b) =>
+          new Date(b.messageHistory[0].receivedAt).getTime() - new Date(a.messageHistory[0].receivedAt).getTime()
+      );
+
+    return unreadConversations;
+  }
+
+  public static async markAsRead(conversationId: string): Promise<void> {
+    await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
   }
 }

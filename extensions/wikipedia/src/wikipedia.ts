@@ -1,52 +1,43 @@
-import useSWR from "swr";
 import got from "got";
 
-interface WikipediaPageExtractResponse {
+export interface PageSummary {
   title: string;
   extract: string;
-}
-
-interface WikipediaFeaturedSearchResponse {
-  tfa: {
-    displaytitle: string;
+  description: string;
+  thumbnail: {
+    source: string;
+  };
+  content_urls: {
+    desktop: {
+      page: string;
+    };
   };
 }
 
-interface WikipediaSearchResponse {
-  query: {
-    prefixsearch: Array<{
-      title: string;
-    }>;
-  };
+const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
+
+export async function getRandomPageUrl() {
+  const response = await got.get(`${getApiUrl()}api/rest_v1/page/random/summary`).json<PageSummary>();
+  return response.content_urls.desktop.page;
 }
 
-const client = got.extend({
-  prefixUrl: "https://en.wikipedia.org/",
-  responseType: "json",
-});
-
-export async function getRandomPageTitle() {
-  const response = await client.get("api/rest_v1/page/random/summary").json<WikipediaPageExtractResponse>();
-  return response.title;
-}
-
-export async function getTodayFeaturedPageTitle() {
+export async function getTodayFeaturedPageUrl() {
   const today = new Date();
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
-  const response = await client
-    .get(`api/rest_v1/feed/featured/${year}/${month}/${day}`)
-    .json<WikipediaFeaturedSearchResponse>();
-  return response.tfa.displaytitle;
+  const response = await got
+    .get(`${getApiUrl()}api/rest_v1/feed/featured/${year}/${month}/${day}`)
+    .json<{ tfa: PageSummary }>();
+  return response.tfa.content_urls.desktop.page;
 }
 
-async function findPagesByTitle(search: string) {
+export async function findPagesByTitle(search: string, language: string) {
   if (!search) {
-    return [];
+    return { language, results: [] };
   }
-  const response = await client
-    .get("w/api.php", {
+  const response = await got
+    .get(`${getApiUrl(language)}w/api.php`, {
       searchParams: {
         action: "query",
         list: "prefixsearch",
@@ -55,29 +46,13 @@ async function findPagesByTitle(search: string) {
         pslimit: 9,
       },
     })
-    .json<WikipediaSearchResponse>();
-  return response.query.prefixsearch.map((result) => result.title);
+    .json<{ query: { prefixsearch: { title: string }[] } }>();
+  return { language, results: response.query.prefixsearch.map((result) => result.title) };
 }
 
-async function getPageExtract(title: string) {
-  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<WikipediaPageExtractResponse>();
-  return response.extract;
-}
-
-export function encodeTitle(title: string) {
-  const replacedSpaces = title.replaceAll(" ", "_");
-  const withoutHTMLTags = replacedSpaces.replaceAll(/(<([^>]+)>)/gi, "");
-  return encodeURIComponent(withoutHTMLTags);
-}
-
-export function useWikipediaSearch(search: string) {
-  return useSWR(["pages", search], () => findPagesByTitle(search));
-}
-
-export function useWikipediaPageSummary(title?: string) {
-  return useSWR(title ? ["page/summary", title] : null, () => {
-    if (title) {
-      return getPageExtract(title);
-    }
-  });
+export async function getPageData(title: string, language: string) {
+  const response = await got
+    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`)
+    .json<PageSummary>();
+  return response;
 }

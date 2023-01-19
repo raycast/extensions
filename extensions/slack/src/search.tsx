@@ -1,27 +1,37 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { UpdatesModal } from "./shared/UpdatesModal";
 import { openChannel, openChat } from "./shared/utils";
 
 export default function Command() {
   return (
     <CacheProvider>
-      <SlackList />
+      <UpdatesModal>
+        <SlackList />
+      </UpdatesModal>
     </CacheProvider>
   );
 }
 
 function SlackList() {
-  const { data: users, error: usersError } = useUsers();
-  const { data: channels, error: channelsError } = useChannels();
-  const { data: groups, error: groupsError } = useGroups();
+  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
+  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
+  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
 
-  if (!users && !channels && !groups && usersError && channelsError && groupsError) {
+  if (
+    usersError &&
+    channelsError &&
+    groupsError &&
+    !isValidatingUsers &&
+    !isValidatingChannels &&
+    !isValidatingGroups
+  ) {
     onApiError({ exitExtension: true });
   }
 
   return (
-    <List isLoading={(!users && !usersError) || (!groups && !groupsError) || (!channels && !channelsError)}>
+    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels}>
       <List.Section title="Users">
         {users?.map(({ name, id, teamId, icon }) => (
           <List.Item

@@ -7,7 +7,9 @@
   "author": "thomas",
   "contributors": [
     "altrdev",
-    "ron-myers"
+    "ron-myers",
+    "sandypockets",
+    "kenan"
   ],
   "license": "MIT",
   "commands": [
@@ -37,14 +39,34 @@
       "title": "Previous Track",
       "subtitle": "Spotify",
       "description": "Skips to the previous track in Spotify.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "previousTrackNotificationEnabled",
+          "type": "checkbox",
+          "label": "Show previous track info on change",
+          "required": false,
+          "description": "Show previous track info on change",
+          "default": false
+        }
+      ]
     },
     {
       "name": "nextTrack",
       "title": "Next Track",
       "subtitle": "Spotify",
       "description": "Skips to the next track in Spotify.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "nextTrackNotificationEnabled",
+          "type": "checkbox",
+          "label": "Show next track info on change",
+          "required": false,
+          "description": "Show next track info on change",
+          "default": false
+        }
+      ]
     },
     {
       "name": "current",
@@ -52,6 +74,42 @@
       "subtitle": "Spotify",
       "description": "Currently playing track in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "backwardXseconds",
+      "title": "Skip Backward",
+      "subtitle": "Spotify",
+      "description": "Skips backward x seconds in Spotify.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "title": "Skip x seconds",
+          "name": "secondsToSkip",
+          "type": "textfield",
+          "default": "15",
+          "description": "The number of seconds to skip forward or backward.",
+          "placeholder": "15 seconds",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "forwardXseconds",
+      "title": "Skip Forward",
+      "subtitle": "Spotify",
+      "description": "Skips forward x seconds in Spotify.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "title": "Skip x seconds",
+          "name": "secondsToSkip",
+          "type": "textfield",
+          "default": "15",
+          "description": "The number of seconds to skip forward or backward.",
+          "placeholder": "15 seconds",
+          "required": false
+        }
+      ]
     },
     {
       "name": "increaseVolume",
@@ -65,6 +123,34 @@
       "title": "Decrease Volume",
       "subtitle": "Spotify",
       "description": "Decrease volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quarterVolume",
+      "title": "Set Volume to 25%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 25% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "halfVolume",
+      "title": "Set Volume to 50%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 50% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "threeQuartersVolume",
+      "title": "Set Volume to 75%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 75% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullVolume",
+      "title": "Set Volume to 100%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 100% in Spotify.",
       "mode": "no-view"
     },
     {

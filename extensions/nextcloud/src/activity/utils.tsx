@@ -1,7 +1,7 @@
 import { Color, Icon } from "@raycast/api";
 
 export function getIcon(activityType: string) {
-  let source: Icon = Icon.Dot;
+  let source: Icon = Icon.Circle;
   let tintColor: Color = Color.PrimaryText;
   switch (activityType) {
     case "file_changed":
@@ -30,6 +30,10 @@ export function getIcon(activityType: string) {
     case "deck":
     case "deck_card_description":
       source = Icon.List;
+      break;
+    case "public_links":
+    case "shared":
+      source = Icon.Link;
       break;
     default:
       console.log("Unrecognized icon type:", activityType);

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macupdater",
+  "title": "MacUpdater",
+  "description": "Get app updates and popular apps from macupdater.net",
+  "icon": "update-command-icon.png",
+  "author": "kall",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "icon": "update-command-icon.png",
+      "title": "Daily macOS App Updates",
+      "subtitle": "macupdater.net",
+      "description": "View a list of all macOS apps updated yesterday",
+      "mode": "view"
+    },
+    {
+      "name": "top",
+      "icon": "top-command-icon.png",
+      "title": "Top 1000 macOS Apps",
+      "subtitle": "macupdater.net",
+      "description": "View a list of the 1000 most popular macOS apps on macupdater.net",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "date-fns": "^2.28.0",
+    "scrape-it": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

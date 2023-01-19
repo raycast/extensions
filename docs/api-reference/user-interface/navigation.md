@@ -6,7 +6,7 @@
 
 A hook that lets you push and pop view components in the navigation stack.
 
-You most likely won't use this hook too often. To push a new component, use the [Push Action](./actions.md#push).
+You most likely won't use this hook too often. To push a new component, use the [Push Action](./actions.md#action.push).
 When a user presses `ESC`, we automatically pop to the previous component.
 
 #### Signature
@@ -18,7 +18,7 @@ function useNavigation(): Navigation;
 #### Example
 
 ```typescript
-import { ActionPanel, Detail, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 
 function Ping() {
   const { push } = useNavigation();
@@ -28,7 +28,7 @@ function Ping() {
       markdown="Ping"
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Push" onAction={() => push(<Pong />)} />
+          <Action title="Push" onAction={() => push(<Pong />)} />
         </ActionPanel>
       }
     />
@@ -43,7 +43,7 @@ function Pong() {
       markdown="Pong"
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Pop" onAction={pop} />
+          <Action title="Pop" onAction={pop} />
         </ActionPanel>
       }
     />
@@ -68,7 +68,4 @@ Return type of the [useNavigation](#usenavigation) hook to perform push and pop 
 
 #### Properties
 
-| Name | Type                                        | Description                                           |
-| :--- | :------------------------------------------ | :---------------------------------------------------- |
-| pop  | <code>() => void</code>                     | Pop current view component from the navigation stack. |
-| push | <code>(component: ReactNode) => void</code> | Push a new view component to the navigation stack.    |
+<InterfaceTableFromJSDoc name="Navigation" />

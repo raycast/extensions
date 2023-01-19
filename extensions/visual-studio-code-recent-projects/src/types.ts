@@ -7,7 +7,7 @@ export interface FileEntry {
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
   const { fileUri } = entry as FileEntry;
-  return fileUri !== undefined && existsSync(new URL(fileUri));
+  return fileUri !== undefined && existsSync(new URL(fileUri)) && fileUri.indexOf(".code-workspace") === -1;
 }
 
 export interface FolderEntry {
@@ -27,7 +27,12 @@ export interface WorkspaceEntry {
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   const { workspace } = entry as WorkspaceEntry;
-  return workspace !== undefined && workspace.configPath !== undefined && existsSync(new URL(workspace.configPath));
+
+  return (
+    workspace !== undefined &&
+    existsSync(new URL(workspace.configPath)) &&
+    workspace.configPath.indexOf(".code-workspace") !== -1
+  );
 }
 
 export interface RemoteEntry {
@@ -46,7 +51,25 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
 export enum VSCodeBuild {
   Code = "Code",
   Insiders = "Code - Insiders",
+  VSCodium = "VSCodium",
 }
+
 export interface Preferences {
   build: VSCodeBuild;
+  keepSectionOrder: boolean;
+  layout: "grid" | "list";
 }
+
+export interface RecentEntries {
+  entries: string;
+}
+
+export type EntryType = "Workspaces" | "Folders" | "Remote Folders" | "Files" | "All Types";
+
+export const Filters: { [key in EntryType]: (entry: EntryLike) => entry is EntryLike } = {
+  "All Types": (entry: EntryLike): entry is EntryLike => true,
+  Workspaces: isWorkspaceEntry,
+  Folders: isFolderEntry,
+  "Remote Folders": isRemoteEntry,
+  Files: isFileEntry,
+};

@@ -9,8 +9,10 @@ export interface PortInfo {
 
 export interface IProcessInfo {
   pid: number;
+  path?: string;
   name?: string;
   parentPid?: number;
+  parentPath?: string;
   user?: string;
   uid?: number;
   protocol?: string;

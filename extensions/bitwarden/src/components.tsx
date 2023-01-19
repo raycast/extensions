@@ -1,6 +1,4 @@
-import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
-import { OpenInBrowserAction } from "@raycast/api/types/api/components/actions/OpenInBrowserAction";
-import { Bitwarden } from "./api";
+import { showToast, ActionPanel, Toast, Action, Detail } from "@raycast/api";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -21,39 +19,5 @@ export function TroubleshootingGuide(): JSX.Element {
         </ActionPanel>
       }
     />
-  );
-}
-
-export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
-  const { bitwardenApi, onUnlock } = props;
-  async function onSubmit(values: { password: string }) {
-    try {
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
-      const status = await bitwardenApi.status();
-      if (status == "unauthenticated") {
-        try {
-          await bitwardenApi.login();
-        } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
-          return;
-        }
-      }
-      const sessionToken = await bitwardenApi.unlock(values.password);
-      toast.hide();
-      onUnlock(sessionToken);
-    } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
-    }
-  }
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
-        </ActionPanel>
-      }
-    >
-      <Form.PasswordField id="password" title="Master Password" />
-    </Form>
   );
 }

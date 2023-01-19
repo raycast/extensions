@@ -1,4 +1,6 @@
-import { render } from "@raycast/api";
-import { MRList, MRScope } from "./components/mr";
+import { MRScope, MRState } from "./components/mr";
+import { MyMergeRequests } from "./components/mr_my";
 
-render(<MRList scope={MRScope.assigned_to_me} />);
+export default function MyMergeRequestsRoot(): JSX.Element {
+  return <MyMergeRequests scope={MRScope.assigned_to_me} state={MRState.all} />;
+}

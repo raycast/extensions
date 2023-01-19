@@ -1,7 +1,7 @@
 import EventSource from "eventsource";
 
-import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
-import { newURL, Sourcegraph } from "..";
+import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
+import { LinkBuilder, Sourcegraph } from "..";
 
 export interface SearchResult {
   url: string;
@@ -11,17 +11,23 @@ export interface SearchResult {
 export interface Suggestion {
   title: string;
   description?: string;
-  query?: string;
+  /**
+   * query describes an entire query to replace the existing query with, or a partial
+   * query to be appended to the current query.
+   */
+  query?: { addition: string } | string;
 }
 
 export interface Alert {
   title: string;
   description?: string;
+  kind?: AlertKind;
 }
 
 export interface Progress {
   matchCount: number;
-  duration: string;
+  durationMs: number;
+  skipped: number;
 }
 
 export interface SearchHandlers {
@@ -31,7 +37,7 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
-export type PatternType = "literal" | "regexp" | "structural";
+export type PatternType = "literal" | "regexp" | "structural" | "lucky";
 
 export async function performSearch(
   abort: AbortSignal,
@@ -44,17 +50,23 @@ export async function performSearch(
     return;
   }
 
+  const link = new LinkBuilder("search");
+
   const parameters = new URLSearchParams([
     ["q", query],
-    ["v", "V2"],
+    ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "1500"],
+    ["display", "200"],
   ]);
-  const requestURL = newURL(src, "/.api/search/stream", parameters);
-  const stream = src.token
-    ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
-    : new EventSource(requestURL);
+  const requestURL = link.new(src, "/.api/search/stream", parameters);
+  const headers: { [key: string]: string } = {
+    "X-Requested-With": "Raycast-Sourcegraph",
+  };
+  if (src.token) {
+    headers["Authorization"] = `token ${src.token}`;
+  }
 
+  const stream = new EventSource(requestURL, { headers });
   return new Promise((resolve) => {
     /**
      * All events that indicate the end of the request should use this to resolve.
@@ -76,21 +88,21 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const matchURL = newURL(src, getMatchUrl(match));
+          const matchURL = link.new(src, getMatchUrl(match));
           // Do some pre-processing of results, since some of the API outputs are a bit
           // confusing, to make it easier later on.
           switch (match.type) {
             case "content":
               // Line number appears 0-indexed, for ease of use increment it so links
               // aren't off by 1.
-              match.lineMatches.forEach((l) => {
+              match.lineMatches?.forEach((l) => {
                 l.lineNumber += 1;
               });
               break;
             case "symbol":
               match.symbols.forEach((s) => {
                 // Turn this into a full URL
-                s.url = newURL(src, s.url);
+                s.url = link.new(src, s.url);
               });
           }
           return { url: matchURL, match };
@@ -110,9 +122,8 @@ export async function performSearch(
           .filter((s) => s.count > 1)
           .map((f) => {
             return {
-              title: `Filter for '${f.label}'`,
-              description: `${f.count} matches`,
-              query: f.value,
+              title: f.label,
+              query: { addition: f.value },
             };
           }),
         false
@@ -150,7 +161,17 @@ export async function performSearch(
           event.data.proposedQueries.map((p) => {
             return {
               title: p.description || event.data.title,
-              description: !p.description ? event.data.title : "",
+              description: p.annotations
+                ?.map((annotation) => {
+                  switch (annotation.name) {
+                    case "ResultCount":
+                      return `${annotation.value} results`;
+                    default:
+                      return undefined;
+                  }
+                })
+                .filter((desc) => !!desc)
+                .join(", "),
               query: p.query,
             };
           }),
@@ -176,9 +197,15 @@ export async function performSearch(
         type: "progress",
         data: message.data ? JSON.parse(message.data) : {},
       };
+
+      const {
+        data: { matchCount, durationMs, skipped },
+      } = event;
+
       handlers.onProgress({
-        matchCount: event.data.matchCount,
-        duration: `${event.data.durationMs}ms`,
+        matchCount: matchCount,
+        durationMs: durationMs,
+        skipped: skipped?.length || 0,
       });
     });
 

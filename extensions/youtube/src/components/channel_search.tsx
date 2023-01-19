@@ -1,18 +1,13 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getErrorMessage, getUuid } from "../lib/utils";
 import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";
-import { ChannelListItem } from "./channel";
-import { RecentSearchesList, useRecentSearch } from "./search";
+import { ChannelItem } from "./channel";
+import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
+import { RecentChannels, PinChannel } from "./recent_channels";
 
 export function SearchChannelList() {
   const [searchText, setSearchText] = useState<string>();
-  const [uuid] = useState<string>(getUuid());
-  const {
-    data: rc,
-    appendRecentSearches,
-    clearAllRecentSearches,
-  } = useRecentSearch("recent_channel_searches", uuid, setSearchText);
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {
       return await searchChannels(searchText);
@@ -20,25 +15,25 @@ export function SearchChannelList() {
     return undefined;
   }, [searchText]);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not search channels", getErrorMessage(error));
+    showToast(Toast.Style.Failure, "Could not search channels", getErrorMessage(error));
   }
+  const layout = getViewLayout();
+  const itemSize = getGridItemSize();
   if (data) {
     return (
-      <List isLoading={isLoading} onSearchTextChange={appendRecentSearches} throttle={true}>
+      <ListOrGrid
+        layout={layout}
+        itemSize={itemSize}
+        isLoading={isLoading}
+        onSearchTextChange={setSearchText}
+        throttle={true}
+      >
         {data?.map((c) => (
-          <ChannelListItem key={c.id} channel={c} />
+          <ChannelItem key={c.id} channel={c} actions={<PinChannel channel={c} />} />
         ))}
-      </List>
+      </ListOrGrid>
     );
   } else {
-    const isLoadingTotal = !searchText ? rc === undefined : true;
-    return (
-      <RecentSearchesList
-        recentSearches={rc}
-        isLoading={isLoadingTotal}
-        setRootSearchText={appendRecentSearches}
-        clearAll={clearAllRecentSearches}
-      />
-    );
+    return <RecentChannels setRootSearchText={setSearchText} isLoading={isLoading} />;
   }
 }
