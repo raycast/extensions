@@ -1,4 +1,4 @@
-import { Icon, ActionPanel, Action, getPreferenceValues, OpenAction } from "@raycast/api";
+import { Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { downloadBook } from "../functions/download-book";
 import { BookEntry } from "../types";
 import { LibgenPreferences, BookAction } from "../types";

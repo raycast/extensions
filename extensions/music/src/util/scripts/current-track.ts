@@ -27,6 +27,13 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => Math.round(rating / STAR_VALUE))
 );
 
+/**
+ *
+ * Add a track to a playlist
+ * @param playlist - The name of the target playlist
+ */
+export const addToPlaylist = (playlist: string) => tell("Music", `duplicate current track to playlist "${playlist}"`);
+
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   const querystring = createQueryString({
     id: "trackId",

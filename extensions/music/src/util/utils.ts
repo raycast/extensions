@@ -43,7 +43,7 @@ export function displayError(error: Error | ScriptError) {
       title: "Report Issue",
       onAction: async () => {
         await open(
-          "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2C+bug&template=extension_bug_report.md&title=%5BMusic%5D"
+          "https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&extension-url=https%3A%2F%2Fraycast.com%2Ffedevitaledev%2Fmusic&title=%5BMusic%5D+..."
         );
 
         await showHUD(`Thanks for reporting this bug!`);
@@ -79,3 +79,5 @@ function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, s
 }
 
 export { handleTaskEitherError };
+
+export const minMax = (min: number, max: number) => (value: number) => Math.max(Math.min(value, max), min);

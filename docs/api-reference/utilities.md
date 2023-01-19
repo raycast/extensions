@@ -61,7 +61,7 @@ export default async function Command() {
 
 #### Return
 
-The default [Application](#application) that would open the file. Throws an error if no application was found.
+A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
 
 ### getFrontmostApplication
 
@@ -86,7 +86,7 @@ export default async function Command() => {
 
 #### Return
 
-The frontmost [Application](#application). Throws an error if no application was found.
+A Promise that resolves with the frontmost [Application](#application). If no application was found, the promise will be rejected.
 
 ### showInFinder
 
@@ -181,7 +181,7 @@ A Promise that resolves when the target has been opened.
 
 ### launchCommand
 
-Launches another command of the same extension.
+Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
 Use this method if your command needs to open another command based on user interaction,
 or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
 
@@ -235,6 +235,6 @@ PathLike: string | Buffer | URL;
 
 Supported path types.
 
-### Arguments
+### LaunchContext
 
-Holds the arguments (entered in Raycast Root Search Bar) that are passed to the command. The key is the `name` defined in manifest file and value is the user's input.
+Represents the passed context object of programmatic command launches.

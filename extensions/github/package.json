@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "github-beta",
-  "title": "GitHub Beta",
+  "name": "github",
+  "title": "GitHub",
   "description": "Work with issues, pull requests, manage workflows, search repositories and stay on top of notifications",
   "icon": "icon.png",
   "access": "public",
@@ -9,7 +9,9 @@
   "owner": "raycast",
   "contributors": [
     "tholanda",
-    "tonka3000"
+    "tonka3000",
+    "khasbilegt",
+    "pernielsentikaer"
   ],
   "categories": [
     "Developer Tools",
@@ -20,7 +22,7 @@
     {
       "name": "my-pull-requests",
       "title": "My Pull Requests",
-      "description": "List pull requests you created, particpated or you were mentioned.",
+      "description": "List pull requests you created, participated in, or were mentioned in.",
       "mode": "view"
     },
     {
@@ -57,6 +59,12 @@
       "name": "create-issue",
       "title": "Create Issue",
       "description": "Create an issue in one of your GitHub repositories.",
+      "mode": "view"
+    },
+    {
+      "name": "create-branch",
+      "title": "Create Branch",
+      "description": "Create a branch in one of your GitHub repositories",
       "mode": "view"
     },
     {
@@ -124,8 +132,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.2",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.45.3",
+    "@raycast/utils": "^1.4.15",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",

@@ -1,7 +1,7 @@
 import { ActionPanel, List } from "@raycast/api";
 import { getDevices } from "./services/devices";
 import { useState, useEffect } from "react";
-import { Device } from "./libs/types";
+import { Device } from "./types";
 
 export default function ManageBluetoothConnectionsView() {
   const [loading, setLoading] = useState(true);

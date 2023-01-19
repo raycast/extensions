@@ -108,7 +108,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       title={todo.title}
       subtitle={subtitle}
       accessories={[
-        { text: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
+        { tag: getPrettyTodoActionName(todo), tooltip: `Reason: ${getPrettyTodoActionName(todo)}` },
         { date: updatedAt, tooltip: updatedAt ? `Updated: ${updatedAt.toLocaleString()}` : undefined },
         { icon: userToIcon(todo.author), tooltip: todo.author?.name },
       ]}

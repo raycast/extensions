@@ -11,7 +11,9 @@
     "gebeto",
     "mommertf",
     "duboiss",
-    "lbergantin"
+    "lbergantin",
+    "crisboarna",
+    "sidhant92"
   ],
   "categories": [
     "Developer Tools",
@@ -72,10 +74,29 @@
       "title": "S3 Buckets",
       "description": "Find and open a bucket and its content (or download it)",
       "mode": "view"
+    },
+    {
+      "name": "cloudwatch",
+      "title": "CloudWatch Log Groups",
+      "description": "Find and open a log group",
+      "mode": "view"
+    },
+    {
+      "name": "ssm",
+      "title": "SSM Parameters",
+      "description": "Find, view and copy a parameter value",
+      "mode": "view"
+    },
+    {
+      "name": "secrets",
+      "title": "Secrets Manager",
+      "description": "Find, view and copy a secret value",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.216.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codepipeline": "^3.216.0",
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
@@ -83,6 +104,8 @@
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-sqs": "^3.216.0",
+    "@aws-sdk/client-ssm": "^3.226.0",
+    "@aws-sdk/client-secrets-manager": "^3.226.0",
     "@aws-sdk/shared-ini-file-loader": "^3.215.0",
     "@raycast/api": "^1.42.0",
     "@raycast/utils": "^1.4.11"

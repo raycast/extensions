@@ -1,5 +1,23 @@
+import fse from "fs-extra";
 import { BookEntry } from "../types";
 import { languages } from "./constants";
+import { join } from "path";
+import { homedir } from "os";
+import { runAppleScript } from "run-applescript";
+import { LibgenPreferences } from "../types";
+
+import {
+  Clipboard,
+  environment,
+  getPreferenceValues,
+  open,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import Style = Toast.Style;
+import { axiosGetImageArrayBuffer } from "./axios-utils";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -28,6 +46,13 @@ export const parseLowerCaseArray = (string: string) => {
 export const extractNumber = (string: string, index = 0) => {
   const numbers = string.match(/\d+/);
   return numbers ? numbers[index] : string; // replace all leading non-digits with nothing
+};
+
+export const resolveHome = (filepath: string) => {
+  if (filepath[0] === "~") {
+    return join(homedir(), filepath.slice(1));
+  }
+  return filepath;
 };
 
 export const sortBooksByPreferredLanguages = (books: BookEntry[], preferredLanguages: string) => {
@@ -85,3 +110,90 @@ export const sortBooksByPreferredFileFormats = (books: BookEntry[], preferredFor
 
   return books;
 };
+
+export const fileNameFromBookEntry = ({ title, author, year }: BookEntry) => {
+  return `${author} - ${title}${year && " (" + year + ")"}`.replace(/\//g, ""); // remove slashes
+};
+
+export const fileNameWithExtensionFromBookEntry = (book: BookEntry) => {
+  const fileName = fileNameFromBookEntry(book);
+  return fileName + "." + book.extension.toLowerCase();
+};
+
+export function buildFileName(path: string, name: string, extension: string) {
+  const directoryExists = fse.existsSync(path + name + "." + extension);
+  if (!directoryExists) {
+    return name + "." + extension;
+  } else {
+    let index = 2;
+    while (directoryExists) {
+      const newName = name + "-" + index + "." + extension;
+      const directoryExists = fse.existsSync(path + newName);
+      if (!directoryExists) {
+        return newName;
+      }
+      index++;
+    }
+    return name + "-" + index + "." + extension;
+  }
+}
+
+export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) {
+  const { downloadPath } = getPreferenceValues<LibgenPreferences>();
+  const name = fileNameFromBookEntry(book);
+  const extension = book.extension.toLowerCase();
+
+  const toast = await showToast(Style.Animated, "Downloading...");
+  try {
+    const fileName = buildFileName(downloadPath, name, extension);
+    const filePath = `${downloadPath}/${fileName}`;
+
+    fse.writeFileSync(filePath, Buffer.from(await axiosGetImageArrayBuffer(url)));
+    const options: Toast.Options = {
+      style: Toast.Style.Success,
+      title: "Success!",
+      message: `Saved to ${downloadPath}`,
+      primaryAction: {
+        title: "Open Book",
+        onAction: (toast) => {
+          open(filePath);
+          toast.hide();
+        },
+      },
+      secondaryAction: {
+        title: "Show in finder",
+        onAction: (toast) => {
+          showInFinder(filePath);
+          toast.hide();
+        },
+      },
+    };
+    await showToast(options);
+  } catch (err) {
+    console.error(err);
+
+    if (toast) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Something went wrong.";
+      toast.message = "Try with a different download gateway.";
+    }
+  }
+}
+
+export async function downloadBookToLocation(url = "", book: BookEntry) {
+  const fileName = fileNameWithExtensionFromBookEntry(book);
+  await showToast(Style.Animated, "Please pick a folder...");
+  try {
+    await runAppleScript(`
+      set outputFolder to choose folder with prompt "Please select an output folder:"
+      set temp_folder to (POSIX path of outputFolder) & "${fileName}"
+      set q_temp_folder to quoted form of temp_folder
+      set cmd to "curl -o " & q_temp_folder & " " & "${url}"
+        do shell script cmd
+    `);
+    await showHUD("Download Complete.");
+  } catch (err) {
+    console.error(err);
+    await showHUD("Download Failed. Try with a different download gateway.");
+  }
+}
