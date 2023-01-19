@@ -45,7 +45,7 @@ export default function Command() {
 
   React.useEffect(() => {
     Clipboard.readText().then((clipboardContents) => {
-      setClipboardText(clipboardContents);
+      setClipboardText(clipboardContents ?? "");
     });
   }, []);
   React.useEffect(() => {
@@ -68,6 +68,7 @@ export default function Command() {
         setInput(newValue || clipboardText);
       }}
       searchBarPlaceholder={"Text to slugify"}
+      isLoading={!clipboardText}
     >
       {result ? (
         <>

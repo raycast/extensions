@@ -3,7 +3,7 @@
   "name": "slugify",
   "title": "Slugify",
   "description": "A quick way to slugify text",
-  "icon": "command-icon.png",
+  "icon": "slugify.png",
   "author": "unreadablename",
   "categories": [
     "Developer Tools",
