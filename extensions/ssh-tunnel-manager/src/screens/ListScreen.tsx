@@ -160,7 +160,8 @@ export function ListScreen(props: {
                   />
                   <Action
                     onAction={deleteTunnel}
-                    title="Delet Tunnel"
+                    title="Delete Tunnel"
+                    style={Action.Style.Destructive}
                     shortcut={{
                       modifiers: ["cmd"],
                       key: "d",
