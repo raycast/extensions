@@ -37,13 +37,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.0.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
