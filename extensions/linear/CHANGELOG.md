@@ -1,6 +1,10 @@
 # Linear Changelog
 
-## [Fix icons] - 2022-20-12
+## [Quick Add Comment to Issue command] - 2023-01-18
+
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
+
+## [Fix icons] - 2022-12-20
 
 - Fix a bug where Linear icons would not show up in the list's accessories for projects
 - Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist
