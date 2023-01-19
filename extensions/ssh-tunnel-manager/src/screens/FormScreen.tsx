@@ -25,7 +25,7 @@ export function FromScreen(props: { onSubmit: (values: Values) => void; shouldEs
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create and establish tunnel" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create And Establish Tunnel" onSubmit={handleSubmit} />
           <Action.SubmitForm
             title="Create tunnel"
             onSubmit={(values: Values) => {
