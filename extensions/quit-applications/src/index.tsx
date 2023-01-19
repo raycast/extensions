@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { runAppleScript } from "run-applescript";
 
@@ -46,8 +46,19 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                 <Action
                   title="Quit"
                   onAction={() => {
-                    this.setState({ apps: this.state.apps.filter((a) => a !== app) });
-                    quitApp(app);
+                    try {
+                      quitApp(app);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: `Quit ${app}`,
+                      });
+                      this.setState({ apps: this.state.apps.filter((a) => a !== app) });
+                    } catch {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: `Unable to quit ${app}`,
+                      });
+                    }
                   }}
                 />
               </ActionPanel>

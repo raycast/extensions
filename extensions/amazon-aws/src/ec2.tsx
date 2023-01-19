@@ -1,7 +1,8 @@
 import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-ec2";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
@@ -29,12 +30,12 @@ function EC2Instance({ instance }: { instance: Instance }) {
       id={instance.InstanceId}
       key={instance.InstanceId}
       title={name || ""}
-      icon={Icon.Layers}
+      icon={"aws-icons/ec2.png"}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`${AWS_URL_BASE}/ec2/v2/home?region=${process.env.AWS_REGION}#InstanceDetails:instanceId=${instance.InstanceId}`}
+            url={resourceToConsoleLink(instance.InstanceId, "AWS::EC2::Instance")}
           />
           <Action.CopyToClipboard title="Copy Instance ID" content={instance.InstanceId || ""} />
           {instance.PrivateIpAddress && (

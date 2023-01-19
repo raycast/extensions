@@ -53,6 +53,7 @@ const normalizeColumns = (
     project: [{ data: { databaseId: '', propertyName: 'None' }, value: '{}' }],
     assignee: [{ name: 'None', value: NONE_VALUE }],
     tags: [{ name: 'None', value: NONE_VALUE }],
+    url: [{ name: 'None', value: NONE_VALUE }],
   }
 
   propertiesValues.forEach((item) => {
@@ -109,6 +110,10 @@ const normalizeColumns = (
 
     if (item.type === 'select') {
       columns.tags.unshift({ name: item.name, value: item.name })
+    }
+
+    if (item.type === 'url') {
+      columns.url.unshift({ name: item.name, value: item.name })
     }
   })
 

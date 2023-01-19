@@ -5,6 +5,8 @@
   "description": "Search all resources across Cloud and SaaS",
   "icon": "logo.png",
   "author": "ozgunarslantas",
+  "owner": "resmo",
+  "access": "public",
   "categories": [
     "Security",
     "Other"

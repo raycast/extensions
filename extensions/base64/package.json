@@ -5,8 +5,17 @@
   "description": "Quickly encode or decode base64 from the clipboard",
   "icon": "command-icon.png",
   "author": "DanielSinclair",
+  "contributors": [
+    "sammarks"
+  ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "index",
+      "title": "Base64",
+      "description": "Encode / decode Base64",
+      "mode": "view"
+    },
     {
       "name": "encode",
       "title": "Base64 Encode",
@@ -20,8 +29,23 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "The default action to take when encoding / decoding a Base64 string.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "default": "copyToClipboard",
+      "data": [
+        { "value": "copyToClipboard", "title": "Copy to Clipboard" },
+        { "value": "pasteInApp", "title": "Paste in App" },
+        { "value": "openInBrowser", "title": "Open in Browser" }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "1.25.5",
+    "@raycast/api": "1.44.0",
     "js-base64": "3.7.2",
     "run-applescript": "6.0.0"
   },

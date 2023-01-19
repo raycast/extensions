@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       paths:
-        description: 'Extensions to update (space-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
+        description: 'Extensions to update (comma-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
         required: true
       command:
         description: "Ray CLI command to run (build | publish)"
@@ -40,7 +40,7 @@ jobs:
           file_path="${{ github.workspace }}/.github/public_raycast_extensions.txt"
           if [[ -f "$file_path" ]]; then
             echo "value<<EOF" >> $GITHUB_OUTPUT
-            cat "$file_path" >> $GITHUB_OUTPUT
+            cat "$file_path"; echo >> $GITHUB_OUTPUT
             echo 'EOF' >> $GITHUB_OUTPUT
           fi
       - name: Run Ray CLI

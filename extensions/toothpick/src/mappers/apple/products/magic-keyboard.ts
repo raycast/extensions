@@ -1,19 +1,9 @@
 import { Color } from "@raycast/api";
-import { Device, RawDeviceData } from "../../../libs/types";
+import { Device, RawDeviceData } from "../../../types";
 
 function populate(device: Device, deviceData: RawDeviceData) {
   // Extract properties for easier access
   const deviceProperties = deviceData[device.name];
-
-  // Populate icon and model
-  switch (device.productId) {
-    case MagicKeyboard.Models.Unknown:
-    case MagicKeyboard.Models.Standard:
-    case MagicKeyboard.Models.Numpad:
-    case MagicKeyboard.Models.Fingerprint:
-      device.icon = { source: "icons/devices/generic/keyboard.svg" };
-      break;
-  }
 
   // Populate accessories
   if (device.connected) {
@@ -32,10 +22,11 @@ function populate(device: Device, deviceData: RawDeviceData) {
 
 const MagicKeyboard = {
   Models: {
-    Unknown: "0x0267",
-    Standard: "0x029C",
-    Numpad: "0x029F",
-    Fingerprint: "0x029A",
+    Standard: "0x0267",
+    Numpad: "0x026C",
+    Standard2021: "0x029C",
+    Numpad2021: "0x029F",
+    Fingerprint2021: "0x029A",
   },
   populate,
 };

@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-07-01 19:05
  * @lastEditor: Tisfeng
- * @lastEditTime: 2022-11-01 22:09
+ * @lastEditTime: 2022-12-16 17:59
  * @fileName: versionInfo.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -26,10 +26,10 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.6.2";
-  buildNumber = 18;
-  versionDate = "2022-11-02";
-  isNeedPrompt = false;
+  version = "2.7.2";
+  buildNumber = 21;
+  versionDate = "2023-01-17";
+  isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
@@ -37,8 +37,7 @@ export class Easydict {
 
 ### 🐞 修复
 
-- 修复了 DeepL 翻译额度超支时会有错误提示问题。
-- 更新法语朗读声音。
+- 修复了 Bing 翻译失败问题。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
@@ -46,8 +45,7 @@ export class Easydict {
 
 ### 🐞 Fixes
 
-- Fixed the problem that an error prompt will appear when DeepL translation quota is exceeded.
-- Updated French say voice.
+- Fixed Bing translation failed.
 `;
 
   getRepoUrl() {

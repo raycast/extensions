@@ -74,7 +74,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.Push
-                    icon={Icon.TextDocument}
+                    icon={Icon.BlankDocument}
                     title="Show Details"
                     target={<SiteView id={site.id} />}
                   />
@@ -243,7 +243,7 @@ function DeployListView(props: DeployListProps) {
       case 'ok':
         return Icon.Checkmark;
       case 'error':
-        return Icon.XmarkCircle;
+        return Icon.XMarkCircle;
       case 'skipped':
         return Icon.Circle;
     }
@@ -259,7 +259,7 @@ function DeployListView(props: DeployListProps) {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={<DeployView siteId={siteId} id={deploy.id} />}
               />

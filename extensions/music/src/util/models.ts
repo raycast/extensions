@@ -22,6 +22,7 @@ export enum SFSymbols {
   STAR = "􀋂",
   STAR_FILL = "􀋃",
   TIME = "􀐫",
+  SPEAKER_FILL = "􀊡",
 }
 
 export interface Track {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { LocalStorage, popToRoot, Clipboard, showHUD } from "@raycast/api";
+import { LocalStorage, popToRoot, Clipboard, showToast, Toast } from "@raycast/api";
 import path from "path";
 import fs from "fs/promises";
 
@@ -15,8 +15,17 @@ const checkLocalStorage = async () => {
 
 export const createAccount = async () => {
   if (await checkLocalStorage()) {
-    return showHUD("❌ Account already exists");
+    return showToast({
+      style: Toast.Style.Failure,
+      title: "Account already exists",
+    });
   }
+
+  // Show a Toast message
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Creating account...",
+  });
 
   // get the available email domains
   const { data } = await axios.get("https://api.mail.tm/domains?page=1");
@@ -58,8 +67,9 @@ export const createAccount = async () => {
     // save email to clipboard
     await Clipboard.copy(email);
 
-    // show a HUD message
-    await showHUD(`✅ Account created successfully. Email copied to clipboard.`);
+    // show a Toast message
+    toast.style = Toast.Style.Success;
+    toast.title = "Account created successfully";
   } catch (error) {
     return "Error creating account";
   }
@@ -67,7 +77,10 @@ export const createAccount = async () => {
 
 export const fetchMessages = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("❌ No account found. Please create one");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "No account found. Please create one",
+    });
     return false;
   }
 
@@ -92,9 +105,17 @@ export const fetchMessages = async () => {
 };
 export const deleteAccount = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("❌ No account found. Please create one");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "No account found. Please create one",
+    });
     return false;
   }
+
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Deleting account...",
+  });
 
   const storage = await LocalStorage.allItems();
 
@@ -109,14 +130,19 @@ export const deleteAccount = async () => {
 
     await LocalStorage.clear();
 
-    showHUD("✅ Account deleted successfully");
+    toast.style = Toast.Style.Success;
+    toast.title = "Account deleted successfully";
   } catch (error) {
     console.log(error);
   }
 };
 export const ShowInfo = async () => {
   if (!(await checkLocalStorage())) {
-    showHUD("❌ No account found. Please create one");
+    showToast({
+      style: Toast.Style.Failure,
+      title: "No account found. Please create one",
+    });
+
     return false;
   }
 
@@ -181,7 +207,10 @@ export const deleteMessage = async (id: string) => {
       },
     });
 
-    showHUD("✅ Message deleted successfully");
+    showToast({
+      style: Toast.Style.Success,
+      title: "Message deleted successfully",
+    });
     popToRoot();
   } catch (error) {
     console.log(error);

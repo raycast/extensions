@@ -1,7 +1,15 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { CloudFormationClient, ListStacksCommand, StackStatus, StackSummary } from "@aws-sdk/client-cloudformation";
+import {
+  CloudFormationClient,
+  ListStackResourcesCommand,
+  ListStacksCommand,
+  StackResourceSummary,
+  StackStatus,
+  StackSummary,
+} from "@aws-sdk/client-cloudformation";
 import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown, { AWS_URL_BASE } from "./aws-profile-dropdown";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { resourceToConsoleLink } from "./util";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -26,19 +34,51 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
     <List.Item
       id={stack.StackName}
       key={stack.StackId}
-      icon={Icon.AppWindowGrid3x3}
+      icon={"aws-icons/cfo.png"}
       title={stack.StackName || ""}
       actions={
         <ActionPanel>
+          <Action.Push
+            icon={Icon.Eye}
+            title="Resources"
+            target={<CloudFormationStackResources stackName={stack.StackName || ""} />}
+          />
           <Action.OpenInBrowser
             title="Open in Browser"
-            url={`${AWS_URL_BASE}/cloudformation/home?region=${process.env.AWS_REGION}#/stacks/stackinfo?stackId=${stack.StackId}`}
+            url={resourceToConsoleLink(stack.StackId, "AWS::CloudFormation::Stack")}
           />
           <Action.CopyToClipboard title="Copy Stack ID" content={stack.StackId || ""} />
         </ActionPanel>
       }
       accessories={[{ icon: iconMap[stack.StackStatus as StackStatus], tooltip: stack.StackStatus }]}
     />
+  );
+}
+
+function CloudFormationStackResources({ stackName }: { stackName: string }) {
+  const { data: resources } = useCachedPromise(fetchStackResources, [stackName]);
+
+  return (
+    <List>
+      {resources?.map((r) => {
+        const consoleLink = resourceToConsoleLink(r.PhysicalResourceId, r.ResourceType || "");
+
+        return (
+          <List.Item
+            id={r.PhysicalResourceId}
+            key={r.PhysicalResourceId}
+            title={r.PhysicalResourceId || ""}
+            accessories={[{ text: r.ResourceType }, { icon: consoleLink ? Icon.Link : undefined }]}
+            actions={
+              <ActionPanel>
+                {consoleLink && <Action.OpenInBrowser title="Open in Browser" url={consoleLink} />}
+                <Action.CopyToClipboard title="Copy Resource ID" content={r.PhysicalResourceId || ""} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
 }
 
@@ -55,6 +95,22 @@ async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<Sta
   }
 
   return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
+}
+
+async function fetchStackResources(
+  stackName: string,
+  token?: string,
+  stacks?: StackResourceSummary[]
+): Promise<StackResourceSummary[]> {
+  const { StackResourceSummaries, NextToken } = await new CloudFormationClient({}).send(
+    new ListStackResourcesCommand({ StackName: stackName, NextToken: token })
+  );
+
+  if (NextToken) {
+    return fetchStackResources(stackName, NextToken, [...(stacks || []), ...(StackResourceSummaries || [])]);
+  }
+
+  return [...(stacks || []), ...(StackResourceSummaries || [])];
 }
 
 const iconMap: Record<StackStatus, Icon> = {

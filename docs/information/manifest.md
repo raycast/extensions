@@ -76,11 +76,11 @@ All properties for extension or command-specific preferences. Use the [Preferenc
 
 ## Argument properties
 
-All properties for command arguments. Use the [Arguments API](./arguments.md) to access their values.
+All properties for command arguments. Use the [Arguments API](./lifecycle/arguments.md) to access their values.
 
 | Property    | Required | Description                                                                                                                                                                                                                   |
 | ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| name        | Yes      | A unique id for the argument. This value will be used to match the arguments and top-level props.                                                                                                                             |
+| name        | Yes      | A unique id for the argument. This value will be used to as the key in the object passed as [top-level prop](./lifecycle/arguments.md#arguments).                                                                             |
 | type        | Yes      | The argument type. We currently support `text` and `password` (for secure entry). When the type is `password`, entered text will be replaced with asterisks. Most common use case – passing passwords or secrets to commands. |
 | placeholder | Yes      | Placeholder for the argument's input field.                                                                                                                                                                                   |
 | required    | No       | Indicates whether the value is required and must be entered by the user before the command is opened. Default value for this is `false`.                                                                                      |

@@ -26,20 +26,11 @@ export function createAccessoriesArray({
             },
           }
         : {}
+
     accessories.push({
       ...icon,
-      text: format(todo.date, 'd MMM'),
+      date: todo.date,
       tooltip: format(todo.date, "EEEE d MMMM yyyy 'at' HH:mm"),
-    })
-  }
-
-  if (todo.tag && !filter?.tag) {
-    accessories.push({
-      text: todo.tag?.name,
-      icon: {
-        source: 'dot.png',
-        tintColor: todo.tag.color,
-      },
     })
   }
 
@@ -53,6 +44,12 @@ export function createAccessoriesArray({
         },
       })
     }
+  }
+
+  if (todo.tag && !filter?.tag) {
+    accessories.push({
+      tag: { value: todo.tag?.name, color: todo.tag.color },
+    })
   }
 
   if (todo.user && !filter?.user) {
