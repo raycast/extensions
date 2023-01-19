@@ -1,5 +1,6 @@
-import { Color, Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { Image, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
+import { truncate } from "lodash";
 import { findTab, getSpaces, getTabs, selectSpace, selectTab } from "./arc";
 import { getDomain, getKey, getShortcut, getSpaceTitle } from "./utils";
 
@@ -11,14 +12,14 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={{ source: "outline.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: { light: "outline-light.svg", dark: "outline-dark.svg" } }}
       isLoading={isLoadingSpaces || isLoadingTabs}
     >
       <MenuBarExtra.Section title="Spaces">
         {spaces?.slice(0, LIMIT).map((space, index) => (
           <MenuBarExtra.Item
             key={space.id}
-            title={getSpaceTitle(space)}
+            title={truncate(getSpaceTitle(space))}
             shortcut={getShortcut(["ctrl"], index)}
             onAction={async () => await selectSpace(space)}
           />
@@ -32,7 +33,7 @@ export default function Command() {
             <MenuBarExtra.Item
               key={getKey(tab)}
               icon={getFavicon(tab.url, { mask: Image.Mask.RoundedRectangle })}
-              title={tab.title}
+              title={truncate(tab.title)}
               subtitle={getDomain(tab.url)}
               shortcut={getShortcut(["cmd"], index)}
               onAction={async () => {
