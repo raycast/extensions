@@ -15,10 +15,13 @@ const headers = {
 
 export const fetchFormDataAndCache = async (deckId: string) => {
   const formattedDeckId = deckId.replace(/[[\]]/g, "");
-  const deckRes = await fetch(`https://app.mochi.cards/api/decks/${formattedDeckId}`, {
+  const res = await fetch(`https://app.mochi.cards/api/decks/${formattedDeckId}`, {
     headers,
   });
-  const deckData = (await deckRes.json()) as DeckResponse;
+  if (res.status !== 200) {
+    throw new Error("Failed to fetch data");
+  }
+  const deckData = (await res.json()) as DeckResponse;
 
   // If template id is not set, don't call templates endpoint
   let formData = null;
@@ -52,7 +55,6 @@ export const fetchFormDataAndCache = async (deckId: string) => {
     };
   }
   LocalStorage.setItem(deckId, formData);
-  console.log("🚀 ~ file: mochiClient.ts:55 ~ fetchFormDataAndCache ~ deckId", deckId);
   return formData;
 };
 
@@ -61,10 +63,12 @@ export const fetchDecksAndCache = async () => {
     method: "GET",
     headers,
   });
+  if (res.status !== 200) {
+    throw new Error("Failed to fetch data");
+  }
   const data = (await res.json()) as DecksResponse;
   const ActiveDecks = data.docs.filter((d) => !d["archived?"] && !d["trashed?"]).sort((a, b) => a.sort - b.sort);
   LocalStorage.setItem(ACTIVE_DECKS_KEY, ActiveDecks);
-  console.log("🚀 ~ file: mochiClient.ts:55 ~ fetchFormDataAndCache ~ deckId", "");
   return ActiveDecks;
 };
 

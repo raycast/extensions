@@ -8,6 +8,7 @@ import DeckDropDown from "./components/DeckDropdown";
 import FormFields from "./components/DeckFields";
 import { fetchFormDataAndCache, fetchDecksAndCache, postCard } from "./lib/mochiClient";
 import { ACTIVE_DECKS_KEY } from "./constants";
+import ErrorMessageView from "./components/ErrorMessageView";
 
 type Values = {
   [key: string]: string;
@@ -18,14 +19,27 @@ const isRefetchNeeded = (cachedTime: number) => {
 };
 export default function Command() {
   const [deckId, setDeckId] = useState("");
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (hasError) {
+      showToast(Toast.Style.Failure, "Failed to fetch data");
+    }
+  }, [hasError]);
 
   // fetch active decks
-  const { isLoading: isLoadingDecks, data: decksData } = useCachedPromise(
+  const {
+    isLoading: isLoadingDecks,
+    data: decksData,
+    error: fetchDecksError,
+  } = useCachedPromise(
     async () => {
       const cached = await LocalStorage.getItem<DecksResponse["docs"]>(ACTIVE_DECKS_KEY);
       if (cached) {
         if (isRefetchNeeded(cached.createdAt)) {
-          fetchDecksAndCache();
+          fetchDecksAndCache().catch(() => {
+            setHasError(true);
+          });
         }
         return cached.value;
       }
@@ -42,7 +56,11 @@ export default function Command() {
   }, [decksData]);
 
   // fetch form data
-  const { isLoading: isLoadingField, data: formData } = useCachedPromise(
+  const {
+    isLoading: isLoadingField,
+    data: formData,
+    error: fetchFormDataError,
+  } = useCachedPromise(
     async (deckId: string) => {
       if (!deckId) return { fields: [] };
 
@@ -50,7 +68,9 @@ export default function Command() {
       // If cached, return cached data and fetch new data in background
       if (cached) {
         if (isRefetchNeeded(cached.createdAt)) {
-          fetchFormDataAndCache(deckId);
+          fetchFormDataAndCache(deckId).catch(() => {
+            setHasError(true);
+          });
         }
         return cached.value;
       }
@@ -92,31 +112,38 @@ export default function Command() {
   };
 
   const isLoading = isLoadingDecks || isLoadingField || !deckId;
+  const hasAnyError = fetchDecksError || fetchFormDataError || hasError;
 
   return (
-    <Form
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Plus} title="Create Card" />
-          <Action.OpenInBrowser url="https://app.mochi.cards" icon={Icon.Book} title="Open Mochi in Browser" />
-          {!isLoading && <DeckSwitchActions decks={decksData} onSubmit={(id) => setDeckId(id)} />}
-          <Action.SubmitForm
-            onSubmit={removeAllCache}
-            icon={Icon.Eraser}
-            title="Clear Cache"
-            shortcut={{ modifiers: ["cmd"], key: `d` }}
-          />
-        </ActionPanel>
-      }
-    >
-      {!isLoadingDecks && (
-        <>
-          <DeckDropDown decks={decksData} deckId={deckId} onChange={(id) => setDeckId(id)} />
-          <Form.Separator />
-          {!isLoadingField && <FormFields fields={formData.fields} fieldsRefs={fieldsRefs} />}
-        </>
+    <>
+      {hasAnyError ? (
+        <ErrorMessageView message="Failed to fetch data. Please check your API key." />
+      ) : (
+        <Form
+          isLoading={isLoading}
+          actions={
+            <ActionPanel>
+              <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Plus} title="Create Card" />
+              <Action.OpenInBrowser url="https://app.mochi.cards" icon={Icon.Book} title="Open Mochi in Browser" />
+              {!isLoading && <DeckSwitchActions decks={decksData} onSubmit={(id) => setDeckId(id)} />}
+              <Action.SubmitForm
+                onSubmit={removeAllCache}
+                icon={Icon.Eraser}
+                title="Clear Cache"
+                shortcut={{ modifiers: ["cmd"], key: `d` }}
+              />
+            </ActionPanel>
+          }
+        >
+          {!isLoadingDecks && (
+            <>
+              <DeckDropDown decks={decksData} deckId={deckId} onChange={(id) => setDeckId(id)} />
+              <Form.Separator />
+              {!isLoadingField && <FormFields fields={formData.fields} fieldsRefs={fieldsRefs} />}
+            </>
+          )}
+        </Form>
       )}
-    </Form>
+    </>
   );
 }
