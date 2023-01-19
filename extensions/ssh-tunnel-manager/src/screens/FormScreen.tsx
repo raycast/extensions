@@ -38,7 +38,7 @@ export function FromScreen(props: { onSubmit: (values: Values) => void; shouldEs
             onAction={pop}
             shortcut={{
               modifiers: ["cmd"],
-              key: "n",,
+              key: "n",
             }}
           />
         </ActionPanel>
