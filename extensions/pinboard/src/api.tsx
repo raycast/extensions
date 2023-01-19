@@ -7,12 +7,15 @@ const apiBasePath = "https://api.pinboard.in/v1";
 const { apiToken, constantTags } = getPreferenceValues();
 
 export interface Bookmark {
-  id: string;
-  url: string;
-  title: string;
-  tags?: string;
-  private: boolean;
-  readLater: boolean;
+  href: string
+  description: string
+  extended: string
+  meta: string
+  hash: string
+  time: string
+  shared: "yes" | "no"
+  toread: "yes" | "no"
+  tags: string
 }
 
 export interface BookmarksState {
@@ -128,6 +131,9 @@ export function useSearchBookmarks(searchKind: SearchKind) {
     search: search,
   };
 }
+
+// function searchBookmarksCache(searchText: string) {
+// }
 
 async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
   const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
