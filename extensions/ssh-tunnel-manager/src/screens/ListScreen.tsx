@@ -104,8 +104,8 @@ export function ListScreen(props: {
             title="Create Tunnel"
             onAction={toCreate}
             shortcut={{
-              modifiers: ["opt", "shift"],
-              key: "tab",
+              modifiers: ["cmd"],
+              key: "n",
             }}
           />
           <Action
@@ -120,7 +120,7 @@ export function ListScreen(props: {
       }
     >
       {listData.length === 0 ? (
-        <List.EmptyView title="No Tunnels Found" description="Press opt+shift+tab to create a tunnel"></List.EmptyView>
+        <List.EmptyView title="No Tunnels Found" description="Press ⌘+n to create a tunnel"></List.EmptyView>
       ) : (
         listData.map((i) => {
           return (

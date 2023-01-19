@@ -37,8 +37,8 @@ export function FromScreen(props: { onSubmit: (values: Values) => void; shouldEs
             title="Tunnel List"
             onAction={pop}
             shortcut={{
-              modifiers: ["opt", "shift"],
-              key: "tab",
+              modifiers: ["cmd"],
+              key: "n",,
             }}
           />
         </ActionPanel>
