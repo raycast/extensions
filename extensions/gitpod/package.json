@@ -3,7 +3,7 @@
   "name": "gitpod",
   "title": "Gitpod",
   "description": "A blazingly fast way to work with Gitpod",
-  "icon": "logo-mark.svg",
+  "icon": "logo-mark.png",
   "author": "Palanikannan1437",
   "owner": "raycast",
   "contributors": [
