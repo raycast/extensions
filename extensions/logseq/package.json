@@ -88,7 +88,7 @@
     "node": ">=16.10"
   },
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.42.0",
     "dayjs": "^1.11.0",
     "edn-data": "^0.2.0",
     "logseq-dateutils": "0.0.22",
