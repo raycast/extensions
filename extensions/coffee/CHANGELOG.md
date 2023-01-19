@@ -2,7 +2,7 @@
 
 ## [Fix] - 2023-01-19
 
-Fixed a bug that caused the extension to crash if menubar command was not enabled.
+Fixed a bug that caused the extension to crash if the menubar command was not enabled.
 
 ## [Update] - 2022-12-09
 
