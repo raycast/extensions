@@ -17,10 +17,12 @@ export default function Command() {
 
   async function handleSubmit(values: CommandForm) {
     if (!values.content) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "🐝 Type something to get started",
       });
+
+      return;
     }
 
     const content = addLeadingTimeToContentIfNecessary(values.content);
