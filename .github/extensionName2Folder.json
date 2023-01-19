@@ -628,6 +628,7 @@
   "sketch": "sketch",
   "slack": "slack",
   "slack-status": "slack-status",
+  "slugify": "slugify",
   "sm-ms": "sm-ms",
   "smultron": "smultron",
   "snake": "snake",
