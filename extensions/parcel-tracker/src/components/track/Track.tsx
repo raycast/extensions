@@ -3,7 +3,7 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { getTrackData } from "../../api/api";
 import { ITrackData } from "../../model/trackData";
-import { isEmpty } from '../../utils/utils';
+import { isEmpty } from "../../utils/utils";
 
 interface IProps {
   vendorKey: string;
