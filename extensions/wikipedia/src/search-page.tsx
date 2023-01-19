@@ -1,13 +1,13 @@
-import {Action, ActionPanel, Icon, List} from "@raycast/api";
-import {usePromise} from "@raycast/utils";
-import {useState} from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import ShowDetailsPage from "./show-details-page";
-import {findPagesByTitle, getPageData} from "./wikipedia";
+import { findPagesByTitle, getPageData } from "./wikipedia";
 
 export default function SearchPage() {
   const [search, setSearch] = useState("");
   const [language, setLanguage] = useState("en");
-  const {data, isLoading} = usePromise(findPagesByTitle, [search, language]);
+  const { data, isLoading } = usePromise(findPagesByTitle, [search, language]);
 
   return (
     <List
@@ -34,12 +34,12 @@ export default function SearchPage() {
   );
 }
 
-function PageItem({title, language}: {title: string; language: string}) {
-  const {data: page} = usePromise(getPageData, [title, language]);
+function PageItem({ title, language }: { title: string; language: string }) {
+  const { data: page } = usePromise(getPageData, [title, language]);
 
   return (
     <List.Item
-      icon={{source: page?.thumbnail?.source || "../assets/wikipedia.png"}}
+      icon={{ source: page?.thumbnail?.source || "../assets/wikipedia.png" }}
       id={title}
       title={title}
       subtitle={page?.description}
@@ -48,7 +48,7 @@ function PageItem({title, language}: {title: string; language: string}) {
           <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
           {page && <Action.Push icon={Icon.Window} title={"Show Details"} target={<ShowDetailsPage page={page} />} />}
           <Action.CopyToClipboard
-            shortcut={{modifiers: ["cmd"], key: "."}}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
             title="Copy URL"
             content={page?.content_urls.desktop.page || ""}
           />
