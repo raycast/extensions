@@ -3,9 +3,10 @@ import { getPreferenceValues } from "@raycast/api";
 import type { StatsQueryResponse, Stats } from "./types";
 
 const { apiKey } = getPreferenceValues();
+const { hostedDomain } = getPreferenceValues() ?? "https://plausible.io";;
 
 export async function verifySite(domain: string): Promise<boolean> {
-  const response = await fetch(`https://plausible.io/api/v1/stats/aggregate?metrics=visits&site_id=${domain}`, {
+  const response = await fetch(`${hostedDomain}/api/v1/stats/aggregate?metrics=visits&site_id=${domain}`, {
     headers: {
       Authorization: `Bearer ${apiKey}`,
     },
@@ -22,7 +23,7 @@ export async function verifySite(domain: string): Promise<boolean> {
 
 export async function getWebsiteStats(domain: string): Promise<Stats> {
   const response = await fetch(
-    `https://plausible.io/api/v1/stats/aggregate?metrics=visits,visitors,bounce_rate,pageviews,visit_duration&site_id=${domain}`,
+    `${hostedDomain}/api/v1/stats/aggregate?metrics=visits,visitors,bounce_rate,pageviews,visit_duration&site_id=${domain}`,
     {
       headers: {
         Authorization: `Bearer ${apiKey}`,
