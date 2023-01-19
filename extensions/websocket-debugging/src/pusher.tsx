@@ -5,7 +5,7 @@ import { Log, Preferences, State } from "./types";
 import { nanoid } from "nanoid";
 import GetTime from "./utils";
 import PusherServer from "pusher";
-import Echo, { Channel } from "laravel-echo";
+import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 
 export default function Command() {
@@ -28,12 +28,12 @@ export default function Command() {
     channel: "my-channel",
   });
 
-  const callback = (eventName: string, data: string) => {
+  const callback = (event: string, message: string) => {
     const newLog: Log = {
       id: nanoid(),
-      event: eventName,
+      event: event,
       channel: state.channel,
-      message: JSON.stringify(data, null, 4),
+      message: JSON.stringify(message, null, 4),
       time: GetTime(),
     };
 
@@ -111,15 +111,15 @@ export default function Command() {
   }, [echoChannel, state.channel]);
 
   const handleSelect = useCallback(
-    (title: string) => {
-      setState((previous) => ({ ...previous, channel: title, isLoading: true }));
-      showToast({ title: "Updated", message: "Now using new channel: " + title });
+    (channel: string) => {
+      setState((previous) => ({ ...previous, channel: channel, isLoading: true }));
+      showToast({ title: "Updated", message: "Now using new channel: " + channel });
     },
     [state.channel, setState, showToast]
   );
 
   const handleCreate = useCallback(
-    (eventName: string, eventData: string | null) => {
+    (event: string, message: string | null) => {
       const pusher = new PusherServer({
         appId: PusherAppID,
         key: PusherAppKey,
@@ -128,9 +128,9 @@ export default function Command() {
         useTLS: PusherAppEncrypted,
       });
 
-      pusher.trigger(state.channel, eventName, eventData);
+      pusher.trigger(state.channel, event, message);
 
-      showToast({ title: "Event Sent", message: "Your event, " + eventName + " has been sent." });
+      showToast({ title: "Event Sent", message: "Your event, " + event + " has been sent." });
     },
     [state.channel, showToast]
   );
@@ -148,7 +148,7 @@ export default function Command() {
       actions={
         <ActionPanel title="Pusher Debug">
           <CreateEventAction onCreate={handleCreate} />
-          <SelectChannelAction onCreate={handleSelect} />
+          <SelectChannelAction defaultChannel={state.channel} onCreate={handleSelect} />
         </ActionPanel>
       }
     >

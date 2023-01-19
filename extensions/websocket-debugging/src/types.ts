@@ -1,9 +1,20 @@
+import { Color } from "@raycast/api";
+
 interface Preferences {
   PusherAppID: string;
   PusherAppKey: string;
   PusherAppSecret: string;
   PusherAppCluster: string;
   PusherAppEncrypted: boolean;
+}
+
+interface CreateEventValues {
+  event: string;
+  message: string;
+}
+
+interface SelectChannelValues {
+  channel: string;
 }
 
 type State = {
@@ -23,4 +34,4 @@ type Log = {
   time: string;
 };
 
-export type { Preferences, State, Log };
+export type { Preferences, State, Log, CreateEventValues, SelectChannelValues };
