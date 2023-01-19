@@ -98,8 +98,6 @@ export function ListScreen(props: {
       }}
       actions={
         <ActionPanel>
-          <Action title="Refresh List" onAction={refreshList} />
-          <Action title="Create Tunnel" onAction={toCreate} />
           <Action
             title="Create Tunnel"
             onAction={toCreate}
