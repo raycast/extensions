@@ -644,6 +644,7 @@
   "spotify-controls": "spotify-controls",
   "spotify-player": "spotify-player",
   "ssh-manager": "ssh-manager",
+  "ssh-tunnel-manager": "ssh-tunnel-manager",
   "stackoverflow": "stackoverflow",
   "statamic-docs": "statamic-docs",
   "static-marks": "static-marks-bookmarks",
