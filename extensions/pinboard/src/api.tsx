@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, Cache, Detail } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -71,9 +71,9 @@ export async function refreshCache() {
     console.debug("Updated lastUpdated cache")
     pinboardCache.set("posts", JSON.stringify(serverPosts));
     console.debug("Updated posts cache")
-    return;
+    return `Successfully updated cache! There are now ${Object.keys(serverPosts).length} items`;
   }
-  return;
+  return "There was no need for an update, so I didn't update";
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
