@@ -69,13 +69,28 @@
           "default": "https://google.com"
         }
       ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Access Spaces and Favorites",
+      "description": "Access your spaces and favorites from the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "search",
+      "title": "Search Arc",
+      "description": "Search tabs, history and search suggestions",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.45.0",
-    "@raycast/utils": "^1.4.0",
+    "@raycast/utils": "^1.4.16",
+    "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
     "run-applescript": "^6.1.0",
     "run-jxa": "^3.0.0",
     "semver": "^7.3.8",
@@ -84,6 +99,7 @@
   "devDependencies": {
     "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
+    "@types/nanoid": "^3.0.0",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
     "@types/semver": "^7.3.13",
