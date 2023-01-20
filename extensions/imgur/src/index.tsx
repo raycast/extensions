@@ -105,6 +105,7 @@ export default function Command() {
         onChange={setMedia}
         title="Media"
         autoFocus
+        info="Select an image or video to upload"
         allowMultipleSelection={false}
       />
     </Form>
