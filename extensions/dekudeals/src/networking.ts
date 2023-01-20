@@ -1,3 +1,4 @@
+import { URLSearchParams } from "node:url";
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { parse, HTMLElement } from "node-html-parser";
@@ -128,7 +129,7 @@ export async function performSearch(searchText: string, signal: AbortSignal): Pr
 
   const response = await fetch("https://www.dekudeals.com/autocomplete" + "?" + params.toString(), {
     method: "get",
-    signal: signal,
+    // signal: signal,
     headers: {
       Cookie: `rack.session=${token}`,
     },
