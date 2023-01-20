@@ -20,7 +20,7 @@
         {
           "name": "token",
           "type": "password",
-          "required": false,
+          "required": true,
           "title": "API token",
           "description": "DekuDeals API token",
           "placeholder": "API token"
