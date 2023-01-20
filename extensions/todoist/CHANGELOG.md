@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Many updates] - 2023-01-20
+## [Add various actions and new completed tasks command] - 2023-01-20
 
 - Add new command to see your completed tasks
 - Add new `Show Project` action
