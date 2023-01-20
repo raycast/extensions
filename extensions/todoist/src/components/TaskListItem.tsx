@@ -4,12 +4,11 @@ import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
-import { priorities } from "../constants";
+import { priorities, ViewMode } from "../constants";
 import CreateTask from "../create-task";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
 import { GroupByProp } from "../helpers/groupBy";
 import { getProjectIcon } from "../helpers/projects";
-import { ViewMode } from "../types";
 
 import TaskActions from "./TaskActions";
 import TaskDetail from "./TaskDetail";

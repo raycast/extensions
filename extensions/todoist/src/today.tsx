@@ -4,9 +4,14 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { todoist, handleError } from "./api";
 import TaskList from "./components/TaskList";
 import View from "./components/View";
-import { GroupByOption, todayGroupByOptions } from "./helpers/groupBy";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
-import { SectionWithTasks } from "./types";
+import {
+  getSectionsWithProjects,
+  GroupByOption,
+  partitionTasksWithOverdue,
+  SectionWithTasks,
+  todayGroupByOptions,
+} from "./helpers/groupBy";
+import { getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
 
 function Today() {
   const {
@@ -44,33 +49,29 @@ function Today() {
 
   let sections: SectionWithTasks[] = [];
 
-  if (groupBy === "default") {
-    const [overdue, today] = partitionTasksWithOverdue(tasks || []);
+  switch (groupBy) {
+    case "default": {
+      const [overdue, today] = partitionTasksWithOverdue(tasks || []);
 
-    sections = [{ name: "Today", tasks: today }];
+      sections = [{ name: "Today", tasks: today }];
 
-    if (overdue.length > 0) {
-      sections.unshift({
-        name: "Overdue",
-        tasks: overdue,
-      });
+      if (overdue.length > 0) {
+        sections.unshift({
+          name: "Overdue",
+          tasks: overdue,
+        });
+      }
+      break;
     }
-  }
-
-  if (groupBy === "priority") {
-    sections = getSectionsWithPriorities(tasks || []);
-  }
-
-  if (groupBy === "project") {
-    sections =
-      projects?.map((project) => ({
-        name: project.name,
-        tasks: tasks?.filter((task) => task.projectId === project.id) || [],
-      })) || [];
-  }
-
-  if (groupBy === "label") {
-    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+    case "priority":
+      sections = getSectionsWithPriorities(tasks || []);
+      break;
+    case "project":
+      sections = getSectionsWithProjects({ tasks: tasks || [], projects: projects || [] });
+      break;
+    case "label":
+      sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      break;
   }
 
   return tasks?.length === 0 ? (

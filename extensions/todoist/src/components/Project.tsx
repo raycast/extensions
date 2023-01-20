@@ -4,10 +4,10 @@ import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { partition } from "lodash";
 
 import { todoist } from "../api";
+import { ViewMode } from "../constants";
 import CreateTask from "../create-task";
-import { GroupByOption, projectGroupByOptions } from "../helpers/groupBy";
+import { GroupByOption, projectGroupByOptions, SectionWithTasks } from "../helpers/groupBy";
 import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
-import { ViewMode, SectionWithTasks } from "../types";
 
 import TaskList from "./TaskList";
 
@@ -26,47 +26,49 @@ function Project({ project }: ProjectProps): JSX.Element {
     (projectId) => todoist.getSections(projectId),
     [project.id]
   );
+
   const { data: labels, isLoading: isLoadingLabels } = useCachedPromise(() => todoist.getLabels());
 
   const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.projectgroupby", "default");
 
   let sections: SectionWithTasks[] = [];
 
-  if (groupBy === "default") {
-    sections = [
-      {
-        name: "No section",
-        tasks: tasks?.filter((task) => !task.sectionId) || [],
-      },
-    ];
+  switch (groupBy) {
+    case "default": {
+      sections = [
+        {
+          name: "No section",
+          tasks: tasks?.filter((task) => !task.sectionId) || [],
+        },
+      ];
 
-    if (allSections && allSections.length > 0) {
-      sections.push(
-        ...allSections.map((section) => ({
-          name: section.name,
-          tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
-        }))
-      );
+      if (allSections && allSections.length > 0) {
+        sections.push(
+          ...allSections.map((section) => ({
+            name: section.name,
+            tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
+          }))
+        );
+      }
+      break;
     }
-  }
+    case "priority":
+      sections = getSectionsWithPriorities(tasks || []);
+      break;
+    case "date": {
+      const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
 
-  if (groupBy === "priority") {
-    sections = getSectionsWithPriorities(tasks || []);
-  }
+      sections = getSectionsWithDueDates(upcomingTasks);
 
-  if (groupBy === "date") {
-    const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
-
-    sections = getSectionsWithDueDates(upcomingTasks);
-
-    sections.push({
-      name: "No due date",
-      tasks: noDueDatesTasks,
-    });
-  }
-
-  if (groupBy === "label") {
-    sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      sections.push({
+        name: "No due date",
+        tasks: noDueDatesTasks,
+      });
+      break;
+    }
+    case "label":
+      sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
+      break;
   }
 
   return tasks?.length === 0 ? (

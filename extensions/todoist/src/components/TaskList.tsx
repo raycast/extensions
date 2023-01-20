@@ -2,8 +2,8 @@ import { Project, Task } from "@doist/todoist-api-typescript";
 import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
-import { GroupByProp } from "../helpers/groupBy";
-import { SectionWithTasks, ViewMode } from "../types";
+import { ViewMode } from "../constants";
+import { GroupByProp, SectionWithTasks } from "../helpers/groupBy";
 
 import TaskListItem from "./TaskListItem";
 

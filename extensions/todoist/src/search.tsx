@@ -5,8 +5,8 @@ import React from "react";
 import { handleError, todoist } from "./api";
 import TaskListItem from "./components/TaskListItem";
 import View from "./components/View";
+import { ViewMode } from "./constants";
 import { getProjectIcon } from "./helpers/projects";
-import { ViewMode } from "./types";
 
 function Search() {
   const {
