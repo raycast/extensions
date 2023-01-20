@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
 import { priorities, ViewMode } from "../constants";
-import CreateTask from "../create-task";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
 import { GroupByProp } from "../helpers/groupBy";
 import { getProjectIcon } from "../helpers/projects";
@@ -15,7 +14,7 @@ import TaskDetail from "./TaskDetail";
 
 interface TaskListItemProps {
   task: Task;
-  mode: ViewMode;
+  mode?: ViewMode;
   projects?: Project[];
   groupBy?: GroupByProp;
   mutateTasks: MutatePromise<Task[] | undefined>;
@@ -92,16 +91,7 @@ export default function TaskListItem({ task, mode, projects, groupBy, mutateTask
             icon={Icon.Sidebar}
           />
 
-          <TaskActions task={task} mutateTasks={mutateTasks} projects={projects} groupBy={groupBy} />
-
-          {mode === ViewMode.project ? (
-            <Action.Push
-              title="Add New Task"
-              target={<CreateTask fromProjectId={task.projectId} />}
-              icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            />
-          ) : null}
+          <TaskActions task={task} mutateTasks={mutateTasks} projects={projects} groupBy={groupBy} mode={mode} />
         </ActionPanel>
       }
     />

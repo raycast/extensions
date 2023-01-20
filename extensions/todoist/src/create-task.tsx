@@ -34,11 +34,13 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: sections,
     isLoading: isLoadingSections,
     error: getSectionsError,
   } = useCachedPromise(() => todoist.getSections());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,

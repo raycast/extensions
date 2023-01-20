@@ -9,7 +9,7 @@ export const priorities = [
 ];
 
 export enum ViewMode {
-  project,
-  date,
-  search,
+  project = "project",
+  date = "date",
+  search = "search",
 }

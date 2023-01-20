@@ -1,4 +1,4 @@
-import { AddTaskArgs, Comment, Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { AddTaskArgs, Comment, Project as TProject, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import {
   ActionPanel,
   Icon,
@@ -14,7 +14,8 @@ import {
 import { MutatePromise } from "@raycast/utils";
 
 import { todoist, handleError } from "../api";
-import { priorities } from "../constants";
+import { priorities, ViewMode } from "../constants";
+import CreateTask from "../create-task";
 import { getAPIDate } from "../helpers/dates";
 import { GroupByProp } from "../helpers/groupBy";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
@@ -22,6 +23,7 @@ import { getProjectIcon } from "../helpers/projects";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { move } from "../sync-api";
 
+import Project from "./Project";
 import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
 import TaskEdit from "./TaskEdit";
@@ -29,8 +31,9 @@ import TaskEdit from "./TaskEdit";
 interface TaskActionsProps {
   task: Task;
   fromDetail?: boolean;
-  projects?: Project[];
+  projects?: TProject[];
   groupBy?: GroupByProp;
+  mode?: ViewMode;
   mutateTasks?: MutatePromise<Task[] | undefined>;
   mutateTaskDetail?: MutatePromise<Task | undefined>;
   mutateComments?: MutatePromise<Comment[] | undefined>;
@@ -41,6 +44,7 @@ export default function TaskActions({
   fromDetail,
   projects,
   groupBy,
+  mode,
   mutateTasks,
   mutateTaskDetail,
   mutateComments,
@@ -97,7 +101,7 @@ export default function TaskActions({
     }
   }
 
-  async function moveTask(task: Task, project: Project) {
+  async function moveTask(task: Task, project: TProject) {
     await showToast({ style: Toast.Style.Animated, title: "Moving task", message: project.name });
 
     try {
@@ -156,6 +160,8 @@ export default function TaskActions({
       }
     }
   }
+
+  const associatedProject = projects?.find((project) => project.id === task.projectId);
 
   return (
     <>
@@ -228,6 +234,15 @@ export default function TaskActions({
           ))}
         </ActionPanel.Submenu>
 
+        {associatedProject && (mode === ViewMode.date || mode === ViewMode.search) ? (
+          <Action.Push
+            title="Show Project"
+            target={<Project project={associatedProject} />}
+            icon={Icon.ArrowRight}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+          />
+        ) : null}
+
         {projects ? (
           <ActionPanel.Submenu
             icon={Icon.List}
@@ -259,16 +274,6 @@ export default function TaskActions({
           target={<TaskCommentForm task={task} mutateComments={mutateComments} mutateTasks={mutateTasks} />}
         />
 
-        <Action
-          title="Delete Task"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={() => deleteTask(task)}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
         {task.commentCount > 0 ? (
           <Action.Push
             title="Show Comments"
@@ -277,6 +282,23 @@ export default function TaskActions({
             shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           />
         ) : null}
+
+        {mode === ViewMode.project ? (
+          <Action.Push
+            title="Add New Task"
+            target={<CreateTask fromProjectId={task.projectId} />}
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          />
+        ) : null}
+
+        <Action
+          title="Delete Task"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={() => deleteTask(task)}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

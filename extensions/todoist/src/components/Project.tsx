@@ -1,5 +1,5 @@
 import { Project as TProject } from "@doist/todoist-api-typescript";
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { partition } from "lodash";
 
@@ -80,6 +80,7 @@ function Project({ project }: ProjectProps): JSX.Element {
           <ActionPanel>
             <Action.Push
               title="Create Task"
+              icon={Icon.Plus}
               target={<CreateTask fromProjectId={project.id} mutateTasks={mutateTasks} />}
               shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
             />
