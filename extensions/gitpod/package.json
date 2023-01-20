@@ -4,10 +4,10 @@
   "title": "Gitpod",
   "description": "A blazingly fast way to work with Gitpod",
   "icon": "logo-mark.png",
-  "author": "Palanikannan1437",
+  "author": "henitchobisa",
   "owner": "raycast",
   "contributors": [
-    "henitchobisa"
+    "Palanikannan1437"
   ],
   "categories": [
     "Developer Tools",
@@ -41,7 +41,6 @@
       ]
     }
   ],
-  
   "preferences": [
     {
       "name": "personalAccessToken",
