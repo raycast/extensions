@@ -11,12 +11,8 @@ interface HandleErrorArgs {
 }
 
 export function handleError({ error, title }: HandleErrorArgs) {
-  if (environment.commandMode === "menu-bar") {
-    if (environment.launchType === LaunchType.UserInitiated) {
-      return showHUD(title);
-    } else {
-      return;
-    }
+  if (environment.commandMode === "menu-bar" && environment.launchType === LaunchType.UserInitiated) {
+    return showHUD(title);
   }
 
   if (error instanceof TodoistRequestError && error.isAuthenticationError()) {
