@@ -24,16 +24,18 @@ const getVolume: TE.TaskEither<ScriptError, number> = pipe(tell("Music", "get so
 export const volume = {
   set: setVolume,
   get: getVolume,
-  decrease: pipe(
-    getVolume,
-    TE.map((value) => value - 10),
-    TE.chain(setVolume)
-  ),
-  increase: pipe(
-    getVolume,
-    TE.map((value) => value + 10),
-    TE.chain(setVolume)
-  ),
+  decrease: (step = 10) =>
+    pipe(
+      getVolume,
+      TE.map((value) => value - step),
+      TE.chain(setVolume)
+    ),
+  increase: (step = 10) =>
+    pipe(
+      getVolume,
+      TE.map((value) => value + step),
+      TE.chain(setVolume)
+    ),
 };
 
 export const getPlayerState = pipe(
