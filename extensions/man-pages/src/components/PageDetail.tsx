@@ -26,7 +26,15 @@ export const PageDetail = ({ command, commandDetails }: { command: string; comma
           <Action
             title="View as PDF in Preview"
             icon={Icon.Document}
-            onAction={() => runCommand(`man -t ${command} | open -f -a Preview`, () => null)}
+            onAction={() => {
+              runCommand(`sw_vers -productVersion`, (os_version) => {
+                if (parseFloat(os_version) < 13.0) {
+                  runCommand(`man -t ${command} | open -f -a Preview`, () => null);
+                } else {
+                  runCommand(`mandoc -T pdf "$(/usr/bin/man -w ${command})" | open -fa Preview`, () => null);
+                }
+              });
+            }}
           />
         </ActionPanel>
       }

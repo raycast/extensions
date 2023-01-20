@@ -7,19 +7,24 @@ import {
   showHUD,
   showToast,
   Toast,
+  getPreferenceValues,
   useNavigation,
 } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
-import { SFSymbols } from "./util/models";
+import { Preferences, SFSymbols } from "./util/models";
+import { divideNumber } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-const volumeLevels = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-
 export default function SetVolume() {
+  const { volumeSteps = "10" } = getPreferenceValues<Preferences>();
+  const step = parseInt(volumeSteps);
+
+  const volumeLevels = divideNumber(100, step);
+
   const [volume, setVolume] = useState<number | null>(null);
 
   useEffect(() => {
