@@ -1,5 +1,5 @@
 import { Task } from "@doist/todoist-api-typescript";
-import { getPreferenceValues, showHUD, Toast, environment, showToast } from "@raycast/api";
+import { getPreferenceValues, Toast, environment, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -19,10 +19,6 @@ export const useFocusedTask = () => {
   async function unfocusTask() {
     setFocusedTask({ id: "", content: "" });
 
-    if (commandMode === "menu-bar") {
-      showHUD("👋 No more focus");
-    }
-
     if (commandMode === "view") {
       await showToast({ style: Toast.Style.Success, title: "👋 No more focus" });
     }
@@ -30,10 +26,6 @@ export const useFocusedTask = () => {
 
   async function focusTask({ id, content }: Task) {
     setFocusedTask({ id, content });
-
-    if (commandMode === "menu-bar") {
-      showHUD(`🎯 Focus on "${content}"`);
-    }
 
     if (commandMode === "view") {
       await showToast({ style: Toast.Style.Success, title: `🎯 Focus on "${content}"` });
