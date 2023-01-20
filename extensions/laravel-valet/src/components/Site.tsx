@@ -14,7 +14,7 @@ export function Site({ site: site }: SiteProps): JSX.Element {
       accessories={[
         {
           icon: site.secured ? Icon.Lock : "",
-          tag: site.secured ? { color: Color.Green, value: "secured" } : "",
+          tag: site.secured ? { color: Color.Green, value: "Secured" } : "",
           tooltip: site.secured ? "Site is secured using the `valet secure` command" : "",
         },
       ]}
