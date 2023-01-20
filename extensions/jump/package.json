@@ -23,6 +23,18 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "copy-jump-data",
+      "title": "Copy Jump Data",
+      "description": "Copy jump destinations and weights in JSON format",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-jump-data",
+      "title": "Import Jump Data",
+      "description": "Import destinations and weights from a JSON string",
+      "mode": "view"
     }
   ],
   "dependencies": {

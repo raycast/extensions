@@ -57,7 +57,7 @@ function jumpToTarget(destination: string) {
         destinationTarget = `http://${destination}`;
       } else {
         // Destination is not an exact path/URL/domain -- try to find a matching file on disk
-        const itemName = destination.split("/").pop();
+        const itemName = destination.split("/").pop()?.replaceAll("`", "\\`");
         destinationTarget = execSync(`mdfind "kMDItemFSName == '*${itemName}*'cdw" | head -1`).toString();
 
         if (!destinationTarget && !destination.toLowerCase().match(fileExtensionExpr)) {
@@ -82,7 +82,6 @@ function jumpToTarget(destination: string) {
       Promise.resolve(LocalStorage.getItem(destinationTarget.toLowerCase())).then((weight) => {
         if (!weight) {
           Promise.resolve(LocalStorage.setItem(destinationTarget.toLowerCase(), 1));
-          console.log("stored", destinationTarget.toLowerCase());
         } else {
           Promise.resolve(LocalStorage.setItem(destinationTarget.toLowerCase(), (weight as number) * 1.1));
         }
@@ -98,10 +97,11 @@ async function getBestMatch(term: string) {
   // Obtains the best match for the supplied term, accounting for weights
   const items = await LocalStorage.allItems<LocalStorage.Values>();
 
-  let maxBaseWeight = 0;
+  let avgBaseWeight = 0;
   Object.entries(items).forEach(([key]) => {
-    maxBaseWeight = Math.max(maxBaseWeight, items[key]);
+    avgBaseWeight += items[key];
   });
+  avgBaseWeight /= Object.entries(items).length;
 
   let bestChoice = undefined;
   let bestChoiceWeight = 0.4;
@@ -142,9 +142,7 @@ async function getBestMatch(term: string) {
     // Weighted Total
     const totalWeight =
       (characterSimilarity * 0.2 - characterDissimilarity * 0.5 + consecutiveSimilarity * 0.5) *
-      (items[key] / maxBaseWeight);
-
-    // console.log(key, term, totalWeight);
+      (items[key] / avgBaseWeight);
 
     if (totalWeight > bestChoiceWeight) {
       bestChoice = key;
