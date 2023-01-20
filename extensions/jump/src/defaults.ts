@@ -10,7 +10,7 @@ export function installDefaultWeights() {
     LocalStorage.setItem("/System/Applications/Mail.app", 1.05),
     LocalStorage.setItem("/System/Applications/Music.app", 1.05),
     LocalStorage.setItem("/System/Applications/Photos.app", 1.05),
-    LocalStorage.setItem("/System/Applications/Safari.app", 1.05),
+    LocalStorage.setItem("/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app", 1.05),
     LocalStorage.setItem("/System/Applications/Podcasts.app", 1.05),
     LocalStorage.setItem("/System/Applications/App Store.app", 1.05),
     LocalStorage.setItem("/System/Applications/Books.app", 1.05),
@@ -33,7 +33,7 @@ export function installDefaultWeights() {
     LocalStorage.setItem(`${os.homedir()}/Applications/`, 1.1),
     LocalStorage.setItem(`${os.homedir()}/Documents/`, 1.1),
 
-    LocalStorage.setItem("https://google.com", 2),
+    LocalStorage.setItem("https://google.com", 1.5),
     LocalStorage.setItem("https://bing.com", 1.5),
     LocalStorage.setItem("https://stackoverflow.com", 1.5),
     LocalStorage.setItem("https://duckduckgo.com", 1.2),
