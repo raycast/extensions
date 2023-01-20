@@ -1,3 +1,3 @@
 # Jump Changelog
 
-## [Initial Version] - 2022-09-19
+## [Initial Version] - 2022-09-20
