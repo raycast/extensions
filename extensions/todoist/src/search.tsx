@@ -6,6 +6,7 @@ import { ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
 import { getColorByKey } from "@doist/todoist-api-typescript";
 import View from "./components/View";
+import { getProjectIcon } from "./helpers/projects";
 
 function Search() {
   const {
@@ -47,16 +48,7 @@ function Search() {
 
       {projects?.map((project) => {
         return (
-          <List.Dropdown.Item
-            key={project.id}
-            title={project.name}
-            value={project.id}
-            icon={
-              project.isInboxProject
-                ? Icon.Envelope
-                : { source: Icon.List, tintColor: getColorByKey(project.color).hexValue }
-            }
-          />
+          <List.Dropdown.Item key={project.id} title={project.name} value={project.id} icon={getProjectIcon(project)} />
         );
       })}
     </List.Dropdown>

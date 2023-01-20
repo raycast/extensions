@@ -7,6 +7,7 @@ import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
 import TaskDetail from "./components/TaskDetail";
 import View from "./components/View";
+import { getProjectIcon } from "./helpers/projects";
 
 type CreateTaskValues = {
   content: string;
@@ -182,12 +183,12 @@ export default function CreateTask({ fromProjectId, mutateTasks, draftValues }: 
           <Form.Dropdown {...itemProps.projectId} title="Project">
             <Form.Dropdown.Item title="No project" value="" icon={Icon.List} />
 
-            {projects.map(({ id, name, color, isInboxProject }) => (
+            {projects.map((project) => (
               <Form.Dropdown.Item
-                key={id}
-                value={String(id)}
-                icon={isInboxProject ? Icon.Envelope : { source: Icon.List, tintColor: getColorByKey(color).hexValue }}
-                title={name}
+                key={project.id}
+                value={String(project.id)}
+                icon={getProjectIcon(project)}
+                title={project.name}
               />
             ))}
           </Form.Dropdown>
