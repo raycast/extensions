@@ -6,7 +6,6 @@ import {
   findTab,
   getSpaces,
   makeNewLittleArcWindow,
-  makeNewTab,
   makeNewTabWithinSpace,
   makeNewWindow,
   reloadTab,
