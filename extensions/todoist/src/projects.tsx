@@ -70,7 +70,11 @@ function Projects() {
           {...(project.isFavorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
             <ActionPanel title={project.name}>
-              <Action.Push icon={Icon.BlankDocument} title="Show Details" target={<Project project={project} />} />
+              <Action.Push
+                icon={Icon.BlankDocument}
+                title="Show Details"
+                target={<Project project={project} projects={projects} />}
+              />
 
               {isTodoistInstalled ? (
                 <Action.Open

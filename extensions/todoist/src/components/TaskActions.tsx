@@ -237,7 +237,7 @@ export default function TaskActions({
         {associatedProject && (mode === ViewMode.date || mode === ViewMode.search) ? (
           <Action.Push
             title="Show Project"
-            target={<Project project={associatedProject} />}
+            target={<Project project={associatedProject} projects={projects} />}
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
           />
@@ -260,13 +260,6 @@ export default function TaskActions({
           </ActionPanel.Submenu>
         ) : null}
 
-        <Action
-          title="Duplicate Task"
-          icon={Icon.PlusCircle}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-          onAction={duplicateTask}
-        />
-
         <Action.Push
           title="Add New Comment"
           icon={Icon.Plus}
@@ -283,11 +276,18 @@ export default function TaskActions({
           />
         ) : null}
 
+        <Action
+          title="Duplicate Task"
+          icon={Icon.PlusCircle}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onAction={duplicateTask}
+        />
+
         {mode === ViewMode.project ? (
           <Action.Push
             title="Add New Task"
             target={<CreateTask fromProjectId={task.projectId} />}
-            icon={Icon.Plus}
+            icon={Icon.NewDocument}
             shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           />
         ) : null}

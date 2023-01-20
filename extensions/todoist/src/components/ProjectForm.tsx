@@ -74,7 +74,7 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
           toast.primaryAction = {
             title: "Open Project",
             shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => push(<Project project={project} />),
+            onAction: () => push(<Project project={project} projects={projects} />),
           };
           toast.secondaryAction = {
             title: `Open Project ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,

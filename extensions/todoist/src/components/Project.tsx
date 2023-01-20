@@ -13,9 +13,10 @@ import TaskList from "./TaskList";
 
 interface ProjectProps {
   project: TProject;
+  projects?: TProject[];
 }
 
-function Project({ project }: ProjectProps): JSX.Element {
+function Project({ project, projects }: ProjectProps): JSX.Element {
   const {
     data: tasks,
     isLoading: isLoadingTasks,
@@ -95,6 +96,7 @@ function Project({ project }: ProjectProps): JSX.Element {
       groupBy={{ value: groupBy, setValue: setGroupBy, options: projectGroupByOptions }}
       isLoading={!tasks || !allSections}
       mutateTasks={mutateTasks}
+      projects={projects}
     />
   );
 }
