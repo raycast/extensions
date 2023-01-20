@@ -8,7 +8,8 @@ interface ExportArguments {
   destination: string;
 }
 
-const fileExtensionExpr = /.*\.(png|pdf|tiff|jpg|jpeg|txt|doc|docx|pages|key|keynote|numbers|rtf|tex|csv|ppt|pptx|tar|rar|xml|html|css|js|ts|tsx|jsx|aif|flac|m4a|mp3|ogg|wav|m4v|mov|mp4|obj|bmp|heic|psd|tif|svg|pub|xls|xlsx|db|sql|app|jar||stl|json|php|xhtml|otf|ttf|woff|woff2||icns|zip|gz|dmg|c|py|lua|java|cpp|swift|yml|rust|r|tmp|ics|torrent|md|rst|m|rb|ruby|javascript|scss|less|apl|adb|ada|ads||applescript|scpt|ino|asm|sh|bash|h|cs|csx|c\\+\\+|lisp|pyx|pxd|pxi|dart|diff|dockerfile|mustache|ex|exs|emaxs|erl|f90|f95|for|graphql|groovy|hs|hsc|ini|cfg|prefs|properties|pde|ipynb|kt|ktm|kts|ll|make|mkfile|mk|markdown|mathematica|mt|ma|matlab|pass|pl|perl|ps|red|reds|robot|sparql|sass|scm|zsh|ksh|toml|vb|vbs|vue|plist|gif)/;
+const fileExtensionExpr =
+  /.*\.(png|pdf|tiff|jpg|jpeg|txt|doc|docx|pages|key|keynote|numbers|rtf|tex|csv|ppt|pptx|tar|rar|xml|html|css|js|ts|tsx|jsx|aif|flac|m4a|mp3|ogg|wav|m4v|mov|mp4|obj|bmp|heic|psd|tif|svg|pub|xls|xlsx|db|sql|app|jar||stl|json|php|xhtml|otf|ttf|woff|woff2||icns|zip|gz|dmg|c|py|lua|java|cpp|swift|yml|rust|r|tmp|ics|torrent|md|rst|m|rb|ruby|javascript|scss|less|apl|adb|ada|ads||applescript|scpt|ino|asm|sh|bash|h|cs|csx|c\\+\\+|lisp|pyx|pxd|pxi|dart|diff|dockerfile|mustache|ex|exs|emaxs|erl|f90|f95|for|graphql|groovy|hs|hsc|ini|cfg|prefs|properties|pde|ipynb|kt|ktm|kts|ll|make|mkfile|mk|markdown|mathematica|mt|ma|matlab|pass|pl|perl|ps|red|reds|robot|sparql|sass|scm|zsh|ksh|toml|vb|vbs|vue|plist|gif)/;
 
 export default function Main(props: { arguments: ExportArguments }) {
   const { destination } = props.arguments;
@@ -107,15 +108,15 @@ async function getBestMatch(term: string) {
   let bestChoiceBaseWeight = 0;
   Object.entries(items).forEach(([key]) => {
     // Overall Character Similarity
-    const intersection = new Set()
-    const s1 = new Set(key)
-    const s2 = new Set(term)
+    const intersection = new Set();
+    const s1 = new Set(key);
+    const s2 = new Set(term);
     for (const elem of s1) {
       if (s2.has(elem)) {
-        intersection.add(elem)
+        intersection.add(elem);
       }
     }
-    const numAlike = intersection.size
+    const numAlike = intersection.size;
     const characterSimilarity = numAlike / term.length;
     const characterDissimilarity = (term.length - numAlike) / term.length;
 
@@ -140,7 +141,10 @@ async function getBestMatch(term: string) {
 
     // Weighted Total
     const totalWeight =
-      (characterSimilarity * 0.1 + sequenceSimilarity * 0.1 - characterDissimilarity * 0.3 + consecutiveSimilarity * 0.5) *
+      (characterSimilarity * 0.1 +
+        sequenceSimilarity * 0.1 -
+        characterDissimilarity * 0.3 +
+        consecutiveSimilarity * 0.5) *
       (items[key] / avgBaseWeight);
 
     if (totalWeight > bestChoiceWeight) {
