@@ -5,8 +5,8 @@ import removeMarkdown from "remove-markdown";
 
 import { todoist } from "../api";
 import { priorities } from "../constants";
-import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import View from "./View";
 
@@ -16,28 +16,20 @@ interface MenubarTaskProps {
 }
 
 const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
-  const { cachedFocusedTask, setCachedFocusedTask, clearCachedFocusedTask } = useCachedFocusedTask();
+  const { focusedTask, unfocusTask, focusTask } = useFocusedTask();
+
   const priority = priorities.find((p) => p.value === task.priority);
-
-  async function focusTask({ id, content }: Task) {
-    await showHUD(`🎯 Focus on "${content}"`);
-
-    setCachedFocusedTask({ id, content });
-  }
-
-  async function unfocusTask() {
-    await showHUD(`👋 No more focus`);
-
-    clearCachedFocusedTask();
-  }
 
   async function completeTask(task: Task) {
     await showHUD("⏰ Completing task");
     try {
       await todoist.closeTask(task.id);
       await showHUD("Task completed 🙌");
-      cachedFocusedTask.id === task.id && clearCachedFocusedTask();
       mutateTasks();
+
+      if (focusedTask.id === task.id) {
+        unfocusTask();
+      }
     } catch (error) {
       showHUD("Unable to complete task ❌");
     }
@@ -97,7 +89,7 @@ const MenubarTask = ({ task, mutateTasks }: MenubarTaskProps) => {
         title={removeMarkdown(task.content)}
         icon={priority && priority.value === 1 ? Icon.Circle : { source: Icon.Circle, tintColor: priority?.color }}
       >
-        {cachedFocusedTask.id !== task.id ? (
+        {focusedTask.id !== task.id ? (
           <MenuBarExtra.Item title="Focus Task" onAction={() => focusTask(task)} icon={Icon.Center} />
         ) : (
           <MenuBarExtra.Item title="Unfocus Task" onAction={() => unfocusTask()} icon={Icon.MinusCircle} />

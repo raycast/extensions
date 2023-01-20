@@ -8,7 +8,6 @@ import {
   Action,
   useNavigation,
   Color,
-  showHUD,
   launchCommand,
   LaunchType,
 } from "@raycast/api";
@@ -16,9 +15,9 @@ import { MutatePromise } from "@raycast/utils";
 
 import { todoist, handleError } from "../api";
 import { priorities } from "../constants";
-import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
 import { getAPIDate } from "../helpers/dates";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { useFocusedTask } from "../hooks/useFocusedTask";
 
 import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
@@ -40,7 +39,8 @@ export default function TaskActions({
   mutateComments,
 }: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
-  const { cachedFocusedTask, setCachedFocusedTask, clearCachedFocusedTask } = useCachedFocusedTask();
+
+  const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
 
   async function mutate({ withPop = false } = {}) {
     if (mutateTasks) {
@@ -56,28 +56,8 @@ export default function TaskActions({
     }
   }
 
-  async function focusTask({ id, content }: Task) {
-    await showHUD(`🎯 Focus on "${content}"`);
-
-    setCachedFocusedTask({ id, content });
-
-    try {
-      launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
-    } catch (error) {
-      /* empty */
-    }
-  }
-
-  async function unfocusTask() {
-    await showHUD(`👋 No more focus`);
-
-    clearCachedFocusedTask();
-
-    try {
-      launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
-    } catch (error) {
-      /* empty */
-    }
+  async function refreshMenuBarCommand() {
+    await launchCommand({ name: "menubar", type: LaunchType.UserInitiated });
   }
 
   async function completeTask(task: Task) {
@@ -87,9 +67,9 @@ export default function TaskActions({
       await todoist.closeTask(task.id);
       await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
 
-      if (cachedFocusedTask.id === task.id) {
-        clearCachedFocusedTask();
-        launchCommand({ name: "menubar", type: LaunchType.Background });
+      if (focusedTask.id === task.id) {
+        unfocusTask();
+        refreshMenuBarCommand();
       }
 
       mutate({ withPop: true });
@@ -145,19 +125,25 @@ export default function TaskActions({
       )}
 
       <ActionPanel.Section>
-        {cachedFocusedTask.id !== task.id ? (
+        {focusedTask.id !== task.id ? (
           <Action
             title="Focus Task"
             icon={Icon.Center}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={() => focusTask(task)}
+            onAction={() => {
+              focusTask(task);
+              refreshMenuBarCommand();
+            }}
           />
         ) : (
           <Action
             title="Unfocus Task"
             icon={Icon.MinusCircle}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={() => unfocusTask()}
+            onAction={() => {
+              unfocusTask();
+              refreshMenuBarCommand();
+            }}
           />
         )}
 
@@ -190,7 +176,6 @@ export default function TaskActions({
           {priorities.map(({ value, name, color, icon }) => (
             <Action
               key={name}
-              id={name}
               title={name}
               icon={{ source: icon, tintColor: color }}
               onAction={() => updateTask(task, { priority: value })}
