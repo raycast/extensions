@@ -29,7 +29,6 @@ function OpenInArcAction(props: { url: string }) {
       }
     } catch (e) {
       console.error(e);
-
       await open(props.url, "company.thebrowser.Browser");
     }
   }
@@ -80,7 +79,7 @@ function OpenInNewIncognitoWindowAction(props: { url: string }) {
 function OpenInLittleArc(props: { url: string }) {
   async function handleAction() {
     try {
-      makeNewLittleArcWindow(props.url);
+      await makeNewLittleArcWindow(props.url);
     } catch (e) {
       await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
     }
@@ -181,18 +180,19 @@ function useBrowsers(options?: { execute?: boolean }) {
 
 export function SearchWithGoogleAction(props: { searchText: string }) {
   async function handleAction() {
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText)}`;
+
     try {
-      await closeMainWindow();
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText)}`;
       const openTab = await findTab(searchUrl);
       if (openTab) {
         await closeMainWindow();
         await selectTab(openTab);
       } else {
-        await makeNewTab(searchUrl);
+        await open(searchUrl, "company.thebrowser.Browser");
       }
     } catch (e) {
-      await showFailureToast(e, { title: "Failed searching with Google" });
+      console.error(e);
+      await open(searchUrl, "company.thebrowser.Browser");
     }
   }
 
