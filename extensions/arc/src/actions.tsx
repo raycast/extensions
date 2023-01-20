@@ -183,7 +183,7 @@ export function SearchWithGoogleAction(props: { searchText: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText ?? "")}`;
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText)}`;
       const openTab = await findTab(searchUrl);
       if (openTab) {
         await closeMainWindow();
