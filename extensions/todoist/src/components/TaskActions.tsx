@@ -1,4 +1,4 @@
-import { Comment, Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { AddTaskArgs, Comment, Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import {
   ActionPanel,
   Icon,
@@ -95,14 +95,41 @@ export default function TaskActions({
   }
 
   async function moveTask(task: Task, project: Project) {
-    await showToast({ style: Toast.Style.Animated, title: `Moving task to ${project.name}` });
+    await showToast({ style: Toast.Style.Animated, title: "Moving task", message: project.name });
 
     try {
       await move(task.id, project.id);
-      await showToast({ style: Toast.Style.Success, title: `Moved task to ${project.name}` });
+      await showToast({ style: Toast.Style.Success, title: "Moved task", message: project.name });
       mutate();
     } catch (error) {
       handleError({ error, title: `Unable to move task to ${project.name}` });
+    }
+  }
+
+  async function duplicateTask() {
+    await showToast({ style: Toast.Style.Animated, title: "Duplicating task", message: task.content });
+
+    const payload: AddTaskArgs = {
+      content: task.content,
+      description: task.description,
+      projectId: task.projectId,
+      sectionId: task.sectionId ? task.sectionId : undefined,
+      parentId: task.parentId ? task.parentId : undefined,
+      order: task.order,
+      labels: task.labels,
+      priority: task.priority,
+      dueString: task.due?.string,
+      dueDate: task.due?.date,
+      dueDatetime: task.due && task.due.datetime ? task.due.datetime : undefined,
+      assigneeId: task.assigneeId ? task.assigneeId : undefined,
+    };
+
+    try {
+      await todoist.addTask(payload);
+      await showToast({ style: Toast.Style.Success, title: "Duplicated task", message: task.content });
+      mutate();
+    } catch (error) {
+      handleError({ error, title: `Unable to duplicate task` });
     }
   }
 
@@ -214,6 +241,13 @@ export default function TaskActions({
             ))}
           </ActionPanel.Submenu>
         ) : null}
+
+        <Action
+          title="Duplicate Task"
+          icon={Icon.PlusCircle}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          onAction={duplicateTask}
+        />
 
         <Action.Push
           title="Add New Comment"
