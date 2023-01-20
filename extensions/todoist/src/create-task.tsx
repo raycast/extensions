@@ -1,12 +1,13 @@
-import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { AddTaskArgs, getColorByKey, Task } from "@doist/todoist-api-typescript";
+import { ActionPanel, Form, Icon, useNavigation, open, Toast, Action, Color } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
+
 import { handleError, todoist } from "./api";
+import TaskDetail from "./components/TaskDetail";
+import View from "./components/View";
 import { priorities } from "./constants";
 import { getAPIDate } from "./helpers/dates";
 import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
-import TaskDetail from "./components/TaskDetail";
-import View from "./components/View";
 import { getProjectIcon } from "./helpers/projects";
 
 type CreateTaskValues = {

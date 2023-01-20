@@ -1,12 +1,13 @@
+import { Task } from "@doist/todoist-api-typescript";
 import { MenuBarExtra, openCommandPreferences, getPreferenceValues, showHUD } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
-import { handleError, todoist } from "./api";
-import { getSectionsWithDueDates } from "./helpers/sections";
-import { checkTodoistApp } from "./helpers/isTodoistInstalled";
 import { useEffect, useMemo } from "react";
+
+import { handleError, todoist } from "./api";
 import MenubarTask from "./components/MenubarTask";
-import { Task } from "@doist/todoist-api-typescript";
 import { useCachedFocusedTask, getFocusFeatureWidth } from "./helpers/cachedFocusedTask";
+import { checkTodoistApp } from "./helpers/isTodoistInstalled";
+import { getSectionsWithDueDates } from "./helpers/sections";
 import { truncateMiddle } from "./helpers/texts";
 
 export default function Command() {

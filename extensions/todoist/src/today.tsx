@@ -1,10 +1,11 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
+
 import { todoist, handleError } from "./api";
-import { SectionWithTasks, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 import View from "./components/View";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
+import { SectionWithTasks, TodayGroupBy } from "./types";
 
 function Today() {
   const {

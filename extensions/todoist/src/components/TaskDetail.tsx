@@ -1,12 +1,14 @@
-import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
+import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers/dates";
-import { priorities } from "../constants";
+
 import { todoist, handleError } from "../api";
-import TaskActions from "./TaskActions";
+import { priorities } from "../constants";
+import { displayDueDate } from "../helpers/dates";
 import { getProjectIcon } from "../helpers/projects";
+
+import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
   taskId: Task["id"];

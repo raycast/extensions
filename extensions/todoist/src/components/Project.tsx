@@ -1,12 +1,14 @@
+import { Project as TProject } from "@doist/todoist-api-typescript";
 import { List, getPreferenceValues, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
-import TaskList from "./TaskList";
-import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
+
 import { todoist } from "../api";
-import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
 import CreateTask from "../create-task";
-import { Project as TProject } from "@doist/todoist-api-typescript";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
+import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
+
+import TaskList from "./TaskList";
 
 interface ProjectProps {
   project: TProject;

@@ -1,12 +1,12 @@
-import React from "react";
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import React from "react";
+
 import { handleError, todoist } from "./api";
-import { ViewMode } from "./types";
 import TaskListItem from "./components/TaskListItem";
-import { getColorByKey } from "@doist/todoist-api-typescript";
 import View from "./components/View";
 import { getProjectIcon } from "./helpers/projects";
+import { ViewMode } from "./types";
 
 function Search() {
   const {

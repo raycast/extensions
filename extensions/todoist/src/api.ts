@@ -1,5 +1,5 @@
-import { environment, getPreferenceValues, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import { TodoistApi, TodoistRequestError } from "@doist/todoist-api-typescript";
+import { environment, getPreferenceValues, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 
 const preferences = getPreferenceValues();
 

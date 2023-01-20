@@ -1,15 +1,16 @@
+import { Project, Task } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { Project, Task } from "@doist/todoist-api-typescript";
 import removeMarkdown from "remove-markdown";
-import { ViewMode } from "../types";
-import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
+
 import { priorities } from "../constants";
-import TaskDetail from "./TaskDetail";
+import CreateTask from "../create-task";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { ViewMode } from "../types";
 
 import TaskActions from "./TaskActions";
-import CreateTask from "../create-task";
+import TaskDetail from "./TaskDetail";
 
 interface TaskListItemProps {
   task: Task;

@@ -1,10 +1,12 @@
+import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
-import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
+
 import { handleError, todoist } from "../api";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
-import View from "./View";
+
 import Project from "./Project";
+import View from "./View";
 
 interface ProjectFormProps {
   project?: TProject;

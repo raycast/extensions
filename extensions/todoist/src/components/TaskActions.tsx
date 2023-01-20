@@ -1,3 +1,4 @@
+import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import {
   ActionPanel,
   Icon,
@@ -12,15 +13,16 @@ import {
   LaunchType,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import { getAPIDate } from "../helpers/dates";
-import { priorities } from "../constants";
+
 import { todoist, handleError } from "../api";
-import TaskEdit from "./TaskEdit";
-import TaskComments from "./TaskComments";
-import TaskCommentForm from "./TaskCommentForm";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { priorities } from "../constants";
 import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
+import { getAPIDate } from "../helpers/dates";
+import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+
+import TaskCommentForm from "./TaskCommentForm";
+import TaskComments from "./TaskComments";
+import TaskEdit from "./TaskEdit";
 
 interface TaskActionsProps {
   task: Task;

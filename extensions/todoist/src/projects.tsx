@@ -1,6 +1,7 @@
 import { Project as TProject } from "@doist/todoist-api-typescript";
 import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import ProjectForm from "./components/ProjectForm";

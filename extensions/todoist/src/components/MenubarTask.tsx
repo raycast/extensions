@@ -2,10 +2,12 @@ import { Task } from "@doist/todoist-api-typescript";
 import { Color, confirmAlert, Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import removeMarkdown from "remove-markdown";
+
 import { todoist } from "../api";
 import { priorities } from "../constants";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
+import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+
 import View from "./View";
 
 interface MenubarTaskProps {

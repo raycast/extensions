@@ -1,8 +1,10 @@
+import { Project, Task } from "@doist/todoist-api-typescript";
 import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { Project, Task } from "@doist/todoist-api-typescript";
-import TaskListItem from "./TaskListItem";
+
 import { SectionWithTasks, ViewMode } from "../types";
+
+import TaskListItem from "./TaskListItem";
 
 interface TaskListProps {
   sections: SectionWithTasks[];
