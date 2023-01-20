@@ -67,7 +67,7 @@ export default function IssueListItem({ issue }: IssueListItemProps) {
             }}
           />
           <Action
-            title="Open PR in github"
+            title="Open PR in GitHub"
             onAction={() => {
               open(issue.url);
             }}
