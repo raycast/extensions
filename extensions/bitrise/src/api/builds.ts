@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { getToken } from ".";
+import { getApiKey } from ".";
 import { groupBy } from "../util/util";
 import { AppSlug, Build, BuildsByStatus, BuildStatus, ApiResponse, BuildParams, BuildTriggerResponse } from "./types";
 
@@ -9,7 +9,7 @@ export async function fetchBuilds(appSlug: AppSlug | "all"): Promise<BuildsBySta
   const response = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: getToken(),
+      Authorization: getApiKey(),
     },
   });
   if (!response.ok) {
@@ -49,7 +49,7 @@ export async function startBuild(appSlug: AppSlug, params: BuildParams): Promise
       triggered_by: "Bitrise Raycast extension",
     }),
     headers: {
-      Authorization: getToken(),
+      Authorization: getApiKey(),
     },
   });
   if (!response.ok) {

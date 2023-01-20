@@ -3,8 +3,9 @@ import fetch from "node-fetch";
 import { ApiResponse } from "./types";
 
 export function getToken(): string {
-  const { personalAccessToken } = getPreferenceValues();
-  return personalAccessToken;
+  // Preference key is `apiKey` to keep it compatible with the old Bitrise extension
+  const { apiKey } = getPreferenceValues();
+  return apiKey;
 }
 
 export async function fetchPagedResource<T>(url: string): Promise<T[]> {
