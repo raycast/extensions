@@ -7,6 +7,7 @@ import removeMarkdown from "remove-markdown";
 import { priorities } from "../constants";
 import CreateTask from "../create-task";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { getProjectIcon } from "../helpers/projects";
 import { ViewMode } from "../types";
 
 import TaskActions from "./TaskActions";
@@ -28,7 +29,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
       const project = projects.find((project) => project.id === task.projectId);
 
       if (project) {
-        accessories.push({ icon: Icon.List, text: project.name, tooltip: `Project: ${project.name}` });
+        accessories.push({ icon: getProjectIcon(project), text: project.name, tooltip: `Project: ${project.name}` });
         keywords.push(project.name);
       }
     }
@@ -90,7 +91,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
             icon={Icon.Sidebar}
           />
 
-          <TaskActions task={task} mutateTasks={mutateTasks} />
+          <TaskActions task={task} mutateTasks={mutateTasks} projects={projects} />
 
           {mode === ViewMode.project ? (
             <Action.Push

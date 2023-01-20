@@ -126,6 +126,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                 <TaskActions
                   task={task}
                   fromDetail={true}
+                  projects={projects}
                   mutateTasks={mutateTasks}
                   mutateTaskDetail={mutateTaskDetail}
                   mutateComments={mutateComments}

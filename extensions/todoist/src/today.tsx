@@ -14,11 +14,13 @@ function Today() {
     error: getTasksError,
     mutate: mutateTasks,
   } = useCachedPromise(() => todoist.getTasks({ filter: "today|overdue" }));
+
   const {
     data: projects,
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,

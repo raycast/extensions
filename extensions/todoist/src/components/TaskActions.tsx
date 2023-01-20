@@ -1,4 +1,4 @@
-import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { Comment, Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import {
   ActionPanel,
   Icon,
@@ -17,7 +17,9 @@ import { todoist, handleError } from "../api";
 import { priorities } from "../constants";
 import { getAPIDate } from "../helpers/dates";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
+import { getProjectIcon } from "../helpers/projects";
 import { useFocusedTask } from "../hooks/useFocusedTask";
+import { move } from "../sync-api";
 
 import TaskCommentForm from "./TaskCommentForm";
 import TaskComments from "./TaskComments";
@@ -26,6 +28,7 @@ import TaskEdit from "./TaskEdit";
 interface TaskActionsProps {
   task: Task;
   fromDetail?: boolean;
+  projects?: Project[];
   mutateTasks?: MutatePromise<Task[] | undefined>;
   mutateTaskDetail?: MutatePromise<Task | undefined>;
   mutateComments?: MutatePromise<Comment[] | undefined>;
@@ -34,6 +37,7 @@ interface TaskActionsProps {
 export default function TaskActions({
   task,
   fromDetail,
+  projects,
   mutateTasks,
   mutateTaskDetail,
   mutateComments,
@@ -87,6 +91,18 @@ export default function TaskActions({
       mutate();
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
+    }
+  }
+
+  async function moveTask(task: Task, project: Project) {
+    await showToast({ style: Toast.Style.Animated, title: `Moving task to ${project.name}` });
+
+    try {
+      await move(task.id, project.id);
+      await showToast({ style: Toast.Style.Success, title: `Moved task to ${project.name}` });
+      mutate();
+    } catch (error) {
+      handleError({ error, title: `Unable to move task to ${project.name}` });
     }
   }
 
@@ -155,7 +171,6 @@ export default function TaskActions({
         />
 
         <Action
-          id="completeTask"
           title="Complete Task"
           icon={Icon.Checkmark}
           shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
@@ -183,6 +198,23 @@ export default function TaskActions({
           ))}
         </ActionPanel.Submenu>
 
+        {projects ? (
+          <ActionPanel.Submenu
+            icon={Icon.List}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            title="Move to Project"
+          >
+            {projects.map((project) => (
+              <Action
+                key={project.id}
+                title={project.name}
+                icon={getProjectIcon(project)}
+                onAction={() => moveTask(task, project)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : null}
+
         <Action.Push
           title="Add New Comment"
           icon={Icon.Plus}
@@ -191,7 +223,6 @@ export default function TaskActions({
         />
 
         <Action
-          id="deleteTask"
           title="Delete Task"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
