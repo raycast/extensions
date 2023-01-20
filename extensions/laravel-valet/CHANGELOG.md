@@ -1,5 +1,5 @@
 # Laravel Valet Changelog
 
-## [Added Laravel Valet] - {PR_MERGE_DATE}
+## [Added Laravel Valet] - 2023-01-20
 
 Initial version code
