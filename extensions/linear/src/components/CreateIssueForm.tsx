@@ -61,6 +61,7 @@ export type CreateIssueValues = {
   cycleId: string;
   projectId: string;
   parentId: string;
+  attachments: string[];
 };
 
 type Preferences = {
@@ -82,6 +83,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
+  console.log(props.draftValues);
   const { push } = useNavigation();
   const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
@@ -125,41 +127,43 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           priority: parseInt(values.priority),
         };
 
-        const { success, issue } = await createIssue(payload);
+        console.log(values.attachments);
 
-        if (success && issue) {
-          toast.style = Toast.Style.Success;
-          toast.title = `Created Issue • ${issue?.identifier}`;
+        // const { success, issue } = await createIssue(payload);
 
-          toast.primaryAction = {
-            title: "Open Issue",
-            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-            onAction: async () => {
-              push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
-              await toast.hide();
-            },
-          };
+        // if (success && issue) {
+        //   toast.style = Toast.Style.Success;
+        //   toast.title = `Created Issue • ${issue?.identifier}`;
 
-          toast.secondaryAction = {
-            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-            ...getCopyToastAction(copyToastAction, issue),
-          };
+        //   toast.primaryAction = {
+        //     title: "Open Issue",
+        //     shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        //     onAction: async () => {
+        //       push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
+        //       await toast.hide();
+        //     },
+        //   };
 
-          reset({
-            title: "",
-            description: "",
-            estimate: "",
-            labelIds: [],
-            dueDate: null,
-            parentId: "",
-          });
+        //   toast.secondaryAction = {
+        //     shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+        //     ...getCopyToastAction(copyToastAction, issue),
+        //   };
 
-          if (hasMoreThanOneTeam) {
-            return focus(autofocusField);
-          }
+        //   reset({
+        //     title: "",
+        //     description: "",
+        //     estimate: "",
+        //     labelIds: [],
+        //     dueDate: null,
+        //     parentId: "",
+        //   });
 
-          return focus("teamId");
-        }
+        //   if (hasMoreThanOneTeam) {
+        //     return focus(autofocusField);
+        //   }
+
+        //   return focus("teamId");
+        // }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to create issue";
@@ -385,6 +389,10 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachments" {...itemProps.attachments} />
     </Form>
   );
 }
