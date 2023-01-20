@@ -12,9 +12,8 @@ import {
   LaunchType,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { addDays } from "date-fns";
 import { Comment, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
-import { getAPIDate, getToday } from "../helpers/dates";
+import { getAPIDate } from "../helpers/dates";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
@@ -22,13 +21,6 @@ import TaskComments from "./TaskComments";
 import TaskCommentForm from "./TaskCommentForm";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { useCachedFocusedTask } from "../helpers/cachedFocusedTask";
-
-const schedules = [
-  { name: "Today", amount: 0 },
-  { name: "Tomorrow", amount: 1 },
-  { name: "In two days", amount: 2 },
-  { name: "In a week", amount: 7 },
-];
 
 interface TaskActionsProps {
   task: Task;
@@ -182,18 +174,11 @@ export default function TaskActions({
           onAction={() => completeTask(task)}
         />
 
-        <ActionPanel.Submenu icon={Icon.Calendar} title="Schedule" shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
-          {schedules.map(({ name, amount }) => (
-            <Action
-              key={name}
-              id={name}
-              title={name}
-              onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
-            />
-          ))}
-
-          <Action title="No due date" onAction={() => updateTask(task, { dueString: "no due date" })} />
-        </ActionPanel.Submenu>
+        <Action.PickDate
+          title="Schedule"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          onChange={(date) => updateTask(task, date ? { dueDate: getAPIDate(date) } : { dueString: "no due date" })}
+        />
 
         <ActionPanel.Submenu
           icon={Icon.LevelMeter}

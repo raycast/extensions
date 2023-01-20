@@ -211,8 +211,8 @@
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
-    "@raycast/api": "^1.45.3",
-    "@raycast/utils": "^1.4.15",
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
     "remove-markdown": "0.5.0"
