@@ -8,14 +8,14 @@ import axios from "axios";
 const preferences = getPreferenceValues();
 
 export const todoistSyncApi = axios.create({
-  baseURL: "https://api.todoist.com/sync/v9/sync",
+  baseURL: "https://api.todoist.com/sync/v9",
   headers: { authorization: `Bearer ${preferences.token}` },
 });
 
 let sync_token = "*";
 
 export async function move(id: string, projectId: string) {
-  const { data } = await todoistSyncApi.post("/", {
+  const { data } = await todoistSyncApi.post("/sync", {
     sync_token,
     resource_types: ["all"],
     commands: [
@@ -28,4 +28,19 @@ export async function move(id: string, projectId: string) {
   });
 
   sync_token = data.sync_token;
+}
+
+type Event = {
+  id: string;
+  event_date: string;
+  event_type: "completed";
+  extra_data: {
+    content: string;
+  };
+};
+
+export async function getActivity() {
+  const { data } = await todoistSyncApi.get("/activity/get?event_type=completed");
+
+  return data.events as Event[];
 }

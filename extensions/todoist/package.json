@@ -92,6 +92,13 @@
       "mode": "view"
     },
     {
+      "name": "completed-tasks",
+      "title": "Completed Tasks",
+      "subtitle": "Todoist",
+      "description": "See all your completed tasks",
+      "mode": "view"
+    },
+    {
       "name": "menubar",
       "title": "Menu Bar Tasks",
       "subtitle": "Todoist",
