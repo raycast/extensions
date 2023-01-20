@@ -197,16 +197,6 @@
         "volume-down",
         "decrease"
       ]
-    },
-    {
-      "name": "add-to-playlist",
-      "title": "Add to Playlist",
-      "subtitle": "Apple Music",
-      "description": "Add current track to playlist",
-      "mode": "view",
-      "keywords": [
-        "add-to-playlist"
-      ]
     }
   ],
   "dependencies": {
