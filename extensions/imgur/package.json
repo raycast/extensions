@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imgur",
   "title": "Imgur",
-  "description": "Imgur - Upload Images & View Uploaded Images and view them",
+  "description": "Imgur - Upload Media & View Images",
   "icon": "imgur.png",
   "author": "BalliAsghar",
   "categories": [
