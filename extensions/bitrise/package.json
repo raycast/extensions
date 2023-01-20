@@ -5,6 +5,9 @@
   "description": "Check your [Bitrise](https://bitrise.io) CI builds and start new ones.",
   "icon": "extension-icon.png",
   "author": "ofalvai",
+  "contributors": [
+    "ubuntudroid"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools"
