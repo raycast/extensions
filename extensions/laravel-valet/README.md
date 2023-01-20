@@ -19,7 +19,7 @@ _Effortless management of your local Valet sites_
 
 ## Showcases
 **Open a site in your browser**
-    ![Open a site in your browser](media/showcase-1.png)
+![Open a site in your browser](media/showcase-1.png)
 
 **Multiple actions for a site**
 ![Open a site in your editor](media/showcase-2.png)
