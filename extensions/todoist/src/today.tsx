@@ -1,11 +1,12 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { List } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import { todoist, handleError } from "./api";
 import TaskList from "./components/TaskList";
 import View from "./components/View";
+import { GroupByOption, todayGroupByOptions } from "./helpers/groupBy";
 import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers/sections";
-import { SectionWithTasks, TodayGroupBy } from "./types";
+import { SectionWithTasks } from "./types";
 
 function Today() {
   const {
@@ -27,8 +28,6 @@ function Today() {
     error: getLabelsError,
   } = useCachedPromise(() => todoist.getLabels());
 
-  const preferences = getPreferenceValues();
-
   if (getTasksError) {
     handleError({ error: getTasksError, title: "Unable to get tasks" });
   }
@@ -41,9 +40,11 @@ function Today() {
     handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
 
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.todaygroupby", "default");
+
   let sections: SectionWithTasks[] = [];
 
-  if (preferences.todayGroupBy === TodayGroupBy.default) {
+  if (groupBy === "default") {
     const [overdue, today] = partitionTasksWithOverdue(tasks || []);
 
     sections = [{ name: "Today", tasks: today }];
@@ -56,11 +57,11 @@ function Today() {
     }
   }
 
-  if (preferences.todayGroupBy === TodayGroupBy.priority) {
+  if (groupBy === "priority") {
     sections = getSectionsWithPriorities(tasks || []);
   }
 
-  if (preferences.todayGroupBy === TodayGroupBy.project) {
+  if (groupBy === "project") {
     sections =
       projects?.map((project) => ({
         name: project.name,
@@ -68,7 +69,7 @@ function Today() {
       })) || [];
   }
 
-  if (preferences.todayGroupBy === TodayGroupBy.label) {
+  if (groupBy === "label") {
     sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
   }
 
@@ -81,6 +82,7 @@ function Today() {
       sections={sections}
       isLoading={isLoadingTasks || isLoadingProjects || isLoadingLabels}
       projects={projects}
+      groupBy={{ value: groupBy, setValue: setGroupBy, options: todayGroupByOptions }}
       mutateTasks={mutateTasks}
     />
   );

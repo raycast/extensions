@@ -1,12 +1,13 @@
 import { Project as TProject } from "@doist/todoist-api-typescript";
-import { List, getPreferenceValues, ActionPanel, Action } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { List, ActionPanel, Action } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { partition } from "lodash";
 
 import { todoist } from "../api";
 import CreateTask from "../create-task";
+import { GroupByOption, projectGroupByOptions } from "../helpers/groupBy";
 import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers/sections";
-import { ViewMode, ProjectGroupBy, SectionWithTasks } from "../types";
+import { ViewMode, SectionWithTasks } from "../types";
 
 import TaskList from "./TaskList";
 
@@ -20,17 +21,18 @@ function Project({ project }: ProjectProps): JSX.Element {
     isLoading: isLoadingTasks,
     mutate: mutateTasks,
   } = useCachedPromise((projectId) => todoist.getTasks({ projectId }), [project.id]);
+
   const { data: allSections, isLoading: isLoadingSections } = useCachedPromise(
     (projectId) => todoist.getSections(projectId),
     [project.id]
   );
   const { data: labels, isLoading: isLoadingLabels } = useCachedPromise(() => todoist.getLabels());
 
-  const preferences = getPreferenceValues();
+  const [groupBy, setGroupBy] = useCachedState<GroupByOption>("todoist.projectgroupby", "default");
 
   let sections: SectionWithTasks[] = [];
 
-  if (preferences.projectGroupBy === ProjectGroupBy.default) {
+  if (groupBy === "default") {
     sections = [
       {
         name: "No section",
@@ -48,11 +50,11 @@ function Project({ project }: ProjectProps): JSX.Element {
     }
   }
 
-  if (preferences.projectGroupBy === ProjectGroupBy.priority) {
+  if (groupBy === "priority") {
     sections = getSectionsWithPriorities(tasks || []);
   }
 
-  if (preferences.projectGroupBy === ProjectGroupBy.date) {
+  if (groupBy === "date") {
     const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
 
     sections = getSectionsWithDueDates(upcomingTasks);
@@ -63,7 +65,7 @@ function Project({ project }: ProjectProps): JSX.Element {
     });
   }
 
-  if (preferences.todayGroupBy === ProjectGroupBy.label) {
+  if (groupBy === "label") {
     sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
   }
 
@@ -87,6 +89,7 @@ function Project({ project }: ProjectProps): JSX.Element {
     <TaskList
       mode={ViewMode.project}
       sections={sections}
+      groupBy={{ value: groupBy, setValue: setGroupBy, options: projectGroupByOptions }}
       isLoading={!tasks || !allSections}
       mutateTasks={mutateTasks}
     />

@@ -10,17 +10,3 @@ export interface SectionWithTasks {
   name: string;
   tasks: Task[];
 }
-
-export enum TodayGroupBy {
-  default = "default",
-  priority = "priority",
-  project = "project",
-  label = "label",
-}
-
-export enum ProjectGroupBy {
-  default = "default",
-  priority = "priority",
-  date = "date",
-  label = "label",
-}

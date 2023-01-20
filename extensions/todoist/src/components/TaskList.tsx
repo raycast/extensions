@@ -2,6 +2,7 @@ import { Project, Task } from "@doist/todoist-api-typescript";
 import { List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
+import { GroupByProp } from "../helpers/groupBy";
 import { SectionWithTasks, ViewMode } from "../types";
 
 import TaskListItem from "./TaskListItem";
@@ -11,10 +12,18 @@ interface TaskListProps {
   isLoading: boolean;
   mode?: ViewMode;
   projects?: Project[];
+  groupBy?: GroupByProp;
   mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-function TaskList({ isLoading, sections, mode = ViewMode.date, projects, mutateTasks }: TaskListProps): JSX.Element {
+function TaskList({
+  isLoading,
+  sections,
+  mode = ViewMode.date,
+  projects,
+  groupBy,
+  mutateTasks,
+}: TaskListProps): JSX.Element {
   const placeholder = `Filter tasks by name${
     mode === ViewMode.date ? ", priority (e.g p1), or project name (e.g Work)" : " or priority (e.g p1)"
   }`;
@@ -32,6 +41,7 @@ function TaskList({ isLoading, sections, mode = ViewMode.date, projects, mutateT
                   key={task.id}
                   task={task}
                   mode={mode}
+                  groupBy={groupBy}
                   mutateTasks={mutateTasks}
                   {...(projects ? { projects } : {})}
                 />

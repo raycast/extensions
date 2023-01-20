@@ -7,6 +7,7 @@ import removeMarkdown from "remove-markdown";
 import { priorities } from "../constants";
 import CreateTask from "../create-task";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers/dates";
+import { GroupByProp } from "../helpers/groupBy";
 import { getProjectIcon } from "../helpers/projects";
 import { ViewMode } from "../types";
 
@@ -17,10 +18,11 @@ interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
   projects?: Project[];
+  groupBy?: GroupByProp;
   mutateTasks: MutatePromise<Task[] | undefined>;
 }
 
-export default function TaskListItem({ task, mode, projects, mutateTasks }: TaskListItemProps): JSX.Element {
+export default function TaskListItem({ task, mode, projects, groupBy, mutateTasks }: TaskListItemProps): JSX.Element {
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];
 
@@ -91,7 +93,7 @@ export default function TaskListItem({ task, mode, projects, mutateTasks }: Task
             icon={Icon.Sidebar}
           />
 
-          <TaskActions task={task} mutateTasks={mutateTasks} projects={projects} />
+          <TaskActions task={task} mutateTasks={mutateTasks} projects={projects} groupBy={groupBy} />
 
           {mode === ViewMode.project ? (
             <Action.Push

@@ -16,6 +16,7 @@ import { MutatePromise } from "@raycast/utils";
 import { todoist, handleError } from "../api";
 import { priorities } from "../constants";
 import { getAPIDate } from "../helpers/dates";
+import { GroupByProp } from "../helpers/groupBy";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getProjectIcon } from "../helpers/projects";
 import { useFocusedTask } from "../hooks/useFocusedTask";
@@ -29,6 +30,7 @@ interface TaskActionsProps {
   task: Task;
   fromDetail?: boolean;
   projects?: Project[];
+  groupBy?: GroupByProp;
   mutateTasks?: MutatePromise<Task[] | undefined>;
   mutateTaskDetail?: MutatePromise<Task | undefined>;
   mutateComments?: MutatePromise<Comment[] | undefined>;
@@ -38,6 +40,7 @@ export default function TaskActions({
   task,
   fromDetail,
   projects,
+  groupBy,
   mutateTasks,
   mutateTaskDetail,
   mutateComments,
@@ -289,6 +292,28 @@ export default function TaskActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
       </ActionPanel.Section>
+
+      {groupBy ? (
+        <ActionPanel.Section>
+          <ActionPanel.Submenu
+            title="Group Tasks By"
+            icon={Icon.AppWindowGrid3x3}
+            shortcut={{ modifiers: ["opt", "shift"], key: "g" }}
+          >
+            {groupBy.options.map((option) => {
+              return (
+                <Action
+                  key={option.value}
+                  title={option.label}
+                  icon={option.icon}
+                  autoFocus={groupBy.value === option.value}
+                  onAction={() => groupBy.setValue(option.value)}
+                />
+              );
+            })}
+          </ActionPanel.Submenu>
+        </ActionPanel.Section>
+      ) : null}
     </>
   );
 }
