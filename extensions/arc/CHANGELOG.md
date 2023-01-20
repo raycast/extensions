@@ -1,5 +1,15 @@
 # Arc Changelog
 
+## [Improvements] - 2023-01-20
+
+– Close Raycast when opening links in a new Little Arc window
+
+## [New Features] - 2023-01-19
+
+– Search across tabs, history, and suggestions with the new "Search Arc" command
+– Quickly access spaces and favorites from your menu bar
+– Fallback to Google search if needed, just press "⌃ + ↵"
+
 ## [New Features] - 2023-01-13
 
 – Search your sidebar

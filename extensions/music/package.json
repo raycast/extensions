@@ -20,6 +20,30 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "volumeSteps",
+      "title": "Volume Steps",
+      "description": "Specify the amount of change for volume levels",
+      "required": false,
+      "default": "10",
+      "data": [
+        {
+          "title": "Low",
+          "value": "5"
+        },
+        {
+          "title": "Standard",
+          "value": "10"
+        },
+        {
+          "title": "High",
+          "value": "25"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "reveal-track",
