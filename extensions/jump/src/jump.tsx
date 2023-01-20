@@ -79,11 +79,11 @@ function jumpToTarget(destination: string) {
         destinationTarget = os.homedir() + destinationTarget.substring(1);
       }
       execSync(`open "${destinationTarget.trim()}"`);
-      Promise.resolve(LocalStorage.getItem(destinationTarget.toLowerCase())).then((weight) => {
+      Promise.resolve(LocalStorage.getItem(destinationTarget)).then((weight) => {
         if (!weight) {
-          Promise.resolve(LocalStorage.setItem(destinationTarget.toLowerCase(), 1));
+          Promise.resolve(LocalStorage.setItem(destinationTarget, 1));
         } else {
-          Promise.resolve(LocalStorage.setItem(destinationTarget.toLowerCase(), (weight as number) * 1.1));
+          Promise.resolve(LocalStorage.setItem(destinationTarget, (weight as number) * 1.1));
         }
       });
       closeMainWindow();
@@ -153,7 +153,7 @@ async function getBestMatch(term: string) {
 
   // Increase the weight of the best candidate entry
   if (bestChoice) {
-    Promise.resolve(LocalStorage.setItem((bestChoice as string).toLowerCase(), bestChoiceBaseWeight * 1.1));
+    Promise.resolve(LocalStorage.setItem(bestChoice as string, bestChoiceBaseWeight * 1.1));
   }
 
   return bestChoice;
