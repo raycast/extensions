@@ -7,12 +7,13 @@ import { homedir } from "os";
 import { join } from "path";
 
 export default function Command() {
-  const { history, error, loading } = useHistory();
+  const [term, setTerm] = useState<string>("");
+  const { history, error, loading } = useHistory(term);
 
   if (error) return <Detail markdown={error} />;
 
   return (
-    <Grid isLoading={loading} columns={4}>
+    <Grid isLoading={loading} columns={4} onSearchTextChange={setTerm}>
       {history.map((item) => (
         <Grid.Item
           key={item.id}
@@ -30,7 +31,7 @@ export default function Command() {
   );
 }
 
-const useHistory = () => {
+const useHistory = (term: string) => {
   const [history, setHistory] = useState<UploadResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,12 +45,21 @@ const useHistory = () => {
         return;
       }
 
+      if (term) {
+        const filtered = history.filter((item: UploadResponse) =>
+          item.title.toLowerCase().includes(term.toLowerCase())
+        );
+        setHistory(filtered);
+        setLoading(false);
+        return;
+      }
+
       setHistory(history);
       setLoading(false);
     };
 
     getHistory();
-  }, []);
+  }, [term]);
 
   return { history, error, loading };
 };
