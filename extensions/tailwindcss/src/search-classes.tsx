@@ -5,7 +5,7 @@ import classes from "./classes.json";
 export default function SearchClasses() {
   const [query, setQuery] = useState("");
   const results = (classes as Array<{ selector: string; classes: string }>)
-    .filter((c) => c.selector.includes(query))
+    .filter((c) => c.selector.includes(query) || c.classes.includes(query))
     .slice(0, 100);
   return (
     <List searchText={query} onSearchTextChange={setQuery} searchBarPlaceholder="Search all classes...">
@@ -24,7 +24,7 @@ export default function SearchClasses() {
               <Action.CopyToClipboard title="Copy CSS" content={classes} shortcut={{ modifiers: ["cmd"], key: "," }} />
               <Action.CopyToClipboard
                 title="Copy Class Name"
-                content={selector}
+                content={selector.replace(".", "")}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
             </ActionPanel>
