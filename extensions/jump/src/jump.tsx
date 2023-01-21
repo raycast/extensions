@@ -17,7 +17,7 @@ export default async function Main(props: { arguments: ExportArguments }) {
   // Install initial data if first time running
   const weight = await LocalStorage.getItem("https://google.com");
   if (!weight) {
-    await installDefaultWeights()
+    await installDefaultWeights();
     await jumpToTarget(destination);
   } else {
     await jumpToTarget(destination);
@@ -122,27 +122,27 @@ async function getBestMatch(term: string) {
     // Consecutive Similarity
     const l1 = key.length;
     const l2 = term.length;
-    const subLengths = Array(l1 + 1).fill(0).map(()=>Array(l2 + 1).fill(0));
+    const subLengths = Array(l1 + 1)
+      .fill(0)
+      .map(() => Array(l2 + 1).fill(0));
     let lml1 = 0;
     let lml2 = 0;
     let lml3 = 0;
     for (let i = 0; i <= l1; i++) {
-        for (let j = 0; j <= l2; j++) {
-            if (i == 0 || j == 0)
-              subLengths[i][j] = 0;
-            else if (key[i - 1] == term[j - 1]) {
-                subLengths[i][j] = subLengths[i - 1][j - 1] + 1;
-                lml3 = lml2;
-                lml2 = lml1;
-                lml1 = Math.max(lml1, subLengths[i][j]);
-            } else
-              subLengths[i][j] = 0;
-        }
+      for (let j = 0; j <= l2; j++) {
+        if (i == 0 || j == 0) subLengths[i][j] = 0;
+        else if (key[i - 1] == term[j - 1]) {
+          subLengths[i][j] = subLengths[i - 1][j - 1] + 1;
+          lml3 = lml2;
+          lml2 = lml1;
+          lml1 = Math.max(lml1, subLengths[i][j]);
+        } else subLengths[i][j] = 0;
+      }
     }
     const consecutiveSimilarity = lml1 / l2;
-    if (lml2 == 0) lml2 = lml1
-    if (lml3 == 0) lml3 = lml2
-    const avgMatchLengthSimilarity = ((lml1 + lml2 + lml3) / 3) / l2;
+    if (lml2 == 0) lml2 = lml1;
+    if (lml3 == 0) lml3 = lml2;
+    const avgMatchLengthSimilarity = (lml1 + lml2 + lml3) / 3 / l2;
 
     // Weighted Total
     const totalWeight =
@@ -152,7 +152,7 @@ async function getBestMatch(term: string) {
         avgMatchLengthSimilarity * 0.4) *
       (items[key] / avgBaseWeight);
 
-    console.log(key, totalWeight, characterSimilarity, characterSimilarity, avgMatchLengthSimilarity)
+    console.log(key, totalWeight, characterSimilarity, characterSimilarity, avgMatchLengthSimilarity);
 
     if (totalWeight > bestChoiceWeight) {
       bestChoice = key;
