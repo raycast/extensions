@@ -131,7 +131,6 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
                 color={
                   getStatusIcon(deploy.state, deploy.error_message).tintColor
                 }
-                // icon={getStatusIcon(deploy.state).icon}
               />
             </List.Item.Detail.Metadata.TagList>
             <List.Item.Detail.Metadata.Separator />
@@ -168,7 +167,10 @@ const DeployMetadata = ({ deploy }: { deploy: Deploy }) => (
                 text={`${deploy.branch}@${deploy.commit_ref.substr(0, 7)}`}
               />
             )}
-            <List.Item.Detail.Metadata.Separator />
+            {(deploy.review_url ||
+              deploy.commit_url ||
+              deploy.committer ||
+              deploy.commit_ref) && <List.Item.Detail.Metadata.Separator />}
           </>
         )}
         {deploy.context && (

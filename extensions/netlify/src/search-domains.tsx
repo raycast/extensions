@@ -63,8 +63,7 @@ export default function Command() {
       const teams = await api.getTeams();
       setTeams(teams);
       if (teams.length === 1 || !teamSlug) {
-        const user = await api.getUser();
-        setTeamSlug(user.preferred_account_id);
+        setTeamSlug(teams[0].slug);
       }
       setLoading(false);
     } catch (e) {

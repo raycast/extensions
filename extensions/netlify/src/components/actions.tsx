@@ -1,4 +1,4 @@
-import { Action, Icon } from '@raycast/api';
+import { Action, Icon, Keyboard } from '@raycast/api';
 
 import { getGitProviderIcon } from '../utils/icons';
 import { GitProvider } from '../utils/interfaces';
@@ -49,16 +49,19 @@ export const OpenGitProfile = ({
   provider: GitProvider;
   username: string;
 }) => {
-  let title, url;
+  let title, url, shortcut: Keyboard.KeyEquivalent;
   if (provider === 'github') {
     title = 'Open GitHub Profile';
     url = `https://github.com/${username}`;
+    shortcut = 'g';
   } else if (provider === 'gitlab') {
     title = 'Open GitLab Profile';
     url = `https://gitlab.com/${username}`;
+    shortcut = 'l';
   } else if (provider === 'bitbucket') {
     title = 'Open BitBucket Profile';
     url = `https://bitbucket.org/${username}`;
+    shortcut = 'b';
   } else {
     return null;
   }
@@ -66,6 +69,7 @@ export const OpenGitProfile = ({
     <Action.OpenInBrowser
       icon={getGitProviderIcon(provider)}
       title={title}
+      shortcut={{ key: shortcut, modifiers: ['cmd', 'shift'] }}
       url={url}
     />
   );
