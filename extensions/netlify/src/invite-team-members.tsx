@@ -10,7 +10,7 @@ import {
   showHUD,
   showToast,
 } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
+import { useCachedState, useForm } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
@@ -19,10 +19,9 @@ import { Role, Site, Team } from './utils/interfaces';
 
 interface FormValues {
   email: string;
-  role: Role;
-  site_access: 'all' | 'selected';
+  role: string;
+  site_access: boolean;
   site_ids: string[];
-  team: string;
 }
 
 const DELIMETER = /[,\n]/;
@@ -35,12 +34,12 @@ export default function Command() {
   const [sites, setSites] = useState<Site[]>([]);
 
   const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
-  const [email, setEmail] = useState<string>('');
-  const [role, setRole] = useState<Role>('Owner');
-  const [checked, setChecked] = useState<boolean>(true);
-  const [selectedSites, setSelectedSites] = useState<string[]>([]);
-
-  const [validationError, setValidationError] = useState<string>('');
+  const initialValues = {
+    email: '',
+    role: 'Owner',
+    site_access: true,
+    site_ids: [],
+  };
 
   async function fetchTeams() {
     setLoading(true);
@@ -73,43 +72,16 @@ export default function Command() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function validateEmail(event: any) {
-    const value = (event.target?.value || '').trim() as string;
-    if (!value?.length) {
-      setValidationError('This field is required.');
-      return false;
-    }
-    if (value.split(DELIMETER).length === 1) {
-      if (!isValidEmail(value)) {
-        setValidationError('Not a valid email.');
-        return false;
-      }
-    } else {
-      const hasAllValidEmails = value
-        .split(DELIMETER)
-        .every((val) => isValidEmail(val.trim()));
-      if (!hasAllValidEmails) {
-        setValidationError('Some of these are invalid.');
-        return false;
-      }
-    }
-    setValidationError('');
-    return true;
-  }
-
-  async function handleSubmit(form: FormValues) {
-    const isValid = validateEmail({ target: { value: form.email } });
-    if (!isValid) {
-      return false;
-    }
-
+  async function onSubmit(form: FormValues) {
     setLoading(true);
     try {
+      const role = form.role as Role;
       const site_access = form.site_access ? 'all' : 'selected';
       const promises = form.email
         .split(DELIMETER)
-        .map((email) => api.addMember({ ...form, email, site_access }));
+        .map((email) =>
+          api.addMember({ ...form, email, role, site_access, team: teamSlug }),
+        );
       await Promise.all(promises);
       setLoading(false);
       const s = promises.length === 1 ? '' : 's';
@@ -126,10 +98,33 @@ export default function Command() {
     }
   }
 
-  function resetFormFields() {
-    setSelectedSites([]);
-    setRole('Owner');
+  function validateEmail(val?: string): string {
+    const value = (val || '').trim();
+    if (!value?.length) {
+      return 'This field is required.';
+    }
+    if (value.split(DELIMETER).length === 1) {
+      if (!isValidEmail(value)) {
+        return 'Not a valid email.';
+      }
+    } else {
+      const hasAllValidEmails = value
+        .split(DELIMETER)
+        .every((v) => isValidEmail(v.trim()));
+      if (!hasAllValidEmails) {
+        return 'Some of these are invalid.';
+      }
+    }
+    return '';
   }
+
+  const { handleSubmit, itemProps, values, reset } = useForm<FormValues>({
+    onSubmit,
+    initialValues,
+    validation: {
+      email: validateEmail,
+    },
+  });
 
   useEffect(() => {
     fetchTeams();
@@ -137,14 +132,17 @@ export default function Command() {
 
   useEffect(() => {
     fetchSites('', teamSlug);
-    resetFormFields();
+    reset(initialValues);
   }, [teamSlug]);
 
   const invitableTeams = teams.filter(canInvite);
-  const numInvites = email.trim().split(DELIMETER).filter(Boolean).length;
+  const numInvites = (values.email || '')
+    .trim()
+    .split(DELIMETER)
+    .filter(Boolean).length;
   const s = numInvites === 1 ? '' : 's';
   const submitButtonLabel =
-    numInvites > 0 ? `Invite ${numInvites} ${role}${s}` : 'Send Invites';
+    numInvites > 0 ? `Invite ${numInvites} ${values.role}${s}` : 'Send Invites';
 
   if (!isLoading && invitableTeams.length === 0) {
     return (
@@ -191,7 +189,7 @@ export default function Command() {
         info="Only team owners can invite new members. Teams with strict SAML enabled are filtered out."
         title="Add to team"
         value={teamSlug}
-        onChange={(team) => setTeamSlug(team)}
+        onChange={setTeamSlug}
       >
         {invitableTeams
           .sort((a, b) => (a.name > b.name ? 1 : -1))
@@ -211,19 +209,14 @@ export default function Command() {
       </Form.Dropdown>
       <Form.TextArea
         autoFocus
-        id="email"
         info="New team members will get an email with a link to accept the invitation. You can enter several email addresses separated by commas or newlines."
         title="Email address(es)"
-        onChange={(value) => setEmail(value)}
-        error={validationError}
-        onBlur={validateEmail}
+        {...itemProps.email}
       />
       <Form.Dropdown
-        id="role"
         title="Role"
         info="A person’s role determines their permissions. Learn more about roles in the Netlify docs."
-        onChange={(value) => setRole(value as Role)}
-        value={role}
+        {...itemProps.role}
       >
         {(teams || [])
           .find(({ slug }) => slug === teamSlug)
@@ -235,24 +228,20 @@ export default function Command() {
             />
           ))}
       </Form.Dropdown>
-      {role !== 'Owner' && (
+      {teams.length > 0 && values.role !== 'Owner' && (
         <Form.Checkbox
-          id="site_access"
           title="What sites can they access?"
           label="All sites (including future sites)"
-          value={checked}
-          onChange={setChecked}
+          {...itemProps.site_access}
         />
       )}
-      {role !== 'Owner' && !checked && (
+      {teams.length > 0 && values.role !== 'Owner' && !values.site_access && (
         <Form.TagPicker
-          id="sites_ids"
           info={`Select the sites that ${
             numInvites === 1 ? 'this team member' : 'these team members'
           } can access.`}
           title="Select specific sites"
-          value={selectedSites}
-          onChange={(values) => setSelectedSites(values)}
+          {...itemProps.site_ids}
         >
           {sites.map((site) => (
             <Form.TagPicker.Item
