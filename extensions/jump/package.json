@@ -14,7 +14,7 @@
       "name": "jump",
       "title": "Jump To Destination",
       "description": "Jump to a website, folder, or file.",
-      "mode": "view",
+      "mode": "no-view",
       "arguments": [
         {
           "name": "destination",

@@ -32,6 +32,7 @@ export function installDefaultWeights() {
     LocalStorage.setItem(`${os.homedir()}/Downloads/`, 1.1),
     LocalStorage.setItem(`${os.homedir()}/Applications/`, 1.1),
     LocalStorage.setItem(`${os.homedir()}/Documents/`, 1.1),
+    LocalStorage.setItem(`${os.homedir()}/.Trash/`, 1.1),
 
     LocalStorage.setItem("https://google.com", 1.5),
     LocalStorage.setItem("https://bing.com", 1.5),
