@@ -11,7 +11,7 @@ function ShowDetailsPage({ page }: { page: PageSummary }) {
   ---
 
   ${page.extract} [read more](${page.content_urls.desktop.page})
-
+  ![](${page.thumbnail?.source})
   `;
 
   return (
