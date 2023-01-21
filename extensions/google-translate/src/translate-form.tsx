@@ -69,7 +69,15 @@ const TranslateForm = () => {
             <Action.OpenInBrowser
               title="Open in Google Translate"
               shortcut={{ modifiers: ["opt"], key: "enter" }}
-              url={"https://translate.google.com/?sl=" + fromLang + "&tl=" + toLang + "&text=" + text + "&op=translate"}
+              url={
+                "https://translate.google.com/?sl=" +
+                fromLang +
+                "&tl=" +
+                toLang +
+                "&text=" +
+                encodeURIComponent(text) +
+                "&op=translate"
+              }
             />
           </ActionPanel.Section>
 

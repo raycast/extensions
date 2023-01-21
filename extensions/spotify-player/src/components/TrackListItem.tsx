@@ -1,16 +1,19 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast } from "@raycast/api";
 import _ from "lodash";
-import { play, startPlaySimilar } from "../spotify/client";
+import { addTrackToQueue, play, startPlaySimilar } from "../spotify/client";
 import { msToHMS, trackTitle } from "../utils";
+import { useSpotify } from "../utils/context";
 
 export default function TrackListItem(props: {
   track: SpotifyApi.TrackObjectSimplified;
   album?: SpotifyApi.AlbumObjectSimplified;
-  spotifyInstalled: boolean;
 }) {
-  const track = props.track;
+  const { installed } = useSpotify();
+
+  const { track } = props;
+
   const album = props.album;
-  const spotifyInstalled = props.spotifyInstalled;
+  const title = trackTitle(track);
   let icon: Image.ImageLike | undefined = undefined;
   if (album && album.images) {
     icon = {
@@ -18,7 +21,7 @@ export default function TrackListItem(props: {
       mask: Image.Mask.Circle,
     };
   }
-  const title = trackTitle(track);
+
   return (
     <List.Item
       title={title}
@@ -34,7 +37,7 @@ export default function TrackListItem(props: {
               play(track.uri);
             }}
           />
-          {spotifyInstalled && track.id && (
+          {installed && track.id && (
             <Action
               title="Play Similar"
               icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
@@ -43,23 +46,37 @@ export default function TrackListItem(props: {
               }}
             />
           )}
+          {installed && track.uri && (
+            <Action
+              title="Add To Queue"
+              icon={Icon.Plus}
+              onAction={() => {
+                addTrackToQueue(track.uri).then((response) => {
+                  if (!response.error) {
+                    showToast({ title: "Added song to queue", message: title });
+                  }
+                });
+              }}
+              shortcut={{ modifiers: ["cmd"], key: "q" }}
+            />
+          )}
           <Action.OpenInBrowser
             title={`Show Track (${track.name.trim()})`}
-            url={spotifyInstalled ? `spotify:track:${track.id}` : track.external_urls.spotify}
+            url={installed ? `spotify:track:${track.id}` : track.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
           />
           {album && (
             <Action.OpenInBrowser
               title={`Open Album (${album.name.trim()})`}
-              url={spotifyInstalled ? `spotify:album:${album.id}` : album.external_urls.spotify}
+              url={installed ? `spotify:album:${album.id}` : album.external_urls.spotify}
               icon={icon}
               shortcut={{ modifiers: ["cmd"], key: "a" }}
             />
           )}
           <Action.OpenInBrowser
             title="Show Artist"
-            url={spotifyInstalled ? `spotify:artist:${track.artists[0].id}` : track.artists[0].external_urls.spotify}
+            url={installed ? `spotify:artist:${track.artists[0].id}` : track.artists[0].external_urls.spotify}
           />
           <Action.CopyToClipboard
             title="Copy URL"

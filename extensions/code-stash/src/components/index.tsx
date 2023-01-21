@@ -1,10 +1,11 @@
 import ViewAction from "./ViewAction";
 import CreateAction from "./CreateAction";
-import CreateForm from "./CreateForm";
+import Form from "./Form";
 import DeleteAction from "./DeleteAction";
 import EmptyView from "./EmptyView";
 import Preview from "./Preview";
 import CopyAction from "./CopyAction";
 import ExportAction from "./ExportAction";
+import EditAction from "./EditAction";
 
-export { ViewAction, CreateAction, CreateForm, DeleteAction, EmptyView, Preview, CopyAction, ExportAction };
+export { ViewAction, CreateAction, Form, DeleteAction, EmptyView, Preview, CopyAction, ExportAction, EditAction };

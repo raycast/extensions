@@ -1,6 +1,26 @@
 # Apple Music Changelog
 
+## [Update] - 2023-01-20
+
+- Updated volume behaviour, the user can now choose the size of the volume increment/decrement from preferences
+
+## [Update] - 2023-01-17
+
+- Added "add to playlist" command, it prompts the user to add currently playing track to a playlist.
+- Added volume controls: "volume up/down" and "set volume" (scale from 0 to 100)
+
+## [Update] - 2022-11-21
+
+- Fixes the command "Love track" so it loves the track instead of adding to library.
+
+## [Update] - 2022-10-29
+
+- Fixed "Add to Library" script.
+- Improved error handling
+- Added "Reveal Track" command
+
 ## [Update] - 2022-07-27
+
 - Improved error reporting
 - New README and screenshots
 
@@ -16,6 +36,7 @@ Squashed a few bugs in "Play Library Album"
 - Renamed "Search & Play Library Track" to "Play Library Track"
 
 ## [Fix] - 2022-05-30
+
 Fixed issue that caused the extension to crash
 
 ## [Track Rating / Fixes] - 2022-05-05

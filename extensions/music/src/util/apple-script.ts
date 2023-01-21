@@ -13,6 +13,7 @@ function toScriptError(e: unknown): ScriptError {
 
 export const runScript = (command: string) =>
   TE.tryCatch(() => pipe(command, logScript, runAppleScript), toScriptError);
+
 export const tell = (application: string, command: string) =>
   runScript(`tell application "${application}" to ${command}`);
 
@@ -35,4 +36,4 @@ export const createQueryString = <T extends object>(obj: T): string => {
 };
 
 // prettier-ignore
-export const parseQueryString = <T = any>() =>(querystring: string): T => Object.fromEntries(new URLSearchParams(querystring)) as unknown as T
+export const parseQueryString = <T = any>() => (querystring: string): T => Object.fromEntries(new URLSearchParams(querystring)) as unknown as T

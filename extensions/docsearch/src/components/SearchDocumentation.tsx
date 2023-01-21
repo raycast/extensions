@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import APIData from "../algolia/apiData";
 import type { IAPIData } from "../algolia/types";
 import { escape2Html } from "../utils";
@@ -10,10 +11,10 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
   const currentAPI = APIData.find((api) =>
     props.lang ? api.name === props.docsName && api.lang === props.lang : api.name === props.docsName
   ) as IAPIData;
+
   const searchClient = algoliasearch(currentAPI.appId, currentAPI.apiKey);
   const searchIndex = searchClient.initIndex(currentAPI.indexName);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -24,6 +25,27 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
       .search(query, currentAPI.searchParameters)
       .then((res) => {
         setIsLoading(false);
+        if (res.hits[0]) {
+          if ("path" in res.hits[0]) {
+            res.hits = res.hits.map((hit: any) => {
+              hit.url = currentAPI.homepage + hit.path;
+
+              return hit;
+            });
+          } else if ("slug" in res.hits[0]) {
+            res.hits = res.hits.map((hit: any) => {
+              hit.url = currentAPI.homepage + hit.slug;
+
+              return hit;
+            });
+          } else if ("url" in res.hits[0] && !((res.hits[0] as any).url as string).startsWith("http")) {
+            res.hits = res.hits.map((hit: any) => {
+              hit.url = currentAPI.homepage + hit.url;
+
+              return hit;
+            });
+          }
+        }
 
         return res.hits;
       })
@@ -39,6 +61,16 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
     (async () => setSearchResults(await search(props.quickSearch)))();
   }, []);
 
+  const getTitle = (result: any) => {
+    const combinedTitle = (titles: Array<string>) => titles.filter((itme) => itme).join(" > ");
+
+    return escape2Html(
+      combinedTitle(
+        "path" in result || "slug" in result ? [result.title, result.description] : Object.values(result.hierarchy)
+      )
+    );
+  };
+
   return (
     <List
       throttle={true}
@@ -51,11 +83,7 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
         <List.Item
           icon={currentAPI.icon}
           key={result.objectID}
-          title={escape2Html(
-            Object.values(result.hierarchy)
-              .filter((item) => item)
-              .join(" > ")
-          )}
+          title={getTitle(result)}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser

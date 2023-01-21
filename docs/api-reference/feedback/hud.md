@@ -21,9 +21,9 @@ async function showHUD(title: string): Promise<void>;
 ```typescript
 import { showHUD } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await showHUD("Hey there 👋");
-};
+}
 ```
 
 #### Parameters

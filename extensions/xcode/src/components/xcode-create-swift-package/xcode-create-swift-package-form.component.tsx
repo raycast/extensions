@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, useNavigation, Navigation, showHUD, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Navigation, showHUD, Toast, useNavigation } from "@raycast/api";
 import { XcodeSwiftPackageType } from "../../models/swift-package/xcode-swift-package-type.model";
 import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
@@ -16,12 +16,7 @@ export function XcodeCreateSwiftPackageForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Swift Package"
-            onSubmit={(formValues) => {
-              return submit(formValues, navigation);
-            }}
-          />
+          <Action.SubmitForm title="Create Swift Package" onSubmit={(formValues) => submit(formValues, navigation)} />
         </ActionPanel>
       }
     >

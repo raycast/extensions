@@ -1,5 +1,9 @@
 import { Grid } from "@raycast/api";
 
+//--------------------------------------------------------------------------------
+// All important constants for all commands should be defined here.
+//--------------------------------------------------------------------------------
+
 export const MAX_RENDERED_NOTES = 1000;
 export const BYTES_PER_KILOBYTE = 1024;
 export const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE ** 2;
@@ -21,11 +25,11 @@ export enum PrimaryAction {
 export const CURRENT_EXTENSION_VERSION = "1.7.0";
 export const APPLICATION_UUID = "49acc9ee-69a0-4419-9aad-5c2689ff0119";
 
-export const INLINE_TAGS_REGEX = /[\s\n](#[a-zA-Z_0-9/-]+)/g;
+export const INLINE_TAGS_REGEX = /(#[a-zA-Z_0-9/-]+)/g;
 export const YAML_FRONTMATTER_REGEX = /---\s([\s\S]*)---/g;
 export const LATEX_REGEX = /\$\$(.|\n)*?\$\$/gm;
 export const LATEX_INLINE_REGEX = /\$(.|\n)*?\$/gm;
-export const CODE_BLOCK_REGEX = /```(.|\n)*?```/gm;
+export const CODE_BLOCK_REGEX = /```(.*)\n([\s\S]*?)```/gm;
 
 export const DAY_NUMBER_TO_STRING: Record<number, string> = {
   0: "Sun",

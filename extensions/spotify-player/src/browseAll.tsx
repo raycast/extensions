@@ -1,8 +1,9 @@
 import { Grid, showToast, Toast } from "@raycast/api";
 import { useGetCategories } from "./spotify/client";
 import CategoryItem from "./components/CategoryItem";
+import { SpotifyProvider } from "./utils/context";
 
-export default function BrowseAll() {
+function BrowseAll() {
   const response = useGetCategories();
 
   if (response.error) {
@@ -17,3 +18,9 @@ export default function BrowseAll() {
     </Grid>
   );
 }
+
+export default () => (
+  <SpotifyProvider>
+    <BrowseAll />
+  </SpotifyProvider>
+);

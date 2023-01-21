@@ -12,3 +12,4 @@
   - [useFetch](utils-reference/react-hooks/useFetch.md)
   - [useForm](utils-reference/react-hooks/useForm.md)
   - [useExec](utils-reference/react-hooks/useExec.md)
+  - [useSQL](utils-reference/react-hooks/useSQL.md)

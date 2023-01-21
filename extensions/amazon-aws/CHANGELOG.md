@@ -1,8 +1,57 @@
 # Amazon AWS Changelog
 
+## [ECS Command] - 2023-01-06
+
+- Added command for forcing a new deployment on a given service
+
+## [CloudFormation Resources List] - 2022-12-25
+
+- Added support for viewing CloudFormation resources from within Raycast ([#4054](https://github.com/raycast/extensions/pull/4054))
+
+## [ECS Command] - 2022-12-14
+
+- Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
+- Added support for viewing Lambda logs from within Raycast or the browser
+
+## [Secrets Manager Command] - 2022-12-13
+
+- Add "Secrets Manager" command ([#3865](https://github.com/raycast/extensions/pull/3843))
+
+## [CloudWatch & SSM Command] - 2022-12-10
+
+- Add "CloudWatch Log Groups" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+- Add "SSM Parameters" command ([#3843](https://github.com/raycast/extensions/pull/3843))
+
+## [UI/UX Tweaks & Fixes] - 2022-12-09
+
+- Simplify UI/UX using Raycast icons, consistent actions, and more ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Cleanup codebase and improve code readability ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Fix two minor bugs related to data fetching ([#3770](https://github.com/raycast/extensions/pull/3770))
+- Update readme, screenshots and copy ([#3770](https://github.com/raycast/extensions/pull/3770))
+
+## [Support AWS Profile Switch] - 2022-11-30
+
+Add "Profile" select replacing the "Profile" and "Region" setting ([#3612](https://github.com/raycast/extensions/pull/3612))
+
+## [S3 Command] - 2022-11-18
+
+Added a new command to list S3 buckets and objects ([#3589](https://github.com/raycast/extensions/pull/3589))
+
+## [Lambda Command] - 2022-11-15
+
+Added a new command to list Lambda functions ([#3525](https://github.com/raycast/extensions/pull/3525))
+
+## [Improve Data Fetching] - 2022-11-14
+
+Use Raycast's API for all data fetching ([#3421](https://github.com/raycast/extensions/pull/3421))
+
+## [Add SQS Queue Purge Action] - 2022-10-26
+
+Add purge action to queue list item ([#3299](https://github.com/raycast/extensions/pull/3299))
+
 ## [Improve icon usage] - 2022-08-01
 
-- Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
+Use built-in icons & tweak Cloudformation list item UI ([#2431](https://github.com/raycast/extensions/pull/2431))
 
 ## [Migrate to Raycast API 1.36.0 + ECS Clusters command] - 2022-07-15
 
@@ -17,11 +66,11 @@
 
 ## [DynamoDB tables command] - 2022-05-10
 
-- Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
+Added DynamoDB tables ([#1606](https://github.com/raycast/extensions/pull/1606))
 
 ## [Improvement] - 2022-04-07
 
-- Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
+Added AWS Profile preferences ([#1410](https://github.com/raycast/extensions/pull/1410))
 
 ## [Full list of resources] - 2022-04-06
 

@@ -51,8 +51,25 @@ export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
 export enum VSCodeBuild {
   Code = "Code",
   Insiders = "Code - Insiders",
+  VSCodium = "VSCodium",
 }
 
 export interface Preferences {
   build: VSCodeBuild;
+  keepSectionOrder: boolean;
+  layout: "grid" | "list";
 }
+
+export interface RecentEntries {
+  entries: string;
+}
+
+export type EntryType = "Workspaces" | "Folders" | "Remote Folders" | "Files" | "All Types";
+
+export const Filters: { [key in EntryType]: (entry: EntryLike) => entry is EntryLike } = {
+  "All Types": (entry: EntryLike): entry is EntryLike => true,
+  Workspaces: isWorkspaceEntry,
+  Folders: isFolderEntry,
+  "Remote Folders": isRemoteEntry,
+  Files: isFileEntry,
+};

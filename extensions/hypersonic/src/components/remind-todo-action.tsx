@@ -1,9 +1,17 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
 import { Todo } from '@/types/todo'
+import { useState } from 'react'
+import * as chrono from 'chrono-node'
+import { toISOStringWithTimezone } from '@/features/todo-list/utils/to-iso-string-with-time-zone'
+import { format } from 'date-fns'
 
 type SetDateActionProps = {
   todo: Todo
-  onSetDate: (todo: Todo, dateValue: string | null, name: string) => void
+  onSetDate: (
+    todo: Todo,
+    dateValue: string | null,
+    name: string
+  ) => Promise<void>
   selectTask?: (todo: Todo) => void
 }
 
@@ -30,7 +38,7 @@ function getNextMondayFromToday() {
 const dates = [
   { name: 'Tomorrow', value: t2 },
   {
-    name: new Intl.DateTimeFormat('en-En', {
+    name: new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
     }).format(t3),
     value: t3,
@@ -41,28 +49,56 @@ const dates = [
   },
 ]
 
-export function RemindAction({
-  todo,
-  onSetDate,
-  selectTask,
-}: SetDateActionProps) {
+export function RemindAction({ todo, onSetDate }: SetDateActionProps) {
+  const [value, setValue] = useState('')
+  const [date, setDate] = useState<Date | null>(null)
+
+  const handleSubmitCustomDate = () => {
+    if (date) {
+      const value = toISOStringWithTimezone(date)
+      const name = format(date, "EEEE d MMMM yyyy 'at' HH:mm")
+      onSetDate(todo, value, name)
+      setValue('')
+      setDate(null)
+    }
+  }
+
   const handleSubmitDate = (date: typeof dates[number]) => {
-    const value = date.value.toISOString().split('T')[0]
+    const value = toISOStringWithTimezone(date.value)
     onSetDate(todo, value, date.name)
   }
 
+  const handleOnChangeText = (text: string) => {
+    const dateMatch = chrono.parse(text)
+    if (dateMatch.length > 0) {
+      const b = dateMatch[0].start.date()
+      const value = format(b, "EEEE d MMMM yyyy 'at' HH:mm")
+      setValue(value)
+      setDate(b)
+    } else if (text.length === 0) {
+      setValue('')
+      setDate(null)
+    }
+  }
+
   return (
-    <ActionPanel.Submenu title="Remind Me" icon={Icon.Calendar}>
-      {dates.map((date) => (
+    <ActionPanel.Submenu
+      title="Add Due Date"
+      icon={Icon.Calendar}
+      shortcut={{ modifiers: ['cmd'], key: 'd' }}
+      onSearchTextChange={handleOnChangeText}
+      filtering={false}
+    >
+      {dates.map((v) => (
         <Action
-          key={date.name}
-          title={date.name}
-          onAction={() => handleSubmitDate(date)}
+          key={v.name}
+          title={v.name}
+          onAction={() => handleSubmitDate(v)}
         />
       ))}
-      {selectTask && (
-        <Action title="Set a specific time" onAction={() => selectTask(todo)} />
-      )}
+      {value ? (
+        <Action title={value} onAction={handleSubmitCustomDate} autoFocus />
+      ) : null}
     </ActionPanel.Submenu>
   )
 }

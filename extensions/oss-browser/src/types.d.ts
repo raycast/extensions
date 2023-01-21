@@ -8,6 +8,9 @@ interface IPreferences {
   pageSize: string;
   downloadLoc?: string;
   streamThreshold: number;
+  stickBookmark: boolean;
+  copyUrlAfterUpload: boolean;
+  renameFileAs: RenameType;
 }
 
 interface IObject {

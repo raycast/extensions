@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Detail, environment, MenuBarExtra } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { authorize } from "../api/oauth";
 
@@ -17,8 +17,15 @@ export function withZoomAuth(component: JSX.Element) {
   }, []);
 
   if (!token) {
-    // Using the <List /> component makes the placeholder buggy
-    return <Detail isLoading />;
+    if (environment.commandMode === "view") {
+      // Using the <List /> component makes the placeholder buggy
+      return <Detail isLoading />;
+    } else if (environment.commandMode === "menu-bar") {
+      return <MenuBarExtra isLoading />;
+    } else {
+      console.error("`withZoomAuth` is only supported in `view` and `menu-bar` mode");
+      return null;
+    }
   }
 
   return component;

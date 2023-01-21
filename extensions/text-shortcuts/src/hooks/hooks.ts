@@ -21,7 +21,7 @@ export const getShortcuts = (refresh: number, preferences: Preferences) => {
     //user shortcuts
     setLoading(true);
     const _localStorage = await LocalStorage.getItem<string>("shortcuts");
-    let _userShortcuts = [];
+    let _userShortcuts: Shortcut[] = [];
     if (typeof _localStorage == "string") {
       _userShortcuts = JSON.parse(_localStorage);
       setUserShortcuts(_userShortcuts);

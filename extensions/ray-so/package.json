@@ -4,7 +4,7 @@
   "title": "ray.so",
   "description": "Create beautiful images of your code using ray.so",
   "icon": "icon.png",
-  "author": "Garrett",
+  "author": "garrett",
   "contributors": [
     "RSO",
     "vette"
@@ -19,8 +19,8 @@
       "mode": "view"
     },
     {
-      "name": "copy-image",
-      "title": "Copy Image",
+      "name": "generate-image",
+      "title": "Generate Image",
       "subtitle": "ray.so",
       "description": "Use Ray.so to create beautiful images of your code",
       "mode": "no-view",

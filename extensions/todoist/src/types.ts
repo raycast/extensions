@@ -11,15 +11,6 @@ export interface SectionWithTasks {
   tasks: Task[];
 }
 
-export enum SWRKeys {
-  projects = "projects",
-  tasks = "tasks",
-  task = "task",
-  labels = "labels",
-  sections = "sections",
-  comments = "comments",
-}
-
 export enum TodayGroupBy {
   default = "default",
   priority = "priority",

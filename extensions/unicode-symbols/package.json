@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "mmazzarolo",
   "contributors": [
-    "FezVrasta"
+    "FezVrasta",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -28,24 +29,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3",
+    "@raycast/api": "^1.42.0",
     "fuse.js": "^6.4.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
     "ts-node": "^10.4.0",
-    "unidata": "^13.0.0",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "unidata": "^13.0.0"
   },
   "scripts": {
+    "prebuild": "ts-node ./scripts/generate-dataset.ts",
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "generate-dataset": "ts-node ./scripts/generate-dataset.ts"
+    "generate-dataset": "ts-node ./scripts/generate-dataset.ts",
+    "lint": "ray lint"
   }
 }

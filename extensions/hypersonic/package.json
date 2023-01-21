@@ -3,9 +3,11 @@
   "name": "hypersonic",
   "title": "Hypersonic",
   "description": "Fastest Notion to-do app ever",
-  "icon": "icon.png",
+  "icon": "icon-purple.png",
   "author": "reboot.studio",
-  "version": "0.0.2",
+  "owner": "reboot",
+  "access": "public",
+  "version": "2.0.2",
   "categories": [
     "Developer Tools",
     "Design Tools",
@@ -15,77 +17,29 @@
   "commands": [
     {
       "name": "index",
-      "title": "My Todos",
+      "title": "My Tasks",
       "subtitle": "Hypersonic",
-      "description": "The fastest Notion to-do app for Raycast.",
+      "description": "Fastest Notion task manager",
       "mode": "view"
+    },
+    {
+      "name": "active-todos",
+      "title": "Active Tasks",
+      "subtitle": "Hypersonic",
+      "description": "See your active tasks",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
-  "preferences": [
-    {
-      "name": "database_name",
-      "type": "textfield",
-      "title": "Notion Database Name",
-      "label": "Notion Database Name",
-      "description": "Are you using your own Database? Add the names for the following properties.",
-      "placeholder": "Hypersonic",
-      "default": "Hypersonic",
-      "required": false
-    },
-    {
-      "name": "property_title",
-      "type": "textfield",
-      "title": "Title Property Name",
-      "label": "Title Property Name",
-      "description": "The database name of the Title Property",
-      "placeholder": "Title",
-      "default": "Title",
-      "required": false
-    },
-    {
-      "name": "property_date",
-      "type": "textfield",
-      "title": "Date Property Name",
-      "label": "Date Property Name",
-      "description": "The database name of the Date Property",
-      "placeholder": "Date",
-      "default": "Date",
-      "required": false
-    },
-    {
-      "name": "property_done",
-      "type": "textfield",
-      "title": "Checkbox Property Name",
-      "label": "Checkbox Property Name",
-      "description": "The database name of the Checkbox Property",
-      "placeholder": "Done",
-      "default": "Done",
-      "required": false
-    },
-    {
-      "name": "property_label",
-      "type": "textfield",
-      "title": "Select Property Name",
-      "label": "Select Property Name",
-      "description": "The database name of the Select Property",
-      "placeholder": "Label",
-      "default": "Label",
-      "required": false
-    },
-    {
-      "name": "open_in_native_app",
-      "type": "checkbox",
-      "title": "Open links in the desktop app",
-      "label": "Open links in the desktop app",
-      "description": "Enable if you want to open links in the desktop app instead of the browser",
-      "default": true,
-      "required": false
-    }
-  ],
+  "preferences": [],
   "dependencies": {
-    "@notionhq/client": "^1.0.4",
-    "@raycast/api": "^1.36.1",
-    "node-fetch": "^3.2.4"
+    "@notionhq/client": "2.2.0",
+    "@raycast/api": "1.45.2",
+    "@raycast/utils": "1.4.14",
+    "chrono-node": "2.4.1",
+    "date-fns": "2.29.3",
+    "fuse.js": "6.6.2",
+    "node-fetch": "3.2.4"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
