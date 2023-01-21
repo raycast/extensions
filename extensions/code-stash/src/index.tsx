@@ -35,7 +35,7 @@ export default function Command() {
 
   const { handleCopy } = useCopy();
   const { handleExport } = useExport();
-  const { readFile, readFolder, isTxtFile, isFolder } = useImport();
+  const { readFile, readFolder, isValidFile, isFolder } = useImport();
 
   useEffect(() => {
     (async () => {
@@ -108,10 +108,11 @@ export default function Command() {
     }
   }
 
-  async function buildImportedFile(file: string) {
+  async function buildImportedCodeStash(file: string) {
     const data = await readFile(file);
     const filename = file.replace(/^.*[\\/]/, "").replace(/.txt$/, "");
-    const lang = detectLang(data);
+
+    const lang = detectLang(data) ?? "Unknown";
 
     if (data) {
       return { id: nanoid(), title: filename, code: data, language: lang };
@@ -122,13 +123,13 @@ export default function Command() {
     const importedStashes = [] as CodeStash[];
 
     for (const file of files) {
-      if (isTxtFile(file) || isFolder(file)) {
-        const fileList = isTxtFile(file) ? [file] : await readFolder(file);
+      if (isValidFile(file) || isFolder(file)) {
+        const fileList = isValidFile(file) ? [file] : await readFolder(file);
 
         if (!fileList) continue;
 
         for (const file of fileList) {
-          const codeStash = await buildImportedFile(file);
+          const codeStash = await buildImportedCodeStash(file);
           if (codeStash) importedStashes.push(codeStash);
         }
       }

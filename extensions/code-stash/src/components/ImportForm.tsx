@@ -23,6 +23,7 @@ function ImportForm({ onImport }: Props) {
     >
       <Form.FilePicker
         id="files"
+        title="Files/Folders"
         allowMultipleSelection={true}
         canChooseDirectories
         canChooseFiles={true}

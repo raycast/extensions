@@ -5,13 +5,13 @@ const useImport = () => {
   const handleValidationError = async () => {
     await showToast({
       title: "There was an error",
-      message: "Please only select .txt files",
+      message: "Please only select non-media files",
       style: Toast.Style.Failure,
     });
   };
 
-  const isTxtFile = (file: string) => {
-    return fs.lstatSync(file).isFile() && file.endsWith(".txt");
+  const isValidFile = (file: string) => {
+    return fs.lstatSync(file).isFile() && !file.match(/\.(pdf|jpe?g|png|gif|mp4|mov|avi|mp3|wav)$/i);
   };
 
   const isFolder = (file: string) => {
@@ -19,7 +19,7 @@ const useImport = () => {
   };
 
   const readFile = async (file: string) => {
-    if (!isTxtFile(file)) {
+    if (!isValidFile(file)) {
       handleValidationError();
       return false;
     }
@@ -56,7 +56,7 @@ const useImport = () => {
     }
   };
 
-  return { readFile, readFolder, isFolder, isTxtFile };
+  return { readFile, readFolder, isFolder, isValidFile };
 };
 
 export default useImport;
