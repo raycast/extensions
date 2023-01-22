@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot, PopToRootType } from "@raycast/api";
+import { closeMainWindow, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
@@ -87,6 +87,7 @@ export async function openNewTab({
       script = getOpenInProfileCommand(profileCurrent);
       break;
     case SettingsProfileOpenBehaviour.ProfileOriginal:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script = getOpenInProfileCommand(profileOriginal!);
       break;
   }
