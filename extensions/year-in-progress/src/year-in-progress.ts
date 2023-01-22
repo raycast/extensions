@@ -5,7 +5,7 @@ export default async function command() {
   const now = new Date();
   const dayOfYear = getDayOfYear(now);
   const daysInYear = isLeapYear(now) ? 366 : 365;
-  const progress = Math.floor((dayOfYear / daysInYear) * 100);
+  const progress = (dayOfYear / daysInYear) * 100;
 
   const formatter = new Intl.NumberFormat(undefined, {
     style: "percent",
