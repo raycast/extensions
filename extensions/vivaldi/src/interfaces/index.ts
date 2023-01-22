@@ -17,7 +17,7 @@ export interface SearchResult<T> {
   readonly isLoading: boolean;
   readonly errorView?: ReactNode;
   readonly data?: T[];
-  readonly revalidate: (profileId: string) => void;
+  readonly revalidate?: (profileId: string) => void;
 }
 
 export interface HistoryEntry {
