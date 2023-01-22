@@ -1,0 +1,2 @@
+// 1 day
+export const DEFAULT_CACHE_DURATION = 86400000;
