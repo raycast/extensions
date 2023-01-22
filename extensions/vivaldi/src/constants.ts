@@ -1,4 +1,8 @@
-export const defaultVivaldiProfilePath = ["Application Support", "Vivaldi", "Default"];
+export const defaultVivaldiProfilePath = ["Application Support", "Vivaldi"];
+export const defaultVivaldiStatePath = ["Application Support", "Vivaldi", "Local State"];
+export const DEFAULT_VIVALDI_PROFILE_ID = "Default";
+export const VIVALDI_PROFILE_KEY = "VIVALDI_PROFILE_KEY";
+export const VIVALDI_PROFILES_KEY = "VIVALDI_PROFILES_KEY";
 
 export const DownloadText = `
 # 🚨Error: Vivaldi browser is not installed
