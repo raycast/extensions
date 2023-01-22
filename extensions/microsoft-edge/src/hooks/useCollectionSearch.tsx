@@ -23,7 +23,7 @@ const searchCollection = (profile: string, query?: string): SearchResult<History
   const dbPath = getCollectionsDbPath(profile);
 
   if (!fs.existsSync(dbPath)) {
-    return { isLoading: false, data: [], errorView: <NoCollectionsError />, revalidate: () => {} };
+    return { isLoading: false, data: [], errorView: <NoCollectionsError /> };
   }
 
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(dbPath, queries);
