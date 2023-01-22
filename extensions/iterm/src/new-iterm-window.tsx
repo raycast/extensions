@@ -1,17 +1,53 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { closeMainWindow, Detail, popToRoot, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { isPermissionError, PermissionErrorScreen } from "./core/permission-error-screen";
 
-export default async function Command() {
-  const script = `
+const scriptToCreateNewWindow = `
   tell application "iTerm"
-    if application "iTerm" is running then
-      create window with default profile
-    end if
     activate
-  end tell`;
+    repeat until application "iTerm" is running
+      delay 0.1
+    end repeat
+    
+    create window with default profile
+    activate
+  end tell
+`;
 
-  await popToRoot();
-  await closeMainWindow();
+export default function Command() {
+  const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
-  await runAppleScript(script);
+  const loadNewTab = () => {
+    runAppleScript(scriptToCreateNewWindow)
+      .then(async () => {
+        await closeMainWindow();
+        await popToRoot();
+      })
+      .catch(async (e) => {
+        if (isPermissionError(e.message)) {
+          setHasPermissionError(true);
+          return;
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot create new iTerm window",
+          message: e.message,
+        });
+      });
+  };
+
+  useEffect(() => {
+    loadNewTab();
+  }, []);
+
+  return (
+    <>
+      {hasPermissionError && <PermissionErrorScreen />}
+      {!hasPermissionError && (
+        <Detail isLoading={true} navigationTitle="Creating iTerm Window..." markdown={"Creating iTerm Window..."} />
+      )}
+    </>
+  );
 }
