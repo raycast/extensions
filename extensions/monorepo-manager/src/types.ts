@@ -1,27 +1,11 @@
+// This is refering a `workspace` which is scanned from `rootSourceFolder`
 export type SimplifiedWorkspace = {
   name: string;
   path: string;
   hasPackageJsonFile: boolean;
 };
 
-export type Package = SimplifiedWorkspace & {
-  npmName?: string;
-  version?: string;
-  isPrivate?: boolean;
-  teamName?: string;
-  groupName?: string;
-  description?: string;
-};
-
-export interface TeamInfo {
-  slack: string;
-  project: string;
-  primaryReleaseModel: string;
-  directlyResponsibleIndividual: string;
-  contributors: string[];
-}
-
-// Refer teams.json file to define type of Team
+// Refer from `teams.json` file to define type of Team
 export interface SimplifiedTeam {
   name: string;
   contributors: string[];
@@ -31,6 +15,9 @@ export interface SimplifiedTeam {
   directlyResponsibleIndividual: string;
 }
 
+/**
+ * This option is used to look up team data inside `teams.json` file.
+ */
 export interface SimplifiedTeamOptions {
   // When `shouldIgnoreCache` is true, the function always query data from file.
   shouldIgnoreCache?: boolean;

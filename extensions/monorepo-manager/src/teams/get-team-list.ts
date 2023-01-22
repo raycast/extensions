@@ -1,4 +1,3 @@
-import path from 'path';
 import fs from 'fs-extra';
 import camelCase from 'lodash/camelCase';
 import type { SimplifiedTeam, SimplifiedTeamOptions } from '../types';
@@ -67,21 +66,4 @@ export function getTeamsMap(options: SimplifiedTeamOptions = {}): Map<string, Si
   }
 
   return resultTeams;
-}
-
-/**
- * Get list of team
- * @returns list of team (an array).
- */
-export function getTeamsList(options: SimplifiedTeamOptions = {}): SimplifiedTeam[] {
-  const teamMap = getTeamsMap(options);
-  return Array.from(teamMap.values());
-}
-
-/**
- * Check given file path has `teams.json` file or not
- */
-export function checkHasTeamsJsonFile(filePath: string) {
-  const candidate = path.join(filePath, 'teams.json');
-  return fs.existsSync(candidate);
 }

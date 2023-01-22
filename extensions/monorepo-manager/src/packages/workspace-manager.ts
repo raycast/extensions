@@ -7,20 +7,17 @@ export interface WorkspaceManagerOptions {
   projectCwd: PortablePath;
   project: Project;
   workspace: Workspace;
-  locator: Locator;
 }
 
 export class WorkspaceManager {
   public readonly $cwd: PortablePath;
-  public readonly locator: Locator;
   public readonly project: Project;
   public readonly workspace: Workspace;
   public readonly workspaceRoot: string;
   public readonly mainFieldName: string | undefined;
 
-  constructor({ projectCwd, workspace, locator, workspaceRoot, project }: WorkspaceManagerOptions) {
+  constructor({ projectCwd, workspace, workspaceRoot, project }: WorkspaceManagerOptions) {
     this.$cwd = projectCwd;
-    this.locator = locator;
     this.project = project;
     this.workspace = workspace;
     this.workspaceRoot = workspaceRoot;
@@ -37,7 +34,7 @@ export class WorkspaceManager {
     const configuration = await Configuration.find($cwd, null, { strict: false });
     const wsProject = await Project.find(configuration, $cwd);
 
-    const { workspace, locator, project } = wsProject;
+    const { workspace, project } = wsProject;
 
     if (workspace === null) {
       throw new Error(`Error initializing workspace with path \`${workspaceRoot}\`, workspace not defined`);
@@ -47,7 +44,6 @@ export class WorkspaceManager {
       projectCwd: $cwd,
       workspaceRoot,
       workspace,
-      locator,
       project,
     });
   }
