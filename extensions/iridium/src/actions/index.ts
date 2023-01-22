@@ -88,6 +88,7 @@ export async function openNewTab({
       script = getOpenInProfileCommand(profileCurrent);
       break;
     case SettingsProfileOpenBehaviour.ProfileOriginal:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script = getOpenInProfileCommand(profileOriginal!);
       break;
   }
