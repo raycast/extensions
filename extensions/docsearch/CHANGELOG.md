@@ -2,7 +2,7 @@
 
 ## [Fix searchbar text] - 2021-12-31
 
-- 🐛 Fix searchbar text was disappearing each time the query is changed by the user.
+- 🐛 Fix searchbar text disappearing each time the query is changed by the user.
 - 📄 add algolia keyword to package.json
 
 ## [Fix for TailwindCSS V3] - 20220-11-17
