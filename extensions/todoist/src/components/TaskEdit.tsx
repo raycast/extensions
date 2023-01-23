@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { Task } from "@doist/todoist-api-typescript";
-import { todoist, handleError } from "../api";
+import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
+import { useState } from "react";
+
+import { todoist, handleError } from "../api";
 
 interface TaskEditProps {
   task: Task;
