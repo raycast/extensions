@@ -27,7 +27,7 @@ export default function ChooseSearchDocumentation() {
       {currentAPIData?.map((API: IAPIData) => (
         <List.Item
           icon={API.icon}
-          key={API.apiKey}
+          key={`${API.homepage}-${API.indexName}`}
           title={API.name}
           subtitle={API.lang}
           actions={
