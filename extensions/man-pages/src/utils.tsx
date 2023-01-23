@@ -17,48 +17,98 @@ if (path) {
 }
 
 const command =
-  "ls /usr/share/man/* /opt/homebrew/share/man/* | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'";
+  "ls /usr/share/man/* /opt/homebrew/share/man/* /usr/local/man/* | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'";
+
+export function processEntryAdditions(crawledPages: string[]) {
+  // Add man entries added since cache was last updated
+  const cachedPages = cache.get("manPages");
+  if (cachedPages) {
+    const pageList = cachedPages.split("\n");
+
+    for (const page of crawledPages) {
+      if (pageList.indexOf(page) == -1) {
+        pageList.push(page)
+      }
+    }
+
+    cache.set("manPages", pageList.join("\n"))
+  }
+}
+
+export function processEntryRemovals(crawledPages: string[]) {
+  // Remove man entries deleted since cache was last updated
+  const cachedPages = cache.get("manPages");
+  if (cachedPages) {
+    const pageList = cachedPages?.split("\n") 
+    for (const page in pageList) {
+      if (crawledPages.indexOf(page) == -1) {
+        pageList.splice(pageList.indexOf(page), 1)
+      }
+    }
+    cache.set("manPages", pageList.join("\n"));
+  }
+}
+
+export function getCommands() {
+  // Get all command names at once
+  return new Promise(function (resolve: (value: string[]) => void) {
+    runCommand(command, () => {null}, (res) => {
+      const pageList = removeInvalidEntries(res.split("\n"))
+      resolve(pageList)
+    });
+  })
+}
+
+function removeInvalidEntries(pageList: string[]) {
+  // Remove invalid entries, empty entries, and duplicates
+  const validPages: string[] = []
+  for (const page of pageList) {
+    if (
+    !page.startsWith("-") &&
+    !page.startsWith("/") &&
+    !page.includes(".") &&
+    page.trim().length > 1 &&
+    validPages.findIndex((item) => page.toUpperCase() == item.toUpperCase()) == -1
+    ) {
+      validPages.push(page)
+    }
+  }
+  return validPages
+}
 
 export function useGetManPages() {
+  // Get list of command names incrementally
   const [pages, setPages] = useState<string[]>([]);
+  const [crawledPages, setCrawledPages] = useState<string[]>([]);
   const [result, setResult] = useState<string>("");
 
   const cachedPages = cache.get("manPages");
 
   // Run the man list command
   useEffect(() => {
-    if (!cachedPages) {
+    if (!cachedPages)
       runCommand(command, setResult);
-    }
-  }, [cachedPages]);
+  }, []);
 
   // Populate the list of pages (IF no cached list exists)
   useEffect(() => {
     if (result != "") {
-      const pageList: string[] = [...pages];
-      result.split("\n").forEach((page) => {
-        // Remove invalid entries, empty entries, and duplicates
-        if (
-          !page.startsWith("-") &&
-          !page.startsWith("/") &&
-          !page.includes(".") &&
-          page.trim().length > 1 &&
-          pageList.findIndex((item) => page.toUpperCase() == item.toUpperCase()) == -1
-        ) {
-          pageList.push(page);
-        }
-      });
-      setPages(pageList);
+      const newEntries = result.split("\n")
+      const pageList = removeInvalidEntries(newEntries.concat(crawledPages))
+      setCrawledPages(pageList);
     }
   }, [result]);
 
   // Get the cached list of pages if it exists
   useEffect(() => {
-    if (cachedPages != undefined && pages.length == 0) {
+    if (cachedPages != undefined && crawledPages.length == 0) {
       const pageList = cachedPages.split("\n");
       setPages(pageList);
+    } else {
+      setPages(crawledPages);
     }
-  }, [cachedPages, pages.length]);
+  }, [crawledPages]);
+  
 
   // Return empty list until data is loaded
   if (!pages?.length) {
@@ -93,7 +143,7 @@ async function getEnv() {
   return env;
 }
 
-export async function runCommand(command: string, callback?: (arg0: string) => unknown) {
+export async function runCommand(command: string, callback?: (res: string) => unknown, finish?: (res: string) => void) {
   // Run a terminal command
   env = await getEnv();
   const child = exec(command, env);
@@ -103,6 +153,10 @@ export async function runCommand(command: string, callback?: (arg0: string) => u
     result = result + data;
     callback?.(result);
   });
+
+  child.stdout?.on("close", () => {
+    finish?.(result)
+  })
 }
 
 export function openInTerminal(page: string) {
