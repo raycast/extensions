@@ -9,23 +9,40 @@ import {
   Toast,
   getPreferenceValues,
   useNavigation,
+  ArgumentsLaunchProps,
 } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 import { useEffect, useState } from "react";
 
-import { Preferences, SFSymbols } from "./util/models";
+import { Preferences } from "./util/models";
 import { divideNumber } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
-export default function SetVolume() {
+export default function SetVolume(props: ArgumentsLaunchProps) {
   const { volumeSteps = "10" } = getPreferenceValues<Preferences>();
   const step = parseInt(volumeSteps);
+
+  const volumeArg = props.arguments?.volumeArg;
 
   const volumeLevels = divideNumber(100, step);
 
   const [volume, setVolume] = useState<number | null>(null);
+
+  if (volumeArg) {
+    pipe(
+      music.player.volume.set(parseInt(volumeArg)),
+      TE.mapLeft((error) => {
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not update volume");
+      }),
+      TE.map(() => {
+        showHUD(`Volume set to ${volumeArg}`);
+        closeMainWindow();
+      })
+    )();
+  }
 
   useEffect(() => {
     pipe(
@@ -40,7 +57,7 @@ export default function SetVolume() {
         <List.Item
           key={level}
           title={level.toString()}
-          icon={volume === level ? Icon.Checkmark : Icon.SpeakerOn}
+          icon={volume === level ? Icon.CheckCircle : Icon.SpeakerOn}
           actions={<Actions value={level} />}
         />
       ))}
@@ -50,7 +67,7 @@ export default function SetVolume() {
 
 function Actions({ value }: { value: number }) {
   const { pop } = useNavigation();
-  const title = SFSymbols.SPEAKER_FILL + "  Set Volume";
+  const title = "Set Volume";
 
   const handleRating = async () => {
     await pipe(
@@ -70,7 +87,7 @@ function Actions({ value }: { value: number }) {
 
   return (
     <ActionPanel>
-      <Action title={title} onAction={handleRating} />
+      <Action title={title} onAction={handleRating} icon={Icon.SpeakerOn} />
     </ActionPanel>
   );
 }
