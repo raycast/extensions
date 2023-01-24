@@ -1,5 +1,5 @@
-# Sleep Timers Changelog
+# Sleep Changelog
 
-## [Added Sleep Timers] - 2023-01-15
+## [Added Sleep Timer] - 2023-01-15
 
-- Initial version of the Sleep Timers extension!
+- Initial version of the Sleep Timer extension!
