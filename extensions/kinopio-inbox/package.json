@@ -27,7 +27,7 @@
   "preferences": [
     {
       "name": "apiKey",
-      "description": "You Kinopio API Key",
+      "description": "Your Kinopio API Key. Open Kinopio and get it from User → Settings → API Key",
       "type": "password",
       "required": true,
       "title": "API Key"

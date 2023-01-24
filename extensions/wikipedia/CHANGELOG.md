@@ -1,7 +1,8 @@
 # Wikipedia Changelog
 
-## [Update] - 2023-01-22
-Added Thumbnail Image in the Search Details page
+## [Update and added language] - 2023-01-24
+- Added Italian
+- Added Thumbnail Image in the Search Details page
 
 ## [Added languages] - 2023-01-19
 Added Turkish and Greek language

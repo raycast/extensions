@@ -172,6 +172,14 @@
       "keywords": [
         "volume",
         "sound"
+      ],
+      "arguments": [
+        {
+          "name": "volumeArg",
+          "placeholder": "Volume (0-100)",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -196,16 +204,6 @@
         "volume",
         "volume-down",
         "decrease"
-      ]
-    },
-    {
-      "name": "add-to-playlist",
-      "title": "Add to Playlist",
-      "subtitle": "Apple Music",
-      "description": "Add current track to playlist",
-      "mode": "view",
-      "keywords": [
-        "add-to-playlist"
       ]
     }
   ],

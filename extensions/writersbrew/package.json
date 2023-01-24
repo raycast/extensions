@@ -90,6 +90,20 @@
       "subtitle": "Writersbrew",
       "description": "Free form prompt writer to generate any text.",
       "mode": "no-view"
+    },
+    {
+      "name": "capture-text",
+      "title": "Capture Text",
+      "subtitle": "Writersbrew",
+      "description": "Capture text by taking a screenshot.",
+      "mode": "no-view"
+    },
+    {
+      "name": "explain-code",
+      "title": "Explain Code",
+      "subtitle": "Writersbrew",
+      "description": "Explain code in english.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

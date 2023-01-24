@@ -1,5 +1,8 @@
 # Code Stash Changelog
 
+## Add Import command - 2023-01-19
+- Add command for importing txt files and folders
+
 ## Add Edit command - 2023-01-05
 - Add command for editing an existing code stash
 
