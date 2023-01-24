@@ -15,6 +15,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -83,7 +84,6 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
-  console.log(props.draftValues);
   const { push } = useNavigation();
   const { signature, autofocusField, copyToastAction } = getPreferenceValues<Preferences>();
 
@@ -127,43 +127,54 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           priority: parseInt(values.priority),
         };
 
-        console.log(values.attachments);
+        const { success, issue } = await createIssue(payload);
 
-        // const { success, issue } = await createIssue(payload);
+        if (success && issue) {
+          toast.style = Toast.Style.Success;
+          toast.title = `Created Issue • ${issue?.identifier}`;
 
-        // if (success && issue) {
-        //   toast.style = Toast.Style.Success;
-        //   toast.title = `Created Issue • ${issue?.identifier}`;
+          toast.primaryAction = {
+            title: "Open Issue",
+            shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+            onAction: async () => {
+              push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
+              await toast.hide();
+            },
+          };
 
-        //   toast.primaryAction = {
-        //     title: "Open Issue",
-        //     shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-        //     onAction: async () => {
-        //       push(<IssueDetail issue={issue} priorities={props.priorities} users={props.users} me={props.me} />);
-        //       await toast.hide();
-        //     },
-        //   };
+          toast.secondaryAction = {
+            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            ...getCopyToastAction(copyToastAction, issue),
+          };
 
-        //   toast.secondaryAction = {
-        //     shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        //     ...getCopyToastAction(copyToastAction, issue),
-        //   };
+          if (values.attachments[0]) {
+            try {
+              await createAttachment({
+                issueId: issue.id,
+                url: values.attachments[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Failed to create attachment";
+              toast.message = "The issue was still created, but the attachment could not be added.";
+            }
+          }
 
-        //   reset({
-        //     title: "",
-        //     description: "",
-        //     estimate: "",
-        //     labelIds: [],
-        //     dueDate: null,
-        //     parentId: "",
-        //   });
+          reset({
+            title: "",
+            description: "",
+            estimate: "",
+            labelIds: [],
+            dueDate: null,
+            parentId: "",
+          });
 
-        //   if (hasMoreThanOneTeam) {
-        //     return focus(autofocusField);
-        //   }
+          if (hasMoreThanOneTeam) {
+            return focus(autofocusField);
+          }
 
-        //   return focus("teamId");
-        // }
+          return focus("teamId");
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to create issue";
@@ -392,7 +403,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       <Form.Separator />
 
-      <Form.FilePicker title="Attachments" {...itemProps.attachments} />
+      <Form.FilePicker title="Attachments" {...itemProps.attachments} allowMultipleSelection={false} />
     </Form>
   );
 }
