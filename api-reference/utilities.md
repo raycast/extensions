@@ -192,7 +192,7 @@ A Promise that resolves when the target has been opened.
 
 ### launchCommand
 
-Launches another command of the same extension. If the command does not exist, or if it's not enabled, an error will be thrown.
+Launches another command of the same extension.
 Use this method if your command needs to open another command based on user interaction,
 or when an immediate background refresh should be triggered, for example when a command needs to update an associated menu-bar command.
 
