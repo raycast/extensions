@@ -15,7 +15,7 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={Icon.Clock}
+      icon={Icon.Moon}
       isLoading={isLoading}
       title={timer && `${timer.name}: ~${formatTime(timer.timeLeft)}`}
     >
