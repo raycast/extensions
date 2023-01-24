@@ -27,7 +27,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Section title={timer ? "Currently Running" : "No Sleep Timers Running"}>
+      <List.Section title={timer ? "Currently Running" : "No Sleep Timer Running"}>
         {timer && (
           <List.Item
             key={timer.originalFile}
