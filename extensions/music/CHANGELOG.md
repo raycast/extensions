@@ -1,5 +1,16 @@
 # Apple Music Changelog
 
+## [Updates & Fixes] - 2023-01-20
+
+- Updated volume behaviour, the user can now choose the size of the volume increment/decrement from preferences
+- Disabled "add to playlist" due to incorrect behaviour.
+- Removed amperstand from search params
+
+## [Update] - 2023-01-17
+
+- Added "add to playlist" command, it prompts the user to add currently playing track to a playlist.
+- Added volume controls: "volume up/down" and "set volume" (scale from 0 to 100)
+
 ## [Update] - 2022-11-21
 
 - Fixes the command "Love track" so it loves the track instead of adding to library.

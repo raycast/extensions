@@ -3,7 +3,7 @@ import { useGetManPages } from "./utils";
 import { Results } from "./components/Results";
 
 interface ExportArguments {
-  command: string;
+  command?: string;
 }
 
 export default function Main(props: { arguments: ExportArguments }) {
@@ -13,7 +13,7 @@ export default function Main(props: { arguments: ExportArguments }) {
   const pages = useGetManPages();
 
   // User provided a command -- try going right to the man page for it
-  if (command != "") {
+  if (command != "" && command != undefined) {
     // Remove terminal metacharacters from input
     const sanitizedCommand = command
       // eslint-disable-next-line no-useless-escape
@@ -46,7 +46,7 @@ export default function Main(props: { arguments: ExportArguments }) {
   });
 
   return (
-    <List searchBarPlaceholder={`Search ${pages.length} man pages...`} enableFiltering={true}>
+    <List searchBarPlaceholder={`Search ${pages.length} man pages...`} filtering={true}>
       <List.EmptyView icon={{ source: "no-view.png" }} title="No Results" />
       {listItems}
     </List>

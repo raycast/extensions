@@ -1,7 +1,9 @@
 import { Label, Task } from "@doist/todoist-api-typescript";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
+
 import { priorities } from "../constants";
+
 import { displayDueDate, isOverdue } from "./dates";
 
 export function partitionTasksWithOverdue(tasks: Task[]) {

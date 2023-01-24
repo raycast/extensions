@@ -20,6 +20,30 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "volumeSteps",
+      "title": "Volume Steps",
+      "description": "Specify the amount of change for volume levels",
+      "required": false,
+      "default": "10",
+      "data": [
+        {
+          "title": "Low",
+          "value": "5"
+        },
+        {
+          "title": "Standard",
+          "value": "10"
+        },
+        {
+          "title": "High",
+          "value": "25"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "reveal-track",
@@ -137,6 +161,49 @@
       "keywords": [
         "track",
         "rating"
+      ]
+    },
+    {
+      "name": "set-volume",
+      "title": "Set Volume",
+      "subtitle": "Apple Music",
+      "description": "Set Music volume",
+      "mode": "view",
+      "keywords": [
+        "volume",
+        "sound"
+      ],
+      "arguments": [
+        {
+          "name": "volumeArg",
+          "placeholder": "Volume (0-100)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "subtitle": "Apple Music",
+      "description": "Increase Music volume",
+      "mode": "no-view",
+      "keywords": [
+        "volume",
+        "volume-up",
+        "increase"
+      ]
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "subtitle": "Apple Music",
+      "description": "Decrease Music volume",
+      "mode": "no-view",
+      "keywords": [
+        "volume",
+        "volume-down",
+        "decrease"
       ]
     }
   ],

@@ -1,8 +1,4 @@
-import { showToast, Form, ActionPanel, Toast, Action, Detail, Icon, showHUD } from "@raycast/api";
-import { useState } from "react";
-import { Bitwarden } from "./api";
-import { useVaultMessages } from "./hooks";
-import { copyPassword } from "./clipboard";
+import { showToast, ActionPanel, Toast, Action, Detail } from "@raycast/api";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -24,65 +20,4 @@ export function TroubleshootingGuide(): JSX.Element {
       }
     />
   );
-}
-
-export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
-  const { bitwardenApi, onUnlock } = props;
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const { userMessage, serverMessage, shouldShowServer } = useVaultMessages(bitwardenApi);
-
-  async function onSubmit(values: { password: string }) {
-    if (values.password.length == 0) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Missing password.");
-      return;
-    }
-    try {
-      setLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
-      const state = await bitwardenApi.status();
-      if (state.status == "unauthenticated") {
-        try {
-          await bitwardenApi.login();
-        } catch (error) {
-          showToast(
-            Toast.Style.Failure,
-            "Failed to unlock vault.",
-            `Please check your ${shouldShowServer && "Server URL, "}API Key and Secret.`
-          );
-          return;
-        }
-      }
-      const sessionToken = await bitwardenApi.unlock(values.password);
-      toast.hide();
-      onUnlock(sessionToken);
-    } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
-      setLoading(false);
-    }
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          {!isLoading && (
-            <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
-          )}
-        </ActionPanel>
-      }
-    >
-      {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
-      <Form.Description title="Vault Status" text={userMessage} />
-      <Form.PasswordField autoFocus id="password" title="Master Password" />
-    </Form>
-  );
-}
-
-export function CopyPasswordToClipboardAction(props: { title: string; content: string }): JSX.Element {
-  async function doCopy() {
-    const copiedSecurely = await copyPassword(props.content);
-    showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
-  }
-
-  return <Action title={props.title} icon={Icon.CopyClipboard} onAction={doCopy}></Action>;
 }

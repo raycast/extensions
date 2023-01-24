@@ -1,18 +1,7 @@
-import { runApplescript } from "./utils";
+import { runAppleScript } from "./utils";
 import { Clipboard } from "@raycast/api";
 
-/**
- * Copies a password to the system clipboard, setting the appropriate options to conceal it from well-behaved
- * clipboard history software.
- *
- * If this cannot be done (e.g. macOS version < 10.10), it will be copied using the standard clipboard copy mechanism.
- *
- * @param password The password to copy.
- * @return true If copied securely.
- */
-export async function copyPassword(password: string): Promise<boolean> {
-  const result = runApplescript(
-    `
+const APPLESCRIPT_COPY_PASSWORD = `
 use AppleScript version "2.4"
 use framework "Foundation"
 use framework "AppKit"
@@ -29,15 +18,25 @@ on run argv
   cb's setString:textToCopy forType:"com.agilebits.onepassword" -- 1Password
   cb's setString:textToCopy forType:NSPasteboardTypeString
 end run
-`,
-    [password]
-  );
+`;
+
+/**
+ * Copies a password to the system clipboard, setting the appropriate options to conceal it from well-behaved
+ * clipboard history software.
+ *
+ * If this cannot be done (e.g. macOS version < 10.10), it will be copied using the standard clipboard copy mechanism.
+ *
+ * @param password The password to copy.
+ * @return true If copied securely.
+ */
+export async function copyPassword(password: string): Promise<{ copiedSecurely: boolean }> {
+  const result = runAppleScript(APPLESCRIPT_COPY_PASSWORD, [password]);
 
   try {
     await result;
-    return true;
+    return { copiedSecurely: true };
   } catch (ex) {
     await Clipboard.copy(password);
-    return false;
+    return { copiedSecurely: false };
   }
 }

@@ -23,6 +23,9 @@ export default function SearchPage() {
           <List.Dropdown.Item title="Japanese" value="ja" />
           <List.Dropdown.Item title="Spanish" value="es" />
           <List.Dropdown.Item title="Russian" value="ru" />
+          <List.Dropdown.Item title="Greek" value="el" />
+          <List.Dropdown.Item title="Turkish" value="tr" />
+          <List.Dropdown.Item title="Italian" value="it" />
         </List.Dropdown>
       }
     >

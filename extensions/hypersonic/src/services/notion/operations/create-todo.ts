@@ -46,6 +46,14 @@ export async function createTodo(
             },
           }
         : {}),
+
+      ...(preferences.properties.url
+        ? {
+            [preferences.properties.url]: {
+              url: todo?.contentUrl ? todo.contentUrl : null,
+            },
+          }
+        : {}),
     },
   })
 

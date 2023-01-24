@@ -6,15 +6,15 @@ import fetch from "node-fetch";
  */
 const useFetchAsync = (
   baseUrl: string
-): ((config: { [arg0: string]: any }, callback: (...args: any) => any) => void) => {
+): ((config: fetchAsyncConfig, callback: (results: JotobaResults) => Promise<JotobaResults>) => Promise<Json>) => {
   const rqUrl = baseUrl;
 
-  const sendRq = useCallback(async (config = { method: "GET" }) => {
+  return useCallback(async (config = { method: "GET" }) => {
     let res;
     if (!config) throw new Error("Not configured.");
 
     if (config.method === "GET") res = await fetch(rqUrl);
-    else if (config.method !== "GET") {
+    else {
       res = await fetch(rqUrl, {
         method: config.method,
         signal: config.signal || undefined,
@@ -27,14 +27,11 @@ const useFetchAsync = (
     }
 
     if (typeof res === "undefined" || !res.ok) {
-      Promise.reject("Could not get data from server.");
-      return;
+      return Promise.reject("Could not get data from server.");
     }
 
     return await res.json();
   }, []);
-
-  return sendRq;
 };
 
 export default useFetchAsync;
