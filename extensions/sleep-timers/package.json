@@ -76,7 +76,7 @@
     {
       "name": "manageTimer",
       "title": "Manage Timer",
-      "description": "View, start, or stop existing sleep timers.",
+      "description": "View, start, or stop existing sleep timer.",
       "mode": "view"
     },
     {
