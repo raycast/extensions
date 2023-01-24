@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Recent Builds Performance Improvements] - 2023-01-24
+
+- Improved the performance of the "Search Recent Builds" and "Show Recent Builds in Menu Bar" command.
+
 ## [Code Snippets] - 2023-01-02
 
 - Added "Create Code Snippet" command to create a new Xcode Code Snippet.
