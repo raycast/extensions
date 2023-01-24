@@ -172,6 +172,14 @@
       "keywords": [
         "volume",
         "sound"
+      ],
+      "arguments": [
+        {
+          "name": "volumeArg",
+          "placeholder": "Volume (0-100)",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
