@@ -147,9 +147,9 @@ function SearchContext({ repository }: SearchContextProps) {
   if (firstLoad && isPRLoading && cache.has(repository.name)) {
     return (
       <List
-        searchBarPlaceholder="Filter `/b` for branches, `/p` for Pull Request, `/i` for issues"
+        searchBarPlaceholder="Filter `/me` for your stuff, `/b` for branches, `/p` for Pull Request, `/i` for issues"
         onSearchTextChange={parseSearchOptions}
-        navigationTitle={"Add `/me` to filter from your profile 🧡"}
+        navigationTitle={repository.nameWithOwner}
         throttle
       >
         {sections.includes("/b") && JSON.parse(cache.get(repository.name)!)?.branches !== undefined && (
@@ -212,7 +212,7 @@ function SearchContext({ repository }: SearchContextProps) {
       isLoading={isPRLoading}
       searchBarPlaceholder="Filter `/b` for branches, `/p` for Pull Request, `/i` for issues"
       onSearchTextChange={parseSearchOptions}
-      navigationTitle={"Add `/me` to filter from your profile 🧡"}
+      navigationTitle={repository.nameWithOwner}
       throttle
     >
       {sections.includes("/b") && data?.branches !== undefined && (
