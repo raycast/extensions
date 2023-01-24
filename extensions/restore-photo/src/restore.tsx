@@ -14,14 +14,19 @@ cloudinary.config({
   secure: true,
 });
 
+type StoredItem = {
+  [key: string]: string;
+};
+
 export default function Command() {
-  const [storedItems, setStoredItems] = React.useState({});
+  const [storedItems, setStoredItems] = React.useState<StoredItem>({});
+
+  async function getStoredItems() {
+    const items = await LocalStorage.allItems();
+    setStoredItems(items);
+  }
 
   React.useEffect(() => {
-    async function getStoredItems() {
-      const items = await LocalStorage.allItems();
-      setStoredItems(items);
-    }
     getStoredItems();
   }, []);
 
@@ -33,14 +38,14 @@ export default function Command() {
           title="Upload Photo"
           actions={
             <ActionPanel>
-              <Action.Push title="Upload Photo" target={<UploadForm />} />
+              <Action.Push title="Upload Photo" target={<UploadForm onSubmit={() => getStoredItems()} />} />
             </ActionPanel>
           }
         />
       </Grid.Section>
 
       <Grid.Section title="Previously Restored">
-        {Object.entries(storedItems).map(([name, url]: any) => (
+        {Object.entries(storedItems).map(([name, url]) => (
           <Grid.Item key={name} content={url} title={name} actions={<SharedActions image={url} name={name} />} />
         ))}
       </Grid.Section>
@@ -54,7 +59,7 @@ type OriginalPhoto = {
   url?: string;
 };
 
-function UploadForm() {
+function UploadForm({ onSubmit }: { onSubmit: () => void }) {
   const [originalPhoto, setOriginalPhoto] = React.useState<OriginalPhoto>({
     name: "",
     path: "",
@@ -65,6 +70,7 @@ function UploadForm() {
   React.useEffect(() => {
     async function addStoredItem() {
       await LocalStorage.setItem(`${originalPhoto.name}`, restoredPhotoUrl);
+      onSubmit();
     }
 
     if (restoredPhotoUrl && originalPhoto.name) {
