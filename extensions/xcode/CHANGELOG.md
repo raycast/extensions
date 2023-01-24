@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Recent Builds Performance Improvements] - 2023-01-21
+## [Recent Builds Performance Improvements] - 2023-01-24
 
 - Improved the performance of the "Search Recent Builds" and "Show Recent Builds in Menu Bar" command.
 
