@@ -82,7 +82,7 @@
     {
       "name": "timersMenuBar",
       "title": "Timers Menu Bar",
-      "description": "View, start, or stop existing sleep timers from the Menu Bar.",
+      "description": "View, start, or stop existing sleep timer from the Menu Bar.",
       "mode": "menu-bar",
       "interval": "10s"
     }
