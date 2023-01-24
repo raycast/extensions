@@ -98,7 +98,9 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                 />
                 <Action
                   title="Restart"
-                  onAction={() => { restartAppWithToast(app) }}
+                  onAction={() => {
+                    restartAppWithToast(app);
+                  }}
                 />
               </ActionPanel>
             }
