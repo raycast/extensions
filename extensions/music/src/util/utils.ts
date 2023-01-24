@@ -1,7 +1,6 @@
 import { showToast, showHUD, Toast, Clipboard, open } from "@raycast/api";
 import { environment } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
-import { Errors } from "io-ts";
 
 import * as TE from "./fp/task-either";
 
