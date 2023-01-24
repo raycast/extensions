@@ -71,7 +71,7 @@ export default function BranchListItem({ branch, mainBranch, repository }: Branc
             }}
           />
           <Action
-            title="Open PR in github"
+            title="Open PR in GitHub"
             onAction={() => {
               open(branchURL);
             }}
