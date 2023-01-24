@@ -403,7 +403,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
       <Form.Separator />
 
-      <Form.FilePicker title="Attachments" {...itemProps.attachments} allowMultipleSelection={false} />
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} allowMultipleSelection={false} />
     </Form>
   );
 }
