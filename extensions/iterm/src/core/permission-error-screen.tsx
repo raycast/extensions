@@ -29,8 +29,9 @@ const permissionErrorMarkdown = `## Raycast needs automation access to iTerm.
 ![Full Disk Access Preferences Pane](${fileUrl(path.join(environment.assetsPath, "permission-raycast-automation.png"))})
 `;
 
+// note: this needs to include the English on all platform portions of the error messages.
 export const isPermissionError = (reason: string) =>
-  reason.indexOf(`Not authorized to send Apple events to iTerm.`) !== -1;
+  reason.indexOf(`Command failed with exit code 1: osascript -e`) !== -1;
 
 export const PermissionErrorScreen = () => (
   <Detail markdown={permissionErrorMarkdown} navigationTitle={"Permission Issue with Raycast"} actions={<Actions />} />
