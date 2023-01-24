@@ -14,9 +14,8 @@
   "commands": [
     {
       "name": "trackFlight",
-      "title": "Track Flight Number:",
-      "subtitle": "Just type in your flight number",
-      "description": "Just fill in will your flight number and we'll get your data!!",
+      "title": "Track Flight",
+      "description": "Track your flight directly from Raycast by flight number",
       "mode": "view",
       "arguments": [
         {
