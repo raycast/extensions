@@ -1,6 +1,6 @@
 # Dock Tinker Changelog
 
-## [Update Raycast API] - 2023-01-24
+## [New function] - 2023-01-24
 
 - Include toggle to lock Dock contents ("contents-immutable" flag).
 
