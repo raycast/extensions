@@ -124,7 +124,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
         />
       ))}
       <Form.TextField id="name" title="Name" placeholder="Pour Tea" autoFocus={hasArgs} />
-      <Form.Checkbox id="willBeSaved" label="Save as preset" />
+      <Form.Checkbox id="willBeSaved" label="Save as Preset" />
     </Form>
   );
 }
