@@ -56,20 +56,11 @@ export function displayError(error: Error | ScriptError) {
   });
 }
 
-// Function overload to accept multiple params types.
-function handleTaskEitherError<E extends Error | Errors, T>(
-  onError?: VoidFn<E>,
-  onSuccess?: VoidFn<T>
-): (te: TE.TaskEither<E, T>) => TE.TaskEither<void, T>;
 /**
  *
- * @param errorMessage Used only in menu-bar {String}
- * @param successMessage Argument for `showHUD` {String}
+ * @param error - Function or error message
+ * @param success - Function or success message
  */
-function handleTaskEitherError<E extends Error | Errors, T>(
-  errorMessage?: string,
-  successMessage?: string
-): (te: TE.TaskEither<E, T>) => TE.TaskEither<void, T>;
 function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, success?: string | VoidFn<T>) {
   const onSuccess = typeof success === "string" ? () => showHUD(success) : success;
   const onError = typeof error === "string" ? () => undefined : error;
