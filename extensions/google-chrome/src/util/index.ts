@@ -1,5 +1,5 @@
 import path from "path";
-import { defaultChromeProfilePath } from "../constants";
+import { DEFAULT_CHROME_PROFILE_ID, defaultChromeProfilePath, defaultChromeStatePath } from "../constants";
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -9,7 +9,10 @@ const userLibraryDirectoryPath = () => {
   return path.join(process.env.HOME, "Library");
 };
 
-export const getHistoryDbPath = () => path.join(userLibraryDirectoryPath(), ...defaultChromeProfilePath, "History");
+export const getHistoryDbPath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultChromeProfilePath, profile ?? DEFAULT_CHROME_PROFILE_ID, "History");
 
-export const getBookmarksFilePath = () =>
-  path.join(userLibraryDirectoryPath(), ...defaultChromeProfilePath, "Bookmarks");
+export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultChromeStatePath);
+
+export const getBookmarksFilePath = (profile?: string) =>
+  path.join(userLibraryDirectoryPath(), ...defaultChromeProfilePath, profile ?? DEFAULT_CHROME_PROFILE_ID, "Bookmarks");

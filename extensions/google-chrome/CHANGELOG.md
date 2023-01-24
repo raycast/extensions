@@ -1,5 +1,10 @@
 # Google Chrome Changelog
 
+## [Profiles support] - 2023-01-24
+
+- Added support for profiles across all commands
+- Added support for opening tabs in different profiles
+
 ## [Search Bookmarks action] - 2022-12-17
 
 - Added search bookmarks action
