@@ -84,7 +84,7 @@ export default function PullRequestListItem({ pullRequest, viewer }: PullRequest
             }}
           />
           <Action
-            title="Open PR in github"
+            title="Open PR in GitHub"
             onAction={() => {
               open(pullRequest.permalink);
             }}
