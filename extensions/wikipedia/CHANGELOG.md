@@ -1,5 +1,8 @@
 # Wikipedia Changelog
 
+## [Added languages] - 2023-01-24
+Added Italian
+
 ## [Added languages] - 2023-01-19
 Added Turkish and Greek language
 
