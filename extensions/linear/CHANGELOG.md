@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Add attachments to Create Issue command] - 2023-01-24
+## [Add attachment to Create Issue command] - 2023-01-24
 
 - Add a file picker on the `Create Issue` command to add a single attachment on a newly created Linear issue
 
