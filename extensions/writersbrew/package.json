@@ -93,14 +93,14 @@
     },
     {
       "name": "capture-text",
-      "title": "Capture text",
+      "title": "Capture Text",
       "subtitle": "Writersbrew",
       "description": "Capture text by taking a screenshot.",
       "mode": "no-view"
     },
     {
       "name": "explain-code",
-      "title": "Explain code",
+      "title": "Explain Code",
       "subtitle": "Writersbrew",
       "description": "Explain code in english.",
       "mode": "no-view"
