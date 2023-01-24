@@ -33,7 +33,7 @@ export default function TrackFlightExtension(props: { arguments: { flightNumber:
 
   function actionCommands() {
     return (
-      <ActionPanel title="#1 in raycast/extensions">
+      <ActionPanel title="Flight Date">
         <Action
           title="Tomorrow"
           onAction={() => {
