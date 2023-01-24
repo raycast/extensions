@@ -1,3 +1,3 @@
 # Restore Photos Changelog
 
-## [Initial Version] - 2023-01-20
+## [Initial Version] - 2023-01-24
