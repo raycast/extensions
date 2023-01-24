@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Profiles support] - 2023-01-22
+## [Profiles support] - 2023-01-24
 
 - Added support for profiles across all commands
 - Added support for opening tabs in different profiles
