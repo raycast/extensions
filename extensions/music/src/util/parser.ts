@@ -20,7 +20,13 @@ export const parseResult = <T extends object>() => (raw: string): ReadonlyArray<
   ))
 );
 
-export const divideNumber = (num: number, step: number) => {
+/**
+ *
+ * Split number into N pieces, starting from 0
+ *
+ * @example divideNumber(100, 25) // => 0,25,50,75,100
+ */
+export const divideNumber = (num: number, step: number): number[] => {
   const arr: number[] = [];
 
   for (let i = 0; i <= num; i += step) {
