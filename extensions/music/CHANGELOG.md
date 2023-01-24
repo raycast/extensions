@@ -1,13 +1,10 @@
 # Apple Music Changelog
 
-## [Fix] - 2023-01-20
-
-- Disabled "add to playlist" due to incorrect behaviour.
-- Removed amperstand from search params
-
-## [Update] - 2023-01-20
+## [Updates & Fixes] - 2023-01-20
 
 - Updated volume behaviour, the user can now choose the size of the volume increment/decrement from preferences
+- Disabled "add to playlist" due to incorrect behaviour.
+- Removed amperstand from search params
 
 ## [Update] - 2023-01-17
 
