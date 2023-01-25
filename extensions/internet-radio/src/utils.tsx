@@ -2,50 +2,50 @@ import { Action, ActionPanel, Color, Form, LocalStorage, useNavigation } from "@
 import { useState } from "react";
 import { runAppleScript } from "run-applescript";
 
-export const colorMap: { [key: string]: Color }= {
-    "40s": Color.Red,
-    "50s": Color.Orange,
-    "60s": Color.Yellow,
-    "70s": Color.Green,
-    "80s": Color.Blue,
-    "rock": Color.Red,
-    "pop": Color.Blue,
-    "disco": Color.Magenta,
-    "alternative": Color.Yellow,
-    "indie": Color.Yellow,
-    "classic rock": Color.Red,
-    "metal": Color.SecondaryText,
-    "heavy metal": Color.SecondaryText,
-    "punk": Color.Purple,
-    "ambient": Color.Magenta,
-    "new age": Color.Blue,
-    "downtempo": Color.Purple,
-    "chillout": Color.Blue,
-    "psychill": Color.Purple,
-    "soundtracks": Color.Green,
-    "classical": Color.Green,
-    "symphony": Color.Green,
-    "romantic": Color.Red,
-    "piano": Color.SecondaryText,
-    "christmas": Color.Green,
-    "jpop": Color.Red,
-    "top 40": Color.Red,
-    "oldies": Color.Orange,
-    "noise": Color.Magenta,
-    "hard rock": Color.Red,
-    "country": Color.Yellow,
-    "dubstep": Color.Magenta,
-    "electronic": Color.Magenta,
-    "video game music": Color.Green,
-    "blues": Color.Blue,
-    "jazz": Color.Orange,
-    "news": Color.Red,
-    "sports": Color.Blue,
-    "games": Color.Green,
-    "hits": Color.Red,
-    "kpop": Color.Magenta,
-    "talk": Color.SecondaryText,
-}
+export const colorMap: { [key: string]: Color } = {
+  "40s": Color.Red,
+  "50s": Color.Orange,
+  "60s": Color.Yellow,
+  "70s": Color.Green,
+  "80s": Color.Blue,
+  rock: Color.Red,
+  pop: Color.Blue,
+  disco: Color.Magenta,
+  alternative: Color.Yellow,
+  indie: Color.Yellow,
+  "classic rock": Color.Red,
+  metal: Color.SecondaryText,
+  "heavy metal": Color.SecondaryText,
+  punk: Color.Purple,
+  ambient: Color.Magenta,
+  "new age": Color.Blue,
+  downtempo: Color.Purple,
+  chillout: Color.Blue,
+  psychill: Color.Purple,
+  soundtracks: Color.Green,
+  classical: Color.Green,
+  symphony: Color.Green,
+  romantic: Color.Red,
+  piano: Color.SecondaryText,
+  christmas: Color.Green,
+  jpop: Color.Red,
+  "top 40": Color.Red,
+  oldies: Color.Orange,
+  noise: Color.Magenta,
+  "hard rock": Color.Red,
+  country: Color.Yellow,
+  dubstep: Color.Magenta,
+  electronic: Color.Magenta,
+  "video game music": Color.Green,
+  blues: Color.Blue,
+  jazz: Color.Orange,
+  news: Color.Red,
+  sports: Color.Blue,
+  games: Color.Green,
+  hits: Color.Red,
+  kpop: Color.Magenta,
+  talk: Color.SecondaryText,
+};
 
 const defaultStations: { [value: string]: { [value: string]: string | string[] } } = {
   "Top 80 Radio": {
@@ -105,143 +105,144 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
     genres: ["top 40", "pop"],
   },
   "Magic 80s Florida": {
-      website: "http://www.magicoldiesflorida.com",
-      stream: "http://airspectrum.cdnstream1.com:8018/1606_192",
-      genres: ["80s", "oldies", "top 40", "pop", "rock"]
+    website: "http://www.magicoldiesflorida.com",
+    stream: "http://airspectrum.cdnstream1.com:8018/1606_192",
+    genres: ["80s", "oldies", "top 40", "pop", "rock"],
   },
   "Pink Noise Radio": {
-      website: "",
-      stream: "https://uk1.internet-radio.com/proxy/pinknoise?mp=/stream",
-      genres: ["noise", "ambient", "chillout"]
+    website: "",
+    stream: "https://uk1.internet-radio.com/proxy/pinknoise?mp=/stream",
+    genres: ["noise", "ambient", "chillout"],
   },
   "Brown Noise Radio": {
     website: "",
     stream: "https://uk1.internet-radio.com/proxy/brownnoise?mp=/stream",
-    genres: ["noise", "ambient", "chillout"]
+    genres: ["noise", "ambient", "chillout"],
   },
   "White Noise Radio": {
     website: "",
     stream: "https://uk1.internet-radio.com/proxy/whitenoise?mp=/stream",
-    genres: ["noise", "ambient", "chillout"]
+    genres: ["noise", "ambient", "chillout"],
   },
   "NoLife Radio": {
-      website: "https://nolife-radio.com",
-      stream: "http://listen.nolife-radio.com/stream",
-      genres: ["video game music", ""]
+    website: "https://nolife-radio.com",
+    stream: "http://listen.nolife-radio.com/stream",
+    genres: ["video game music", ""],
   },
   "Radio Summernight": {
-      website: "http://radiosummernight.ch",
-      stream: "https://stream.laut.fm/radiosummernight",
-      genres: ["pop", "alternative", "rock"]
+    website: "http://radiosummernight.ch",
+    stream: "https://stream.laut.fm/radiosummernight",
+    genres: ["pop", "alternative", "rock"],
   },
   "Metal Rock Radio": {
-      website: "http://metalrockradio.com",
-      stream: "https://kathy.torontocast.com:2800/stream/1/",
-      genres: ["metal", "hard rock", "classic rock"]
+    website: "http://metalrockradio.com",
+    stream: "https://kathy.torontocast.com:2800/stream/1/",
+    genres: ["metal", "hard rock", "classic rock"],
   },
   "Frontier Country": {
-      website: "http://www.frontiercountryonline.com",
-      stream: "http://192.111.140.11:8205/stream/1/",
-      genres: ["country", ""]
+    website: "http://www.frontiercountryonline.com",
+    stream: "http://192.111.140.11:8205/stream/1/",
+    genres: ["country", ""],
   },
   "Dubstep.fm": {
-      website: "https://www.dubstep.fm",
-      stream: "http://50.117.1.60/stream/1/",
-      genres: ["dubstep", "electronic"]
+    website: "https://www.dubstep.fm",
+    stream: "http://50.117.1.60/stream/1/",
+    genres: ["dubstep", "electronic"],
   },
   "Blues Radio": {
     website: "http://www.bluesradio.gr",
     stream: "http://i4.streams.ovh:8352/stream/1/",
-    genres: ["blues", ""]
+    genres: ["blues", ""],
   },
   "Majestic Jukebox Radio": {
     website: "https://www.majesticjukeboxradio.com/",
     stream: "https://uk3.internet-radio.com/proxy/majesticjukebox?mp=/live",
-    genres: ["rock", "jazz", "blues", "country", "soul", "40s", "50s", "60s", "70s", "80s"]
+    genres: ["rock", "jazz", "blues", "country", "soul", "40s", "50s", "60s", "70s", "80s"],
   },
   "BBC Radio 1": {
     website: "https://tunein.com/radio/BBC-Radio-1-988-s24939/",
     stream: "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
-    genres: ["pop", ""]
+    genres: ["pop", ""],
   },
   "BBC World Service": {
     website: "https://tunein.com/radio/BBC-World-Service-News-s24948/",
     stream: "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
   "Bloomberg Radio": {
     website: "https://tunein.com/radio/Bloomberg-Radio-s165740/",
     stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC.aac",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
   "Associated Press": {
     website: "https://tunein.com/radio/Associated-Press-s249264/",
     stream: "http://apnews.streamguys1.com/apnews",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
   "KPOP Radio": {
     website: "https://zeno.fm/radio/kpop-radio",
     stream: "https://stream-55.zeno.fm/382yfn6u498uv?zs=mvrPGxDnTw-zWW4K1sLI2A",
-    genres: ["kpop", ""]
+    genres: ["kpop", ""],
   },
   "WRCW Crime Story": {
     website: "https://live365.com/station/WRCW-Crime-Story----a60381",
     stream: "https://streaming.live365.com/a60381",
-    genres: ["talk", ""]
+    genres: ["talk", ""],
   },
-  "NPR": {
+  NPR: {
     website: "https://www.npr.org",
     stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
   "Hot Hitz": {
     website: "http://player.100hitz.com",
     stream: "https://pureplay.cdnstream1.com/6027_128.mp3",
-    genres: ["hits", "pop"]
+    genres: ["hits", "pop"],
   },
   "Fox News": {
     website: "https://radio.foxnews.com/player-files/radio.php",
     stream: "https://live.wostreaming.net/direct/foxnewsradio-foxnewsradioaac-imc",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
   "NBC News": {
     website: "https://tunein.com/radio/NBC-News-NOW-s310584/",
     stream: "https://stream.revma.ihrhls.com/zc6043",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
-  "Newsmax": {
+  Newsmax: {
     website: "https://www.iheart.com/live/newsmax-8856/",
     stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/NEWSMAX_FM.aac",
-    genres: ["news", "talk"]
+    genres: ["news", "talk"],
   },
-  "ESPN": {
+  ESPN: {
     website: "https://www.iheart.com/live/espn-radio-7903/",
     stream: "https://live.wostreaming.net/direct/espn-network-48",
-    genres: ["sports", "talk"]
+    genres: ["sports", "talk"],
   },
-  "AmbientRadio": {
+  AmbientRadio: {
     website: "http://www.ambientradio.net",
     stream: "https://stream.rcast.net/13551.mp3",
-    genres: ["ambient", "chillout"]
+    genres: ["ambient", "chillout"],
   },
   "Greatest Hits Radio USA": {
     website: "https://www.greatesthitsradiousa.com/",
     stream: "https://stream.rcast.net/69558.mp3",
-    genres: ["hits", "oldies"]
+    genres: ["hits", "oldies"],
   },
   "Adagio.FM": {
     website: "http://adagio.fm",
     stream: "http://hi5.adagio.fm/;",
-    genres: ["classical", ""]
+    genres: ["classical", ""],
   },
   "Streaming Soundtracks": {
     website: "http://www.streamingsoundtracks.com",
     stream: "http://hi5.streamingsoundtracks.com/;",
-    genres: ["soundtracks", ""]
-  }
+    genres: ["soundtracks", ""],
+  },
 };
 
 export async function loadDefaults() {
+  // Loads default stations into LocalStorage & ensures data keys are non-null
   const testEntry = await LocalStorage.getItem("-default-data-loaded");
   if (!testEntry) {
     for (const station in defaultStations) {
@@ -257,6 +258,7 @@ export async function loadDefaults() {
 
     await LocalStorage.setItem("-is-playing", "");
     await LocalStorage.setItem("-current-station-name", "");
+    await LocalStorage.setItem("-current-station-url", "");
     await LocalStorage.setItem("-current-track-id", "");
     await LocalStorage.setItem("-last-station-name", "");
     await LocalStorage.setItem("-last-station-url", "");
@@ -264,6 +266,7 @@ export async function loadDefaults() {
 }
 
 export async function getAllStations() {
+  // Gets a list of all stations and their associated data
   const stations: { [stationName: string]: { [key: string]: string | string[] } } = {};
   const stationEntries = await LocalStorage.allItems();
   Object.entries(stationEntries).forEach(([key, value]) => {
@@ -284,12 +287,13 @@ export async function getAllStations() {
 }
 
 export async function playStation(stationName: string, stationURL: string) {
-  const isPlaying = await LocalStorage.getItem("-is-playing")
-  const prevTrackID = await LocalStorage.getItem("-current-track-id")
-  const prevStationName = await LocalStorage.getItem("-current-station-name")
+  // Plays a station's stream URL in Music.app
+  const isPlaying = await LocalStorage.getItem("-is-playing");
+  const prevTrackID = await LocalStorage.getItem("-current-track-id");
+  const prevStationName = await LocalStorage.getItem("-current-station-name");
   if (isPlaying == "true") {
-    pausePlayback()
-    deleteTrack(prevTrackID?.toString(), prevStationName?.toString())
+    pausePlayback();
+    deleteTrack(prevTrackID?.toString(), prevStationName?.toString());
   }
   const streamID = await runAppleScript(`tell application "Music"
       try
@@ -313,27 +317,35 @@ export async function playStation(stationName: string, stationURL: string) {
         end try
       end try
     end tell`);
-  
+
   await LocalStorage.setItem("-is-playing", "true");
   await LocalStorage.setItem("-current-station-name", stationName);
+  await LocalStorage.setItem("-current-station-url", stationURL);
   await LocalStorage.setItem("-current-track-id", streamID);
-  await LocalStorage.setItem("-last-station-name", stationName);
-  await LocalStorage.setItem("-last-station-url", stationURL);
 
   return streamID;
 }
 
 export async function pausePlayback() {
+  // Pauses Music.app and clears storage data keys
+
+  const stationName = await LocalStorage.getItem("-current-station-name");
+  const stationURL = await LocalStorage.getItem("-current-station-url");
+
+  await LocalStorage.setItem("-last-station-name", stationName as string);
+  await LocalStorage.setItem("-last-station-url", stationURL as string);
+
   await runAppleScript(`tell application "Music"
       pause
     end tell`);
-  
+
   await LocalStorage.setItem("-is-playing", "");
   await LocalStorage.setItem("-current-station-name", "");
   await LocalStorage.setItem("-current-track-id", "");
 }
 
 export async function deleteTrack(trackID?: string, trackName?: string) {
+  // Deletes a station's track from Music.app
   if (trackID != undefined && trackID != "") {
     await runAppleScript(`tell application "Music"
             try
@@ -351,6 +363,7 @@ export async function deleteTrack(trackID?: string, trackName?: string) {
 }
 
 export async function deleteStation(stationName: string, stationData: { [key: string]: string | string[] }) {
+  // Deletes a station from storage
   for (const key in stationData) {
     let value = stationData[key];
     if (Array.isArray(value)) {
@@ -376,9 +389,10 @@ async function modifyStation(
     >
   >
 ) {
-    if (oldName != "") {
+  // Updates the metadata of a station
+  if (oldName != "") {
     await deleteStation(oldName, oldData);
-    }
+  }
   for (const key in newData) {
     let value = newData[key];
     if (Array.isArray(value)) {
@@ -406,6 +420,7 @@ export function EditStationForm(props: {
     >
   >;
 }) {
+  // Displays a form for updating station metadata
   const { stationName, stationData, setStations } = props;
 
   const [nameError, setNameError] = useState<string | undefined>();
@@ -446,13 +461,12 @@ export function EditStationForm(props: {
         defaultValue={stationName}
         error={nameError}
         onBlur={(event) => {
-            if (event.target.value?.length == 0) {
-              setNameError("Station name cannot be empty!");
-            } else if (nameError !== undefined) {
-                setNameError(undefined);
-            }
+          if (event.target.value?.length == 0) {
+            setNameError("Station name cannot be empty!");
+          } else if (nameError !== undefined) {
+            setNameError(undefined);
           }
-        }
+        }}
       />
 
       <Form.TextField

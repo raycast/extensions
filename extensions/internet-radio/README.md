@@ -11,3 +11,5 @@ Play live internet radio through Music.app. The 36 default stations cover a wide
     - Stops the currently playing station and removes the associated stream file from Music.app.
 - Play Last Station
     - Resumes playback of the last played station.
+- Play Random Station
+    - Plays a random live radio station.
