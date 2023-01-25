@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "passage-lookup",
-      "title": "Loopkup Verse",
+      "title": "Lookup Passage",
       "subtitle": "ESV",
       "description": "Lookup, display, copy, and paste Bible passages from the English Standard Version.",
       "mode": "view"
