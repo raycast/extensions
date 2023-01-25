@@ -31,6 +31,13 @@
       "subtitle": "Audio Device",
       "description": "Sets the active audio output device to the favourite specified in the preferences",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-favourites",
+      "title": "Toggle Output Device between Favourites",
+      "subtitle": "Audio Device",
+      "description": "Toggle the active audio output device between the favourites specified in the preferences",
+      "mode": "no-view"
     }
   ],
   "preferences": [
