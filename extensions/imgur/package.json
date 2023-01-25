@@ -5,6 +5,9 @@
   "description": "Imgur - Upload Media & View Images",
   "icon": "imgur.png",
   "author": "BalliAsghar",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Applications",
     "Media"
@@ -30,7 +33,7 @@
     {
       "name": "clientID",
       "title": "Client ID",
-      "description": "Provide your Imgur Client ID",
+      "description": "You can get your own Client ID from https://api.imgur.com/oauth2/addclient",
       "default": "aee191b1f4042c1",
       "type": "textfield",
       "required": false

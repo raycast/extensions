@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Icon, Toast, showToast, Clipboard, LocalStorage } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Toast, showToast, Clipboard, LocalStorage, open } from "@raycast/api";
 import fs from "fs";
 import { useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
@@ -69,22 +69,36 @@ export default function Command() {
       data: data,
     };
 
+    const toast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
     try {
-      showToast(Toast.Style.Animated, "Uploading", "Please wait...");
       const response = await axios(config);
 
       if (!response.data.success) {
-        showToast(Toast.Style.Failure, "Upload failed", "Please try again");
+        toast.style = Toast.Style.Failure;
+        toast.title = "Upload failed";
+        toast.message = "Please try again";
         return;
       }
 
       const data = response.data.data as UploadResponse;
       await Clipboard.copy(data.link);
       await saveHistory(type, data);
-      showToast(Toast.Style.Success, "Upload successful", "Link copied to clipboard");
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Upload successful";
+      toast.message = "Link copied to clipboard";
+      toast.primaryAction = {
+        title: "Open in Browser",
+        onAction: (toast) => {
+          open(data.link);
+          toast.hide();
+        },
+      };
       setMedia([]);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Upload failed", "Please try again");
+      toast.style = Toast.Style.Failure;
+      toast.title = "Upload failed";
+      toast.message = "Please try again";
       console.log(error);
     }
   };

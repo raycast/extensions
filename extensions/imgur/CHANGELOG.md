@@ -1,3 +1,3 @@
 # Imgur Changelog
 
-## [Initial Version] - 2023-01-19
+## [Initial Version] - 2023-01-25

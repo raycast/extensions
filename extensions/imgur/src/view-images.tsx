@@ -22,6 +22,7 @@ export default function Command() {
             <ActionPanel>
               <Action.Push title="Details" target={<MetaData {...item} />} icon={{ source: Icon.Info }} />
               <Download url={item.link} filename={item.title} />
+              <Action.OpenInBrowser url={item.link} />
               <Action.CopyToClipboard title="Copy Link" content={item.link} />
             </ActionPanel>
           }
@@ -81,6 +82,7 @@ const MetaData = (item: UploadResponse) => {
       actions={
         <ActionPanel>
           <Download url={item.link} filename={item.title} />
+          <Action.OpenInBrowser url={item.link} />
           <Action.CopyToClipboard title="Copy Link" content={item.link} />
         </ActionPanel>
       }
