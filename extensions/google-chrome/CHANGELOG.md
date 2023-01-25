@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Performances improve] - 2023-01-25
+
+- Improved getting open tabs faster
+
 ## [Profiles support] - 2023-01-24
 
 - Added support for profiles across all commands
