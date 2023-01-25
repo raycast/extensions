@@ -1,6 +1,6 @@
 # internet-radio
 
-Play live internet radio through Music.app. The 36 default stations cover a wide variety of genres, including live news, and you can add custom stations by providing a directly link to the stream URL (e.g. a live broadcast mp3, ogg, acc, pls, or other audio file). 
+Play live internet radio through Music.app. The 36 default stations cover a wide variety of genres, including live news, and you can add custom stations by providing a directly link to the stream URL (e.g. a live broadcast mp3, ogg, acc, pls, or other audio file). You can also view the current station and control playback via a menu bar extra.
 
 # Commands
 - Browse Stations
@@ -13,3 +13,7 @@ Play live internet radio through Music.app. The 36 default stations cover a wide
     - Resumes playback of the last played station.
 - Play Random Station
     - Plays a random live radio station.
+- Menu Bar Radio
+    - View current station and control playback from the menu bar.
+- Current Station
+    - Shows the currently playing station.

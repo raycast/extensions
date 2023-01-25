@@ -1,4 +1,4 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { environment, LaunchType, LocalStorage, showToast, Toast } from "@raycast/api";
 import { loadDefaults, playStation } from "./utils";
 
 export default async function Command() {
@@ -8,8 +8,10 @@ export default async function Command() {
 
   if ((lastStationName && lastStationURL && lastStationName != "") || lastStationURL != "") {
     await playStation(lastStationName as string, lastStationURL as string);
-    await showToast({ title: "Resuming Station", message: lastStationName as string });
-  } else {
+    if (environment.launchType == LaunchType.UserInitiated) {
+      await showToast({ title: "Resuming Station", message: lastStationName as string });
+    }
+  } else if (environment.launchType == LaunchType.UserInitiated) {
     await showToast({ title: "Failed to play last station", style: Toast.Style.Failure });
   }
 }

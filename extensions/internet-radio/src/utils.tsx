@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Form, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Form, launchCommand, LaunchType, LocalStorage, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { runAppleScript } from "run-applescript";
 
@@ -291,10 +291,12 @@ export async function playStation(stationName: string, stationURL: string) {
   const isPlaying = await LocalStorage.getItem("-is-playing");
   const prevTrackID = await LocalStorage.getItem("-current-track-id");
   const prevStationName = await LocalStorage.getItem("-current-station-name");
+
   if (isPlaying == "true") {
-    pausePlayback();
-    deleteTrack(prevTrackID?.toString(), prevStationName?.toString());
+    await pausePlayback();
+    await deleteTrack(prevTrackID?.toString(), prevStationName?.toString());
   }
+
   const streamID = await runAppleScript(`tell application "Music"
       try
         set trackIDs to get id of URL tracks
@@ -322,7 +324,12 @@ export async function playStation(stationName: string, stationURL: string) {
   await LocalStorage.setItem("-current-station-name", stationName);
   await LocalStorage.setItem("-current-station-url", stationURL);
   await LocalStorage.setItem("-current-track-id", streamID);
+  await launchCommand({ name: "current-station", type: LaunchType.Background })
 
+  if (environment.commandName != "menubar-radio") {
+    await launchCommand({ name: "menubar-radio", type: LaunchType.Background })
+  }
+  
   return streamID;
 }
 
@@ -342,6 +349,13 @@ export async function pausePlayback() {
   await LocalStorage.setItem("-is-playing", "");
   await LocalStorage.setItem("-current-station-name", "");
   await LocalStorage.setItem("-current-track-id", "");
+
+  console.log(await LocalStorage.getItem("-current-station-name"))
+  await launchCommand({ name: "current-station", type: LaunchType.Background })
+
+  if (environment.commandName != "menubar-radio") {
+    await launchCommand({ name: "menubar-radio", type: LaunchType.Background })
+  }
 }
 
 export async function deleteTrack(trackID?: string, trackName?: string) {

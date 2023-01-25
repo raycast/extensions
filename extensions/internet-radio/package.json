@@ -31,14 +31,26 @@
     {
       "name": "stop-playback",
       "title": "Stop Playback",
-      "description": "Stops radio playback and removes the associated stream file from Music.app.",
+      "description": "Stops radio playback and removes the associated stream file from Music.app",
       "mode": "no-view"
     },
     {
       "name": "play-random-station",
       "title": "Play Random Station",
-      "description": "Plays a random live radio station.",
+      "description": "Plays a random live radio station",
       "mode": "no-view"
+    },
+    {
+      "name": "current-station",
+      "title": "Current Station",
+      "description": "Shows the currently playing station",
+      "mode": "no-view"
+    },
+    {
+      "name": "menubar-radio",
+      "title": "Menu Bar Radio",
+      "description": "View current station and control playback from the menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
