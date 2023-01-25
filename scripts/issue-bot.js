@@ -71,7 +71,7 @@ module.exports = async ({ github, context, core }) => {
     // we don't want to label the issue here, only answer to a comment
 
     // if the one who posts a comment is an owner of the extension related to the issue
-    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user) !== -1) {
+    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user.login) !== -1) {
       if (closeIssueMatch.test(context.payload.comment.body)) {
         console.log(`closing #${context.payload.issue.number}`);
         await github.rest.issues.update({
@@ -84,7 +84,7 @@ module.exports = async ({ github, context, core }) => {
         console.log("didn't find the right comment");
       }
     } else {
-      console.log(`${context.payload.comment.user} is not an owner`);
+      console.log(`${context.payload.comment.user.login} is not an owner`);
     }
     return;
   }
