@@ -34,7 +34,7 @@
     },
     {
       "name": "toggle-favourites",
-      "title": "Toggle Output Device between Favourites",
+      "title": "Toggle Favourites",
       "subtitle": "Audio Device",
       "description": "Toggle the active audio output device between the favourites specified in the preferences",
       "mode": "no-view"
@@ -62,7 +62,7 @@
       "name": "favourite2",
       "required": false,
       "title": "Favourite Output Device 2",
-      "description": "The name, as found in the output device list, of the output device to use as the favourite two",
+      "description": "For Toggle Favourites. Requires the IDs in both favourites fields. You can find the ID with Set Output Device Action",
       "type": "textfield",
       "default": ""
     }
