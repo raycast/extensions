@@ -3,13 +3,13 @@ import { startCase } from "lodash";
 import { getStories } from "./hackernews";
 import { Topic } from "./types";
 import { useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
 
 export default function Command() {
-  const [topic, setTopic] = useState<Topic | null>(Topic.FrontPage);
-  const { data, isLoading } = useCachedPromise(getStories, [topic]);
+  const [topic, setTopic] = useState<Topic>(Topic.FrontPage);
+  const { data, isLoading } = usePromise(getStories, [topic]);
 
   return (
     <List

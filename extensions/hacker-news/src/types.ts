@@ -1,3 +1,5 @@
+import Parser from "rss-parser";
+
 export enum Topic {
   Active = "active",
   AskHN = "ask",
@@ -15,3 +17,8 @@ export enum Topic {
   ShowHN = "show",
   WhoIsHiring = "whoishiring",
 }
+
+export type CacheEntry = {
+  timestamp: number;
+  items: Parser.Item[];
+};
