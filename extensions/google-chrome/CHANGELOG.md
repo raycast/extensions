@@ -2,7 +2,7 @@
 
 ## [Performances improve] - 2023-01-25
 
-- Improved getting open tabs faster
+- Improved getting open tabs
 
 ## [Profiles support] - 2023-01-24
 
