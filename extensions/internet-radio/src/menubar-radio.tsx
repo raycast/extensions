@@ -48,14 +48,14 @@ export default function Command() {
     <MenuBarExtra
       isLoading={stationList.length == 0}
       title={currentStationName}
-      icon={Icon.Livestream}
+      icon={isPlaying ? Icon.Livestream : Icon.LivestreamDisabled}
       tooltip={`Currently playing station: ${currentStationName}`}
     >
       <MenuBarExtra.Item title="Controls" />
 
       {isPlaying ? (
         <MenuBarExtra.Item
-          icon={Icon.Pause}
+          icon={Icon.Stop}
           title="Stop Playback"
           onAction={async () => await launchCommand({ name: "stop-playback", type: LaunchType.Background })}
           shortcut={{ modifiers: ["cmd"], key: "s" }}

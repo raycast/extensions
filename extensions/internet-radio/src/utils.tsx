@@ -37,7 +37,6 @@ export const colorMap: { [key: string]: Color } = {
   symphony: Color.Green,
   romantic: Color.Red,
   piano: Color.SecondaryText,
-  christmas: Color.Green,
   jpop: Color.Red,
   "top 40": Color.Red,
   oldies: Color.Orange,
@@ -55,6 +54,8 @@ export const colorMap: { [key: string]: Color } = {
   hits: Color.Red,
   kpop: Color.Magenta,
   talk: Color.SecondaryText,
+  ASMR: Color.Blue,
+  holiday: Color.Green,
 };
 
 const defaultStations: { [value: string]: { [value: string]: string | string[] } } = {
@@ -102,7 +103,7 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
   "Radio X-MAS": {
     website: "http://www.radio-xmas.at",
     stream: "http://77.75.16.229:443/stream/1/",
-    genres: ["christmas", ""],
+    genres: ["holiday", ""],
   },
   "J-Pop Sakura": {
     website: "https://asiadreamradio.com",
@@ -249,6 +250,51 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
     stream: "http://hi5.streamingsoundtracks.com/;",
     genres: ["soundtracks", ""],
   },
+  "Ambient Sleeping Pill": {
+    website: "https://ambientsleepingpill.com",
+    stream: "http://radio.stereoscenic.com/asp-h",
+    genres: ["ambient", "chillout"]
+  },
+  "Exclusively Ocean": {
+    website: "https://www.getmeradio.com/stations/exclusivelyocean-3235/",
+    stream: "https://streaming.exclusive.radio/er/ocean/icecast.audio",
+    genres: ["ambient", ""]
+  },
+  "Exclusively Birdsong": {
+    website: "https://www.getmeradio.com/stations/exclusivelybirdsong-3243/",
+    stream: "https://streaming.exclusive.radio/er/birdsong/icecast.audio",
+    genres: ["ambient", ""]
+  },
+  "Calm Piano": {
+    website: "https://www.getmeradio.com/stations/calmpiano-4057/",
+    stream: "https://drive.uber.radio/uber/calmpiano/icecast.audio",
+    genres: ["piano", ""]
+  },
+  "ASMR Mix": {
+    website: "https://www.getmeradio.com/stations/asmrmix-7014/",
+    stream: "https://drive.uber.radio/uber/asmrmix/icecast.audio",
+    genres: ["ambient", "ASMR"]
+  },
+  "SCIFI.radio": {
+    website: "https://scifi.radio",
+    stream: "https://station.kryptonradio.com:8080/stream",
+    genres: ["soundtracks", ""]
+  },
+  "Horror and Halloween Radio": {
+    website: "http://horrorandhalloweenradio.com/",
+    stream: "http://s2.voscast.com:11034/;stream1674643361109/1",
+    genres: ["holiday", ""]
+  },
+  "Park Magic Radio": {
+    website: "http://parkmagicradio.ca/",
+    stream: "http://www.parkmagicradio.ca:8000/stream/1/;",
+    genres: ["soundtracks", ""]
+  },
+  "Musical Theater Radio": {
+    website: "https://www.musicaltheatreradio.com",
+    stream: "https://streaming.live365.com/a99840",
+    genres: ["soundtracks", ""]
+  }
 };
 
 export async function loadDefaults() {
