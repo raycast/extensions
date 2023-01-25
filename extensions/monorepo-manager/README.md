@@ -24,7 +24,7 @@ Actions of a workspace or normal folder:
 When you select a workspace, it shows list of packages of selected workspace.
 Here are actions of a package:
 
-- `See Package Detail` of the selected package. This is a default action (Its shortcut is Enter).
+- `See Package Details` of the selected package. This is a default action (Its shortcut is Enter).
 - `Show in Finder`: open the selected package in Finder.
 - `Open in Visual Studio Code`: open the selected package in Visual Studio Code Text editor.
 - `Open in Sublime Text`: open the selected package in Sublime Text editor.
