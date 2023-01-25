@@ -15,9 +15,6 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-// Library imports
-import { NodeHtmlMarkdown } from "node-html-markdown";
-
 // types
 import { SearchResponse, Preferences, Search } from "./types";
 
@@ -69,9 +66,14 @@ export default function EsvSearch() {
         id: crypto.randomUUID(),
         q: query,
         refs: passages.results.map((i) => i.reference).join(","),
-        results: NodeHtmlMarkdown.translate(
-          passages.results.map((i) => `<h2>${i.reference}</h2><p>${i.content}</p>`).join("")
-        ),
+        results: passages.results
+          .map(
+            (i) => `
+## ${i.reference}
+${i.content}
+        `
+          )
+          .join(""),
       };
       setSearchResult(passageObject);
       const resultExists = prevItems.some((item: Search) => item.q === passageObject.q);
