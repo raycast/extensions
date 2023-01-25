@@ -81,7 +81,7 @@ module.exports = async ({ github, context, core }) => {
           state: "closed",
         });
       } else {
-        console.log("didn't find the right comment");
+        console.log(`didn't find the right comment in ${context.payload.comment.body}`);
       }
     } else {
       console.log(`${context.payload.comment.user.login} is not an owner`);
