@@ -39,7 +39,7 @@ export default function main() {
         repeat with lineItem in docData
           tell newDoc to make new row at front of rows with properties {name: lineItem}
         end repeat
-      end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())))
+      end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())));
     });
-  }, [])
+  }, []);
 }

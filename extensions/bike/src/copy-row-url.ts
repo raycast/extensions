@@ -14,6 +14,6 @@ export default function main() {
     runAppleScript(`tell application "Bike"
             set theText to URL of selection row of document 1
             set the clipboard to theText
-        end tell`).then(() => showHUD("Copied Row URL To Clipboard!").then(() => Promise.resolve(popToRoot())))
-  }, [])
+        end tell`).then(() => showHUD("Copied Row URL To Clipboard!").then(() => Promise.resolve(popToRoot())));
+  }, []);
 }

@@ -43,13 +43,13 @@
     },
     {
       "name": "close-all-but-current",
-      "title": "Close Other Documents",
+      "title": "Close Other Bikes",
       "description": "Gracefully closes all except the current Bike document, prompting to save as needed.",
       "mode": "view"
     },
     {
       "name": "force-close-all-but-current",
-      "title": "Force Close Other Documents",
+      "title": "Force Close Other Bikes",
       "description": "Force closes all except the current Bike document.",
       "mode": "view"
     },

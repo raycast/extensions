@@ -18,6 +18,6 @@ export default function main() {
           close last document saving no
         end try
       end repeat
-    end tell`).then(() => showHUD("Closed Other Documents").then(() => Promise.resolve(popToRoot())))
-  }, [])
+    end tell`).then(() => showHUD("Closed Other Documents").then(() => Promise.resolve(popToRoot())));
+  }, []);
 }

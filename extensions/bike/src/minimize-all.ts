@@ -10,8 +10,8 @@ export default function main() {
   }
 
   useEffect(() => {
-    runAppleScript('tell application "Bike" to set the miniaturized of every window to true').then(
-      () => showHUD("Minimized Bike").then(() => Promise.resolve(popToRoot()))
-    )
-  }, [])
+    runAppleScript('tell application "Bike" to set the miniaturized of every window to true').then(() =>
+      showHUD("Minimized Bike").then(() => Promise.resolve(popToRoot()))
+    );
+  }, []);
 }

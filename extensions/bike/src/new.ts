@@ -13,6 +13,6 @@ export default function main() {
     runAppleScript(`tell application "Bike"
       activate  
       make new document
-    end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())))
-  }, [])
+    end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())));
+  }, []);
 }

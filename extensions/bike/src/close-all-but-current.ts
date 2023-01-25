@@ -13,7 +13,7 @@ export default function main() {
     setRanScript(true);
 
     // Run script
-      runAppleScript(`tell application "Bike"
+    runAppleScript(`tell application "Bike"
       activate
       set docZero to document 1
       set theCount to (count of documents)

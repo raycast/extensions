@@ -161,7 +161,7 @@ async function custom_tc() {
           set foreground color to choose color
       end try
     end tell`);
-    await showHUD("Set Bike Foreground Color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function white_tc() {
