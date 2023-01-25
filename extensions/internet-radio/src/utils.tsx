@@ -2,8 +2,12 @@ import { Action, ActionPanel, Color, Form, LocalStorage, useNavigation } from "@
 import { useState } from "react";
 import { runAppleScript } from "run-applescript";
 
-export const colorMap = {
-    "80s": Color.Orange,
+export const colorMap: { [key: string]: Color }= {
+    "40s": Color.Red,
+    "50s": Color.Orange,
+    "60s": Color.Yellow,
+    "70s": Color.Green,
+    "80s": Color.Blue,
     "rock": Color.Red,
     "pop": Color.Blue,
     "disco": Color.Magenta,
@@ -13,7 +17,7 @@ export const colorMap = {
     "metal": Color.SecondaryText,
     "heavy metal": Color.SecondaryText,
     "punk": Color.Purple,
-    "ambient": Color.Brown,
+    "ambient": Color.Magenta,
     "new age": Color.Blue,
     "downtempo": Color.Purple,
     "chillout": Color.Blue,
@@ -27,12 +31,20 @@ export const colorMap = {
     "jpop": Color.Red,
     "top 40": Color.Red,
     "oldies": Color.Orange,
-    "noise": Color.Brown,
+    "noise": Color.Magenta,
     "hard rock": Color.Red,
     "country": Color.Yellow,
     "dubstep": Color.Magenta,
     "electronic": Color.Magenta,
     "video game music": Color.Green,
+    "blues": Color.Blue,
+    "jazz": Color.Orange,
+    "news": Color.Red,
+    "sports": Color.Blue,
+    "games": Color.Green,
+    "hits": Color.Red,
+    "kpop": Color.Magenta,
+    "talk": Color.SecondaryText,
 }
 
 const defaultStations: { [value: string]: { [value: string]: string | string[] } } = {
@@ -137,6 +149,96 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
       stream: "http://50.117.1.60/stream/1/",
       genres: ["dubstep", "electronic"]
   },
+  "Blues Radio": {
+    website: "http://www.bluesradio.gr",
+    stream: "http://i4.streams.ovh:8352/stream/1/",
+    genres: ["blues", ""]
+  },
+  "Majestic Jukebox Radio": {
+    website: "https://www.majesticjukeboxradio.com/",
+    stream: "https://uk3.internet-radio.com/proxy/majesticjukebox?mp=/live",
+    genres: ["rock", "jazz", "blues", "country", "soul", "40s", "50s", "60s", "70s", "80s"]
+  },
+  "BBC Radio 1": {
+    website: "https://tunein.com/radio/BBC-Radio-1-988-s24939/",
+    stream: "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
+    genres: ["pop", ""]
+  },
+  "BBC World Service": {
+    website: "https://tunein.com/radio/BBC-World-Service-News-s24948/",
+    stream: "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+    genres: ["news", "talk"]
+  },
+  "Bloomberg Radio": {
+    website: "https://tunein.com/radio/Bloomberg-Radio-s165740/",
+    stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC.aac",
+    genres: ["news", "talk"]
+  },
+  "Associated Press": {
+    website: "https://tunein.com/radio/Associated-Press-s249264/",
+    stream: "http://apnews.streamguys1.com/apnews",
+    genres: ["news", "talk"]
+  },
+  "KPOP Radio": {
+    website: "https://zeno.fm/radio/kpop-radio",
+    stream: "https://stream-55.zeno.fm/382yfn6u498uv?zs=mvrPGxDnTw-zWW4K1sLI2A",
+    genres: ["kpop", ""]
+  },
+  "WRCW Crime Story": {
+    website: "https://live365.com/station/WRCW-Crime-Story----a60381",
+    stream: "https://streaming.live365.com/a60381",
+    genres: ["talk", ""]
+  },
+  "NPR": {
+    website: "https://www.npr.org",
+    stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
+    genres: ["news", "talk"]
+  },
+  "Hot Hitz": {
+    website: "http://player.100hitz.com",
+    stream: "https://pureplay.cdnstream1.com/6027_128.mp3",
+    genres: ["hits", "pop"]
+  },
+  "Fox News": {
+    website: "https://radio.foxnews.com/player-files/radio.php",
+    stream: "https://live.wostreaming.net/direct/foxnewsradio-foxnewsradioaac-imc",
+    genres: ["news", "talk"]
+  },
+  "NBC News": {
+    website: "https://tunein.com/radio/NBC-News-NOW-s310584/",
+    stream: "https://stream.revma.ihrhls.com/zc6043",
+    genres: ["news", "talk"]
+  },
+  "Newsmax": {
+    website: "https://www.iheart.com/live/newsmax-8856/",
+    stream: "https://playerservices.streamtheworld.com/api/livestream-redirect/NEWSMAX_FM.aac",
+    genres: ["news", "talk"]
+  },
+  "ESPN": {
+    website: "https://www.iheart.com/live/espn-radio-7903/",
+    stream: "https://live.wostreaming.net/direct/espn-network-48",
+    genres: ["sports", "talk"]
+  },
+  "AmbientRadio": {
+    website: "http://www.ambientradio.net",
+    stream: "https://stream.rcast.net/13551.mp3",
+    genres: ["ambient", "chillout"]
+  },
+  "Greatest Hits Radio USA": {
+    website: "https://www.greatesthitsradiousa.com/",
+    stream: "https://stream.rcast.net/69558.mp3",
+    genres: ["hits", "oldies"]
+  },
+  "Adagio.FM": {
+    website: "http://adagio.fm",
+    stream: "http://hi5.adagio.fm/;",
+    genres: ["classical", ""]
+  },
+  "Streaming Soundtracks": {
+    website: "http://www.streamingsoundtracks.com",
+    stream: "http://hi5.streamingsoundtracks.com/;",
+    genres: ["soundtracks", ""]
+  }
 };
 
 export async function loadDefaults() {
@@ -156,6 +258,8 @@ export async function loadDefaults() {
     await LocalStorage.setItem("-is-playing", "");
     await LocalStorage.setItem("-current-station-name", "");
     await LocalStorage.setItem("-current-track-id", "");
+    await LocalStorage.setItem("-last-station-name", "");
+    await LocalStorage.setItem("-last-station-url", "");
   }
 }
 
@@ -180,11 +284,17 @@ export async function getAllStations() {
 }
 
 export async function playStation(stationName: string, stationURL: string) {
+  const isPlaying = await LocalStorage.getItem("-is-playing")
+  const prevTrackID = await LocalStorage.getItem("-current-track-id")
+  const prevStationName = await LocalStorage.getItem("-current-station-name")
+  if (isPlaying == "true") {
+    pausePlayback()
+    deleteTrack(prevTrackID?.toString(), prevStationName?.toString())
+  }
   const streamID = await runAppleScript(`tell application "Music"
       try
         set trackIDs to get id of URL tracks
         open location "${stationURL}"
-        
         repeat with newID in (get id of URL tracks)
             if newID is not in trackIDs then
                 set theStream to track id newID
@@ -199,12 +309,17 @@ export async function playStation(stationName: string, stationURL: string) {
           set name of URL track 1 to "Raycast: ${stationName}"
           return id of URL track 1
         on error
-          -- return ""
-          say "wow"
+          return ""
         end try
       end try
     end tell`);
-  console.log("wow", streamID);
+  
+  await LocalStorage.setItem("-is-playing", "true");
+  await LocalStorage.setItem("-current-station-name", stationName);
+  await LocalStorage.setItem("-current-track-id", streamID);
+  await LocalStorage.setItem("-last-station-name", stationName);
+  await LocalStorage.setItem("-last-station-url", stationURL);
+
   return streamID;
 }
 
@@ -212,6 +327,10 @@ export async function pausePlayback() {
   await runAppleScript(`tell application "Music"
       pause
     end tell`);
+  
+  await LocalStorage.setItem("-is-playing", "");
+  await LocalStorage.setItem("-current-station-name", "");
+  await LocalStorage.setItem("-current-track-id", "");
 }
 
 export async function deleteTrack(trackID?: string, trackName?: string) {
@@ -376,7 +495,7 @@ export function EditStationForm(props: {
         placeholder="Comma-separated list of genres streamed by this station"
         error={genreError}
         onChange={() => (genreError !== undefined ? setGenreError(undefined) : null)}
-        onBlur={(event) => {
+        onBlur={() => {
           if (genreError !== undefined) {
             setGenreError(undefined);
           }

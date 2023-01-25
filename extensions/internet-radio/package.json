@@ -21,6 +21,18 @@
       "title": "New Station",
       "description": "Add a new radio station",
       "mode": "view"
+    },
+    {
+      "name": "play-last-station",
+      "title": "Play Last Station",
+      "description": "Resumes playback of the last played station",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-playback",
+      "title": "Stop Playback",
+      "description": "Stops radio playback and removes the associated stream file from Music.app.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

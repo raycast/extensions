@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, useNavigation, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LocalStorage, useNavigation, Color, showToast } from "@raycast/api";
 import {
   deleteStation,
   deleteTrack,
@@ -44,8 +44,12 @@ export default function Command() {
 
   const listItems: JSX.Element[] = [];
   stationList.sort(([a], [b]) => {return a > b ? 1 : -1}).forEach(([stationName, stationData]) => {
-    console.log(stationData.genres);
     const tags = []
+
+    if (currentStationName == stationName) {
+      tags.push({ icon: Icon.Play })
+    }
+
     for (const genre of stationData.genres) {
       if (genre == "") continue
       let tagColor = Color.SecondaryText
@@ -54,6 +58,7 @@ export default function Command() {
       }
       tags.push({ tag: { value: genre, color: tagColor}})
     }
+
     listItems.push(
       <List.Item
         key={stationName}
@@ -69,26 +74,11 @@ export default function Command() {
                   icon={Icon.Play}
                   onAction={() => {
                     playStation(stationName, stationData.stream as unknown as string).then((stationID) => {
-                      LocalStorage.setItem("-is-playing", "true");
-                      LocalStorage.setItem("-current-station-name", stationName);
-                      LocalStorage.setItem("-current-track-id", stationID);
-
                       setIsPlaying(true);
                       setCurrentStationName(stationName);
                       setCurrentTrackID(stationID);
                     });
-                  }}
-                />
-              ) : null}
-
-              {isPlaying && currentStationName == stationName ? (
-                <Action
-                  title={"Pause Playback"}
-                  icon={Icon.Pause}
-                  onAction={() => {
-                    LocalStorage.setItem("-is-playing", "");
-                    setIsPlaying(false);
-                    pausePlayback();
+                    showToast({ title: `Playing Station: ${stationName}` })
                   }}
                 />
               ) : null}
@@ -98,16 +88,15 @@ export default function Command() {
                   title={"Stop Playback"}
                   icon={Icon.Stop}
                   onAction={() => {
-                    pausePlayback();
-                    deleteTrack(currentTrackID);
+                    pausePlayback().then(() => {
+                      deleteTrack(currentTrackID);
+                      
+                      setIsPlaying(false);
+                      setCurrentStationName("");
+                      setCurrentTrackID("");
 
-                    LocalStorage.setItem("-is-playing", "");
-                    LocalStorage.setItem("-current-station-name", "");
-                    LocalStorage.setItem("-current-track-id", "");
-
-                    setIsPlaying(false);
-                    setCurrentStationName("");
-                    setCurrentTrackID("");
+                      showToast({ title: `Stopped Station: ${currentStationName}` })
+                    });
                   }}
                 />
               ) : null}
