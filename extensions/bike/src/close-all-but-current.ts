@@ -13,7 +13,6 @@ export default function main() {
     setRanScript(true);
 
     // Run script
-    Promise.resolve(
       runAppleScript(`tell application "Bike"
       activate
       set docZero to document 1
@@ -24,12 +23,6 @@ export default function main() {
         end try
         set theCount to (theCount - 1)
       end repeat
-    end tell`)
-    );
-
-    showHUD("Closed other Bikes");
-
-    // Close the Raycast window
-    Promise.resolve(popToRoot());
+    end tell`).then(() => showHUD("Closed Other Documents").then(() => popToRoot()));
   }
 }

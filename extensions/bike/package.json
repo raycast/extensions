@@ -43,13 +43,13 @@
     },
     {
       "name": "close-all-but-current",
-      "title": "Close Other Bikes",
+      "title": "Close Other Documents",
       "description": "Gracefully closes all except the current Bike document, prompting to save as needed.",
       "mode": "view"
     },
     {
       "name": "force-close-all-but-current",
-      "title": "Force Close Other Bikes",
+      "title": "Force Close Other Documents",
       "description": "Force closes all except the current Bike document.",
       "mode": "view"
     },
@@ -66,17 +66,39 @@
       "mode": "view"
     },
     {
-      "name": "copy-url",
-      "title": "Copy Bike URL",
+      "name": "copy-document-url",
+      "title": "Copy Document URL",
       "description": "Copies the URL for the current Bike document to the clipboard.",
       "mode": "view"
+    },
+    {
+      "name": "copy-row-url",
+      "title": "Copy Row URL",
+      "description": "Copies the URL for the currently selected row to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "search-rows",
+      "title": "Search Rows",
+      "description": "Search the current document's rows for a given text string",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "query",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.2",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.46.1",
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
