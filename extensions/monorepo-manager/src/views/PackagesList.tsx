@@ -84,7 +84,7 @@ export function PackagesList(props: Props) {
               <ActionPanel title={`Actions for ${name} workspace:`}>
                 <ActionPanel.Section>
                   <Action.Push
-                    title="See package detail"
+                    title="See Package Detail"
                     target={<PackageDetail workspace={it} workspaceRootInstance={wsManager} />}
                     icon={Icon.Info}
                   />

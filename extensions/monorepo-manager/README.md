@@ -12,7 +12,7 @@ Each folder is considered a project or workspace if it has a `package.json` file
 
 Actions of a workspace or normal folder:
 
-- `Show List of Packages` of current selected workspace. A normal folder does not have this action.
+- `Show List of Packages` of current selected workspace. A normal folder does not have this action. This is a default action (Its shortcut is Enter).
 - `Show in Finder`: : open selected workspace/folder in Finder.
 - `Open in Visual Studio Code`: open selected workspace/folder in Visual Studio Code Text editor.
 - `Open in Sublime Text`: open selected workspace/folder in Sublime Text editor.
@@ -24,7 +24,7 @@ Actions of a workspace or normal folder:
 When you select a workspace, it shows list of packages of selected workspace.
 Here are actions of a package:
 
-- `See package detail` of the selected package.
+- `See Package Detail` of the selected package. This is a default action (Its shortcut is Enter).
 - `Show in Finder`: open the selected package in Finder.
 - `Open in Visual Studio Code`: open the selected package in Visual Studio Code Text editor.
 - `Open in Sublime Text`: open the selected package in Sublime Text editor.

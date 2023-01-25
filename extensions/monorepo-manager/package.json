@@ -23,16 +23,16 @@
   "preferences": [
     {
       "name": "rootSourceFolder",
-      "title": "Root source folder path",
+      "title": "Root Source Folder Path",
       "description": "A absolute folder path contains all workspaces/projects",
-      "type": "textfield",
+      "type": "directory",
       "required": true,
       "placeholder": "/Uers/your-name/sources/",
       "default": ""
     },
     {
       "name": "cacheDuration",
-      "title": "Cache duration",
+      "title": "Cache Duration",
       "description": "Cache duration (ms). Default is 1 day",
       "type": "textfield",
       "required": false,
@@ -41,7 +41,7 @@
     },
     {
       "name": "slackRedirectLink",
-      "title": "Slack channel redirection link",
+      "title": "Slack Channel Redirection Link",
       "description": "A Slack link is used to redirect to a specific channel, which is gotten from package information",
       "type": "textfield",
       "required": false,
@@ -50,7 +50,7 @@
     },
     {
       "name": "mainFieldName",
-      "title": "Field name in `package.json` file containing detail of a package",
+      "title": "Field in `package.json` File Containing Detail of a Package",
       "description": "If the field name is not specified, some detail info of current package will be omitted",
       "type": "textfield",
       "required": false,
