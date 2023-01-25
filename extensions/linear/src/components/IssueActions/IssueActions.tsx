@@ -2,6 +2,7 @@ import { Action, Icon, ActionPanel, showToast, Toast, confirmAlert, Color, useNa
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
+import { format } from "date-fns";
 
 import { IssueResult, IssueDetailResult } from "../../api/getIssues";
 
@@ -287,6 +288,28 @@ export default function IssueActions({
     });
   }
 
+  async function setDueDate(dueDate: Date | null) {
+    updateIssue({
+      animatedTitle: dueDate ? "Setting due date" : "Removing due date",
+      payload: { dueDate },
+      optimisticUpdate(issue) {
+        return {
+          ...issue,
+          dueDate,
+        };
+      },
+      rollbackUpdate(issue) {
+        return {
+          ...issue,
+          dueDate: issue.dueDate,
+        };
+      },
+      successTitle: dueDate ? "Set due date" : "Removed due date",
+      successMessage: dueDate ? `${issue.identifier} due date set to ${format(dueDate, "MM/dd/yyyy")}` : "",
+      errorTitle: "Failed to set due date",
+    });
+  }
+
   function refresh() {
     if (mutateList) {
       mutateList();
@@ -391,6 +414,12 @@ export default function IssueActions({
             })}
           </ActionPanel.Submenu>
         ) : null}
+
+        <Action.PickDate
+          title="Set Due Date"
+          shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
+          onChange={setDueDate}
+        />
 
         <LabelSubmenu issue={issue} updateIssue={updateIssue} />
 

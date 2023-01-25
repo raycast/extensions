@@ -1,6 +1,15 @@
 # Amazon AWS Changelog
 
+## [ECS Command] - 2023-01-06
+
+- Added command for forcing a new deployment on a given service
+
+## [CloudFormation Resources List] - 2022-12-25
+
+- Added support for viewing CloudFormation resources from within Raycast ([#4054](https://github.com/raycast/extensions/pull/4054))
+
 ## [ECS Command] - 2022-12-14
+
 - Added support for viewing ECS cluster, services, task, task definitions, containers and container logs from within Raycast or the browser
 - Added support for viewing Lambda logs from within Raycast or the browser
 

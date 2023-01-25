@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchLogStreams, getTaskCWLogsGroupUrl } from "../../actions";
-import { getActionOpenInBrowser, getFilterPlaceholder } from "../../util";
+import { fetchLogStreams } from "../../actions";
+import { getActionOpenInBrowser, getFilterPlaceholder, resourceToConsoleLink } from "../../util";
 import { LogStartTimes } from "../../interfaces";
 import CloudwatchLogs from "./CloudwatchLogs";
 import CloudwatchLogsTimeDropdown from "../searchbar/CloudwatchLogsTimeDropdown";
@@ -38,7 +38,7 @@ function CloudwatchLogStreams({ logGroupName }: { logGroupName: string }) {
                     ></CloudwatchLogs>
                   }
                 />
-                {getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName))}
+                {getActionOpenInBrowser(resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup"))}
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
                     title="Copy Stream ARN"

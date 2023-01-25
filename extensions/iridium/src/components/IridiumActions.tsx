@@ -1,7 +1,9 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
-import { openNewHistoryTab, openNewTab, setActiveTab } from "../actions";
-import { Tab } from "../interfaces";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
+import { openNewTab, setActiveTab } from "../actions";
+import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { useCachedState } from "@raycast/utils";
+import { IRIDIUM_PROFILE_KEY, DEFAULT_IRIDIUM_PROFILE_ID } from "../constants";
 
 export class IridiumActions {
   public static NewTab = NewTabActions;
@@ -10,12 +12,13 @@ export class IridiumActions {
 }
 
 function NewTabActions({ query }: { query?: string }): ReactElement {
+  const { openTabInProfile } = getPreferenceValues<Preferences>();
+  const [profileCurrent] = useCachedState(IRIDIUM_PROFILE_KEY, DEFAULT_IRIDIUM_PROFILE_ID);
+
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item
-        onAction={function () {
-          openNewTab(query);
-        }}
+        onAction={() => openNewTab({ query, profileCurrent, openTabInProfile })}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
         icon={Icon.Globe}
       />
@@ -32,16 +35,48 @@ function TabListItemActions({ tab }: { tab: Tab }) {
   );
 }
 
-function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
+function HistoryItemActions({
+  title,
+  url,
+  profile: profileOriginal,
+}: {
+  title: string;
+  url: string;
+  profile: string;
+}): ReactElement {
+  const { openTabInProfile } = getPreferenceValues<Preferences>();
+  const [profileCurrent] = useCachedState(IRIDIUM_PROFILE_KEY, DEFAULT_IRIDIUM_PROFILE_ID);
+
   return (
     <ActionPanel title={title}>
       <ActionPanel.Item
-        onAction={function () {
-          openNewHistoryTab(url);
-        }}
-        title={"Open in Tab"}
-        icon={Icon.Globe}
+        onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })}
+        title={"Open"}
       />
+      <ActionPanel.Section title={"Open in profile"}>
+        <ActionPanel.Item
+          onAction={() =>
+            openNewTab({
+              url,
+              profileOriginal,
+              profileCurrent,
+              openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
+            })
+          }
+          title={"Open in current profile"}
+        />
+        <ActionPanel.Item
+          onAction={() =>
+            openNewTab({
+              url,
+              profileOriginal,
+              profileCurrent,
+              openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
+            })
+          }
+          title={"Open in original profile"}
+        />
+      </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
     </ActionPanel>
   );
