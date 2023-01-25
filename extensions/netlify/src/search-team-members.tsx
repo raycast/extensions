@@ -1,83 +1,34 @@
 import { ActionPanel, Action, Image, List } from '@raycast/api';
-import { getAvatarIcon, useCachedState } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { getAvatarIcon, usePromise } from '@raycast/utils';
 
 import { OpenGitProfile } from './components/actions';
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
-import { formatDate, handleNetworkError } from './utils/helpers';
+import { formatDate, humanRole } from './utils/helpers';
+import { useTeams } from './utils/hooks';
 import { getGitProviderIcon } from './utils/icons';
-import {
-  Committer,
-  GitProvider,
-  Member,
-  Reviewer,
-  Team,
-} from './utils/interfaces';
+import { Committer, GitProvider, Member, Reviewer } from './utils/interfaces';
 import InviteTeamMembers from './invite-team-members';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const { isLoadingTeams, teams, teamSlug, setTeamSlug } = useTeams({
+    scoped: true,
+  });
 
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [committers, setCommitters] = useState<Committer[]>([]);
-  const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-
-  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
-
-  const teamDropdown = (
-    <TeamDropdown
-      required
-      teamSlug={teamSlug}
-      setTeamSlug={setTeamSlug}
-      teams={teams}
-    />
+  const { data, isLoading } = usePromise(
+    async (slug: string) => {
+      if (slug) {
+        return await Promise.all([
+          api.getMembers(slug),
+          api.getCommitters(slug),
+          api.getReviewers(slug),
+        ]);
+      } else {
+        return [];
+      }
+    },
+    [teamSlug],
   );
-
-  async function fetchTeams() {
-    setLoading(true);
-    try {
-      const teams = await api.getTeams();
-      setTeams(teams);
-      if (teams.length === 1 || !teamSlug) {
-        setTeamSlug(teams[0].slug);
-      }
-      setLoading(false);
-    } catch (e) {
-      handleNetworkError(e);
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  useEffect(() => {
-    async function reload() {
-      setLoading(true);
-      const promises = [
-        api.getMembers(teamSlug),
-        api.getCommitters(teamSlug),
-        api.getReviewers(teamSlug),
-      ];
-      try {
-        const responses = await Promise.all(promises);
-        const [mems, coms, revs] = responses;
-        setMembers(mems as Member[]);
-        setCommitters(coms as Committer[]);
-        setReviewers(revs as Reviewer[]);
-        setLoading(false);
-      } catch (e) {
-        handleNetworkError(e);
-        setLoading(false);
-      }
-    }
-    if (teamSlug) {
-      reload();
-    }
-  }, [teamSlug]);
 
   function getName(user: Member | Reviewer) {
     return user.full_name || user.email || '';
@@ -94,9 +45,21 @@ export default function Command() {
     return !committer.member_id && now - lastSeen <= ONE_MONTH_AGO;
   }
 
+  const teamDropdown = (
+    <TeamDropdown
+      required
+      teamSlug={teamSlug}
+      setTeamSlug={setTeamSlug}
+      teams={teams}
+    />
+  );
+
+  const members = (data?.[0] || []) as Member[];
+  const committers = (data?.[1] || []) as Committer[];
+  const reviewers = (data?.[2] || []) as Reviewer[];
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingTeams || isLoading}
       searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Search for team members..."
     >
@@ -115,6 +78,7 @@ export default function Command() {
               }}
               title={name}
               subtitle={member.email}
+              keywords={[member.email, humanRole(member.role)]}
               accessories={[
                 ...Object.entries(member.connected_accounts).map(
                   ([provider, username]) => ({
@@ -128,7 +92,7 @@ export default function Command() {
                       tooltip: `Invitation sent`,
                     }
                   : {
-                      tag: member.role,
+                      tag: humanRole(member.role),
                       tooltip: `Can access ${member.site_access} sites`,
                     },
               ].filter(Boolean)}

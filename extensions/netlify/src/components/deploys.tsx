@@ -1,14 +1,10 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { usePromise } from '@raycast/utils';
+import { useState } from 'react';
 
 import api from '../utils/api';
 import { OpenRepo } from '../components/actions';
-import {
-  formatDate,
-  getDeployUrl,
-  getStatusText,
-  handleNetworkError,
-} from '../utils/helpers';
+import { formatDate, getDeployUrl, getStatusText } from '../utils/helpers';
 import { getStatusIcon } from '../utils/icons';
 import { Deploy } from '../utils/interfaces';
 
@@ -17,29 +13,14 @@ interface Props {
   siteName: string;
 }
 
-export default function DeployListView(props: Props) {
-  const [isLoading, setLoading] = useState<boolean>(true);
-  const [deploys, setDeploys] = useState<Deploy[]>([]);
-
+export default function DeployListView({ siteId, siteName }: Props) {
   const [query, setQuery] = useState<string>('');
   const [context, setContext] = useState<string>('');
 
-  const { siteId, siteName } = props;
-
-  useEffect(() => {
-    async function fetchDeploys() {
-      try {
-        const deploys = await api.getDeploys(siteId);
-        setDeploys(deploys);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    fetchDeploys();
-  }, []);
+  const { isLoading, data: deploys } = usePromise(
+    async (siteId: string) => await api.getDeploys(siteId),
+    [siteId],
+  );
 
   const ContextDropdown = (
     <List.Dropdown
@@ -56,7 +37,7 @@ export default function DeployListView(props: Props) {
     </List.Dropdown>
   );
 
-  const filteredDeploys = deploys.filter((deploy) => {
+  const filteredDeploys = (deploys || []).filter((deploy) => {
     const conditions = [];
     if (query) {
       const keywords = [

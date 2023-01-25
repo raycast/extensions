@@ -1,79 +1,50 @@
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { usePromise } from '@raycast/utils';
+import { useState } from 'react';
 
 import api from './utils/api';
 import { formatDate, handleNetworkError } from './utils/helpers';
+import { useTeams } from './utils/hooks';
 import { getFramework, getGitProviderIcon } from './utils/icons';
-import { Site, Team } from './utils/interfaces';
+import { Site } from './utils/interfaces';
 
 import { OpenOnNetlify, OpenRepo } from './components/actions';
 import DeployListView from './components/deploys';
 import TeamDropdown from './components/team-dropdown';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
-
-  const [sites, setSites] = useState<Site[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [favorites, setFavorites] = useState<string[]>([]);
-
   const [query, setQuery] = useState<string>('');
-  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
-  async function fetchSites(query = '', team?: string) {
-    setLoading(true);
-    try {
-      const sites = await api.getSites(query, team);
-      setSites(sites);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
+  const { isLoadingTeams, teams, teamSlug, setTeamSlug } = useTeams({
+    scoped: false,
+  });
 
-  async function fetchTeams() {
-    try {
-      const teams = await api.getTeams();
-      setTeams(teams);
-    } catch (e) {
-      // ignore silently
-    }
-  }
+  const { data: sites = [], isLoading: isLoadingSites } = usePromise(
+    async (query: string, team: string) => await api.getSites(query, team),
+    [query, teamSlug],
+  );
 
-  async function fetchUser() {
-    try {
+  const { data: favorites = [], mutate: mutateFavorites } =
+    usePromise(async () => {
       const user = await api.getUser();
-      setFavorites(user.favorite_sites);
-    } catch (e) {
-      // ignore silently
-    }
-  }
+      return user.favorite_sites;
+    }, []);
 
   async function toggleFavorite(siteId: string) {
-    setLoading(true);
     const ids = favorites.includes(siteId)
       ? favorites.filter((id) => id !== siteId)
       : favorites.concat(siteId);
+
     try {
-      const user = await api.saveFavorites(ids);
-      setFavorites(user.favorite_sites);
-      setLoading(false);
+      await mutateFavorites(api.saveFavorites(ids), {
+        optimisticUpdate() {
+          return ids;
+        },
+      });
     } catch (e) {
-      setLoading(false);
       handleNetworkError(e);
     }
   }
-
-  useEffect(() => {
-    fetchTeams();
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    fetchSites(query, teamSlug);
-  }, [query, teamSlug]);
 
   const teamDropdown = (
     <TeamDropdown teamSlug={teamSlug} setTeamSlug={setTeamSlug} teams={teams} />
@@ -81,7 +52,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingTeams || isLoadingSites}
       isShowingDetail
       onSearchTextChange={setQuery}
       searchText={query}

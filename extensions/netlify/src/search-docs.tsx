@@ -6,10 +6,10 @@ import {
   List,
   LocalStorage,
 } from '@raycast/api';
+import { usePromise } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
-import { handleNetworkError } from './utils/helpers';
 import { AlgoliaHit } from './utils/interfaces';
 
 const NAMESPACE = 'docs.bookmark.v1.';
@@ -20,11 +20,13 @@ const getTitle = (hit: AlgoliaHit) => {
 };
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(false);
-
   const [query, setQuery] = useState<string>('');
-  const [hits, setHits] = useState<AlgoliaHit[]>([]);
   const [bookmarks, setBookmarks] = useState<AlgoliaHit[]>([]);
+
+  const { data: hits = [], isLoading } = usePromise(
+    async (query: string) => (query ? await api.searchDocs(query) : []),
+    [query],
+  );
 
   async function getBookmarks() {
     const bookmarkedItems = await LocalStorage.allItems<
@@ -39,24 +41,6 @@ export default function Command() {
   useEffect(() => {
     getBookmarks();
   }, []);
-
-  useEffect(() => {
-    async function fetchHits() {
-      setLoading(true);
-      try {
-        const hits = await api.searchDocs(query);
-        setHits(hits);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-        handleNetworkError(e);
-      }
-    }
-
-    if (query) {
-      fetchHits();
-    }
-  }, [query]);
 
   const sections = hits.reduce(
     (acc: Record<string, AlgoliaHit[]>, cur: AlgoliaHit) => {

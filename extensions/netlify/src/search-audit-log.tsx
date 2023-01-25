@@ -1,59 +1,25 @@
 import { ActionPanel, Action, Detail, List } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { usePromise } from '@raycast/utils';
+import { useState } from 'react';
 
 import { OpenOnNetlify } from './components/actions';
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
-import { formatDate, handleNetworkError } from './utils/helpers';
+import { formatDate } from './utils/helpers';
+import { useTeams } from './utils/hooks';
 import { getIconForAuditLogPayload } from './utils/icons';
-import { AuditLog, Team } from './utils/interfaces';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
-
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
-
   const [query, setQuery] = useState<string>('');
-  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
 
-  async function fetchAuditLog(team: string) {
-    setLoading(true);
-    try {
-      const auditLog = await api.getAuditLog(team);
-      setAuditLog(auditLog);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
+  const { isLoadingTeams, teams, teamSlug, setTeamSlug } = useTeams({
+    scoped: true,
+  });
 
-  async function fetchTeams() {
-    setLoading(true);
-    try {
-      const teams = await api.getTeams();
-      setTeams(teams);
-      if (teams.length === 1 || !teamSlug) {
-        setTeamSlug(teams[0].slug);
-      }
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
-
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  useEffect(() => {
-    if (teamSlug) {
-      fetchAuditLog(teamSlug);
-    }
-  }, [teamSlug]);
+  const { data: auditLog = [], isLoading } = usePromise(
+    async (team: string) => (team ? await api.getAuditLog(team) : []),
+    [teamSlug],
+  );
 
   const teamDropdown = (
     <TeamDropdown
@@ -77,7 +43,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingTeams || isLoading}
       onSearchTextChange={setQuery}
       searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Filter recent audit log entries"

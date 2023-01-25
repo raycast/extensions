@@ -6,16 +6,15 @@ import {
   Image,
   List,
   popToRoot,
-  Toast,
   showHUD,
-  showToast,
 } from '@raycast/api';
-import { useCachedState, useForm } from '@raycast/utils';
+import { useForm, usePromise } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 
 import api from './utils/api';
-import { isValidEmail, handleNetworkError } from './utils/helpers';
-import { Role, Site, Team } from './utils/interfaces';
+import { handleNetworkError, humanRole, isValidEmail } from './utils/helpers';
+import { useTeams } from './utils/hooks';
+import { Role, Team } from './utils/interfaces';
 
 interface FormValues {
   email: string;
@@ -24,46 +23,26 @@ interface FormValues {
   site_ids: string[];
 }
 
+const initialValues: FormValues = {
+  email: '',
+  role: 'Owner',
+  site_access: true,
+  site_ids: [],
+};
 const DELIMETER = /[,\n]/;
 const SAML_ENFORCED = ['enforced_strict', 'enforced_with_fallback'];
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [sites, setSites] = useState<Site[]>([]);
+  const { isLoadingTeams, teams, teamSlug, setTeamSlug } = useTeams({
+    scoped: false,
+  });
 
-  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
-  const initialValues = {
-    email: '',
-    role: 'Owner',
-    site_access: true,
-    site_ids: [],
-  };
-
-  async function fetchTeams() {
-    setLoading(true);
-    try {
-      const teams = await api.getTeams();
-      setTeams(teams);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
-
-  async function fetchSites(query = '', team?: string) {
-    setLoading(true);
-    try {
-      const sites = await api.getSites(query, team);
-      setSites(sites);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
+  const { data: sites = [], isLoading: isLoadingSites } = usePromise(
+    async (team: string) => await api.getSites('', team),
+    [teamSlug],
+  );
 
   function canInvite(team: Team) {
     return (
@@ -87,14 +66,9 @@ export default function Command() {
       const s = promises.length === 1 ? '' : 's';
       showHUD(`✉️ Invitation${s} sent`);
       popToRoot();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (e) {
       setLoading(false);
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Error ${error.code || 'unknown'}`,
-        message: error.message || 'Something went wrong',
-      });
+      handleNetworkError(e);
     }
   }
 
@@ -127,11 +101,6 @@ export default function Command() {
   });
 
   useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  useEffect(() => {
-    fetchSites('', teamSlug);
     reset(initialValues);
   }, [teamSlug]);
 
@@ -144,7 +113,7 @@ export default function Command() {
   const submitButtonLabel =
     numInvites > 0 ? `Invite ${numInvites} ${values.role}${s}` : 'Send Invites';
 
-  if (!isLoading && invitableTeams.length === 0) {
+  if (!isLoadingTeams && invitableTeams.length === 0) {
     return (
       <List>
         <List.EmptyView
@@ -166,7 +135,7 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoadingTeams || isLoadingSites || isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -223,7 +192,7 @@ export default function Command() {
           ?.roles_allowed.map((role) => (
             <Form.Dropdown.Item
               key={role}
-              title={role === 'Controller' ? 'Billing Admin' : role}
+              title={humanRole(role)}
               value={role}
             />
           ))}

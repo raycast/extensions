@@ -148,7 +148,7 @@ export interface Member {
   id: string;
   full_name: string;
   pending?: boolean;
-  role: string;
+  role: Role;
   site_access: 'all' | 'selected' | 'none';
 }
 

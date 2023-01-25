@@ -9,84 +9,36 @@ import {
   confirmAlert,
   showToast,
 } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { useEffect, useState } from 'react';
+import { usePromise } from '@raycast/utils';
+import { useState } from 'react';
 
 import { OpenOnNetlify } from './components/actions';
 import TeamDropdown from './components/team-dropdown';
 import api from './utils/api';
-import { getDomainUrl, handleNetworkError } from './utils/helpers';
-import { formatDate } from './utils/helpers';
-import { Domain, DomainSearch, Team } from './utils/interfaces';
+import { formatDate, getDomainUrl, handleNetworkError } from './utils/helpers';
+import { useTeams } from './utils/hooks';
+import { DomainSearch } from './utils/interfaces';
 
 export default function Command() {
-  const [isLoading, setLoading] = useState<boolean>(true);
-
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [registeredDomains, setRegisteredDomains] = useState<Domain[]>([]);
-  const [searchedDomains, setSearchedDomains] = useState<DomainSearch[]>([]);
-
   const [query, setQuery] = useState<string>('');
-  const [teamSlug, setTeamSlug] = useCachedState<string>('teamSlug', '');
+
+  const { isLoadingTeams, teams, teamSlug, setTeamSlug } = useTeams({
+    scoped: true,
+  });
+
+  const { data: registeredDomains = [], isLoading: isLoadingDomains } =
+    usePromise(async (slug: string) => await api.getDomains(slug), [teamSlug]);
+
+  const { data: searchedDomains = [], isLoading: isSearchingDomains } =
+    usePromise(
+      async (query: string, team: string) =>
+        query ? await api.searchDomains(query, team) : [],
+      [query, teamSlug],
+    );
 
   const team = teams.find((team) => team.slug === teamSlug);
   const teamName = team?.name;
   const canBuyDomain = team?.user_capabilities?.billing?.c;
-
-  async function fetchDomains(team: string) {
-    setLoading(true);
-    try {
-      const domains = await api.getDomains(team);
-      setRegisteredDomains(domains);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
-
-  async function searchDomains(query: string, team: string) {
-    setLoading(true);
-    try {
-      const domains = await api.searchDomains(query, team);
-      setSearchedDomains(domains);
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
-
-  async function fetchTeams() {
-    setLoading(true);
-    try {
-      const teams = await api.getTeams();
-      setTeams(teams);
-      if (teams.length === 1 || !teamSlug) {
-        setTeamSlug(teams[0].slug);
-      }
-      setLoading(false);
-    } catch (e) {
-      setLoading(false);
-      handleNetworkError(e);
-    }
-  }
-
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  useEffect(() => {
-    fetchDomains(teamSlug);
-  }, [teamSlug]);
-
-  useEffect(() => {
-    if (query) {
-      searchDomains(query, teamSlug);
-    } else {
-      setSearchedDomains([]);
-    }
-  }, [query]);
 
   async function confirmBuyDomain(domain: DomainSearch) {
     const options: Alert.Options = {
@@ -103,7 +55,6 @@ export default function Command() {
               title: `${domain.name} purchased!`,
             });
             setQuery('');
-            fetchDomains(teamSlug);
           } catch (e) {
             handleNetworkError(e);
           }
@@ -124,9 +75,9 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingTeams || isLoadingDomains || isSearchingDomains}
       filtering
-      onSearchTextChange={setQuery}
+      onSearchTextChange={(text) => setQuery(text.replace(/ /g, ''))}
       searchText={query}
       searchBarAccessory={teams.length > 1 ? teamDropdown : undefined}
       searchBarPlaceholder="Search for a domain name..."

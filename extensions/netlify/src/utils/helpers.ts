@@ -1,7 +1,7 @@
 import { getPreferenceValues, Toast, showToast } from '@raycast/api';
 import { AxiosError } from 'axios';
 
-import { DeployState, Preferences } from './interfaces';
+import { DeployState, Preferences, Role } from './interfaces';
 
 const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
 
@@ -43,17 +43,21 @@ export function handleNetworkError(e: unknown): void {
   const error = e as AxiosError;
   const status = error.response?.status;
   if (!status) {
-    showToast(Toast.Style.Failure, 'Unknown error');
+    showToast(Toast.Style.Failure, 'Unknown error', 'Please try again.');
   }
   if (status === 401) {
     showToast(
       Toast.Style.Failure,
       'Failed to authorize',
-      'Please make sure that your API key is valid.',
+      'Check your API key.',
     );
   } else {
-    showToast(Toast.Style.Failure, 'Network error', 'Please try again later.');
+    showToast(Toast.Style.Failure, 'Network error', `Error code ${status}`);
   }
+}
+
+export function humanRole(role: Role): string {
+  return role === 'Controller' ? 'Billing Admin' : role;
 }
 
 export const isValidEmail = (email?: string | null): boolean =>
