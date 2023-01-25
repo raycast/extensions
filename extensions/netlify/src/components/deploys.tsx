@@ -17,7 +17,7 @@ export default function DeployListView({ siteId, siteName }: Props) {
   const [query, setQuery] = useState<string>('');
   const [context, setContext] = useState<string>('');
 
-  const { isLoading, data: deploys } = usePromise(
+  const { data: deploys = [], isLoading } = usePromise(
     async (siteId: string) => await api.getDeploys(siteId),
     [siteId],
   );
@@ -37,7 +37,7 @@ export default function DeployListView({ siteId, siteName }: Props) {
     </List.Dropdown>
   );
 
-  const filteredDeploys = (deploys || []).filter((deploy) => {
+  const filteredDeploys = deploys.filter((deploy) => {
     const conditions = [];
     if (query) {
       const keywords = [
