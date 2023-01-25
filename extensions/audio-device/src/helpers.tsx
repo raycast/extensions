@@ -109,7 +109,7 @@ type SetAudioDeviceActionProps = {
 
 function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Select ${device.name}`}
       onAction={async () => {
         try {

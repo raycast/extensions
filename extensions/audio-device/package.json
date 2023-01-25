@@ -50,6 +50,14 @@
       "description": "The name, as found in the output device list, of the output device to use as the favourite one",
       "type": "textfield",
       "default": ""
+    },
+    {
+      "name": "favourite2",
+      "required": false,
+      "title": "Favourite Output Device 2",
+      "description": "The name, as found in the output device list, of the output device to use as the favourite two",
+      "type": "textfield",
+      "default": ""
     }
   ],
   "dependencies": {
