@@ -253,48 +253,48 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
   "Ambient Sleeping Pill": {
     website: "https://ambientsleepingpill.com",
     stream: "http://radio.stereoscenic.com/asp-h",
-    genres: ["ambient", "chillout"]
+    genres: ["ambient", "chillout"],
   },
   "Exclusively Ocean": {
     website: "https://www.getmeradio.com/stations/exclusivelyocean-3235/",
     stream: "https://streaming.exclusive.radio/er/ocean/icecast.audio",
-    genres: ["ambient", ""]
+    genres: ["ambient", ""],
   },
   "Exclusively Birdsong": {
     website: "https://www.getmeradio.com/stations/exclusivelybirdsong-3243/",
     stream: "https://streaming.exclusive.radio/er/birdsong/icecast.audio",
-    genres: ["ambient", ""]
+    genres: ["ambient", ""],
   },
   "Calm Piano": {
     website: "https://www.getmeradio.com/stations/calmpiano-4057/",
     stream: "https://drive.uber.radio/uber/calmpiano/icecast.audio",
-    genres: ["piano", ""]
+    genres: ["piano", ""],
   },
   "ASMR Mix": {
     website: "https://www.getmeradio.com/stations/asmrmix-7014/",
     stream: "https://drive.uber.radio/uber/asmrmix/icecast.audio",
-    genres: ["ambient", "ASMR"]
+    genres: ["ambient", "ASMR"],
   },
   "SCIFI.radio": {
     website: "https://scifi.radio",
     stream: "https://station.kryptonradio.com:8080/stream",
-    genres: ["soundtracks", ""]
+    genres: ["soundtracks", ""],
   },
   "Horror and Halloween Radio": {
     website: "http://horrorandhalloweenradio.com/",
     stream: "http://s2.voscast.com:11034/;stream1674643361109/1",
-    genres: ["holiday", ""]
+    genres: ["holiday", ""],
   },
   "Park Magic Radio": {
     website: "http://parkmagicradio.ca/",
     stream: "http://www.parkmagicradio.ca:8000/stream/1/;",
-    genres: ["soundtracks", ""]
+    genres: ["soundtracks", ""],
   },
   "Musical Theater Radio": {
     website: "https://www.musicaltheatreradio.com",
     stream: "https://streaming.live365.com/a99840",
-    genres: ["soundtracks", ""]
-  }
+    genres: ["soundtracks", ""],
+  },
 };
 
 export async function loadDefaults() {
