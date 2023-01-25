@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, environment, Form, launchCommand, LaunchType, LocalStorage, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  environment,
+  Form,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  useNavigation,
+} from "@raycast/api";
 import { useState } from "react";
 import { runAppleScript } from "run-applescript";
 
@@ -249,7 +259,7 @@ export async function loadDefaults() {
       for (const key in defaultStations[station]) {
         let value = defaultStations[station][key];
         if (Array.isArray(value)) {
-          value = value.join("\n");
+          value = value.join(",");
         }
         await LocalStorage.setItem(`station~${station}#${key}`, value);
       }
@@ -273,7 +283,7 @@ export async function getAllStations() {
     if (key.startsWith("station~")) {
       const stationName = key.substring(key.indexOf("~") + 1, key.indexOf("#"));
       const attribute = key.substring(key.indexOf("#") + 1);
-      const trueValue = value.indexOf("\n") == -1 ? value : value.split("\n");
+      const trueValue = value.indexOf(",") == -1 ? value : value.split(",");
 
       if (!(stationName in stations)) {
         stations[stationName] = {
@@ -324,12 +334,12 @@ export async function playStation(stationName: string, stationURL: string) {
   await LocalStorage.setItem("-current-station-name", stationName);
   await LocalStorage.setItem("-current-station-url", stationURL);
   await LocalStorage.setItem("-current-track-id", streamID);
-  await launchCommand({ name: "current-station", type: LaunchType.Background })
+  await launchCommand({ name: "current-station", type: LaunchType.Background });
 
   if (environment.commandName != "menubar-radio") {
-    await launchCommand({ name: "menubar-radio", type: LaunchType.Background })
+    await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
   }
-  
+
   return streamID;
 }
 
@@ -350,11 +360,10 @@ export async function pausePlayback() {
   await LocalStorage.setItem("-current-station-name", "");
   await LocalStorage.setItem("-current-track-id", "");
 
-  console.log(await LocalStorage.getItem("-current-station-name"))
-  await launchCommand({ name: "current-station", type: LaunchType.Background })
+  await launchCommand({ name: "current-station", type: LaunchType.Background });
 
   if (environment.commandName != "menubar-radio") {
-    await launchCommand({ name: "menubar-radio", type: LaunchType.Background })
+    await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
   }
 }
 
@@ -381,7 +390,7 @@ export async function deleteStation(stationName: string, stationData: { [key: st
   for (const key in stationData) {
     let value = stationData[key];
     if (Array.isArray(value)) {
-      value = value.join("\n");
+      value = value.join(",");
     }
     await LocalStorage.removeItem(`station~${stationName}#${key}`);
   }
@@ -410,7 +419,7 @@ async function modifyStation(
   for (const key in newData) {
     let value = newData[key];
     if (Array.isArray(value)) {
-      value = value.join("\n");
+      value = value.join(",");
     }
     await LocalStorage.setItem(`station~${newName}#${key}`, value);
   }
@@ -443,14 +452,20 @@ export function EditStationForm(props: {
   const [genreError, setGenreError] = useState<string | undefined>();
 
   const { pop } = useNavigation();
-
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values) => {
-              console.log(values);
+              const genres: string[] = [];
+              if (values.genresField.indexOf(",") != -1) {
+                values.genresField.split(",").forEach((genre: string) => genres.push(genre.trim()));
+              } else {
+                genres.push(values.genresField);
+                genres.push("");
+              }
+
               modifyStation(
                 stationName,
                 values.nameField,
@@ -458,7 +473,7 @@ export function EditStationForm(props: {
                 {
                   website: values.websiteField,
                   stream: values.streamField,
-                  genres: values.genresField.split(", "),
+                  genres: genres,
                 },
                 setStations
               );
@@ -528,7 +543,9 @@ export function EditStationForm(props: {
             setGenreError(undefined);
           }
         }}
-        defaultValue={(stationData.genres as string[]).join(", ")}
+        defaultValue={
+          (stationData.genres as string[]).join("") === "" ? "" : (stationData.genres as string[]).join(", ")
+        }
       />
     </Form>
   );

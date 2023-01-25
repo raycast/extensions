@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, useNavigation, Color, showToast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  LocalStorage,
+  useNavigation,
+  Color,
+  showToast,
+  confirmAlert,
+  Alert,
+  Image,
+} from "@raycast/api";
 import {
   deleteStation,
   deleteTrack,
@@ -65,12 +77,18 @@ export default function Command() {
         tags.push({ tag: { value: genre, color: tagColor } });
       }
 
+      let websiteIcon: Image.ImageLike = Icon.Link;
+      if (stationData.website != "") {
+        websiteIcon = getFavicon(stationData.website as string, { fallback: Icon.Link });
+      }
+
       listItems.push(
         <List.Item
           key={stationName}
-          icon={getFavicon(stationData.website as string)}
+          icon={websiteIcon}
           title={stationName}
           accessories={tags}
+          keywords={[...stationData.genres]}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
@@ -119,15 +137,25 @@ export default function Command() {
                 <Action
                   title={"Delete Station"}
                   style={Action.Style.Destructive}
+                  icon={Icon.Trash}
                   onAction={() => {
-                    deleteTrack(undefined, `Raycast: ${stationName}`).then(() => {
-                      deleteStation(stationName, stationData).then(() => {
-                        getAllStations().then((stationList) => {
-                          setStations(stationList);
-                        });
-                      });
+                    deleteTrack(undefined, `Raycast: ${stationName}`).then(async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Are you sure?",
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                        })
+                      ) {
+                        await deleteStation(stationName, stationData);
+                        const stationList = await getAllStations();
+                        setStations(stationList);
+                      }
                     });
                   }}
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
                 />
 
                 <Action
@@ -138,6 +166,7 @@ export default function Command() {
                       <EditStationForm stationName={stationName} stationData={stationData} setStations={setStations} />
                     );
                   }}
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -149,7 +178,7 @@ export default function Command() {
   return (
     <List>
       <List.EmptyView
-        icon={{ source: "command-icon.png" }}
+        icon={{ source: "no-view.png" }}
         title="Use the 'New Station' command to add your first station."
       />
       {listItems}
