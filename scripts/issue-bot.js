@@ -84,7 +84,7 @@ module.exports = async ({ github, context, core }) => {
         console.log("didn't find the right comment");
       }
     } else {
-      console.log("not an owner");
+      console.log(`${context.payload.comment.user} is not an owner`);
     }
     return;
   }
