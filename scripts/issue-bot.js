@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
-const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/[^\/]+\/([^\/\s]+)/;
-const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
+const newMatch = /### Extension\s*https:\/\/(www\.)?raycast\.com\/[^\/]+\/([^\/\s]+)/;
+const newMatchGitHub =
+  /### Extension\s*https:\/\/(www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatch =
-  /# Extension – \[[^\]]*\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+  /# Extension – \[[^\]]*\]\(https:\/\/(www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 
