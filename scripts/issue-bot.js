@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
-const newMatch = /### Extension\s*https:\/\/www.raycast\.com\/[^\/]+\/([^\/\s]+)/;
-const newMatchGitHub = /### Extension\s*https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
+const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/[^\/]+\/([^\/\s]+)/;
+const newMatchGitHub =
+  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatch =
-  /# Extension – \[[^\]]*\]\(https:\/\/github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+  /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 
@@ -30,6 +31,7 @@ module.exports = async ({ github, context, core }) => {
     [];
 
   if (!ext) {
+    console.log(`could not find the extension in the body`);
     await comment({
       github,
       context,
@@ -50,6 +52,7 @@ module.exports = async ({ github, context, core }) => {
     codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
+    console.log(`could not find the extension ${ext}`);
     await comment({
       github,
       context,
@@ -68,15 +71,20 @@ module.exports = async ({ github, context, core }) => {
     // we don't want to label the issue here, only answer to a comment
 
     // if the one who posts a comment is an owner of the extension related to the issue
-    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user) !== -1) {
+    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user.login) !== -1) {
       if (closeIssueMatch.test(context.payload.comment.body)) {
+        console.log(`closing #${context.payload.issue.number}`);
         await github.rest.issues.update({
           issue_number: context.payload.issue.number,
           owner: context.repo.owner,
           repo: context.repo.repo,
           state: "closed",
         });
+      } else {
+        console.log(`didn't find the right comment`);
       }
+    } else {
+      console.log(`${context.payload.comment.user.login} is not an owner`);
     }
     return;
   }
@@ -102,8 +110,11 @@ module.exports = async ({ github, context, core }) => {
   const toNotify = owners.filter((x) => x !== sender);
 
   if (!toNotify.length) {
+    console.log("no one to notify, skipping comment");
     return;
   }
+
+  console.log("Sending welcome message");
 
   await comment({
     github,

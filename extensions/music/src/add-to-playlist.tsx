@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
@@ -83,7 +83,7 @@ interface ActionsProps {
 }
 
 function Actions({ playlist: { name }, pop }: ActionsProps) {
-  const title1 = SFSymbols.ADD_TO_LIBRARY + `  Add to Playlist "${name}"`;
+  const title1 = `Add to Playlist "${name}"`;
 
   const handleSubmit = () => async () => {
     await pipe(
@@ -101,7 +101,7 @@ function Actions({ playlist: { name }, pop }: ActionsProps) {
 
   return (
     <ActionPanel title={title1}>
-      <Action title={title1} onAction={handleSubmit()} />
+      <Action title={title1} onAction={handleSubmit()} icon={Icon.PlusCircle} />
     </ActionPanel>
   );
 }

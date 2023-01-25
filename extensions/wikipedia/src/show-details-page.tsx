@@ -10,8 +10,8 @@ function ShowDetailsPage({ page }: { page: PageSummary }) {
 
   ---
 
-  ${page.extract} [read more](${page.content_urls.desktop.page})
-
+  ${page.extract} [read more](${page.content_urls.desktop.page})\n\n
+  ![](${page.thumbnail?.source})
   `;
 
   return (
