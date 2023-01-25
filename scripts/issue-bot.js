@@ -77,7 +77,11 @@ module.exports = async ({ github, context, core }) => {
           repo: context.repo.repo,
           state: "closed",
         });
+      } else {
+        console.log("didn't find the right comment");
       }
+    } else {
+      console.log("not an owner");
     }
     return;
   }
