@@ -76,7 +76,6 @@ export function DeviceList({ type }: DeviceListProps) {
             title={d.name}
             subtitle={subtitle(d)}
             icon={deviceIcon(d)}
-            accessoryIcon={d.uid === data.current.uid ? Icon.Checkmark : undefined}
             actions={
               <ActionPanel>
                 <SetAudioDeviceAction device={d} type={type} />
@@ -92,6 +91,11 @@ export function DeviceList({ type }: DeviceListProps) {
                 />
               </ActionPanel>
             }
+            accessories={[
+              {
+                icon: d.uid === data.current.uid ? Icon.Checkmark : undefined,
+              },
+            ]}
           />
         ))}
     </List>
