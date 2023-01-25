@@ -102,7 +102,7 @@ export default function EsvSearch() {
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
-                    title="Open at ESV.com"
+                    title="Open at ESV.org"
                     url={`https://esv.org/${encodeURIComponent(searchResult.refs)}`}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
@@ -139,7 +139,7 @@ export default function EsvSearch() {
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
-                    title="Open at ESV.com"
+                    title="Open at ESV.org"
                     url={`https://esv.org/${encodeURIComponent(item.refs)}`}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
