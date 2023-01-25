@@ -31,6 +31,7 @@ module.exports = async ({ github, context, core }) => {
     [];
 
   if (!ext) {
+    console.log(`could not find the extension in the body`);
     await comment({
       github,
       context,
@@ -51,6 +52,7 @@ module.exports = async ({ github, context, core }) => {
     codeowners[`/extensions/${(await getExtensionName2Folder({ github, context }))[ext]}`];
 
   if (!owners) {
+    console.log(`could not find the extension ${ext}`);
     await comment({
       github,
       context,
@@ -111,6 +113,8 @@ module.exports = async ({ github, context, core }) => {
     console.log("no one to notify, skipping comment");
     return;
   }
+
+  console.log("Sending welcome message");
 
   await comment({
     github,
