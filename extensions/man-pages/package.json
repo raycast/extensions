@@ -10,6 +10,17 @@
     "Documentation"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "manPageDirectories",
+      "description": "The directories to crawl for man page entries, separated by commas.",
+      "placeholder": "/usr/share/man/, /opt/homebrew/share/man/, /usr/local/man/",
+      "type": "textfield",
+      "default": "/usr/share/man/, /opt/homebrew/share/man/, /usr/local/man/",
+      "required": false,
+      "title": "Man Page Directories"
+    }
+  ],
   "commands": [
     {
       "name": "search-man-pages",

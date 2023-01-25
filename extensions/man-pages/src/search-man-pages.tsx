@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useGetManPages } from "./utils";
 import { Results } from "./components/Results";
 

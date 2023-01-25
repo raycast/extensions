@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cache } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { exec } from "child_process";
 import { shellEnv } from "shell-env";
@@ -16,8 +16,9 @@ if (path) {
   env = { env: { PATH: path } };
 }
 
-const command =
-  "ls /usr/share/man/* /opt/homebrew/share/man/* /usr/local/man/* | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'";
+interface Preferences {
+  manPageDirectories: string;
+}
 
 export function processEntryAdditions(crawledPages: string[]) {
   // Add man entries added since cache was last updated
@@ -49,10 +50,29 @@ export function processEntryRemovals(crawledPages: string[]) {
   }
 }
 
+function getCrawlCommand() {
+  const { manPageDirectories } = getPreferenceValues<Preferences>();
+  let parsedDirectories = "/usr/share/man/* /opt/homebrew/share/man/* /usr/local/man/*"
+  if (manPageDirectories.includes("/")) {
+    const directories: string[] = []
+    manPageDirectories.split(",").forEach((directory) => {
+      let directoryPath = directory.trim()
+      if (!directoryPath.endsWith("/")) {
+        directoryPath = `${directoryPath}/`
+      }
+      directoryPath = `${directoryPath}*`
+      directories.push(directoryPath)
+    })
+    parsedDirectories = directories.join(" ")
+  }
+  console.log(parsedDirectories)
+  return `ls ${parsedDirectories} | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'`;
+}
+
 export function getCommands() {
   // Get all command names at once
   return new Promise(function (resolve: (value: string[]) => void) {
-    runCommand(command, () => {null}, (res) => {
+    runCommand(getCrawlCommand(), () => {null}, (res) => {
       const pageList = removeInvalidEntries(res.split("\n"))
       resolve(pageList)
     });
@@ -87,7 +107,7 @@ export function useGetManPages() {
   // Run the man list command
   useEffect(() => {
     if (!cachedPages)
-      runCommand(command, setResult);
+      runCommand(getCrawlCommand(), setResult);
   }, []);
 
   // Populate the list of pages (IF no cached list exists)
