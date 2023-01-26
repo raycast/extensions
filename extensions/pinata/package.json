@@ -38,24 +38,28 @@
     {
       "name": "uploadFile",
       "title": "Upload File",
+      "subtitle": "Pinata",
       "description": "Upload a file to Pinata",
       "mode": "view"
     },
     {
       "name": "uploadDirectory",
       "title": "Upload Folder",
+      "subtitle": "Pinata",
       "description": "Upload a folder to Pinata",
       "mode": "view"
     },
     {
       "name": "listFiles",
       "title": "List Files",
+      "subtitle": "Pinata",
       "description": "Retrieve the latest 100 files from your Pinata account",
       "mode": "view"
     },
     {
       "name": "listSubmarineFiles",
       "title": "List Submarined Files",
+      "subtitle": "Pinata",
       "description": "Retrieve the latest 100 Submarined files from your Pinata account",
       "mode": "view"
     }
