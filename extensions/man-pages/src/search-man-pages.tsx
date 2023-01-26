@@ -1,5 +1,5 @@
-import { Action, ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
-import { useGetManPages } from "./utils";
+import { Action, ActionPanel, List, useNavigation, launchCommand, LaunchType, Icon } from "@raycast/api";
+import { runInTerminal, useGetManPages } from "./utils";
 import { Results } from "./components/Results";
 
 interface ExportArguments {
@@ -38,12 +38,27 @@ export default function Main(props: { arguments: ExportArguments }) {
         id={index.toString()}
         actions={
           <ActionPanel>
-            <Action title={page} onAction={() => push(<Results command={page} />)} />
+            <ActionPanel.Section title="Command Actions">
+              <Action
+                title="View Man Page"
+                icon={Icon.Eye}
+                shortcut={{ modifiers: ["cmd"], key: "v" }}
+                onAction={() => push(<Results command={page} />)}
+              />
+              <Action
+                title="Run In Terminal"
+                icon={Icon.Terminal}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                onAction={async () => await runInTerminal(page)}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
     );
   });
+
+  launchCommand({ name: "reload-man-page-entries", type: LaunchType.Background });
 
   return (
     <List searchBarPlaceholder={`Search ${pages.length} man pages...`} filtering={true}>
