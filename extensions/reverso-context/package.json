@@ -20,7 +20,7 @@
     },
     {
       "name": "context_2nd",
-      "title": "Translate With The Context (2nd pair)",
+      "title": "Translate With The Context (2nd Pair)",
       "subtitle": "Reverso Context",
       "description": "The same as previous one, but you can set second pair of languages to another shortcut",
       "mode": "view"
