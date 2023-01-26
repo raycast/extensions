@@ -4,6 +4,7 @@ import {
   Color,
   environment,
   Form,
+  Icon,
   launchCommand,
   LaunchType,
   LocalStorage,
@@ -56,6 +57,61 @@ export const colorMap: { [key: string]: Color } = {
   talk: Color.SecondaryText,
   ASMR: Color.Blue,
   holiday: Color.Green,
+  folk: Color.Orange,
+  dance: Color.Purple,
+  emo: Color.Purple,
+  opera: Color.Yellow,
+  grunge: Color.Green,
+  goth: Color.Purple,
+  anime: Color.Magenta,
+  acoustic: Color.Orange,
+  gospel: Color.Yellow,
+  guitar: Color.Orange,
+  lullabies: Color.Magenta,
+  "sing along": Color.Magenta,
+  stories: Color.Magenta,
+  "avant-garde": Color.Red,
+  baroque: Color.SecondaryText,
+  choral: Color.Magenta,
+  concerto: Color.Red,
+  expressionist: Color.Red,
+  impressionist: Color.Magenta,
+  orchestral: Color.Orange,
+  novelty: Color.Green,
+  parody: Color.SecondaryText,
+  comedy: Color.Orange,
+  jingles: Color.Blue,
+  bluegrass: Color.Blue,
+  fiddle: Color.Orange,
+  christian: Color.Magenta,
+  cowboy: Color.Orange,
+  club: Color.Purple,
+  exercise: Color.Yellow,
+  hardcore: Color.Red,
+  house: Color.Orange,
+  techno: Color.Magenta,
+  trance: Color.Purple,
+  trap: Color.Orange,
+  swing: Color.Blue,
+  drum: Color.SecondaryText,
+  crunk: Color.Green,
+  glitch: Color.PrimaryText,
+  "hip hop": Color.Purple,
+  rap: Color.Red,
+  karaoke: Color.Red,
+  latin: Color.Orange,
+  soul: Color.SecondaryText,
+  "R&B": Color.Red,
+  reggae: Color.Yellow,
+  african: Color.Yellow,
+  asian: Color.Magenta,
+  australian: Color.Red,
+  cajun: Color.Orange,
+  caribbean: Color.Blue,
+  celtic: Color.Green,
+  european: Color.Magenta,
+  polka: Color.Purple,
+  hawaiian: Color.Yellow,
 };
 
 const defaultStations: { [value: string]: { [value: string]: string | string[] } } = {
@@ -121,17 +177,17 @@ const defaultStations: { [value: string]: { [value: string]: string | string[] }
     genres: ["80s", "oldies", "top 40", "pop", "rock"],
   },
   "Pink Noise Radio": {
-    website: "",
+    website: "https://www.internet-radio.com/station/pinknoise/",
     stream: "https://uk1.internet-radio.com/proxy/pinknoise?mp=/stream",
     genres: ["noise", "ambient", "chillout"],
   },
   "Brown Noise Radio": {
-    website: "",
+    website: "https://www.internet-radio.com/station/brownnoise/",
     stream: "https://uk1.internet-radio.com/proxy/brownnoise?mp=/stream",
     genres: ["noise", "ambient", "chillout"],
   },
   "White Noise Radio": {
-    website: "",
+    website: "https://www.internet-radio.com/station/whitenoise/",
     stream: "https://uk1.internet-radio.com/proxy/whitenoise?mp=/stream",
     genres: ["noise", "ambient", "chillout"],
   },
@@ -495,21 +551,54 @@ export function EditStationForm(props: {
   const [nameError, setNameError] = useState<string | undefined>();
   const [streamError, setStreamError] = useState<string | undefined>();
   const [websiteError, setWebsiteError] = useState<string | undefined>();
-  const [genreError, setGenreError] = useState<string | undefined>();
 
   const { pop } = useNavigation();
+
+  const checkStationNameValidity = (name: string): boolean => {
+    if (name.length == 0) {
+      setNameError("Station name cannot be empty!");
+      return false;
+    } else if (nameError !== undefined) {
+      setNameError(undefined);
+    }
+    return true;
+  };
+
+  const checkStationStreamURLValidity = (streamURL: string): boolean => {
+    if (streamURL.length == 0) {
+      setStreamError("Stream URL cannot be empty!");
+      return false;
+    } else if (!streamURL.includes(":") || streamURL.includes(" ")) {
+      setStreamError("Please enter a valid stream URL!");
+      return false;
+    } else if (streamError !== undefined) {
+      setStreamError(undefined);
+    }
+    return true;
+  };
+
+  const checkStationWebsiteValidity = (websiteURL: string): boolean => {
+    if (websiteURL != "" && !websiteURL.includes(":") && !websiteURL.startsWith("/")) {
+      setWebsiteError("Please enter a valid website URL, or leave this blank!");
+      return false;
+    } else if (websiteError !== undefined) {
+      setWebsiteError(undefined);
+    }
+    return true;
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={(values) => {
-              const genres: string[] = [];
-              if (values.genresField.indexOf(",") != -1) {
-                values.genresField.split(",").forEach((genre: string) => genres.push(genre.trim()));
-              } else {
-                genres.push(values.genresField);
-                genres.push("");
+              if (
+                !checkStationNameValidity(values.nameField) ||
+                !checkStationStreamURLValidity(values.streamField) ||
+                !checkStationWebsiteValidity(values.websiteField)
+              ) {
+                return;
               }
 
               modifyStation(
@@ -519,7 +608,7 @@ export function EditStationForm(props: {
                 {
                   website: values.websiteField,
                   stream: values.streamField,
-                  genres: genres,
+                  genres: values.genresField,
                 },
                 setStations
               );
@@ -531,17 +620,12 @@ export function EditStationForm(props: {
     >
       <Form.TextField
         id="nameField"
+        autoFocus={true}
         title="Station Name"
         placeholder="Memorable name for the station"
         defaultValue={stationName}
         error={nameError}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("Station name cannot be empty!");
-          } else if (nameError !== undefined) {
-            setNameError(undefined);
-          }
-        }}
+        onBlur={(event) => checkStationNameValidity(event.target.value || "")}
       />
 
       <Form.TextField
@@ -550,15 +634,7 @@ export function EditStationForm(props: {
         placeholder="URL of audio livestream"
         error={streamError}
         onChange={() => (streamError !== undefined ? setStreamError(undefined) : null)}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setStreamError("Stream URL cannot be empty!");
-          } else if (!event.target.value?.includes(":") || event.target.value?.includes(" ")) {
-            setStreamError("Please enter a valid stream URL!");
-          } else if (streamError !== undefined) {
-            setStreamError(undefined);
-          }
-        }}
+        onBlur={(event) => checkStationStreamURLValidity(event.target.value || "")}
         defaultValue={stationData.stream as string}
       />
 
@@ -568,31 +644,20 @@ export function EditStationForm(props: {
         placeholder="URL of the main site for this radio station"
         error={websiteError}
         onChange={() => (websiteError !== undefined ? setWebsiteError(undefined) : null)}
-        onBlur={(event) => {
-          if (event.target.value != "" && !event.target.value?.includes(":") && !event.target.value?.startsWith("/")) {
-            setWebsiteError("Please enter a valid website URL, or leave this blank!");
-          } else if (websiteError !== undefined) {
-            setWebsiteError(undefined);
-          }
-        }}
+        onBlur={(event) => checkStationWebsiteValidity(event.target.value || "")}
         defaultValue={stationData.website as string}
       />
 
-      <Form.TextField
+      <Form.TagPicker
         id="genresField"
         title="Genres"
-        placeholder="Comma-separated list of genres streamed by this station"
-        error={genreError}
-        onChange={() => (genreError !== undefined ? setGenreError(undefined) : null)}
-        onBlur={() => {
-          if (genreError !== undefined) {
-            setGenreError(undefined);
-          }
-        }}
-        defaultValue={
-          (stationData.genres as string[]).join("") === "" ? "" : (stationData.genres as string[]).join(", ")
-        }
-      />
+        defaultValue={[]}
+        placeholder="List of genres streamed by this station"
+      >
+        {Object.entries(colorMap).map(([key, color]) => {
+          return <Form.TagPicker.Item value={key} title={key} icon={{ source: Icon.Circle, tintColor: color }} />;
+        })}
+      </Form.TagPicker>
     </Form>
   );
 }

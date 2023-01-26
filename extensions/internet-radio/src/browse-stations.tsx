@@ -128,9 +128,13 @@ export default function Command() {
 
               <ActionPanel.Section>
                 <Action.OpenInBrowser title="Open Stream In Browser" url={stationData.stream as string} />
-                <Action.OpenInBrowser title="Open Website" url={stationData.website as string} />
+                {stationData.website ? (
+                  <Action.OpenInBrowser title="Open Website" url={stationData.website as string} />
+                ) : null}
                 <Action.CopyToClipboard title="Copy Stream URL" content={stationData.stream as string} />
-                <Action.CopyToClipboard title="Copy Website URL" content={stationData.website as string} />
+                {stationData.website ? (
+                  <Action.CopyToClipboard title="Copy Website URL" content={stationData.website as string} />
+                ) : null}
               </ActionPanel.Section>
 
               <ActionPanel.Section>

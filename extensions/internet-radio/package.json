@@ -50,7 +50,8 @@
       "name": "menubar-radio",
       "title": "Menu Bar Radio",
       "description": "View current station and control playback from the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "dependencies": {
