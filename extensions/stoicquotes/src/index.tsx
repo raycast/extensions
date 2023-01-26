@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from '@raycast/api';
+import { Action, ActionPanel, Detail, Icon } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
 
 type StoicQuote = {
@@ -29,7 +29,7 @@ export default function Command() {
       markdown={stoicQuote}
       actions={
         <ActionPanel>
-          <Action title="New Quote" onAction={revalidate} />
+          <Action title="New Quote" icon={Icon.ArrowClockwise} onAction={revalidate} />
           <Action.CopyToClipboard
             title="Copy as Markdown"
             content={markdownQuote}
