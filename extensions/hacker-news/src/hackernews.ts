@@ -13,7 +13,11 @@ const parser = new Parser({
   },
 });
 
-export async function getStories(topic: Topic) {
+export async function getStories(topic: Topic | null) {
+  if (!topic) {
+    return [];
+  }
+
   const cachedResponse = cache.get(topic);
   if (cachedResponse) {
     const parsed: CacheEntry = JSON.parse(cachedResponse);

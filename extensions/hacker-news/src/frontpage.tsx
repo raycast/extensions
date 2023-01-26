@@ -8,14 +8,19 @@ import Parser from "rss-parser";
 import { getIcon, getAccessories } from "./utils";
 
 export default function Command() {
-  const [topic, setTopic] = useState<Topic>(Topic.FrontPage);
-  const { data, isLoading } = usePromise(getStories, [topic]);
+  const [topic, setTopic] = useState<Topic | null>(null);
+  const { data, isLoading } = usePromise(getStories, [topic], { execute: !!topic });
 
   return (
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Page" storeValue onChange={(newValue) => setTopic(newValue as Topic)}>
+        <List.Dropdown
+          tooltip="Select Page"
+          defaultValue={Topic.FrontPage}
+          storeValue
+          onChange={(newValue) => setTopic(newValue as Topic)}
+        >
           {Object.entries(Topic).map(([name, value]) => (
             <List.Dropdown.Item key={value} title={startCase(name)} value={value} />
           ))}
