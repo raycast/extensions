@@ -1,6 +1,6 @@
 # Man Pages Changelog
 
-## [Custom Man Page Directories] - 2023-01-25
+## [Custom Man Page Directories] - 2023-01-26
 
 - Add "Reload Man Page Entries" command
 - Add "Man Page Directories" preference

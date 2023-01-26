@@ -100,7 +100,6 @@ function removeInvalidEntries(pageList: string[]) {
 export function useGetManPages() {
   // Get list of command names incrementally
   const [pages, setPages] = useState<string[]>([]);
-  const [crawledPages, setCrawledPages] = useState<string[]>([]);
   const [result, setResult] = useState<string>("");
 
   const cachedPages = cache.get("manPages");
@@ -116,22 +115,19 @@ export function useGetManPages() {
   useEffect(() => {
     if (result != "") {
       const newEntries = result.split("\n");
-      const pageList = removeInvalidEntries(newEntries.concat(crawledPages));
-      setCrawledPages(pageList);
+      const pageList = removeInvalidEntries(newEntries.concat(pages));
+      setPages(pageList);
+      cache.set("manPages", pageList.join("\n"));
     }
   }, [result]);
 
   // Get the cached list of pages if it exists
   useEffect(() => {
-    if (cachedPages != undefined && crawledPages.length == 0) {
+    if (cachedPages != undefined) {
       const pageList = cachedPages.split("\n");
       setPages(pageList);
-    } else {
-      // Otherwise, use the crawled pages
-      setPages(crawledPages);
-      cache.set("manPages", crawledPages.join("\n"));
     }
-  }, [crawledPages]);
+  }, []);
 
   // Return the list of pages
   return !pages?.length ? [] : pages;
@@ -157,15 +153,24 @@ async function getEnv() {
   return env;
 }
 
-export async function runCommand(command: string, callback?: (res: string) => unknown, finish?: (res: string) => void) {
+export async function runCommand(
+  command: string,
+  callback?: (res: string) => unknown,
+  finish?: (res: string) => void,
+  keepResult?: boolean
+) {
   // Run a terminal command
   env = await getEnv();
   const child = exec(command, env);
   let result = "";
 
   child.stdout?.on("data", (data: string) => {
-    result = result + data;
-    callback?.(result);
+    if (keepResult == undefined || keepResult == true) {
+      result = result + data;
+      callback?.(result);
+    } else {
+      callback?.(data);
+    }
   });
 
   child.stdout?.on("close", () => {
