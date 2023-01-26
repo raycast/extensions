@@ -81,7 +81,7 @@ export default function AppsView() {
           actions={
             <ActionPanel>
               <ActionPanelSection>
-                <PasteAction content={a.code} title="Copy Code" />
+                <PasteAction content={a.code} title="Paste Code" />
                 <PushAction
                   icon={Icon.Plus}
                   title="Add App"
