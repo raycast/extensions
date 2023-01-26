@@ -61,16 +61,18 @@
     "@raycast/api": "latest",
     "@yarnpkg/core": "latest",
     "fs-extra": "latest",
-    "lodash": "latest"
+    "lodash": "latest",
+    "parse-git-config": "latest"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
     "@types/lodash": "^4.14.191",
-    "@types/node": "18.8.3",
+    "@types/node": "18.11.18",
+    "@types/parse-git-config": "^3.0.1",
     "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

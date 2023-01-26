@@ -10,28 +10,42 @@ This extension will scan all direct folders in `rootSourceFolder` (configured in
 
 Each folder is considered a project or workspace if it has a `package.json` file at the root. Otherwise, it is considered a normal folder.
 
-Actions of a workspace or normal folder:
-
-- `Show List of Packages` of current selected workspace. A normal folder does not have this action. This is a default action (Its shortcut is Enter).
-- `Show in Finder`: : open selected workspace/folder in Finder.
-- `Open in Visual Studio Code`: open selected workspace/folder in Visual Studio Code Text editor.
-- `Open in Sublime Text`: open selected workspace/folder in Sublime Text editor.
-- `Copy Path`: copy path of selected workspace/folder.
-- `Clear Cache`: clear cached so it can load the latest updates next time.
+- Only a workspace has a special action `Show List of Packages`. A normal folder does not have this action.
+- Only a package has this special action `See Package Details` that allows to see details of selected pacakge.
 
 ### Package List view
 
 When you select a workspace, it shows list of packages of selected workspace.
-Here are actions of a package:
 
-- `See Package Details` of the selected package. This is a default action (Its shortcut is Enter).
-- `Show in Finder`: open the selected package in Finder.
-- `Open in Visual Studio Code`: open the selected package in Visual Studio Code Text editor.
-- `Open in Sublime Text`: open the selected package in Sublime Text editor.
-- `Copy Path`: copy path of the selected package.
-- `Clear Cache`: clear cached to load the latest updates.hot2.png)
+---
+
+## All actions
+
+A worksapce, normal folder and package have these common actions:
+
+### Actions related to editors
+
+- `Open in Visual Studio Code`: open selected workspace/folder/package in Visual Studio Code Text editor.
+- `Open in Sublime Text`: open selected workspace/folder/package in Sublime Text editor.
+
+### Common actions
+
+- `Open in Finder`: : open selected workspace/folder/package in Finder.
+- `Copy Path`: copy path of selected workspace/folder/package.
+- `Open in Terminal`: open selected workspace/folder/package in Terminal app.
+- `Open With...`: open selected workspace/folder/package in any applications.
+- `Open Remote URL`: open remote git URL of selected workspace/folder/package in browser.
+
+### Actions if a package has a team information
+
 - `Open Jira Project Link`: open a Jira project of the selected package if it is avaiable.
 - `Open Slack Channel`: open a Slack Channel of a team owning the selected package if it is avaiable.
+
+### Uncommon actions
+
+- `Submit Feedback`: open a Github link which users can submit feedback / questions / issues.
+- `Clear Cache`: clear cached to load the latest updates.
+- `Trash`: remove folder of workspace/folder/package.
 
 ### Package Detail view
 
@@ -51,7 +65,6 @@ If you follow next section to setup `teams.json` file, the Package Detail view c
 ## How to setup `teams.json`
 
 1. Create a file `teams.json` at root folder of a workspace/prject. The `teams.json` file is considered as file databse containg all teams. It has this structure
-
 
 ```json
 // in `teams.json` file
@@ -75,7 +88,6 @@ If you follow next section to setup `teams.json` file, the Package Detail view c
 
 2. In `package.json` file in a single package/workspace, there should be a field to specify a team owning that package
 
-
 ```json
 // in `package.json` file
 
@@ -98,3 +110,15 @@ If you follow next section to setup `teams.json` file, the Package Detail view c
 `mainFieldName` is configured in this Raycast extension preferrences. So the Package Detail view can use this field to look up team information in `teams.json` file.
 
 ---
+
+## Development
+
+1. Install this [Raycast VSCode extension](https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast)
+2. In VSCode, press `Cmd + Shift + P` -> choose `Raycast: Start Development Mode`
+3. Now you can follow this [Raycast document](https://developers.raycast.com/basics/debug-an-extension) for debugging.
+
+---
+
+## Feedback
+
+- Please raise your question / feedback on [Github Issue page](https://github.com/tung-dang/raycast-monorepo-manager/issues)

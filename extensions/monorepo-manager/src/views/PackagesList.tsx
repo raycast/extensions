@@ -6,9 +6,12 @@ import * as cached from '../utils/cache';
 import { WorkspaceManager } from '../packages/workspace-manager';
 import { PackageDetail } from './PackageDetail';
 import type { Workspace } from '@yarnpkg/core';
-import { getCommonActions, getOpenInEditorActions } from '../utils/actions';
-import { ActionOpenProjectLink } from './ActionOpenProjectLink';
-import { ActionOpenSlackLink } from './ActionOpenSlackLink';
+import {
+  getActionsForPackageWithTeam,
+  getCommonActions,
+  getOpenInEditorActions,
+  getRareActions,
+} from '../utils/actions';
 
 interface Props {
   workspace: SimplifiedWorkspace;
@@ -81,7 +84,7 @@ export function PackagesList(props: Props) {
             accessories={[{ text: `🧑‍🤝‍🧑: ${WorkspaceManager.getWorkspaceTeam(it)}` }]}
             detail={<List.Item.Detail markdown={`Hello World`} />}
             actions={
-              <ActionPanel title={`Actions for ${name} workspace:`}>
+              <ActionPanel title={`Actions for this package: "${name}"`}>
                 <ActionPanel.Section>
                   <Action.Push
                     title="See Package Details"
@@ -92,12 +95,10 @@ export function PackagesList(props: Props) {
 
                 <ActionPanel.Section>{getOpenInEditorActions(path)}</ActionPanel.Section>
 
-                <ActionPanel.Section>
-                  <ActionOpenSlackLink teamName={teamName} workspace={it} workspaceRootInstance={wsManager} />
-                  <ActionOpenProjectLink teamName={teamName} workspace={it} workspaceRootInstance={wsManager} />
-                </ActionPanel.Section>
+                <ActionPanel.Section>{getActionsForPackageWithTeam(teamName, it, wsManager)}</ActionPanel.Section>
 
-                <ActionPanel.Section>{getCommonActions(path)}</ActionPanel.Section>
+                <ActionPanel.Section>{getCommonActions(path, wsManager?.$cwd)}</ActionPanel.Section>
+                <ActionPanel.Section>{getRareActions(path)}</ActionPanel.Section>
               </ActionPanel>
             }
           />

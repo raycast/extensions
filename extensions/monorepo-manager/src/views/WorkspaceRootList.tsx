@@ -4,7 +4,7 @@ import { SimplifiedWorkspace } from '../types';
 import orderBy from 'lodash/orderBy';
 import { iconPackage } from '../utils/icons';
 import { PackagesList } from './PackagesList';
-import { getCommonActions, getOpenInEditorActions } from '../utils/actions';
+import { getCommonActions, getOpenInEditorActions, getRareActions } from '../utils/actions';
 
 interface Props {
   workspaces: SimplifiedWorkspace[];
@@ -49,12 +49,11 @@ export function WorkspaceRootList(props: Props) {
             icon={it.hasPackageJsonFile ? iconPackage : Icon.Folder}
             detail={detailView}
             actions={
-              <ActionPanel title={`Actions for this workspace ${it.name}:`}>
+              <ActionPanel title={`Actions for this workspace "${it.name}":`}>
                 <ActionPanel.Section>{getDefaultAction(it.name, it)}</ActionPanel.Section>
-
                 <ActionPanel.Section>{getOpenInEditorActions(it.path)}</ActionPanel.Section>
-
                 <ActionPanel.Section>{getCommonActions(it.path)}</ActionPanel.Section>
+                <ActionPanel.Section>{getRareActions(it.path)}</ActionPanel.Section>
               </ActionPanel>
             }
           />
