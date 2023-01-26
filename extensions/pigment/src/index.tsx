@@ -68,7 +68,11 @@ export default function Command() {
           <List.Item
             key={index}
             title={color.hex()}
-            icon={{ source: Icon.CircleFilled, tintColor: color.hex(), tooltip: "color" }}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: color.hex(),
+              tooltip: "color",
+            }}
             subtitle={color.isDark() ? "(Darker)" : "(Lighter)"}
             actions={
               <ActionPanel>
