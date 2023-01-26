@@ -8,14 +8,16 @@ export default async function Main() {
     popToRoot();
   }
 
+  // Process additions and removals
   const cachedPages = cache.get("manPages")?.split("\n");
   const pages = await getCommands();
   processEntryRemovals(pages);
-  processEntryAdditions(pages);
+  const pagesAfterAdditions = processEntryAdditions(pages || []) || [];
 
+  // Determine number of additions/removals
   let numChanged = 0;
   if (cachedPages) {
-    numChanged = pages.length - cachedPages.length;
+    numChanged = pagesAfterAdditions.length - cachedPages.length;
   }
 
   if (environment.launchType == LaunchType.UserInitiated) {

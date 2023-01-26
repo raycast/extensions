@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { Cache, environment, getPreferenceValues, LaunchType, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { exec } from "child_process";
 import { shellEnv } from "shell-env";
+import * as fs from "fs";
 
 interface Env {
   env: Record<string, string>;
@@ -23,30 +24,30 @@ interface Preferences {
 
 export function processEntryAdditions(crawledPages: string[]) {
   // Add man entries added since cache was last updated
-  const cachedPages = cache.get("manPages");
+  const cachedPages = cache.get("manPages")?.split("\n");
   if (cachedPages) {
-    const pageList = cachedPages.split("\n");
     for (const page of crawledPages) {
-      if (pageList.indexOf(page) == -1) {
-        pageList.push(page);
+      if (cachedPages.indexOf(page) == -1) {
+        cachedPages.push(page);
       }
     }
-    cache.set("manPages", pageList.join("\n"));
+    cache.set("manPages", cachedPages.join("\n"));
   }
+  return cachedPages;
 }
 
 export function processEntryRemovals(crawledPages: string[]) {
   // Remove man entries deleted since cache was last updated
-  const cachedPages = cache.get("manPages");
+  const cachedPages = cache.get("manPages")?.split("\n");
   if (cachedPages) {
-    const pageList = cachedPages?.split("\n");
-    for (const page in pageList) {
+    for (const page in cachedPages) {
       if (crawledPages.indexOf(page) == -1) {
-        pageList.splice(pageList.indexOf(page), 1);
+        cachedPages.splice(cachedPages.indexOf(page), 1);
       }
     }
-    cache.set("manPages", pageList.join("\n"));
+    cache.set("manPages", cachedPages.join("\n"));
   }
+  return cachedPages;
 }
 
 function getCrawlCommand() {
@@ -59,7 +60,14 @@ function getCrawlCommand() {
       if (!directoryPath.endsWith("/")) {
         directoryPath = `${directoryPath}/`;
       }
-      return `${directoryPath}*`;
+      if (fs.existsSync(directoryPath)) {
+        return `${directoryPath}*`;
+      } else {
+        if (environment.launchType == LaunchType.UserInitiated) {
+          showToast({ title: "Invalid Directory", message: directoryPath, style: Toast.Style.Failure });
+        }
+        return "";
+      }
     });
     parsedDirectories = directories.join(" ");
   }
@@ -85,15 +93,11 @@ export function getCommands() {
 function removeInvalidEntries(pageList: string[]) {
   // Remove invalid entries, empty entries, and duplicates
   const validPages: string[] = [];
-  for (const page of pageList) {
-    if (
-      !page.match(/(^-.*)|(^\/.*)|(.*\.1.*)/) &&
-      page.trim().length > 1 &&
-      validPages.findIndex((item) => page.toUpperCase() == item.toUpperCase()) == -1
-    ) {
+  pageList.forEach((page, index1) => {
+    if (!page.match(/(^-.*)|(^\/.*)|(.*\.1.*)/) && page.trim().length > 0 && !validPages.includes(page)) {
       validPages.push(page);
     }
-  }
+  });
   return validPages;
 }
 
@@ -101,20 +105,26 @@ export function useGetManPages() {
   // Get list of command names incrementally
   const [pages, setPages] = useState<string[]>([]);
   const [result, setResult] = useState<string>("");
+  const [leftoverResult, setLeftoverResult] = useState<string>("");
 
-  const cachedPages = cache.get("manPages");
+  const cachedPages = cache.get("manPages")?.split("\n");
 
   // Run the man list command
   useEffect(() => {
     if (!cachedPages) {
-      runCommand(getCrawlCommand(), setResult);
+      runCommand(getCrawlCommand(), setResult, () => null, false);
     }
   }, []);
 
   // Crawl for new man page entries
   useEffect(() => {
     if (result != "") {
-      const newEntries = result.split("\n");
+      const newEntries = (leftoverResult + result).split("\n");
+      if (!result.endsWith("\n")) {
+        setLeftoverResult(newEntries.pop() || "");
+      } else {
+        setLeftoverResult("");
+      }
       const pageList = removeInvalidEntries(newEntries.concat(pages));
       setPages(pageList);
       cache.set("manPages", pageList.join("\n"));
@@ -124,8 +134,7 @@ export function useGetManPages() {
   // Get the cached list of pages if it exists
   useEffect(() => {
     if (cachedPages != undefined) {
-      const pageList = cachedPages.split("\n");
-      setPages(pageList);
+      setPages(cachedPages);
     }
   }, []);
 
