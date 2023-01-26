@@ -54,7 +54,7 @@ export default function NewDocForm({ template }: { template: Document }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Generate new Document"
+            title="Generate New Document"
             onSubmit={(values) => submitForm(values)}
           />
         </ActionPanel>
