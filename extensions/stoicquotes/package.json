@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Random Stoic Quote",
-      "subtitle": "Stoic Quotes",
       "description": "Get a random quote from one of the stoic philosophers - Marcus Aurelius, Cato, Zeno, Seneca or Epictetus",
       "mode": "view"
     }
