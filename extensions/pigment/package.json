@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pigment",
+  "title": "Pigment",
+  "description": "Get color values of hex codes, HSLs, RGBs, and more! (Inspired by https://twitter.com/cnrad)",
+  "icon": "command-icon.png",
+  "author": "cody",
+  "categories": [
+    "Applications",
+    "Design Tools",
+    "Developer Tools",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Pigment",
+      "subtitle": "Color Previewer",
+      "description": "Get color values of hex codes, HSLs, RGBs, and more! (Inspired by https://twitter.com/cnrad)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "@raycast/utils": "^1.4.8",
+    "color": "^4.2.3",
+    "svg-to-dataurl": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/color": "^3.0.3",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "version": "1.0.0"
+}
