@@ -89,16 +89,6 @@ export function DeviceList({ type }: DeviceListProps) {
                     });
                   }}
                 />
-                <Action
-                  title={`Copy Device Id to Clipboard`}
-                  onAction={async () => {
-                    await Clipboard.copy(d.id);
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: "Device id copied to the clipboard",
-                    });
-                  }}
-                />
               </ActionPanel>
             }
             accessories={[

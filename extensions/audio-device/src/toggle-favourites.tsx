@@ -1,8 +1,8 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { AudioDevice, getDefaultOutputDevice, getOutputDevices, setDefaultOutputDevice } from "./audio-device";
 
-const getName = (devices: AudioDevice[], deviceId: string): string => {
-  return devices.filter((device) => String(device.id) === String(deviceId))[0].name;
+const getId = (devices: AudioDevice[], deviceName: string): string => {
+  return devices.filter((device) => String(device.name) === String(deviceName))[0].id;
 };
 
 export default async () => {
@@ -10,17 +10,20 @@ export default async () => {
   const current = await getDefaultOutputDevice();
   const devices = await getOutputDevices();
 
+  console.log(String(current.name), String(favourite));
   if (favourite != null && favourite !== "") {
     try {
       // Switch to favorite2 if already in favourite
-      if (favourite2 != null && favourite2 !== "" && String(current.id) === String(favourite)) {
-        await setDefaultOutputDevice(favourite2);
-        await showHUD(`Active output audio device set to ${getName(devices, favourite2)}`);
+      if (favourite2 != null && favourite2 !== "" && String(current.name) === String(favourite)) {
+        const deviceId = getId(devices, favourite2);
+        await setDefaultOutputDevice(deviceId);
+        await showHUD(`Active output audio device set to ${favourite2}`);
       }
       // Otherwise set to favourite
       else {
-        await setDefaultOutputDevice(favourite);
-        await showHUD(`Active output audio device set to ${getName(devices, favourite)}`);
+        const deviceId = getId(devices, favourite);
+        await setDefaultOutputDevice(deviceId);
+        await showHUD(`Active output audio device set to ${favourite}`);
       }
     } catch (err) {
       await showToast({
