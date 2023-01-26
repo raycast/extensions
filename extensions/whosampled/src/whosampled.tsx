@@ -21,6 +21,16 @@ end if
 
 export default async function main() {
   const result = await runAppleScript(script);
+  if (result === "NOT_RUNNING") {
+    await showHUD("❌ Spotify is not running");
+    return;
+  }
+
+  if (result === "NOT_PLAYING") {
+    await showHUD(" ❌ Spotify is not playing");
+    return;
+  }
+
   const strippedResult = result.replace(/ \([^)]*\)/g, "").replace(/ *\[[^)]*\]/g, "");
   console.log(strippedResult);
   const searchURL = WhoSampledURL.replace("*", encodeURIComponent(strippedResult));
