@@ -3,7 +3,7 @@ import {
   ActionPanelItem,
   ActionPanelSection,
   allLocalStorageItems,
-  CopyToClipboardAction,
+  PasteAction,
   Form,
   FormValue,
   getLocalStorageItem,
@@ -81,7 +81,7 @@ export default function AppsView() {
           actions={
             <ActionPanel>
               <ActionPanelSection>
-                <CopyToClipboardAction content={a.code} title="Copy Code" />
+                <PasteAction content={a.code} title="Copy Code" />
                 <PushAction
                   icon={Icon.Plus}
                   title="Add App"
