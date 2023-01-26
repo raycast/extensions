@@ -1,11 +1,12 @@
 import { loadPreferences } from '@/services/storage'
 import { notion } from '../client'
 
-export async function inProgressTodo(pageId: string): Promise<boolean> {
+export async function setStatusTodo(
+  pageId: string,
+  statusId: string
+): Promise<boolean> {
   const preferences = await loadPreferences()
   const status = preferences.properties.status
-
-  if (!status.inProgressId) return false
 
   const notionClient = await notion()
   await notionClient.pages.update({
@@ -13,7 +14,7 @@ export async function inProgressTodo(pageId: string): Promise<boolean> {
     properties: {
       [status.name]: {
         status: {
-          id: status.inProgressId,
+          id: statusId,
         },
       },
     },
