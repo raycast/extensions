@@ -3,7 +3,7 @@
   "name": "esv-bible",
   "title": "ESV-Bible",
   "description": "Search the ESV using the ESV api and return Bible text for any valid passage.",
-  "warning": "Warning: If you disable the copyright from showing, you may be out of compliance with the Terms of Service of ESV.org. Use at your own risk.",
+  "warning": "Warning: If you disable the copyright from showing, you may be out of compliance with the Terms of Service of https://api.esv.org/. Use at your own risk.",
   "icon": "icon.png",
   "author": "cpenned",
   "categories": [
@@ -33,7 +33,7 @@
       "type": "password",
       "required": true,
       "title": "ESV API Token",
-      "placeholder": "Can be found at https://api.esv.org/",
+      "placeholder": "Can be created at https://api.esv.org/",
       "description": "The API token for your ESV account."
     },
     {
