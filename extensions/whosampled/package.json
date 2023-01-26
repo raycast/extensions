@@ -5,6 +5,9 @@
   "description": "Search WhoSampled.com from the currently playing song",
   "icon": "icon2.png",
   "author": "andrewtruex",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Web",
     "Fun",
