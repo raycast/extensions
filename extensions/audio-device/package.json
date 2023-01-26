@@ -54,7 +54,7 @@
       "name": "favourite",
       "required": false,
       "title": "Favourite Output Device",
-      "description": "The name, as found in the output device list, of the output device to use as the favourite one",
+      "description": "The name, as found in the output device list, of the output device to use as the first favourite",
       "type": "textfield",
       "default": ""
     },
@@ -62,7 +62,7 @@
       "name": "favourite2",
       "required": false,
       "title": "Favourite Output Device 2",
-      "description": "For Toggle Favourites. Requires the IDs in both favourites fields. You can find the ID with Set Output Device Action",
+      "description": "The name, as found in the output device list, of the output device to use as the second favourite",
       "type": "textfield",
       "default": ""
     }
