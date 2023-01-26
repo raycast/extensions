@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whosampled",
   "title": "WhoSampled",
-  "description": "Search WhoSampled.com from the currently playing song",
+  "description": "Search WhoSampled.com from the currently playing song in Spotify",
   "icon": "icon2.png",
   "author": "andrewtruex",
   "contributors": [
@@ -18,7 +18,7 @@
     {
       "name": "whosampled",
       "title": "WhoSampled",
-      "description": "Search WhoSampled.com from the currently playing song",
+      "description": "Search WhoSampled.com from the currently playing song in Spotify",
       "mode": "no-view"
     }
   ],
