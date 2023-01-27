@@ -30,7 +30,6 @@ interface Metadata {
 
 const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
-const GATEWAY = preferences.GATEWAY;
 
 export function getPinned() {
   return useFetch<Response>("https://api.pinata.cloud/data/pinList?includesCount=false&status=pinned&pageLimit=100", {

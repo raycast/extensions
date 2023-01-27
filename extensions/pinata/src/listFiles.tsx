@@ -18,7 +18,6 @@ interface Preferences {
 }
 
 const preferences = getPreferenceValues<Preferences>();
-const JWT = `Bearer ${preferences.PINATA_JWT}`;
 const GATEWAY = preferences.GATEWAY;
 
 export default function Command() {

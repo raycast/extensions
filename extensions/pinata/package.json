@@ -66,6 +66,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.45.2",
+    "@raycast/utils": "^1.4.16",
     "axios": "^1.2.1",
     "base-path-converter": "^1.0.2",
     "form-data": "^4.0.0",
