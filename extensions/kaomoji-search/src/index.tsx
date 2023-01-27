@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 
 export default function Command() {
   const { state, search } = useSearch();
-  const { displayMode } = getPreferenceValues<{ displayMode: "list" | "grid" }>();
+  const { displayMode, primaryAction } = getPreferenceValues<Preference>();
 
   const displayGroupedResults = state.searchText.length === 0;
   const groupedResultsByCategory = useMemo(() => {
@@ -52,14 +52,14 @@ export default function Command() {
             key={category}
           >
             {groupedResultsByCategory[category].map((searchResult) => (
-              <ItemComponent key={searchResult.id} searchResult={searchResult} />
+              <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
             ))}
           </ListComponent.Section>
         ))
       ) : (
         <ListComponent.Section title="Results" subtitle={state.results.length + ""}>
           {state.results.map((searchResult) => (
-            <ItemComponent key={searchResult.id} searchResult={searchResult} />
+            <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
           ))}
         </ListComponent.Section>
       )}
@@ -67,7 +67,42 @@ export default function Command() {
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+const getItemActions = (text: string) => {
+  return [
+    <Action.Paste title="Paste in Active App" content={text} key="paste-in-active-app" />,
+    <Action.CopyToClipboard content={text} key="copy-to-clipboard" />,
+  ];
+};
+
+function ItemActions({
+  searchResult,
+  primaryAction,
+}: {
+  searchResult: SearchResult;
+  primaryAction: Preference["primaryAction"];
+}) {
+  const actions = useMemo(() => {
+    if (primaryAction === "copy-to-clipboard") {
+      return getItemActions(searchResult.name).reverse();
+    } else {
+      return getItemActions(searchResult.name);
+    }
+  }, [primaryAction, searchResult.name]);
+
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>{actions}</ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
+function SearchListItem({
+  searchResult,
+  primaryAction,
+}: {
+  searchResult: SearchResult;
+  primaryAction: Preference["primaryAction"];
+}) {
   return (
     <List.Item
       title={searchResult.name}
@@ -76,14 +111,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           text: searchResult.description,
         },
       ]}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Paste title="Paste in Active App" content={searchResult.name} />
-            <Action.CopyToClipboard content={searchResult.name} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} />}
     />
   );
 }
@@ -106,7 +134,13 @@ function getBase64SvgUrl(kaomoji: string, dark = false) {
   return "data:image/svg+xml;base64," + Buffer.from(getSvgWithKaomoji(kaomoji, dark)).toString("base64");
 }
 
-function SearchGridItem({ searchResult }: { searchResult: SearchResult }) {
+function SearchGridItem({
+  searchResult,
+  primaryAction,
+}: {
+  searchResult: SearchResult;
+  primaryAction: Preference["primaryAction"];
+}) {
   return (
     <Grid.Item
       content={{
@@ -116,14 +150,7 @@ function SearchGridItem({ searchResult }: { searchResult: SearchResult }) {
         },
       }}
       title={searchResult.description}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.Paste title="Paste in Active App" content={searchResult.name} />
-            <Action.CopyToClipboard content={searchResult.name} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+      actions={<ItemActions searchResult={searchResult} primaryAction={primaryAction} />}
     />
   );
 }
@@ -223,4 +250,9 @@ interface SearchResult {
   name: string;
   description: string;
   category: string;
+}
+
+interface Preference {
+  displayMode: "list" | "grid";
+  primaryAction: "copy-to-clipboard" | "paste-to-active-app";
 }

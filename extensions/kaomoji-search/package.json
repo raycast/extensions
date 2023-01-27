@@ -32,6 +32,24 @@
           "value": "grid"
         }
       ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary action",
+      "required": false,
+      "description": "Choose the primary action for the results.",
+      "default": "paste-to-active-app",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy-to-clipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste-to-active-app"
+        }
+      ]
     }
   ],
   "dependencies": {
