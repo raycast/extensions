@@ -21,9 +21,9 @@
           "name": "token",
           "type": "password",
           "required": true,
-          "title": "API token",
-          "description": "DekuDeals API token",
-          "placeholder": "API token"
+          "title": "API Token",
+          "description": "DekuDeals API token (rack.session)",
+          "placeholder": "token"
         }
       ]
     }
