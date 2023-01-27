@@ -53,7 +53,7 @@ export default function Command() {
 
   // Use primary genre color for livestream icon
   let iconColor = cachedIconColor;
-  if (stations != undefined && currentStationName != undefined) {
+  if (stations != undefined && currentStationName != undefined && currentStationName in stations) {
     iconColor = colorMap[stations[currentStationName].genres[0]];
   }
 
