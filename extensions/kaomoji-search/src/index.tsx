@@ -1,7 +1,8 @@
-import { ActionPanel, CopyToClipboardAction, PasteAction, List, showToast, ToastStyle, randomId } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { AbortError } from "node-fetch";
 import { lib } from "asciilib";
+import { nanoid } from "nanoid";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -21,12 +22,16 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      accessoryTitle={searchResult.description}
+      accessories={[
+        {
+          text: searchResult.description,
+        },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PasteAction title="Paste in Active App" content={searchResult.name} />
-            <CopyToClipboardAction content={searchResult.name} />
+            <Action.Paste title="Paste in Active App" content={searchResult.name} />
+            <Action.CopyToClipboard content={searchResult.name} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -64,7 +69,7 @@ function useSearch() {
         return;
       }
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast(Toast.Style.Failure, "Could not perform search", String(error));
     }
   }
 
@@ -87,7 +92,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   return results.map((entry: AsciiLibEntry) => {
     return {
-      id: randomId(),
+      id: nanoid(),
       name: entry.entry as string,
       description: entry.name as string,
     };
