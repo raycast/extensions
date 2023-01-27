@@ -14,6 +14,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "required": false,
+      "description": "Choose how to display the results.",
+      "default": "list",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.46.0",
     "asciilib": "^0.7.0",
