@@ -104,6 +104,20 @@
       "subtitle": "Writersbrew",
       "description": "Explain code in english.",
       "mode": "no-view"
+    },
+    {
+      "name": "show-my-presets",
+      "title": "Show My Presets",
+      "subtitle": "Writersbrew",
+      "description": "Show list of my presets.",
+      "mode": "view"
+    },
+    {
+      "name": "write-an-email",
+      "title": "Write an email",
+      "subtitle": "Writersbrew",
+      "description": "Write an email in the app",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -114,6 +128,7 @@
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
