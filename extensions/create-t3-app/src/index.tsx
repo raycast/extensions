@@ -107,14 +107,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={handleSubmit}
-            title="Create app (opens Terminal)"
-          />
-          <Action
-            onAction={() => openCommandPreferences()}
-            title="Change extension preferences"
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Create app (opens Terminal)" />
+          <Action onAction={() => openCommandPreferences()} title="Change extension preferences" />
         </ActionPanel>
       }
     >
@@ -128,9 +122,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           dropNameErrorIfNeeded();
           if (!value) return;
           if (!/^[\w-]+$/.test(value)) {
-            setNameError(
-              "Project name cannot contain spaces or special characters"
-            );
+            setNameError("Project name cannot contain spaces or special characters");
           }
         }}
         autoFocus
@@ -169,12 +161,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       <Form.Checkbox id="tailwind" label="tailwind" storeValue />
       <Form.Checkbox id="trpc" label="trpc" storeValue />
       <Form.Separator />
-      <Form.Checkbox
-        id="git"
-        label="Initialize a new git repository"
-        storeValue
-        defaultValue={true}
-      />
+      <Form.Checkbox id="git" label="Initialize a new git repository" storeValue defaultValue={true} />
       <Form.Separator />
       <Form.Checkbox
         id="install"
