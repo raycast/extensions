@@ -101,11 +101,7 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy Links">
-            <Action.CopyToClipboard
-              title={"Copy Repository link"}
-              content={repo.url}
-              icon={Icon.CopyClipboard}
-            />
+            <Action.CopyToClipboard title={"Copy Repository link"} content={repo.url} icon={Icon.CopyClipboard} />
             {repo.clone.ssh ? (
               <Action.CopyToClipboard
                 title={"Copy git clone command (ssh)"}
