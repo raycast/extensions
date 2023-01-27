@@ -32,7 +32,11 @@ export default function Command() {
     >
       {displayGroupedResults ? (
         Object.keys(groupedResultsByCategory).map((category) => (
-          <ListComponent.Section title={category} subtitle={groupedResultsByCategory[category].length + ""}>
+          <ListComponent.Section
+            title={category}
+            subtitle={groupedResultsByCategory[category].length + ""}
+            key={category}
+          >
             {groupedResultsByCategory[category].map((searchResult) => (
               <ItemComponent key={searchResult.id} searchResult={searchResult} />
             ))}
