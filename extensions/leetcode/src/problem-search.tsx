@@ -35,7 +35,6 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
     onData: (data) => {
       setProblem(data.data.problem);
     },
-    keepPreviousData: true,
   });
 
   return (
@@ -89,6 +88,7 @@ export default function Command(): JSX.Element {
       setProblems(data.data.problemsetQuestionList.problems);
     },
     execute: canExecute,
+    keepPreviousData: true,
   });
 
   useEffect(() => {
@@ -118,6 +118,7 @@ export default function Command(): JSX.Element {
       }
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      throttle={true}
     >
       <List.EmptyView title={isLoading ? 'Loading ...' : 'No results found'} />
       {problems.map((problem) => (
