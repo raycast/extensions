@@ -81,7 +81,49 @@
       "name": "search",
       "title": "Search Arc",
       "description": "Search tabs, history and search suggestions",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showFavorites",
+          "label": "Show Favorites",
+          "description": "Show favorites in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showPinnedTabs",
+          "label": "Show Pinned Tabs",
+          "description": "Show pinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showUnpinnedTabs",
+          "label": "Show Unpinned Tabs",
+          "description": "Show unpinned tabs in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showHistory",
+          "label": "Show History",
+          "description": "Show history in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "showSuggestions",
+          "label": "Show Suggestions",
+          "description": "Show suggestions in search results",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
     }
   ],
   "dependencies": {

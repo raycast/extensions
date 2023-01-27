@@ -24,6 +24,14 @@ export type NewTabPreferences = {
   url: string;
 };
 
+export type SearchArcPreferences = {
+  showFavorites: boolean;
+  showPinnedTabs: boolean;
+  showUnpinnedTabs: boolean;
+  showHistory: boolean;
+  showSuggestions: boolean;
+};
+
 export type Suggestion = {
   id: string;
   query: string;
