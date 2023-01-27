@@ -1,8 +1,21 @@
-import { ActionPanel, List, showToast, Action, Toast, getPreferenceValues, Grid } from "@raycast/api";
-import { useState, useEffect, useRef, useMemo } from "react";
+import {
+  ActionPanel,
+  List,
+  showToast,
+  Action,
+  Toast,
+  getPreferenceValues,
+  Grid,
+  Clipboard,
+  Icon,
+  showHUD,
+} from "@raycast/api";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { AbortError } from "node-fetch";
 import { lib } from "asciilib";
 import { nanoid } from "nanoid";
+import { useRecentKaomoji } from "./useRecentKaomoji";
+import { Preference, SearchResult, SearchState } from "./types";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -34,6 +47,8 @@ export default function Command() {
     });
   }, [groupedResultsByCategory]);
 
+  const { recentKaomojis } = useRecentKaomoji();
+
   const ListComponent = displayMode === "list" ? List : Grid;
   const ItemComponent = displayMode === "list" ? SearchListItem : SearchGridItem;
 
@@ -45,17 +60,25 @@ export default function Command() {
       throttle
     >
       {displayGroupedResults ? (
-        groupedResultsCategories.map((category) => (
-          <ListComponent.Section
-            title={category}
-            subtitle={groupedResultsByCategory[category].length + ""}
-            key={category}
-          >
-            {groupedResultsByCategory[category].map((searchResult) => (
-              <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
+        <>
+          <ListComponent.Section title="Frequently Used" subtitle={recentKaomojis.length + ""}>
+            {recentKaomojis.map((result) => (
+              <ItemComponent key={result.id} searchResult={result} primaryAction={primaryAction} />
             ))}
           </ListComponent.Section>
-        ))
+
+          {groupedResultsCategories.map((category) => (
+            <ListComponent.Section
+              title={category}
+              subtitle={groupedResultsByCategory[category].length + ""}
+              key={category}
+            >
+              {groupedResultsByCategory[category].map((searchResult) => (
+                <ItemComponent key={searchResult.id} searchResult={searchResult} primaryAction={primaryAction} />
+              ))}
+            </ListComponent.Section>
+          ))}
+        </>
       ) : (
         <ListComponent.Section title="Results" subtitle={state.results.length + ""}>
           {state.results.map((searchResult) => (
@@ -67,13 +90,6 @@ export default function Command() {
   );
 }
 
-const getItemActions = (text: string) => {
-  return [
-    <Action.Paste title="Paste in Active App" content={text} key="paste-in-active-app" />,
-    <Action.CopyToClipboard content={text} key="copy-to-clipboard" />,
-  ];
-};
-
 function ItemActions({
   searchResult,
   primaryAction,
@@ -81,13 +97,34 @@ function ItemActions({
   searchResult: SearchResult;
   primaryAction: Preference["primaryAction"];
 }) {
+  const { addKaomoji } = useRecentKaomoji();
+
+  const pasteInActiveApp = useCallback(() => {
+    addKaomoji(searchResult);
+    Clipboard.paste(searchResult.name);
+  }, [addKaomoji]);
+
+  const copyToClipboard = useCallback(() => {
+    addKaomoji(searchResult);
+    Clipboard.copy(searchResult.name);
+    showHUD("Copied to Clipboard");
+  }, [addKaomoji]);
+
+  const PasteInActiveAppAction = useMemo(() => {
+    return <Action title="Paste in Active App" onAction={pasteInActiveApp} icon={Icon.Clipboard} />;
+  }, [pasteInActiveApp]);
+
+  const CopyToClipboardAction = useMemo(() => {
+    return <Action title="Copy to Clipboard" onAction={copyToClipboard} icon={Icon.Clipboard} />;
+  }, [copyToClipboard]);
+
   const actions = useMemo(() => {
     if (primaryAction === "copy-to-clipboard") {
-      return getItemActions(searchResult.name).reverse();
+      return [CopyToClipboardAction, PasteInActiveAppAction];
     } else {
-      return getItemActions(searchResult.name);
+      return [PasteInActiveAppAction, CopyToClipboardAction];
     }
-  }, [primaryAction, searchResult.name]);
+  }, [primaryAction, CopyToClipboardAction, PasteInActiveAppAction]);
 
   return (
     <ActionPanel>
@@ -237,22 +274,4 @@ function searchForResults(keyword: string): Promise<AsciiLibEntry[]> {
   });
 
   return Promise.resolve(filteredResults);
-}
-
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
-  searchText: string;
-}
-
-interface SearchResult {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-}
-
-interface Preference {
-  displayMode: "list" | "grid";
-  primaryAction: "copy-to-clipboard" | "paste-to-active-app";
 }
