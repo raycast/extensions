@@ -93,16 +93,17 @@
           "data": [
             {
               "title": "Tabs → History → Suggestions",
-              "value": "asc"
+              "value": "tabsHistorySuggestions"
             },
             {
               "title": "History → Tabs → Suggestions",
-              "value": "desc"
+              "value": "historyTabsSuggestions"
             }
           ]
         },
         {
           "name": "showFavorites",
+          "title": "Sections",
           "label": "Show Favorites",
           "description": "Show favorites in search results",
           "type": "checkbox",

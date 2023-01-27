@@ -40,7 +40,7 @@ function SearchArc() {
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
 
-      {searchArcPreferences.sorting === "asc" ? (
+      {searchArcPreferences.sorting === "tabsHistorySuggestions" ? (
         <>
           <TabListSections searchText={searchText} tabs={tabs} mutateTabs={mutateTabs} />
           <HistoryListSection searchText={searchText} history={history} />
