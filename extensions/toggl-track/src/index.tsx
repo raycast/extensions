@@ -16,13 +16,6 @@ function ListView() {
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries
-    .reduce((acc, timeEntry) => {
-      const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
-      if (!existing) {
-        acc.push(timeEntry);
-      }
-      return acc;
-    }, [] as TimeEntry[])
     .sort((a, b) => {
       if (a.at > b.at) {
         return -1;
@@ -33,7 +26,14 @@ function ListView() {
       }
 
       return 0;
-    });
+    })
+    .reduce((acc, timeEntry) => {
+      const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
+      if (!existing) {
+        acc.push(timeEntry);
+      }
+      return acc;
+    }, [] as TimeEntry[]);
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
