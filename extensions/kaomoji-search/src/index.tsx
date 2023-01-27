@@ -20,6 +20,20 @@ export default function Command() {
     return groupedResults;
   }, [state.results]);
 
+  const groupedResultsCategories = useMemo(() => {
+    return Object.keys(groupedResultsByCategory).sort((a, b) => {
+      if (a === "UNASSIGNED") {
+        return 1;
+      }
+
+      if (b === "UNASSIGNED") {
+        return -1;
+      }
+
+      return a.localeCompare(b);
+    });
+  }, [groupedResultsByCategory]);
+
   const ListComponent = displayMode === "list" ? List : Grid;
   const ItemComponent = displayMode === "list" ? SearchListItem : SearchGridItem;
 
@@ -31,7 +45,7 @@ export default function Command() {
       throttle
     >
       {displayGroupedResults ? (
-        Object.keys(groupedResultsByCategory).map((category) => (
+        groupedResultsCategories.map((category) => (
           <ListComponent.Section
             title={category}
             subtitle={groupedResultsByCategory[category].length + ""}
