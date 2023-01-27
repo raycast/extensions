@@ -1,5 +1,5 @@
 import { ActionPanel, List, showToast, Action, Toast, getPreferenceValues, Grid } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { AbortError } from "node-fetch";
 import { lib } from "asciilib";
 import { nanoid } from "nanoid";
@@ -8,27 +8,45 @@ export default function Command() {
   const { state, search } = useSearch();
   const { displayMode } = getPreferenceValues<{ displayMode: "list" | "grid" }>();
 
-  if (displayMode === "grid") {
-    return (
-      <Grid isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
-        <Grid.Section title="Results" subtitle={state.results.length + ""}>
+  const displayGroupedResults = state.searchText.length === 0;
+  const groupedResultsByCategory = useMemo(() => {
+    const groupedResults: Record<string, SearchResult[]> = {};
+    state.results.forEach((result) => {
+      if (!groupedResults[result.category]) {
+        groupedResults[result.category] = [];
+      }
+      groupedResults[result.category].push(result);
+    });
+    return groupedResults;
+  }, [state.results]);
+
+  const ListComponent = displayMode === "list" ? List : Grid;
+  const ItemComponent = displayMode === "list" ? SearchListItem : SearchGridItem;
+
+  return (
+    <ListComponent
+      isLoading={state.isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search by name..."
+      throttle
+    >
+      {displayGroupedResults ? (
+        Object.keys(groupedResultsByCategory).map((category) => (
+          <ListComponent.Section title={category} subtitle={groupedResultsByCategory[category].length + ""}>
+            {groupedResultsByCategory[category].map((searchResult) => (
+              <ItemComponent key={searchResult.id} searchResult={searchResult} />
+            ))}
+          </ListComponent.Section>
+        ))
+      ) : (
+        <ListComponent.Section title="Results" subtitle={state.results.length + ""}>
           {state.results.map((searchResult) => (
-            <SearchGridItem key={searchResult.id} searchResult={searchResult} />
+            <ItemComponent key={searchResult.id} searchResult={searchResult} />
           ))}
-        </Grid.Section>
-      </Grid>
-    );
-  } else {
-    return (
-      <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
-        <List.Section title="Results" subtitle={state.results.length + ""}>
-          {state.results.map((searchResult) => (
-            <SearchListItem key={searchResult.id} searchResult={searchResult} />
-          ))}
-        </List.Section>
-      </List>
-    );
-  }
+        </ListComponent.Section>
+      )}
+    </ListComponent>
+  );
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -93,7 +111,7 @@ function SearchGridItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [state, setState] = useState<SearchState>({ results: [], isLoading: true, searchText: "" });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -116,6 +134,7 @@ function useSearch() {
         ...oldState,
         results: results,
         isLoading: false,
+        searchText,
       }));
     } catch (error) {
       if (error instanceof AbortError) {
@@ -148,6 +167,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       id: nanoid(),
       name: entry.entry as string,
       description: entry.name as string,
+      category: entry.category,
     };
   });
 }
@@ -177,10 +197,12 @@ function searchForResults(keyword: string): Promise<AsciiLibEntry[]> {
 interface SearchState {
   results: SearchResult[];
   isLoading: boolean;
+  searchText: string;
 }
 
 interface SearchResult {
   id: string;
   name: string;
   description: string;
+  category: string;
 }
