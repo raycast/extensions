@@ -31,8 +31,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "open": "^8.4.0"
+    "@raycast/api": "^1.45.2"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

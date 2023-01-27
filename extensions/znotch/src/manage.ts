@@ -1,5 +1,4 @@
-import open from "open";
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow, showHUD, open } from "@raycast/api";
 import { isZNotchInstalled } from "./check-installed";
 
 export enum Action {
