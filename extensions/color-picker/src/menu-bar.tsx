@@ -1,33 +1,30 @@
-import { Clipboard, environment, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
+import {
+  Clipboard,
+  environment,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  openCommandPreferences,
+  showHUD,
+} from "@raycast/api";
 import { useHistory } from "./history";
-import { getFormattedColor, getIcon, getShortcut, pickColor } from "./utils";
+import { getFormattedColor, getIcon, getShortcut } from "./utils";
 
 export default function Command() {
-  const { history, add, remove, clear } = useHistory();
+  const { history, remove, clear } = useHistory();
 
   return (
     <MenuBarExtra icon={Icon.EyeDropper}>
       <MenuBarExtra.Item
         title="Pick Color"
-        onAction={async () => {
-          try {
-            const pickedColor = await pickColor();
-            if (!pickedColor) {
-              return;
-            }
-
-            add(pickedColor);
-
-            const formattedColor = getFormattedColor(pickedColor);
-            await Clipboard.copy(formattedColor);
-
-            await showHUD("Copied color to clipboard");
-          } catch (e) {
-            console.error(e);
-
-            await showHUD("❌ Failed picking color");
-          }
-        }}
+        onAction={async () =>
+          await launchCommand({
+            name: "pick-color",
+            type: LaunchType.Background,
+            context: { source: "menu-bar" },
+          })
+        }
       />
       <MenuBarExtra.Section>
         {history?.slice(0, 9).map((historyItem, index) => {
@@ -57,7 +54,7 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
         />
-        {environment.isDevelopment && <MenuBarExtra.Item title="Clear Cached State" onAction={() => clear()} />}
+        {environment.isDevelopment && <MenuBarExtra.Item title="Clear All Colors" onAction={() => clear()} />}
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

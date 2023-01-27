@@ -1,8 +1,9 @@
-import { Clipboard, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { addToHistory } from "./history";
+import { PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor, pickColor } from "./utils";
 
-export default async function command() {
+export default async function command(props: PickColorCommandLaunchProps) {
   await closeMainWindow();
 
   try {
@@ -17,19 +18,14 @@ export default async function command() {
     await Clipboard.copy(hex);
 
     await showHUD("Copied color to clipboard");
+
+    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+    if (props.launchContext?.source === "organize-colors") {
+      await launchCommand({ name: "organize-colors", type: LaunchType.UserInitiated });
+    }
   } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed picking color",
-      message: e instanceof Error ? e.message : String(e),
-      primaryAction: {
-        title: "Copy Error",
-        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        async onAction(toast) {
-          await Clipboard.copy(e instanceof Error ? e.message : String(e));
-          await toast.hide();
-        },
-      },
-    });
+    console.error(e);
+
+    await showHUD("❌ Failed picking color");
   }
 }

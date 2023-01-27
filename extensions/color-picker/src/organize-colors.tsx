@@ -1,14 +1,43 @@
-import { Action, ActionPanel, Alert, confirmAlert, Grid, Icon, showToast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Grid,
+  Icon,
+  launchCommand,
+  LaunchType,
+  showToast,
+} from "@raycast/api";
+import { useHistory } from "./history";
 import { organizeColorsCommandPreferences } from "./preferences";
-import { HistoryItem } from "./types";
 import { getFormattedColor } from "./utils";
 
 export default function Command() {
-  const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
+  const { history, remove, clear } = useHistory();
 
   return (
     <Grid>
+      <Grid.EmptyView
+        icon={Icon.EyeDropper}
+        title="No colors picked yet ¯\_(ツ)_/¯"
+        description="Use the Pick Color command to pick some"
+        actions={
+          <ActionPanel>
+            <Action
+              icon={Icon.EyeDropper}
+              title="Pick Color"
+              onAction={async () =>
+                await launchCommand({
+                  name: "pick-color",
+                  type: LaunchType.Background,
+                  context: { source: "organize-colors" },
+                })
+              }
+            />
+          </ActionPanel>
+        }
+      />
       {history?.map((historyItem) => {
         const formattedColor = getFormattedColor(historyItem.color);
         return (
@@ -50,13 +79,31 @@ export default function Command() {
                           style: Alert.ActionStyle.Destructive,
                         },
                       });
+
                       if (confirmed) {
-                        setHistory((previousHistory) => {
-                          return previousHistory.filter(
-                            (item) => getFormattedColor(item.color) !== getFormattedColor(historyItem.color)
-                          );
-                        });
+                        remove(historyItem.color);
                         await showToast({ title: "Deleted color" });
+                      }
+                    }}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete All Colors"
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Delete All Colors",
+                        message: "Do you want to delete all colors from your history?",
+                        primaryAction: {
+                          title: "Delete All",
+                          style: Alert.ActionStyle.Destructive,
+                        },
+                      });
+
+                      if (confirmed) {
+                        clear();
+                        await showToast({ title: "Deleted all colors" });
                       }
                     }}
                   />

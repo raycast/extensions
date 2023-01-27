@@ -1,3 +1,5 @@
+import { LaunchType } from "@raycast/api";
+
 export type Color = {
   alpha: number;
   red: number;
@@ -16,4 +18,11 @@ export type OrganizeColorsCommandPreferences = {
 
 export type ExtensionPreferences = {
   colorFormat: "hex" | "rgba" | "rgba-percentage";
+};
+
+export type PickColorCommandLaunchProps = {
+  launchType: LaunchType;
+  launchContext: {
+    source?: "menu-bar" | "organize-colors";
+  };
 };
