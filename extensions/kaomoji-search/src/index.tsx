@@ -111,11 +111,15 @@ function ItemActions({
   }, [addKaomoji]);
 
   const PasteInActiveAppAction = useMemo(() => {
-    return <Action title="Paste in Active App" onAction={pasteInActiveApp} icon={Icon.Clipboard} />;
+    return (
+      <Action title="Paste in Active App" onAction={pasteInActiveApp} icon={Icon.Clipboard} key="paste-in-active-app" />
+    );
   }, [pasteInActiveApp]);
 
   const CopyToClipboardAction = useMemo(() => {
-    return <Action title="Copy to Clipboard" onAction={copyToClipboard} icon={Icon.Clipboard} />;
+    return (
+      <Action title="Copy to Clipboard" onAction={copyToClipboard} icon={Icon.Clipboard} key="copy-to-clipboard" />
+    );
   }, [copyToClipboard]);
 
   const actions = useMemo(() => {
@@ -160,8 +164,10 @@ function toHTMLEntities(str: string) {
 }
 
 function getSvgWithKaomoji(kaomoji: string, dark = false) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 90 90">
-  <text dominant-baseline="middle" x="45" y="45" text-anchor="middle" fill="${dark ? "#fff" : "#000"}" font-size="8px">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" >
+  <text dominant-baseline="middle" x="45" y="45" text-anchor="middle" fill="${
+    dark ? "#fff" : "#000"
+  }" font-size="8px" text-length="90" length-adjust="spacing">
     ${toHTMLEntities(kaomoji)}
   </text>
 </svg>`;
