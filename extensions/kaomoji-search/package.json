@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.46.0",
-    "asciilib": "^0.7.0",
+    "asciilib": "^1.0.0",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.0.0"
   },
