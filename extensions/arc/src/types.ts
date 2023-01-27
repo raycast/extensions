@@ -25,6 +25,7 @@ export type NewTabPreferences = {
 };
 
 export type SearchArcPreferences = {
+  sorting: "asc" | "desc";
   showFavorites: boolean;
   showPinnedTabs: boolean;
   showUnpinnedTabs: boolean;

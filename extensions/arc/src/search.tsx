@@ -1,8 +1,8 @@
 import { Icon, List } from "@raycast/api";
-import { useCachedPromise, useSQL } from "@raycast/utils";
+import { MutatePromise, useCachedPromise, useSQL } from "@raycast/utils";
 import { useState } from "react";
 import { historyDatabasePath, getHistoryQuery } from "./sql";
-import { HistoryEntry } from "./types";
+import { HistoryEntry, Suggestion, Tab } from "./types";
 import {
   getKey,
   getLocationTitle,
@@ -32,16 +32,6 @@ function SearchArc() {
     return permissionView;
   }
 
-  const orderedLocations = getOrderedLocations();
-  const groupedTabs = chain(tabs)
-    .filter(
-      (tab) =>
-        tab.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        tab.url.toLowerCase().includes(searchText.toLowerCase())
-    )
-    .groupBy((tab) => tab.location)
-    .value();
-
   return (
     <List
       searchBarPlaceholder="Search history"
@@ -50,6 +40,36 @@ function SearchArc() {
     >
       <List.EmptyView icon={Icon.MagnifyingGlass} title="Nothing found ¯\_(ツ)_/¯" />
 
+      {searchArcPreferences.sorting === "asc" ? (
+        <>
+          <TabListSections searchText={searchText} tabs={tabs} mutateTabs={mutateTabs} />
+          <HistoryListSection searchText={searchText} history={history} />
+          <SuggestionsListSection searchText={searchText} suggestions={suggestions} />
+        </>
+      ) : (
+        <>
+          <HistoryListSection searchText={searchText} history={history} />
+          {!isLoadingHistory && <TabListSections searchText={searchText} tabs={tabs} mutateTabs={mutateTabs} />}
+          <SuggestionsListSection searchText={searchText} suggestions={suggestions} />
+        </>
+      )}
+    </List>
+  );
+}
+
+function TabListSections(props: { tabs?: Tab[]; mutateTabs: MutatePromise<Tab[] | undefined>; searchText: string }) {
+  const orderedLocations = getOrderedLocations();
+  const groupedTabs = chain(props.tabs)
+    .filter(
+      (tab) =>
+        tab.title.toLowerCase().includes(props.searchText.toLowerCase()) ||
+        tab.url.toLowerCase().includes(props.searchText.toLowerCase())
+    )
+    .groupBy((tab) => tab.location)
+    .value();
+
+  return (
+    <>
       {orderedLocations
         .filter((location) => isLocationShown(location))
         .map((location) => {
@@ -57,29 +77,33 @@ function SearchArc() {
           return (
             <List.Section key={location} title={getLocationTitle(location)} subtitle={getNumberOfTabs(tabs)}>
               {tabs?.map((tab) => (
-                <TabListItem key={getKey(tab)} tab={tab} searchText={searchText} mutate={mutateTabs} />
+                <TabListItem key={getKey(tab)} tab={tab} searchText={props.searchText} mutate={props.mutateTabs} />
               ))}
             </List.Section>
           );
         })}
-
-      {searchArcPreferences.showHistory && (
-        <List.Section title="History" subtitle={getNumberOfHistoryEntries(history)}>
-          {history?.map((entry) => (
-            <HistoryEntryListItem key={entry.id} searchText={searchText} entry={entry} />
-          ))}
-        </List.Section>
-      )}
-
-      {searchArcPreferences.showSuggestions && (
-        <List.Section title="Suggestions">
-          {suggestions?.map((suggestion) => (
-            <SuggestionListItem key={suggestion.id} suggestion={suggestion} searchText={searchText} />
-          ))}
-        </List.Section>
-      )}
-    </List>
+    </>
   );
+}
+
+function HistoryListSection(props: { history?: HistoryEntry[]; searchText: string }) {
+  return searchArcPreferences.showHistory ? (
+    <List.Section title="History" subtitle={getNumberOfHistoryEntries(props.history)}>
+      {props.history?.map((entry) => (
+        <HistoryEntryListItem key={entry.id} searchText={props.searchText} entry={entry} />
+      ))}
+    </List.Section>
+  ) : null;
+}
+
+function SuggestionsListSection(props: { suggestions?: Suggestion[]; searchText: string }) {
+  return searchArcPreferences.showSuggestions ? (
+    <List.Section title="Suggestions">
+      {props.suggestions?.map((suggestion) => (
+        <SuggestionListItem key={suggestion.id} suggestion={suggestion} searchText={props.searchText} />
+      ))}
+    </List.Section>
+  ) : null;
 }
 
 export default function Command() {

@@ -84,6 +84,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "sorting",
+          "title": "Sorting",
+          "description": "Sorting of sections in search results",
+          "type": "dropdown",
+          "required": false,
+          "default": "asc",
+          "data": [
+            {
+              "title": "Tabs → History → Suggestions",
+              "value": "asc"
+            },
+            {
+              "title": "History → Tabs → Suggestions",
+              "value": "desc"
+            }
+          ]
+        },
+        {
           "name": "showFavorites",
           "label": "Show Favorites",
           "description": "Show favorites in search results",
