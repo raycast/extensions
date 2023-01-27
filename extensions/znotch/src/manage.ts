@@ -13,6 +13,6 @@ export async function manage(action: Action, message: string) {
     showHUD("zNotch: " + message);
     await closeMainWindow();
   } else {
-    await showHUD("zNotch app is not installed");
+    await showHUD("zNotch App is not installed");
   }
 }
