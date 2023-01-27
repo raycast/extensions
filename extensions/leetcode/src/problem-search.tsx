@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
+import { useCachedState, useFetch } from '@raycast/utils';
 import { useEffect, useState } from 'react';
 import { endpoint, getProblemQuery, searchProblemQuery } from './api';
 import { GetProblemResponse, Problem, ProblemDifficulty, ProblemPreview, SearchProblemResponse } from './types';
@@ -58,7 +58,7 @@ function ProblemDetail(props: { titleSlug: string }): JSX.Element {
 export default function Command(): JSX.Element {
   const [searchText, setSearchText] = useState<string>('');
   const [categorySlug, setCategorySlug] = useState<string>('');
-  const [problems, setProblems] = useState<ProblemPreview[]>([]);
+  const [problems, setProblems] = useCachedState<ProblemPreview[]>('searched-problems', []);
   const [canExecute, setCanExecute] = useState<boolean>(false);
 
   const { isLoading } = useFetch<SearchProblemResponse>(endpoint, {
@@ -92,7 +92,9 @@ export default function Command(): JSX.Element {
   });
 
   useEffect(() => {
-    setCanExecute(true);
+    if (searchText !== '' || problems.length === 0) {
+      setCanExecute(true);
+    }
   }, [searchText, categorySlug]);
 
   return (
