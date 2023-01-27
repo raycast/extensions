@@ -210,7 +210,7 @@ function SearchContext({ repository }: SearchContextProps) {
   return (
     <List
       isLoading={isPRLoading}
-      searchBarPlaceholder="Filter `/b` for branches, `/p` for Pull Request, `/i` for issues"
+      searchBarPlaceholder="Filter `/me` for your stuff, `/b` for branches, `/p` for Pull Request, `/i` for issues"
       onSearchTextChange={parseSearchOptions}
       navigationTitle={repository.nameWithOwner}
       throttle
