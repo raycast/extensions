@@ -68,7 +68,7 @@ export async function refreshCache() {
   const shouldRefresh = cachedLastUpdated !== serverLastUpdated?.update_time;
   console.debug({ shouldRefresh, cachedLastUpdated, serverLastUpdated });
 
-  const serverPosts = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
+  const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
       return [];
     } else {
@@ -76,15 +76,15 @@ export async function refreshCache() {
     }
   })) as PinboardBookmark[];
 
-  const transformedServerPosts = serverPosts.map((post) => transformBookmark(post));
+  const transformedServerBookmarks = serverBookmarks.map((post) => transformBookmark(post));
 
-  if (shouldRefresh && serverPosts && serverLastUpdated) {
+  if (shouldRefresh && serverBookmarks && serverLastUpdated) {
     console.debug("Refreshing cache...");
     pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
     console.debug("Updated lastUpdated cache");
-    pinboardCache.set("posts", JSON.stringify(serverPosts));
-    console.debug("Updated posts cache");
-    return `Successfully updated cache! There are now ${Object.keys(serverPosts).length} items`;
+    pinboardCache.set("posts", JSON.stringify(serverBookmarks));
+    console.debug("Updated bookmarks cache");
+    return `Successfully updated cache! There are now ${Object.keys(serverBookmarks).length} items`;
   }
   return "There was no need for an update, so I didn't update";
 }
