@@ -1,21 +1,13 @@
-import got from "got";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { MenuBarExtra, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { Draft } from "./types";
 import { extensionPreferences } from "./preferences";
+import { getMenuBarExtraItemShortcut, getRelativeDate, getTypefullyIcon } from "./utils";
 
-dayjs.extend(relativeTime);
+const MAX_TITLE_LENGTH = 24;
 
-const sortAscByDateFn = (draftA: Draft, draftB: Draft): number => {
-  return new Date(draftA.scheduled_date).getTime() - new Date(draftB.scheduled_date).getTime();
-};
-
-const ScheduledPostItem = (props: { draft: Draft }) => {
-  const MAX_TITLE_LENGTH = 24;
-
-  const timeUntilPost = dayjs().to(dayjs(props.draft.scheduled_date));
+function ScheduledPostItem(props: { draft: Draft; index: number }) {
+  const timeUntilPost = getRelativeDate(props.draft.scheduled_date);
   const title =
     props.draft.text_first_tweet.length > 0
       ? props.draft.text_first_tweet.slice(0, MAX_TITLE_LENGTH - timeUntilPost.length)
@@ -23,70 +15,60 @@ const ScheduledPostItem = (props: { draft: Draft }) => {
 
   return (
     <MenuBarExtra.Item
-      key={props.draft.id}
-      title={`${title}... (${timeUntilPost})`}
+      title={title}
+      subtitle={timeUntilPost}
+      shortcut={getMenuBarExtraItemShortcut(props.index)}
       onAction={() => open(`https://typefully.com/?d=${props.draft.id}`)}
     />
   );
-};
-
+}
 export default function Command() {
-  const { isLoading, data } = useCachedPromise(
-    async (url: string): Promise<Array<Draft>> => {
-      const drafts: Array<Draft> = await got
-        .get(url, {
-          headers: {
-            "X-API-KEY": `Bearer ${extensionPreferences.token}`,
-          },
-          responseType: "json",
-        })
-        .json();
-
-      const sortedDraftsByDate = drafts.sort((a: Draft, b: Draft) => {
-        return new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime();
-      });
-
-      return sortedDraftsByDate;
-    },
-    ["https://api.typefully.com/v1/drafts/recently-scheduled"],
+  const { data: scheduledDrafts, isLoading: isLoadingScheduledDrafts } = useFetch<Draft[]>(
+    "https://api.typefully.com/v1/drafts/recently-scheduled",
     {
-      keepPreviousData: true,
+      headers: {
+        "X-API-KEY": `Bearer ${extensionPreferences.token}`,
+        accept: "application/json",
+      },
     }
   );
 
   return (
     <MenuBarExtra
-      icon={{
-        source: {
-          light: "black-feather.svg",
-          dark: "white-feather.svg",
-        },
-      }}
-      tooltip="Your Pull Requests"
-      title={data && data.length > 0 ? data.length.toString() : undefined}
-      isLoading={isLoading}
+      icon={getTypefullyIcon(scheduledDrafts && scheduledDrafts.length > 0)}
+      title={scheduledDrafts && scheduledDrafts.length > 0 ? scheduledDrafts.length.toString() : undefined}
+      isLoading={isLoadingScheduledDrafts}
     >
-      {/* Quick Links */}
-      <MenuBarExtra.Section title="Quick Links">
-        <MenuBarExtra.Item title="Open Typefully" onAction={() => open("https://typefully.com")} />
-        <MenuBarExtra.Item title="Open Twitter" onAction={() => open("https://twitter.com")} />
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Typefully"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={() => open("https://typefully.com")}
+        />
+        <MenuBarExtra.Item
+          title="Open Twitter"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          onAction={() => open("https://twitter.com")}
+        />
       </MenuBarExtra.Section>
-
-      {/* Scheduled Posts */}
-      <MenuBarExtra.Section title="Upcoming Scheduled Posts">
-        {data === undefined || data.length === 0 ? (
-          <MenuBarExtra.Item title="No posts found. 😔" />
+      <MenuBarExtra.Section>
+        {scheduledDrafts && scheduledDrafts.length > 0 ? (
+          scheduledDrafts
+            ?.slice(0, 10)
+            ?.sort((a: Draft, b: Draft) => {
+              return new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime();
+            })
+            .map((draft, index) => <ScheduledPostItem key={draft.id} draft={draft} index={index} />)
         ) : (
-          data
-            .sort(sortAscByDateFn)
-            .slice(0, 5)
-            .map((draft) => <ScheduledPostItem key={draft.id} draft={draft} />)
+          <MenuBarExtra.Item title="No scheduled posts" />
         )}
-
-        {/* Optional extra, if there are > 5 posts */}
-        {data !== undefined && data.length > 5 && (
-          <MenuBarExtra.Item title="... more posts later" onAction={() => open(`https://typefully.com/`)} />
-        )}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Configure Command"
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={openCommandPreferences}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
