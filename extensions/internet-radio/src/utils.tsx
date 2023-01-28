@@ -116,7 +116,7 @@ export const colorMap: { [key: string]: Color } = {
 };
 
 interface stationList {
-  [value: string]: { [value: string]: string | string[] }
+  [value: string]: { [value: string]: string | string[] };
 }
 
 export async function loadDefaults() {
@@ -125,12 +125,12 @@ export async function loadDefaults() {
   if (!testEntry) {
     for (const station in defaultStations) {
       if (station == "default") {
-        continue
+        continue;
       }
       for (const key in (defaultStations as stationList)[station]) {
         let value = (defaultStations as stationList)[station][key];
         if (Array.isArray(value)) {
-          value = value.join(",") + ","
+          value = value.join(",") + ",";
         }
         await LocalStorage.setItem(`station~${station}#${key}`, value);
       }
@@ -285,7 +285,7 @@ async function modifyStation(
   for (const key in newData) {
     let value = newData[key];
     if (Array.isArray(value)) {
-      value = value.join(",") + ","
+      value = value.join(",") + ",";
     }
     await LocalStorage.setItem(`station~${newName}#${key}`, value);
   }
@@ -419,7 +419,9 @@ export function EditStationForm(props: {
         placeholder="List of genres streamed by this station"
       >
         {Object.entries(colorMap).map(([key, color]) => {
-          return <Form.TagPicker.Item value={key} title={key} key={key} icon={{ source: Icon.Circle, tintColor: color }} />;
+          return (
+            <Form.TagPicker.Item value={key} title={key} key={key} icon={{ source: Icon.Circle, tintColor: color }} />
+          );
         })}
       </Form.TagPicker>
     </Form>

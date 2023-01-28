@@ -30,16 +30,18 @@ interface Preferences {
   showStationIcons: boolean;
 }
 
-function GenreDropdown(props: { onGenreSelection: React.Dispatch<React.SetStateAction<string | undefined>> } ) {
-  const { onGenreSelection } = props
+function GenreDropdown(props: { onGenreSelection: React.Dispatch<React.SetStateAction<string | undefined>> }) {
+  const { onGenreSelection } = props;
   return (
-    <List.Dropdown
-      tooltip="Select Genre"
-      onChange={(genreSelection) => onGenreSelection(genreSelection)}
-    >
+    <List.Dropdown tooltip="Select Genre" onChange={(genreSelection) => onGenreSelection(genreSelection)}>
       <List.Dropdown.Item key="All Genres" title="All Genres" value="All Genres" />
       {Object.entries(colorMap).map(([genre, genreColor]) => (
-        <List.Dropdown.Item key={genre} title={genre} value={genre} icon={{ source: Icon.Circle, tintColor: genreColor }} />
+        <List.Dropdown.Item
+          key={genre}
+          title={genre}
+          value={genre}
+          icon={{ source: Icon.Circle, tintColor: genreColor }}
+        />
       ))}
     </List.Dropdown>
   );
@@ -54,7 +56,7 @@ export default function Command() {
   const [stations, setStations] = useState<{ [stationName: string]: { [key: string]: string | string[] } }>();
   const { push } = useNavigation();
 
-  const preferences = getPreferenceValues<Preferences>()
+  const preferences = getPreferenceValues<Preferences>();
 
   // Load default stations, if necessary
   useEffect(() => {
@@ -83,8 +85,12 @@ export default function Command() {
     .forEach(([stationName, stationData]) => {
       const tags = [];
 
-      if (genreSelection != undefined && genreSelection != "All Genres" && !stationData.genres.includes(genreSelection)) {
-        return
+      if (
+        genreSelection != undefined &&
+        genreSelection != "All Genres" &&
+        !stationData.genres.includes(genreSelection)
+      ) {
+        return;
       }
 
       if (currentStationName == stationName) {
@@ -212,10 +218,7 @@ export default function Command() {
       searchBarPlaceholder={`Search ${Object.entries(stations).length || ""} radio stations...`}
       searchBarAccessory={<GenreDropdown onGenreSelection={setGenreSelection} />}
     >
-      <List.EmptyView
-        icon={{ source: "no-view.png" }}
-        title={`No ${null} radio stations found!`}
-      />
+      <List.EmptyView icon={{ source: "no-view.png" }} title={`No ${null} radio stations found!`} />
       {listItems}
     </List>
   );

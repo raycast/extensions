@@ -1,8 +1,17 @@
-import { Color, getPreferenceValues, Icon, Image, launchCommand, LaunchType, LocalStorage, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  getPreferenceValues,
+  Icon,
+  Image,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  MenuBarExtra,
+  openCommandPreferences,
+} from "@raycast/api";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { colorMap, getAllStations, loadDefaults, playStation } from "./utils";
-
 
 interface Preferences {
   showColoredIcon: boolean;
@@ -16,7 +25,7 @@ export default function Command() {
   const [stations, setStations] = useState<{ [stationName: string]: { [key: string]: string | string[] } }>();
   const [cachedIconColor, setCachedIconColor] = useCachedState<string>(Color.SecondaryText);
 
-  const preferences = getPreferenceValues<Preferences>()
+  const preferences = getPreferenceValues<Preferences>();
 
   // Load default stations, if necessary
   useEffect(() => {
@@ -73,7 +82,7 @@ export default function Command() {
       setCachedIconColor(iconColor);
     }, [iconColor]);
   } else {
-    iconColor = Color.SecondaryText
+    iconColor = Color.SecondaryText;
   }
 
   return (
@@ -94,13 +103,15 @@ export default function Command() {
           />
         ) : null}
 
-        {lastStationName != "" ? <MenuBarExtra.Item
-          icon={Icon.ArrowCounterClockwise}
-          title="Play Last Station"
-          onAction={async () => await launchCommand({ name: "play-last-station", type: LaunchType.Background })}
-          shortcut={{ modifiers: ["cmd"], key: "l" }}
-          tooltip="Resume playback of the last stopped station"
-        /> : null}
+        {lastStationName != "" ? (
+          <MenuBarExtra.Item
+            icon={Icon.ArrowCounterClockwise}
+            title="Play Last Station"
+            onAction={async () => await launchCommand({ name: "play-last-station", type: LaunchType.Background })}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            tooltip="Resume playback of the last stopped station"
+          />
+        ) : null}
 
         <MenuBarExtra.Item
           icon={Icon.Shuffle}
@@ -109,7 +120,6 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           tooltip="Start playing a randomly selected station"
         />
-
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Stations">
@@ -117,13 +127,13 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item 
-            title="Preferences..."
-            icon={Icon.Gear}
-            onAction={async () => await openCommandPreferences()}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-            tooltip="Configure preferences for Menu Bar Radio"
-          />
+        <MenuBarExtra.Item
+          title="Preferences..."
+          icon={Icon.Gear}
+          onAction={async () => await openCommandPreferences()}
+          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          tooltip="Configure preferences for Menu Bar Radio"
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
