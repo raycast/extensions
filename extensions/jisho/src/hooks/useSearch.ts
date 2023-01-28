@@ -4,14 +4,11 @@ import { nanoid } from "nanoid";
 import { useState } from "react";
 
 import { SearchResult } from "../types/types";
-import { useSearchHistory } from "./useSearchHistory";
 
 type Json = Record<string, unknown>;
 
 const useSearch = (initialSearchText: string) => {
   const [searchText, setSearchText] = useState<string>(initialSearchText);
-
-  const { addToHistory } = useSearchHistory(searchText);
 
   const { isLoading, data } = useFetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
     parseResponse: parseResponse,
@@ -32,9 +29,8 @@ const useSearch = (initialSearchText: string) => {
       isLoading,
       results: data,
     },
-    search: setSearchText,
+    setSearchText,
     searchText,
-    addToHistory,
   };
 };
 

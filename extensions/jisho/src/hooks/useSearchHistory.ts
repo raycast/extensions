@@ -1,6 +1,7 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+
 import { SearchHistory, SearchHistoryItem, SearchResult } from "../types/types";
 
 export const getCurrentHistory = async (): Promise<SearchHistory> => {
@@ -63,5 +64,9 @@ export const useSearchHistory = (currentSearch: string) => {
     setHistory((history) => appendToHistory(history, chosenItem));
   }, []);
 
-  return { addToHistory, history };
+  const removeFromHistory = useCallback((chosenItem: SearchHistoryItem) => {
+    setHistory((history) => history.filter((item) => !equals(item, chosenItem)));
+  }, []);
+
+  return { addToHistory, removeFromHistory, history };
 };

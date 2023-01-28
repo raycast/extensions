@@ -1,27 +1,27 @@
-import { Action, ActionPanel, Icon, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, List } from "@raycast/api";
 
 import { SearchHistoryItem } from "../types/types";
 import SearchResultItem from "./SearchResultItem";
-
-const launchSearch = async (searchText: string) => {
-  await launchCommand({
-    name: "search",
-    type: LaunchType.UserInitiated,
-    context: {
-      searchText,
-    },
-  });
-};
+import Command from "../search";
 
 export default function SearchHistoryItem({
   searchHistoryItem,
   addToHistory,
+  removeFromHistory,
 }: {
   searchHistoryItem: SearchHistoryItem;
   addToHistory: (result: SearchHistoryItem) => void;
+  removeFromHistory: (result: SearchHistoryItem) => void;
 }) {
   if (searchHistoryItem.type === "result") {
-    return <SearchResultItem searchResult={searchHistoryItem} addToHistory={addToHistory} />;
+    return (
+      <SearchResultItem
+        historyItem
+        searchResult={searchHistoryItem}
+        removeFromHistory={removeFromHistory}
+        addToHistory={addToHistory}
+      />
+    );
   } else {
     return (
       <List.Item
@@ -29,12 +29,30 @@ export default function SearchHistoryItem({
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action
+              <Action.Push
                 title="Search again"
                 icon={Icon.MagnifyingGlass}
-                onAction={() => {
+                target={
+                  <Command
+                    launchContext={{
+                      searchText: searchHistoryItem.query,
+                    }}
+                    launchType={LaunchType.UserInitiated}
+                    arguments={{}}
+                  />
+                }
+                onPush={() => {
                   addToHistory(searchHistoryItem);
-                  launchSearch(searchHistoryItem.query);
+                }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title="Remove from history"
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                onAction={() => {
+                  removeFromHistory(searchHistoryItem);
                 }}
               />
             </ActionPanel.Section>

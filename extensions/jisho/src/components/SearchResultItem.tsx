@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCallback } from "react";
 
 import { SearchHistoryItem, SearchResult } from "../types/types";
@@ -7,8 +7,12 @@ import { SearchHistoryItems } from "../hooks/useSearchHistory";
 export default function SearchResultItem({
   searchResult,
   addToHistory,
+  removeFromHistory,
+  historyItem,
 }: {
   addToHistory: (result: SearchHistoryItem) => void;
+  removeFromHistory: (result: SearchHistoryItem) => void;
+  historyItem?: boolean;
   searchResult: SearchResult;
 }) {
   const title = searchResult.kanji || searchResult.reading;
@@ -41,6 +45,18 @@ export default function SearchResultItem({
               />
             )}
           </ActionPanel.Section>
+          {historyItem && (
+            <ActionPanel.Section>
+              <Action
+                title="Remove from history"
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                onAction={() => {
+                  removeFromHistory(SearchHistoryItems.resultItem(searchResult));
+                }}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
       accessories={[
