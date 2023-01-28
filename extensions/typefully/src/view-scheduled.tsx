@@ -14,6 +14,10 @@ export default function Command() {
           title={draft.text_first_tweet}
           accessories={[
             {
+              icon: draft.num_tweets > 1 ? Icon.SpeechBubbleActive : undefined,
+              tooltip: draft.num_tweets > 1 ? `Tweets: ${draft.num_tweets}` : undefined,
+            },
+            {
               icon: draft.scheduled_date ? Icon.Clock : undefined,
               date: draft.scheduled_date ? new Date(draft.scheduled_date) : undefined,
               tooltip: draft.scheduled_date
