@@ -1,9 +1,8 @@
-import { Form, ActionPanel, Action, showToast, Toast, Icon, open } from "@raycast/api";
-import fetch from "node-fetch";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, open, Clipboard } from "@raycast/api";
 import { useState } from "react";
-import { extensionPreferences } from "./preferences";
-import { CreateDraftValues, Draft } from "./types";
+import { CreateDraftValues } from "./types";
 import { FormValidation, useForm } from "@raycast/utils";
+import { createDraft } from "./typefully";
 
 export default function Command() {
   const [shareOptions, setShareOptions] = useState<string>();
@@ -15,25 +14,7 @@ export default function Command() {
       });
 
       try {
-        const response = await fetch("https://api.typefully.com/v1/drafts/", {
-          method: "POST",
-          headers: {
-            "X-API-KEY": `Bearer ${extensionPreferences.token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: values.content,
-            threadify: values.threadify,
-            schedule_date:
-              values.shareOptions == "schedule"
-                ? values.scheduleDate?.toISOString()
-                : values.shareOptions == "next-free-slot"
-                ? "next-free-slot"
-                : undefined,
-          }),
-        });
-
-        const draft = (await response.json()) as Draft;
+        const draft = await createDraft(values);
 
         reset({
           content: "",
@@ -50,6 +31,14 @@ export default function Command() {
             onAction: async (toast) => {
               await toast.hide();
               await open(`https://typefully.com/?d=${draft.id}`);
+            },
+          },
+          secondaryAction: {
+            title: "Copy Draft URL",
+            shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+            onAction: async (toast) => {
+              await toast.hide();
+              await Clipboard.copy(`https://typefully.com/?d=${draft.id}`);
             },
           },
         });
