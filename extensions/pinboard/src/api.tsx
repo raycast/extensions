@@ -6,16 +6,25 @@ const apiBasePath = "https://api.pinboard.in/v1";
 
 const { apiToken, constantTags } = getPreferenceValues();
 
+export interface PinboardBookmark {
+  href: string;
+  description: string;
+  extended: string;
+  meta: string;
+  hash: string;
+  time: string;
+  shared: "yes" | "no";
+  toread: "yes" | "no";
+  tags: string;
+}
+
 export interface Bookmark {
-  href: string
-  description: string
-  extended: string
-  meta: string
-  hash: string
-  time: string
-  shared: "yes" | "no"
-  toread: "yes" | "no"
+  id: string
+  url: string
+  title: string
   tags: string
+  private: boolean
+  readLater: boolean
 }
 
 export interface BookmarksState {
@@ -60,13 +69,15 @@ export async function refreshCache() {
   const shouldRefresh = cachedLastUpdated !== serverLastUpdated?.update_time;
   console.debug({shouldRefresh, cachedLastUpdated, serverLastUpdated})
 
-  const serverPosts = await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
+  const serverPosts = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
       return [];
     } else {
       return res.json();
     }
-  }) as Bookmark[];
+  })) as PinboardBookmark[]; 
+
+  const transformedServerPosts = serverPosts.map(post => transformBookmark(post))
 
   if (shouldRefresh && serverPosts && serverLastUpdated) {
     console.debug("Refreshing cache...")
@@ -135,6 +146,17 @@ export function useSearchBookmarks(searchKind: SearchKind) {
 // function searchBookmarksCache(searchText: string) {
 // }
 
+function transformBookmark(post: PinboardBookmark): Bookmark {
+  return {
+    id: post.hash as string,
+    url: post.href as string,
+    title: post.description as string,
+    tags: post.tags as string,
+    private: (post.shared as string) === "no",
+    readLater: (post.toread as string) === "yes",
+  };
+}
+
 async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
   const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
 
@@ -156,17 +178,8 @@ async function searchBookmarks(searchText: string, kind: SearchKind, signal: Abo
   }
 
   const json = (await response.json()) as Record<string, unknown>;
-  const posts = (json?.posts ?? json) as Record<string, unknown>[];
-  return posts.map((post) => {
-    return {
-      id: post.hash as string,
-      url: post.href as string,
-      title: post.description as string,
-      tags: post.tags as string,
-      private: (post.shared as string) === "no",
-      readLater: (post.toread as string) === "yes",
-    };
-  });
+  const posts = (json?.posts ?? json) as PinboardBookmark[];
+  return posts.map((post) => transformBookmark(post));
 }
 
 export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
