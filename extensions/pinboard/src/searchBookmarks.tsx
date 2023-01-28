@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Cache, List } from "@raycast/api";
+import { Cache, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import type { Bookmark } from "./api";
+import { BookmarkListItem } from "./components";
 
 export default function Command() {
   const pinboardCache = new Cache({
@@ -18,7 +19,7 @@ export default function Command() {
     filterBookmarks(
       bookmarks.filter((bookmark) => {
         console.log({ bookmark });
-        return bookmark.description.toLowerCase().includes(searchText);
+        return bookmark.title.toLowerCase().includes(searchText);
       })
     );
   }, [searchText]);
@@ -27,18 +28,13 @@ export default function Command() {
     <List
       filtering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Beers"
-      searchBarPlaceholder="Search your favorite beer"
+      navigationTitle="Search Pins by Title"
+      searchBarPlaceholder="Search by title..."
     >
       {filteredBookmarks.map((bookmark) => (
-        <List.Item
-          key={bookmark.hash}
-          title={bookmark.description}
-          actions={
-            <ActionPanel>
-              <Action title="Select" onAction={() => console.log(`${bookmark.description} selected`)} />
-            </ActionPanel>
-          }
+        <BookmarkListItem
+          key={bookmark.id}
+          bookmark={bookmark}
         />
       ))}
     </List>
