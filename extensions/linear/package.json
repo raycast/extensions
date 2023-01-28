@@ -57,11 +57,11 @@
           "type": "dropdown",
           "required": false,
           "description": "Select the copy action for the toast secondary action",
-          "default": "key",
+          "default": "id",
           "data": [
             {
-              "title": "Copy Issue Key",
-              "value": "key"
+              "title": "Copy Issue ID",
+              "value": "id"
             },
             {
               "title": "Copy Issue URL",
@@ -173,6 +173,37 @@
           "type": "text"
         }
       ]
+    },
+    {
+      "name": "quick-add-comment-to-issue",
+      "title": "Quick Add Comment to Issue",
+      "description": "Quickly add a comment to an issue using its ID.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": false,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "comment",
+          "placeholder": "Comment",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "issueId",
+          "placeholder": "Issue ID",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -186,9 +217,10 @@
   ],
   "dependencies": {
     "@linear/sdk": "^1.22.0",
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.13",
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
     "date-fns": "^2.28.0",
+    "file-type": "^18.2.0",
     "lodash": "^4.17.21",
     "node-emoji": "^1.11.0",
     "remove-markdown": "^0.5.0"

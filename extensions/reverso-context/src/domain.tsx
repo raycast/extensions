@@ -32,3 +32,18 @@ export interface UsageExample {
   source: string;
   sourceUrl: string;
 }
+
+export interface Preferences {
+  langFrom: LangCode;
+  langTo: LangCode;
+  correctLangPairDirection: boolean;
+}
+
+export interface AllPreferences {
+  langFrom: LangCode;
+  langTo: LangCode;
+  correctLangPairDirection: boolean;
+  langFrom_2nd: LangCode;
+  langTo_2nd: LangCode;
+  correctLangPairDirection_2nd: boolean;
+}
