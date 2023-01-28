@@ -32,10 +32,7 @@ export default function Command() {
       searchBarPlaceholder="Search by title..."
     >
       {filteredBookmarks.map((bookmark) => (
-        <BookmarkListItem
-          key={bookmark.id}
-          bookmark={bookmark}
-        />
+        <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
       ))}
     </List>
   );

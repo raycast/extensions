@@ -19,12 +19,12 @@ export interface PinboardBookmark {
 }
 
 export interface Bookmark {
-  id: string
-  url: string
-  title: string
-  tags: string
-  private: boolean
-  readLater: boolean
+  id: string;
+  url: string;
+  title: string;
+  tags: string;
+  private: boolean;
+  readLater: boolean;
 }
 
 export interface BookmarksState {
@@ -43,7 +43,6 @@ type LastUpdated = {
 };
 
 export async function refreshCache() {
-
   const allPostsEndpoint = `${apiBasePath}/posts/all`;
   const lastUpdatedEndpoint = `${apiBasePath}/posts/update`;
 
@@ -54,20 +53,20 @@ export async function refreshCache() {
   });
 
   const isFirstInit = pinboardCache.isEmpty;
-  console.debug({ isFirstInit })
+  console.debug({ isFirstInit });
 
   // Get the last updated time from the server and from the cache. We always want these values.
   const cachedLastUpdated = pinboardCache.get("lastUpdated");
-  const serverLastUpdated = await fetch(`${lastUpdatedEndpoint}?${params.toString()}`).then((res) => {
+  const serverLastUpdated = (await fetch(`${lastUpdatedEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
-      return {update_time: "na"}
+      return { update_time: "na" };
     } else {
       return res.json();
     }
-  }) as LastUpdated;
+  })) as LastUpdated;
 
   const shouldRefresh = cachedLastUpdated !== serverLastUpdated?.update_time;
-  console.debug({shouldRefresh, cachedLastUpdated, serverLastUpdated})
+  console.debug({ shouldRefresh, cachedLastUpdated, serverLastUpdated });
 
   const serverPosts = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
@@ -75,16 +74,16 @@ export async function refreshCache() {
     } else {
       return res.json();
     }
-  })) as PinboardBookmark[]; 
+  })) as PinboardBookmark[];
 
-  const transformedServerPosts = serverPosts.map(post => transformBookmark(post))
+  const transformedServerPosts = serverPosts.map((post) => transformBookmark(post));
 
   if (shouldRefresh && serverPosts && serverLastUpdated) {
-    console.debug("Refreshing cache...")
+    console.debug("Refreshing cache...");
     pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
-    console.debug("Updated lastUpdated cache")
+    console.debug("Updated lastUpdated cache");
     pinboardCache.set("posts", JSON.stringify(serverPosts));
-    console.debug("Updated posts cache")
+    console.debug("Updated posts cache");
     return `Successfully updated cache! There are now ${Object.keys(serverPosts).length} items`;
   }
   return "There was no need for an update, so I didn't update";
