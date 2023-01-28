@@ -46,7 +46,11 @@ export function getMenuBarExtraItemDraftTitle(draft: Draft) {
     return "Untitled draft";
   }
 
-  return firstLine.slice(0, 50);
+  if (firstLine.length <= 50) {
+    return firstLine;
+  }
+
+  return firstLine.slice(0, 50) + "...";
 }
 
 export function getMenuBarExtraNotificationKey(notification: Notification) {
@@ -84,7 +88,11 @@ export function getMenuBarExtraItemNotificationTitle(notification: Notification)
     return "Untitled draft";
   }
 
-  return firstLine.slice(0, 50);
+  if (firstLine.length <= 50) {
+    return firstLine;
+  }
+
+  return firstLine.slice(0, 50) + "...";
 }
 
 export function getMenuBarExtraItemNotificationSubtitle(notification: Notification) {
