@@ -9,7 +9,7 @@ export default function Command() {
   });
 
   // What happens when it's empty? What should I do about it?
-  const JSONbookmarks = pinboardCache.get("posts") as string;
+  const JSONbookmarks = pinboardCache.get("bookmarks") as string;
   const bookmarks = JSON.parse(JSONbookmarks) as Bookmark[];
 
   const [searchText, setSearchText] = useState("");

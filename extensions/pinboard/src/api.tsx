@@ -82,7 +82,7 @@ export async function refreshCache() {
     console.debug("Refreshing cache...");
     pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
     console.debug("Updated lastUpdated cache");
-    pinboardCache.set("posts", JSON.stringify(transformedServerBookmarks));
+    pinboardCache.set("bookmarks", JSON.stringify(transformedServerBookmarks));
     console.debug("Updated bookmarks cache");
     return `Successfully updated cache! There are now ${Object.keys(serverBookmarks).length} items`;
   }
