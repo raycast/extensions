@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import useSearch from "./hooks/useSearch";
 import { SearchResult } from "./types/types";
 
@@ -22,16 +22,15 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={title}
       subtitle={searchResult.kanji ? searchResult.reading : ""}
-      accessoryTitle={searchResult.definition.join(", ") || "No definition"}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={new URL(searchResult.url).href} />
+            <Action.OpenInBrowser url={new URL(searchResult.url).href} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy" content={title} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard title="Copy" content={title} shortcut={{ modifiers: ["cmd"], key: "." }} />
             {searchResult.reading && (
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
                 title="Copy Reading"
                 content={searchResult.reading}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
@@ -40,6 +39,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: searchResult.definition.join(", ") || "No definition",
+        },
+      ]}
     />
   );
 }

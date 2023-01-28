@@ -1,4 +1,4 @@
-import { randomId, showToast, ToastStyle } from "@raycast/api";
+import { randomId, showToast, Toast } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useEffect, useRef } from "react";
 import { SearchState, SearchResult } from "../types/types";
@@ -33,7 +33,11 @@ const useSearch = () => {
         return;
       }
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could not perform search",
+        message: String(error),
+      });
     }
   }
 
