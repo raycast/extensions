@@ -1,25 +1,17 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast } from "@raycast/api";
 import { useRef, useState } from "react";
 import got from "got";
-import { Preferences } from "./interfaces/preferences";
-import { useForm } from "@raycast/utils";
-
-type Values = {
-  content: string;
-  threadify: boolean;
-  schedule_date?: Date;
-  share_options: string;
-};
+import { extensionPreferences } from "./preferences";
+import { CreateDraftValues } from "./types";
 
 const Command = () => {
   const textAreaRef = useRef<Form.TextArea>(null);
-  const preferences = getPreferenceValues<Preferences>();
   const [shareOptions, setShareOptions] = useState<string>();
 
-  async function handleSubmit(values: Values) {
+  async function handleSubmit(values: CreateDraftValues) {
     showToast({ title: "Submitting to Typefully", message: "We've submitted your draft to Typefully." });
 
-    const data: Record<string, any> = {
+    const data: Record<string, unknown> = {
       content: values.content,
       threadify: values.threadify,
     };
@@ -37,7 +29,7 @@ const Command = () => {
         .post("https://api.typefully.com/v1/drafts/", {
           json: data,
           headers: {
-            "X-API-KEY": `Bearer ${preferences.token}`,
+            "X-API-KEY": `Bearer ${extensionPreferences.token}`,
           },
         })
         .json();

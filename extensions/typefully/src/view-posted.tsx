@@ -1,23 +1,17 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Preferences } from "./interfaces/preferences";
+import { extensionPreferences } from "./preferences";
+import { Tweet } from "./types";
 
 dayjs.extend(relativeTime);
 
-interface Tweet {
-  id: number;
-  text_first_tweet: string;
-  published_on: Date;
-  twitter_url: string;
-}
-
-interface State {
+type State = {
   tweets?: Tweet[];
   error?: Error;
-}
+};
 
 const iconToEmojiMap = new Map<number, string>([
   [1, "1️⃣"],
@@ -57,14 +51,13 @@ function ScheduledListItem(props: { item: Tweet; index: number }) {
 }
 
 const Command = () => {
-  const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function fetchScheduledDrafts() {
       const response = await got.get("https://api.typefully.com/v1/drafts/recently-published", {
         headers: {
-          "X-API-KEY": `Bearer ${preferences.token}`,
+          "X-API-KEY": `Bearer ${extensionPreferences.token}`,
         },
       });
 

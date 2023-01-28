@@ -1,10 +1,10 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Draft } from "./interfaces/draft";
-import { Preferences } from "./interfaces/preferences";
+import { Draft } from "./types";
+import { extensionPreferences } from "./preferences";
 
 dayjs.extend(relativeTime);
 
@@ -50,14 +50,13 @@ function ScheduledListItem(props: { item: Draft; index: number }) {
 }
 
 const Command = () => {
-  const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function fetchScheduledDrafts() {
       const response = await got.get("https://api.typefully.com/v1/drafts/recently-scheduled", {
         headers: {
-          "X-API-KEY": `Bearer ${preferences.token}`,
+          "X-API-KEY": `Bearer ${extensionPreferences.token}`,
         },
       });
 

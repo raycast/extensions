@@ -1,22 +1,18 @@
 import got from "got";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { getPreferenceValues, MenuBarExtra, open } from "@raycast/api";
+import { MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Draft } from "./interfaces/draft";
-import { Preferences } from "./interfaces/preferences";
+import { Draft } from "./types";
+import { extensionPreferences } from "./preferences";
 
 dayjs.extend(relativeTime);
-
-interface ScheduledPostItemProps {
-  draft: Draft;
-}
 
 const sortAscByDateFn = (draftA: Draft, draftB: Draft): number => {
   return new Date(draftA.scheduled_date).getTime() - new Date(draftB.scheduled_date).getTime();
 };
 
-const ScheduledPostItem = (props: ScheduledPostItemProps) => {
+const ScheduledPostItem = (props: { draft: Draft }) => {
   const MAX_TITLE_LENGTH = 24;
 
   const timeUntilPost = dayjs().to(dayjs(props.draft.scheduled_date));
@@ -35,13 +31,12 @@ const ScheduledPostItem = (props: ScheduledPostItemProps) => {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const { isLoading, data } = useCachedPromise(
     async (url: string): Promise<Array<Draft>> => {
       const drafts: Array<Draft> = await got
         .get(url, {
           headers: {
-            "X-API-KEY": `Bearer ${preferences.token}`,
+            "X-API-KEY": `Bearer ${extensionPreferences.token}`,
           },
           responseType: "json",
         })
