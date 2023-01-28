@@ -17,13 +17,11 @@ function ListView() {
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-    .reduce((acc, timeEntry) => {
-      const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
-      if (!existing) {
-        acc.push(timeEntry);
-      }
-      return acc;
-    }, [] as TimeEntry[]);
+    .reduce(
+      (acc, timeEntry) =>
+        acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid) ? acc : [...acc, timeEntry],
+      [] as TimeEntry[]
+    );
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
