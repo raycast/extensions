@@ -34,18 +34,24 @@ const appendToHistory = (history: SearchHistory, search: SearchHistoryItem): Sea
   return history;
 };
 
+export const SearchHistoryItems = {
+  resultItem: (result: SearchResult): SearchHistoryItem => ({
+    type: "result",
+    ...result,
+  }),
+  queryItem: (query: string): SearchHistoryItem => ({
+    type: "query",
+    query,
+  }),
+};
+
 export const useSearchHistory = (currentSearch: string) => {
   const preferences = useMemo(() => getPreferenceValues(), []);
 
   const currentSearchRef = useRef<string>(currentSearch);
   useEffect(() => {
     if (preferences["save-to-history-on-clear"] && currentSearchRef.current) {
-      setHistory((history) =>
-        appendToHistory(history, {
-          type: "query",
-          query: currentSearchRef.current,
-        })
-      );
+      setHistory((history) => appendToHistory(history, SearchHistoryItems.queryItem(currentSearchRef.current)));
     }
 
     currentSearchRef.current = currentSearch;
@@ -53,14 +59,9 @@ export const useSearchHistory = (currentSearch: string) => {
 
   const [history, setHistory] = useCachedState("history", [] as SearchHistory);
 
-  const onChoose = useCallback((chosenItem: SearchResult) => {
-    setHistory((history) =>
-      appendToHistory(history, {
-        type: "result",
-        ...chosenItem,
-      })
-    );
+  const addToHistory = useCallback((chosenItem: SearchHistoryItem) => {
+    setHistory((history) => appendToHistory(history, chosenItem));
   }, []);
 
-  return { onChoose, history };
+  return { addToHistory, history };
 };

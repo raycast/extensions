@@ -11,7 +11,7 @@ type Json = Record<string, unknown>;
 const useSearch = (initialSearchText: string) => {
   const [searchText, setSearchText] = useState<string>(initialSearchText);
 
-  const { onChoose } = useSearchHistory(searchText);
+  const { addToHistory } = useSearchHistory(searchText);
 
   const { isLoading, data } = useFetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
     parseResponse: parseResponse,
@@ -34,7 +34,7 @@ const useSearch = (initialSearchText: string) => {
     },
     search: setSearchText,
     searchText,
-    onChoose,
+    addToHistory,
   };
 };
 

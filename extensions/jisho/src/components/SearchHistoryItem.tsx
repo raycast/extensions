@@ -1,9 +1,7 @@
-import { Action, ActionPanel, LaunchType, List, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, List, launchCommand } from "@raycast/api";
 
 import { SearchHistoryItem } from "../types/types";
 import SearchResultItem from "./SearchResultItem";
-
-const noop = () => null;
 
 const launchSearch = async (searchText: string) => {
   await launchCommand({
@@ -15,9 +13,15 @@ const launchSearch = async (searchText: string) => {
   });
 };
 
-export default function SearchHistoryItem({ searchHistoryItem }: { searchHistoryItem: SearchHistoryItem }) {
+export default function SearchHistoryItem({
+  searchHistoryItem,
+  addToHistory,
+}: {
+  searchHistoryItem: SearchHistoryItem;
+  addToHistory: (result: SearchHistoryItem) => void;
+}) {
   if (searchHistoryItem.type === "result") {
-    return <SearchResultItem searchResult={searchHistoryItem} onChoose={noop} />;
+    return <SearchResultItem searchResult={searchHistoryItem} addToHistory={addToHistory} />;
   } else {
     return (
       <List.Item
@@ -25,7 +29,14 @@ export default function SearchHistoryItem({ searchHistoryItem }: { searchHistory
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action title="Search again" onAction={launchSearch.bind(null, searchHistoryItem.query)} />
+              <Action
+                title="Search again"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => {
+                  addToHistory(searchHistoryItem);
+                  launchSearch(searchHistoryItem.query);
+                }}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }

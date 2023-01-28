@@ -5,7 +5,7 @@ import SearchResultItem from "./components/SearchResultItem";
 
 export default function Command({ launchContext }: LaunchProps) {
   const { searchText: initialSearchText = "" } = (launchContext as { searchText: string }) || {};
-  const { state, search, searchText, onChoose } = useSearch(initialSearchText);
+  const { state, search, searchText, addToHistory } = useSearch(initialSearchText);
 
   return (
     <List
@@ -17,7 +17,7 @@ export default function Command({ launchContext }: LaunchProps) {
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
-          <SearchResultItem key={searchResult.id} searchResult={searchResult} onChoose={onChoose} />
+          <SearchResultItem key={searchResult.id} searchResult={searchResult} addToHistory={addToHistory} />
         ))}
       </List.Section>
     </List>

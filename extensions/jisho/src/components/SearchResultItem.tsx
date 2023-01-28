@@ -1,17 +1,21 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useMemo } from "react";
+import { useCallback } from "react";
 
-import { SearchResult } from "../types/types";
+import { SearchHistoryItem, SearchResult } from "../types/types";
+import { SearchHistoryItems } from "../hooks/useSearchHistory";
 
 export default function SearchResultItem({
   searchResult,
-  onChoose,
+  addToHistory,
 }: {
-  onChoose: (result: SearchResult) => void;
+  addToHistory: (result: SearchHistoryItem) => void;
   searchResult: SearchResult;
 }) {
   const title = searchResult.kanji || searchResult.reading;
-  const onChooseBound = useMemo(() => onChoose.bind(null, searchResult), [searchResult, onChoose]);
+  const onChooseBound = useCallback(
+    () => addToHistory(SearchHistoryItems.resultItem(searchResult)),
+    [searchResult, addToHistory]
+  );
 
   return (
     <List.Item
