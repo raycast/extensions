@@ -12,8 +12,8 @@ export type ExtensionPreferences = {
 export type CreateDraftValues = {
   content: string;
   threadify: boolean;
-  schedule_date?: Date;
-  share_options: string;
+  scheduleDate: Date | null;
+  shareOptions: string;
 };
 
 export type Tweet = {
