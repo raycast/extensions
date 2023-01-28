@@ -14,7 +14,7 @@ export default function ProjectListItem({
 }) {
   return (
     <List.Item
-      icon={{ source: Icon.Circle, tintColor: project?.hex_color }}
+      icon={{ source: Icon.Circle, tintColor: project?.color }}
       title={project?.name || "No project"}
       subtitle={subtitle}
       accessoryTitle={accessoryTitle}
