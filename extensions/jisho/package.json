@@ -6,12 +6,33 @@
   "icon": "jisho-icon.png",
   "author": "dmacdermott",
   "license": "MIT",
+  "contributors": [
+    "dmacdermott",
+    "mmtftr"
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "save-to-history-on-clear",
+      "label": "Save to history on clear",
+      "description": "Jisho saves the last search query to the history once the search query is cleared.",
+      "type": "checkbox",
+      "default": true
+    }
+  ],
   "commands": [
     {
-      "name": "index",
+      "name": "search",
       "title": "Translate Japanese",
       "subtitle": "Jisho",
       "description": "Search Jisho.org for Japanese translations",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "View Search History",
+      "subtitle": "Jisho",
+      "description": "View previous search queries and results",
       "mode": "view"
     }
   ],

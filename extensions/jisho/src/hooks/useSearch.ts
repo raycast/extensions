@@ -1,13 +1,17 @@
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
-import { SearchResult } from "../types/types";
 import { nanoid } from "nanoid";
+import { useState } from "react";
+
+import { SearchResult } from "../types/types";
+import { useSearchHistory } from "./useSearchHistory";
 
 type Json = Record<string, unknown>;
 
-const useSearch = () => {
-  const [searchText, setSearchText] = useState<string>("");
+const useSearch = (initialSearchText: string) => {
+  const [searchText, setSearchText] = useState<string>(initialSearchText);
+
+  const { onChoose } = useSearchHistory(searchText);
 
   const { isLoading, data } = useFetch(`https://jisho.org/api/v1/search/words?keyword=${searchText}`, {
     parseResponse: parseResponse,
@@ -29,6 +33,8 @@ const useSearch = () => {
       results: data,
     },
     search: setSearchText,
+    searchText,
+    onChoose,
   };
 };
 
