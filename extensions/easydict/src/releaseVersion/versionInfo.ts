@@ -26,34 +26,26 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.7.1";
-  buildNumber = 20;
-  versionDate = "2023-01-08";
+  version = "2.7.2";
+  buildNumber = 21;
+  versionDate = "2023-01-17";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### 💎 优化
-
-- 优化了系统代理的获取方式。
-
 ### 🐞 修复
 
-- 修复了一些已知问题。
+- 修复了 Bing 翻译失败问题。
 
 #### 如果觉得这个扩展还不错，给个 [Star](https://github.com/tisfeng/Raycast-Easydict) ⭐️ 支持一下吧 (^-^)
 
 ---
 
-### 💎 Improvement
-
-- Improved the way to get the system proxy.
-
 ### 🐞 Fixes
 
-- Fixed some known issues.
+- Fixed Bing translation failed.
 `;
 
   getRepoUrl() {
