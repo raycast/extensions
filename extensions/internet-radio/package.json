@@ -14,7 +14,18 @@
       "name": "browse-stations",
       "title": "Browse Stations",
       "description": "Browse all currently configured radio stations",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStationIcons",
+          "type": "checkbox",
+          "default": true,
+          "title": "Appearance",
+          "label": "Station Icons",
+          "description": "Whether to show station website favicons",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-station",
@@ -51,7 +62,26 @@
       "title": "Menu Bar Radio",
       "description": "View current station and control playback from the menu bar",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "showColoredIcon",
+          "title": "Appearance",
+          "type": "checkbox",
+          "default": true,
+          "label": "Colored Menu Icon",
+          "description": "Whether to indicate the first genre of the currently playing station",
+          "required": false
+        },
+        {
+          "name": "showStationIcons",
+          "type": "checkbox",
+          "default": true,
+          "label": "Station Icons",
+          "description": "Whether to show station website favicons",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

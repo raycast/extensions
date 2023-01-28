@@ -1,3 +1,3 @@
-# internet-radio Changelog
+# Internet Radio Changelog
 
-## [Initial Version] - 2023-01-20
+## [Initial Version] - 2023-01-28

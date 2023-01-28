@@ -10,6 +10,7 @@ import {
   confirmAlert,
   Alert,
   Image,
+  getPreferenceValues,
 } from "@raycast/api";
 import {
   deleteStation,
@@ -24,13 +25,36 @@ import {
 import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
+interface Preferences {
+  showColoredIcon: boolean;
+  showStationIcons: boolean;
+}
+
+function GenreDropdown(props: { onGenreSelection: React.Dispatch<React.SetStateAction<string | undefined>> } ) {
+  const { onGenreSelection } = props
+  return (
+    <List.Dropdown
+      tooltip="Select Genre"
+      onChange={(genreSelection) => onGenreSelection(genreSelection)}
+    >
+      <List.Dropdown.Item key="All Genres" title="All Genres" value="All Genres" />
+      {Object.entries(colorMap).map(([genre, genreColor]) => (
+        <List.Dropdown.Item key={genre} title={genre} value={genre} icon={{ source: Icon.Circle, tintColor: genreColor }} />
+      ))}
+    </List.Dropdown>
+  );
+}
+
 export default function Command() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentStationName, setCurrentStationName] = useState<string>("");
   const [currentTrackID, setCurrentTrackID] = useState<string>("");
   const [lastStationName, setLastStationName] = useState<string>("");
+  const [genreSelection, setGenreSelection] = useState<string | undefined>();
   const [stations, setStations] = useState<{ [stationName: string]: { [key: string]: string | string[] } }>();
   const { push } = useNavigation();
+
+  const preferences = getPreferenceValues<Preferences>()
 
   // Load default stations, if necessary
   useEffect(() => {
@@ -59,6 +83,10 @@ export default function Command() {
     .forEach(([stationName, stationData]) => {
       const tags = [];
 
+      if (genreSelection != undefined && genreSelection != "All Genres" && !stationData.genres.includes(genreSelection)) {
+        return
+      }
+
       if (currentStationName == stationName) {
         // Add "Now Playing" icon
         tags.push({ icon: Icon.Play });
@@ -85,7 +113,7 @@ export default function Command() {
       listItems.push(
         <List.Item
           key={stationName}
-          icon={websiteIcon}
+          icon={preferences.showStationIcons ? websiteIcon : undefined}
           title={stationName}
           accessories={tags}
           keywords={[...stationData.genres]}
@@ -180,10 +208,13 @@ export default function Command() {
     });
 
   return (
-    <List>
+    <List
+      searchBarPlaceholder={`Search ${Object.entries(stations).length || ""} radio stations...`}
+      searchBarAccessory={<GenreDropdown onGenreSelection={setGenreSelection} />}
+    >
       <List.EmptyView
         icon={{ source: "no-view.png" }}
-        title="Use the 'New Station' command to add your first station."
+        title={`No ${null} radio stations found!`}
       />
       {listItems}
     </List>
