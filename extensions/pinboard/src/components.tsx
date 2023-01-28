@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon } from "@raycast/api";
 import { Bookmark } from "./api";
 
 export function BookmarkListItem(props: { bookmark: Bookmark }) {
@@ -9,7 +9,7 @@ export function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.id}
       title={bookmark.title}
       icon="list-icon.png"
-      accessoryTitle={bookmark.tags}
+      accessories={[{ text: { value: bookmark.tags, color: Color.Orange } }]}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={bookmark.url} />
