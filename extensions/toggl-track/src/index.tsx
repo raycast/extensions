@@ -16,17 +16,7 @@ function ListView() {
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries
-    .sort((a, b) => {
-      if (a.at > b.at) {
-        return -1;
-      }
-
-      if (a.at < b.at) {
-        return 1;
-      }
-
-      return 0;
-    })
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .reduce((acc, timeEntry) => {
       const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
       if (!existing) {
