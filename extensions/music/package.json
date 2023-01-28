@@ -20,7 +20,38 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
   },
+  "preferences": [
+    {
+      "type": "dropdown",
+      "name": "volumeSteps",
+      "title": "Volume Steps",
+      "description": "Specify the amount of change for volume levels",
+      "required": false,
+      "default": "10",
+      "data": [
+        {
+          "title": "Low",
+          "value": "5"
+        },
+        {
+          "title": "Standard",
+          "value": "10"
+        },
+        {
+          "title": "High",
+          "value": "25"
+        }
+      ]
+    }
+  ],
   "commands": [
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Apple Music",
+      "description": "Toggle Shuffle",
+      "mode": "no-view"
+    },
     {
       "name": "reveal-track",
       "title": "Reveal Track",
@@ -148,6 +179,14 @@
       "keywords": [
         "volume",
         "sound"
+      ],
+      "arguments": [
+        {
+          "name": "volumeArg",
+          "placeholder": "Volume (0-100)",
+          "type": "text",
+          "required": false
+        }
       ]
     },
     {
@@ -172,16 +211,6 @@
         "volume",
         "volume-down",
         "decrease"
-      ]
-    },
-    {
-      "name": "add-to-playlist",
-      "title": "Add to Playlist",
-      "subtitle": "Apple Music",
-      "description": "Add current track to playlist",
-      "mode": "view",
-      "keywords": [
-        "add-to-playlist"
       ]
     }
   ],

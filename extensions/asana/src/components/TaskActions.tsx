@@ -190,6 +190,8 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
           content={task.name}
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
+
+        <Action.CopyToClipboard title="Copy Task ID" content={task.gid} shortcut={{ modifiers: ["cmd"], key: "i" }} />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

@@ -52,6 +52,7 @@ const normalizeValuesToStore = (
         type: status.type,
         name: status.name,
         doneName: status.doneName,
+        completedStatuses: status.completedStatuses,
         inProgressId: status.inProgressId,
         notStartedId: status.notStartedId,
       },
@@ -64,6 +65,7 @@ const normalizeValuesToStore = (
         status: {
           type: projectStatus.type,
           name: projectStatus.name,
+          completedStatuses: projectStatus.completedStatuses,
           doneName: projectStatus.doneName,
         },
       },
@@ -140,7 +142,7 @@ export default function ConfigurationForm({
       // Set default values
       setValue('titleProperty', database.columns.title[0] || '')
       setValue('dateProperty', database.columns.date[0] || '')
-      setValue('statusProperty', database.columns.status[0]?.value || '')
+      setValue('statusProperty', database.columns.status[0]?.data.name || '')
       setValue('tagsProperty', database.columns.tags[0]?.value || '')
       setValue('assigneeProperty', database.columns.assignee[0]?.value || '')
       setValue('urlProperty', database.columns.url[0]?.value || '')

@@ -46,7 +46,7 @@ export default function IssueListItem({ issue, viewer, mutateList }: IssueListIt
     });
   }
 
-  if (issue.linkedBranches.nodes?.length) {
+  if (issue.linkedBranches?.nodes?.length) {
     accessories.unshift({
       icon: { source: "branch.svg", tintColor: Color.SecondaryText },
       tooltip: issue.linkedBranches.nodes[0]?.ref?.name,

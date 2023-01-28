@@ -60,7 +60,7 @@ const command = async (props: { arguments: Arguments }) => {
     };
 
     toast.secondaryAction = {
-      title: "Copy Issue Key",
+      title: "Copy Issue ID",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
       onAction: () => Clipboard.copy(issue.identifier),
     };
