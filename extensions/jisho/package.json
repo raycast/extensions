@@ -7,8 +7,7 @@
   "author": "dmacdermott",
   "license": "MIT",
   "contributors": [
-    "dmacdermott",
-    "mmtftr"
+    "mmtf"
   ],
   "preferences": [
     {
@@ -30,7 +29,7 @@
     },
     {
       "name": "history",
-      "title": "View Search History",
+      "title": "Search History",
       "subtitle": "Jisho",
       "description": "View previous search queries and results",
       "mode": "view"
