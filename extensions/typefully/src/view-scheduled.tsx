@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Draft } from "./types";
 import { extensionPreferences } from "./preferences";
+import { sortByScheduled } from "./utils";
 
 dayjs.extend(relativeTime);
 
@@ -61,9 +62,7 @@ const Command = () => {
       });
 
       const drafts = JSON.parse(response.body);
-      const sortedDraftsByDate = drafts.sort((a: Draft, b: Draft) => {
-        return new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime();
-      });
+      const sortedDraftsByDate = drafts.sort(sortByScheduled);
 
       setState({ drafts: sortedDraftsByDate });
     }
