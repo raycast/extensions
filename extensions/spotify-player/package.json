@@ -124,6 +124,33 @@
       "title": "Dislike Current Song",
       "description": "Dislikes currently playing song",
       "mode": "no-view"
+    },
+    {
+      "name": "transferPlaybackToDevice",
+      "subtitle": "Spotify",
+      "title": "Transfer Playback To Device",
+      "description": "Transfer playback to another device",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ensurePlayback",
+          "title": "Playback State",
+          "description": "Ensure playback happens on new device or maintain the current playback state",
+          "type": "checkbox",
+          "default": true,
+          "label": "Ensure playback happens on the new device",
+          "required": false
+        },
+        {
+          "name": "enableDeviceTypeIcons",
+          "title": "Device Type Icons",
+          "description": "Shows or hides the device type icons in the device list",
+          "type": "checkbox",
+          "default": true,
+          "label": "Show device type icons for each device",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

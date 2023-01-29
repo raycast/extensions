@@ -689,3 +689,78 @@ export async function addTrackToQueue(trackUri: string): Promise<Response<Spotif
     return { error: (e as unknown as SpotifyApi.ErrorObject).message };
   }
 }
+
+// https://developer.spotify.com/documentation/web-api/reference/#/operations/get-a-users-available-devices
+export function useGetMyDevices(): Response<SpotifyApi.UserDevicesResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.UserDevicesResponse>>({ isLoading: true });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const response =
+          (await spotifyApi
+            .getMyDevices()
+            .then((response) => response.body as SpotifyApi.UserDevicesResponse)
+            .catch((error: unknown) => {
+              setResponse((oldState) => ({ ...oldState, error: (error as SpotifyApi.ErrorObject).message }));
+            })) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: response }));
+        }
+      } catch (e: unknown) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return response;
+}
+
+// https://developer.spotify.com/documentation/web-api/reference/#/operations/transfer-a-users-playback
+export async function transferPlaybackToDevice(
+  device: SpotifyApi.UserDevice,
+  options?: SpotifyApi.TransferPlaybackParameterObject
+): Promise<void> {
+  try {
+    // Devices with the is_restricted flag cannot be controlled by the Web API.
+    // See: https://developer.spotify.com/documentation/web-api/guides/using-connect-web-api/#devices-not-appearing-on-device-list
+    if (device.is_restricted || device.id === null) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Unable to transfer playback to ${device.name}.`,
+        message: "Unable to control this device through the Spotify API.",
+      });
+      return;
+    }
+    await authorizeIfNeeded();
+    await spotifyApi.transferMyPlayback([device.id], options);
+  } catch (e: unknown) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Failed to transfer playback to ${device.name}.`,
+      message: (e as SpotifyApi.ErrorObject).message,
+    });
+  }
+}
