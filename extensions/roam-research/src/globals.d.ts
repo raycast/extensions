@@ -6,4 +6,3 @@ type RoamResponse<T> = {
 type CachedGraph = { nameField: string; tokenField: string };
 
 type CachedGraphMap = Record<string, CachedGraph>;
-
