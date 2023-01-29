@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useGraphConfigCache, saveGraphAllBlocks } from "./cache";
 import { graphApi, graphApiInitial } from "./roamApi";
 
-
 const showLoading = (msg: string) => {
   showToast({
     title: msg,
@@ -18,7 +17,6 @@ const showFailure = (title: string, msg: string) => {
   });
 };
 
-
 const showGraphValidateFailure = (msg: string) => {
   showFailure("Failure", msg);
 };
@@ -27,7 +25,7 @@ function checkGraphValid(graphName: string, token: string) {
   return graphApi(graphName, token).q("[:find ?e . :where [?e :block/uid]]");
 }
 
-export  function NewGraph() {
+export function NewGraph() {
   const [nameError, setNameError] = useState<string | undefined>();
   const [graphCache, saveGraphCache] = useGraphConfigCache();
 
@@ -73,10 +71,14 @@ export  function NewGraph() {
               try {
                 const response = await checkGraphValid(
                   values.nameField || "thoughtfull",
-                  values.tokenField || "roam-graph-token-qqBDiLUAK_CUh_zbEMIz40gdnLEOJ"
+                  values.tokenField ||
+                    "roam-graph-token-qqBDiLUAK_CUh_zbEMIz40gdnLEOJ"
                 );
 
-                const api = graphApiInitial(values.nameField, values.tokenField);
+                const api = graphApiInitial(
+                  values.nameField,
+                  values.tokenField
+                );
                 api.getAllBlocks().then((response) => {
                   saveGraphAllBlocks(values.nameField, response.result);
                   saveGraphCache(values as CachedGraph);

@@ -6,9 +6,18 @@ import { graphApiInitial } from "./roamApi";
 import { ReversePullBlock } from "./type";
 import { detailMarkdown, timeformatFromMs } from "./utils";
 
-export function MentioningNotes({ block, graph }: { block: ReversePullBlock; graph: CachedGraph }) {
+export function MentioningNotes({
+  block,
+  graph,
+}: {
+  block: ReversePullBlock;
+  graph: CachedGraph;
+}) {
   const { isLoading, data } = usePromise(
-    graphApiInitial(graph.nameField, graph.tokenField).getMentioning.bind(null, block[":block/uid"]!)
+    graphApiInitial(graph.nameField, graph.tokenField).getMentioning.bind(
+      null,
+      block[":block/uid"]!
+    )
   );
   console.log(data, " ---");
   return (
@@ -22,7 +31,13 @@ export function MentioningNotes({ block, graph }: { block: ReversePullBlock; gra
   );
 }
 
-export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: CachedGraph }) {
+export function BlockDetail({
+  block,
+  graph,
+}: {
+  block: ReversePullBlock;
+  graph: CachedGraph;
+}) {
   console.log(block[":block/_refs"], block, "---");
   const _refs = block[":block/_refs"] || [];
   return (
@@ -35,7 +50,10 @@ export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: 
             title="Open in browser"
             url={`https://roamresearch.com/#/app/${graph.nameField}/page/${block[":block/uid"]}`}
           />
-          <Action.OpenWith title="Open in app" path={`roam://#/app/thoughtfull/page/${block[":block/uid"]}`} />
+          <Action.OpenWith
+            title="Open in app"
+            path={`roam://#/app/thoughtfull/page/${block[":block/uid"]}`}
+          />
           {_refs.length ? (
             <Action.Push
               title={`Show Linked References(${block[":block/_refs"].length})`}
@@ -53,16 +71,23 @@ export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: 
               <Detail.Metadata.TagList.Item text="Block" color={"#7AE1D8"} />
             )}
           </Detail.Metadata.TagList>
-          <Detail.Metadata.Label title="Linked References" text={_refs.length + ""} />
-          <Detail.Metadata.Label title="edit time" text={`${timeformatFromMs(block[":edit/time"])}`} />
-          <Detail.Metadata.Label title="create time" text={`${timeformatFromMs(block[":create/time"])}`} />
+          <Detail.Metadata.Label
+            title="Linked References"
+            text={_refs.length + ""}
+          />
+          <Detail.Metadata.Label
+            title="edit time"
+            text={`${timeformatFromMs(block[":edit/time"])}`}
+          />
+          <Detail.Metadata.Label
+            title="create time"
+            text={`${timeformatFromMs(block[":create/time"])}`}
+          />
         </Detail.Metadata>
       }
     />
   );
 }
-
-
 
 export const GraphDetail = ({ graph }: { graph: CachedGraph }) => {
   const { data } = useGraphAllBlocks(graph.nameField);
@@ -86,7 +111,10 @@ export const GraphDetail = ({ graph }: { graph: CachedGraph }) => {
         title="Append To Daily Note"
         actions={
           <ActionPanel>
-            <Action.Push title="Append" target={<DailyNoteDetail graph={graph} />} />
+            <Action.Push
+              title="Append"
+              target={<DailyNoteDetail graph={graph} />}
+            />
           </ActionPanel>
         }
       />

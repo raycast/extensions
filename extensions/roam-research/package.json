@@ -4,8 +4,8 @@
   "title": "Roam Research",
   "description": "Roam Research With Raycast",
   "icon": "favicon.png",
-  "author": "dive2Pro",
-  "owner": "",
+  "author": "hyc",
+  "owner": "hyc",
   "categories": [
     "Productivity"
   ],
@@ -37,7 +37,7 @@
     },
     {
       "name": "daily-note",
-      "title": "Append to daily note",
+      "title": "Append to Daily Note",
       "description": "Roam Research",
       "mode": "view"
     }

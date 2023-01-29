@@ -1,5 +1,17 @@
-import { List, Icon, ActionPanel, Action, confirmAlert, Alert, useNavigation } from "@raycast/api";
-import { graphConfigCache, useGraphAllBlocks, useGraphConfigCache } from "./cache";
+import {
+  List,
+  Icon,
+  ActionPanel,
+  Action,
+  confirmAlert,
+  Alert,
+  useNavigation,
+} from "@raycast/api";
+import {
+  graphConfigCache,
+  useGraphAllBlocks,
+  useGraphConfigCache,
+} from "./cache";
 import { AllBlocks, UpdateAction } from "./components";
 import { graphList } from "./list";
 import { keys } from "./utils";

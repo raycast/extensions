@@ -56,4 +56,4 @@ ${block[":block/string"] || block[":node/title"] || ""}
 
 export const todayUid = () => {
   return dayjs().format("MM-DD-YYYY");
-}
+};

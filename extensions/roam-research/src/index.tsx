@@ -1,4 +1,11 @@
-import { ActionPanel, Detail, List, Action, Icon, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  Icon,
+  useNavigation,
+} from "@raycast/api";
 import { useGraphConfigCache } from "./cache";
 import { NewGraph } from "./new-graph";
 import GraphList, { graphList } from "./list";
@@ -38,7 +45,10 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action.Push title="Add New Graph" target={<NewGraph />} />
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
+            <Action.Push
+              title="Show Details"
+              target={<Detail markdown="# Hey! 👋" />}
+            />
           </ActionPanel>
         }
       />
