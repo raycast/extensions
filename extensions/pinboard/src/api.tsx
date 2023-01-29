@@ -70,7 +70,7 @@ export async function refreshCache() {
 
   const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
-      return [];
+      return Promise.reject(res.statusText)
     } else {
       return res.json();
     }
