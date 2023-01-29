@@ -4,9 +4,7 @@ import { graphApiInitial } from "./roamApi";
 import { CONSTANTS, keys } from "./utils";
 
 const useUpdateCache = async (graphCache: CachedGraph) => {
-  const [graphAllBlocks, setGraphAllBlocks] = useGraphCache(
-    graphCache.nameField
-  );
+  const [graphAllBlocks, setGraphAllBlocks] = useGraphCache(graphCache.nameField);
 
   setGraphAllBlocks((prev) => {
     return {

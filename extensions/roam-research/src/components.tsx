@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { saveGraphAllBlocks } from "./cache";
 import { graphApiInitial } from "./roamApi";
 import { useState } from "react";
@@ -61,9 +52,7 @@ export const AllBlocks = ({
   showAllFirst?: boolean;
   title?: string;
 }) => {
-  const [filteredList, filterList] = useState<ReversePullBlock[]>(
-    showAllFirst ? blocks : []
-  );
+  const [filteredList, filterList] = useState<ReversePullBlock[]>(showAllFirst ? blocks : []);
   const changeResult = useEvent(
     debounce((text: string) => {
       text = text.trim();
@@ -119,10 +108,7 @@ export const AllBlocks = ({
 
 export const DailyNoteDetail = ({ graph }: { graph: CachedGraph }) => {
   const { pop } = useNavigation();
-  const [template, setTemplate] = useCachedState(
-    "dn-template",
-    `- from [[Raycast]] at {date} \n - {content}`
-  );
+  const [template, setTemplate] = useCachedState("dn-template", `- from [[Raycast]] at {date} \n - {content}`);
   console.log(template, " ----");
   return (
     <Form
@@ -167,18 +153,10 @@ export const DailyNoteDetail = ({ graph }: { graph: CachedGraph }) => {
           />
           <Action.OpenInBrowser
             title="Open in browser"
-            url={`https://roamresearch.com/#/app/${
-              graph.nameField
-            }/page/${todayUid()}`}
+            url={`https://roamresearch.com/#/app/${graph.nameField}/page/${todayUid()}`}
           />
-          <Action.OpenWith
-            title="Open in app"
-            path={`roam://#/app/thoughtfull/page/${todayUid()}`}
-          />
-          <Action.OpenInBrowser
-            title="View date format"
-            url="https://day.js.org/docs/en/parse/string-format"
-          />
+          <Action.OpenWith title="Open in app" path={`roam://#/app/thoughtfull/page/${todayUid()}`} />
+          <Action.OpenInBrowser title="View date format" url="https://day.js.org/docs/en/parse/string-format" />
         </ActionPanel>
       }
     >

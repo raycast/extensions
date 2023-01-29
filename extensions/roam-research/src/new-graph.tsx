@@ -71,14 +71,10 @@ export function NewGraph() {
               try {
                 const response = await checkGraphValid(
                   values.nameField || "thoughtfull",
-                  values.tokenField ||
-                    "roam-graph-token-qqBDiLUAK_CUh_zbEMIz40gdnLEOJ"
+                  values.tokenField || "roam-graph-token-qqBDiLUAK_CUh_zbEMIz40gdnLEOJ"
                 );
 
-                const api = graphApiInitial(
-                  values.nameField,
-                  values.tokenField
-                );
+                const api = graphApiInitial(values.nameField, values.tokenField);
                 api.getAllBlocks().then((response) => {
                   saveGraphAllBlocks(values.nameField, response.result);
                   saveGraphCache(values as CachedGraph);

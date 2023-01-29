@@ -52,15 +52,11 @@ export const parseTemplate = (template: string) => {
     // 重置父级位置
     if (currentLevel - latestLevel > 1) {
       currentLevel = latestLevel + 1;
-      result.push(
-        geneAction(uids[currentLevel - 1] + 1, r2, uids[currentLevel]--)
-      );
+      result.push(geneAction(uids[currentLevel - 1] + 1, r2, uids[currentLevel]--));
     } else if (currentLevel === 0) {
       result.push(geneAction(today + "", r2, uids[currentLevel]--));
     } else {
-      result.push(
-        geneAction(uids[currentLevel - 1] + 1, r2, uids[currentLevel]--)
-      );
+      result.push(geneAction(uids[currentLevel - 1] + 1, r2, uids[currentLevel]--));
     }
     latestLevel = currentLevel;
     reg1Result = REG1.exec(template);
@@ -71,19 +67,10 @@ export const parseTemplate = (template: string) => {
     }
     const trimStart = template.replace(/^\s*/gi, "");
     const currentLevel = template.length - trimStart.length;
-    console.log(
-      template,
-      "@",
-      trimStart,
-      currentLevel,
-      template.length,
-      trimStart.length
-    );
+    console.log(template, "@", trimStart, currentLevel, template.length, trimStart.length);
     const parentUid = currentLevel === 0 ? today : uids[currentLevel - 1] + 1;
     if (trimStart.startsWith("- ")) {
-      result.push(
-        geneAction(parentUid, trimStart.substring(2), uids[currentLevel]--)
-      );
+      result.push(geneAction(parentUid, trimStart.substring(2), uids[currentLevel]--));
     } else {
       result.push(geneAction(parentUid, trimStart, uids[currentLevel]--));
     }

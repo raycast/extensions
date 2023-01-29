@@ -1,21 +1,10 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  confirmAlert,
-  Alert,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, List, confirmAlert, Alert, useNavigation } from "@raycast/api";
 import { useGraphConfigCache, graphConfigCache } from "./cache";
 import { UpdateAction } from "./components";
 import { GraphDetail } from "./detail";
 import { keys } from "./utils";
 
-export const graphList = (
-  graphCache: CachedGraphMap,
-  onAction: (graph: CachedGraph) => void
-) => {
+export const graphList = (graphCache: CachedGraphMap, onAction: (graph: CachedGraph) => void) => {
   if (keys(graphCache).length === 0) {
     return <List.EmptyView icon={Icon.Tray} title="Please add graph first" />;
   }
