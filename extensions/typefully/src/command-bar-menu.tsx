@@ -29,7 +29,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={getTypefullyIcon(inbox.length > 0)}
-      title={getMenuBarExtraTitle(inbox)}
+      title={getMenuBarExtraTitle(inbox, scheduledDrafts)}
       isLoading={isLoadingNotifications || isLoadingScheduledDrafts || isLoadingPublishedDrafts}
     >
       <MenuBarExtra.Section>

@@ -36,8 +36,21 @@ export function getTypefullyIcon(tinted = false) {
   };
 }
 
-export function getMenuBarExtraTitle(inbox: InboxNotification[]) {
-  return inbox.length > 0 ? inbox.length.toString() : undefined;
+export function getMenuBarExtraTitle(inbox?: InboxNotification[], scheduledDrafts?: Draft[]) {
+  let title = "";
+
+  if (inbox && inbox.length > 0) {
+    title += inbox.length.toString();
+  }
+
+  if (scheduledDrafts && scheduledDrafts.length > 0) {
+    if (title.length > 0) {
+      title += " | ";
+    }
+    title += scheduledDrafts.length.toString();
+  }
+
+  return title ? title : undefined;
 }
 
 export function getMenuBarExtraItemDraftTitle(draft: Draft) {
