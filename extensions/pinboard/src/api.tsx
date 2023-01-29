@@ -142,9 +142,6 @@ export function useSearchBookmarks(searchKind: SearchKind) {
   };
 }
 
-// function searchBookmarksCache(searchText: string) {
-// }
-
 function transformBookmark(post: PinboardBookmark): Bookmark {
   return {
     id: post.hash as string,
