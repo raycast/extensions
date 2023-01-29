@@ -13,6 +13,5 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true
-  },
-  "files": ["node_modules/roamjs-components/types/native.d.ts"]
+  }
 }
