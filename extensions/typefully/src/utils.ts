@@ -109,22 +109,6 @@ export function getMenuBarExtraItemNotificationTitle(notification: Notification)
 }
 
 export function getMenuBarExtraItemNotificationSubtitle(notification: Notification) {
-  // if (isInboxNotification(notification)) {
-  //   return notification.author.screen_name;
-  // } else if (isActivityNotification(notification)) {
-  //   if (isAutoRetweetPublishedPayload(notification.payload)) {
-  //     return "Auto-retweet";
-  //   } else if (isAutoPlugPublishedPayload(notification.payload)) {
-  //     return "Auto-plug";
-  //   } else if (isDraftPublishedPayload(notification.payload)) {
-  //     return "Draft";
-  //   } else if (isScheduledDraftPublishedPayload(notification.payload)) {
-  //     return "Scheduled draft";
-  //   }
-  // } else {
-  //   console.warn("Unknown notification type");
-  //   return undefined;
-  // }
   return dayjs().to(notification.created_at);
 }
 
