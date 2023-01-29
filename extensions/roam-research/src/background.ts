@@ -1,12 +1,12 @@
-import { useCachedState, usePromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
 import { useGraphCache } from "./cache";
 import { graphApiInitial } from "./roamApi";
 import { CONSTANTS, keys } from "./utils";
 
 const useUpdateCache = async (graphCache: CachedGraph) => {
-  const [graphAllBlocks, setGraphAllBlocks] = useGraphCache(graphCache.nameField);
-
+  const [graphAllBlocks, setGraphAllBlocks] = useGraphCache(
+    graphCache.nameField
+  );
 
   setGraphAllBlocks((prev) => {
     return {
@@ -15,7 +15,7 @@ const useUpdateCache = async (graphCache: CachedGraph) => {
     };
   });
   console.log("gggg", graphCache);
-    
+
   await graphApiInitial(graphCache.nameField, graphCache.tokenField)
     .getAllBlocks()
     .then((response) => {

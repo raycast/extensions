@@ -1,6 +1,4 @@
-import type { PullBlock } from 'roamjs-components/types/native';
-
-export type ReversePullBlock = PullBlock & {
+export type ReversePullBlock = any & {
   ":block/_children": ReversePullBlock[];
-  ":block/_refs": {":db/id": number}[]
+  ":block/_refs": { ":db/id": number }[];
 };

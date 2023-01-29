@@ -6,7 +6,6 @@ import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { CONSTANTS } from "./utils";
-import type { PullBlock } from "roamjs-components/types/native";
 import { ReversePullBlock } from "./type";
 
 const graphCache = {
@@ -32,13 +31,17 @@ const graphCache = {
 export const graphConfigCache = graphCache.create(CONSTANTS.keys.graph);
 
 export const saveGraphAllBlocks = (graphName: string, result: object) => {
-  const graphCacheInstance = graphCache.create(CONSTANTS.keys["graph-name"](graphName));
+  const graphCacheInstance = graphCache.create(
+    CONSTANTS.keys["graph-name"](graphName)
+  );
   graphCacheInstance.save(JSON.stringify(result));
 };
 
 export const useGraphAllBlocks = (graphName: string) => {
   const [state, setState] = useState<ReversePullBlock[]>([]);
-  const graphCacheInstance = graphCache.create(CONSTANTS.keys["graph-name"](graphName));
+  const graphCacheInstance = graphCache.create(
+    CONSTANTS.keys["graph-name"](graphName)
+  );
   useEffect(() => {
     const v = graphCacheInstance.load();
     if (v) {
@@ -64,7 +67,9 @@ const rand = (max: number) => Math.floor(Math.random() * max);
 
 export const useRandomNote = (graphName: string) => {
   const { data } = useGraphAllBlocks(graphName);
-  const validBlocks = data.filter((b) => b[":block/string"] || b[":node/title"])
+  const validBlocks = data.filter(
+    (b) => b[":block/string"] || b[":node/title"]
+  );
   return validBlocks[rand(validBlocks.length)];
 };
 
@@ -102,9 +107,12 @@ export const useGraphConfigCache = () => {
 };
 
 export const useGraphCache = (name: string) => {
-  const [graphAllBlocks, setGraphAllBlocks] = useCachedState(CONSTANTS.keys["graph-name"](name), {
-    loading: false,
-    data: [],
-  });
+  const [graphAllBlocks, setGraphAllBlocks] = useCachedState(
+    CONSTANTS.keys["graph-name"](name),
+    {
+      loading: false,
+      data: [],
+    }
+  );
   return [graphAllBlocks, setGraphAllBlocks] as const;
 };
