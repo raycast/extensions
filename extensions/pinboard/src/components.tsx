@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Color, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Color } from "@raycast/api";
 import { Bookmark } from "./api";
 
 export function BookmarkListItem(props: { bookmark: Bookmark }) {
