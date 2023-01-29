@@ -47,7 +47,7 @@ export default function Command() {
       {inbox && inbox.length > 0 ? (
         <MenuBarExtra.Section title="Inbox">
           {inbox
-            ?.slice(9)
+            ?.slice(0, 9)
             ?.sort(sortByCreated)
             .map((notification, index) => (
               <MenuBarExtra.Item
@@ -65,7 +65,7 @@ export default function Command() {
       {scheduledDrafts && scheduledDrafts.length > 0 ? (
         <MenuBarExtra.Section title="Queue">
           {scheduledDrafts
-            ?.slice(9)
+            ?.slice(0, 9)
             ?.sort(sortByScheduled)
             .map((draft, index) => (
               <MenuBarExtra.Item
