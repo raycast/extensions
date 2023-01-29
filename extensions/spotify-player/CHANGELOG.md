@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2023-01-29
+
+- Introduce new command "Transfer Playback To Device"
+
 ## [Fix] - 2023-01-13
 
 - Allow no-view commands (`Like Current Song`, `Dislike Current Song`, `Just Play` and `Star Radio`) to initialize authorization.
