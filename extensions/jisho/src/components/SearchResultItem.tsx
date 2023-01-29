@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback } from "react";
 
 import { SearchHistoryItem, SearchResult } from "../types/types";
@@ -45,18 +45,34 @@ export default function SearchResultItem({
               />
             )}
           </ActionPanel.Section>
-          {historyItem && (
-            <ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action
+              title="Add to history"
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+              onAction={() => {
+                addToHistory(SearchHistoryItems.resultItem(searchResult));
+                showToast({
+                  title: "Added to history",
+                  style: Toast.Style.Success,
+                });
+              }}
+            />
+            {historyItem && (
               <Action
                 title="Remove from history"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "delete" }}
                 onAction={() => {
                   removeFromHistory(SearchHistoryItems.resultItem(searchResult));
+                  showToast({
+                    title: "Remove from history",
+                    style: Toast.Style.Success,
+                  });
                 }}
               />
-            </ActionPanel.Section>
-          )}
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[

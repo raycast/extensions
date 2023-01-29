@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, List, Toast, showToast } from "@raycast/api";
 
 import { SearchHistoryItem } from "../types/types";
 import SearchResultItem from "./SearchResultItem";
@@ -53,6 +53,10 @@ export default function SearchHistoryItem({
                 shortcut={{ modifiers: ["cmd"], key: "delete" }}
                 onAction={() => {
                   removeFromHistory(searchHistoryItem);
+                  showToast({
+                    title: "Remove from history",
+                    style: Toast.Style.Success,
+                  });
                 }}
               />
             </ActionPanel.Section>
