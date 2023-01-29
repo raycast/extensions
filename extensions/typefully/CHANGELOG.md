@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Added Notiifcations to Menu Bar] - 2023-01-29
+
+- Menu bar now shows scheduled drafts, tweeted drafts and activity/inbox notifications
+
 ## [Added Menu Bar Sections] - 2022-11-11
 
 - Menu bar now shows headers as a title instead of just disabled text
