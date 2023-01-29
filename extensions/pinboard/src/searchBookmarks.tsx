@@ -1,37 +1,28 @@
 import { Cache, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
+import { refreshCache } from "./api";
 import type { Bookmark } from "./api";
 import { BookmarkListItem } from "./components";
 
-export default function Command() {
+export default function SearchBookmarks() {
   const pinboardCache = new Cache({
     namespace: "pinboard",
   });
 
-  // What happens when it's empty? What should I do about it?
   const JSONbookmarks = pinboardCache.get("bookmarks") as string;
-  const bookmarks = JSON.parse(JSONbookmarks) as Bookmark[];
-
-  const [searchText, setSearchText] = useState("");
-  const [filteredBookmarks, filterBookmarks] = useState(bookmarks);
+  const bookmarks = useMemo(() => (JSONbookmarks ? (JSON.parse(JSONbookmarks) as Bookmark[]) : []), [JSONbookmarks]);
 
   useEffect(() => {
-    filterBookmarks(
-      bookmarks.filter((bookmark) => {
-        console.log({ bookmark });
-        return bookmark.title.toLowerCase().includes(searchText);
-      })
-    );
-  }, [searchText]);
+    // When we run this, if the cache is empty, let's fill it.
+    // Is there any way to get this to update the UI?
+    if (!JSONbookmarks) {
+      refreshCache();
+    }
+  }, [JSONbookmarks]);
 
   return (
-    <List
-      filtering={false}
-      onSearchTextChange={setSearchText}
-      navigationTitle="Search Pins by Title"
-      searchBarPlaceholder="Search by title..."
-    >
-      {filteredBookmarks.map((bookmark) => (
+    <List navigationTitle="Search bookmarks by title" searchBarPlaceholder="Search by title...">
+      {bookmarks.map((bookmark) => (
         <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
       ))}
     </List>
