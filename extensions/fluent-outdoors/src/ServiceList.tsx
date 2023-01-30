@@ -5,7 +5,7 @@ import { getFavouriteTracksStorage } from "./Storage";
 import { TrackItem } from "./TrackItem";
 import TrackList from "./TrackList";
 import { Service, Track } from "./types/common";
-import { showError } from "./utils";
+import { getServiceFromTrack, showError } from "./utils";
 
 export default function ServiceList({ services }: { services: Service[] }) {
   const [ready, setReady] = useState(false);
@@ -51,8 +51,10 @@ export default function ServiceList({ services }: { services: Service[] }) {
             }
 
             // Build favourite track with updated maintenance info
+            const service = await getServiceFromTrack(updatedTrack, services);
             const favouriteTrack: Track = {
               ...favouriteBaseTrack,
+              service,
               maintenanceDate: updatedTrack.maintenanceDate,
               status: updatedTrack.status,
             } as Track;

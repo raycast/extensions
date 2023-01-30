@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, Color, showToast, Toast } from "@rayca
 import { useState } from "react";
 import { getFavouriteTracksStorage } from "./Storage";
 import { TrackDetails } from "./TrackDetails";
-import { OnFavouriteTracksUpdateAction, Track } from "./types/common";
+import { OnFavouriteTracksUpdateAction, Service, Track } from "./types/common";
 import { getTrackCondition } from "./utils";
 
 export function TrackItem({
@@ -54,7 +54,7 @@ export function TrackItem({
     <List.Item
       icon={{ source: trackIcon, tintColor: trackColor }}
       title={track.name}
-      subtitle={track.serviceId}
+      subtitle={track.service.name}
       actions={
         <ActionPanel>
           <Action.Push title="Show details" target={<TrackDetails track={track} />} />

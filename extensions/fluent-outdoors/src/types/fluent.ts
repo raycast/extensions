@@ -1,3 +1,5 @@
+import { Nullish } from "./common";
+
 export interface Feature {
   id: string;
   type: string;
@@ -69,7 +71,7 @@ export interface Notice {
   end: string | Date;
   title: string;
   description: string;
-  linkUrl?: string | null;
+  linkUrl?: Nullish<string>;
   linkBody?: any;
   type: string;
   isPublic: boolean;

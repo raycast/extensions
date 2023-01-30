@@ -22,6 +22,9 @@ export default function TrackList({ service, favouriteTracks, onFavouriteTracksU
     fluent
       .getTracks()
       .then((tracks) => {
+        // Sort alphabetically
+        tracks.sort((trackA, trackB) => trackA.name.localeCompare(trackB.name));
+
         setTracks(tracks);
         return fluent.getAnnouncements();
       })

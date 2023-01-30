@@ -1,6 +1,6 @@
 # Fluent Outdoors Changelog
 
-## [Initial Version] - 2023-01-28
+## [Initial Version] - 2023-01-30
 
 - Favourite tracks
 - Track listing per service

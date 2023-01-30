@@ -1,5 +1,9 @@
 import { Color, Icon } from "@raycast/api";
 
+export type Nullable<T> = T | null;
+
+export type Nullish<T> = T | undefined | null;
+
 export type Service = {
   id: string;
   country: string;
@@ -12,10 +16,20 @@ export type ServiceError = {
   message: string;
 };
 
-// Track to ser
+export type TrackTypeName =
+  | "fireplace"
+  | "snowmobileroute"
+  | "outdoorroute"
+  | "skitrack"
+  | "parking"
+  | "skatefield"
+  | "athleticfield"
+  | "frisbee";
+
 export interface BaseTrack {
   id: string;
   serviceId: string;
+  type: TrackTypeName;
   name: string;
   description: string;
 }
@@ -45,7 +59,8 @@ export interface Announcement {
 }
 
 export interface Track extends BaseTrack {
-  maintenanceDate: Date | null;
+  service: Service;
+  maintenanceDate: Nullable<Date>;
   status: StatusText;
 }
 

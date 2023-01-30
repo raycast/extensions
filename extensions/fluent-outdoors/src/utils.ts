@@ -1,6 +1,6 @@
 import { Color, Icon, showToast, Toast } from "@raycast/api";
 import { differenceInDays, format, intlFormatDistance } from "date-fns";
-import { Service, ServiceError, Track, TrackCondition, TrackStatus } from "./types/common";
+import { BaseTrack, Service, ServiceError, Track, TrackCondition, TrackStatus } from "./types/common";
 
 export async function showError({ title = "Failure", message }: ServiceError) {
   return showToast({
@@ -80,7 +80,7 @@ export function getTrackCondition({ track }: { track: Track }): TrackCondition {
   return condition;
 }
 
-export async function getServiceFromTrack(track: Track, services: Service[]) {
+export async function getServiceFromTrack(track: BaseTrack, services: Service[]) {
   const trackService = services.find((service) => service.id === track.serviceId);
   if (!trackService) {
     throw new Error("Failed to find service");

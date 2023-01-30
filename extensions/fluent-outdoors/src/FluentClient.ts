@@ -1,6 +1,6 @@
 import { join, normalize } from "path";
 import fetch from "node-fetch";
-import { Announcement, Service, Track } from "./types/common";
+import { Announcement, Service, Track, TrackTypeName } from "./types/common";
 import * as fluent from "./types/fluent";
 
 type FluentTracksResponse = { type: string; features: fluent.Feature[] };
@@ -42,10 +42,12 @@ export class FluentClient {
     try {
       const response = await this.fetch<FluentTracksResponse>(this.getUrl("/api/public/venue/list"));
       return (response as FluentTracksResponse).features.map((feature) => {
-        const { id, name, description, status, maintenance } = feature.properties;
+        const { id, name, description, status, maintenance, type } = feature.properties;
         return {
           id,
           serviceId: this.service.id,
+          service: this.service,
+          type: type as TrackTypeName,
           name,
           description,
           maintenanceDate: this.getLatestDate([maintenance.kunto, maintenance.manual, maintenance.manual]),

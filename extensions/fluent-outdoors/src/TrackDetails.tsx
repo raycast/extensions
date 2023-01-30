@@ -3,6 +3,7 @@ import { Track } from "./types/common";
 import { formatDate, getTrackCondition, getTrackStatus } from "./utils";
 
 export function TrackDetails({ track }: { track: Track }) {
+  const location = `${track.service.name} / ${track.service.country}`;
   const condition = getTrackCondition({ track });
   const status = getTrackStatus({ track });
   const description = `# ${track.name}
@@ -15,6 +16,8 @@ ${track.description ?? "No further details"}
       navigationTitle={track.name}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Location" text={location} />
+          <Detail.Metadata.Label title="Type" text={track.type} />
           <Detail.Metadata.Label title="Maintenance date" text={formatDate(track.maintenanceDate)} />
           <Detail.Metadata.Label
             title="Expected condition"
