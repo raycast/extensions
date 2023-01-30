@@ -1,10 +1,11 @@
 import { Icon, List, Image, ActionPanel, Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { Cluster, clusterApiUrl, Connection } from "@solana/web3.js";
 import axios from "axios";
 import { useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { Token } from "../../types/tokens";
+import { resolveUrl, SolType } from "../../utils/explorerResolver";
 import { isNumeric } from "../../utils/isNumeric";
 import AccountDetailView from "../AccountDetailView";
 import { TokenDetailView } from "../OtherView/TokenDetailView";
@@ -78,7 +79,10 @@ const Command = ({ cluster }: Props) => {
                 icon={{ source: token.logoURI ?? Icon.Circle, mask: Image.Mask.Circle, fallback: "command-icon.png" }}
                 actions={
                   <ActionPanel>
-                    <Action.Push title="View Token Details" target={<TokenDetailView token={token} />} />
+                    <Action.Push
+                      title="View Token Details"
+                      target={<TokenDetailView token={token} cluster={cluster} />}
+                    />
                   </ActionPanel>
                 }
               />
@@ -86,31 +90,20 @@ const Command = ({ cluster }: Props) => {
           </List.Section>
 
           {isNumeric(debouncedQuery) && (
-            <>
-              <List.Section title="Block">
-                <List.Item
-                  title={`Slot #${debouncedQuery}`}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser url={"https://google.com"} />
-                      {/* TODO: fix url */}
-                    </ActionPanel>
-                  }
-                />
-              </List.Section>
-
-              <List.Section title="Epoch">
-                <List.Item
-                  title={`Epoch #${debouncedQuery}`}
-                  actions={
-                    <ActionPanel>
-                      <Action.OpenInBrowser url={"https://google.com"} />
-                      {/* TODO: fix url */}
-                    </ActionPanel>
-                  }
-                />
-              </List.Section>
-            </>
+            <List.Section title="Block">
+              <List.Item
+                title={`Slot #${debouncedQuery}`}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="Open in Explorer"
+                      url={resolveUrl(debouncedQuery, SolType.BLOCK, cluster)}
+                      icon={getFavicon(resolveUrl(debouncedQuery, SolType.BLOCK, cluster))}
+                    />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
           )}
         </List>
       );

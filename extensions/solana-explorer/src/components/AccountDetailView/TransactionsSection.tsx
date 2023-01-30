@@ -2,6 +2,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { ConfirmedSignatureInfo, Connection } from "@solana/web3.js";
 import type { FC } from "react";
+import { resolveUrl, SolType } from "../../utils/explorerResolver";
 import TransactionDetailView from "../TransactionDetailView";
 
 interface ITransactionsSectionProps {
@@ -25,15 +26,9 @@ export const TransactionsSection: FC<ITransactionsSectionProps> = ({ connection,
               />
               <Action.CopyToClipboard title="Copy Signature" content={transaction.signature} />
               <Action.OpenInBrowser
-                title="Open in Solana Explorer"
-                url={`https://explorer.solana.com/sig/${transaction.signature}?cluster=${cluster}`}
-                icon={getFavicon("https://explorer.solana.com")}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              />
-              <Action.OpenInBrowser
-                title="Open in Solscan"
-                url={`https://solscan.io/tx/${transaction.signature}?cluster=${cluster}`}
-                icon={getFavicon("https://solscan.io")}
+                title="Open in Explorer"
+                url={resolveUrl(transaction.signature, SolType.TRANSACTION, cluster)}
+                icon={getFavicon(resolveUrl(transaction.signature, SolType.TRANSACTION, cluster))}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
               />
             </ActionPanel>

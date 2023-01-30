@@ -3,6 +3,7 @@ import { getFavicon } from "@raycast/utils";
 import { Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import type { FC } from "react";
 import { Account } from "../../types";
+import { resolveUrl, SolType } from "../../utils/explorerResolver";
 import AccountDetailView from "../AccountDetailView";
 
 interface IAccountsSectionProps {
@@ -27,15 +28,9 @@ export const AccountsSection: FC<IAccountsSectionProps> = ({ accounts, connectio
                 />
                 <Action.CopyToClipboard title="Copy Address" content={accountKey.pubkey} />
                 <Action.OpenInBrowser
-                  title="Open in Solana Explorer"
-                  url={`https://explorer.solana.com/address/${accountKey.pubkey}?cluster=${cluster}`}
-                  icon={getFavicon("https://explorer.solana.com")}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                />
-                <Action.OpenInBrowser
-                  title="Open in Solscan"
-                  url={`https://solscan.io/account/${accountKey.pubkey}?cluster=${cluster}`}
-                  icon={getFavicon("https://solscan.io")}
+                  title="Open in Explorer"
+                  url={resolveUrl(accountKey.pubkey, SolType.ADDRESS, cluster)}
+                  icon={getFavicon(resolveUrl(accountKey.pubkey, SolType.ADDRESS, cluster))}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
                 />
               </ActionPanel>

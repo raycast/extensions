@@ -1,14 +1,16 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { FC } from "react";
 import { Token } from "../../types/tokens";
+import { resolveUrl, SolType } from "../../utils/explorerResolver";
 import { nFormatter } from "../../utils/nFormatter";
 
 interface ITokenDetailViewProps {
   token: Token;
+  cluster: string;
 }
 
-export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token }) => {
+export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token, cluster }) => {
   const {
     data: tokenCoingeckoData,
     revalidate: revalidateTokenCoingeckoData,
@@ -39,6 +41,12 @@ export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token }) => {
             }}
           />
           <Action.CopyToClipboard title="Copy Address" content={token.address} />
+          <Action.OpenInBrowser
+            title="Open in Explorer"
+            url={resolveUrl(token.address, SolType.TOKEN, cluster)}
+            icon={getFavicon(resolveUrl(token.address, SolType.ADDRESS, cluster))}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+          />
         </ActionPanel>
       }
       metadata={

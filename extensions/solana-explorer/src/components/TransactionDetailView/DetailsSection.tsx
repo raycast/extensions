@@ -2,6 +2,7 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { LAMPORTS_PER_SOL, ParsedTransactionWithMeta } from "@solana/web3.js";
 import type { FC } from "react";
+import { resolveUrl, SolType } from "../../utils/explorerResolver";
 
 interface ITransactionSectionProps {
   data: ParsedTransactionWithMeta;
@@ -16,16 +17,11 @@ export const DetailsSection: FC<ITransactionSectionProps> = ({ data, sig, cluste
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Signature" content={sig} />
+
           <Action.OpenInBrowser
-            title="Open in Solana Explorer"
-            url={`https://explorer.solana.com/sig/${sig}?cluster=${cluster}`}
-            icon={getFavicon("https://explorer.solana.com")}
-          />
-          <Action.OpenInBrowser
-            title="Open in Solscan"
-            url={`https://solscan.io/tx/${sig}?cluster=${cluster}`}
-            icon={getFavicon("https://solscan.io")}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+            title="Open in Explorer"
+            url={resolveUrl(sig, SolType.TRANSACTION, cluster)}
+            icon={getFavicon(resolveUrl(sig, SolType.TRANSACTION, cluster))}
           />
         </ActionPanel>
       }
