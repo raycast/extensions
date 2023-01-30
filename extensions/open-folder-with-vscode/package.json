@@ -19,42 +19,24 @@
   ],
   "preferences": [
     {
-      "name": "terminal",
-      "type": "dropdown",
-      "required": false,
-      "title": "Default Terminal",
-      "description": "set default terminal",
-      "default": "",
-      "data": [
-        {
-          "value": "",
-          "title": "default"
-        },
-        {
-          "value": "zsh -l -c",
-          "title": "zsh"
-        },
-        {
-          "value": "bash -l -c",
-          "title": "bash"
-        }
-      ]
-    },
-    {
       "name": "build",
       "type": "dropdown",
       "required": false,
       "title": "Build",
-      "default": "code",
-      "description": "Select which build of Visual Studio Code to use",
+      "default": "Code",
+      "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
-          "value": "code",
+          "value": "com.microsoft.VSCode",
           "title": "Visual Studio Code"
         },
         {
-          "value": "code-insiders",
+          "value": "com.microsoft.VSCodeInsiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "com.visualstudio.code.oss",
+          "title": "VSCodium"
         }
       ]
     }

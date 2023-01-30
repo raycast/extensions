@@ -6,7 +6,7 @@ export default async function main() {
   const path = await getFocusFinderPath();
 
   if (path) {
-    const { terminal, build } = getPreferenceValues<Preferences>();
-    await openWithVScode({ path, terminal, build });
+    const { build } = getPreferenceValues<Preferences>();
+    await openWithVScode({ path, build });
   }
 }
