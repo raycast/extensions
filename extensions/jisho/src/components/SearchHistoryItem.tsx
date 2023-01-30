@@ -30,7 +30,7 @@ export default function SearchHistoryItem({
           <ActionPanel>
             <ActionPanel.Section>
               <Action.Push
-                title="Search again"
+                title="Search Again"
                 icon={Icon.MagnifyingGlass}
                 target={
                   <Command

@@ -7,7 +7,7 @@ export default function Command() {
   const { history, addToHistory, removeFromHistory } = useSearchHistory("");
 
   return (
-    <List searchBarPlaceholder="Search...">
+    <List searchBarPlaceholder="Search History...">
       <List.Section title="Search History" subtitle={history.length + ""}>
         {history.map((item, idx) => (
           <SearchHistoryItem
