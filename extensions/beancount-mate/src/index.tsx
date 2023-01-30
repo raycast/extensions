@@ -69,11 +69,7 @@ export default function Command() {
               />
             }
           />
-          <Action
-            title="Open Perferences"
-            icon={Icon.Cog}
-            onAction={openCommandPreferences}
-          />
+          <Action title="Open Perferences" icon={Icon.Cog} onAction={openCommandPreferences} />
         </ActionPanel>
       }
     >
