@@ -16,7 +16,7 @@ export default function SearchResultItem({
   searchResult: SearchResult;
 }) {
   const title = searchResult.kanji || searchResult.reading;
-  const onChooseBound = useCallback(
+  const onChoose = useCallback(
     () => addToHistory(SearchHistoryItems.resultItem(searchResult)),
     [searchResult, addToHistory]
   );
@@ -28,11 +28,11 @@ export default function SearchResultItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser onOpen={onChooseBound} url={new URL(searchResult.url).href} />
+            <Action.OpenInBrowser onOpen={onChoose} url={new URL(searchResult.url).href} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              onCopy={onChooseBound}
+              onCopy={onChoose}
               title="Copy"
               content={title}
               shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -47,7 +47,7 @@ export default function SearchResultItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
-              title="Add to history"
+              title="Add to History"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "enter" }}
               onAction={() => {
@@ -60,13 +60,13 @@ export default function SearchResultItem({
             />
             {historyItem && (
               <Action
-                title="Remove from history"
+                title="Remove from History"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "delete" }}
                 onAction={() => {
                   removeFromHistory(SearchHistoryItems.resultItem(searchResult));
                   showToast({
-                    title: "Remove from history",
+                    title: "Removed from history.",
                     style: Toast.Style.Success,
                   });
                 }}

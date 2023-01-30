@@ -48,7 +48,7 @@ export default function SearchHistoryItem({
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action
-                title="Remove from history"
+                title="Remove from History"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "delete" }}
                 onAction={() => {
