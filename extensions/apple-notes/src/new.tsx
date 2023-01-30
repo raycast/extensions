@@ -10,7 +10,7 @@ export default async (props: LaunchProps) => {
   if (fallingBack) {
     // Save the current clipboard content if possible
     currentClipboardContent = await Clipboard.readText();
-    await Clipboard.copy(props.fallbackText!);
+    await Clipboard.copy(props.fallbackText ?? "");
   }
 
   await closeMainWindow();
@@ -26,10 +26,10 @@ export default async (props: LaunchProps) => {
     runAppleScriptSync(`
       tell application "System Events" to keystroke "v" using command down
     `);
-    if (!!currentClipboardContent) {
+    if (currentClipboardContent) {
       // Simply give it a break before restoring the clipboard
       await setTimeout(200);
-      Clipboard.copy(currentClipboardContent!);
+      Clipboard.copy(currentClipboardContent ?? "");
     }
   }
 };
