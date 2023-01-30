@@ -1,7 +1,7 @@
 # Hints AI Assistant -> Raycast Extension 🥳
 
 Quickly create, update and pull deals, tasks and notes via Raycast.
-![Hints](metadata/demo-hints.png)
+![Hints](metadata/hints-1.png)
 
 Currently we support Notion, Obsidian, HubSpot, Pipedrive, Clickup, Trello, Jira. Coda and Asana coming soon. For more information check our website [hints.so](http://hints.so) or join community [telegram](https://t.me/hints_chat), [discord](https://get.hints.so/hints-discord), [slack](https://get.hints.so/hints-slack)
 

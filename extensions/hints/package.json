@@ -5,7 +5,6 @@
   "description": "Quickly send command into Hints AI Assistant with Raycast",
   "icon": "command-icon.png",
   "author": "alexjedi",
-  "owner": "hintsflow",
   "categories": [
     "Productivity",
     "Applications"
