@@ -4,7 +4,7 @@ Beancount Mate is the best teammate for double-entry bookkeeping.
 
 With Beancount Meta, you can:
 
-1. Quick generate transcation record. (use costflow syntax)
+1. Quick generate transaction record. (use costflow syntax)
 2. Save record to your beancount journal file.
 
 To get started, you need to create a costflow config file firstly.
@@ -46,3 +46,6 @@ touch ~/.constflow/config.json
   }
 }
 ```
+
+Then after open "Bookkeep" command in Raycast,
+Now enjoy bookkeeping!
