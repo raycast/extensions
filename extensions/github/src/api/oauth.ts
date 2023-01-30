@@ -21,7 +21,7 @@ export async function authorize() {
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: "https://github.oauth-proxy.raycast.com/authorize",
     clientId,
-    scope: "notifications repo read:org read:user read:project",
+    scope: "notifications repo read:org user read:project",
   });
 
   const { authorizationCode } = await oauthClient.authorize(authRequest);

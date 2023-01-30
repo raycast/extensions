@@ -118,6 +118,12 @@
       "title": "My Discussions",
       "description": "Show your Discussions",
       "mode": "view"
+    },
+    {
+      "name": "set-status",
+      "title": "Set Status",
+      "description": "Set your GitHub status",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -137,6 +143,7 @@
     "date-fns": "^2.29.3",
     "graphql-request": "^5.0.0",
     "lodash": "^4.17.21",
+    "node-emoji": "^1.11.0",
     "node-fetch": "^3.2.10",
     "octokit": "^2.0.10"
   },
@@ -147,6 +154,7 @@
     "@graphql-codegen/typescript-operations": "2.5.3",
     "@types/lodash": "^4.14.184",
     "@types/node": "^18.7.18",
+    "@types/node-emoji": "^1.8.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "concurrently": "^7.4.0",

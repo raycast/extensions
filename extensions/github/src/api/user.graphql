@@ -12,9 +12,34 @@ query getViewer {
     organizations(first: 50) {
       totalCount
       nodes {
+        id
         avatarUrl
         login
       }
     }
+    status {
+      emoji
+      message
+    }
+  }
+}
+
+mutation changeUserStatus(
+  $emoji: String
+  $message: String
+  $expiresAt: DateTime
+  $limitedAvailability: Boolean
+  $organizationId: ID
+) {
+  changeUserStatus(
+    input: {
+      emoji: $emoji
+      message: $message
+      expiresAt: $expiresAt
+      limitedAvailability: $limitedAvailability
+      organizationId: $organizationId
+    }
+  ) {
+    clientMutationId # Placeholder
   }
 }

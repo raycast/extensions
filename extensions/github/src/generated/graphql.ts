@@ -526,6 +526,16 @@ export type AddedToProjectEvent = Node & {
   id: Scalars["ID"];
 };
 
+/** Represents an announcement banner. */
+export type AnnouncementBanner = {
+  /** The text of the announcement */
+  announcement?: Maybe<Scalars["String"]>;
+  /** The expiration date of the announcement, if any */
+  announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
+  /** Whether the announcement can be dismissed by the user */
+  announcementUserDismissible?: Maybe<Scalars["Boolean"]>;
+};
+
 /** A GitHub App. */
 export type App = Node & {
   __typename?: "App";
@@ -3287,7 +3297,7 @@ export type CreateMigrationSourceInput = {
   ownerId: Scalars["ID"];
   /** The migration source type. */
   type: MigrationSourceType;
-  /** The migration source URL. */
+  /** The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`. */
   url: Scalars["String"];
 };
 
@@ -5316,42 +5326,49 @@ export type EnablePullRequestAutoMergePayload = {
 };
 
 /** An account to manage multiple organizations with consolidated policy and billing. */
-export type Enterprise = Node & {
-  __typename?: "Enterprise";
-  /** A URL pointing to the enterprise's public avatar. */
-  avatarUrl: Scalars["URI"];
-  /** Enterprise billing information visible to enterprise billing managers. */
-  billingInfo?: Maybe<EnterpriseBillingInfo>;
-  /** Identifies the date and time when the object was created. */
-  createdAt: Scalars["DateTime"];
-  /** Identifies the primary key from the database. */
-  databaseId?: Maybe<Scalars["Int"]>;
-  /** The description of the enterprise. */
-  description?: Maybe<Scalars["String"]>;
-  /** The description of the enterprise as HTML. */
-  descriptionHTML: Scalars["HTML"];
-  id: Scalars["ID"];
-  /** The location of the enterprise. */
-  location?: Maybe<Scalars["String"]>;
-  /** A list of users who are members of this enterprise. */
-  members: EnterpriseMemberConnection;
-  /** The name of the enterprise. */
-  name: Scalars["String"];
-  /** A list of organizations that belong to this enterprise. */
-  organizations: OrganizationConnection;
-  /** Enterprise information only visible to enterprise owners. */
-  ownerInfo?: Maybe<EnterpriseOwnerInfo>;
-  /** The HTTP path for this enterprise. */
-  resourcePath: Scalars["URI"];
-  /** The URL-friendly identifier for the enterprise. */
-  slug: Scalars["String"];
-  /** The HTTP URL for this enterprise. */
-  url: Scalars["URI"];
-  /** Is the current viewer an admin of this enterprise? */
-  viewerIsAdmin: Scalars["Boolean"];
-  /** The URL of the enterprise website. */
-  websiteUrl?: Maybe<Scalars["URI"]>;
-};
+export type Enterprise = AnnouncementBanner &
+  Node & {
+    __typename?: "Enterprise";
+    /** The text of the announcement */
+    announcement?: Maybe<Scalars["String"]>;
+    /** The expiration date of the announcement, if any */
+    announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
+    /** Whether the announcement can be dismissed by the user */
+    announcementUserDismissible?: Maybe<Scalars["Boolean"]>;
+    /** A URL pointing to the enterprise's public avatar. */
+    avatarUrl: Scalars["URI"];
+    /** Enterprise billing information visible to enterprise billing managers. */
+    billingInfo?: Maybe<EnterpriseBillingInfo>;
+    /** Identifies the date and time when the object was created. */
+    createdAt: Scalars["DateTime"];
+    /** Identifies the primary key from the database. */
+    databaseId?: Maybe<Scalars["Int"]>;
+    /** The description of the enterprise. */
+    description?: Maybe<Scalars["String"]>;
+    /** The description of the enterprise as HTML. */
+    descriptionHTML: Scalars["HTML"];
+    id: Scalars["ID"];
+    /** The location of the enterprise. */
+    location?: Maybe<Scalars["String"]>;
+    /** A list of users who are members of this enterprise. */
+    members: EnterpriseMemberConnection;
+    /** The name of the enterprise. */
+    name: Scalars["String"];
+    /** A list of organizations that belong to this enterprise. */
+    organizations: OrganizationConnection;
+    /** Enterprise information only visible to enterprise owners. */
+    ownerInfo?: Maybe<EnterpriseOwnerInfo>;
+    /** The HTTP path for this enterprise. */
+    resourcePath: Scalars["URI"];
+    /** The URL-friendly identifier for the enterprise. */
+    slug: Scalars["String"];
+    /** The HTTP URL for this enterprise. */
+    url: Scalars["URI"];
+    /** Is the current viewer an admin of this enterprise? */
+    viewerIsAdmin: Scalars["Boolean"];
+    /** The URL of the enterprise website. */
+    websiteUrl?: Maybe<Scalars["URI"]>;
+  };
 
 /** An account to manage multiple organizations with consolidated policy and billing. */
 export type EnterpriseAvatarUrlArgs = {
@@ -9119,7 +9136,7 @@ export type Migration = {
   migrationSource: MigrationSource;
   /** The target repository name. */
   repositoryName: Scalars["String"];
-  /** The migration source URL. */
+  /** The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`. */
   sourceUrl: Scalars["URI"];
   /** The migration state. */
   state: MigrationState;
@@ -9133,7 +9150,7 @@ export type MigrationSource = Node & {
   name: Scalars["String"];
   /** The migration source type. */
   type: MigrationSourceType;
-  /** The migration source URL. */
+  /** The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`. */
   url: Scalars["URI"];
 };
 
@@ -9639,6 +9656,8 @@ export type Mutation = {
   removeEnterpriseAdmin?: Maybe<RemoveEnterpriseAdminPayload>;
   /** Removes the identity provider from an enterprise */
   removeEnterpriseIdentityProvider?: Maybe<RemoveEnterpriseIdentityProviderPayload>;
+  /** Removes a user from all organizations within the enterprise */
+  removeEnterpriseMember?: Maybe<RemoveEnterpriseMemberPayload>;
   /** Removes an organization from the enterprise */
   removeEnterpriseOrganization?: Maybe<RemoveEnterpriseOrganizationPayload>;
   /** Removes a support entitlement from an enterprise member. */
@@ -9665,6 +9684,8 @@ export type Mutation = {
   resolveReviewThread?: Maybe<ResolveReviewThreadPayload>;
   /** Retire a published payment tier from your GitHub Sponsors profile so it cannot be used to start new sponsorships. */
   retireSponsorsTier?: Maybe<RetireSponsorsTierPayload>;
+  /** Create a pull request that reverts the changes from a merged pull request. */
+  revertPullRequest?: Maybe<RevertPullRequestPayload>;
   /** Revoke the migrator role to a user for all organizations under an enterprise account. */
   revokeEnterpriseOrganizationsMigratorRole?: Maybe<RevokeEnterpriseOrganizationsMigratorRolePayload>;
   /** Revoke the migrator role from a user or a team. */
@@ -10357,6 +10378,11 @@ export type MutationRemoveEnterpriseIdentityProviderArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationRemoveEnterpriseMemberArgs = {
+  input: RemoveEnterpriseMemberInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationRemoveEnterpriseOrganizationArgs = {
   input: RemoveEnterpriseOrganizationInput;
 };
@@ -10419,6 +10445,11 @@ export type MutationResolveReviewThreadArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationRetireSponsorsTierArgs = {
   input: RetireSponsorsTierInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationRevertPullRequestArgs = {
+  input: RevertPullRequestInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -12335,6 +12366,7 @@ export type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry = AuditEntry
 
 /** An account on GitHub, with one or more owners, that has repositories, members and teams. */
 export type Organization = Actor &
+  AnnouncementBanner &
   MemberStatusable &
   Node &
   PackageOwner &
@@ -12348,6 +12380,12 @@ export type Organization = Actor &
   Sponsorable &
   UniformResourceLocatable & {
     __typename?: "Organization";
+    /** The text of the announcement */
+    announcement?: Maybe<Scalars["String"]>;
+    /** The expiration date of the announcement, if any */
+    announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
+    /** Whether the announcement can be dismissed by the user */
+    announcementUserDismissible?: Maybe<Scalars["Boolean"]>;
     /** Determine if this repository owner has any items that can be pinned to their profile. */
     anyPinnableItems: Scalars["Boolean"];
     /** Audit log entries of the organization */
@@ -17510,6 +17548,29 @@ export type RemoveEnterpriseIdentityProviderPayload = {
   identityProvider?: Maybe<EnterpriseIdentityProvider>;
 };
 
+/** Autogenerated input type of RemoveEnterpriseMember */
+export type RemoveEnterpriseMemberInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the enterprise from which the user should be removed. */
+  enterpriseId: Scalars["ID"];
+  /** The ID of the user to remove from the enterprise. */
+  userId: Scalars["ID"];
+};
+
+/** Autogenerated return type of RemoveEnterpriseMember */
+export type RemoveEnterpriseMemberPayload = {
+  __typename?: "RemoveEnterpriseMemberPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The updated enterprise. */
+  enterprise?: Maybe<Enterprise>;
+  /** The user that was removed from the enterprise. */
+  user?: Maybe<User>;
+  /** The viewer performing the mutation. */
+  viewer?: Maybe<User>;
+};
+
 /** Autogenerated input type of RemoveEnterpriseOrganization */
 export type RemoveEnterpriseOrganizationInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -19784,7 +19845,7 @@ export type RepositoryMigration = Migration &
     migrationSource: MigrationSource;
     /** The target repository name. */
     repositoryName: Scalars["String"];
-    /** The migration source URL. */
+    /** The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`. */
     sourceUrl: Scalars["URI"];
     /** The migration state. */
     state: MigrationState;
@@ -20322,6 +20383,31 @@ export type RetireSponsorsTierPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The tier that was retired. */
   sponsorsTier?: Maybe<SponsorsTier>;
+};
+
+/** Autogenerated input type of RevertPullRequest */
+export type RevertPullRequestInput = {
+  /** The description of the revert pull request. */
+  body?: InputMaybe<Scalars["String"]>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** Indicates whether the revert pull request should be a draft. */
+  draft?: InputMaybe<Scalars["Boolean"]>;
+  /** The ID of the pull request to revert. */
+  pullRequestId: Scalars["ID"];
+  /** The title of the revert pull request. */
+  title?: InputMaybe<Scalars["String"]>;
+};
+
+/** Autogenerated return type of RevertPullRequest */
+export type RevertPullRequestPayload = {
+  __typename?: "RevertPullRequestPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The pull request that was reverted. */
+  pullRequest?: Maybe<PullRequest>;
+  /** The new pull request that reverts the input pull request. */
+  revertPullRequest?: Maybe<PullRequest>;
 };
 
 /** A user, team, or app who has the ability to dismiss a review on a protected branch. */
@@ -30242,9 +30328,23 @@ export type GetViewerQuery = {
     organizations: {
       __typename?: "OrganizationConnection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "Organization"; avatarUrl: any; login: string } | null> | null;
+      nodes?: Array<{ __typename?: "Organization"; id: string; avatarUrl: any; login: string } | null> | null;
     };
+    status?: { __typename?: "UserStatus"; emoji?: string | null; message?: string | null } | null;
   };
+};
+
+export type ChangeUserStatusMutationVariables = Exact<{
+  emoji?: InputMaybe<Scalars["String"]>;
+  message?: InputMaybe<Scalars["String"]>;
+  expiresAt?: InputMaybe<Scalars["DateTime"]>;
+  limitedAvailability?: InputMaybe<Scalars["Boolean"]>;
+  organizationId?: InputMaybe<Scalars["ID"]>;
+}>;
+
+export type ChangeUserStatusMutation = {
+  __typename?: "Mutation";
+  changeUserStatus?: { __typename?: "ChangeUserStatusPayload"; clientMutationId?: string | null } | null;
 };
 
 export const ShortRepositoryFieldsFragmentDoc = gql`
@@ -31407,13 +31507,39 @@ export const GetViewerDocument = gql`
       organizations(first: 50) {
         totalCount
         nodes {
+          id
           avatarUrl
           login
         }
       }
+      status {
+        emoji
+        message
+      }
     }
   }
   ${UserFieldsFragmentDoc}
+`;
+export const ChangeUserStatusDocument = gql`
+  mutation changeUserStatus(
+    $emoji: String
+    $message: String
+    $expiresAt: DateTime
+    $limitedAvailability: Boolean
+    $organizationId: ID
+  ) {
+    changeUserStatus(
+      input: {
+        emoji: $emoji
+        message: $message
+        expiresAt: $expiresAt
+        limitedAvailability: $limitedAvailability
+        organizationId: $organizationId
+      }
+    ) {
+      clientMutationId
+    }
+  }
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -31979,6 +32105,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
           client.request<GetViewerQuery>(GetViewerDocument, variables, { ...requestHeaders, ...wrappedRequestHeaders }),
         "getViewer",
         "query"
+      );
+    },
+    changeUserStatus(
+      variables?: ChangeUserStatusMutationVariables,
+      requestHeaders?: Dom.RequestInit["headers"]
+    ): Promise<ChangeUserStatusMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ChangeUserStatusMutation>(ChangeUserStatusDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "changeUserStatus",
+        "mutation"
       );
     },
   };
