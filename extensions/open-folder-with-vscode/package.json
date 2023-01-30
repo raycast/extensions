@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-folder-with-vscode",
-  "title": "open current focused folder with vscode",
+  "title": "Open Folder With VScode",
   "description": "open current focused folder with vscode",
   "icon": "icon.png",
   "author": "lf7817",
