@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-folder-with-vscode",
+  "title": "open current focused folder with vscode",
+  "description": "open current focused folder with vscode",
+  "icon": "icon.png",
+  "author": "lf7817",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open Folder With VScode",
+      "description": "open current focused folder with vscode",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminal",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Terminal",
+      "description": "set default terminal",
+      "default": "",
+      "data": [
+        {
+          "value": "",
+          "title": "default"
+        },
+        {
+          "value": "zsh -l -c",
+          "title": "zsh"
+        },
+        {
+          "value": "bash -l -c",
+          "title": "bash"
+        }
+      ]
+    },
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "code",
+      "description": "Select which build of Visual Studio Code to use",
+      "data": [
+        {
+          "value": "code",
+          "title": "Visual Studio Code"
+        },
+        {
+          "value": "code-insiders",
+          "title": "Visual Studio Code - Insiders"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "version": "1.0.0"
+}
