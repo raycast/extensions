@@ -1,67 +1,84 @@
-import { ActionPanel, Action, List, Icon } from '@raycast/api'
-import { Dataset, otDatasets } from './ot_datasets';
-import { useCachedPromise } from '@raycast/utils';
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { Dataset, otDatasets } from "./ot_datasets";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 export default function Command() {
-    const { data, isLoading } = useCachedPromise(() => new Promise<Dataset[]>((resolve) => resolve(otDatasets)));
-    const [filter, setFilter] = useState<string>("all");
-    console.log(data)
-    return (
-        <List 
-            isLoading={isLoading} 
-            isShowingDetail
-            searchBarAccessory={
-                <List.Dropdown tooltip="Show posts filter" onChange={(newValue) => setFilter(newValue)}>
-                    <List.Dropdown.Item title="All" value="all" />
-                    <List.Dropdown.Item title="Platform" value="platform" />
-                    <List.Dropdown.Item title="Genetics" value="genetics" />
-                    <List.Dropdown.Item title="Genetics (dev)" value="genetics-dev" />
-                </List.Dropdown>
-            }
-            searchBarPlaceholder="Search a dataset in Open Targets..."
+  const { data, isLoading } = useCachedPromise(
+    () => new Promise<Dataset[]>((resolve) => resolve(otDatasets))
+  );
+  const [filter, setFilter] = useState<string>("all");
+  console.log(data);
+  return (
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Show posts filter"
+          onChange={(newValue) => setFilter(newValue)}
         >
-            {data &&
-                data.filter((dataset) => {
-                    if (filter === "all") {
-                        return true;
-                    }
-                    return dataset.type.includes(filter);
-                })
-                .map((dataset) => {
-                    return (
-                            <List.Item
-                                key={dataset.name}
-                                title={dataset.name}
-                                icon={Icon.Tag}
-                                actions={
-                                    <ActionPanel>
-                                        <Action.CopyToClipboard title="Copy location in GCS" content={dataset.location} />
-                                    </ActionPanel>
-                                }
-                                detail={
-                                    <List.Item.Detail 
-                                        metadata={
-                                            <List.Item.Detail.Metadata>
-                                                <List.Item.Detail.Metadata.Label title="Schema" />
-                                                <List.Item.Detail.Metadata.Separator />
-                                                {dataset.schema_fields.map((field) => {
-                                                    return (
-                                                        <List.Item.Detail.Metadata.Label
-                                                            key={field}
-                                                            title={field.name}
-                                                            icon={field.nullable === true ? Icon.Checkmark : Icon.XMarkCircleFilled}
-                                                            text={typeof field.type === 'string' ? field.type : field.type.type}
-                                                        />
-                                                    );
-                                                })}
-                                            </List.Item.Detail.Metadata>
-                                        }
-                                    />
-                                }
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item title="Platform" value="platform" />
+          <List.Dropdown.Item title="Genetics" value="genetics" />
+          <List.Dropdown.Item title="Genetics (dev)" value="genetics-dev" />
+        </List.Dropdown>
+      }
+      searchBarPlaceholder="Search a dataset in Open Targets..."
+    >
+      {data &&
+        data
+          .filter((dataset) => {
+            if (filter === "all") {
+              return true;
+            }
+            return dataset.type.includes(filter);
+          })
+          .map((dataset) => {
+            return (
+              <List.Item
+                key={dataset.name}
+                title={dataset.name}
+                icon={Icon.Tag}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard
+                      title="Copy location in GCS"
+                      content={dataset.location}
+                    />
+                  </ActionPanel>
+                }
+                detail={
+                  <List.Item.Detail
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Schema" />
+                        <List.Item.Detail.Metadata.Separator />
+                        {dataset.schema_fields.map((field) => {
+                          return (
+                            <List.Item.Detail.Metadata.Label
+                              key={field}
+                              title={field.name}
+                              icon={
+                                field.nullable === true
+                                  ? Icon.Checkmark
+                                  : Icon.XMarkCircleFilled
+                              }
+                              text={
+                                typeof field.type === "string"
+                                  ? field.type
+                                  : field.type.type
+                              }
                             />
-                    );
-                })}
-            </List>
-    );
+                          );
+                        })}
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+              />
+            );
+          })}
+    </List>
+  );
 }

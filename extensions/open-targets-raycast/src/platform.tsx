@@ -1,16 +1,19 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
-import { runPlatform } from './services/api';
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { runPlatform } from "./services/api";
 import { useEffect, useState } from "react";
 
-export default function sCommand({arguments : {input = ""}}: {arguments: {input: string}}) {
-
-  let lower_input = input.toLowerCase();
+export default function sCommand({
+  arguments: { input = "" },
+}: {
+  arguments: { input: string };
+}) {
+  const lower_input = input.toLowerCase();
 
   const [state, setState] = useState<any>([] as any);
 
   useEffect(() => {
     async function fetchData() {
-      const response = await runPlatform(lower_input)
+      const response = await runPlatform(lower_input);
       setState(response);
     }
 
@@ -18,11 +21,18 @@ export default function sCommand({arguments : {input = ""}}: {arguments: {input:
   }, []);
 
   return (
-    <List searchBarPlaceholder="Search for a gene, disease, or drug...">≥
-      {(state).map((item : any) => (
+    <List searchBarPlaceholder="Search for a gene, disease, or drug...">
+      ≥
+      {state.map((item: any) => (
         <List.Item
           key={item.id}
-          icon={item.entity === "target" ? Icon.Dna : item.entity === "drug" ? Icon.Pill : Icon.Heart}
+          icon={
+            item.entity === "target"
+              ? Icon.Dna
+              : item.entity === "drug"
+              ? Icon.Pill
+              : Icon.Heart
+          }
           title={item.name}
           actions={
             <ActionPanel>
@@ -32,5 +42,5 @@ export default function sCommand({arguments : {input = ""}}: {arguments: {input:
         />
       ))}
     </List>
-  )
+  );
 }
