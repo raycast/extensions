@@ -2,6 +2,8 @@ import { LocalStorage, closeMainWindow, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
 import * as os from "os";
 
+import { getCurrentDirectory, getRunningApplications } from "./utils";
+
 import { installDefaultWeights } from "./defaults";
 
 interface ExportArguments {
@@ -41,12 +43,12 @@ async function jumpToTarget(destination: string) {
   const match = await getBestMatch(destination);
   if (match !== undefined && destinationTarget == "") {
     // If not path/URL override, make the jump
+    closeMainWindow();
     try {
       execSync(`open "${(match as string).trim()}"`);
     } catch (error) {
-      showHUD("Jump Failed — Jump Point No Longer Valid");
+      await showHUD("Jump Failed — Jump Point No Longer Valid");
     }
-    closeMainWindow();
     return;
   }
 
@@ -67,7 +69,7 @@ async function jumpToTarget(destination: string) {
           destinationTarget = `${destinationTarget}.com`;
         }
       } else if (!destinationTarget && destination.toLowerCase().match(fileExtensionExpr)) {
-        showHUD("Jump Failed — Destination Not Found");
+        await showHUD("Jump Failed — Destination Not Found");
         return;
       }
     }
@@ -86,15 +88,19 @@ async function jumpToTarget(destination: string) {
       await LocalStorage.setItem(destinationTarget, (weight as number) * 1.1);
     }
 
+    closeMainWindow();
     execSync(`open "${destinationTarget.trim()}"`);
   } catch (error) {
-    showHUD("Jump Failed — Provide a More Precise Destination");
+    await showHUD("Jump Failed — Provide a More Precise Destination");
   }
 }
 
 async function getBestMatch(term: string) {
   // Obtains the best match for the supplied term, accounting for weights
   const items = await LocalStorage.allItems<LocalStorage.Values>();
+
+  const runningApplications = await getRunningApplications();
+  const currentDirectory = await getCurrentDirectory();
 
   let avgBaseWeight = 0;
   Object.entries(items).forEach(([key]) => {
@@ -144,15 +150,30 @@ async function getBestMatch(term: string) {
     if (lml3 == 0) lml3 = lml2;
     const avgMatchLengthSimilarity = (lml1 + lml2 + lml3) / 3 / l2;
 
+    let regexString = "";
+    term.split("").forEach((char) => {
+      regexString += (char.match(/([[\])(+*.^$?])/g) ? "\\" : "") + char + ".*";
+    });
+    const rgx = new RegExp(regexString, "i");
+    const regexMatchModifier = key.match(rgx) ? 2 : 1
+
     // Weighted Total
-    const totalWeight =
+    let totalWeight =
       (characterSimilarity * 0.1 -
         characterDissimilarity * 0.3 +
         consecutiveSimilarity * 0.4 +
         avgMatchLengthSimilarity * 0.4) *
-      (items[key] / avgBaseWeight);
+      (items[key] / avgBaseWeight) * regexMatchModifier;
 
-    console.log(key, totalWeight, characterSimilarity, characterSimilarity, avgMatchLengthSimilarity);
+    // Slightly prefer closed applications
+    if (key in runningApplications) {
+      totalWeight *= 0.9;
+    }
+
+    // Prefer subfolders & files of current directory
+    if (key.indexOf(currentDirectory) != -1) {
+      totalWeight *= 1.05;
+    }
 
     if (totalWeight > bestChoiceWeight) {
       bestChoice = key;

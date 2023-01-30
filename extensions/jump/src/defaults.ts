@@ -27,6 +27,7 @@ export function installDefaultWeights() {
     LocalStorage.setItem("/System/Applications/Stickies.app", 1.05),
     LocalStorage.setItem("/System/Applications/Weather.app", 1.05),
     LocalStorage.setItem("/System/Applications/Maps.app", 1.05),
+    LocalStorage.setItem("/System/Applications/Utilities/Terminal.app", 1.05),
 
     LocalStorage.setItem(`${os.homedir()}/Desktop/`, 1.1),
     LocalStorage.setItem(`${os.homedir()}/Downloads/`, 1.1),

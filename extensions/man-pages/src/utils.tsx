@@ -17,25 +17,37 @@ if (path) {
 }
 
 const command =
-  "ls /usr/share/man/* /opt/homebrew/share/man/* | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'";
+  "ls /usr/local/man/* /usr/share/man/* /opt/homebrew/share/man/* | sed -E -e 's/ *//' | sed -E -e 's/([^.,]*)\\.[n0-9](tcl)?$/\\1/' | sed -E -e 's/\\/usr\\/.*://' | sed -E -e 's/^[A-Z].*//'";
 
 export function useGetManPages() {
   const [pages, setPages] = useState<string[]>([]);
+  const [foundPages, setFoundPages] = useState<string[]>([]);
   const [result, setResult] = useState<string>("");
 
-  const cachedPages = cache.get("manPages");
+  let cachedPages = cache.get("manPages");
+
+  function pruneEntries() {
+    if (cachedPages != undefined) {
+      const pageList = cachedPages?.split("\n") 
+      for (const page in pageList) {
+        if (foundPages.indexOf(page) == -1) {
+          pageList.splice(pageList.indexOf(page), 1)
+        }
+      }
+      cachedPages = pageList.join("\n")
+      cache.set("manPages", cachedPages);
+    }
+  }
 
   // Run the man list command
   useEffect(() => {
-    if (!cachedPages) {
-      runCommand(command, setResult);
-    }
-  }, [cachedPages]);
+      runCommand(command, setResult, pruneEntries);
+  }, []);
 
   // Populate the list of pages (IF no cached list exists)
   useEffect(() => {
     if (result != "") {
-      const pageList: string[] = [...pages];
+      const pageList: string[] = [...foundPages];
       result.split("\n").forEach((page) => {
         // Remove invalid entries, empty entries, and duplicates
         if (
@@ -48,17 +60,28 @@ export function useGetManPages() {
           pageList.push(page);
         }
       });
-      setPages(pageList);
+      setFoundPages(pageList);
     }
   }, [result]);
 
   // Get the cached list of pages if it exists
   useEffect(() => {
-    if (cachedPages != undefined && pages.length == 0) {
+    if (cachedPages != undefined) {
       const pageList = cachedPages.split("\n");
+
+      console.log(pageList.length)
+
+      for (const page of foundPages) {
+        if (pageList.indexOf(page) == -1) {
+          pageList.push(page)
+        }
+      }
+      
       setPages(pageList);
+    } else {
+      setPages(foundPages)
     }
-  }, [cachedPages, pages.length]);
+  }, [foundPages]);
 
   // Return empty list until data is loaded
   if (!pages?.length) {
@@ -93,7 +116,7 @@ async function getEnv() {
   return env;
 }
 
-export async function runCommand(command: string, callback?: (arg0: string) => unknown) {
+export async function runCommand(command: string, callback?: (arg0: string) => unknown, finish?: () => void) {
   // Run a terminal command
   env = await getEnv();
   const child = exec(command, env);
@@ -103,6 +126,10 @@ export async function runCommand(command: string, callback?: (arg0: string) => u
     result = result + data;
     callback?.(result);
   });
+
+  child.stdout?.on("close", () => {
+    finish?.()
+  })
 }
 
 export function openInTerminal(page: string) {
