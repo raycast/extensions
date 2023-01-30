@@ -10,7 +10,6 @@ export default async () => {
   const current = await getDefaultOutputDevice();
   const devices = await getOutputDevices();
 
-  console.log(String(current.name), String(favourite));
   if (favourite != null && favourite !== "") {
     try {
       // Switch to favorite2 if already in favourite
