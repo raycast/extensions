@@ -2,6 +2,17 @@ import { Color, Icon, showToast, Toast } from "@raycast/api";
 import { differenceInDays, format, intlFormatDistance } from "date-fns";
 import { BaseTrack, Service, ServiceError, Track, TrackCondition, TrackStatus } from "./types/common";
 
+export function sortByName(trackA: BaseTrack, trackB: BaseTrack) {
+  return trackA.name.localeCompare(trackB.name);
+}
+
+export function sortByMaintenance(trackA: Track, trackB: Track) {
+  const maintenanceDateA = trackA.maintenanceDate?.valueOf() ?? 0;
+  const maintenanceDateB = trackB.maintenanceDate?.valueOf() ?? 0;
+
+  return maintenanceDateB - maintenanceDateA;
+}
+
 export async function showError({ title = "Failure", message }: ServiceError) {
   return showToast({
     style: Toast.Style.Failure,

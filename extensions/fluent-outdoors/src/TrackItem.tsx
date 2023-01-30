@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, Color, showToast, Toast } from "@rayca
 import { useState } from "react";
 import { getFavouriteTracksStorage } from "./Storage";
 import { TrackDetails } from "./TrackDetails";
-import { OnFavouriteTracksUpdateAction, Service, Track } from "./types/common";
+import { OnFavouriteTracksUpdateAction, Track } from "./types/common";
 import { getTrackCondition } from "./utils";
 
 export function TrackItem({

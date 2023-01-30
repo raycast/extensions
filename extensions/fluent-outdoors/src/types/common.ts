@@ -4,6 +4,10 @@ export type Nullable<T> = T | null;
 
 export type Nullish<T> = T | undefined | null;
 
+export interface Preferences {
+  sortBy: string;
+}
+
 export type Service = {
   id: string;
   country: string;

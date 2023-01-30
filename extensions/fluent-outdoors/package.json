@@ -21,6 +21,26 @@
         "skiing",
         "skating",
         "sports"
+      ],
+      "preferences": [
+        {
+          "name": "sortBy",
+          "title": "Sort results by",
+          "description": "Sort by name or maintenance",
+          "type": "dropdown",
+          "required": false,
+          "default": "maintenance",
+          "data": [
+            {
+              "title": "Name",
+              "value": "name"
+            },
+            {
+              "title": "Maintenance",
+              "value": "maintenance"
+            }
+          ]
+        }
       ]
     }
   ],

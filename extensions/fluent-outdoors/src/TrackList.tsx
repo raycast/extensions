@@ -1,9 +1,9 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { FluentClient } from "./FluentClient";
-import { Announcement, OnFavouriteTracksUpdateAction, Service, Track } from "./types/common";
+import { Announcement, OnFavouriteTracksUpdateAction, Preferences, Service, Track } from "./types/common";
 import { TrackItem } from "./TrackItem";
-import { showError } from "./utils";
+import { showError, sortByMaintenance, sortByName } from "./utils";
 import { AnnouncementItem } from "./AnnouncementItem";
 
 interface TrackListProps {
@@ -16,14 +16,20 @@ export default function TrackList({ service, favouriteTracks, onFavouriteTracksU
   const [ready, setReady] = useState(false);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     const fluent = new FluentClient(service);
     fluent
       .getTracks()
       .then((tracks) => {
-        // Sort alphabetically
-        tracks.sort((trackA, trackB) => trackA.name.localeCompare(trackB.name));
+        // Sort tracks and store
+        if (preferences.sortBy === "name") {
+          tracks.sort(sortByName);
+        }
+        if (preferences.sortBy === "maintenance") {
+          tracks.sort(sortByMaintenance);
+        }
 
         setTracks(tracks);
         return fluent.getAnnouncements();
