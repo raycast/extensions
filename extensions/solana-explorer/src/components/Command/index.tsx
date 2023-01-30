@@ -5,6 +5,7 @@ import axios from "axios";
 import { useMemo, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { Token } from "../../types/tokens";
+import { isNumeric } from "../../utils/isNumeric";
 import AccountDetailView from "../AccountDetailView";
 import { TokenDetailView } from "../OtherView/TokenDetailView";
 import TransactionDetailView from "../TransactionDetailView";
@@ -83,6 +84,34 @@ const Command = ({ cluster }: Props) => {
               />
             ))}
           </List.Section>
+
+          {isNumeric(debouncedQuery) && (
+            <>
+              <List.Section title="Block">
+                <List.Item
+                  title={`Slot #${debouncedQuery}`}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser url={"https://google.com"} />
+                      {/* TODO: fix url */}
+                    </ActionPanel>
+                  }
+                />
+              </List.Section>
+
+              <List.Section title="Epoch">
+                <List.Item
+                  title={`Epoch #${debouncedQuery}`}
+                  actions={
+                    <ActionPanel>
+                      <Action.OpenInBrowser url={"https://google.com"} />
+                      {/* TODO: fix url */}
+                    </ActionPanel>
+                  }
+                />
+              </List.Section>
+            </>
+          )}
         </List>
       );
     }

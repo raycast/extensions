@@ -11,12 +11,6 @@
   ],
   "commands": [
     {
-      "name": "solana-explorer",
-      "title": "Solana Explorer",
-      "description": "Look up transactions and accounts on the various Solana clusters.",
-      "mode": "view"
-    },
-    {
       "name": "mainnet",
       "title": "Solana Mainnet Explorer",
       "description": "Explore transactions on the mainnet",
