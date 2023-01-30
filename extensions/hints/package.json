@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hints",
+  "title": "Hints AI Assistant",
+  "description": "Quickly send command into Hints AI Assistant with Raycast",
+  "icon": "command-icon.png",
+  "author": "alexjedi",
+  "owner": "hintsflow",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "use-flow-page",
+      "title": "Use Hints AI Assistant",
+      "description": "Use Hints AI Assistant to manage integration",
+      "mode": "view"
+    },
+    {
+      "name": "view-log",
+      "title": "View Requests Log",
+      "description": "View your log of operations",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Hints Token",
+      "placeholder": "Enter your Hints Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.1",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "prettier": "^2.8.3",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
