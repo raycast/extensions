@@ -31,7 +31,7 @@ export default function Command() {
         {timer && (
           <List.Item
             key={timer.originalFile}
-            icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
+            icon={{ source: Icon.Moon, tintColor: Color.Yellow }}
             title={timer.name}
             subtitle={formatTime(timer.timeLeft) + " left"}
             accessoryTitle={formatTime(timer.secondsSet) + " originally"}
