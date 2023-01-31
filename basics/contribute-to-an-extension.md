@@ -12,7 +12,7 @@ First, you need to find the source code of the extension. The easiest way to do 
 
 ![View source code of an extension](https://user-images.githubusercontent.com/17166544/159994970-ec6d8265-4195-4a4f-86fd-237424fff6d2.png)
 
-Then, you need to [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to have the source code locally.
+Then, you need to [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to have the source code locally. To prevent downloading the entire repository, you can do a sparse checkout as described [here](https://developers.raycast.com/basics/publish-an-extension#alternative-way).
 
 ## Develop the extension
 
