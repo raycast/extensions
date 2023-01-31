@@ -16,6 +16,7 @@ import {
 } from "@raycast/api";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { formatBytes } from "./utils";
 
 interface Preferences {
   PINATA_JWT: string;
@@ -32,23 +33,34 @@ function SubmarineDetail({ fileId, cid }) {
   const [time, setTime] = useState("");
 
   const generateKey = async (fileId, cid) => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "generating link" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "generating link",
+    });
     try {
       const data = JSON.stringify({
         timeoutSeconds: time,
         contentIds: [`${fileId}`],
       });
 
-      const token = await axios.post("https://managed.mypinata.cloud/api/v1/auth/content/jwt", data, {
-        headers: {
-          "x-api-key": SUBMARINE_KEY,
-          "Content-Type": "application/json",
-        },
-      });
+      const token = await axios.post(
+        "https://managed.mypinata.cloud/api/v1/auth/content/jwt",
+        data,
+        {
+          headers: {
+            "x-api-key": SUBMARINE_KEY,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (stream) {
-        await Clipboard.copy(`${GATEWAY}/ipfs/${cid}?accessToken=${token.data}&stream=true`);
+        await Clipboard.copy(
+          `${GATEWAY}/ipfs/${cid}?accessToken=${token.data}&stream=true`
+        );
       } else {
-        await Clipboard.copy(`${GATEWAY}/ipfs/${cid}?accessToken=${token.data}`);
+        await Clipboard.copy(
+          `${GATEWAY}/ipfs/${cid}?accessToken=${token.data}`
+        );
       }
       toast.style = Toast.Style.Success;
       toast.title = "Link Generated";
@@ -76,7 +88,10 @@ If your plan does not include a Dedicated Gateway consider upgrading [here!](htt
         markdown={markdown}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action
+              title="Open Extension Preferences"
+              onAction={openExtensionPreferences}
+            />
           </ActionPanel>
         }
       />
@@ -87,7 +102,11 @@ If your plan does not include a Dedicated Gateway consider upgrading [here!](htt
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate Link" onSubmit={() => generateKey(fileId, cid)} icon={Icon.Link} />
+          <Action.SubmitForm
+            title="Generate Link"
+            onSubmit={() => generateKey(fileId, cid)}
+            icon={Icon.Link}
+          />
         </ActionPanel>
       }
     >
@@ -99,7 +118,12 @@ If your plan does not include a Dedicated Gateway consider upgrading [here!](htt
         <Form.Dropdown.Item value="604800" title="1 Week" />
         <Form.Dropdown.Item value="2629746" title="1 Month" />
       </Form.Dropdown>
-      <Form.Checkbox id="stream" label="Stream Video File" value={stream} onChange={setStream} />
+      <Form.Checkbox
+        id="stream"
+        label="Stream Video File"
+        value={stream}
+        onChange={setStream}
+      />
     </Form>
   );
 }
@@ -112,14 +136,20 @@ function SubmarineList() {
 
   useEffect(() => {
     async function fetchFiles() {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Fetching files" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching files",
+      });
 
       try {
-        const res = await axios.get("https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100", {
-          headers: {
-            "x-api-key": SUBMARINE_KEY,
-          },
-        });
+        const res = await axios.get(
+          "https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100",
+          {
+            headers: {
+              "x-api-key": SUBMARINE_KEY,
+            },
+          }
+        );
 
         toast.style = Toast.Style.Success;
         toast.title = "Complete!";
@@ -134,18 +164,6 @@ function SubmarineList() {
     fetchFiles();
   }, []);
 
-  const formatBytes = (bytes, decimals = 2) => {
-    if (!+bytes) return "0 Bytes";
-
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-  };
-
   const deleteFile = async (fileId) => {
     const options: Alert.Options = {
       title: "Delete File",
@@ -158,14 +176,20 @@ function SubmarineList() {
     };
 
     if (await confirmAlert(options)) {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting File" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Deleting File",
+      });
 
       try {
-        const delRes = await axios.delete(`https://managed.mypinata.cloud/api/v1/content/${fileId}`, {
-          headers: {
-            "x-api-key": SUBMARINE_KEY,
-          },
-        });
+        const delRes = await axios.delete(
+          `https://managed.mypinata.cloud/api/v1/content/${fileId}`,
+          {
+            headers: {
+              "x-api-key": SUBMARINE_KEY,
+            },
+          }
+        );
         toast.style = Toast.Style.Success;
         toast.title = "File Deleted!";
       } catch (error) {
@@ -192,15 +216,24 @@ function SubmarineList() {
             key={item.id}
             title={item.name}
             subtitle={item.cid}
-            accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.createdAt) }]}
+            accessories={[
+              { text: formatBytes(item.size) },
+              { date: new Date(item.createdAt) },
+            ]}
             actions={
               <ActionPanel>
                 <Action
                   title="Generate Link"
-                  onAction={() => push(<SubmarineDetail fileId={item.id} cid={item.cid} />)}
+                  onAction={() =>
+                    push(<SubmarineDetail fileId={item.id} cid={item.cid} />)
+                  }
                   icon={Icon.Link}
                 />
-                <Action.CopyToClipboard title="Copy CID to Clipboard" content={item.cid} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard
+                  title="Copy CID to Clipboard"
+                  content={item.cid}
+                  icon={Icon.CopyClipboard}
+                />
                 <Action
                   title="Delete File"
                   shortcut={{ modifiers: ["cmd"], key: "delete" }}
