@@ -18,6 +18,115 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "parser",
+      "type": "dropdown",
+      "title": "Select parser",
+      "description": "Specify which parser to use.",
+      "label": "Include AirPlay devices",
+      "data": [
+        {
+          "title": "flow",
+          "value": "flow"
+        },
+        {
+          "title": "babel",
+          "value": "babel"
+        },
+        {
+          "title": "babel-flow",
+          "value": "babel-flow"
+        },
+        {
+          "title": "babel-ts",
+          "value": "babel-ts"
+        },
+        {
+          "title": "typescript",
+          "value": "typescript"
+        },
+        {
+          "title": "acorn",
+          "value": "acorn"
+        },
+        {
+          "title": "espree",
+          "value": "espree"
+        },
+        {
+          "title": "meriyah",
+          "value": "meriyah"
+        },
+        {
+          "title": "css",
+          "value": "css"
+        },
+        {
+          "title": "less",
+          "value": "less"
+        },
+        {
+          "title": "scss",
+          "value": "scss"
+        },
+        {
+          "title": "json",
+          "value": "json"
+        },
+        {
+          "title": "json5",
+          "value": "json5"
+        },
+        {
+          "title": "json-stringify",
+          "value": "json-stringify"
+        },
+        {
+          "title": "graphql",
+          "value": "graphql"
+        },
+        {
+          "title": "markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "mdx",
+          "value": "mdx"
+        },
+        {
+          "title": "vue",
+          "value": "vue"
+        },
+        {
+          "title": "yaml",
+          "value": "yaml"
+        },
+        {
+          "title": "glimmer",
+          "value": "glimmer"
+        },
+        {
+          "title": "html",
+          "value": "html"
+        },
+        {
+          "title": "angular",
+          "value": "angular"
+        },
+        {
+          "title": "lwc",
+          "value": "lwc"
+        },
+        {
+          "title": "doc-explorer",
+          "value": "doc-explorer"
+        }
+      ],
+      "default": "babel",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.46.1"
   },
