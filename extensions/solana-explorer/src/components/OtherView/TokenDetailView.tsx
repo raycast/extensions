@@ -20,8 +20,6 @@ export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token, cluster }) =
     execute: !!token.extensions?.coingeckoId,
   });
 
-  console.log(tokenCoingeckoData.market_data.current_price);
-
   const markdown = `
 # ${token.name}
 
@@ -55,14 +53,14 @@ export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token, cluster }) =
           <List.Item.Detail.Metadata.Label title="Symbol" text={token.symbol} />
           <List.Item.Detail.Metadata.Label title="Address" text={token.address} />
           <List.Item.Detail.Metadata.Label title="Decimals" text={token.decimals.toString()} />
-          {tokenCoingeckoData.market_data.current_price.usd && (
+          {tokenCoingeckoData?.market_data?.current_price?.usd && (
             <List.Item.Detail.Metadata.Label
               title="Price"
               text={`$${tokenCoingeckoData.market_data.current_price.usd}`}
             />
           )}
 
-          {tokenCoingeckoData.market_data.price_change_24h_in_currency.usd && (
+          {tokenCoingeckoData?.market_data?.price_change_24h_in_currency?.usd && (
             <List.Item.Detail.Metadata.Label
               title="Price change (24 hour)"
               text={`$${tokenCoingeckoData.market_data.price_change_24h_in_currency.usd}`}
@@ -83,14 +81,14 @@ export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token, cluster }) =
             />
           )}
 
-          {tokenCoingeckoData.market_data.market_cap.usd && (
+          {tokenCoingeckoData?.market_data?.market_cap?.usd && (
             <List.Item.Detail.Metadata.Label
               title="Market Cap"
               text={`$${nFormatter(tokenCoingeckoData.market_data.market_cap.usd)}`}
             />
           )}
 
-          {tokenCoingeckoData.market_data.total_volume.usd && (
+          {tokenCoingeckoData?.market_data?.total_volume?.usd && (
             <List.Item.Detail.Metadata.Label
               title="Total Volume (24 hour)"
               text={`$${nFormatter(tokenCoingeckoData.market_data.total_volume.usd)}`}

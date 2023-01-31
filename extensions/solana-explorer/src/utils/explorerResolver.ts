@@ -4,7 +4,7 @@ export enum SolType {
   TRANSACTION = "Transaction",
   ADDRESS = "Address",
   BLOCK = "Block",
-  TOKEN = "Tokens",
+  TOKEN = "Token",
 }
 
 /**
