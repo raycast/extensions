@@ -1,5 +1,9 @@
 # Bitfinex Changelog
 
+## [Bugfix] - 2023-01-31
+
+- Fixed a bug in edit offer
+
 ## [Auto-renew offers and improvements] - 2022-12-11
 
 - Send notification when there's high lending rates. You can also configure the threshold in the preferences.
