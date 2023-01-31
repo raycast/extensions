@@ -60,7 +60,7 @@ export type Profile = {
     address: string;
     username: string;
     displayName: string;
-    bio: string;
+    bio: string | undefined;
     followers: number;
     following: number;
     avatarUrl: string;

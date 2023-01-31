@@ -13,6 +13,9 @@ function populate(device: Device, deviceData: RawDeviceData) {
     case SonyProducts.Models.WF1000XM4:
       device.icon = { source: "icons/devices/sony/wf.1000xm4.svg" };
       break;
+    case SonyProducts.Models.WF1000XM3:
+      device.icon = { source: "icons/devices/sony/wf.1000xm3.svg" };
+      break;
   }
 
   // Populate accessories
@@ -35,6 +38,7 @@ const SonyProducts = {
     WH1000XM4: "0x0D58",
     WH1000XM3: "0x0CD3",
     WF1000XM4: "0x0DE1",
+    WF1000XM3: "0x0CE0",
   },
   populate,
 };

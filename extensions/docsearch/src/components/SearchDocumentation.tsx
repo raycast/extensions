@@ -12,6 +12,7 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
     props.lang ? api.name === props.docsName && api.lang === props.lang : api.name === props.docsName
   ) as IAPIData;
 
+  const [searchText, setSearchText] = useState(props.quickSearch || "");
   const searchClient = algoliasearch(currentAPI.appId, currentAPI.apiKey);
   const searchIndex = searchClient.initIndex(currentAPI.indexName);
 
@@ -58,8 +59,8 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
   };
 
   useEffect(() => {
-    (async () => setSearchResults(await search(props.quickSearch)))();
-  }, []);
+    search(searchText).then(setSearchResults);
+  }, [searchText]);
 
   const getTitle = (result: any) => {
     const combinedTitle = (titles: Array<string>) => titles.filter((itme) => itme).join(" > ");
@@ -76,8 +77,8 @@ export function SearchDocumentation(props: { docsName: string; lang?: string; qu
       throttle={true}
       navigationTitle={currentAPI.name}
       isLoading={isLoading || searchResults === undefined}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
-      searchText={props.quickSearch}
+      onSearchTextChange={setSearchText}
+      searchText={searchText}
     >
       {searchResults?.map((result) => (
         <List.Item

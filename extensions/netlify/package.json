@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "netlify",
   "title": "Netlify",
-  "description": "View your Netlify sites, domains, and team members",
+  "description": "Search your Netlify sites, deploys, domains, team members, audit log, and official documentation.",
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
@@ -16,24 +16,71 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-sites",
-      "title": "View Sites",
+      "name": "find-local-sites",
+      "title": "Find Local Sites",
       "subtitle": "Netlify",
-      "description": "View your sites",
+      "description": "Find your Netlify sites that you have saved locally on your hard drive.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "scanPath",
+          "type": "textfield",
+          "required": true,
+          "default": "",
+          "title": "Scan path",
+          "description": "Path to scan for finding local Netlify sites. Use : to separate multiple paths."
+        }
+      ]
+    },
+    {
+      "name": "invite-team-members",
+      "title": "Invite Team Members",
+      "subtitle": "Netlify",
+      "description": "Invite new people to join your team.",
       "mode": "view"
     },
     {
-      "name": "view-domains",
-      "title": "View Domains",
+      "name": "search-domains",
+      "title": "Search Domains",
       "subtitle": "Netlify",
-      "description": "View your domains",
+      "description": "Search your team's domain names, and register new domains.",
       "mode": "view"
     },
     {
-      "name": "view-members",
-      "title": "View Members",
+      "name": "search-audit-log",
+      "title": "Search Audit Log",
       "subtitle": "Netlify",
-      "description": "View team members",
+      "description": "Search your team's audit log.",
+      "mode": "view"
+    },
+    {
+      "name": "search-docs",
+      "title": "Search Docs",
+      "subtitle": "Netlify",
+      "description": "Search Netlify's official documentation.",
+      "keywords": [
+        "documentation"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-sites",
+      "title": "Search Sites",
+      "subtitle": "Netlify",
+      "description": "Search your sites and deploys.",
+      "keywords": [
+        "deploys"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-team-members",
+      "title": "Search Team Members",
+      "subtitle": "Netlify",
+      "description": "Search your team's members, Git contributors, and reviewers.",
+      "keywords": [
+        "reviewers"
+      ],
       "mode": "view"
     }
   ],
@@ -49,10 +96,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.42.0",
-    "axios": "^0.24.0"
+    "@raycast/utils": "^1.4.14",
+    "axios": "^0.24.0",
+    "parse-git-config": "^3.0.0",
+    "parse-github-url": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^18.8.3",
+    "@types/parse-git-config": "^3.0.1",
+    "@types/parse-github-url": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

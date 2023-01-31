@@ -15,6 +15,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -61,6 +62,7 @@ export type CreateIssueValues = {
   cycleId: string;
   projectId: string;
   parentId: string;
+  attachments: string[];
 };
 
 type Preferences = {
@@ -144,6 +146,19 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
             ...getCopyToastAction(copyToastAction, issue),
           };
+
+          if (values.attachments[0]) {
+            try {
+              await createAttachment({
+                issueId: issue.id,
+                url: values.attachments[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Failed to create attachment";
+              toast.message = "The issue was still created, but the attachment could not be added.";
+            }
+          }
 
           reset({
             title: "",
@@ -385,6 +400,10 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} allowMultipleSelection={false} />
     </Form>
   );
 }
