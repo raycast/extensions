@@ -8,7 +8,7 @@ interface Preferences {
   GATEWAY: string;
 }
 
-interface Response {
+export interface PinnedResponse {
   count: number;
   rows: RowsItem[];
 }
@@ -30,13 +30,17 @@ interface Metadata {
 
 const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
+const GATEWAY = preferences.GATEWAY;
 
 export function getPinned() {
-  return useFetch<Response>("https://api.pinata.cloud/data/pinList?includesCount=false&status=pinned&pageLimit=100", {
-    headers: {
-      Authorization: JWT,
-    },
-  });
+  return useFetch<PinnedResponse>(
+    "https://api.pinata.cloud/data/pinList?includesCount=false&status=pinned&pageLimit=100",
+    {
+      headers: {
+        Authorization: JWT,
+      },
+    }
+  );
 }
 
 export function deleteFileByHash(hash) {

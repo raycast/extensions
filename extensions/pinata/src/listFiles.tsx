@@ -9,7 +9,8 @@ import {
   Alert,
   confirmAlert,
 } from "@raycast/api";
-import { deleteFileByHash, getPinned } from "./api";
+import axios from "axios";
+import { deleteFileByHash, getPinned, PinnedResponse } from "./api";
 
 interface Preferences {
   PINATA_JWT: string;
@@ -18,11 +19,13 @@ interface Preferences {
 }
 
 const preferences = getPreferenceValues<Preferences>();
+const JWT = `Bearer ${preferences.PINATA_JWT}`;
 const GATEWAY = preferences.GATEWAY;
 
 export default function Command() {
-  const { data, error, isLoading, mutate, revalidate } = getPinned();
+  const { data, error, isLoading, mutate } = getPinned();
 
+  // console.logo(data);
   const formatBytes = (bytes: number, decimals = 2) => {
     if (!+bytes) return "0 Bytes";
 
@@ -45,13 +48,24 @@ export default function Command() {
       },
     };
     if (await confirmAlert(options)) {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting File" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Deleting File",
+      });
 
       try {
-        await deleteFileByHash(hash);
+        deleteFileByHash(hash);
+        await mutate(deleteFileByHash(hash), {
+          optimisticUpdate(data: PinnedResponse) {
+            return {
+              ...data,
+              rows: data.rows.filter((row) => row.ipfs_pin_hash !== hash),
+            };
+          },
+        });
+
         toast.style = Toast.Style.Success;
         toast.title = "File Deleted!";
-        revalidate();
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed Deleting File";
@@ -62,6 +76,7 @@ export default function Command() {
     }
   };
 
+  console.log(isLoading);
   return (
     <List isLoading={isLoading}>
       <List.EmptyView
@@ -76,11 +91,20 @@ export default function Command() {
             key={item.id}
             title={item.metadata.name}
             subtitle={item.ipfs_pin_hash}
-            accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.date_pinned) }]}
+            accessories={[
+              { text: formatBytes(item.size) },
+              { date: new Date(item.date_pinned) },
+            ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`} />
-                <Action.CopyToClipboard title="Copy CID to Clipboard" content={item.cid} icon={Icon.CopyClipboard} />
+                <Action.OpenInBrowser
+                  url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`}
+                />
+                <Action.CopyToClipboard
+                  title="Copy CID to Clipboard"
+                  content={item.cid}
+                  icon={Icon.CopyClipboard}
+                />
                 <Action.OpenInBrowser
                   url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}?stream=true`}
                   title="Stream Video File"
