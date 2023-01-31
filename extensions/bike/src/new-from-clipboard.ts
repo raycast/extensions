@@ -1,19 +1,17 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Clipboard, popToRoot, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
 
 export default function main() {
-  const [ranScript, setRanScript] = useState<boolean>(false);
-
   const error_alert = checkBikeInstalled();
   if (error_alert !== undefined) {
     return error_alert;
-  } else if (!ranScript) {
-    setRanScript(true);
+  }
 
+  useEffect(() => {
     // Get lines of text from the clipboard
-    Promise.resolve(Clipboard.readText()).then((text) => {
+    Clipboard.readText().then((text) => {
       const lines = text?.split("\n").reverse();
       const clipboard_lines = lines?.map(
         (line: string) => '"' + line.replaceAll("\\", "\\\\").replaceAll('"', '\\"') + '"'
@@ -41,12 +39,7 @@ export default function main() {
         repeat with lineItem in docData
           tell newDoc to make new row at front of rows with properties {name: lineItem}
         end repeat
-      end tell`);
+      end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())));
     });
-
-    showHUD("Created new Bike");
-
-    // Close the Raycast window
-    Promise.resolve(popToRoot());
-  }
+  }, []);
 }

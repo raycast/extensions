@@ -161,7 +161,7 @@ async function custom_bg() {
           set background color to choose color
       end try
     end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function white_bg() {
@@ -169,7 +169,7 @@ async function white_bg() {
     activate
     set background color to {65535, 65535, 65535}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function black_bg() {
@@ -177,7 +177,7 @@ async function black_bg() {
     activate
     set background color to {0, 0, 0}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function red_bg() {
@@ -185,7 +185,7 @@ async function red_bg() {
     activate
     set background color to {32768, 0, 0}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function orange_bg() {
@@ -193,7 +193,7 @@ async function orange_bg() {
     activate
     set background color to {65535, 22768, 0}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function yellow_bg() {
@@ -201,7 +201,7 @@ async function yellow_bg() {
     activate
     set background color to {55535, 55535, 0}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function green_bg() {
@@ -209,7 +209,7 @@ async function green_bg() {
     activate
     set background color to {0, 32768, 0}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function teal_bg() {
@@ -217,7 +217,7 @@ async function teal_bg() {
     activate
     set background color to {0, 32768, 32768}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function blue_bg() {
@@ -225,7 +225,7 @@ async function blue_bg() {
     activate
     set background color to {0, 0, 65535}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }
 
 async function purple_bg() {
@@ -233,5 +233,5 @@ async function purple_bg() {
     activate
     set background color to {32768, 0, 32768}
   end tell`);
-  showHUD("Set Bike background color");
+  await showHUD("Set Bike Background Color");
 }

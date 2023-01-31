@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { popToRoot, showHUD } from "@raycast/api";
+import { showHUD, popToRoot } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
 
@@ -10,9 +10,10 @@ export default function main() {
   }
 
   useEffect(() => {
+    // Copy row URL to the clipboard
     runAppleScript(`tell application "Bike"
-      activate  
-      make new document
-    end tell`).then(() => showHUD("Created New Bike Document").then(() => Promise.resolve(popToRoot())));
+            set theText to URL of selection row of document 1
+            set the clipboard to theText
+        end tell`).then(() => showHUD("Copied Row URL To Clipboard!").then(() => Promise.resolve(popToRoot())));
   }, []);
 }
