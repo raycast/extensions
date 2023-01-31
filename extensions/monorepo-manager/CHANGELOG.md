@@ -1,6 +1,6 @@
 # Monorepo Manager Changelog
 
-## [Initial Version] - 2023-01-22
+## [Initial Version] - 2023-01-31
 
 - Add one command `manageMonorepo`.
 - Add Workspaces List view + some detaul actions.
