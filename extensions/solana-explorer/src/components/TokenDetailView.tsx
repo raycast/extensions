@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { FC } from "react";
-import { Token } from "../../types/tokens";
-import { resolveUrl, SolType } from "../../utils/explorerResolver";
-import { nFormatter } from "../../utils/nFormatter";
+import { Token } from "../types/tokens";
+import { resolveUrl, SolType } from "../utils/explorerResolver";
+import { nFormatter } from "../utils/nFormatter";
 
 interface ITokenDetailViewProps {
   token: Token;

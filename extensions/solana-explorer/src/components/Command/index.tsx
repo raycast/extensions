@@ -11,7 +11,7 @@ import { isNumeric } from "../../utils/isNumeric";
 import { getPreviousSearches, putInStorage, StorageItem } from "../../utils/storage";
 import { truncateAddress, truncateSig } from "../../utils/truncate";
 import AccountDetailView from "../AccountDetailView";
-import { TokenDetailView } from "../OtherView/TokenDetailView";
+import { TokenDetailView } from "../TokenDetailView";
 import TransactionDetailView from "../TransactionDetailView";
 
 interface Props {
@@ -60,7 +60,8 @@ const Command = ({ cluster }: Props) => {
   useEffect(() => {
     const loadPrevious = async () => {
       const previousSearches = await getPreviousSearches();
-      setPreviousSearches(previousSearches);
+
+      setPreviousSearches(previousSearches.filter((item) => item.cluster === cluster));
     };
     loadPrevious().catch(console.log);
   }, []);
@@ -71,10 +72,10 @@ const Command = ({ cluster }: Props) => {
 
   if (debouncedQuery) {
     if (debouncedQuery.length === 44) {
-      putInStorage(debouncedQuery, SolType.ADDRESS);
+      putInStorage(debouncedQuery, SolType.ADDRESS, cluster);
       return <AccountDetailView pubkey={debouncedQuery} connection={connection} />;
     } else if (debouncedQuery.length === 88) {
-      putInStorage(debouncedQuery, SolType.TRANSACTION);
+      putInStorage(debouncedQuery, SolType.TRANSACTION, cluster);
       return <TransactionDetailView signature={debouncedQuery} connection={connection} />;
     } else {
       return (
@@ -99,7 +100,7 @@ const Command = ({ cluster }: Props) => {
                     <Action.Push
                       title="View Token Details"
                       target={<TokenDetailView token={token} cluster={cluster} />}
-                      onPush={() => putInStorage(token.symbol, SolType.TOKEN)}
+                      onPush={() => putInStorage(token.symbol, SolType.TOKEN, cluster)}
                     />
                   </ActionPanel>
                 }
@@ -117,7 +118,7 @@ const Command = ({ cluster }: Props) => {
                       title="Open in Explorer"
                       url={resolveUrl(debouncedQuery, SolType.BLOCK, cluster)}
                       icon={getFavicon(resolveUrl(debouncedQuery, SolType.BLOCK, cluster))}
-                      onOpen={() => putInStorage(debouncedQuery, SolType.BLOCK)}
+                      onOpen={() => putInStorage(debouncedQuery, SolType.BLOCK, cluster)}
                     />
                   </ActionPanel>
                 }

@@ -7,13 +7,25 @@
   "author": "darklong",
   "license": "MIT",
   "contributors": [
-    "anishde12020"
+    "AnishDe12020"
   ],
   "commands": [
     {
       "name": "mainnet",
       "title": "Solana Mainnet Explorer",
       "description": "Explore transactions on the mainnet",
+      "mode": "view"
+    },
+    {
+      "name": "testnet",
+      "title": "Solana Testnet Explorer",
+      "description": "Explore transactions on the testnet",
+      "mode": "view"
+    },
+    {
+      "name": "devnet",
+      "title": "Solana Devnet Explorer",
+      "description": "Explore transactions on the devnet",
       "mode": "view"
     }
   ],
