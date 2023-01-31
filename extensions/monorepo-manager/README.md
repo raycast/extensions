@@ -6,7 +6,7 @@ This Raycast Monorepo is an extension installed in [Raycast](https://www.raycast
 The extension helps you to:
 
 - Open a project folder quickly.
-- If the project is a Yarn/Npm monorepo, it can list all packages inside the monorepo, filter, and open a single package quickly. Each package can have some metadata (such as team information and Jira project URL...), and you can quickly view this metadata. 
+- If the project is a Yarn/Npm monorepo, it can list all packages inside the monorepo, filter, and open a single package quickly. Each package can have some metadata (such as team information and Jira project URL...), and you can quickly view this metadata.
 
 ### Workspace List view
 
@@ -27,7 +27,7 @@ When you select a workspace, it shows a list of packages of the selected workspa
 
 ## All actions
 
-A w, normal folder, and package have these common actions:
+A worksapce, normal folder, and package have these common actions:
 
 ### Actions related to editors
 
@@ -127,6 +127,7 @@ If you follow the next section to setup `teams.json` file, the Package Detail vi
 - `node_modules`
 - `.circleci`
 - `.github`
+- `.git`
 
 ---
 
