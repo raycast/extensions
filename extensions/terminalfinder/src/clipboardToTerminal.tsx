@@ -4,8 +4,7 @@ import { runAppleScript } from "run-applescript";
 export default async () => {
   const directory = await Clipboard.readText();
 
-  let script: string;
-  script = `
+  const script = `
       tell application "System Events"
       set pathList to "${directory}"
       if not (exists (processes where name is "Terminal")) then

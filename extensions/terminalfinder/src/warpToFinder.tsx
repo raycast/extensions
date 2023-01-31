@@ -2,9 +2,7 @@ import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async () => {
-  let script: string;
-
-  script = `
+  const script = `
       tell application "Warp" to activate
       tell application "System Events"
         keystroke "open -a Finder ./"

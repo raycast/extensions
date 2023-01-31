@@ -4,8 +4,7 @@ import { runAppleScript } from "run-applescript";
 export default async () => {
   const directory = await Clipboard.readText();
 
-  let script: string;
-  script = `
+  const script = `
       set command to "open -a /Applications/Warp.app " & "${directory}"
       do shell script command
   `;

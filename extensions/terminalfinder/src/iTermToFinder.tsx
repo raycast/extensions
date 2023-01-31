@@ -2,9 +2,7 @@ import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async () => {
-  let script: string;
-
-  script = `
+  const script = `
       if application "iTerm" is not running then
           return "Not running"
       end if

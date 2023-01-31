@@ -4,8 +4,7 @@ import { runAppleScript } from "run-applescript";
 export default async () => {
   const directory = await Clipboard.readText();
 
-  let script: string;
-  script = `
+  const script = `
       tell application "System Events"
       -- some versions might identify as "iTerm2" instead of "iTerm"
       set isRunning to (exists (processes where name is "iTerm")) or (exists (processes where name is "iTerm2"))
