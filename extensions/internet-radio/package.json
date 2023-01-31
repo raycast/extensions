@@ -5,6 +5,9 @@
   "description": "Plays internet radio via the Music app",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Media"
   ],
