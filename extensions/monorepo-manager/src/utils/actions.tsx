@@ -57,7 +57,7 @@ export function getCommonActions(path: string, rootPath?: string) {
  */
 export function getRareActions(path: string) {
   return [
-    <Action.OpenInBrowser key="submit-feedback" title="Submit Feedback" url={GITHUB_ISSUE_URL} icon={Icon.Trash} />,
+    <Action.OpenInBrowser key="submit-feedback" title="Submit Feedback" url={GITHUB_ISSUE_URL} icon={Icon.Stars} />,
     <Action.Trash key="trash" title="Move to Trash" paths={path} icon={Icon.Trash} />,
     <Action key="clear-cache" title="Clear Cache" onAction={cached.clear} icon={Icon.Circle} />,
   ];
