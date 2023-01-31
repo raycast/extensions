@@ -83,6 +83,13 @@
       "description": "Harvest Account ID",
       "link": "https://id.getharvest.com/developers",
       "type": "textfield"
+    },
+    {
+      "name": "showClient",
+      "title": "Show Client Name above selected project",
+      "description": "in the time entry form",
+      "required": false,
+      "type": "checkbox"
     }
   ],
   "dependencies": {
