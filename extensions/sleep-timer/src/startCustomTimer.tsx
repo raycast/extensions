@@ -123,7 +123,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
           onBlur={item.validator}
         />
       ))}
-      <Form.TextField id="name" title="Name" placeholder="Pour Tea" autoFocus={hasArgs} />
+      <Form.TextField id="name" title="Name" placeholder="Sleep Tight..." autoFocus={hasArgs} />
       <Form.Checkbox id="willBeSaved" label="Save as Preset" />
     </Form>
   );
