@@ -104,7 +104,6 @@ function removeInvalidEntries(pageList: string[]) {
 export function useGetManPages() {
   // Get list of command names incrementally
   const [pages, setPages] = useState<string[]>([]);
-  const [foundPages, setFoundPages] = useState<string[]>([]);
   const [result, setResult] = useState<string>("");
   const [leftoverResult, setLeftoverResult] = useState<string>("");
 
@@ -186,10 +185,6 @@ export async function runCommand(
   child.stdout?.on("close", () => {
     finish?.(result);
   });
-
-  child.stdout?.on("close", () => {
-    finish?.()
-  })
 }
 
 export function runInTerminal(command: string) {
