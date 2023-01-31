@@ -30,16 +30,24 @@ const importData = async (data: { [x: string]: number }, importMethod: string) =
 const checkJSONFormat = (jsonString: string, setJSONError: (error: string | undefined) => void) => {
   // Check for properly formatted jump data JSON string
   let error = null;
-  try {
-    const data = JSON.parse(jsonString);
-    for (const key in data) {
-      if (!parseFloat(data[key])) {
-        error = "Unexpected data type in place of numeric weights.";
-        break;
+  if (jsonString.trim().length == 0) {
+    error = "JSON string cannot be empty.";
+  } else {
+    try {
+      const data = JSON.parse(jsonString.trim());
+      for (const key in data) {
+        if (!parseFloat(data[key])) {
+          error = "Unexpected data type in place of numeric weights.";
+          break;
+        }
       }
+    } catch {
+      error = "Please enter a valid JSON string!";
     }
-  } catch {
-    error = "Please enter a valid JSON string!";
+
+    if (error == null && !jsonString.trim().match(/^{(.+:.+,?)+}$/)) {
+      error = "Please enter a valid JSON string!";
+    }
   }
 
   if (error) {
@@ -60,7 +68,7 @@ const ImportDataForm = () => {
           <Action.SubmitForm
             icon={Icon.ChevronRight}
             onSubmit={(values) => {
-              const data = JSON.parse(values.jsonStringField);
+              const data = JSON.parse(values.jsonStringField.trim());
               Promise.resolve(importData(data, values.importMethodField));
             }}
           />
@@ -84,7 +92,12 @@ const ImportDataForm = () => {
         title="JSON String"
         placeholder="Enter a JSON string..."
         error={jsonError}
-        onChange={(jsonString) => checkJSONFormat(jsonString, setJSONError)}
+        onChange={(jsonString) => {
+          checkJSONFormat(jsonString, setJSONError);
+        }}
+        onBlur={(event) => {
+          checkJSONFormat(event.target.value as string, setJSONError);
+        }}
         info={`Must be a valid JSON string specifying destinations and weights. For example:
 
 {"https://google.com":1.1880000000000002,"https://mail.google.com":1.05,"/System/Applications/Calendar.app":1.05}`}

@@ -10,10 +10,7 @@ export function installDefaultWeights() {
     LocalStorage.setItem("/System/Applications/Mail.app", 1.05),
     LocalStorage.setItem("/System/Applications/Music.app", 1.05),
     LocalStorage.setItem("/System/Applications/Photos.app", 1.05),
-    LocalStorage.setItem(
-      "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app",
-      1.05
-    ),
+    LocalStorage.setItem("/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app", 1.05),
     LocalStorage.setItem("/System/Applications/Podcasts.app", 1.05),
     LocalStorage.setItem("/System/Applications/App Store.app", 1.05),
     LocalStorage.setItem("/System/Applications/Books.app", 1.05),

@@ -54,33 +54,21 @@ async function jumpToTarget(destination: string) {
 
   // Attempt to find an appropriate destination on the system, fallback to forming a URL
   if (destinationTarget == "") {
-    if (
-      destination
-        .toLowerCase()
-        .match(/[.*\\.]*.*\.(com|net|org|tk|nl|uk|gov|edu|io|xyz|co|us)/)
-    ) {
+    if (destination.toLowerCase().match(/[.*\\.]*.*\.(com|net|org|tk|nl|uk|gov|edu|io|xyz|co|us)/)) {
       // Destination is a domain -- create a full URL and go to it
       destinationTarget = `http://${destination}`;
     } else {
       // Destination is not an exact path/URL/domain -- try to find a matching file on disk
       const itemName = destination.split("/").pop()?.replaceAll("`", "\\`");
-      destinationTarget = execSync(
-        `mdfind "kMDItemFSName == '*${itemName}*'cdw" | head -1`
-      ).toString();
+      destinationTarget = execSync(`mdfind "kMDItemFSName == '*${itemName}*'cdw" | head -1`).toString();
 
-      if (
-        !destinationTarget &&
-        !destination.toLowerCase().match(fileExtensionExpr)
-      ) {
+      if (!destinationTarget && !destination.toLowerCase().match(fileExtensionExpr)) {
         // Destination is just a term -- assume it's a website
         destinationTarget = `http://${destination}`;
         if (destination.indexOf(".") == -1) {
           destinationTarget = `${destinationTarget}.com`;
         }
-      } else if (
-        !destinationTarget &&
-        destination.toLowerCase().match(fileExtensionExpr)
-      ) {
+      } else if (!destinationTarget && destination.toLowerCase().match(fileExtensionExpr)) {
         await showHUD("Jump Failed — Destination Not Found");
         return;
       }
@@ -197,10 +185,7 @@ async function getBestMatch(term: string) {
 
   // Increase the weight of the best candidate entry
   if (bestChoice) {
-    await LocalStorage.setItem(
-      bestChoice as string,
-      bestChoiceBaseWeight * 1.01
-    );
+    await LocalStorage.setItem(bestChoice as string, bestChoiceBaseWeight * 1.01);
   }
 
   return bestChoice;

@@ -64,10 +64,7 @@ const EditDestinationForm = (props: {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={async (values: {
-              urlPathField: string;
-              weightField: string;
-            }) => {
+            onSubmit={async (values: { urlPathField: string; weightField: string }) => {
               const newWeight = parseFloat(values.weightField);
               await LocalStorage.removeItem(destination);
               await LocalStorage.setItem(values.urlPathField, newWeight);
@@ -106,126 +103,120 @@ export default function Main() {
 
   // Install initial data if first time running
   useEffect(() => {
-    Promise.resolve(LocalStorage.getItem("https://google.com")).then(
-      (weight) => {
-        if (!weight) {
-          Promise.resolve(installDefaultWeights()).then(() =>
-            Promise.resolve(LocalStorage.allItems()).then(
-              (destinationsList) => {
-                setDestinations(destinationsList);
-              }
-            )
-          );
-        } else {
+    Promise.resolve(LocalStorage.getItem("https://google.com")).then((weight) => {
+      if (!weight) {
+        Promise.resolve(installDefaultWeights()).then(() =>
           Promise.resolve(LocalStorage.allItems()).then((destinationsList) => {
             setDestinations(destinationsList);
-          });
-        }
+          })
+        );
+      } else {
+        Promise.resolve(LocalStorage.allItems()).then((destinationsList) => {
+          setDestinations(destinationsList);
+        });
       }
-    );
+    });
   }, []);
 
-  const listItems = Object.entries(destinations).map(
-    ([target, weight], index) => {
-      let itemIcon: Image.ImageLike | Icon | { fileIcon: string } = Icon.Link;
-      if (target.startsWith("/")) {
-        itemIcon = { fileIcon: target };
-      } else if (target.match(/^[A-Za-z-._~:/?#[\]@!$&'()*+,;=]+$/)) {
-        try {
-          itemIcon = getFavicon(target, { fallback: Icon.Link });
-        } catch (error) {
-          console.log(error);
-        }
+  const listItems = Object.entries(destinations).map(([target, weight], index) => {
+    let itemIcon: Image.ImageLike | Icon | { fileIcon: string } = Icon.Link;
+    if (target.startsWith("/")) {
+      itemIcon = { fileIcon: target };
+    } else if (target.match(/^[A-Za-z-._~:/?#[\]@!$&'()*+,;=]+$/)) {
+      try {
+        itemIcon = getFavicon(target, { fallback: Icon.Link });
+      } catch (error) {
+        console.log(error);
       }
-
-      return (
-        <List.Item
-          title={target}
-          subtitle={`Weight: ${weight}`}
-          key={target}
-          icon={itemIcon}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section title="This Destination">
-                <Action
-                  title="Jump"
-                  icon={Icon.ArrowRightCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "j" }}
-                  onAction={async () => {
-                    await closeMainWindow();
-                    await launchCommand({
-                      name: "jump",
-                      type: LaunchType.Background,
-                      arguments: { destination: target },
-                    });
-                  }}
-                />
-
-                <Action
-                  title="Edit Destination"
-                  icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  onAction={() =>
-                    push(
-                      <EditDestinationForm
-                        destination={target}
-                        weight={weight}
-                        onSubmit={async () => {
-                          setDestinations(await LocalStorage.allItems());
-                          pop();
-                        }}
-                      />
-                    )
-                  }
-                />
-
-                <Action
-                  title="Delete Destination"
-                  icon={Icon.Trash}
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  style={Action.Style.Destructive}
-                  onAction={async () => {
-                    const options: Alert.Options = {
-                      title: "Delete Destination",
-                      message: "Are you sure?",
-                      primaryAction: {
-                        title: "Delete",
-                        style: Alert.ActionStyle.Destructive,
-                      },
-                    };
-                    if (await confirmAlert(options)) {
-                      await LocalStorage.removeItem(target);
-                      setDestinations(await LocalStorage.allItems());
-                    }
-                  }}
-                />
-              </ActionPanel.Section>
-
-              <ActionPanel.Section title="General">
-                <Action
-                  title="New Destination"
-                  icon={Icon.PlusCircle}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={() =>
-                    push(
-                      <EditDestinationForm
-                        destination=""
-                        weight={1}
-                        onSubmit={async () => {
-                          setDestinations(await LocalStorage.allItems());
-                          pop();
-                        }}
-                      />
-                    )
-                  }
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      );
     }
-  );
+
+    return (
+      <List.Item
+        title={target}
+        subtitle={`Weight: ${weight}`}
+        key={target}
+        icon={itemIcon}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section title="This Destination">
+              <Action
+                title="Jump"
+                icon={Icon.ArrowRightCircle}
+                shortcut={{ modifiers: ["cmd"], key: "j" }}
+                onAction={async () => {
+                  await closeMainWindow();
+                  await launchCommand({
+                    name: "jump",
+                    type: LaunchType.Background,
+                    arguments: { destination: target },
+                  });
+                }}
+              />
+
+              <Action
+                title="Edit Destination"
+                icon={Icon.Pencil}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                onAction={() =>
+                  push(
+                    <EditDestinationForm
+                      destination={target}
+                      weight={weight}
+                      onSubmit={async () => {
+                        setDestinations(await LocalStorage.allItems());
+                        pop();
+                      }}
+                    />
+                  )
+                }
+              />
+
+              <Action
+                title="Delete Destination"
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  const options: Alert.Options = {
+                    title: "Delete Destination",
+                    message: "Are you sure?",
+                    primaryAction: {
+                      title: "Delete",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  };
+                  if (await confirmAlert(options)) {
+                    await LocalStorage.removeItem(target);
+                    setDestinations(await LocalStorage.allItems());
+                  }
+                }}
+              />
+            </ActionPanel.Section>
+
+            <ActionPanel.Section title="General">
+              <Action
+                title="New Destination"
+                icon={Icon.PlusCircle}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() =>
+                  push(
+                    <EditDestinationForm
+                      destination=""
+                      weight={1}
+                      onSubmit={async () => {
+                        setDestinations(await LocalStorage.allItems());
+                        pop();
+                      }}
+                    />
+                  )
+                }
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  });
 
   return <List isLoading={!listItems.length}>{listItems}</List>;
 }
