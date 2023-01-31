@@ -3,7 +3,7 @@
   "name": "netlify",
   "title": "Netlify",
   "description": "Search your Netlify sites, deploys, domains, team members, audit log, and official documentation.",
-  "icon": "netlify-icon.png",
+  "icon": "extension-icon.png",
   "author": "destiner",
   "owner": "netlify",
   "access": "public",
