@@ -23,7 +23,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Build",
-      "default": "Code",
+      "default": "com.microsoft.VSCode",
       "description": "Select which build of Visual Studio Code to use when searching for recent projects",
       "data": [
         {
