@@ -5,12 +5,14 @@ export default async () => {
   let script: string;
 
   script = `
-      if application "Terminal" is not running then
+      if application "iTerm" is not running then
           return "Not running"
       end if
   
-      tell application "Terminal"
-      do script "open -a Finder ./" in first window
+      tell application "iTerm"
+      tell the current session of current window
+          write text "open -a Finder ./"
+      end tell
       end tell
   `;
 
