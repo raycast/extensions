@@ -1,6 +1,12 @@
-## Intro about Raycast Monorepo
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/tung-dang/raycast-monorepo-manager/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/tung-dang/raycast-monorepo-manager/tree/main)
+
+## Introduction about Raycast Monorepo
 
 This Raycast Monorepo is an extension which is installed in [Raycast](https://www.raycast.com/).
+The extension helps you to:
+
+- Open project folder quickly.
+- If the project is a Yarn/Npm monorepo, it can list all packages inside the monorepo, filter and open a single package quickly. Each package can has some metadata (such as team information, Jira project url...) and you can quick view these metadata. 
 
 ### Workspace List view
 
@@ -116,6 +122,11 @@ If you follow next section to setup `teams.json` file, the Package Detail view c
 1. Install this [Raycast VSCode extension](https://marketplace.visualstudio.com/items?itemName=tonka3000.raycast)
 2. In VSCode, press `Cmd + Shift + P` -> choose `Raycast: Start Development Mode`
 3. Now you can follow this [Raycast document](https://developers.raycast.com/basics/debug-an-extension) for debugging.
+4. After testing in the `main` branch, we can follow this [Raycast document](https://developers.raycast.com/basics/publish-an-extension) to update the extension in [the Raycast store](https://www.raycast.com/store). At this moment, we do manually coping all files to the Raycast repo except these folders:
+
+- `node_modules`
+- `.circleci`
+- `.github`
 
 ---
 

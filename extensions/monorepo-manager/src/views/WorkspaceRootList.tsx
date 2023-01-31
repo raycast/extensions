@@ -8,6 +8,7 @@ import { getCommonActions, getOpenInEditorActions, getRareActions } from '../uti
 
 interface Props {
   workspaces: SimplifiedWorkspace[];
+  isLoading: boolean;
 }
 // If a workspace has `package.json` file, default action will be showing list of actions of that package.
 // Otherwise, the default action will be showing in the Finder.
@@ -26,14 +27,14 @@ const getDefaultAction = (workspaceName: string, workspace: SimplifiedWorkspace)
  * A view shows list of workspace root to choose
  */
 export function WorkspaceRootList(props: Props) {
-  const { workspaces } = props;
+  const { workspaces, isLoading } = props;
 
   const sortedWorkspaces = useMemo(() => {
     return orderBy(workspaces, ['hasPackageJsonFile'], ['desc']);
   }, [workspaces]);
 
   return (
-    <List searchBarPlaceholder="Search your workspace to start searching packages inside it.">
+    <List searchBarPlaceholder="Search your workspace to start searching packages inside it." isLoading={isLoading}>
       {sortedWorkspaces.map((it: SimplifiedWorkspace) => {
         const detailView = it.hasPackageJsonFile ? (
           ''
