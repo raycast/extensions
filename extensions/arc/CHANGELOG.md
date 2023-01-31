@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2023-01-31
+
+- Added preferences to configure the `Search Arc` command.
+
 ## [Improvements] - 2023-01-20
 
 – Close Raycast when opening links in a new Little Arc window
