@@ -10,7 +10,10 @@ export function installDefaultWeights() {
     LocalStorage.setItem("/System/Applications/Mail.app", 1.05),
     LocalStorage.setItem("/System/Applications/Music.app", 1.05),
     LocalStorage.setItem("/System/Applications/Photos.app", 1.05),
-    LocalStorage.setItem("/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app", 1.05),
+    LocalStorage.setItem(
+      "/System/Volumes/Preboot/Cryptexes/App/System/Applications/Safari.app",
+      1.05
+    ),
     LocalStorage.setItem("/System/Applications/Podcasts.app", 1.05),
     LocalStorage.setItem("/System/Applications/App Store.app", 1.05),
     LocalStorage.setItem("/System/Applications/Books.app", 1.05),
@@ -39,8 +42,8 @@ export function installDefaultWeights() {
     LocalStorage.setItem("https://bing.com", 1.5),
     LocalStorage.setItem("https://stackoverflow.com", 1.5),
     LocalStorage.setItem("https://duckduckgo.com", 1.2),
-    LocalStorage.setItem("http://wolframalpha.com", 1.2),
-    LocalStorage.setItem("http://chat.openai.com", 1.06),
+    LocalStorage.setItem("https://wolframalpha.com", 1.2),
+    LocalStorage.setItem("https://chat.openai.com", 1.06),
     LocalStorage.setItem("https://yahoo.com", 1.1),
 
     LocalStorage.setItem("https://youtube.com", 1.2),
