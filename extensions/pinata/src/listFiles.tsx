@@ -91,20 +91,11 @@ export default function Command() {
             key={item.id}
             title={item.metadata.name}
             subtitle={item.ipfs_pin_hash}
-            accessories={[
-              { text: formatBytes(item.size) },
-              { date: new Date(item.date_pinned) },
-            ]}
+            accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.date_pinned) }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`}
-                />
-                <Action.CopyToClipboard
-                  title="Copy CID to Clipboard"
-                  content={item.cid}
-                  icon={Icon.CopyClipboard}
-                />
+                <Action.OpenInBrowser url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}`} />
+                <Action.CopyToClipboard title="Copy CID to Clipboard" content={item.cid} icon={Icon.CopyClipboard} />
                 <Action.OpenInBrowser
                   url={`${GATEWAY}/ipfs/${item.ipfs_pin_hash}?stream=true`}
                   title="Stream Video File"
