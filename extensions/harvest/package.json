@@ -86,9 +86,9 @@
     },
     {
       "name": "showClient",
-      "title": "Show Client Name above selected project",
       "description": "in the time entry form",
       "required": false,
+      "label": "Show Client Name above selected project",
       "type": "checkbox"
     }
   ],
