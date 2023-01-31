@@ -5,6 +5,8 @@
   "description": "Search your Netlify sites, deploys, domains, team members, audit log, and official documentation.",
   "icon": "icon.png",
   "author": "destiner",
+  "owner": "netlify",
+  "access": "public",
   "contributors": [
     "jonohewitt",
     "jasonbarry"
