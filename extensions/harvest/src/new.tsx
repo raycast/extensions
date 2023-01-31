@@ -221,7 +221,7 @@ export default function Command({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={() => handleSubmit()}
+            onSubmit={handleSubmit}
             title={entry?.id ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
           />
         </ActionPanel>
