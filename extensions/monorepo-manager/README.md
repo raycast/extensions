@@ -2,11 +2,11 @@
 
 ## Introduction about Raycast Monorepo
 
-This Raycast Monorepo is an extension which is installed in [Raycast](https://www.raycast.com/).
+This Raycast Monorepo is an extension installed in [Raycast](https://www.raycast.com/).
 The extension helps you to:
 
-- Open project folder quickly.
-- If the project is a Yarn/Npm monorepo, it can list all packages inside the monorepo, filter and open a single package quickly. Each package can has some metadata (such as team information, Jira project url...) and you can quick view these metadata. 
+- Open a project folder quickly.
+- If the project is a Yarn/Npm monorepo, it can list all packages inside the monorepo, filter, and open a single package quickly. Each package can have some metadata (such as team information and Jira project URL...), and you can quickly view this metadata. 
 
 ### Workspace List view
 
@@ -17,47 +17,47 @@ This extension will scan all direct folders in `rootSourceFolder` (configured in
 Each folder is considered a project or workspace if it has a `package.json` file at the root. Otherwise, it is considered a normal folder.
 
 - Only a workspace has a special action `Show List of Packages`. A normal folder does not have this action.
-- Only a package has this special action `See Package Details` that allows to see details of selected pacakge.
+- Only a package has this special action `See Package Details` that allows seeing details of the selected package.
 
 ### Package List view
 
-When you select a workspace, it shows list of packages of selected workspace.
+When you select a workspace, it shows a list of packages of the selected workspace.
 
 ---
 
 ## All actions
 
-A worksapce, normal folder and package have these common actions:
+A w, normal folder, and package have these common actions:
 
 ### Actions related to editors
 
-- `Open in Visual Studio Code`: open selected workspace/folder/package in Visual Studio Code Text editor.
-- `Open in Sublime Text`: open selected workspace/folder/package in Sublime Text editor.
+- `Open in Visual Studio Code`: open the selected workspace/folder/package in Visual Studio Code Text editor.
+- `Open in Sublime Text`: open the selected workspace/folder/package in Sublime Text editor.
 
 ### Common actions
 
 - `Open in Finder`: : open selected workspace/folder/package in Finder.
-- `Copy Path`: copy path of selected workspace/folder/package.
-- `Open in Terminal`: open selected workspace/folder/package in Terminal app.
+- `Copy Path`: copy path of the selected workspace/folder/package.
+- `Open in Terminal`: open the selected workspace/folder/package in Terminal app.
 - `Open With...`: open selected workspace/folder/package in any applications.
-- `Open Remote URL`: open remote git URL of selected workspace/folder/package in browser.
+- `Open Remote URL`: open remote git URL of the selected workspace/folder/package in a browser.
 
 ### Actions if a package has a team information
 
-- `Open Jira Project Link`: open a Jira project of the selected package if it is avaiable.
-- `Open Slack Channel`: open a Slack Channel of a team owning the selected package if it is avaiable.
+- `Open Jira Project Link`: open a Jira project of the selected package if available.
+- `Open Slack Channel`: open a Slack Channel of a team owning the selected package if available.
 
 ### Uncommon actions
 
-- `Submit Feedback`: open a Github link which users can submit feedback / questions / issues.
+- `Submit Feedback`: open a Github link where users can submit feedback/questions/issues.
 - `Clear Cache`: clear cached to load the latest updates.
-- `Trash`: remove folder of workspace/folder/package.
+- `Trash`: remove the folder of workspace/folder/package.
 
 ### Package Detail view
 
-When you select a package and then choose `See package detail` action. The next view will show details of selected package. In addition, it also show content of `README.md` file of selected package if it is available.
+When you select a package and then choose `See package detail` action. The next view will show details of the selected package. In addition, it also shows the content of `README.md` file of the selected package if available.
 
-If you follow next section to setup `teams.json` file, the Package Detail view can show team information who owns the selected package.
+If you follow the next section to setup `teams.json` file, the Package Detail view can show team information about who owns the selected package.
 
 ## Extension preferences
 
@@ -113,7 +113,7 @@ If you follow next section to setup `teams.json` file, the Package Detail view c
 
 ```
 
-`mainFieldName` is configured in this Raycast extension preferrences. So the Package Detail view can use this field to look up team information in `teams.json` file.
+`mainFieldName` is configured in this Raycast extension preferences. So the Package Detail view can use this field to look up team information in `teams.json` file.
 
 ---
 
