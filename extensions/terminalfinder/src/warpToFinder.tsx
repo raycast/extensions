@@ -5,12 +5,10 @@ export default async () => {
   let script: string;
 
   script = `
-      if application "Terminal" is not running then
-          return "Not running"
-      end if
-  
-      tell application "Terminal"
-      do script "open -a Finder ./" in first window
+      tell application "Warp" to activate
+      tell application "System Events"
+        keystroke "open -a Finder ./"
+        key code 36
       end tell
   `;
 
