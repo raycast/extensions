@@ -104,7 +104,7 @@ async function daily_bike() {
 
     move startRow to front of rows of newDoc
   end tell`);
-  showHUD("Created new Bike");
+  await showHUD("Created New Bike Document");
 }
 
 async function cornell() {
@@ -149,7 +149,7 @@ async function cornell() {
 
     move startRow to front of rows of newDoc
   end tell`);
-  showHUD("Created new Bike");
+  await showHUD("Created New Bike Document");
 }
 
 async function shopping_list() {
@@ -221,5 +221,5 @@ async function shopping_list() {
 
     move startRow to front of rows of newDoc
   end tell`);
-  showHUD("Created new Bike");
+  await showHUD("Created New Bike Document");
 }

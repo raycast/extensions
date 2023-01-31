@@ -2,8 +2,8 @@ import { getLatestDownload } from "./utils";
 import { open, popToRoot, showHUD } from "@raycast/api";
 
 export default async function main() {
-  const latestDownload = await getLatestDownload();
-  if (latestDownload === undefined) {
+  const latestDownload = getLatestDownload();
+  if (!latestDownload) {
     await showHUD("No downloads found");
     return;
   }

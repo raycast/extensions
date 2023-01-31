@@ -161,7 +161,7 @@ async function custom_tc() {
           set foreground color to choose color
       end try
     end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function white_tc() {
@@ -169,7 +169,7 @@ async function white_tc() {
     activate
     set foreground color to {65535, 65535, 65535}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function black_tc() {
@@ -177,7 +177,7 @@ async function black_tc() {
     activate
     set foreground color to {0, 0, 0}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function red_tc() {
@@ -185,7 +185,7 @@ async function red_tc() {
     activate
     set foreground color to {32768, 0, 0}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function orange_tc() {
@@ -193,7 +193,7 @@ async function orange_tc() {
     activate
     set foreground color to {65535, 22768, 0}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function yellow_tc() {
@@ -201,7 +201,7 @@ async function yellow_tc() {
     activate
     set foreground color to {55535, 55535, 0}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function green_tc() {
@@ -209,7 +209,7 @@ async function green_tc() {
     activate
     set foreground color to {0, 32768, 0}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function teal_tc() {
@@ -217,7 +217,7 @@ async function teal_tc() {
     activate
     set foreground color to {0, 32768, 32768}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function blue_tc() {
@@ -225,7 +225,7 @@ async function blue_tc() {
     activate
     set foreground color to {0, 0, 65535}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }
 
 async function purple_tc() {
@@ -233,5 +233,5 @@ async function purple_tc() {
     activate
     set foreground color to {32768, 0, 32768}
   end tell`);
-  showHUD("Set Bike foreground color");
+  await showHUD("Set Bike Foreground Color");
 }

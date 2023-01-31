@@ -1,5 +1,20 @@
 # GitHub Changelog
 
+## [Clear form fields] - 2023-01-19
+
+- Clear form fields when creating an issue
+- Clear form fields when creating a pull request
+
+## [Add linked branch actions] - 2023-01-11
+
+- Add `Create Branch` command
+- Add create, delete branch actions directly from an issue action panel
+
+## [Add text colors and tags] - 2022-12-16
+
+- Add colors to review decisions and remove icons to avoid confusion with CI checks
+- Change primary language and workflow's head branches from texts to tags
+
 ## [Issue and Pull Requests from repos] - 2022-11-21
 
 - Add actions to show pull requests and issues directly from a repository

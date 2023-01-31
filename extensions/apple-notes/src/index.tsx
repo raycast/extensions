@@ -78,7 +78,7 @@ export default function Command() {
               <ActionPanel title="Failure Actions">
                 <Action.OpenInBrowser
                   title={"Submit bug report"}
-                  url="https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BApple%20Notes%5D+..."
+                  url="https://github.com/raycast/extensions/issues/new?template=extension_bug_report.yml&title=%5BApple%20Notes%5D+...&extension-url=https%3A%2F%2Fraycast.com%2Ftumtum%2Fapple-notes"
                 />
                 <Action.CopyToClipboard title="Copy Error Message" content={failedToOpenMessage} />
               </ActionPanel>

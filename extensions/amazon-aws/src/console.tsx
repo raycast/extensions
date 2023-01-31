@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
-import { AWS_URL_BASE } from "./aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function Console() {
   const { data: services, isLoading } = useCachedPromise(loadJSON);

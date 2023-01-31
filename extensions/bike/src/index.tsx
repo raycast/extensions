@@ -6,7 +6,7 @@ export default function checkBikeInstalled() {
   const [app, setApp] = useState<string | undefined>();
 
   useEffect(() => {
-    Promise.resolve(getApplications()).then((apps) => {
+    getApplications().then((apps) => {
       const app = apps.find((app) => app.name == "Bike");
       setApp(app?.name);
       if (app === undefined) setApp("");

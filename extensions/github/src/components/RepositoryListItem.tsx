@@ -27,7 +27,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
 
   if (repository.primaryLanguage) {
     accessories.unshift({
-      text: repository.primaryLanguage.name,
+      tag: repository.primaryLanguage.name,
       tooltip: `Language: ${repository.primaryLanguage.name}`,
     });
   }

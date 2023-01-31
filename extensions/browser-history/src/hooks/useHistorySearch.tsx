@@ -1,12 +1,14 @@
+import { existsSync } from "fs";
+import { useSQL } from "@raycast/utils";
 import { HistoryEntry, HistoryQueryFunction, SearchResult, SupportedBrowsers } from "../interfaces";
 import { getHistoryDateColumn, getHistoryDbPath, getHistoryTable } from "../util";
-import { useSQL } from "@raycast/utils";
+import { NotInstalledError } from "../components";
 
 const whereClauses = (tableTitle: string, terms: string[], tableUrl?: string) => {
   return terms.map((t) => `${tableTitle}.title LIKE '%${t}%'`).join(" AND ");
 };
 
-const getSafariHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+const getWebKitHistoryQuery = (table: string, date_field: string, terms: string[]) =>
   `SELECT history_items.id as id, url, history_visits.title as title, datetime(${date_field}+978307200, "unixepoch", "localtime") as lastVisited
   FROM ${table}
     INNER JOIN history_visits
@@ -17,7 +19,15 @@ const getSafariHistoryQuery = (table: string, date_field: string, terms: string[
   LIMIT 30
   `;
 
-const getOtherHistoryQuery = (table: string, date_field: string, terms: string[]) => `SELECT
+const getOrionHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+  `SELECT ID as id, URL as url, TITLE as title, datetime(${date_field}+978307200, "unixepoch", "localtime") as lastVisited
+  FROM ${table}
+  WHERE ${whereClauses(table, terms)}
+  ORDER BY ${date_field} DESC
+  LIMIT 30
+  `;
+
+const getChromiumGeckoHistoryQuery = (table: string, date_field: string, terms: string[]) => `SELECT
     id, url, title,
     datetime(${date_field} / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime') as lastVisited
   FROM ${table}
@@ -27,9 +37,11 @@ const getOtherHistoryQuery = (table: string, date_field: string, terms: string[]
 const getHistoryQuery = (browser: SupportedBrowsers): HistoryQueryFunction => {
   switch (browser) {
     case SupportedBrowsers.Safari:
-      return getSafariHistoryQuery;
+      return getWebKitHistoryQuery;
+    case SupportedBrowsers.Orion:
+      return getOrionHistoryQuery;
     default:
-      return getOtherHistoryQuery;
+      return getChromiumGeckoHistoryQuery;
   }
 };
 
@@ -43,6 +55,16 @@ const searchHistory = (
   const terms = query ? query.trim().split(" ") : [""];
   const queries = queryBuilder(table, date_field, terms);
   const dbPath = getHistoryDbPath(browser);
+
+  if (!existsSync(dbPath)) {
+    return {
+      browser,
+      data: [],
+      isLoading: false,
+      permissionView: <NotInstalledError browser={browser} />,
+    };
+  }
+
   const { data, isLoading, permissionView } = useSQL<HistoryEntry>(dbPath, queries);
   return {
     browser,

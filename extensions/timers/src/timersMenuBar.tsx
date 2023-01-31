@@ -45,6 +45,11 @@ export default function Command() {
 
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item
+        title="Start 2 Minute Timer"
+        onAction={() => handleStartTimer(60 * 2, "2 Minute Timer")}
+        key="2M"
+      />
+      <MenuBarExtra.Item
         title="Start 5 Minute Timer"
         onAction={() => handleStartTimer(60 * 5, "5 Minute Timer")}
         key="5M"

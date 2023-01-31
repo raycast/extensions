@@ -11,3 +11,6 @@ supernotes
 resmo
 ploi
 vercast
+ohdear
+devutils
+arc
