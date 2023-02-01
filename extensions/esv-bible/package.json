@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "esv-bible",
-  "title": "ESV-Bible",
-  "description": "Search the ESV using the ESV api and return Bible text for any valid passage.",
+  "title": "ESV Bible",
+  "description": "Search the ESV using the ESV A and return Bible text for any valid passage.",
   "warning": "Warning: If you disable the copyright from showing, you may be out of compliance with the Terms of Service of https://api.esv.org/. Use at your own risk.",
   "icon": "icon.png",
   "author": "cpenned",
