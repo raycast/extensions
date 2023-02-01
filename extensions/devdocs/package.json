@@ -8,11 +8,27 @@
   "author": "pomdtr",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Documentation",
+      "name": "search-docsets",
+      "title": "Search Docsets",
       "subtitle": "DevDocs",
       "description": "Search through DevDocs documentation sets from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "subtitle": "DevDocs",
+      "description": "Search through DevDocs documentation entries from Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "slug",
+          "description": "The slug of the documentation set",
+          "type": "text",
+          "placeholder": "javascript",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
