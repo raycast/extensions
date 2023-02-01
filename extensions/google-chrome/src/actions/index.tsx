@@ -106,9 +106,11 @@ export async function openNewTab({
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
-      activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
+    end tell
+    tell application "System Events" to tell process "Google Chrome"
+      perform action "AXRaise" of window ${tab.windowsIndex}
+      set frontmost to true
     end tell
     return true
   `);

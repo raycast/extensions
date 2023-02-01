@@ -9,10 +9,7 @@ export default function Command() {
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
-    async function getTabs() {
-      setTabs(await getOpenTabs(useOriginalFavicon));
-    }
-    getTabs().then();
+    getOpenTabs(useOriginalFavicon).then(setTabs);
   }, []);
 
   return (

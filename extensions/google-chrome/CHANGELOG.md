@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Activate among multiple windows] - 2023-02-01
+
+- Activate certain window correctly
+
 ## [Performances improve] - 2023-01-26
 
 - Improved getting open tabs speed
