@@ -1,14 +1,42 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { Dataset, otDatasets } from "./ot_datasets";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useState, FC } from "react";
+
+const ListDetail: FC<{ dataset: Dataset }> = ({ dataset }) =>
+  <List.Item.Detail
+    metadata={
+      <List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="Schema" />
+        <List.Item.Detail.Metadata.Separator />
+        {dataset.schema_fields.map((field, i) => {
+          return (
+            <List.Item.Detail.Metadata.Label
+              key={`${field.name}-field-${i}`}
+              title={field.name}
+              icon={
+                field.nullable === true
+                  ? Icon.Checkmark
+                  : Icon.XMarkCircleFilled
+              }
+              text={
+                typeof field.type === "string"
+                  ? field.type
+                  : field.type.type
+              }
+            />
+          );
+        })}
+      </List.Item.Detail.Metadata>
+    }
+  />
+
 
 export default function Command() {
   const { data, isLoading } = useCachedPromise(
     () => new Promise<Dataset[]>((resolve) => resolve(otDatasets))
   );
   const [filter, setFilter] = useState<string>("all");
-  console.log(data);
   return (
     <List
       isLoading={isLoading}
@@ -49,32 +77,7 @@ export default function Command() {
                   </ActionPanel>
                 }
                 detail={
-                  <List.Item.Detail
-                    metadata={
-                      <List.Item.Detail.Metadata>
-                        <List.Item.Detail.Metadata.Label title="Schema" />
-                        <List.Item.Detail.Metadata.Separator />
-                        {dataset.schema_fields.map((field) => {
-                          return (
-                            <List.Item.Detail.Metadata.Label
-                              key={field}
-                              title={field.name}
-                              icon={
-                                field.nullable === true
-                                  ? Icon.Checkmark
-                                  : Icon.XMarkCircleFilled
-                              }
-                              text={
-                                typeof field.type === "string"
-                                  ? field.type
-                                  : field.type.type
-                              }
-                            />
-                          );
-                        })}
-                      </List.Item.Detail.Metadata>
-                    }
-                  />
+                  <ListDetail dataset={dataset} />
                 }
               />
             );
