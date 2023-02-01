@@ -24,7 +24,6 @@
       "type": "dropdown",
       "title": "Select parser",
       "description": "Specify which parser to use.",
-      "label": "Include AirPlay devices",
       "data": [
         {
           "title": "flow",
