@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trackflight",
   "title": "Flight Tracker",
-  "description": "Track your flight with your flight number.",
+  "description": "Track your flight with your flight number by using AeroData Box API directly in Raycast.",
   "icon": "icon.png",
   "author": "cojmeister",
   "license": "MIT",
