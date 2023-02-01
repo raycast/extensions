@@ -2,7 +2,6 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { default as alias } from "./alias.json";
 
 export default function Command() {
-
   return (
     <List>
       {alias.map((a: { alias: string; command: string }) => {
