@@ -2,11 +2,11 @@
 
 ## [New command] - 2023-02-01
 
-Add toggle private session command.
+Add Toggle Private Session command.
 
 ## [New commands] - 2022-05-02
 
-Add Decrease volume and Increase volume commands.
+Add Decrease Volume and Increase Volume commands.
 
 ## [Fix] - 2022-02-07
 
