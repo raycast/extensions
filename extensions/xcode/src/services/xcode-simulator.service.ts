@@ -41,15 +41,22 @@ export class XcodeSimulatorService {
     // For each DeviceGroup
     for (const deviceGroup in devicesResponseJSON.devices) {
       // Initialize runtime components from DeviceGroup
-      const runtimeComponents = deviceGroup.substring(deviceGroup.lastIndexOf(".") + 1).split("-");
+      const runtimeComponents = deviceGroup
+        .substring(deviceGroup.lastIndexOf(".") + 1)
+        .split("-");
       // Initialize runtime string
-      const runtime = [runtimeComponents.shift(), runtimeComponents.join(".")].join(" ");
+      const runtime = [
+        runtimeComponents.shift(),
+        runtimeComponents.join("."),
+      ].join(" ");
       // Push Simulators in DeviceGroup
       simulators.push(
-        ...devicesResponseJSON.devices[deviceGroup].map((simulator: XcodeSimulator) => {
-          simulator.runtime = runtime;
-          return simulator;
-        })
+        ...devicesResponseJSON.devices[deviceGroup].map(
+          (simulator: XcodeSimulator) => {
+            simulator.runtime = runtime;
+            return simulator;
+          }
+        )
       );
     }
     // Return XcodeSimulators
@@ -131,5 +138,19 @@ export class XcodeSimulatorService {
     return execAsync(
       ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
     ).then();
+  }
+
+  /**
+   * Open URL in Simulator
+   */
+  static openUrl(url: string): Promise<void> {
+    return execAsync(`xcrun simctl openurl booted '${url}'`).then();
+  }
+
+  /**
+   * Show Simulator
+   */
+  static showSimulator(): Promise<void> {
+    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
   }
 }

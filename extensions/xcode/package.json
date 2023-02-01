@@ -241,6 +241,21 @@
       "mode": "no-view"
     },
     {
+      "name": "open-url-in-simulator.command",
+      "title": "Open URL in Simulator",
+      "subtitle": "Xcode",
+      "description": "Open the given URL in the currently booted simualtor.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "URL",
+          "placeholder": "URL to open...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "clear-swift-package-manager-cache.command",
       "title": "Clear Swift Package Manager Cache",
       "subtitle": "Xcode",
