@@ -47,7 +47,7 @@
       "title": "Refresh Pinboard Cache",
       "description": "Refreshes cache",
       "mode": "no-view",
-      "interval": "10m"
+      "interval": "1h"
     }
   ],
   "preferences": [
