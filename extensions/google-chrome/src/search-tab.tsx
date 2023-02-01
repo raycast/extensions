@@ -1,16 +1,10 @@
-import { getPreferenceValues, List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Preferences, Tab } from "./interfaces";
-import { getOpenTabs } from "./actions";
+import { List } from "@raycast/api";
+import { useContext } from "react";
 import { ChromeListItems } from "./components";
+import { TabsContext, TabsProvider } from "./contexts/TabsContext";
 
-export default function Command() {
-  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
-  const [tabs, setTabs] = useState<Tab[]>([]);
-
-  useEffect(() => {
-    getOpenTabs(useOriginalFavicon).then(setTabs);
-  }, []);
+function MainList() {
+  const { tabs, useOriginalFavicon } = useContext(TabsContext);
 
   return (
     <List isLoading={tabs.length === 0}>
@@ -18,5 +12,13 @@ export default function Command() {
         <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <TabsProvider>
+      <MainList />
+    </TabsProvider>
   );
 }

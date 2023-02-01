@@ -103,17 +103,21 @@ export async function openNewTab({
   return await runAppleScript(script);
 }
 
-export async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
+export async function setActiveTab(tab: Tab): Promise<number> {
+  const count = await runAppleScript(`
+    set _count to 0
     tell application "Google Chrome"
+      activate
       set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
+      set _count to (count of windows)
     end tell
     tell application "System Events" to tell process "Google Chrome"
       perform action "AXRaise" of window ${tab.windowsIndex}
       set frontmost to true
     end tell
-    return true
+    return _count
   `);
+  return parseInt(count);
 }
 const checkAppInstalled = async () => {
   const installed = await LocalStorage.getItem("is-installed");

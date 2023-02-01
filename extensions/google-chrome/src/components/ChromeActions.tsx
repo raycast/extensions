@@ -1,9 +1,10 @@
-import { ReactElement } from "react";
+import { ReactElement, useContext } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
 import { openNewTab, setActiveTab } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
+import { TabsContext } from "../contexts/TabsContext";
 
 export class ChromeActions {
   public static NewTab = NewTabActions;
@@ -82,9 +83,11 @@ function HistoryItemActions({
 }
 
 function GoToTab(props: { tab: Tab }) {
+  const { syncTabs } = useContext(TabsContext);
   async function handleAction() {
-    await setActiveTab(props.tab);
+    const count = await setActiveTab(props.tab);
     await closeMainWindow();
+    if (count > 1) await syncTabs();
   }
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
