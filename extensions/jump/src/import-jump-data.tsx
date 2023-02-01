@@ -52,8 +52,10 @@ const checkJSONFormat = (jsonString: string, setJSONError: (error: string | unde
 
   if (error) {
     setJSONError(error);
+    return error;
   } else {
     setJSONError(undefined);
+    return undefined;
   }
 };
 
@@ -68,8 +70,10 @@ const ImportDataForm = () => {
           <Action.SubmitForm
             icon={Icon.ChevronRight}
             onSubmit={(values) => {
-              const data = JSON.parse(values.jsonStringField.trim());
-              Promise.resolve(importData(data, values.importMethodField));
+              if (checkJSONFormat(values.jsonStringField, setJSONError) == undefined) {
+                const data = JSON.parse(values.jsonStringField.trim());
+                Promise.resolve(importData(data, values.importMethodField));
+              }
             }}
           />
         </ActionPanel>
