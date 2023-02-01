@@ -88,45 +88,60 @@ ${i.content}
       isLoading={isLoading}
       searchText={query}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search for a passage..."
+      searchBarPlaceholder="Search for a Bible word or phrase..."
       isShowingDetail={prevItems.length > 0}
       selectedItemId={searchResult?.id}
       throttle={true}
     >
+      {!query && prevItems.length === 0 && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Type to search"
+          description="Provide a word or phrase (e.g., “Jesus sea of Galilee”)"
+        />
+      )}
+      {searchResult && searchResult?.results?.length !== 0 && prevItems.length > 0 && (
+        <List.Section title="Current Search">
+          <List.Item
+            title={searchResult.q}
+            icon={Icon.MagnifyingGlass}
+            id="1"
+            detail={<List.Item.Detail markdown={searchResult.results} />}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title="Open at ESV.org"
+                  url={`https://esv.org/${encodeURIComponent(searchResult.refs)}`}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <Action.CopyToClipboard title="Copy Search Results" content={searchResult.results} />
+                <Action.Paste
+                  title="Paste Search Results"
+                  content={searchResult.results}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                />
+                <Action
+                  title="Clear Previous Searches"
+                  onAction={clearCache}
+                  icon={Icon.Eraser}
+                  shortcut={{ modifiers: ["opt"], key: "backspace" }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {searchResult &&
-        (searchResult?.results?.length !== 0 ? (
-          <List.Section title="Current Search">
-            <List.Item
-              title={searchResult.q}
-              icon={Icon.MagnifyingGlass}
-              id="1"
-              detail={<List.Item.Detail markdown={searchResult.results} />}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open at ESV.org"
-                    url={`https://esv.org/${encodeURIComponent(searchResult.refs)}`}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
-                  <Action.CopyToClipboard title="Copy Search Results" content={searchResult.results} />
-                  <Action.Paste
-                    title="Paste Search Results"
-                    content={searchResult.results}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                  <Action
-                    title="Clear Previous Searches"
-                    onAction={clearCache}
-                    icon={Icon.Eraser}
-                    shortcut={{ modifiers: ["opt"], key: "backspace" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          </List.Section>
+        searchResult?.results?.length === 0 &&
+        (prevItems.length === 0 ? (
+          <List.EmptyView
+            icon={Icon.XMarkCircle}
+            title="No result found"
+            description="Please try another search (e.g., “Jesus sea of Galilee”)"
+          />
         ) : (
           <List.Section title="No result found">
-            <List.Item title="Please try another serach" icon={Icon.XMarkCircle} />
+            <List.Item title="Please try another search" icon={Icon.XMarkCircle} />
           </List.Section>
         ))}
       <List.Section title="Previous Searches">

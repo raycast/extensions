@@ -118,7 +118,7 @@ export default function EsvSearch() {
       isLoading={isLoading}
       searchText={query}
       onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search for a passage..."
+      searchBarPlaceholder="Type one or more Bible references..."
       isShowingDetail={prevItems.length > 0}
       selectedItemId={searchResult?.id}
       throttle={true}
@@ -130,46 +130,61 @@ export default function EsvSearch() {
         </List.Dropdown>
       }
     >
+      {!query && prevItems.length === 0 && (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Type a Bible reference to get started"
+          description="e.g., John 3:16, 1 John 1:1"
+        />
+      )}
+      {searchResult && searchResult?.passage?.styled.length !== 0 && prevItems.length > 0 && (
+        <List.Section title="Current Passage">
+          <List.Item
+            title={searchResult.ref}
+            icon={Icon.Book}
+            id="1"
+            detail={<List.Item.Detail markdown={searchResult.passage.styled} />}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Styled Text" content={searchResult.passage.styled} />
+                <Action.Paste title="Paste Styled Text" content={searchResult.passage.styled} />
+                <Action.CopyToClipboard
+                  title="Copy Plain Text"
+                  content={searchResult.passage.plain}
+                  shortcut={{ modifiers: ["shift"], key: "enter" }}
+                />
+                <Action.Paste
+                  title="Paste Plain Text"
+                  content={searchResult.passage.plain}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Reference"
+                  content={searchResult.ref}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
+                <Action
+                  title="Clear Previous Passages"
+                  onAction={clearCache}
+                  icon={Icon.Eraser}
+                  shortcut={{ modifiers: ["opt"], key: "backspace" }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {searchResult &&
-        (searchResult?.passage?.styled.length !== 0 ? (
-          <List.Section title="Current Passage">
-            <List.Item
-              title={searchResult.ref}
-              icon={Icon.Book}
-              id="1"
-              detail={<List.Item.Detail markdown={searchResult.passage.styled} />}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Styled Text" content={searchResult.passage.styled} />
-                  <Action.Paste title="Paste Styled Text" content={searchResult.passage.styled} />
-                  <Action.CopyToClipboard
-                    title="Copy Plain Text"
-                    content={searchResult.passage.plain}
-                    shortcut={{ modifiers: ["shift"], key: "enter" }}
-                  />
-                  <Action.Paste
-                    title="Paste Plain Text"
-                    content={searchResult.passage.plain}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Reference"
-                    content={searchResult.ref}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  />
-                  <Action
-                    title="Clear Previous Passages"
-                    onAction={clearCache}
-                    icon={Icon.Eraser}
-                    shortcut={{ modifiers: ["opt"], key: "backspace" }}
-                  />
-                </ActionPanel>
-              }
-            />
-          </List.Section>
+        searchResult?.passage?.styled.length === 0 &&
+        (prevItems.length === 0 ? (
+          <List.EmptyView
+            icon={Icon.XMarkCircle}
+            title="No result found"
+            description="Please try another reference search (e.g., Genesis 1:1)"
+          />
         ) : (
           <List.Section title="No result found">
-            <List.Item title="Please try another serach" icon={Icon.XMarkCircle} />
+            <List.Item title="Please try another search" icon={Icon.XMarkCircle} />
           </List.Section>
         ))}
       <List.Section title="Previous Passages">
