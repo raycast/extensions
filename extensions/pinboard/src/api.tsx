@@ -1,10 +1,10 @@
-import { getPreferenceValues, showToast, Toast, Cache, Detail } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
-import fetch, { AbortError } from "node-fetch";
+import { getPreferenceValues, Cache } from "@raycast/api";
+import fetch from "node-fetch";
+import { usePromise } from "@raycast/utils";
 
 const apiBasePath = "https://api.pinboard.in/v1";
 
-const { apiToken, constantTags } = getPreferenceValues();
+const { apiToken } = getPreferenceValues();
 
 export interface PinboardBookmark {
   href: string;
@@ -70,7 +70,7 @@ export async function refreshCache() {
 
   const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
     if (!res.ok) {
-      return Promise.reject(res.statusText)
+      return Promise.reject(res.statusText);
     } else {
       return res.json();
     }
@@ -89,56 +89,58 @@ export async function refreshCache() {
   return "There was no need for an update, so I didn't update";
 }
 
-export function useSearchBookmarks(searchKind: SearchKind) {
-  const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
-  const cancelRef = useRef<AbortController | null>(null);
+export function useSearchBookmarks() {
+ const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
 
-  const search = useCallback(
-    async (searchText: string) => {
-      cancelRef.current?.abort();
-      cancelRef.current = new AbortController();
-      try {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: true,
-        }));
-        let bookmarks: Bookmark[];
-        switch (searchKind) {
-          case SearchKind.All:
-            bookmarks = await searchBookmarks(searchText, searchKind, cancelRef.current.signal);
-            break;
-          case SearchKind.Constant:
-            bookmarks = await searchBookmarks(searchText + " " + constantTags, searchKind, cancelRef.current.signal);
-            break;
-        }
+  const allPostsEndpoint = `${apiBasePath}/posts/all`;
+  const lastUpdatedEndpoint = `${apiBasePath}/posts/update`;
 
-        setState((oldState) => ({
-          ...oldState,
-          bookmarks: bookmarks,
-          isLoading: false,
-          title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
-        }));
-      } catch (error) {
-        if (error instanceof AbortError) {
-          return;
-        }
-        console.error("searchBookmarks error", error);
-        showToast({ title: "Could not search bookmarks", message: String(error), style: Toast.Style.Failure });
+  const pinboardCache = new Cache({
+    namespace: "pinboard",
+  });
+
+  const cachedLastUpdated = pinboardCache.get("lastUpdated");
+
+  const { data, isLoading } = usePromise(async () => {
+    const serverLastUpdated = (await fetch(`${lastUpdatedEndpoint}?${params.toString()}`).then((res) => {
+      if (!res.ok) {
+        return { update_time: "na" };
+      } else {
+        return res.json();
       }
-    },
-    [searchKind]
-  );
+    })) as LastUpdated;
 
-  useEffect(() => {
-    search("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, [search]);
+    const shouldUpdateCache = Boolean(cachedLastUpdated !== serverLastUpdated?.update_time);
+
+    let bookmarks = [] as Bookmark[];
+    if (shouldUpdateCache) {
+      // Get the data from the server
+      const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
+        if (!res.ok) {
+          return Promise.reject(res.statusText);
+        }
+        return res.json();
+      })) as PinboardBookmark[];
+
+      console.log("Server Bookmarks:", serverBookmarks);
+      bookmarks = serverBookmarks.map((post) => transformBookmark(post)) as Bookmark[];
+      console.log("Transformed Bookmarks:", bookmarks);
+      pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
+      pinboardCache.set("bookmarks", JSON.stringify(bookmarks));
+    } else {
+      // Get the data from the cache
+      console.log("Getting bookmarks from cache")
+      const cachedBookmarks = pinboardCache.get("bookmarks");
+      if (cachedBookmarks) {
+        bookmarks = JSON.parse(cachedBookmarks) as Bookmark[];
+       }
+    }
+    return bookmarks
+  });
 
   return {
-    state: state,
-    search: search,
+    bookmarks: data,
+    isLoading,
   };
 }
 
@@ -151,31 +153,6 @@ function transformBookmark(post: PinboardBookmark): Bookmark {
     private: (post.shared as string) === "no",
     readLater: (post.toread as string) === "yes",
   };
-}
-
-async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
-  const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
-
-  const params = new URLSearchParams();
-  if (searchText.length > 0) {
-    params.append("tag", searchText);
-    params.append("results", "100");
-  }
-  params.append("format", "json");
-  params.append("auth_token", apiToken);
-
-  const response = await fetch(apiBasePath + path + "?" + params.toString(), {
-    method: "get",
-    signal: signal,
-  });
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  const json = (await response.json()) as Record<string, unknown>;
-  const posts = (json?.posts ?? json) as PinboardBookmark[];
-  return posts.map((post) => transformBookmark(post));
 }
 
 export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
