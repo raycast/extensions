@@ -41,6 +41,7 @@
 - [Lifecycle](information/lifecycle/README.md)
   - [Arguments](information/lifecycle/arguments.md)
   - [Background Refresh](information/lifecycle/background-refresh.md)
+  - [Deeplinks](information/lifecycle/deeplinks.md)
 - [Manifest](information/manifest.md)
 - [Security](information/security.md)
 - [Terminology](information/terminology.md)
