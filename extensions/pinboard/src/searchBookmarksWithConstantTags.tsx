@@ -1,17 +1,38 @@
-import { List } from "@raycast/api";
-import { useSearchBookmarks, SearchKind } from "./api";
+import { getPreferenceValues, List } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { useSearchBookmarks, Bookmark } from "./api";
 import { BookmarkListItem } from "./components";
 
 export default function Command() {
-  const { state, search } = useSearchBookmarks(SearchKind.Constant);
+  const { isLoading, bookmarks } = useSearchBookmarks();
+  const [searchText, setSearchText] = useState("");
+  const [filteredBookmarks, setFilteredBookmarks] = useState(bookmarks);
+
+  useEffect(() => {
+    if (bookmarks) {
+      setFilteredBookmarks(filterByTagsWithConstant(bookmarks, searchText));
+    }
+  }, [searchText, bookmarks]);
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by tags..." throttle>
-      <List.Section title={state.title} subtitle={state.bookmarks.length + ""}>
-        {state.bookmarks.map((bookmark) => (
-          <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
-        ))}
-      </List.Section>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by tags..." throttle>
+      {filteredBookmarks &&
+        filteredBookmarks.map((bookmark) => <BookmarkListItem key={bookmark.id} bookmark={bookmark} />)}
     </List>
   );
+}
+
+function filterByTagsWithConstant(bookmarks: Bookmark[], searchTerm: string) {
+  const { constantTags } = getPreferenceValues();
+  console.log({constantTags})
+  const searchTags = searchTerm.split(' ');
+  const searchTagsWithConstant = [...searchTags, constantTags]
+  return bookmarks.filter(bookmark => {
+    const bookmarkTags = bookmark.tags.split(' ');
+    return searchTagsWithConstant.every(searchTag => {
+      return bookmarkTags.some(bookmarkTag => {
+        return bookmarkTag.includes(searchTag);
+      });
+    });
+  });
 }
