@@ -104,14 +104,14 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
             <Action.CopyToClipboard title={"Copy Repository link"} content={repo.url} icon={Icon.CopyClipboard} />
             {repo.clone.ssh ? (
               <Action.CopyToClipboard
-                title={"Copy git clone command (ssh)"}
+                title={"Copy Git Clone Command (SSH)"}
                 content={`git clone ${repo.clone.ssh}`}
                 icon={Icon.CopyClipboard}
               />
             ) : null}
             {repo.clone.https ? (
               <Action.CopyToClipboard
-                title={"Copy git clone command (https)"}
+                title={"Copy Git Clone Command (HTTPS)"}
                 content={`git clone ${repo.clone.https}`}
                 icon={Icon.CopyClipboard}
               />
