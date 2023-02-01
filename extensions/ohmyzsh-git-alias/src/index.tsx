@@ -21,9 +21,15 @@ export default function Command() {
             title={a.alias}
             subtitle={a.command}
             actions={
-              <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy Alias" content={a.alias} />
-                <Action.CopyToClipboard title="Copy Command" content={a.command} />
+              <ActionPanel>
+                <ActionPanel.Section title="Paste">
+                  <Action.Paste title="Paste Alias" content={a.alias} />
+                  <Action.Paste title="Paste Command" content={a.command} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Copy">
+                  <Action.CopyToClipboard title="Copy Alias" content={a.alias} />
+                  <Action.CopyToClipboard title="Copy Command" content={a.command} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

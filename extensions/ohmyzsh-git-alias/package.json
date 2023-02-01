@@ -5,6 +5,7 @@
   "description": "Quick search git alias.",
   "icon": "icon.png",
   "author": "yufeikang",
+  "owner": "kang",
   "categories": [
     "Developer Tools",
     "Documentation"
@@ -19,8 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "axios": "^1.2.1"
+    "@raycast/api": "^1.45.2"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
