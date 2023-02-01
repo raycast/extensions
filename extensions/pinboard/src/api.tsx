@@ -90,7 +90,7 @@ export async function refreshCache() {
 }
 
 export function useSearchBookmarks() {
- const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
+  const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
 
   const allPostsEndpoint = `${apiBasePath}/posts/all`;
   const lastUpdatedEndpoint = `${apiBasePath}/posts/update`;
@@ -129,13 +129,13 @@ export function useSearchBookmarks() {
       pinboardCache.set("bookmarks", JSON.stringify(bookmarks));
     } else {
       // Get the data from the cache
-      console.log("Getting bookmarks from cache")
+      console.log("Getting bookmarks from cache");
       const cachedBookmarks = pinboardCache.get("bookmarks");
       if (cachedBookmarks) {
         bookmarks = JSON.parse(cachedBookmarks) as Bookmark[];
-       }
+      }
     }
-    return bookmarks
+    return bookmarks;
   });
 
   return {

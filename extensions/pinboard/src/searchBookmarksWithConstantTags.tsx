@@ -24,13 +24,13 @@ export default function Command() {
 
 function filterByTagsWithConstant(bookmarks: Bookmark[], searchTerm: string) {
   const { constantTags } = getPreferenceValues();
-  console.log({constantTags})
-  const searchTags = searchTerm.split(' ');
-  const searchTagsWithConstant = [...searchTags, constantTags]
-  return bookmarks.filter(bookmark => {
-    const bookmarkTags = bookmark.tags.split(' ');
-    return searchTagsWithConstant.every(searchTag => {
-      return bookmarkTags.some(bookmarkTag => {
+  console.log({ constantTags });
+  const searchTags = searchTerm.split(" ");
+  const searchTagsWithConstant = [...searchTags, constantTags];
+  return bookmarks.filter((bookmark) => {
+    const bookmarkTags = bookmark.tags.split(" ");
+    return searchTagsWithConstant.every((searchTag) => {
+      return bookmarkTags.some((bookmarkTag) => {
         return bookmarkTag.includes(searchTag);
       });
     });
