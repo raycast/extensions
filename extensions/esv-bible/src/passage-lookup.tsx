@@ -140,8 +140,8 @@ export default function EsvSearch() {
               detail={<List.Item.Detail markdown={searchResult.passage.styled} />}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy styled text" content={searchResult.passage.styled} />
-                  <Action.Paste title="Paste styled text" content={searchResult.passage.styled} />
+                  <Action.CopyToClipboard title="Copy Styled Text" content={searchResult.passage.styled} />
+                  <Action.Paste title="Paste Styled Text" content={searchResult.passage.styled} />
                   <Action.CopyToClipboard
                     title="Copy Plain Text"
                     content={searchResult.passage.plain}
@@ -183,8 +183,8 @@ export default function EsvSearch() {
               detail={<List.Item.Detail markdown={item.passage.styled} />}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy styled text" content={item.passage.styled} />
-                  <Action.Paste title="Paste styled text" content={item.passage.styled} />
+                  <Action.CopyToClipboard title="Copy Styled Text" content={item.passage.styled} />
+                  <Action.Paste title="Paste Styled Text" content={item.passage.styled} />
                   <Action.CopyToClipboard
                     title="Copy Plain Text"
                     content={item.passage.plain}
