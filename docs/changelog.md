@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.47.0 - 2023-02-01
+
+### ✨ New
+
+- **Clipboard**: Add a new `Clipboard.read()` method that reads the clipboard content as plain text, file path, or HTML.
+
+### 💎 Improvements
+
+- **List Accessories**: Tags can now use any color (we made some improvements to ensure that any color would have enough contrast to be readable)
+
+### 🐞 Fixes
+
+- Fixed a bug where reloading menu bar commands in development mode would not respect certain manifest property updates (e.g. interval).
+- Fixed a bug that caused `Metadata.Link`'s `title` to be cut off unnecessarily when using the large text size.
+- Fixed a bug where `clearSearchBar` wouldn’t clear the search bar when rendering a Grid.
+- Fixed a bug where `ray lint` would fail if there were a .DS_Store file in the `src` folder.
+
 ## 1.46.0 - 2023-01-18
 
 ⚠️️ **Global Fetch Deprecation**: We've removed the experimental support for global fetch in Node 18. The reason is that the feature is not stable yet (hence the warning on it being "experimental" in the dev console) and is not compatible with our new proxy feature in Raycast. We've scanned the public repository for extensions that make use of global fetch and replaced it with the _cross-fetch_ dependency via separate PRs. If we missed an extension, let us know - in most cases, it should be a straightforward replacement.
