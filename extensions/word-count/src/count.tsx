@@ -5,7 +5,8 @@ import { count } from "./lib/count";
 export default function Command() {
   const [text, setText] = useState("");
   const [includeWhitespace, setIncludeWhitespace] = useState(true);
-  const [result, setResult] = useState<string>("");
+  const [result, setResult] = useState("");
+  const [time, setTime] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -26,6 +27,11 @@ export default function Command() {
     const result = count(text, includeWhitespace);
     const resultStr = `${result.characters} characters · ${result.words} words · ${result.sentences} sentences · ${result.paragraphs} paragraphs`;
     setResult(resultStr);
+
+    const wordsPerMinute = 150;
+    const minutes = Math.floor(result.words / wordsPerMinute);
+    const seconds = Math.round((result.words / wordsPerMinute - minutes) * 60);
+    setTime(minutes + " minutes and " + seconds + " seconds");
   }, [text, includeWhitespace]);
 
   const actions = (
@@ -62,6 +68,7 @@ export default function Command() {
         value={includeWhitespace}
         onChange={setIncludeWhitespace}
       />
+      <Form.Description text={time} />
     </Form>
   );
 }
