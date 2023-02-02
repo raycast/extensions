@@ -310,6 +310,35 @@ export default function IssueActions({
     });
   }
 
+  async function setReminder(reminderDate: Date | null) {
+    if (!reminderDate) {
+      await showToast({ style: Toast.Style.Failure, title: "Failed setting reminder" });
+      return;
+    }
+
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Setting reminder" });
+
+      await linearClient.issueReminder(issue.id, reminderDate);
+
+      if (mutateDetail) {
+        pop();
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Reminder set",
+        message: `${issue.identifier} reminder set to ${format(reminderDate, "MM/dd/yyyy")}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to set reminder",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   function refresh() {
     if (mutateList) {
       mutateList();
@@ -420,6 +449,8 @@ export default function IssueActions({
           shortcut={{ modifiers: ["opt", "shift"], key: "d" }}
           onChange={setDueDate}
         />
+
+        <Action.PickDate title="Set Reminder" shortcut={{ modifiers: ["cmd"], key: "h" }} onChange={setReminder} />
 
         <LabelSubmenu issue={issue} updateIssue={updateIssue} />
 
