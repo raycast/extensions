@@ -14,7 +14,7 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
       showToast({
         style: Toast.Style.Failure,
         title: "Cannot search OneNote notes",
-        message: error.message
+        message: error.message,
       });
     }
   }
@@ -35,8 +35,8 @@ export function getListItems(query: string, elt: OneNoteItem | undefined = undef
                 {
                   text:
                     (elt == undefined && item.ParentGOID != null ? getParentTitle(item) + " ・ " : "") +
-                    parseDatetime(item.LastModifiedTime)
-                }
+                    parseDatetime(item.LastModifiedTime),
+                },
               ]}
               subtitle={item.Content?.split("\n")[2]}
               actions={
