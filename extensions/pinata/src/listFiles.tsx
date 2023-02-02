@@ -64,7 +64,6 @@ export default function Command() {
     }
   };
 
-  console.log(isLoading);
   return (
     <List isLoading={isLoading}>
       <List.EmptyView
@@ -77,7 +76,7 @@ export default function Command() {
         data.rows.map((item) => (
           <List.Item
             key={item.id}
-            title={item.metadata.name}
+            title={item.metadata.name ? item.metadata.name : "null"}
             subtitle={item.ipfs_pin_hash}
             accessories={[{ text: formatBytes(item.size) }, { date: new Date(item.date_pinned) }]}
             actions={
