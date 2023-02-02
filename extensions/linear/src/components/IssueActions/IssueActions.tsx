@@ -78,7 +78,7 @@ export default function IssueActions({
     try {
       await showToast({ style: Toast.Style.Animated, title: animatedTitle });
 
-      const asyncUpdate = linearClient.issueUpdate(issue.id, payload);
+      const asyncUpdate = linearClient.updateIssue(issue.id, payload);
 
       await Promise.all([
         asyncUpdate,
@@ -151,7 +151,7 @@ export default function IssueActions({
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting issue" });
 
-        const asyncUpdate = linearClient.issueDelete(issue.id);
+        const asyncUpdate = linearClient.deleteIssue(issue.id);
 
         if (mutateDetail) {
           pop();
