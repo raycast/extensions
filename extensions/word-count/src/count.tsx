@@ -31,7 +31,7 @@ export default function Command() {
     const wordsPerMinute = 150;
     const minutes = Math.floor(result.words / wordsPerMinute);
     const seconds = Math.round((result.words / wordsPerMinute - minutes) * 60);
-    setTime(minutes + " minutes and " + seconds + " seconds");
+    setTime("150 WPM: " + minutes + " minutes and " + seconds + " seconds");
   }, [text, includeWhitespace]);
 
   const actions = (
