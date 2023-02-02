@@ -450,7 +450,11 @@ export default function IssueActions({
           onChange={setDueDate}
         />
 
-        <Action.PickDate title="Set Reminder" shortcut={{ modifiers: ["cmd"], key: "h" }} onChange={setReminder} />
+        <Action.PickDate
+          title="Set Reminder"
+          shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          onChange={setReminder}
+        />
 
         <LabelSubmenu issue={issue} updateIssue={updateIssue} />
 
