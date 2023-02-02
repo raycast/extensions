@@ -60,18 +60,16 @@ export default function IssueListItem({ issue }: IssueListItemProps) {
       actions={
         <ActionPanel>
           <Action
-            title="Open PR in Gitpod"
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            title="Open Issue in Gitpod"
             onAction={() => {
               open(`https://gitpod.io/#${issue.url}`);
             }}
           />
           <Action
-            title="Open PR in GitHub"
+            title="View Issue in GitHub"
             onAction={() => {
               open(issue.url);
             }}
-            shortcut={{ modifiers: ["shift"], key: "enter" }}
           />
         </ActionPanel>
       }
