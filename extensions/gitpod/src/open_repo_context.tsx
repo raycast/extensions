@@ -32,10 +32,7 @@ function SearchContext({ repository }: SearchContextProps) {
 
   const [firstLoad, setfirstLoad] = useState(true);
 
-  const {
-    data,
-    isLoading: isPRLoading,
-  } = usePromise(
+  const { data, isLoading: isPRLoading } = usePromise(
     async (searchText) => {
       const result: {
         pullRequest?: PullRequestFieldsFragment[] | undefined;
@@ -179,11 +176,13 @@ function SearchContext({ repository }: SearchContextProps) {
               withNumber: true,
             })}
           >
-            {JSON.parse(cache.get(repository.nameWithOwner)!).pullRequest.map((pullRequest: PullRequestFieldsFragment) => {
-              if (!pullRequest.closed) {
-                return <PullRequestListItem key={pullRequest.id} pullRequest={pullRequest} viewer={viewer} />;
+            {JSON.parse(cache.get(repository.nameWithOwner)!).pullRequest.map(
+              (pullRequest: PullRequestFieldsFragment) => {
+                if (!pullRequest.closed) {
+                  return <PullRequestListItem key={pullRequest.id} pullRequest={pullRequest} viewer={viewer} />;
+                }
               }
-            })}
+            )}
           </List.Section>
         )}
 
