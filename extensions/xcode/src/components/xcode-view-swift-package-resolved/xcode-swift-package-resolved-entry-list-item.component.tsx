@@ -14,7 +14,6 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
 }): JSX.Element {
   return (
     <List.Item
-      key={props.entry.location}
       title={props.entry.name}
       subtitle={props.entry.version ?? props.entry.branch ?? props.entry.revision}
       actions={
@@ -23,7 +22,6 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
           <Action.ShowInFinder title="Show Package.resolved" path={props.packageResolvedPath} />
           <Action.Open
             application={XcodeService.bundleIdentifier}
-            key="open-with-xcode"
             title={`Open ${props.xcodeProject.name} with Xcode`}
             target={props.xcodeProject.filePath}
             icon={Icon.Hammer}

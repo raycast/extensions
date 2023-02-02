@@ -4,9 +4,9 @@ import { Course } from "./components/course";
 import { Assignment } from "./components/assignment";
 import { Announcement } from "./components/announcement";
 import { EmptyView } from "./components/error-view";
-import { checkApi, getCourses, getAssignments, getAnnouncements } from "./utils/api";
+import { checkApi, getCourses, getAnnouncements } from "./utils/api";
 import { course, announcement, assignment } from "./utils/types";
-import { Error } from "./utils/utils";
+import { Error, getCourseColors } from "./utils/utils";
 
 export default function main() {
   const [courses, setCourses] = useState<course[]>();
@@ -20,22 +20,18 @@ export default function main() {
       try {
         const json = await checkApi();
         if (json.status == "unauthenticated" || !(json instanceof Array)) {
-          setCourses(null);
+          setCourses(undefined);
           setIsLoading(false);
           setError(Error.INVALID_API_KEY);
           return;
         }
         const courses = await getCourses(json);
-        const assignments = await getAssignments(courses);
-        const announcements = await getAnnouncements(courses);
-        courses.forEach((course: course, index: number) => {
-          course.assignments = assignments[index];
-        });
         setCourses(courses);
-        setAnnouncements(announcements);
+        setAnnouncements(await getAnnouncements(courses));
         setIsLoading(false);
-      } catch {
-        setCourses(null);
+      } catch (error) {
+        console.error(error);
+        setCourses(undefined);
         setIsLoading(false);
         setError(Error.INVALID_DOMAIN);
       }
@@ -45,7 +41,7 @@ export default function main() {
 
   return (
     <List isLoading={isLoading}>
-      {courses !== null ? (
+      {courses !== undefined ? (
         <React.Fragment>
           <List.Section title="Courses">
             {!isLoading &&

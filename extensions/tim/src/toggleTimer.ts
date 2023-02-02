@@ -1,8 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { buildScriptEnsuringTimIsRunning } from "./utils";
+import { buildScriptEnsuringTimIsRunning, checkIfTimInstalled, showNotInstalledToast } from "./utils";
 
 export default async () => {
+  const timAvailable = await checkIfTimInstalled();
+  if (!timAvailable) return showNotInstalledToast();
+
   try {
     const script = buildScriptEnsuringTimIsRunning(`toggletimer`);
     await runAppleScript(script);

@@ -12,8 +12,9 @@ import { XcodeService } from "../../services/xcode.service";
  */
 export function SwiftPackageIndexList(): JSX.Element {
   // Use is Xcode installed Promise
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], { onError: () => {} });
+  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], {
+    onError: () => Promise.resolve(),
+  });
   // Use search text state
   const [searchText, setSearchText] = useState<string>("");
   // Use page state. Default value `1`
@@ -61,6 +62,7 @@ export function SwiftPackageIndexList(): JSX.Element {
   );
   return (
     <List
+      throttle
       isLoading={swiftPackageIndexSearchResults.isLoading}
       onSelectionChange={(id) => {
         if (
@@ -70,8 +72,7 @@ export function SwiftPackageIndexList(): JSX.Element {
           setPage(swiftPackageIndexSearchResults.data.nextPage);
         }
       }}
-      searchBarPlaceholder="Search Swift Package Index"
-      throttle={true}
+      searchBarPlaceholder="Search for Swift Packages"
       onSearchTextChange={(searchText) => {
         setPage(1);
         setSearchResults([]);
@@ -88,22 +89,24 @@ export function SwiftPackageIndexList(): JSX.Element {
       ) : (swiftPackageIndexSearchResults.isLoading && !swiftPackageIndexSearchResults.data?.results.length) ||
         !searchText.length ? (
         <List.EmptyView
-          icon={Icon.MagnifyingGlass}
-          title="Search Swift Package Index"
-          description="Type something to search the Swift Package Index."
+          icon={swiftPackageIndexSearchResults.isLoading ? Icon.Hourglass : Icon.MagnifyingGlass}
+          title={swiftPackageIndexSearchResults.isLoading ? "Searching" : "Search Swift Package Index"}
+          description={
+            swiftPackageIndexSearchResults.isLoading
+              ? "Please wait..."
+              : "Type something to search the Swift Package Index."
+          }
         />
       ) : !swiftPackageIndexSearchResults.data?.results.length ? (
         <List.EmptyView title="No results" description={`No results could be found for "${searchText}"`} />
       ) : (
-        swiftPackageIndexSearchResults.data?.results.map((searchResult) => {
-          return (
-            <SwiftPackageIndexListItem
-              key={searchResult.id}
-              searchResult={searchResult}
-              isAddToXcodeActionVisible={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
-            />
-          );
-        })
+        swiftPackageIndexSearchResults.data?.results.map((searchResult) => (
+          <SwiftPackageIndexListItem
+            key={searchResult.id}
+            searchResult={searchResult}
+            isAddToXcodeActionVisible={isXcodeInstalled.data === undefined || isXcodeInstalled.data}
+          />
+        ))
       )}
     </List>
   );

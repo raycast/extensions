@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
+import { findClosestColor } from "./colors";
 
 import {
   REMtoPX,
@@ -32,6 +33,8 @@ export default function Command() {
   const [rgba, setRGBA] = useState<number[] | null>(null);
   const [hsl, setHSL] = useState<number[] | null>(null);
   const [hsla, setHSLA] = useState<number[] | null>(null);
+  const [closestColor, setClosestColor] = useState<{ name: string; hex: string } | null>(null);
+  const [input, setInput] = useState("");
 
   const handleOnTextChange = (value = "") => {
     setPX(null);
@@ -43,7 +46,9 @@ export default function Command() {
     setRGBA(null);
     setHSL(null);
     setHSLA(null);
+    setClosestColor(null);
     if (value === "") return;
+    setInput(value);
     // check what input is
 
     // check if input is rem
@@ -55,7 +60,7 @@ export default function Command() {
     }
 
     // check if input is px
-    const pxMatch = value.match(/(\d+)(\spx|px)/);
+    const pxMatch = value.match(/(\d+|^.\d+|^,\d+|^\d+,\d+|^\d+.\d+)(\spx|px)/);
     if (pxMatch) {
       console.log("its a px");
       setREM(PXtoREM(Number(pxMatch[1])));
@@ -81,8 +86,10 @@ export default function Command() {
         setHSLA(HEXtoHSLA(value));
         setHSL(HEXtoHSL(hexMatch[1]));
       } else {
-        setRGB(HEXtoRGB(value));
+        const hexToRgbResult = HEXtoRGB(value);
+        setRGB(hexToRgbResult);
         setHSL(HEXtoHSL(value));
+        setClosestColor(findClosestColor(hexToRgbResult[0], hexToRgbResult[1], hexToRgbResult[2]));
       }
     }
 
@@ -101,6 +108,7 @@ export default function Command() {
       } else {
         setHEX(RGBtoHEX([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
         setHSL(RGBtoHSL([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
+        setClosestColor(findClosestColor(+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]));
       }
     }
 
@@ -109,7 +117,7 @@ export default function Command() {
       /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
     );
     if (hslMatch) {
-      console.log("its a hsl", hslMatch);
+      console.log("its a hsl");
       // if hsl color has alpha
       if (hslMatch.groups && hslMatch.groups.alpha) {
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
@@ -117,8 +125,10 @@ export default function Command() {
         setRGB(HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
         setRGBA(HSLtoRGBA([+hslMatch[2], +hslMatch[4], +hslMatch[7], +hslMatch.groups.alpha]));
       } else {
+        const hslToRgbResult = HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
-        setRGB(HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
+        setRGB(hslToRgbResult);
+        setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
       }
     }
   };
@@ -127,12 +137,13 @@ export default function Command() {
     <List
       onSearchTextChange={handleOnTextChange}
       enableFiltering={false}
-      searchBarPlaceholder="Type your unit here... (eg.: 22px)"
+      searchBarPlaceholder="Type your unit here... (eg.: 22px or #006699)"
     >
       <List.Section>
         {rem && (
           <List.Item
             title={`${rem}rem`}
+            accessories={[{ text: "to rem" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`${rem}rem`} />
@@ -143,6 +154,7 @@ export default function Command() {
         {px && (
           <List.Item
             title={`${px}px`}
+            accessories={[{ text: "to px" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`${px}px`} />
@@ -153,6 +165,7 @@ export default function Command() {
         {pt && (
           <List.Item
             title={`${pt}pt`}
+            accessories={[{ text: "to pt" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`${pt}pt`} />
@@ -164,6 +177,7 @@ export default function Command() {
           <List.Item
             title={hex}
             icon={{ source: Icon.CircleFilled, tintColor: hex }}
+            accessories={[{ text: "to hex" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={hex} />
@@ -175,6 +189,7 @@ export default function Command() {
           <List.Item
             title={hexa}
             icon={{ source: Icon.CircleFilled, tintColor: hexa }}
+            accessories={[{ text: "to hexa" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={hexa} />
@@ -186,6 +201,7 @@ export default function Command() {
           <List.Item
             title={`rgb(${rgb.join(", ")})`}
             icon={{ source: Icon.CircleFilled, tintColor: `rgb(${rgb.join(", ")})` }}
+            accessories={[{ text: "to rgb" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`rgb(${rgb.join(", ")})`} />
@@ -197,6 +213,7 @@ export default function Command() {
           <List.Item
             title={`rgba(${rgba.join(", ")})`}
             icon={{ source: Icon.CircleFilled, tintColor: `rgba(${rgba.join(", ")})` }}
+            accessories={[{ text: "to rgba" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`rgba(${rgba.join(", ")})`} />
@@ -208,6 +225,7 @@ export default function Command() {
           <List.Item
             title={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`}
             icon={{ source: Icon.CircleFilled, tintColor: `hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)` }}
+            accessories={[{ text: "to hsl" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`} />
@@ -219,9 +237,28 @@ export default function Command() {
           <List.Item
             title={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`}
             icon={{ source: Icon.CircleFilled, tintColor: `hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})` }}
+            accessories={[{ text: "to hsla" }]}
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {closestColor && (
+          <List.Item
+            title={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.hex : closestColor.name}
+            subtitle={input !== closestColor.hex && hex !== closestColor.hex ? closestColor.name : ""}
+            icon={{ source: Icon.CircleFilled, tintColor: closestColor.hex }}
+            accessories={[
+              {
+                text:
+                  input !== closestColor.hex && hex !== closestColor.hex ? "closest Tailwind color" : "Tailwind color",
+              },
+            ]}
+            actions={
+              <ActionPanel title="Copy">
+                <Action.CopyToClipboard content={input !== closestColor.hex ? closestColor.hex : closestColor.name} />
               </ActionPanel>
             }
           />

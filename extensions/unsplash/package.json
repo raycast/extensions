@@ -49,7 +49,7 @@
     {
       "name": "accessKey",
       "title": "Access Key",
-      "description": "Get your API key from https://unsplash.com/app/api",
+      "description": "Get your API key from https://unsplash.com/oauth/applications",
       "type": "password",
       "required": true
     },

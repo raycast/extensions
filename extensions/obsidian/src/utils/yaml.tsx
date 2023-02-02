@@ -28,16 +28,12 @@ function yamlHas(yaml: any, property: string) {
 // Get certain properties from YAML frontmatter
 //--------------------------------------------------------------------------------
 
-export function yamlTitleForString(str: string) {
+export function yamlPropertyForString(str: string, property: string): string | undefined {
   const parsedYAML = parsedYAMLFrontmatter(str);
   if (parsedYAML) {
-    if (yamlHas(parsedYAML, "title")) {
-      return parsedYAML.title;
-    } else {
-      return "";
+    if (yamlHas(parsedYAML, property)) {
+      return parsedYAML[property];
     }
-  } else {
-    return "";
   }
 }
 

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orion",
+  "title": "Orion",
+  "description": "Manage your Orion bookmarks, History, and Reading List",
+  "icon": "orion-icon.png",
+  "author": "plonq",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Search Orion Bookmarks",
+      "description": "Browse your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "reading-list",
+      "title": "Search Orion Reading List",
+      "description": "Browse your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search Orion History",
+      "description": "Browse your history",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.7",
+    "bplist-parser": "^0.3.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -34,7 +34,7 @@ export function icibaDictionary(queryWordInfo: QueryWordInfo): Promise<QueryType
           type: DicionaryType.Iciba,
           result: response.data,
           translations: [],
-          wordInfo: queryWordInfo,
+          queryWordInfo: queryWordInfo,
         };
         resolve(result);
       })

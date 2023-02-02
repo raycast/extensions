@@ -1,72 +1,103 @@
-import { getPreferenceValues, showToast, Toast } from '@raycast/api'
-import { isNotionClientError } from '@notionhq/client'
 import { Todo } from '@/types/todo'
 import { notion } from '../client'
-import { storeTodos } from '@/services/storage'
-import { mapPageToTodo } from '../utils/map-page-to-todo'
+import { loadPreferences } from '@/services/storage'
+import { normalizeTodo } from '../utils/normalize-todo'
+import { Filter } from '@/types/filter'
 
-export async function getTodos(
-  databaseId: string,
-  localTodos: Todo[]
-): Promise<Todo[]> {
-  try {
-    const notionClient = await notion()
-    const preferences = getPreferenceValues()
-    const response = await notionClient.databases.query({
-      database_id: databaseId,
-      filter: {
-        and: [
-          {
-            property: preferences.property_done,
-            checkbox: {
-              equals: false,
-            },
-          },
-          {
-            or: [
-              {
-                property: preferences.property_date,
-                date: {
-                  before: new Date().toISOString(),
-                },
-              },
-            ],
-          },
-        ],
+export async function getTodos({
+  databaseId,
+  filter,
+}: {
+  databaseId: string
+  filter: Filter
+}): Promise<Todo[]> {
+  const notionClient = await notion()
+  const preferences = await loadPreferences()
+  const status = preferences.properties.status
+
+  let donePropertyQuery: any = [
+    { property: status.name, checkbox: { equals: false } },
+  ]
+
+  if (status.type === 'status') {
+    // Make it compatible with the old version without groups
+    donePropertyQuery = [
+      {
+        property: status.name,
+        status: { does_not_equal: status.doneName },
       },
-      sorts: [
-        {
-          timestamp: 'created_time',
-          direction: 'ascending',
-        },
-      ],
-    })
+    ]
 
-    const todos = response.results.map(mapPageToTodo)
-
-    const sortedTodos = todos
-      .map((todo: any) => {
-        const localTodoIndex = localTodos.findIndex((t) => t.id === todo.id)
-
-        if (localTodoIndex !== -1) {
-          todo.position = localTodoIndex
-        } else {
-          todo.position = 0
-        }
-
-        return todo
-      })
-      .sort((a, b) => a.position - b.position)
-
-    await storeTodos(sortedTodos)
-
-    return sortedTodos
-  } catch (err: unknown) {
-    if (isNotionClientError(err)) {
-      showToast(Toast.Style.Failure, err.message)
-    } else {
-      showToast(Toast.Style.Failure, 'Error occurred')
+    if (status.completedStatuses && status.completedStatuses.length > 0) {
+      donePropertyQuery = status.completedStatuses.map((completeStatus) => ({
+        property: status.name,
+        status: { does_not_equal: completeStatus },
+      }))
     }
-    return []
   }
+
+  const dynamicFiltersQuery = [
+    ...(filter?.projectId && preferences.properties.project
+      ? [
+          {
+            property: preferences.properties.project,
+            relation: { contains: filter.projectId },
+          },
+        ]
+      : []),
+    ...(filter?.user?.id && preferences.properties.assignee
+      ? [
+          {
+            property: preferences.properties.assignee,
+            people: { contains: filter.user.id },
+          },
+        ]
+      : []),
+    ...(filter?.tag?.id && preferences.properties.tag
+      ? [
+          {
+            property: preferences.properties.tag,
+            select: { equals: filter.tag.name },
+          },
+        ]
+      : []),
+    ...(filter?.status?.id && preferences.properties.status.type === 'status'
+      ? [
+          {
+            property: status.name,
+            status: { equals: filter.status.name },
+          },
+        ]
+      : []),
+  ]
+
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      and: [
+        ...(!filter.status?.id ? donePropertyQuery : []),
+        ...dynamicFiltersQuery,
+      ],
+    },
+    sorts: [
+      { property: status.name, direction: 'descending' },
+      {
+        property: preferences.properties.date,
+        direction: 'ascending',
+      },
+      {
+        timestamp: 'created_time',
+        direction: 'descending',
+      },
+    ],
+  })
+
+  const todos = response.results.map((page) =>
+    normalizeTodo({
+      page,
+      preferences: preferences.properties,
+    })
+  )
+
+  return todos
 }

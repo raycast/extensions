@@ -10,7 +10,6 @@ import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; revalidate: () => void }): JSX.Element {
   return (
     <List.Item
-      key={props.simulator.udid}
       icon={{ source: "xcode-simulator.png" }}
       title={props.simulator.name}
       subtitle={props.simulator.runtime}
@@ -30,7 +29,6 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
       actions={
         <ActionPanel>
           <Action
-            key="boot-or-shutdown"
             icon={Icon.Power}
             title={props.simulator.state === XcodeSimulatorState.shutdown ? "Boot" : "Shutdown"}
             onAction={() => {
@@ -47,7 +45,7 @@ export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; reval
               props.revalidate();
             }}
           />
-          <Action.ShowInFinder key="show-in-finder" path={props.simulator.dataPath} />
+          <Action.ShowInFinder path={props.simulator.dataPath} />
         </ActionPanel>
       }
     />

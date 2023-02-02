@@ -17,7 +17,27 @@
       "title": "Upload Images",
       "subtitle": "SM.MS",
       "description": "Upload images to SM.MS and get the link to the image.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "uploadMode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Upload Mode",
+          "description": "Select the default upload mode: Path Mode, URL Mode.",
+          "default": "true",
+          "data": [
+            {
+              "title": "Path Mode",
+              "value": "true"
+            },
+            {
+              "title": "URL Mode",
+              "value": "false"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "delete-images",
@@ -49,10 +69,28 @@
       "title": "API secret token",
       "description": "SM.MS API secret token.",
       "default": ""
+    },
+    {
+      "name": "domain",
+      "type": "dropdown",
+      "required": true,
+      "title": "SM.MS domain",
+      "description": "Select the domain name to visit, mainland China users select smms.app.",
+      "default": "smms.app",
+      "data": [
+        {
+          "title": "sm.ms",
+          "value": "sm.ms"
+        },
+        {
+          "title": "smms.app",
+          "value": "smms.app"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.37.0",
+    "@raycast/api": "^1.44.0",
     "axios": "^0.27.2",
     "form-data": "^4.0.0",
     "fs-extra": "^10.1.0",

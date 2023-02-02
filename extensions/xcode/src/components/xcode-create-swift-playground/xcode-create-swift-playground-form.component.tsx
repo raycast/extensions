@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Navigation, useNavigation, Toast, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, Navigation, showHUD, Toast, useNavigation } from "@raycast/api";
 import { XcodeSwiftPlaygroundPlatform } from "../../models/swift-playground/xcode-swift-playground-platform.model";
 import { XcodeSwiftPlaygroundService } from "../../services/xcode-swift-playground.service";
 import { XcodeSwiftPlaygroundTemplate } from "../../models/swift-playground/xcode-swift-playground-template.model";
@@ -20,15 +20,11 @@ export function XcodeCreateSwiftPlaygroundForm(): JSX.Element {
         <ActionPanel>
           <Action.SubmitForm
             title={"Open or create Swift Playground"}
-            onSubmit={(formValues) => {
-              return submit(formValues, navigation, false);
-            }}
+            onSubmit={(formValues) => submit(formValues, navigation, false)}
           />
           <Action.SubmitForm
             title={"Create Swift Playground"}
-            onSubmit={(formValues) => {
-              return submit(formValues, navigation, true);
-            }}
+            onSubmit={(formValues) => submit(formValues, navigation, true)}
           />
         </ActionPanel>
       }
@@ -72,14 +68,14 @@ export function XcodeCreateSwiftPlaygroundForm(): JSX.Element {
       <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
         {Object.keys(XcodeSwiftPlaygroundPlatform)
           .map((platform) => platform.toLocaleLowerCase())
-          .map((platform) => {
-            return <Form.Dropdown.Item key={platform} value={platform} title={platform.replace("os", "OS")} />;
-          })}
+          .map((platform) => (
+            <Form.Dropdown.Item key={platform} value={platform} title={platform.replace("os", "OS")} />
+          ))}
       </Form.Dropdown>
       <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.Empty}>
-        {Object.keys(XcodeSwiftPlaygroundTemplate).map((template) => {
-          return <Form.Dropdown.Item key={template} value={template} title={template} />;
-        })}
+        {Object.keys(XcodeSwiftPlaygroundTemplate).map((template) => (
+          <Form.Dropdown.Item key={template} value={template} title={template} />
+        ))}
       </Form.Dropdown>
       <Form.Checkbox id="open" label="Open in Xcode after creation" defaultValue={true} />
     </Form>

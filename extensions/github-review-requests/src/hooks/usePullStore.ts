@@ -33,23 +33,17 @@ const usePullStore = () => {
         .then(
           lastVisitedAt =>
             ({
-              updatedPulls:
-                pull.user.login !== login && pull.requestedReviewers.length > 0
-                  ? updatedPulls
-                  : updatedPulls.filter(pr => pr.id !== pull.id),
+              updatedPulls: updatedPulls.filter(pr => pr.id !== pull.id),
 
               recentlyVisitedPulls: [
                 pull,
                 ...recentlyVisitedPulls.filter(pr => pr.id !== pull.id).slice(0, 19),
               ] as PullRequestShort[],
 
-              hiddenPulls:
-                pull.user.login !== login && pull.requestedReviewers.length > 0
-                  ? hiddenPulls
-                  : ([
-                      { id: pull.id, lastVisitedAt },
-                      ...hiddenPulls.filter(pr => pr.id !== pull.id),
-                    ] as PullRequestLastVisit[]),
+              hiddenPulls: [
+                { id: pull.id, lastVisitedAt },
+                ...hiddenPulls.filter(pr => pr.id !== pull.id),
+              ] as PullRequestLastVisit[],
             } as PullStore)
         )
         .then(({ updatedPulls, recentlyVisitedPulls, hiddenPulls }: PullStore) => {

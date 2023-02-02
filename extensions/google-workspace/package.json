@@ -91,8 +91,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "@raycast/utils": "^1.0.7",
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.8",
     "date-fns": "^2.28.0",
     "jwt-decode": "^3.1.2",
     "node-fetch": "^3.2.6"

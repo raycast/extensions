@@ -1,4 +1,4 @@
-import { Clipboard, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences, showHUD } from "@raycast/api";
 import React from "react";
 import { getShortLinks } from "./hooks/hooks";
 
@@ -33,17 +33,25 @@ export default function SearchLinks() {
               icon={Icon.Link}
               title={"Short Link: " + value.shortURL}
               tooltip={"Short Link"}
-              onAction={async () => {
-                await showHUD("Copy " + value.shortURL);
-                await Clipboard.copy(value.shortURL);
+              onAction={async (event: MenuBarExtra.ActionEvent) => {
+                if (event.type == "left-click") {
+                  await showHUD("Copy " + value.shortURL);
+                  await Clipboard.copy(value.shortURL);
+                } else {
+                  await open(value.shortURL);
+                }
               }}
             />
             <MenuBarExtra.Item
               icon={Icon.Link}
               title={"Original Link: " + value.originalURL}
-              onAction={async () => {
-                await showHUD("Copy " + value.originalURL);
-                await Clipboard.copy(value.originalURL);
+              onAction={async (event: MenuBarExtra.ActionEvent) => {
+                if (event.type == "left-click") {
+                  await showHUD("Copy " + value.originalURL);
+                  await Clipboard.copy(value.originalURL);
+                } else {
+                  await open(value.originalURL);
+                }
               }}
             />
             <MenuBarExtra.Item icon={Icon.Store} title={"Source: " + value.source} />

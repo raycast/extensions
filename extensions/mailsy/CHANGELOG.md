@@ -1,5 +1,9 @@
 # Mailsy Changelog
 
+## [Changes] - 2023-01-17
+ - The commands' titles have been changed.
+ - Toasts are used in place of the HUD.
+
 ## [Added feature] - 2022-06-24
 
 - User can Delete a Email

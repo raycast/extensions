@@ -6,8 +6,9 @@ import { XcodeService } from "../../services/xcode.service";
  * Xcode Installation Verifier
  */
 export function XcodeInstallationVerifier<Content>(props: { children: Content }) {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], { onError: () => {} });
+  const isXcodeInstalled = usePromise(XcodeService.isXcodeInstalled, [], {
+    onError: () => Promise.resolve(),
+  });
   return isXcodeInstalled.data === false ? (
     <List searchBarPlaceholder="Xcode is not installed">
       <List.EmptyView

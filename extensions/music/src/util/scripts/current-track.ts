@@ -7,9 +7,14 @@ import { createQueryString, parseQueryString, runScript, tell } from "../apple-s
 import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";
 
+export const reveal = tell("Music", "reveal current track");
 export const love = tell("Music", "set loved of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
-export const addToLibrary = tell("Music", 'duplicate current track to library playlist "Library"');
+export const addToLibrary = pipe(
+  tell("Music", 'duplicate current track to source "Library"'),
+  // added a fallback script
+  TE.orElse(() => tell("Music", 'duplicate current track to library playlist "Library"'))
+);
 
 export const setCurrentTrackRating: RTE.ReaderTaskEither<number, ScriptError, string> = pipe(
   R.ask<number>(),
@@ -21,6 +26,13 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => parseInt(rating)),
   TE.map((rating) => Math.round(rating / STAR_VALUE))
 );
+
+/**
+ *
+ * Add a track to a playlist
+ * @param playlist - The name of the target playlist
+ */
+export const addToPlaylist = (playlist: string) => tell("Music", `duplicate current track to playlist "${playlist}"`);
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   const querystring = createQueryString({

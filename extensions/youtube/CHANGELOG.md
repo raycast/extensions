@@ -1,5 +1,15 @@
 # YouTube Changelog
 
+## [README update] - 2023-01-17
+- Fixed path to API
+
+## [Fix Crash] - 2022-11-21
+- Fix crash when video title contain unusual characters
+
+## [IINA] - 2022-11-01
+- Add correct appid for IINA otherwise the browser will be opened instead of IINA
+- Upgrade to Raycast 1.42
+
 ## [Updates] - 2022-07-08
 
 - Added optional grid view. 

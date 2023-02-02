@@ -38,7 +38,13 @@ async function getDocsets(dashApp: Application): Promise<Docset[]> {
   return JSON.parse(data).map((docset: Docset) => ({
     ...docset,
     iconPath: getDocsetIconPath(dashApp.path, docset.docsetPath, docset.docsetBundle),
-    docsetKeyword: stripColon(docset.keyword || docset.suggestedKeyword || docset.pluginKeyword || docset.docsetBundle),
+    docsetKeyword: stripColon(
+      docset.keyword ||
+        docset.effectiveKeyword ||
+        docset.suggestedKeyword ||
+        docset.pluginKeyword ||
+        docset.docsetBundle
+    ),
   }));
 }
 

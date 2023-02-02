@@ -16,6 +16,36 @@
       "subtitle": "TinyPNG",
       "description": "Compress selected images with TinyPNG.",
       "mode": "no-view"
+    },
+    {
+      "name": "resizingImages",
+      "title": "Resizing Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress and resizing selected images with TinyPNG.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "method",
+          "placeholder": "fit",
+          "type": "text",
+          "description": "Resize method. Available values are values are 'fit', 'scale', 'cover', 'thumb'",
+          "required": true
+        },
+        {
+          "name": "width",
+          "placeholder": "width(px)",
+          "type": "text",
+          "description": "Width to be resized",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "height(px)",
+          "type": "text",
+          "description": "height to be resized",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

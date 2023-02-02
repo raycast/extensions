@@ -5,12 +5,17 @@
   "description": "Interact with the Supernotes platform in Raycast.",
   "icon": "supernotes-icon.png",
   "author": "acnebs",
+  "owner": "supernotes",
+  "access": "public",
   "license": "MIT",
   "categories": [
     "Applications",
     "Data",
     "Productivity"
   ],
+  "contributors": [
+    "peduarte"
+],
   "commands": [
     {
       "name": "create",
@@ -42,17 +47,17 @@
     }
   },
   "dependencies": {
-    "@raycast/api": "^1.37.1",
-    "node-fetch": "^3.2.6"
+    "@raycast/api": "^1.44.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.29.0",
+    "eslint-config-prettier": "^8.5.0",
     "import-sort-style-supernotes": "^0.4.1",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
