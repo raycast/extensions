@@ -1,0 +1,147 @@
+import { useEffect, useRef, useState } from "react";
+import { Item } from "../types";
+import { Action, ActionPanel, List, environment } from "@raycast/api";
+import { exec } from "child_process";
+import { secondsToTime } from "../utils";
+
+export function Timer(props: { item: Item }) {
+  const item = props.item;
+
+  const intervalTimerRef = useRef<NodeJS.Timeout>();
+
+  const [paused, setPaused] = useState<boolean>(false);
+  const pausedRef = useRef<boolean>(false);
+
+  const secondsRef = useRef<number>(item.interval.warmup > 0 ? item.interval.warmup : item.interval.high);
+  const [seconds, setSeconds] = useState<number>(item.interval.warmup > 0 ? item.interval.warmup : item.interval.high);
+
+  const periodsRef = useRef<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
+  const [period, setPeriod] = useState<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
+
+  const intervalsRef = useRef<number>(item.interval.intervals);
+  const [intervals, setintervals] = useState<number>(intervalsRef.current);
+
+  const [totalTime, setTotalTime] = useState<number>(0);
+
+  useEffect(() => {
+    return function cleanup() {
+      if (intervalTimerRef.current) {
+        clearInterval(intervalTimerRef.current);
+        console.log("Clearing interval");
+      }
+    };
+  }, []);
+
+  function ContinueSession() {
+    pausedRef.current = false;
+    setPaused(false);
+  }
+
+  function PauseSession() {
+    pausedRef.current = true;
+    setPaused(true);
+  }
+
+  function StartSession() {
+    clearInterval(intervalTimerRef.current);
+    intervalTimerRef.current = setInterval(() => {
+      // Check if paused
+      if (!pausedRef.current) {
+        // Count down current period
+        countdown(false);
+
+        if (intervalsRef.current === item.interval.intervals) {
+          if (!["WARMUP", "COOLDOWN"].includes(periodsRef.current)) {
+            intervalsRef.current -= 1;
+            setintervals(intervalsRef.current);
+          }
+        }
+
+        if (secondsRef.current === 0) {
+          // If current period is done
+          exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
+
+          if (intervalsRef.current === 1 && item.interval.cooldown > 0) {
+            periodsRef.current = "COOLDOWN";
+            setPeriod(periodsRef.current);
+
+            secondsRef.current = item.interval.cooldown;
+            setSeconds(secondsRef.current);
+          } else {
+            // If there is no more intervals
+            if (intervalsRef.current === 0) {
+              clearInterval(intervalTimerRef.current);
+              return;
+            }
+          }
+
+          if (periodsRef.current === "HIGH") {
+            periodsRef.current = "LOW";
+            setPeriod(periodsRef.current);
+
+            secondsRef.current = item.interval.low;
+            setSeconds(secondsRef.current);
+          } else if (["LOW", "WARMUP"].includes(periodsRef.current)) {
+            periodsRef.current = "HIGH";
+            setPeriod(periodsRef.current);
+
+            secondsRef.current = item.interval.high;
+            setSeconds(secondsRef.current);
+          }
+
+          intervalsRef.current -= 1;
+          setintervals(intervalsRef.current);
+        }
+      }
+    }, 1000);
+
+    intervalsRef.current -= 1;
+    setintervals(intervalsRef.current);
+    countdown(true);
+  }
+
+  function countdown(playSound: boolean) {
+    setTotalTime((previous) => previous + 1);
+    setSeconds((previous) => previous - 1);
+    secondsRef.current -= 1;
+
+    if (playSound) {
+      exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
+    }
+  }
+
+  let title = `${secondsToTime(seconds)}`;
+  if (totalTime === 0) {
+    title = "Ready";
+  } else if (item.interval.totalTime === totalTime) {
+    title = "Done";
+  }
+
+  let description = `ELAPSED: ${secondsToTime(totalTime)}     INTERVAL: ${(intervals - item.interval.intervals) * -1}/${
+    item.interval.intervals
+  }     REMAINING: ${secondsToTime(item.interval.totalTime - totalTime)}`;
+  if (totalTime === 0) {
+    description = `PRESS ENTER TO START`;
+  }
+
+  return (
+    <List
+      navigationTitle={`${item.title}: ${item.interval.high} / ${item.interval.low} @ ${secondsToTime(
+        item.interval.totalTime
+      )}`}
+    >
+      <List.EmptyView
+        icon={`${period}.png`}
+        title={title}
+        description={`${description}`}
+        actions={
+          <ActionPanel>
+            {totalTime === 0 && <Action title="Start" onAction={StartSession} />}
+            {pausedRef.current && <Action title="Start" onAction={ContinueSession} />}
+            {!pausedRef.current && totalTime > 0 && <Action title="Pause" onAction={PauseSession} />}
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}

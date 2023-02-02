@@ -1,0 +1,82 @@
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { IntervalFormValues, Item } from "../types";
+import { nanoid } from "nanoid";
+import { calculateInterval, numberGreaterThanZero, requiredNumberGreaterThanZero, setsToSeconds } from "../utils";
+import { FormValidation, useForm } from "@raycast/utils";
+
+export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void }) {
+  const { pop } = useNavigation();
+
+  const { handleSubmit, itemProps, setValue } = useForm<IntervalFormValues>({
+    async onSubmit(values) {
+      const sets = parseInt(values.sets);
+      const warmup = values.warmup ? parseInt(values.warmup) : 0;
+      const cooldown = values.cooldown ? parseInt(values.cooldown) : 0;
+      const high = parseInt(values.high);
+      const low = parseInt(values.low);
+
+      const interval: Item = {
+        title: values.title,
+        subtitle: values.subtitle,
+        interval: {
+          warmup: warmup,
+          cooldown: cooldown,
+          high: high,
+          low: low,
+          sets: sets,
+          intervals: calculateInterval(sets, warmup, cooldown),
+          totalTime: setsToSeconds(sets, high, low, warmup, cooldown),
+        },
+      };
+
+      props.onSave(props?.item ? { ...interval, id: props.item.id } : { ...interval, id: nanoid() });
+      pop();
+    },
+    validation: {
+      title: FormValidation.Required,
+      warmup: (value) => {
+        return numberGreaterThanZero(value);
+      },
+      cooldown: (value) => {
+        return numberGreaterThanZero(value);
+      },
+      high: (value) => {
+        return requiredNumberGreaterThanZero(value);
+      },
+      low: (value) => {
+        return requiredNumberGreaterThanZero(value);
+      },
+      sets: (value) => {
+        return requiredNumberGreaterThanZero(value);
+      },
+    },
+    initialValues: {
+      title: props.item?.title,
+      subtitle: props.item?.subtitle,
+      warmup: props.item?.interval.warmup ? props.item.interval.warmup.toString() : "",
+      cooldown: props.item?.interval.cooldown ? props.item.interval.cooldown.toString() : "",
+      high: props.item?.interval.high ? props.item.interval.high.toString() : "",
+      low: props.item?.interval.low ? props.item.interval.low.toString() : "",
+      sets: props.item?.interval.sets ? props.item.interval.sets.toString() : "",
+    },
+  });
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Title" placeholder="My Awesome Interval" {...itemProps.title} />
+      <Form.TextField title="Subtitle" placeholder="The best ever!" {...itemProps.subtitle} />
+      <Form.Description title="" text="All intervals are shown in seconds" />
+      <Form.TextField title="Warmup" placeholder="0" info="Optional Warmup" {...itemProps.warmup} />
+      <Form.TextField title="Cooldown" placeholder="0" info="Optional Cooldown" {...itemProps.cooldown} />
+      <Form.TextField title="High" placeholder="30" {...itemProps.high} />
+      <Form.TextField title="Low" placeholder="90" {...itemProps.low} />
+      <Form.TextField title="Sets" placeholder="6" {...itemProps.sets} />
+    </Form>
+  );
+}
