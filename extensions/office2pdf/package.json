@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "office2pdf",
   "title": "Office2PDF",
-  "description": "raycast extension to convert office files to pdf using CloudConvert api",
+  "description": "Raycast extension to convert office files to pdf using CloudConvert api",
   "icon": "office2pdf.png",
   "author": "ARui",
   "categories": [
@@ -22,7 +22,7 @@
     {
       "name": "APIKey",
       "title": "API Key",
-      "description": "Get the API key at ",
+      "description": "Get the API key at https://cloudconvert.com/dashboard/api",
       "type": "password",
       "required": true
     },
