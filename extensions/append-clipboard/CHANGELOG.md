@@ -1,6 +1,6 @@
 # Append Clipboard Changelog
 
-## [Fix bug] - {PR_MERGE_DATE}
+## [Fix bug] - 2023-02-02
 
 - Fix the bug that `Error: Cannot copy selected text from frontmost application.`
 
