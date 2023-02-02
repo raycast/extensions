@@ -5,7 +5,7 @@ const makeSilent = (str: string) => str.replace(/[.#@]/g, (match) => match + "\u
 export default async function main(props: LaunchProps) {
   if (props.arguments.text) {
     await Clipboard.copy(makeSilent(props.arguments.text));
-    await showHUD("Copied ato clipboard!");
+    await showHUD("Copied to clipboard!");
   } else {
     try {
       const selectedText = await getSelectedText();
