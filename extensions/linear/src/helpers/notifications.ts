@@ -16,6 +16,7 @@ enum IssueNotificationType {
   issueMention = "issueMention",
   issueDue = "issueDue",
   issueSubscribed = "issueSubscribed",
+  issueReminder = "issueReminder",
 }
 
 enum ProjectNotificationType {
@@ -36,6 +37,7 @@ const notificationIcons: Record<string, Image.ImageLike> = {
   [IssueNotificationType.issueMention]: Icon.Bubble,
   [IssueNotificationType.issueDue]: Icon.Calendar,
   [IssueNotificationType.issueSubscribed]: Icon.Bell,
+  [IssueNotificationType.issueReminder]: Icon.Clock,
   [ProjectNotificationType.projectUpdatePrompt]: Icon.Heartbeat,
   [ProjectNotificationType.projectUpdateMentionPrompt]: Icon.Bubble,
 };
@@ -68,6 +70,7 @@ const notificationTitles: Record<string, string> = {
   [IssueNotificationType.issueMention]: "Mentioned in the issue's description",
   [IssueNotificationType.issueDue]: "Due soon, due, or overdue",
   [IssueNotificationType.issueSubscribed]: "Subscribed to the issue",
+  [IssueNotificationType.issueReminder]: "Reminded about the issue",
   [ProjectNotificationType.projectUpdatePrompt]: "Reminded to provide a project update",
   [ProjectNotificationType.projectUpdateMentionPrompt]: "Mentioned in a project update",
 };
@@ -83,6 +86,8 @@ export function getNotificationTitle(notification: NotificationResult) {
       );
     }
   }
+
+  console.log(notification.type);
 
   return notificationTitles[notification.type] || "Unknown notification";
 }

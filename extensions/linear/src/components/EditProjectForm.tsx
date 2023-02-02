@@ -33,7 +33,7 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       const toast = await showToast({ style: Toast.Style.Animated, title: "Editing project" });
 
       try {
-        const { success } = await linearClient.projectUpdate(project.id, {
+        const { success } = await linearClient.updateProject(project.id, {
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,
