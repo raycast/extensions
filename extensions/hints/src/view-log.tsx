@@ -75,14 +75,14 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel title="Actions">
-                  <Action.CopyToClipboard title="Copy message to clipboard" content={log.text} />
+                  <Action.CopyToClipboard title="Copy Message to Clipboard" content={log.text} />
                   <Action.OpenInBrowser
-                    title="Open integration settings"
+                    title="Open Integration Settings"
                     url={`https://i.hints.so/integrations/output/${log.destination}/${log.integrationId}`}
                     shortcut={{ modifiers: ["cmd"], key: "enter" }}
                   />
                   <Action.OpenInBrowser
-                    title="Open created item"
+                    title="Open Created Item"
                     url="hints.so"
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />

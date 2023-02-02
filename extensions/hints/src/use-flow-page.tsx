@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Toast, getSelectedText, List, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Toast, getSelectedText, List, getPreferenceValues, showToast, Icon } from "@raycast/api";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
@@ -113,19 +113,20 @@ export default function Command() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      navigationTitle="Send commands to Hints AI Assistant"
-      searchBarPlaceholder="Type your text here"
+      searchBarPlaceholder="Type your text here..."
       throttle={true}
     >
       <List.Item
         title=""
+        icon={Icon.Plus}
         subtitle={`Press Enter to send command to AI Assistant ${hashtag ? `in ${hashtag}` : ""}`}
         actions={
           <ActionPanel title="Actions">
-            <Action title="Send Command" onAction={() => handleSubmit(searchText)} />
+            <Action title="Send Command" icon={Icon.PlusCircle} onAction={() => handleSubmit(searchText)} />
             <Action
               title="Paste from Clipboard"
               onAction={handleSearchFromClipboard}
+              icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             />
             <Action.OpenInBrowser
@@ -149,9 +150,10 @@ export default function Command() {
               accessories={[{ text: "active" }]}
               actions={
                 <ActionPanel title="Actions">
-                  <Action title="Send Command" onAction={() => handleSubmitWithTag(flow.tagName)} />
+                  <Action title="Send Command" icon={Icon.Hashtag} onAction={() => handleSubmitWithTag(flow.tagName)} />
                   <Action
                     title="Paste from Clipboard"
+                    icon={Icon.Clipboard}
                     onAction={handleSearchFromClipboard}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
                   />
