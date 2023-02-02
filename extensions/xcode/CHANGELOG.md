@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Bug Fix] - 2023-02-01
+
+- Fixed a bug where the URL of a Swift package wasn't created correctly. 
+
 ## [Recent Builds Performance Improvements] - 2023-01-24
 
 - Improved the performance of the "Search Recent Builds" and "Show Recent Builds in Menu Bar" command.
