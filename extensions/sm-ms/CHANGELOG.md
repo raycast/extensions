@@ -1,6 +1,6 @@
 # SM.MS Changelog
 
-## [Upload images from clipboard] - {PR_MERGE_DATE}
+## [Upload images from clipboard] - 2023-02-02
 
 - Images can now be uploaded from the clipboard (must be a file copied in the finder or link to an image)
 
