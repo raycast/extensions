@@ -6,15 +6,23 @@
 * Support find target currency by filter, format: `${expression} in ${filter key word}`
 * Support pin your favorite currencies
 * Remember the source currency
+* Support find historical currency by date, format: `${expression} at ${yyyy/mm/dd}` or use Action 'Set Currency Date' [*Attention]
 
+\* use historical currency needs Pro/Business/Volume Plan subscription, Free version does not allow query historical currency API.
+See detail:
+https://www.exchangerate-api.com/docs/historical-data-requests
 
+**If anyone find free version API for currency historical data, please contact with me!**
+
+## Screenshots
+calculate currency exchange expression
 ![exchange_based_on_expression](./media/expression.png)
 
-calculate currency exchange expression
-
-![youdao_translate_result](./media/filter.png)
-
 find target currency with filter
+![exchange_based_on_filter](./media/filter.png)
+
+exchange with historical currency
+![exchange_based_on_historical_currency](./media/historical.png)
 
 ## How to get API Keys
 * Go to https://www.exchangerate-api.com/ and register a account, it is free
