@@ -57,11 +57,11 @@ export class SwiftPackageIndexService {
             description: swiftPackage.summary,
             author: swiftPackage.repositoryOwner,
             stars: swiftPackage.stars,
-            url: Path.join(
+            url: [
               SwiftPackageIndexService.gitHubHostUrl,
               swiftPackage.repositoryOwner,
-              swiftPackage.repositoryName
-            ),
+              swiftPackage.repositoryName,
+            ].join("/"),
             lastActivityAt: swiftPackage.lastActivityAt ? new Date(swiftPackage.lastActivityAt) : undefined,
           };
         }),

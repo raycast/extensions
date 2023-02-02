@@ -67,6 +67,7 @@
 /extensions/bitwarden                                @jomifepe @daniel-stoneuk @pomdtr @andreaselia @pernielsentikaer
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/bob                                      @ViGeng
+/extensions/bonk-price                               @AnishDe12020
 /extensions/brasileirao-serie-a                      @willianhf
 /extensions/brave                                    @ron-myers @rgomezcasas @crisboarna
 /extensions/brave-search                             @VishwasShashidhar @Spl0itable
@@ -185,7 +186,7 @@
 /extensions/displayplacer                            @eluce2
 /extensions/dlmoji                                   @Hydrapse
 /extensions/dock                                     @pradeepb28
-/extensions/dock-tinker                              @koinzhang
+/extensions/dock-tinker                              @koinzhang @garrucho
 /extensions/docker                                   @priithaamer @gebeto
 /extensions/dockerhub                                @k8scat @tonka3000
 /extensions/docsearch                                @Fatpandac @AnishDe12020 @pomdtr
@@ -630,6 +631,7 @@
 /extensions/short-io                                 @koinzhang
 /extensions/shortcut                                 @Yukaii @robertn702
 /extensions/signal                                   @leeraymond78
+/extensions/silent-mention                           @peduarte
 /extensions/simctl                                   @noppefoxwolf
 /extensions/simon                                    @andreaselia @pernielsentikaer
 /extensions/simple-youdao                            @xeric
@@ -785,5 +787,6 @@
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zendesk                                  @cpenned
 /extensions/zeplin-project-search                    @dorukgunes
+/extensions/znotch                                   @zkondor
 /extensions/zoom                                     @thomaslombart
 /extensions/zotero                                   @sadanand-singh

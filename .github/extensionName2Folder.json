@@ -66,6 +66,7 @@
   "bitwarden": "bitwarden",
   "blockchain-explorer-search": "blockchain-explorer-search",
   "bobcontrol": "bob",
+  "bonk-price": "bonk-price",
   "brasileirao-serie-a": "brasileirao-serie-a",
   "brave": "brave",
   "brave-search": "brave-search",
@@ -629,6 +630,7 @@
   "short-io": "short-io",
   "shortcut": "shortcut",
   "signal": "signal",
+  "silent-mention": "silent-mention",
   "simulator-control": "simctl",
   "simon": "simon",
   "simple-youdao": "simple-youdao",
@@ -784,6 +786,7 @@
   "zen-mode": "zen-mode",
   "zendesk": "zendesk",
   "zeplin-project-raycast-extension": "zeplin-project-search",
+  "znotch": "znotch",
   "zoom": "zoom",
   "zotero": "zotero"
 }
