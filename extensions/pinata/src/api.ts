@@ -12,6 +12,13 @@ export interface PinnedResponse {
   count: number;
   rows: RowsItem[];
 }
+
+export interface SubmarinedPinnedResponse {
+  status: number;
+  totalItems: number;
+  items: SubmarineItem[];
+}
+
 interface RowsItem {
   id: string;
   cid: string;
@@ -24,12 +31,26 @@ interface RowsItem {
   regions: any[];
 }
 
+interface SubmarineItem {
+  id: string;
+  createdAt: string;
+  cid: string;
+  name: string;
+  mimeType: string;
+  originalName: string;
+  size: number;
+  metadata: Metadata;
+  pinToIPFS: boolean;
+  isDuplicate: boolean;
+}
+
 interface Metadata {
   name: string;
 }
 
 const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
+const SUBMARINE_KEY = preferences.SUBMARINE_KEY
 const GATEWAY = preferences.GATEWAY;
 
 export function getPinned() {
@@ -43,6 +64,18 @@ export function getPinned() {
   );
 }
 
+export function getSubmarinedPinned() {
+  return useFetch<SubmarinedPinnedResponse>(
+    "https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100",
+    {
+      headers: {
+        'x-api-key': `${SUBMARINE_KEY}`,
+      },
+    }
+  );
+}
+
+
 export function deleteFileByHash(hash) {
   return axios.delete(`https://api.pinata.cloud/pinning/unpin/${hash}`, {
     headers: {
@@ -50,3 +83,11 @@ export function deleteFileByHash(hash) {
     },
   });
 }
+export function deleteSubmarineFileByHash(id) {
+  return axios.delete(`https://managed.mypinata.cloud/api/v1/content/${id}`, {
+    headers: {
+      'x-api-key': `${SUBMARINE_KEY}`,
+    },
+  });
+}
+

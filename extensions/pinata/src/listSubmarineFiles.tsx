@@ -17,6 +17,7 @@ import {
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { formatBytes } from "./utils";
+import { deleteSubmarineFileByHash, getSubmarinedPinned, SubmarinedPinnedResponse } from "./api";
 
 interface Preferences {
   PINATA_JWT: string;
@@ -107,33 +108,7 @@ If your plan does not include a Dedicated Gateway consider upgrading [here!](htt
 
 function SubmarineList() {
   const { push } = useNavigation();
-
-  const [pins, setPins] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchFiles() {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Fetching files" });
-
-      try {
-        const res = await axios.get("https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100", {
-          headers: {
-            "x-api-key": SUBMARINE_KEY,
-          },
-        });
-
-        toast.style = Toast.Style.Success;
-        toast.title = "Complete!";
-        const files = res.data;
-        const rows = files.items;
-        setPins(rows);
-        setLoading(false);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchFiles();
-  }, []);
+  const { data, isLoading, mutate } = getSubmarinedPinned();
 
   const deleteFile = async (fileId) => {
     const options: Alert.Options = {
@@ -150,11 +125,16 @@ function SubmarineList() {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting File" });
 
       try {
-        const delRes = await axios.delete(`https://managed.mypinata.cloud/api/v1/content/${fileId}`, {
-          headers: {
-            "x-api-key": SUBMARINE_KEY,
+        deleteSubmarineFileByHash(fileId);
+        await mutate(deleteSubmarineFileByHash(fileId), {
+          optimisticUpdate(data: SubmarinedPinnedResponse) {
+            return {
+              ...data,
+              items: data.items.filter((item) => item.id !== fileId)
+            };
           },
         });
+
         toast.style = Toast.Style.Success;
         toast.title = "File Deleted!";
       } catch (error) {
@@ -168,15 +148,15 @@ function SubmarineList() {
   };
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.EmptyView
         icon={{ source: "loading/loading.gif" }}
         title="Retrieving your files"
         description="This will only take a few seconds"
       />
 
-      {!loading &&
-        pins.map((item) => (
+      {data?.items &&
+        data.items.map((item) => (
           <List.Item
             key={item.id}
             title={item.name}
