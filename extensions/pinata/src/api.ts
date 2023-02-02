@@ -50,7 +50,7 @@ interface Metadata {
 
 const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
-const SUBMARINE_KEY = preferences.SUBMARINE_KEY
+const SUBMARINE_KEY = preferences.SUBMARINE_KEY;
 const GATEWAY = preferences.GATEWAY;
 
 export function getPinned() {
@@ -65,16 +65,12 @@ export function getPinned() {
 }
 
 export function getSubmarinedPinned() {
-  return useFetch<SubmarinedPinnedResponse>(
-    "https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100",
-    {
-      headers: {
-        'x-api-key': `${SUBMARINE_KEY}`,
-      },
-    }
-  );
+  return useFetch<SubmarinedPinnedResponse>("https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100", {
+    headers: {
+      "x-api-key": `${SUBMARINE_KEY}`,
+    },
+  });
 }
-
 
 export function deleteFileByHash(hash) {
   return axios.delete(`https://api.pinata.cloud/pinning/unpin/${hash}`, {
@@ -86,8 +82,7 @@ export function deleteFileByHash(hash) {
 export function deleteSubmarineFileByHash(id) {
   return axios.delete(`https://managed.mypinata.cloud/api/v1/content/${id}`, {
     headers: {
-      'x-api-key': `${SUBMARINE_KEY}`,
+      "x-api-key": `${SUBMARINE_KEY}`,
     },
   });
 }
-

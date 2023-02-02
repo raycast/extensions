@@ -130,7 +130,7 @@ function SubmarineList() {
           optimisticUpdate(data: SubmarinedPinnedResponse) {
             return {
               ...data,
-              items: data.items.filter((item) => item.id !== fileId)
+              items: data.items.filter((item) => item.id !== fileId),
             };
           },
         });
