@@ -1,7 +1,11 @@
 import { ActionPanel, List, Action, showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import checkBikeInstalled from "./index";
-import React from "react";
+import { setBikeBackgroundColor } from "./scripts";
+
+const setBackgroundColor = async (color: string) => {
+  await setBikeBackgroundColor(color);
+  await showHUD("Set Bike Background Color");
+};
 
 export default function main() {
   const error_alert = checkBikeInstalled();
@@ -17,8 +21,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Custom Background Color"
-              onAction={() => {
-                custom_bg();
+              onAction={async () => {
+                await setBackgroundColor("choose color");
               }}
             />
           </ActionPanel>
@@ -31,8 +35,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="White Background"
-              onAction={() => {
-                white_bg();
+              onAction={async () => {
+                await setBackgroundColor("{65535, 65535, 65535}");
               }}
             />
           </ActionPanel>
@@ -45,8 +49,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Black Background"
-              onAction={() => {
-                black_bg();
+              onAction={async () => {
+                await setBackgroundColor("{0, 0, 0}");
               }}
             />
           </ActionPanel>
@@ -59,8 +63,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Red Background"
-              onAction={() => {
-                red_bg();
+              onAction={async () => {
+                await setBackgroundColor("{32768, 0, 0}");
               }}
             />
           </ActionPanel>
@@ -73,8 +77,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Orange Background"
-              onAction={() => {
-                orange_bg();
+              onAction={async () => {
+                await setBackgroundColor("{65535, 22768, 0}");
               }}
             />
           </ActionPanel>
@@ -87,8 +91,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Yellow Background"
-              onAction={() => {
-                yellow_bg();
+              onAction={async () => {
+                await setBackgroundColor("{55535, 55535, 0}");
               }}
             />
           </ActionPanel>
@@ -101,8 +105,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Green Background"
-              onAction={() => {
-                green_bg();
+              onAction={async () => {
+                await setBackgroundColor("{0, 32768, 0}");
               }}
             />
           </ActionPanel>
@@ -115,8 +119,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Teal Background"
-              onAction={() => {
-                teal_bg();
+              onAction={async () => {
+                await setBackgroundColor("{0, 32768, 32768}");
               }}
             />
           </ActionPanel>
@@ -129,8 +133,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Blue Background"
-              onAction={() => {
-                blue_bg();
+              onAction={async () => {
+                await setBackgroundColor("{0, 0, 65535}");
               }}
             />
           </ActionPanel>
@@ -143,8 +147,8 @@ export default function main() {
           <ActionPanel>
             <Action
               title="Purple Background"
-              onAction={() => {
-                purple_bg();
+              onAction={async () => {
+                await setBackgroundColor("{32768, 0, 32768}");
               }}
             />
           </ActionPanel>
@@ -152,86 +156,4 @@ export default function main() {
       />
     </List>
   );
-}
-
-async function custom_bg() {
-  await runAppleScript(`tell application "Bike"
-      activate
-      try
-          set background color to choose color
-      end try
-    end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function white_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {65535, 65535, 65535}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function black_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {0, 0, 0}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function red_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {32768, 0, 0}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function orange_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {65535, 22768, 0}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function yellow_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {55535, 55535, 0}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function green_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {0, 32768, 0}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function teal_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {0, 32768, 32768}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function blue_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {0, 0, 65535}
-  end tell`);
-  await showHUD("Set Bike Background Color");
-}
-
-async function purple_bg() {
-  await runAppleScript(`tell application "Bike"
-    activate
-    set background color to {32768, 0, 32768}
-  end tell`);
-  await showHUD("Set Bike Background Color");
 }

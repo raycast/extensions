@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { popToRoot, showHUD } from "@raycast/api";
 import checkBikeInstalled from "./index";
-import { forceCloseAllButCurrentDocument } from "./scripts";
+import { extractLinksFromDocument } from "./scripts";
 
 export default function main() {
   const error_alert = checkBikeInstalled();
@@ -10,8 +10,8 @@ export default function main() {
   }
 
   useEffect(() => {
-    Promise.resolve(forceCloseAllButCurrentDocument()).then(() =>
-      showHUD("Closed Other Documents").then(() => Promise.resolve(popToRoot()))
+    Promise.resolve(extractLinksFromDocument(1)).then((count: number) =>
+      showHUD(`Copied ${count} ${count == 1 ? "Link" : "Links"} To Clipboard`).then(() => Promise.resolve(popToRoot()))
     );
   }, []);
 }
