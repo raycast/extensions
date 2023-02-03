@@ -1,5 +1,8 @@
 # Code Stash Changelog
 
+## Adds new language types - 2023-02-03
+- Adds ENV, Properties & C# to language types
+
 ## Add Import command - 2023-01-19
 - Add command for importing txt files and folders
 
