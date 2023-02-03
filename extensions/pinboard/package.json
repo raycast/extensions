@@ -48,12 +48,6 @@
       "description": "Refreshes cache",
       "mode": "no-view",
       "interval": "1h"
-    },
-    {
-      "name": "dumpCache",
-      "title": "Dump Pinboard Cache (for debugging)",
-      "description": "Dumps cache",
-      "mode": "view"
     }
   ],
   "preferences": [
