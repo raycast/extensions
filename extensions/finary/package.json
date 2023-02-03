@@ -13,31 +13,31 @@
   "commands": [
     {
       "name": "dashboard",
-      "title": "See your current Net Worth",
+      "title": "See Your Current Net Worth",
       "description": "Go to Dashboard",
       "mode": "no-view"
     },
     {
       "name": "portfolio",
-      "title": "See your detailed Portfolio",
+      "title": "See Your Detailed Portfolio",
       "description": "Go to Portfolio",
       "mode": "no-view"
     },
     {
       "name": "add-asset",
-      "title": "Add an Asset to your Portfolio",
+      "title": "Add an Asset to Your Portfolio",
       "description": "Add an Asset",
       "mode": "no-view"
     },
     {
       "name": "insights",
-      "title": "Discover your Insights",
+      "title": "Discover Your Insights",
       "description": "Go to Insights",
       "mode": "no-view"
     },
     {
       "name": "settings",
-      "title": "Edit the settings of your Account",
+      "title": "Edit the Settings of Your Account",
       "description": "Go to Settings",
       "mode": "no-view"
     }
