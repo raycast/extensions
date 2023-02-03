@@ -3,12 +3,6 @@
   <h1 align="center">Pokédex</h1>
 </p>
 
-<p align="center">
-  <a title="Install Pokédex Raycast Extension" href="https://www.raycast.com/anhthang/pokedex#install">
-    <img style="height: 64px" src="https://assets.raycast.com/anhthang/pokedex/install_button@2x.png" height="64">
-  </a>
-</p>
-
 A [Raycast](https://raycast.com/) extenstion that lets you search for a Pokémon by name or using its National Pokédex number.
 
 This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses [PokéAPI](https://pokeapi.co/).
