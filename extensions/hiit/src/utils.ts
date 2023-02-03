@@ -22,14 +22,14 @@ export const numberGreaterThanZero = (value: string | undefined) => {
   }
 };
 
-export const requiredNumberGreaterThanZero = (value: string | undefined) => {
+export const requiredNumberGreaterThan = (value: string | undefined, minValue?: number) => {
   if (!value?.length) {
     return "Please enter a number";
   }
   if (value && isNaN(parseInt(value))) {
     return "Please enter a number";
   }
-  if (value && value < "0") {
-    return "Please select a number greater than 0";
+  if (minValue && value && value < minValue.toString()) {
+    return `Please select a number greater than ${minValue}`;
   }
 };

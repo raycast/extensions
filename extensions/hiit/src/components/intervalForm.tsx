@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { IntervalFormValues, Item } from "../types";
 import { nanoid } from "nanoid";
-import { calculateInterval, numberGreaterThanZero, requiredNumberGreaterThanZero, setsToSeconds } from "../utils";
+import {
+  calculateInterval,
+  numberGreaterThanZero,
+  requiredNumberGreaterThan,
+  secondsToTime,
+  setsToSeconds,
+} from "../utils";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void }) {
@@ -41,13 +47,13 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
         return numberGreaterThanZero(value);
       },
       high: (value) => {
-        return requiredNumberGreaterThanZero(value);
+        return requiredNumberGreaterThan(value, 0);
       },
       low: (value) => {
-        return requiredNumberGreaterThanZero(value);
+        return requiredNumberGreaterThan(value, 0);
       },
       sets: (value) => {
-        return requiredNumberGreaterThanZero(value);
+        return requiredNumberGreaterThan(value, 1);
       },
     },
     initialValues: {
@@ -71,12 +77,24 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
     >
       <Form.TextField title="Title" placeholder="My Awesome Interval" {...itemProps.title} />
       <Form.TextField title="Subtitle" placeholder="The best ever!" {...itemProps.subtitle} />
-      <Form.Description title="" text="All intervals are shown in seconds" />
+      <Form.Description title="Info" text="All intervals are shown in seconds" />
       <Form.TextField title="Warmup" placeholder="0" info="Optional Warmup" {...itemProps.warmup} />
       <Form.TextField title="Cooldown" placeholder="0" info="Optional Cooldown" {...itemProps.cooldown} />
       <Form.TextField title="High" placeholder="30" {...itemProps.high} />
       <Form.TextField title="Low" placeholder="90" {...itemProps.low} />
       <Form.TextField title="Sets" placeholder="6" {...itemProps.sets} />
+      <Form.Description
+        title="Current Interval"
+        text={`${secondsToTime(
+          setsToSeconds(
+            parseInt(itemProps.sets.value || "1"),
+            parseInt(itemProps.high.value || "0"),
+            parseInt(itemProps.low.value || "0"),
+            parseInt(itemProps.warmup.value || "0"),
+            parseInt(itemProps.cooldown.value || "0")
+          )
+        )}`}
+      />
     </Form>
   );
 }

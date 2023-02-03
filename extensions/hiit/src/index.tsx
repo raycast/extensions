@@ -38,7 +38,6 @@ export default function Command() {
         return (
           <List.Item
             key={item.id}
-            icon="list-icon.png"
             title={item.title}
             subtitle={item.subtitle}
             accessories={accessories(item)}
