@@ -67,7 +67,7 @@ export function useSearchBookmarks() {
 
     let bookmarks = [] as Bookmark[];
     if (shouldUpdateCache) {
-      // Get the data from the server
+      console.debug("Getting bookmarks from server");
       const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
         if (!res.ok) {
           return Promise.reject(res.statusText);
@@ -75,14 +75,13 @@ export function useSearchBookmarks() {
         return res.json();
       })) as PinboardBookmark[];
 
-      console.log("Server Bookmarks:", serverBookmarks);
+      console.debug("Got bookmarks from server");
       bookmarks = serverBookmarks.map((post) => transformBookmark(post)) as Bookmark[];
-      console.log("Transformed Bookmarks:", bookmarks);
       pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
       pinboardCache.set("bookmarks", JSON.stringify(bookmarks));
     } else {
       // Get the data from the cache
-      console.log("Getting bookmarks from cache");
+      console.debug("Getting bookmarks from cache");
       const cachedBookmarks = pinboardCache.get("bookmarks");
       if (cachedBookmarks) {
         bookmarks = JSON.parse(cachedBookmarks) as Bookmark[];
