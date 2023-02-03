@@ -14,30 +14,35 @@
     {
       "name": "dashboard",
       "title": "See Your Current Net Worth",
+      "subtitle": "Finary",
       "description": "Go to Dashboard",
       "mode": "no-view"
     },
     {
       "name": "portfolio",
       "title": "See Your Detailed Portfolio",
+      "subtitle": "Finary",
       "description": "Go to Portfolio",
       "mode": "no-view"
     },
     {
       "name": "add-asset",
       "title": "Add an Asset to Your Portfolio",
+      "subtitle": "Finary",
       "description": "Add an Asset",
       "mode": "no-view"
     },
     {
       "name": "insights",
       "title": "Discover Your Insights",
+      "subtitle": "Finary",
       "description": "Go to Insights",
       "mode": "no-view"
     },
     {
       "name": "settings",
       "title": "Edit the Settings of Your Account",
+      "subtitle": "Finary",
       "description": "Go to Settings",
       "mode": "no-view"
     }
