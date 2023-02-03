@@ -244,7 +244,7 @@
       "name": "open-url-in-simulator.command",
       "title": "Open URL in Simulator",
       "subtitle": "Xcode",
-      "description": "Open the given URL in the currently booted simualtor.",
+      "description": "Open the given URL in Simulator.",
       "mode": "no-view",
       "arguments": [
         {
