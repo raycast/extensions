@@ -5,6 +5,7 @@ This extension utilizes Fantastical natural language processing to add events an
     - [Adding Events](#adding-events)
     - [Adding Reminders](#adding-reminders)
     - [Adding a list or calendar to an event or reminder](#adding-a-list-or-calendar-to-an-event-or-reminder)
+    - [Adding events or reminders without having to open the app](#adding-events-or-reminders-without-having-to-open-the-app)
   - [Contributing](#contributing)
 
 ### Adding Events
@@ -58,6 +59,11 @@ As you can see Fantastical figured out what calender was meant just from the /s 
 
 
 If you are unsure on how to add calenders you can read more [here](https://flexibits.com/fantastical-ios/help/adding-calendars).
+
+### Adding events or reminders without having to open the app
+
+
+If you want to add events or reminders without having to open the app you can use the same commands as before and prepending quickly to them or just use ```fan quick add event``` or ```fan quick add reminder```. 
 
 ## Contributing
 

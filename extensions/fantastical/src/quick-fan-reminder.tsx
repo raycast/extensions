@@ -1,17 +1,25 @@
-import { Action, ActionPanel, showToast, Toast, open } from "@raycast/api";
+import { showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { isInstalled } from "./isInstalled";
+import { getName } from "./isInstalled";
+
 interface Arguments {
   add: string;
 }
 
 export default async (props: { arguments: Arguments }) => {
   const args = props.arguments;
-  if (await isInstalled()) {
+  const name = await getName();
+  if (name !== undefined) {
     await runAppleScript(`
-        tell application "Fantastical" 
-            \n parse sentence "${args.add}" \n
+        tell application "${name}" 
+            \n parse sentence "TODO ${args.add}" with add immediately\n
         end tell`);
+    const optionsSuccess: Toast.Options = {
+        style: Toast.Style.Success,
+        title: "Reminder added",
+        message: "Your reminder has been added to Fantastical.",
+    };
+    showToast(optionsSuccess);
   } else {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
@@ -24,7 +32,6 @@ export default async (props: { arguments: Arguments }) => {
         },
       },
     };
-
     showToast(options);
   }
 };

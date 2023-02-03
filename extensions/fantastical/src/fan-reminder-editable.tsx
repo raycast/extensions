@@ -1,6 +1,6 @@
 import { showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { isInstalled } from "./isInstalled";
+import { getName } from "./isInstalled";
 
 interface Arguments {
   add: string;
@@ -8,11 +8,12 @@ interface Arguments {
 
 export default async (props: { arguments: Arguments }) => {
   const args = props.arguments;
-  if (await isInstalled()) {
-    const text = `tell application "Fantastical" 
-                        \n parse sentence "Todo ${args.add}" 
-                    \n end tell`;
-    await runAppleScript(text);
+  const name = await getName();
+  if (name !== undefined) {
+    await runAppleScript(`
+        tell application "${name}" 
+            \n parse sentence "TODO ${args.add}"\n
+        end tell`);
   } else {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
@@ -25,7 +26,6 @@ export default async (props: { arguments: Arguments }) => {
         },
       },
     };
-
     showToast(options);
   }
 };

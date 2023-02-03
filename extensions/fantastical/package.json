@@ -18,9 +18,9 @@
   ],
   "commands": [
     {
-      "name": "fan-add-event",
+      "name": "fan-add-event-editable",
       "title": "Add Fantastical Calendar Event",
-      "description": "add a new fantastical event",
+      "description": "Add a new fantastical event and open the app",
       "mode": "no-view",
       "arguments": [
         {
@@ -41,9 +41,9 @@
       ]
     },
     {
-      "name": "fan-reminder",
+      "name": "fan-reminder-editable",
       "title": "Add Fantastical Reminder",
-      "description": "Add a new Fantastical reminder",
+      "description": "Add a new Fantastical reminder and open the app",
       "mode": "no-view",
       "arguments": [
         {
@@ -63,7 +63,58 @@
         "fan reminder"
       ]
       
+    },
+    {
+      "name": "quick-fan-reminder",
+      "title": "Quickly Add Fantastical Reminder",
+      "description": "Add a new reminder without opening Fantastical",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "add",
+          "title": "Add Reminder",
+          "placeholder": "reminder",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "fantastical",
+        "fan",
+        "add",
+        "reminder",
+        "fan add reminder",
+        "fan reminder",
+        "quick"
+      ]
+      
+    },
+    {
+      "name": "quick-fan-add-event",
+      "title": "Quickly Add Fantastical Event",
+      "description": "Add a new event without opening Fantastical",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "name": "add",
+          "title": "Add Reminder",
+          "placeholder": "reminder",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "fantastical",
+        "fan",
+        "add",
+        "reminder",
+        "fan add reminder",
+        "fan reminder",
+        "quick"
+      ]
+      
     }
+
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
