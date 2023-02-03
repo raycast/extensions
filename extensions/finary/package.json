@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finary",
   "title": "Finary",
-  "description": "View your Finary portfolio",
+  "description": "Fastest way to explore your Finary Portfolio & Investments.",
   "icon": "icon.png",
   "author": "jetaix",
   "categories": [
@@ -13,26 +13,32 @@
   "commands": [
     {
       "name": "dashboard",
-      "title": "Dashboard",
-      "description": "Go to dashboard",
+      "title": "See your current Net Worth",
+      "description": "Go to Dashboard",
       "mode": "no-view"
     },
     {
       "name": "portfolio",
-      "title": "Portfolio",
-      "description": "Go to portfolio",
+      "title": "See your detailed Portfolio",
+      "description": "Go to Portfolio",
       "mode": "no-view"
     },
     {
       "name": "add-asset",
-      "title": "Add Asset",
-      "description": "Add a asset in my portfolio",
+      "title": "Add an Asset to your Portfolio",
+      "description": "Add an Asset",
+      "mode": "no-view"
+    },
+    {
+      "name": "insights",
+      "title": "Discover your Insights",
+      "description": "Go to Insights",
       "mode": "no-view"
     },
     {
       "name": "settings",
-      "title": "My Account",
-      "description": "Go to settings",
+      "title": "Edit the settings of your Account",
+      "description": "Go to Settings",
       "mode": "no-view"
     }
   ],
