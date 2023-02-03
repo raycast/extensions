@@ -26,11 +26,29 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
 
     const markStart = Date.now();
 
+    const totalBookedTime = entries.reduce((acc, val) => {
+      if (!val.duration.stoppedAt || !val.duration.startedAt) {
+        // Skip entries that are still running (no stoppedAt)
+        return acc;
+      }
+
+      const [startedAt, stoppedAt] = [
+        new Date(val.duration.startedAt + "Z").getTime(),
+        new Date(val.duration.stoppedAt + "Z").getTime(),
+      ];
+
+      return (acc += stoppedAt - startedAt);
+    }, 0);
+
     Promise.resolve(tracking && activity ? entries.concat([mockEntry(tracking, activity)]) : entries)
       .then(entries => entries.reduce(groupByActivity, [] as TimeEntry[][]))
       .then(groupped => groupped.map(arr => arr.reduce(groupIntoReport, blankReport(arr[0].activity))))
       .then(entries => entries.sort((l, r) => (l.duration > r.duration ? -1 : 1)))
       .then(entries => entries.map(entry => `* ${entry.activity.name} for ${humanizeDuration(entry.duration)}`))
+      .then(entries => [
+        ...entries,
+        `# Total Booked Time (not incl. current task): ${humanizeDuration(totalBookedTime)}`,
+      ])
       .then(list => list.join("\n\n"))
       .then(markdown =>
         markdown
