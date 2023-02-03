@@ -60,7 +60,6 @@ export const storage: TogglStorage = {
 };
 
 export type StorageValues = {
-  // It's null only before the first API fetch
   me: Me | null;
   projects: Project[];
   workspaces: Workspace[];

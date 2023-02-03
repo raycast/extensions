@@ -13,10 +13,17 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const [billable, setBillable] = useState<boolean>(false);
 
   async function handleSubmit(values: { description: string }) {
+    const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
+
+    if (!workspaceId) {
+      await showToast(Toast.Style.Failure, "Failed to start time entry");
+      return;
+    }
+
     try {
       await toggl.createTimeEntry({
         projectId: selectedProject?.id,
-        workspaceId: selectedProject?.workspace_id || (me as Me).default_workspace_id,
+        workspaceId,
         description: values.description,
         tags: selectedTags,
         billable,

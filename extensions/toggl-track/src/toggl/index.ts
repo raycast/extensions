@@ -44,7 +44,7 @@ const TogglAPI = function (apiToken: string) {
         billable,
         created_with: "raycast-toggl-track",
         description,
-        // For running entries should be -1 * (Unix start time)
+        // For running entries should be -1 * (Unix start time). See https://developers.track.toggl.com/docs/tracking
         duration: Math.floor((-1 * now.getTime()) / 1000),
         project_id: projectId !== -1 ? projectId : undefined,
         start: now.toISOString(),
