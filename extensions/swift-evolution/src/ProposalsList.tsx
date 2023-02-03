@@ -14,11 +14,15 @@ export type ProposalViewModel = {
     name: string;
     link: string;
   }[];
+  implementations: {
+    title: string;
+    url: string;
+  }[];
   reviewManagerName: string;
   reviewManagerProfileLink: string;
   swiftVersion?: string;
   scheduled?: string;
-  repos: string[];
+  isNew: boolean;
 
   keywords: string[];
   link: string;
@@ -110,7 +114,7 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
   const { push } = useNavigation();
   return (
     <List.Item
-      title={proposal.title}
+      title={(proposal.isNew ? "🆕 " : "") + proposal.title}
       keywords={proposal.keywords}
       actions={
         <ActionPanel>
@@ -130,25 +134,6 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={"ID"} text={proposal.id} />
               <List.Item.Detail.Metadata.Label title={"Title"} text={proposal.title} />
-              <List.Item.Detail.Metadata.Separator />
-              {proposal.authors.map((author, index) => {
-                return (
-                  <>
-                    <List.Item.Detail.Metadata.Link
-                      title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
-                      target={author.link}
-                      text={author.name}
-                      key={author.name}
-                    />
-                  </>
-                );
-              })}
-              <List.Item.Detail.Metadata.Link
-                title={"Review Manager"}
-                target={proposal.reviewManagerProfileLink}
-                text={proposal.reviewManagerName}
-              />
-              <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.TagList title="Status">
                 <List.Item.Detail.Metadata.TagList.Item
                   text={proposal.status}
@@ -169,13 +154,39 @@ function DetailedProposalList(props: { proposal: ProposalViewModel; toggleDetail
               ) : (
                 <></>
               )}
-              {proposal.repos.length > 0 ? (
+              <List.Item.Detail.Metadata.Separator />
+              {proposal.authors.map((author, index) => {
+                return (
+                  <>
+                    <List.Item.Detail.Metadata.Link
+                      title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
+                      target={author.link}
+                      text={author.name}
+                      key={author.name}
+                    />
+                  </>
+                );
+              })}
+              <List.Item.Detail.Metadata.Link
+                title={"Review Manager"}
+                target={proposal.reviewManagerProfileLink}
+                text={proposal.reviewManagerName}
+              />
+              <List.Item.Detail.Metadata.Separator />
+              {proposal.implementations.length > 0 ? (
                 <>
-                  <List.Item.Detail.Metadata.TagList title={`Repo${proposal.repos.length > 1 ? "s" : ""}`}>
-                    {proposal.repos.map((repo) => {
-                      return <List.Item.Detail.Metadata.TagList.Item text={repo} color={Color.Brown} key={repo} />;
-                    })}
-                  </List.Item.Detail.Metadata.TagList>
+                  {proposal.implementations.map((implementation, index) => {
+                    return (
+                      <>
+                        <List.Item.Detail.Metadata.Link
+                          title={index === 0 ? `Implementation${proposal.implementations.length > 1 ? "s" : ""}` : ""}
+                          target={implementation.url}
+                          text={implementation.title}
+                          key={implementation.url}
+                        />
+                      </>
+                    );
+                  })}
                 </>
               ) : (
                 <></>
