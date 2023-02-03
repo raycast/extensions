@@ -1,32 +1,23 @@
-import {showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { getName } from "./isInstalled";
+import { getName } from "./getName";
 interface Arguments {
   add: string;
-}// 
+}
 
 export default async (props: { arguments: Arguments }) => {
   const args = props.arguments;
   const name = await getName();
-  console.log(name);
-  if (name !== undefined) {
+  if (name !== undefined ) {
     await runAppleScript(`
         tell application "${name}" 
-            \n parse sentence "${args.add}"\n
+            \n parse sentence "${args.add}" \n
         end tell`);
   } else {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
+    await showToast({
       title: "Fantastical is not installed",
+      style: Toast.Style.Failure,
       message: "Please first install Fantastical to use this extension.",
-      primaryAction: {
-        title: "Install Fantastical",
-        onAction: () => {
-          open("https://fantastical.app/");
-        },
-      },
-    };
-
-    showToast(options);
+    });
   }
 };

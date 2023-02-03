@@ -1,6 +1,6 @@
 import {showToast, Toast, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { getName } from "./isInstalled";
+import { getName } from "./getName";
 interface Arguments {
   add: string;
 }// 
