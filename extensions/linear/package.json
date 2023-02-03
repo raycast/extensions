@@ -4,7 +4,7 @@
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
   "icon": "linear.png",
-  "owner": "raycast",
+  "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
   "contributors": [
