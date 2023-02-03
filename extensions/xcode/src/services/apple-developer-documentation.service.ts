@@ -44,7 +44,7 @@ export class AppleDeveloperDocumentationService {
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = Path.join(AppleDeveloperDocumentationService.hostUrl, entry.url);
+      entry.url = [AppleDeveloperDocumentationService.hostUrl, entry.url].join("/");
     }
     // Return Documentation Entries
     return entries;
