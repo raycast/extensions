@@ -6,7 +6,7 @@ import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulat
 import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { groupBy } from "../shared/group-by";
-import { Clipboard, closeMainWindow, showToast, Toast, LaunchProps } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { XcodeService } from "./xcode.service";
 /**
  * XcodeSimulatorService
@@ -15,8 +15,10 @@ export class XcodeSimulatorService {
   /**
    * Retrieve all XcodeSimulatorGroups
    */
-  static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
-    const simulators = await XcodeSimulatorService.xcodeSimulators();
+  static async xcodeSimulatorGroups(stateFilter?: string | null): Promise<XcodeSimulatorGroup[]> {
+    const simulators = (await XcodeSimulatorService.xcodeSimulators()).filter((value) =>
+      stateFilter ? stateFilter === value.state : true
+    );
     return groupBy(simulators, (simulator) => simulator.runtime)
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
