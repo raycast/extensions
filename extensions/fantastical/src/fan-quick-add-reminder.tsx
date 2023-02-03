@@ -15,9 +15,9 @@ export default async (props: { arguments: Arguments }) => {
             \n parse sentence "TODO ${args.add}" with add immediately\n
         end tell`);
     const optionsSuccess: Toast.Options = {
-        style: Toast.Style.Success,
-        title: "Reminder added",
-        message: "Your reminder has been added to Fantastical.",
+      style: Toast.Style.Success,
+      title: "Reminder added",
+      message: "Your reminder has been added to Fantastical.",
     };
     showToast(optionsSuccess);
   } else {
