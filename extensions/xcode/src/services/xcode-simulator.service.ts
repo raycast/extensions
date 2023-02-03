@@ -6,13 +6,7 @@ import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulat
 import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { groupBy } from "../shared/group-by";
-import {
-  Clipboard,
-  closeMainWindow,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { Clipboard, closeMainWindow, showToast, Toast, LaunchProps } from "@raycast/api";
 import { XcodeService } from "./xcode.service";
 /**
  * XcodeSimulatorService
@@ -48,22 +42,15 @@ export class XcodeSimulatorService {
     // For each DeviceGroup
     for (const deviceGroup in devicesResponseJSON.devices) {
       // Initialize runtime components from DeviceGroup
-      const runtimeComponents = deviceGroup
-        .substring(deviceGroup.lastIndexOf(".") + 1)
-        .split("-");
+      const runtimeComponents = deviceGroup.substring(deviceGroup.lastIndexOf(".") + 1).split("-");
       // Initialize runtime string
-      const runtime = [
-        runtimeComponents.shift(),
-        runtimeComponents.join("."),
-      ].join(" ");
+      const runtime = [runtimeComponents.shift(), runtimeComponents.join(".")].join(" ");
       // Push Simulators in DeviceGroup
       simulators.push(
-        ...devicesResponseJSON.devices[deviceGroup].map(
-          (simulator: XcodeSimulator) => {
-            simulator.runtime = runtime;
-            return simulator;
-          }
-        )
+        ...devicesResponseJSON.devices[deviceGroup].map((simulator: XcodeSimulator) => {
+          simulator.runtime = runtime;
+          return simulator;
+        })
       );
     }
     // Return XcodeSimulators
@@ -121,11 +108,7 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
-    return execAsync(
-      ["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(
-        " "
-      )
-    ).then();
+    return execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" ")).then();
   }
 
   /**
@@ -147,15 +130,7 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     return execAsync(
-      [
-        "xcrun",
-        "simctl",
-        "privacy",
-        xcodeSimulator.udid,
-        action,
-        serviceType,
-        bundleIdentifier,
-      ].join(" ")
+      ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
     ).then();
   }
 
@@ -189,9 +164,7 @@ export class XcodeSimulatorService {
       await checkPreconditions();
       const trimmedUrl = url?.trim();
       await checkUrlValidity(trimmedUrl);
-      await execAsync(
-        `xcrun simctl openurl ${udid?.trim() ?? "booted"} '${trimmedUrl}'`
-      );
+      await execAsync(`xcrun simctl openurl ${udid?.trim() ?? "booted"} '${trimmedUrl}'`);
       toast.style = Toast.Style.Success;
       toast.title = "URL opened in Simulator.";
       XcodeSimulatorService.showSimulator();
@@ -200,15 +173,12 @@ export class XcodeSimulatorService {
       console.error(error);
       const defaultTitle = "Error while opening URL in Simulator.";
       toast.style = Toast.Style.Failure;
-      toast.title =
-        error instanceof Error ? error.message ?? defaultTitle : defaultTitle;
+      toast.title = error instanceof Error ? error.message ?? defaultTitle : defaultTitle;
     }
 
     async function checkPreconditions() {
-      if (!(await XcodeService.isXcodeInstalled()))
-        throw Error("Xcode is not installed");
-      if (!(await XcodeSimulatorService.existsBootedSimulator()))
-        throw Error("No booted Simulator found.");
+      if (!(await XcodeService.isXcodeInstalled())) throw Error("Xcode is not installed");
+      if (!(await XcodeSimulatorService.existsBootedSimulator())) throw Error("No booted Simulator found.");
     }
 
     async function checkUrlValidity(url: string | undefined) {

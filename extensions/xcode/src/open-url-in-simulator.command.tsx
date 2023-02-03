@@ -6,10 +6,5 @@ interface OpenSimulatorArguments {
   udid?: string;
 }
 
-export default async (
-  props: LaunchProps<{ arguments: OpenSimulatorArguments }>
-) =>
-  XcodeSimulatorService.openUrl(
-    props.arguments.url ?? (await Clipboard.readText()),
-    undefined
-  );
+export default async (props: LaunchProps<{ arguments: OpenSimulatorArguments }>) =>
+  XcodeSimulatorService.openUrl(props.arguments.url ?? (await Clipboard.readText()), undefined);
