@@ -22,7 +22,7 @@ export interface Bookmark {
   id: string;
   url: string;
   title: string;
-  tags: string;
+  tags?: string;
   private: boolean;
   readLater: boolean;
 }
