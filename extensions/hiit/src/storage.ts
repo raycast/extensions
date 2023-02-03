@@ -27,3 +27,10 @@ export async function addItem(item: Item) {
   await saveItems(items);
   return items;
 }
+
+export async function deleteItem(item: Item) {
+  let items = await getItems();
+  items = items.filter((i) => i.id !== item.id);
+  await saveItems(items);
+  return items;
+}

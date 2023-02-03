@@ -1,11 +1,12 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { secondsToTime } from "./utils";
-import { addItem, getItems } from "./storage";
+import { addItem, deleteItem, getItems } from "./storage";
 import { Item } from "./types";
 import { NewInterval } from "./components/actions/newInterval";
 import { EditInterval } from "./components/actions/editInterval";
 import { Timer } from "./components/timer";
+import { DeleteInterval } from "./components/actions/deleteInterval";
 
 export default function Command() {
   const [intervalList, setIntervalList] = useState<Item[]>([]);
@@ -14,6 +15,13 @@ export default function Command() {
   async function handleCreate(item: Item) {
     const items = await addItem(item);
     setIntervalList(items);
+    await showToast(Toast.Style.Success, "Interval Added");
+  }
+
+  async function handleDelete(item: Item) {
+    const items = await deleteItem(item);
+    setIntervalList(items);
+    await showToast(Toast.Style.Success, "Interval Deleted");
   }
 
   useEffect(() => {
@@ -45,6 +53,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push title="Open Timer" icon={Icon.Clock} target={<Timer item={item} />} />
                 <EditInterval item={item} onSave={handleCreate} />
+                <DeleteInterval item={item} onDelete={handleDelete} />
                 <ActionPanel.Section>
                   <NewInterval onSave={handleCreate} />
                 </ActionPanel.Section>
