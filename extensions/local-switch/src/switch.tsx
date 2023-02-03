@@ -1,5 +1,5 @@
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon, Toast, showToast, closeMainWindow, PopToRootType, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Color } from "@raycast/api";
 import type { Host } from "./types";
 import { type WithBrowser, withBrowser } from "./lib/withBrowser";
 import { useCachedHosts } from "./hooks/useCachedHosts";
@@ -41,15 +41,7 @@ export const Switch: FC<WithBrowser> = ({ browser }) => {
       if (!hosts[host.host]) {
         addHost(host.host);
       }
-      await showToast({
-        title: "Switching...",
-        style: Toast.Style.Animated,
-      });
       await browser.switch(host.host);
-      await showToast({
-        title: "Done!",
-        style: Toast.Style.Success,
-      });
       await browser.getCurrentTabUrl().then((host) => setCurrentHost(host));
       setQuery("");
       await closeMainWindow({
