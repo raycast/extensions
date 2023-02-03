@@ -1,5 +1,11 @@
 # Swift-evolution Changelog
 
+## [Minor UI update] - 2023-02-02
+
+- Add a 🆕 emoji to proposal younger than 7 days
+- Restructure the details view a little bit
+- Add Implementations section with links to PRs
+
 ## [Major UI update] - 2023-01-16
 
 - Remove grouping by status
