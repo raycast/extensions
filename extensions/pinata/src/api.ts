@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Toast, showToast, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import axios from "axios";
 
@@ -60,6 +60,17 @@ export function getPinned() {
       headers: {
         Authorization: JWT,
       },
+      onError: (error: Error) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to fetch`,
+          message: `Check and make sure the API key is valid`,
+          primaryAction: {
+            title: "Change  Preferences",
+            onAction: () => openExtensionPreferences(),
+          },
+        });
+      },
     }
   );
 }
@@ -68,6 +79,17 @@ export function getSubmarinedPinned() {
   return useFetch<SubmarinedPinnedResponse>("https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100", {
     headers: {
       "x-api-key": `${SUBMARINE_KEY}`,
+    },
+    onError: (error: Error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to fetch`,
+        message: `Check and make sure the API key is valid`,
+        primaryAction: {
+          title: "Change  Preferences",
+          onAction: () => openExtensionPreferences(),
+        },
+      });
     },
   });
 }

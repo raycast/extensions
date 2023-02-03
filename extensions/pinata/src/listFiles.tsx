@@ -66,12 +66,6 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.EmptyView
-        icon={{ source: "loading/loading.gif" }}
-        title="Retrieving your files"
-        description="This will only take a few seconds"
-      />
-
       {data?.rows &&
         data.rows.map((item) => (
           <List.Item
