@@ -9,7 +9,6 @@ import {
   getRelativeDate,
   getTypefullyIcon,
   sortByCreated,
-  sortByPublished,
   sortByScheduled,
   getMenuBarItemNotificationTooltip,
   getFlattenAcivityNotifications,
@@ -56,7 +55,7 @@ export default function Command() {
                 subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
                 tooltip={getMenuBarItemNotificationTooltip(notification)}
                 shortcut={getMenuBarExtraItemShortcut(index, ["ctrl"])}
-                onAction={() => open(`https://typefully.com/?d=${notification.payload.draft_id}`)}
+                onAction={() => open(notification.url)}
               />
             ))}
         </MenuBarExtra.Section>
@@ -97,7 +96,7 @@ export default function Command() {
                   title={getMenuBarExtraItemNotificationTitle(notification)}
                   subtitle={getMenuBarExtraItemNotificationSubtitle(notification)}
                   tooltip={getMenuBarItemNotificationTooltip(notification)}
-                  onAction={() => open(`https://typefully.com/?d=${notification.payload.draft_id}`)}
+                  onAction={() => open(notification.url)}
                 />
               ))}
           </MenuBarExtra.Submenu>
