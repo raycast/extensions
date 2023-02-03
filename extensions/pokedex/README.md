@@ -3,6 +3,12 @@
   <h1 align="center">Pokédex</h1>
 </p>
 
+<p align="center">
+  <a title="Install Pokédex Raycast Extension" href="https://www.raycast.com/anhthang/pokedex#install">
+    <img style="height: 64px" src="https://assets.raycast.com/anhthang/pokedex/install_button@2x.png" height="64">
+  </a>
+</p>
+
 A [Raycast](https://raycast.com/) extenstion that lets you search for a Pokémon by name or using its National Pokédex number.
 
 This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses [PokéAPI](https://pokeapi.co/).
@@ -11,7 +17,7 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 
 ## Features
 
-898 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian), Mega Evolution, Gigantamax
+1008 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian, Hisuian, Paldea), Mega Evolution, Gigantamax
 
 - [x] 🔍 Pokédex
   - Pokémon
@@ -23,21 +29,17 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
       - Forms
       - Evolutions
       - Pokédex entries
-    - Surprise Me!
+      - Learnset
     - Open in the Official Pokémon Website, Open in Bulbapedia.
     - Filter by Pokémon type
-    - Show/Hide preview pane
   - Moves
   - Abilities
 - [x] ⚙️ Preference
-  - Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish.
-  - Show/Hide preview pane
+  - Pokémon details by preferred language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish, Chinese (Simplified & Traditional).
 
 ## TODO
 
 - [ ] Egg moves
-- [ ] Moves learnt by level up
-- [ ] Moves learnt by TM
 - [ ] Sprites
 - [ ] Where to find
 
