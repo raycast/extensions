@@ -35,7 +35,7 @@ export default function IssueComments({ issue }: IssueCommentsProps) {
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting comment" });
 
-        await mutateComments(linearClient.commentDelete(commentId), {
+        await mutateComments(linearClient.deleteComment(commentId), {
           optimisticUpdate(data) {
             if (!data) {
               return data;

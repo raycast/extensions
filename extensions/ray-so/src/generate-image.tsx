@@ -26,6 +26,6 @@ export default async () => {
 
   await showToast(ToastStyle.Animated, "Generating screenshot");
 
-  const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&spacing=${preferences.padding}&code=${base64Text}`;
+  const url = `https://ray.so/#theme=${preferences.theme}&background=${preferences.background}&darkMode=${preferences.darkMode}&padding=${preferences.padding}&code=${base64Text}`;
   open(url);
 };

@@ -17,6 +17,7 @@ export interface Project {
 }
 
 export interface TimeEntry {
+  at: string;
   billable: boolean;
   description: string;
   id: number;

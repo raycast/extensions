@@ -15,13 +15,13 @@ function ListView() {
   const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce((acc, timeEntry) => {
-    const existing = acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id);
-    if (!existing) {
-      acc.push(timeEntry);
-    }
-    return acc;
-  }, [] as TimeEntry[]);
+  const timeEntriesWithUniqueProjectAndDescription = timeEntries
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .reduce(
+      (acc, timeEntry) =>
+        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id) ? acc : [...acc, timeEntry],
+      [] as TimeEntry[]
+    );
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
