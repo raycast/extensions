@@ -25,9 +25,9 @@ export default function Command() {
 function filterByTags(bookmarks: Bookmark[], searchTerm: string) {
   return bookmarks.filter((bookmark) => {
     const searchTags = searchTerm.split(" ");
-    const bookmarkTags = bookmark.tags.split(" ");
+    const bookmarkTags = bookmark.tags?.split(" ");
     return searchTags.every((searchTag) => {
-      return bookmarkTags.some((bookmarkTag) => {
+      return bookmarkTags?.some((bookmarkTag) => {
         return bookmarkTag.includes(searchTag);
       });
     });

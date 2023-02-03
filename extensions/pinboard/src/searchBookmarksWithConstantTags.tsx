@@ -28,9 +28,9 @@ function filterByTagsWithConstant(bookmarks: Bookmark[], searchTerm: string) {
   const searchTags = searchTerm.split(" ");
   const searchTagsWithConstant = [...searchTags, constantTags];
   return bookmarks.filter((bookmark) => {
-    const bookmarkTags = bookmark.tags.split(" ");
+    const bookmarkTags = bookmark.tags?.split(" ");
     return searchTagsWithConstant.every((searchTag) => {
-      return bookmarkTags.some((bookmarkTag) => {
+      return bookmarkTags?.some((bookmarkTag) => {
         return bookmarkTag.includes(searchTag);
       });
     });
