@@ -19,7 +19,9 @@ function ListView() {
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .reduce(
       (acc, timeEntry) =>
-        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id) ? acc : [...acc, timeEntry],
+        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
+          ? acc
+          : [...acc, timeEntry],
       [] as TimeEntry[]
     );
 
