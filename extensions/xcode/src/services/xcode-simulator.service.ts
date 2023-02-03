@@ -41,15 +41,22 @@ export class XcodeSimulatorService {
     // For each DeviceGroup
     for (const deviceGroup in devicesResponseJSON.devices) {
       // Initialize runtime components from DeviceGroup
-      const runtimeComponents = deviceGroup.substring(deviceGroup.lastIndexOf(".") + 1).split("-");
+      const runtimeComponents = deviceGroup
+        .substring(deviceGroup.lastIndexOf(".") + 1)
+        .split("-");
       // Initialize runtime string
-      const runtime = [runtimeComponents.shift(), runtimeComponents.join(".")].join(" ");
+      const runtime = [
+        runtimeComponents.shift(),
+        runtimeComponents.join("."),
+      ].join(" ");
       // Push Simulators in DeviceGroup
       simulators.push(
-        ...devicesResponseJSON.devices[deviceGroup].map((simulator: XcodeSimulator) => {
-          simulator.runtime = runtime;
-          return simulator;
-        })
+        ...devicesResponseJSON.devices[deviceGroup].map(
+          (simulator: XcodeSimulator) => {
+            simulator.runtime = runtime;
+            return simulator;
+          }
+        )
       );
     }
     // Return XcodeSimulators
@@ -107,7 +114,11 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     // Launch application by bundle identifier
-    return execAsync(["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(" ")).then();
+    return execAsync(
+      ["xcrun", "simctl", action, xcodeSimulator.udid, bundleIdentifier].join(
+        " "
+      )
+    ).then();
   }
 
   /**
@@ -129,7 +140,15 @@ export class XcodeSimulatorService {
       // eslint-disable-next-line no-empty
     } catch {}
     return execAsync(
-      ["xcrun", "simctl", "privacy", xcodeSimulator.udid, action, serviceType, bundleIdentifier].join(" ")
+      [
+        "xcrun",
+        "simctl",
+        "privacy",
+        xcodeSimulator.udid,
+        action,
+        serviceType,
+        bundleIdentifier,
+      ].join(" ")
     ).then();
   }
 
@@ -145,5 +164,14 @@ export class XcodeSimulatorService {
    */
   static showSimulator(): Promise<void> {
     return execAsync(`open -b "com.apple.iphonesimulator"`).then();
+  }
+
+  /**
+   * Defines wether there is at least one booted Simulator or not.
+   */
+  static async existsBootedSimulator(): Promise<boolean> {
+    return XcodeSimulatorService.xcodeSimulators().then((simulators) =>
+      simulators.some((s) => s.state == XcodeSimulatorState.booted)
+    );
   }
 }
