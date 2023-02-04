@@ -42,6 +42,7 @@ There are different ways to launch a command:
 - The command was launched in the [background](./background-refresh.md).
 - A [Form's Draft](../../api-reference/user-interface/form.md#drafts) was saved and the user executes it.
 - A user registers the command as a [fallback command](https://manual.raycast.com/fallback-commands) and executes it when there are no results in the root search.
+- A user clicks a [Deeplink](./deeplinks.md)
 
 Depending on how the command was launched, different arguments will be passed to the exported default function.
 

@@ -38,6 +38,7 @@ export interface TimeEntry {
   start: Date;
   duration: number;
   description: string;
+  at: string;
   tags: string[];
 }
 

@@ -23,3 +23,18 @@ export type Space = {
 export type NewTabPreferences = {
   url: string;
 };
+
+export type SearchArcPreferences = {
+  sorting: "tabsHistorySuggestions" | "historyTabsSuggestions";
+  showFavorites: boolean;
+  showPinnedTabs: boolean;
+  showUnpinnedTabs: boolean;
+  showHistory: boolean;
+  showSuggestions: boolean;
+};
+
+export type Suggestion = {
+  id: string;
+  query: string;
+  url: string;
+};
