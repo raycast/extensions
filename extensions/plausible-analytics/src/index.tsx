@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { Action, ActionPanel, List, Icon, useNavigation, Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  useNavigation,
+  Form,
+  showToast,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import { Storage } from "./storage";
 import { verifySite, getStatsForAllWebsites } from "./api";
-import {Stats} from './types';
+import { Stats } from "./types";
 
 const { hostedDomain } = getPreferenceValues() ?? "https://plausible.io";
 
@@ -21,7 +31,7 @@ function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
     }
 
     await Storage.addDomain(domain);
-    showToast(Toast.Style.Success, "Website successfully added");
+    await showToast(Toast.Style.Success, "Website successfully added");
     refreshSiteList();
     pop();
   };
@@ -69,7 +79,6 @@ function SiteList() {
   return (
     <List isShowingDetail={domains.length > 0} isLoading={isLoading}>
       {domains.map((domain) => {
-
         const stats = cachedStats[domain];
 
         return (
@@ -100,8 +109,8 @@ function SiteList() {
                   style={Action.Style.Destructive}
                   onAction={async () => {
                     await Storage.removeDomain(domain);
-                    showToast(Toast.Style.Success, "Website successfully removed");
-                    refreshSiteList();
+                    await showToast(Toast.Style.Success, "Website successfully removed");
+                    await refreshSiteList();
                   }}
                 />
               </ActionPanel>
