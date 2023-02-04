@@ -9,21 +9,21 @@ export default function EmptyView(props: {
   searchText: string;
   onCreate: (listId: string, task: TaskForm) => void;
 }) {
+  const createAction = (
+    <Action.Push
+      title="Create Task"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
+    />
+  );
+
   if (props.tasks.length > 0) {
     return (
       <List.EmptyView
         icon="💬"
         title="No Matching Tasks"
         description={`Can't find a task matching ${props.searchText}.\nCreate it now!`}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Create Task"
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
-            />
-          </ActionPanel>
-        }
+        actions={<ActionPanel>{createAction}</ActionPanel>}
       />
     );
   }
@@ -34,15 +34,7 @@ export default function EmptyView(props: {
           icon="✅"
           title="All Done"
           description="All tasks complete!"
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Create Task"
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
-              />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{createAction}</ActionPanel>}
         />
       );
     case Filter.Completed:
@@ -55,15 +47,7 @@ export default function EmptyView(props: {
           icon="📝"
           title="No Tasks Found"
           description="You don't have any tasks yet."
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Create Task"
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateTaskForm listId={props.listId} title={props.searchText} onCreate={props.onCreate} />}
-              />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{createAction}</ActionPanel>}
         />
       );
       break;

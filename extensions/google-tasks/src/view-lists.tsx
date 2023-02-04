@@ -38,6 +38,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="Show List" icon={Icon.List} target={<ListView listId={list.id} />} />
+                <Action.CopyToClipboard title="Copy List Title" icon={Icon.Clipboard} content={list.title} />
               </ActionPanel>
             }
           />

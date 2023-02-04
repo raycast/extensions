@@ -6,8 +6,8 @@ import { client } from "./oauth";
 
 // Cache
 const cache = new Cache();
-const TASKLISTS_KEY = cacheKey('tasklists');
-const TASKS_KEY_PREFIX = cacheKey('tasks');
+const TASKLISTS_KEY = cacheKey("tasklists");
+const TASKS_KEY_PREFIX = cacheKey("tasks");
 
 const getCachedTasklists = (): Tasklist[] => JSON.parse(cache.get(TASKLISTS_KEY) || "[]");
 export const getCachedTasksByListId = (tasklist: string): Task[] =>
