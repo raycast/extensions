@@ -1,5 +1,9 @@
 # AI Assistant Changelog
 
+## [Version: 1.3.0] - 2023-02-05
+
+- Refine UI
+
 ## [Version: 1.2.0] - 2023-01-24
 
 - Add support for OpenAI `code-davinci-002` model

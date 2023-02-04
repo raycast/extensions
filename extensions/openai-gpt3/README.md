@@ -21,7 +21,7 @@ The interface of the extension follows the interface of the OpenAI Playground.
 
 `Send Prompt`: send entered prompt to GPT3.
 
-`Copy Answer to Clipboard`: copy the last answer from GPT3 to the system's clipboard.
+`Copy to Clipboard`: copy the last answer from GPT3 to the system's clipboard.
 
 `Load an Example`: load an example of GPT3 usage into your prompt. Examples are taken from the OpenAI website.
 

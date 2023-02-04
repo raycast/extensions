@@ -11,9 +11,10 @@ import {
 import { useState } from "react";
 import { Configuration, OpenAIApi } from "openai";
 import request from "axios";
-import { encode } from "./encoder";
-import * as example from "../assets/examples";
-import * as infoMessages from "./info-messages";
+import { encode } from "../encoder";
+import * as example from "../../assets/examples";
+import * as infoMessages from "../info-messages";
+import ResultView from "./result";
 
 interface Preferences {
   openAiApiKey: string;
@@ -45,12 +46,11 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-export default function Command() {
+export default function FormView({ push }: { push: (component: React.ReactNode) => void }) {
   const maxTokensDavinci = 4096;
   const maxTokensAdaBabbageCurie = 2048;
   const maxTokensCodex = 8000;
   const [textPrompt, setTextPrompt] = useState("");
-  const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [numTokensPrompt, setNumTokensPrompt] = useState<number | undefined>(0);
   const [maxTokens, setMaxTokens] = useState<number>(256);
@@ -114,7 +114,6 @@ export default function Command() {
   };
 
   const handleSubmit = async (formRequest: gptFormValues) => {
-    await showToast({ title: "Prompt Sent" });
     setIsLoading(true);
     try {
       const completion: gptCompletion = await openai.createCompletion({
@@ -126,11 +125,8 @@ export default function Command() {
         frequency_penalty: Number(formRequest.frequencyPenalty),
         presence_penalty: Number(formRequest.presencePenalty),
       });
-      await showToast({ title: "Answer Received" });
-      const response = completion.data.choices[0].text;
-      setTextPrompt(textPrompt + response);
-      setAnswer(response);
-      setNumTokensPrompt(completion.data.usage.total_tokens);
+      const response = completion.data;
+      push(<ResultView result={response} />);
     } catch (error) {
       if (request.isAxiosError(error) && error.response) {
         await showToast({ style: Toast.Style.Failure, title: "Error:", message: error.response.data.error.message });
@@ -138,7 +134,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error:",
-          message: "Something went wrong but I am not sure what",
+          message: "Something went wrong, but I am not sure what",
         });
       }
     }
@@ -154,11 +150,6 @@ export default function Command() {
             title="Send Prompt"
             icon={Icon.Paperclip}
             onSubmit={(values: gptFormValues) => handleSubmit(values)}
-          />
-          <Action.CopyToClipboard
-            title="Copy Answer to Clipboard"
-            content={answer}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <ActionPanel.Submenu title="Load an Example" icon={Icon.Book}>
             <Action
@@ -195,7 +186,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="This is your AI playground" />
       <Form.TextArea
         id="prompt"
         title="Prompt"
@@ -218,7 +208,7 @@ export default function Command() {
       />
       <Form.Description text={`Prompt token count: ${numTokensPrompt}`} />
       <Form.Separator />
-      <Form.Description text="These are the model parameters" />
+      <Form.Description text="Model Parameters" />
       <Form.Dropdown
         id="model"
         title="AI Model"
