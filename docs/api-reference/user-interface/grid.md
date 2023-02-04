@@ -65,7 +65,7 @@ Other times, you may want the content of the search bar to be updated by the ext
 To do so, you can use the `searchText` [prop](#props).
 
 ```typescript
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Grid } from "@raycast/api";
 
 const items = [
@@ -183,6 +183,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 
@@ -278,7 +279,7 @@ export default function Command() {
       }
     >
       {(items[type] || []).map((item) => (
-        <Grid.Item content={item.content} keywords={item.keywords} />
+        <Grid.Item key={`${item.content}`} content={item.content} keywords={item.keywords} />
       ))}
     </Grid>
   );
@@ -380,6 +381,7 @@ export default function CommandWithCustomEmptyView() {
   }>({ searchText: "", items: [] });
 
   useEffect(() => {
+    console.log("Running effect after state.searchText changed. Current value:", JSON.stringify(state.searchText));
     // perform an API call that eventually populates `items`.
   }, [state.searchText]);
 

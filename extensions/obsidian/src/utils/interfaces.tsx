@@ -1,4 +1,5 @@
 import { Image } from "@raycast/api";
+import { NoteAction } from "./constants";
 
 //--------------------------------------------------------------------------------
 // All interfaces for all commands should be defined here.
@@ -115,4 +116,17 @@ export interface MediaState {
 export interface MediaSearchArguments {
   searchArgument: string;
   typeArgument: string;
+}
+
+export interface NoteListProps {
+  title?: string;
+  vault: Vault;
+  notes: Note[] | undefined;
+  allNotes?: Note[];
+  setNotes?: (notes: Note[]) => void;
+  isLoading?: boolean;
+  searchArguments: SearchArguments;
+  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
+  onDelete?: (note: Note, vault: Vault) => void;
+  onSearchChange?: (search: string) => void;
 }

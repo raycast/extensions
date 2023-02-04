@@ -1,10 +1,19 @@
-# ai-gen: OpenAI Image and Text Generator
+# OpenAI Image and Text Generator
 
-The `ai-gen` extension uses the OpenAI [Image Generation](https://beta.openai.com/docs/guides/images) API — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — and the [Text Completion](https://beta.openai.com/docs/guides/completion) API to generate results from a text-based prompt.
+The OpenAI Generator extension uses the OpenAI [Image Generation](https://beta.openai.com/docs/guides/images) API — colloquially known as [DALL·E 2](https://openai.com/dall-e-2/) — and the [Text Completion](https://beta.openai.com/docs/guides/completion) API to generate results from a text-based prompt.
+
+## Usage
+
+This extension provides 4 commands:
+
+1. **Complete Text** - uses the GPT-3 AI models to generate a text completion that attempts to match whatever context or pattern you gave it
+2. **Create Image** - uses the DALL•E AI model to generate new images
+3. **Create Image Variation** - uses the DALL•E AI model to create a variation on an image you upload from your local disk
+3. **Create Image Edit** - uses the DALL•E AI model to extend an image you upload using a mask
 
 ## API Keys
 
-In order to use OpenAI's APIs, you have to create an account and create [a new API key](https://beta.openai.com/account/api-keys). Once you have a key, paste it into the extenion's settings.
+In order to use OpenAI's APIs, you have to create an account and create [a new API key](https://beta.openai.com/account/api-keys). Once you have a key, paste it into the extension's settings.
 
 Please make sure to [familiarize yourself](https://beta.openai.com/docs/guides/images/introduction) with the API's limits. While it's super fun to just start immediately generating images, the Create Image API is heavily rate-limited (you'll be limited to 10 images per minute, and 25 per 5 minutes) and even the Text Completion API can run up a bill if you push it hard enough.
 

@@ -6,18 +6,16 @@ export function NoteListDropdown(props: {
   allNotes?: Note[];
   setNotes?: (notes: Note[]) => void;
   tags: string[];
-  searchArguments?: SearchArguments;
+  searchArguments: SearchArguments;
 }) {
   const { setNotes, allNotes, tags, searchArguments } = props;
 
   function defaultTagValue() {
-    if (searchArguments) {
-      if (searchArguments.tagArgument) {
-        if (searchArguments.tagArgument.startsWith("#")) {
-          return searchArguments.tagArgument;
-        } else {
-          return "#" + searchArguments.tagArgument;
-        }
+    if (searchArguments.tagArgument) {
+      if (searchArguments.tagArgument.startsWith("#")) {
+        return searchArguments.tagArgument;
+      } else {
+        return "#" + searchArguments.tagArgument;
       }
     }
   }
@@ -58,7 +56,7 @@ export function NoteListDropdown(props: {
 
   function dropdownWithoutDefault() {
     return (
-      <List.Dropdown tooltip="Search For" onChange={handleChange}>
+      <List.Dropdown tooltip="Search For" defaultValue="all" onChange={handleChange}>
         {dropdownContent()}
       </List.Dropdown>
     );

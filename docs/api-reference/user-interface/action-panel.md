@@ -97,7 +97,7 @@ This is handy when an action needs to select from a range of options. For exampl
 #### Example
 
 ```typescript
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (

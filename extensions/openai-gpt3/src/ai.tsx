@@ -48,6 +48,7 @@ const openai = new OpenAIApi(configuration);
 export default function Command() {
   const maxTokensDavinci = 4096;
   const maxTokensAdaBabbageCurie = 2048;
+  const maxTokensCodex = 8000;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -62,10 +63,12 @@ export default function Command() {
   const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
 
   const modelLimit = {} as modelTokenLimit;
+  modelLimit["text-davinci-003"] = maxTokensDavinci;
   modelLimit["text-davinci-002"] = maxTokensDavinci;
   modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
+  modelLimit["code-davinci-002"] = maxTokensCodex;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -222,10 +225,12 @@ export default function Command() {
         info={infoMessages.model}
         onChange={(newValue: string) => setMaxModelTokens(modelLimit[newValue])}
       >
+        <Form.Dropdown.Item value="text-davinci-003" title="text-davinci-003" />
         <Form.Dropdown.Item value="text-davinci-002" title="text-davinci-002" />
         <Form.Dropdown.Item value="text-curie-001" title="text-curie-001" />
         <Form.Dropdown.Item value="text-babbage-001" title="text-babbage-001" />
         <Form.Dropdown.Item value="text-ada-001" title="text-ada-001" />
+        <Form.Dropdown.Item value="code-davinci-002" title="code-davinci-002" />
       </Form.Dropdown>
       <Form.TextField
         id="temperature"

@@ -6,6 +6,7 @@ import { authorize } from "./oauth";
 import { isSpotifyInstalled } from "../utils";
 import { getTrack, isRunning, playTrack, setShuffling } from "./applescript";
 import { TrackInfo } from "./types";
+import { addToSavedTracks, removeFromSavedTracks } from "./util";
 
 export const spotifyApi = new SpotifyWebApi();
 
@@ -15,6 +16,7 @@ async function authorizeIfNeeded(): Promise<void> {
     spotifyApi.setAccessToken(accessToken);
   } catch (error) {
     console.error("authorization error:", error);
+
     showToast({ style: Toast.Style.Failure, title: String(error) });
     return;
   }
@@ -35,12 +37,15 @@ export async function likeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> |
   }
 
   await authorizeIfNeeded();
+  const accessToken = spotifyApi.getAccessToken();
+  if (!accessToken) return;
+
   try {
     const track = await getTrack();
     if (track && track.id) {
       const trackId = track.id.replace("spotify:track:", "");
       try {
-        const response = await spotifyApi.addToMySavedTracks([trackId]);
+        const response = await addToSavedTracks(trackId, accessToken);
         if (response) {
           return { result: track };
         }
@@ -67,12 +72,15 @@ export async function dislikeCurrentlyPlayingTrack(): Promise<Response<TrackInfo
   }
 
   await authorizeIfNeeded();
+  const accessToken = spotifyApi.getAccessToken();
+  if (!accessToken) return;
+
   try {
     const track = await getTrack();
     if (track && track.id) {
       const trackId = track.id.replace("spotify:track:", "");
       try {
-        const response = await spotifyApi.removeFromMySavedTracks([trackId]);
+        const response = await removeFromSavedTracks(trackId, accessToken);
         if (response) {
           return { result: track };
         }

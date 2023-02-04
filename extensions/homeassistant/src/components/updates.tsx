@@ -3,7 +3,9 @@ import { useState } from "react";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { useHAStates } from "../hooks";
-import { StateListItem, useStateSearch } from "./states";
+import { getStateTooltip } from "../utils";
+import { ShowAttributesAction } from "./entity";
+import { PrimaryIconColor, StateListItem, useStateSearch } from "./states";
 
 function ChangelogDetail(props: { state: State }): JSX.Element {
   const s = props.state;
@@ -107,6 +109,54 @@ export function UpdateSkipVersionAction(props: { state: State }): JSX.Element | 
   );
 }
 
+interface HACSRepo {
+  name: string | undefined;
+  display_name: string | undefined;
+  installed_version: string | undefined;
+  available_version: string | undefined;
+}
+
+function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
+  const r = props.repo;
+  if (!r || !r.display_name || !r.available_version || !r.name) {
+    return null;
+  }
+  return (
+    <List.Item
+      title={r.name || r.display_name}
+      icon={{ source: "hacs.svg", tintColor: PrimaryIconColor }}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Install">
+            <Action.OpenInBrowser title="Open in Dashboard" url={ha.urlJoin("hacs/entry")} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attribtues">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+      accessories={[
+        { text: `${r.installed_version} => ${r.available_version}`, tooltip: getStateTooltip(props.state) },
+      ]}
+    />
+  );
+}
+
+function HACSUpdateItems(props: { state: State | undefined }): JSX.Element | null {
+  const s = props.state;
+  if (!s) {
+    return null;
+  }
+  const repos: HACSRepo[] | undefined = s.attributes.repositories;
+  return (
+    <>
+      {repos?.map((r, i) => (
+        <HACSUpdateItem key={i} repo={r} state={s} />
+      ))}
+    </>
+  );
+}
+
 export function UpdatesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
@@ -127,12 +177,15 @@ export function UpdatesList(): JSX.Element {
   const updateRequiredStates = states.filter((s) => s.state === "on");
   const otherStates = states.filter((s) => s.state !== "on");
 
+  const hacsState = allStates?.find((s) => s.entity_id === "sensor.hacs");
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section title="Updates available" subtitle={`${updateRequiredStates?.length}`}>
         {updateRequiredStates?.map((state) => (
           <StateListItem key={state.entity_id} state={state} />
         ))}
+        <HACSUpdateItems state={hacsState} />
       </List.Section>
       <List.Section title="No Updates required" subtitle={`${otherStates?.length}`}>
         {otherStates?.map((state) => (

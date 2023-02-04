@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, open, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, open, Toast, showToast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 
 import useTeams from "../hooks/useTeams";
@@ -33,11 +33,10 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
 
   const { handleSubmit, itemProps, focus, reset } = useForm<CreateProjectValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
       try {
-        const { success, project } = await linearClient.projectCreate({
+        const { success, project } = await linearClient.createProject({
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,

@@ -62,7 +62,7 @@ export function CompleteTextForm(props: { draftValues?: CompleteTextValues }) {
     return setErrors({ ...errors, ...{ [k]: v } });
   }
 
-  const [tokenCount, setTokenCount] = useState<number>();
+  const [tokenCount, setTokenCount] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState<boolean>();
   const [model, setModel] = useState(PREFERRED_MODELS[0]);
 

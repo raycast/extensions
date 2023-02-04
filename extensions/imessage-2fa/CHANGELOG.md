@@ -1,4 +1,8 @@
-# iMessage 2FA Changelog
+# Messages 2FA Changelog
+
+## [Update] - 2023-01-16
+
+- Add polling of 2FA codes
 
 ## [Update] - 2022-10-24
 

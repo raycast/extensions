@@ -4,19 +4,11 @@ import { useState, useEffect } from "react";
 import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
-import {
-  CopyEntityIDAction,
-  CopyStateValueAction,
-  EntityStandardActionSections,
-  OpenEntityHistoryAction,
-  OpenEntityLogbookAction,
-  ShowAttributesAction,
-} from "./entity";
+import { EntityStandardActionSections } from "./entity";
 import {
   SelectVolumeAction,
   SelectSourceAction,
   getMediaPlayerTitleAndArtist,
-  CopyTrackToClipboard,
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
 } from "./mediaplayer";
@@ -70,6 +62,7 @@ import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSk
 import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
 import { ZoneShowDetailAction } from "./zones";
 import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
+import { getStateTooltip } from "../utils";
 
 export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -518,6 +511,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       accessories={[
         {
           text: extraTitle(state) + stateValue(state),
+          tooltip: getStateTooltip(state),
         },
       ]}
     />

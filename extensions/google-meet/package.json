@@ -5,6 +5,9 @@
   "description": "Start a Google Meet directly from Raycast",
   "icon": "google-meet-icon.png",
   "author": "vitoorgomes",
+  "contributors": [
+    "hughlaw"
+  ],
   "license": "MIT",
   "commands": [
     {

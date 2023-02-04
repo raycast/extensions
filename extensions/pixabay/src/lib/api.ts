@@ -4,6 +4,8 @@ import fs from "fs";
 import { pipeline } from "stream";
 import util from "util";
 import { resolveFilepath } from "./utils";
+import fetch from "cross-fetch";
+
 const streamPipeline = util.promisify(pipeline);
 
 export function getDownloadFolder(): string {

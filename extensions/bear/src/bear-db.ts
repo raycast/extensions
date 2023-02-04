@@ -9,9 +9,11 @@ export interface Note {
   title: string;
   text: string;
   modifiedAt: Date;
+  createdAt: Date;
   tags: string[];
   encrypted: boolean;
   formattedTags: string;
+  wordCount: number;
 }
 
 const BEAR_DB_PATH =
@@ -23,6 +25,7 @@ SELECT
   notes.ZTITLE AS title,
   notes.ZTEXT AS text,
   notes.ZMODIFICATIONDATE AS modified_at,
+  notes.ZCREATIONDATE AS created_at,
   group_concat(tags.ZTITLE) AS tags,
   notes.ZENCRYPTED AS encrypted
 FROM
@@ -148,14 +151,17 @@ export class BearDb {
 
   private toNote(row: ParamsObject): Note {
     const tags = (row.tags as string | undefined)?.split(",") ?? [];
+    const text = (row.text as string) ?? "";
     return {
       id: row.id as string,
       title: row.title as string,
-      text: row.text as string,
+      text,
       modifiedAt: new Date(((row.modified_at as number) + BEAR_EPOCH) * 1000),
+      createdAt: new Date(((row.created_at as number) + BEAR_EPOCH) * 1000),
       tags: tags,
       formattedTags: formatTags(tags),
       encrypted: row.encrypted === 1,
+      wordCount: [...text.matchAll(/\b\w+\b/g)].length,
     };
   }
 

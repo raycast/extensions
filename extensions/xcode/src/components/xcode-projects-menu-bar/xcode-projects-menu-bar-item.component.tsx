@@ -15,13 +15,7 @@ export function XcodeProjectsMenuBarItem(props: { project: XcodeProject }): JSX.
       tooltip={tildify(props.project.filePath)}
       onAction={(event: MenuBarExtra.ActionEvent) =>
         open(
-          event.type === "left-click"
-            ? props.project.filePath
-            : props.project.filePath
-                .split("/")
-                .filter((component) => component)
-                .slice(0, -1)
-                .join("/"),
+          event.type === "left-click" ? props.project.filePath : props.project.directoryPath,
           event.type === "left-click" ? XcodeService.bundleIdentifier : undefined
         )
       }

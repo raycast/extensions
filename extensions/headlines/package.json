@@ -5,6 +5,9 @@
   "description": "Super breif news extension.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
@@ -251,7 +254,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.0",
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
     "node-fetch": "^3.2.9"
   },
   "devDependencies": {

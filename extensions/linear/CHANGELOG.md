@@ -1,5 +1,40 @@
 # Linear Changelog
 
+## [Add attachment to Create Issue command] - 2023-01-24
+
+- Add a file picker on the `Create Issue` command to add a single attachment on a newly created Linear issue
+
+## [Add due date action] - 2023-01-19
+
+- Add a new action to set due dates on issues
+- Add due date accessory on issue list items
+
+## [Quick Add Comment to Issue command] - 2023-01-18
+
+- Add a new command allowing you to quickly add a comment to an issue using its issue ID.
+
+## [Fix icons] - 2022-12-20
+
+- Fix a bug where Linear icons would not show up in the list's accessories for projects
+- Fix a bug where Linear icons would not show up if the corresponding icon in the file system doesn't exist
+- Add new predefined icons
+
+## [Add new accessories in issue list] - 2022-12-12
+
+- Add cycle, project, label, and estimate accessories in the issue list if any
+
+## [Added right click support to menubar] - 2022-12-05
+
+- Added right click support to menubar which mark the issue as read.
+
+## [Copy Formatted Issue URL Action] - 2022-11-23
+
+- Add a new "Copy Formatted Issue URL" Action
+
+## [Add all teams option in "Search Projects" command] - 2022-11-21
+
+- Add an `All teams` option in `Search Projects` command allowing users to see all projects in a Linear workspace
+
 ## [Create issue customization] - 2022-10-13
 
 - Add a preference to select the toast copy action after creating the issue

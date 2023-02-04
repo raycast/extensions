@@ -1,10 +1,12 @@
+import { AddProjectArgs, colors, Project as TProject, ProjectViewStyle } from "@doist/todoist-api-typescript";
 import { ActionPanel, Action, Toast, Form, Icon, showToast, open, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useCachedPromise, useForm } from "@raycast/utils";
-import { AddProjectArgs, colors, Project as TProject } from "@doist/todoist-api-typescript";
+
 import { handleError, todoist } from "../api";
 import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
-import View from "./View";
+
 import Project from "./Project";
+import View from "./View";
 
 interface ProjectFormProps {
   project?: TProject;
@@ -13,9 +15,10 @@ interface ProjectFormProps {
 
 type ProjectFormValues = {
   name: string;
-  favorite: boolean;
-  colorId: string;
+  isFavorite: boolean;
+  color: string;
   parentId: string;
+  viewStyle: string;
 };
 
 export default function ProjectForm({ project, mutate }: ProjectFormProps) {
@@ -29,19 +32,20 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
 
   const isCreatingProject = !project;
 
-  const projects = data?.filter((project) => !project.inboxProject);
+  const projects = data?.filter((project) => !project.isInboxProject);
 
   const initialValues = {
     name: project ? project.name : "",
     parentId: "",
-    favorite: project ? project.favorite : false,
-    colorId: project ? String(project.color) : "",
+    isFavorite: project ? project.isFavorite : false,
+    color: project ? project.color : "",
+    viewStyle: project ? project.viewStyle : "list",
   };
 
   const { handleSubmit, itemProps, focus, reset } = useForm<ProjectFormValues>({
-    async onSubmit({ name, favorite, colorId, parentId }) {
+    async onSubmit({ name, isFavorite, color, parentId, viewStyle }) {
       async function create() {
-        const body: AddProjectArgs = { name, favorite };
+        const body: AddProjectArgs = { name, isFavorite };
 
         if (!body.name) {
           await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
@@ -49,30 +53,34 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
         }
 
         if (parentId) {
-          body.parentId = parseInt(parentId);
+          body.parentId = parentId;
         }
 
-        if (colorId) {
-          body.color = parseInt(colorId);
+        if (color) {
+          body.color = color;
+        }
+
+        if (viewStyle) {
+          body.viewStyle = viewStyle as ProjectViewStyle;
         }
 
         const toast = new Toast({ style: Toast.Style.Animated, title: "Creating project" });
         await toast.show();
 
         try {
-          const { url, id } = await todoist.addProject(body);
+          const project = await todoist.addProject(body);
           toast.style = Toast.Style.Success;
           toast.title = "Project created";
           toast.primaryAction = {
             title: "Open Project",
             shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => push(<Project projectId={id} />),
+            onAction: () => push(<Project project={project} projects={projects} />),
           };
           toast.secondaryAction = {
             title: `Open Project ${isTodoistInstalled ? "in Todoist" : "in Browser"}`,
             shortcut: { modifiers: ["cmd", "shift"], key: "o" },
             onAction: async () => {
-              open(isTodoistInstalled ? `todoist://project?id=${id}` : url);
+              open(isTodoistInstalled ? `todoist://project?id=${project.id}` : project.url);
             },
           };
 
@@ -89,15 +97,19 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
           return;
         }
 
-        const body: AddProjectArgs = { name, favorite };
+        const body: AddProjectArgs = { name, isFavorite };
 
         if (!body.name) {
           await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
           return;
         }
 
-        if (colorId) {
-          body.color = parseInt(colorId);
+        if (color) {
+          body.color = color;
+        }
+
+        if (viewStyle) {
+          body.viewStyle = viewStyle as ProjectViewStyle;
         }
 
         await showToast({ style: Toast.Style.Animated, title: "Updating project" });
@@ -110,7 +122,7 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
           }
           pop();
         } catch (error) {
-          handleError({ error, title: "Unable to create project" });
+          handleError({ error, title: "Unable to update project" });
         }
       }
 
@@ -138,13 +150,13 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
       >
         <Form.TextField {...itemProps.name} title="Name" placeholder="My project" />
 
-        <Form.Dropdown {...itemProps.colorId} title="Color">
-          {colors.map(({ name, id, value }) => (
+        <Form.Dropdown {...itemProps.color} title="Color">
+          {colors.map(({ key, displayName, hexValue }) => (
             <Form.Dropdown.Item
-              value={String(id)}
-              title={name}
-              key={id}
-              icon={{ source: Icon.Dot, tintColor: value }}
+              value={key}
+              title={displayName}
+              key={key}
+              icon={{ source: Icon.CircleFilled, tintColor: hexValue }}
             />
           ))}
         </Form.Dropdown>
@@ -153,12 +165,18 @@ export default function ProjectForm({ project, mutate }: ProjectFormProps) {
           <Form.Dropdown {...itemProps.parentId} title="Parent project">
             <Form.Dropdown.Item value="" title="None" />
             {projects.map(({ id, name }) => (
-              <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+              <Form.Dropdown.Item value={id} title={name} key={id} />
             ))}
           </Form.Dropdown>
         ) : null}
 
-        <Form.Checkbox {...itemProps.favorite} label="Mark as favorite?" />
+        <Form.Checkbox {...itemProps.isFavorite} label="Mark as favorite?" />
+
+        <Form.Dropdown {...itemProps.viewStyle} title="View Style">
+          <Form.Dropdown.Item value="list" title="List" icon={Icon.List} />
+
+          <Form.Dropdown.Item value="board" title="Board" icon={Icon.BarChart} />
+        </Form.Dropdown>
       </Form>
     </View>
   );

@@ -1,10 +1,21 @@
 import { useEffect } from "react";
-import { Clipboard, Form, ActionPanel, Action, Icon, Toast, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  Clipboard,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  useNavigation,
+  showToast,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -51,12 +62,13 @@ export type CreateIssueValues = {
   cycleId: string;
   projectId: string;
   parentId: string;
+  attachments: string[];
 };
 
 type Preferences = {
   signature: boolean;
   autofocusField: "teamId" | "title";
-  copyToastAction: "key" | "url" | "title";
+  copyToastAction: "id" | "url" | "title";
 };
 
 function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
@@ -68,7 +80,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
     return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
   }
 
-  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+  return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
@@ -80,8 +92,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
 
   const { handleSubmit, itemProps, values, setValue, focus, reset, setValidationError } = useForm<CreateIssueValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating issue" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
       let payloadDescription = values.description || "";
       if (signature) {
@@ -135,6 +146,19 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
             ...getCopyToastAction(copyToastAction, issue),
           };
+
+          if (values.attachments[0]) {
+            try {
+              await createAttachment({
+                issueId: issue.id,
+                url: values.attachments[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Failed to create attachment";
+              toast.message = "The issue was still created, but the attachment could not be added.";
+            }
+          }
 
           reset({
             title: "",
@@ -376,6 +400,10 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} allowMultipleSelection={false} />
     </Form>
   );
 }

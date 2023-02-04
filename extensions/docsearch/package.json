@@ -5,16 +5,38 @@
   "description": "Link all DocSearch into Raycast",
   "icon": "docsearch.png",
   "author": "Fatpandac",
+  "keywords": [
+    "algolia"
+  ],
   "categories": [
     "Documentation"
   ],
   "license": "MIT",
+  "contributors": [
+    "AnishDe12020",
+    "pomdtr"
+  ],
   "commands": [
     {
       "name": "docsearch",
       "title": "Search Documentation",
       "subtitle": "DocSearch",
       "description": "Search documentation",
+      "mode": "view"
+    },
+    {
+      "name": "apollo",
+      "icon": "logo/apollo.png",
+      "title": "Apollo",
+      "subtitle": "DocSearch",
+      "description": "Search Apollo documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
       "mode": "view"
     },
     {
@@ -38,6 +60,21 @@
       "title": "Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search Bootstrap documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "clerk",
+      "icon": "logo/clerk.png",
+      "title": "Clerk",
+      "subtitle": "DocSearch",
+      "description": "Search Clerk documentation",
       "arguments": [
         {
           "name": "search",
@@ -183,6 +220,36 @@
       "mode": "view"
     },
     {
+      "name": "supabase",
+      "icon": "logo/supabase.png",
+      "title": "Supabase",
+      "subtitle": "DocSearch",
+      "description": "Search Supabase documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "slidev",
+      "icon": "logo/slidev.png",
+      "title": "Slidev",
+      "subtitle": "DocSearch",
+      "description": "Search Slidev documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
       "name": "slidev_zh-Hans",
       "icon": "logo/slidev.png",
       "title": "Slidev(zh-Hans)",
@@ -200,7 +267,7 @@
     {
       "name": "tailwindcss3",
       "icon": "logo/tailwindcss.png",
-      "title": "TailwindCSS V3",
+      "title": "TailwindCSS v3",
       "subtitle": "DocSearch",
       "description": "Search TailwindCss documentation",
       "arguments": [
@@ -458,6 +525,36 @@
       "title": "React Bootstrap",
       "subtitle": "DocSearch",
       "description": "Search React Bootstrap documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "gitbook",
+      "icon": "logo/gitbook.png",
+      "title": "GitBook",
+      "subtitle": "DocSearch",
+      "description": "Search gitbook documentation",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "raycast",
+      "icon": "logo/raycast.png",
+      "title": "Raycast",
+      "subtitle": "DocSearch",
+      "description": "Search Raycast documentation",
       "arguments": [
         {
           "name": "search",

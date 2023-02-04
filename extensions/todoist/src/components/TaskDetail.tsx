@@ -1,10 +1,13 @@
-import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
+import { ActionPanel, Detail, Icon } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers/dates";
-import { priorities } from "../constants";
+
 import { todoist, handleError } from "../api";
+import { priorities } from "../constants";
+import { displayDueDate } from "../helpers/dates";
+import { getProjectIcon } from "../helpers/projects";
+
 import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
@@ -19,16 +22,19 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
     error: getTaskError,
     mutate: mutateTaskDetail,
   } = useCachedPromise((taskId) => todoist.getTask(taskId), [taskId]);
+
   const {
     data: projects,
     isLoading: isLoadingProjects,
     error: getProjectsError,
   } = useCachedPromise(() => todoist.getProjects());
+
   const {
     data: labels,
     isLoading: isLoadingLabels,
     error: getLabelsError,
   } = useCachedPromise(() => todoist.getLabels());
+
   const {
     data: comments,
     isLoading: isLoadingComments,
@@ -54,11 +60,12 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
 
   const priority = priorities.find((priority) => priority.value === task?.priority);
   const project = projects?.find((project) => project.id === task?.projectId);
-  const taskLabels = task?.labelIds.map((labelId) => {
-    const associatedLabel = labels?.find((label) => label.id === labelId);
+  const taskLabels = task?.labels.map((labelName) => {
+    const associatedLabel = labels?.find((label) => label.name === labelName);
+
     return {
       ...associatedLabel,
-      color: colors.find((color) => color.id === associatedLabel?.color),
+      color: colors.find((color) => color.key === associatedLabel?.color),
     };
   });
   const hasComments = comments && comments.length > 0;
@@ -73,16 +80,15 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
   return (
     <Detail
       isLoading={isLoadingTask || isLoadingProjects || isLoadingLabels || isLoadingComments}
+      navigationTitle={task?.content}
       {...(task
         ? {
             markdown: `# ${task?.content}\n\n${task?.description}`,
             metadata: (
               <Detail.Metadata>
-                <Detail.Metadata.Label
-                  title="Project"
-                  text={project?.name}
-                  icon={project?.inboxProject ? Icon.Envelope : Icon.List}
-                />
+                {project ? (
+                  <Detail.Metadata.Label title="Project" text={project.name} icon={getProjectIcon(project)} />
+                ) : null}
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
 
@@ -100,7 +106,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                       <Detail.Metadata.TagList.Item
                         key={taskLabel?.id || index}
                         text={taskLabel?.name || ""}
-                        color={taskLabel.color?.value}
+                        color={taskLabel.color?.hexValue}
                       />
                     ))}
                   </Detail.Metadata.TagList>
@@ -120,6 +126,7 @@ export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JS
                 <TaskActions
                   task={task}
                   fromDetail={true}
+                  projects={projects}
                   mutateTasks={mutateTasks}
                   mutateTaskDetail={mutateTaskDetail}
                   mutateComments={mutateComments}

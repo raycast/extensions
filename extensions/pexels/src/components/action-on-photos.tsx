@@ -1,18 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import React from "react";
 import { Preferences } from "../types/preferences";
 import { buildImageName, deleteCache, downloadPhoto, setWallpaper } from "../utils/common-utils";
 import { PexelsPhoto } from "../types/types";
 import { ActionToPexels } from "./action-to-pexels";
 import { Photo } from "pexels";
+import { ActionOpenPreferences } from "./action-open-preferences";
 
 export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
   const { pexelsPhoto } = props;
@@ -58,7 +51,7 @@ export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
         }}
       />
       <Action
-        icon={Icon.Window}
+        icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
           setWallpaper(pexelsPhoto.src.original).then(() => "");
@@ -96,14 +89,7 @@ export function ActionOnPhotos(props: { pexelsPhoto: Photo }) {
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Gear}
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={openExtensionPreferences}
-        />
-      </ActionPanel.Section>
+      <ActionOpenPreferences />
     </ActionPanel>
   );
 }

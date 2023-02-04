@@ -1,229 +1,243 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  openCommandPreferences,
-} from '@raycast/api'
+import { useMemo } from 'react'
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 import { useTodoList } from '@/features/todo-list/hooks/use-todo-list'
 import { EmptyList } from '@/features/todo-list/components/empty-list'
 import { CompleteTodoAction } from '@/components/complete-todo-action'
 import { SetLabelAction } from '@/components/set-todo-label-action'
 import { RemindAction } from '@/components/remind-todo-action'
 import { CopyToDoAction } from '@/components/copy-todo-action'
-import { WhatHaveIDoneAction } from '@/features/todo-list/components/what-have-i-done-action'
-import { OpenNotionAction } from '@/features/todo-list/components/open-notion-action'
 import { DeleteTodoAction } from '@/components/delete-todo-action'
-import { TransparentEmpty } from '@/features/todo-list/components/transparent-empty'
-import { useMemo, useState } from 'react'
-import { Todo } from '@/types/todo'
-import { DateReminder } from './components/date-reminder'
-import { getProgressIcon } from '@raycast/utils'
-import { InProgressAction } from '@/features/todo-list/components/in-progress-action'
-import { ReauthorizeAction } from './components/reauthorize-action'
-import { templateUrl } from '@/constants/template-url'
+import { SetProjectAction } from './components/set-todo-project-action'
+import { SetUserAction } from './components/set-todo-user-action'
+import { SetFilter } from './components/set-filter-action'
+import { createAccessoriesArray } from '@/utils/create-accessories-array'
+import { GeneralActions } from './components/general-actions'
+import { CopyTaskLinkAction } from './components/copy-task-link'
+import { OpenInNotionAction } from './components/open-in-notion-action'
+import { OpenOnNotionAction } from './components/open-on-notion'
+import { OpenAttachedLink } from './components/open-attached-link'
+import { SetStatusAction } from './components/set-todo-status-action'
 
 export function TodoList() {
   const {
     todos,
-    data,
     tags,
+    statuses,
     notionDbUrl,
     hasStatusProperty,
-    searchText,
-    setSearchText,
+    hasAssigneeProperty,
+    hasProjectProperty,
+    hasTagProperty,
     loading,
-    dbError,
     handleCreate,
     handleComplete,
-    handleInProgress,
+    handleSetStatus,
     handleSetTag,
     handleSetDate,
     handleDelete,
-    handleMoveUp,
-    handleMoveDown,
-    setFilter,
-    filter,
+    projects,
+    projectsById,
+    handleSetProject,
+    users,
+    handleSetUser,
+    newTodo,
+    searchText,
+    onSearchTextChange,
+    filterTodo,
+    handleSetFilter,
+    resetFilter,
+    mutatePreferences,
+    isNotionInstalled,
   } = useTodoList()
 
-  const [todoToEdit, setTodoToEdit] = useState<Todo | null>(null)
-  const databaseName = useMemo(() => getPreferenceValues().database_name, [])
-
-  if (dbError) {
-    return (
-      <List>
-        <List.EmptyView
-          title={`We couldn't find ${databaseName} database.`}
-          description="Make sure to duplicate the template (↵) and grant permission (⌘ + ↵)"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser
-                title="View Link"
-                icon={Icon.Link}
-                url={templateUrl}
-              />
-              <ReauthorizeAction />
-            </ActionPanel>
-          }
-        />
-      </List>
-    )
-  }
-
-  if (todoToEdit) {
-    return (
-      <DateReminder
-        taskToEdit={todoToEdit}
-        setTaskToEdit={setTodoToEdit}
-        handleSetDate={handleSetDate}
-      />
-    )
-  }
+  const filterCount = useMemo(() => {
+    let amount = 0
+    if (filterTodo.tag) amount++
+    if (filterTodo.projectId) amount++
+    if (filterTodo.user) amount++
+    if (filterTodo.status) amount++
+    return amount
+  }, [filterTodo])
 
   return (
     <List
       isLoading={loading}
       searchText={searchText}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Filter or create to-do"
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by tag"
-          value={filter}
-          onChange={setFilter}
-        >
-          <List.Dropdown.Item title="All" value={'all'} />
-          {tags?.map((tag) => (
-            <List.Dropdown.Item
-              key={tag.id}
-              icon={{
-                source: 'dot.png',
-                tintColor: tag.color,
-              }}
-              title={tag.name}
-              value={tag.id}
-            />
-          ))}
-        </List.Dropdown>
-      }
+      onSearchTextChange={onSearchTextChange}
+      searchBarPlaceholder="Search or create task"
     >
-      {searchText ? (
+      {newTodo && newTodo.previewTitle ? (
         <List.Item
           icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-          title={`Create "${searchText}"`}
+          title={newTodo.previewTitle}
+          accessories={createAccessoriesArray({
+            todo: newTodo,
+            projectsById,
+          })}
           actions={
             <ActionPanel>
               <Action
                 icon={Icon.Plus}
-                title="Create To-do"
+                title="Create Task"
                 onAction={handleCreate}
               />
-              <Action.OpenInBrowser
-                title="Open Database"
-                icon={Icon.Binoculars}
-                url={notionDbUrl}
-                shortcut={{ modifiers: ['cmd'], key: 'i' }}
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Copy URL"
+                onAction={() => handleCreate('SHARE')}
+              />
+              <Action
+                icon={Icon.Plus}
+                title="Create Task and Open in Notion"
+                onAction={() => handleCreate('OPEN')}
+                shortcut={{ modifiers: ['cmd'], key: 'o' }}
+              />
+              <GeneralActions
+                mutatePreferences={mutatePreferences}
+                notionDbUrl={notionDbUrl}
               />
             </ActionPanel>
           }
         />
       ) : null}
-      {todos.length > 0
-        ? todos?.map((todo, index) => (
-            <List.Item
-              key={todo.id}
-              icon={{
-                source: {
-                  light: getProgressIcon(todo.inProgress ? 0.5 : 0, '#E0A905'),
-                  dark: getProgressIcon(todo.inProgress ? 0.5 : 0, '#edc03c'),
-                },
-              }}
-              title={todo.title}
-              accessories={
-                todo.tag
-                  ? [
-                      {
-                        text: todo.tag.name,
-                        icon: {
-                          source: 'dot.png',
-                          tintColor: todo.tag.color,
-                        },
-                      },
-                    ]
-                  : []
-              }
-              actions={
-                <ActionPanel>
-                  <CompleteTodoAction todo={todo} onComplete={handleComplete} />
-                  <RemindAction
-                    todo={todo}
-                    onSetDate={handleSetDate}
-                    selectTask={setTodoToEdit}
-                  />
-                  <SetLabelAction
-                    todo={todo}
-                    tags={tags}
-                    onSetLabel={handleSetTag}
-                  />
-                  {hasStatusProperty && (
-                    <InProgressAction
-                      todo={todo}
-                      inProgress={handleInProgress}
-                    />
-                  )}
-                  <Action
-                    icon={Icon.ChevronUp}
-                    title={'Move Up'}
-                    onAction={() => handleMoveUp(index)}
-                    shortcut={{ modifiers: ['shift'], key: 'arrowUp' }}
-                  />
-                  <Action
-                    icon={Icon.ChevronDown}
-                    title={'Move Down'}
-                    onAction={() => handleMoveDown(index)}
-                    shortcut={{ modifiers: ['shift'], key: 'arrowDown' }}
-                  />
-                  <DeleteTodoAction todo={todo} onDelete={handleDelete} />
-                  <ActionPanel.Section>
-                    {todo.contentUrl ? (
-                      <Action.OpenInBrowser
-                        title="View Link"
-                        icon={Icon.Link}
-                        url={todo.contentUrl}
-                        shortcut={{ modifiers: ['cmd'], key: 'e' }}
+      {!newTodo?.title && filterCount > 0 ? (
+        <List.Item
+          title={'Filtering by'}
+          accessories={createAccessoriesArray({
+            todo: filterTodo,
+            projectsById,
+          })}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.XMarkCircle}
+                title="Clear Filters"
+                onAction={resetFilter}
+              />
+              <SetFilter
+                users={users}
+                projects={projects}
+                tags={tags}
+                statuses={statuses}
+                hasStatusProperty={hasStatusProperty}
+                onSetFilter={handleSetFilter}
+              />
+              <GeneralActions
+                mutatePreferences={mutatePreferences}
+                notionDbUrl={notionDbUrl}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {statuses?.map((status) => {
+        const numberOfIssues =
+          todos[status.id]?.length === 1
+            ? '1 issue'
+            : `${todos[status.id]?.length} issues`
+
+        return (
+          <List.Section
+            key={status.id}
+            title={status.name}
+            subtitle={numberOfIssues}
+          >
+            {todos[status.id]?.map((todo) => {
+              return (
+                <List.Item
+                  key={todo.id}
+                  icon={{
+                    source: status && status.icon ? status.icon : 'pending.svg',
+                    tintColor: status?.color
+                      ? status.color
+                      : Color.SecondaryText,
+                  }}
+                  title={todo.title}
+                  accessories={createAccessoriesArray({
+                    todo,
+                    projectsById,
+                    filter: filterTodo,
+                    showStatus: false,
+                  })}
+                  actions={
+                    <ActionPanel>
+                      <CompleteTodoAction
+                        todo={todo}
+                        onComplete={handleComplete}
                       />
-                    ) : null}
-                    <CopyToDoAction todo={todo} />
-                    <Action.OpenInBrowser
-                      title="Open in Notion"
-                      icon={Icon.Window}
-                      url={todo.url}
-                      shortcut={{ modifiers: ['cmd'], key: 'o' }}
-                    />
-                    <OpenNotionAction notionDbUrl={notionDbUrl} />
-                  </ActionPanel.Section>
-                  <ActionPanel.Section>
-                    <WhatHaveIDoneAction />
-                  </ActionPanel.Section>
-                  <ReauthorizeAction />
-                  <Action
-                    title="Open Extension Preferences"
-                    icon={Icon.Gear}
-                    onAction={openCommandPreferences}
-                    shortcut={{ modifiers: ['cmd'], key: ',' }}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))
-        : null}
-      {data && data.length === 0 ? (
-        <EmptyList notionDbUrl={notionDbUrl} />
-      ) : (
-        <TransparentEmpty />
-      )}
+                      {hasStatusProperty && statuses?.length > 0 && (
+                        <SetStatusAction
+                          todo={todo}
+                          statuses={statuses}
+                          onSetStatus={handleSetStatus}
+                        />
+                      )}
+
+                      {hasTagProperty ||
+                      hasAssigneeProperty ||
+                      hasProjectProperty ||
+                      hasStatusProperty ? (
+                        <SetFilter
+                          users={users}
+                          projects={projects}
+                          tags={tags}
+                          statuses={statuses}
+                          hasStatusProperty={hasStatusProperty}
+                          onSetFilter={handleSetFilter}
+                        />
+                      ) : null}
+                      {todo.contentUrl ? (
+                        <OpenAttachedLink url={todo.contentUrl} />
+                      ) : null}
+                      <ActionPanel.Section>
+                        <RemindAction todo={todo} onSetDate={handleSetDate} />
+                        {hasTagProperty && (
+                          <SetLabelAction
+                            todo={todo}
+                            tags={tags}
+                            onSetLabel={handleSetTag}
+                            allowCreate
+                          />
+                        )}
+                        {hasProjectProperty && (
+                          <SetProjectAction
+                            todo={todo}
+                            projects={projects}
+                            onSetProject={handleSetProject}
+                          />
+                        )}
+                        {hasAssigneeProperty && (
+                          <SetUserAction
+                            todo={todo}
+                            users={users}
+                            onSetUser={handleSetUser}
+                          />
+                        )}
+                        <CopyToDoAction todo={todo} />
+                        <CopyTaskLinkAction todo={todo} />
+                        {isNotionInstalled ? (
+                          <OpenInNotionAction url={todo.url} />
+                        ) : (
+                          <OpenOnNotionAction url={todo.shareUrl} />
+                        )}
+                        <DeleteTodoAction todo={todo} onDelete={handleDelete} />
+                      </ActionPanel.Section>
+                      <GeneralActions
+                        mutatePreferences={mutatePreferences}
+                        notionDbUrl={notionDbUrl}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              )
+            })}
+          </List.Section>
+        )
+      })}
+      <EmptyList
+        notionDbUrl={notionDbUrl}
+        mutatePreferences={mutatePreferences}
+      />
     </List>
   )
 }

@@ -6,7 +6,7 @@
 2. Click Button `Create New App`
 3. Select `From an app manifest`
 4. Select a workspace to which you want to grant the extension access.
-5. Copy and paste the following manifest:  
+5. Copy and paste the following manifest (Select `YAML`):  
    _Feel free to exclude permission scope groups - see comments - if you don't want to have the full experience of this extension._
 
     ```

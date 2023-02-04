@@ -13,6 +13,16 @@ export type CreateVariationRequest = {
   user?: string;
 };
 
+export type CreateImageEditRequest = {
+  image: string;
+  mask: string;
+  prompt: string;
+  n?: number;
+  size?: string;
+  responseFormat?: string;
+  user?: string;
+};
+
 export type ImagesResponse = {
   images?: ImagesResponseDataInner[];
   error?: Error;
@@ -24,6 +34,14 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
   const cancelRef = useRef<AbortController | null>(null);
 
   const openai = new OpenAIApi(config as Configuration);
+
+  function catchError(err: any) {
+    if (err.response) {
+      setState({ error: new Error(`${err.response.status}: ${err.response.data.error.message}`) });
+    } else {
+      setState({ error: err.message });
+    }
+  }
 
   const createImage = useCallback(
     async function createImage(requestOpt: CreateImageRequest) {
@@ -40,12 +58,7 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
 
         setState({ images: data.data });
       } catch (e) {
-        const error = e as any;
-        if (error.response) {
-          setState({ error: new Error(`${error.response.status}: ${error.response.data.error.message}`) });
-        } else {
-          setState({ error: error.message });
-        }
+        catchError(e);
       }
 
       setIsLoading(false);
@@ -84,12 +97,7 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
 
         setState({ images: data.data });
       } catch (e) {
-        const error = e as any;
-        if (error.response) {
-          setState({ error: new Error(`${error.response.status}: ${error.response.data.error.message}`) });
-        } else {
-          setState({ error: error.message });
-        }
+        catchError(e);
       }
 
       setIsLoading(false);
@@ -101,5 +109,46 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
     [state, cancelRef]
   );
 
-  return [state, createImage, createVariation, isLoading] as const;
+  const createImageEdit = useCallback(
+    async function createImageEdit({ image, mask, prompt, n, size }: CreateImageEditRequest) {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+      setIsLoading(true);
+
+      try {
+        const formData = new FormData();
+        formData.append("prompt", prompt);
+        formData.append("image", createReadStream(image));
+        formData.append("mask", createReadStream(mask));
+        n && formData.append("n", n);
+        size && formData.append("size", size);
+
+        // Another bug in the openai library, this time with how it makes the POST request using
+        // axios vias the openai.createImageEdit function, so we make it ourselves
+        const { data }: { data: AIImagesResponse } = await axios.post(
+          "https://api.openai.com/v1/images/edits",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${config.apiKey}`,
+              ...formData.getHeaders(),
+            },
+          }
+        );
+
+        setState({ images: data.data });
+      } catch (e) {
+        catchError(e);
+      }
+
+      setIsLoading(false);
+
+      return () => {
+        cancelRef.current?.abort();
+      };
+    },
+    [state, cancelRef]
+  );
+
+  return [state, createImage, createVariation, createImageEdit, isLoading] as const;
 }

@@ -7,6 +7,7 @@
 - [Community](https://raycast.com/community)
 - [GitHub](https://github.com/raycast/extensions)
 - [Store](https://raycast.com/store)
+- [Icon Generator](https://icon.ray.so)
 - [Extension Icon Template](https://www.figma.com/community/file/1030764827259035122)
 
 ## Basics
@@ -34,12 +35,13 @@
 
 ## Information
 
-- [Arguments](information/arguments.md)
-- [Background Refresh](information/background-refresh.md)
 - [Best Practices](information/best-practices.md)
 - [CLI](information/cli.md)
 - [File Structure](information/file-structure.md)
-- [Lifecycle](information/lifecycle.md)
+- [Lifecycle](information/lifecycle/README.md)
+  - [Arguments](information/lifecycle/arguments.md)
+  - [Background Refresh](information/lifecycle/background-refresh.md)
+  - [Deeplinks](information/lifecycle/deeplinks.md)
 - [Manifest](information/manifest.md)
 - [Security](information/security.md)
 - [Terminology](information/terminology.md)

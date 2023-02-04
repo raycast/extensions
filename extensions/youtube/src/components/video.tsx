@@ -153,9 +153,7 @@ export function VideoItem(props: { video: Video; actions?: JSX.Element | undefin
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
-  const maxLength = 70;
-  const rawTitle = he.decode(video.title);
-  const title = rawTitle.slice(0, maxLength) + (rawTitle.length > maxLength ? " ..." : "");
+  const title = he.decode(video.title);
 
   const mainActions = () => {
     const showDetail = <ShowVideoDetails video={video} />;

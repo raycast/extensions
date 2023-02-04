@@ -28,17 +28,45 @@
         {
           "title": "Code :sparkles:",
           "value": "code"
+        },
+        {
+          "title": "Description + Emoji ✨",
+          "value": "description-emoji"
+        },
+        {
+          "title": "Description + Code :sparkles:",
+          "value": "description-code"
         }
       ],
-      "description": "Copy the emoji or copy the code",
+      "description": "Copy the emoji, copy the code or copy description",
       "default": "emoji"
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ],
+      "description": "Primary action of the extension",
+      "default": "paste"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "gitmojis": "^3.12.0"
+    "@raycast/api": "^1.42.0",
+    "gitmojis": "^3.13.0",
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

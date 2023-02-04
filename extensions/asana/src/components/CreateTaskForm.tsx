@@ -1,7 +1,17 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, useNavigation, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Form,
+  Icon,
+  useNavigation,
+  Toast,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { format } from "date-fns";
-import { FormValidation, getAvatarIcon, useForm } from "@raycast/utils";
-import { useMemo } from "react";
+import { FormValidation, getAvatarIcon, useCachedState, useForm } from "@raycast/utils";
+import { useMemo, useEffect } from "react";
 import { useWorkspaces } from "../hooks/useWorkspaces";
 import { useProjects } from "../hooks/useProjects";
 import { useUsers } from "../hooks/useUsers";
@@ -21,10 +31,11 @@ export default function CreateTaskForm(props: {
 }) {
   const { push } = useNavigation();
 
+  const [lastWorkspace, setLastWorkspace] = useCachedState<string>("last-workspace");
+
   const { handleSubmit, itemProps, values, focus, reset } = useForm<TaskFormValues>({
     async onSubmit(values) {
-      const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
-      await toast.show();
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task" });
 
       try {
         const { signature } = getPreferenceValues<{ signature: boolean }>();
@@ -76,7 +87,15 @@ export default function CreateTaskForm(props: {
           },
         };
 
-        reset({ name: "", description: "", due_date: null });
+        reset({
+          name: "",
+          description: "",
+          due_date: null,
+          // keep the rest
+          assignee: values.assignee,
+          workspace: values.workspace,
+          projects: values.projects,
+        });
 
         focus("name");
       } catch (error) {
@@ -90,7 +109,7 @@ export default function CreateTaskForm(props: {
       name: FormValidation.Required,
     },
     initialValues: {
-      workspace: props.draftValues?.workspace || props.workspace,
+      workspace: props.draftValues?.workspace || props.workspace || lastWorkspace,
       projects: props.draftValues?.projects,
       name: props.draftValues?.name,
       description: props.draftValues?.description,
@@ -99,10 +118,14 @@ export default function CreateTaskForm(props: {
     },
   });
 
-  const { data: workspaces } = useWorkspaces();
-  const { data: allProjects } = useProjects(values.workspace);
-  const { data: users } = useUsers(values.workspace);
-  const { data: me } = useMe();
+  useEffect(() => {
+    setLastWorkspace(values.workspace);
+  }, [values.workspace]);
+
+  const { data: workspaces, isLoading: isLoadingWorkspaces } = useWorkspaces();
+  const { data: allProjects, isLoading: isLoadingProjects } = useProjects(values.workspace);
+  const { data: users, isLoading: isLoadingUsers } = useUsers(values.workspace);
+  const { data: me, isLoading: isLoadingMe } = useMe();
 
   const customFields = useMemo(() => {
     const selectedProjects = allProjects?.filter((project) => {
@@ -125,6 +148,7 @@ export default function CreateTaskForm(props: {
         </ActionPanel>
       }
       enableDrafts={!props.fromEmptyView}
+      isLoading={isLoadingWorkspaces || isLoadingProjects || isLoadingUsers || isLoadingMe}
     >
       <Form.Dropdown title="Workspace" storeValue {...itemProps.workspace}>
         {workspaces?.map((workspace) => {

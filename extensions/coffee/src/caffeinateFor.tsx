@@ -1,47 +1,66 @@
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle, popToRoot } from "@raycast/api";
-import Caffeinate from "./caffeinate";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+import { CaffeinateFormValues } from "./interfaces";
+import { startCaffeinate } from "./utils";
 
-const durationUnitMultiplierMap = {
-  seconds: 1,
-  minutes: 60,
-  hours: 60 * 60,
-};
+export default function Command() {
+  const { handleSubmit, itemProps } = useForm<CaffeinateFormValues>({
+    async onSubmit(values) {
+      const hasValue = Object.keys(values).some((key) => values[key] !== "");
 
-interface FormValues {
-  time: string;
-  unit: keyof typeof durationUnitMultiplierMap;
-}
+      if (!hasValue) {
+        await showToast(Toast.Style.Failure, "No values set for caffeinate length");
+        return;
+      }
 
-const CaffeinateFor = () => {
-  const onSubmit = async ({ time, unit }: FormValues) => {
-    const timeAsNumber = Number.parseFloat(time);
-    if (Number.isNaN(timeAsNumber)) {
-      await showToast(ToastStyle.Failure, "Invalid time");
-      return;
-    }
+      let seconds = 0;
+      let caffeinateString = "";
+      const mapping = [
+        { multiplier: 1, value: values.seconds, string: "s" },
+        { multiplier: 60, value: values.minutes, string: "m" },
+        { multiplier: 3600, value: values.hours, string: "h" },
+      ];
 
-    const multiplier = durationUnitMultiplierMap[unit] ?? 1;
+      mapping.forEach((item) => {
+        if (item.value) {
+          seconds += parseInt(item.value) * item.multiplier;
+          caffeinateString += item.value + item.string;
+        }
+      });
 
-    await Caffeinate(`-t ${timeAsNumber * multiplier}`);
-    popToRoot();
-  };
+      await startCaffeinate(true, `Caffeinating your Mac for ${caffeinateString}`, `-t ${seconds}`);
+      await popToRoot();
+    },
+    validation: {
+      hours: (value) => {
+        if (value && isNaN(parseInt(value, 10))) {
+          return "Hours must be a number";
+        }
+      },
+      minutes: (value) => {
+        if (value && isNaN(parseInt(value, 10))) {
+          return "Minutes must be a number";
+        }
+      },
+      seconds: (value) => {
+        if (value && isNaN(parseInt(value, 10))) {
+          return "Seconds must be a number";
+        }
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Caffeinate" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Caffeinate" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="time" title="Duration" />
-      <Form.Dropdown id="unit" title="Duration Unit" defaultValue="minutes">
-        <Form.Dropdown.Item value="seconds" title="Seconds" />
-        <Form.Dropdown.Item value="minutes" title="Minutes" />
-        <Form.Dropdown.Item value="hours" title="Hours" />
-      </Form.Dropdown>
+      <Form.TextField title="Hours" {...itemProps.hours} />
+      <Form.TextField title="Minutes" {...itemProps.minutes} />
+      <Form.TextField title="Seconds" {...itemProps.seconds} />
     </Form>
   );
-};
-
-export default CaffeinateFor;
+}

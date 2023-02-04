@@ -9,8 +9,10 @@ import downloadTempFile from "../lib/downloadTempFile";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 
 type ImageActionProps = {
+  prompt?: string;
+  image?: string;
+  mask?: string;
   url: string;
-  prompt: string;
   size: CreateImageRequestSizeEnum;
   n: string;
   variationCount: number;
@@ -18,13 +20,14 @@ type ImageActionProps = {
 };
 
 export function ImageActions(props: ImageActionProps) {
-  const { url, prompt, n, size, variationCount, showDetailAction } = props;
+  const { url, prompt, image, mask, n, size, variationCount = 0, showDetailAction } = props;
   const number = parseInt(n, 10);
 
   const { push } = useNavigation();
   async function createVariationAction(url: string, count: number) {
-    const file = await downloadTempFile(url);
-    push(<ImagesGrid prompt={prompt} file={file} n={n} size={size} variationCount={count + 1} />);
+    const file = url.startsWith("http") ? await downloadTempFile(url) : url;
+    // Ignore the prompt when a mask was submitted so we make a pure variation vs an edit
+    push(<ImagesGrid prompt={mask ? "" : prompt} image={file} n={n} size={size} variationCount={count + 1} />);
   }
 
   return (
@@ -50,7 +53,9 @@ export function ImageActions(props: ImageActionProps) {
           <Action.Push
             title="View Details"
             icon={Icon.Eye}
-            target={<ImageDetails url={url} opt={{ prompt, n: number, size: props.size, variationCount }} />}
+            target={
+              <ImageDetails url={url} opt={{ prompt, image, mask, n: number, size: props.size, variationCount }} />
+            }
             shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           />
         )}
