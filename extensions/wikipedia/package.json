@@ -40,6 +40,41 @@
     "Web",
     "News"
   ],
+  "preferences": [
+    {
+      "name": "zhVariant",
+      "title": "Chinese Language Variants",
+      "description": "Select the default language variant for the Chinese Wikipedia",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "臺灣正體",
+          "value": "zh-tw"
+        },
+        {
+          "title": "大陆简体",
+          "value": "zh-cn"
+        },
+        {
+          "title": "香港繁體",
+          "value": "zh-hk"
+        },
+        {
+          "title": "澳門繁體",
+          "value": "zh-mo"
+        },
+        {
+          "title": "大马简体",
+          "value": "zh-my"
+        },
+        {
+          "title": "新加坡简体",
+          "value": "zh-sg"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.47.2",
     "@raycast/utils": "^1.4.16",

@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import got from "got";
 
 export interface PageSummary {
@@ -12,6 +13,20 @@ export interface PageSummary {
       page: string;
     };
   };
+}
+
+interface Preferences {
+  zhVariant: string;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+
+function getVariant(language: string) {
+  if (language === "zh") {
+    return preferences.zhVariant;
+  }
+
+  return "";
 }
 
 const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
@@ -51,8 +66,12 @@ export async function findPagesByTitle(search: string, language: string) {
 }
 
 export async function getPageData(title: string, language: string) {
+  const variant = getVariant(language);
+
   const response = await got
-    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`)
+    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
+      ...(variant && { headers: { "Accept-Language": variant } }),
+    })
     .json<PageSummary>();
   return response;
 }

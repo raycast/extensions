@@ -1,5 +1,11 @@
 # Wikipedia Changelog
 
+## [Update and added language] - 2023-02-05
+
+- Upgrade dependencies
+- Added Chinese language
+- Support Chinese language variants
+
 ## [Update and added language] - 2023-01-24
 - Added Italian
 - Added Thumbnail Image in the Search Details page
