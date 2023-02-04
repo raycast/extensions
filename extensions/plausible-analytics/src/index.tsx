@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Action, ActionPanel, List, Icon, useNavigation, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, useNavigation, Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import { Storage } from "./storage";
 import { verifySite, getStatsForAllWebsites } from "./api";
-import { Stats } from "./types";
+import {Stats} from './types';
+
+const { hostedDomain } = getPreferenceValues() ?? "https://plausible.io";
 
 function AddSite({ refreshSiteList }: { refreshSiteList: () => void }) {
   const { pop } = useNavigation();
@@ -67,6 +69,7 @@ function SiteList() {
   return (
     <List isShowingDetail={domains.length > 0} isLoading={isLoading}>
       {domains.map((domain) => {
+
         const stats = cachedStats[domain];
 
         return (
@@ -91,7 +94,7 @@ function SiteList() {
             }
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Show in Plausible" url={`https://plausible.io/${domain}`} />
+                <Action.OpenInBrowser title="Show in Plausible" url={`${hostedDomain}/${domain}`} />
                 <Action
                   title={`Remove ${domain}`}
                   style={Action.Style.Destructive}
