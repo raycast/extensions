@@ -41,8 +41,8 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1",
-    "@raycast/utils": "^1.4.14",
+    "@raycast/api": "^1.47.2",
+    "@raycast/utils": "^1.4.16",
     "got": "^12.5.3"
   },
   "devDependencies": {
