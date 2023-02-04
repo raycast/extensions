@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sidekick",
+  "title": "Sidekick",
+  "description": "Search and open tabs and history in Sidekick.",
+  "icon": "sidekick-icon.png",
+  "author": "shikibu9419",
+  "license": "MIT",
+  "categories": [
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "sidekick-search-tab",
+      "title": "Search Tabs",
+      "subtitle": "Sidekick",
+      "description": "List all tabs and go to the selected.",
+      "mode": "view"
+    },
+    {
+      "name": "sidekick-search-history",
+      "title": "Search History",
+      "subtitle": "Sidekick",
+      "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "sidekick-search-bookmark",
+      "title": "Search Bookmark",
+      "subtitle": "Sidekick",
+      "description": "Search browser bookmarks.",
+      "mode": "view"
+    },
+    {
+      "name": "sidekick-new-tab",
+      "title": "New Tab",
+      "subtitle": "Sidekick",
+      "description": "Open a new Sidekick tab.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "useOriginalFavicon",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Sidekick profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.11",
+    "run-applescript": "^6.0.0",
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
