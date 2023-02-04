@@ -1,49 +1,37 @@
 import { Color, Icon, Action } from "@raycast/api";
 import { PlaylistList } from "./playlist";
-import { SearchVideoList } from "./video_search";
+import { SearchVideoList } from "./video-search";
 import { Channel } from "../lib/youtubeapi";
-import { addRecentChannel } from "./recent_channels";
+import { addRecentChannel } from "./cached-channels";
 
-export function OpenChannelInBrowser(props: { channelId: string | undefined; channel?: Channel }): JSX.Element | null {
-  const channelId = props.channelId;
-  if (channelId) {
-    return (
-      <Action.OpenInBrowser
-        title="Open Channel in Browser"
-        url={`https://youtube.com/channel/${channelId}`}
-        shortcut={{ modifiers: ["cmd"], key: "b" }}
-        onOpen={async () => {
-          if (props.channel) {
-            await addRecentChannel(props.channel);
-          }
-        }}
-      />
-    );
-  }
-  return null;
+export function OpenChannelInBrowser({ channelId, channel }: { channelId: string | undefined; channel?: Channel }) {
+  return channelId ? (
+    <Action.OpenInBrowser
+      title="Open Channel in Browser"
+      url={`https://youtube.com/channel/${channelId}`}
+      shortcut={{ modifiers: ["cmd"], key: "b" }}
+      onOpen={() => {
+        if (channel) {
+          addRecentChannel(channel);
+        }
+      }}
+    />
+  ) : null;
 }
 
-export function SearchChannelVideosAction(props: { channel: Channel }): JSX.Element | null {
-  const cid = props.channel.id;
-  if (cid) {
-    return (
-      <Action.Push
-        title="Search Channel Videos"
-        target={<SearchVideoList channedId={cid} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-        icon={{ source: Icon.MagnifyingGlass, tintColor: Color.PrimaryText }}
-        onPush={async () => await addRecentChannel(props.channel)}
-      />
-    );
-  }
-  return null;
+export function SearchChannelVideosAction({ channel }: { channel: Channel }) {
+  return (
+    <Action.Push
+      title="Search Channel Videos"
+      target={<SearchVideoList channelId={channel.id} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      icon={{ source: Icon.MagnifyingGlass, tintColor: Color.PrimaryText }}
+      onPush={() => addRecentChannel(channel)}
+    />
+  );
 }
 
-export function ShowRecentPlaylistVideosAction(props: {
-  channel: Channel;
-  playlistId: string | undefined;
-  title?: string | undefined;
-}): JSX.Element | null {
+export function ShowRecentPlaylistVideosAction(props: { channel: Channel; playlistId?: string; title?: string }) {
   const pid = props.playlistId;
   if (pid) {
     const title = props.title ? props.title : "Show Playlist Videos";
@@ -53,7 +41,7 @@ export function ShowRecentPlaylistVideosAction(props: {
         target={<PlaylistList playlistId={pid} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
         icon={{ source: Icon.Bubble, tintColor: Color.PrimaryText }}
-        onPush={async () => await addRecentChannel(props.channel)}
+        onPush={() => addRecentChannel(props.channel)}
       />
     );
   }
