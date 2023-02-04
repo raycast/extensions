@@ -14,14 +14,14 @@ export default function Command() {
   const { push } = useNavigation();
   const { data: statusData, revalidate: revalidateStatus, isLoading: isStatusLoading } = useStatus();
   const { data, isLoading: isPodcastsLoading, error } = usePodcasts();
-  const [removedFeeds, setRemovedFeeds] = useState<string[]>([])
+  const [removedFeeds, setRemovedFeeds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   if (error) {
     return <Detail markdown={`${error}`} />;
   }
 
-  const filteredList = reject(data, podcast => includes(removedFeeds, podcast.feedUrl))
+  const filteredList = reject(data, (podcast) => includes(removedFeeds, podcast.feedUrl));
 
   const removePodcast = async (feed: string) => {
     const feedsValue = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
@@ -29,7 +29,7 @@ export default function Command() {
 
     const newFeeds = JSON.parse(feedsValue).filter((url: string) => url !== feed);
     await LocalStorage.setItem(PODCASTS_FEEDS_KEY, JSON.stringify(newFeeds));
-    setRemovedFeeds(prev => [...prev, feed])
+    setRemovedFeeds((prev) => [...prev, feed]);
   };
 
   const progress = statusData ? formatProgress(statusData.position, statusData.time) : "";

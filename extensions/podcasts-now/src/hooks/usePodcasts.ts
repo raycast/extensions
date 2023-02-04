@@ -53,5 +53,10 @@ export const usePodcasts = () => {
     })();
   }, [podcastsFeedsUrls]);
 
-  return { isLoading: data.length !== podcastsFeedsUrls.length, data, revalidate: () => setRevalidate(Date.now()), error };
+  return {
+    isLoading: data.length !== podcastsFeedsUrls.length,
+    data,
+    revalidate: () => setRevalidate(Date.now()),
+    error,
+  };
 };
