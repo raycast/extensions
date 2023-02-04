@@ -4,6 +4,11 @@ export enum Filter {
   Completed = "completed",
 }
 
+export interface Tasklist {
+  id: string;
+  title: string;
+}
+
 export interface Task {
   id: string;
   title: string;

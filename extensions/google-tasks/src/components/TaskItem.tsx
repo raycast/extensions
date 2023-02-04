@@ -36,7 +36,7 @@ export default function TaskItem(props: {
               />
               <List.Item.Detail.Metadata.Separator />
               {getChildren(props.task, props.tasks).map((child) => {
-                return <List.Item.Detail.Metadata.Label title={child.title} icon={getIcon(child)} />;
+                return <List.Item.Detail.Metadata.Label key={child.id} title={child.title} icon={getIcon(child)} />;
               })}
             </List.Item.Detail.Metadata>
           }

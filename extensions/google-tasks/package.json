@@ -21,6 +21,50 @@
       "title": "View Lists",
       "description": "View task lists",
       "mode": "view"
+    },
+    {
+      "name": "quick-list",
+      "title": "Quick View",
+      "description": "View tasks in specified list quickly",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "tasklistTitle",
+          "type": "textfield",
+          "required": true,
+          "title": "Default List Title",
+          "description": "Default list"
+        }
+      ]
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add",
+      "description": "Add task to specified list quickly",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "type": "text",
+          "placeholder": "Task Title",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "placeholder": "Task Note",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "tasklistTitle",
+          "type": "textfield",
+          "required": true,
+          "title": "Default List Title",
+          "description": "Default list"
+        }
+      ]
     }
   ],
   "preferences": [

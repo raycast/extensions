@@ -1,5 +1,7 @@
-import { Color, Icon } from "@raycast/api";
+import { environment, Color, Icon } from "@raycast/api";
 import { Task } from "./types";
+
+export const cacheKey = (key: string) => `${environment.commandName}-${key}`;
 
 export function isCompleted(task: Task): boolean {
   if (task.status === "completed") {
