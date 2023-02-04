@@ -1,26 +1,31 @@
-import { Cache, environment, Icon } from "@raycast/api";
+import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 
 import { execFileSync } from "child_process";
-import { chmodSync, copyFileSync, existsSync } from "fs";
+import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
 import { CategoryName } from "./types";
 
+export type Preferences = {
+  cliPath: string;
+  version: "v7" | "v8";
+};
+
 export const cache = new Cache();
 
-export const BINARY_PATH = `${environment.assetsPath}/op`;
-export const CLI_PATH = `/usr/local/bin/op`;
+export const CLI_PATH =
+  getPreferenceValues<Preferences>().cliPath ||
+  ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
 export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
 export const ACCOUNT_CACHE_NAME = "@account";
 
 export function op(args: string[]) {
-  if (!existsSync(CLI_PATH)) {
-    chmodSync(BINARY_PATH, 0o755);
-    copyFileSync(BINARY_PATH, CLI_PATH);
+  if (CLI_PATH) {
+    const stdout = execFileSync(CLI_PATH, args);
+    return stdout.toString();
   }
-  const stdout = execFileSync(CLI_PATH, args);
-  return stdout.toString();
+  throw Error("1Password CLI is not found!");
 }
 
 export function useOp<T>(args: string[], cacheKey?: string) {

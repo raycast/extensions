@@ -58,6 +58,15 @@
         }
       ],
       "required": true
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "title": "1Password CLI path",
+      "description": "Enter the CLI binary path",
+      "default": "/usr/local/bin/op",
+      "placeholder": "e.g., /usr/local/bin/op",
+      "required": false
     }
   ],
   "dependencies": {

@@ -51,7 +51,7 @@ export function CopyToClipboard({
         });
 
         try {
-          const stdout = execFileSync(CLI_PATH, ["read", `op://${vault_id}/${id}/${field}`]);
+          const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
           await copyPassword(stdout.toString());
 
           toast.style = Toast.Style.Success;

@@ -9,7 +9,9 @@ const INSTRUCTION = `
 
 ## ✅ 1Password CLI
 
-### This extension utilizes the 1Password CLI tool and, it will be installed automatically when you run your first command. But in case there's an issue, check the following.
+### This extension utilizes the 1Password CLI tool. You can setup the tool by following their [official document](https://developer.1password.com/docs/cli/get-started/).
+
+### In case there's an issue with the tool, check the following.
 ![Terminal Instruction](${binary})
 
 ## ✅ Enable Command-Line Interface (CLI)
@@ -32,8 +34,8 @@ export function Guide() {
       markdown={INSTRUCTION}
       actions={
         <ActionPanel>
-          <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
           <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action.Open title="Open 1Password Settings" target="onepassword://settings" />
         </ActionPanel>
       }
     />
