@@ -30,6 +30,10 @@ export async function writeFile(content: string, storagePath: string, filename: 
   await showInFinder(storageFile);
 }
 
+export function readFile(file: string): string {
+    return fs.readFileSync(file, 'utf-8');
+}
+
 /**
  * It waits for a stream to close
  * @param stream - The stream to wait for.

@@ -2,24 +2,20 @@ import { getPreferenceValues, showHUD, closeMainWindow, getSelectedFinderItems, 
 import { initializeFirebaseApp, restore } from "firestore-export-import";
 import { IImportOptions } from "firestore-export-import/dist/helper";
 import { Preferences } from "./interfaces";
+import { readFile } from "./utils";
 
-/* A constant that is used to display debug messages in the console. */
-const __DEBUG = true;
 /* Getting the preferences from the Raycast API. */
 const preferences = getPreferenceValues<Preferences>();
-/* Importing the service account from the preferences. */
-/* tslint:disable no-var-requires */
-const serviceAccount = require(preferences.firebaseAuth);
 
 /* Setting the export options. */
 const importOptions: IImportOptions = {
   autoParseDates: true,
   autoParseGeos: true,
-  showLogs: __DEBUG,
+  showLogs: false,
 };
 
 /* Initializing the Firebase app with the service account. */
-initializeFirebaseApp(serviceAccount);
+initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 export default async function Command() {
   try {
@@ -30,7 +26,6 @@ export default async function Command() {
       /* It closes the main window of the Raycast application. */
       await closeMainWindow({ clearRootSearch: true });
       /* Exporting the data from the Firestore database. */
-      __DEBUG && console.log("Files List: " + JSON.stringify(fileSystemItems));
       await Promise.all(
         fileSystemItems.map(async (file) => {
           await restore(file.path, importOptions);

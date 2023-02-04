@@ -2,16 +2,11 @@ import { getPreferenceValues, showHUD, closeMainWindow } from "@raycast/api";
 import { backups, initializeFirebaseApp } from "firestore-export-import";
 import { IExportOptions } from "firestore-export-import/dist/helper";
 import moment from "moment";
-import { convertStringToNumber, writeFile } from "./utils";
+import { convertStringToNumber, readFile, writeFile } from "./utils";
 import { Preferences } from "./interfaces";
 
-/* A constant that is used to display debug messages in the console. */
-const __DEBUG = true;
 /* Getting the preferences from the Raycast API. */
 const preferences = getPreferenceValues<Preferences>();
-/* Importing the service account from the preferences. */
-/* tslint:disable no-var-requires */
-const serviceAccount = require(preferences.firebaseAuth);
 
 /* Setting the export options. */
 const exportOptions: IExportOptions = {
@@ -20,7 +15,7 @@ const exportOptions: IExportOptions = {
 };
 
 /* Initializing the Firebase app with the service account. */
-initializeFirebaseApp(serviceAccount);
+initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 const collectionsList: Array<string> | undefined =
   preferences.collectionList?.length !== 0 ? preferences.collectionList.split(",") : undefined;
