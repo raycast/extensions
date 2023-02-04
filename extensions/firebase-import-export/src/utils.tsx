@@ -30,8 +30,13 @@ export async function writeFile(content: string, storagePath: string, filename: 
   await showInFinder(storageFile);
 }
 
+/**
+ * It reads a file and returns its contents
+ * @param {string} file - The file to read.
+ * @returns The contents of the file.
+ */
 export function readFile(file: string): string {
-    return fs.readFileSync(file, 'utf-8');
+  return fs.readFileSync(file, "utf-8");
 }
 
 /**
