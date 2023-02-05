@@ -249,7 +249,7 @@
       "arguments": [
         {
           "name": "url",
-          "placeholder": "URL to open",
+          "placeholder": "maps://",
           "type": "text",
           "required": true
         }
