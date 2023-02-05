@@ -5,6 +5,9 @@
   "description": "Collection of scripts that process data",
   "icon": "icon.png",
   "author": "Kang",
+  "contributors": [
+    "Saafo"
+  ],
   "license": "MIT",
   "categories": [
     "Developer Tools",
