@@ -1,5 +1,10 @@
 # Google Translate Changelog
 
+## [Add auto-detect language] - 2023-02-05
+
+- Add auto-detect language to the `Translate` command.
+- Update zh-TW title
+
 ## [Fix] - 2022-10-24
 
 Fix query parameter encoding in `Action.OpenInBrowser` url
