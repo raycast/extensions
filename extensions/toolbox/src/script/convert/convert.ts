@@ -42,7 +42,7 @@ export const HexToString: Script = {
     desc: "Convert Hex to UTF8 String",
     type: ["form", "clipboard"],
     keywords: ["markup"],
-    example: '72617963617374',
+    example: "72617963617374",
   },
   run(input) {
     return Buffer.from(input, "hex").toString("utf8");
@@ -55,7 +55,7 @@ export const StringToHex: Script = {
     desc: "Convert UTF8 String to Hex",
     type: ["form", "clipboard"],
     keywords: ["markup"],
-    example: 'raycast',
+    example: "raycast",
   },
   run(input) {
     return Buffer.from(input, "utf8").toString("hex");
