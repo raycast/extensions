@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "jonasmerlin"
   ],
   "categories": [
     "Media"
@@ -40,6 +41,12 @@
       "name": "play-last-station",
       "title": "Play Last Station",
       "description": "Resumes playback of the last played station",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggle play or pause of current radio station in Music.",
       "mode": "no-view"
     },
     {
