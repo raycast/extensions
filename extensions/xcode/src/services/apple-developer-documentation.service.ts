@@ -1,5 +1,4 @@
 import fetch from "node-fetch";
-import * as Path from "path";
 import { AppleDeveloperDocumentationEntry } from "../models/apple-developer-documentation/apple-developer-documentation-entry.model";
 import { URL } from "url";
 

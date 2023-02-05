@@ -6,19 +6,28 @@ import { XcodeSimulatorAppAction } from "../models/xcode-simulator/xcode-simulat
 import { XcodeSimulatorAppPrivacyAction } from "../models/xcode-simulator/xcode-simulator-app-privacy-action.model";
 import { XcodeSimulatorAppPrivacyServiceType } from "../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { groupBy } from "../shared/group-by";
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { XcodeService } from "./xcode.service";
+import {
+  XcodeSimulatorOpenUrlError,
+  XcodeSimulatorOpenUrlErrorReason,
+} from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
+
 /**
  * XcodeSimulatorService
  */
 export class XcodeSimulatorService {
   /**
+   * Launches simulator application
+   */
+  static launchSimulatorApplication(): Promise<void> {
+    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
+  }
+
+  /**
    * Retrieve all XcodeSimulatorGroups
    */
-  static async xcodeSimulatorGroups(stateFilter?: string | null): Promise<XcodeSimulatorGroup[]> {
-    const simulators = (await XcodeSimulatorService.xcodeSimulators()).filter((value) =>
-      stateFilter ? stateFilter === value.state : true
-    );
+  static async xcodeSimulatorGroups(): Promise<XcodeSimulatorGroup[]> {
+    const simulators = await XcodeSimulatorService.xcodeSimulators();
     return groupBy(simulators, (simulator) => simulator.runtime)
       .map((group) => {
         return { runtime: group.key, simulators: group.values };
@@ -65,8 +74,8 @@ export class XcodeSimulatorService {
    */
   static boot(xcodeSimulator: XcodeSimulator): Promise<void> {
     return execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`).then(() => {
-      // Silently open Simulator application
-      execAsync("open -a simulator");
+      // Silently launch Simulator application
+      XcodeSimulatorService.launchSimulatorApplication();
     });
   }
 
@@ -137,56 +146,44 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Show Simulator
+   * Bool value if a given url is valid to be opened in a simulator
+   * @param url The url to validate.
    */
-  static showSimulator(): Promise<void> {
-    return execAsync(`open -b "com.apple.iphonesimulator"`).then();
+  static isValidUrl(url: string): boolean {
+    return /\w+:\/\/+/.test(url);
   }
 
   /**
-   * Defines wether there is at least one booted Simulator or not.
+   * Opens a URL in a Simulator
+   * @param url The url which should be opened
+   * @param simulator The optional Simulator where the url should be opened.
    */
-  static async existsBootedSimulator(): Promise<boolean> {
-    return XcodeSimulatorService.xcodeSimulators().then((simulators) =>
-      simulators.some((s) => s.state == XcodeSimulatorState.booted)
-    );
-  }
-
-  /**
-   * Opens URL in Simulator
-   * @param udid UDID of the Simulator in which we want to open the URL in.
-   * @param url URL we want to open
-   */
-  static async openUrl(url?: string, udid?: string) {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Opening URL in Simulator",
+  static async openUrl(url: string, simulator?: XcodeSimulator) {
+    // Trim url
+    const trimmedUrl = url.trim();
+    // Check if the url has a valid scheme e.g. (maps://, https://raycast.com)
+    if (!XcodeSimulatorService.isValidUrl(trimmedUrl)) {
+      throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.badUrl);
+    }
+    // Check if no simulator is presented
+    if (!simulator) {
+      // Check if Xcode is not installed
+      if (!(await XcodeService.isXcodeInstalled())) {
+        // Throw error
+        throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.xcodeInstallationMissing);
+      }
+      // Retrieve all simulators
+      const simulators = await XcodeSimulatorService.xcodeSimulators();
+      // Check if at least one simulator is booted
+      if (!simulators.some((xcodeSimulator) => xcodeSimulator.state === XcodeSimulatorState.booted)) {
+        // Otherwise throw an error
+        throw new XcodeSimulatorOpenUrlError(XcodeSimulatorOpenUrlErrorReason.bootedSimulatorMissing);
+      }
+    }
+    // Open URL in simulator
+    return execAsync(["xcrun", "simctl", "openurl", simulator?.udid ?? "booted", trimmedUrl].join(" ")).then(() => {
+      // Silently launch Simulator application
+      XcodeSimulatorService.launchSimulatorApplication();
     });
-    try {
-      await checkPreconditions();
-      const trimmedUrl = url?.trim();
-      await checkUrlValidity(trimmedUrl);
-      await execAsync(`xcrun simctl openurl ${udid?.trim() ?? "booted"} '${trimmedUrl}'`);
-      toast.style = Toast.Style.Success;
-      toast.title = "URL opened in Simulator.";
-      XcodeSimulatorService.showSimulator();
-      await closeMainWindow();
-    } catch (error) {
-      console.error(error);
-      const defaultTitle = "Error while opening URL in Simulator.";
-      toast.style = Toast.Style.Failure;
-      toast.title = error instanceof Error ? error.message ?? defaultTitle : defaultTitle;
-    }
-
-    async function checkPreconditions() {
-      if (!(await XcodeService.isXcodeInstalled())) throw Error("Xcode is not installed");
-      if (!(await XcodeSimulatorService.existsBootedSimulator())) throw Error("No booted Simulator found.");
-    }
-
-    async function checkUrlValidity(url: string | undefined) {
-      if (!url) throw Error("URL provided is empty.");
-      const regex = /\w+:\/\/[^\s]+/;
-      if (!regex.test(url)) throw Error("URL provided has wrong format.");
-    }
   }
 }
