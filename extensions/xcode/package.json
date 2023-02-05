@@ -251,7 +251,7 @@
           "name": "url",
           "placeholder": "URL to open",
           "type": "text",
-          "required": false
+          "required": true
         }
       ]
     },
