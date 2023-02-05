@@ -27,12 +27,15 @@ export default async (props: LaunchProps<{ arguments: { url: string } }>) => {
           toast.title = "Please enter a valid url";
           break;
         case XcodeSimulatorOpenUrlErrorReason.bootedSimulatorMissing:
-          // Hide toast
-          await toast.hide();
-          // Show info hud
-          await showHUD("Please boot a simulator to open a url");
-          // Launch manage simulators command in order to boot a simulator
-          await launchCommand({ name: "manage-simulators.command", type: LaunchType.UserInitiated });
+          toast.style = Toast.Style.Failure;
+          toast.title = "No simulator is booted, please boot a simulator to open a url.";
+          toast.primaryAction = {
+            title: "Manage Simulators",
+            onAction: async (toast) => {
+              await launchCommand({ name: "manage-simulators.command", type: LaunchType.UserInitiated });
+              await toast.hide();
+            },
+          };
           break;
         case XcodeSimulatorOpenUrlErrorReason.xcodeInstallationMissing:
           // Hide toast
