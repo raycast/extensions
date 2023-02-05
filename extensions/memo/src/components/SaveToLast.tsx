@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Action, ActionPanel, Form } from "@raycast/api"
 import { Page } from "../core/dm"
 import { DONATION_URL } from "../config"
+import { MetaActionSection } from "./MetaActionSection"
 
 export type SaveToLastProps = {
     saver: Saver
@@ -52,9 +53,7 @@ export function SaveToLast(props: SaveToLastProps) {
                 <Action title="Save" onAction={() => handleSave(props.lastSelectedPage, text)} icon="notion_icon.png" />
             </ActionPanel.Section>
 
-            <ActionPanel.Section>
-                <Action.OpenInBrowser url={DONATION_URL} title={"Buy Us a Coffee"} icon="bmcbrand/bmc-logo.svg" />
-            </ActionPanel.Section>
+            <MetaActionSection />
         </ActionPanel>
     )
 
