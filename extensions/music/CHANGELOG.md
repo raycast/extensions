@@ -1,5 +1,9 @@
 # Apple Music Changelog
 
+## [Updates] - 2023-02-05
+
+- Re-enabled "add to playlist"
+
 ## [Updates & Fixes] - 2023-01-20
 
 - Updated volume behaviour, the user can now choose the size of the volume increment/decrement from preferences
