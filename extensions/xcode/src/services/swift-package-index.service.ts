@@ -1,6 +1,5 @@
 import fetch from "node-fetch";
 import { SwiftPackageIndexSearchResults } from "../models/swift-package-index/swift-package-index-search-results.model";
-import Path from "path";
 import { URL } from "url";
 
 /**
