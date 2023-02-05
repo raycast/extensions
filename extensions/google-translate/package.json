@@ -12,7 +12,8 @@
   "contributors": [
     "FezVrasta",
     "henrique",
-    "metakirby5"
+    "metakirby5",
+    "tangerine1202"
   ],
   "license": "MIT",
   "commands": [
@@ -537,7 +538,7 @@
           "value": "zh-CN"
         },
         {
-          "title": "🇨🇳 Chinese Traditional",
+          "title": "🇹🇼 Taiwanese Mandarin",
           "value": "zh-TW"
         },
         {
@@ -935,6 +936,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }
