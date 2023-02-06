@@ -1,13 +1,14 @@
 import { Action, Alert, Icon, confirmAlert } from "@raycast/api";
 import { Item } from "../../types";
 
-export function DeleteInterval(props: { item: Item; onDelete: (item: Item) => void }) {
+export function DeleteInterval(props: { item: Item; type: string; onDelete: (item: Item) => void }) {
   const item = props.item;
+  const type = props.type;
 
   return (
     <Action
-      title="Delete Interval"
-      icon={Icon.Pencil}
+      title={`Delete ${type}`}
+      icon={Icon.Trash}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       style={Action.Style.Destructive}
       onAction={async () => {

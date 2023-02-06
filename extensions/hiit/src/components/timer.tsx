@@ -3,6 +3,8 @@ import { Item } from "../types";
 import { Action, ActionPanel, List, environment } from "@raycast/api";
 import { exec } from "child_process";
 import { secondsToTime } from "../utils";
+import { nanoid } from "nanoid";
+import { addItem } from "../storage";
 
 export function Timer(props: { item: Item }) {
   const item = props.item;
@@ -22,11 +24,23 @@ export function Timer(props: { item: Item }) {
   const [intervals, setintervals] = useState<number>(intervalsRef.current);
 
   const [totalTime, setTotalTime] = useState<number>(0);
+  const totalTimeRef = useRef<number>(0);
+
+  const [currentHistoryId, setCurrentHistoryId] = useState<string>(nanoid());
 
   useEffect(() => {
     return function cleanup() {
       if (intervalTimerRef.current) {
         clearInterval(intervalTimerRef.current);
+
+        console.log(item.interval.totalTime, totalTimeRef.current);
+        if (totalTimeRef.current !== 0 && item.interval.totalTime === totalTimeRef.current) {
+          console.log("im here");
+          const newItem = { ...item, id: currentHistoryId, finished: true, date: new Date().getTime() };
+          addItem(newItem, "history");
+          console.log("here too");
+        }
+
         console.log("Clearing interval");
       }
     };
@@ -98,10 +112,15 @@ export function Timer(props: { item: Item }) {
     intervalsRef.current -= 1;
     setintervals(intervalsRef.current);
     countdown(true);
+
+    const newItem = { ...item, id: currentHistoryId, finished: false, date: new Date().getTime() };
+    addItem(newItem, "history");
   }
 
   function countdown(playSound: boolean) {
     setTotalTime((previous) => previous + 1);
+    totalTimeRef.current += 1;
+
     setSeconds((previous) => previous - 1);
     secondsRef.current -= 1;
 

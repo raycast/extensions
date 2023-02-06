@@ -7,6 +7,8 @@ import { NewInterval } from "./components/actions/newInterval";
 import { EditInterval } from "./components/actions/editInterval";
 import { Timer } from "./components/timer";
 import { DeleteInterval } from "./components/actions/deleteInterval";
+import { HistoryView } from "./components/actions/historyView";
+import { accessories } from "./components/accessories";
 
 export default function Command() {
   const [intervalList, setIntervalList] = useState<Item[]>([]);
@@ -51,11 +53,12 @@ export default function Command() {
             accessories={accessories(item)}
             actions={
               <ActionPanel>
-                <Action.Push title="Open Timer" icon={Icon.Clock} target={<Timer item={item} />} />
+                <Action.Push title="Open Interval" icon={Icon.Clock} target={<Timer item={item} />} />
                 <EditInterval item={item} onSave={handleCreate} />
-                <DeleteInterval item={item} onDelete={handleDelete} />
+                <DeleteInterval item={item} type="Interval" onDelete={handleDelete} />
                 <ActionPanel.Section>
                   <NewInterval onSave={handleCreate} />
+                  <HistoryView />
                 </ActionPanel.Section>
               </ActionPanel>
             }
@@ -64,37 +67,4 @@ export default function Command() {
       })}
     </List>
   );
-}
-
-function accessories(item: Item) {
-  const accessories = [
-    { text: `${item.interval.high} / ${item.interval.low}`, icon: Icon.Crown, tooltip: "Intervals" },
-    { text: `${item.interval.intervals}`, icon: Icon.ArrowLeftCircle, tooltip: "Total Intervals" },
-  ];
-
-  if (item.interval.warmup) {
-    accessories.push({
-      text: `${secondsToTime(item.interval.warmup)}`,
-      icon: Icon.ArrowUpCircle,
-      tooltip: "Warmup",
-    });
-  }
-
-  if (item.interval.cooldown) {
-    accessories.push({
-      text: `${secondsToTime(item.interval.cooldown)}`,
-      icon: Icon.ArrowDownCircle,
-      tooltip: "Cooldown",
-    });
-  }
-
-  return [
-    ...accessories,
-
-    {
-      text: `${secondsToTime(item.interval.totalTime)}`,
-      icon: Icon.Clock,
-      tooltip: "Total Time",
-    },
-  ];
 }

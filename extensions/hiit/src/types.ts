@@ -11,6 +11,9 @@ export type Item = {
     intervals: number;
     totalTime: number;
   };
+  date?: number;
+  finished?: boolean;
+  note?: string;
 };
 
 export type IntervalFormValues = {
@@ -21,4 +24,8 @@ export type IntervalFormValues = {
   high: string;
   low: string;
   sets: string;
+};
+
+export type NoteFormValues = {
+  note: string;
 };
