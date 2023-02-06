@@ -1,38 +1,39 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { addItem, deleteItem, getItems } from "../storage";
 import { Item } from "../types";
 import { DeleteInterval } from "./actions/deleteInterval";
-import { accessories } from "./accessories";
-import { NoteForm } from "./noteForm";
 import { secondsToTime } from "../utils";
+import { NoteFormView } from "./actions/noteFormView";
 
 export function History() {
+  const key = "history";
+
   const [intervalList, setIntervalList] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   async function handleDelete(item: Item) {
-    const items = await deleteItem(item, "history");
+    const items = await deleteItem(item, key);
     setIntervalList(items);
     await showToast(Toast.Style.Success, "Interval Deleted");
   }
 
   async function handleCreate(item: Item) {
-    const items = await addItem(item, "history");
+    const items = await addItem(item, key);
     setIntervalList(items);
     await showToast(Toast.Style.Success, "Interval Added");
   }
 
   useEffect(() => {
     (async () => {
-      const items = await getItems("history");
+      const items = await getItems(key);
       setIntervalList(items);
       setLoading(false);
     })();
   }, []);
 
   return (
-    <List isLoading={loading} navigationTitle="History" isShowingDetail>
+    <List isLoading={loading} searchBarPlaceholder="Search history..." navigationTitle="History" isShowingDetail>
       {intervalList.reverse().map((item) => {
         return (
           <List.Item
@@ -42,25 +43,12 @@ export function History() {
             accessories={historyAccessories(item)}
             actions={
               <ActionPanel>
+                <NoteFormView item={item} onSave={handleCreate} />
                 <DeleteInterval item={item} type="History" onDelete={handleDelete} />
-                <Action.Push
-                  title="Add Note"
-                  icon={Icon.Pencil}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={
-                    <NoteForm
-                      item={item}
-                      onSave={async function (item: Item): Promise<void> {
-                        await handleCreate(item);
-                      }}
-                    />
-                  }
-                />
               </ActionPanel>
             }
             detail={
               <List.Item.Detail
-                markdown={``}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title="Status">
@@ -70,9 +58,31 @@ export function History() {
                       />
                     </List.Item.Detail.Metadata.TagList>
 
-                    <List.Item.Detail.Metadata.Label title="Date" text={new Date(item.date).toLocaleDateString()} />
-                    <List.Item.Detail.Metadata.Label title="Total Time" text={secondsToTime(item.interval.totalTime)} />
+                    {item.date && (
+                      <List.Item.Detail.Metadata.Label title="Date" text={new Date(item.date).toLocaleDateString()} />
+                    )}
                     <List.Item.Detail.Metadata.Separator />
+
+                    {item.finished && (
+                      <>
+                        <List.Item.Detail.Metadata.Label title="Warmup" text={secondsToTime(item.interval.warmup)} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Cooldown"
+                          text={secondsToTime(item.interval.cooldown)}
+                        />
+                        <List.Item.Detail.Metadata.Label
+                          title="High Interval"
+                          text={secondsToTime(item.interval.high)}
+                        />
+                        <List.Item.Detail.Metadata.Label title="Low Interval" text={secondsToTime(item.interval.low)} />
+                        <List.Item.Detail.Metadata.Label title="Sets" text={item.interval.sets.toString()} />
+                        <List.Item.Detail.Metadata.Label
+                          title="Total Time"
+                          text={secondsToTime(item.interval.totalTime)}
+                        />
+                        <List.Item.Detail.Metadata.Separator />
+                      </>
+                    )}
 
                     {item.note && <List.Item.Detail.Metadata.Label title="Note" text={item.note} />}
                   </List.Item.Detail.Metadata>

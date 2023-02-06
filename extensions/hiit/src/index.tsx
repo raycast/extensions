@@ -37,13 +37,14 @@ export default function Command() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder="Search interval..."
+      searchBarPlaceholder="Search intervals..."
       actions={
         <ActionPanel>
           <NewInterval onSave={handleCreate} />
         </ActionPanel>
       }
     >
+      <List.EmptyView title="No Intervals" description="Type ⌘+N to add an interval" icon="no-view.png" />
       {intervalList.map((item) => {
         return (
           <List.Item

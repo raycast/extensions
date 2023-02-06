@@ -143,6 +143,8 @@ export function Timer(props: { item: Item }) {
     description = `PRESS ENTER TO START`;
   }
 
+  console.log(item.interval.totalTime - totalTime);
+
   return (
     <List
       navigationTitle={`${item.title}: ${item.interval.high} / ${item.interval.low} @ ${secondsToTime(
@@ -157,7 +159,9 @@ export function Timer(props: { item: Item }) {
           <ActionPanel>
             {totalTime === 0 && <Action title="Start" onAction={StartSession} />}
             {pausedRef.current && <Action title="Start" onAction={ContinueSession} />}
-            {!pausedRef.current && totalTime > 0 && <Action title="Pause" onAction={PauseSession} />}
+            {!pausedRef.current && totalTime > 0 && item.interval.totalTime - totalTime > 0 && (
+              <Action title="Pause" onAction={PauseSession} />
+            )}
           </ActionPanel>
         }
       />
