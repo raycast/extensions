@@ -36,7 +36,6 @@ const getTopCpuProcess = async (count: number): Promise<string[][]> => {
 const getRelativeTime = (uptime: number): string => {
   const rtf = new Intl.RelativeTimeFormat("en");
 
-  // "Math.abs" accounts for both "past" & "future" scenarios
   for (const unit in UNITS) {
     let seconds = UNITS[unit as keyof typeof UNITS];
 
