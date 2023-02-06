@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionFavoriteItem, OrionFavoritesPlistResult } from "../types";
-import {getOrionBasePath, unique} from "../utils";
+import { getOrionBasePath, unique } from "../utils";
 import { join } from "path";
 
-const FAVORITES_PATH =  join(getOrionBasePath(), "Defaults/favourites.plist");
+const FAVORITES_PATH = join(getOrionBasePath(), "Defaults/favourites.plist");
 
 const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);

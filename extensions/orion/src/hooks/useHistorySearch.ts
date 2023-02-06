@@ -1,7 +1,7 @@
 import { join } from "path";
 import { HistoryItem } from "../types";
 import { useSQL } from "@raycast/utils";
-import {getOrionBasePath} from "src/utils";
+import { getOrionBasePath } from "src/utils";
 
 const HISTORY_DB = join(getOrionBasePath(), "Defaults/history");
 const LIMIT = 100;

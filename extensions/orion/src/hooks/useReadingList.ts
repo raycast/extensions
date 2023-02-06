@@ -3,9 +3,9 @@ import { parseFileSync } from "bplist-parser";
 
 import { Bookmark, OrionReadingListItem, OrionReadingListPlistResult } from "../types";
 import { join } from "path";
-import {getOrionBasePath} from "src/utils";
+import { getOrionBasePath } from "src/utils";
 
-const READING_LIST_PATH =  join(getOrionBasePath(), "Defaults/reading_list.plist");
+const READING_LIST_PATH = join(getOrionBasePath(), "Defaults/reading_list.plist");
 
 const useBookmarks = () => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>();
