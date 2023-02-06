@@ -31,67 +31,40 @@ export default function Command(): ReactElement {
 
     const promises = Promise.all([
       translate(toTranslate, {
+        from: undefined,
         to: preferences.lang1,
       }),
       translate(toTranslate, {
+        from: undefined,
         to: preferences.lang2,
-      }),
-      translate(toTranslate, {
-        from: preferences.lang1,
-        to: preferences.lang2,
-      }),
-      translate(toTranslate, {
-        from: preferences.lang2,
-        to: preferences.lang1,
       }),
     ]);
 
     promises
       .then((res) => {
         if (localCount === count) {
+          const detectedLangCode = res[0].from.language.iso as LanguageCode;
+          const detectedLangRep =
+            supportedLanguagesByCode[detectedLangCode].flag ?? supportedLanguagesByCode[detectedLangCode].code;
           const lang1Rep =
             supportedLanguagesByCode[preferences.lang1].flag ?? supportedLanguagesByCode[preferences.lang1].code;
           const lang2Rep =
             supportedLanguagesByCode[preferences.lang2].flag ?? supportedLanguagesByCode[preferences.lang2].code;
-          const ret = [];
 
-          // auto detect language
-          if (res[0].from.language.iso !== undefined) {
-            const detectedLangCode = res[0].from.language.iso as LanguageCode;
-            const detectedLangRep =
-              supportedLanguagesByCode[detectedLangCode].flag ?? supportedLanguagesByCode[detectedLangCode].code;
-            ret.push(
-              {
-                text: res[0].text,
-                languages: `(auto) ${detectedLangRep} -> ${lang1Rep}`,
-                source_language: supportedLanguagesByCode[detectedLangCode].code,
-                target_language: supportedLanguagesByCode[preferences.lang1].code,
-              },
-              {
-                text: res[1].text,
-                languages: `(auto) ${detectedLangRep} -> ${lang2Rep}`,
-                source_language: supportedLanguagesByCode[detectedLangCode].code,
-                target_language: supportedLanguagesByCode[preferences.lang2].code,
-              }
-            );
-          }
-
-          ret.push(
+          setResults([
             {
-              text: res[2].text,
-              languages: `${lang1Rep} -> ${lang2Rep}`,
-              source_language: supportedLanguagesByCode[preferences.lang1].code,
-              target_language: supportedLanguagesByCode[preferences.lang2].code,
+              text: res[0].text,
+              languages: `${detectedLangRep} -> ${lang1Rep}`,
+              source_language: supportedLanguagesByCode[detectedLangCode].code,
+              target_language: supportedLanguagesByCode[preferences.lang1].code,
             },
             {
-              text: res[3].text,
-              languages: `${lang2Rep} -> ${lang1Rep}`,
-              source_language: supportedLanguagesByCode[preferences.lang2].code,
-              target_language: supportedLanguagesByCode[preferences.lang1].code,
-            }
-          );
-
-          setResults(ret);
+              text: res[1].text,
+              languages: `${detectedLangRep} -> ${lang2Rep}`,
+              source_language: supportedLanguagesByCode[detectedLangCode].code,
+              target_language: supportedLanguagesByCode[preferences.lang2].code,
+            },
+          ]);
         }
       })
       .catch((errors) => {

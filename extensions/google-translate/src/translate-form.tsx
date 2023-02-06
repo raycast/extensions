@@ -9,9 +9,9 @@ const TranslateForm = () => {
   const preferences = usePreferences();
 
   const [text, setText] = React.useState("");
-  const [fromLang, setFromLang] = React.useState<LanguageCode | string>(preferences.lang1);
+  const [fromLang, setFromLang] = React.useState<LanguageCode | string>("auto");
   const fromLangObj = supportedLanguagesByCode[fromLang as LanguageCode];
-  const [toLang, setToLang] = React.useState<LanguageCode | string>(preferences.lang2);
+  const [toLang, setToLang] = React.useState<LanguageCode | string>(preferences.lang1);
   const toLangObj = supportedLanguagesByCode[toLang as LanguageCode];
 
   const [isLoading, setIsLoading] = React.useState(false);
@@ -34,7 +34,7 @@ const TranslateForm = () => {
     const debouncedTranslate = debounce(
       async (text: string, fromLang: LanguageCode | string, toLang: LanguageCode | string) => {
         const result = await translate(text, {
-          from: fromLang,
+          from: fromLang === "auto" ? undefined : fromLang,
           to: toLang,
         });
 
@@ -136,9 +136,10 @@ const TranslateForm = () => {
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="language_to" title="To" value={toLang} onChange={setToLang} storeValue>
-        {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
-        ))}
+        {languages
+          .filter((lang) => lang.code !== "auto")
+          .map((lang) => (<Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />))
+        }
       </Form.Dropdown>
       <Form.TextArea id="result" title="Translation" value={translated} placeholder="Translation" />
     </Form>
