@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [CLI support] - 2023-01-23
+## [CLI support] - 2023-02-06
 
 This new version of the 1Password extension contains the following changes.
 
