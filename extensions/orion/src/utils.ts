@@ -37,6 +37,5 @@ export function groupHistoryByDay(groups: Map<string, HistoryItem[]>, entry: His
 }
 
 export function getOrionBasePath() {
-  console.log("prefs", getPreferenceValues());
   return join(homedir(), "/Library/Application Support", getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion");
 }
