@@ -24,7 +24,7 @@ export function NoteForm(props: { item: Item; onSave: (item: Item) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Note" placeholder="It was soooo hard!" {...itemProps.note} />
+      <Form.TextArea title="Note" placeholder="It was soooo hard!" {...itemProps.note} />
     </Form>
   );
 }
