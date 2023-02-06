@@ -2,7 +2,7 @@ import { homedir } from "os";
 import { URL } from "url";
 import { HistoryItem } from "src/types";
 import { join } from "path";
-import {getPreferenceValues} from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 export function extractDomainName(urlString: string) {
   try {
@@ -37,6 +37,6 @@ export function groupHistoryByDay(groups: Map<string, HistoryItem[]>, entry: His
 }
 
 export function getOrionBasePath() {
-  console.log("prefs", getPreferenceValues())
-  return join(homedir(), "/Library/Application Support", getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion")
+  console.log("prefs", getPreferenceValues());
+  return join(homedir(), "/Library/Application Support", getPreferenceValues()["orion-rc"] ? "Orion RC" : "Orion");
 }
