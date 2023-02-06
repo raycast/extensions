@@ -33,7 +33,7 @@
     {
       "name": "orion-rc",
       "title": "Orion",
-      "label": "Use release candidate",
+      "label": "Use Release Candidate",
       "description": "Looks in '~/Library/Application Support/Orion RC' instead of '~/Library/Application Support/Orion'",
       "type": "checkbox",
       "required": false,
