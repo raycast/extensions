@@ -5,7 +5,6 @@
   "description": "Navigate within Reflect to create, search, and view notes.",
   "icon": "command-icon.png",
   "author": "ryon",
-  "owner": "lame",
   "categories": [
     "Applications",
     "Productivity"
