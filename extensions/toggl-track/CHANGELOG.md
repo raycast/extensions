@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2023-01-27
+
+-  Sort time entries starting from latest
+
 ## [New Feature] - 2022-10-20
 
 - Add a manual refresh action to command's main window.

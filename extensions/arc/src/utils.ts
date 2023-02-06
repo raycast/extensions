@@ -1,4 +1,5 @@
 import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
+import { searchArcPreferences } from "./preferences";
 import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
@@ -26,6 +27,17 @@ export function getKey(tab: Tab) {
 
 export function getOrderedLocations() {
   return ["topApp", "pinned", "unpinned"] as TabLocation[];
+}
+
+export function isLocationShown(location: TabLocation) {
+  switch (location) {
+    case "topApp":
+      return searchArcPreferences.showFavorites;
+    case "pinned":
+      return searchArcPreferences.showPinnedTabs;
+    case "unpinned":
+      return searchArcPreferences.showUnpinnedTabs;
+  }
 }
 
 export function getLocationTitle(location: TabLocation) {

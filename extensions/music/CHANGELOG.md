@@ -4,6 +4,11 @@
 
 - Re-enabled "add to playlist"
 
+## [Update & Fixes] - 2023-01-24
+
+- `Set Volume` - Fixed volume argument behaviour
+- `Toggle Shuffle` - New commmand
+
 ## [Updates & Fixes] - 2023-01-20
 
 - Updated volume behaviour, the user can now choose the size of the volume increment/decrement from preferences

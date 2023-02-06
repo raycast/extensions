@@ -46,6 +46,13 @@
   ],
   "commands": [
     {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Apple Music",
+      "description": "Toggle Shuffle",
+      "mode": "no-view"
+    },
+    {
       "name": "reveal-track",
       "title": "Reveal Track",
       "subtitle": "Apple Music",

@@ -66,7 +66,7 @@ function Actions({ profile, farcasterInstalled }: ProfileActionsProps) {
 function ProfileDetails({ profile }: { profile: Profile }) {
   // Find all links in bio and replace them with markdown links
   const bio = profile.body.bio;
-  const markdown = linkify(bio);
+  const markdown = linkify(bio || "");
 
   return (
     <List.Item.Detail

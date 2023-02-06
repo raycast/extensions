@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { closeMainWindow, LocalStorage, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
@@ -11,7 +11,8 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
-  const openTabs = await runAppleScript(`
+  try {
+    const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Google Chrome"
         set _window_index to 1
@@ -31,10 +32,17 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       return _output
   `);
 
-  return openTabs
-    .split("\n")
-    .filter((line) => line.length !== 0)
-    .map((line) => Tab.parse(line));
+    return openTabs
+      .split("\n")
+      .filter((line) => line.length !== 0)
+      .map((line) => Tab.parse(line));
+  } catch (err) {
+    if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
+      LocalStorage.removeItem("is-installed");
+    }
+    await checkAppInstalled();
+    return [];
+  }
 }
 
 export async function openNewTab({
@@ -106,6 +114,9 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 const checkAppInstalled = async () => {
+  const installed = await LocalStorage.getItem("is-installed");
+  if (installed) return;
+
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
@@ -117,4 +128,5 @@ return isInstalled`);
   if (appInstalled === "false") {
     throw new Error(NOT_INSTALLED_MESSAGE);
   }
+  LocalStorage.setItem("is-installed", true);
 };
