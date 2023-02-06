@@ -25,7 +25,7 @@ export interface MemoryMonitorState {
   topProcess: string[][];
 }
 
-export interface PowerMointorState {
+export interface PowerMonitorState {
   batteryLevel: string;
   isCharging: boolean;
   cycleCount: string;
