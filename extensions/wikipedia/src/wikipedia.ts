@@ -16,7 +16,7 @@ export interface PageSummary {
 }
 
 interface Preferences {
-  zhVariant: string;
+  zhVariant?: string;
 }
 
 const preferences = getPreferenceValues<Preferences>();
@@ -26,7 +26,7 @@ function getVariant(language: string) {
     return preferences.zhVariant;
   }
 
-  return "";
+  return undefined;
 }
 
 const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
@@ -69,9 +69,10 @@ export async function getPageData(title: string, language: string) {
   const variant = getVariant(language);
 
   const response = await got
-    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
-      ...(variant && { headers: { "Accept-Language": variant } }),
-    })
+    .get(
+      `${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+      variant ? { headers: { "Accept-Language": variant } } : undefined
+    )
     .json<PageSummary>();
   return response;
 }
