@@ -74,6 +74,11 @@ export default function Command() {
                       title="Copy location in GCS"
                       content={dataset.location}
                     />
+                    <Action.OpenInBrowser
+                      title="Open in FTP"
+                      // open in browser if ftp is defined, otherwise show message in Raycast
+                      url={dataset.ftp ? dataset.ftp : "No FTP available"}
+                    />
                   </ActionPanel>
                 }
                 detail={
