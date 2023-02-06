@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "switch",
-      "title": "Switch Url",
+      "title": "Switch Host",
       "subtitle": "Local Switch",
       "description": "Allows to switch remote url to localhost and vice verse",
       "mode": "view"
