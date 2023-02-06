@@ -46,7 +46,7 @@ export default function Project({ project, teamId, priorities, users, me, mutate
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
-        await mutateProjects(linearClient.projectArchive(project.id), {
+        await mutateProjects(linearClient.archiveProject(project.id), {
           optimisticUpdate(data) {
             if (!data) {
               return data;

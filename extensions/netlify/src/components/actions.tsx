@@ -5,7 +5,7 @@ import { GitProvider } from '../utils/interfaces';
 
 export const OpenOnNetlify = ({ url }: { url: string }) => (
   <Action.OpenInBrowser
-    icon="icon.png"
+    icon="netlify-icon.png"
     shortcut={{ key: 'n', modifiers: ['cmd'] }}
     title="Open on Netlify"
     url={url}

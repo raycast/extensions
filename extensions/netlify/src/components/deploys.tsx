@@ -198,7 +198,7 @@ const DeployActions = ({
   <ActionPanel>
     <ActionPanel.Section>
       <Action.OpenInBrowser
-        icon="icon.png"
+        icon="netlify-icon.png"
         title="View Deploy Logs"
         url={getDeployUrl(siteName, deploy.id)}
       />
