@@ -169,6 +169,7 @@
 /extensions/defichain-lottery                        @adrian-schnell @pernielsentikaer
 /extensions/defiscan                                 @adrian-schnell
 /extensions/dekudeals                                @rrroyal
+/extensions/descript-to-youtube-chapters             @peduarte
 /extensions/designer-news                            @itsnwa
 /extensions/deutscherwetterdienst                    @NicolaiSchmid
 /extensions/dev-to                                   @aeither
@@ -279,6 +280,7 @@
 /extensions/gitlab                                   @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew
 /extensions/gitlab-docs                              @saschaeggi
 /extensions/gitmoji                                  @ricoberger
+/extensions/gitpod                                   @henit-chobisa @Palanikannan1437
 /extensions/go-package-search                        @bstncartwright @k8scat
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna
@@ -357,7 +359,7 @@
 /extensions/jira-search-self-hosted                  @emanguy @svenwiegand @koseduhemak @rnprest
 /extensions/jira-time-tracking                       @niallpaterson
 /extensions/jira2git                                 @ipiranhaa
-/extensions/jisho                                    @dmacdermott
+/extensions/jisho                                    @dmacdermott @mmtftr
 /extensions/jotoba                                   @clnhs
 /extensions/json-editor                              @lryong
 /extensions/json-format                              @Destiner
