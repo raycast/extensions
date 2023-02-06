@@ -138,8 +138,9 @@ const TranslateForm = () => {
       <Form.Dropdown id="language_to" title="To" value={toLang} onChange={setToLang} storeValue>
         {languages
           .filter((lang) => lang.code !== "auto")
-          .map((lang) => (<Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />))
-        }
+          .map((lang) => (
+            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
+          ))}
       </Form.Dropdown>
       <Form.TextArea id="result" title="Translation" value={translated} placeholder="Translation" />
     </Form>
