@@ -91,7 +91,7 @@ export const HostItem = ({ host, onSwitch, onDelete }: HostItemProps) => {
         <ActionPanel>
           <ActionPanel.Section>
             <Action title={`Switch to ${host.host}`} icon={Icon.Switch} onAction={switchHost} />
-            {onDelete && <Action title="Delete" icon={Icon.Trash} onAction={deleteAction} />}
+            {onDelete && <Action title="Delete Host" icon={Icon.Trash} onAction={deleteAction} />}
           </ActionPanel.Section>
         </ActionPanel>
       }
