@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, Image, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Image, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useForm, useCachedPromise } from "@raycast/utils";
 import emojis, { emoji } from "node-emoji";
 import { useMemo } from "react";
@@ -81,8 +81,6 @@ function SetStatusForm({ context }: SetStatusFormProps) {
         if (values.organizationId) {
           payload.organizationId = values.organizationId;
         }
-
-        console.log(payload);
 
         await github.changeUserStatus(payload);
         await mutate();

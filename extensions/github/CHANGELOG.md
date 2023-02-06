@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Add Set Status command] - 2023-02-06
+
+- Add a command to set the user's status on GitHub
+
 ## [Clear form fields] - 2023-01-19
 
 - Clear form fields when creating an issue
