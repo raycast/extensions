@@ -141,9 +141,7 @@ export default function CreateTaskForm(props: {
   }, [values.projects]);
 
   const hasCustomFields = customFields && customFields.length > 0;
-  const selectedWorkspace = workspaces?.filter((workspace) => {
-    return values.workspace?.includes(workspace.gid);
-  });
+  const selectedWorkspace = workspaces?.find((workspace) => values.workspace === workspace.gid);
 
   return (
     <Form
@@ -194,13 +192,9 @@ export default function CreateTaskForm(props: {
           );
         })}
       </Form.Dropdown>
-      {selectedWorkspace?.map((workspace) => {
-      // const WorkspaceEmail = workspaces?.map(workspace => workspace.email_domains)
-      if (workspace.is_organization === true) {
-              return (
-                <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
-              );
-            }})}
+      {selectedWorkspace?.is_organization ? (
+        <Form.DatePicker title="Start Date" type={Form.DatePicker.Type.Date} {...itemProps.start_date} />
+      ) : null}
       <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due_date} />
 
       {hasCustomFields
