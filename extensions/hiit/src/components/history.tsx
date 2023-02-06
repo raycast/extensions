@@ -71,9 +71,8 @@ export function History() {
                     </List.Item.Detail.Metadata.TagList>
 
                     <List.Item.Detail.Metadata.Label title="Date" text={new Date(item.date).toLocaleDateString()} />
+                    <List.Item.Detail.Metadata.Label title="Total Time" text={secondsToTime(item.interval.totalTime)} />
                     <List.Item.Detail.Metadata.Separator />
-
-                    <List.Item.Detail.Metadata.Label title="Total time" text={secondsToTime(item.interval.totalTime)} />
 
                     {item.note && <List.Item.Detail.Metadata.Label title="Note" text={item.note} />}
                   </List.Item.Detail.Metadata>
@@ -89,31 +88,11 @@ export function History() {
 
 function historyAccessories(item: Item) {
   const historyAccessories = [];
-  /*
+
   if (item.date) {
     const date = new Date(item.date);
     historyAccessories.push({ icon: Icon.Calendar, date: new Date(item.date), tooltip: date.toLocaleString() });
   }
-  */
-
-  const tintedIcon = { source: Icon.Bubble, tintColor: Color.Red };
-  historyAccessories.push(tintedIcon);
-
-  /*
-  // Push finished icon
-  historyAccessories.push({
-    source: Icon.XMarkCircle,
-    tintColor: Color.Red,
-  });
-  */
-
-  // historyAccessories.push({ icon: Icon.Clock, text: secondsToTime(item.interval.totalTime) });
-
-  /*
-  if (item.note) {
-    historyAccessories.push({ icon: Icon.Document, tooltip: item.note, text: "" });
-  }
-  */
 
   return [...historyAccessories];
 }
