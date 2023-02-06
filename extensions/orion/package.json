@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.1",
+    "@raycast/utils": "^1.4.7",
     "bplist-parser": "^0.3.2"
   },
   "devDependencies": {
