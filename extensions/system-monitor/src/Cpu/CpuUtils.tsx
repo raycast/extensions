@@ -4,6 +4,15 @@ import { ExecError } from "../Interfaces";
 
 const execp = promisify(exec);
 
+const UNITS = {
+  year: 24 * 60 * 60 * 365,
+  month: (24 * 60 * 60 * 365) / 12,
+  day: 24 * 60 * 60,
+  hour: 60 * 60,
+  minute: 60,
+  second: 0,
+};
+
 const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   try {
     const output = await execp("/bin/ps -Aceo pcpu,comm -r");
@@ -24,4 +33,19 @@ const getTopCpuProcess = async (count: number): Promise<string[][]> => {
   }
 };
 
-export { getTopCpuProcess };
+const getRelativeTime = (uptime: number): string => {
+  const rtf = new Intl.RelativeTimeFormat("en");
+
+  // "Math.abs" accounts for both "past" & "future" scenarios
+  for (const unit in UNITS) {
+    let seconds = UNITS[unit as keyof typeof UNITS];
+
+    if (uptime > seconds || unit == "second") {
+      return rtf.format(-Math.round(uptime / seconds), unit as Intl.RelativeTimeFormatUnit);
+    }
+  }
+
+  return "Unknown";
+};
+
+export { getTopCpuProcess, getRelativeTime };

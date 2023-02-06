@@ -13,6 +13,7 @@ export interface NetworkMonitorState {
 
 export interface CpuMonitorState {
   cpu: string;
+  uptime: string;
   avgLoad: string[];
   topProcess: string[][];
 }
