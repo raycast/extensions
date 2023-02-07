@@ -37,7 +37,7 @@ const getRelativeTime = (uptime: number): string => {
   const rtf = new Intl.RelativeTimeFormat("en");
 
   for (const unit in UNITS) {
-    let seconds = UNITS[unit as keyof typeof UNITS];
+    const seconds = UNITS[unit as keyof typeof UNITS];
 
     if (uptime > seconds || unit == "second") {
       return rtf.format(-Math.round(uptime / seconds), unit as Intl.RelativeTimeFormatUnit);
