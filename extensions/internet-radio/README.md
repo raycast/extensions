@@ -1,10 +1,14 @@
 # internet-radio
 
-Play live internet radio through Music.app. The 36 default stations cover a wide variety of genres, including live news, and you can add custom stations by providing a directly link to the stream URL (e.g. a live broadcast mp3, ogg, acc, pls, or other audio file). You can also view the current station and control playback via a menu bar extra.
+Play live internet radio through Music, QuickTime Player, VLC, or Vox. The 36 default stations cover a wide variety of genres, including live news, and you can add custom stations by providing a directly link to the stream URL (e.g. a live broadcast mp3, ogg, acc, pls, or other audio file). You can also view the current station and control playback via a menu bar extra.
+
+Note: When adding URLs, they must be URLs that Music.app can play. For a lot of streams, including many on TuneIn, you can find a direct url to an audio file by observing the network tab in your browser’s inspector.
 
 # Commands
-- Browse Stations
-    - Browse the list of currently configured stations, and edit or delete stations, and control playback.
+- Search Stations
+    - Search a database of known radio stations, optionally playing them or saving them for later
+- Browse Saved Stations
+    - Browse the list of saved stations, and edit or delete stations, and control playback.
 - New Station
     - Add a custom station via a simple form.
 - Stop Playback
