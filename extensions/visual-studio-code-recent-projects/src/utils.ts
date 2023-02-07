@@ -72,4 +72,4 @@ export async function getFocusFinderPath() {
   } catch (e) {
     throw new Error("Finder not running");
   }
-};
+}
