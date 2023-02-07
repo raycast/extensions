@@ -1,6 +1,6 @@
 # DevDocs Extension
 
-## Deeplinks - 2023-02-01
+## Deeplinks - 2023-02-07
 
 - Add deeplinks support
 
