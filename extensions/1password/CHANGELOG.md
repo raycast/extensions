@@ -1,5 +1,20 @@
 # 1Password Changelog
 
+## [CLI support] - 2023-02-06
+
+This new version of the 1Password extension contains the following changes.
+
+### 1Password 8
+- Filter by categories
+- opbookmark is removed
+- Copying of item fields
+- Create new items (TBD)
+
+### 1Password 7
+- Better caching
+- Beautiful icons instead of emojis
+- Cleaner code
+
 ## [Support for 1Password 8] - 2022-05-03
 
 - Added support for 1Password 8

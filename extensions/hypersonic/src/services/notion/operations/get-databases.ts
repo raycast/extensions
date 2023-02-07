@@ -66,10 +66,17 @@ const normalizeColumns = (
     }
 
     if (item.type === 'status') {
+      const completeGroup = item.status.groups[2]
+
+      const completedOptions = item.status?.options
+        .filter((option) => completeGroup?.option_ids.includes(option.id))
+        .map((option) => option.name)
+
       const data = {
         type: item.type,
         name: item.name,
         doneName: item.status?.options[item.status.options.length - 1]?.name,
+        completedStatuses: completedOptions,
         inProgressId:
           item.status.groups[1].option_ids[
             item.status.groups[1].option_ids.length - 1

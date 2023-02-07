@@ -1,11 +1,11 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Tab } from "./interfaces";
+import { Preferences, Tab } from "./interfaces";
 import { getOpenTabs } from "./actions";
 import { ChromeListItems } from "./components";
 
 export default function Command() {
-  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
+  const { useOriginalFavicon } = getPreferenceValues<Preferences>();
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
