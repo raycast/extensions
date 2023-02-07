@@ -1,5 +1,4 @@
 import { Script } from "../type";
-import { Buffer } from "buffer";
 import yaml from "js-yaml";
 
 export const yamlToJson: Script = {
