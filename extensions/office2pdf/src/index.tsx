@@ -205,7 +205,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="Upload"
       enableDrafts
       actions={
         <ActionPanel>
