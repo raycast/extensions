@@ -29,3 +29,7 @@ export type IntervalFormValues = {
 export type NoteFormValues = {
   note: string;
 };
+
+export type Preferences = {
+  beep: boolean;
+};

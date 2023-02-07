@@ -1,6 +1,5 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { secondsToTime } from "./utils";
 import { addItem, deleteItem, getItems } from "./storage";
 import { Item } from "./types";
 import { NewInterval } from "./components/actions/newInterval";

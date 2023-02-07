@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Item } from "../types";
-import { Action, ActionPanel, List, environment } from "@raycast/api";
+import { Item, Preferences } from "../types";
+import { Action, ActionPanel, List, environment, getPreferenceValues, open } from "@raycast/api";
 import { exec } from "child_process";
 import { secondsToTime } from "../utils";
 import { nanoid } from "nanoid";
 import { addItem } from "../storage";
 
 export function Timer(props: { item: Item }) {
-  const item = props.item;
+  const preferences = getPreferenceValues<Preferences>();
+  const { item } = props;
 
   const intervalTimerRef = useRef<NodeJS.Timeout>();
 
@@ -19,6 +20,8 @@ export function Timer(props: { item: Item }) {
 
   const periodsRef = useRef<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
   const [period, setPeriod] = useState<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
+
+  const [nextStage, setNextStage] = useState<string>("HIGH");
 
   const intervalsRef = useRef<number>(item.interval.intervals);
   const [intervals, setintervals] = useState<number>(intervalsRef.current);
@@ -33,12 +36,9 @@ export function Timer(props: { item: Item }) {
       if (intervalTimerRef.current) {
         clearInterval(intervalTimerRef.current);
 
-        console.log(item.interval.totalTime, totalTimeRef.current);
         if (totalTimeRef.current !== 0 && item.interval.totalTime === totalTimeRef.current) {
-          console.log("im here");
           const newItem = { ...item, id: currentHistoryId, finished: true, date: new Date().getTime() };
           addItem(newItem, "history");
-          console.log("here too");
         }
 
         console.log("Clearing interval");
@@ -73,8 +73,6 @@ export function Timer(props: { item: Item }) {
 
         if (secondsRef.current === 0) {
           // If current period is done
-          exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
-
           if (intervalsRef.current === 1 && item.interval.cooldown > 0) {
             periodsRef.current = "COOLDOWN";
             setPeriod(periodsRef.current);
@@ -117,15 +115,33 @@ export function Timer(props: { item: Item }) {
     addItem(newItem, "history");
   }
 
+  function getNextStage() {
+    if (periodsRef.current === "HIGH") {
+      return "Low";
+    } else if (["LOW", "WARMUP"].includes(periodsRef.current)) {
+      return "High";
+    }
+  }
+
   function countdown(playSound: boolean) {
+    console.log({ playSound });
+    console.log(getNextStage());
     setTotalTime((previous) => previous + 1);
     totalTimeRef.current += 1;
 
     setSeconds((previous) => previous - 1);
     secondsRef.current -= 1;
 
-    if (playSound) {
-      exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
+    if (preferences.beep) {
+      if (secondsRef.current > 0 && secondsRef.current < 4) {
+        exec(`afplay ${environment.assetsPath}/beep01.mp3 && $$`);
+      }
+
+      if (playSound) {
+        exec(`say Warmup`);
+      } else if (secondsRef.current === 0) {
+        exec(`say ${getNextStage()}`);
+      }
     }
   }
 
@@ -142,8 +158,6 @@ export function Timer(props: { item: Item }) {
   if (totalTime === 0) {
     description = `PRESS ENTER TO START`;
   }
-
-  console.log(item.interval.totalTime - totalTime);
 
   return (
     <List
