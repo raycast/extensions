@@ -1,3 +1,3 @@
 # Knowwa Changelog
 
-## [Initial Version] - 2022-12-10
+## [Initial Version] - 2023-02-07
