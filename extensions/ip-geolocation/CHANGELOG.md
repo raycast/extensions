@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Update UI] - {PR_MERGE_DATE}
+## [Update UI] - 2023-02-07
 
 - Now command: Copy Local IP Address
 - Now display IPv4 and IPv6 information separately
