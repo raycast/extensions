@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nodemodules-cleaner",
-  "title": "NodeModules Cleaner",
-  "description": "cleanup useless node_modules",
+  "title": "Node Modules Cleaner",
+  "description": "Cleanup useless node_modules folders",
   "icon": "command-icon.png",
   "author": "ninjiacoder",
   "categories": [
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show Projects contains node_modules",
-      "description": "Show projects contains node_modules",
+      "title": "Node Modules Cleaner",
+      "description": "Show folders containing node_modules",
       "mode": "view"
     },
     {
