@@ -69,7 +69,7 @@ export const scriptFinderPath = `
 export async function getFocusFinderPath() {
   try {
     return await runAppleScript(scriptFinderPath);
-  } catch (e) {
+  } catch (e: any) {
     throw new Error("Finder not running");
   }
 }

@@ -7,7 +7,7 @@ export default async function main() {
     const path = await getFocusFinderPath();
     await open(path, bundleIdentifier);
     await closeMainWindow();
-  } catch (e) {
+  } catch (e: any) {
     await showToast({
       title: "",
       style: Toast.Style.Failure,
