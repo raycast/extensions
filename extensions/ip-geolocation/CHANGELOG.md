@@ -1,5 +1,10 @@
 # IP Geolocation Changelog
 
+## [Update UI] - {PR_MERGE_DATE}
+
+- Now command: Copy Local IP Address
+- Now display IPv4 and IPv6 information separately
+
 ## [Update UI] - 2022-12-05
 
 - Update UI: new extension icon, new information icon
