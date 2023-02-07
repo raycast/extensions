@@ -31,11 +31,7 @@ export default function Command(): ReactElement {
 
     const promises = Promise.all([
       translate(toTranslate, {
-        from: undefined,
-        to: preferences.lang1,
-      }),
-      translate(toTranslate, {
-        from: undefined,
+        from: preferences.lang1 === "auto" ? undefined : preferences.lang1,
         to: preferences.lang2,
       }),
     ]);
@@ -43,25 +39,23 @@ export default function Command(): ReactElement {
     promises
       .then((res) => {
         if (localCount === count) {
-          const detectedLangCode = res[0].from.language.iso as LanguageCode;
-          const detectedLangRep =
-            supportedLanguagesByCode[detectedLangCode].flag ?? supportedLanguagesByCode[detectedLangCode].code;
-          const lang1Rep =
-            supportedLanguagesByCode[preferences.lang1].flag ?? supportedLanguagesByCode[preferences.lang1].code;
+          let lang1Code = preferences.lang1;
+          if (preferences.lang1 === "auto") {
+            if (res[0].from.language.iso !== undefined) {
+              lang1Code = res[0].from.language.iso as LanguageCode;
+            } else {
+              showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
+            }
+          }
+          const lang1Rep = supportedLanguagesByCode[lang1Code].flag ?? supportedLanguagesByCode[lang1Code].code;
           const lang2Rep =
             supportedLanguagesByCode[preferences.lang2].flag ?? supportedLanguagesByCode[preferences.lang2].code;
 
           setResults([
             {
               text: res[0].text,
-              languages: `${detectedLangRep} -> ${lang1Rep}`,
-              source_language: supportedLanguagesByCode[detectedLangCode].code,
-              target_language: supportedLanguagesByCode[preferences.lang1].code,
-            },
-            {
-              text: res[1].text,
-              languages: `${detectedLangRep} -> ${lang2Rep}`,
-              source_language: supportedLanguagesByCode[detectedLangCode].code,
+              languages: `${lang1Rep} -> ${lang2Rep}`,
+              source_language: supportedLanguagesByCode[lang1Code].code,
               target_language: supportedLanguagesByCode[preferences.lang2].code,
             },
           ]);

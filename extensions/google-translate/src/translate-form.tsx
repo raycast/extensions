@@ -9,9 +9,9 @@ const TranslateForm = () => {
   const preferences = usePreferences();
 
   const [text, setText] = React.useState("");
-  const [fromLang, setFromLang] = React.useState<LanguageCode | string>("auto");
+  const [fromLang, setFromLang] = React.useState<LanguageCode | string>(preferences.lang1);
   const fromLangObj = supportedLanguagesByCode[fromLang as LanguageCode];
-  const [toLang, setToLang] = React.useState<LanguageCode | string>(preferences.lang1);
+  const [toLang, setToLang] = React.useState<LanguageCode | string>(preferences.lang2);
   const toLangObj = supportedLanguagesByCode[toLang as LanguageCode];
 
   const [isLoading, setIsLoading] = React.useState(false);

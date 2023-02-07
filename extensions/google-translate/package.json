@@ -38,8 +38,12 @@
       "type": "dropdown",
       "required": true,
       "title": "First Language",
-      "default": "en",
+      "default": "auto",
       "data": [
+        {
+          "title": "🌐 Auto-detect",
+          "value": "auto"
+        },
         {
           "title": "🇿🇦 Afrikaans",
           "value": "af"
