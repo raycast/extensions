@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Fix text error] - {PR_MERGE_DATE}
+## [Fix text error] - 2023-02-07
 
 - Fix text error in preferences
 
