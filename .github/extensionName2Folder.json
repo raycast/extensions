@@ -364,6 +364,7 @@
   "json-format": "json-format",
   "json-to-go": "json-to-go",
   "json2ts": "json2ts",
+  "jump": "jump",
   "just-focus": "just-focus",
   "search-justwatch": "justwatch-search",
   "jwt-decoder": "jwt-decoder",
