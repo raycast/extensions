@@ -218,9 +218,9 @@ export default function Command() {
         id="file"
         value={file}
         onChange={setFile}
-        title="file"
+        title="File"
         autoFocus
-        info="Select an word or ppt file to upload"
+        info="Select a word or ppt file to upload"
         allowMultipleSelection={false}
       />
     </Form>
