@@ -117,9 +117,15 @@ export function Timer(props: { item: Item }) {
 
   function getNextStage() {
     if (periodsRef.current === "HIGH") {
+      if (intervalsRef.current === 1 && item.interval.cooldown > 0) {
+        return "Cooldown";
+      }
+
       return "Low";
     } else if (["LOW", "WARMUP"].includes(periodsRef.current)) {
       return "High";
+    } else if (periodsRef.current === "COOLDOWN") {
+      return "Done";
     }
   }
 
@@ -149,6 +155,7 @@ export function Timer(props: { item: Item }) {
   if (totalTime === 0) {
     title = "Ready";
   } else if (item.interval.totalTime === totalTime) {
+    open("raycast://confetti");
     title = "Done";
   }
 
