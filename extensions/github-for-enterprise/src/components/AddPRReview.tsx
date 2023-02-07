@@ -1,6 +1,6 @@
 import { ADD_PR_REVIEW, SUBMIT_PR_REVIEW } from "@/queries/pull-requests";
 import { fetcher } from "@/utils";
-import { ActionPanel, Form, FormValues, showToast, SubmitFormAction, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, FormValues, showToast, Action, ToastStyle, useNavigation } from "@raycast/api";
 import React from "react";
 import { useSWRConfig } from "swr";
 
@@ -44,10 +44,9 @@ export default function AddPRReview({ id, title }: any) {
   return (
     <Form
       navigationTitle={title}
-      onSubmit={addReview}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add Review" onSubmit={addReview} />
+          <Action.SubmitForm title="Add Review" onSubmit={addReview} />
         </ActionPanel>
       }
     >
