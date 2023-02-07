@@ -108,7 +108,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create App" />
-          <Action onAction={() => openCommandPreferences()} title="Change extension preferences" />
+          <Action onAction={() => openCommandPreferences()} title="Change Extension Preferences" />
         </ActionPanel>
       }
     >
