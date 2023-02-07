@@ -34,7 +34,7 @@ export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: 
           <Action.OpenInBrowser
             url={`https://roamresearch.com/#/app/${graph.nameField}/page/${block[":block/uid"]}`}
           />
-          <Action.OpenWith title="Open in app" path={`roam://#/app/thoughtfull/page/${block[":block/uid"]}`} />
+          <Action.OpenWith title="Open in App" path={`roam://#/app/thoughtfull/page/${block[":block/uid"]}`} />
           {_refs.length ? (
             <Action.Push
               title={`Show Linked References(${block[":block/_refs"].length})`}
