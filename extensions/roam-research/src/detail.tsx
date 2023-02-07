@@ -27,7 +27,7 @@ export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: 
   const _refs = block[":block/_refs"] || [];
   return (
     <Detail
-      navigationTitle={"Note detail "}
+      navigationTitle={"Note Detail "}
       markdown={detailMarkdown(block)}
       actions={
         <ActionPanel>
