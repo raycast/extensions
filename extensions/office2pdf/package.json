@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert",
+      "title": "Convert File",
+      "subtitle": "Office2PDF",
       "description": "Convert Office to PDF using CloudConvert API,",
       "mode": "view"
     }
