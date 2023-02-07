@@ -157,7 +157,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       </Form.Dropdown>
       <Form.Description text="Which packages would you like to enable?" />
       <Form.Checkbox id="next-auth" label="next-auth" storeValue />
-      <Form.Checkbox id="prisma" label="prisma" storeValue />
+      <Form.Checkbox id="prisma" label="Prisma" storeValue />
       <Form.Checkbox id="tailwind" label="tailwind" storeValue />
       <Form.Checkbox id="trpc" label="trpc" storeValue />
       <Form.Separator />
