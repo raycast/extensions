@@ -1,4 +1,4 @@
-# Mochi for Todoist
+# Mochi
 
 **This extension is not created by, affiliated with, or supported by Mochi Cards, LLC.**
 
@@ -13,7 +13,6 @@ Then, copy it and paste it either into the extension's Welcome screen or in the 
 ## 🚸 Limitations
 
 - To speed up startup, cache the deck information in LocalStorage. If template changes are not reflected, clear the cache with the cache clear command.
-- Only the first 5 decks on Mochi's dashboard can be selected.
 - File and image attachments are not supported.
 
 ## 🛣️ Roadmap
