@@ -2,9 +2,11 @@ import * as staticDatasets from "./schemas/index";
 
 const platform_bucket =
   "gs://open-targets-pre-data-releases/22.11/output/etl/parquet";
-const platform_ftp = "http://ftp.ebi.ac.uk/pub/databases/opentargets/platform/latest/output/etl/parquet/";
+const platform_ftp =
+  "http://ftp.ebi.ac.uk/pub/databases/opentargets/platform/latest/output/etl/parquet/";
 const genetics_bucket = "gs://genetics-portal-dev-data/22.09.0/outputs";
-const genetics_ftp = "http://ftp.ebi.ac.uk/pub/databases/opentargets/genetics/latest/";
+const genetics_ftp =
+  "http://ftp.ebi.ac.uk/pub/databases/opentargets/genetics/latest/";
 const genetics_dev_bucket =
   "gs://genetics_etl_python_playground/XX.XX/output/python_etl/parquet";
 export interface Dataset {
@@ -234,53 +236,53 @@ export const otDatasets: Dataset[] = [
     ftp: `${genetics_ftp}/lut/variant-index/`,
     schema_fields: staticDatasets.variant_index.fields,
   },
-    // Genetics (dev)
-    {
-      name: "Study index (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/study-index`,
-      schema_fields: staticDatasets.studies_dev.fields,
-    },
-    {
-      name: "Colocalisation (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/colocalisation`,
-      schema_fields: staticDatasets.colocalisation_dev.fields,
-    },
-    {
-      name: "Study locus (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/study-locus`,
-      schema_fields: staticDatasets.study_locus_dev.fields,
-    },
-    {
-      name: "Study locus overlap (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/study-locus-overlap`,
-      schema_fields: staticDatasets.study_locus_overlap_dev.fields,
-    },
-    {
-      name: "Targets (dev)",
-      type: "genetics-dev",
-      location: `gs://genetics_etl_python_playground/input/v2g_input/targets_correct_tss`,
-      schema_fields: staticDatasets.targets_dev.fields,
-    },
-    {
-      name: "Variant to gene (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/variant-to-gene`,
-      schema_fields: staticDatasets.v2g_dev.fields,
-    },
-    {
-      name: "Variant annotation (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/variant-annotation`,
-      schema_fields: staticDatasets.variant_annotation_dev.fields,
-    },
-    {
-      name: "Variant index (dev)",
-      type: "genetics-dev",
-      location: `${genetics_dev_bucket}/variant-index`,
-      schema_fields: staticDatasets.variant_index_dev.fields,
-    }
+  // Genetics (dev)
+  {
+    name: "Study index (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/study-index`,
+    schema_fields: staticDatasets.studies_dev.fields,
+  },
+  {
+    name: "Colocalisation (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/colocalisation`,
+    schema_fields: staticDatasets.colocalisation_dev.fields,
+  },
+  {
+    name: "Study locus (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/study-locus`,
+    schema_fields: staticDatasets.study_locus_dev.fields,
+  },
+  {
+    name: "Study locus overlap (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/study-locus-overlap`,
+    schema_fields: staticDatasets.study_locus_overlap_dev.fields,
+  },
+  {
+    name: "Targets (dev)",
+    type: "genetics-dev",
+    location: `gs://genetics_etl_python_playground/input/v2g_input/targets_correct_tss`,
+    schema_fields: staticDatasets.targets_dev.fields,
+  },
+  {
+    name: "Variant to gene (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/variant-to-gene`,
+    schema_fields: staticDatasets.v2g_dev.fields,
+  },
+  {
+    name: "Variant annotation (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/variant-annotation`,
+    schema_fields: staticDatasets.variant_annotation_dev.fields,
+  },
+  {
+    name: "Variant index (dev)",
+    type: "genetics-dev",
+    location: `${genetics_dev_bucket}/variant-index`,
+    schema_fields: staticDatasets.variant_index_dev.fields,
+  },
 ];

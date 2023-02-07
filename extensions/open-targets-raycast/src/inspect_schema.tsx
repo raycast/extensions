@@ -3,7 +3,7 @@ import { Dataset, otDatasets } from "./ot_datasets";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, FC } from "react";
 
-const ListDetail: FC<{ dataset: Dataset }> = ({ dataset }) =>
+const ListDetail: FC<{ dataset: Dataset }> = ({ dataset }) => (
   <List.Item.Detail
     metadata={
       <List.Item.Detail.Metadata>
@@ -20,9 +20,7 @@ const ListDetail: FC<{ dataset: Dataset }> = ({ dataset }) =>
                   : Icon.XMarkCircleFilled
               }
               text={
-                typeof field.type === "string"
-                  ? field.type
-                  : field.type.type
+                typeof field.type === "string" ? field.type : field.type.type
               }
             />
           );
@@ -30,7 +28,7 @@ const ListDetail: FC<{ dataset: Dataset }> = ({ dataset }) =>
       </List.Item.Detail.Metadata>
     }
   />
-
+);
 
 export default function Command() {
   const { data, isLoading } = useCachedPromise(
@@ -81,9 +79,7 @@ export default function Command() {
                     />
                   </ActionPanel>
                 }
-                detail={
-                  <ListDetail dataset={dataset} />
-                }
+                detail={<ListDetail dataset={dataset} />}
               />
             );
           })}
