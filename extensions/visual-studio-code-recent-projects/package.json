@@ -24,6 +24,12 @@
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
       "mode": "view"
+    },
+    {
+      "name": "open-folder",
+      "title": "Open Folder With VScode",
+      "description": "open current focused folder with vscode",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -95,7 +101,8 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "run-applescript": "^6.1.0"
   },
   "scripts": {
     "dev": "ray develop",
