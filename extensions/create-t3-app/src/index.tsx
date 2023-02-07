@@ -158,7 +158,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       <Form.Description text="Which packages would you like to enable?" />
       <Form.Checkbox id="next-auth" label="next-auth" storeValue />
       <Form.Checkbox id="prisma" label="Prisma" storeValue />
-      <Form.Checkbox id="tailwind" label="tailwind" storeValue />
+      <Form.Checkbox id="tailwind" label="Tailwind" storeValue />
       <Form.Checkbox id="trpc" label="trpc" storeValue />
       <Form.Separator />
       <Form.Checkbox id="git" label="Initialize a new git repository" storeValue defaultValue={true} />
