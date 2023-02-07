@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Add auto-detect option] - 2023-02-07
+
+Add auto-detect to the language option.
+
 ## [Add auto-detect language] - 2023-02-05
 
 - Add auto-detect language to the `Translate` command.
