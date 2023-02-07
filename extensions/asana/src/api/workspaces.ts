@@ -3,7 +3,6 @@ import { request } from "./request";
 export type Workspace = {
   gid: string;
   name: string;
-  email_domains: string[];
   is_organization: boolean;
 };
 
