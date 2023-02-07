@@ -26,9 +26,10 @@
       "mode": "view"
     },
     {
-      "name": "open-folder",
-      "title": "Open Folder With VScode",
-      "description": "open current focused folder with vscode",
+      "name": "open-with-vscode",
+      "title": "Open With Visual Studio Code",
+      "subtitle": "Visual Studio Code",
+      "description": "Opens the currently selected Finder item with Visual Studio Code.",
       "mode": "no-view"
     }
   ],
@@ -101,8 +102,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
-    "typescript": "^4.4.3",
-    "run-applescript": "^6.1.0"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "dev": "ray develop",

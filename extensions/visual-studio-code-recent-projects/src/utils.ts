@@ -1,6 +1,5 @@
 import { existsSync } from "fs";
 import { URL } from "url";
-import { runAppleScript } from "run-applescript";
 import { isDeepStrictEqual } from "util";
 import { EntryType, EntryLike, FileEntry, FolderEntry, RemoteEntry, WorkspaceEntry } from "./types";
 
@@ -54,22 +53,4 @@ export function filterEntriesByType(filter: EntryType | null) {
 
 export function filterUnpinnedEntries(pinnedEntries: EntryLike[]) {
   return (entry: EntryLike) => pinnedEntries.find((pinnedEntry) => isDeepStrictEqual(pinnedEntry, entry)) === undefined;
-}
-
-export const scriptFinderPath = `
-  if application "Finder" is not running then
-      return "Finder not running"
-  end if
-
-  tell application "Finder"
-      return POSIX path of ((insertion location) as alias)
-  end tell
-`;
-
-export async function getFocusFinderPath() {
-  try {
-    return await runAppleScript(scriptFinderPath);
-  } catch (e: any) {
-    throw new Error("Finder not running");
-  }
 }
