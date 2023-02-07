@@ -21,8 +21,6 @@ export function Timer(props: { item: Item }) {
   const periodsRef = useRef<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
   const [period, setPeriod] = useState<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
 
-  const [nextStage, setNextStage] = useState<string>("HIGH");
-
   const intervalsRef = useRef<number>(item.interval.intervals);
   const [intervals, setintervals] = useState<number>(intervalsRef.current);
 
@@ -130,8 +128,6 @@ export function Timer(props: { item: Item }) {
   }
 
   function countdown(playSound: boolean) {
-    console.log({ playSound });
-    console.log(getNextStage());
     setTotalTime((previous) => previous + 1);
     totalTimeRef.current += 1;
 
@@ -139,14 +135,24 @@ export function Timer(props: { item: Item }) {
     secondsRef.current -= 1;
 
     if (preferences.beep) {
-      if (secondsRef.current > 0 && secondsRef.current < 4) {
+      if (secondsRef.current > 0 && secondsRef.current < 4 && preferences.beep) {
         exec(`afplay ${environment.assetsPath}/beep01.mp3 && $$`);
       }
+    }
 
-      if (playSound) {
+    if (playSound && preferences.intervalbeep !== "none") {
+      if (preferences.intervalbeep === "pronounce") {
         exec(`say Warmup`);
-      } else if (secondsRef.current === 0) {
+      } else {
+        exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
+      }
+    }
+
+    if (secondsRef.current === 0 && preferences.intervalbeep !== "none") {
+      if (preferences.intervalbeep === "pronounce") {
         exec(`say ${getNextStage()}`);
+      } else {
+        exec(`afplay ${environment.assetsPath}/beep.mp3 && $$`);
       }
     }
   }

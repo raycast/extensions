@@ -32,4 +32,5 @@ export type NoteFormValues = {
 
 export type Preferences = {
   beep: boolean;
+  intervalbeep: string;
 };
