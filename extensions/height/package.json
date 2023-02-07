@@ -13,6 +13,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search_lists",
+      "title": "Search Lists",
+      "description": "",
+      "mode": "view"
+    },
+    {
       "name": "create_list",
       "title": "Create List",
       "description": "",
