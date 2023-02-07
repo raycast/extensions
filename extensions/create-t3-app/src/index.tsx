@@ -135,31 +135,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         allowMultipleSelection={false}
         defaultValue={[prefs.directory]}
       />
-      <Form.Dropdown
-        id="language"
-        storeValue
-        title="JS or TS?"
-        defaultValue="ts"
-        error={langError}
-        onChange={(value) => {
-          switch (value) {
-            case "ts":
-              setLangError(undefined);
-              break;
-            case "js":
-              setLangError("Wrong answer! Pick TypeScript!");
-              break;
-          }
-        }}
-      >
-        <Form.Dropdown.Item value="ts" title="TypeScript" />
-        <Form.Dropdown.Item value="js" title="JavaScript" />
-      </Form.Dropdown>
       <Form.Description text="Which packages would you like to enable?" />
-      <Form.Checkbox id="next-auth" label="next-auth" storeValue />
+      <Form.Checkbox id="next-auth" label="Next Auth" storeValue />
       <Form.Checkbox id="prisma" label="Prisma" storeValue />
       <Form.Checkbox id="tailwind" label="Tailwind" storeValue />
-      <Form.Checkbox id="trpc" label="trpc" storeValue />
+      <Form.Checkbox id="trpc" label="tRPC" storeValue />
       <Form.Separator />
       <Form.Checkbox id="git" label="Initialize a new git repository" storeValue defaultValue={true} />
       <Form.Separator />
