@@ -114,7 +114,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     >
       <Form.TextField
         id="appName"
-        title="Project name"
+        title="Project Name"
         placeholder="my-t3-app"
         defaultValue={props.arguments.appName}
         error={nameError}
