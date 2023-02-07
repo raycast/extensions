@@ -1,13 +1,11 @@
-import { runAppleScript } from "run-applescript";
-import { HistoryEntry, Tab } from "./types";
+import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
+import { searchArcPreferences } from "./preferences";
+import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
 export function getDomain(url: string) {
   try {
     const urlObj = new URL(url);
-    return {
-      value: urlObj.hostname.replace("www.", ""),
-      tooltip: url,
-    };
+    return urlObj.hostname.replace("www.", "");
   } catch (e) {
     console.error(e);
     return undefined;
@@ -19,84 +17,87 @@ export function getLastVisitedAt(entry: HistoryEntry) {
   return { date, tooltip: `Last visited: ${date.toLocaleString()}` };
 }
 
-let promiseInFlight: Promise<Tab[]> | undefined;
-let openTabs: Tab[] | undefined;
-
-export function getOpenTabs() {
-  if (openTabs) {
-    return Promise.resolve(openTabs);
-  }
-
-  if (promiseInFlight) {
-    return promiseInFlight;
-  }
-
-  promiseInFlight = runAppleScript(`
-      set _output to ""
-
-      tell application "Arc"
-        set _window_index to 1
-        
-        repeat with _window in windows
-          set _tab_index to 1
-          
-          repeat with _tab in tabs of _window
-            set _title to get title of _tab
-            set _url to get URL of _tab
-            
-            set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"windowId\\": " & _window_index & ", \\"tabId\\": " & _tab_index & " }")
-            
-            if _tab_index < (count tabs of _window) and _window_index < 3 then
-              set _output to (_output & ",\\n")
-            else
-              set _output to (_output & "\\n")
-            end if
-            
-            set _tab_index to _tab_index + 1
-          end repeat
-          
-          set _window_index to _window_index + 1
-        end repeat
-      end tell
-      
-      return "[\\n" & _output & "\\n]"
-    `)
-    .then((res) => JSON.parse(res))
-    .then((res) => {
-      openTabs = res;
-      return res;
-    })
-    .finally(() => (promiseInFlight = undefined));
-
-  return promiseInFlight;
+export function getSpaceTitle(space: Space) {
+  return space.title || `Space ${space.id}`;
 }
 
-export async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Arc"
-      activate
-      set index of window (${tab.windowId} as number) to (${tab.windowId} as number)
-      set active tab index of window (${tab.windowId} as number) to (${tab.tabId} as number)
-    end tell
-  `);
+export function getKey(tab: Tab) {
+  return `${tab.windowId}-${tab.tabId}`;
 }
 
-export class PermissionError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "PermissionError";
+export function getOrderedLocations() {
+  return ["topApp", "pinned", "unpinned"] as TabLocation[];
+}
+
+export function isLocationShown(location: TabLocation) {
+  switch (location) {
+    case "topApp":
+      return searchArcPreferences.showFavorites;
+    case "pinned":
+      return searchArcPreferences.showPinnedTabs;
+    case "unpinned":
+      return searchArcPreferences.showUnpinnedTabs;
   }
 }
 
-export const isPermissionError = (error: unknown) => {
-  return error instanceof Error && error.name === "PermissionError";
-};
+export function getLocationTitle(location: TabLocation) {
+  switch (location) {
+    case "topApp":
+      return "Favorites";
+    case "pinned":
+      return "Pinned Tabs";
+    case "unpinned":
+      return "Unpinned Tabs";
+  }
+}
 
-export async function createNewArcWindow() {
-  await runAppleScript(`
-    tell application "Arc"
-      make new window
-      activate
-    end tell
-  `);
+export function getShortcut(modifiers: Keyboard.KeyModifier[], index: number) {
+  const key = index + 1;
+
+  let shortcut: Keyboard.Shortcut | undefined;
+  if (key >= 1 && key <= 9) {
+    shortcut = { modifiers: modifiers, key: String(key) as Keyboard.KeyEquivalent };
+  }
+
+  return shortcut;
+}
+
+export function getNumberOfTabs(tabs?: Tab[]) {
+  if (!tabs) {
+    return undefined;
+  }
+
+  return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
+}
+
+export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
+  if (!entries) {
+    return undefined;
+  }
+
+  return entries.length === 1 ? "1 entry" : `${entries.length} entries`;
+}
+
+export async function showFailureToast(error: unknown, options?: Omit<Toast.Options, "style">) {
+  if (!error) {
+    return;
+  }
+
+  if (environment.launchType === "background") {
+    return;
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: options?.title ?? "Something went wrong",
+    message: options?.message ?? (error instanceof Error ? error.message : String(error)),
+    primaryAction: {
+      title: "Copy Error",
+      async onAction(toast) {
+        const content = error instanceof Error ? error?.stack || error?.message || String(error) : String(error);
+        await Clipboard.copy(content);
+        await toast.hide();
+      },
+    },
+  });
 }

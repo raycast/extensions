@@ -3,6 +3,9 @@ import { useState, ReactElement } from "react";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { GroupedEntries, HistoryEntry } from "./interfaces";
 import { IridiumListsItems } from "./components";
+import IridiumProfileDropDown from "./components/IridiumProfileDropdown";
+import { useCachedState } from "@raycast/utils";
+import { IRIDIUM_PROFILE_KEY, DEFAULT_IRIDIUM_PROFILE_ID } from "./constants";
 
 const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
@@ -22,7 +25,8 @@ const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { data, isLoading, errorView } = useHistorySearch(searchText);
+  const [profile] = useCachedState<string>(IRIDIUM_PROFILE_KEY, DEFAULT_IRIDIUM_PROFILE_ID);
+  const { data, isLoading, errorView, revalidate } = useHistorySearch(profile, searchText);
 
   if (errorView) {
     return errorView as ReactElement;
@@ -32,11 +36,16 @@ export default function Command(): ReactElement {
   const groups = Array.from(groupedEntries.keys());
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
+    <List
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      throttle={true}
+      searchBarAccessory={<IridiumProfileDropDown onProfileSelected={revalidate} />}
+    >
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <IridiumListsItems.TabHistory entry={e} key={e.id} />
+            <IridiumListsItems.TabHistory entry={e} key={e.id} profile={profile} />
           ))}
         </List.Section>
       ))}

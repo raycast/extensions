@@ -1,5 +1,17 @@
 # Hypersonic Changelog
 
+## [2.0.3] - 2023-01-23
+
+#### New
+
+- Set status action to mark a task with every status available in notion.
+- Segmented todo list to show tasks with different statuses.
+- Filter by status action to filter tasks by status.
+
+#### Updated
+
+- Improved date picker.
+
 ## [2.0.2] - 2022-12-23
 
 #### New

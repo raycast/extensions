@@ -72,7 +72,7 @@
           "title": "Padding",
           "type": "dropdown",
           "required": false,
-          "description": "Set the spacing around the code",
+          "description": "Set the padding around the code",
           "default": "64",
           "data": [
             {
@@ -97,7 +97,7 @@
           "name": "darkMode",
           "title": "Dark Mode",
           "type": "checkbox",
-          "description": "Set the spacing around the code",
+          "description": "Set the theme to light or dark mode",
           "required": false,
           "default": true,
           "label": "Enabled"
@@ -106,7 +106,7 @@
           "name": "background",
           "title": "Background",
           "type": "checkbox",
-          "description": "Set the spacing around the code",
+          "description": "Select whether you want a gradient background or not",
           "required": false,
           "default": true,
           "label": "Enabled"

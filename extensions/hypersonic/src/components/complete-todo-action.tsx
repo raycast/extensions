@@ -1,4 +1,4 @@
-import { Action, Icon } from '@raycast/api'
+import { Action, Color, Icon } from '@raycast/api'
 import { Todo } from '@/types/todo'
 
 export function CompleteTodoAction({
@@ -10,7 +10,13 @@ export function CompleteTodoAction({
 }) {
   return (
     <Action
-      icon={Icon.Checkmark}
+      icon={{
+        source: 'completed.svg',
+        tintColor: {
+          light: Color.SecondaryText,
+          dark: Color.PrimaryText,
+        },
+      }}
       title={'Mark as Completed'}
       onAction={() => onComplete(todo)}
     />

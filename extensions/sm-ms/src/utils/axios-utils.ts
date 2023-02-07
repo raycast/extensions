@@ -1,7 +1,7 @@
 import axios from "axios";
 import { SM_MS_BASE_URL } from "./costants";
 import { ImageData, SMMSResponse } from "../types/types";
-import { Clipboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
 import { isEmpty, isUrl, titleCase } from "./common-utils";
 import { secretToken } from "../hooks/hooks";
 import fse from "fs-extra";
@@ -78,6 +78,53 @@ export const uploadImage = async (
     })
     .catch((reason) => {
       showToast(Style.Failure, String(reason));
+      return { success: false, code: "Error!", message: String(reason) };
+    });
+};
+
+export const uploadImageFromClipboard = async (imagePath: string) => {
+  const formData = new FormData();
+  let imageStream;
+  if (isEmpty(imagePath)) {
+    console.error("Please select an image file!");
+    return;
+  }
+  if (!fse.existsSync(imagePath) && !isUrl(imagePath)) {
+    console.error("Please input an valid image url!");
+    return;
+  }
+
+  await showHUD("Uploading image...");
+  if (fse.existsSync(imagePath)) {
+    imageStream = fse.createReadStream(imagePath);
+  } else if (isUrl(imagePath)) {
+    //URL
+    imageStream = (await axios.get(imagePath, { responseType: "stream" })).data;
+  }
+  formData.append("smfile", imageStream);
+
+  const config = {
+    headers: {
+      Authorization: secretToken,
+      "Content-Type": "multipart/form-data",
+    },
+  };
+  return await axios
+    .post(SM_MS_BASE_URL + "/upload", formData, config)
+    .then((axiosResponse) => {
+      const smmsResponse = axiosResponse.data as SMMSResponse;
+      if (smmsResponse.success) {
+        showHUD("URL is copied to clipboard.");
+        const imageData = smmsResponse.data as ImageData;
+        Clipboard.copy(imageData.url);
+        return { success: smmsResponse.success, code: smmsResponse.code, message: imageData.url };
+      } else {
+        showHUD(smmsResponse.message);
+        return { success: smmsResponse.success, code: smmsResponse.code, message: smmsResponse.message };
+      }
+    })
+    .catch((reason) => {
+      showHUD(String(reason));
       return { success: false, code: "Error!", message: String(reason) };
     });
 };

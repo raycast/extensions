@@ -13,8 +13,7 @@ function ClubProfile(props: TeamTeam) {
         { h1: props.name },
         {
           img: {
-            // source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.svg`,
-            source: `https://resources.premierleague.com/premierleague/badges/100/${props.altIds.opta}@x2.png`,
+            source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.png`,
           },
         },
       ])}
@@ -84,7 +83,7 @@ export default function Club() {
             title={team.name}
             subtitle={team.grounds[0].name}
             content={{
-              source: `https://resources.premierleague.com/premierleague/badges/100/${team.altIds.opta}@x2.png`,
+              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.png`,
               fallback: "default.png",
             }}
             actions={

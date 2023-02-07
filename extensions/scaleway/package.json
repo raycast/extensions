@@ -36,6 +36,13 @@
       "icon": "instances.webp"
     },
     {
+      "name": "iam",
+      "title": "IAM",
+      "description": "Get information about iam",
+      "mode": "view",
+      "icon": "iam.webp"
+    },
+    {
       "name": "databases",
       "title": "Databases",
       "description": "Get information about databases",
@@ -78,6 +85,48 @@
       "icon": "redis.webp"
     },
     {
+      "name": "publicGateways",
+      "title": "Public Gateways",
+      "description": "Get information about Public Gateways",
+      "mode": "view",
+      "icon": "publicGateways.webp"
+    },
+    {
+      "name": "k8s",
+      "title": "Kubernetes",
+      "description": "Get information about Kubernetes",
+      "mode": "view",
+      "icon": "k8s.webp"
+    },
+    {
+      "name": "mnq",
+      "title": "Messaging & Queuing",
+      "description": "Get information about Messaging & Queuing",
+      "mode": "view",
+      "icon": "mnq.webp"
+    },
+    {
+      "name": "privateNetworks",
+      "title": "Private Networks",
+      "description": "Get information about Private Networks",
+      "mode": "view",
+      "icon": "privateNetworks.webp"
+    },
+    {
+      "name": "functions",
+      "title": "Serverless Functions",
+      "description": "Get information about Serverless Functions",
+      "mode": "view",
+      "icon": "functions.webp"
+    },
+    {
+      "name": "registry",
+      "title": "Registry",
+      "description": "Get information about Registry",
+      "mode": "view",
+      "icon": "registry.webp"
+    },
+    {
       "name": "transactionalEmail",
       "title": "Transactional Email",
       "description": "Get information about transactionalEmail domains",
@@ -86,24 +135,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.1",
-    "@scaleway/configuration-loader": "^0.1.0-beta.5",
-    "@scaleway/sdk": "^0.1.0-beta.22",
-    "@scaleway/use-dataloader": "^2.16.4",
-    "react": "^18.2.0"
+    "@raycast/api": "1.45.2",
+    "@scaleway/configuration-loader": "0.1.0-beta.6",
+    "@scaleway/sdk": "0.1.0-beta.30",
+    "@scaleway/use-dataloader": "2.16.7",
+    "react": "18.2.0"
   },
   "devDependencies": {
-    "@scaleway/eslint-config-react": "^3.13.0",
-    "@scaleway/tsconfig": "^1.1.0",
-    "@types/node": "^18.11.17",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.42.1",
-    "@typescript-eslint/parser": "^5.42.1",
-    "eslint": "^8.27.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.7.1",
-    "prop-types": "^15.8.1",
-    "typescript": "^4.8.4"
+    "@scaleway/eslint-config-react": "3.13.3",
+    "@scaleway/tsconfig": "1.1.0",
+    "@types/node": "18.11.18",
+    "@types/react": "18.0.26",
+    "@typescript-eslint/eslint-plugin": "5.48.0",
+    "@typescript-eslint/parser": "5.48.0",
+    "eslint": "8.31.0",
+    "eslint-config-prettier": "8.6.0",
+    "prettier": "2.8.1",
+    "typescript": "4.9.4"
   },
   "preferences": [
     {
@@ -122,10 +170,10 @@
     },
     {
       "name": "defaultOrganizationId",
-      "title": "Default Organization ID",
-      "description": "An organization ID",
+      "title": "Organization ID",
+      "description": "The organization ID that will be used by default",
       "type": "textfield",
-      "required": false
+      "required": true
     },
     {
       "name": "defaultRegion",
@@ -142,6 +190,14 @@
       "type": "textfield",
       "required": false,
       "default": "fr-par-1"
+    },
+    {
+      "name": "profileName",
+      "title": "Profile Name (default)",
+      "description": "If you have already configure the CLI and your ~/.config/scw/config.yaml to use multiple profile. If you use this field, all others will not be used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "default"
     }
   ],
   "scripts": {

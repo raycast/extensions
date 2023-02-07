@@ -10,7 +10,15 @@ type UpdateOfferFormValues = {
   period: string;
 };
 
-export function EditOfferForm(props: { offer: any; mutateFundingInfo: () => void; mutateBalanceInfo: () => void }) {
+type EditOfferFormProps = {
+  offer: any;
+  mutateFundingInfo: () => void;
+  mutateBalanceInfo: () => void;
+};
+
+const { symbol, ...fieldValidation } = basicFieldValidations;
+
+export function EditOfferForm(props: EditOfferFormProps) {
   const defaultRate = Number(props.offer.rate * 365 * 100).toFixed(3);
   const rest = Bitfinex.rest();
   const { pop } = useNavigation();
@@ -36,7 +44,7 @@ export function EditOfferForm(props: { offer: any; mutateFundingInfo: () => void
 
       pop();
     },
-    validation: basicFieldValidations,
+    validation: fieldValidation,
   });
 
   return (

@@ -9,11 +9,9 @@ import { normalizeUser } from './normalize-user'
 export const normalizeTodo = ({
   page,
   preferences,
-  inProgressId = null,
 }: {
   page: any
   preferences: Preferences['properties']
-  inProgressId?: string | null
 }): Todo => {
   const dateValue = page.properties[preferences.date]?.date?.start || null
 
@@ -42,8 +40,9 @@ export const normalizeTodo = ({
     url: formatNotionUrl(page.url),
     shareUrl: page.url,
     contentUrl,
-    inProgress:
-      page.properties[preferences.status.name]?.status?.id === inProgressId,
+    status: {
+      ...page.properties[preferences.status.name]?.status,
+    },
     projectId: preferences.project
       ? page.properties[preferences.project]?.relation[0]?.id
       : null,

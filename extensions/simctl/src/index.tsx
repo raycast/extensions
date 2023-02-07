@@ -26,6 +26,38 @@ export default function Command() {
     fetchSimulators();
   }, []);
 
+  const openAction = (device: Device) => {
+    if (device.state !== "Booted") {
+      return null;
+    }
+    return (
+      <Action
+        title="Open"
+        icon={Icon.Window}
+        onAction={() => {
+          exec(`open -g -a Simulator`);
+          const appleScript = `
+        if running of application "Simulator" then
+          tell application "System Events"
+            set theWindows to windows of (processes whose name is "Simulator")
+            repeat with theWindow in (the first item of theWindows)
+              set theWindowName to name of theWindow
+              if theWindowName contains "${device.name}" then
+                perform action "AXRaise" of theWindow
+              end if
+            end repeat
+          end tell
+          tell the application "Simulator"
+            activate
+          end tell
+        end if
+        `;
+          exec(`osascript -e '${appleScript}'`);
+        }}
+      />
+    );
+  };
+
   const bootAction = (device: Device) => {
     if (device.state === "Booted") {
       return null;
@@ -98,6 +130,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
+                  {openAction(device)}
                   {bootAction(device)}
                   {shutdownAction(device)}
                   <Action

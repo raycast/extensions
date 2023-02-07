@@ -9,7 +9,8 @@
     "altrdev",
     "ron-myers",
     "sandypockets",
-    "kenan"
+    "kenan",
+    "dmacdermott"
   ],
   "license": "MIT",
   "commands": [
@@ -179,6 +180,13 @@
       "title": "Toggle Repeat",
       "subtitle": "Spotify",
       "description": "Toggles repeat mode in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "privateSession",
+      "title": "Toggle Private Session",
+      "subtitle": "Spotify",
+      "description": "Toggles Private Session in Spotify.",
       "mode": "no-view"
     }
   ],
