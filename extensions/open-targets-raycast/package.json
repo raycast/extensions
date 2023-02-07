@@ -44,13 +44,13 @@
       "name": "genetics_docs",
       "title": "Open Genetics Docs",
       "description": "Search the Open Targets Genetics documentation.",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "platform_docs",
       "title": "Open Platform Docs",
       "description": "Search the Open Targets Platform documentation.",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "inspect_schema",
