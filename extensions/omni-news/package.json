@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Omni",
+      "title": "Read News",
+      "subtitle": "Omni",
       "description": "Fetch news from Omni",
       "mode": "view"
     }
