@@ -14,13 +14,13 @@ export function History() {
   async function handleDelete(item: Item) {
     const items = await deleteItem(item, HISTORY_KEY);
     setIntervalList(items);
-    await showToast(Toast.Style.Success, "Interval Deleted");
+    await showToast(Toast.Style.Success, "Interval deleted");
   }
 
   async function handleCreate(item: Item) {
     const items = await addItem(item, HISTORY_KEY);
     setIntervalList(items);
-    await showToast(Toast.Style.Success, "Interval Added");
+    await showToast(Toast.Style.Success, "Interval added");
   }
 
   useEffect(() => {
