@@ -1,25 +1,10 @@
-export type ListIcon =
-  | "list"
-  | "listCircles"
-  | "listTriangle"
-  | "listSquare"
-  | "listLines"
-  | "listRectangles"
-  | "listCircle"
-  | "listRocket"
-  | "listMushroom"
-  | "listBolt"
-  | "listBug"
-  | "listFlower"
-  | "listThumbsUp"
-  | "listTarget"
-  | "listSparkle"
-  | "listMedal"
-  | "listFlag";
+import { ListIcons, ListTypes, ListVisualizations } from "../utils/list";
 
-export type ListTypes = "list" | "smartlist";
+export type ListIcon = (typeof ListIcons)[number]["value"];
 
-export type ListVisualizations = "list" | "kanban" | "calendar" | "gantt";
+export type ListType = (typeof ListTypes)[number]["value"];
+
+export type ListVisualization = (typeof ListVisualizations)[number]["value"];
 
 export type ListObject = {
   id: string;
@@ -28,9 +13,9 @@ export type ListObject = {
   archivedAt: string | null;
   archivedBy: string | null;
   description: string;
-  visualization: ListVisualizations;
+  visualization: ListVisualization;
   key: string;
-  type: ListTypes;
+  type: ListType;
   reserved: boolean;
   createdAt: string;
   updatedAt: string;
@@ -42,9 +27,14 @@ export type CreateListFormValues = {
   name: string;
   type: string;
   description?: string;
+  hue: string;
+  icon: string;
+  visualization?: string;
+};
+
+export type CreateListPayload = Omit<CreateListFormValues, "hue", "icon"> & {
   appearance?: {
     hue: number | null;
-    iconUrl: string;
+    icon: ListIcon;
   };
-  visualization?: string;
 };

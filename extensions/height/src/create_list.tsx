@@ -1,19 +1,33 @@
-import { Action, ActionPanel, Form, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, showToast, Toast, environment } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useState } from "react";
 import { ApiList } from "./api/list";
-import { CreateListFormValues } from "./types/list";
+import { CreateListFormValues, CreateListPayload } from "./types/list";
+import { ListIcons, ListTypes, ListVisualizations } from "./utils/list";
 
 export default function Command(props: LaunchProps<{ draftValues: CreateListFormValues }>) {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { theme } = environment;
   const { draftValues } = props;
 
   const { handleSubmit, itemProps, reset } = useForm<CreateListFormValues>({
     async onSubmit(values) {
+      setIsLoading(true);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Adding list" });
 
-      console.log("values:", values);
+      const payload: CreateListPayload = {
+        type: values.type,
+        name: values.name,
+        description: values.description,
+        visualization: values.visualization,
+        appearance: {
+          hue: values.hue === "" ? null : Number(values.hue),
+          icon: values.icon,
+        },
+      };
 
       try {
-        const [data, error] = await ApiList.create(values);
+        const [data, error] = await ApiList.create(payload);
 
         if (data) {
           toast.style = Toast.Style.Success;
@@ -24,8 +38,11 @@ export default function Command(props: LaunchProps<{ draftValues: CreateListForm
             name: "",
             description: "",
             visualization: "list",
+            hue: "",
+            icon: "",
           });
         }
+
         if (error) {
           throw new Error(error.message);
         }
@@ -33,6 +50,8 @@ export default function Command(props: LaunchProps<{ draftValues: CreateListForm
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to create list";
         toast.message = error instanceof Error ? error.message : undefined;
+      } finally {
+        setIsLoading(false);
       }
     },
     initialValues: {
@@ -40,6 +59,8 @@ export default function Command(props: LaunchProps<{ draftValues: CreateListForm
       visualization: draftValues?.visualization,
       name: draftValues?.name,
       description: draftValues?.description,
+      hue: draftValues?.hue,
+      icon: draftValues?.icon,
     },
     validation: {
       type: FormValidation.Required,
@@ -52,37 +73,56 @@ export default function Command(props: LaunchProps<{ draftValues: CreateListForm
           return "Name is required";
         }
       },
+      hue: (value) => {
+        if (value && /(^[^0-9]+)/.test(value)) {
+          return "Hue must be a number";
+        } else if (value && Number(value) < 0) {
+          return "Hue must be greater than 0";
+        } else if (value && Number(value) > 360) {
+          return "Hue must be less than 360";
+        }
+      },
     },
   });
 
   return (
     <Form
       enableDrafts
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create list" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Dropdown title="Type" {...itemProps.type}>
-        <Form.Dropdown.Item value="list" title="List" icon="" />
-        <Form.Dropdown.Item value="smartlist" title="Smart list" icon="" />
+        {ListTypes.map((item) => (
+          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+        ))}
       </Form.Dropdown>
 
       <Form.Dropdown title="Visualization" {...itemProps.visualization}>
-        <Form.Dropdown.Item value="list" title="Spreadsheet" icon="" />
-        <Form.Dropdown.Item value="kanban" title="Kanban" icon="" />
-        <Form.Dropdown.Item value="calendar" title="Calendar" icon="" />
-        <Form.Dropdown.Item value="gantt" title="Gantt" icon="" />
+        {ListVisualizations.map((item) => (
+          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+        ))}
       </Form.Dropdown>
 
       <Form.TextField autoFocus title="Name" placeholder="Enter name of list" {...itemProps.name} />
 
       <Form.TextArea title="Description" placeholder="Describe list" {...itemProps.description} />
 
-      <Form.TextField autoFocus title="Hue" placeholder="Enter number from 0 to 360" {...itemProps.name} />
+      <Form.TextField title="Hue" placeholder="Enter number from 0 to 360" {...itemProps.hue} />
 
-      <Form.TextField autoFocus title="Name" placeholder="Enter name of list" {...itemProps.name} />
+      <Form.Dropdown title="Icon" {...itemProps.icon}>
+        {ListIcons.map((item) => (
+          <Form.Dropdown.Item
+            key={item.value}
+            value={item.value}
+            title={item.name}
+            icon={`${item.icon}-${theme}.svg`}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

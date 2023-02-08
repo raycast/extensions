@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
-import { CreateListFormValues, ListObject } from "../types/list";
+import { CreateListPayload, ListObject } from "../types/list";
 import { ApiErrorResponse, UseFetchParams } from "../types/utils";
 import { ApiHeaders, ApiUrls } from "./helpers";
 
@@ -20,7 +20,7 @@ export const ApiList = {
       ...options,
     });
   },
-  async create(values: CreateListFormValues) {
+  async create(values: CreateListPayload) {
     const response = await fetch(ApiUrls.lists, {
       method: "POST",
       headers: ApiHeaders,
