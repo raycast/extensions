@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "local-switch",
-  "title": "Local Switch",
+  "name": "host-switch",
+  "title": "Host Switch",
   "description": "Quickly switch between hosts while preserving the url path",
   "icon": "icon.png",
   "author": "ewgenius",
@@ -14,7 +14,6 @@
     {
       "name": "switch",
       "title": "Switch Host",
-      "subtitle": "Local Switch",
       "description": "Quickly switch between hosts",
       "mode": "view"
     }
