@@ -36,7 +36,7 @@ export default function CreateProjectForm({ draftValues }: { draftValues?: Creat
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating project" });
 
       try {
-        const { success, project } = await linearClient.projectCreate({
+        const { success, project } = await linearClient.createProject({
           teamIds: values.teamIds,
           name: values.name,
           description: values.description,

@@ -1,5 +1,10 @@
 # Writersbrew Changelog
 
+## [New Commands] - 2023-01-27
+
+- Added Write an email
+- Added Show my presets
+
 ## [New Commands] - 2023-01-24
 
 - Added Explain code

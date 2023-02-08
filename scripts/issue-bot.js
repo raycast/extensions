@@ -123,7 +123,7 @@ module.exports = async ({ github, context, core }) => {
       .map((x) => `@${x}`)
       .join(
         " "
-      )} you might want to have a look.\n\n_PS: You can close this issue once resolved by posting \`@raycastbot close this issue\`._`,
+      )} you might want to have a look.\n\n💡 Tip: Once the issue is resolved, comment \`@raycastbot close this issue\` to close it.`,
   });
 };
 
