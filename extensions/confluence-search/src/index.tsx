@@ -2,7 +2,6 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   getPreferenceValues,
-  Icon,
   ImageMask,
   List,
   OpenInBrowserAction,
@@ -103,19 +102,48 @@ async function parseResponse(response: Response) {
         url: jsonResult.content._links.webui as string,
         author: jsonResult.content.version.by.displayName as string,
         icon: jsonResult.content.version.by.profilePicture.path as string,
+        subTitle: jsonResult.resultGlobalContainer.title as string,
+        mediaType: jsonResult.content?.metadata?.mediaType as string,
       };
     });
 }
 
+function getConfluenceIcon(searchResult: SearchResult) {
+  if (searchResult.type == "page") {
+    return "confluence-icon-page.svg";
+  }
+  if (searchResult.mediaType) {
+    switch (true) {
+      case searchResult.mediaType.startsWith("image"):
+        return "confluence-icon-image.svg";
+      case searchResult.mediaType == "application/pdf":
+        return "confluence-icon-pdf.svg";
+      case searchResult.mediaType == "application/zip":
+        return "confluence-icon-zip.svg";
+      case searchResult.mediaType == "application/octet-stream":
+        return "confluence-icon-file.svg";
+      case searchResult.mediaType.indexOf("audio") > -1:
+        return "confluence-icon-audio.svg";
+      case searchResult.mediaType.indexOf("video") > -1:
+        return "confluence-icon-video.svg";
+      case searchResult.mediaType.indexOf("sheet") > -1:
+        return "confluence-icon-spreadsheet.svg";
+    }
+    return "confluence-icon-file.svg";
+  }
+  return "confluence-icon-all.svg";
+}
+
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+  console.log(searchResult.type, searchResult.mediaType);
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.type}
+      subtitle={searchResult.subTitle}
       keywords={[searchResult.name, searchResult.type]}
       accessoryTitle={searchResult.author}
-      accessoryIcon={{ source: `${confluenceUrl}${searchResult.icon}`, mask: ImageMask.Circle }}
-      icon={Icon.Document}
+      accessoryIcon={{ source: `https://${prefs.instance}${searchResult.icon}`, mask: ImageMask.Circle }}
+      icon={{ source: getConfluenceIcon(searchResult) }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -139,6 +167,8 @@ interface SearchResult {
   url: string;
   author: string;
   icon: string;
+  subTitle: string;
+  mediaType: string;
 }
 
 interface APIResponse {
@@ -161,6 +191,11 @@ interface ResultsItem {
   friendlyLastModified: string;
   score: number;
 }
+
+interface Metadata {
+  mediaType: string;
+  comment: string;
+}
 interface Content {
   id: string;
   type: string;
@@ -171,6 +206,7 @@ interface Content {
   extensions: Extensions;
   _expandable: _expandable;
   _links: _links;
+  metadata: Metadata;
 }
 interface Version {
   by: By;
