@@ -135,7 +135,6 @@ function getConfluenceIcon(searchResult: SearchResult) {
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  console.log(searchResult.type, searchResult.mediaType);
   return (
     <List.Item
       title={searchResult.name}
