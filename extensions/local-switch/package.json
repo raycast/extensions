@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "local-switch",
   "title": "Local Switch",
-  "description": "Quickly switch between localhost and remote urls, preserving url path",
+  "description": "Quickly switch between hosts while preserving the url path",
   "icon": "icon.png",
   "author": "ewgenius",
   "categories": [
