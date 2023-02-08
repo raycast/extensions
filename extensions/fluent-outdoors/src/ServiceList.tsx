@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { log } from "console";
 import { useEffect, useState } from "react";
 import { FluentClient } from "./FluentClient";
 import { getFavouriteTracksStorage } from "./Storage";
@@ -70,8 +71,7 @@ export default function ServiceList({ services }: { services: Service[] }) {
         return showError({
           message: "Failed to retrieve service",
         });
-      })
-      .finally(() => setReady(true));
+      });
   };
 
   // Update on initial load
@@ -79,53 +79,55 @@ export default function ServiceList({ services }: { services: Service[] }) {
     updateFavouriteTracks();
   }, []);
 
-  if (!ready) {
-    return (
-      <List isLoading={true}>
-        <List.Item title="Loading..." />
-      </List>
-    );
-  }
+  // Set ready flag
+  useEffect(() => {
+    const favouritesTracksLoaded = favouriteTracks !== undefined;
+    const servicesLoaded = services !== undefined;
+    setReady(favouritesTracksLoaded && servicesLoaded);
+  }, [favouriteTracks, services]);
 
   return (
     <List isLoading={!ready}>
       <List.Section title="Favourites">
-        {favouriteTracks?.map((favouriteTrack) => {
-          return (
-            <TrackItem
-              isFavourite={true}
-              key={favouriteTrack.id}
-              track={favouriteTrack}
-              onFavouriteTracksUpdate={() => updateFavouriteTracks()}
-            />
-          );
-        })}
+        {ready &&
+          favouriteTracks?.map((favouriteTrack) => {
+            return (
+              <TrackItem
+                isFavourite={true}
+                key={favouriteTrack.id}
+                track={favouriteTrack}
+                onFavouriteTracksUpdate={() => updateFavouriteTracks()}
+              />
+            );
+          })}
       </List.Section>
       <List.Section title="All tracks by services">
-        {services.map((service, index) => {
-          return (
-            <List.Item
-              key={index}
-              icon={{ source: Icon.House }}
-              title={service.name}
-              subtitle={service.country}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Details"
-                    target={
-                      <TrackList
-                        service={service}
-                        favouriteTracks={favouriteTracks || []}
-                        onFavouriteTracksUpdate={updateFavouriteTracks}
-                      />
-                    }
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+        {ready &&
+          services.map((service, index) => {
+            return (
+              <List.Item
+                key={index}
+                icon={{ source: Icon.House }}
+                title={service.name}
+                subtitle={service.country}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="Show Details"
+                      icon={Icon.MagnifyingGlass}
+                      target={
+                        <TrackList
+                          service={service}
+                          favouriteTracks={favouriteTracks || []}
+                          onFavouriteTracksUpdate={updateFavouriteTracks}
+                        />
+                      }
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
       </List.Section>
     </List>
   );

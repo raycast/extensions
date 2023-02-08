@@ -14,8 +14,8 @@ interface TrackListProps {
 
 export default function TrackList({ service, favouriteTracks, onFavouriteTracksUpdate }: TrackListProps) {
   const [ready, setReady] = useState(false);
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [tracks, setTracks] = useState<Track[]>();
+  const [announcements, setAnnouncements] = useState<Announcement[]>();
   const preferences = getPreferenceValues<Preferences>();
 
   useEffect(() => {
@@ -45,22 +45,31 @@ export default function TrackList({ service, favouriteTracks, onFavouriteTracksU
       .finally(() => setReady(true));
   }, []);
 
+  // Set ready flag
+  useEffect(() => {
+    const tracksReady = tracks !== undefined;
+    const announcementsReady = announcements !== undefined;
+    setReady(tracksReady && announcementsReady);
+  }, [tracks, announcements]);
+
   return (
     <List isLoading={!ready}>
       <List.Section title="Announcements">
-        {announcements?.map((announcement) => {
-          return <AnnouncementItem key={announcement.id} announcement={announcement} />;
-        })}
+        {ready &&
+          announcements?.map((announcement) => {
+            return <AnnouncementItem key={announcement.id} announcement={announcement} />;
+          })}
       </List.Section>
-      <List.Section title="All tracks by services">
-        {tracks.map((track, index) => (
-          <TrackItem
-            isFavourite={Boolean(favouriteTracks.find((favouriteTrack) => favouriteTrack.id === track.id))}
-            onFavouriteTracksUpdate={onFavouriteTracksUpdate}
-            key={index}
-            track={track}
-          />
-        ))}
+      <List.Section title="All Tracks by Services">
+        {ready &&
+          tracks?.map((track, index) => (
+            <TrackItem
+              isFavourite={Boolean(favouriteTracks.find((favouriteTrack) => favouriteTrack.id === track.id))}
+              onFavouriteTracksUpdate={onFavouriteTracksUpdate}
+              key={index}
+              track={track}
+            />
+          ))}
       </List.Section>
     </List>
   );

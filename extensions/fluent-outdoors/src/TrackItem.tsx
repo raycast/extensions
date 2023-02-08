@@ -20,7 +20,8 @@ export function TrackItem({
   const storage = getFavouriteTracksStorage();
   let trackIcon = Icon.Snowflake;
   let trackColor = Color.PrimaryText;
-  let trackActionText = "Mark as favourite";
+  let trackActionText = "Mark as Favourite";
+  let trackActionIcon = Icon.Star;
 
   // Add to favourites
   let trackAction = async () => {
@@ -34,7 +35,8 @@ export function TrackItem({
 
   // Favourite
   if (favourite) {
-    trackActionText = "Remove from favourites";
+    trackActionText = "Remove From favourites";
+    trackActionIcon = Icon.StarDisabled;
     // Remove from favourites
     trackAction = async () => {
       setFavourite(false);
@@ -57,8 +59,13 @@ export function TrackItem({
       subtitle={track.service.name}
       actions={
         <ActionPanel>
-          <Action.Push title="Show details" target={<TrackDetails track={track} />} />
-          <Action title={trackActionText} onAction={trackAction} shortcut={{ modifiers: ["cmd"], key: "f" }} />
+          <Action.Push title="Show Details" icon={Icon.MagnifyingGlass} target={<TrackDetails track={track} />} />
+          <Action
+            title={trackActionText}
+            icon={trackActionIcon}
+            onAction={trackAction}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+          />
         </ActionPanel>
       }
       accessories={[

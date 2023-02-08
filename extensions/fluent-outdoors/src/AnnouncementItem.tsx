@@ -9,7 +9,11 @@ export function AnnouncementItem({ announcement }: { announcement: Announcement 
       title={announcement.title}
       actions={
         <ActionPanel>
-          <Action.Push title="Show details" target={<AnnouncementDetails announcement={announcement} />} />
+          <Action.Push
+            title="Show Details"
+            icon={Icon.MagnifyingGlass}
+            target={<AnnouncementDetails announcement={announcement} />}
+          />
         </ActionPanel>
       }
     />

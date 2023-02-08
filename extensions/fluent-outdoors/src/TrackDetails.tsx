@@ -18,7 +18,7 @@ ${track.description ?? "No further details"}
         <Detail.Metadata>
           <Detail.Metadata.Label title="Location" text={location} />
           <Detail.Metadata.Label title="Type" text={track.type} />
-          <Detail.Metadata.Label title="Maintenance date" text={formatDate(track.maintenanceDate)} />
+          <Detail.Metadata.Label title="Maintenance Date" text={formatDate(track.maintenanceDate)} />
           <Detail.Metadata.Label
             title="Expected condition"
             text={condition.text}
