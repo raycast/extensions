@@ -1,5 +1,9 @@
 # Typefully Changelog
 
+## [Fixes and enhancements] - 2023-02-03
+
+- Fixed an issue to open the correct notification and remove the recently tweeted section in the menu bar command. The tweets are part of the activity submenu.
+
 ## [Added Notiifcations to Menu Bar] - 2023-01-29
 
 - Menu bar now shows scheduled drafts, tweeted drafts and activity/inbox notifications

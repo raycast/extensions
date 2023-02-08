@@ -31,34 +31,32 @@ export default function Command(): ReactElement {
 
     const promises = Promise.all([
       translate(toTranslate, {
-        from: preferences.lang1,
+        from: preferences.lang1 === "auto" ? undefined : preferences.lang1,
         to: preferences.lang2,
-      }),
-      translate(toTranslate, {
-        from: preferences.lang2,
-        to: preferences.lang1,
       }),
     ]);
 
     promises
       .then((res) => {
         if (localCount === count) {
-          const lang1Rep =
-            supportedLanguagesByCode[preferences.lang1].flag ?? supportedLanguagesByCode[preferences.lang1].code;
+          let lang1Code = preferences.lang1;
+          if (preferences.lang1 === "auto") {
+            if (res[0].from.language.iso !== undefined) {
+              lang1Code = res[0].from.language.iso as LanguageCode;
+            } else {
+              showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
+            }
+          }
+          const lang1Rep = supportedLanguagesByCode[lang1Code].flag ?? supportedLanguagesByCode[lang1Code].code;
           const lang2Rep =
             supportedLanguagesByCode[preferences.lang2].flag ?? supportedLanguagesByCode[preferences.lang2].code;
+
           setResults([
             {
               text: res[0].text,
               languages: `${lang1Rep} -> ${lang2Rep}`,
-              source_language: supportedLanguagesByCode[preferences.lang1].code,
+              source_language: supportedLanguagesByCode[lang1Code].code,
               target_language: supportedLanguagesByCode[preferences.lang2].code,
-            },
-            {
-              text: res[1].text,
-              languages: `${lang2Rep} -> ${lang1Rep}`,
-              source_language: supportedLanguagesByCode[preferences.lang2].code,
-              target_language: supportedLanguagesByCode[preferences.lang1].code,
             },
           ]);
         }
