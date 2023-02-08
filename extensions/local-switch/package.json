@@ -15,7 +15,7 @@
       "name": "switch",
       "title": "Switch Host",
       "subtitle": "Local Switch",
-      "description": "Allows to switch remote url to localhost and vice verse",
+      "description": "Quickly switch between hosts",
       "mode": "view"
     }
   ],
