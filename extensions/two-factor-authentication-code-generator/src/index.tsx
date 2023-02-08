@@ -1,9 +1,7 @@
 import {
+  Action,
   ActionPanel,
-  ActionPanelItem,
-  ActionPanelSection,
   allLocalStorageItems,
-  PasteAction,
   Form,
   FormValue,
   getLocalStorageItem,
@@ -80,23 +78,26 @@ export default function AppsView() {
           key={a.name}
           actions={
             <ActionPanel>
-              <ActionPanelSection>
-                <PasteAction content={a.code} title="Paste Code" />
-                <PushAction
+              <ActionPanel.Section>
+                <Action.Paste content={a.code} title="Paste Code" />
+                <Action.CopyToClipboard content={a.code} title="Copy Code" />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.Push
                   icon={Icon.Plus}
                   title="Add App"
                   target={<AddForm />}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
-                <PushAction
+                <Action.Push
                   icon={Icon.Link}
                   title="Add App By URL"
                   target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                 />
-              </ActionPanelSection>
-              <ActionPanelSection>
-                <ActionPanelItem
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action
                   icon={Icon.Trash}
                   title="Remove App"
                   onAction={async () => {
@@ -124,7 +125,7 @@ export default function AppsView() {
                     key: "return",
                   }}
                 />
-              </ActionPanelSection>
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
