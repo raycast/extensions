@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chatgpt3-prompt",
   "title": "ChatGPT3 Prompt",
-  "description": "ChatGPT 3 prompt list",
+  "description": "Prompt list for interacting with ChatGPT3",
   "icon": "command-icon.png",
   "author": "denizyoldas",
   "contributors": [
