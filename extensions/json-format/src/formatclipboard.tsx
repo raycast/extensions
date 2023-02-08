@@ -6,24 +6,31 @@ import {
   Toast,
   showHUD,
 } from '@raycast/api';
-import { autoPasteEnabled } from './utils';
+import { autoPasteEnabled, getIndentation } from './utils';
 
 export default async () => {
+  const indent = getIndentation();
+  const space = indent === 'tab' ? '\t' : parseInt(indent);
+  const clipboardText = (await Clipboard.readText()) as string;
+  const trimmedText = clipboardText.trim();
+  if (trimmedText.length === 0) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Empty input',
+    });
+    return;
+  }
   try {
-    const clipboardText = (await Clipboard.readText()) as string;
-    const trimmedText = clipboardText.trim();
-    let jsObject = parseJson(trimmedText);
-    if (!jsObject) {
-      jsObject = parseJSObject(trimmedText);
-    }
+    const json = JSON.parse(trimmedText);
+    const output = JSON.stringify(json, null, space);
+
     if (autoPasteEnabled()) {
-      await Clipboard.paste(JSON.stringify(jsObject, null, 2));
+      await Clipboard.paste(output);
       showHUD('Pasted succesfully!');
     } else {
-      await Clipboard.copy(JSON.stringify(jsObject, null, 2));
+      await Clipboard.copy(output);
       showHUD('Copied succesfully!');
     }
-
     closeMainWindow();
     popToRoot();
   } catch (err) {
@@ -34,17 +41,3 @@ export default async () => {
     popToRoot();
   }
 };
-
-function parseJson(input: string) {
-  try {
-    return JSON.parse(input);
-  } catch (err) {
-    return;
-  }
-}
-
-function parseJSObject(input: string): object | undefined | Error {
-  let output;
-  eval(`output = ${input}`);
-  return output;
-}
