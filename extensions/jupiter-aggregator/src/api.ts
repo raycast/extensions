@@ -46,6 +46,7 @@ export function fetchPrice(token) {
         title: "Price Fetch Failed",
         message: "Check network connection",
       });
+      console.log(error)
     },
   });
 }
@@ -58,14 +59,15 @@ export function fetchTokenList() {
         title: "Failed to fetch token list",
         message: "Check network connection",
       });
+      console.log(error)
     },
   });
 }
 
-export const compareTokens = async (token1, amount, token2) => {
+export const compareTokens = async (token1: string, amount: any, token2: string) => {
   try {
     const res = await axios.get(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`);
-    let result = amount * res.data.data[token1].price;
+    const result = amount * res.data.data[token1].price;
     return result;
   } catch (error) {
     console.log(error);
