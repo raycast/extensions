@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "switch",
-      "title": "Switch Host",
+      "title": "Host Switch",
       "description": "Quickly switch between hosts",
       "mode": "view"
     }
