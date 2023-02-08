@@ -13,6 +13,17 @@
   "categories": [
     "Productivity"
   ],
+  "preferences": [
+    {
+      "name": "application",
+      "type": "appPicker",
+      "required": false,
+      "title": "Application to search in",
+      "description": "It is useful for selecting different distribution of Craft, If you don't choose anything, it will select non-Setapp version by default.",
+      "default": "com.lukilabs.lukiapp",
+      "placeholder": "com.lukilabs.lukiapp"
+    }
+  ],
   "commands": [
     {
       "name": "search",
@@ -41,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.1",
+    "@raycast/api": "^1.47.3",
     "chrono-node": "^2.3.9"
   },
   "devDependencies": {
