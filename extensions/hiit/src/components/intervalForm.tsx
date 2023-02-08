@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { IntervalFormValues, Item } from "../types";
 import { nanoid } from "nanoid";
-import { calculateInterval, requiredNumberGreaterThan, secondsToTime, setsToSeconds } from "../utils";
+import { calculateInterval, requiresNumberGreaterThan, secondsToTime, setsToSeconds } from "../utils";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void }) {
@@ -32,19 +32,19 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
     validation: {
       title: FormValidation.Required,
       warmup: (value) => {
-        return requiredNumberGreaterThan(value, 1);
+        return requiresNumberGreaterThan(value, 1);
       },
       cooldown: (value) => {
-        return requiredNumberGreaterThan(value, 1);
+        return requiresNumberGreaterThan(value, 1);
       },
       high: (value) => {
-        return requiredNumberGreaterThan(value, 0);
+        return requiresNumberGreaterThan(value, 0);
       },
       low: (value) => {
-        return requiredNumberGreaterThan(value, 0);
+        return requiresNumberGreaterThan(value, 0);
       },
       sets: (value) => {
-        return requiredNumberGreaterThan(value, 1);
+        return requiresNumberGreaterThan(value, 1);
       },
     },
     initialValues: {

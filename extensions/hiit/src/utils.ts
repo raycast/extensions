@@ -13,7 +13,7 @@ export const calculateInterval = (sets: number, warmup: number, cooldown: number
   return intervals;
 };
 
-export const requiredNumberGreaterThan = (value: string | undefined, minValue?: number) => {
+export const requiresNumberGreaterThan = (value: string | undefined, minValue?: number) => {
   if (!value?.length) {
     return "Please enter a number";
   }
