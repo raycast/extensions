@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { resolve } from "path";
 import { useRef, useState, useEffect } from "react";
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
-import { PermissionError } from "./errors";
+import { NotInstalledError, PermissionError } from "./errors";
 
 let SQL: SqlJsStatic;
 
@@ -34,7 +34,9 @@ const useSql = <Result>(path: string, query: string) => {
           if (e instanceof Error && e.message.includes("operation not permitted")) {
             setError(new PermissionError("You do not have permission to access the database."));
           } else {
-            setError(e as Error);
+            if (e instanceof Error && e.message.includes("no such file"))
+              setError(new NotInstalledError("Microsoft OneNote is not installed."));
+            else setError(e as Error);
           }
           return;
         }

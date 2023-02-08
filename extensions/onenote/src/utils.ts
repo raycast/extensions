@@ -83,7 +83,7 @@ export function getIcon(item: OneNoteItem) {
   if (item.Type == PAGE) return { source: Icon.Document, tintColor: Color.SecondaryText };
   if (item.Type == SECTION) return { source: Icon.Folder, tintColor: "#C35BE2" };
   if (item.Type == GROUP) return { source: Icon.ChevronRight, tintColor: "#C35BE2" };
-  if (item.Type == NOTEBOOK) return { source: Icon.Tray, tintColor: "#641996" };
+  if (item.Type == NOTEBOOK) return { source: Icon.Tray, tintColor: Color.Purple };
 }
 
 async function get_user_uid(): Promise<string> {

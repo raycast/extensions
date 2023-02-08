@@ -15,12 +15,6 @@
       "title": "Search Notes",
       "description": "Search notes in the Microsoft OneNote app",
       "mode": "view"
-    },
-    {
-      "name": "browse",
-      "title": "Browse Notes",
-      "description": "Browse Microsoft Onenote notes hierarchy",
-      "mode": "view"
     }
   ],
   "dependencies": {

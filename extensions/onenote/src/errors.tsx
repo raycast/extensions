@@ -9,9 +9,22 @@ export class PermissionError extends Error {
   }
 }
 
+export class NotInstalledError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotInstalledError";
+  }
+}
+
 export const isPermissionError = (error: unknown) => {
   return error instanceof Error && error.name === "PermissionError";
 };
+
+export const isNotInstalledError = (error: unknown) => {
+  return error instanceof Error && error.name === "NotInstalledError";
+};
+
+const notInstalledErrorMarkdown = `## Microsoft OneNote is not installed.`;
 
 // @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Microsoft OneNote notes.
@@ -39,3 +52,4 @@ const Actions = () => (
 );
 
 export const PermissionErrorScreen = () => <Detail markdown={permissionErrorMarkdown} actions={<Actions />} />;
+export const NotInstalledErrorScreen = () => <Detail markdown={notInstalledErrorMarkdown} />;
