@@ -165,14 +165,14 @@ export function Timer(props: { item: Item }) {
     title = "Done";
   }
 
-  const description = [];
-  if (totalTime === 0) {
-    description.push(`PRESS ENTER TO START`);
-  } else {
-    description.push(`ELAPSED: ${secondsToTime(totalTime)}`);
-    description.push(`INTERVAL: ${(intervals - item.interval.intervals) * -1} / ${item.interval.intervals}`);
-    description.push(`REMAINING: ${secondsToTime(item.interval.totalTime - totalTime)}`);
-  }
+  const description =
+    totalTime > 0
+      ? [
+          `ELAPSED: ${secondsToTime(totalTime)}`,
+          `INTERVAL: ${(intervals - item.interval.intervals) * -1} / ${item.interval.intervals}`,
+          `REMAINING: ${secondsToTime(item.interval.totalTime - totalTime)}`,
+        ]
+      : ["PRESS ENTER TO START"];
 
   return (
     <List
