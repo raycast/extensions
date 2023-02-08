@@ -5,28 +5,27 @@ import { Item } from "../types";
 import { DeleteInterval } from "./actions/deleteInterval";
 import { secondsToTime } from "../utils";
 import { NoteFormView } from "./actions/noteFormView";
+import { HISTORY_KEY } from "../constants";
 
 export function History() {
-  const key = "history";
-
   const [intervalList, setIntervalList] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   async function handleDelete(item: Item) {
-    const items = await deleteItem(item, key);
+    const items = await deleteItem(item, HISTORY_KEY);
     setIntervalList(items);
     await showToast(Toast.Style.Success, "Interval Deleted");
   }
 
   async function handleCreate(item: Item) {
-    const items = await addItem(item, key);
+    const items = await addItem(item, HISTORY_KEY);
     setIntervalList(items);
     await showToast(Toast.Style.Success, "Interval Added");
   }
 
   useEffect(() => {
     (async () => {
-      const items = await getItems(key);
+      const items = await getItems(HISTORY_KEY);
       setIntervalList(items);
       setLoading(false);
     })();

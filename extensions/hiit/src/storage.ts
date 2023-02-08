@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { Item } from "./types";
-import { DEFAULT_KEY } from "./const";
+import { DEFAULT_KEY } from "./constants";
 
 export async function getItems(key = DEFAULT_KEY): Promise<Item[]> {
   const items = await LocalStorage.getItem<string>(key);

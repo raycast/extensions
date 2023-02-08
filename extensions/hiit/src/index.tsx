@@ -43,7 +43,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <List.EmptyView title="No Intervals" description="Type ⌘+N to add an interval" icon="no-view.png" />
+      <List.EmptyView title="No Intervals" description="Press ⌘+N to add an interval" icon="no-view.png" />
       {intervalList.map((item) => {
         return (
           <List.Item

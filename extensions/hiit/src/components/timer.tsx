@@ -58,50 +58,50 @@ export function Timer(props: { item: Item }) {
     clearInterval(intervalTimerRef.current);
     intervalTimerRef.current = setInterval(() => {
       // Check if paused
-      if (!pausedRef.current) {
-        // Count down current period
-        countdown(false);
+      if (pausedRef.current) return;
 
-        if (intervalsRef.current === item.interval.intervals) {
-          if (!["WARMUP", "COOLDOWN"].includes(periodsRef.current)) {
-            intervalsRef.current -= 1;
-            setintervals(intervalsRef.current);
-          }
-        }
+      // Count down current period
+      countdown(false);
 
-        if (secondsRef.current === 0) {
-          // If current period is done
-          if (intervalsRef.current === 1 && item.interval.cooldown > 0) {
-            periodsRef.current = "COOLDOWN";
-            setPeriod(periodsRef.current);
-
-            secondsRef.current = item.interval.cooldown;
-            setSeconds(secondsRef.current);
-          } else {
-            // If there is no more intervals
-            if (intervalsRef.current === 0) {
-              clearInterval(intervalTimerRef.current);
-              return;
-            }
-          }
-
-          if (periodsRef.current === "HIGH") {
-            periodsRef.current = "LOW";
-            setPeriod(periodsRef.current);
-
-            secondsRef.current = item.interval.low;
-            setSeconds(secondsRef.current);
-          } else if (["LOW", "WARMUP"].includes(periodsRef.current)) {
-            periodsRef.current = "HIGH";
-            setPeriod(periodsRef.current);
-
-            secondsRef.current = item.interval.high;
-            setSeconds(secondsRef.current);
-          }
-
+      if (intervalsRef.current === item.interval.intervals) {
+        if (!["WARMUP", "COOLDOWN"].includes(periodsRef.current)) {
           intervalsRef.current -= 1;
           setintervals(intervalsRef.current);
         }
+      }
+
+      if (secondsRef.current === 0) {
+        // If current period is done
+        if (intervalsRef.current === 1 && item.interval.cooldown > 0) {
+          periodsRef.current = "COOLDOWN";
+          setPeriod(periodsRef.current);
+
+          secondsRef.current = item.interval.cooldown;
+          setSeconds(secondsRef.current);
+        } else {
+          // If there is no more intervals
+          if (intervalsRef.current === 0) {
+            clearInterval(intervalTimerRef.current);
+            return;
+          }
+        }
+
+        if (periodsRef.current === "HIGH") {
+          periodsRef.current = "LOW";
+          setPeriod(periodsRef.current);
+
+          secondsRef.current = item.interval.low;
+          setSeconds(secondsRef.current);
+        } else if (["LOW", "WARMUP"].includes(periodsRef.current)) {
+          periodsRef.current = "HIGH";
+          setPeriod(periodsRef.current);
+
+          secondsRef.current = item.interval.high;
+          setSeconds(secondsRef.current);
+        }
+
+        intervalsRef.current -= 1;
+        setintervals(intervalsRef.current);
       }
     }, 1000);
 
@@ -165,11 +165,13 @@ export function Timer(props: { item: Item }) {
     title = "Done";
   }
 
-  let description = `ELAPSED: ${secondsToTime(totalTime)}     INTERVAL: ${(intervals - item.interval.intervals) * -1}/${
-    item.interval.intervals
-  }     REMAINING: ${secondsToTime(item.interval.totalTime - totalTime)}`;
+  const description = [];
   if (totalTime === 0) {
-    description = `PRESS ENTER TO START`;
+    description.push(`PRESS ENTER TO START`);
+  } else {
+    description.push(`ELAPSED: ${secondsToTime(totalTime)}`);
+    description.push(`INTERVAL: ${(intervals - item.interval.intervals) * -1} / ${item.interval.intervals}`);
+    description.push(`REMAINING: ${secondsToTime(item.interval.totalTime - totalTime)}`);
   }
 
   return (
@@ -181,7 +183,7 @@ export function Timer(props: { item: Item }) {
       <List.EmptyView
         icon={`${period}.png`}
         title={title}
-        description={`${description}`}
+        description={description.join("     ")}
         actions={
           <ActionPanel>
             {totalTime === 0 && <Action title="Start" onAction={StartSession} />}
