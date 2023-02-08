@@ -1,18 +1,10 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { IntervalFormValues, Item } from "../types";
 import { nanoid } from "nanoid";
-import {
-  calculateInterval,
-  numberGreaterThanZero,
-  requiredNumberGreaterThan,
-  secondsToTime,
-  setsToSeconds,
-} from "../utils";
+import { calculateInterval, requiredNumberGreaterThan, secondsToTime, setsToSeconds } from "../utils";
 import { FormValidation, useForm } from "@raycast/utils";
 
 export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void }) {
-  const { pop } = useNavigation();
-
   const { handleSubmit, itemProps, setValue } = useForm<IntervalFormValues>({
     async onSubmit(values) {
       const sets = parseInt(values.sets);
@@ -36,15 +28,14 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
       };
 
       props.onSave(props?.item ? { ...interval, id: props.item.id } : { ...interval, id: nanoid() });
-      pop();
     },
     validation: {
       title: FormValidation.Required,
       warmup: (value) => {
-        return numberGreaterThanZero(value);
+        return requiredNumberGreaterThan(value, 1);
       },
       cooldown: (value) => {
-        return numberGreaterThanZero(value);
+        return requiredNumberGreaterThan(value, 1);
       },
       high: (value) => {
         return requiredNumberGreaterThan(value, 0);
@@ -87,7 +78,7 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
         title="Current Interval"
         text={`${secondsToTime(
           setsToSeconds(
-            parseInt(itemProps.sets.value || "1"),
+            parseInt(itemProps.sets.value || "2"),
             parseInt(itemProps.high.value || "0"),
             parseInt(itemProps.low.value || "0"),
             parseInt(itemProps.warmup.value || "0"),

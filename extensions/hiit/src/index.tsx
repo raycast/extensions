@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { addItem, deleteItem, getItems } from "./storage";
 import { Item } from "./types";
@@ -12,17 +12,19 @@ import { accessories } from "./components/accessories";
 export default function Command() {
   const [intervalList, setIntervalList] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { pop } = useNavigation();
 
   async function handleCreate(item: Item) {
     const items = await addItem(item);
     setIntervalList(items);
-    await showToast(Toast.Style.Success, "Interval Added");
+    pop();
+    await showToast(Toast.Style.Success, "Interval added");
   }
 
   async function handleDelete(item: Item) {
     const items = await deleteItem(item);
     setIntervalList(items);
-    await showToast(Toast.Style.Success, "Interval Deleted");
+    await showToast(Toast.Style.Success, "Interval deleted");
   }
 
   useEffect(() => {

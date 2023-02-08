@@ -5,30 +5,25 @@ import { exec } from "child_process";
 import { secondsToTime } from "../utils";
 import { nanoid } from "nanoid";
 import { addItem } from "../storage";
+import { HISTORY_KEY } from "../constants";
 
 export function Timer(props: { item: Item }) {
-  const preferences = getPreferenceValues<Preferences>();
   const { item } = props;
-
+  const preferences = getPreferenceValues<Preferences>();
   const intervalTimerRef = useRef<NodeJS.Timeout>();
-
   const [paused, setPaused] = useState<boolean>(false);
   const pausedRef = useRef<boolean>(false);
-
   const secondsRef = useRef<number>(item.interval.warmup > 0 ? item.interval.warmup : item.interval.high);
   const [seconds, setSeconds] = useState<number>(item.interval.warmup > 0 ? item.interval.warmup : item.interval.high);
-
   const periodsRef = useRef<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
   const [period, setPeriod] = useState<string>(item.interval.warmup > 0 ? "WARMUP" : "HIGH");
-
   const intervalsRef = useRef<number>(item.interval.intervals);
   const [intervals, setintervals] = useState<number>(intervalsRef.current);
-
   const [totalTime, setTotalTime] = useState<number>(0);
   const totalTimeRef = useRef<number>(0);
-
   const [currentHistoryId, setCurrentHistoryId] = useState<string>(nanoid());
 
+  // region Cleanup after component unmounts
   useEffect(() => {
     return function cleanup() {
       if (intervalTimerRef.current) {
@@ -36,22 +31,16 @@ export function Timer(props: { item: Item }) {
 
         if (totalTimeRef.current !== 0 && item.interval.totalTime === totalTimeRef.current) {
           const newItem = { ...item, id: currentHistoryId, finished: true, date: new Date().getTime() };
-          addItem(newItem, "history");
+          addItem(newItem, HISTORY_KEY);
         }
-
-        console.log("Clearing interval");
       }
     };
   }, []);
+  // endregion
 
-  function ContinueSession() {
-    pausedRef.current = false;
-    setPaused(false);
-  }
-
-  function PauseSession() {
-    pausedRef.current = true;
-    setPaused(true);
+  function togglePause() {
+    setPaused(!pausedRef.current);
+    pausedRef.current = !pausedRef.current;
   }
 
   function StartSession() {
@@ -110,7 +99,7 @@ export function Timer(props: { item: Item }) {
     countdown(true);
 
     const newItem = { ...item, id: currentHistoryId, finished: false, date: new Date().getTime() };
-    addItem(newItem, "history");
+    addItem(newItem, HISTORY_KEY);
   }
 
   function getNextStage() {
@@ -189,9 +178,9 @@ export function Timer(props: { item: Item }) {
         actions={
           <ActionPanel>
             {totalTime === 0 && <Action title="Start" onAction={StartSession} />}
-            {pausedRef.current && <Action title="Start" onAction={ContinueSession} />}
+            {pausedRef.current && <Action title="Start" onAction={togglePause} />}
             {!pausedRef.current && totalTime > 0 && item.interval.totalTime - totalTime > 0 && (
-              <Action title="Pause" onAction={PauseSession} />
+              <Action title="Pause" onAction={togglePause} />
             )}
           </ActionPanel>
         }

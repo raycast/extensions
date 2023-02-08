@@ -47,20 +47,20 @@
   "preferences": [
     {
       "name": "beep",
-      "description": "Enable Countdown Beeps (Last 3 seconds)",
+      "description": "Enable countdown beeps (last 3 seconds)",
       "type": "checkbox",
-      "required": false,
+      "required": true,
       "default": true,
       "title": "Countdown Beeps",
-      "label": "Enable Countdown Beeps (Last 3 seconds)"
+      "label": "Enable countdown beeps (last 3 seconds)"
     },
     {
       "name": "intervalbeep",
       "description": "Interval Change Sound",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "title": "Interval Change Sound",
-      "value": "pronounce",
+      "default": "pronounce",
       "placeholder": "Interval Change Sound",
       "data": [
         {

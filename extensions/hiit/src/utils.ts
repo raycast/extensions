@@ -13,15 +13,6 @@ export const calculateInterval = (sets: number, warmup: number, cooldown: number
   return intervals;
 };
 
-export const numberGreaterThanZero = (value: string | undefined) => {
-  if (value && isNaN(parseInt(value))) {
-    return "Please enter a number";
-  }
-  if (value && value < "0") {
-    return "Please select a number greater than 0";
-  }
-};
-
 export const requiredNumberGreaterThan = (value: string | undefined, minValue?: number) => {
   if (!value?.length) {
     return "Please enter a number";
@@ -29,7 +20,7 @@ export const requiredNumberGreaterThan = (value: string | undefined, minValue?: 
   if (value && isNaN(parseInt(value))) {
     return "Please enter a number";
   }
-  if (minValue && value && value < minValue.toString()) {
+  if (minValue && value && value <= minValue.toString()) {
     return `Please select a number greater than ${minValue}`;
   }
 };

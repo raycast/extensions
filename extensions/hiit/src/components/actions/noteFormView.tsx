@@ -1,5 +1,4 @@
 import { Action, Icon } from "@raycast/api";
-import { IntervalForm } from "../intervalForm";
 import { Item } from "../../types";
 import { NoteForm } from "../noteForm";
 
