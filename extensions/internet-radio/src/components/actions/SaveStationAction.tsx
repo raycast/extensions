@@ -15,7 +15,7 @@ export default function SaveStationAction(props: {
       title="Save Station"
       icon={Icon.Download}
       onAction={async () => {
-        onStart?.()
+        onStart?.();
         const currentTempInfo = await LocalStorage.getItem("-temp-station-info");
         if (currentTempInfo != undefined && Object.keys(JSON.parse(currentTempInfo as string))[0] == stationName) {
           await LocalStorage.removeItem("-temp-station-info");
@@ -26,7 +26,7 @@ export default function SaveStationAction(props: {
 
         const updatedSavedStations = await getAllStations();
         setSavedStations(updatedSavedStations);
-        onFinish?.()
+        onFinish?.();
       }}
     />
   );

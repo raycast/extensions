@@ -16,7 +16,7 @@ export default function DeleteStationAction(props: {
       style={Action.Style.Destructive}
       icon={Icon.Trash}
       onAction={async () => {
-        onStart?.()
+        onStart?.();
         if (
           await confirmAlert({
             title: "Are you sure?",
@@ -30,7 +30,7 @@ export default function DeleteStationAction(props: {
           const stationList = await getAllStations();
           setStations(stationList);
         }
-        onFinish?.()
+        onFinish?.();
       }}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
     />

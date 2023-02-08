@@ -26,7 +26,7 @@ export default function Command() {
   const [currentStationName, setCurrentStationName] = useCachedState<string>("radio-title");
   const [lastStationName, setLastStationName] = useCachedState<string>("");
   const [stations, setStations] = useState<StationListObject>();
-  const [tempStationInfo, setTempStationInfo] = useState<StationData>();
+  const [tempStationInfo, setTempStationInfo] = useState<{ [key: string]: StationData }>();
   const [cachedIconColor, setCachedIconColor] = useCachedState<string>(Color.SecondaryText);
 
   const preferences = getPreferenceValues<Preferences>();
@@ -45,8 +45,10 @@ export default function Command() {
     LocalStorage.getItem("-is-playing").then((playStatus) => setIsPlaying(playStatus as string));
     LocalStorage.getItem("-current-station-name").then((stationName) => setCurrentStationName(stationName as string));
     LocalStorage.getItem("-last-station-name").then((stationName) => setLastStationName(stationName as string));
-    LocalStorage.getItem("-temp-station-info").then((tempInfo) => tempInfo != undefined ? setTempStationInfo(JSON.parse(tempInfo as string)) : null)
-  }, [])
+    LocalStorage.getItem("-temp-station-info").then((tempInfo) =>
+      tempInfo != undefined ? setTempStationInfo(JSON.parse(tempInfo as string)) : null
+    );
+  }, []);
 
   // Create a menu subitem for each station
   const stationList =
@@ -130,27 +132,39 @@ export default function Command() {
           tooltip="Start playing a randomly selected station"
         />
 
-        {isPlaying ? tempStationInfo == undefined || currentStationName != Object.keys(tempStationInfo)[0] ? (
-          <MenuBarExtra.Item  
-            icon={Icon.Trash}
-            title="Delete Station"
-            onAction={async () => {
-              await deleteStation(currentStationName as string, (stations || {})[currentStationName as string])
-              await showHUD(`Removed ${currentStationName} From Saved Stations`)
-            }}
-            tooltip="Remove the current station from your saved stations list"
-          />
-        ) : (
-          <MenuBarExtra.Item  
-          icon={Icon.Download}
-          title="Save Station"
-          onAction={async () => {
-            await modifyStation("", currentStationName, dummyStation, tempStationInfo, () => null)
-            await showHUD(`Added ${currentStationName} To Saved Stations`)
-            await LocalStorage.removeItem("-temp-station-info")
-          }}
-          tooltip="Add the current station to your saved stations list"
-        />
+        {isPlaying && stations != undefined ? (
+          tempStationInfo == undefined || currentStationName != Object.keys(tempStationInfo)[0] ? (
+            <MenuBarExtra.Item
+              icon={Icon.Trash}
+              title="Delete Station"
+              onAction={async () => {
+                await deleteStation(currentStationName as string, (stations || {})[currentStationName as string]);
+                await showHUD(`Removed ${currentStationName} From Saved Stations`);
+
+                const stationInfo: StationListObject = {};
+                stationInfo[currentStationName as string] = stations[currentStationName as string];
+                await LocalStorage.setItem("-temp-station-info", JSON.stringify(stationInfo));
+              }}
+              tooltip="Remove the current station from your saved stations list"
+            />
+          ) : (
+            <MenuBarExtra.Item
+              icon={Icon.Download}
+              title="Save Station"
+              onAction={async () => {
+                await modifyStation(
+                  "",
+                  currentStationName,
+                  dummyStation,
+                  tempStationInfo[currentStationName],
+                  () => null
+                );
+                await showHUD(`Added ${currentStationName} To Saved Stations`);
+                await LocalStorage.removeItem("-temp-station-info");
+              }}
+              tooltip="Add the current station to your saved stations list"
+            />
+          )
         ) : null}
       </MenuBarExtra.Section>
 

@@ -16,9 +16,9 @@ export default function EditStationAction(props: {
       title={"Edit Station"}
       icon={Icon.Pencil}
       onAction={() => {
-        onStart?.()
-        push(<EditStationForm stationName={stationName} stationData={data} setStations={setStations} />)
-        onFinish?.()
+        onStart?.();
+        push(<EditStationForm stationName={stationName} stationData={data} setStations={setStations} />);
+        onFinish?.();
       }}
       shortcut={{ modifiers: ["cmd"], key: "e" }}
     />

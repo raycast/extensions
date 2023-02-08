@@ -25,20 +25,15 @@ export default function DeleteAllStationsAction(props: {
             },
           })
         ) {
-          onStart?.()
+          onStart?.();
           const numStations = Object.keys(stations).length;
-          const emptyList = new Promise<StationListObject>((resolve) => {
-            Object.entries(stations).forEach(async ([sName, sData]) => {
-              await deleteTrack(undefined, `Raycast: ${sName}`);
-              await deleteStation(sName, sData);
-              if (Object.keys(await getAllStations()).length == 0) {
-                resolve({});
-              }
-            });
-          });
-          setStations(await emptyList);
+          for (const stationName in stations) {
+            await deleteTrack(undefined, `Raycast: ${stationName}`);
+            await deleteStation(stationName, stations[stationName]);
+          }
+          setStations({});
           await showToast({ title: `Deleted ${numStations} Stations` });
-          onFinish?.()
+          onFinish?.();
         }
       }}
       shortcut={{ modifiers: ["cmd"], key: "d" }}

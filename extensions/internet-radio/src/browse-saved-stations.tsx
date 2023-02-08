@@ -6,6 +6,7 @@ import StationActionPanel from "./components/StationActionPanel";
 import GenreDropdown from "./components/GenreDropdown";
 import { StationListObject } from "./types";
 import { colorMap } from "./genres";
+import StationDetails from "./components/StationDetails";
 
 interface Preferences {
   showColoredIcon: boolean;
@@ -14,6 +15,7 @@ interface Preferences {
 
 export default function Command() {
   const [waitingForAction, setWaitingForAction] = useState<boolean>(false);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentStationName, setCurrentStationName] = useState<string>("");
   const [currentTrackID, setCurrentTrackID] = useState<string>("");
@@ -49,23 +51,29 @@ export default function Command() {
         return;
       }
 
-      const tags = [];
+      const accessories = [];
       if (currentStationName == stationName) {
         // Add "Now Playing" icon
-        tags.push({ icon: Icon.Play });
+        accessories.push({ icon: Icon.Play });
       } else if (!isPlaying && lastStationName == stationName) {
         // Add last played station indicator
-        tags.push({ text: "Last Played" });
+        accessories.push({ text: "Last Played" });
       }
 
       // Add genre labels
+      const tags = [];
       for (const genre of stationData.genres) {
         if (genre == "") continue;
         let tagColor = Color.SecondaryText;
         if (genre in colorMap) {
           tagColor = colorMap[genre];
         }
-        tags.push({ tag: { value: genre, color: tagColor } });
+
+        if (showDetails) {
+          tags.push(<List.Item.Detail.Metadata.TagList.Item text={genre} color={tagColor} key={genre} />);
+        } else {
+          accessories.push({ tag: { value: genre, color: tagColor } });
+        }
       }
 
       let websiteIcon: Image.ImageLike = Icon.Link;
@@ -81,7 +89,7 @@ export default function Command() {
           key={stationName}
           icon={preferences.showStationIcons ? websiteIcon : undefined}
           title={stationName}
-          accessories={tags}
+          accessories={accessories}
           keywords={[...stationData.genres]}
           actions={
             <StationActionPanel
@@ -104,8 +112,11 @@ export default function Command() {
                 setCurrentStationName("");
                 setCurrentTrackID("");
               }}
+              showDetails={showDetails}
+              setShowDetails={setShowDetails}
             />
           }
+          detail={showDetails ? <StationDetails stationName={stationName} data={stationData} tags={tags} /> : null}
         />
       );
     });
@@ -115,6 +126,7 @@ export default function Command() {
       isLoading={waitingForAction}
       searchBarPlaceholder={`Search ${Object.entries(stations).length || ""} radio stations...`}
       searchBarAccessory={<GenreDropdown onGenreSelection={setGenreSelection} />}
+      isShowingDetail={showDetails}
     >
       <List.EmptyView icon={{ source: "no-view.png" }} title={`No radio stations found!`} />
       {listItems}

@@ -129,7 +129,13 @@
     {
       "name": "export-saved-stations",
       "title": "Export Saved Stations",
-      "description": "Wow hello world",
+      "description": "Export saved station data to a JSON file",
+      "mode": "view"
+    },
+    {
+      "name": "import-station-data",
+      "title": "Import Station Data",
+      "description": "Import stations from a JSON file",
       "mode": "view"
     }
   ],

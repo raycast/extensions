@@ -5,7 +5,7 @@ export default function StopPlaybackAction(props: {
   stationName: string;
   trackID: string;
   onStart?: () => void;
-  onFinish?: () => void
+  onFinish?: () => void;
   onCompletion: () => void;
 }) {
   const { stationName, trackID, onStart, onFinish, onCompletion } = props;
@@ -15,12 +15,12 @@ export default function StopPlaybackAction(props: {
       title={"Stop Playback"}
       icon={Icon.Stop}
       onAction={async () => {
-        onStart?.()
-        await pausePlayback()
+        onStart?.();
+        await pausePlayback();
         await deleteTrack(trackID);
         await showToast({ title: "Stopped Station", message: stationName });
         onCompletion();
-        onFinish?.()
+        onFinish?.();
       }}
     />
   );

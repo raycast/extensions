@@ -16,12 +16,12 @@ export default function PlayStationAction(props: {
       title={"Play Station"}
       icon={Icon.Play}
       onAction={async () => {
-        onStart?.()
+        onStart?.();
         await playStation(stationName, data.stream as string).then((stationID) => {
           if (stationID != -1) {
             onCompletion(stationID.toString());
             showToast({ title: "Playing Station", message: stationName });
-            onFinish?.()
+            onFinish?.();
           }
         });
       }}

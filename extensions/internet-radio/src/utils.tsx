@@ -29,7 +29,7 @@ export const dummyStation: StationData = {
   stream: "",
   genres: [],
   description: "",
-  discontinued: false
+  discontinued: false,
 };
 
 interface stationList {
@@ -80,7 +80,7 @@ export async function getAllStations() {
           stream: "",
           genres: [],
           description: "",
-          discontinued: false
+          discontinued: false,
         };
       }
       stations[stationName][attribute] = trueValue;
@@ -121,6 +121,7 @@ export async function playStation(stationName: string, stationURL: string): Prom
                 if newID is not in trackIDs then
                     set theStream to track id newID
                     set name of theStream to "Raycast: ${stationName}"
+                    say "wow"
                     return contents of newID
                 end if
             end repeat
@@ -263,7 +264,7 @@ export async function deleteTrack(trackID?: string, trackName?: string) {
 }
 
 export async function getPlayStatus() {
-  return await runAppleScript(`tell application "Music" to return player state`) == "playing"
+  return (await runAppleScript(`tell application "Music" to return player state`)) == "playing";
 }
 
 export async function deleteStation(stationName: string, stationData: StationData) {
@@ -287,7 +288,7 @@ export async function modifyStation(
   }
   for (const key in newData) {
     let value = newData[key];
-    if (value == undefined) continue
+    if (value == undefined) continue;
     if (Array.isArray(value)) {
       value = value.join(",") + ",";
     }
@@ -370,7 +371,7 @@ export function EditStationForm(props: {
                   stream: values.streamField,
                   genres: values.genresField,
                   description: "",
-                  discontinued: false
+                  discontinued: false,
                 },
                 setStations
               );
