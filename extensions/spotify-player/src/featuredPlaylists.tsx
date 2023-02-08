@@ -1,7 +1,7 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useGetFeaturedPlaylists } from "./spotify/client";
-import PlaylistItem from "./components/PlaylistListItem";
+import PlaylistItem from "./components/PlaylistItem";
 import { SpotifyProvider } from "./utils/context";
 
 function FeaturedPlaylists() {

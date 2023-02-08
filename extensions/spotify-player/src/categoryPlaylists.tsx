@@ -1,6 +1,6 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useGetCategoryPlaylists } from "./spotify/client";
-import PlaylistItem from "./components/PlaylistListItem";
+import PlaylistItem from "./components/PlaylistItem";
 import { SpotifyProvider } from "./utils/context";
 
 type Props = { category: SpotifyApi.CategoryObject };
@@ -21,7 +21,7 @@ function CategoryPlaylists({ category }: Props) {
       enableFiltering
     >
       {response.result?.playlists.items.map((p) => (
-        <PlaylistItem key={p.id} playlist={p} />
+        <PlaylistItem type="list" key={p.id} playlist={p} />
       ))}
     </List>
   );

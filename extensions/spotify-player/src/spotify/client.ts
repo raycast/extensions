@@ -216,7 +216,7 @@ export async function playShuffled(uri: string): Promise<void> {
   }
 }
 
-export function useSearch(query: string | undefined): Response<SpotifyApi.SearchResponse> {
+export function useSearch(query: string | undefined, limit: number): Response<SpotifyApi.SearchResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.SearchResponse>>({ isLoading: false });
 
   let cancel = false;
@@ -236,7 +236,7 @@ export function useSearch(query: string | undefined): Response<SpotifyApi.Search
       try {
         const response =
           (await spotifyApi
-            .search(query, ["track", "artist", "album", "playlist"], { limit: 10 })
+            .search(query, ["track", "artist", "album", "playlist"], { limit: limit })
             .then((response: { body: any }) => response.body as SpotifyApi.SearchResponse)
             .catch((error) => {
               setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));

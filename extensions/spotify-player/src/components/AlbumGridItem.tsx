@@ -1,8 +1,14 @@
-import { Grid, Image } from "@raycast/api";
+import { Image } from "@raycast/api";
 import { AlbumsActionPanel } from "./AlbumsActionPanel";
+import { ListOrGridItem } from "./ListOrGridItem";
 
-export default function AlbumGridItem(props: { album: SpotifyApi.AlbumObjectSimplified }) {
-  const { album } = props;
+export default function AlbumGridItem({
+  album,
+  type,
+}: {
+  album: SpotifyApi.AlbumObjectSimplified;
+  type: "grid" | "list";
+}) {
   const icon: Image.ImageLike = {
     source: album.images[0]?.url,
   };
@@ -12,5 +18,15 @@ export default function AlbumGridItem(props: { album: SpotifyApi.AlbumObjectSimp
     0,
     4
   )} • ${album.total_tracks.toString()} songs`;
-  return <Grid.Item title={title} subtitle={subtitle} content={icon} actions={<AlbumsActionPanel album={album} />} />;
+
+  return (
+    <ListOrGridItem
+      type={type}
+      title={title}
+      subtitle={subtitle}
+      content={icon}
+      icon={icon}
+      actions={<AlbumsActionPanel album={album} />}
+    />
+  );
 }

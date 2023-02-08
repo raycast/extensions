@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, Image } from "@raycast/api";
-import { TracksList } from "../searchTracks";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { getAlbumTracks, play, playShuffled } from "../spotify/client";
 import { useSpotify } from "../utils/context";
+import TrackListItem from "./TrackListItem";
 
 export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplified }) {
   const { installed } = useSpotify();
@@ -16,25 +16,13 @@ export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplifi
 
   return (
     <ActionPanel title={title}>
-      <Action
-        title="Play"
-        icon={Icon.Play}
-        onAction={() => {
-          play(undefined, album.uri);
-        }}
-      />
-      <Action
-        icon={Icon.Shuffle}
-        title="Play Shuffled"
-        onAction={() => {
-          playShuffled(album.uri);
-        }}
-      />
+      <Action title="Play" icon={Icon.Play} onAction={() => play(undefined, album.uri)} />
+      <Action icon={Icon.Shuffle} title="Play Shuffled" onAction={() => playShuffled(album.uri)} />
       <Action.Push
         title="Open Album"
         icon={Icon.ArrowRight}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-        target={<TracksForAlbum albumId={album.id} />}
+        target={<TracksForAlbum album={album} />}
       />
       <Action.OpenInBrowser
         title={`Show Album (${album.name.trim()})`}
@@ -56,9 +44,21 @@ export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplifi
   );
 }
 
-function TracksForAlbum(props: { albumId: string }) {
-  const response = getAlbumTracks(props.albumId);
+function TracksForAlbum({ album }: { album: SpotifyApi.AlbumObjectSimplified }) {
+  const response = getAlbumTracks(album.id);
 
   const tracks = response.result?.items as SpotifyApi.TrackObjectFull[];
-  return <TracksList tracks={tracks} isLoading={response.isLoading} />;
+
+  return (
+    <List
+      navigationTitle="Search Tracks"
+      searchBarPlaceholder="Search music by keywords"
+      isLoading={response.isLoading}
+    >
+      {tracks &&
+        tracks
+          .sort((t) => t.popularity)
+          .map((t: SpotifyApi.TrackObjectFull) => <TrackListItem key={t.id} track={t} album={album} />)}
+    </List>
+  );
 }
