@@ -46,7 +46,7 @@ export function fetchPrice(token) {
         title: "Price Fetch Failed",
         message: "Check network connection",
       });
-      console.log(error)
+      console.log(error);
     },
   });
 }
@@ -59,7 +59,7 @@ export function fetchTokenList() {
         title: "Failed to fetch token list",
         message: "Check network connection",
       });
-      console.log(error)
+      console.log(error);
     },
   });
 }
