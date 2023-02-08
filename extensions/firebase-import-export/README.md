@@ -4,11 +4,11 @@ Extension to export and import Firestore Collections (backup and restore). Inclu
 
 ## Preferences
 
-This extension need only few configurations.
+This extension needs only a few configurations.
 
 ### Firebase Authentication File
 
-To connect to your Firebase projet, you need to retreive a private key.
+You need to retrieve a private key to connect to your Firebase projet.
 For this, open your project and go to [admin SDK](https://console.firebase.google.com/project/_/settings/serviceaccounts/adminsdk).
 Here you will be able to generate a new private key.
 
@@ -28,8 +28,8 @@ This option allow to export each collection in a separated file
 
 ### Limit of exported documents
 
-Limit number of documents when exporting
-Default Value : 0 (unlimited)
+Limit the number of documents when exporting
+Default Value: 0 (unlimited)
 
 # Acknowledgements
 
