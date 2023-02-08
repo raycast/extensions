@@ -31,7 +31,11 @@ export default async function Command() {
           );
         });
       } else {
-        writeFile(JSON.stringify(collections, null, 4), preferences.exportFileStorage, "backup" + "_" + dayjs().format("YYYY-MM-DD_Hmm") + ".json");
+        writeFile(
+          JSON.stringify(collections, null, 4),
+          preferences.exportFileStorage,
+          "backup" + "_" + dayjs().format("YYYY-MM-DD_Hmm") + ".json"
+        );
       }
     });
     await showHUD("🤟 Backups are generated !! 🤟");

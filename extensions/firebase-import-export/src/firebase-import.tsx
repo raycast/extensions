@@ -16,9 +16,15 @@ initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 export default async function Command() {
   try {
-    const fileSystemItems = await getSelectedFinderItems().catch(error => {throw new Error("You need to select in Finder, one or more files to import")});
+    const fileSystemItems = await getSelectedFinderItems().catch((error) => {
+      throw new Error("You need to select in Finder, one or more files to import");
+    });
     if (
-      await confirmAlert({ icon: "🚨", title: "Are you sure you want to restore these collections? This will override or add new data to the current collections" })
+      await confirmAlert({
+        icon: "🚨",
+        title:
+          "Are you sure you want to restore these collections? This will override or add new data to the current collections",
+      })
     ) {
       await closeMainWindow({ clearRootSearch: true });
       await Promise.all(
