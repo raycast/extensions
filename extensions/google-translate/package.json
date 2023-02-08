@@ -923,7 +923,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.47.3",
     "@types/debounce": "^1.2.1",
     "@vitalets/google-translate-api": "^7.0.0",
     "debounce": "^1.2.1"
