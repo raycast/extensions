@@ -64,7 +64,7 @@ export default function Command() {
           return;
         }
       });
-      return !alreadySaved;
+      return !alreadySaved && !stationData.discontinued;
     });
 
   const listItems = filteredStations.map(([stationName, stationData]) => {

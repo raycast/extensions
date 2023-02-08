@@ -234,4 +234,10 @@ export const colorMap: { [key: string]: Color } = {
   roots: Color.Green,
   black: Color.PrimaryText,
   danish: Color.Red,
+  portuguese: Color.Green,
+  multicultural: Color.Blue,
+  poetry: Color.Magenta,
+  literature: Color.Orange,
+  live: Color.Red,
+  tribal: Color.Green,
 };

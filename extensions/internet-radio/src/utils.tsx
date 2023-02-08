@@ -108,6 +108,7 @@ export async function playStation(stationName: string, stationURL: string): Prom
   if (audioApplication == "music") {
     streamID = await runAppleScript(`try
         tell application "Music"
+          launch
           tell application "System Events"
             repeat while "Music" is not in (name of every process whose background only is false)
               delay 0.5
