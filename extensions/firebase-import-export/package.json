@@ -17,7 +17,41 @@
       "title": "Export Firebase",
       "subtitle": "Export Collection(s)",
       "description": "Export Firebase Collections",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "required": true,
+          "name": "exportFileStorage",
+          "title": "Storage location for export",
+          "description": "Where do you want to store export file",
+          "type": "directory"
+        },
+        {
+          "required": false,
+          "name": "collectionList",
+          "title": "Collections to export",
+          "description": "List of collections to export (separated by comma)",
+          "type": "textfield",
+          "placeholder": "collection1,collection2,collection3",
+          "default": ""
+        },
+        {
+          "required": false,
+          "name": "fileByCollection",
+          "label": "One file for each collection",
+          "description": "Each collection will be store in a separated file",
+          "type": "checkbox",
+          "default": false
+        },
+        {
+          "required": false,
+          "name": "limitDocumentExport",
+          "title": "Limit of exported documents",
+          "description": "limit number of documents when exporting (default: no limit)",
+          "type": "textfield",
+          "placeholder": "0"
+        }
+      ]
     },
     {
       "name": "firebase-import",
@@ -34,44 +68,12 @@
       "title": "Firebase Authentication File",
       "description": "You can generate a new private key from your Firebase project's settings",
       "type": "file"
-    },
-    {
-      "required": true,
-      "name": "exportFileStorage",
-      "title": "Storage location for export",
-      "description": "Where do you want to store export file",
-      "type": "directory"
-    },
-    {
-      "required": false,
-      "name": "collectionList",
-      "title": "Collections to export",
-      "description": "List of collections to export (separated by comma)",
-      "type": "textfield",
-      "placeholder": "collection1,collection2,collection3",
-      "default": ""
-    },
-    {
-      "required": false,
-      "name": "fileByCollection",
-      "label": "One file for each collection",
-      "description": "Each collection will be store in a separated file",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "required": false,
-      "name": "limitDocumentExport",
-      "title": "Limit of exported documents",
-      "description": "limit number of documents when exporting (default: no limit)",
-      "type": "textfield",
-      "placeholder": "0"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.47.2",
-    "firestore-export-import": "^1.3.5",
-    "moment": "^2.29.4"
+    "dayjs": "^1.11.7",
+    "firestore-export-import": "^1.3.5"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

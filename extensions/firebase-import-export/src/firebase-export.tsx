@@ -1,20 +1,17 @@
 import { getPreferenceValues, showHUD, closeMainWindow } from "@raycast/api";
 import { backups, initializeFirebaseApp } from "firestore-export-import";
 import { IExportOptions } from "firestore-export-import/dist/helper";
-import moment from "moment";
+import dayjs from "dayjs";
 import { convertStringToNumber, readFile, writeFile } from "./utils";
 import { Preferences } from "./interfaces";
 
-/* Getting the preferences from the Raycast API. */
 const preferences = getPreferenceValues<Preferences>();
 
-/* Setting the export options. */
 const exportOptions: IExportOptions = {
   docsFromEachCollection:
     preferences.limitDocumentExport?.length !== 0 ? convertStringToNumber(preferences.limitDocumentExport) : 0,
 };
 
-/* Initializing the Firebase app with the service account. */
 initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 const collectionsList: Array<string> | undefined =
@@ -22,9 +19,7 @@ const collectionsList: Array<string> | undefined =
 
 export default async function Command() {
   try {
-    /* It closes the main window of the Raycast application. */
     await closeMainWindow({ clearRootSearch: true });
-    /* Exporting the data from the Firestore database. */
     await backups(collectionsList, exportOptions).then((collections: any) => {
       if (preferences.fileByCollection) {
         Object.entries(collections).forEach((entry) => {
@@ -32,17 +27,15 @@ export default async function Command() {
           writeFile(
             JSON.stringify({ [collection]: content }, null, 4),
             preferences.exportFileStorage,
-            collection + "_" + moment().format("YYYY-MM-DD_Hmm") + ".json"
+            collection + "_" + dayjs().format("YYYY-MM-DD_Hmm") + ".json"
           );
         });
       } else {
-        writeFile(JSON.stringify(collections, null, 4), preferences.exportFileStorage, "backup.json");
+        writeFile(JSON.stringify(collections, null, 4), preferences.exportFileStorage, "backup" + "_" + dayjs().format("YYYY-MM-DD_Hmm") + ".json");
       }
     });
-    /* It shows a message in the HUD (Heads Up Display) of the Raycast application. */
     await showHUD("🤟 Backups are generated !! 🤟");
   } catch (err) {
-    /* Showing a message in the HUD (Heads Up Display) of the Raycast application. */
     await showHUD("❌ Failed to export Firestore Collection(s) !");
   }
 }
