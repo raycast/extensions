@@ -3,7 +3,18 @@ import { LanguageCode } from "./languages";
 
 export const AUTO_DETECT = "auto";
 
-export async function simpleTranslate(text: string, options: { langFrom: LanguageCode; langTo: LanguageCode }) {
+export type SimpleTranslateResult = {
+  originalText: string;
+  translatedText: string;
+  pronunciation: string;
+  langFrom: LanguageCode;
+  langTo: LanguageCode;
+};
+
+export async function simpleTranslate(
+  text: string,
+  options: { langFrom: LanguageCode; langTo: LanguageCode }
+): Promise<SimpleTranslateResult> {
   const isAutoDetect = options.langFrom === AUTO_DETECT;
   const translated = await translate(text, {
     from: isAutoDetect ? undefined : options.langFrom,
