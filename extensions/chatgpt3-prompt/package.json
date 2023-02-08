@@ -5,6 +5,9 @@
   "description": "ChatGPT 3 prompt list",
   "icon": "command-icon.png",
   "author": "denizyoldas",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data"
   ],
@@ -14,11 +17,31 @@
       "name": "index",
       "title": "GPT3 Prompts Search",
       "description": "OpenAI GPT3 Prompt List",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "description": "The primary action to perform on a selected prompt.",
+          "required": false,
+          "title": "Primary Action",
+          "default": "copy",
+          "data": [
+            {
+              "title": "Paste to Active App",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.2"
+    "@raycast/api": "^1.47.3"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
