@@ -9,7 +9,7 @@ export default function Command() {
   const [amount, setAmount] = useState("1");
 
   const submitHander = async () => {
-    let price = await compareTokens(token1, amount, token2);
+    const price = await compareTokens(token1, amount, token2);
     await showToast({
       style: Toast.Style.Success,
       title: `${price}`,
