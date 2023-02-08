@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, getPreferenceValues, Icon } from "@raycast/api";
 import data from "./result.json";
 
 type CommandPreferences = {
@@ -37,6 +37,7 @@ export default function Command() {
                 )}
                 <Action.Push
                   title="Show Prompt"
+                  icon={Icon.AppWindowList}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   target={
                     <Detail
