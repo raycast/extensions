@@ -7,5 +7,5 @@ export interface Preferences {
 }
 
 export const getPreferences = (): Preferences => {
-  return getPreferenceValues<Preferences>()
-}
+  return getPreferenceValues<Preferences>();
+};

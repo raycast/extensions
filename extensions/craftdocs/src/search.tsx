@@ -4,7 +4,15 @@ import ListBlocks from "./components/ListBlocks";
 import useAppExists, { UseAppExists } from "./hooks/useAppExists";
 import useConfig, { UseConfig } from "./hooks/useConfig";
 import useDB, { UseDB } from "./hooks/useDB";
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  List,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+} from "@raycast/api";
 import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
 import Style = Toast.Style;
@@ -83,7 +91,11 @@ const NoResults = () => (
         </ActionPanel>
       }
     >
-      <List.EmptyView title="No results" description="Selecting Craft application in preferences might help" icon={"command-icon-small.png"} />
+      <List.EmptyView
+        title="No results"
+        description="Selecting Craft application in preferences might help"
+        icon={"command-icon-small.png"}
+      />
     </List>
   </>
 );

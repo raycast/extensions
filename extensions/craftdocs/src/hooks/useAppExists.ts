@@ -12,19 +12,19 @@ export default function useAppExists() {
 
   useEffect(() => {
     const check = async () => {
-      const apps = await getApplications()
-      const preferredApp = getPreferences().application
-      const found = apps.find((app) => app.bundleId && bundleIds.includes(app.bundleId as typeof bundleIds[number]))
-      const app = preferredApp || found
+      const apps = await getApplications();
+      const preferredApp = getPreferences().application;
+      const found = apps.find((app) => app.bundleId && bundleIds.includes(app.bundleId as typeof bundleIds[number]));
+      const app = preferredApp || found;
 
       if (!app) {
-        return setState({ appExistsLoading: false, appExists: false })
+        return setState({ appExistsLoading: false, appExists: false });
       }
 
-      setState({ appExistsLoading: false, appExists: true })
-    }
+      setState({ appExistsLoading: false, appExists: true });
+    };
 
-    check()
+    check();
   }, []);
 
   return state;
