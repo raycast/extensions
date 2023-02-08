@@ -20,7 +20,7 @@ export function History() {
   async function handleCreate(item: Item) {
     const items = await addItem(item, HISTORY_KEY);
     setIntervalList(items);
-    await showToast(Toast.Style.Success, "Interval added");
+    await showToast(Toast.Style.Success, "Note added");
   }
 
   useEffect(() => {
