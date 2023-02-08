@@ -160,6 +160,8 @@ export function Timer(props: { item: Item }) {
   let title = `${secondsToTime(seconds)}`;
   if (totalTime === 0) {
     title = "Ready";
+  } else if (pausedRef.current) {
+    title = "Paused";
   } else if (item.interval.totalTime === totalTime) {
     open("raycast://confetti");
     title = "Done";
