@@ -1,7 +1,3 @@
-import { environment } from "@raycast/api";
-import fs from "fs";
-import { SVG_PATH } from "./constants";
-
 export const secondsToTime = (secs: number) => {
   return new Date(secs * 1000).toISOString().substring(14, 19);
 };
