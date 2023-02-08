@@ -32,7 +32,7 @@
       "required": true,
       "name": "firebaseAuth",
       "title": "Firebase Authentication File",
-      "description": "You can Generate New Private Key from Project Settings from Firebase Console",
+      "description": "You can generate a new private key from your Firebase project's settings",
       "type": "file"
     },
     {
