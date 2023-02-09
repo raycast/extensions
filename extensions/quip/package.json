@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quip",
-  "title": "quip",
+  "title": "Quip",
   "description": "Search and View Quip Documents",
   "icon": "quip.png",
   "author": "justin0u0",
