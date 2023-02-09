@@ -18,7 +18,7 @@
     },
     {
       "name": "menu-bar",
-      "title": "Colors Menu",
+      "title": "Menu Bar Color Picker",
       "description": "Access your colors from the menu bar",
       "mode": "menu-bar"
     },
@@ -69,6 +69,10 @@
         {
           "title": "RGBA % - rgba(100%, 39%, 39%, 1)",
           "value": "rgba-percentage"
+        },
+        {
+          "title": "HSLA - hsla(0, 100%, 69%, 1)",
+          "value": "hsla"
         }
       ]
     }
