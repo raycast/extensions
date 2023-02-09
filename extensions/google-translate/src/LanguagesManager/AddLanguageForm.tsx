@@ -1,10 +1,8 @@
 import React from "react";
-import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { languages, supportedLanguagesByCode } from "../languages";
+import { Action, ActionPanel, Form } from "@raycast/api";
+import { languages } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
-import { isSameLanguageSet, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 
 export const AddLanguageForm: React.VFC<{
   onAddLanguage: (data: LanguageCodeSet) => void;

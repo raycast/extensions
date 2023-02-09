@@ -1,5 +1,5 @@
 import React from "react";
-import { Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Icon, List, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { LanguageCodeSet } from "../types";
 import { usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";

@@ -1,7 +1,6 @@
 import React from "react";
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { supportedLanguagesByCode } from "../languages";
 import { LanguageCodeSet } from "../types";
 import { isSameLanguageSet, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
