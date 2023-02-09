@@ -1,9 +1,12 @@
 import {
+  Action,
   ActionPanel,
   CopyToClipboardAction,
+  Detail,
   getPreferenceValues,
   ImageMask,
   List,
+  openExtensionPreferences,
   OpenInBrowserAction,
   showToast,
   ToastStyle,
@@ -17,6 +20,8 @@ const prefs: { instanceType: string; user: string; instance: string; unsafeHttps
 export const confluenceUrl =
   prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
+const missingPrefs = prefs.instanceType == "cloud" ? !prefs.user || !prefs.token : !prefs.token;
+
 const headers = {
   Accept: "application/json",
   Authorization:
@@ -25,11 +30,52 @@ const headers = {
       : `Bearer ${prefs.token}`,
 };
 
-export default function Command() {
-  const [results, isLoading, search] = useSearch();
+function renderFilter(onChange: (value: string) => void) {
+  return (
+    <List.Dropdown onChange={onChange} tooltip="Confluence Types">
+      <List.Dropdown.Item title="Page" value="page" />
+      <List.Dropdown.Item title="Blog" value="blogpost" />
+      <List.Dropdown.Item title="Attachment" value="attachment" />
+      <List.Dropdown.Item title="All" value="" />
+    </List.Dropdown>
+  );
+}
+
+function renderPreferences() {
+  const markdown = `Username is required for cloud instances. Please set your preferences in the extension preferences.`;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search by name..." onSearchTextChange={search} throttle>
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export default function Command() {
+  if (missingPrefs) {
+    return renderPreferences();
+  }
+  const [results, isLoading, search] = useSearch();
+  const [_type, setType] = useState("page");
+  const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    search(searchText, _type);
+  }, [searchText, _type]);
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search by name..."
+      onSearchTextChange={(searchText) => setSearchText(searchText)}
+      searchBarAccessory={renderFilter(setType)}
+      throttle
+    >
       <List.Section title="Results">
         {results.length > 0 &&
           results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
@@ -44,12 +90,12 @@ function useSearch() {
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
-    async function search(searchText: string) {
+    async function search(searchText: string, _type: string) {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       setIsLoading(true);
       try {
-        const response = await searchConfluence(searchText, cancelRef.current.signal);
+        const response = await searchConfluence(searchText, _type, cancelRef.current.signal);
         setResults(response);
       } catch (error) {
         if (error instanceof AbortError) {
@@ -64,7 +110,7 @@ function useSearch() {
   );
 
   useEffect(() => {
-    search("");
+    search("", "page");
     return () => {
       cancelRef.current?.abort();
     };
@@ -73,7 +119,7 @@ function useSearch() {
   return [results, isLoading, search] as const;
 }
 
-async function searchConfluence(searchText: string, signal: AbortSignal) {
+async function searchConfluence(searchText: string, _type: string, signal: AbortSignal) {
   const httpsAgent = new https.Agent({
     rejectUnauthorized: !prefs.unsafeHttps,
   });
@@ -83,7 +129,13 @@ async function searchConfluence(searchText: string, signal: AbortSignal) {
     signal: signal,
     agent: httpsAgent,
   };
-  const apiUrl = `${confluenceUrl}/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
+  let query = `title~"${searchText}*"`; // default query
+  if (_type) {
+    query = `type=${_type} AND ${query}`;
+  }
+  // url encode query
+  query = encodeURIComponent(query);
+  const apiUrl = `${confluenceUrl}/rest/api/search?cql=${query}&expand=content.version`;
   return fetch(apiUrl, init).then((response) => {
     return parseResponse(response);
   });
@@ -111,6 +163,8 @@ async function parseResponse(response: Response) {
 function getConfluenceIcon(searchResult: SearchResult) {
   if (searchResult.type == "page") {
     return "confluence-icon-page.svg";
+  } else if (searchResult.type == "blogpost") {
+    return "confluence-icon-blog.svg";
   }
   if (searchResult.mediaType) {
     switch (true) {
