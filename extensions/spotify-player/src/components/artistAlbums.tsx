@@ -1,4 +1,4 @@
-import { getArtistAlbums } from "../spotify/client";
+import { useArtistAlbums } from "../spotify/client";
 import { List } from "@raycast/api";
 import AlbumListItem from "./AlbumListItem";
 
@@ -18,7 +18,7 @@ export function AlbumsList(props: { albums: SpotifyApi.AlbumObjectSimplified[] }
 
 export function AlbumsListByArtist(props: { artistId: string }) {
   const { artistId } = props;
-  const response = getArtistAlbums(artistId);
+  const response = useArtistAlbums(artistId);
   const albums = response.result?.items;
   return (
     <List navigationTitle="Search Albums" searchBarPlaceholder="Search albums by keywords..." throttle isShowingDetail>

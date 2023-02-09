@@ -63,32 +63,11 @@
       ]
     },
     {
-      "name": "playSimilar",
-      "title": "Start Radio",
-      "subtitle": "Spotify",
-      "description": "Starts playing similar tracks to the currently playing. The command initiate the Song's Radio",
-      "mode": "no-view"
-    },
-    {
       "name": "search",
       "title": "Search",
       "subtitle": "Spotify",
       "description": "Search Spotify",
       "mode": "view"
-    },
-    {
-      "name": "likeCurrentSong",
-      "subtitle": "Spotify",
-      "title": "Like Current Song",
-      "description": "Likes currently playing song",
-      "mode": "no-view"
-    },
-    {
-      "name": "dislikeCurrentSong",
-      "subtitle": "Spotify",
-      "title": "Dislike Current Song",
-      "description": "Dislikes currently playing song",
-      "mode": "no-view"
     }
   ],
   "preferences": [

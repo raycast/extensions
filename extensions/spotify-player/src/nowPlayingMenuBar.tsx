@@ -12,7 +12,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { dislikeCurrentlyPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
+// import { dislikeCurrentlyPlayingTrack, likeCurrentlyPlayingTrack, startPlaySimilar } from "./spotify/client";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "./spotify/types";
 import { getState, getTrack, nextTrack, pause, play, previousTrack } from "./spotify/applescript";
 import { SpotifyProvider, useSpotify } from "./utils/context";
@@ -161,7 +161,7 @@ function NowPlayingMenuBar() {
                   }
                 }}
               />
-              <MenuBarExtra.Item
+              {/* <MenuBarExtra.Item
                 icon={Icon.HeartDisabled}
                 title="Dislike"
                 onAction={async () => {
@@ -175,7 +175,7 @@ function NowPlayingMenuBar() {
                     console.error(err);
                   }
                 }}
-              />
+              /> */}
             </>
           )}
           {currentlyPlayingTrack && (

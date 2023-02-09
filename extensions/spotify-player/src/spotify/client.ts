@@ -3,10 +3,7 @@ import { useEffect, useState } from "react";
 import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
 import { authorize } from "./oauth";
-import { isSpotifyInstalled } from "../utils";
-import { getTrack, isRunning, playTrack, setShuffling } from "./applescript";
-import { TrackInfo } from "./types";
-import { addToSavedTracks, removeFromSavedTracks } from "./util";
+import { isRunning, playTrack, setShuffling } from "./applescript";
 
 export const spotifyApi = new SpotifyWebApi();
 
@@ -22,80 +19,7 @@ async function authorizeIfNeeded(): Promise<void> {
   }
 }
 
-export const notPlayingErrorMessage = "Spotify Is Not Playing";
-
-export async function likeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> | undefined> {
-  const isInstalled = await isSpotifyInstalled();
-
-  if (!isInstalled) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "You don't have Spotify Installed",
-      message: "Liking songs that're playing on a different device is not supported yet",
-    });
-    return undefined;
-  }
-
-  await authorizeIfNeeded();
-  const accessToken = spotifyApi.getAccessToken();
-  if (!accessToken) return;
-
-  try {
-    const track = await getTrack();
-    if (track && track.id) {
-      const trackId = track.id.replace("spotify:track:", "");
-      try {
-        const response = await addToSavedTracks(trackId, accessToken);
-        if (response) {
-          return { result: track };
-        }
-      } catch (e: any) {
-        return { error: (e as unknown as SpotifyApi.ErrorObject).message };
-      }
-    } else {
-      return { error: "Playing song hasn't been found" };
-    }
-  } catch (e: any) {
-    return { error: e };
-  }
-}
-export async function dislikeCurrentlyPlayingTrack(): Promise<Response<TrackInfo> | undefined> {
-  const isInstalled = await isSpotifyInstalled();
-
-  if (!isInstalled) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "You don't have Spotify Installed",
-      message: "Liking songs that're playing on a different device is not supported yet",
-    });
-    return undefined;
-  }
-
-  await authorizeIfNeeded();
-  const accessToken = spotifyApi.getAccessToken();
-  if (!accessToken) return;
-
-  try {
-    const track = await getTrack();
-    if (track && track.id) {
-      const trackId = track.id.replace("spotify:track:", "");
-      try {
-        const response = await removeFromSavedTracks(trackId, accessToken);
-        if (response) {
-          return { result: track };
-        }
-      } catch (e: any) {
-        return { error: (e as unknown as SpotifyApi.ErrorObject).message };
-      }
-    } else {
-      return { error: "Playing song hasn't been found" };
-    }
-  } catch (e: any) {
-    return { error: e };
-  }
-}
-
-export function getArtistAlbums(artistId: string | undefined): Response<SpotifyApi.ArtistsAlbumsResponse> {
+export function useArtistAlbums(artistId: string | undefined): Response<SpotifyApi.ArtistsAlbumsResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ArtistsAlbumsResponse>>({ isLoading: false });
 
   let cancel = false;
@@ -145,75 +69,6 @@ export function getArtistAlbums(artistId: string | undefined): Response<SpotifyA
   }, [artistId]);
 
   return response;
-}
-
-export async function startPlaySimilar(options: object | undefined): Promise<void> {
-  try {
-    await authorizeIfNeeded();
-    const response =
-      (await spotifyApi
-        .getRecommendations(options)
-        .then((response: { body: any }) => response.body as SpotifyApi.RecommendationsFromSeedsResponse)) ?? undefined;
-    const tracks = response.tracks.flatMap((track) => track.uri);
-    if (tracks) {
-      const isSpotifyRunning = await isRunning();
-      if (isSpotifyRunning) {
-        await spotifyApi.play({ uris: tracks });
-      } else {
-        playTrack(tracks[0]);
-      }
-    }
-  } catch (e: any) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed Playing Similar",
-      message: (e as unknown as SpotifyApi.ErrorObject).message,
-    });
-  }
-}
-
-export async function play(uri?: string, context_uri?: string): Promise<void> {
-  try {
-    const isSpotifyRunning = await isRunning();
-    if (isSpotifyRunning) {
-      await authorizeIfNeeded();
-      await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
-    } else {
-      await playTrack(uri ?? context_uri ?? "");
-    }
-  } catch (e: any) {
-    const errorMessage = (e as unknown as SpotifyApi.ErrorObject).message;
-    if (errorMessage.includes("NO_ACTIVE_DEVICE")) {
-      await playTrack(uri ?? context_uri ?? "");
-      return;
-    }
-
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed Start Playing",
-      message: errorMessage,
-    });
-  }
-}
-
-export async function playShuffled(uri: string): Promise<void> {
-  try {
-    const isSpotifyRunning = await isRunning();
-    if (isSpotifyRunning) {
-      await authorizeIfNeeded();
-      await spotifyApi.setShuffle(true);
-      await spotifyApi.play({ context_uri: uri });
-    } else {
-      setShuffling(true);
-      playTrack(uri ?? "");
-    }
-  } catch (e: any) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed Playing Shuffled Playlist",
-      message: (e as unknown as SpotifyApi.ErrorObject).message,
-    });
-  }
 }
 
 export function useSearch(query: string | undefined, limit: number): Response<SpotifyApi.SearchResponse> {
@@ -266,57 +121,7 @@ export function useSearch(query: string | undefined, limit: number): Response<Sp
   return response;
 }
 
-export function useArtistsSearch(query: string | undefined): Response<SpotifyApi.ArtistSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.ArtistSearchResponse>>({ isLoading: false });
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .searchArtists(query, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.ArtistSearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return response;
-}
-
-export function getAlbumTracks(albumId: string | undefined): Response<SpotifyApi.AlbumTracksResponse> {
+export function useAlbumTracks(albumId: string | undefined): Response<SpotifyApi.AlbumTracksResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.AlbumTracksResponse>>({ isLoading: false });
 
   let cancel = false;
@@ -367,8 +172,8 @@ export function getAlbumTracks(albumId: string | undefined): Response<SpotifyApi
   return response;
 }
 
-export function useAlbumSearch(query: string | undefined): Response<SpotifyApi.AlbumSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.AlbumSearchResponse>>({ isLoading: false });
+export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
+  const [response, setResponse] = useState<Response<SpotifyApi.CurrentlyPlayingResponse>>({ isLoading: true });
 
   let cancel = false;
 
@@ -379,17 +184,14 @@ export function useAlbumSearch(query: string | undefined): Response<SpotifyApi.A
       if (cancel) {
         return;
       }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
+
       setResponse((oldState) => ({ ...oldState, isLoading: true }));
 
       try {
         const response =
           (await spotifyApi
-            .searchAlbums(query, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.AlbumSearchResponse)
+            .getMyCurrentPlayingTrack()
+            .then((response: { body: any }) => response.body as SpotifyApi.CurrentlyPlayingResponse)
             .catch((error) => {
               setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
             })) ?? undefined;
@@ -413,59 +215,81 @@ export function useAlbumSearch(query: string | undefined): Response<SpotifyApi.A
     return () => {
       cancel = true;
     };
-  }, [query]);
+  }, []);
 
   return response;
 }
 
-export function useTrackSearch(query: string | undefined): Response<SpotifyApi.TrackSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.TrackSearchResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-      try {
-        const response =
-          (await spotifyApi
-            .searchTracks(query, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.TrackSearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
+export async function startPlaySimilar(trackIds: string[], artistIds?: string[]): Promise<void> {
+  await authorizeIfNeeded();
+  try {
+    const response =
+      (await spotifyApi
+        .getRecommendations({ seed_tracks: trackIds, seed_artists: artistIds })
+        .then((response: { body: any }) => response.body as SpotifyApi.RecommendationsFromSeedsResponse)) ?? undefined;
+    const tracks = response.tracks.flatMap((track) => track.uri);
+    if (tracks) {
+      await spotifyApi.play({ uris: tracks });
     }
+  } catch (error: any) {
+    return error;
+  }
+}
 
-    fetchData();
+export async function play(uri?: string, context_uri?: string): Promise<void> {
+  await authorizeIfNeeded();
+  try {
+    await spotifyApi.play({ uris: uri ? [uri] : undefined, context_uri });
+  } catch (error: any) {
+    return error;
+  }
+}
 
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
+export async function pause(): Promise<void> {
+  await authorizeIfNeeded();
+  try {
+    await spotifyApi.pause();
+  } catch (e: any) {
+    return e;
+  }
+}
 
-  return response;
+export async function skipToNext(): Promise<void> {
+  await authorizeIfNeeded();
+  try {
+    await spotifyApi.skipToNext();
+  } catch (e: any) {
+    return e;
+  }
+}
+
+export async function skipToPrevious(): Promise<void> {
+  await authorizeIfNeeded();
+  try {
+    await spotifyApi.skipToPrevious();
+  } catch (e: any) {
+    return e;
+  }
+}
+
+export async function playShuffled(uri: string): Promise<void> {
+  try {
+    const isSpotifyRunning = await isRunning();
+    if (isSpotifyRunning) {
+      await authorizeIfNeeded();
+      await spotifyApi.setShuffle(true);
+      await spotifyApi.play({ context_uri: uri });
+    } else {
+      setShuffling(true);
+      playTrack(uri ?? "");
+    }
+  } catch (e: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed Playing Shuffled Playlist",
+      message: (e as unknown as SpotifyApi.ErrorObject).message,
+    });
+  }
 }
 
 export async function searchTracks(query: string, limit: number): Promise<Response<SpotifyApi.TrackSearchResponse>> {
@@ -483,204 +307,44 @@ export async function searchTracks(query: string, limit: number): Promise<Respon
   }
 }
 
-export function usePlaylistSearch(query: string | undefined): Response<SpotifyApi.PlaylistSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: false });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      if (!query) {
-        setResponse((oldState) => ({ ...oldState, isLoading: false, result: undefined }));
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .searchPlaylists(query, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.PlaylistSearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return response;
-}
-
-export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPlaylistsResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: true });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .getFeaturedPlaylists({ limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.ListOfFeaturedPlaylistsResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, []);
-
-  return response;
-}
-
-export function useGetCategories(): Response<SpotifyApi.MultipleCategoriesResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.MultipleCategoriesResponse>>({ isLoading: true });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .getCategories({ limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.MultipleCategoriesResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, []);
-
-  return response;
-}
-
-export function useGetCategoryPlaylists(categoryId: string): Response<SpotifyApi.PlaylistSearchResponse> {
-  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistSearchResponse>>({ isLoading: true });
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function fetchData() {
-      await authorizeIfNeeded();
-
-      if (cancel) {
-        return;
-      }
-      setResponse((oldState) => ({ ...oldState, isLoading: true }));
-
-      try {
-        const response =
-          (await spotifyApi
-            .getPlaylistsForCategory(categoryId, { limit: 50 })
-            .then((response: { body: any }) => response.body as SpotifyApi.PlaylistSearchResponse)
-            .catch((error) => {
-              setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
-            })) ?? undefined;
-
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, result: response }));
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
-        }
-      } finally {
-        if (!cancel) {
-          setResponse((oldState) => ({ ...oldState, isLoading: false }));
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [categoryId]);
-
-  return response;
-}
-
 export async function addTrackToQueue(trackUri: string): Promise<Response<SpotifyApi.AddToQueueResponse>> {
   await authorizeIfNeeded();
   try {
     const response = (await spotifyApi
       .addToQueue(trackUri)
       .then((response: { body: any }) => response.body as SpotifyApi.AddToQueueResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.AddToQueueResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
+}
+
+export async function addToSavedTracks(trackIds: string[]): Promise<Response<SpotifyApi.SaveTracksForUserResponse>> {
+  await authorizeIfNeeded();
+  try {
+    const response = (await spotifyApi
+      .addToMySavedTracks(trackIds)
+      .then((response: { body: any }) => response.body as SpotifyApi.SaveTracksForUserResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.AddToQueueResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
+}
+
+export async function removeFromSavedTracks(
+  trackIds: string[]
+): Promise<Response<SpotifyApi.SaveTracksForUserResponse>> {
+  await authorizeIfNeeded();
+  try {
+    const response = (await spotifyApi
+      .removeFromMySavedTracks(trackIds)
+      .then((response: { body: any }) => response.body as SpotifyApi.SaveTracksForUserResponse)
       .catch((error) => {
         return { error: (error as unknown as SpotifyApi.ErrorObject).message };
       })) as SpotifyApi.AddToQueueResponse | undefined;

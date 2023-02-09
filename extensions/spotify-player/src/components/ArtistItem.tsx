@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Image, showHUD } from "@raycast/api";
-import { getArtistAlbums, play, startPlaySimilar } from "../spotify/client";
+import { useArtistAlbums, play, startPlaySimilar } from "../spotify/client";
 import { useSpotify } from "../utils/context";
 import { AlbumsList } from "./artistAlbums";
 import { ListOrGridItem } from "./ListOrGridItem";
@@ -31,7 +31,7 @@ export default function AlbumGridItem({
 
 export function ArtistsActionPanel({ title, artist }: { title: string; artist: SpotifyApi.ArtistObjectFull }) {
   const { installed } = useSpotify();
-  const response = getArtistAlbums(artist.id);
+  const response = useArtistAlbums(artist.id);
   const albums = response.result?.items;
 
   const artistImage = artist.images[0]?.url;

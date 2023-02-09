@@ -1,6 +1,6 @@
 import { Image, List } from "@raycast/api";
 import _ from "lodash";
-import { getAlbumTracks } from "../spotify/client";
+import { useAlbumTracks } from "../spotify/client";
 import { AlbumsActionPanel } from "./AlbumsActionPanel";
 
 export default function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimplified; showDetails: boolean }) {
@@ -29,7 +29,7 @@ export default function AlbumListItem(props: { album: SpotifyApi.AlbumObjectSimp
 
 function AlbumDetail(props: { album: SpotifyApi.AlbumObjectSimplified }) {
   const { album } = props;
-  const response = getAlbumTracks(album.id);
+  const response = useAlbumTracks(album.id);
   const albums = response.result?.items;
   return <List.Item.Detail isLoading={response.isLoading} markdown={getAlbumDetailMarkdownContent(album, albums)} />;
 }

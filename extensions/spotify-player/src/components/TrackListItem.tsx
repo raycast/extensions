@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Color, Icon, Image, List, showToast } from "@raycast/api";
-import _ from "lodash";
 import { addTrackToQueue, play, startPlaySimilar } from "../spotify/client";
 import { msToHMS } from "../utils";
 import { useSpotify } from "../utils/context";

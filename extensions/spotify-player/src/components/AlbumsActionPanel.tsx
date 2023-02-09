@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
-import { getAlbumTracks, play, playShuffled } from "../spotify/client";
+import { useAlbumTracks, play, playShuffled } from "../spotify/client";
 import { useSpotify } from "../utils/context";
 import TrackListItem from "./TrackListItem";
 
@@ -45,7 +45,7 @@ export function AlbumsActionPanel(props: { album: SpotifyApi.AlbumObjectSimplifi
 }
 
 function TracksForAlbum({ album }: { album: SpotifyApi.AlbumObjectSimplified }) {
-  const response = getAlbumTracks(album.id);
+  const response = useAlbumTracks(album.id);
 
   const tracks = response.result?.items as SpotifyApi.TrackObjectFull[];
 
