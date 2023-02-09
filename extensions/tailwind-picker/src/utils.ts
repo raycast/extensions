@@ -2,8 +2,6 @@ import { environment } from "@raycast/api";
 import { execa } from "execa";
 import { chmodSync } from "fs";
 import { join } from "path";
-import { getTransformedRadixConfig } from "./radix";
-import { getTransformedTailwindConfig } from "./tailwind";
 
 export type RGB = Record<"r" | "g" | "b", number>;
 export type HSL = Record<"h" | "s" | "l", number>;
@@ -66,11 +64,11 @@ export function toRgb(hex: string): RGB {
 export function toHex(rgb: RGB) {
   const { r, g, b } = rgb;
   const [intR, intG, intB] = [r, g, b].map((c) => Math.round(c));
-  return `#${intR!.toString(16)}${intG!.toString(16)}${intB!.toString(16)}`;
+  return `#${intR.toString(16)}${intG.toString(16)}${intB.toString(16)}`;
 }
 
 export function parseHslString(string: string): HSL {
-  let [h, s, l] = string
+  const [h, s, l] = string
     .replace("hsl(", "")
     .replace(")", "")
     .split(",")
