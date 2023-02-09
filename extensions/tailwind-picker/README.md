@@ -9,19 +9,19 @@ This is a Turborepo with two workspaces, the root Raycast extension as well as a
 1. Install deps
 
 ```bash
-pnpm install
+npm install
 ```
 
-2. Build everything
+1. Build everything (Turbo will cache so the native package isn't compiled over and over)
 
 ```bash
-pnpm turbo build
+npx turbo build
 ```
 
 3. Run the extension
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 You will then see the `Pick Color` command in Raycast.
