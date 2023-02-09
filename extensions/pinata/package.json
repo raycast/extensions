@@ -5,6 +5,8 @@
   "description": "An extension to interact with the Pianta API and Submarine API",
   "icon": "pinnie.png",
   "author": "stevedsimkins",
+  "owner":"pinata",
+  "access": "public",
   "categories": [
     "Web",
     "Developer Tools"
