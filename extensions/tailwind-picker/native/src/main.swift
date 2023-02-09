@@ -13,7 +13,7 @@ struct RGBA: Encodable {
 }
 
 NSColorSampler().show { selectedColor in
-  guard let color = selectedColor else {
+  guard let color = selectedColor?.usingColorSpace(NSColorSpace.sRGB) else {
     print("No color selected")
     exit(1)
   }
