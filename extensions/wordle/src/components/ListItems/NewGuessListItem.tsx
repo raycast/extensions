@@ -15,9 +15,10 @@ export const NewGuessListItem = ({ wordleProperties, textInputProperties, index 
   const { guesses, checkIfWordExists, makeGuess } = wordleProperties;
   const { state, length, hasCorrectLength } = textInputProperties;
   const [guessInput, setGuessInput] = state;
+  const guessInputInLowercase = guessInput.toLowerCase();
 
-  const isExistingWord = checkIfWordExists(guessInput);
-  const isGuessUnique = !guesses.map((guess) => guess.word).includes(guessInput);
+  const isExistingWord = checkIfWordExists(guessInputInLowercase);
+  const isGuessUnique = !guesses.map((guess) => guess.word).includes(guessInputInLowercase);
   const isValidGuess = hasCorrectLength && isExistingWord && isGuessUnique;
 
   const validatorAccessories: ValidatorAccessory[] = [
@@ -56,7 +57,7 @@ export const NewGuessListItem = ({ wordleProperties, textInputProperties, index 
   return (
     <List.Item
       icon={`guess-icon.png`}
-      title={`${index}. ${getUppercaseValue(guessInput)}`}
+      title={`${index}. ${getUppercaseValue(guessInputInLowercase)}`}
       accessories={validatorAccessories.filter((va) => va.validators.every((v) => v)).map((va) => va.accessory)}
       actions={
         <ActionPanel>
@@ -65,7 +66,7 @@ export const NewGuessListItem = ({ wordleProperties, textInputProperties, index 
               icon={Icon.LightBulb}
               title="Make Guess"
               onAction={async () => {
-                await makeGuess(guessInput);
+                await makeGuess(guessInputInLowercase);
                 setGuessInput("");
               }}
             />

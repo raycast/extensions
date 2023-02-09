@@ -3,14 +3,14 @@ import { LaunchProps, List } from "@raycast/api";
 import { usePersistence } from "@src/hooks";
 import { Language } from "@src/types";
 import { EntriesEmptyView, HistoryListItem } from "@src/components";
-import { getHistoryListItemId } from "@src/util";
+import { getLocalStorageEntryId } from "@src/util";
 
 export default function show_history({ launchContext }: LaunchProps) {
   const languageOptions = Object.values(Language);
   const { language } = { ...launchContext } as { language: Language };
   const initialLanguages = (language && [language]) || languageOptions;
   const [languages, setLanguages] = useState<Language[]>(initialLanguages);
-  const { entries, isLoading, deleteAllEntries } = usePersistence(languages);
+  const { entries, isLoading, deleteAllEntries, deleteEntry } = usePersistence(languages);
 
   const areEntriesExisting = entries && entries.length > 0;
 
@@ -41,12 +41,13 @@ export default function show_history({ launchContext }: LaunchProps) {
       {entries &&
         entries.map((entry) => (
           <HistoryListItem
-            key={getHistoryListItemId({ date: entry.date, language: entry.language })}
+            key={getLocalStorageEntryId({ date: entry.date, language: entry.language })}
             entry={entry}
             deleteAllEntries={deleteAllEntries}
+            deleteEntry={deleteEntry}
           />
         ))}
-      {!areEntriesExisting && <EntriesEmptyView />}
+      {!areEntriesExisting && <EntriesEmptyView selectedLanguages={languages} />}
     </List>
   );
 }

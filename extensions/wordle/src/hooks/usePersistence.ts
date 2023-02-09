@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
 import { Language, LocalStorageEntry } from "@src/types";
-import { isSameDay, isToday, parseStorageValues, showErrorToast, showSuccessToast } from "@src/util";
+import {
+  getLocalStorageEntryId,
+  isSameDay,
+  isToday,
+  parseStorageValues,
+  showErrorToast,
+  showSuccessToast,
+} from "@src/util";
 
 export const usePersistence = (languages: Language[]) => {
   const [entries, setEntries] = useState<LocalStorageEntry[]>();
@@ -53,6 +60,27 @@ export const usePersistence = (languages: Language[]) => {
     }
   };
 
+  const deleteEntry = async ({ language, date }: { language: Language; date: Date }) => {
+    try {
+      if (
+        await confirmAlert({
+          title: "Are you sure?",
+          message: "All your saved data from this specific puzzle will be irreversibly removed.",
+          primaryAction: {
+            title: "Delete Summary",
+            style: Alert.ActionStyle.Destructive,
+          },
+        })
+      ) {
+        await LocalStorage.removeItem(getLocalStorageEntryId({ language, date }));
+        setEntries((prev) => prev?.filter((entry) => !(entry.date === date && entry.language === language)));
+        showSuccessToast({ title: "Entry removed" });
+      }
+    } catch {
+      showErrorToast({ title: "Failed to remove entry from local storage" });
+    }
+  };
+
   const deleteAllEntries = async () => {
     try {
       if (
@@ -74,5 +102,5 @@ export const usePersistence = (languages: Language[]) => {
     }
   };
 
-  return { entries, activeEntry, setEntry, deleteAllEntries, isLoading };
+  return { entries, activeEntry, setEntry, deleteAllEntries, deleteEntry, isLoading };
 };

@@ -123,5 +123,5 @@ export const showSuccessToast = async ({ title, message }: { title: string; mess
   await showToast(options);
 };
 
-export const getHistoryListItemId = ({ language, date }: { language: Language; date: Date }) =>
+export const getLocalStorageEntryId = ({ language, date }: { language: Language; date: Date }) =>
   `${language}-${date.getMonth()}/${date.getDate()}/${date.getFullYear()}`;

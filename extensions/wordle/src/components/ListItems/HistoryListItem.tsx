@@ -1,15 +1,16 @@
 import { Action, ActionPanel, Color, environment, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { EXTENSION_AUTHOR_NAME, GUESS_LIMIT, HINT_TYPE_UNICODE_MAP, LANGUAGE_UNICODE_MAP } from "@src/constants";
-import { EntryState, EntryStateColorMap, LocalStorageEntry } from "@src/types";
+import { EntryState, EntryStateColorMap, Language, LocalStorageEntry } from "@src/types";
 import { formatTime, showErrorToast, isToday, determineHints } from "@src/util";
 import { HistoryListItemDetail } from "@src/components";
 
 type HistoryListItemProps = {
   entry: LocalStorageEntry;
   deleteAllEntries: () => Promise<void>;
+  deleteEntry: (entryId: { date: Date; language: Language }) => Promise<void>;
 };
 
-export const HistoryListItem = ({ entry, deleteAllEntries }: HistoryListItemProps) => {
+export const HistoryListItem = ({ entry, deleteAllEntries, deleteEntry }: HistoryListItemProps) => {
   const { date, language, wordsOfGuesses, solution } = entry;
 
   const formattedDate = `${formatTime(date.getMonth() + 1)}/${formatTime(date.getDate())}/${date.getFullYear()}`;
@@ -68,7 +69,15 @@ export const HistoryListItem = ({ entry, deleteAllEntries }: HistoryListItemProp
           )}
           <Action
             icon={Icon.Trash}
-            title="Delete All Entries"
+            title="Delete Summary"
+            onAction={() => {
+              deleteEntry({ language, date });
+            }}
+            style={Action.Style.Destructive}
+          />
+          <Action
+            icon={Icon.Trash}
+            title="Delete All Summaries"
             onAction={deleteAllEntries}
             style={Action.Style.Destructive}
           />

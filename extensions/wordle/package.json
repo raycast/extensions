@@ -13,18 +13,21 @@
     {
       "name": "play_en-US",
       "title": "Play English (US)",
+      "subtitle": "Wordle",
       "description": "Play Wordle with an English word set",
       "mode": "view"
     },
     {
       "name": "play_de-DE",
       "title": "Play German (DE)",
+      "subtitle": "Wordle",
       "description": "Play Wordle with a German word set",
       "mode": "view"
     },
     {
       "name": "show_history",
       "title": "Show History",
+      "subtitle": "Wordle",
       "description": "Show your Wordle history",
       "mode": "view"
     }
