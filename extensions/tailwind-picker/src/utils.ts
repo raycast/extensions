@@ -35,7 +35,6 @@ export function nearestColor(color: RGB, colors: RGB[]) {
   let nearestColor = colors[0];
   if (!nearestColor) throw new Error("No colors provided");
 
-  // FIXME: Improve algorithm precision
   for (const c of colors) {
     const r = c.r - color.r;
     const g = c.g - color.g;
