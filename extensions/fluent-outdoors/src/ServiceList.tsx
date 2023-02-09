@@ -1,5 +1,4 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { log } from "console";
 import { useEffect, useState } from "react";
 import { FluentClient } from "./FluentClient";
 import { getFavouriteTracksStorage } from "./Storage";
