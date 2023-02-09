@@ -1,19 +1,21 @@
 import React from "react";
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import debounce from "debounce";
-import { usePreferences } from "./hooks";
+import { useSelectedLanguagesSet } from "./hooks";
 import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
 import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult } from "./simple-translate";
+import { LanguagesManager } from "./languages-manager";
 
 const TranslateForm = () => {
-  const preferences = usePreferences();
-
-  const [text, setText] = React.useState("");
-  const [langFrom, setLangFrom] = React.useState<LanguageCode>(preferences.lang1);
+  const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
+  const langFrom = selectedLanguageSet.langFrom;
+  const langTo = selectedLanguageSet.langTo;
+  const setLangFrom = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langFrom: l });
+  const setLangTo = (l: LanguageCode) => setSelectedLanguageSet({ ...selectedLanguageSet, langTo: l });
   const fromLangObj = supportedLanguagesByCode[langFrom];
-  const [langTo, setLangTo] = React.useState<LanguageCode>(preferences.lang2);
   const toLangObj = supportedLanguagesByCode[langTo];
 
+  const [text, setText] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [translated, setTranslated] = React.useState<SimpleTranslateResult | null>(null);
 
@@ -88,15 +90,18 @@ const TranslateForm = () => {
                 "&op=translate"
               }
             />
+            <Action.Push
+              title="Select language"
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              target={<LanguagesManager />}
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Settings">
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
               onAction={() => {
-                const oldFromLang = langFrom;
-                setLangFrom(langTo);
-                setLangTo(oldFromLang);
+                setSelectedLanguageSet({ langFrom: langTo, langTo: langFrom });
               }}
               title={`${toLangObj.flag || toLangObj.code} <-> ${fromLangObj.flag || fromLangObj.code} Switch Languages`}
             />
