@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quip",
   "title": "quip",
-  "description": "Search and View Quip Document.",
+  "description": "Search and View Quip Documents",
   "icon": "quip.png",
   "author": "justin0u0",
   "categories": [
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Document",
+      "title": "Document Search",
       "subtitle": "Quip",
       "description": "Search the Quip Document.",
       "mode": "view",
