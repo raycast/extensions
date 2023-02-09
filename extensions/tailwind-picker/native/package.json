@@ -2,8 +2,8 @@
   "name": "@tailwind-picker/native",
   "version": "0.0.1",
   "scripts": {
-    "build:swift": "swift build --configuration=release --arch arm64 --arch x86_64",
-    "postbuild": "mv .build/apple/Products/Release/tailwind-picker ../assets/tailwind-picker",
+    "build:swift": "swift build --configuration=release",
+    "postbuild": "cp .build/release/tailwind-picker ../assets/tailwind-picker",
     "build": "run-s build:swift postbuild"
   },
   "devDependencies": {

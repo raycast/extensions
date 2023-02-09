@@ -17,6 +17,9 @@
       "mode": "no-view"
     }
   ],
+  "workspaces": [
+    "native"
+  ],
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
