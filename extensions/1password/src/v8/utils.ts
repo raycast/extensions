@@ -4,7 +4,6 @@ import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
-
 import { CategoryName } from "./types";
 
 export type Preferences = {
