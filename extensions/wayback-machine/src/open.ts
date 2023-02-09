@@ -35,6 +35,6 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
       return showHUD("❌ No archived version found");
     }
   } catch (err) {
-    console.error(err);
+    return showHUD(`❌ An error occurred, try again later`);
   }
 }
