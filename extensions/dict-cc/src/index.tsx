@@ -1,8 +1,10 @@
+
 import { useState } from "react";
-import { Action, ActionPanel, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+
 import translate, { Languages, Translations } from "dictcc";
 
-import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter } from "./utils";
+import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "./utils";
 
 interface IListWithEmptyViewProps {
   loading: boolean;
@@ -79,6 +81,11 @@ export default function Command() {
                   title="Copy Text"
                   content={translation.targetTranslation.text}
                   shortcut={{ modifiers: ["cmd"], key: "." }}
+                />
+                <Action
+                  title="Play audio"
+                  icon={Icon.Play}
+                  onAction={() => playAudio(translation.targetTranslationAudioUrl)}
                 />
                 {url && <Action.OpenInBrowser url={url} />}
               </ActionPanel>
