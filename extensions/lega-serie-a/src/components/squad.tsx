@@ -1,8 +1,23 @@
-import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Grid,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getSquad } from "../api";
 import { SquadGroup, Squad } from "../types";
 import Player from "./player";
+
+const positionMap = new Map<string, string>([
+  ["P", "Goalkeeper"],
+  ["D", "Defender"],
+  ["C", "Midfielder"],
+  ["A", "Striker"],
+]);
+
+const { language } = getPreferenceValues();
 
 export default function ClubSquad(props: {
   team_name: string;
@@ -28,8 +43,11 @@ export default function ClubSquad(props: {
     >
       {playerGroups &&
         Object.entries(playerGroups).map(([code, members]) => {
+          const position =
+            language === "en" ? positionMap.get(code) : members[0].role;
+
           return (
-            <Grid.Section title={members[0].role} key={code}>
+            <Grid.Section title={position} key={code}>
               {members.map((member: Squad) => {
                 return (
                   <Grid.Item
