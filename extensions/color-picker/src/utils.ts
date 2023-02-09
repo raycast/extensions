@@ -38,6 +38,11 @@ export function getFormattedColor(color: Color) {
       const alpha = Math.round(color.alpha / 255);
       return `rgba(${red}%, ${green}%, ${blue}%, ${alpha})`;
     }
+    case "hsla": {
+      const hsl = convert.rgb.hsl(color.red, color.green, color.blue);
+      const alpha = Math.round(color.alpha / 255);
+      return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha})`;
+    }
   }
 }
 

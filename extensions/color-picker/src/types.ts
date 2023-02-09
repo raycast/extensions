@@ -17,7 +17,7 @@ export type OrganizeColorsCommandPreferences = {
 };
 
 export type ExtensionPreferences = {
-  colorFormat: "hex" | "rgba" | "rgba-percentage";
+  colorFormat: "hex" | "rgba" | "rgba-percentage" | "hsla";
 };
 
 export type PickColorCommandLaunchProps = {
