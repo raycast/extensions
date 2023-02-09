@@ -151,6 +151,17 @@ export function OpenProjectIssuesPushAction(props: { project: Project }): JSX.El
   );
 }
 
+export function CreateNewProjectIssuePushAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Create New Issue"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+      url={props.project.web_url + "/-/issues/new"}
+    />
+  );
+}
+
 export function OpenProjectMergeRequestsPushAction(props: { project: Project }): JSX.Element {
   return (
     <Action.Push

@@ -95,6 +95,7 @@
 /extensions/chakra-ui-docs                           @pgvr @Ansub
 /extensions/change-case                              @es183923 @pernielsentikaer
 /extensions/change-scroll-direction                  @gregoralbrecht
+/extensions/chatgpt3-prompt                          @denizyoldas @pernielsentikaer
 /extensions/cheatsheets                              @Destiner
 /extensions/cheetah                                  @RongleCat
 /extensions/chess-com                                @joshfarrant
@@ -123,6 +124,7 @@
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/coinpaprika                              @gumbleliks
 /extensions/color-casket                             @slavarazum @fe9lix @pernielsentikaer
+/extensions/color-picker                             @thomaspaulmann
 /extensions/colorslurp                               @Jordan-Ellis
 /extensions/commitlint                               @lardissone
 /extensions/common-directory                         @koinzhang
@@ -244,6 +246,7 @@
 /extensions/finary                                   @jetaix
 /extensions/finnish-dictionary                       @albertoxamin
 /extensions/fip                                      @louison
+/extensions/firebase-import-export                   @mguyard
 /extensions/flaticon                                 @kudrykv
 /extensions/flow                                     @vimtor
 /extensions/flutter-documentation-search             @MattisBrizard
@@ -488,6 +491,7 @@
 /extensions/obsidian-bookmarks                       @Dru89
 /extensions/odin                                     @aamoussa97
 /extensions/office-quotes                            @braydoncoyer @sandypockets
+/extensions/office2pdf                               @ARui-tw
 /extensions/ohdear                                   @andreaselia @pernielsentikaer @Hodglim
 /extensions/ohmyzsh-git-alias                        @yufeikang
 /extensions/ohmyzsh-plugins                          @k8scat
@@ -510,6 +514,7 @@
 /extensions/ossinsight                               @k8scat @pernielsentikaer
 /extensions/pagerduty                                @horimislime
 /extensions/palette-colors                           @douglas-pires
+/extensions/papermatch                               @marlonjames71
 /extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @parabol @BartoszJarocki
 /extensions/parallels-virtual-machines               @danpalmer
@@ -565,6 +570,7 @@
 /extensions/quickfile                                @danielroe
 /extensions/quicktime                                @pradeepb28
 /extensions/quicktype                                @Aayush9029
+/extensions/quip                                     @justin0u0
 /extensions/quit-applications                        @mackopes @jrnxf
 /extensions/r-pkg-search                             @gadenbuie
 /extensions/radix                                    @peduarte
@@ -589,6 +595,7 @@
 /extensions/reddit-search                            @ewlcheng
 /extensions/redis                                    @k8scat
 /extensions/redmine                                  @jwickers
+/extensions/reflect                                  @RyonHuedepohl
 /extensions/refresh-wifi                             @natterstefan
 /extensions/regex-repl                               @hongkiulam
 /extensions/regex-tester                             @allenan
@@ -656,7 +663,7 @@
 /extensions/smultron                                 @blackspike
 /extensions/snake                                    @tonka3000
 /extensions/social-network-trends                    @koinzhang
-/extensions/solana-explorer                          @TrGiLong
+/extensions/solana-explorer                          @TrGiLong @AnishDe12020
 /extensions/sonarr                                   @Aayush9029
 /extensions/soundboard                               @pernielsentikaer @andreaselia
 /extensions/sourcegraph                              @bobheadxi
@@ -665,7 +672,7 @@
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/specify                                  @AllanMichay
 /extensions/speedtest                                @tonka3000
-/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott
+/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer
 /extensions/spotify-player                           @mattisssa @dillionverma @andreaselia @stuart @tonka3000 @dancannon @sxn
 /extensions/ssh-manager                              @scopsy
 /extensions/ssh-tunnel-manager                       @MinatoHikari
@@ -755,6 +762,7 @@
 /extensions/visual-studio-code-project-manager       @MarkusLanger @GastroGeek @4very @TobiasYin @yossizahn
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons @macbookandrew @cy-98 @immint023 @pernielsentikaer @elijah-scott
 /extensions/vivaldi                                  @crisboarna
+/extensions/vocab-search                             @DATADEER @pernielsentikaer
 /extensions/vuejs-documentation                      @Dpblandin
 /extensions/vueuse-functions                         @noopurphalak
 /extensions/wakatime                                 @iammola

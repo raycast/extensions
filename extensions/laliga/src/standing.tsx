@@ -45,13 +45,39 @@ export default function GetTables() {
           };
         }
 
+        const accessories: List.Item.Accessory[] = [
+          {
+            text: {
+              color: Color.PrimaryText,
+              value: team.points.toString(),
+            },
+            tooltip: "Points",
+          },
+        ];
+
+        if (!showStats) {
+          accessories.unshift(
+            {
+              icon: Icon.SoccerBall,
+              text: team.played.toString(),
+              tooltip: "Played",
+            },
+            {
+              icon: Icon.Goal,
+              text: `${team.goals_for} - ${team.goals_against}`,
+              tooltip: "Goals For - Goals Against",
+            }
+          );
+        }
+
         return (
           <List.Item
             key={team.team.id}
+            icon={icon}
             title={team.position.toString()}
             subtitle={team.team.nickname}
             keywords={[team.team.nickname, team.team.shortname]}
-            accessories={[{ text: team.points.toString() }, { icon }]}
+            accessories={accessories}
             detail={
               <List.Item.Detail
                 metadata={
