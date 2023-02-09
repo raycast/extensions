@@ -1,22 +1,10 @@
 import React from "react";
-import { Icon, List, useNavigation } from "@raycast/api";
+import { Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { supportedLanguagesByCode } from "../languages";
 import { LanguageCodeSet } from "../types";
 import { usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { LanguagesManagerList } from "./LanguagesManagerList";
-
-export function LanguageManagerListDropdownItem(props: { languageSet: LanguageCodeSet }) {
-  const langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
-
-  return (
-    <List.Dropdown.Item
-      title={`${langFrom.name} ${langFrom?.flag ?? "🏳"} -> ${langTo?.flag ?? "🏳"} ${langTo.name}`}
-      value={JSON.stringify(props.languageSet)}
-    />
-  );
-}
+import { formatLanguageSet } from "../utils";
 
 export function LanguageManagerListDropdown() {
   const navigation = useNavigation();
@@ -37,9 +25,16 @@ export function LanguageManagerListDropdown() {
       }}
     >
       <List.Dropdown.Item icon={Icon.Pencil} title="Manage language sets..." value="manage" />
-      <LanguageManagerListDropdownItem languageSet={preferencesLanguageSet} />
+      <List.Dropdown.Item
+        title={formatLanguageSet(preferencesLanguageSet)}
+        value={JSON.stringify(preferencesLanguageSet)}
+      />
       {languages.map((langSet) => (
-        <LanguageManagerListDropdownItem key={`${langSet.langFrom} ${langSet.langTo}`} languageSet={langSet} />
+        <List.Dropdown.Item
+          key={`${langSet.langFrom} ${langSet.langTo}`}
+          title={formatLanguageSet(langSet)}
+          value={JSON.stringify(langSet)}
+        />
       ))}
     </List.Dropdown>
   );

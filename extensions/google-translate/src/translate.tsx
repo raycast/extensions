@@ -1,5 +1,5 @@
-import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
+import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { useSelectedLanguagesSet } from "./hooks";
 import { supportedLanguagesByCode, LanguageCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";

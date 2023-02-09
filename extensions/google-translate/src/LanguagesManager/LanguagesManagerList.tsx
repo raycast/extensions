@@ -1,10 +1,11 @@
 import React from "react";
-import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { supportedLanguagesByCode } from "../languages";
 import { LanguageCodeSet } from "../types";
 import { isSameLanguageSet, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
+import { formatLanguageSet, getLanguageSetObjects } from "../utils";
 
 export function LanguagesManagerItem({
   languageSet,
@@ -17,8 +18,7 @@ export function LanguagesManagerItem({
   onDelete?: () => void;
   selected?: boolean;
 }) {
-  const langFrom = supportedLanguagesByCode[languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[languageSet.langTo];
+  const { langFrom, langTo } = getLanguageSetObjects(languageSet);
 
   return (
     <List.Item
@@ -40,13 +40,11 @@ export const SaveCurrentLanguageSet: React.FC<{ languageSet: LanguageCodeSet; on
   languageSet,
   onSelect,
 }) => {
-  const langFrom = supportedLanguagesByCode[languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[languageSet.langTo];
   return (
     <List.Item
       icon={Icon.SaveDocument}
       title="Save current set"
-      subtitle={`${langFrom.name} ${langFrom?.flag ?? "🏳"} -> ${langTo?.flag ?? "🏳"} ${langTo.name}`}
+      subtitle={formatLanguageSet(languageSet)}
       actions={
         <ActionPanel>
           <Action title="Save current set" onAction={onSelect} />
@@ -82,6 +80,7 @@ export const LanguagesManagerList: React.VFC = () => {
                   onAddLanguage={(langSet) => {
                     setLanguages([...languages, langSet]);
                     navigation.pop();
+                    showToast(Toast.Style.Success, "Language set was saved!", formatLanguageSet(langSet));
                   }}
                 />
               }
@@ -115,6 +114,7 @@ export const LanguagesManagerList: React.VFC = () => {
           }}
           onDelete={() => {
             setLanguages(languages.filter((l) => !isSameLanguageSet(l, langSet)));
+            showToast(Toast.Style.Success, "Language set was deleted!", formatLanguageSet(langSet));
           }}
         />
       ))}
