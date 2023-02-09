@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "formatclipboard",
-      "title": "Format Clipboard",
-      "description": "Formats a json string stored in clipboard and copies it back",
+      "title": "Format Clipboard JSON",
+      "description": "Formats a JSON string stored in clipboard and copies it back",
       "mode": "no-view"
     },
     {
