@@ -5,6 +5,7 @@ import { getStatusIcon, StateType } from "./states";
 
 enum IssueNotificationType {
   issueAssignedToYou = "issueAssignedToYou",
+  issueUnassignedFromYou = "issueUnassignedFromYou",
   issueCreated = "issueCreated",
   issuePriorityUrgent = "issuePriorityUrgent",
   issueStatusChanged = "issueStatusChanged",
@@ -58,6 +59,7 @@ export function getNotificationIcon(notification: NotificationResult) {
 
 const notificationTitles: Record<string, string> = {
   [IssueNotificationType.issueAssignedToYou]: "Assigned",
+  [IssueNotificationType.issueUnassignedFromYou]: "Unassigned",
   [IssueNotificationType.issueCreated]: "New issue created",
   [IssueNotificationType.issuePriorityUrgent]: "Marked as urgent",
   [IssueNotificationType.issueBlocking]: "Marked as blocking",
