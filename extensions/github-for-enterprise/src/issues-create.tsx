@@ -3,7 +3,7 @@ import { CreateIssue, GetIssueTemplates, GetRepositories, Repository } from "@/t
 import { fetcher } from "@/utils";
 import { Action, ActionPanel, Form, FormValues, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import matter from "gray-matter";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useSWRImmutable from "swr/immutable";
 
 export default function Command() {
