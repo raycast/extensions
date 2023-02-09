@@ -7,9 +7,11 @@ const VOCAB_DICTIONARY_PAGE_URL = "https://www.vocabulary.com/dictionary";
 
 export default function Command() {
   const [words, setWords] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const onSearchTextChange = async (query: string) => {
     if (!query.trim()) return;
+    setLoading(true);
     try {
       const response = await axios.get(`${VOCAB_API_URL}/words/${query}`);
       if (response.status === 200) {
@@ -22,6 +24,8 @@ export default function Command() {
         title: "Failed to fetch words",
         message: "Please try again later",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,7 +36,7 @@ export default function Command() {
       filtering={false}
       onSearchTextChange={onSearchTextChange}
       throttle={true}
-      isLoading={false}
+      isLoading={loading}
       searchBarPlaceholder="Search word..."
     >
       {words.map((word: { word: string; description: string }, i: number) => {
@@ -47,7 +51,7 @@ function WordActions(word: string) {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open in browser" url={dictionaryPageUrl} />
+      <Action.OpenInBrowser url={dictionaryPageUrl} />
     </ActionPanel>
   );
 }

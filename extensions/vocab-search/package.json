@@ -5,6 +5,9 @@
   "description": "Retrieve Word definitions from vocab.com",
   "icon": "vocab-logo.png",
   "author": "datadeer",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"
