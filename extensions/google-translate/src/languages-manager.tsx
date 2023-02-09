@@ -9,6 +9,12 @@ const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet)
   return langSet1.langFrom === langSet2.langFrom && langSet1.langTo === langSet2.langTo;
 };
 
+const usePreferencesLanguageSet = () => {
+  const preferences = usePreferences();
+  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: preferences.lang2 };
+  return preferencesLanguageSet;
+};
+
 export const AddLanguageForm: React.VFC<{
   onAddLanguage: (data: LanguageCodeSet) => void;
 }> = ({ onAddLanguage }) => {
@@ -93,8 +99,7 @@ export const SaveCurrentLanguageSet: React.FC<{ languageSet: LanguageCodeSet; on
 
 export const LanguagesManager: React.VFC = () => {
   const navigation = useNavigation();
-  const preferences = usePreferences();
-  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: preferences.lang2 };
+  const preferencesLanguageSet = usePreferencesLanguageSet();
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
   const [languages, setLanguages] = useCachedState<LanguageCodeSet[]>("languages", []);
 
@@ -125,22 +130,24 @@ export const LanguagesManager: React.VFC = () => {
           </ActionPanel>
         }
       />
-      {!languages.some((l) => isSameLanguageSet(l, selectedLanguageSet)) && (
-        <SaveCurrentLanguageSet
-          languageSet={selectedLanguageSet}
-          onSelect={() => setLanguages([...languages, selectedLanguageSet])}
-        />
-      )}
+      {!languages.some((l) => isSameLanguageSet(l, selectedLanguageSet)) &&
+        !isSameLanguageSet(preferencesLanguageSet, selectedLanguageSet) && (
+          <SaveCurrentLanguageSet
+            languageSet={selectedLanguageSet}
+            onSelect={() => setLanguages([...languages, selectedLanguageSet])}
+          />
+        )}
       <LanguagesManagerItem
-        languageSet={{ langFrom: preferences.lang1, langTo: preferences.lang2 }}
+        languageSet={preferencesLanguageSet}
         onSelect={() => {
-          setSelectedLanguageSet({ langFrom: preferences.lang1, langTo: preferences.lang2 });
+          setSelectedLanguageSet(preferencesLanguageSet);
           navigation.pop();
         }}
         selected={isSameLanguageSet(selectedLanguageSet, preferencesLanguageSet)}
       />
       {languages.map((langSet) => (
         <LanguagesManagerItem
+          key={`${langSet.langFrom} ${langSet.langTo}`}
           selected={isSameLanguageSet(selectedLanguageSet, langSet)}
           languageSet={langSet}
           onSelect={() => {
@@ -155,3 +162,42 @@ export const LanguagesManager: React.VFC = () => {
     </List>
   );
 };
+
+export function LanguageManagerDropdownItem(props: { languageSet: LanguageCodeSet }) {
+  const langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
+  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
+
+  return (
+    <List.Dropdown.Item
+      title={`${langFrom.name} ${langFrom?.flag ?? "🏳"} -> ${langTo?.flag ?? "🏳"} ${langTo.name}`}
+      value={JSON.stringify(props.languageSet)}
+    />
+  );
+}
+
+export function LanguageManagerDropdown() {
+  const navigation = useNavigation();
+  const preferencesLanguageSet = usePreferencesLanguageSet();
+  const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
+  const [languages] = useCachedState<LanguageCodeSet[]>("languages", []);
+  return (
+    <List.Dropdown
+      value={JSON.stringify(selectedLanguageSet)}
+      tooltip="Language Set"
+      onChange={(value) => {
+        if (value === "manage") {
+          navigation.push(<LanguagesManager />);
+        } else {
+          const langSet: LanguageCodeSet = JSON.parse(value);
+          setSelectedLanguageSet(langSet);
+        }
+      }}
+    >
+      <List.Dropdown.Item icon={Icon.Pencil} title="Manage language sets..." value="manage" />
+      <LanguageManagerDropdownItem languageSet={preferencesLanguageSet} />
+      {languages.map((langSet) => (
+        <LanguageManagerDropdownItem key={`${langSet.langFrom} ${langSet.langTo}`} languageSet={langSet} />
+      ))}
+    </List.Dropdown>
+  );
+}
