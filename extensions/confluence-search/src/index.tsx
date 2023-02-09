@@ -1,15 +1,13 @@
 import {
-  Action,
   ActionPanel,
-  CopyToClipboardAction,
+  Action,
+  Image,
   Detail,
   getPreferenceValues,
-  ImageMask,
   List,
   openExtensionPreferences,
-  OpenInBrowserAction,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -101,7 +99,7 @@ function useSearch() {
         if (error instanceof AbortError) {
           return;
         }
-        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+        showToast(Toast.Style.Failure, "Could not perform search", String(error));
       } finally {
         setIsLoading(false);
       }
@@ -194,14 +192,18 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       subtitle={searchResult.subTitle}
       keywords={[searchResult.name, searchResult.type]}
-      accessoryTitle={searchResult.author}
-      accessoryIcon={{ source: `https://${prefs.instance}${searchResult.icon}`, mask: ImageMask.Circle }}
+      accessories={[
+        {
+          text: { value: searchResult.author },
+          icon: { source: `https://${prefs.instance}${searchResult.icon}`, mask: Image.Mask.Circle },
+        },
+      ]}
       icon={{ source: getConfluenceIcon(searchResult) }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + searchResult.url} />
-            <CopyToClipboardAction
+            <Action.OpenInBrowser title="Open in Browser" url={confluenceUrl + searchResult.url} />
+            <Action.CopyToClipboard
               title="Copy URL"
               content={confluenceUrl + searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
