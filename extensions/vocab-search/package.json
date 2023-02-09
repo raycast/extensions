@@ -3,7 +3,7 @@
   "name": "vocab",
   "title": "Vocabulary.com",
   "description": "Retrieve Word definitions from vocab.com",
-  "icon": "/vocab-logo.png",
+  "icon": "vocab-logo.png",
   "author": "datadeer",
   "categories": [
     "Productivity",
