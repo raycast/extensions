@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { CategoryName } from "../types";
 import { getV7Items, getV7CategoryIcon } from "../utils";
+import resetCache from "../../reset-cache";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -66,6 +67,9 @@ export function Items() {
                       application="com.agilebits.onepassword7"
                       shortcut={{ modifiers: ["cmd"], key: "e" }}
                     />
+                    <ActionPanel.Section>
+                      <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />

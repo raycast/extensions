@@ -6,6 +6,7 @@ import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Item, Url, User } from "../types";
 import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp } from "../utils";
 import { Guide } from "./Guide";
+import resetCache from "../../reset-cache";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -91,6 +92,9 @@ export function Items() {
                         </ActionPanel.Section>
                       </>
                     )}
+                    <ActionPanel.Section>
+                      <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />

@@ -4,6 +4,7 @@ import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { useEffect, useState } from "react";
 
+
 import { CategoryName } from "./types";
 
 export type Preferences = {
@@ -22,7 +23,7 @@ export const ACCOUNT_CACHE_NAME = "@account";
 
 export function op(args: string[]) {
   if (CLI_PATH) {
-    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 1536 * 1024 });
+    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
     return stdout.toString();
   }
   throw Error("1Password CLI is not found!");
