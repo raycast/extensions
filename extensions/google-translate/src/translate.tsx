@@ -2,7 +2,7 @@ import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api"
 import { ReactElement, useEffect, useState } from "react";
 import { useSelectedLanguagesSet } from "./hooks";
 import { supportedLanguagesByCode, LanguageCode } from "./languages";
-import { LanguageManagerDropdown } from "./languages-manager";
+import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 
 let count = 0;
@@ -95,7 +95,7 @@ export default function Command(): ReactElement {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       throttle
-      searchBarAccessory={<LanguageManagerDropdown />}
+      searchBarAccessory={<LanguageManagerListDropdown />}
     >
       {results.map((r, index) => (
         <List.Item

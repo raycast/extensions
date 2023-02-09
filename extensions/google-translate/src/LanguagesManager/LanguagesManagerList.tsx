@@ -1,51 +1,10 @@
 import React from "react";
 import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { languages, supportedLanguagesByCode } from "./languages";
-import { AUTO_DETECT } from "./simple-translate";
-import { LanguageCodeSet, usePreferences, useSelectedLanguagesSet } from "./hooks";
-
-const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet) => {
-  return langSet1.langFrom === langSet2.langFrom && langSet1.langTo === langSet2.langTo;
-};
-
-const usePreferencesLanguageSet = () => {
-  const preferences = usePreferences();
-  const preferencesLanguageSet: LanguageCodeSet = { langFrom: preferences.lang1, langTo: preferences.lang2 };
-  return preferencesLanguageSet;
-};
-
-export const AddLanguageForm: React.VFC<{
-  onAddLanguage: (data: LanguageCodeSet) => void;
-}> = ({ onAddLanguage }) => {
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Add language set"
-            onSubmit={(values: LanguageCodeSet) => {
-              onAddLanguage(values);
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.Dropdown id="langFrom">
-        {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
-        ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="langTo">
-        {languages
-          .filter((lang) => lang.code !== AUTO_DETECT)
-          .map((lang) => (
-            <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
-          ))}
-      </Form.Dropdown>
-    </Form>
-  );
-};
+import { supportedLanguagesByCode } from "../languages";
+import { LanguageCodeSet } from "../types";
+import { isSameLanguageSet, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
+import { AddLanguageForm } from "./AddLanguageForm";
 
 export function LanguagesManagerItem({
   languageSet,
@@ -97,7 +56,7 @@ export const SaveCurrentLanguageSet: React.FC<{ languageSet: LanguageCodeSet; on
   );
 };
 
-export const LanguagesManager: React.VFC = () => {
+export const LanguagesManagerList: React.VFC = () => {
   const navigation = useNavigation();
   const preferencesLanguageSet = usePreferencesLanguageSet();
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -162,42 +121,3 @@ export const LanguagesManager: React.VFC = () => {
     </List>
   );
 };
-
-export function LanguageManagerDropdownItem(props: { languageSet: LanguageCodeSet }) {
-  const langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
-
-  return (
-    <List.Dropdown.Item
-      title={`${langFrom.name} ${langFrom?.flag ?? "🏳"} -> ${langTo?.flag ?? "🏳"} ${langTo.name}`}
-      value={JSON.stringify(props.languageSet)}
-    />
-  );
-}
-
-export function LanguageManagerDropdown() {
-  const navigation = useNavigation();
-  const preferencesLanguageSet = usePreferencesLanguageSet();
-  const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
-  const [languages] = useCachedState<LanguageCodeSet[]>("languages", []);
-  return (
-    <List.Dropdown
-      value={JSON.stringify(selectedLanguageSet)}
-      tooltip="Language Set"
-      onChange={(value) => {
-        if (value === "manage") {
-          navigation.push(<LanguagesManager />);
-        } else {
-          const langSet: LanguageCodeSet = JSON.parse(value);
-          setSelectedLanguageSet(langSet);
-        }
-      }}
-    >
-      <List.Dropdown.Item icon={Icon.Pencil} title="Manage language sets..." value="manage" />
-      <LanguageManagerDropdownItem languageSet={preferencesLanguageSet} />
-      {languages.map((langSet) => (
-        <LanguageManagerDropdownItem key={`${langSet.langFrom} ${langSet.langTo}`} languageSet={langSet} />
-      ))}
-    </List.Dropdown>
-  );
-}

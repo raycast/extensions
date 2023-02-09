@@ -1,10 +1,10 @@
 import React from "react";
-import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import debounce from "debounce";
 import { useSelectedLanguagesSet } from "./hooks";
 import { LanguageCode, supportedLanguagesByCode, languages } from "./languages";
 import { AUTO_DETECT, simpleTranslate, SimpleTranslateResult } from "./simple-translate";
-import { LanguagesManager } from "./languages-manager";
+import { LanguagesManagerList } from "./LanguagesManager";
 
 const TranslateForm = () => {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -91,9 +91,10 @@ const TranslateForm = () => {
               }
             />
             <Action.Push
-              title="Select language"
+              icon={Icon.Pencil}
+              title="Manage language sets..."
               shortcut={{ modifiers: ["cmd"], key: "l" }}
-              target={<LanguagesManager />}
+              target={<LanguagesManagerList />}
             />
           </ActionPanel.Section>
 
