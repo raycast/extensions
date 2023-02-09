@@ -1,5 +1,10 @@
 # Google Translate Changelog
 
+## [Enhancements] - 2023-02-09
+
+- Retuned back LangTo -> LangFrom translation
+- Improved auto-detect translation in Translate Form
+
 ## [Add auto-detect option] - 2023-02-07
 
 Add auto-detect to the language option.
