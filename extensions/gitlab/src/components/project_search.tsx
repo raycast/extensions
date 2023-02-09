@@ -7,6 +7,7 @@ import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CreateNewProjectIssuePushAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
   OpenProjectLabelsInBrowserAction,
@@ -54,6 +55,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
+            <CreateNewProjectIssuePushAction project={project} />
             <OpenProjectLabelsInBrowserAction project={project} />
             <OpenProjectSecurityComplianceInBrowserAction project={project} />
             <OpenProjectSettingsInBrowserAction project={project} />
