@@ -305,3 +305,55 @@ export interface Player {
   team_image_secondary: string;
   team_slug: TeamSlug;
 }
+
+export interface Club {
+  active: number;
+  address: string;
+  background_image: string;
+  business_name: string;
+  category_season_id: number;
+  city: string;
+  coach_id: number;
+  cod_coach: string;
+  created_at: Date;
+  deleted_at: null;
+  entity_id: number;
+  facebook_url: string;
+  fax: string;
+  georule: string;
+  georule_id: number;
+  instagram_url: string;
+  json_tag: string;
+  logo: string;
+  name: string;
+  netco_full_id: string;
+  netco_id: string;
+  opta_id: string;
+  order: number;
+  phone_number: string;
+  president: string;
+  secondary_logo: string;
+  shop_url: string;
+  short_name: string;
+  slug: string;
+  source_full_logo_path: null;
+  status: string;
+  tag: string;
+  team_id: number;
+  team_type: string;
+  ticket_url: string;
+  twitter_url: string;
+  uniform_away: string;
+  uniform_away_url: string;
+  uniform_home: string;
+  uniform_home_url: string;
+  uniform_third: string;
+  uniform_third_url: string;
+  updated_at: Date;
+  venue_id: number;
+  website: string;
+  youtube: string;
+  zip_code: number;
+  "x-geoip-country": string;
+  image_url: string;
+}

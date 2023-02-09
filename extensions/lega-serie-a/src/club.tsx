@@ -3,7 +3,7 @@ import { Team } from "./types";
 import { getTeams } from "./api";
 import SeasonDropdown, { seasons } from "./components/season_dropdown";
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
-import ClubSquad from "./components/squad";
+import ClubDetails from "./components/club";
 
 export default function Club() {
   const [clubs, setClubs] = useState<Team[]>();
@@ -36,9 +36,9 @@ export default function Club() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Club Squads"
+                  title="Club Details"
                   icon={Icon.Sidebar}
-                  target={<ClubSquad {...club} season={season} />}
+                  target={<ClubDetails {...club} season={season} />}
                 />
               </ActionPanel>
             }

@@ -13,6 +13,7 @@ import {
   Team,
   Player,
   SerieAPlayer,
+  Club,
 } from "../types";
 
 const { language } = getPreferenceValues();
@@ -161,6 +162,23 @@ export const getPlayer = async (
     const { data }: AxiosResponse<SerieAPlayer> = await axios(config);
 
     return data.data.reverse()[0];
+  } catch (e) {
+    showFailureToast();
+
+    return undefined;
+  }
+};
+
+export const getClub = async (slug: string): Promise<Club | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `https://www.legaseriea.it/_next/data/sIOZ2yIbsl4I8hp82xokQ/en/team/${slug}/club.json?slug=team&slug=${slug}&slug=club`,
+  };
+
+  try {
+    const { data } = await axios(config);
+
+    return data?.pageProps?.page?.context;
   } catch (e) {
     showFailureToast();
 
