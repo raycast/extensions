@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tailwind-picker",
+  "title": "Tailwind Color Picker",
+  "description": "Tailwind CSS Color Picker",
+  "icon": "icon.png",
+  "author": "juliusmarminge",
+  "categories": [
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pick-color",
+      "title": "Pick Tailwind Color",
+      "description": "Get a Tailwind CSS color using a color picker",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "execa": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.21.0",
+    "@types/node": "18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.4",
+    "turbo": "^1.7.4",
+    "typescript": "^4.9.5"
+  }
+}
