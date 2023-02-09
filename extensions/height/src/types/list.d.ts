@@ -21,6 +21,15 @@ export type ListObject = {
   updatedAt: string;
   defaultList: boolean;
   url: string;
+  appearance?: {
+    icon: ListIcon;
+    hue: number | null;
+    iconUrl: string;
+  };
+};
+
+export type ApiListResponse = {
+  list: ListObject[];
 };
 
 export type CreateListFormValues = {
@@ -32,9 +41,18 @@ export type CreateListFormValues = {
   visualization?: string;
 };
 
+export type UpdateListFormValues = Omit<CreateListFormValues, "icon">;
+
 export type CreateListPayload = Omit<CreateListFormValues, "hue", "icon"> & {
   appearance?: {
     hue: number | null;
     icon: ListIcon;
+  };
+};
+
+export type UpdateListPayload = Partial<Omit<UpdateListFormValues, "hue">> & {
+  appearance?: {
+    hue?: number | null;
+    icon?: ListIcon;
   };
 };

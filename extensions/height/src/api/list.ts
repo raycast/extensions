@@ -1,25 +1,9 @@
-import { showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
-import { CreateListPayload, ListObject } from "../types/list";
-import { ApiErrorResponse, UseFetchParams } from "../types/utils";
+import { CreateListPayload, ListObject, UpdateListPayload } from "../types/list";
+import { ApiErrorResponse } from "../types/utils";
 import { ApiHeaders, ApiUrls } from "./helpers";
 
-type ApiListResponse = {
-  list: ListObject[];
-};
-
 export const ApiList = {
-  getAll(options?: UseFetchParams<ApiListResponse>) {
-    return useFetch<ApiListResponse>(ApiUrls.lists, {
-      headers: ApiHeaders,
-      keepPreviousData: true,
-      onError: (error) => {
-        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
-      },
-      ...options,
-    });
-  },
   async create(values: CreateListPayload) {
     const response = await fetch(ApiUrls.lists, {
       method: "POST",
@@ -32,5 +16,12 @@ export const ApiList = {
     } else {
       return [null, ((await response.json()) as ApiErrorResponse).error] as const;
     }
+  },
+  update(id: string, values: UpdateListPayload) {
+    return fetch(`${ApiUrls.lists}/${id}`, {
+      method: "PATCH",
+      headers: ApiHeaders,
+      body: JSON.stringify(values),
+    });
   },
 };
