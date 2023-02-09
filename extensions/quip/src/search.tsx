@@ -85,7 +85,6 @@ export default function Command(): JSX.Element {
 
   return (
     <List
-      navigationTitle="Search Quip Documents"
       searchBarPlaceholder="Search Quip documents "
       searchText={searchText}
       onSearchTextChange={setSearchText}
