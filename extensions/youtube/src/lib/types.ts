@@ -11,7 +11,7 @@ export enum PrimaryAction {
 }
 
 export type Preferences = {
-  apiKey: string;
+  apikey: string;
   viewLayout: ViewLayout;
   primaryAction: PrimaryAction;
   gridColumns: number;

@@ -7,8 +7,8 @@ import { convertYouTubeDuration } from "duration-iso-8601";
 import { Preferences } from "./types";
 
 function createClient(): youtube_v3.Youtube {
-  const { apiKey } = getPreferenceValues<Preferences>();
-  return youtube({ version: "v3", auth: apiKey });
+  const { apikey } = getPreferenceValues<Preferences>();
+  return youtube({ version: "v3", auth: apikey });
 }
 
 export const youtubeClient = createClient();

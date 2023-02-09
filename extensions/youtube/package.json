@@ -31,7 +31,7 @@
   ],
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "apikey",
       "type": "password",
       "title": "API Key",
       "placeholder": "Your YouTube enabled Google API key",
