@@ -1,9 +1,9 @@
 {
-  "name": "@tailwind-picker/native",
+  "name": "@palette-picker/native",
   "version": "0.0.1",
   "scripts": {
     "build:swift": "swift build --configuration=release",
-    "postbuild": "cp .build/release/tailwind-picker ../assets/tailwind-picker",
+    "postbuild": "cp .build/release/color-picker ../assets/color-picker",
     "build": "run-s build:swift postbuild"
   },
   "devDependencies": {

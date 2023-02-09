@@ -8,7 +8,7 @@ export type HSL = Record<"h" | "s" | "l", number>;
 
 export async function pickColor() {
   // Launch the binary with the correct permissions
-  const command = join(environment.assetsPath, "tailwind-picker");
+  const command = join(environment.assetsPath, "color-picker");
   chmodSync(command, 0o755);
 
   try {
