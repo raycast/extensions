@@ -74,7 +74,7 @@ export default function Fixture() {
                   }
                   icon={Icon.Clock}
                   accessories={[
-                    { text: `${match.venue.name}, ${match.venue.city}` },
+                    { text: match.venue.name },
                     { icon: "stadium.svg" },
                   ]}
                   actions={
