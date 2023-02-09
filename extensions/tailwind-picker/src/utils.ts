@@ -2,9 +2,11 @@ import { environment } from "@raycast/api";
 import { execa } from "execa";
 import { chmodSync } from "fs";
 import { join } from "path";
+import { getTransformedRadixConfig } from "./radix";
 import { getTransformedTailwindConfig } from "./tailwind";
 
 export type RGB = Record<"r" | "g" | "b", number>;
+export type HSL = Record<"h" | "s" | "l", number>;
 
 export async function pickColor() {
   // Launch the binary with the correct permissions
@@ -63,17 +65,33 @@ export function toRgb(hex: string): RGB {
 
 export function toHex(rgb: RGB) {
   const { r, g, b } = rgb;
-  return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+  const [intR, intG, intB] = [r, g, b].map((c) => Math.round(c));
+  return `#${intR!.toString(16)}${intG!.toString(16)}${intB!.toString(16)}`;
 }
 
-export function toTailwind(color: RGB) {
-  const tailwindColors = getTransformedTailwindConfig();
-  const colors = Array.from(tailwindColors.keys());
+export function parseHslString(string: string): HSL {
+  let [h, s, l] = string
+    .replace("hsl(", "")
+    .replace(")", "")
+    .split(",")
+    .map((s) =>
+      s.includes("%") ? parseFloat(s.trim()) / 100 : parseFloat(s.trim())
+    );
 
-  const nearest = nearestColor(color, colors);
-  const tailwind = tailwindColors.get(nearest);
+  if (h === undefined || s === undefined || l === undefined)
+    throw new Error("Invalid HSL string");
 
-  if (!tailwind) throw new Error("Could not find tailwind color");
+  return { h, s, l };
+}
 
-  return tailwind;
+export function fromHsl(hsl: HSL): RGB {
+  const { h, s, l } = hsl;
+
+  const fn = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+  };
+
+  return { r: fn(0) * 255, g: fn(8) * 255, b: fn(4) * 255 };
 }

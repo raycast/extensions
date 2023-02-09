@@ -1,4 +1,4 @@
-import { RGB, toRgb } from "./utils";
+import { nearestColor, RGB, toRgb } from "./utils";
 
 /**
  * Transforms the tailwind config into a map of rgb-colors to tailwind colors
@@ -23,6 +23,21 @@ export function getTransformedTailwindConfig() {
   }
 
   return rgbToTw;
+}
+
+/**
+ * Takes an RGB color and returns the closest tailwind color
+ */
+export function toTailwind(color: RGB) {
+  const tailwindColors = getTransformedTailwindConfig();
+  const colors = Array.from(tailwindColors.keys());
+
+  const nearest = nearestColor(color, colors);
+  const tailwind = tailwindColors.get(nearest);
+
+  if (!tailwind) throw new Error("Could not find tailwind color");
+
+  return tailwind;
 }
 
 /**

@@ -11,9 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "pick-color",
+      "name": "pick-tailwind",
       "title": "Pick Tailwind Color",
-      "description": "Get a Tailwind CSS color using a color picker",
+      "description": "Pick a color and get the nearest Tailwind CSS color",
+      "mode": "no-view"
+    },
+    {
+      "name": "pick-radix",
+      "title": "Pick RadixUI Color",
+      "description": "Pick a color and get the nearest Radix UI color",
       "mode": "no-view"
     }
   ],

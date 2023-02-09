@@ -15,7 +15,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": false
   },
   "include": [".eslintrc.js", "src"]
 }

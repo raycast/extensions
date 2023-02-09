@@ -22,7 +22,7 @@ NSColorSampler().show { selectedColor in
     r: Float(color.redComponent * 255),
     g: Float(color.greenComponent * 255),
     b: Float(color.blueComponent * 255),
-    a: Float(color.alphaComponent * 255)
+    a: Float(color.alphaComponent)
   )
   
   guard let json = try? JSONEncoder().encode(rgba) else {
