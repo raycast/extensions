@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { IssueResult } from "../api/getIssues";
-import { statusIcons } from "../helpers/states";
+import { getStatusIcon } from "../helpers/states";
 import { getUserIcon } from "../helpers/users";
 import { priorityIcons } from "../helpers/priorities";
 
@@ -81,7 +81,7 @@ export default function IssueListItem({
       text: estimate ? estimate.text : undefined,
     },
     {
-      icon: { source: statusIcons[issue.state.type], tintColor: issue.state.color },
+      icon: getStatusIcon(issue.state),
       tooltip: `Status: ${issue.state.name}`,
     },
     {
