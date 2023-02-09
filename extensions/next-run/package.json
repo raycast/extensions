@@ -5,9 +5,6 @@
   "description": "Spin up a Next.js project from Raycast",
   "icon": "extension_icon.png",
   "author": "jonathangiardino",
-  "contributors": [
-    "jonathangiardino"
-  ],
   "categories": [
     "Developer Tools",
     "Productivity"
