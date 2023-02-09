@@ -30,9 +30,12 @@ export default function Fixture() {
         </List.Dropdown>
       }
     >
-      {Object.entries(categories).map(([day, matches]) => {
+      {Object.entries(categories).map(([day, matches], key) => {
         return (
-          <List.Section title={`${matches[0].matchdayLabel} - ${day}`}>
+          <List.Section
+            title={`${matches[0].matchdayLabel} - ${day}`}
+            key={key}
+          >
             {matches.map((match) => {
               const { teams, score, matchStatus } = match;
 
