@@ -19,6 +19,8 @@
   </ol>
 </details>
 
+---
+
 ## Prerequisites
 
 - Your devices need first to be added in the [Tuya Smart or Smart Life app][tuya-smart-url].
@@ -51,7 +53,7 @@
 ## Get Authorization Key
 
 Click the created project to enter the `Project Overview` page and get the `Authorization Key`. You will need these for setting up the integration. in the next step.
-<img src="https://raw.githubusercontent.com/raycast/extensions/6824b503ce9b92e2a749b481043b30bcd8254108/extensions/tuya-smart/assets/all_devices.png">
+<img src="https://github.com/AndresMorelos/raycast-extensions/blob/tuya-smart-extension/extensions/tuya-smart/assets/auth_key.png?raw=true">
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
