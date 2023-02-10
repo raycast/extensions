@@ -23,6 +23,18 @@
       "title": "Create List",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "search_tasks",
+      "title": "Search Tasks",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "create_task",
+      "title": "Create Task",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
