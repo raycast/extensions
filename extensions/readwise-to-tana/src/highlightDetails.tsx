@@ -51,6 +51,11 @@ export default function HighlightDetails({
             title="Location"
             text={highlight.location.toString()}
           />
+          <List.Item.Detail.Metadata.Link
+            title="Link"
+            text="Open in Readwise"
+            target={`https://readwise.io/open/${highlight.id}`}
+          />
           {highlight.color ? (
             <List.Item.Detail.Metadata.Label
               title="Color"
