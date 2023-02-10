@@ -2,9 +2,10 @@ import { showToast, Toast, confirmAlert, Icon, open } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 
-import { NoteFormPreferences, FormValue, Vault } from "./interfaces";
-import { applyTemplates } from "./utils";
-import { directoryCreationErrorToast, fileWriteErrorToast } from "../components/Toasts";
+import { FormValue, Vault } from "../interfaces";
+import { applyTemplates } from "../utils";
+import { directoryCreationErrorToast, fileWriteErrorToast } from "../../components/Toasts";
+import { NoteFormPreferences } from "../preferences";
 
 class NoteCreator {
   vaultPath: string;
