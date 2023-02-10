@@ -1,1 +1,0 @@
-export { useAllDomainsQuery } from './useDomainsQuery'

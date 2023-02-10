@@ -1,1 +1,0 @@
-export { TeamsSelector } from "./TeamSelector";
