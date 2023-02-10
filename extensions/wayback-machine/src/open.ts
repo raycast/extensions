@@ -19,7 +19,7 @@ export default async function main(props: LaunchProps<{ arguments: WaybackArgume
 
   const urlRegex = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
   const webpageUrl: string | undefined = url || selectedText;
-  if (webpageUrl && !urlRegex.test(webpageUrl)) {
+  if (webpageUrl === undefined || !urlRegex.test(webpageUrl)) {
     return showHUD("❌ No domain found");
   }
 
