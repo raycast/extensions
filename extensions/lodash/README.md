@@ -1,3 +1,0 @@
-# Lodash
-
-Search Lodash documentation
