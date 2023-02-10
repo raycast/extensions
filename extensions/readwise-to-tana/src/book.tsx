@@ -1,10 +1,23 @@
 import { List, LocalStorage } from '@raycast/api'
 import { useBook, useHighlights } from './useApi'
 import Highlight from './highlight'
+import React from 'react'
 
 export default function Book({ id }: { id: string }) {
   const { data: book, isLoading: isLoadingBook } = useBook(id)
   const { highlights, isLoading: isLoadingHighlights } = useHighlights(id)
+  const [lastSynced, setLastSynced] = React.useState<string | null>(null)
+  const [syncedItems, setSyncedItems] = React.useState<LocalStorage.Values>({})
+
+  React.useEffect(() => {
+    const getSyncedItems = async () => {
+      const itemsInStorage = await LocalStorage.allItems()
+
+      setSyncedItems(itemsInStorage)
+    }
+
+    getSyncedItems()
+  }, [lastSynced])
 
   let allNotes = `%%tana%%
 - ${book?.title} #book
@@ -20,11 +33,21 @@ export default function Book({ id }: { id: string }) {
   }
 
   const handleCopyAll = async () => {
+    const currentTime = new Date().toISOString()
     const ids = highlights.map(({ id }) => id)
 
     for (const id of ids) {
-      await LocalStorage.setItem(id.toString(), new Date().toISOString())
+      await LocalStorage.setItem(id.toString(), currentTime)
     }
+
+    setLastSynced(currentTime)
+  }
+
+  const handleCopy = async (id: number) => {
+    const currentTime = new Date().toISOString()
+
+    await LocalStorage.setItem(id.toString(), currentTime)
+    setLastSynced(currentTime)
   }
 
   return (
@@ -43,6 +66,8 @@ export default function Book({ id }: { id: string }) {
             allNotes={allNotes}
             highlight={highlight}
             handleCopyAll={handleCopyAll}
+            handleCopy={handleCopy}
+            synced={syncedItems[highlight.id.toString()]}
           />
         ))
       )}

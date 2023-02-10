@@ -1,45 +1,22 @@
-import {
-  Action,
-  LocalStorage,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-} from '@raycast/api'
+import { Action, ActionPanel, Color, Icon, List } from '@raycast/api'
 import type { Highlight } from './useApi'
 import HighlightDetails from './highlightDetails'
-import React from 'react'
 
 type HighlightProps = {
   allNotes: string
+  handleCopy: (id: number) => void
   handleCopyAll: () => void
   highlight: Highlight
+  synced?: string
 }
 
 export default function Highlight({
   allNotes,
   highlight,
+  handleCopy,
   handleCopyAll,
+  synced,
 }: HighlightProps) {
-  const [syncDate, setSyncDate] = React.useState<string>()
-
-  React.useEffect(() => {
-    const getItem = async () => {
-      const item = await LocalStorage.getItem<string>(highlight.id.toString())
-
-      setSyncDate(item)
-    }
-
-    getItem()
-  }, [])
-
-  const handleCopy = async (id: number) => {
-    await LocalStorage.setItem(id.toString(), new Date().toISOString())
-    const item = await LocalStorage.getItem<string>(highlight.id.toString())
-
-    setSyncDate(item)
-  }
-
   return (
     <List.Item
       actions={
@@ -65,9 +42,9 @@ export default function Highlight({
       key={highlight.id}
       title={highlight.text}
       subtitle={highlight.note}
-      detail={<HighlightDetails highlight={highlight} syncDate={syncDate} />}
+      detail={<HighlightDetails highlight={highlight} syncDate={synced} />}
       accessories={[
-        syncDate
+        synced
           ? {
               icon: {
                 tintColor: Color.Green,
