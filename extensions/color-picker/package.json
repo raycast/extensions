@@ -5,6 +5,9 @@
   "description": "Pick and organize colors, everywhere on your Mac",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "otakustay"
+  ],
   "categories": [
     "Design Tools"
   ],
