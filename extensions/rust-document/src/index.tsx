@@ -1,7 +1,7 @@
 import { ActionPanel, Detail, List, Action, getPreferenceValues } from "@raycast/api";
 import got from "got";
 import { useState } from "react";
-import { parse } from 'node-html-parser';
+import { parse } from "node-html-parser";
 
 interface State {
   crates: CrateDesc[];
@@ -23,11 +23,10 @@ interface SymbolDesc {
 }
 
 export default function Command() {
-
-  const [state, setState] = useState<State>({ crates: [] })
+  const [state, setState] = useState<State>({ crates: [] });
 
   async function execQuery(query: string) {
-    const splited = query.split('#');
+    const splited = query.split("#");
     const crate = splited[0];
 
     console.log("splited: ", splited);
@@ -51,19 +50,21 @@ export default function Command() {
   }
 
   async function searchCrate(crate: string) {
-    const data: any = await got.get(`https://crates.io/api/v1/crates?page=1&per_page=10&q=${crate}`, {
-      parseJson: text => JSON.parse(text)
-    }).json();
+    const data: any = await got
+      .get(`https://crates.io/api/v1/crates?page=1&per_page=10&q=${crate}`, {
+        parseJson: (text) => JSON.parse(text),
+      })
+      .json();
 
-    const crates: Array<CrateDesc> = data["crates"].map((crate: { [x: string]: any; }) => {
+    const crates: Array<CrateDesc> = data["crates"].map((crate: { [x: string]: any }) => {
       return {
         name: crate["name"],
         version: crate["newest_version"],
         desc: crate["description"],
-      }
+      };
     });
 
-    setState({ crates: crates, symbol: state.symbol, curr_select: state.curr_select })
+    setState({ crates: crates, symbol: state.symbol, curr_select: state.curr_select });
   }
 
   async function requestResourceSuffix(crate: string) {
@@ -90,14 +91,14 @@ export default function Command() {
     const body = (await got.get(`https://docs.rs/${crate}/latest/${crateUnderscore}/all.html`)).body;
     const root = parse(body);
     const mainContent = root.getElementById("main-content");
-    const list = mainContent.getElementsByTagName("a").map(item => {
+    const list = mainContent.getElementsByTagName("a").map((item) => {
       return {
         name: item.firstChild.toString(),
         href: itemPrefix + item.getAttribute("href"),
-        version: item.parentNode.parentNode.previousSibling.childNodes[0].toString()
-      }
+        version: item.parentNode.parentNode.previousSibling.childNodes[0].toString(),
+      };
     });
-    return list
+    return list;
   }
 
   // replace `-` with `_`
@@ -109,7 +110,7 @@ export default function Command() {
     if (select !== null) {
       state.curr_select = select;
       console.log("select: ", select);
-      setState({ crates: state.crates, symbol: state.symbol, curr_select: select })
+      setState({ crates: state.crates, symbol: state.symbol, curr_select: select });
     }
   }
 
@@ -119,18 +120,24 @@ export default function Command() {
     if (state.symbol != undefined && state.symbol.length > 0) {
       return state.crates.find((item) => item.name == crateName)?.url || "";
     } else {
-      return `https://docs.rs/${crateName}`
+      return `https://docs.rs/${crateName}`;
     }
   }
 
   return (
     <List onSearchTextChange={execQuery} onSelectionChange={changeSelect}>
       {state.crates.map((crate) => (
-        <List.Item title={crate.name} id={crate.name} subtitle={crate.desc} accessories={[
-          { text: crate.version }
-        ]} actions={<ActionPanel>
-          <Action.OpenInBrowser url={getUrl()} />
-        </ActionPanel>} />
+        <List.Item
+          title={crate.name}
+          id={crate.name}
+          subtitle={crate.desc}
+          accessories={[{ text: crate.version }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={getUrl()} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );
