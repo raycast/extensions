@@ -45,8 +45,10 @@ export const useBook = (id: string) => {
 }
 
 export const useHighlights = (bookId: string) => {
-  return useFetch<{ results: Highlight[] }>(
+  const { data, isLoading } = useFetch<{ results: Highlight[] }>(
     `${baseUrl}/highlights?book_id=${bookId}`,
     getHeaders()
   )
+
+  return { highlights: data?.results ?? [], isLoading }
 }

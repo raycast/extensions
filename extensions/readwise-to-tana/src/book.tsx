@@ -4,13 +4,13 @@ import Highlight from './highlight'
 
 export default function Book({ id }: { id: string }) {
   const { data: book, isLoading: isLoadingBook } = useBook(id)
-  const { data: highlights, isLoading: isLoadingHighlights } = useHighlights(id)
+  const { highlights, isLoading: isLoadingHighlights } = useHighlights(id)
 
   let allNotes = `%%tana%%
 - ${book?.title} #book
   - Author:: ${book?.author} #person\n`
 
-  for (const highlight of highlights?.results || []) {
+  for (const highlight of highlights) {
     if (highlight.note) {
       allNotes += `  - ${highlight.text}
     - **Note:** ${highlight.note}\n`
@@ -20,7 +20,7 @@ export default function Book({ id }: { id: string }) {
   }
 
   const handleCopyAll = async () => {
-    const ids = highlights?.results.map((highlight) => highlight.id) ?? []
+    const ids = highlights.map(({ id }) => id)
 
     for (const id of ids) {
       await LocalStorage.setItem(id.toString(), new Date().toISOString())
@@ -31,13 +31,13 @@ export default function Book({ id }: { id: string }) {
     <List
       navigationTitle={book?.title}
       isLoading={isLoadingBook || isLoadingHighlights}
-      isShowingDetail={highlights?.results.length !== 0}
+      isShowingDetail={highlights.length !== 0}
       searchBarPlaceholder="Filter Highlights"
     >
-      {highlights?.results.length === 0 ? (
+      {highlights.length === 0 ? (
         <List.EmptyView title={`No highlights found for ${book?.title}`} />
       ) : (
-        highlights?.results.map((highlight) => (
+        highlights.map((highlight) => (
           <Highlight
             key={highlight.id}
             allNotes={allNotes}
