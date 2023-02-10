@@ -23,3 +23,6 @@ Tapping the item will toggle play/pause for the current playing podcast.
 
 This plugin allows users to forward/rewind 15 seconds through actions listed in the action panel.
 
+# Menu Bar Player
+
+The user can easily check the player's current state from the menu bar icon and menu bar items. The menu bar items also have control actions like play/pause/forward/rewind.
