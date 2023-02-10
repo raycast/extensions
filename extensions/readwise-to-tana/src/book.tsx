@@ -19,22 +19,46 @@ export default function Book({ id }: { id: string }) {
     getSyncedItems()
   }, [lastSynced])
 
-  let allNotes = `%%tana%%
+  let allUnsyncedHighlights = '%%tana%%\n'
+
+  let allHighlights = `%%tana%%
 - ${book?.title} #book
   - Author:: ${book?.author} #person\n`
 
   for (const highlight of highlights) {
     if (highlight.note) {
-      allNotes += `  - ${highlight.text}
+      allHighlights += `  - ${highlight.text}
     - **Note:** ${highlight.note}\n`
     } else {
-      allNotes += `  - ${highlight.text}\n`
+      allHighlights += `  - ${highlight.text}\n`
+    }
+
+    if (!syncedItems[highlight.id.toString()]) {
+      if (highlight.note) {
+        allUnsyncedHighlights += `- ${highlight.text}
+  - **Note:** ${highlight.note}\n`
+      } else {
+        allUnsyncedHighlights += `- ${highlight.text}\n`
+      }
     }
   }
 
   const handleCopyAll = async () => {
     const currentTime = new Date().toISOString()
     const ids = highlights.map(({ id }) => id)
+
+    for (const id of ids) {
+      await LocalStorage.setItem(id.toString(), currentTime)
+    }
+
+    setLastSynced(currentTime)
+  }
+
+  const handleCopyUnsynced = async () => {
+    const currentTime = new Date().toISOString()
+    const ids = highlights
+      .map(({ id }) => id)
+      .filter((id) => !syncedItems[id.toString()])
 
     for (const id of ids) {
       await LocalStorage.setItem(id.toString(), currentTime)
@@ -63,9 +87,11 @@ export default function Book({ id }: { id: string }) {
         highlights.map((highlight) => (
           <Highlight
             key={highlight.id}
-            allNotes={allNotes}
+            allHighlights={allHighlights}
+            allUnsyncedHighlights={allUnsyncedHighlights}
             highlight={highlight}
             handleCopyAll={handleCopyAll}
+            handleCopyUnsynced={handleCopyUnsynced}
             handleCopy={handleCopy}
             synced={syncedItems[highlight.id.toString()]}
           />
