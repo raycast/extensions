@@ -51,7 +51,7 @@ export default function Command() {
               title={item.name}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Project Setup" target={<ProjectForm item={item} />} />
+                  <Action.Push title="Project Setup" icon={Icon.Hammer} target={<ProjectForm item={item} />} />
                 </ActionPanel>
               }
             />
