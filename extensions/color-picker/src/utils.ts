@@ -27,6 +27,9 @@ export function getFormattedColor(color: Color) {
     case "hex": {
       return getHex(color);
     }
+    case "hex-lower-case": {
+      return getHex(color).toLowerCase();
+    }
     case "rgba": {
       const alpha = Math.round(color.alpha / 255);
       return `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`;

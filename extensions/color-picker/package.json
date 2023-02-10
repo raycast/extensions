@@ -5,6 +5,9 @@
   "description": "Pick and organize colors, everywhere on your Mac",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "otakustay"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -61,6 +64,10 @@
         {
           "title": "HEX - #FF6363",
           "value": "hex"
+        },
+        {
+          "title": "HEX Lower Case - #ff6363",
+          "value": "hex-lower-case"
         },
         {
           "title": "RGBA - rgba(255, 99, 99, 1)",
