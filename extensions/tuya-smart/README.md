@@ -11,7 +11,7 @@
     <li><a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Create a project</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#installation">Link Devices by App Account</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -29,7 +29,23 @@
 2. In the left navigation bar, click `Cloud` > `Development`.
 3. On the page that appears, click `Create Cloud Project`.
 4. In the `Create Cloud Project` dialog box, configure `Project Name`, `Description`, `Industry`, adn `Data Center`. For the `Development` Method field, select `Smart Home` from the dropdown list. For the `Data Center` field, select the zone your are located in. Refer to country/data center mapping list [here][data-center-mappings-url]
-   <img width=180 src="https://raw.githubusercontent.com/raycast/extensions/08e658302c225c17cf9af4ebd4073e22f57ca279/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+   <img src="https://raw.githubusercontent.com/raycast/extensions/8a356b6f2f352065a45eccfaa7ac24159406e59e/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+5. Click `Create` to continue with the project configuration.
+6. In Configuration Wizard, make sure you add `Device Status Notification API`. The list of API should look like this:
+   <img src="https://raw.githubusercontent.com/raycast/extensions/8a356b6f2f352065a45eccfaa7ac24159406e59e/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+7. Click `Authorize`.
+
+## Link Devices by App Account
+
+1. Navigate to the `Devices` tab.
+2. Click `Link Tuya App Account` > `Add App Account`.
+   <img src="https://raw.githubusercontent.com/raycast/extensions/8a356b6f2f352065a45eccfaa7ac24159406e59e/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+3. Scan the QR code that appears using the `Tuya Smart` app or `Smart Life` app.
+   <img src="https://raw.githubusercontent.com/raycast/extensions/8a356b6f2f352065a45eccfaa7ac24159406e59e/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+4. Click `Confirm` in the app.
+5. To confirm that everything worked, navigate to the `All Devices` tab. Here you should be able to find the devices from the app.
+   <img src="https://raw.githubusercontent.com/raycast/extensions/8a356b6f2f352065a45eccfaa7ac24159406e59e/extensions/tuya-smart/assets/Create_Cloud_Project_Dialog_box.png">
+6. If zero devices are imported, try changing the DataCenter and check the account used is the “Home Owner”. You can change DataCenter by clicking the Cloud icon on the left menu, then clicking the Edit link in the Operation column for your newly created project. You can change DataCenter in the popup window.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
