@@ -158,7 +158,7 @@ function ProjectForm({ item }: { item: ExampleSource }) {
         <>
           <Form.FilePicker
             id="folder"
-            title="Preferred folder"
+            title="Preferred Folder"
             value={[preferredFolder]}
             onChange={(value) => setPreferredFolder(value[0])}
             allowMultipleSelection={false}
