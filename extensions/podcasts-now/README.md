@@ -6,20 +6,20 @@ Manage, explore and listen podcasts all in one place through Raycast.
 
 # Manage Podcasts
 
-When use Podcasts Now at first time, it will ask to manage podcasts which means the user need to fill in podcast feed urls manually or import from a file.
-Then the user could add or remove podcasts at anytime through "manage podcasts" action in actions panel.
+When using Podcasts Now for the first time, it will ask to manage podcasts, meaning the user must fill in podcast feed URLs manually or import them from a file.
+Then the user could add or remove podcasts at any time through the "manage podcasts" action in the actions panel.
 
 # Play a Podcast
 
-User could explore all subscribed podcasts. Enter any podcast, it will show all episodes from that podcast.
-Select a episode will start playing the episode through Music.app(will run Music.app at background).
+The user can explore all subscribed podcasts. Enter any podcast, and it will show all episodes from that podcast.
+Select an episode will start playing the episode through Music.app (will run Music.app in the background).
 
 # Pause/Resume
 
-There is an player section on top of the podcasts list section. It will show the current player state like playing/pause/stopped.
-Tap the item will toggle playing/pause for the current playing podcast.
+There is a player section on top of the podcasts list section. It will show the current player's state, like playing/pause/stopped.
+Tapping the item will toggle play/pause for the current playing podcast.
 
 # Forward/Rewind
 
-This plugin allows user to forward/rewind 15 seconds through actions listed in action panel.
+This plugin allows users to forward/rewind 15 seconds through actions listed in the action panel.
 
