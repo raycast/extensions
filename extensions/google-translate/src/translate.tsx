@@ -1,6 +1,8 @@
-import { List, getPreferenceValues, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
+import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
+import { useSelectedLanguagesSet } from "./hooks";
 import { supportedLanguagesByCode, LanguageCode } from "./languages";
+import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 
 let count = 0;
@@ -33,6 +35,7 @@ async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text:
 }
 
 export default function Command(): ReactElement {
+  const [selectedLanguageSet] = useSelectedLanguagesSet();
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
   const [results, setResults] = useState<
@@ -51,15 +54,10 @@ export default function Command(): ReactElement {
     setIsLoading(true);
     setResults([]);
 
-    const preferences = getPreferenceValues<{
-      lang1: LanguageCode;
-      lang2: LanguageCode;
-    }>();
-
-    translateText(preferences.lang1, preferences.lang2, toTranslate)
+    translateText(selectedLanguageSet.langFrom, selectedLanguageSet.langTo, toTranslate)
       .then((translations) => {
         if (localCount === count) {
-          if (preferences.lang1 === AUTO_DETECT && !translations.length) {
+          if (selectedLanguageSet.langFrom === AUTO_DETECT && !translations.length) {
             showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
             setResults([]);
             return;
@@ -88,7 +86,7 @@ export default function Command(): ReactElement {
       .then(() => {
         setIsLoading(false);
       });
-  }, [toTranslate]);
+  }, [toTranslate, selectedLanguageSet.langFrom, selectedLanguageSet.langTo]);
 
   return (
     <List
@@ -97,6 +95,7 @@ export default function Command(): ReactElement {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       throttle
+      searchBarAccessory={<LanguageManagerListDropdown />}
     >
       {results.map((r, index) => (
         <List.Item

@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-02-10
+
+- Add Languages Set manager to be able to configure multiple language presets and easy switch between them
+
 ## [Enhancements] - 2023-02-09
 
 - Retuned back LangTo -> LangFrom translation
