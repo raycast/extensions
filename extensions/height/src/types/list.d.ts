@@ -28,10 +28,6 @@ export type ListObject = {
   };
 };
 
-export type ApiListResponse = {
-  list: ListObject[];
-};
-
 export type CreateListFormValues = {
   name: string;
   type: string;
@@ -41,14 +37,14 @@ export type CreateListFormValues = {
   visualization?: string;
 };
 
-export type UpdateListFormValues = Omit<CreateListFormValues, "icon">;
-
 export type CreateListPayload = Omit<CreateListFormValues, "hue", "icon"> & {
   appearance?: {
     hue: number | null;
     icon: ListIcon;
   };
 };
+
+export type UpdateListFormValues = Omit<CreateListFormValues, "icon">;
 
 export type UpdateListPayload = Partial<Omit<UpdateListFormValues, "hue">> & {
   appearance?: {

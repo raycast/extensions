@@ -1,9 +1,10 @@
 import { useFetch } from "@raycast/utils";
 import { ApiHeaders, ApiUrls } from "../api/helpers";
-import { ApiListResponse } from "../types/list";
+import { ListObject } from "../types/list";
+import { ApiResponse } from "../types/utils";
 
 export default function useLists() {
-  const { data, error, isLoading, mutate } = useFetch<ApiListResponse>(ApiUrls.lists, {
+  const { data, error, isLoading, mutate } = useFetch<ApiResponse<ListObject>>(ApiUrls.lists, {
     headers: ApiHeaders,
   });
 

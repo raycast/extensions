@@ -1,6 +1,10 @@
 import { useFetch } from "@raycast/utils";
 
-type ApiErrorResponse = {
+export type ApiResponse<T> = {
+  list: T[];
+};
+
+export type ApiErrorResponse = {
   error: {
     name: string;
     type: string;

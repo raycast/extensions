@@ -2,12 +2,13 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiList } from "../api/list";
-import { ApiListResponse, ListObject, UpdateListFormValues, UpdateListPayload } from "../types/list";
+import { ListObject, UpdateListFormValues, UpdateListPayload } from "../types/list";
+import { ApiResponse } from "../types/utils";
 import { ListTypes, ListVisualizations } from "../utils/list";
 
 type Props = {
   list: ListObject;
-  mutateList: MutatePromise<ApiListResponse | undefined>;
+  mutateList: MutatePromise<ApiResponse<ListObject> | undefined>;
 };
 
 export default function UpdateList({ list, mutateList }: Props) {
