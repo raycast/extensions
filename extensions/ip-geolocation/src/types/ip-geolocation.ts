@@ -22,6 +22,10 @@ export interface IPGeolocationReadable {
   GeoCoordinates: string; //(lat,lon)
   Timezone: string;
   AS: string;
-  ISP: string; //ispO
+  ISP: string; //isp
   Organization: string; //org
+}
+
+export enum CacheKey {
+  MY_IP_GEOLOCATION = "My ip geolocation",
 }

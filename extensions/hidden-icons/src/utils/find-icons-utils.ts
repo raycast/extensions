@@ -1,28 +1,7 @@
 import { easyIcon, hardIcon, hellIcon, mediumIcon } from "./icon-utils";
 import { LocalStorage } from "@raycast/api";
-
-const columnCount = 39;
-const rowCount = 9;
-export const allCountDownTime = 30;
-
-export type HistoryScore = {
-  mode: string;
-  score: number;
-};
-
-export const historyScoreInit: HistoryScore[] = [
-  { mode: "Easy", score: 0 },
-  { mode: "Medium", score: 0 },
-  { mode: "Hard", score: 0 },
-  { mode: "Hell", score: 0 },
-];
-
-export const modes = [
-  { title: "Easy", value: "Easy" },
-  { title: "Medium", value: "Medium" },
-  { title: "Hard", value: "Hard" },
-  { title: "Hell", value: "Hell" },
-];
+import { HistoryScore } from "../types/types";
+import { historyScoreInit, ICON_COUNT } from "./constants";
 
 const getTwoRandoms = (length: number) => {
   const randoms: number[] = [];
@@ -85,27 +64,22 @@ const getIcons = (mode: string) => {
   }
 };
 export const getRandomFindOutIcon = (lastRandomRaw: number, mode: string) => {
-  const _findOutIcons: string[][] = [];
+  const _findOutIcons: string[] = [];
   const { contextIcon, targetIcon } = getIcons(mode);
 
-  let randomRaw = Math.floor(Math.random() * rowCount);
+  let randomRaw = Math.floor(Math.random() * ICON_COUNT);
 
   while (randomRaw === lastRandomRaw) {
-    randomRaw = Math.floor(Math.random() * rowCount);
+    randomRaw = Math.floor(Math.random() * ICON_COUNT);
   }
-  const randomColum = Math.floor(Math.random() * columnCount);
 
-  for (let i = 0; i < rowCount; i++) {
-    const arr = [];
-    for (let j = 0; j < columnCount; j++) {
-      arr.push(contextIcon);
-    }
-    _findOutIcons.push(arr);
+  for (let i = 0; i < ICON_COUNT; i++) {
+    _findOutIcons.push(contextIcon);
   }
-  _findOutIcons[randomRaw][randomColum] = targetIcon;
+  _findOutIcons[randomRaw] = targetIcon;
   const findOutIcons: string[] = [];
   for (let i = 0; i < _findOutIcons.length; i++) {
-    findOutIcons.push(_findOutIcons[i].join(""));
+    findOutIcons.push(_findOutIcons[i]);
   }
 
   return { targetIcon: targetIcon, targetIndex: randomRaw, randomFindOutIcons: findOutIcons };

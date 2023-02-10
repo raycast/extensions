@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 
 import { preferences } from "../helpers/preferences";
@@ -27,7 +27,7 @@ export const getSecret = async (secretEngine: string, path: string): Promise<Sec
       }
     }
   } catch (err) {
-    showToast(ToastStyle.Failure, `Could not get secret: ${err.message}`);
+    showToast(Toast.Style.Failure, `Could not get secret: ${err.message}`);
     return Promise.resolve(undefined);
   }
 };

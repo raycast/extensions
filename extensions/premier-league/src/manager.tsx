@@ -1,8 +1,7 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Grid } from "@raycast/api";
 import json2md from "json2md";
 import { useManagers, useSeasons } from "./hooks";
 import { PlayerContent } from "./types";
-import { getFlagEmoji } from "./utils";
 
 function PlayerProfile(props: PlayerContent) {
   return (
@@ -42,21 +41,17 @@ export default function Manager() {
   const managers = useManagers(seasons[0]?.id.toString());
 
   return (
-    <List throttle isLoading={!managers}>
+    <Grid throttle isLoading={!managers}>
       {managers?.map((p) => {
         return (
-          <List.Item
+          <Grid.Item
             key={p.id}
             title={p.name.display}
             subtitle={p.currentTeam?.name}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
+            content={{
+              source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${p.altIds.opta}.png`,
               fallback: "player-missing.png",
             }}
-            accessories={[
-              { text: p.birth.country.country },
-              { icon: getFlagEmoji(p.birth.country.isoCode) },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -69,6 +64,6 @@ export default function Manager() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

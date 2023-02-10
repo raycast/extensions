@@ -5,11 +5,13 @@
   "description": "Read the latest stories of Hacker News.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "GastroGeek",
+    "sxn",
+    "itsnwa"
+  ],
   "categories": [
     "News"
-  ],
-  "contributors": [
-    "sxn"
   ],
   "license": "MIT",
   "commands": [
@@ -21,14 +23,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
     "lodash": "^4.17.21",
     "rss-parser": "3.12.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.180",
-    "@types/node": "~16.10.0",
-    "@types/react": "17.0.41",
     "@typescript-eslint/eslint-plugin": "5.15.0",
     "@typescript-eslint/parser": "5.15.0",
     "eslint": "8.11.0",

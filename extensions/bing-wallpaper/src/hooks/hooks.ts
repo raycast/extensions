@@ -24,6 +24,7 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
               const _bingWallpaperHD = (first_data as BingResponseData).images.concat(
                 (second_data as BingResponseData).images
               );
+
               setBingWallpaperHD(_bingWallpaperHD);
               if (showDownloadedWallpapers) {
                 setDownloadedBingWallpapers(getDownloadedBingWallpapers());

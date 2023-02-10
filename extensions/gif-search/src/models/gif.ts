@@ -38,3 +38,12 @@ export function renderGifMarkdownDetails(gif: IGif, limitHeight?: boolean) {
   const height = limitHeight ? DETAIL_WINDOW_HEIGHT : "";
   return `<img alt="${gif.title}" src="${gif.gif_url}" height="${height}" />`;
 }
+
+export function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}

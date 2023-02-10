@@ -1,9 +1,10 @@
-import { List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest, Project } from "../gitlabapi";
-import { daysInSeconds } from "../utils";
+import { daysInSeconds, showErrorToast } from "../utils";
 import { MRListItem, MRScope, MRState } from "./mr";
 import { MyProjectsDropdown } from "./project";
 
@@ -11,26 +12,23 @@ import { MyProjectsDropdown } from "./project";
 
 function MyMRList(props: {
   mrs: MergeRequest[] | undefined;
-  isLoading?: boolean | undefined;
+  isLoading: boolean;
   title?: string;
   performRefetch: () => void;
   searchText?: string | undefined;
   onSearchTextChange?: (text: string) => void;
   searchBarAccessory?:
-    | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
     | null
     | undefined;
 }): JSX.Element {
   const mrs = props.mrs;
 
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
   const refresh = () => {
     props.performRefetch();
   };
+
+  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
 
   return (
     <List
@@ -39,10 +37,18 @@ function MyMRList(props: {
       searchText={props.searchText}
       onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={props.searchBarAccessory}
+      isShowingDetail={getListDetailsPreference()}
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} showCIStatus={true} />
+          <MRListItem
+            key={mr.id}
+            mr={mr}
+            refreshData={refresh}
+            showCIStatus={true}
+            expandDetails={expandDetails}
+            onToggleDetails={() => setExpandDetails(!expandDetails)}
+          />
         ))}
       </List.Section>
     </List>
@@ -60,7 +66,7 @@ export function MyMergeRequests(props: {
   const [project, setProject] = useState<Project>();
   const { mrs: raw, isLoading, error, performRefetch } = useMyMergeRequests(scope, state, project);
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
+    showErrorToast(error, "Cannot search Merge Requests");
   }
   const mrs: MergeRequest[] | undefined = project ? raw?.filter((m) => m.project_id === project.id) : raw;
   const title =
@@ -84,7 +90,7 @@ export function useMyMergeRequests(
   project: Project | undefined
 ): {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
 } {

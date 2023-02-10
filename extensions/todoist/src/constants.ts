@@ -1,4 +1,4 @@
-import { Color, Icon } from "@raycast/api";
+import { Color } from "@raycast/api";
 
 // Todoist priorities are reversed
 export const priorities = [
@@ -7,3 +7,9 @@ export const priorities = [
   { name: "Priority 3", value: 2, color: Color.Blue, searchKeyword: "p3", icon: "priority.svg" },
   { name: "Priority 4", value: 1, color: Color.SecondaryText, searchKeyword: "p4", icon: "priority-outlined.svg" },
 ];
+
+export enum ViewMode {
+  project = "project",
+  date = "date",
+  search = "search",
+}

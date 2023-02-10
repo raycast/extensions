@@ -9,7 +9,7 @@ import fg from "fast-glob";
 
 import {
   DEFAULT_FILE_PREVIEW_IMAGE_PATH,
-  FILE_ICON_SCRIPT_PATH,
+  DEFAULT_FOLDER_PREVIEW_IMAGE_PATH,
   FILE_SIZE_UNITS,
   IGNORED_GLOBS,
   MAX_TMP_FILE_PREVIEWS_LIMIT,
@@ -122,42 +122,6 @@ const clearLeastAccessedFilePreviewsCache = (previewFiles: Array<string>) => {
   });
 };
 
-const installFileIconScript = () => {
-  fs.writeFileSync(
-    FILE_ICON_SCRIPT_PATH,
-    `#!/usr/bin/env xcrun swift
-
-import Cocoa
-
-public func UIImagePNGRepresentation(_ image: NSImage) -> Data? {
-  var rect = CGRect(origin: .zero, size: CGSize(width: 192, height: 192))
-  guard let cgImage = image.cgImage(forProposedRect: &rect, context: nil, hints: nil)
-    else { return nil }
-  let imageRep = NSBitmapImageRep(cgImage: cgImage)
-  imageRep.size = image.size
-  return imageRep.representation(using: .png, properties: [:])
-}
-
-
-let myWorkspace = NSWorkspace.shared
-let path = CommandLine.arguments[1]
-
-if !FileManager.default.fileExists(atPath: path) {
-    exit(1)
-}
-
-let image = myWorkspace.icon(forFile: path)
-
-if let pngData = UIImagePNGRepresentation(image)?.base64EncodedString() {
-  print(pngData)
-} else {
-  print("")
-}`,
-    "utf8"
-  );
-  fs.chmodSync(FILE_ICON_SCRIPT_PATH, 0o755);
-};
-
 export const initialSetup = () => {
   if (pathExists(TMP_FILE_PREVIEWS_PATH)) {
     const previewFiles = readdirSync(TMP_FILE_PREVIEWS_PATH, "utf8");
@@ -165,37 +129,25 @@ export const initialSetup = () => {
       clearLeastAccessedFilePreviewsCache(previewFiles);
     }
   }
-
-  installFileIconScript();
 };
 
 export const filePreview = async (file: FileInfo | null, controller: AbortController): Promise<string> => {
-  if (!file) {
-    return "";
+  const previewImage = (path: string) => `<img src="file://${path}" width="192" height="192" />`;
+
+  if (!file || !pathExists(file.path)) {
+    return previewImage(DEFAULT_FILE_PREVIEW_IMAGE_PATH);
   }
 
   const previewPath = await filePreviewPath(file, controller);
   const previewExists = previewPath && existsSync(decodeURI(previewPath).replace("file://", ""));
 
   if (previewExists) {
-    return `<img src="${previewPath}" alt="${file.name}" />`;
+    return previewImage(previewPath);
   } else {
-    // Fallback to the file icon
-    let iconPNGData = "";
-    try {
-      const { stdout } = await execAsync(`${escapePath(FILE_ICON_SCRIPT_PATH)} ${escapePath(file.path)}`, {
-        signal: controller.signal,
-        timeout: 2000 /* milliseconds */,
-        killSignal: "SIGKILL",
-      });
-      iconPNGData = stdout.trim();
-    } catch (e) {
-      log("error", e);
-    }
-
-    return iconPNGData !== ""
-      ? `<img src="data:image/png;base64,${iconPNGData}" alt="${file.name}" width="192" height="192" />`
-      : `<img src="file://${DEFAULT_FILE_PREVIEW_IMAGE_PATH}" alt="${file.name}" width="192" height="192" />`;
+    const iconPath = statSync(file.path).isDirectory()
+      ? DEFAULT_FOLDER_PREVIEW_IMAGE_PATH
+      : DEFAULT_FILE_PREVIEW_IMAGE_PATH;
+    return previewImage(iconPath);
   }
 };
 

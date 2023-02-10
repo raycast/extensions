@@ -1,105 +1,130 @@
-import { showToast, Toast, confirmAlert, Icon, open, getPreferenceValues } from "@raycast/api";
-
+import { showToast, Toast, confirmAlert, Icon, open } from "@raycast/api";
 import path from "path";
 import fs from "fs";
-import { NoteFormPreferences } from "./interfaces";
 
-interface FormValue {
-  path: string;
-  name: string;
-  content: string;
-  tags: string[];
-}
+import { NoteFormPreferences, FormValue, Vault } from "./interfaces";
+import { applyTemplates } from "./utils";
+import { directoryCreationErrorToast, fileWriteErrorToast } from "../components/Toasts";
 
 class NoteCreator {
   vaultPath: string;
   noteProps: FormValue;
-  saved = false;
-  openOnCreation: boolean;
+  pref: NoteFormPreferences;
 
-  constructor(noteProps: FormValue, vaultPath: string, openOnCreation: boolean) {
-    this.vaultPath = vaultPath;
+  /**
+   * Creates notes in a vault.
+   *
+   * @param noteProps - Path, name, content and tags from a form
+   * @param vault - The vault to create the note in
+   * @param pref - The preferences for the note form command
+   */
+  constructor(noteProps: FormValue, vault: Vault, pref: NoteFormPreferences) {
+    this.vaultPath = vault.path;
     this.noteProps = noteProps;
-    this.openOnCreation = openOnCreation;
+    this.pref = pref;
   }
 
-  createNote() {
-    if (this.noteProps.name == "") {
-      const pref: NoteFormPreferences = getPreferenceValues();
-      this.noteProps.name = pref.prefNoteName;
-    }
-    const content = this.buildNoteContent();
-    this.saveNote(content);
-    if (this.openOnCreation) {
+  /**
+   * Creates a note in the vault by adding a YAML frontmatter, applyin templates to the content and name and then saving the note. Can open the note in obsidian if the preference is set.
+   *
+   * @returns True if the note was created successfully
+   */
+
+  async createNote() {
+    const fillDefaults = !this.pref.fillFormWithDefaults && this.noteProps.content.length == 0;
+
+    let name = this.noteProps.name == "" ? this.pref.prefNoteName : this.noteProps.name;
+    let content = fillDefaults ? this.pref.prefNoteContent : this.noteProps.content;
+
+    console.log(this.noteProps.content);
+
+    content = this.addYAMLFrontmatter(content);
+    content = await applyTemplates(content);
+    name = await applyTemplates(name);
+
+    const saved = await this.saveNote(content, name);
+
+    if (this.pref.openOnCreate) {
       const target =
-        "obsidian://open?path=" +
-        encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, this.noteProps.name + ".md"));
-      open(target);
+        "obsidian://open?path=" + encodeURIComponent(path.join(this.vaultPath, this.noteProps.path, name + ".md"));
+      if (saved) {
+        setTimeout(() => {
+          open(target);
+        }, 200);
+      }
     }
-    return this.saved;
+    return saved;
   }
 
-  buildNoteContent() {
-    let content = "";
+  /**
+   * Adds YAML frontmatter to the beginning of the note content.
+   *
+   * @param content - The content of the note
+   * @returns The content with YAML frontmatter
+   */
+  addYAMLFrontmatter(content: string) {
     if (this.noteProps.tags.length > 0) {
       content = "---\ntags: [";
       for (let i = 0; i < this.noteProps.tags.length - 1; i++) {
         content += '"' + this.noteProps.tags[i] + '",';
       }
       content += '"' + this.noteProps.tags.pop() + '"]\n---\n';
+      content += this.noteProps.content;
     }
-    content += this.noteProps.content;
+
     return content;
   }
 
-  async saveNote(content: string) {
+  /**
+   * Saves a string to disk with filename name.
+   *
+   * @param content - The content of the note
+   * @param name - The name of the note
+   * @returns - True if the note was saved successfully
+   */
+  async saveNote(content: string, name: string) {
     const notePath = path.join(this.vaultPath, this.noteProps.path);
 
-    if (fs.existsSync(path.join(notePath, this.noteProps.name + ".md"))) {
+    if (fs.existsSync(path.join(notePath, name + ".md"))) {
       const options = {
         title: "Override note",
-        message: 'Are you sure you want to override the note: "' + this.noteProps.name + '"?',
+        message: 'Are you sure you want to override the note: "' + name + '"?',
         icon: Icon.ExclamationMark,
       };
       if (await confirmAlert(options)) {
-        this.writeToFile(notePath, content);
+        this.writeToFile(notePath, name, content);
+        return true;
       }
     } else {
-      this.writeToFile(notePath, content);
+      this.writeToFile(notePath, name, content);
+      return true;
     }
   }
 
-  writeToFile(notePath: string, content: string) {
+  /**
+   * Writes a string to a file with filename name.
+   *
+   * @param notePath - The path to the note
+   * @param name - The name of the note
+   * @param content - The content of the note
+   * @returns - True if the note was saved successfully
+   * @throws - Shows a toast if the file could not be written
+   */
+
+  writeToFile(notePath: string, name: string, content: string) {
     try {
-      try {
-        fs.mkdirSync(notePath, { recursive: true });
-      } catch {
-        showToast({
-          title: "Couldn't create directories for the given path:",
-          message: notePath,
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
-      try {
-        fs.writeFileSync(path.join(notePath, this.noteProps.name + ".md"), content);
-      } catch {
-        showToast({
-          title: "Couldn't write to file:",
-          message: notePath + "/" + this.noteProps.name + ".md",
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
-      showToast({ title: "Note created", style: Toast.Style.Success });
-      this.saved = true;
+      fs.mkdirSync(notePath, { recursive: true });
     } catch {
-      showToast({
-        title: "Something went wrong",
-        message: " Maybe your vault, path or filename is not valid",
-        style: Toast.Style.Failure,
-      });
+      directoryCreationErrorToast(notePath);
+      return;
     }
+    try {
+      fs.writeFileSync(path.join(notePath, name + ".md"), content);
+    } catch {
+      fileWriteErrorToast(notePath, name);
+      return;
+    }
+    showToast({ title: "Note created", style: Toast.Style.Success });
   }
 }
 

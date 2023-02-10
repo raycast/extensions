@@ -27,17 +27,16 @@ async function getItem(key: string): Promise<Value | undefined>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
   const item = await LocalStorage.getItem<string>("favorite-fruit");
   console.log(item);
-};
+}
 ```
 
 #### Parameters
 
-| Name | Type                | Required | Description                                |
-| :--- | :------------------ | :------- | :----------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to retrieve the value of. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.getItem" />
 
 #### Return
 
@@ -58,17 +57,16 @@ async function setItem(key: string, value: Value): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
-  await LocalStorage.setItem("favorite-fruit", "cherry");
-};
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
+  const item = await LocalStorage.getItem<string>("favorite-fruit");
+  console.log(item);
+}
 ```
 
 #### Parameters
 
-| Name  | Type                                      | Required | Description                                               |
-| :---- | :---------------------------------------- | :------- | :-------------------------------------------------------- |
-| key   | <code>string</code>                       | Yes      | The key you want to create or update the value of.        |
-| value | <code>[Value](#localstorage.value)</code> | Yes      | The value you want to create or update for the given key. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.setItem" />
 
 #### Return
 
@@ -89,16 +87,17 @@ async function removeItem(key: string): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
+  await LocalStorage.setItem("favorite-fruit", "apple");
+  console.log(await LocalStorage.getItem<string>("favorite-fruit"));
   await LocalStorage.removeItem("favorite-fruit");
-};
+  console.log(await LocalStorage.getItem<string>("favorite-fruit"));
+}
 ```
 
 #### Parameters
 
-| Name | Type                | Required | Description                              |
-| :--- | :------------------ | :------- | :--------------------------------------- |
-| key  | <code>string</code> | Yes      | The key you want to remove the value of. |
+<FunctionParametersTableFromJSDoc name="LocalStorage.removeItem" />
 
 #### Return
 
@@ -124,10 +123,10 @@ interface Values {
   priority: number;
 }
 
-export default async () => {
+export default async function Command() {
   const items = await LocalStorage.allItems<Values>();
   console.log(`Local storage item count: ${Object.entries(items).length}`);
-};
+}
 ```
 
 #### Return
@@ -149,9 +148,9 @@ async function clear(): Promise<void>;
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await LocalStorage.clear();
-};
+}
 ```
 
 #### Return
@@ -185,7 +184,7 @@ Supported storage value types.
 ```typescript
 import { LocalStorage } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   // String
   await LocalStorage.setItem("favorite-fruit", "cherry");
 
@@ -194,5 +193,5 @@ export default async () => {
 
   // Boolean
   await LocalStorage.setItem("fruit-eaten-today", true);
-};
+}
 ```

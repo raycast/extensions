@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "library-genesis",
+  "title": "Library Genesis",
+  "description": "Search books on Library Genesis and directly download them.",
+  "icon": "command-icon.png",
+  "author": "yz3440",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-books",
+      "title": "Search Books",
+      "subtitle": "Library Genesis",
+      "description": "Search books on Library Genesis.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "title": "Primary action",
+      "description": "Changing the primary action after a search.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open Download Page",
+          "value": "0"
+        },
+        {
+          "title": "Open Book Info",
+          "value": "1"
+        },
+        {
+          "title": "Download Book",
+          "value": "2"
+        }
+      ],
+      "default": "",
+      "required": true
+    },
+    {
+      "name": "copySearchContentFromClipboard",
+      "title": "Search Field from Clipboard",
+      "description": "Copy search content from clipboard",
+      "type": "checkbox",
+      "default": false,
+      "label": "Automatically copy from clipboard",
+      "required": true
+    },
+    {
+      "name": "preferredLibgenMirror",
+      "title": "Preferred Libgen Mirror",
+      "description": "Force query from the specified mirror.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "https://libgen.li",
+      "required": false
+    },
+    {
+      "name": "downloadGateway",
+      "title": "Download Gateway",
+      "description": "Choosing the default download gateway.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Default",
+          "value": "0"
+        },
+        {
+          "title": "Cloudflare",
+          "value": "1"
+        },
+        {
+          "title": "IPFS.io",
+          "value": "2"
+        },
+        {
+          "title": "Infura",
+          "value": "3"
+        },
+        {
+          "title": "Pinata",
+          "value": "4"
+        }
+      ],
+      "default": "0",
+      "required": true
+    },
+    {
+      "name": "downloadPath",
+      "title": "Download Directory",
+      "description": "Set the default download directory.",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "alwaysAskWhereToSave",
+      "description": "Always ask where to save the downloaded file, ignoring the default directory.",
+      "type": "checkbox",
+      "default": false,
+      "label": "Always ask where to save",
+      "required": true
+    },
+    {
+      "name": "searchPriority",
+      "title": "Priotitize Search By",
+      "description": "Prioritizes searching results by the following fields.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "0"
+        },
+        {
+          "title": "Preferred Languages",
+          "value": "1"
+        },
+        {
+          "title": "Preferred File Formats",
+          "value": "2"
+        }
+      ],
+      "default": "0",
+      "required": false
+    },
+    {
+      "name": "preferredLanguages",
+      "title": "Preferred Languages",
+      "description": "A comma separated list of your preferred languages.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "English, Spanish, German, ...",
+      "required": false
+    },
+    {
+      "name": "preferredFormats",
+      "title": "Preferred File Formats",
+      "description": "A comma separated list of your preferred file formats.",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "PDF, EPUB, MOBI, ...",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "axios": "^1.2.1",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.1.0",
+    "libgen": "^2.1.2",
+    "node-fetch": "^3.2.8",
+    "node-html-parser": "^5.3.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,7 +1,4 @@
 <p align="center">
-  <img src="./assets/parrot-icon.png" width="256"/>
-</p>
-<p align="center">
   <strong>raycast-Parrot</strong>
 </p>
 <p align="center">A Raycast translation Extension, Powerful and Easy to use. </p>
@@ -13,6 +10,7 @@
 2. Support Play TTS (Text to Speech)
 3. Support Copy Auto Paste, also support **lowerCamelCase** and **ALL_UPPERCASE** copy mode.
 4. Quick translation to another language
+5. Use third-party dictionary queries. now we only support EuDic(欧路词典)
 
 ## Documents
 

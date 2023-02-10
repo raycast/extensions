@@ -1,8 +1,8 @@
 # Port Manager Extension
 
-The Port manager extension lists open ports and allows to [kill](https://ss64.com/osx/kill.html) the processes which open them. It allows killing either with the default **SIGTERM** signal or **SIGKILL**, which can't be ignored by the process.
+The Port manager extension lists open ports and allows to [kill](https://ss64.com/osx/kill.html) the processes which open them. It allows killing either with the default `SIGTERM` signal or `SIGKILL``, which can't be ignored by the process.
 
-It also offers the ability to copy information about the process (PID, Name, Parent PID, User name, User UID) or a `kill` command to paste in a terminal.
+It also offers the ability to copy information about the process (PID, name, path of the executable, parent PID, path of the parent executable, user name, user UID) or a `kill` command to paste in a terminal.
 
 ## Use Sudo
 

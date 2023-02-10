@@ -1,30 +1,8 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getSquad } from "../api";
 import { Squad, Team } from "../types";
 import Player from "./player";
-
-const getFlagEmoji = (isoCode?: string) => {
-  if (!isoCode) return "🏴";
-
-  if (isoCode === "GB-ENG") {
-    return "🏴󠁧󠁢󠁥󠁮󠁧󠁿";
-  }
-  if (isoCode === "GB-WLS") {
-    return "🏴󠁧󠁢󠁷󠁬󠁳󠁿";
-  }
-  if (isoCode === "GB-SCT") {
-    return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
-  }
-  if (isoCode === "GB-NIR") {
-    // The only official flag in Northern Ireland is the Union Flag of the United Kingdom.
-    return "🇬🇧";
-  }
-
-  return isoCode
-    .toUpperCase()
-    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
-};
 
 export default function ClubSquad(props: Team) {
   const [members, setMembers] = useState<Squad[]>([]);
@@ -40,26 +18,18 @@ export default function ClubSquad(props: Team) {
   }, [props.slug]);
 
   return (
-    <List
+    <Grid
       throttle
       navigationTitle={`Squad | ${props.nickname} | Club`}
       isLoading={loading}
     >
       {members.map((member) => {
         return (
-          <List.Item
+          <Grid.Item
             key={member.id}
             title={member.person.name}
             subtitle={member.position.name}
-            icon={member.photos["001"]["64x70"]}
-            accessories={
-              member.person.country
-                ? [
-                    { text: member.person.country.id },
-                    { icon: getFlagEmoji(member.person.country.id) },
-                  ]
-                : undefined
-            }
+            content={member.photos["001"]["512x556"] || ""}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -72,6 +42,6 @@ export default function ClubSquad(props: Team) {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

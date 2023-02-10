@@ -6,16 +6,6 @@ description: This guide sets you up with Raycast for Teams.
 
 Raycast for Teams allows you to build, share and discover extensions in a private store. The store is only accessible to members of your organization.
 
-{% hint style="info" %}
-Raycast for Teams is currently in beta. It's for free during the beta period and you will be notified as soon as we announce pricing for the team features.
-{% endhint %}
-
-## Activate Raycast for Teams
-
-While Raycast for Teams is in beta, you need to activate early access to it. For this, open Raycast, insert `0xC0C0A` in the root search and press `↵`.
-
-![Activate Raycast for Teams](../.gitbook/assets/teams-activate.png)
-
 ## Create Your Organization
 
 To get started, create your organization. Specify the name of the organization, a handle (used in links, e.g. `https://raycast.com/your_org/some_extension`) and optionally upload an avatar.

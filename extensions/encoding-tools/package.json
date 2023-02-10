@@ -46,13 +46,21 @@
       "title": "Decode Base64",
       "description": "Decode Base64 hash from clipboard contents.",
       "mode": "no-view"
+    },
+    {
+      "name": "bcrypt",
+      "title": "Encode Bcrypt",
+      "description": "Calculate Bcrypt hash from clipboard contents.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
+    "bcryptjs": "^2.4.3",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
     "@types/node": "~16.10.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

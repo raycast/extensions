@@ -221,6 +221,7 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
       key={file.displayPath}
       icon={{ fileIcon: file.path }}
       title={file.name}
+      quickLook={{ name: file.name, path: file.path }}
       accessories={
         file.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
       }
@@ -231,6 +232,7 @@ const ListItem = ({ file, idPrefix }: ListItemProps) => {
             <Action.Open title="Open File" icon={Icon.Document} target={file.path} />
             <Action.ShowInFinder path={file.path} />
             <Action.OpenWith path={file.path} />
+            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
             <Action.CopyToClipboard
               title="Copy File Path"
               content={escapePath(file.displayPath)}

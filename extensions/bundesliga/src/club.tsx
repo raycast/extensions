@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Grid } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
 import ClubPersons from "./components/clubpersons";
@@ -37,7 +37,16 @@ function ClubDetails(props: { team: Club; competition: string }) {
                 text={team.colors.club.secondary.hex}
               />
             </Detail.Metadata.TagList>
-            <Detail.Metadata.Label title="Stadium" text={team.stadium.name} />
+            <Detail.Metadata.Label
+              title="Stadium"
+              text={team.stadium.name}
+              icon={{
+                source: {
+                  dark: team.stadium.stadiumIconUrlWhite,
+                  light: team.stadium.stadiumIconUrlBlack,
+                },
+              }}
+            />
             <Detail.Metadata.Label
               title="Capacity"
               text={team.stadium.capacity}
@@ -100,44 +109,31 @@ export default function Club() {
   const clubs = useClubs();
 
   return (
-    <List
+    <Grid
       throttle
       isLoading={!clubs}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip="Filter by Competition"
           value={competition}
           onChange={setCompetition}
         >
-          <List.Dropdown.Item title="Bundesliga" value="bundesliga" />
-          <List.Dropdown.Item title="2. Bundesliga" value="2bundesliga" />
-        </List.Dropdown>
+          <Grid.Dropdown.Item title="Bundesliga" value="bundesliga" />
+          <Grid.Dropdown.Item title="2. Bundesliga" value="2bundesliga" />
+        </Grid.Dropdown>
       }
     >
       {((clubs && clubs[competition]) || []).map((team) => {
         return (
-          <List.Item
+          <Grid.Item
             key={team.id}
             title={team.name.full}
-            subtitle={team.threeLetterCode}
-            icon={{
+            subtitle={team.stadium.name}
+            content={{
               source: `https://www.bundesliga.com/assets/clublogo/${team.id}.svg`,
               // source: team.logos[0].uri,
               fallback: "default_clublogo.svg",
             }}
-            accessories={[
-              {
-                text: team.stadium.name,
-              },
-              {
-                icon: {
-                  source: {
-                    dark: team.stadium.stadiumIconUrlWhite,
-                    light: team.stadium.stadiumIconUrlBlack,
-                  },
-                },
-              },
-            ]}
             actions={
               <ActionPanel>
                 <Action.Push
@@ -150,6 +146,6 @@ export default function Club() {
           />
         );
       })}
-    </List>
+    </Grid>
   );
 }

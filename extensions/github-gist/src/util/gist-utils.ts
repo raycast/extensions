@@ -20,7 +20,7 @@ export interface Gist {
 
 export enum GITHUB_GISTS {
   MY_GISTS = "My Gists",
-  STARRED = "My Starred",
+  STARRED = "Starred Gists",
   ALL_GISTS = "All Public Gists",
 }
 export const githubGists = Object.values(GITHUB_GISTS);

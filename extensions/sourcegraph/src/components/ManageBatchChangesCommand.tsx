@@ -1,32 +1,24 @@
 import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, showToast, Form } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { useState, Fragment, useMemo } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
-import { useMutation, useQuery } from "@apollo/client";
 
 import { Sourcegraph, instanceName, LinkBuilder } from "../sourcegraph";
 import {
-  BatchChangeFields as BatchChange,
-  ChangesetFields as Changeset,
-  GetChangesets,
-  GetChangesetsVariables,
-  GetBatchChanges,
-  MergeChangeset,
-  MergeChangesetVariables,
-  ReenqueueChangeset,
-  ReenqueueChangesetVariables,
-  PublishChangesetVariables,
-  PublishChangeset,
-} from "../sourcegraph/gql/schema";
+  BatchChangeFragment as BatchChange,
+  ChangesetFragment as Changeset,
+  useGetBatchChangesQuery,
+  useGetChangesetsQuery,
+  useMergeChangesetMutation,
+  usePublishChangesetMutation,
+  useReenqueueChangesetMutation,
+} from "../sourcegraph/gql/operations";
+
 import { copyShortcut, refreshShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
-import ExpandableErrorToast from "./ExpandableErrorToast";
+import ExpandableToast from "./ExpandableToast";
 import { propsToKeywords } from "./keywords";
-import { GET_BATCH_CHANGES, GET_CHANGESETS } from "../sourcegraph/gql/queries";
-import {
-  MERGE_CHANGESET,
-  PUBLISH_CHANGEST as PUBLISH_CHANGESET,
-  REENQUEUE_CHANGEST as REENQUEUE_CHANGESET,
-} from "../sourcegraph/gql/mutations";
+
 import { sentenceCase } from "../text";
 
 const link = new LinkBuilder("batch-changes");
@@ -44,9 +36,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
    */
   const [searchText, setSearchText] = useState("");
 
-  const { loading, error, data, refetch } = useQuery<GetBatchChanges>(GET_BATCH_CHANGES, {
-    client: src.client,
-  });
+  const { loading, error, data, refetch } = useGetBatchChangesQuery({ client: src.client });
   const refresh = async () => {
     await refetch();
   };
@@ -54,7 +44,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
   }
 
   const showSuggestions = !loading && searchText === "";
@@ -117,22 +107,25 @@ function BatchChangeItem({
   }
   const author = batchChange.creator?.displayName || batchChange.creator?.username;
 
-  const icon: Image.ImageLike = { source: Icon.Circle };
+  // Indicated published changesets with the icon
+  const { changesetsStats } = batchChange;
+  const publishedChangesets = changesetsStats.total - changesetsStats.unpublished;
+  const progress = publishedChangesets ? publishedChangesets / changesetsStats.total : 0;
+  let icon: Image.ImageLike;
   switch (batchChange.state) {
     case "OPEN":
-      icon.source = Icon.Circle;
-      icon.tintColor = Color.Green;
+      // Provide hex because this API does not accept Color.
+      icon = getProgressIcon(progress, "#37b24d");
       break;
     case "CLOSED":
-      icon.source = Icon.Checkmark;
-      icon.tintColor = Color.Red;
+      // Provide hex because this API does not accept Color.
+      icon = getProgressIcon(progress, "#c92a2a");
       break;
-    case "DRAFT":
-      icon.source = Icon.Document;
-      break;
+    default:
+      icon = { source: Icon.Document };
   }
 
-  const { changesetsStats } = batchChange;
+  // Add summary stats
   const accessories: List.Item.Accessory[] = [];
   if (changesetsStats.open) {
     accessories.push({
@@ -150,7 +143,7 @@ function BatchChangeItem({
   }
   if (changesetsStats.draft || changesetsStats.unpublished) {
     accessories.push({
-      icon: { tintColor: Color.SecondaryText, source: Icon.Document },
+      icon: { tintColor: Color.SecondaryText, source: Icon.CircleEllipsis },
       text: `${changesetsStats.draft + changesetsStats.unpublished}`,
       tooltip: "Unpublished changesets",
     });
@@ -169,7 +162,7 @@ function BatchChangeItem({
           <Action.Push
             key={nanoid()}
             title="View Batch Change"
-            icon={{ source: Icon.MagnifyingGlass }}
+            icon={{ source: Icon.Maximize }}
             target={<BatchChangeView batchChange={batchChange} src={src} />}
           />
           <Action.OpenInBrowser key={nanoid()} url={url} shortcut={secondaryActionShortcut} />
@@ -200,8 +193,8 @@ function BatchChangeItem({
 }
 
 function BatchChangeView({ batchChange, src }: { batchChange: BatchChange; src: Sourcegraph }) {
-  const { loading, error, data, refetch } = useQuery<GetChangesets, GetChangesetsVariables>(GET_CHANGESETS, {
-    client: src.client,
+  const { loading, error, data, refetch } = useGetChangesetsQuery({
+    ...src,
     variables: {
       namespace: batchChange.namespace.id,
       name: batchChange.name,
@@ -214,7 +207,7 @@ function BatchChangeView({ batchChange, src }: { batchChange: BatchChange; src: 
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Get changesets failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get changesets failed", error.message).show();
   }
 
   const published = changesets.filter((c) => c.state !== "UNPUBLISHED");
@@ -286,23 +279,12 @@ function ChangesetItem({
     toast.hide();
   }
 
-  const [mergeChangeset, { error: mergeError }] = useMutation<MergeChangeset, MergeChangesetVariables>(
-    MERGE_CHANGESET,
-    {
-      client: src.client,
-    }
-  );
-  const [reenqueueChangeset, { error: reenqueueError }] = useMutation<ReenqueueChangeset, ReenqueueChangesetVariables>(
-    REENQUEUE_CHANGESET,
-    { client: src.client }
-  );
-  const [publishChangeset, { error: publishError }] = useMutation<PublishChangeset, PublishChangesetVariables>(
-    PUBLISH_CHANGESET,
-    { client: src.client }
-  );
+  const [mergeChangeset, { error: mergeError }] = useMergeChangesetMutation(src);
+  const [reenqueueChangeset, { error: reenqueueError }] = useReenqueueChangesetMutation(src);
+  const [publishChangeset, { error: publishError }] = usePublishChangesetMutation(src);
   const error = mergeError || publishError || reenqueueError;
   if (error) {
-    ExpandableErrorToast(push, "Unexpected error", "Changeset operation failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Changeset operation failed", error.message).show();
   }
 
   const icon: Image.ImageLike = { source: Icon.Circle };
@@ -312,7 +294,7 @@ function ChangesetItem({
   switch (changeset.state) {
     case "OPEN":
       icon.tintColor = Color.Green;
-      icon.source = Icon.Circle;
+      icon.source = Icon.Dot;
 
       if (changeset.__typename !== "ExternalChangeset") {
         break;
@@ -327,7 +309,7 @@ function ChangesetItem({
           icon.source = Icon.Checkmark;
           break;
         case "CHANGES_REQUESTED":
-          icon.source = Icon.XmarkCircle;
+          icon.source = Icon.XMarkCircle;
           break;
         default:
           icon.source = Icon.Circle;
@@ -380,7 +362,7 @@ function ChangesetItem({
       break;
 
     case "CLOSED":
-      icon.source = Icon.XmarkCircle;
+      icon.source = Icon.XMarkCircle;
       icon.tintColor = Color.Red;
       break;
 
@@ -438,7 +420,7 @@ function ChangesetItem({
 
   let title = "";
   let props = {};
-  let subtitleTooltip: string | null = null;
+  let subtitleTooltip: string | null | undefined = null;
   if (changeset.__typename === "ExternalChangeset") {
     title = `${changeset.repository.name}`;
     subtitleTooltip = changeset.title;

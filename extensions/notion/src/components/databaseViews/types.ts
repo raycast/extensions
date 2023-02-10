@@ -8,4 +8,5 @@ export type DatabaseViewProps = {
   onPageCreated: (page: Page) => void;
   onPageUpdated: (page: Page) => void;
   saveDatabaseView: (newDatabaseView: DatabaseView) => void;
+  sort?: "last_edited_time" | "created_time";
 };

@@ -1,69 +1,49 @@
 import React, { useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  getPreferenceValues,
-  Icon,
-  openExtensionPreferences,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { handleLiveTemplate, runShortcut, Taction } from "./util/shortcut";
-import { fetchItemInput } from "./util/input";
-import { TactionActions, tactionForms } from "./create-shortcut";
-import { Preference } from "./util/utils";
+import { ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import { Taction } from "./util/shortcut";
+import { tactionForms } from "./create-shortcut";
+import { shortcutTips } from "./util/constants";
+import { ActionRunShortcut } from "./components/action-run-shortcut";
+import { ActionOnTactions } from "./components/action-on-tactions";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { Preferences } from "./types/preferences";
 
 export default function CreateShortcut() {
   const [tactions, setTactions] = useState<Taction[]>([]);
-  const { closeMainWindow } = getPreferenceValues<Preference>();
+  const { primaryAction, closeMainWindow } = getPreferenceValues<Preferences>();
 
   return (
     <Form
-      actions={<RunShortcutActions tactions={tactions} setTactions={setTactions} closeMainWindow={closeMainWindow} />}
+      actions={
+        <RunShortcutActions
+          primaryAction={primaryAction}
+          tactions={tactions}
+          setTactions={setTactions}
+          closeMainWindow={closeMainWindow}
+        />
+      }
     >
       {tactionForms(tactions, setTactions)}
-      <Form.Description text={"  ⌘D       ⌘E       ⌘N        ⌘R            ⌘T              ⌘L"} />
-      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
+      <Form.Description text={shortcutTips.key} />
+      <Form.Description text={shortcutTips.action} />
     </Form>
   );
 }
 
 function RunShortcutActions(props: {
+  primaryAction: string;
   tactions: Taction[];
   setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
   closeMainWindow: boolean;
 }) {
-  const { tactions, setTactions, closeMainWindow } = props;
+  const { primaryAction, tactions, setTactions, closeMainWindow } = props;
+  console.debug(primaryAction);
   return (
     <ActionPanel>
-      <Action
-        title={"Run Shortcut Now"}
-        icon={Icon.TwoArrowsClockwise}
-        onAction={async () => {
-          const _inputItem = await fetchItemInput();
-          const _runShortcut = runShortcut(_inputItem.content, handleLiveTemplate(tactions));
-          await Clipboard.paste(_runShortcut);
-          if (closeMainWindow) {
-            await showHUD("Pasted result to active app");
-          } else {
-            await showToast(Toast.Style.Success, "Pasted result to active app!");
-          }
-        }}
-      />
+      <ActionRunShortcut primaryAction={primaryAction} closeMainWindow={closeMainWindow} tactions={tactions} />
 
-      <TactionActions tactions={tactions} setTactions={setTactions} />
-
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Gear}
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={openExtensionPreferences}
-        />
-      </ActionPanel.Section>
+      <ActionOnTactions tactions={tactions} setTactions={setTactions} />
+      <ActionOpenPreferences />
     </ActionPanel>
   );
 }

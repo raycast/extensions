@@ -1,12 +1,13 @@
-import { ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
-import { getErrorMessage, projectIcon } from "../utils";
+import { getErrorMessage, projectIcon, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
   CopyProjectIDToClipboardAction,
+  CreateNewProjectIssuePushAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
   OpenProjectLabelsInBrowserAction,
@@ -18,15 +19,24 @@ import {
   ProjectDefaultActions,
   ShowProjectLabels,
 } from "./project_actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
+  const accessories = [];
+  if (project.archived) {
+    accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
+  }
+  accessories.push({
+    text: project.star_count.toString(),
+    icon: { source: Icon.Star, tintColor: Color.Yellow },
+    tooltip: `Number of stars: ${project.star_count}`,
+  });
   return (
     <List.Item
       id={project.id.toString()}
       title={project.name_with_namespace}
-      subtitle={"Stars " + project.star_count}
+      accessories={accessories}
       icon={projectIcon(project)}
       actions={
         <ActionPanel>
@@ -45,6 +55,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
+            <CreateNewProjectIssuePushAction project={project} />
             <OpenProjectLabelsInBrowserAction project={project} />
             <OpenProjectSecurityComplianceInBrowserAction project={project} />
             <OpenProjectSettingsInBrowserAction project={project} />
@@ -53,9 +64,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
             <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Cache">
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -67,11 +76,7 @@ export function ProjectSearchList(): JSX.Element {
   const { projects, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Project", error);
-  }
-
-  if (!projects) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Project");
   }
 
   return (
@@ -95,7 +100,7 @@ export function useSearch(query: string | undefined): {
 } {
   const [projects, setProjects] = useState<Project[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking

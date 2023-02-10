@@ -22,7 +22,7 @@ export default function VaultMetadata({ vault, no }: Props) {
       <Detail.Metadata.Label title="Vault name" text={`${vault.name}`} />
       <Detail.Metadata.Label title="Next ratio" text={`${vault.nextCollateralRatio?.toFixed(1)} %`} />
       <Detail.Metadata.Label title="Current ratio" text={`${vault.collateralRatio?.toFixed(1)} %`} />
-      <Detail.Metadata.Label title="Collateral value" text={`${vault.collateralRatio?.toFixed(2)} $`} />
+      <Detail.Metadata.Label title="Collateral value" text={`${vault.collateralValue?.toFixed(2)} $`} />
       <Detail.Metadata.Label title="Loan value" text={`${vault.loanValue?.toFixed(2)} $`} />
     </>
   );

@@ -1,11 +1,16 @@
-import { ActionPanel, Icon, Action, Form, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
+import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
 import { useOneTimePasswordHistoryWarning, usePasswordGenerator } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise } from "./utils";
-import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
-import { debounce } from "throttle-debounce";
+import {
+  PasswordGeneratorOptions as PassGenOptions,
+  PasswordOptionField,
+  PasswordOptionsToFieldEntries,
+  PasswordType,
+} from "./types";
 import { TroubleshootingGuide } from "./components";
+import { useState } from "react";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -25,25 +30,13 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
 
   if (!options) return <Detail isLoading />;
 
-  const showDebouncedToast = debounce(1000, showToast);
+  const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
 
-  const handlePasswordTypeChange = (type: string) => {
-    setOption("passphrase", type === "passphrase");
-  };
-
-  const handleFieldChange =
-    <O extends keyof PasswordGeneratorOptions>(field: O, errorMessage?: string) =>
-    async (value: PasswordGeneratorOptions[O]) => {
-      if (isValidFieldValue(field, value)) {
-        showDebouncedToast.cancel();
-        setOption(field, value);
-        return;
-      }
-
-      if (errorMessage) {
-        showDebouncedToast(Toast.Style.Failure, errorMessage);
-      }
+  const handleFieldChange = <O extends keyof PassGenOptions>(field: O) => {
+    return (value: PassGenOptions[O]) => {
+      setOption(field, value);
     };
+  };
 
   const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";
 
@@ -83,25 +76,20 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
       <Form.Description title="🔑  Password" text={password ?? "Generating..."} />
       <FormSpace />
       <Form.Separator />
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        value={passwordType}
-        onChange={handlePasswordTypeChange}
-        defaultValue="password"
-      >
+      <Form.Dropdown id="type" title="Type" value={passwordType} onChange={handlePasswordTypeChange} autoFocus>
         {Object.keys(PASSWORD_OPTIONS_MAP).map((key) => (
           <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
         ))}
       </Form.Dropdown>
       {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
-        ([option, optionField]: PasswordOptionsToFieldEntries) => (
+        ([optionType, optionField]: PasswordOptionsToFieldEntries) => (
           <OptionField
-            key={option}
-            option={option}
+            key={optionType}
+            option={optionType}
             field={optionField}
-            currentOptions={options}
-            handleFieldChange={handleFieldChange(option, optionField.errorMessage)}
+            defaultValue={options[optionType]}
+            errorMessage={optionField.errorMessage}
+            onChange={handleFieldChange(optionType)}
           />
         )
       )}
@@ -109,28 +97,26 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   );
 }
 
-async function clearStorage() {
-  for (const key of Object.values(LOCAL_STORAGE_KEY)) {
-    await LocalStorage.removeItem(key);
-  }
-}
-
-function isValidFieldValue<O extends keyof PasswordGeneratorOptions>(field: O, value: PasswordGeneratorOptions[O]) {
-  if (field === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
-  if (field === "separator") return (value as string).length === 1;
-  if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
-  return true;
-}
-
 type OptionFieldProps = {
   field: PasswordOptionField;
-  option: keyof PasswordGeneratorOptions;
-  currentOptions: PasswordGeneratorOptions | undefined;
-  handleFieldChange: (value: PasswordGeneratorOptions[keyof PasswordGeneratorOptions]) => Promise<void>;
+  option: keyof PassGenOptions;
+  defaultValue: PassGenOptions[keyof PassGenOptions];
+  onChange: (value: PassGenOptions[keyof PassGenOptions]) => void;
+  errorMessage?: string;
 };
 
-function OptionField({ option, currentOptions, handleFieldChange, field }: OptionFieldProps) {
+function OptionField({ option, defaultValue = "", onChange: handleChange, errorMessage, field }: OptionFieldProps) {
   const { hint = "", label, type } = field;
+  const [error, setError] = useState<string>();
+
+  const handleTextFieldChange = (value: string) => {
+    if (isValidFieldValue(option, value)) {
+      handleChange(value);
+      setError(undefined);
+    } else {
+      setError(errorMessage);
+    }
+  };
 
   if (type === "boolean") {
     return (
@@ -139,8 +125,8 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
         id={option}
         title={label}
         label={hint}
-        value={Boolean(currentOptions?.[option])}
-        onChange={handleFieldChange}
+        defaultValue={Boolean(defaultValue)}
+        onChange={handleChange}
       />
     );
   }
@@ -151,10 +137,24 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
       id={option}
       title={label}
       placeholder={hint}
-      value={String(currentOptions?.[option] ?? "")}
-      onChange={handleFieldChange}
+      defaultValue={String(defaultValue)}
+      onChange={handleTextFieldChange}
+      error={error}
     />
   );
+}
+
+async function clearStorage() {
+  for (const key of Object.values(LOCAL_STORAGE_KEY)) {
+    await LocalStorage.removeItem(key);
+  }
+}
+
+function isValidFieldValue<O extends keyof PassGenOptions>(field: O, value: PassGenOptions[O]) {
+  if (field === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
+  if (field === "separator") return (value as string).length === 1;
+  if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
+  return true;
 }
 
 export default GeneratePassword;

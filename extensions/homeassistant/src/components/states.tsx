@@ -4,21 +4,15 @@ import { useState, useEffect } from "react";
 import { range } from "lodash-es";
 import { ha, shouldDisplayEntityID } from "../common";
 import { useHAStates } from "../hooks";
-import {
-  CopyEntityIDAction,
-  CopyStateValueAction,
-  OpenEntityHistoryAction,
-  OpenEntityLogbookAction,
-  ShowAttributesAction,
-} from "./entity";
+import { EntityStandardActionSections } from "./entity";
 import {
   SelectVolumeAction,
   SelectSourceAction,
   getMediaPlayerTitleAndArtist,
-  CopyTrackToClipboard,
   MediaPlayerTurnOnAction,
   MediaPlayerTurnOffAction,
 } from "./mediaplayer";
+import { FanSpeedControlAction, FanSpeedUpAction, FanSpeedDownAction } from "./fan";
 import {
   BrightnessControlAction,
   BrightnessDownAction,
@@ -30,7 +24,13 @@ import {
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
-import { AutomationTriggerAction, AutomationTurnOffAction, AutomationTurnOnAction } from "./automation";
+import {
+  AutomationDebugInBrowserAction,
+  AutomationEditInBrowserAction,
+  AutomationTriggerAction,
+  AutomationTurnOffAction,
+  AutomationTurnOnAction,
+} from "./automation";
 import {
   VacuumLocateAction,
   VacuumPauseAction,
@@ -40,11 +40,17 @@ import {
   VacuumTurnOffAction,
   VacuumTurnOnAction,
 } from "./vacuum";
-import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
-import { ScriptRunAction } from "./scripts";
+import {
+  CameraOpenStreamInBrowserAction,
+  CameraOpenStreamInIINAAction,
+  CameraOpenStreamInVLCAction,
+  CameraShowImage,
+  CameraTurnOffAction,
+  CameraTurnOnAction,
+} from "./cameras";
+import { ScriptDebugInBrowserAction, ScriptEditInBrowserAction, ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
-import { SceneActivateAction } from "./scenes";
-import { ensureCleanAccessories } from "../utils";
+import { SceneActivateAction, SceneEditInBrowserAction } from "./scenes";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
 import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
@@ -53,10 +59,14 @@ import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
 import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
-import { ShowWeatherAction, weatherConditionToIcon, weatherStatusToIcon } from "./weather";
+import { ShowWeatherAction, weatherConditionToIcon } from "./weather";
+import { ZoneShowDetailAction } from "./zones";
+import { PersonCopyIDAction, PersonCopyUserIDAction, PersonOpenInGoogleMapsAction } from "./persons";
+import { getStateTooltip } from "../utils";
 
-const PrimaryIconColor = Color.Blue;
+export const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
+const Unavailable = "unavailable";
 
 const lightColor: Record<string, Color.ColorLike> = {
   on: Color.Yellow,
@@ -130,6 +140,17 @@ function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
       const color =
         state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "window") {
+      const source = state.state === "on" ? "cover-open.png" : "cover-close.png"; // window icons are the same as cover icons in HA
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
+      return { source: source, tintColor: color };
+    } else if (dc === "power_factor") {
+      const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
+      return { source: "angle-acute.png", tintColor: color };
+    } else if (dc === "energy") {
+      const color = state.state === Unavailable ? UnavailableColor : PrimaryIconColor;
+      return { source: "flash.png", tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -162,7 +183,53 @@ function getIcon(state: State): Image.ImageLike | undefined {
     const source = getLightIconSource(state);
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
+    const ep = state.attributes.entity_picture;
+    if (ep && ep.startsWith("/")) {
+      return { source: ha.urlJoin(ep), mask: Image.Mask.Circle };
+    }
     return { source: "person.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("device_tracker")) {
+    let source = "entity.png";
+    let color: Color.ColorLike = PrimaryIconColor;
+    switch (state.attributes.source_type) {
+      case "gps":
+        {
+          source = "person.png";
+        }
+        break;
+      case "router":
+        {
+          if (state.state === "home") {
+            source = "lan-connect.svg";
+          } else {
+            source = "lan-disconnect.svg";
+          }
+        }
+        break;
+      default:
+        {
+          source = "lan-disconnect.svg";
+        }
+        break;
+    }
+    switch (state.state) {
+      case "home":
+        {
+          color = Color.Yellow;
+        }
+        break;
+      case "not_home":
+        {
+          color = PrimaryIconColor;
+        }
+        break;
+      default:
+        {
+          color = UnavailableColor;
+        }
+        break;
+    }
+    return { source: source, tintColor: color };
   } else if (e.startsWith("update")) {
     const ep = (state.attributes.entity_picture as string) || undefined;
     if (ep) {
@@ -227,6 +294,25 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("weather")) {
     return { source: weatherConditionToIcon(state.state) };
+  } else if (e.startsWith("fan")) {
+    let source = "fan.png";
+    let tintColor: Color.ColorLike = PrimaryIconColor;
+
+    switch (state.state.toLocaleLowerCase()) {
+      case "on":
+        tintColor = Color.Yellow;
+        break;
+      case "off":
+        source = "fan-off.png";
+        break;
+      case "unavailable":
+        tintColor = UnavailableColor;
+        break;
+    }
+
+    return { source: source, tintColor: tintColor };
+  } else if (e.startsWith("zone")) {
+    return { source: "home.svg", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -287,6 +373,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
           return `${Math.round(percent)}%`;
         }
       }
+    } else if (state.entity_id.startsWith("fan")) {
+      // Speed as a percentage
+      const p = state.attributes.percentage || undefined;
+      if (!isNaN(p)) {
+        return `${p}%`;
+      }
     } else if (state.entity_id.startsWith("sensor")) {
       const unit = (state.attributes.unit_of_measurement as string) || undefined;
       const sl = state.state?.toLocaleLowerCase();
@@ -345,6 +437,15 @@ export function StateListItem(props: { state: State }): JSX.Element {
             }
             case "off": {
               return "Closed";
+            }
+          }
+        } else if (dc === "window") {
+          switch (state.state) {
+            case "on": {
+              return "open";
+            }
+            case "off": {
+              return "closed";
             }
           }
         }
@@ -407,11 +508,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
       subtitle={subtitle(state)}
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
-      accessories={ensureCleanAccessories([
+      accessories={[
         {
           text: extraTitle(state) + stateValue(state),
+          tooltip: getStateTooltip(state),
         },
-      ])}
+      ]}
     />
   );
 }
@@ -447,20 +549,41 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopCover(props.state.entity_id)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attribtues">
-            <ShowAttributesAction state={state} />
+          <EntityStandardActionSections state={state} />
+        </ActionPanel>
+      );
+    }
+    case "fan": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <Action
+              title="Toggle"
+              onAction={async () => await ha.toggleFan(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <Action
+              title="Turn On"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.turnOnFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Green }}
+            />
+            <Action
+              title="Turn Off"
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => await ha.turnOffFan(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Red }}
+            />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
+          <ActionPanel.Section title="Speed">
+            <FanSpeedControlAction state={state} />
+            <FanSpeedUpAction state={state} />
+            <FanSpeedDownAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -497,17 +620,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <ColorTempControlDownAction state={state} />
             <ColorRgbControlAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -535,7 +648,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopMedia(entityID)}
-              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
             />
             <Action
               title="Next"
@@ -555,20 +668,20 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
               onAction={async () => await ha.volumeUpMedia(entityID)}
-              icon={{ source: Icon.SpeakerArrowUp, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerUp, tintColor: Color.PrimaryText }}
             />
             <Action
               title="Volume Down"
               shortcut={{ modifiers: ["cmd"], key: "-" }}
               onAction={async () => await ha.volumeDownMedia(entityID)}
-              icon={{ source: Icon.SpeakerArrowDown, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerDown, tintColor: Color.PrimaryText }}
             />
             <SelectVolumeAction state={state} />
             <Action
               title="Mute"
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={async () => await ha.muteMedia(entityID)}
-              icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
+              icon={{ source: Icon.SpeakerOff, tintColor: Color.PrimaryText }}
             />
             <SelectSourceAction state={state} />
           </ActionPanel.Section>
@@ -576,18 +689,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <MediaPlayerTurnOnAction state={state} />
             <MediaPlayerTurnOffAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-            <CopyTrackToClipboard state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -695,16 +797,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               />
             )}
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -715,18 +808,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <AutomationTurnOnAction state={state} />
             <AutomationTurnOffAction state={state} />
             <AutomationTriggerAction state={state} />
+            <AutomationEditInBrowserAction state={state} />
+            <AutomationDebugInBrowserAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -742,17 +827,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <VacuumTurnOffAction state={state} />
             <VacuumReturnToBaseAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -762,21 +837,16 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Image">
             <CameraShowImage state={state} />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Video Stream">
+            <CameraOpenStreamInBrowserAction state={state} />
+            <CameraOpenStreamInVLCAction state={state} />
+            <CameraOpenStreamInIINAAction state={state} />
+          </ActionPanel.Section>
           <ActionPanel.Section title="Controls">
             <CameraTurnOnAction state={state} />
             <CameraTurnOffAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -785,18 +855,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <ScriptRunAction state={state} />
+            <ScriptEditInBrowserAction state={state} />
+            <ScriptDebugInBrowserAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -806,17 +868,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <ButtonPressAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -825,18 +877,9 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <SceneActivateAction state={state} />
+            <SceneEditInBrowserAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -862,17 +905,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -886,17 +919,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <InputBooleanOnAction state={state} />
             <InputBooleanOffAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -907,17 +930,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <InputNumberIncrementAction state={state} />
             <InputNumberDecrementAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -929,17 +942,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <TimerPauseAction state={state} />
             <TimerCancelAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -949,17 +952,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputSelectOptionSelectAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -969,17 +962,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputButtonPressAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -989,17 +972,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputTextSetValueAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -1009,17 +982,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputDateTimeSetValueAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -1034,17 +997,31 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <UpdateInstallAction state={state} />
             <UpdateSkipVersionAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
+          <EntityStandardActionSections state={state} />
+        </ActionPanel>
+      );
+    }
+    case "zone": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ZoneShowDetailAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
+          <EntityStandardActionSections state={state} />
+        </ActionPanel>
+      );
+    }
+    case "person": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <PersonOpenInGoogleMapsAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
+          <ActionPanel.Section title="Properties">
+            <PersonCopyIDAction state={state} />
+            <PersonCopyUserIDAction state={state} />
           </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -1058,34 +1035,14 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <UpdateInstallAction state={state} />
             <UpdateSkipVersionAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
     default: {
       return (
         <ActionPanel>
-          <ActionPanel.Section title="Attributes">
-            <ShowAttributesAction state={props.state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Values">
-            <CopyEntityIDAction state={state} />
-            <CopyStateValueAction state={state} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="History">
-            <OpenEntityHistoryAction state={state} />
-            <OpenEntityLogbookAction state={state} />
-          </ActionPanel.Section>
+          <EntityStandardActionSections state={state} />
         </ActionPanel>
       );
     }
@@ -1098,7 +1055,7 @@ export function useStateSearch(
   device_class?: string,
   allStates?: State[]
 ): {
-  states?: State[];
+  states?: State[] | undefined;
 } {
   const [states, setStates] = useState<State[]>();
 
@@ -1121,7 +1078,7 @@ export function useStateSearch(
       haStates = haStates.slice(0, 1000);
       setStates(haStates);
     } else {
-      setStates([]);
+      return undefined;
     }
   }, [query, allStates]);
   return { states };

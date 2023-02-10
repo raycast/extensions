@@ -1,11 +1,11 @@
-import { ActionPanel, closeMainWindow, Icon, Action } from "@raycast/api";
+import { closeMainWindow, Icon, Action } from "@raycast/api";
 
 import { LocalTab, Tab } from "../types";
-import { executeJxa } from "../utils";
+import { executeJxa, safariAppIdentifier } from "../utils";
 
 const activateLocalTab = async (tab: LocalTab) =>
   executeJxa(`
-      const safari = Application("Safari");
+      const safari = Application("${safariAppIdentifier}");
       const window = safari.windows.byId(${tab.window_id});
       const tab = window.tabs[${tab.index - 1}];
       window.index = 1;

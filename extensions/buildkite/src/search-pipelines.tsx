@@ -44,17 +44,17 @@ query SearchPipelinesQuery($org: ID!, $search: String) {
 export default function Pipelines() {
   const { org } = getPreferenceValues();
   const [search, setSearch] = useState("");
-  const state = useQuery<QueryResponse>([org, search], {
+  const { data, isLoading } = useQuery<QueryResponse>({
     query: QUERY,
     errorMessage: "Could not load pipelines",
     variables: { org, search },
   });
 
-  const pipelines = state?.organization.pipelines.edges ?? [];
+  const pipelines = data?.organization.pipelines.edges ?? [];
 
   return (
     <List
-      isLoading={pipelines.length === 0}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter pipelines by name..."
       onSearchTextChange={(search) => setSearch(search)}
       throttle

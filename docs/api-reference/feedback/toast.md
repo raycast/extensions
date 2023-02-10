@@ -23,7 +23,7 @@ async function showToast(options: Toast.Options): Promise<Toast>;
 ```typescript
 import { showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const success = false;
 
   if (success) {
@@ -35,7 +35,7 @@ export default async () => {
       message: "Pizza dropped on the floor",
     });
   }
-};
+}
 ```
 
 When showing an animated Toast, you can later on update it:
@@ -44,7 +44,7 @@ When showing an animated Toast, you can later on update it:
 import { showToast, Toast } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
-export default async () => {
+export default async function Command() {
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Uploading image",
@@ -59,16 +59,16 @@ export default async () => {
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to upload image";
-    toast.message = err.message;
+    if (err instanceof Error) {
+      toast.message = err.message;
+    }
   }
-};
+}
 ```
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Toast.Options](#toast.options)</code> | Yes      | The options used to create the Toast. |
+<FunctionParametersTableFromJSDoc name="showToast" />
 
 #### Return
 
@@ -102,7 +102,7 @@ The options to create a [Toast](#toast).
 ```typescript
 import { showToast, Toast } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const options: Toast.Options = {
     style: Toast.Style.Success,
     title: "Finished cooking",
@@ -116,7 +116,7 @@ export default async () => {
     },
   };
   await showToast(options);
-};
+}
 ```
 
 #### Properties

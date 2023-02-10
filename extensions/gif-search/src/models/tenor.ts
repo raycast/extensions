@@ -6,7 +6,7 @@ import path from "path";
 import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
-import type { APIOpt, IGif, IGifAPI } from "../models/gif";
+import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";
 
 export interface TenorResults {
   results?: TenorGif[];
@@ -139,13 +139,14 @@ export class TenorAPI {
 
 export function mapTenorResponse(tenorResp: TenorGif) {
   const mediaItem = tenorResp.media[0];
+  const title = tenorResp.title || tenorResp.h1_title || tenorResp.content_description;
   return <IGif>{
     id: tenorResp.id,
-    title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
+    title: title,
     url: tenorResp.itemurl,
-    slug: path.basename(tenorResp.itemurl),
-    preview_gif_url: mediaItem.tinygif.preview,
-    gif_url: mediaItem.tinygif.url,
+    slug: slugify(title),
+    preview_gif_url: mediaItem.tinygif.url,
+    gif_url: mediaItem.gif.url,
     metadata: {
       width: mediaItem.gif.dims[0],
       height: mediaItem.gif.dims[1],

@@ -1,9 +1,10 @@
 import { List, ActionPanel, Action } from "@raycast/api";
+import { ShowVaultInFinderAction } from "../utils/actions";
 
 import { Vault } from "../utils/interfaces";
 
-export function VaultSelection(props: { vaults: Vault[]; target: (path: Vault) => React.ReactFragment }) {
-  const vaults = props.vaults;
+export function VaultSelection(props: { vaults: Vault[]; target: (vault: Vault) => any }) {
+  const { vaults, target } = props;
   return (
     <List>
       {vaults?.map((vault) => (
@@ -12,7 +13,8 @@ export function VaultSelection(props: { vaults: Vault[]; target: (path: Vault) =
           key={vault.key}
           actions={
             <ActionPanel>
-              <Action.Push title="Select Vault" target={props.target(vault)} />
+              <Action.Push title="Select Vault" target={target(vault)} />
+              <ShowVaultInFinderAction vault={vault} />
             </ActionPanel>
           }
         />

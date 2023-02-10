@@ -1,21 +1,30 @@
-import { showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 
-import { parseVaults } from "./utils/utils";
+import { useObsidianVaults } from "./utils/utils";
 import { VaultSelection } from "./components/VaultSelection";
-import { Vault } from "./utils/interfaces";
-import { NoteListPinned } from "./components/NoteListPinned";
+import { SearchArguments, Vault } from "./utils/interfaces";
+import { NoteListPinned } from "./components/NoteList/NoteListPinned";
+import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
+import { noVaultPathsToast } from "./components/Toasts";
 
-export default function Command() {
-  const vaults = parseVaults();
-  if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <NoteListPinned vaultPath={vault.path} />} />;
+export default function Command(props: { arguments: SearchArguments }) {
+  const { vaults, ready } = useObsidianVaults();
+
+  if (!ready) {
+    return <List isLoading={true}></List>;
+  } else if (vaults.length === 0) {
+    return <NoVaultFoundMessage />;
+  } else if (vaults.length > 1) {
+    return (
+      <VaultSelection
+        vaults={vaults}
+        target={(vault: Vault) => <NoteListPinned vault={vault} showTitle={true} searchArguments={props.arguments} />}
+      />
+    );
   } else if (vaults.length == 1) {
-    return <NoteListPinned vaultPath={vaults[0].path} />;
+    return <NoteListPinned vault={vaults[0]} showTitle={false} searchArguments={props.arguments} />;
   } else {
-    showToast({
-      title: "Path Error",
-      message: "Something went wrong with your vault path. There are no paths to select from.",
-      style: Toast.Style.Failure,
-    });
+    noVaultPathsToast();
+    return <List />;
   }
 }

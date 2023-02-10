@@ -1,4 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getDateForPageWithoutBrackets } from "logseq-dateutils";
 import { parseEDNString } from "edn-data";
 import path from "path";
 import * as R from "ramda";
@@ -41,24 +42,32 @@ export const validateUserConfigGraphPath = () => {
   return validateFolderPath(getUserConfiguredGraphPath());
 };
 
-const parseJournalFileNameFromLogseqConfig = () => {
+const parseLogseqConfig = () => {
   const logseqConfigPath = path.join(getUserConfiguredGraphPath(), "/logseq/config.edn");
+  return fs.promises
+    .readFile(logseqConfigPath, { encoding: "utf8" })
+    .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }));
+};
+
+export const getPreferredFormat = () => {
+  return parseLogseqConfig().then((v: any) => v["preferred-format"] || "md");
+};
+
+const parseJournalFileNameFromLogseqConfig = () => {
   return (
-    fs.promises
-      .readFile(logseqConfigPath, { encoding: "utf8" })
-      .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }))
+    parseLogseqConfig()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((v: any) => ({
         fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
         journalsDirectory: v["journals-directory"] || "journals",
-        dateFormat: (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase(),
+        dateFormat: v["journal/file-name-format"] || "yyyy_MM_dd",
       }))
   );
 };
 
 const buildJournalPath = (graphPath: string) => {
   return parseJournalFileNameFromLogseqConfig().then(({ dateFormat, journalsDirectory, fileFormat }) =>
-    path.join(graphPath, journalsDirectory, `${dayjs().format(dateFormat)}${fileFormat}`)
+    path.join(graphPath, journalsDirectory, `${getDateForPageWithoutBrackets(new Date(), dateFormat)}${fileFormat}`)
   );
 };
 
@@ -104,4 +113,22 @@ export const formatFilePath = (pageName: string) => {
   const dbName = getUserConfiguredGraphPath().split("/")[getUserConfiguredGraphPath().split("/").length - 1];
   const finalURL = encodeURI(`logseq://graph/${dbName}?file=${pageName}`);
   return finalURL;
+};
+
+const getCurrentTime = () => {
+  return dayjs().format("HH:mm");
+};
+
+export const addLeadingTimeToContentIfNecessary = (content: string) => {
+  let result = content;
+
+  if (getPreferenceValues().addQuickCaptureTag) {
+    result = `[[quick capture]]: ` + result;
+  }
+
+  if (getPreferenceValues().insertTime) {
+    result = `**${getCurrentTime()}** ` + result;
+  }
+
+  return result;
 };

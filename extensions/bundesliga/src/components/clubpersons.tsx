@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { usePersons } from "../hooks";
-import { getFlagEmoji, positionMap } from "../utils";
+import { positionMap } from "../utils";
 import Person from "./person";
 
 type PropsType = {
@@ -12,41 +12,18 @@ export default function ClubPersons(props: PropsType) {
   const players = usePersons(props.club);
 
   return (
-    <List navigationTitle={props.navigationTitle} throttle isLoading={!players}>
+    <Grid navigationTitle={props.navigationTitle} throttle isLoading={!players}>
       {players &&
         Object.entries(players).map(([position, persons]) => {
           return (
-            <List.Section key={position} title={positionMap.get(position)}>
+            <Grid.Section key={position} title={positionMap.get(position)}>
               {persons.map((person, idx) => {
-                const props: Partial<List.Item.Props> = {
-                  accessories: [
-                    {
-                      icon: getFlagEmoji(
-                        person.nationality.firstNationalityCode
-                      ),
-                    },
-                  ],
-                };
-
-                if (person.nationality.secondNationalityCode) {
-                  props.accessories?.push({
-                    icon: getFlagEmoji(
-                      person.nationality.secondNationalityCode
-                    ),
-                  });
-                }
-                if (person.nationality.thirdNationalityCode) {
-                  props.accessories?.push({
-                    icon: getFlagEmoji(person.nationality.thirdNationalityCode),
-                  });
-                }
                 return (
-                  <List.Item
+                  <Grid.Item
                     key={position + idx}
-                    title={person.shirtNumber}
-                    subtitle={person.name.full}
-                    keywords={[person.name.full]}
-                    icon={{
+                    title={person.name.full}
+                    subtitle={person.nationality.firstNationality}
+                    content={{
                       source: person.playerImages.FACE_CIRCLE,
                       fallback: "player-circle-default.png",
                     }}
@@ -63,9 +40,9 @@ export default function ClubPersons(props: PropsType) {
                   />
                 );
               })}
-            </List.Section>
+            </Grid.Section>
           );
         })}
-    </List>
+    </Grid>
   );
 }

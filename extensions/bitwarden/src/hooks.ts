@@ -11,16 +11,16 @@ const initialPasswordGeneratorState = {
   isGenerating: true,
 };
 
-type State = typeof initialPasswordGeneratorState;
+type GeneratorState = typeof initialPasswordGeneratorState;
 
-type Action =
+type GeneratorActions =
   | { type: "generate" }
   | { type: "setPassword"; password: string }
   | { type: "setOptions"; options: PasswordGeneratorOptions }
   | { type: "cancelGenerate" }
   | { type: "clearPassword"; password: string };
 
-const passwordReducer = (state: State, action: Action): State => {
+const passwordReducer = (state: GeneratorState, action: GeneratorActions): GeneratorState => {
   switch (action.type) {
     case "generate":
       return { ...state, isGenerating: true };
@@ -35,24 +35,21 @@ const passwordReducer = (state: State, action: Action): State => {
   }
 };
 
-type UsePasswordGeneratorOptions = {
-  regenerateOnOptionChange?: boolean;
-};
-
-export function usePasswordGenerator(bitwardenApi: Bitwarden, hookOptions?: UsePasswordGeneratorOptions) {
-  const { regenerateOnOptionChange = true } = hookOptions ?? {};
-
+export function usePasswordGenerator(bitwardenApi: Bitwarden) {
   const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
   const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
 
-  const generatePassword = async () => {
+  const generatePassword = async (passwordOptions = options) => {
     try {
       renewAbortController();
       dispatch({ type: "generate" });
-      const password = await bitwardenApi.generatePassword(options, abortControllerRef?.current);
+      const password = await bitwardenApi.generatePassword(passwordOptions, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
     } catch (error) {
-      dispatch({ type: "cancelGenerate" });
+      // generate password was likely aborted
+      if (abortControllerRef?.current.signal.aborted) {
+        dispatch({ type: "cancelGenerate" });
+      }
     }
   };
 
@@ -68,24 +65,22 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden, hookOptions?: UseP
     if (!options || options[option] === value) return;
     if (state.isGenerating) {
       abortPreviousGenerate();
-      dispatch({ type: "cancelGenerate" });
     }
 
     const newOptions = { ...options, [option]: value };
     dispatch({ type: "setOptions", options: newOptions });
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
+    await Promise.all([
+      LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions)),
+      generatePassword(newOptions),
+    ]);
   };
 
   const restoreStoredOptions = async () => {
     const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
     const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
     dispatch({ type: "setOptions", options: newOptions });
+    await generatePassword(newOptions);
   };
-
-  useEffect(() => {
-    if (!regenerateOnOptionChange || !options) return;
-    generatePassword();
-  }, [options]);
 
   useEffect(() => {
     restoreStoredOptions();

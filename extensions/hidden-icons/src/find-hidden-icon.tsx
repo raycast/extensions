@@ -1,39 +1,30 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { allCountDownTime, getHistoryScore, getRandomFindOutIcon, modes } from "./utils/find-icons-utils";
+import { getHistoryScore } from "./utils/find-icons-utils";
 import ScorePage from "./score-page";
-import { clearInterval } from "timers";
+import { GenerateFindOutIcons, startGame } from "./hooks/hooks";
+import { modes } from "./utils/constants";
+import { Preferences } from "./types/preferences";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
-export default function Command() {
+export default function FindHiddenIcon() {
+  const { allCountDownTime } = getPreferenceValues<Preferences>();
   const [difficultyMode, setDifficultyMode] = useState<string>("easy");
-  const [findOutIcons, setFindOutIcons] = useState<string[]>([]);
-  const [targetIcon, setTargetIcon] = useState<string>("");
-  const [targetIndex, setTargetIndex] = useState<number>(-1);
-  const [refreshIcon, setRefreshIcon] = useState<boolean>(false);
+  const [refreshIcon, setRefreshIcon] = useState<number>(0);
   const [lastRandomRow, setLastRandomRow] = useState<number>(0);
-  const [isGaming, setIsGaming] = useState<boolean>(false);
-  const [leftTime, setLeftTime] = useState<number>(allCountDownTime);
-  const [score, setScore] = useState<number>(0);
-  const [showScore, setShowScore] = useState<boolean>(false);
 
   const { push } = useNavigation();
-
-  useEffect(() => {
-    async function _fetchIcons() {
-      if (isGaming) {
-        const { targetIcon, targetIndex, randomFindOutIcons } = getRandomFindOutIcon(lastRandomRow, difficultyMode);
-        setFindOutIcons(randomFindOutIcons);
-        setTargetIcon(targetIcon);
-        setTargetIndex(targetIndex);
-      }
-    }
-
-    _fetchIcons().then();
-  }, [refreshIcon]);
+  const { score, leftTime, showScore, setScore, isGaming, setIsGaming } = startGame(parseInt(allCountDownTime));
+  const { findOutIcons, targetIcon, targetIndex } = GenerateFindOutIcons(
+    isGaming,
+    difficultyMode,
+    lastRandomRow,
+    refreshIcon
+  );
 
   useEffect(() => {
     async function _fetchHistoryScore() {
-      if (isGaming) {
+      if (!isGaming && showScore !== 0) {
         const historyScore = await getHistoryScore();
         push(<ScorePage myScore={{ mode: difficultyMode, score: score }} historyScore={historyScore} />);
       }
@@ -42,35 +33,14 @@ export default function Command() {
     _fetchHistoryScore().then();
   }, [showScore]);
 
-  useEffect(() => {
-    async function _() {
-      if (isGaming) {
-        let countDown = Number(allCountDownTime);
-        const interval = setInterval(() => {
-          countDown -= 1;
-          setLeftTime(countDown);
-          if (countDown === 0) {
-            setShowScore(!showScore);
-            setLeftTime(allCountDownTime);
-            setIsGaming(false);
-            clearInterval(interval);
-          }
-        }, 1000);
-        setRefreshIcon(!refreshIcon);
-        setScore(0);
-      }
-    }
-
-    _().then();
-  }, [isGaming]);
-
   return (
-    <List
-      isLoading={false}
-      enableFiltering={false}
-      searchBarPlaceholder="Find the hidden icon in 30 seconds"
+    <Grid
+      columns={8}
+      inset={Grid.Inset.Medium}
+      filtering={false}
+      searchBarPlaceholder={`Find the hidden icon in ${allCountDownTime} seconds`}
       searchBarAccessory={
-        <List.Dropdown
+        <Grid.Dropdown
           tooltip={"Difficulty mode"}
           storeValue={true}
           onChange={(newValue) => {
@@ -78,46 +48,46 @@ export default function Command() {
           }}
         >
           {isGaming ? (
-            <List.Dropdown.Item key={difficultyMode} title={difficultyMode} value={difficultyMode} />
+            <Grid.Dropdown.Item key={difficultyMode} title={difficultyMode} value={difficultyMode} />
           ) : (
             modes.map((value) => {
-              return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+              return <Grid.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
             })
           )}
-        </List.Dropdown>
+        </Grid.Dropdown>
       }
     >
       {!isGaming ? (
-        <List.EmptyView
+        <Grid.EmptyView
           title={`Press ↩︎ to start game`}
-          icon={"find-icons.png"}
+          icon={"place-holder.png"}
           actions={
             <ActionPanel>
               <Action
                 title={"Start Game"}
-                icon={Icon.Binoculars}
+                icon={Icon.GameController}
                 onAction={() => {
                   setIsGaming(true);
                 }}
               />
               <Action
                 title={"Score History"}
-                icon={Icon.TextDocument}
+                icon={Icon.StarCircle}
                 shortcut={{ modifiers: ["cmd"], key: "h" }}
                 onAction={async () => {
                   const historyScore = await getHistoryScore();
-                  push(<ScorePage myScore={{ mode: difficultyMode, score: score }} historyScore={historyScore} />);
+                  push(<ScorePage myScore={{ mode: difficultyMode, score: 0 }} historyScore={historyScore} />);
                 }}
               />
+              <ActionOpenPreferences />
             </ActionPanel>
           }
         />
       ) : (
         findOutIcons.map((value, index) => (
-          <List.Item
+          <Grid.Item
             key={"index" + index}
-            icon={" "}
-            title={value}
+            content={value}
             actions={
               <ActionPanel>
                 <Action
@@ -128,14 +98,15 @@ export default function Command() {
                     if (targetIndex == index) {
                       setScore(score + 1);
                     }
-                    setRefreshIcon(!refreshIcon);
+                    setRefreshIcon(Date.now());
                   }}
                 />
+                <ActionOpenPreferences />
               </ActionPanel>
             }
           />
         ))
       )}
-    </List>
+    </Grid>
   );
 }

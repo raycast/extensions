@@ -126,17 +126,17 @@ export function useCache<T>(
 ): {
   data?: T;
   error?: string;
-  isLoading: boolean | undefined;
+  isLoading: boolean;
   performRefetch: () => void;
 } {
   const secondsToRefetchUser = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
   const secondsToInvalid = options.secondsToInvalid === undefined ? daysInSeconds(3) : options.secondsToInvalid;
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(new Date());
   const shouldForceRefetch = useRef(false);
-  const depsAll = [timestamp];
+  const depsAll: unknown[] = [timestamp];
   if (options.deps) {
     for (const d of options.deps) {
       depsAll.push(d);

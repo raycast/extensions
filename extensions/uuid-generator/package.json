@@ -5,22 +5,43 @@
   "description": "A quick way to generate UUIDs without opening the browser",
   "icon": "command-icon.png",
   "author": "jmaeso",
+  "contributors": [
+    "GastroGeek",
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "generate",
-      "title": "Generate UUID",
-      "description": "Copy a generated UUID to the clipboard",
-      "mode": "no-view"
+      "title": "Generate UUIDs",
+      "description": "Copy generated UUIDs to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "upperCaseLetters",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Options",
+          "label": "Uppercase Letters",
+          "description": "Should letters be uppercased?"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.39.3",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@types/uuid": "^8.3.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

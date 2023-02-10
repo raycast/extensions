@@ -1,27 +1,53 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
-import useSWR from "swr";
+import { ActionPanel, Detail, Icon } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
-import { displayDueDate } from "../helpers";
-import { priorities } from "../constants";
-import { SWRKeys } from "../types";
+
 import { todoist, handleError } from "../api";
-import TaskComments from "./TaskComments";
-import TaskCommentForm from "./TaskCommentForm";
+import { priorities } from "../constants";
+import { displayDueDate } from "../helpers/dates";
+import { getProjectIcon } from "../helpers/projects";
+
+import TaskActions from "./TaskActions";
 
 interface TaskDetailProps {
-  task: Task;
+  taskId: Task["id"];
+  mutateTasks?: MutatePromise<Task[] | undefined>;
 }
 
-export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
-  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
-  const { data: comments, error: getCommentsError } = useSWR(SWRKeys.comments, () =>
-    todoist.getComments({ taskId: task.id })
-  );
+export default function TaskDetail({ taskId, mutateTasks }: TaskDetailProps): JSX.Element {
+  const {
+    data: task,
+    isLoading: isLoadingTask,
+    error: getTaskError,
+    mutate: mutateTaskDetail,
+  } = useCachedPromise((taskId) => todoist.getTask(taskId), [taskId]);
+
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: getProjectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+
+  const {
+    data: labels,
+    isLoading: isLoadingLabels,
+    error: getLabelsError,
+  } = useCachedPromise(() => todoist.getLabels());
+
+  const {
+    data: comments,
+    isLoading: isLoadingComments,
+    error: getCommentsError,
+    mutate: mutateComments,
+  } = useCachedPromise((taskId) => todoist.getComments({ taskId }), [task?.id], { execute: !!task?.id });
+
+  if (getTaskError) {
+    handleError({ error: getTaskError, title: "Unable to get task detail" });
+  }
 
   if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get tasks" });
+    handleError({ error: getProjectsError, title: "Unable to get projects" });
   }
 
   if (getLabelsError) {
@@ -32,19 +58,20 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
     handleError({ error: getCommentsError, title: "Unable to get comments" });
   }
 
-  const priority = priorities.find((priority) => priority.value === task.priority);
-  const project = projects?.find((project) => project.id === task.projectId);
-  const taskLabels = task.labelIds.map((labelId) => {
-    const associatedLabel = labels?.find((label) => label.id === labelId);
+  const priority = priorities.find((priority) => priority.value === task?.priority);
+  const project = projects?.find((project) => project.id === task?.projectId);
+  const taskLabels = task?.labels.map((labelName) => {
+    const associatedLabel = labels?.find((label) => label.name === labelName);
+
     return {
       ...associatedLabel,
-      color: colors.find((color) => color.id === associatedLabel?.color),
+      color: colors.find((color) => color.key === associatedLabel?.color),
     };
   });
   const hasComments = comments && comments.length > 0;
 
   let displayedDate = "No due date";
-  if (task.due) {
+  if (task?.due) {
     const dueDate = displayDueDate(task.due.date);
 
     displayedDate = task.due.datetime ? `${dueDate} ${format(new Date(task.due.datetime), "HH:mm")}` : dueDate;
@@ -52,59 +79,62 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
 
   return (
     <Detail
-      markdown={`# ${task.content}\n\n${task.description}`}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Project"
-            text={project?.name}
-            icon={project?.inboxProject ? Icon.Envelope : Icon.List}
-          />
+      isLoading={isLoadingTask || isLoadingProjects || isLoadingLabels || isLoadingComments}
+      navigationTitle={task?.content}
+      {...(task
+        ? {
+            markdown: `# ${task?.content}\n\n${task?.description}`,
+            metadata: (
+              <Detail.Metadata>
+                {project ? (
+                  <Detail.Metadata.Label title="Project" text={project.name} icon={getProjectIcon(project)} />
+                ) : null}
 
-          <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
+                <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
 
-          <Detail.Metadata.Label
-            title="Priority"
-            text={priority?.name}
-            icon={{ source: Icon.LevelMeter, tintColor: priority?.color }}
-          />
-          {taskLabels && taskLabels.length > 0 ? (
-            <Detail.Metadata.TagList title="Labels">
-              {taskLabels.map((taskLabel, index) => (
-                <Detail.Metadata.TagList.Item
-                  key={taskLabel?.id || index}
-                  text={taskLabel?.name || ""}
-                  color={taskLabel.color?.value}
+                {priority ? (
+                  <Detail.Metadata.Label
+                    title="Priority"
+                    text={priority.name}
+                    icon={{ source: priority.icon, tintColor: priority?.color }}
+                  />
+                ) : null}
+
+                {taskLabels && taskLabels.length > 0 ? (
+                  <Detail.Metadata.TagList title="Labels">
+                    {taskLabels.map((taskLabel, index) => (
+                      <Detail.Metadata.TagList.Item
+                        key={taskLabel?.id || index}
+                        text={taskLabel?.name || ""}
+                        color={taskLabel.color?.hexValue}
+                      />
+                    ))}
+                  </Detail.Metadata.TagList>
+                ) : null}
+
+                {hasComments ? (
+                  <Detail.Metadata.Label
+                    title="Comments"
+                    text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}`}
+                    icon={Icon.Bubble}
+                  />
+                ) : null}
+              </Detail.Metadata>
+            ),
+            actions: (
+              <ActionPanel>
+                <TaskActions
+                  task={task}
+                  fromDetail={true}
+                  projects={projects}
+                  mutateTasks={mutateTasks}
+                  mutateTaskDetail={mutateTaskDetail}
+                  mutateComments={mutateComments}
                 />
-              ))}
-            </Detail.Metadata.TagList>
-          ) : null}
-
-          {hasComments ? (
-            <Detail.Metadata.Label
-              title="Comments"
-              text={`${comments.length} ${comments.length === 1 ? "comment" : "comments"}`}
-              icon={Icon.Bubble}
-            />
-          ) : null}
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={task.url} />
-
-          <Action.Push title="Add New Comment" icon={Icon.Plus} target={<TaskCommentForm task={task} />} />
-
-          {hasComments ? (
-            <Action.Push
-              title="Show Comments"
-              icon={Icon.Bubble}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              target={<TaskComments task={task} />}
-            />
-          ) : null}
-        </ActionPanel>
-      }
+              </ActionPanel>
+            ),
+          }
+        : {})}
     />
   );
 }

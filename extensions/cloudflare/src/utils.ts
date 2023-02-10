@@ -11,18 +11,12 @@ import {
 const CLOUDFLARE_BASE = 'https://dash.cloudflare.com';
 
 interface Preferences {
-  email: string;
-  key: string;
+  token: string;
 }
 
-function getEmail() {
-  const { email } = getPreferenceValues<Preferences>();
-  return email;
-}
-
-function getKey() {
-  const { key } = getPreferenceValues<Preferences>();
-  return key;
+function getToken() {
+  const { token } = getPreferenceValues<Preferences>();
+  return token;
 }
 
 function getSiteStatusIcon(status: ZoneStatus): Icon {
@@ -115,7 +109,7 @@ function handleNetworkError(e: unknown): void {
     showToast(
       Toast.Style.Failure,
       'Failed to authorize',
-      'Please make sure that your API key and email are valid.',
+      'Please make sure that your API token is valid.',
     );
   } else {
     showToast(Toast.Style.Failure, 'Network error', 'Please try again later.');
@@ -123,8 +117,7 @@ function handleNetworkError(e: unknown): void {
 }
 
 export {
-  getEmail,
-  getKey,
+  getToken,
   getSiteStatusIcon,
   getDeploymentStatusIcon,
   getDomainStatusIcon,

@@ -12,6 +12,9 @@ Typically used as a standalone view or when navigating from a [List](list.md).
 
 #### Example
 
+{% tabs %}
+{% tab title="Render a markdown string" %}
+
 ```typescript
 import { Detail } from "@raycast/api";
 
@@ -19,6 +22,21 @@ export default function Command() {
   return <Detail markdown="**Hello** _World_!" />;
 }
 ```
+
+{% endtab %}
+
+{% tab title="Render an image from the assets directory" %}
+
+```typescript
+import { Detail } from "@raycast/api";
+
+export default function Command() {
+  return <Detail markdown={`![Image Title](example.png)`} />;
+}
+```
+
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -37,6 +55,7 @@ Use it to display additional structured data about the main content shown in the
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
 const markdown = `
 # Pikachu
 
@@ -58,11 +77,7 @@ export default function Main() {
             <Detail.Metadata.TagList.Item text="Electric" color={"#eed535"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="Evolution"
-            target="https://www.pokemon.com/us/pokedex/pikachu"
-            text="Raichu"
-          />
+          <Detail.Metadata.Link title="Evolution" target="https://www.pokemon.com/us/pokedex/pikachu" text="Raichu" />
         </Detail.Metadata>
       }
     />
@@ -85,6 +100,15 @@ A single value with an optional icon.
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
+
 export default function Main() {
   return (
     <Detail
@@ -92,11 +116,7 @@ export default function Main() {
       navigationTitle="Pikachu"
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Height"
-            text={`1' 04"`}
-            icon="weight.svg"
-          />
+          <Detail.Metadata.Label title="Height" text={`1' 04"`} icon="weight.svg" />
         </Detail.Metadata>
       }
     />
@@ -119,6 +139,15 @@ An item to display a link.
 ```typescript
 import { Detail } from "@raycast/api";
 
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
+
 export default function Main() {
   return (
     <Detail
@@ -126,11 +155,7 @@ export default function Main() {
       navigationTitle="Pikachu"
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link
-            title="Evolution"
-            target="https://www.pokemon.com/us/pokedex/pikachu"
-            text="Raichu"
-          />
+          <Detail.Metadata.Link title="Evolution" target="https://www.pokemon.com/us/pokedex/pikachu" text="Raichu" />
         </Detail.Metadata>
       }
     />
@@ -152,6 +177,15 @@ A list of [`Tags`](detail.md#detail.metadata.taglist.item) displayed in a row.
 
 ```typescript
 import { Detail } from "@raycast/api";
+
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
 
 export default function Main() {
   return (
@@ -190,6 +224,15 @@ A metadata item that shows a separator line. Use it for grouping and visually se
 
 ```typescript
 import { Detail } from "@raycast/api";
+
+// Define markdown here to prevent unwanted indentation.
+const markdown = `
+# Pikachu
+
+![](https://assets.pokemon.com/assets/cms2/img/pokedex/full/025.png)
+
+Pikachu that can generate powerful electricity have cheek sacs that are extra soft and super stretchy.
+`;
 
 export default function Main() {
   return (

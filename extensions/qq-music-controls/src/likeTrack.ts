@@ -3,7 +3,7 @@ import { buildScriptEnsuringQQMusicIsRunning, runAppleScriptSilently } from "./u
 export default async () => {
   const script = buildScriptEnsuringQQMusicIsRunning(
     `tell menu "播放控制" of menu bar item "播放控制" of menu bar 1
-      click menu item "喜欢歌"
+      click menu item "喜欢歌曲"
     end tell`
   );
   await runAppleScriptSilently(script);

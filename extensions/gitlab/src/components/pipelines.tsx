@@ -1,8 +1,8 @@
-import { Action, ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, getGitLabGQL } from "../common";
 import { gql } from "@apollo/client";
-import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, getIdFromGqlId, now, showErrorToast } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -22,6 +22,11 @@ const GET_PIPELINES = gql`
           active
           path
           ref
+          startedAt
+          duration
+          createdAt
+          updatedAt
+          finishedAt
         }
       }
     }
@@ -61,27 +66,67 @@ function getStatusText(status: string) {
   }
 }
 
+function getDateStatus(pipeline: any): {
+  icon: Image.ImageLike | undefined;
+  tooltip: string | undefined;
+  date: Date | undefined;
+} {
+  if (pipeline.finishedAt) {
+    const d = new Date(pipeline.finishedAt);
+    const durationText = pipeline.duration ? `\nDuration: ${pipeline.duration} seconds` : "";
+    return { icon: Icon.Calendar, tooltip: `Finished at ${d.toLocaleString()}${durationText}`, date: d };
+  }
+  if (pipeline.startedAt) {
+    const d = new Date(pipeline.startedAt);
+    return { icon: Icon.WristWatch, tooltip: `Started at ${d.toLocaleString()}`, date: d };
+  }
+  if (pipeline.createdAt) {
+    const d = new Date(pipeline.createdAt);
+    return { icon: Icon.Stop, tooltip: `Created at ${d.toLocaleString()}`, date: d };
+  }
+  return { icon: undefined, tooltip: undefined, date: undefined };
+}
+
 export function PipelineListItem(props: {
   pipeline: any;
   projectFullPath: string;
   onRefreshPipelines: () => void;
+  navigationTitle?: string;
 }): JSX.Element {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
+  console.log(pipeline);
+  const dateStatus = getDateStatus(pipeline);
   return (
     <List.Item
       id={`${pipeline.id}`}
       title={pipeline.id.toString()}
-      icon={icon}
+      icon={{
+        value: icon,
+        tooltip: pipeline?.status
+          ? `Status: ${capitalizeFirstLetter(getStatusText(pipeline.status.toLowerCase()))}`
+          : "",
+      }}
       subtitle={pipeline.ref || ""}
-      accessories={ensureCleanAccessories([{ text: getStatusText(pipeline.status.toLowerCase()) }])}
+      accessories={[
+        {
+          tooltip: dateStatus.tooltip,
+          icon: dateStatus.icon,
+          date: dateStatus.date,
+        },
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Push
               title="Show Jobs"
               target={
-                <JobList projectFullPath={props.projectFullPath} pipelineID={pipeline.id} pipelineIID={pipeline.iid} />
+                <JobList
+                  projectFullPath={props.projectFullPath}
+                  pipelineID={pipeline.id}
+                  pipelineIID={pipeline.iid}
+                  navigationTitle={props.navigationTitle}
+                />
               }
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
@@ -96,24 +141,27 @@ export function PipelineListItem(props: {
   );
 }
 
-export function PipelineList(props: { projectFullPath: string }): JSX.Element {
+export function PipelineList(props: { projectFullPath: string; navigationTitle?: string }): JSX.Element {
   const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
   useInterval(() => {
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
+    showErrorToast(error, "Cannot search Pipelines");
   }
   return (
-    <List isLoading={isLoading} navigationTitle="Pipelines">
-      {pipelines?.map((pipeline) => (
-        <PipelineListItem
-          key={pipeline.id}
-          pipeline={pipeline}
-          projectFullPath={props.projectFullPath}
-          onRefreshPipelines={refresh}
-        />
-      ))}
+    <List isLoading={isLoading} navigationTitle={props.navigationTitle || "Pipelines"}>
+      <List.Section title="Pipelines">
+        {pipelines?.map((pipeline) => (
+          <PipelineListItem
+            key={pipeline.id}
+            pipeline={pipeline}
+            projectFullPath={props.projectFullPath}
+            onRefreshPipelines={refresh}
+            navigationTitle={props.navigationTitle}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -129,7 +177,7 @@ export function useSearch(
 } {
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [timestamp, setTimestamp] = useState<Date>(now());
 
   const refresh = () => {
@@ -150,7 +198,7 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
+        const data = await getGitLabGQL().client.query({
           query: GET_PIPELINES,
           variables: { fullPath: projectFullPath },
           fetchPolicy: "network-only",
@@ -160,7 +208,12 @@ export function useSearch(
           iid: `${p.iid}`,
           status: p.status,
           active: p.active,
-          webUrl: `${gitlabgql.url}${p.path}`,
+          webUrl: `${getGitLabGQL().url}${p.path}`,
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+          startedAt: p.startedAt,
+          duration: p.duration,
+          finishedAt: p.finishedAt,
           ref: p.ref,
         }));
         if (!didUnmount) {

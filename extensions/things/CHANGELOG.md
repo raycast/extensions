@@ -1,5 +1,13 @@
 # Things Changelog
 
+## [Update] - 2022-12-18
+
+Added troubleshooting
+
+## [Update] - 2022-07-11
+
+Added support for Things beta.
+
 ## [Fixes and Updates] - 2022-03-02
 
 - Updated the API

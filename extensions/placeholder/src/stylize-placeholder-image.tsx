@@ -103,10 +103,10 @@ export default function StylizePlaceholderImage(props: { id: string; width: numb
         }}
       />
       <Form.Checkbox
-        id={"Cache"}
-        label={"Cache"}
+        id={"No Cache"}
+        label={"No Cache"}
         value={picsumConfig.cache}
-        info={"Allow browser image cache"}
+        info={"Prevent the image from being cached"}
         onChange={(newValue) => {
           const _randomImageConfig = { ...picsumConfig };
           _randomImageConfig.cache = newValue;

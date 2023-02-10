@@ -16,6 +16,7 @@ Support directory, URL, IP address, URL scheme, mailto, email address, etc.
 
 - Trim Text: Automatically remove spaces at both ends of text.
 - Show HUD: After open the path, display the HUD pop-up prompt.
+- File Operation: When the path is a file, should the file be opened or shown in Finder.
 - Priority Detection: Priority detection of selected text or clipboard.
 - Search Engine: Search Engine for selected or clipboard text.
 

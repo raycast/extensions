@@ -9,6 +9,8 @@ import { Keyboard } from "@raycast/api";
 import { parseValues } from "../typeUtilities";
 
 export default class HSLColor extends Color<HSL> {
+  public type = "HSL";
+
   public static validator = isValidHSL;
 
   public static prepareValue = <HSL>(value: string): HSL => parseValues(value) as unknown as HSL;

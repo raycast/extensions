@@ -2,7 +2,7 @@ import { Action, showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel } f
 import { Project, User, Label, Milestone } from "./gitlabapi";
 import { gitlab } from "./common";
 import { useState, useEffect } from "react";
-import { getErrorMessage, projectIcon, toFormValues } from "./utils";
+import { getErrorMessage, projectIcon, showErrorToast, toFormValues } from "./utils";
 import { useCache } from "./cache";
 
 interface IssueFormValues {
@@ -29,7 +29,7 @@ async function submit(values: IssueFormValues) {
     await showToast(Toast.Style.Success, "Issue created", "Issue creation successful");
     popToRoot();
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Error", getErrorMessage(error));
+    await showErrorToast(getErrorMessage(error));
   }
 }
 
@@ -56,7 +56,7 @@ function IssueForm() {
   const error = errorProjects || errorProjectInfo;
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot create issue", error);
+    showErrorToast(error, "Cannot create Issue");
   }
 
   return (

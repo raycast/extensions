@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { ensureCleanAccessories } from "../utils";
+import { capitalizeFirstLetter, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { ClearLocalCacheAction } from "./cache_actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -26,10 +26,11 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessories={ensureCleanAccessories([
-        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle } },
-      ])}
-      icon={icon}
+      subtitle={`&${epic.iid}`}
+      accessories={[
+        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle }, tooltip: epic.author?.name },
+      ]}
+      icon={{ value: icon, tooltip: epic.state ? `Status: ${capitalizeFirstLetter(epic.state)}` : "" }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -39,9 +40,7 @@ export function EpicListItem(props: { epic: any }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ClearLocalCacheAction />
-          </ActionPanel.Section>
+          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -73,7 +72,7 @@ export function EpicList(props: { group: Group }) {
   );
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search epics", error);
+    showErrorToast(error, "Cannot search Epics");
   }
 
   const navTitle = `Epics ${props.group.full_path}`;

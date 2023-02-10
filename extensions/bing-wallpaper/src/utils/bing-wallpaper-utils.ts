@@ -2,11 +2,11 @@ export const buildBingWallpapersURL = (wallpaperDate = 0, count = 8) => {
   return `https://www.bing.com/HPImageArchive.aspx?format=js&idx=${wallpaperDate}&n=${count}&pid=hp&uhd=1&uhdwidth=3840&uhdheight=2160`;
 };
 
-export const buildBingImageURL = (urlSuffix: string, downloadSize = "full", high = 3840, width = 2160) => {
+export const buildBingImageURL = (urlSuffix: string, downloadSize = "raw", high = 3840, width = 2160) => {
   let _urlSuffix;
   switch (downloadSize) {
     case "raw": {
-      _urlSuffix = urlSuffix.replace("&w=3840&h=2160", "");
+      _urlSuffix = urlSuffix.replace("&w=3840&h=2160&rs=1&c=4", "");
       break;
     }
     case "full": {

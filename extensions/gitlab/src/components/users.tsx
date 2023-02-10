@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { getErrorMessage } from "../utils";
+import { getErrorMessage, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 
 export function UserList(): JSX.Element {
@@ -10,11 +10,7 @@ export function UserList(): JSX.Element {
   const { users, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
-  }
-
-  if (!users) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    showErrorToast(error, "Cannot search Merge Requests");
   }
 
   return (
@@ -32,7 +28,7 @@ export function UserListItem(props: { user: User }): JSX.Element {
     <List.Item
       id={user.id.toString()}
       title={user.name}
-      subtitle={"#" + user.username}
+      subtitle={user.username}
       icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
@@ -53,7 +49,7 @@ export function useSearch(query: string | undefined): {
 } {
   const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -93,4 +89,8 @@ export function useSearch(query: string | undefined): {
   }, [query]);
 
   return { users, error, isLoading };
+}
+
+export function userIcon(user: User): Image.ImageLike {
+  return { source: user.avatar_url, mask: Image.Mask.Circle };
 }

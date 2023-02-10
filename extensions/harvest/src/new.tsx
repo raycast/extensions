@@ -10,9 +10,10 @@ import {
   confirmAlert,
   Icon,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -39,12 +40,11 @@ export default function Command({
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
   const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
-
-  // console.log(projectId);
+  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {
     if (error) {
-      if (error.isAxiosError && error.response?.status === 401) {
+      if (isAxiosError(error) && error.response?.status === 401) {
         showToast({
           style: Toast.Style.Failure,
           title: "Invalid Token",
@@ -98,16 +98,18 @@ export default function Command({
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Project Selected",
       });
+      return;
     }
     if (values.task_id === null) {
-      return showToast({
+      showToast({
         style: Toast.Style.Failure,
         title: "No Task Selected",
       });
+      return;
     }
 
     setTimeFormat(hours);
@@ -225,6 +227,12 @@ export default function Command({
         </ActionPanel>
       }
     >
+      {showClient && (
+        <Form.Description
+          text={projects.find((o) => o.project.id === parseInt(projectId ?? "0"))?.client.name ?? ""}
+          title="Client"
+        />
+      )}
       <Form.Dropdown
         id="project_id"
         title="Project"
@@ -242,6 +250,7 @@ export default function Command({
                 const code = project.project.code;
                 return (
                   <Form.Dropdown.Item
+                    keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
@@ -281,7 +290,7 @@ export default function Command({
         title="Date"
         type={Form.DatePicker.Type.Date}
         value={spentDate}
-        onChange={setSpentDate}
+        onChange={(newValue) => newValue && setSpentDate(newValue)}
       />
     </Form>
   );

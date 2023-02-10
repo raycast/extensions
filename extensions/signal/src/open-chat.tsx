@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useSignalChats } from "./utils/use-signal-chats";
-import { SignalChat } from "./utils/types";
-import SignalChatForm from "./add-chat";
-import { useState } from "react";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import formatTimeDistance from "fromnow";
+import osascript from "osascript-tag";
+import { useState } from "react";
+import SignalChatForm from "./add-chat";
+import { SignalChat } from "./utils/types";
+import { useSignalChats } from "./utils/use-signal-chats";
 
 export default function ChatList() {
   const { chats, isLoading, updateChats } = useSignalChats();
@@ -116,6 +117,42 @@ function getChatItemProps(chat: SignalChat) {
   };
   //   }
 }
+const executeJxa = async (script: string) => {
+  try {
+    const result = await osascript.jxa({ parse: true })`${script}`;
+    return result;
+  } catch (err: unknown) {
+    if (typeof err === "string") {
+      const message = err.replace("execution error: Error: ", "");
+      console.log(err);
+      showToast(Toast.Style.Failure, "Something went wrong", message);
+    }
+  }
+};
+
+async function openSingalUrl(url: string) {
+  const result = executeJxa(`
+  const app = Application("Signal");
+var running = app.running();
+app.activate();
+if (running){
+  app.includeStandardAdditions = true;
+  app.openLocation('${url}');
+}
+return running;
+  `);
+
+  result.then((value) => {
+    console.log("result is " + value);
+    if (!value) {
+      showHUD("Signal not opened, opening...");
+      setTimeout(() => {
+        openSingalUrl(url);
+      }, 6000);
+    }
+    closeMainWindow();
+  });
+}
 
 function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListItemProps) {
   const { title, accessoryTitle, icon, keywords, subtitle, appUrl, webUrl, form } = getChatItemProps(chat);
@@ -131,11 +168,13 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser
+            <Action
               title="Open in Signal"
               icon={Icon.Message}
-              url={appUrl}
-              onOpen={() => onOpenChat(chat)}
+              onAction={() => {
+                openSingalUrl(appUrl);
+                onOpenChat(chat);
+              }}
             />
             {webUrl ? (
               <Action.OpenInBrowser

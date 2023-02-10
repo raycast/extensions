@@ -1,96 +1,27 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import {
-  editingAtom,
-  newTodoTextAtom,
-  searchBarTextAtom,
-  searchModeAtom,
-  todoAtom,
-  TodoItem,
-  TodoSections,
-} from "./atoms";
+import { editingAtom, newTodoTextAtom, searchModeAtom, TodoItem, TodoSections } from "./atoms";
 import { useAtom } from "jotai";
 import { SECTIONS_DATA } from "./config";
 import _ from "lodash";
-import { insertIntoSection, compare } from "./utils";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
 import OpenUrlAction from "./open_url_action";
 import ListActions from "./list_actions";
 import { useMemo } from "react";
 import urlRegexSafe from "url-regex-safe";
+import { useTodo } from "./hooks/useTodo";
 
 const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
-  const [todoSections, setTodoSections] = useAtom(todoAtom);
+  const { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin } = useTodo({ item, idx, sectionKey });
   const [newTodoText] = useAtom(newTodoTextAtom);
-  const [, setSearchBarText] = useAtom(searchBarTextAtom);
-  const [editing, setEditing] = useAtom(editingAtom);
+  const [editing] = useAtom(editingAtom);
   const [searchMode, setSearchMode] = useAtom(searchModeAtom);
 
   const urls = useMemo(() => {
     return item.title.match(urlRegexSafe());
   }, [item.title]);
-
-  const setClone = () => {
-    setTodoSections(_.cloneDeep(todoSections));
-  };
-
-  const toggleCompleted = (completed: boolean) => {
-    todoSections[sectionKey][idx].completed = completed;
-    todoSections[sectionKey].splice(idx, 1);
-    todoSections[sectionKey] = [...insertIntoSection(todoSections[sectionKey], item, compare)];
-    setClone();
-  };
-
-  const moveToSection = (newSection: keyof TodoSections) => {
-    if (newSection === "completed") {
-      item.completed = true;
-    } else if (newSection === "todo") {
-      item.completed = false;
-    }
-    todoSections[newSection] = [...insertIntoSection(todoSections[newSection], item, compare)];
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
-  };
-
-  const unPin = () => {
-    moveToSection(item.completed ? "completed" : "todo");
-  };
-  const pin = () => {
-    moveToSection("pinned");
-  };
-
-  // don't change section if pinned
-  const markCompleted = () => {
-    if (sectionKey === "pinned") {
-      toggleCompleted(true);
-    } else {
-      moveToSection("completed");
-    }
-  };
-
-  // don't change section if pinned
-  const markTodo = () => {
-    if (sectionKey === "pinned") {
-      toggleCompleted(false);
-    } else {
-      moveToSection("todo");
-    }
-  };
-
-  const deleteTodo = () => {
-    todoSections[sectionKey].splice(idx, 1);
-    setClone();
-  };
-
-  const editTodo = () => {
-    setEditing({
-      sectionKey,
-      index: idx,
-    });
-    setSearchBarText(item.title);
-  };
 
   dayjs.extend(customParseFormat);
   const datePart = dayjs(item.timeAdded).format("MMM D");
@@ -113,7 +44,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
             {item.completed ? (
               <Action
                 title="Mark as Uncompleted"
-                icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                 onAction={() => markTodo()}
               />
             ) : (

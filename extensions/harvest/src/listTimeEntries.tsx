@@ -210,7 +210,7 @@ export default function Command() {
       <>
         <Action
           title="Previous Day"
-          icon={{ source: "./arrow.left@2x.png" }}
+          icon={Icon.ArrowLeft}
           shortcut={{ key: "arrowLeft", modifiers: ["cmd"] }}
           onAction={() => {
             changeViewDate(dayjs(viewDate).subtract(1, "d").toDate());
@@ -218,7 +218,7 @@ export default function Command() {
         />
         <Action
           title="Next Day"
-          icon={{ source: "./arrow.right@2x.png" }}
+          icon={Icon.ArrowRight}
           shortcut={{ key: "arrowRight", modifiers: ["cmd"] }}
           onAction={() => {
             changeViewDate(dayjs(viewDate).add(1, "d").toDate());

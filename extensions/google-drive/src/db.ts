@@ -52,7 +52,8 @@ export const dumpDb = (db: Database) => {
 };
 
 const dbConnection = async () => {
-  const SQL = await initSqlJs({ locateFile: () => join(environment.assetsPath, "sql-wasm.wasm") });
+  const wasmBinary = readFileSync(join(environment.assetsPath, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
   if (!existsSync(DB_FILE_PATH)) {
     const db = new SQL.Database();
     await writeFileSync(DB_FILE_PATH, db.export());
@@ -243,17 +244,14 @@ export const indexFiles = async (db: Database, options: IndexFilesOptions = { fo
       }`,
       message: "This may take some time, please wait...",
     });
-    let favoriteFilePaths: Array<string> = [];
 
-    if (options.force) {
-      // Backup the favorite file paths before force indexing
-      favoriteFilePaths = queryFavoriteFiles(db, 1000).map((file) => file.path);
+    // Backup the favorite file paths before indexing
+    const favoriteFilePaths = queryFavoriteFiles(db, 1000).map((file) => file.path);
 
-      // Delete all the old indexed files
-      db.exec("DELETE from files");
+    // Delete all the old indexed files
+    db.exec("DELETE from files");
 
-      clearAllFilePreviewsCache(false);
-    }
+    clearAllFilePreviewsCache(false);
 
     await listFilesAndInsertIntoDb(db, toast);
 

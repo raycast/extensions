@@ -3,20 +3,17 @@ import { useCallback, useEffect, useState } from "react";
 import fse from "fs-extra";
 import path from "path";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
-
-//for refresh useState
-export const refreshNumber = () => {
-  return new Date().getTime();
-};
+import { templateFolderPath } from "../utils/constants";
 
 //new file here
-export const getTemplateFile = (templateFolderPath: string, refresh: number) => {
+export const getTemplateFile = (refresh: number) => {
   const [templateFiles, setTemplateFiles] = useState<TemplateType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     const _templateFiles: TemplateType[] = [];
     try {
+      fse.ensureDirSync(templateFolderPath);
       fse.readdirSync(templateFolderPath).forEach((file) => {
         if (!file.startsWith(".")) {
           const filePath = templateFolderPath + "/" + file;
@@ -29,12 +26,12 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
           });
         }
       });
+      setTemplateFiles(_templateFiles);
+      setIsLoading(false);
     } catch (e) {
+      setIsLoading(false);
       console.error(String(e));
-      fse.mkdirSync(templateFolderPath);
     }
-    setTemplateFiles(_templateFiles);
-    setIsLoading(false);
   }, [refresh]);
 
   useEffect(() => {

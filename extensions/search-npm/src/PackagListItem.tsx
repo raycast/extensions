@@ -9,10 +9,10 @@ import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
 import { parseRepoUrl } from './utils/parseRepoUrl'
 import { Readme } from './Readme'
-import { NpmsResultModel } from './npmsResponse.model'
+import { NpmObject } from './npmResponse.model'
 
 interface PackageListItemProps {
-  result: NpmsResultModel
+  result: NpmObject
   searchTerm: string
 }
 
@@ -118,7 +118,7 @@ export const PackageListItem = ({
               <Action.Push
                 title="View readme"
                 target={<Readme user={owner} repo={name} />}
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
               />
             ) : null}
             <Action.OpenInBrowser
@@ -170,6 +170,10 @@ export const PackageListItem = ({
             <Action.CopyToClipboard
               title="Copy Package Name"
               content={pkg.name}
+            />
+            <Action.CopyToClipboard
+              title="Copy Package URL"
+              content={pkg.links.npm}
             />
           </ActionPanel.Section>
         </ActionPanel>

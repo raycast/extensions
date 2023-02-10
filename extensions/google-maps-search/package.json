@@ -5,6 +5,9 @@
   "description": "Quickly open Google Maps directions, for example from your current location to your home.",
   "icon": "google-maps-icon.png",
   "author": "ratoru",
+  "contributors": [
+    "lin"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -66,16 +69,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.1"
+    "@raycast/api": "^1.39.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
+    "eslint": "^8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "typescript": "^4.7.4"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,11 +1,12 @@
-import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, daysInSeconds, ensureCleanAccessories } from "../utils";
+import { capitalizeFirstLetter, daysInSeconds, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
+import { CacheActionPanelSection } from "./cache_actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
@@ -390,8 +391,13 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     <List.Item
       title={title || ""}
       icon={icon}
-      accessories={ensureCleanAccessories([{ text: accessoryTitle }])}
-      actions={<ActionPanel>{actionElement && actionElement}</ActionPanel>}
+      accessories={[{ text: accessoryTitle }]}
+      actions={
+        <ActionPanel>
+          {actionElement && actionElement}
+          {actionElement && <CacheActionPanelSection />}
+        </ActionPanel>
+      }
     />
   );
 }
@@ -419,11 +425,11 @@ export function EventList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(Toast.Style.Failure, "Cannot search Events", error);
+    showErrorToast(error, "Cannot search Events");
   }
 
   if (!data) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+    return <List isLoading={true} />;
   }
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>

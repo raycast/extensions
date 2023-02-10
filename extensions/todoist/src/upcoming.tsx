@@ -1,23 +1,49 @@
-import useSWR from "swr";
-import TaskList from "./components/TaskList";
-import { getSectionsWithDueDates } from "./helpers";
+import { useCachedPromise } from "@raycast/utils";
+
 import { handleError, todoist } from "./api";
-import { SWRKeys } from "./types";
+import TaskList from "./components/TaskList";
+import View from "./components/View";
+import { getSectionsWithDueDates } from "./helpers/sections";
 
-export default function Upcoming() {
-  const { data, error } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "view all" }));
-  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+function Upcoming() {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    error: tasksError,
+    mutate: mutateTasks,
+  } = useCachedPromise(() => todoist.getTasks({ filter: "all" }));
 
-  if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Unable to get tasks" });
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: projectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+
+  if (projectsError) {
+    handleError({ error: projectsError, title: "Unable to get projects" });
   }
 
-  if (error) {
-    handleError({ error, title: "Unable to get tasks" });
+  if (tasksError) {
+    handleError({ error: tasksError, title: "Unable to get tasks" });
   }
 
-  const tasks = data?.filter((task) => task.due?.date) || [];
-  const sections = getSectionsWithDueDates(tasks);
+  const upcomingTasks = tasks?.filter((task) => task.due?.date) || [];
+  const sections = getSectionsWithDueDates(upcomingTasks);
 
-  return <TaskList sections={sections} isLoading={!data && !error} projects={projects} />;
+  return (
+    <TaskList
+      sections={sections}
+      isLoading={isLoadingTasks || isLoadingProjects}
+      projects={projects}
+      mutateTasks={mutateTasks}
+    />
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <Upcoming />
+    </View>
+  );
 }

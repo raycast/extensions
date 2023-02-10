@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jump",
+  "title": "Jump",
+  "description": "Jump to websites, folders, or files",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "jump",
+      "title": "Jump To Destination",
+      "description": "Jump to a website, folder, or file.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "destination",
+          "placeholder": "destination",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "copy-jump-data",
+      "title": "Copy Jump Data",
+      "description": "Copy jump destinations and weights in JSON format",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-jump-data",
+      "title": "Import Jump Data",
+      "description": "Import destinations and weights from a JSON string",
+      "mode": "view"
+    },
+    {
+      "name": "browse-destinations",
+      "title": "Browse Destinations",
+      "description": "Browse and manage stored jump destinations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

@@ -27,6 +27,7 @@ export default function Main() {
       <Form.TextField id="name" title="Connection Name" />
       <Form.TextField id="address" title="Server Address" placeholder={"A resolvable DNS name or IP"} />
       <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
+      <Form.TextField id="port" title="Port (optional)" placeholder={"An optional custom port (other than 22)"} />
       <Form.TextField
         id="sshKey"
         title="SSH Key Location (optional)"

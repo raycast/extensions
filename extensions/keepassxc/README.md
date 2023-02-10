@@ -36,8 +36,10 @@ This extension works by using `keepassxc-cli`(inside `KeePassXC.app`) in command
 ### Related commands
 
 ```bash
-# List entries
+# List entries for version < 2.7
 keepassxc-cli locate -q /path/to/database.kdbx /
+# List entries for version >= 2.7
+keepassxc-cli find -q /path/to/database.kdbx /
 
 # Get password by entry
 keepassxc-cli show -q -a Password /path/to/database.kdbx entry_name

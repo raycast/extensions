@@ -1,31 +1,11 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
-import json2md from "json2md";
 import { useTable } from "./hooks";
-import { Entry } from "./types/firebase";
 
 export default function Table() {
   const [competition, setCompetition] = useState<string>("bundesliga");
   const table = useTable(competition);
   const [showStats, setShowStats] = useState<boolean>(false);
-
-  const clubStats = (entry: Entry): json2md.DataObject => {
-    return [
-      { h1: entry.club.nameFull },
-      { h2: "Stats" },
-      {
-        p: [
-          `Played: ${entry.gamesPlayed}`,
-          `Won: ${entry.wins}`,
-          `Drawn: ${entry.draws}`,
-          `Lost: ${entry.losses}`,
-          `Goals For: ${entry.goalsScored}`,
-          `Goals Against: ${entry.goalsAgainst}`,
-          `Goal Difference: ${entry.goalDifference}`,
-        ],
-      },
-    ];
-  };
 
   return (
     <List
@@ -61,28 +41,77 @@ export default function Table() {
           };
         }
 
-        const props: Partial<List.Item.Props> = showStats
-          ? {
-              accessories: [{ text: entry.points.toString() }, { icon }],
-              detail: <List.Item.Detail markdown={json2md(clubStats(entry))} />,
+        const accessories: List.Item.Accessory[] = [
+          {
+            text: {
+              color: Color.PrimaryText,
+              value: entry.points.toString(),
+            },
+            tooltip: "Points",
+          },
+          { icon },
+        ];
+
+        if (!showStats) {
+          accessories.unshift(
+            {
+              icon: Icon.SoccerBall,
+              text: entry.gamesPlayed.toString(),
+              tooltip: "Played",
+            },
+            {
+              icon: Icon.Goal,
+              text: `${entry.goalsScored} - ${entry.goalsAgainst}`,
+              tooltip: "Goals For - Goals Against",
             }
-          : {
-              accessories: [
-                { text: `Played: ${entry.gamesPlayed}` },
-                { text: `Points: ${entry.points}` },
-                { icon },
-              ],
-            };
+          );
+        }
 
         return (
           <List.Item
-            key={entry.rank}
-            title={`${entry.rank}. ${entry.club.nameFull}`}
-            icon={{
-              source: entry.club.logoUrl,
-              fallback: "default_clublogo.svg",
-            }}
-            {...props}
+            key={entry.club.id}
+            icon={entry.club.logoUrl}
+            title={entry.rank.toString()}
+            subtitle={entry.club.nameFull}
+            keywords={[entry.club.nameFull, entry.club.nameShort]}
+            accessories={accessories}
+            detail={
+              <List.Item.Detail
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Stats" />
+                    <List.Item.Detail.Metadata.Label
+                      title="Played"
+                      text={entry.gamesPlayed.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Won"
+                      text={entry.wins.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Drawn"
+                      text={entry.draws.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Lost"
+                      text={entry.losses.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals For"
+                      text={entry.goalsScored.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goals Against"
+                      text={entry.goalsAgainst.toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Goal Difference"
+                      text={entry.goalDifference.toString()}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <Action

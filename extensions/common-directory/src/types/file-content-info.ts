@@ -8,3 +8,8 @@ export interface FileContentInfo {
   modified: string;
   lastOpened: string;
 }
+
+export interface FolderPageItem {
+  name: string;
+  isFolder: boolean;
+}
