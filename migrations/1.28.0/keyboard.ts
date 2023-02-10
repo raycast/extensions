@@ -1,10 +1,7 @@
 import { JSCodeshift, Collection } from "jscodeshift";
 import { isVariableDeclared, removeImport, addImport } from "../utils";
 
-export default function KeyboardTransform(
-  j: JSCodeshift,
-  root: Collection<any>
-) {
+export default function KeyboardTransform(j: JSCodeshift, root: Collection<any>) {
   if (isVariableDeclared(j, root, "Keyboard")) {
     throw new Error("Keyboard already defined");
   }

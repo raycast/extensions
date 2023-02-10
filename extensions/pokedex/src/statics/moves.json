@@ -17,7 +17,7 @@
     "type": "Poison",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Acid Armor",
@@ -57,7 +57,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Attack by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Attack by one stage."
   },
   {
     "name": "Barrage",
@@ -107,7 +107,7 @@
     "type": "Dark",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Blizzard",
@@ -117,7 +117,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to freeze the target."
+    "short_effect": "Has a 10% chance to freeze the target."
   },
   {
     "name": "Body Slam",
@@ -127,7 +127,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Bone Club",
@@ -137,7 +137,7 @@
     "type": "Ground",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to make the target flinch."
   },
   {
     "name": "Bonemerang",
@@ -157,7 +157,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Bubble Beam",
@@ -167,7 +167,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Clamp",
@@ -207,7 +207,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 10% chance to confuse the target."
   },
   {
     "name": "Constrict",
@@ -217,7 +217,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Conversion",
@@ -297,7 +297,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 20% chance to confuse the target."
   },
   {
     "name": "Double-Edge",
@@ -397,7 +397,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Explosion",
@@ -417,7 +417,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Fire Punch",
@@ -427,7 +427,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Fire Spin",
@@ -457,7 +457,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Flash",
@@ -587,7 +587,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "High Jump Kick",
@@ -647,7 +647,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to make the target flinch."
   },
   {
     "name": "Hypnosis",
@@ -667,7 +667,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to freeze the target."
+    "short_effect": "Has a 10% chance to freeze the target."
   },
   {
     "name": "Ice Punch",
@@ -677,7 +677,7 @@
     "type": "Ice",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to freeze the target."
+    "short_effect": "Has a 10% chance to freeze the target."
   },
   {
     "name": "Jump Kick",
@@ -747,7 +747,7 @@
     "type": "Ghost",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Light Screen",
@@ -947,7 +947,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 30% chance to poison the target."
   },
   {
     "name": "Pound",
@@ -967,7 +967,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 10% chance to confuse the target."
   },
   {
     "name": "Psychic",
@@ -977,7 +977,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Psywave",
@@ -1077,7 +1077,7 @@
     "type": "Rock",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Rock Throw",
@@ -1097,7 +1097,7 @@
     "type": "Fighting",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Sand Attack",
@@ -1187,7 +1187,7 @@
     "type": "Flying",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "User charges for one turn before attacking.  Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "User charges for one turn before attacking.  Has a 30% chance to make the target flinch."
   },
   {
     "name": "Slam",
@@ -1227,7 +1227,7 @@
     "type": "Poison",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 30% chance to poison the target."
   },
   {
     "name": "Smog",
@@ -1237,7 +1237,7 @@
     "type": "Poison",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 40% chance to poison the target."
   },
   {
     "name": "Smokescreen",
@@ -1317,7 +1317,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Strength",
@@ -1487,7 +1487,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Thunderbolt",
@@ -1497,7 +1497,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 10% chance to paralyze the target."
   },
   {
     "name": "Thunder Punch",
@@ -1507,7 +1507,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 10% chance to paralyze the target."
   },
   {
     "name": "Thunder Shock",
@@ -1517,7 +1517,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 10% chance to paralyze the target."
   },
   {
     "name": "Thunder Wave",
@@ -1557,7 +1557,7 @@
     "type": "Normal",
     "damage_class": "special",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to burn, freeze, or paralyze the target."
+    "short_effect": "Has a 20% chance to burn, freeze, or paralyze the target."
   },
   {
     "name": "Twineedle",
@@ -1567,7 +1567,7 @@
     "type": "Bug",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Hits twice in the same turn.  Has a $effect_chance% chance to poison the target."
+    "short_effect": "Hits twice in the same turn.  Has a 20% chance to poison the target."
   },
   {
     "name": "Vise Grip",
@@ -1597,7 +1597,7 @@
     "type": "Water",
     "damage_class": "physical",
     "generation": "Generation I",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 20% chance to make the target flinch."
   },
   {
     "name": "Water Gun",
@@ -1667,7 +1667,7 @@
     "type": "Rock",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to raise all of the user's stats by one stage."
+    "short_effect": "Has a 10% chance to raise all of the user's stats by one stage."
   },
   {
     "name": "Attract",
@@ -1767,7 +1767,7 @@
     "type": "Dark",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 20% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Curse",
@@ -1807,7 +1807,7 @@
     "type": "Dragon",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Dynamic Punch",
@@ -1817,7 +1817,7 @@
     "type": "Fighting",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 100% chance to confuse the target."
   },
   {
     "name": "Encore",
@@ -1887,7 +1887,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to burn the target.  Lets frozen Pokémon thaw themselves."
+    "short_effect": "Has a 10% chance to burn the target.  Lets frozen Pokémon thaw themselves."
   },
   {
     "name": "Foresight",
@@ -1967,7 +1967,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Iron Tail",
@@ -1977,7 +1977,7 @@
     "type": "Steel",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 30% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Lock-On",
@@ -2037,7 +2037,7 @@
     "type": "Steel",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Attack by one stage."
+    "short_effect": "Has a 10% chance to raise the user's Attack by one stage."
   },
   {
     "name": "Milk Drink",
@@ -2097,7 +2097,7 @@
     "type": "Ground",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 100% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Nightmare",
@@ -2117,7 +2117,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 50% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Outrage",
@@ -2157,7 +2157,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to freeze the target."
+    "short_effect": "Has a 10% chance to freeze the target."
   },
   {
     "name": "Present",
@@ -2247,7 +2247,7 @@
     "type": "Fighting",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 50% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Rollout",
@@ -2267,7 +2267,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to burn the target.  Lets frozen Pokémon thaw themselves."
+    "short_effect": "Has a 50% chance to burn the target.  Lets frozen Pokémon thaw themselves."
   },
   {
     "name": "Safeguard",
@@ -2307,7 +2307,7 @@
     "type": "Ghost",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 20% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Sketch",
@@ -2337,7 +2337,7 @@
     "type": "Poison",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 30% chance to poison the target."
   },
   {
     "name": "Snore",
@@ -2347,7 +2347,7 @@
     "type": "Normal",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch.  Only works if the user is sleeping."
+    "short_effect": "Has a 30% chance to make the target flinch.  Only works if the user is sleeping."
   },
   {
     "name": "Spark",
@@ -2357,7 +2357,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Spider Web",
@@ -2397,7 +2397,7 @@
     "type": "Steel",
     "damage_class": "physical",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Defense by one stage."
+    "short_effect": "Has a 10% chance to raise the user's Defense by one stage."
   },
   {
     "name": "Sunny Day",
@@ -2477,7 +2477,7 @@
     "type": "Dragon",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 20% chance to make the target flinch."
   },
   {
     "name": "Vital Throw",
@@ -2507,7 +2507,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation II",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 100% chance to paralyze the target."
   },
   {
     "name": "Aerial Ace",
@@ -2567,7 +2567,7 @@
     "type": "Ghost",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Blast Burn",
@@ -2587,7 +2587,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has an increased chance for a critical hit and a $effect_chance% chance to burn the target."
+    "short_effect": "Has an increased chance for a critical hit and a 10% chance to burn the target."
   },
   {
     "name": "Block",
@@ -2697,7 +2697,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 50% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Dive",
@@ -2767,7 +2767,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to make the target flinch."
   },
   {
     "name": "Facade",
@@ -2887,7 +2887,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Helping Hand",
@@ -3007,7 +3007,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 50% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Magical Leaf",
@@ -3057,7 +3057,7 @@
     "type": "Steel",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Attack by one stage."
+    "short_effect": "Has a 20% chance to raise the user's Attack by one stage."
   },
   {
     "name": "Mist Ball",
@@ -3067,7 +3067,7 @@
     "type": "Psychic",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 50% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Muddy Water",
@@ -3077,7 +3077,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 30% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Mud Shot",
@@ -3087,7 +3087,7 @@
     "type": "Ground",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Mud Sport",
@@ -3117,7 +3117,7 @@
     "type": "Grass",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Odor Sleuth",
@@ -3147,7 +3147,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to badly poison the target."
+    "short_effect": "Has a 50% chance to badly poison the target."
   },
   {
     "name": "Poison Tail",
@@ -3157,7 +3157,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has an increased chance for a critical hit and a $effect_chance% chance to poison the target."
+    "short_effect": "Has an increased chance for a critical hit and a 10% chance to poison the target."
   },
   {
     "name": "Psycho Boost",
@@ -3217,7 +3217,7 @@
     "type": "Rock",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Role Play",
@@ -3247,7 +3247,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to inflict a status effect which depends upon the terrain."
+    "short_effect": "Has a 30% chance to inflict a status effect which depends upon the terrain."
   },
   {
     "name": "Shadow Blast",
@@ -3277,7 +3277,7 @@
     "type": "Shadow",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 10% chance to paralyze the target."
   },
   {
     "name": "Shadow Break",
@@ -3297,7 +3297,7 @@
     "type": "Shadow",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to freeze the target."
+    "short_effect": "Has a 10% chance to freeze the target."
   },
   {
     "name": "Shadow Down",
@@ -3327,7 +3327,7 @@
     "type": "Shadow",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Shadow Half",
@@ -3467,7 +3467,7 @@
     "type": "Bug",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 10% chance to confuse the target."
   },
   {
     "name": "Silver Wind",
@@ -3477,7 +3477,7 @@
     "type": "Bug",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to raise all of the user's stats by one stage."
+    "short_effect": "Has a 10% chance to raise all of the user's stats by one stage."
   },
   {
     "name": "Skill Swap",
@@ -3647,7 +3647,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation III",
-    "short_effect": "User takes 1/3 the damage inflicted in recoil.  Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "User takes 1/3 the damage inflicted in recoil.  Has a 10% chance to paralyze the target."
   },
   {
     "name": "Water Pulse",
@@ -3657,7 +3657,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation III",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 20% chance to confuse the target."
   },
   {
     "name": "Water Sport",
@@ -3737,7 +3737,7 @@
     "type": "Flying",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Aqua Jet",
@@ -3847,7 +3847,7 @@
     "type": "Bug",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Bullet Punch",
@@ -3877,7 +3877,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Special Attack by one stage."
+    "short_effect": "Has a 70% chance to raise the user's Special Attack by one stage."
   },
   {
     "name": "Chatter",
@@ -3917,7 +3917,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has an increased chance for a critical hit and a $effect_chance% chance to poison the target."
+    "short_effect": "Has an increased chance for a critical hit and a 10% chance to poison the target."
   },
   {
     "name": "Crush Grip",
@@ -3937,7 +3937,7 @@
     "type": "Dark",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 20% chance to make the target flinch."
   },
   {
     "name": "Dark Void",
@@ -3977,7 +3977,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Double Hit",
@@ -4017,7 +4017,7 @@
     "type": "Dragon",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 20% chance to make the target flinch."
   },
   {
     "name": "Drain Punch",
@@ -4037,7 +4037,7 @@
     "type": "Ground",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Embargo",
@@ -4057,7 +4057,7 @@
     "type": "Grass",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Feint",
@@ -4077,7 +4077,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to burn the target and a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to burn the target and a 10% chance to make the target flinch."
   },
   {
     "name": "Flare Blitz",
@@ -4087,7 +4087,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "User takes 1/3 the damage inflicted in recoil.  Has a $effect_chance% chance to burn the target."
+    "short_effect": "User takes 1/3 the damage inflicted in recoil.  Has a 10% chance to burn the target."
   },
   {
     "name": "Flash Cannon",
@@ -4097,7 +4097,7 @@
     "type": "Steel",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Fling",
@@ -4117,7 +4117,7 @@
     "type": "Fighting",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Special Defense by one stage."
   },
   {
     "name": "Force Palm",
@@ -4127,7 +4127,7 @@
     "type": "Fighting",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 30% chance to paralyze the target."
   },
   {
     "name": "Gastro Acid",
@@ -4187,7 +4187,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 30% chance to poison the target."
   },
   {
     "name": "Gyro Ball",
@@ -4267,7 +4267,7 @@
     "type": "Ice",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to freeze the target and a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to freeze the target and a 10% chance to make the target flinch."
   },
   {
     "name": "Ice Shard",
@@ -4287,7 +4287,7 @@
     "type": "Steel",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Judgment",
@@ -4317,7 +4317,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 30% chance to burn the target."
   },
   {
     "name": "Leaf Storm",
@@ -4417,7 +4417,7 @@
     "type": "Steel",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 30% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Mud Bomb",
@@ -4427,7 +4427,7 @@
     "type": "Ground",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 30% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Nasty Plot",
@@ -4467,7 +4467,7 @@
     "type": "Ghost",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to raise all of the user's stats by one stage."
+    "short_effect": "Has a 10% chance to raise all of the user's stats by one stage."
   },
   {
     "name": "Payback",
@@ -4497,7 +4497,7 @@
     "type": "Poison",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 30% chance to poison the target."
   },
   {
     "name": "Power Gem",
@@ -4587,7 +4587,7 @@
     "type": "Normal",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 20% chance to confuse the target."
   },
   {
     "name": "Rock Polish",
@@ -4637,7 +4637,7 @@
     "type": "Grass",
     "damage_class": "special",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Defense by two stages."
+    "short_effect": "Has a 40% chance to lower the target's Special Defense by two stages."
   },
   {
     "name": "Shadow Claw",
@@ -4737,7 +4737,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target and a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 10% chance to paralyze the target and a 10% chance to make the target flinch."
   },
   {
     "name": "Toxic Spikes",
@@ -4847,7 +4847,7 @@
     "type": "Psychic",
     "damage_class": "physical",
     "generation": "Generation IV",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 20% chance to make the target flinch."
   },
   {
     "name": "Acid Spray",
@@ -4917,7 +4917,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 20% chance to burn the target."
   },
   {
     "name": "Bolt Strike",
@@ -4927,7 +4927,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 20% chance to paralyze the target."
   },
   {
     "name": "Bulldoze",
@@ -4937,7 +4937,7 @@
     "type": "Ground",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Chip Away",
@@ -5067,7 +5067,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Special Attack by one stage."
+    "short_effect": "Has a 50% chance to raise the user's Special Attack by one stage."
   },
   {
     "name": "Final Gambit",
@@ -5127,7 +5127,7 @@
     "type": "Ice",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Requires a turn to charge before attacking.  Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Requires a turn to charge before attacking.  Has a 30% chance to paralyze the target."
   },
   {
     "name": "Frost Breath",
@@ -5227,7 +5227,7 @@
     "type": "Psychic",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Heat Crash",
@@ -5287,7 +5287,7 @@
     "type": "Flying",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 30% chance to confuse the target."
   },
   {
     "name": "Ice Burn",
@@ -5297,7 +5297,7 @@
     "type": "Ice",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Requires a turn to charge before attacking.  Has a $effect_chance% chance to burn the target."
+    "short_effect": "Requires a turn to charge before attacking.  Has a 30% chance to burn the target."
   },
   {
     "name": "Icicle Crash",
@@ -5307,7 +5307,7 @@
     "type": "Ice",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Incinerate",
@@ -5327,7 +5327,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 100% chance to burn the target."
   },
   {
     "name": "Leaf Tornado",
@@ -5337,7 +5337,7 @@
     "type": "Grass",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 50% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Low Sweep",
@@ -5367,7 +5367,7 @@
     "type": "Dark",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's accuracy by one stage."
+    "short_effect": "Has a 40% chance to lower the target's accuracy by one stage."
   },
   {
     "name": "Power Split",
@@ -5447,7 +5447,7 @@
     "type": "Water",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 50% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Reflect Type",
@@ -5467,7 +5467,7 @@
     "type": "Normal",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to put the target to sleep."
+    "short_effect": "Has a 10% chance to put the target to sleep."
   },
   {
     "name": "Retaliate",
@@ -5507,7 +5507,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 30% chance to burn the target."
   },
   {
     "name": "Searing Shot",
@@ -5517,7 +5517,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 30% chance to burn the target."
   },
   {
     "name": "Secret Sword",
@@ -5577,7 +5577,7 @@
     "type": "Poison",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to poison the target."
+    "short_effect": "Has a 10% chance to poison the target."
   },
   {
     "name": "Smack Down",
@@ -5597,7 +5597,7 @@
     "type": "Dark",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Soak",
@@ -5617,7 +5617,7 @@
     "type": "Bug",
     "damage_class": "physical",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Stored Power",
@@ -5647,7 +5647,7 @@
     "type": "Bug",
     "damage_class": "special",
     "generation": "Generation V",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Synchronoise",
@@ -5857,7 +5857,7 @@
     "type": "Rock",
     "damage_class": "physical",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to raise the user's Defense by two stages for each target hit."
+    "short_effect": "Has a 50% chance to raise the user's Defense by two stages for each target hit."
   },
   {
     "name": "Disarming Voice",
@@ -6147,7 +6147,7 @@
     "type": "Fairy",
     "damage_class": "special",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 30% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Mystical Fire",
@@ -6157,7 +6157,7 @@
     "type": "Fire",
     "damage_class": "special",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Noble Roar",
@@ -6177,7 +6177,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 100% chance to paralyze the target."
   },
   {
     "name": "Oblivion Wing",
@@ -6257,7 +6257,7 @@
     "type": "Fairy",
     "damage_class": "physical",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Attack by one stage."
+    "short_effect": "Has a 10% chance to lower the target's Attack by one stage."
   },
   {
     "name": "Powder",
@@ -6317,7 +6317,7 @@
     "type": "Water",
     "damage_class": "special",
     "generation": "Generation VI",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 30% chance to burn the target."
   },
   {
     "name": "Sticky Web",
@@ -6977,7 +6977,7 @@
     "type": "Water",
     "damage_class": "physical",
     "generation": "Generation VII",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 20% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Lunge",
@@ -7237,7 +7237,7 @@
     "type": "Ghost",
     "damage_class": "physical",
     "generation": "Generation VII",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Defense by one stage."
+    "short_effect": "Has a 20% chance to lower the target's Defense by one stage."
   },
   {
     "name": "Shattered Psyche",
@@ -7417,7 +7417,7 @@
     "type": "Electric",
     "damage_class": "special",
     "generation": "Generation VII",
-    "short_effect": "Has a $effect_chance% chance to paralyze the target."
+    "short_effect": "Has a 100% chance to paralyze the target."
   },
   {
     "name": "Stomping Tantrum",
@@ -7587,7 +7587,7 @@
     "type": "Electric",
     "damage_class": "physical",
     "generation": "Generation VII",
-    "short_effect": "Has a $effect_chance% chance to make the target flinch."
+    "short_effect": "Has a 30% chance to make the target flinch."
   },
   {
     "name": "Zippy Zap",
@@ -7777,7 +7777,7 @@
     "type": "Grass",
     "damage_class": "physical",
     "generation": "Generation VIII",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Speed by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Speed by one stage."
   },
   {
     "name": "Dual Wingbeat",
@@ -8237,7 +8237,7 @@
     "type": "Fire",
     "damage_class": "physical",
     "generation": "Generation VIII",
-    "short_effect": "Has a $effect_chance% chance to burn the target."
+    "short_effect": "Has a 10% chance to burn the target."
   },
   {
     "name": "Rising Voltage",
@@ -8317,7 +8317,7 @@
     "type": "Fairy",
     "damage_class": "physical",
     "generation": "Generation VIII",
-    "short_effect": "Has a $effect_chance% chance to lower the target's Special Attack by one stage."
+    "short_effect": "Has a 100% chance to lower the target's Special Attack by one stage."
   },
   {
     "name": "Steel Beam",
@@ -8347,7 +8347,7 @@
     "type": "Fairy",
     "damage_class": "special",
     "generation": "Generation VIII",
-    "short_effect": "Has a $effect_chance% chance to confuse the target."
+    "short_effect": "Has a 20% chance to confuse the target."
   },
   {
     "name": "Stuff Cheeks",

@@ -4,16 +4,16 @@ The Keyboard APIs are useful to make your actions accessible via the keyboard sh
 
 ## Types
 
-### Shortcut
+### Keyboard.Shortcut
 
 A keyboard shortcut is defined by one or more modifier keys (command, control, etc.) and a single key equivalent (a character or special key).
 
-See [KeyModifier](#keymodifier) and [KeyEquivalent](#keyequivalent) for supported values.
+See [KeyModifier](#keyboard.keymodifier) and [KeyEquivalent](#keyboard.keyequivalent) for supported values.
 
 #### Example
 
 ```typescript
-import { ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -21,22 +21,18 @@ export default function Command() {
       markdown="Let's play some games 👾"
       actions={
         <ActionPanel title="Game controls">
-          <ActionPanel.Item
-            title="Up"
-            shortcut={{ modifiers: ["opt"], key: "arrowUp" }}
-            onAction={() => console.log("Go up")}
-          />
-          <ActionPanel.Item
+          <Action title="Up" shortcut={{ modifiers: ["opt"], key: "arrowUp" }} onAction={() => console.log("Go up")} />
+          <Action
             title="Down"
             shortcut={{ modifiers: ["opt"], key: "arrowDown" }}
             onAction={() => console.log("Go down")}
           />
-          <ActionPanel.Item
+          <Action
             title="Left"
             shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
             onAction={() => console.log("Go left")}
           />
-          <ActionPanel.Item
+          <Action
             title="Right"
             shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
             onAction={() => console.log("Go right")}
@@ -50,12 +46,9 @@ export default function Command() {
 
 #### Properties
 
-| Name      | Type                                         | Required | Description                                 |
-| :-------- | :------------------------------------------- | :------- | :------------------------------------------ |
-| key       | <code>[KeyEquivalent](#keyequivalent)</code> | Yes      | The key of the keyboard shortcut.           |
-| modifiers | <code>[KeyModifier](#keymodifier)[]</code>   | Yes      | The modifier keys of the keyboard shortcut. |
+<InterfaceTableFromJSDoc name="Keyboard.Shortcut" />
 
-### KeyEquivalent
+### Keyboard.KeyEquivalent
 
 ```typescript
 KeyEquivalent: "a" |
@@ -134,12 +127,12 @@ KeyEquivalent: "a" |
   "backspace";
 ```
 
-KeyEquivalent of a [Shortcut](#shortcut)
+KeyEquivalent of a [Shortcut](#keyboard.shortcut)
 
-### KeyModifier
+### Keyboard.KeyModifier
 
 ```typescript
 KeyModifier: "cmd" | "ctrl" | "opt" | "shift";
 ```
 
-Modifier of a [Shortcut](#shortcut)
+Modifier of a [Shortcut](#keyboard.shortcut)

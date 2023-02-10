@@ -1,4 +1,4 @@
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { File } from "../types";
 
@@ -6,7 +6,7 @@ const VISITED_FIGMA_FILES_KEY = "VISITED_FIGMA_FILES";
 const VISITED_FIGMA_FILES_LENGTH = 5;
 
 async function loadVisitedFiles() {
-  const item = await getLocalStorageItem<string>(VISITED_FIGMA_FILES_KEY);
+  const item = await LocalStorage.getItem<string>(VISITED_FIGMA_FILES_KEY);
   if (item) {
     const parsed = JSON.parse(item);
     return parsed as File[];
@@ -17,11 +17,11 @@ async function loadVisitedFiles() {
 
 async function saveVisitedFiles(file: File[]) {
   const data = JSON.stringify(file);
-  await setLocalStorageItem(VISITED_FIGMA_FILES_KEY, data);
+  await LocalStorage.setItem(VISITED_FIGMA_FILES_KEY, data);
 }
 
 export async function clearVisitedFiles() {
-  return await removeLocalStorageItem(VISITED_FIGMA_FILES_KEY);
+  return await LocalStorage.removeItem(VISITED_FIGMA_FILES_KEY);
 }
 
 export function useVisitedFiles() {
@@ -31,10 +31,13 @@ export function useVisitedFiles() {
     loadVisitedFiles().then(setFiles);
   }, []);
 
-  function visitFile(file: File) {
-    const nextFiles = [file, ...(files?.filter((item) => item !== file) ?? [])].slice(0, VISITED_FIGMA_FILES_LENGTH);
+  async function visitFile(file: File) {
+    const nextFiles = [file, ...(files?.filter((item) => item.name !== file.name) ?? [])].slice(
+      0,
+      VISITED_FIGMA_FILES_LENGTH
+    );
     setFiles(nextFiles);
-    saveVisitedFiles(nextFiles);
+    await saveVisitedFiles(nextFiles);
   }
 
   return { files, visitFile, isLoading: !files };

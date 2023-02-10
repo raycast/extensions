@@ -1,10 +1,7 @@
 import { JSCodeshift, Collection } from "jscodeshift";
-import { isVariableDeclared, removeImport, addImport } from "../utils";
+import { removeImport, addImport } from "../utils";
 
-export default function ActionPanelTransform(
-  j: JSCodeshift,
-  root: Collection<any>
-) {
+export default function ListTransform(j: JSCodeshift, root: Collection<any>) {
   let needToAddImport = false;
 
   for (let name of [
@@ -18,10 +15,7 @@ export default function ActionPanelTransform(
       .replaceWith((p) => {
         needToAddImport = true;
         return j.jsxOpeningElement(
-          j.jsxMemberExpression(
-            j.jsxIdentifier("List"),
-            j.jsxIdentifier(name[1])
-          ),
+          j.jsxMemberExpression(j.jsxIdentifier("List"), j.jsxIdentifier(name[1])),
           p.node.attributes,
           p.node.selfClosing
         );
@@ -32,12 +26,7 @@ export default function ActionPanelTransform(
       })
       .replaceWith((p) => {
         needToAddImport = true;
-        return j.jsxClosingElement(
-          j.jsxMemberExpression(
-            j.jsxIdentifier("List"),
-            j.jsxIdentifier(name[1])
-          )
-        );
+        return j.jsxClosingElement(j.jsxMemberExpression(j.jsxIdentifier("List"), j.jsxIdentifier(name[1])));
       });
 
     root
@@ -49,10 +38,7 @@ export default function ActionPanelTransform(
       .replaceWith((p) => {
         needToAddImport = true;
         return j.tsTypeReference(
-          j.tsQualifiedName(
-            j.tsQualifiedName(j.identifier("List"), j.identifier(name[1])),
-            j.identifier("Props")
-          ),
+          j.tsQualifiedName(j.tsQualifiedName(j.identifier("List"), j.identifier(name[1])), j.identifier("Props")),
           p.node.typeParameters
         );
       });
@@ -70,10 +56,7 @@ export default function ActionPanelTransform(
       })
       .replaceWith((p) => {
         needToAddImport = true;
-        return j.tsTypeReference(
-          j.tsQualifiedName(j.identifier("List"), j.identifier(name[1])),
-          p.node.typeParameters
-        );
+        return j.tsTypeReference(j.tsQualifiedName(j.identifier("List"), j.identifier(name[1])), p.node.typeParameters);
       });
 
     removeImport(j, root, name[0]);

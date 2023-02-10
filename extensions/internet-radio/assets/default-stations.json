@@ -1,0 +1,204 @@
+{
+    "Top 80 Radio": {
+        "website": "https://www.top80radio.com",
+        "stream": "https://securestreams6.autopo.st:2321/stream.mp3",
+        "genres": [
+            "80s",
+            "rock",
+            "pop",
+            "disco"
+        ]
+    },
+    "Radio Bloodstream": {
+        "website": "http://www.radiobloodstream.com/",
+        "stream": "https://www.internet-radio.com/servers/tools/playlistgenerator/?u=http://s8.myradiostream.com:58238/listen.pls?sid=1&t=.pls",
+        "genres": [
+            "rock",
+            "metal",
+            "heavy metal",
+            "punk"
+        ]
+    },
+    "Psyndora Chillout": {
+        "website": "https://www.psyndora.com/chill.html",
+        "stream": "https://cast.magicstreams.gr:9125/stream/1/",
+        "genres": [
+            "downtempo",
+            "chillout",
+            "psychill"
+        ]
+    },
+    "CINEMIX": {
+        "website": "http://www.cinemix.radio",
+        "stream": "http://51.81.46.118:1190/stream/1/",
+        "genres": [
+            "soundtracks"
+        ]
+    },
+    "Pink Noise Radio": {
+        "website": "https://www.internet-radio.com/station/pinknoise/",
+        "stream": "https://uk1.internet-radio.com/proxy/pinknoise?mp=/stream",
+        "genres": [
+            "noise",
+            "ambient",
+            "chillout"
+        ]
+    },
+    "Brown Noise Radio": {
+        "website": "https://www.internet-radio.com/station/brownnoise/",
+        "stream": "https://uk1.internet-radio.com/proxy/brownnoise?mp=/stream",
+        "genres": [
+            "noise",
+            "ambient",
+            "chillout"
+        ]
+    },
+    "White Noise Radio": {
+        "website": "https://www.internet-radio.com/station/whitenoise/",
+        "stream": "https://uk1.internet-radio.com/proxy/whitenoise?mp=/stream",
+        "genres": [
+            "noise",
+            "ambient",
+            "chillout"
+        ]
+    },
+    "Radio Summernight": {
+        "website": "http://radiosummernight.ch",
+        "stream": "https://stream.laut.fm/radiosummernight",
+        "genres": [
+            "pop",
+            "alternative",
+            "rock"
+        ]
+    },
+    "Frontier Country": {
+        "website": "http://www.frontiercountryonline.com",
+        "stream": "http://192.111.140.11:8205/stream/1/",
+        "genres": [
+            "country"
+        ]
+    },
+    "Dubstep.fm": {
+        "website": "https://www.dubstep.fm",
+        "stream": "http://50.117.1.60/stream/1/",
+        "genres": [
+            "dubstep",
+            "electronic"
+        ]
+    },
+    "Blues Radio": {
+        "website": "http://www.bluesradio.gr",
+        "stream": "http://i4.streams.ovh:8352/stream/1/",
+        "genres": [
+            "blues"
+        ]
+    },
+    "BBC Radio 1": {
+        "website": "https://tunein.com/radio/BBC-Radio-1-988-s24939/",
+        "stream": "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
+        "genres": [
+            "pop"
+        ]
+    },
+    "BBC World Service": {
+        "website": "https://tunein.com/radio/BBC-World-Service-News-s24948/",
+        "stream": "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+        "genres": [
+            "news",
+            "talk"
+        ]
+    },
+    "KPOP Radio": {
+        "website": "https://zeno.fm/radio/kpop-radio",
+        "stream": "https://stream-55.zeno.fm/382yfn6u498uv?zs=mvrPGxDnTw-zWW4K1sLI2A",
+        "genres": [
+            "kpop"
+        ]
+    },
+    "NPR": {
+        "website": "https://www.npr.org",
+        "stream": "https://playerservices.streamtheworld.com/api/livestream-redirect/WMEAFM.mp3",
+        "genres": [
+            "news",
+            "talk"
+        ]
+    },
+    "Hot Hitz": {
+        "website": "http://player.100hitz.com",
+        "stream": "https://pureplay.cdnstream1.com/6027_128.mp3",
+        "genres": [
+            "hits",
+            "pop"
+        ]
+    },
+    "ESPN": {
+        "website": "https://www.iheart.com/live/espn-radio-7903/",
+        "stream": "https://live.wostreaming.net/direct/espn-network-48",
+        "genres": [
+            "sports",
+            "talk"
+        ]
+    },
+    "Greatest Hits Radio USA": {
+        "website": "https://www.greatesthitsradiousa.com/",
+        "stream": "https://stream.rcast.net/69558.mp3",
+        "genres": [
+            "hits",
+            "oldies"
+        ]
+    },
+    "Adagio.FM": {
+        "website": "http://adagio.fm",
+        "stream": "http://hi5.adagio.fm/;",
+        "genres": [
+            "classical"
+        ]
+    },
+    "Ambient Sleeping Pill": {
+        "website": "https://ambientsleepingpill.com",
+        "stream": "http://radio.stereoscenic.com/asp-h",
+        "genres": [
+            "ambient",
+            "chillout"
+        ]
+    },
+    "Exclusively Birdsong": {
+        "website": "https://www.getmeradio.com/stations/exclusivelybirdsong-3243/",
+        "stream": "https://streaming.exclusive.radio/er/birdsong/icecast.audio",
+        "genres": [
+            "ambient"
+        ]
+    },
+    "Latin Hits": {
+        "website": "https://tunein.com/radio/Latin-Hits-s249995/",
+        "stream": "https://rfcmedia.streamguys1.com/latinhits.mp3",
+        "genres": [
+            "latin",
+            "world"
+        ]
+    },
+    "HI95 Kauai": {
+        "website": "http://www.hi95kauai.com/",
+        "stream": "https://pacificmedia.cdnstream1.com/2789_64.aac",
+        "genres": [
+            "hawaiian",
+            "tropical"
+        ]
+    },
+    "talkSPORT": {
+        "website": "https://talksport.com",
+        "stream": "https://radio.talksport.com/stream",
+        "genres": [
+            "sports",
+            "talk"
+        ]
+    },
+    "Irish Pub Radio": {
+        "website": "http://www.irishpubradio.com/",
+        "stream": "https://solid24.streamupsolutions.com/proxy/vbkiacud?mp=/live",
+        "genres": [
+            "irish",
+            "world"
+        ]
+    }
+}

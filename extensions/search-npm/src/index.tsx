@@ -1,30 +1,34 @@
 import { List } from '@raycast/api'
 import { useState } from 'react'
-import { fetchPackages } from './utils/fetchPackages'
-import { NpmsFetchResponse } from './npmsResponse.model'
+import { useFetch } from '@raycast/utils'
 import { PackageListItem } from './PackagListItem'
+import { NpmSearchFetchResponse } from './npmResponse.model'
 
 export default function PackageList() {
-  const [results, setResults] = useState<NpmsFetchResponse>([])
-  const [loading, setLoading] = useState<boolean>(false)
-
-  const onSearchTextChange = async (text: string) => {
-    setLoading(true)
-    const response = await fetchPackages(text.replace(/\s/g, '+'))
-    setResults(response)
-    setLoading(false)
-  }
+  const [searchTerm, setSearchTerm] = useState('')
+  const { isLoading, data } = useFetch<NpmSearchFetchResponse>(
+    `https://registry.npmjs.org/-/v1/search?text=${searchTerm.replace(
+      /\s/g,
+      '+',
+    )}`,
+  )
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       searchBarPlaceholder={`Search packages, like "promises"…`}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={setSearchTerm}
       throttle
     >
-      {results?.length
-        ? results.map((result) => {
-            return <PackageListItem key={result.package.name} result={result} />
+      {data?.objects
+        ? data.objects.map((result) => {
+            return (
+              <PackageListItem
+                key={result.package.name}
+                result={result}
+                searchTerm={searchTerm}
+              />
+            )
           })
         : null}
     </List>

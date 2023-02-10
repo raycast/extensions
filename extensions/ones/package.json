@@ -2,20 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ones",
   "title": "ONES",
-  "description": "Raycast Extensions for ones.ai",
-  "icon": "command-icon-black.png",
+  "description": "Raycast Extension for ONES",
+  "icon": "icon.png",
   "author": "k8scat",
   "license": "MIT",
   "keywords": [
     "ones",
-    "ones.ai",
-    "raycast",
-    "extension",
     "search",
     "manhour",
     "task",
     "project",
-    "wiki"
+    "wiki",
+    "page"
   ],
   "commands": [
     {
@@ -71,7 +69,7 @@
       "name": "manage-manhour",
       "title": "Manage Manhour",
       "subtitle": "ONES Project",
-      "description": "Query manhour, record manhour, modify manhour and delete manhour in ONES Project",
+      "description": "Query, record, modify or delete manhour in ONES Project",
       "mode": "view"
     }
   ],
@@ -82,7 +80,7 @@
       "required": true,
       "title": "URL",
       "description": "URL for ONES",
-      "default": "https://ones.ai"
+      "default": "https://ones.com"
     },
     {
       "name": "email",
@@ -103,29 +101,29 @@
       "type": "textfield",
       "required": false,
       "title": "Team UUID",
-      "description": "Team UUID for ONES"
+      "description": "Team UUID for ONES, should be set if you are in multiple teams"
     },
     {
       "name": "manhourUser",
       "type": "textfield",
       "required": false,
-      "title": "Manhour Owner",
-      "description": "Manhour owner name or uuid, set to ONES API - UserUUID while empty"
+      "title": "Manhour Owner UUID",
+      "description": "Manhour owner uuid, default is login user uuid"
     },
     {
       "name": "manhourDays",
       "type": "textfield",
       "required": false,
       "title": "Manhour Days",
-      "description": "Query Manhours in n days, default set to 7",
+      "description": "Search manhour in some days, default is 7",
       "default": "7"
     },
     {
       "name": "manhourTaskUUID",
       "type": "textfield",
       "required": false,
-      "title": "Manhour Task",
-      "description": "UUID of the task where manhour record"
+      "title": "Manhour Task UUID",
+      "description": "Default task uuid for adding manhour"
     },
     {
       "name": "manhourMode",
@@ -147,7 +145,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.39.3",
     "axios": "^0.24.0",
     "moment": "^2.29.1"
   },
@@ -163,6 +161,11 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "migrate": "ray migrate",
+    "pc": "prettier --check .",
+    "pw": "prettier --write .",
+    "fix-lint": "ray lint --fix"
   }
 }

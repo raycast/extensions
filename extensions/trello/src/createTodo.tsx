@@ -54,7 +54,6 @@ export default function Command() {
     }
 
     function handleSubmit(values: Values) {
-        console.log(values);
         postTodo(values);
     }
 

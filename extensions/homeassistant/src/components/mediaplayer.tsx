@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Color, CopyToClipboardAction } from "@raycast/api";
+import { ActionPanel, Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -30,11 +30,11 @@ export function SelectSourceAction(props: { state: State }): JSX.Element | null 
     return (
       <ActionPanel.Submenu
         title={title}
-        icon={{ source: Icon.TextDocument, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.BlankDocument, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       >
         {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
+          <Action key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -62,7 +62,7 @@ export function SelectVolumeAction(props: { state: State }): JSX.Element | null 
         shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
       >
         {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
+          <Action key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -75,8 +75,48 @@ export function CopyTrackToClipboard(props: { state: State }): JSX.Element | nul
   const song = getMediaPlayerTitleAndArtist(state);
   if (song) {
     return (
-      <CopyToClipboardAction title="Copy Track" content={song} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
+      <Action.CopyToClipboard title="Copy Track" content={song} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
     );
   }
   return null;
+}
+
+export function MediaPlayerTurnOnAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const handle = async () => {
+    await ha.callService("media_player", "turn_on", { entity_id: state.entity_id });
+  };
+  const s = state.state;
+  if (s !== "off" && s !== "standby") {
+    return null;
+  }
+
+  return (
+    <Action
+      title="Turn On"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd"], key: "o" }}
+      icon={{ source: "power-btn.png", tintColor: Color.Green }}
+    />
+  );
+}
+
+export function MediaPlayerTurnOffAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const handle = async () => {
+    await ha.callService("media_player", "turn_off", { entity_id: state.entity_id });
+  };
+  const s = state.state;
+  if (s === "off") {
+    return null;
+  }
+
+  return (
+    <Action
+      title="Turn Off"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+      icon={{ source: "power-btn.png", tintColor: Color.Red }}
+    />
+  );
 }

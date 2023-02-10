@@ -1,19 +1,15 @@
 import {
+  Action,
   ActionPanel,
-  AlertOptions,
-  allLocalStorageItems,
-  clearLocalStorage,
+  Alert,
   Color,
   confirmAlert,
   Form,
   Icon,
   List,
-  PushAction,
-  removeLocalStorageItem,
-  setLocalStorageItem,
+  LocalStorage,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
+  Toast,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -21,16 +17,16 @@ import { getCurrentBackend, setCurrentBackend } from "../utils";
 import { BackendsT } from "./types";
 
 async function getBackends(): Promise<BackendsT> {
-  const items: BackendsT = await allLocalStorageItems();
+  const items: BackendsT = await LocalStorage.allItems();
   return items;
 }
 
 async function addBackend(url: string, secret: string) {
-  await setLocalStorageItem(url, secret);
+  await LocalStorage.setItem(url, secret);
 }
 
 async function removeBackend(url: string) {
-  await removeLocalStorageItem(url);
+  await LocalStorage.removeItem(url);
 }
 
 export default function Backends(): JSX.Element {
@@ -66,24 +62,24 @@ export default function Backends(): JSX.Element {
           accessoryTitle={key == current ? "Current" : ""}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
+              <Action
                 title="Use Backend"
                 onAction={async () => {
                   await setCurrentBackend(key);
                   setCurrent(key);
                 }}
               />
-              <ActionPanel.Item
+              <Action
                 title="Remove"
                 onAction={async () => {
-                  const options: AlertOptions = {
+                  const options: Alert.Options = {
                     title: "Delete this backend?",
                     primaryAction: {
                       title: "Confirm",
                       onAction: async () => {
                         await removeBackend(key);
                         setRefreshKey((oldKey) => oldKey + 1);
-                        showToast(ToastStyle.Success, "Delete Success", key);
+                        showToast(Toast.Style.Success, "Delete Success", key);
                       },
                     },
                   };
@@ -100,13 +96,13 @@ export default function Backends(): JSX.Element {
         key={backendList.length}
         actions={
           <ActionPanel>
-            <PushAction
+            <Action.Push
               title="Add Backend"
               target={
                 <Form
                   actions={
                     <ActionPanel>
-                      <SubmitFormAction
+                      <Action.SubmitForm
                         title="Submit"
                         onSubmit={async (values: { url: string; secret: string }) => {
                           if (values.url.startsWith("http://") || values.url.startsWith("https://")) {
@@ -114,12 +110,12 @@ export default function Backends(): JSX.Element {
                             await setCurrentBackend(values.url);
                             setCurrent(values.url);
                             setRefreshKey((oldKey) => oldKey + 1);
-                            showToast(ToastStyle.Success, "Add Success", values.url);
+                            showToast(Toast.Style.Success, "Add Success", values.url);
                             // ref: https://github.com/raycast/extensions/issues/571
                             // no problem with(@raycast/api>=1.27.0)
                             popNavigation();
                           } else {
-                            await showToast(ToastStyle.Failure, "invalid url");
+                            await showToast(Toast.Style.Failure, "invalid url");
                           }
                         }}
                       />
@@ -140,17 +136,17 @@ export default function Backends(): JSX.Element {
         key={backendList.length + 1}
         actions={
           <ActionPanel>
-            <ActionPanel.Item
+            <Action
               title="Remove"
               onAction={async () => {
-                const options: AlertOptions = {
+                const options: Alert.Options = {
                   title: "Delete All Data?",
                   primaryAction: {
                     title: "Confirm",
                     onAction: async () => {
-                      await clearLocalStorage();
+                      await LocalStorage.clear();
                       setRefreshKey((oldKey) => oldKey + 1);
-                      showToast(ToastStyle.Success, "Delete Success");
+                      showToast(Toast.Style.Success, "Delete Success");
                     },
                   },
                 };

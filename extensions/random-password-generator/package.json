@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "random-password-generator",
+  "title": "Random Password Generator",
+  "description": "Generate random password of different length",
+  "icon": "icon.png",
+  "author": "textnav",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Random Password",
+      "description": "Generate random password of different length and strength",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3",
+    "@zxcvbn-ts/core": "^2.0.0",
+    "@zxcvbn-ts/language-common": "^2.0.0",
+    "@zxcvbn-ts/language-en": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity",
+    "Security"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

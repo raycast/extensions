@@ -1,0 +1,129 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Popover
+order: 1
+slug: /core/popover/
+category: "overlay"
+description: "Display popover section relative to given target element"
+props: ["Popover"]
+import: "import { Popover } from '@mantine/core';"
+source: "mantine-core/src/components/Popover/Popover.tsx"
+docs: "core/Popover.mdx"
+styles: ["Popover"]
+---
+
+import { PopoverDemos, PasswordInputDemos } from "@mantine/demos";
+
+## Usage
+
+<Demo data={PopoverDemos.usage} />
+
+## Examples
+
+### Show on focus
+
+This example uses `onFocusCapture` and `onBlurCapture` events on Popover component
+to determine if any element inside has focus:
+
+<Demo data={PasswordInputDemos.strengthMeter} demoProps={{ zIndex: 5 }} />
+
+### With form
+
+By default, focus trap inside popover is active,
+you can place forms inside and focus will be kept inside popover:
+
+<Demo data={PopoverDemos.form} demoProps={{ zIndex: 4 }} />
+
+### Show on hover
+
+To show popover on hover add `onMouseEnter` and `onMouseLeave` handlers to
+element that should trigger popover. Note that in this case you have to disable
+focus trap with `trapFocus={false}`:
+
+<Demo data={PopoverDemos.hover} />
+
+## Position and placement
+
+Popover position relative to target element is defined by:
+
+- **position** – popover side – top, bottom, right or left, defaults to top
+- **placement** – popover placement relative to position – start, center or end, defaults to center
+- **gutter** – space between popover and target element in px, defaults to 10px
+
+```tsx
+<Popover position="bottom" placement="end" gutter={10} />
+```
+
+All positions and placement:
+
+<Demo data={PopoverDemos.positions} />
+
+## Control behavior
+
+By default, popover:
+
+- has focus trap
+- closes when escape key is pressed
+- closes when outside click is registered
+
+Usually it is a good idea to turn these settings off, if you show popover on
+focus or hover:
+
+```tsx
+<Popover
+  trapFocus={false} // -> disable focus trap
+  closeOnEscape={false} // -> disable escape key press handling
+  closeOnClickOutside={false} // -> disable outside click handling
+/>
+```
+
+## Close button and title
+
+Popover includes optional close button and title:
+
+- set `withCloseButton` prop to show close button, add `closeButtonLabel` to set aria-label attribute on close button
+- set `title` prop to add title at the top of popover
+
+```tsx
+<Popover title="Popover title" withCloseButton closeButtonLabel="Close popover" />
+```
+
+## Control appearance
+
+To change popover appearance use:
+
+- `radius` – applies border-radius from `theme.radius`
+- `spacing` – adds padding to all sides of popover from `theme.spacing`
+- `shadow` – add box-shadow from `theme.shadows`
+
+<Demo data={PopoverDemos.configurator} />
+
+## Initial focus
+
+Popover uses [use-focus-trap](/hooks/use-focus-trap/) to manage focus.
+To specify initial focus element add `data-autofocus` attribute:
+
+```tsx
+<Popover>
+  <input />
+  {/* Second input in modal will have initial focus */}
+  <input data-autofocus />
+  <input />
+</Popover>
+```
+
+## Usage with other overlays
+
+Popover listens for outside clicks with [use-click-outside](/hooks/use-click-outside/) hook.
+This means that it is not possible to use elements that render overlays within [Portal](/core/portal/)
+inside Popover. To use components like [Autocomplete](/core/autocomplete/),
+[Menu](/core/menu/), [DatePicker](/dates/date-picker/) portal feature should be disabled for these components:
+
+```tsx
+<Popover>
+  <Menu withinPortal={false} />
+  <Autocomplete withinPortal={false} />
+  <DatePicker withinPortal={false} />
+</Popover>
+```

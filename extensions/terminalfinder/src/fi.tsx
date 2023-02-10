@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
   const script = `
@@ -36,8 +36,8 @@ export default async () => {
   `;
   try {
     const result = await runAppleScript(script);
-    await showToast(ToastStyle.Success, "Done", result);
+    await showToast(Toast.Style.Success, "Done", result);
   } catch (err) {
-    await showToast(ToastStyle.Failure, "Finder is not running");
+    await showToast(Toast.Style.Failure, "Finder is not running");
   }
 };

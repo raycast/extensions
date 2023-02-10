@@ -2,10 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepcast",
   "title": "Deepcast",
-  "description": "Translate words, or entire sentences, into 26 different languages using DeepL.",
+  "description": "Translate words, or entire sentences, into 27 different languages using DeepL.",
   "icon": "icon.png",
   "author": "mooxl",
+  "contributors": [
+    "peter-gy",
+    "popalay"
+  ],
   "license": "MIT",
+  "keywords": [
+    "deepl",
+    "translate"
+  ],
   "commands": [
     {
       "name": "index",
@@ -195,6 +203,13 @@
       "subtitle": "Deepcast",
       "description": "Translate selected text into Swedish using DeepL",
       "mode": "no-view"
+    },
+    {
+      "name": "ukrainian",
+      "title": "Translate Into Ukrainian",
+      "subtitle": "Deepcast",
+      "description": "Translate selected text into Ukrainian using DeepL",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -217,7 +232,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.31.0",
     "got": "^11.8.2"
   },
   "devDependencies": {

@@ -1,8 +1,7 @@
 import { faker } from "@faker-js/faker";
-import { environment } from "@raycast/api";
-import { Project, Issue, Organization } from "./types";
+import { Project, Issue, Organization, User } from "./types";
 
-function fakeOrganization() {
+function fakeOrganization(): Organization {
   const name = faker.company.companyName();
   return {
     id: faker.datatype.uuid(),
@@ -11,7 +10,7 @@ function fakeOrganization() {
   };
 }
 
-function fakeProject(organization: Organization) {
+function fakeProject(organization: Organization): Project {
   const name = faker.hacker.noun();
   return {
     id: faker.datatype.uuid(),
@@ -23,7 +22,16 @@ function fakeProject(organization: Organization) {
   };
 }
 
-function fakeIssue(project: Project) {
+function fakeUser(): User {
+  return {
+    type: "user",
+    id: faker.datatype.uuid(),
+    email: faker.internet.email(),
+    name: faker.name.findName(),
+  };
+}
+
+function fakeIssue(project: Project): Issue {
   return {
     id: faker.datatype.uuid(),
     count: faker.datatype.number(),
@@ -34,10 +42,14 @@ function fakeIssue(project: Project) {
     shortId: faker.datatype.string(5),
     userCount: faker.datatype.number(),
     project: project,
+    assignedTo: fakeUser(),
+    culprit: faker.hacker.phrase(),
+    firstSeen: faker.date.recent().toUTCString(),
+    tags: [],
   };
 }
 
-export function fakeProjects(organization?: Organization) {
+export async function fakeProjects(organization?: Organization): Promise<Project[]> {
   const org = organization ?? fakeOrganization();
   const projects = new Array<Project>();
   for (let i = 0; i < 5; i++) {
@@ -47,7 +59,7 @@ export function fakeProjects(organization?: Organization) {
   return projects;
 }
 
-export function fakeIssues(project?: Project) {
+export async function fakeIssues(project?: Project): Promise<Issue[]> {
   const proj = project ?? fakeProject(fakeOrganization());
   const issues = new Array<Issue>();
   for (let i = 0; i < 10; i++) {

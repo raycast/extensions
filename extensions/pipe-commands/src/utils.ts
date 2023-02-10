@@ -1,8 +1,12 @@
-import { ScriptCommand, ScriptMetadatas, scriptModes } from "./types";
-import { chmod, copyFile, readFile, stat } from "fs/promises";
-import { basename, resolve } from "path";
+import { ScriptCommand, ScriptMetadatas } from "./types";
+
+import { readFile, stat } from "fs/promises";
+import { resolve } from "path";
+import { Validator } from "jsonschema";
 import { globbySync } from "globby";
-import { environment } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
+import untildify from "untildify";
+import { readFileSync } from "fs";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
 
@@ -11,33 +15,56 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    metadatas[metadataTitle] = metadataTitle == "argument1" ? JSON.parse(match[2]) : match[2];
+    metadatas[metadataTitle] = ["argument1", "needsConfirmation", "schemaVersion"].includes(metadataTitle)
+      ? JSON.parse(match[2])
+      : match[2];
   }
 
   return metadatas as unknown as ScriptMetadatas;
 }
 
-export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]; invalid: string[] }> {
-  const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
-  const userPaths = globbySync(`${environment.supportPath}/**/*`);
-  const scriptPaths = [...userPaths, ...defaultPaths].filter((path) => !path.startsWith("."));
+export interface InvalidCommand {
+  path: string;
+  content: string;
+  errors: string[];
+}
 
-  const commands = await Promise.all(
+export async function parseScriptCommands(): Promise<{
+  commands: ScriptCommand[];
+  invalid: InvalidCommand[];
+}> {
+  const { commandFolder } = getPreferenceValues<{ commandFolder: string }>();
+
+  const defaultPaths = globbySync(`${environment.assetsPath}/commands/**/*`);
+  const userPaths = commandFolder ? globbySync(`${untildify(commandFolder)}/**/*`) : [];
+  const scriptPaths = [...userPaths, ...defaultPaths].filter(
+    (path) => !(path.startsWith(".") || path.endsWith(".png") || path.endsWith(".svg"))
+  );
+
+  let commands = await Promise.all(
     scriptPaths.map(async (scriptPath) => {
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, content: script, metadatas };
     })
   );
-  const res = { commands: [] as ScriptCommand[], invalid: [] as string[] };
+  commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
+
+  const schema = JSON.parse(readFileSync(resolve(environment.assetsPath, "schema.json"), "utf-8"));
+  const validator = new Validator();
+
+  const valids = [] as ScriptCommand[];
+  const invalid = [] as InvalidCommand[];
   for (const command of commands) {
-    if (command.metadatas.title && command.metadatas.argument1 && scriptModes.includes(command.metadatas.mode)) {
-      res.commands.push({ ...command, user: command.path.startsWith(environment.supportPath) });
+    const res = validator.validate(command.metadatas, schema);
+    if (res.valid) {
+      valids.push({ ...command, user: command.path.startsWith(commandFolder) });
     } else {
-      res.invalid.push(command.path);
+      invalid.push({ path: command.path, content: command.content, errors: res.errors.map((err) => err.stack) });
     }
   }
-  return res;
+
+  return { commands: valids, invalid };
 }
 
 export async function sortByAccessTime(commands: ScriptCommand[]): Promise<ScriptCommand[]> {
@@ -48,8 +75,4 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
     })
   );
   return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
-}
-
-export function codeblock(code: string) {
-  return ["```", code, "```"].join("\n");
 }

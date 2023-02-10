@@ -1,18 +1,20 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Color,
   getPreferenceValues,
   Icon,
   Image,
   Keyboard,
   List,
+  open,
   showToast,
   Toast,
 } from "@raycast/api";
 
 import { useState, ReactElement } from "react";
-import { gitRemotes, Preferences, tildifyPath, useRepoCache } from "./utils";
+import { GitRepo, Preferences, tildifyPath, useRepoCache } from "./utils";
 
 export default function Main(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
@@ -21,6 +23,18 @@ export default function Main(): ReactElement {
 
   if (error) {
     showToast(Toast.Style.Failure, "", error);
+  }
+
+  function getTarget(repo: GitRepo, bundleId = ""): string {
+    // Should it return the repo fullPath or url?
+    if (
+      bundleId.toLowerCase() === repo.defaultBrowserId.toLowerCase() &&
+      repo.remotes.length > 0 &&
+      repo.remotes[0].url.length > 0
+    ) {
+      return repo.remotes[0].url;
+    }
+    return repo.fullPath;
   }
 
   return (
@@ -40,20 +54,20 @@ export default function Main(): ReactElement {
                   <Action.Open
                     title={`Open in ${preferences.openWith1.name}`}
                     icon={{ fileIcon: preferences.openWith1.path }}
-                    target={repo.fullPath}
+                    target={`${getTarget(repo, preferences.openWith1.bundleId)}`}
                     application={preferences.openWith1.bundleId}
                   />
                   <Action.Open
                     title={`Open in ${preferences.openWith2.name}`}
                     icon={{ fileIcon: preferences.openWith2.path }}
-                    target={repo.fullPath}
+                    target={`${getTarget(repo, preferences.openWith2.bundleId)}`}
                     application={preferences.openWith2.bundleId}
                   />
                   {preferences.openWith3 && (
                     <Action.Open
                       title={`Open in ${preferences.openWith3.name}`}
                       icon={{ fileIcon: preferences.openWith3.path }}
-                      target={repo.fullPath}
+                      target={`${getTarget(repo, preferences.openWith3.bundleId)}`}
                       application={preferences.openWith3.bundleId}
                       shortcut={{ modifiers: ["opt"], key: "return" }}
                     />
@@ -62,7 +76,7 @@ export default function Main(): ReactElement {
                     <Action.Open
                       title={`Open in ${preferences.openWith4.name}`}
                       icon={{ fileIcon: preferences.openWith4.path }}
-                      target={repo.fullPath}
+                      target={`${getTarget(repo, preferences.openWith4.bundleId)}`}
                       application={preferences.openWith4.bundleId}
                       shortcut={{ modifiers: ["ctrl"], key: "return" }}
                     />
@@ -71,15 +85,34 @@ export default function Main(): ReactElement {
                     <Action.Open
                       title={`Open in ${preferences.openWith5.name}`}
                       icon={{ fileIcon: preferences.openWith5.path }}
-                      target={repo.fullPath}
+                      target={`${getTarget(repo, preferences.openWith5.bundleId)}`}
                       application={preferences.openWith5.bundleId}
                       shortcut={{ modifiers: ["shift"], key: "return" }}
                     />
                   )}
+                  <Action
+                    title="Open in All Applications"
+                    icon={Icon.ChevronUp}
+                    onAction={() => {
+                      // checking for app != null to not open in default app
+                      function openIn(application?: Application | string) {
+                        if (application != null) {
+                          open(repo.fullPath, application);
+                        }
+                      }
+                      // awaiting all opens doesn't seem to work
+                      // it gets stuck when opening with Finder
+                      openIn(preferences.openWith1.bundleId);
+                      openIn(preferences.openWith2.bundleId);
+                      openIn(preferences.openWith3?.bundleId);
+                      openIn(preferences.openWith4?.bundleId);
+                      openIn(preferences.openWith5?.bundleId);
+                    }}
+                  />
                   <Action.OpenWith path={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  {gitRemotes(repo.fullPath).map((remote) => {
+                  {repo.remotes.map((remote) => {
                     let shortcut = undefined as Keyboard.Shortcut | undefined;
                     switch (remote.name) {
                       case "origin":

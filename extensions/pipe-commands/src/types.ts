@@ -6,21 +6,19 @@ export interface ScriptCommand {
 }
 
 export interface ScriptMetadatas {
+  schemaVersion: 1;
   title: string;
+  description?: string;
   icon?: string;
-  argument1: ScriptArgument;
-  mode: ScriptMode;
+  iconDark?: string;
+  argument1?: ScriptArgument;
+  mode: "silent" | "pipe";
   packageName?: string;
   currentDirectoryPath?: string;
+  needsConfirmation?: boolean;
 }
 
-export const argumentTypes = ["text", "file"] as const;
-export type ArgumentType = typeof argumentTypes[number];
-
-export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
-export type ScriptMode = typeof scriptModes[number];
-
 export interface ScriptArgument {
-  type: ArgumentType;
+  type: "text";
   percentEncoded?: boolean;
 }

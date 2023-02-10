@@ -5,6 +5,7 @@
   "description": "View calendar month-by-month",
   "icon": "command-icon.png",
   "author": "fuksman",
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {

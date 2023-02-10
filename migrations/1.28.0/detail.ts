@@ -1,10 +1,7 @@
 import { JSCodeshift, Collection } from "jscodeshift";
-import { isVariableDeclared, removeImport, addImport } from "../utils";
+import { removeImport, addImport } from "../utils";
 
-export default function ActionPanelTransform(
-  j: JSCodeshift,
-  root: Collection<any>
-) {
+export default function DetailTransform(j: JSCodeshift, root: Collection<any>) {
   let needToAddImport = false;
 
   for (let name of [["DetailProps", "Props"]]) {

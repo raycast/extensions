@@ -15,7 +15,7 @@ import { useState, useCallback, useMemo } from "react";
 import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 import { useAsync } from "react-use";
-import { runAppleScript } from "run-applescript";
+import { Action$ } from "raycast-toolkit";
 import path from "path";
 
 const preferences = getPreferenceValues();
@@ -53,20 +53,6 @@ export default function AddNewTorrent() {
     return text?.startsWith("magnet:") || text?.endsWith(".torrent") ? text : undefined;
   }, []);
 
-  // Very convoluted way to prompt user for a file path since Raycast doesn't support
-  // this operation natively
-  const handleSelectFromFinder = useCallback(async () => {
-    const path = await runAppleScript(`
-      set chosenFile to choose file with prompt "Please select a .torrent file:"  of type {"torrent"}
-      set raycastPath to POSIX path of (path to application "Raycast")
-      do shell script "open " & raycastPath
-      return POSIX path of chosenFile
-    `);
-    if (path) {
-      setInput(path);
-    }
-  }, []);
-
   // `defaultValue` is ignored if it's `undefined` while the form is loading, bug?
   if (textFromClipboard.loading) return <Form />;
 
@@ -76,11 +62,13 @@ export default function AddNewTorrent() {
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Plus} title="Add Torrent" onSubmit={handleSubmit} />
-          <Action
+          <Action$.SelectFile
             icon={Icon.Finder}
             title="Select Torrent From Finder..."
+            prompt="Please select a .torrent file"
+            type="torrent"
             shortcut={{ key: "o", modifiers: ["cmd"] }}
-            onAction={handleSelectFromFinder}
+            onSelect={setInput}
           />
           <ActionPanel.Submenu icon={Icon.Text} title="Insert Quick Path" shortcut={{ key: "q", modifiers: ["cmd"] }}>
             {preferences.quickPaths

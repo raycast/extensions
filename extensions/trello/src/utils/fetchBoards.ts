@@ -12,7 +12,6 @@ export const returnBoards = async () => {
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const json: any = await response.json();
-    console.log(json);
     return json as Board[];
   } catch (error) {
     showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");

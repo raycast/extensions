@@ -7,6 +7,11 @@
   "author": "L3K0V",
   "version": "1.0.0",
   "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",
@@ -18,7 +23,8 @@
         "gitfox",
         "repositories",
         "repository",
-        "repo"
+        "repo",
+        "repos"
       ],
       "mode": "view"
     }
@@ -35,21 +41,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "bplist-parser": "^0.3.1",
+    "@raycast/api": "^1.42.2",
+    "@raycast/utils": "^1.4.10",
+    "bplist-parser": "^0.3.2",
     "node-git-current-branch": "^2.0.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.12.0",
-    "@typescript-eslint/parser": "^5.12.0",
-    "eslint": "^8.9.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.23.0",
-    "typescript": "^4.5.5"
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
   },
   "scripts": {
     "build": "ray build -e dist",

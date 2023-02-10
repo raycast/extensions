@@ -12,19 +12,19 @@ This example shows how to build commands that don't show a UI in Raycast. This t
 
 ![Example: Control the Spotify macOS app from Raycast](../.gitbook/assets/example-spotify-controls.png)
 
-### Control Spotify macOS app
+## Control Spotify macOS app
 
 Spotify's macOS app supports AppleScript. This is great to control the app without opening it. For this, we use the [`run-applescript`](https://www.npmjs.com/package/run-applescript) package. Let's start by toggling play pause:
 
 ```typescript
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
-### Close Raycast main window
+## Close Raycast main window
 
 When performing this command, you'll notice that Raycast toggles the play pause state of the Spotify macOS app but the Raycast main window stays open. Ideally the window closes after you run the command. Then you can carry on with what you did before.
 
@@ -34,10 +34,10 @@ Here is how you can close the main window:
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await closeMainWindow();
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
 Notice that we call the `closeMainWindow` function before running the AppleScript. This makes the command feel snappier.

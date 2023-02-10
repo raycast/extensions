@@ -6284,5 +6284,775 @@
     "types": ["Psychic", "Grass"],
     "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/898.png",
     "generation": "Generation VIII"
+  },
+  {
+    "id": 899,
+    "name": "Wyrdeer",
+    "types": ["Normal", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/899.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 900,
+    "name": "Kleavor",
+    "types": ["Bug", "Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/900.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 901,
+    "name": "Ursaluna",
+    "types": ["Ground", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/901.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 902,
+    "name": "Basculegion",
+    "types": ["Water", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/902.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 903,
+    "name": "Sneasler",
+    "types": ["Fighting", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/903.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 904,
+    "name": "Overqwil",
+    "types": ["Dark", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/904.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 905,
+    "name": "Enamorus",
+    "types": ["Fairy", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/905.png",
+    "generation": "Generation VIII"
+  },
+  {
+    "id": 906,
+    "name": "Sprigatito",
+    "types": ["Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/906.png",
+    "generation": "IX"
+  },
+  {
+    "id": 907,
+    "name": "Floragato",
+    "types": ["Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/907.png",
+    "generation": "IX"
+  },
+  {
+    "id": 908,
+    "name": "Meowscarada",
+    "types": ["Grass", "Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/908.png",
+    "generation": "IX"
+  },
+  {
+    "id": 909,
+    "name": "Fuecoco",
+    "types": ["Fire"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/909.png",
+    "generation": "IX"
+  },
+  {
+    "id": 910,
+    "name": "Crocalor",
+    "types": ["Fire"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/910.png",
+    "generation": "IX"
+  },
+  {
+    "id": 911,
+    "name": "Skeledirge",
+    "types": ["Fire", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/911.png",
+    "generation": "IX"
+  },
+  {
+    "id": 912,
+    "name": "Quaxly",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/912.png",
+    "generation": "IX"
+  },
+  {
+    "id": 913,
+    "name": "Quaxwell",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/913.png",
+    "generation": "IX"
+  },
+  {
+    "id": 914,
+    "name": "Quaquaval",
+    "types": ["Water", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/914.png",
+    "generation": "IX"
+  },
+  {
+    "id": 915,
+    "name": "Lechonk",
+    "types": ["Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/915.png",
+    "generation": "IX"
+  },
+  {
+    "id": 916,
+    "name": "Oinkologne",
+    "types": ["Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/916.png",
+    "generation": "IX"
+  },
+  {
+    "id": 917,
+    "name": "Tarountula",
+    "types": ["Bug"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/917.png",
+    "generation": "IX"
+  },
+  {
+    "id": 918,
+    "name": "Spidops",
+    "types": ["Bug"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/918.png",
+    "generation": "IX"
+  },
+  {
+    "id": 919,
+    "name": "Nymble",
+    "types": ["Bug"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/919.png",
+    "generation": "IX"
+  },
+  {
+    "id": 920,
+    "name": "Lokix",
+    "types": ["Bug", "Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/920.png",
+    "generation": "IX"
+  },
+  {
+    "id": 921,
+    "name": "Pawmi",
+    "types": ["Electric"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/921.png",
+    "generation": "IX"
+  },
+  {
+    "id": 922,
+    "name": "Pawmo",
+    "types": ["Electric", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/922.png",
+    "generation": "IX"
+  },
+  {
+    "id": 923,
+    "name": "Pawmot",
+    "types": ["Electric", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/923.png",
+    "generation": "IX"
+  },
+  {
+    "id": 924,
+    "name": "Tandemaus",
+    "types": ["Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/924.png",
+    "generation": "IX"
+  },
+  {
+    "id": 925,
+    "name": "Maushold",
+    "types": ["Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/925.png",
+    "generation": "IX"
+  },
+  {
+    "id": 926,
+    "name": "Fidough",
+    "types": ["Fairy"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/926.png",
+    "generation": "IX"
+  },
+  {
+    "id": 927,
+    "name": "Dachsbun",
+    "types": ["Fairy"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/927.png",
+    "generation": "IX"
+  },
+  {
+    "id": 928,
+    "name": "Smoliv",
+    "types": ["Grass", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/928.png",
+    "generation": "IX"
+  },
+  {
+    "id": 929,
+    "name": "Dolliv",
+    "types": ["Grass", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/929.png",
+    "generation": "IX"
+  },
+  {
+    "id": 930,
+    "name": "Arboliva",
+    "types": ["Grass", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/930.png",
+    "generation": "IX"
+  },
+  {
+    "id": 931,
+    "name": "Squawkabilly",
+    "types": ["Normal", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/931.png",
+    "generation": "IX"
+  },
+  {
+    "id": 932,
+    "name": "Nacli",
+    "types": ["Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/932.png",
+    "generation": "IX"
+  },
+  {
+    "id": 933,
+    "name": "Naclstack",
+    "types": ["Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/933.png",
+    "generation": "IX"
+  },
+  {
+    "id": 934,
+    "name": "Garganacl",
+    "types": ["Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/934.png",
+    "generation": "IX"
+  },
+  {
+    "id": 935,
+    "name": "Charcadet",
+    "types": ["Fire"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/935.png",
+    "generation": "IX"
+  },
+  {
+    "id": 936,
+    "name": "Armarouge",
+    "types": ["Fire", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/936.png",
+    "generation": "IX"
+  },
+  {
+    "id": 937,
+    "name": "Ceruledge",
+    "types": ["Fire", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/937.png",
+    "generation": "IX"
+  },
+  {
+    "id": 938,
+    "name": "Tadbulb",
+    "types": ["Electric"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/938.png",
+    "generation": "IX"
+  },
+  {
+    "id": 939,
+    "name": "Bellibolt",
+    "types": ["Electric"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/939.png",
+    "generation": "IX"
+  },
+  {
+    "id": 940,
+    "name": "Wattrel",
+    "types": ["Electric", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/940.png",
+    "generation": "IX"
+  },
+  {
+    "id": 941,
+    "name": "Kilowattrel",
+    "types": ["Electric", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/941.png",
+    "generation": "IX"
+  },
+  {
+    "id": 942,
+    "name": "Maschiff",
+    "types": ["Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/942.png",
+    "generation": "IX"
+  },
+  {
+    "id": 943,
+    "name": "Mabosstiff",
+    "types": ["Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/943.png",
+    "generation": "IX"
+  },
+  {
+    "id": 944,
+    "name": "Shroodle",
+    "types": ["Poison", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/944.png",
+    "generation": "IX"
+  },
+  {
+    "id": 945,
+    "name": "Grafaiai",
+    "types": ["Poison", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/945.png",
+    "generation": "IX"
+  },
+  {
+    "id": 946,
+    "name": "Bramblin",
+    "types": ["Grass", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/946.png",
+    "generation": "IX"
+  },
+  {
+    "id": 947,
+    "name": "Brambleghast",
+    "types": ["Grass", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/947.png",
+    "generation": "IX"
+  },
+  {
+    "id": 948,
+    "name": "Toedscool",
+    "types": ["Ground", "Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/948.png",
+    "generation": "IX"
+  },
+  {
+    "id": 949,
+    "name": "Toedscruel",
+    "types": ["Ground", "Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/949.png",
+    "generation": "IX"
+  },
+  {
+    "id": 950,
+    "name": "Klawf",
+    "types": ["Rock"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/950.png",
+    "generation": "IX"
+  },
+  {
+    "id": 951,
+    "name": "Capsakid",
+    "types": ["Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/951.png",
+    "generation": "IX"
+  },
+  {
+    "id": 952,
+    "name": "Scovillain",
+    "types": ["Grass", "Fire"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/952.png",
+    "generation": "IX"
+  },
+  {
+    "id": 953,
+    "name": "Rellor",
+    "types": ["Bug"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/953.png",
+    "generation": "IX"
+  },
+  {
+    "id": 954,
+    "name": "Rabsca",
+    "types": ["Bug", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/954.png",
+    "generation": "IX"
+  },
+  {
+    "id": 955,
+    "name": "Flittle",
+    "types": ["Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/955.png",
+    "generation": "IX"
+  },
+  {
+    "id": 956,
+    "name": "Espathra",
+    "types": ["Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/956.png",
+    "generation": "IX"
+  },
+  {
+    "id": 957,
+    "name": "Tinkatink",
+    "types": ["Fairy", "Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/957.png",
+    "generation": "IX"
+  },
+  {
+    "id": 958,
+    "name": "Tinkatuff",
+    "types": ["Fairy", "Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/958.png",
+    "generation": "IX"
+  },
+  {
+    "id": 959,
+    "name": "Tinkaton",
+    "types": ["Fairy", "Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/959.png",
+    "generation": "IX"
+  },
+  {
+    "id": 960,
+    "name": "Wiglett",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/960.png",
+    "generation": "IX"
+  },
+  {
+    "id": 961,
+    "name": "Wugtrio",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/961.png",
+    "generation": "IX"
+  },
+  {
+    "id": 962,
+    "name": "Bombirdier",
+    "types": ["Flying", "Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/962.png",
+    "generation": "IX"
+  },
+  {
+    "id": 963,
+    "name": "Finizen",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/963.png",
+    "generation": "IX"
+  },
+  {
+    "id": 964,
+    "name": "Palafin",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/964.png",
+    "generation": "IX"
+  },
+  {
+    "id": 965,
+    "name": "Varoom",
+    "types": ["Steel", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/965.png",
+    "generation": "IX"
+  },
+  {
+    "id": 966,
+    "name": "Revavroom",
+    "types": ["Steel", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/966.png",
+    "generation": "IX"
+  },
+  {
+    "id": 967,
+    "name": "Cyclizar",
+    "types": ["Dragon", "Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/967.png",
+    "generation": "IX"
+  },
+  {
+    "id": 968,
+    "name": "Orthworm",
+    "types": ["Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/968.png",
+    "generation": "IX"
+  },
+  {
+    "id": 969,
+    "name": "Glimmet",
+    "types": ["Rock", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/969.png",
+    "generation": "IX"
+  },
+  {
+    "id": 970,
+    "name": "Glimmora",
+    "types": ["Rock", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/970.png",
+    "generation": "IX"
+  },
+  {
+    "id": 971,
+    "name": "Greavard",
+    "types": ["Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/971.png",
+    "generation": "IX"
+  },
+  {
+    "id": 972,
+    "name": "Houndstone",
+    "types": ["Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/972.png",
+    "generation": "IX"
+  },
+  {
+    "id": 973,
+    "name": "Flamigo",
+    "types": ["Flying", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/973.png",
+    "generation": "IX"
+  },
+  {
+    "id": 974,
+    "name": "Cetoddle",
+    "types": ["Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/974.png",
+    "generation": "IX"
+  },
+  {
+    "id": 975,
+    "name": "Cetitan",
+    "types": ["Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/975.png",
+    "generation": "IX"
+  },
+  {
+    "id": 976,
+    "name": "Veluza",
+    "types": ["Water", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/976.png",
+    "generation": "IX"
+  },
+  {
+    "id": 977,
+    "name": "Dondozo",
+    "types": ["Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/977.png",
+    "generation": "IX"
+  },
+  {
+    "id": 978,
+    "name": "Tatsugiri",
+    "types": ["Dragon", "Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/978.png",
+    "generation": "IX"
+  },
+  {
+    "id": 979,
+    "name": "Annihilape",
+    "types": ["Fighting", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/979.png",
+    "generation": "IX"
+  },
+  {
+    "id": 980,
+    "name": "Clodsire",
+    "types": ["Poison", "Ground"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/980.png",
+    "generation": "IX"
+  },
+  {
+    "id": 981,
+    "name": "Farigiraf",
+    "types": ["Normal", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/981.png",
+    "generation": "IX"
+  },
+  {
+    "id": 982,
+    "name": "Dudunsparce",
+    "types": ["Normal"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/982.png",
+    "generation": "IX"
+  },
+  {
+    "id": 983,
+    "name": "Kingambit",
+    "types": ["Dark", "Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/983.png",
+    "generation": "IX"
+  },
+  {
+    "id": 984,
+    "name": "Great Tusk",
+    "types": ["Ground", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/984.png",
+    "generation": "IX"
+  },
+  {
+    "id": 985,
+    "name": "Scream Tail",
+    "types": ["Fairy", "Psychic"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/985.png",
+    "generation": "IX"
+  },
+  {
+    "id": 986,
+    "name": "Brute Bonnet",
+    "types": ["Grass", "Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/986.png",
+    "generation": "IX"
+  },
+  {
+    "id": 987,
+    "name": "Flutter Mane",
+    "types": ["Ghost", "Fairy"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/987.png",
+    "generation": "IX"
+  },
+  {
+    "id": 988,
+    "name": "Slither Wing",
+    "types": ["Bug", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/988.png",
+    "generation": "IX"
+  },
+  {
+    "id": 989,
+    "name": "Sandy Shocks",
+    "types": ["Electric", "Ground"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/989.png",
+    "generation": "IX"
+  },
+  {
+    "id": 990,
+    "name": "Iron Treads",
+    "types": ["Ground", "Steel"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/990.png",
+    "generation": "IX"
+  },
+  {
+    "id": 991,
+    "name": "Iron Bundle",
+    "types": ["Ice", "Water"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/991.png",
+    "generation": "IX"
+  },
+  {
+    "id": 992,
+    "name": "Iron Hands",
+    "types": ["Fighting", "Electric"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/992.png",
+    "generation": "IX"
+  },
+  {
+    "id": 993,
+    "name": "Iron Jugulis",
+    "types": ["Dark", "Flying"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/993.png",
+    "generation": "IX"
+  },
+  {
+    "id": 994,
+    "name": "Iron Moth",
+    "types": ["Fire", "Poison"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/994.png",
+    "generation": "IX"
+  },
+  {
+    "id": 995,
+    "name": "Iron Thorns",
+    "types": ["Rock", "Electric"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/995.png",
+    "generation": "IX"
+  },
+  {
+    "id": 996,
+    "name": "Frigibax",
+    "types": ["Dragon", "Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/996.png",
+    "generation": "IX"
+  },
+  {
+    "id": 997,
+    "name": "Arctibax",
+    "types": ["Dragon", "Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/997.png",
+    "generation": "IX"
+  },
+  {
+    "id": 998,
+    "name": "Baxcalibur",
+    "types": ["Dragon", "Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/998.png",
+    "generation": "IX"
+  },
+  {
+    "id": 999,
+    "name": "Gimmighoul",
+    "types": ["Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/999.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1000,
+    "name": "Gholdengo",
+    "types": ["Steel", "Ghost"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1000.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1001,
+    "name": "Wo-Chien",
+    "types": ["Dark", "Grass"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1001.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1002,
+    "name": "Chien-Pao",
+    "types": ["Dark", "Ice"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1002.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1003,
+    "name": "Ting-Lu",
+    "types": ["Dark", "Ground"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1003.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1004,
+    "name": "Chi-Yu",
+    "types": ["Dark", "Fire"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1004.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1005,
+    "name": "Roaring Moon",
+    "types": ["Dragon", "Dark"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1005.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1006,
+    "name": "Iron Valiant",
+    "types": ["Fairy", "Fighting"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1006.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1007,
+    "name": "Koraidon",
+    "types": ["Fighting", "Dragon"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1007.png",
+    "generation": "IX"
+  },
+  {
+    "id": 1008,
+    "name": "Miraidon",
+    "types": ["Electric", "Dragon"],
+    "artwork": "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/1008.png",
+    "generation": "IX"
   }
 ]

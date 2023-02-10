@@ -1,12 +1,22 @@
 import { Action, Keyboard } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { URL } from "url";
 
 const OpenUrlAction = ({ url, shortcut, title }: { url: string; shortcut?: Keyboard.Shortcut; title?: string }) => {
-  const hostname = new URL(url).hostname;
-  const faviconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
+  let resolvedUrl = url;
+  try {
+    new URL(url);
+  } catch (e) {
+    try {
+      resolvedUrl = `https://${url}`;
+    } catch (e) {
+      return null;
+    }
+  }
+
   return (
     <>
-      <Action.OpenInBrowser icon={{ source: faviconUrl }} shortcut={shortcut} title={title ?? url} url={url} />
+      <Action.OpenInBrowser icon={getFavicon(resolvedUrl)} shortcut={shortcut} title={title ?? url} url={resolvedUrl} />
     </>
   );
 };

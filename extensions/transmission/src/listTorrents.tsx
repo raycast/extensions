@@ -18,7 +18,7 @@ import {
 import { useState, useMemo, useEffect } from "react";
 import { $enum } from "ts-enum-util";
 import prettyBytes from "pretty-bytes";
-import { useStateFromLocalStorage } from "./utils/hooks";
+import { usePersistentState } from "raycast-toolkit";
 import { truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { useAllTorrents, useMutateTorrent, useSessionStats } from "./modules/client";
@@ -53,6 +53,8 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
       return t1.name.localeCompare(t2.name) * direction;
     case "status":
       return (t2.status - t1.status) * direction;
+    case "addedDate":
+      return (t2.addedDate - t1.addedDate) * direction;
     default:
       return 0;
   }
@@ -62,7 +64,7 @@ type TorrentStatusFilterType = keyof typeof TorrentStatus | "All";
 let useStatusFilter: () => [TorrentStatusFilterType, (status: TorrentStatusFilterType) => void, boolean];
 
 if (preferences.rememberStatusFilter) {
-  useStatusFilter = () => useStateFromLocalStorage<keyof typeof TorrentStatus | "All">("statusFilter", "All");
+  useStatusFilter = () => usePersistentState<keyof typeof TorrentStatus | "All">("statusFilter", "All");
 } else {
   useStatusFilter = () => {
     const [state, setState] = useState<TorrentStatusFilterType>("All");
@@ -106,16 +108,16 @@ export default function TorrentList() {
   }, [torrentsError]);
 
   const paddedRateDownloads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
+    [filteredTorrents]
   );
   const paddedRateUploads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
+    [filteredTorrents]
   );
   const paddedPercentDones = useMemo(
-    () => padList(sortedTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
+    [filteredTorrents]
   );
 
   return (
@@ -233,8 +235,23 @@ function TorrentListItem({
     .filter(Boolean)
     .join(" - ");
 
-  const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
-  const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
+  const downloadStats = useMemo(
+    () => [
+      { icon: Icon.ChevronDown, textIcon: "↓", text: rateDownload },
+      { icon: Icon.ChevronUp, textIcon: "↑", text: rateUpload },
+      { text: percentDone },
+    ],
+    [rateDownload, rateUpload, percentDone]
+  );
+
+  const details = useAsync(
+    () =>
+      renderDetails(
+        torrent,
+        downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")
+      ),
+    [torrent, downloadStats]
+  );
 
   const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
 
@@ -244,7 +261,7 @@ function TorrentListItem({
       key={torrent.id}
       title={truncate(torrent.name, 60)}
       icon={statusIcon(torrent)}
-      accessoryTitle={!isShowingDetail ? downloadStats : undefined}
+      accessories={!isShowingDetail ? downloadStats.map(({ text, icon }) => ({ text, icon })) : undefined}
       detail={
         isShowingDetail && (
           <List.Item.Detail

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jwt-decoder",
+  "title": "JWT Decoder",
+  "description": "Decode Your JSON Web Tokens – extract the header and data information from a JWT",
+  "icon": "jwt.png",
+  "author": "gdsmith",
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "jwt-view",
+      "title": "View Decoded JWT",
+      "description": "View and copy the contents your JWT",
+      "mode": "view"
+    },
+    {
+      "name": "jwt-list",
+      "title": "Search Decoded JWT",
+      "description": "Search and copy the contents of your JWT",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "@types/react-dom": "^17.0.14",
+    "csv-parse": "^5.0.4",
+    "jose": "^4.6.0",
+    "node-fetch": "^3.2.3",
+    "raycast-hooks": "^1.0.3",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -49,17 +49,17 @@ interface BuildsProps {
 }
 
 export function Builds({ pipeline }: BuildsProps) {
-  const state = useQuery<QueryResponse>([pipeline], {
+  const { data, isLoading } = useQuery<QueryResponse>({
     query: QUERY,
     errorMessage: "Could not load builds",
     variables: { pipeline },
   });
 
-  const builds = state?.pipeline.builds.edges ?? [];
+  const builds = data?.pipeline.builds.edges ?? [];
   const branches = Object.entries(builds.reduce(groupBranches, {})).sort(sortBranches);
 
   return (
-    <List isLoading={branches.length === 0} searchBarPlaceholder="Filter builds by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter builds by name...">
       {branches.map(([name, builds]) => (
         <List.Section key={name} title={name}>
           {builds.map((build) => (

@@ -3,9 +3,16 @@
   "name": "pipe-commands",
   "title": "Pipe Commands",
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
-  "icon": "command-icon.png",
+  "icon": "pipe-icon.png",
   "author": "pomdtr",
+  "contributors": [
+    "gasolin"
+  ],
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "pipe-selection-to-command",
@@ -20,38 +27,53 @@
       "subtitle": "Pipe Commands",
       "description": "Apply a script on your clipboard.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "commandFolder",
+      "title": "Commands Folder",
+      "required": false,
+      "type": "textfield",
+      "description": "The folder where your Pipe Commands are stored."
     },
     {
-      "name": "create-pipe-command",
-      "title": "Create Pipe Command",
-      "subtitle": "Pipe Commands",
-      "description": "Generate a new Pipe Command using built-in templates.",
-      "mode": "view"
-    },
-    {
-      "name": "manage-pipe-commands",
-      "title": "Manage Pipe Commands",
-      "subtitle": "Pipe Commands",
-      "description": "Edit your Pipe Commands.",
-      "mode": "view"
+      "name": "primaryAction",
+      "type": "dropdown",
+      "description": "The primary action for Pipe Commands.",
+      "required": false,
+      "title": "Primary Action",
+      "default": "copy",
+      "data": [
+        {
+          "title": "Paste Script Output",
+          "value": "paste"
+        },
+        {
+          "title": "Copy Script Ouput",
+          "value": "copy"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
-    "globby": "^13.1.1"
+    "@raycast/api": "^1.38.0",
+    "globby": "^13.1.1",
+    "jsonschema": "^1.4.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "typescript-json-schema": "^0.53.0"
   },
   "scripts": {
+    "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"

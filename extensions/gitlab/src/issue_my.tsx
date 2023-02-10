@@ -1,4 +1,6 @@
-import { render } from "@raycast/api";
-import { IssueList, IssueScope, IssueState } from "./components/issues";
+import { IssueScope, IssueState } from "./components/issues";
+import { MyIssues } from "./components/issues_my";
 
-render(<IssueList scope={IssueScope.assigned_to_me} state={IssueState.opened} />);
+export default function MyOpenIssuesRoot(): JSX.Element {
+  return <MyIssues scope={IssueScope.assigned_to_me} state={IssueState.opened} />;
+}

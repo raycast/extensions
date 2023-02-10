@@ -7,6 +7,12 @@ export function FormulaInfo(props: { formula: Formula; onAction: (result: boolea
   return (
     <Detail
       markdown={formatInfo(props.formula)}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Link title="Homepage" text={props.formula.homepage} target={props.formula.homepage} />
+          <Detail.Metadata.Label title="License" text={props.formula.license} />
+        </Detail.Metadata>
+      }
       actions={
         <FormulaActionPanel
           formula={props.formula}
@@ -27,11 +33,6 @@ function formatInfo(formula: Formula): string {
   return `
 # ${formula.name}
 ${formula.desc}
-
-[${formula.homepage}](${formula.homepage})
-
-#### License
- ${formula.license}
 
 ${formatVersions(formula)}
 

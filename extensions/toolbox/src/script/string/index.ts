@@ -1,4 +1,3 @@
-export * from "./base64";
-export * from "./countWords";
-export * from "./camelCase";
+export * from "./count";
 export * from "./trim";
+export * from "./reverse";
