@@ -124,7 +124,7 @@ function ProjectForm({ item }: { item: ExampleSource }) {
       actions={
         <ActionPanel>
           {location === "local" ? (
-            <Action.SubmitForm icon={Icon.Code} title="Clone locally" onSubmit={async () => await cloneLocally()} />
+            <Action.SubmitForm icon={Icon.Code} title="Clone Locally" onSubmit={async () => await cloneLocally()} />
           ) : (
             <Action.OpenInBrowser
               icon={Icon.Globe}
