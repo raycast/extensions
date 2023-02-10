@@ -7,3 +7,4 @@
 - Copy individual notes
 - Copy all notes with super tags in Tana's paste format
 - Store which notes have already been copied
+- Use custom templates using Handlebars

@@ -4,12 +4,12 @@ import { useFetch } from '@raycast/utils'
 const baseUrl = 'https://readwise.io/api/v2'
 
 export type Book = {
-  cover_image_url: string
-  num_highlights: number
-  source: string
   author: string
   category: string
+  cover_image_url: string
   id: string
+  num_highlights: number
+  source: string
   title: string
 }
 

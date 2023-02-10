@@ -2,8 +2,14 @@ import { List, LocalStorage } from '@raycast/api'
 import { useBook, useHighlights } from './useApi'
 import Highlight from './highlight'
 import React from 'react'
+import Handlebars from 'handlebars'
 
-export default function Book({ id }: { id: string }) {
+type BookProps = {
+  id: string
+  template: string
+}
+
+export default function Book({ id, template }: BookProps) {
   const { data: book, isLoading: isLoadingBook } = useBook(id)
   const { highlights, isLoading: isLoadingHighlights } = useHighlights(id)
   const [lastSynced, setLastSynced] = React.useState<string | null>(null)
@@ -19,20 +25,17 @@ export default function Book({ id }: { id: string }) {
     getSyncedItems()
   }, [lastSynced])
 
+  if (!book) {
+    return (
+      <List>
+        <List.EmptyView title="No information found" />
+      </List>
+    )
+  }
+
   let allUnsyncedHighlights = '%%tana%%\n'
 
-  let allHighlights = `%%tana%%
-- ${book?.title} #book
-  - Author:: ${book?.author} #person\n`
-
   for (const highlight of highlights) {
-    if (highlight.note) {
-      allHighlights += `  - ${highlight.text}
-    - **Note:** ${highlight.note}\n`
-    } else {
-      allHighlights += `  - ${highlight.text}\n`
-    }
-
     if (!syncedItems[highlight.id.toString()]) {
       if (highlight.note) {
         allUnsyncedHighlights += `- ${highlight.text}
@@ -42,6 +45,12 @@ export default function Book({ id }: { id: string }) {
       }
     }
   }
+
+  const h = Handlebars.compile(template)
+  const allHighlights = h({
+    ...book,
+    highlights,
+  })
 
   const handleCopyAll = async () => {
     const currentTime = new Date().toISOString()
