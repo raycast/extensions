@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create New Project",
+      "title": "Create New Next.js Project",
       "description": "Create New Next.js Project From Raycast",
       "mode": "view"
     }
