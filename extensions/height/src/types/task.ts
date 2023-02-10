@@ -28,6 +28,6 @@ export type CreateTaskFormValues = {
 
 export type CreateTaskPayload = CreateTaskFormValues;
 
-export type UpdateTaskFormValues = Omit<CreateTaskFormValues, "icon">;
+export type UpdateTaskFormValues = CreateTaskFormValues;
 
 export type UpdateTaskPayload = Partial<UpdateTaskFormValues>;
