@@ -12,6 +12,7 @@ import {
   Action,
   ActionPanel,
   popToRoot,
+  List,
 } from "@raycast/api";
 import {
   startPlaySimilar,
@@ -22,19 +23,28 @@ import {
   skipToPrevious,
   addToSavedTracks,
   removeFromSavedTracks,
+  containsMySavedTracks,
 } from "./spotify/client";
 import { SpotifyProvider, useSpotify } from "./utils/context";
-
-function isTrack(item: unknown): item is SpotifyApi.TrackObjectFull {
-  return item !== undefined && (item as SpotifyApi.TrackObjectFull).album !== undefined;
-}
+import { isTrack } from "./utils";
 
 function NowPlaying() {
   const { installed } = useSpotify();
   const response = useNowPlaying();
   const [isPaused, setIsPaused] = useState(response.result?.is_playing === false);
+  const [songAlreadyLiked, setSongAlreadyLiked] = useState<boolean | null>(null);
 
-  useEffect(() => setIsPaused(response.result?.is_playing === false), [response.result?.is_playing]);
+  const trackAlreadyLiked = async (trackId: string) => {
+    const songResponse = await containsMySavedTracks([trackId]);
+    setSongAlreadyLiked(songResponse[0]);
+  };
+
+  useEffect(() => {
+    setIsPaused(response.result?.is_playing === false);
+    if (response.result && Object.keys(response.result).length > 0 && isTrack(response.result)) {
+      trackAlreadyLiked(response.result.item.id);
+    }
+  }, [response.result]);
 
   if (response.error) {
     showToast(Toast.Style.Failure, "Now Playing has failed", response.error);
@@ -47,15 +57,23 @@ function NowPlaying() {
   const isIdle = response.result && Object.keys(response.result).length === 0;
 
   if (isIdle) {
-    return <Detail markdown={`# Nothing is playing right now`} />;
+    return (
+      <List>
+        <List.EmptyView icon={Icon.XMarkCircle} title="Nothing is playing right now" />
+      </List>
+    );
   }
 
   if (!response.result) {
     return <Detail markdown={`# Something is wrong`} />;
   }
 
-  if (!isTrack(response.result.item)) {
-    return <Detail markdown={`# Podcast \n We currently don't support podcasts in "Now Playing".`} />;
+  if (!isTrack(response.result)) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.ExclamationMark} title="Podcasts are not supported at the moment" />
+      </List>
+    );
   }
 
   const { item } = response.result;
@@ -106,6 +124,7 @@ by ${artistName}
               }}
             />
           )}
+
           <Action
             icon={Icon.Forward}
             title={"Next Track"}
@@ -134,22 +153,31 @@ by ${artistName}
               showHUD(`Playing Radio`);
             }}
           />
-          <Action
-            icon={Icon.Heart}
-            title="Like"
-            onAction={async () => {
-              await addToSavedTracks([trackId]);
-              showHUD(`Added to your Liked Songs`);
-            }}
-          />
-          <Action
-            icon={Icon.HeartDisabled}
-            title="Dislike"
-            onAction={async () => {
-              await removeFromSavedTracks([trackId]);
-              showHUD(`Removed from your Liked Songs`);
-            }}
-          />
+          {songAlreadyLiked && (
+            <Action
+              icon={Icon.HeartDisabled}
+              title="Dislike"
+              onAction={async () => {
+                await removeFromSavedTracks([trackId]);
+                await closeMainWindow();
+                await popToRoot();
+                showHUD(`Removed from your Liked Songs`);
+              }}
+            />
+          )}
+          {!songAlreadyLiked && (
+            <Action
+              icon={Icon.Heart}
+              title="Like"
+              onAction={async () => {
+                await addToSavedTracks([trackId]);
+                await closeMainWindow();
+                await popToRoot();
+                showHUD(`Added to your Liked Songs`);
+              }}
+            />
+          )}
+
           <Action
             key={trackId}
             icon={"icon.png"}

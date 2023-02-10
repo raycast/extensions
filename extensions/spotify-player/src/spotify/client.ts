@@ -272,6 +272,16 @@ export async function skipToPrevious(): Promise<void> {
   }
 }
 
+export async function containsMySavedTracks(trackIds: string[]): Promise<SpotifyApi.CheckUsersSavedTracksResponse> {
+  await authorizeIfNeeded();
+  try {
+    const response = await spotifyApi.containsMySavedTracks(trackIds).then((response: { body: any }) => response.body);
+    return response as SpotifyApi.CheckUsersSavedTracksResponse;
+  } catch (error: any) {
+    return error;
+  }
+}
+
 export async function playShuffled(uri: string): Promise<void> {
   try {
     const isSpotifyRunning = await isRunning();

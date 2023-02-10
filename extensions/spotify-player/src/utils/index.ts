@@ -10,6 +10,10 @@ export async function isSpotifyInstalled() {
   return applications.some(({ bundleId }) => bundleId === "com.spotify.client");
 }
 
+export function isTrack(result: any): result is { item: SpotifyApi.TrackObjectFull } {
+  return result.currently_playing_type !== "episode";
+}
+
 export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
   return `${track.artists[0].name} - ${track.name}`;
 }
