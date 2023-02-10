@@ -27,10 +27,6 @@ export default function Book({ id }: { id: string }) {
     }
   }
 
-  const handleCopy = async (id: number) => {
-    await LocalStorage.setItem(id.toString(), new Date().toISOString())
-  }
-
   return (
     <List
       navigationTitle={book?.title}
@@ -46,7 +42,6 @@ export default function Book({ id }: { id: string }) {
             key={highlight.id}
             allNotes={allNotes}
             highlight={highlight}
-            handleCopy={handleCopy}
             handleCopyAll={handleCopyAll}
           />
         ))

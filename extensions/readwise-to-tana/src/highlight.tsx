@@ -13,7 +13,6 @@ import React from 'react'
 type HighlightProps = {
   allNotes: string
   handleCopyAll: () => void
-  handleCopy: (id: number) => void
   highlight: Highlight
 }
 
@@ -21,7 +20,6 @@ export default function Highlight({
   allNotes,
   highlight,
   handleCopyAll,
-  handleCopy,
 }: HighlightProps) {
   const [syncDate, setSyncDate] = React.useState<string>()
 
@@ -34,6 +32,13 @@ export default function Highlight({
 
     getItem()
   }, [])
+
+  const handleCopy = async (id: number) => {
+    await LocalStorage.setItem(id.toString(), new Date().toISOString())
+    const item = await LocalStorage.getItem<string>(highlight.id.toString())
+
+    setSyncDate(item)
+  }
 
   return (
     <List.Item
