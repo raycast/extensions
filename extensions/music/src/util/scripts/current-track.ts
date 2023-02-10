@@ -33,8 +33,7 @@ export const getCurrentTrackRating = pipe(
  * @param playlist - The name of the target playlist
  */
 export const addToPlaylist = (playlist: string) =>
-  tell(
-    "Music",
+  runScript(
     `
 tell application "Music"
 	set theName to name of current track
