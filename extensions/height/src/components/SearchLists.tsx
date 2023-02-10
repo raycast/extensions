@@ -73,6 +73,20 @@ export default function SearchLists() {
                   onAction={() => push(<UpdateList list={item} mutateList={listsMutate} />)}
                 />
               </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.CopyToClipboard
+                  title="Copy List Name"
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  icon={Icon.CopyClipboard}
+                  content={item.name}
+                />
+              </ActionPanel.Section>
+              <Action.CopyToClipboard
+                title="Copy List URL"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                icon={Icon.CopyClipboard}
+                content={item.url}
+              />
             </ActionPanel>
           }
         />
