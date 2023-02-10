@@ -38,11 +38,11 @@ export default function Command() {
     title={[Friend.first_name, Friend.last_name].join(" ")}
     accessories={[
       // return the amount and currency code if they are present, if not, don't show anything
-      { text: { 
+      { text: {
         value: `${Friend.balance[0]?.amount && Friend.balance[0]?.currency_code ? `${Friend.balance[0].amount} ${Friend.balance[0].currency_code}` : ''}`, 
         color: Number(Friend.balance[0]?.amount) < 0 ? Color.Red : Color.Green}, 
-        icon: `${Friend.balance[0]?.amount && Friend.balance[0]?.currency_code ? Icon.Coins: ''}`
       },
+      {icon: `${Friend.balance[0]?.amount && Friend.balance[0]?.currency_code ? Icon.Coins: ''}`},
       { date: new Date(Friend.updated_at), tooltip: `Last interaction: ${new Date(Friend.updated_at).toLocaleString()}` } 
     ]}
     actions={
