@@ -1,33 +1,35 @@
-import { LaunchProps, Toast, showToast } from "@raycast/api";
-import { sendMemo } from "./utils/api";
+import { LaunchProps, Toast, showToast } from '@raycast/api'
+import { sendMemo } from './utils/api'
 
 interface TodoArguments {
-  text: string;
+  text: string
 }
 
-export default async function Command(props: LaunchProps<{ arguments: TodoArguments }>) {
-  const { text = "" } = props.arguments;
+export default async function Command(
+  props: LaunchProps<{ arguments: TodoArguments }>
+) {
+  const { text = '' } = props.arguments
 
   showToast({
     style: Toast.Style.Animated,
-    title: "Sending",
-  });
+    title: 'Sending',
+  })
 
   const response = await sendMemo({
     content: text,
-    visibility: "PRIVATE",
+    visibility: 'PRIVATE',
     resourceIdList: [],
-  });
+  })
 
   if (response?.data?.id) {
     showToast({
       style: Toast.Style.Success,
-      title: "Sent",
-    });
+      title: 'Sent',
+    })
   } else {
     showToast({
       style: Toast.Style.Failure,
-      title: "Failed",
-    });
+      title: 'Failed',
+    })
   }
 }

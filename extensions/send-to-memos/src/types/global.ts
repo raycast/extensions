@@ -1,3 +1,3 @@
 export interface Preferences {
-  openApi: string;
+  openApi: string
 }
