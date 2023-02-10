@@ -1,45 +1,41 @@
-import { Action, ActionPanel, Detail, Icon, Image, List, LocalStorage, useNavigation } from "@raycast/api";
-import { includes, lowerCase, reject } from "lodash";
-import { useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { includes, reject } from "lodash";
+import { useEffect, useState } from "react";
 
-import { PODCASTS_FEEDS_KEY } from "./constants";
-import { usePodcasts } from "./hooks/usePodcasts";
-import EpisodeList from "./episode-list";
 import { useStatus } from "./hooks/useStatus";
-import { PlayerState, statusMapping, togglePause, forward, rewind } from "./apple-music";
+import { PlayerState, statusMapping, togglePause, forward, rewind, play } from "./apple-music";
 import { formatProgress } from "./utils";
 import AddPodcast from "./add-podcast";
+import PodcastItem from "./podcast-item";
+import { usePodcastFeeds } from "./hooks/usePodcasts";
 
 export default function Command() {
   const { push } = useNavigation();
   const { data: statusData, revalidate: revalidateStatus, isLoading: isStatusLoading } = useStatus();
-  const { data, isLoading: isPodcastsLoading, error } = usePodcasts();
+  const { data: feeds, isLoading: isPodcastsLoading, revalidate: revalidateFeeds, error } = usePodcastFeeds();
   const [removedFeeds, setRemovedFeeds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isStatusLoading) {
+      setIsLoading(isStatusLoading);
+    }
+  }, [isStatusLoading]);
 
   if (error) {
     return <Detail markdown={`${error}`} />;
   }
 
-  const filteredList = reject(data, (podcast) => includes(removedFeeds, podcast.feedUrl));
-
-  const removePodcast = async (feed: string) => {
-    const feedsValue = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
-    if (typeof feedsValue !== "string") return;
-
-    const newFeeds = JSON.parse(feedsValue).filter((url: string) => url !== feed);
-    await LocalStorage.setItem(PODCASTS_FEEDS_KEY, JSON.stringify(newFeeds));
-    setRemovedFeeds((prev) => [...prev, feed]);
-  };
+  const filteredList = reject(feeds, (feed) => includes(removedFeeds, feed));
 
   const progress = statusData ? formatProgress(statusData.position, statusData.time) : "";
   const statusTitle = statusMapping.titles[statusData?.state || PlayerState.stopped];
-  const controlActionWithRevalidateStatus = (action: () => Promise<unknown> | unknown) => {
+  const controlActionWithRevalidateStatus = (action: () => Promise<string>) => {
     return async () => {
       setIsLoading(true);
-      await action();
+      const result = await action();
       revalidateStatus();
-      setIsLoading(false);
+      return result;
     };
   };
 
@@ -56,7 +52,11 @@ export default function Command() {
           description="Please manage your subscribed podcasts first."
           actions={
             <ActionPanel>
-              <Action icon={Icon.Cog} title="Manage Podcasts" onAction={() => push(<AddPodcast />)} />
+              <Action
+                icon={Icon.Cog}
+                title="Manage Podcasts"
+                onAction={() => push(<AddPodcast onSubmitted={revalidateFeeds} />)}
+              />
             </ActionPanel>
           }
         />
@@ -72,8 +72,8 @@ export default function Command() {
     >
       <List.Section title="Player">
         <List.Item
-          icon={statusMapping.icons[statusData?.state || PlayerState.stopped]}
-          title={isPlayerLoading ? "Waiting..." : statusTitle}
+          icon={isPlayerLoading ? Icon.CircleProgress : statusMapping.icons[statusData?.state || PlayerState.stopped]}
+          title={isPlayerLoading ? "Loading..." : statusTitle}
           subtitle={trackName}
           accessories={[{ text: progress }]}
           actions={
@@ -92,41 +92,31 @@ export default function Command() {
                 <Action
                   icon={Icon.RotateAntiClockwise}
                   title="Rewind 15s"
+                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                   onAction={controlActionWithRevalidateStatus(rewind)}
                 />
-                <Action icon={Icon.Cog} title="Manage Podcasts" onAction={() => push(<AddPodcast />)} />
+                <Action
+                  icon={Icon.Cog}
+                  title="Manage Podcasts"
+                  shortcut={{ modifiers: ["cmd"], key: "," }}
+                  onAction={() => push(<AddPodcast onSubmitted={revalidateFeeds} />)}
+                />
               </ActionPanel>
             )
           }
         />
       </List.Section>
       <List.Section title="Podcasts">
-        {filteredList.map((item) => {
-          return (
-            <List.Item
-              id={item.feedUrl}
-              key={item.feedUrl}
-              icon={{
-                source: item?.itunes?.image || "",
-                mask: Image.Mask.RoundedRectangle,
-              }}
-              title={{ value: item.title, tooltip: item.description }}
-              subtitle={item.description}
-              actions={
-                <ActionPanel>
-                  <Action.Push icon={Icon.Livestream} title="Episodes" target={<EpisodeList feed={item.feedUrl} />} />
-                  <Action
-                    icon={Icon.Trash}
-                    title="Unsubscribe"
-                    onAction={() => removePodcast(item.feedUrl)}
-                    style={Action.Style.Destructive}
-                  />
-                  <Action icon={Icon.Cog} title="Manage Podcasts" onAction={() => push(<AddPodcast />)} />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+        {filteredList.map((feed) => (
+          <PodcastItem
+            key={feed}
+            feed={feed}
+            onRemovePodcast={(feed) => setRemovedFeeds((prev) => [...prev, feed])}
+            onPlay={(title, feed) => controlActionWithRevalidateStatus(() => play(title, feed))()}
+            onClick={push}
+            onAddPodcastSubmitted={revalidateFeeds}
+          />
+        ))}
       </List.Section>
     </List>
   );

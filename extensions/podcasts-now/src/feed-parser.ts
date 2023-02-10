@@ -1,3 +1,4 @@
+import { Cache } from "@raycast/api";
 import { pick } from "lodash";
 import Parser from "rss-parser";
 
@@ -6,18 +7,18 @@ export interface Episode {
   pubDate: string;
   link?: string;
   guid: string;
-  image?: {
-    url: string;
-  };
   enclosure: {
     url: string;
     length?: string;
   };
   "itunes:duration": string;
+  itunes?: {
+    image: string;
+  };
 }
 
 export interface Podcast {
-  feedUrl: string;
+  feed: string;
   title: string;
   description: string;
   itunes?: {
@@ -35,10 +36,16 @@ const parser: Parser<Podcast> = new Parser({
   },
 });
 
+const cache = new Cache({ namespace: "podcasts" });
 export const getFeed = async (url: string): Promise<Podcast> => {
+  const cached = cache.get(url);
+  if (cached) return JSON.parse(cached);
+
   const data = await parser.parseURL(url);
-  data.feedUrl = url;
-  return pick(data, ["feedUrl", "title", "description", "itunes"]);
+  data.feed = url;
+  const podcast = pick(data, ["feed", "title", "description", "itunes"]);
+  cache.set(url, JSON.stringify(podcast));
+  return podcast;
 };
 
 export const getEpisodes = async (url: string): Promise<Episode[]> => {

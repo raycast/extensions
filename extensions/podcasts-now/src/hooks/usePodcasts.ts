@@ -1,62 +1,21 @@
-import { LocalStorage, Cache } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { forEach } from "lodash";
+import { LocalStorage } from "@raycast/api";
 
 import { PODCASTS_FEEDS_KEY } from "../constants";
-import { getFeed, Podcast } from "../feed-parser";
+import { getFeed } from "../feed-parser";
+import { useCachedPromise } from "@raycast/utils";
 
-const cache = new Cache({ namespace: "podcasts" });
+export const usePodcastFeeds = () => {
+  return useCachedPromise<() => Promise<string[]>>(async () => {
+    const podcastsFeeds = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
 
-export const usePodcasts = () => {
-  const [podcastsFeedsUrls, setPodcastsFeedsUrls] = useState<string[]>([]);
-  const [data, setData] = useState<Podcast[]>([]);
-  const [revalidate, setRevalidate] = useState(Date.now());
-  const [error, setError] = useState<Error>();
+    if (typeof podcastsFeeds !== "string") {
+      return;
+    }
 
-  useEffect(() => {
-    (async () => {
-      if (!revalidate) return;
+    return JSON.parse(podcastsFeeds);
+  });
+};
 
-      const podcastsFeeds = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
-
-      if (typeof podcastsFeeds !== "string") {
-        return;
-      }
-
-      const urls: string[] = JSON.parse(podcastsFeeds);
-      setPodcastsFeedsUrls(urls);
-    })();
-  }, [revalidate]);
-
-  useEffect(() => {
-    (async () => {
-      forEach(podcastsFeedsUrls, (url) => {
-        const cached = cache.get(url);
-        if (cached) {
-          setData((prev) => {
-            if (prev.find((podcast) => podcast.feedUrl === url)) {
-              return prev;
-            }
-            return [...prev, JSON.parse(cached)];
-          });
-        } else {
-          try {
-            getFeed(url).then((podcast) => {
-              cache.set(url, JSON.stringify(podcast));
-              setData((prev) => [...prev, podcast]);
-            });
-          } catch (err) {
-            setError(err as Error);
-          }
-        }
-      });
-    })();
-  }, [podcastsFeedsUrls]);
-
-  return {
-    isLoading: data.length !== podcastsFeedsUrls.length,
-    data,
-    revalidate: () => setRevalidate(Date.now()),
-    error,
-  };
+export const usePodcast = (feed: string) => {
+  return useCachedPromise(getFeed, [feed]);
 };

@@ -1,3 +1,4 @@
+import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { Episode, getEpisodes } from "../feed-parser";
 
@@ -20,4 +21,8 @@ export const useEpisodesFetch = (feed: string) => {
   }, [feed]);
 
   return { data, error, isLoading };
+};
+
+export const useEpisodes = (feed: string) => {
+  return useCachedPromise(getEpisodes, [feed]);
 };

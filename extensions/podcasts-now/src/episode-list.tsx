@@ -1,45 +1,29 @@
-import { Action, ActionPanel, Detail, Image, List, popToRoot, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
-import { play } from "./apple-music";
-import { useEpisodesFetch as useEpisodes } from "./hooks/useEpisodes";
+import { Action, ActionPanel, Detail, Icon, Image, List, useNavigation } from "@raycast/api";
+import { useEpisodes } from "./hooks/useEpisodes";
 import { formatDuration } from "./utils";
 
-export default function Command({ feed }: { feed: string }) {
-  const [isLoading, setIsLoading] = useState(false);
+interface Props {
+  feed: string;
+  onPlay: (title: string, url: string) => Promise<string>;
+}
 
-  const { data, isLoading: isFeedLoading, error } = useEpisodes(feed);
+export default function Command({ feed, onPlay }: Props) {
+  const { pop } = useNavigation();
+
+  const { data, isLoading, error } = useEpisodes(feed);
 
   if (error) {
     return <Detail markdown={`${error}`} />;
   }
 
-  const onPlay = async (title: string, url: string) => {
-    setIsLoading(true);
-    await showToast({
-      title: "Waiting...",
-      style: Toast.Style.Animated,
-    });
-    await play(title, url);
-    await showToast({
-      title: "Playing",
-      message: title,
-      style: Toast.Style.Success,
-    });
-    setIsLoading(false);
-    popToRoot();
-  };
-
   return (
-    <List
-      isLoading={isLoading || isFeedLoading}
-      navigationTitle="Search Episodes"
-      searchBarPlaceholder="Search your favorite episode"
-    >
+    <List isLoading={isLoading} navigationTitle="Search Episodes" searchBarPlaceholder="Search your favorite episode">
       {data?.map((item) => (
         <List.Item
           key={item.guid}
           icon={{
-            source: item.image?.url || "",
+            source: item.itunes?.image || "",
+            fallback: Icon.Livestream,
             mask: Image.Mask.RoundedRectangle,
           }}
           title={item.title}
@@ -47,7 +31,13 @@ export default function Command({ feed }: { feed: string }) {
           accessories={[{ date: new Date(item.pubDate) }]}
           actions={
             <ActionPanel>
-              <Action title="Play" onAction={async () => await onPlay(item.title, item.enclosure.url)} />
+              <Action
+                title="Play"
+                onAction={() => {
+                  onPlay(item.title, item.enclosure.url);
+                  pop();
+                }}
+              />
             </ActionPanel>
           }
         />

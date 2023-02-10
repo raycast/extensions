@@ -21,6 +21,17 @@ export const statusMapping = {
   },
 };
 
+export const actionMapping = {
+  titles: {
+    [PlayerState.paused]: "Playing",
+    [PlayerState.playing]: "Paused",
+  },
+  icons: {
+    [PlayerState.paused]: Icon.Play,
+    [PlayerState.playing]: Icon.Pause,
+  },
+};
+
 export interface StatusData {
   name: string;
   position: number;
@@ -28,27 +39,25 @@ export interface StatusData {
   state: PlayerState;
 }
 
-const statusEmojiMapping = {
+export const statusEmojiMapping = {
   [PlayerState.stopped]: "⏹️",
   [PlayerState.playing]: "▶️",
   [PlayerState.paused]: "⏸️",
 };
 
-export const play = async (name: string, input: string) => {
+export const play = (name: string, input: string) => {
   const script = `tell application "Music"
   open location "${input}"
   set name of current track to "${replace(name, /"/g, "")}"
 end tell`;
-  await runAppleScript(script);
-  await getStatus();
+  return runAppleScript(script);
 };
 
-export const togglePause = async () => {
+export const togglePause = () => {
   const script = `tell application "Music"
   playpause
 end tell`;
-  await runAppleScript(script);
-  await getStatus();
+  return runAppleScript(script);
 };
 
 export const forward = () => {
@@ -77,8 +86,6 @@ export const getStatus = async (): Promise<StatusData> => {
     const state = (await runAppleScript(`tell application "Music"
     get player state
   end tell`)) as PlayerState;
-    const stateEmoji = statusEmojiMapping[state];
-    updateCommandMetadata({ subtitle: `${stateEmoji} ${name}` });
     return {
       name,
       position,

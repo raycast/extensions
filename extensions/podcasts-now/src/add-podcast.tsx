@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, LocalStorage, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { uniq } from "lodash";
 import { XMLParser } from "fast-xml-parser";
@@ -6,8 +6,9 @@ import fs from "fs";
 
 import { PODCASTS_FEEDS_KEY } from "./constants";
 
-export default function Command() {
-  const [podcastsFeeds, setPodcastsFeeds] = useState<string>("");
+export default function AddPodcast({ onSubmitted }: { onSubmitted: () => void }) {
+  const { pop } = useNavigation();
+  const [podcastsFeeds, setPodcastsFeeds] = useState<string>();
   const [files, setFiles] = useState<string[]>([]);
 
   useEffect(() => {
@@ -51,13 +52,14 @@ export default function Command() {
       }
     });
     await LocalStorage.setItem(PODCASTS_FEEDS_KEY, JSON.stringify(uniq(validUrls)));
-    popToRoot({ clearSearchBar: false });
+    onSubmitted();
+    pop();
   };
 
   return (
     <Form
       actions={
-        <ActionPanel title="#1 in raycast/extensions">
+        <ActionPanel title="Manage Podcast Feeds">
           <Action.SubmitForm title="Add" onSubmit={onSubmit} />
         </ActionPanel>
       }
