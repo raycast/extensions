@@ -42,6 +42,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "typescript": "tsc --noEmit --watch"
   }
 }
