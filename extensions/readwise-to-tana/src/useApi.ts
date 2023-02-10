@@ -14,15 +14,15 @@ export type Book = {
 }
 
 export type Highlight = {
-  color: string
-  highlighted_at: string | null
+  color?: string
+  highlighted_at?: string | null
   id: number
-  location: string
-  location_type: string
-  note: string
+  location?: string
+  location_type?: string
+  note?: string
   text: string
   updated: string
-  url: string | null
+  url?: string | null
 }
 
 type Preferences = {
