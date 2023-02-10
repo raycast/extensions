@@ -1,11 +1,16 @@
-import { commandSync } from "execa";
 import _ from "lodash";
 import osascript from "osascript-tag";
 import { URL } from "url";
 
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 
 import { HistoryItem, Tab } from "./types";
+
+type Preferences = {
+  safariAppIdentifier: string;
+};
+
+export const { safariAppIdentifier }: Preferences = getPreferenceValues();
 
 export const executeJxa = async (script: string) => {
   try {
@@ -15,9 +20,17 @@ export const executeJxa = async (script: string) => {
     if (typeof err === "string") {
       const message = err.replace("execution error: Error: ", "");
       if (message.match(/Application can't be found/)) {
-        showToast(ToastStyle.Failure, "Application not found", "Things must be running");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Application not found",
+          message: "Things must be running",
+        });
       } else {
-        showToast(ToastStyle.Failure, "Something went wrong", message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Something went wrong",
+          message: message,
+        });
       }
     }
   }
@@ -49,12 +62,6 @@ export const getUrlDomain = (url: string) => {
   }
 };
 
-export const getFaviconUrl = (domain: string | undefined) => {
-  if (domain) {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
-  }
-};
-
 export const formatDate = (date: string) =>
   new Date(date).toLocaleDateString(undefined, {
     year: "numeric",
@@ -76,15 +83,6 @@ export const search = (collection: object[], keys: string[], searchText: string)
   _.filter(collection, (item) =>
     _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)))
   );
-
-export const getCurrentDeviceName = (): string => {
-  try {
-    return commandSync("/usr/sbin/scutil --get ComputerName").stdout;
-  } catch (err) {
-    console.error(err);
-    return "";
-  }
-};
 
 const dtf = new Intl.DateTimeFormat(undefined, {
   weekday: "long",

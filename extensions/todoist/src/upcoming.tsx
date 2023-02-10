@@ -1,21 +1,49 @@
-import { render } from "@raycast/api";
-import useSWR from "swr";
-import TaskList from "./components/TaskList";
-import { getSectionsWithDueDates } from "./utils";
+import { useCachedPromise } from "@raycast/utils";
+
 import { handleError, todoist } from "./api";
-import { SWRKeys } from "./types";
+import TaskList from "./components/TaskList";
+import View from "./components/View";
+import { getSectionsWithDueDates } from "./helpers/sections";
 
-function Upcoming(): JSX.Element {
-  const { data, error } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "view all" }));
+function Upcoming() {
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    error: tasksError,
+    mutate: mutateTasks,
+  } = useCachedPromise(() => todoist.getTasks({ filter: "all" }));
 
-  if (error) {
-    handleError({ error, title: "Unable to get tasks" });
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    error: projectsError,
+  } = useCachedPromise(() => todoist.getProjects());
+
+  if (projectsError) {
+    handleError({ error: projectsError, title: "Unable to get projects" });
   }
 
-  const tasks = data?.filter((task) => task.due?.date) || [];
-  const sections = getSectionsWithDueDates(tasks);
+  if (tasksError) {
+    handleError({ error: tasksError, title: "Unable to get tasks" });
+  }
 
-  return <TaskList sections={sections} isLoading={!data && !error} />;
+  const upcomingTasks = tasks?.filter((task) => task.due?.date) || [];
+  const sections = getSectionsWithDueDates(upcomingTasks);
+
+  return (
+    <TaskList
+      sections={sections}
+      isLoading={isLoadingTasks || isLoadingProjects}
+      projects={projects}
+      mutateTasks={mutateTasks}
+    />
+  );
 }
 
-render(<Upcoming />);
+export default function Command() {
+  return (
+    <View>
+      <Upcoming />
+    </View>
+  );
+}

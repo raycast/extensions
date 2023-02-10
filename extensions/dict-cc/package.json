@@ -1,0 +1,281 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dict-cc",
+  "title": "dict.cc",
+  "description": "Simple translation using dict.cc",
+  "icon": "icon.png",
+  "author": "natterstefan",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Translate",
+      "subtitle": "dict.cc",
+      "description": "Translates a given term from one into another language.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sourceLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Source Language",
+      "description": "Source Language to translate a term from",
+      "default": "de",
+      "data": [
+        {
+          "title": "Albanian (sq) 🇦🇱",
+          "value": "sq"
+        },
+        {
+          "title": "Bosnian (bs) 🇧🇦",
+          "value": "bs"
+        },
+        {
+          "title": "Bulgarian (bg) 🇧🇬",
+          "value": "bg"
+        },
+        {
+          "title": "Croatian (hr) 🇭🇷",
+          "value": "hr"
+        },
+        {
+          "title": "Czech (cs) 🇨🇿",
+          "value": "cs"
+        },
+        {
+          "title": "Danish (da) 🇩🇰",
+          "value": "da"
+        },
+        {
+          "title": "Dutch (nl) 🇳🇱",
+          "value": "nl"
+        },
+        {
+          "title": "English (en) 🇬🇧",
+          "value": "en"
+        },
+        {
+          "title": "Esperanto (eo)",
+          "value": "eo"
+        },
+        {
+          "title": "Finnish (fi) 🇫🇮",
+          "value": "fi"
+        },
+        {
+          "title": "French (fr) 🇫🇷",
+          "value": "fr"
+        },
+        {
+          "title": "German (de) 🇩🇪",
+          "value": "de"
+        },
+        {
+          "title": "Greek (el) 🇬🇷",
+          "value": "el"
+        },
+        {
+          "title": "Hungarian (hu) 🇭🇺",
+          "value": "hu"
+        },
+        {
+          "title": "Icelandic (is) 🇮🇸",
+          "value": "is"
+        },
+        {
+          "title": "Italian (it) 🇮🇹",
+          "value": "it"
+        },
+        {
+          "title": "Latin (la)",
+          "value": "la"
+        },
+        {
+          "title": "Norwegian (no) 🇳🇴",
+          "value": "no"
+        },
+        {
+          "title": "Polish (pl) 🇵🇱",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese (pt) 🇵🇹",
+          "value": "pt"
+        },
+        {
+          "title": "Romanian (ro) 🇷🇴",
+          "value": "ro"
+        },
+        {
+          "title": "Russian (ru) 🇷🇺",
+          "value": "ru"
+        },
+        {
+          "title": "Serbian (sr) 🇷🇸",
+          "value": "sr"
+        },
+        {
+          "title": "Slovakian (sk) 🇸🇰",
+          "value": "sk"
+        },
+        {
+          "title": "Spanish (es) 🇪🇸",
+          "value": "es"
+        },
+        {
+          "title": "Swedish (sv) 🇸🇪",
+          "value": "sv"
+        },
+        {
+          "title": "Turkish (tr) 🇹🇷",
+          "value": "tr"
+        }
+      ]
+    },
+    {
+      "name": "targetLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Target Language",
+      "description": "Target Language to translate a term into",
+      "default": "en",
+      "data": [
+        {
+          "title": "Albanian (sq) 🇦🇱",
+          "value": "sq"
+        },
+        {
+          "title": "Bosnian (bs) 🇧🇦",
+          "value": "bs"
+        },
+        {
+          "title": "Bulgarian (bg) 🇧🇬",
+          "value": "bg"
+        },
+        {
+          "title": "Croatian (hr) 🇭🇷",
+          "value": "hr"
+        },
+        {
+          "title": "Czech (cs) 🇨🇿",
+          "value": "cs"
+        },
+        {
+          "title": "Danish (da) 🇩🇰",
+          "value": "da"
+        },
+        {
+          "title": "Dutch (nl) 🇳🇱",
+          "value": "nl"
+        },
+        {
+          "title": "English (en) 🇬🇧",
+          "value": "en"
+        },
+        {
+          "title": "Esperanto (eo)",
+          "value": "eo"
+        },
+        {
+          "title": "Finnish (fi) 🇫🇮",
+          "value": "fi"
+        },
+        {
+          "title": "French (fr) 🇫🇷",
+          "value": "fr"
+        },
+        {
+          "title": "German (de) 🇩🇪",
+          "value": "de"
+        },
+        {
+          "title": "Greek (el) 🇬🇷",
+          "value": "el"
+        },
+        {
+          "title": "Hungarian (hu) 🇭🇺",
+          "value": "hu"
+        },
+        {
+          "title": "Icelandic (is) 🇮🇸",
+          "value": "is"
+        },
+        {
+          "title": "Italian (it) 🇮🇹",
+          "value": "it"
+        },
+        {
+          "title": "Latin (la)",
+          "value": "la"
+        },
+        {
+          "title": "Norwegian (no) 🇳🇴",
+          "value": "no"
+        },
+        {
+          "title": "Polish (pl) 🇵🇱",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese (pt) 🇵🇹",
+          "value": "pt"
+        },
+        {
+          "title": "Romanian (ro) 🇷🇴",
+          "value": "ro"
+        },
+        {
+          "title": "Russian (ru) 🇷🇺",
+          "value": "ru"
+        },
+        {
+          "title": "Serbian (sr) 🇷🇸",
+          "value": "sr"
+        },
+        {
+          "title": "Slovakian (sk) 🇸🇰",
+          "value": "sk"
+        },
+        {
+          "title": "Spanish (es) 🇪🇸",
+          "value": "es"
+        },
+        {
+          "title": "Swedish (sv) 🇸🇪",
+          "value": "sv"
+        },
+        {
+          "title": "Turkish (tr) 🇹🇷",
+          "value": "tr"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "dictcc": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/debounce-promise": "^3.1.4",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

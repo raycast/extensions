@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action, useNavigation } from "@raycast/api";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ let isLive = true;
 export default function Torrent(param: { ip: string }) {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [data, setData] = useState<Torrent[]>([]);
+  const { pop } = useNavigation();
 
   useEffect(() => {
     async function getTorrent() {
@@ -55,7 +56,12 @@ export default function Torrent(param: { ip: string }) {
       navigationTitle="Torrent History"
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={"https://iknowwhatyoudownload.com"} />
+          <Action.OpenInBrowser
+            url={"https://iknowwhatyoudownload.com"}
+            onOpen={() => {
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -68,7 +74,7 @@ export default function Torrent(param: { ip: string }) {
           actions={
             item.url && (
               <ActionPanel>
-                <OpenInBrowserAction url={"https://iknowwhatyoudownload.com" + item.url} />
+                <Action.OpenInBrowser url={"https://iknowwhatyoudownload.com" + item.url} />
               </ActionPanel>
             )
           }

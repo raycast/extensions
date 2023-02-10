@@ -1,85 +1,110 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  ImageMask,
   getPreferenceValues,
   Icon,
+  ImageMask,
+  List,
+  OpenInBrowserAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch, { Response } from "node-fetch";
+import fetch, { AbortError, RequestInit, Response } from "node-fetch";
+import { useCallback, useEffect, useRef, useState } from "react";
+import https = require("https");
 
-const prefs: { instance: string; user: string; token: string } = getPreferenceValues();
-export const confluenceUrl = `https://${prefs.instance}`;
+const prefs: { instanceType: string; user: string; instance: string; unsafeHttps: boolean; token: string } =
+  getPreferenceValues();
+export const confluenceUrl =
+  prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
-};
-
-const init = {
-  headers,
+  Authorization:
+    prefs.instanceType == "cloud"
+      ? "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
+      : `Bearer ${prefs.token}`,
 };
 
 export default function Command() {
-  const [results, setResults] = useState<SearchResult[]>([]);
-
-  const [loadingState, setLoadingState] = useState(true);
-
-  useEffect(() => {
-    searchConfluence().then((response) => {
-      setLoadingState(false);
-      if (!response.ok) {
-        const failureMessage = response.message ? response.message : response.statusText;
-        showToast(ToastStyle.Failure, "API request failed", failureMessage);
-      } else {
-        parseResponse(response).then((response: SearchResult[]) => {
-          setResults(response);
-        });
-      }
-    });
-  }, []);
+  const [results, isLoading, search] = useSearch();
 
   return (
-    <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
+    <List isLoading={isLoading} searchBarPlaceholder="Search by name..." onSearchTextChange={search} throttle>
       <List.Section title="Results">
-        {results && results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
+        {results.length > 0 &&
+          results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
       </List.Section>
     </List>
   );
 }
 
-async function searchConfluence() {
-  const apiUrl = `${confluenceUrl}/wiki/rest/api/content?expand=version`;
-  const response = await fetch(apiUrl, init)
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      {
-        return error;
-      }
-    });
+function useSearch() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const cancelRef = useRef<AbortController | null>(null);
 
-  return response;
+  const search = useCallback(
+    async function search(searchText: string) {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+      setIsLoading(true);
+      try {
+        const response = await searchConfluence(searchText, cancelRef.current.signal);
+        setResults(response);
+      } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
+        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [cancelRef, setIsLoading, setResults]
+  );
+
+  useEffect(() => {
+    search("");
+    return () => {
+      cancelRef.current?.abort();
+    };
+  }, []);
+
+  return [results, isLoading, search] as const;
+}
+
+async function searchConfluence(searchText: string, signal: AbortSignal) {
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: !prefs.unsafeHttps,
+  });
+  const init: RequestInit = {
+    headers,
+    method: "get",
+    signal: signal,
+    agent: httpsAgent,
+  };
+  const apiUrl = `${confluenceUrl}/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
+  return fetch(apiUrl, init).then((response) => {
+    return parseResponse(response);
+  });
 }
 
 async function parseResponse(response: Response) {
   const json = (await response.json()) as APIResponse;
   const jsonResults = (json?.results as ResultsItem[]) ?? [];
-  return jsonResults.map((jsonResult: ResultsItem) => {
-    return {
-      id: jsonResult.id as string,
-      name: jsonResult.title as string,
-      type: jsonResult.type as string,
-      url: jsonResult._links.webui as string,
-      author: jsonResult.version.by.displayName as string,
-      icon: jsonResult.version.by.profilePicture.path as string,
-    };
-  });
+  return jsonResults
+    .filter((jsonResult: ResultsItem) => jsonResult.content)
+    .map((jsonResult: ResultsItem) => {
+      return {
+        id: jsonResult.content.id as string,
+        name: jsonResult.content.title as string,
+        type: jsonResult.content.type as string,
+        url: jsonResult.content._links.webui as string,
+        author: jsonResult.content.version.by.displayName as string,
+        icon: jsonResult.content.version.by.profilePicture.path as string,
+      };
+    });
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -94,10 +119,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + "/wiki" + searchResult.url} />
+            <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + searchResult.url} />
             <CopyToClipboardAction
               title="Copy URL"
-              content={confluenceUrl + "/wiki" + searchResult.url}
+              content={confluenceUrl + searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
           </ActionPanel.Section>
@@ -124,6 +149,19 @@ interface APIResponse {
   _links: _links;
 }
 interface ResultsItem {
+  content: Content;
+  title: string;
+  excerpt: string;
+  url: string;
+  resultGlobalContainer: ResultGlobalContainer;
+  breadcrumbs: string[];
+  entityType: string;
+  iconCssClass: string;
+  lastModified: string;
+  friendlyLastModified: string;
+  score: number;
+}
+interface Content {
   id: string;
   type: string;
   status: string;
@@ -192,7 +230,10 @@ interface _links {
   base?: string;
   context?: string;
 }
-
 interface Extensions {
   position: number;
+}
+interface ResultGlobalContainer {
+  title: string;
+  displayUrl: string;
 }

@@ -6,7 +6,9 @@
   "icon": "composer-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",
-  "contributors": [],
+  "contributors": [
+    "macbookandrew"
+  ],
   "commands": [
     {
       "name": "composer",

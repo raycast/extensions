@@ -6,7 +6,9 @@
   "icon": "icon@light.png",
   "author": "bgnfu7re",
   "contributors": [
-    "rcruzper"
+    "rcruzper",
+    "aexvir",
+    "albertoxamin"
   ],
   "license": "MIT",
   "commands": [
@@ -16,6 +18,29 @@
       "subtitle": "Datadog",
       "description": "List Dashboards",
       "mode": "view"
+    },
+    {
+      "name": "command-list-notebooks",
+      "title": "List Notebooks",
+      "subtitle": "Datadog",
+      "description": "List notebooks",
+      "mode": "view"
+    },
+    {
+      "name": "command-list-monitors",
+      "title": "List Monitors",
+      "subtitle": "Datadog",
+      "description": "List monitors",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "tags",
+          "title": "Tags",
+          "description": "Comma separated list indicating what service and/or custom tags, if any, should be used to filter the list of monitors.",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     },
     {
       "name": "command-list-apm",
@@ -50,6 +75,13 @@
       "required": true
     },
     {
+      "type": "textfield",
+      "name": "domain",
+      "title": "Domain",
+      "description": "Custom domain for Datadog URLs",
+      "required": false
+    },
+    {
       "type": "dropdown",
       "name": "server",
       "title": "Server",
@@ -81,8 +113,8 @@
     }
   ],
   "dependencies": {
-    "@datadog/datadog-api-client": "^1.0.0-beta.6",
-    "@raycast/api": "^1.26.3",
+    "@datadog/datadog-api-client": "^1.0.0-beta.7",
+    "@raycast/api": "^1.36.0",
     "node-fetch": "^3.1.1"
   },
   "devDependencies": {

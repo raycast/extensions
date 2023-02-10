@@ -1,0 +1,52 @@
+fragment SearchNotebook on Notebook {
+  id
+  title
+  viewerHasStarred
+  public
+  stars {
+    totalCount
+  }
+  creator {
+    username
+    displayName
+    url
+  }
+  namespace {
+    namespaceName
+    url
+  }
+  blocks {
+    __typename
+    ... on MarkdownBlock {
+      markdownInput
+    }
+    ... on QueryBlock {
+      queryInput
+    }
+    ... on FileBlock {
+      fileInput {
+        repositoryName
+        filePath
+      }
+    }
+    ... on SymbolBlock {
+      symbolInput {
+        repositoryName
+        filePath
+        symbolName
+        symbolContainerName
+        symbolKind
+      }
+    }
+  }
+  createdAt
+  updatedAt
+}
+
+query GetNotebooks($query: String!, $orderBy: NotebooksOrderBy) {
+  notebooks(query: $query, orderBy: $orderBy, descending: true) {
+    nodes {
+      ...SearchNotebook
+    }
+  }
+}

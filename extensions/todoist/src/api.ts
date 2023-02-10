@@ -1,5 +1,5 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { TodoistApi, TodoistRequestError } from "@doist/todoist-api-typescript";
+import { environment, getPreferenceValues, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 
 const preferences = getPreferenceValues();
 
@@ -11,9 +11,21 @@ interface HandleErrorArgs {
 }
 
 export function handleError({ error, title }: HandleErrorArgs) {
-  if (error instanceof TodoistRequestError && error.isAuthenticationError()) {
-    return showToast(ToastStyle.Failure, title, "Please, make sure your Todoist token is correct.");
+  if (environment.commandMode === "menu-bar" && environment.launchType === LaunchType.UserInitiated) {
+    return showHUD(title);
   }
 
-  return showToast(ToastStyle.Failure, title, error instanceof Error ? error.message : "");
+  if (error instanceof TodoistRequestError && error.isAuthenticationError()) {
+    return showToast({
+      style: Toast.Style.Failure,
+      title: title,
+      message: "Please, make sure your Todoist token is correct.",
+    });
+  }
+
+  return showToast({
+    style: Toast.Style.Failure,
+    title: title,
+    message: error instanceof Error ? error.message : "",
+  });
 }

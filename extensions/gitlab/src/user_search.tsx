@@ -1,4 +1,5 @@
-import { render } from "@raycast/api";
 import { UserList } from "./components/users";
 
-render(<UserList />);
+export default function UserSearchRoot(): JSX.Element {
+  return <UserList />;
+}

@@ -1,4 +1,4 @@
-import { Form, ActionPanel, CopyToClipboardAction } from "@raycast/api";
+import { Form, ActionPanel, Action } from "@raycast/api";
 import { markdownTable } from "markdown-table";
 import { useState } from "react";
 
@@ -55,8 +55,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          {isValid && <CopyToClipboardAction title="Copy Score" content={scoreText} />}
-          {isValid && <CopyToClipboardAction title="Copy Markdown Table" content={md} />}
+          {isValid && <Action.CopyToClipboard title="Copy Score" content={scoreText} />}
+          {isValid && <Action.CopyToClipboard title="Copy Markdown Table" content={md} />}
         </ActionPanel>
       }
     >

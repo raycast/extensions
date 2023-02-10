@@ -1,11 +1,10 @@
-import Dockerode from '@priithaamer/dockerode';
 import { Detail } from '@raycast/api';
-import { useMemo } from 'react';
 import { useDocker } from './docker';
+import { useDockerode } from './docker/dockerode';
 import { formatImageDetailMarkdown } from './docker/image';
 
 export default function ImageDetail({ imageId }: { imageId: string }) {
-  const docker = useMemo(() => new Dockerode(), []);
+  const docker = useDockerode();
   const { useImageInfo } = useDocker(docker);
   const { imageInfo, isLoading } = useImageInfo({ Id: imageId });
 

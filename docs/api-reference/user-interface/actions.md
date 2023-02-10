@@ -24,14 +24,8 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <Action.OpenInBrowser url="https://github.com/raycast/extensions/pull/1" />
-            <Action.CopyToClipboard
-              title="Copy Pull Request Number"
-              content="#1"
-            />
-            <Action
-              title="Close Pull Request"
-              onAction={() => console.log("Close PR #1")}
-            />
+            <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
+            <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
           </ActionPanel>
         }
       />
@@ -42,15 +36,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default | Description                         |
-| :------- | :-------------------------------------------------------- | :------- | :------ | :---------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | The icon displayed for the action.  |
-| id       | <code>string</code>                                       | No       | -       | ID of the item.                     |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -       | The keyboard shortcut for the item. |
-| title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.   |
-| onAction | <code>() => void</code>                                   | No       | -       |                                     |
+<PropsTableFromJSDoc component="Action" />
 
-### CopyToClipboard
+### Action.CopyToClipboard
 
 Action that copies the content to the clipboard.
 
@@ -67,10 +55,7 @@ export default function Command() {
       markdown="Press `⌘ + .` and share some love."
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            content="I ❤️ Raycast"
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
+          <Action.CopyToClipboard content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
         </ActionPanel>
       }
     />
@@ -80,15 +65,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                      | Description                                                   |
-| :------- | :-------------------------------------------------------- | :------- | :------------------------------------------- | :------------------------------------------------------------ |
-| content  | <code>string</code> or <code>number</code>                | Yes      | -                                            | The contents that will be written to the clipboard as string. |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Clipboard](./icons-and-images.md#icon) | A optional icon displayed for the item.                       |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                            | The keyboard shortcut for the action.                         |
-| title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
-| onCopy   | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
+<PropsTableFromJSDoc component="Action.CopyToClipboard" />
 
-### Open
+### Action.Open
 
 An action to open a file or folder with a specific application, just as if you had double-clicked the
 file's icon.
@@ -116,16 +95,9 @@ export default function Command() {
 
 #### Props
 
-| Prop        | Type                                                                           | Required | Default                                   | Description                                       |
-| :---------- | :----------------------------------------------------------------------------- | :------- | :---------------------------------------- | :------------------------------------------------ |
-| application | <code>string</code> or <code>[Application](../utilities.md#application)</code> | No       | -                                         | The application name to use for opening the file. |
-| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | [Icon.Finder](./icons-and-images.md#icon) | The icon displayed for the action.                |
-| shortcut    | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code>                      | No       | -                                         | The keyboard shortcut for the action.             |
-| target      | <code>string</code>                                                            | Yes      | -                                         | The file, folder or URL to open.                  |
-| title       | <code>string</code>                                                            | Yes      | -                                         | The title for the action.                         |
-| onOpen      | <code>(target: string) => void</code>                                          | No       | -                                         |                                                   |
+<PropsTableFromJSDoc component="Action.Open" />
 
-### OpenInBrowser
+### Action.OpenInBrowser
 
 Action that opens a URL in the default browser.
 
@@ -152,15 +124,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                  | Description                                      |
-| :------- | :-------------------------------------------------------- | :------- | :--------------------------------------- | :----------------------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Globe](./icons-and-images.md#icon) | The icon displayed for the action.               |
-| shortcut | <code>[Shortcut](../keyboard.md#shortcut)</code>          | No       | -                                        | The optional keyboard shortcut for the menu item |
-| title    | <code>string</code>                                       | No       | -                                        | An optional title for the action.                |
-| url      | <code>string</code>                                       | Yes      | -                                        | The URL to open.                                 |
-| onOpen   | <code>(url: string) => void</code>                        | No       | -                                        |                                                  |
+<PropsTableFromJSDoc component="Action.OpenInBrowser" />
 
-### OpenWith
+### Action.OpenWith
 
 Action that opens a file or folder with a specific application.
 
@@ -191,15 +157,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                   | Description                           |
-| :------- | :-------------------------------------------------------- | :------- | :---------------------------------------- | :------------------------------------ |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Upload](./icons-and-images.md#icon) | The icon displayed for the action.    |
-| path     | <code>string</code>                                       | Yes      | -                                         | The path to open.                     |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                         | The keyboard shortcut for the action. |
-| title    | <code>string</code>                                       | No       | Open With                                 | The title for the action.             |
-| onOpen   | <code>(path: string) => void</code>                       | No       | -                                         |                                       |
+<PropsTableFromJSDoc component="Action.OpenWith" />
 
-### Paste
+### Action.Paste
 
 Action that pastes the content to the front-most applications.
 
@@ -226,15 +186,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                      | Description                                                   |
-| :------- | :-------------------------------------------------------- | :------- | :------------------------------------------- | :------------------------------------------------------------ |
-| content  | <code>string</code> or <code>number</code>                | Yes      | -                                            | The contents that will be written to the clipboard as string. |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Clipboard](./icons-and-images.md#icon) | The icon displayed for the action.                            |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                            | The keyboard shortcut for the action.                         |
-| title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
-| onPaste  | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
+<PropsTableFromJSDoc component="Action.Paste" />
 
-### Push
+### Action.Push
 
 Action that pushes a new view to the navigation stack.
 
@@ -267,15 +221,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default | Description                                                  |
-| :------- | :-------------------------------------------------------- | :------- | :------ | :----------------------------------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | The icon displayed for the action.                           |
-| shortcut | <code>[Shortcut](../keyboard.md#shortcut)</code>          | No       | -       | The keyboard shortcut for the action.                        |
-| target   | <code>ReactNode</code>                                    | Yes      | -       | The target view that will be pushed to the navigation stack. |
-| title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.                            |
-| onPush   | <code>() => void</code>                                   | No       | -       |                                                              |
+<PropsTableFromJSDoc component="Action.Push" />
 
-### ShowInFinder
+### Action.ShowInFinder
 
 Action that shows a file or folder in the Finder.
 
@@ -305,15 +253,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                   | Description                             |
-| :------- | :-------------------------------------------------------- | :------- | :---------------------------------------- | :-------------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Finder](./icons-and-images.md#icon) | A optional icon displayed for the item. |
-| path     | <code>PathLike</code>                                     | Yes      | -                                         | The path to open.                       |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                         | The keyboard shortcut for the action.   |
-| title    | <code>string</code>                                       | No       | Show in Finder                            | An optional title for the action.       |
-| onShow   | <code>(path: PathLike) => void</code>                     | No       | -                                         |                                         |
+<PropsTableFromJSDoc component="Action.ShowInFinder" />
 
-### SubmitForm
+### Action.SubmitForm
 
 Action that adds a submit handler for capturing form values.
 
@@ -327,10 +269,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Answer"
-            onSubmit={(values) => console.log(values)}
-          />
+          <Action.SubmitForm title="Submit Answer" onSubmit={(values) => console.log(values)} />
         </ActionPanel>
       }
     >
@@ -342,14 +281,9 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default | Description                           |
-| :------- | :-------------------------------------------------------- | :------- | :------ | :------------------------------------ |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | -       | The icon displayed for the action.    |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -       | The keyboard shortcut for the action. |
-| title    | <code>string</code>                                       | No       | -       | The title displayed for the item.     |
-| onSubmit | <code>(input: [Values](./form.md#values)) => void</code>  | No       | -       |                                       |
+<PropsTableFromJSDoc component="Action.SubmitForm" />
 
-### Trash
+### Action.Trash
 
 Action that moves a file or folder to the Trash.
 
@@ -377,10 +311,139 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                      | Required | Default                                  | Description                                    |
-| :------- | :-------------------------------------------------------- | :------- | :--------------------------------------- | :--------------------------------------------- |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Trash](./icons-and-images.md#icon) | A optional icon displayed for the action.      |
-| paths    | <code>PathLike</code> or <code>PathLike[]</code>          | Yes      | -                                        | The item or items to move to the trash.        |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                        | The optional keyboard shortcut for the action. |
-| title    | <code>string</code>                                       | No       | Move to Trash                            | An optional title for the action.              |
-| onTrash  | <code>(paths: PathLike \| PathLike[]) => void</code>      | No       | -                                        |                                                |
+<PropsTableFromJSDoc component="Action.Trash" />
+
+### Action.CreateSnippet
+
+Action that navigates to the the Create Snippet command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out snippet creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateSnippet snippet={{ text: "DE75512108001245126199" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.CreateSnippet" />
+
+### Action.CreateQuicklink
+
+Action that navigates to the the Create Quicklink command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out quicklink creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.CreateQuicklink" />
+
+### Action.ToggleQuickLook
+
+Action that toggles the Quick Look to preview a file.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Preview me"
+        quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
+        actions={
+          <ActionPanel>
+            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.ToggleQuickLook" />
+
+### Action.PickDate
+
+Action to pick a date.
+
+#### Example
+
+```typescript
+import { ActionPanel, List, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="Todo"
+        actions={
+          <ActionPanel>
+            <Action.PickDate title="Set Due Date…" />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Action.PickDate" />
+
+## Types
+
+### Snippet
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Snippet" />
+
+### Quicklink
+
+#### Properties
+
+<InterfaceTableFromJSDoc name="Quicklink" />
+
+### Action.Style
+
+Defines the visual style of the Action.
+
+Use [Action.Style.Regular](#action.style) for displaying a regular actions.
+Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
+Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.

@@ -1,4 +1,4 @@
-import { environment, preferences, showToast, ToastStyle } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import { homedir } from "os";
@@ -9,6 +9,7 @@ import { exec } from "child_process";
 const execp = promisify(exec);
 import parseGitConfig = require("parse-git-config");
 import parseGithubURL = require("parse-github-url");
+import getDefaultBrowser from "default-browser";
 
 const CacheFile = path.join(environment.supportPath, "cache.json");
 
@@ -16,6 +17,8 @@ export interface GitRepo {
   name: string;
   fullPath: string;
   icon: string;
+  defaultBrowserId: string;
+  remotes: RemoteRepo[];
 }
 
 interface GitRemote {
@@ -29,6 +32,7 @@ export interface RemoteRepo {
 }
 
 export class Cache {
+  version = 2;
   repos: GitRepo[];
 
   constructor() {
@@ -42,7 +46,9 @@ export class Cache {
     const jsonData = fs.readFileSync(CacheFile).toString();
     if (jsonData.length > 0) {
       const cache: Cache = JSON.parse(jsonData);
-      this.repos = cache.repos;
+      if (cache.version && cache.version === this.version) {
+        this.repos = cache.repos;
+      }
     }
   }
 
@@ -66,10 +72,21 @@ export interface RepoSearchResponse {
   repos: GitRepo[];
 }
 
-export interface Settings {
-  reposDir: string;
-  maxDepth: number;
-  includeSubmodules: boolean;
+export interface OpenWith {
+  name: string;
+  path: string;
+  bundleId: string;
+}
+
+export interface Preferences {
+  repoScanPath: string;
+  repoScanDepth?: number;
+  includeSubmodules?: boolean;
+  openWith1: OpenWith;
+  openWith2: OpenWith;
+  openWith3?: OpenWith;
+  openWith4?: OpenWith;
+  openWith5?: OpenWith;
 }
 
 export function resolvePath(filepath: string): string {
@@ -93,15 +110,11 @@ function makeSupportPath() {
   fs.mkdirSync(environment.supportPath, { recursive: true });
 }
 
-export async function loadSettings(): Promise<Settings> {
-  return {
-    reposDir: preferences.repoScanPath?.value as string,
-    maxDepth: (preferences.repoScanDepth?.value as number) ?? 3,
-    includeSubmodules: preferences.includeSubmodules?.value as boolean,
-  };
+export async function loadPreferences(): Promise<Preferences> {
+  return getPreferenceValues<Preferences>();
 }
 
-export function gitRemotes(path: string): RemoteRepo[] {
+function gitRemotes(path: string): RemoteRepo[] {
   let repos = [] as RemoteRepo[];
   const gitConfig = parseGitConfig.sync({ cwd: path, path: ".git/config", expandKeys: true });
   if (gitConfig.remote != null) {
@@ -147,13 +160,21 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
       .map((path) => {
         const fullPath = path;
         const name = `${fullPath.split("/").pop() ?? "unknown"}`;
-        return { name: name, icon: "git-submodule-icon.png", fullPath: fullPath };
+        const remotes = gitRemotes(fullPath);
+        return {
+          name: name,
+          icon: "git-submodule-icon.png",
+          fullPath: fullPath,
+          defaultBrowserId: "",
+          remotes: remotes,
+        };
       });
   } else {
     return repoPaths.map((path) => {
       const fullPath = path.replace("/.git", "");
       const name = fullPath.split("/").pop() ?? "unknown";
-      return { name: name, icon: "git-icon.png", fullPath: fullPath };
+      const remotes = gitRemotes(fullPath);
+      return { name: name, icon: "git-icon.png", fullPath: fullPath, defaultBrowserId: "", remotes: remotes };
     });
   }
 }
@@ -166,7 +187,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type d`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
-        showToast(ToastStyle.Failure, "Find Failed", stderr);
+        showToast(Toast.Style.Failure, "Find Failed", stderr);
         console.error(`error: ${stderr}`);
         return [];
       }
@@ -208,6 +229,10 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       return 1;
     }
     return 0;
+  });
+  const defaultBrowser = await getDefaultBrowser();
+  foundRepos.map((repo) => {
+    repo.defaultBrowserId = defaultBrowser.id;
   });
   cache.setRepos(foundRepos);
   cache.save();
@@ -265,16 +290,20 @@ export function useRepoCache(query: string | undefined): {
       setError(undefined);
 
       try {
-        const settings = await loadSettings();
-        if (settings.reposDir.length == 0) {
+        const preferences = await loadPreferences();
+        if (preferences.repoScanPath.length == 0) {
           setError("Directories to scan has not been defined in settings");
           return;
         }
-        const [repoPaths, unresolvedPaths] = parsePath(settings.reposDir);
+        const [repoPaths, unresolvedPaths] = parsePath(preferences.repoScanPath);
         if (unresolvedPaths.length > 0) {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
-        const repos = await findRepos(repoPaths, settings.maxDepth, settings.includeSubmodules);
+        const repos = await findRepos(
+          repoPaths,
+          preferences.repoScanDepth ?? 3,
+          preferences.includeSubmodules ?? false
+        );
 
         if (!cancel) {
           let filteredRepos = repos;

@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qq-music-controls",
+  "title": "QQ Music Controls",
+  "description": "Control the QQ Music app for macOS with your keyboard.",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "icon": "icon.png",
+  "author": "jwickers",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "QQ Music",
+      "description": "Plays current track in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "subtitle": "QQ Music",
+      "description": "Pause current track in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playPause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "QQ Music",
+      "description": "Toggles play or pause of current track in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previousTrack",
+      "title": "Previous Track",
+      "subtitle": "QQ Music",
+      "description": "Skips to the previous track in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "nextTrack",
+      "title": "Next Track",
+      "subtitle": "QQ Music",
+      "description": "Skips to the next track in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "likeTrack",
+      "title": "Like Current Track",
+      "subtitle": "QQ Music",
+      "description": "Likes the currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggleLyrics",
+      "title": "Toggle Lyrics",
+      "subtitle": "QQ Music",
+      "description": "Toggle the lyrics display on the desktop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "increaseVolume",
+      "title": "Increase Volume",
+      "subtitle": "QQ Music",
+      "description": "Increase volume in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "decreaseVolume",
+      "title": "Decrease Volume",
+      "subtitle": "QQ Music",
+      "description": "Decrease volume in QQ Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "QQ Music",
+      "description": "Toggles shuffle mode in QQ Music and play.",
+      "mode": "no-view"
+    },
+    {
+      "name": "sequential",
+      "title": "Toggle Sequential",
+      "subtitle": "QQ Music",
+      "description": "Toggles sequential mode in QQ Music and play.",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat",
+      "title": "Toggle Repeat",
+      "subtitle": "QQ Music",
+      "description": "Toggles repeat mode in QQ Music and play.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "2.4.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

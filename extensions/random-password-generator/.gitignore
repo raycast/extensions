@@ -1,0 +1,5 @@
+# os files
+.DS_Store
+
+# libraries
+node_modules

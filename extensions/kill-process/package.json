@@ -56,6 +56,14 @@
       "title": "Display",
       "label": "Show PID",
       "description": "Show process PID info."
+    },
+    {
+      "name": "shouldShowPath",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Process Path",
+      "description": "Show process Path."
     }
   ]
 }

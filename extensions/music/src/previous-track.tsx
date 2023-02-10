@@ -1,7 +1,10 @@
-import { closeMainWindow } from "@raycast/api";
-import * as playerControls from "./util/controls";
+import { pipe } from "fp-ts/lib/function";
 
-export default async () => {
-  await closeMainWindow();
-  await playerControls.previous();
-};
+import { SFSymbols } from "./util/models";
+import * as music from "./util/scripts";
+import { handleTaskEitherError } from "./util/utils";
+
+export default pipe(
+  music.player.previous,
+  handleTaskEitherError(SFSymbols.WARNING + " Failed to rewind track", SFSymbols.TRACK_PREVIOUS + " Track rewinded")
+)();

@@ -5,6 +5,10 @@
   "description": "Search and create notes within the Apple Notes application.",
   "icon": "command-icon.png",
   "author": "tumtum",
+  "contributors": [
+    "ron-myers",
+    "mathieudutour"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -18,12 +22,13 @@
       "name": "new",
       "title": "New Note",
       "subtitle": "Notes",
-      "description": "Add a new note in the Apple Notes app",
+      "description": "Create a new note in the Apple Notes app",
       "mode": "no-view",
       "keywords": [
         "write note",
         "add note",
-        "make note"
+        "make note",
+        "create note"
       ]
     }
   ],
@@ -41,20 +46,30 @@
       "name": "folders",
       "title": "Folder name",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "label": "Show folder name next to each note",
       "description": "Show the folder name next to a note",
+      "required": false
+    },
+    {
+      "name": "modificationDate",
+      "title": "Date modified",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show the modification date next to each note",
+      "description": "Show the modification date next to each note",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "date-format-parse": "^0.2.7",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.37.0",
+    "file-url": "^4.0.0",
+    "run-applescript": "^6.0.0",
+    "sql.js": "^1.7.0",
+    "sugar": "^2.0.6"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -66,6 +81,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

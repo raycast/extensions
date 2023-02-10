@@ -1,10 +1,14 @@
 # Alert
 
+When the user takes an important action (for example when irreversibly deleting something), you can ask for confirmation by using `confirmAlert`.
+
+![](../../.gitbook/assets/alert.png)
+
 ## API Reference
 
 ### confirmAlert
 
-Creates and shows a confirmation Alert with the given options.
+Creates and shows a confirmation Alert with the given [options](#alert.options).
 
 #### Signature
 
@@ -17,22 +21,23 @@ async function confirmAlert(options: Alert.Options): Promise<boolean>;
 ```typescript
 import { confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   if (await confirmAlert({ title: "Are you sure?" })) {
+    console.log("confirmed");
     // do something
+  } else {
+    console.log("canceled");
   }
-};
+}
 ```
 
 #### Parameters
 
-| Name    | Type                                         | Required | Description                           |
-| :------ | :------------------------------------------- | :------- | :------------------------------------ |
-| options | <code>[Alert.Options](#alert.options)</code> | Yes      | The options used to create the Alert. |
+<FunctionParametersTableFromJSDoc name="confirmAlert" />
 
 #### Return
 
-A Promise that resolves to a boolean when the user takes an action.
+A Promise that resolves to a boolean when the user triggers one of the actions.
 It will be `true` for the primary Action, `false` for the dismiss Action.
 
 ## Types
@@ -44,9 +49,9 @@ The options to create an Alert.
 #### Example
 
 ```typescript
-import { Alert } from "@raycast/api";
+import { Alert, confirmAlert } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const options: Alert.Options = {
     title: "Finished cooking",
     message: "Delicious pasta for lunch",
@@ -60,18 +65,12 @@ export default async () => {
     },
   };
   await confirmAlert(options);
-};
+}
 ```
 
 #### Properties
 
-| Name          | Type                                                      | Required | Description                                                                                                                |
-| :------------ | :-------------------------------------------------------- | :------- | :------------------------------------------------------------------------------------------------------------------------- |
-| dismissAction | <code>[Alert.ActionOptions](#alert.actionoptions)</code>  | No       | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action.              |
-| icon          | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | The icon of an alert to illustrate the action. Displayed on the top.                                                       |
-| message       | <code>string</code>                                       | No       | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. |
-| primaryAction | <code>[Alert.ActionOptions](#alert.actionoptions)</code>  | No       | The primary Action the user can take.                                                                                      |
-| title         | <code>string</code>                                       | Yes      | The title of an alert. Displayed below the icon.                                                                           |
+<InterfaceTableFromJSDoc name="Alert.Options" />
 
 ### Alert.ActionOptions
 
@@ -79,11 +78,7 @@ The options to create an Alert Action.
 
 #### Properties
 
-| Name     | Type                                                 | Required | Description                                     |
-| :------- | :--------------------------------------------------- | :------- | :---------------------------------------------- |
-| style    | <code>[Alert.ActionStyle](#alert.actionstyle)</code> | No       | The style of the action.                        |
-| title    | <code>string</code>                                  | Yes      | The title of the action.                        |
-| onAction | <code>() => void</code>                              | No       | A callback called when the action is triggered. |
+<InterfaceTableFromJSDoc name="Alert.ActionOptions" />
 
 ### Alert.ActionStyle
 
@@ -94,8 +89,8 @@ Use [Alert.ActionStyle.Destructive](#alert.actionstyle) for confirmations of a d
 
 #### Enumeration members
 
-| Name        | Value         |
-| :---------- | :------------ |
-| Cancel      | "CANCEL"      |
-| Default     | "DEFAULT"     |
-| Destructive | "DESTRUCTIVE" |
+| Name        | Value                                                   |
+| :---------- | :------------------------------------------------------ |
+| Default     | ![](../../.gitbook/assets/alert-action-default.png)     |
+| Destructive | ![](../../.gitbook/assets/alert-action-destructive.png) |
+| Cancel      | ![](../../.gitbook/assets/alert-action-cancel.png)      |

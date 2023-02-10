@@ -17,7 +17,7 @@ export default function Command() {
         key={pref.name}
         title={pref.name}
         subtitle={String(preferences[pref.name] ?? "(not defined)")}
-        accessoryTitle={pref.type + (pref.required ? " (required)" : " (optional)")}
+        accessories={[{ text: pref.type + (pref.required ? " (required)" : " (optional)") }]}
       />
     );
   });

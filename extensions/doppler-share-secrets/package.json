@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
   "commands": [
     {
       "name": "index",

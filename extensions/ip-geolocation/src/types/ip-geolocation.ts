@@ -1,0 +1,31 @@
+export interface IPGeolocation {
+  status: string;
+  country: string;
+  countryCode: string;
+  region: string;
+  regionName: string;
+  city: string;
+  district: string;
+  zip: string;
+  lat: number;
+  lon: number;
+  timezone: string;
+  isp: string;
+  org: string;
+  as: string;
+  query: string;
+}
+
+export interface IPGeolocationReadable {
+  IP: string; //query
+  Location: string; //country  regionName city district
+  GeoCoordinates: string; //(lat,lon)
+  Timezone: string;
+  AS: string;
+  ISP: string; //isp
+  Organization: string; //org
+}
+
+export enum CacheKey {
+  MY_IP_GEOLOCATION = "My ip geolocation",
+}

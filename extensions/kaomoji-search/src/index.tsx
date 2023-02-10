@@ -25,8 +25,8 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PasteAction title="Paste to Current Window" content={searchResult.name} />
-            <CopyToClipboardAction title="Copy to Clipboard" content={searchResult.name} />
+            <PasteAction title="Paste in Active App" content={searchResult.name} />
+            <CopyToClipboardAction content={searchResult.name} />
           </ActionPanel.Section>
         </ActionPanel>
       }

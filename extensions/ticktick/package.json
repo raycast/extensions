@@ -5,24 +5,34 @@
   "icon": "tick-logo.png",
   "author": "appest",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Today Tasks",
       "subtitle": "TickTick",
-      "description": "Show today tasks.",
+      "description": "Show today to-do tasks.",
       "mode": "view"
     },
     {
       "name": "next7Days",
       "title": "Next 7 Days Tasks",
       "subtitle": "TickTick",
-      "description": "Show next 7 days tasks.",
+      "description": "Show next 7 days to-do tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search tasks.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.2",
+    "@raycast/api": "^1.36.0",
     "moment": "^2.29.1",
     "run-applescript": "^6.0.0"
   },
@@ -36,11 +46,11 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

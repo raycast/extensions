@@ -6,4 +6,4 @@ https://www.raycast.com/nhojb/brew
 
 ## Issue Tracker
 
-https://github.com/nhojb/raycast-brew/issues
+https://github.com/raycast/extensions/issues

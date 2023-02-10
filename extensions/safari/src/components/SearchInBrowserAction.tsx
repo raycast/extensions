@@ -1,6 +1,6 @@
-import { ActionPanel, closeMainWindow, Icon } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Icon, Action } from "@raycast/api";
 
-import { executeJxa } from "../utils";
+import { executeJxa, safariAppIdentifier } from "../utils";
 
 const searchInBrowser = async (searchText?: string) => {
   if (!searchText) {
@@ -9,7 +9,7 @@ const searchInBrowser = async (searchText?: string) => {
   }
 
   executeJxa(`
-      const safari = Application("Safari");
+      const safari = Application("${safariAppIdentifier}");
       safari.searchTheWeb({ for: "${searchText}" });
       safari.activate();
   `);
@@ -17,7 +17,7 @@ const searchInBrowser = async (searchText?: string) => {
 
 const SearchInBrowserAction = (props: { searchText?: string }) => {
   return props.searchText ? (
-    <ActionPanel.Item
+    <Action
       title="Search in Browser"
       icon={Icon.MagnifyingGlass}
       onAction={async () => {

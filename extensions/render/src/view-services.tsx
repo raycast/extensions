@@ -1,15 +1,11 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Detail,
   Icon,
   List,
-  ListItem,
-  ListSection,
-  OpenInBrowserAction,
-  PushAction,
   showToast,
-  ToastStyle,
+  Action,
+  Toast,
 } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Service, {
@@ -84,33 +80,33 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {Object.keys(ownerMap).map((owner) => (
-        <ListSection key={owner} title={ownerMap[owner]}>
+        <List.Section key={owner} title={ownerMap[owner]}>
           {serviceMap[owner] &&
             serviceMap[owner].map((service) => (
-              <ListItem
+              <List.Item
                 key={service.id}
                 icon={getServiceIcon(service)}
                 title={service.name}
                 subtitle={formatServiceType(service)}
                 actions={
                   <ActionPanel>
-                    <PushAction
+                    <Action.Push
                       icon={Icon.TextDocument}
                       title="Show Details"
                       target={<ServiceView service={service} />}
                     />
-                    <PushAction
+                    <Action.Push
                       icon={Icon.Hammer}
                       title="Show Deploys"
                       target={<DeployListView service={service} />}
                       shortcut={{ modifiers: ['cmd'], key: 'd' }}
                     />
-                    <OpenInBrowserAction
+                    <Action.OpenInBrowser
                       title="Open in Render"
                       url={getServiceUrl(service)}
                       shortcut={{ modifiers: ['cmd'], key: 'r' }}
                     />
-                    <OpenInBrowserAction
+                    <Action.OpenInBrowser
                       title="Open Repo"
                       url={service.repo}
                       shortcut={{ modifiers: ['cmd'], key: 'g' }}
@@ -119,7 +115,7 @@ export default function Command() {
                 }
               />
             ))}
-        </ListSection>
+        </List.Section>
       ))}
     </List>
   );
@@ -172,12 +168,12 @@ function ServiceView(props: ServiceProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             icon={Icon.Hammer}
             title="Show Deploys"
             target={<DeployListView service={service} />}
           />
-          <PushAction
+          <Action.Push
             icon={Icon.Text}
             title="Show Environment Variables"
             target={
@@ -188,7 +184,7 @@ function ServiceView(props: ServiceProps) {
             }
             shortcut={{ modifiers: ['cmd'], key: 'e' }}
           />
-          <PushAction
+          <Action.Push
             icon={Icon.Text}
             title="Show Custom Domains"
             target={
@@ -199,12 +195,12 @@ function ServiceView(props: ServiceProps) {
             }
             shortcut={{ modifiers: ['cmd'], key: 'd' }}
           />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Render"
             url={getServiceUrl(service)}
             shortcut={{ modifiers: ['cmd'], key: 'r' }}
           />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open Repo"
             url={service.repo}
             shortcut={{ modifiers: ['cmd'], key: 'g' }}
@@ -244,23 +240,23 @@ function DeployListView(props: ServiceProps) {
   return (
     <List navigationTitle={navigationTitle} isLoading={isLoading}>
       {deploys.map((deploy) => (
-        <ListItem
+        <List.Item
           key={deploy.id}
           icon={getDeployStatusIcon(deploy.status)}
           title={formatCommit(deploy.commit.message)}
           actions={
             <ActionPanel>
-              <PushAction
+              <Action.Push
                 icon={Icon.TextDocument}
                 title="Show Details"
                 target={<DeployView service={service} deploy={deploy} />}
               />
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open in Render"
                 url={getDeployUrl(service, deploy.id)}
                 shortcut={{ modifiers: ['cmd'], key: 'r' }}
               />
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open Commit"
                 url={getCommitUrl(service.repo, deploy.commit.id)}
                 shortcut={{ modifiers: ['cmd'], key: 'g' }}
@@ -295,12 +291,12 @@ function DeployView(props: DeployProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open in Render"
             url={getDeployUrl(service, deploy.id)}
             shortcut={{ modifiers: ['cmd'], key: 'r' }}
           />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title="Open Commit"
             url={getCommitUrl(service.repo, deploy.commit.id)}
             shortcut={{ modifiers: ['cmd'], key: 'g' }}
@@ -341,13 +337,13 @@ function EnvVariableListView(props: EnvVariableListProps) {
   return (
     <List navigationTitle={navigationTitle} isLoading={isLoading}>
       {Object.entries(variables).map(([key, value]) => (
-        <ListItem
+        <List.Item
           key={key}
           title={key}
           subtitle={value}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={`${key}=${value}`} />
+              <Action.CopyToClipboard content={`${key}=${value}`} />
             </ActionPanel>
           }
         />
@@ -386,7 +382,7 @@ function DomainListView(props: DomainListProps) {
   return (
     <List navigationTitle={navigationTitle} isLoading={isLoading}>
       {domains.map((domain) => (
-        <ListItem icon={getDomainIcon(domain.verified)} title={domain.name} />
+        <List.Item icon={getDomainIcon(domain.verified)} title={domain.name} />
       ))}
     </List>
   );
@@ -394,14 +390,21 @@ function DomainListView(props: DomainListProps) {
 
 function handleError(e: unknown) {
   if (e instanceof AuthError) {
-    showToast(
-      ToastStyle.Failure,
-      'Failed to authorize',
-      'Please make sure that your API key is valid.'
-    );
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Failed to authorize',
+      message: 'Please make sure that your API key is valid.',
+    });
   } else if (e instanceof NetworkError) {
-    showToast(ToastStyle.Failure, 'Network error', 'Please try again later.');
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Network error',
+      message: 'Please try again later.',
+    });
   } else {
-    showToast(ToastStyle.Failure, 'Unknown error');
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Unknown error',
+    });
   }
 }

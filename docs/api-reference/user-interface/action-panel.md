@@ -1,16 +1,19 @@
 # Action Panel
 
+![](../../.gitbook/assets/action-panel.png)
+
 ## API Reference
 
 ### ActionPanel
 
 Exposes a list of [actions](./actions.md) that can be performed by the user.
 
-Often items are context-aware, e.g. based on the selected list item. Actions can be grouped into semantic
-section and can have keyboard shortcuts assigned.
+Often items are context-aware, e.g., based on the selected list item. Actions can be grouped into semantic
+sections and can have keyboard shortcuts assigned.
 
 The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
-In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+In [List](./list.md), [Grid](./grid.md), and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+Keep in mind that while you can specify an alternative shortcut for the primary and secondary actions, it won't be displayed in the Action Panel.
 
 #### Example
 
@@ -40,16 +43,13 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                       | Required | Default | Description                                                                                                        |
-| :------- | :--------------------------------------------------------- | :------- | :------ | :----------------------------------------------------------------------------------------------------------------- |
-| children | <code>[ActionPanel.Children](#actionpanel.children)</code> | No       | -       | Sections or Actions. If [Action](./actions.md) elements are specified, a default section is automatically created. |
-| title    | <code>string</code>                                        | No       | -       | The title displayed at the top of the panel                                                                        |
+<PropsTableFromJSDoc component="ActionPanel" />
 
 ### ActionPanel.Section
 
 A group of visually separated items.
 
-Use sections if the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
+Use sections when the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
 For example, create a section for all copy actions.
 
 #### Example
@@ -66,24 +66,15 @@ export default function Command() {
         actions={
           <ActionPanel title="#1 in raycast/extensions">
             <ActionPanel.Section title="Copy">
-              <Action.CopyToClipboard
-                title="Copy Pull Request Number"
-                content="#1"
-              />
+              <Action.CopyToClipboard title="Copy Pull Request Number" content="#1" />
               <Action.CopyToClipboard
                 title="Copy Pull Request URL"
                 content="https://github.com/raycast/extensions/pull/1"
               />
-              <Action.CopyToClipboard
-                title="Copy Pull Request Title"
-                content="Docs: Update API Reference"
-              />
+              <Action.CopyToClipboard title="Copy Pull Request Title" content="Docs: Update API Reference" />
             </ActionPanel.Section>
             <ActionPanel.Section title="Danger zone">
-              <Action
-                title="Close Pull Request"
-                onAction={() => console.log("Close PR #1")}
-              />
+              <Action title="Close Pull Request" onAction={() => console.log("Close PR #1")} />
             </ActionPanel.Section>
           </ActionPanel>
         }
@@ -95,10 +86,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :-------------------------------- |
-| children | <code>[ActionPanel.Section.Children](#actionpanel.section.children)</code> | No       | -       | The item elements of the Section. |
-| title    | <code>string</code>                                                        | No       | -       | Title displayed above the section |
+<PropsTableFromJSDoc component="ActionPanel.Section" />
 
 ### ActionPanel.Submenu
 
@@ -109,7 +97,7 @@ This is handy when an action needs to select from a range of options. For exampl
 #### Example
 
 ```typescript
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -146,13 +134,7 @@ export default function Command() {
 
 #### Props
 
-| Prop     | Type                                                                       | Required | Default | Description                                                                                       |
-| :------- | :------------------------------------------------------------------------- | :------- | :------ | :------------------------------------------------------------------------------------------------ |
-| children | <code>[ActionPanel.Submenu.Children](#actionpanel.submenu.children)</code> | No       | -       | Items of the submenu.                                                                             |
-| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                  | No       | -       | The icon displayed for the submenu.                                                               |
-| id       | <code>string</code>                                                        | No       | -       | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
-| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code>                  | No       | -       | The keyboard shortcut for the submenu.                                                            |
-| title    | <code>string</code>                                                        | Yes      | -       | The title displayed for submenu.                                                                  |
+<PropsTableFromJSDoc component="ActionPanel.Submenu" />
 
 ## Types
 

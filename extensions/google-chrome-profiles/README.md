@@ -8,42 +8,43 @@
     View your Google Chrome profiles, show bookmarks, open the right profile.
 </p>
 
-## Intro
+## Why
 
-With profiles, you can keep all your Chrome info separate, like bookmarks, history, passwords, and other settings.
+Profiles in Chrome are absolutely awesome. It allows to keep your browsing experience (bookmarks, navigation history, passwords, and other settings) separated by company / perso / pro / whatever.
 
-Problem: jumping from a profile to another is very painful.
+Problem: jumping from a profile to another is painful.
 
-Here comes this extension.
+Here comes this extension:
+
+Hit `⌘ ⇧ M`, choose the right profile, hit `Enter ↵`, and tada 🎉
 
 ![jump from profile to profile](https://user-images.githubusercontent.com/2499356/146406690-e1e79b29-5e22-4764-ad32-daccb598975b.jpg)
 
-## List Profiles
+## How it works
 
-| Actions                    |       |
-| -------------------------- | ----- |
-| show profile's bookmarks   | `↵`   |
-| open profile chrome window | `⌘ ↵` |
+When the extension opens, it lists all your existing profiles.
 
-![show existing profiles](https://user-images.githubusercontent.com/2499356/146404653-37a398ea-338e-4124-89a8-f7583156f00c.jpg)
+> Hit `Enter ↵` to enter a profile's bookmarks, or `⌘ ↵` to open (or focus) the profile chrome window.
 
-## List Profiles > Show Bookmarks
+When entering a profile, you can choose whether:
 
-| Actions                            |       |
-| ---------------------------------- | ----- |
-| open and close Raycast main window | `↵`   |
-| open and keep Raycast opened       | `⌘ ↵` |
+- open a new blank tab
+- filter the bookmarks and/or open a bookmark
+- search the input text in the search engine of your choice (cf. settings)
+- open the URL in the clipboard (if any of course) in a new tab
 
-![show profile bookmarks](https://user-images.githubusercontent.com/2499356/146406243-634818d9-9a8b-4646-aa45-35fb1d83c21e.jpg)
+> Hit `Enter ↵` to open the selected item and close the Raycast main window, or `⌘ ↵` to open the selected item and keep Raycast opened.
 
-## Recommended Hotkey
+![show profile bookmarks](https://user-images.githubusercontent.com/2499356/182669098-0adfd17f-b586-4820-bebf-85e5ec49cd39.jpg)
 
-Use the default Google Chrome profile shortcut `⌘ ⇧ M` as Command shortcut.
+## Hotkey (recommended)
 
-![command shortcut](https://user-images.githubusercontent.com/2499356/146419810-86942ca2-7d92-48ef-b46d-4aa48bcf9842.png)
+I highly recommend that you map the default Google Chrome profile shortcut (`⌘ ⇧ M`) to open this extension. Like so:
+
+![command shortcut](https://user-images.githubusercontent.com/2499356/182660159-9b373fe9-f9df-4edd-953d-925308c61b3e.jpg)
 
 ## Settings
 
-Choose the URL for the new Tab.
+If needed, set the URL for the new tab (default is `about:blank`) and your search engine in the extension setting (default is `google.com`).
 
-![settings](https://user-images.githubusercontent.com/2499356/147462128-121990c5-3400-4f91-b484-188ede6f9b7d.jpg)
+![extension setting](https://user-images.githubusercontent.com/2499356/182661111-b53372fa-ff38-4134-934d-c2cb65fc367e.jpg)

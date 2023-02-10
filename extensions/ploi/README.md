@@ -72,5 +72,5 @@ $ prettier --write . && prettier --check . && npm run build
 ## Contributors
 
 - [Dennis Smink](https://github.com/Cannonb4ll)
-- Robin Rosier (Initial creator)
+- [Robin Rosiers](https://github.com/RosiersRobin) (Initial creator)
 - [Kevin Batdorf](https://github.com/KevinBatdorf) (Inspiration 💙)

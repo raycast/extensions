@@ -1,5 +1,9 @@
 # HUD
 
+When the user takes an action that has the side effect of closing Raycast (for example when copying something in the [Clipboard](../clipboard.md)), you can use a HUD to confirm that the action worked properly.
+
+![](../../.gitbook/assets/hud.png)
+
 ## API Reference
 
 ### showHUD
@@ -17,16 +21,14 @@ async function showHUD(title: string): Promise<void>;
 ```typescript
 import { showHUD } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   await showHUD("Hey there 👋");
-};
+}
 ```
 
 #### Parameters
 
-| Name  | Type                | Required | Description                                   |
-| :---- | :------------------ | :------- | :-------------------------------------------- |
-| title | <code>string</code> | Yes      | The title that will be displayed for the HUD. |
+<FunctionParametersTableFromJSDoc name="showHUD" />
 
 #### Return
 
