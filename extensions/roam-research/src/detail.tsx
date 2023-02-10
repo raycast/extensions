@@ -31,9 +31,7 @@ export function BlockDetail({ block, graph }: { block: ReversePullBlock; graph: 
       markdown={detailMarkdown(block)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://roamresearch.com/#/app/${graph.nameField}/page/${block[":block/uid"]}`}
-          />
+          <Action.OpenInBrowser url={`https://roamresearch.com/#/app/${graph.nameField}/page/${block[":block/uid"]}`} />
           <Action.OpenWith title="Open in App" path={`roam://#/app/thoughtfull/page/${block[":block/uid"]}`} />
           {_refs.length ? (
             <Action.Push
