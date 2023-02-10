@@ -43,19 +43,21 @@ export default function HighlightDetails({
       }
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Updated"
-            text={dateFormatter.format(new Date(highlight.updated))}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Location"
-            text={highlight.location.toString()}
-          />
           <List.Item.Detail.Metadata.Link
             title="Link"
             text="Open in Readwise"
             target={`https://readwise.io/open/${highlight.id}`}
           />
+          <List.Item.Detail.Metadata.Label
+            title="Updated"
+            text={dateFormatter.format(new Date(highlight.updated))}
+          />
+          {highlight.location ? (
+            <List.Item.Detail.Metadata.Label
+              title="Location"
+              text={highlight.location.toString()}
+            />
+          ) : null}
           {highlight.color ? (
             <List.Item.Detail.Metadata.Label
               title="Color"
