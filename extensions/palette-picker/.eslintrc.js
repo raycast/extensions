@@ -31,12 +31,7 @@ const config = {
   ],
   root: true,
   reportUnusedDisableDirectives: true,
-  ignorePatterns: [
-    ".eslintrc.js",
-    "**/*.config.js",
-    "**/*.config.cjs",
-    "packages/config/**",
-  ],
+  ignorePatterns: [".eslintrc.js"],
 };
 
 module.exports = config;
