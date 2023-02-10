@@ -138,7 +138,7 @@ function ProjectForm({ item }: { item: ExampleSource }) {
     >
       <Form.TextField
         id="projectName"
-        title="Project name"
+        title="Project Name"
         autoFocus
         placeholder="Enter project name"
         value={name}
