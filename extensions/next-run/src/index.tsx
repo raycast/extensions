@@ -67,6 +67,11 @@ function ProjectForm({ item }: { item: ExampleSource }) {
   const [location, setLocation] = useState("local");
   const [preferredFolder, setPreferredFolder] = useState(homedir());
   const [preferredPackageManager, setPreferredPackageManager] = useState("npm");
+  const [error, setError] = useState<string | undefined>();
+
+  const vercelUrl = `https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/${template}&project-name=${name}&repository-name=${name
+    .toLowerCase()
+    .replace(/ /g, "-")}`;
 
   const savePreferences = async () => {
     await Promise.all([
@@ -76,6 +81,10 @@ function ProjectForm({ item }: { item: ExampleSource }) {
   };
 
   const cloneLocally = async () => {
+    if (name === "") {
+      setError("Project name is required");
+      return;
+    }
     const generateCommand = preferredPackageManager === "npm" ? "npx" : preferredPackageManager;
     const slugifiedName = name.toLowerCase().replace(/ /g, "-");
     const appleScript = `
@@ -93,13 +102,14 @@ function ProjectForm({ item }: { item: ExampleSource }) {
   };
 
   const cloneOnVercel = async () => {
+    if (name === "") {
+      setError("Project name is required");
+      return;
+    }
     await savePreferences();
+    open(vercelUrl);
     popToRoot({ clearSearchBar: true });
   };
-
-  const vercelUrl = `https://vercel.com/new/clone?repository-url=https://github.com/vercel/next.js/tree/canary/examples/${template}&project-name=${name}&repository-name=${name
-    .toLowerCase()
-    .replace(/ /g, "-")}`;
 
   useEffect(() => {
     const getSavedPreferences = async () => {
@@ -126,12 +136,7 @@ function ProjectForm({ item }: { item: ExampleSource }) {
           {location === "local" ? (
             <Action.SubmitForm icon={Icon.Code} title="Clone Locally" onSubmit={async () => await cloneLocally()} />
           ) : (
-            <Action.OpenInBrowser
-              icon={Icon.Globe}
-              title="Open on Vercel"
-              url={vercelUrl}
-              onOpen={async () => cloneOnVercel()}
-            />
+            <Action.SubmitForm icon={Icon.Globe} title="Open on Vercel" onSubmit={async () => cloneOnVercel()} />
           )}
         </ActionPanel>
       }
@@ -143,6 +148,14 @@ function ProjectForm({ item }: { item: ExampleSource }) {
         placeholder="Enter project name"
         value={name}
         onChange={setName}
+        error={error}
+        onBlur={(e) => {
+          if (e.target.value?.length === 0) {
+            setError("Project name is required");
+          } else {
+            setError(undefined);
+          }
+        }}
       />
       <Form.Dropdown
         id="location"
