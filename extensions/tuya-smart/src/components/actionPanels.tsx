@@ -27,7 +27,7 @@ export function DeviceActionPanel(props: {
 export function CommandActionPanel(props: {
   device: Device;
   command: Status;
-  onAction: (props: { result: boolean; newValue: any }) => void;
+  onAction: (props: { result: boolean; newValue: string | boolean }) => void;
 }): JSX.Element {
   const deviceId = props.device.id;
   const commandValue = props.command.value;

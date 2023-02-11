@@ -60,7 +60,7 @@ export function TextCommand(props: {
   );
 }
 
-async function sendTextCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: any }> {
+async function sendTextCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: string }> {
   showToast(Toast.Style.Animated, `Turning ${command.code} ${command.value}`);
 
   try {
@@ -75,17 +75,17 @@ async function sendTextCommand(deviceId: string, command: Status): Promise<{ res
     });
     if (result) {
       showToast(Toast.Style.Success, `Turned ${command.code} ${command.value}`);
-      return { result: true, newValue: command.value };
+      return { result: true, newValue: command.value as string };
     }
     showToast(Toast.Style.Failure, `Send Text Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as string };
   } catch (err) {
     showToast(Toast.Style.Failure, `Send Text Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as string };
   }
 }
 
-async function onCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: any }> {
+async function onCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: boolean }> {
   showToast(Toast.Style.Animated, `Turning On ${command.code}`);
 
   try {
@@ -104,14 +104,14 @@ async function onCommand(deviceId: string, command: Status): Promise<{ result: b
       return { result: true, newValue: command.value };
     }
     showToast(Toast.Style.Failure, `On Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as boolean };
   } catch (err) {
     showToast(Toast.Style.Failure, `On Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as boolean };
   }
 }
 
-async function offCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: any }> {
+async function offCommand(deviceId: string, command: Status): Promise<{ result: boolean; newValue: boolean }> {
   showToast(Toast.Style.Animated, `Turning Off ${command.code}`);
 
   try {
@@ -130,10 +130,10 @@ async function offCommand(deviceId: string, command: Status): Promise<{ result: 
       return { result: true, newValue: command.value };
     }
     showToast(Toast.Style.Failure, `On Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as boolean };
   } catch (err) {
     showToast(Toast.Style.Failure, `Off Command ${command.code} failed`);
-    return { result: false, newValue: command.value };
+    return { result: false, newValue: command.value as boolean };
   }
 }
 

@@ -36,17 +36,17 @@ export function DeviceList(props: DeviceListProps): JSX.Element {
 
 export function DeviceListItem(props: { device: Device; onAction: () => void }): JSX.Element {
   const device = props.device;
-  let category = device.category;
-  let online = device.online;
-  let tintColor = online ? Color.Green : Color.Red;
-  let tooltip: string | undefined = online ? "Online" : "Offline";
+  const category = device.category;
+  const online = device.online;
+  const tintColor = online ? Color.Green : Color.Red;
+  const tooltip: string | undefined = online ? "Online" : "Offline";
 
   const icon = { source: Icon.Circle, tintColor };
 
   return (
     <List.Item
       title={device.name}
-      accessories={[{ text: device.category }]}
+      accessories={[{ text: category }]}
       icon={tooltip ? { value: icon, tooltip } : icon}
       actions={<DeviceActionPanel device={device} showDetails={true} onAction={props.onAction} />}
     />
@@ -54,8 +54,8 @@ export function DeviceListItem(props: { device: Device; onAction: () => void }):
 }
 
 export function CommandList(props: CommandListProps): JSX.Element {
-  const [commands, setCommands] = useState<Status[]>(props.commands);
-  const [device, setDevice] = useState<Device>(props.device);
+  const [commands] = useState<Status[]>(props.commands);
+  const [device] = useState<Device>(props.device);
   return (
     <List>
       {commands.map((command) => (
@@ -80,7 +80,7 @@ export function CommandListItem(props: { command: Status; device: Device; onActi
         <CommandActionPanel
           command={command}
           device={props.device}
-          onAction={({ result, newValue }) => {
+          onAction={({ newValue }) => {
             setCommand((prev) => {
               return {
                 ...prev,

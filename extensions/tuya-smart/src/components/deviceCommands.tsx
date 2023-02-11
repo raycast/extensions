@@ -23,8 +23,15 @@ export function DeviceCommands(props: { device: Device }): JSX.Element {
     }
     default:
       return <></>;
-      break;
   }
 
-  return <CommandList commands={commands} device={device} onAction={() => {}} />;
+  return (
+    <CommandList
+      commands={commands}
+      device={device}
+      onAction={() => {
+        console.info("Action not defined yet");
+      }}
+    />
+  );
 }

@@ -14,7 +14,7 @@ const getPreference = () => {
 
 const context = getPreference();
 
-export const getDevices = async (last_row_key?: string, allDevices: any = []): Promise<Device[]> => {
+export const getDevices = async (last_row_key?: string, allDevices: Device[] = []): Promise<Device[]> => {
   const devicesResult = await context.request<DevicesReponse>({
     path: "/v1.0/iot-01/associated-users/devices",
     method: "GET",

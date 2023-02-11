@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { LocalStorage } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { getDevices, getCategories } from "./utils/tuyaConnector";
 import { DeviceCategory, Device } from "./utils/interfaces";
@@ -17,8 +16,7 @@ export default function Command() {
   useEffect(() => {
     const getDeviceCategories = async () => {
       const categories = await getCategories();
-      setCategories((prev) => {
-        LocalStorage.setItem("categories", JSON.stringify(categories.result));
+      setCategories(() => {
         return categories.result;
       });
     };
@@ -58,7 +56,9 @@ export default function Command() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<DeviceOnlineFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
-      onAction={() => () => {}}
+      onAction={() => {
+        console.info("Action not defined yet");
+      }}
     />
   );
 }
