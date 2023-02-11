@@ -1,57 +1,4 @@
 import { Image } from "@raycast/api";
-import { NoteAction } from "./constants";
-
-//--------------------------------------------------------------------------------
-// All interfaces for all commands should be defined here.
-//--------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------
-// Preference interfaces
-//--------------------------------------------------------------------------------
-
-export interface GlobalPreferences {
-  vaultPath: string;
-}
-
-export interface QuickLookPreferences {
-  removeYAML: boolean;
-  removeLinks: boolean;
-  removeLatex: boolean;
-}
-
-export interface AppendNotePreferences {
-  appendTemplate: string;
-  appendSelectedTemplate: string;
-}
-export interface NoteFormPreferences extends GlobalPreferences {
-  prefPath: string;
-  prefNoteName: string;
-  prefNoteContent: string;
-  fillFormWithDefaults: boolean;
-  prefTag: string;
-  tags: string;
-  openOnCreate: boolean;
-  folderActions: string;
-}
-
-export interface SearchNotePreferences extends GlobalPreferences, QuickLookPreferences, AppendNotePreferences {
-  primaryAction: string;
-  excludedFolders: string;
-  showDetail: boolean;
-  showMetadata: boolean;
-  searchContent: boolean;
-}
-
-export interface RandomNotePreferences extends GlobalPreferences, QuickLookPreferences, AppendNotePreferences {}
-
-export interface SearchMediaPreferences extends GlobalPreferences {
-  imageSize: string;
-  excludedFolders: string;
-}
-
-//--------------------------------------------------------------------------------
-// Other interfaces
-//--------------------------------------------------------------------------------
 
 export interface Vault {
   name: string;
@@ -64,6 +11,7 @@ export interface Note {
   path: string;
   tags: string[];
   content: string;
+  starred: boolean;
 }
 
 export interface CodeBlock {
@@ -92,11 +40,6 @@ export interface ObsidianVaultsState {
   vaults: Vault[];
 }
 
-export interface PinnedNotesJSON {
-  vaultPath: string;
-  pinnedNotes: string[];
-}
-
 export interface SearchArguments {
   searchArgument: string;
   tagArgument: string;
@@ -121,12 +64,10 @@ export interface MediaSearchArguments {
 export interface NoteListProps {
   title?: string;
   vault: Vault;
-  notes: Note[] | undefined;
-  allNotes?: Note[];
-  setNotes?: (notes: Note[]) => void;
+  notes: Note[];
   isLoading?: boolean;
   searchArguments: SearchArguments;
-  action?: (note: Note, vault: Vault, actionCallback: (action: NoteAction) => void) => React.ReactFragment;
+  action?: (note: Note, vault: Vault) => React.ReactFragment;
   onDelete?: (note: Note, vault: Vault) => void;
   onSearchChange?: (search: string) => void;
 }
