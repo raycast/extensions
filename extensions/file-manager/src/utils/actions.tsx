@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { AppContext } from "./AppContext";
 import { getParentFolder } from "./folders";
 
-interface ActionsGoDirectoryPairsProps {
+interface ActionsGoDirectoryPairProps {
   currentFolderPath: string;
   // When a currently selected item is a file, `subDirectoryPath` is passed as `null`,
   subDirectoryPath: string | null;
@@ -23,7 +23,7 @@ interface ActionsGoDirectoryPairsProps {
  * Only `Go to Sub Directory` shows.
  *
  */
-export function ActionsGoDirectoryPairs(props: ActionsGoDirectoryPairsProps) {
+export function ActionsGoDirectoryPair(props: ActionsGoDirectoryPairProps) {
   const { currentFolderPath, subDirectoryPath } = props;
   const { renderDirectory } = useContext(AppContext);
 

@@ -6,7 +6,7 @@ import { lstatSync, readdirSync, readlinkSync } from "node:fs";
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 import { getExtPreferences } from "./preferences";
-import { ActionsGoDirectoryPairs } from "./utils/actions";
+import { ActionsGoDirectoryPair } from "./utils/actions";
 import { Directory } from "./ui/Directory";
 import { FileDataType, FileType } from "./types";
 
@@ -45,7 +45,7 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
             content={`${filePath}/`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
-          <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={filePath} />
+          <ActionsGoDirectoryPair currentFolderPath={currentFolderPath} subDirectoryPath={filePath} />
         </ActionPanel>
       }
     />
@@ -83,7 +83,7 @@ export function FileItem(props: { fileData: FileDataType }) {
             content={filePath}
             shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
           />
-          <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={null} />
+          <ActionsGoDirectoryPair currentFolderPath={currentFolderPath} subDirectoryPath={null} />
         </ActionPanel>
       }
     />
@@ -125,7 +125,7 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
               content={filePath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={originalPath} />
+            <ActionsGoDirectoryPair currentFolderPath={currentFolderPath} subDirectoryPath={originalPath} />
           </ActionPanel>
         }
       />
@@ -151,7 +151,7 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
               content={originalPath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
-            <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={null} />
+            <ActionsGoDirectoryPair currentFolderPath={currentFolderPath} subDirectoryPath={null} />
           </ActionPanel>
         }
       />
