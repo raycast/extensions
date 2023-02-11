@@ -46,7 +46,6 @@ export function DeviceListItem(props: { device: Device; onAction: () => void }):
   return (
     <List.Item
       title={device.name}
-      subtitle={category}
       accessories={[{ text: device.category }]}
       icon={tooltip ? { value: icon, tooltip } : icon}
       actions={<DeviceActionPanel device={device} showDetails={true} onAction={props.onAction} />}
@@ -60,7 +59,12 @@ export function CommandList(props: CommandListProps): JSX.Element {
   return (
     <List>
       {commands.map((command) => (
-        <CommandListItem key={`command-${command.code}`} command={command} device={device} onAction={props.onAction} />
+        <CommandListItem
+          key={`command-${command.name ?? command.code}`}
+          command={command}
+          device={device}
+          onAction={props.onAction}
+        />
       ))}
     </List>
   );

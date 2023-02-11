@@ -1,4 +1,3 @@
-import { stat } from "fs";
 import { Device, Status } from "../utils/interfaces";
 import { CommandList } from "./list";
 
@@ -23,7 +22,6 @@ export function DeviceCommands(props: { device: Device }): JSX.Element {
       break;
     }
     default:
-      console.log(device.status, device.id);
       return <></>;
       break;
   }
