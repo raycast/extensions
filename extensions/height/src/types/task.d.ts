@@ -1,3 +1,20 @@
+import { Option } from "./fieldTemplate";
+
+export type Field = {
+  fieldTemplateId: string;
+  name: string;
+  type: "text" | "labels" | "select" | "date" | "linkedTasks" | "status";
+  value: string;
+  label: Option | null;
+  values?: unknown;
+  date?: Date;
+  recursion?: unknown;
+  labels?: unknown;
+  linkedTasks?: unknown;
+  linkedTimer?: unknown;
+  selectValue: Option | null;
+};
+
 export type TaskObject = {
   id: string;
   model: "task";
@@ -20,6 +37,7 @@ export type TaskObject = {
   completedByUserId: string | null;
   orderIndex: number;
   subtasksIds: string[];
+  fields: Field[];
   parentTasks: string[];
   subscribersIds: string[];
   // TODO: Dodaj obiekt link
