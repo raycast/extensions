@@ -1,44 +1,16 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  ShowInFinderAction,
-  OpenWithAction,
-  OpenAction,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  PushAction,
-  Icon,
-  Detail,
-} from "@raycast/api";
+import { ActionPanel, List, showToast, Toast, Icon, Action } from "@raycast/api";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
-import filesize from "filesize";
-import { existsSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
+import { filesize } from "filesize";
+import { lstatSync, readdirSync, readlinkSync } from "node:fs";
 import { resolve } from "node:path";
 import { homedir } from "node:os";
+import { getExtPreferences } from "./preferences";
+import { ActionsGoDirectoryPairs } from "./utils/actions";
+import { Directory } from "./ui/Directory";
+import { FileDataType, FileType } from "./types";
 
 const exec = promisify(_exec);
-
-export type FileType = "directory" | "file" | "symlink" | "other";
-
-export type FileDataType = {
-  type: FileType;
-  name: string;
-  size: number;
-  permissions: string;
-  path: string;
-};
-
-export type PreferencesType = {
-  showDots: boolean;
-  directoriesFirst: boolean;
-  caseSensitive: boolean;
-  showFilePermissions: boolean;
-  showFileSize: boolean;
-  startDirectory: string;
-};
 
 export async function runShellScript(command: string) {
   const { stdout, stderr } = await exec(command);
@@ -46,29 +18,34 @@ export async function runShellScript(command: string) {
 }
 
 export function getStartDirectory(): string {
-  let { startDirectory } = getPreferenceValues();
+  let { startDirectory } = getExtPreferences();
   startDirectory = startDirectory.replace("~", homedir());
   return resolve(startDirectory);
 }
 
 export function DirectoryItem(props: { fileData: FileDataType }) {
-  const preferences: PreferencesType = getPreferenceValues();
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const { fileData } = props;
+  const { showFilePermissions } = getExtPreferences();
+
+  const currentFolderPath = fileData.path;
+  const filePath = `${currentFolderPath}/${fileData.name}`;
+
   return (
     <List.Item
       id={filePath}
-      title={props.fileData.name}
-      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+      title={fileData.name}
+      subtitle={showFilePermissions ? fileData.permissions : ""}
       icon={{ fileIcon: filePath }}
       actions={
         <ActionPanel>
-          <PushAction title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
-          <ShowInFinderAction path={filePath} />
-          <CopyToClipboardAction
+          <Action.Push title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
+          <Action.ShowInFinder path={filePath} />
+          <Action.CopyToClipboard
             title="Copy Directory Path"
             content={`${filePath}/`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
+          <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={filePath} />
         </ActionPanel>
       }
     />
@@ -76,28 +53,37 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
 }
 
 export function FileItem(props: { fileData: FileDataType }) {
-  const preferences: PreferencesType = getPreferenceValues();
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const { fileData } = props;
+  const { showFilePermissions, showFileSize } = getExtPreferences();
+
+  const currentFolderPath = fileData.path;
+  const filePath = `${currentFolderPath}/${fileData.name}`;
+
   return (
     <List.Item
       key={filePath}
       id={filePath}
-      title={props.fileData.name}
+      title={fileData.name}
       icon={{ fileIcon: filePath }}
-      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
-      accessoryTitle={
-        preferences.showFileSize ? filesize(props.fileData.size, { round: 0, roundingMethod: "floor", spacer: "" }) : ""
-      }
+      subtitle={showFilePermissions ? fileData.permissions : ""}
+      accessories={[
+        {
+          text: showFileSize
+            ? (filesize(fileData.size, { round: 0, roundingMethod: "floor", spacer: "" }) as string)
+            : "",
+        },
+      ]}
       actions={
         <ActionPanel>
-          <OpenAction title="Open File" target={filePath} />
-          <ShowInFinderAction path={filePath} />
-          <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-          <CopyToClipboardAction
+          <Action.Open title="Open File" target={filePath} />
+          <Action.ShowInFinder path={filePath} />
+          <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          <Action.CopyToClipboard
             title="Copy File Path"
             content={filePath}
             shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
           />
+          <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={null} />
         </ActionPanel>
       }
     />
@@ -105,36 +91,41 @@ export function FileItem(props: { fileData: FileDataType }) {
 }
 
 export function SymlinkItem(props: { fileData: FileDataType }) {
-  const preferences: PreferencesType = getPreferenceValues();
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const { fileData } = props;
+  const currentFolderPath = fileData.path;
+
+  const { showFilePermissions } = getExtPreferences();
+  const filePath = `${currentFolderPath}/${fileData.name}`;
   const a = readlinkSync(filePath);
-  const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
+  const originalPath = a.startsWith("/") ? a : `${currentFolderPath}/${a}`;
   const originalFileData = lstatSync(originalPath);
+
   if (originalFileData.isDirectory()) {
     return (
       <List.Item
         id={filePath}
-        title={props.fileData.name}
+        title={fileData.name}
         icon={{ fileIcon: filePath }}
-        subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+        subtitle={showFilePermissions ? fileData.permissions : ""}
         actions={
           <ActionPanel>
-            <PushAction
+            <Action.Push
               title="Open Symlink Directory"
               icon={Icon.ArrowRight}
               target={<Directory path={originalPath} />}
             />
-            <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <CopyToClipboardAction
+            <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.CopyToClipboard
               title="Copy Symlink Path"
               content={filePath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Original Directory Path"
               content={filePath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
+            <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={originalPath} />
           </ActionPanel>
         }
       />
@@ -143,23 +134,24 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
     return (
       <List.Item
         id={filePath}
-        title={props.fileData.name}
+        title={fileData.name}
         icon={{ fileIcon: filePath }}
-        subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
+        subtitle={showFilePermissions ? fileData.permissions : ""}
         actions={
           <ActionPanel>
-            <OpenAction title="Open File" target={originalPath} />
-            <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <CopyToClipboardAction
+            <Action.Open title="Open File" target={originalPath} />
+            <Action.OpenWith path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.CopyToClipboard
               title="Copy Symlink Path"
               content={filePath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Original File Path"
               content={originalPath}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
+            <ActionsGoDirectoryPairs currentFolderPath={currentFolderPath} subDirectoryPath={null} />
           </ActionPanel>
         }
       />
@@ -176,12 +168,12 @@ export function createItem(fileData: FileDataType) {
   } else if (fileData.type === "symlink") {
     return <SymlinkItem fileData={fileData} key={filePath} />;
   } else {
-    showToast(ToastStyle.Failure, "Unsupported file type", `File type: ${fileData.type}`);
+    showToast(Toast.Style.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
 }
 
 export function getDirectoryData(path: string): FileDataType[] {
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getExtPreferences();
   let files: string[] = readdirSync(path);
   if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
@@ -216,26 +208,4 @@ export function getDirectoryData(path: string): FileDataType[] {
     data.push(d);
   }
   return data;
-}
-
-export function Directory(props: { path: string }) {
-  if (!existsSync(props.path)) {
-    return <Detail markdown={`# Error: \n\nThe directory \`${props.path}\` does not exist. `} />;
-  }
-  const directoryData = getDirectoryData(props.path);
-  const preferences: PreferencesType = getPreferenceValues();
-  if (preferences.directoriesFirst) {
-    const directories = directoryData.filter((file) => file.type === "directory");
-    const nonDirectories = directoryData.filter((file) => file.type !== "directory");
-    return (
-      <List searchBarPlaceholder={`Search in ${props.path}/`}>
-        <List.Section title="Directories">{directories.map((data) => createItem(data))}</List.Section>
-        <List.Section title="Files">{nonDirectories.map((data) => createItem(data))}</List.Section>
-      </List>
-    );
-  } else {
-    return (
-      <List searchBarPlaceholder={`Search in ${props.path}/`}>{directoryData.map((data) => createItem(data))}</List>
-    );
-  }
 }

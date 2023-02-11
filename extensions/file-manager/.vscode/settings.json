@@ -1,0 +1,9 @@
+{
+  "grammarly.selectors": [
+    {
+      "language": "typescriptreact",
+      "scheme": "file",
+      "pattern": "src/utils/actions.tsx"
+    }
+  ]
+}
