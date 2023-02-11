@@ -31,7 +31,9 @@ export type ListObject = {
   totalActiveUsersCount: number;
 };
 
-export type CreateListFormValues = Pick<ListObject, "name" | "type" | "description"> & {
+export type CreateListFormValues = Pick<ListObject, "name" | "description"> & {
+  type: string;
+  visualization: string;
   hue: ListObject["appearance"]["hue"];
   icon: ListObject["appearance"]["icon"];
 };
