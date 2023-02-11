@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "logitech-litra",
+  "title": "Logitech Litra",
+  "description": "Manage Logitech Litra Glow and Logitech Litra Beam lights from Raycast",
+  "icon": "command-icon.png",
+  "author": "timrogers",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Devices",
+      "description": "Turn your Logitech Litra devices on or off",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliDirectory",
+      "type": "textfield",
+      "required": true,
+      "title": "CLI directory",
+      "description": "The path to the directory where the executable files from the `litra` npm package are installed. Install the CLI with `npm install -g litra`, then run `dirname $(which litra-on)`."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.13.0",
+    "@types/react": "18.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.34.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
