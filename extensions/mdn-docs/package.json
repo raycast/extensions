@@ -5,7 +5,6 @@
 	"description": "Search the MDN docs from your keyboard",
 	"icon": "icon.png",
 	"author": "bobbymannino",
-	"owner": "bobbymannino",
 	"categories": [
 		"Developer Tools",
 		"Web",
