@@ -29,14 +29,17 @@ export default function Command() {
 
   const bookmarkList = items?.filter(
     ([_, v]) =>
-      v.value.toLowerCase().includes(searchText.toLowerCase()) ||
-      v.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      v.value?.toLowerCase().includes(searchText?.toLowerCase()) ||
+      v.title?.toLowerCase().includes(searchText?.toLowerCase()) ||
       searchText === v.number
   );
 
   async function fetchStorage() {
     try {
       const res = await LocalStorage.allItems();
+      if (!res) {
+        return setItems(undefined);
+      }
       const allItems = Object.entries(res);
       const finalRes: Items = [];
       allItems.forEach(([key, value], i) => {
