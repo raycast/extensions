@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
-import { BYTES_PER_MEGABYTE } from "./constants";
-import { Note, Vault } from "./interfaces";
+import { BYTES_PER_MEGABYTE } from "../constants";
+import { Note, Vault } from "../interfaces";
 import { NoteLoader } from "./loader";
 
 //--------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ const cache = new Cache({ capacity: BYTES_PER_MEGABYTE * 500 });
  * @param vault - Vault to cache notes for
  * @returns The cached notes for the vault
  */
-function cacheNotesFor(vault: Vault) {
+export function cacheNotesFor(vault: Vault) {
   const nl = new NoteLoader(vault);
   const notes = nl.loadNotes();
   cache.set(vault.name, JSON.stringify({ lastCached: Date.now(), notes: notes }));
@@ -38,7 +38,7 @@ export function renewCache(vault: Vault) {
  * @param vault - Vault to test if cache exists for
  * @returns true if cache exists for vault
  */
-function cacheExistForVault(vault: Vault) {
+export function cacheExistForVault(vault: Vault) {
   if (cache.has(vault.name)) {
     return true;
   } else {
@@ -75,18 +75,13 @@ export function deleteNoteFromCache(vault: Vault, note: Note) {
   }
 }
 
-/**
- * The preferred way of loading notes inside the extension
- *
- * @param vault - The Vault to get the notes from
- * @returns All notes in the cache for the vault
- */
-export function useNotes(vault: Vault): Note[] {
+export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
     const data = JSON.parse(cache.get(vault.name) ?? "");
     if (data.lastCached > Date.now() - 1000 * 60 * 5) {
-      console.log("Cache still valid for vault: " + vault.name);
-      return data.notes;
+      const notes_ = data.notes;
+      console.log("Returning cached notes");
+      return notes_;
     }
   }
   return cacheNotesFor(vault);

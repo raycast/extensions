@@ -1,5 +1,4 @@
-import { useNotes } from "./cache";
-import { Media, Note, Vault } from "./interfaces";
+import { Media, Note } from "./interfaces";
 
 /**
  * Filters a list of notes according to the input search string. If the search string is empty, all notes are returned. It will match the notes title, path and content.
@@ -35,14 +34,13 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
  * @param input - Search input
  * @returns - A list of media filtered according to the input search string
  */
-export function filterMedia(mediaList: Media[], input: string, vault: Vault) {
+export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
   if (input.length === 0) {
     return mediaList;
   }
 
   input = input.toLowerCase();
 
-  let notes = useNotes(vault);
   notes = notes.filter((note) => note.title.toLowerCase().includes(input));
 
   return mediaList.filter((media) => {
@@ -64,8 +62,6 @@ export function fuzzyFilter(notes: Note[], input: string) {
     return notes;
   }
   input = input.toLowerCase();
-
-  const tokens = tokenize(input);
 
   // TODO: weigh tokens before using them
 
