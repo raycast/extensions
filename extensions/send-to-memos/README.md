@@ -8,10 +8,16 @@ Raycast extension for [usememos/memos](https://github.com/usememos/memos).
 
 ![](metadata/SCR-20230210-x2p.png)
 
-2. Create a memo quickly.
+# Create
+
+## Create a memo quickly.
 
 ![](metadata/SCR-20230210-x5j.png)
 
-3. Create a memo with a template.
+## Create a memo with a template.
 
 ![](metadata/SCR-20230210-x6a.png)
+
+# Search
+
+![](metadata/SCR-20230211-p36.png)
