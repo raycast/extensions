@@ -6,8 +6,9 @@ import fs from "fs";
 import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
-import { Preferences } from "../types/global";
-import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "../types/request";
+
+import { Preferences } from "./types";
+import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
 

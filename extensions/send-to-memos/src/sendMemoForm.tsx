@@ -1,8 +1,8 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
 import { useState } from "react";
-import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types/request";
-import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./utils/api";
-import { VISIBILITY } from "./utils/constant";
+import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
+import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./api";
+import { VISIBILITY } from "./constant";
 
 interface FormData {
   content: string;

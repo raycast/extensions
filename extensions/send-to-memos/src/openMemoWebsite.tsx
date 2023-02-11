@@ -1,5 +1,5 @@
 import { getPreferenceValues, open } from "@raycast/api";
-import { Preferences } from "./types/global";
+import { Preferences } from "./types";
 import parse from "url-parse";
 
 export default async function Main() {

@@ -1,5 +1,5 @@
 import { LaunchProps, Toast, showToast } from "@raycast/api";
-import { sendMemo } from "./utils/api";
+import { sendMemo } from "./api";
 
 interface TodoArguments {
   text: string;

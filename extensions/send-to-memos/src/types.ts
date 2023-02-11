@@ -1,4 +1,8 @@
-import { VISIBILITY } from "../utils/constant";
+import { VISIBILITY } from "./constant";
+
+export interface Preferences {
+  openApi: string;
+}
 
 export enum ROLE {
   HOST = "HOST",
