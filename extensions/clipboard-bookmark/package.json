@@ -2,12 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clipboard-bookmark",
   "title": "Clipboard Bookmark",
-  "keywords": [
-    "raycast",
-    "clipboard bookmark",
-    "clipboard",
-    "bookmark"
-  ],
   "description": "Bookmark your clipboard",
   "icon": "icon.png",
   "author": "kikiding",
