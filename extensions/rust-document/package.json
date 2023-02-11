@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "rust-document",
-  "title": "Rust Document",
-  "description": "Search Rust document quickly",
+  "name": "rust-documentation",
+  "title": "Rust Documentation",
+  "description": "Search Rust documentation quickly",
   "icon": "rust.png",
   "author": "waynexia",
   "categories": [
@@ -14,8 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "rs",
-      "description": "Search Rust document quickly",
+      "title": "Search Documentation",
+      "subtitle": "Rust",
+      "description": "Search Rust documentation quickly",
       "mode": "view"
     }
   ],
