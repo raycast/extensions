@@ -37,6 +37,13 @@
       "mode": "view",
       "subtitle": "Memos",
       "icon": "logo.png"
+    },
+    {
+      "name": "memosList",
+      "title": "Memos List",
+      "description": "Show Memos List",
+      "mode": "view",
+      "subtitle": "Memos"
     }
   ],
   "dependencies": {

@@ -7,7 +7,7 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences } from "./types";
+import { Preferences, ResponseData } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -78,11 +78,11 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
 };
 
 export const getMe = () => {
-  return getUseFetch<MeResponse>(getRequestUrl(`/api/user/me?openId=${getOpenId()}`), {});
+  return getUseFetch<ResponseData<MeResponse>>(getRequestUrl(`/api/user/me?openId=${getOpenId()}`), {});
 };
 
 export const sendMemo = (data: PostMemoParams) => {
-  return getFetch<MemoInfoResponse>({
+  return getFetch<ResponseData<MemoInfoResponse>>({
     url: getOpenApi(),
     method: "POST",
     data,
@@ -92,7 +92,7 @@ export const sendMemo = (data: PostMemoParams) => {
 export const getTags = () => {
   const url = getRequestUrl(`/api/tag?openId=${getOpenId()}`);
 
-  return getUseFetch<TagResponse>(url, {});
+  return getUseFetch<ResponseData<TagResponse>>(url, {});
 };
 
 export const postFile = (filePath: string) => {
@@ -104,10 +104,16 @@ export const postFile = (filePath: string) => {
     contentType: mime.getType(filePath) || undefined,
   });
 
-  return getFetch<PostFileResponse>({
+  return getFetch<ResponseData<PostFileResponse>>({
     url: getRequestUrl(`/api/resource/blob?openId=${getOpenId()}`),
     method: "POST",
     data: formData,
     headers: {},
   });
+};
+
+export const getAllMemos = () => {
+  const url = getRequestUrl(`/api/memo?openId=${getOpenId()}`);
+
+  return getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {});
 };

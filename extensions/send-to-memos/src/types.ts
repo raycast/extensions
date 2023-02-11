@@ -9,6 +9,10 @@ export enum ROLE {
   USER = "USER",
 }
 
+export interface ResponseData<T> {
+  data: T;
+}
+
 export interface PostMemoParams {
   content: string;
   visibility: keyof typeof VISIBILITY;
@@ -28,67 +32,59 @@ interface ResourceObj {
 }
 
 export interface MemoInfoResponse {
-  data: {
+  id: number;
+  rowStatus: string;
+  creatorId: number;
+  createdTs: number;
+  updatedTs: number;
+  content: string;
+  visibility: string;
+  pinned: boolean;
+  displayTs: number;
+  creator: {
     id: number;
     rowStatus: string;
-    creatorId: number;
-    createdTs: number;
-    updatedTs: number;
-    content: string;
-    visibility: string;
-    pinned: boolean;
-    displayTs: number;
-    creator: {
-      id: number;
-      rowStatus: string;
-      createdTs: number;
-      updatedTs: number;
-      username: string;
-      role: string;
-      email: string;
-      nickname: string;
-      openId: string;
-      userSettingList: null;
-    };
-    resourceList: ResourceObj[];
-  };
-}
-
-export interface TagResponse {
-  data: string[];
-}
-
-export interface MeResponse {
-  data: {
-    id: number;
-    rowStatus: "NORMAL";
     createdTs: number;
     updatedTs: number;
     username: string;
-    role: ROLE;
+    role: string;
     email: string;
     nickname: string;
     openId: string;
-    userSettingList: [
-      {
-        UserID: number;
-        key: string;
-        value: string;
-      }
-    ];
+    userSettingList: null;
   };
+  resourceList: ResourceObj[];
+}
+
+export type TagResponse = string[];
+
+export interface MeResponse {
+  id: number;
+  rowStatus: "NORMAL";
+  createdTs: number;
+  updatedTs: number;
+  username: string;
+  role: ROLE;
+  email: string;
+  nickname: string;
+  openId: string;
+  userSettingList: [
+    {
+      UserID: number;
+      key: string;
+      value: string;
+    }
+  ];
 }
 
 export interface PostFileResponse {
-  data: {
-    id: number;
-    creatorId: number;
-    createdTs: number;
-    updatedTs: number;
-    filename: string;
-    externalLink: string;
-    type: string;
-    size: number;
-    linkedMemoAmount: number;
-  };
+  id: number;
+  creatorId: number;
+  createdTs: number;
+  updatedTs: number;
+  filename: string;
+  externalLink: string;
+  type: string;
+  size: number;
+  linkedMemoAmount: number;
 }

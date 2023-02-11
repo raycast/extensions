@@ -1,6 +1,6 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
 import { useState } from "react";
-import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types";
+import { MemoInfoResponse, PostFileResponse, PostMemoParams, ResponseData } from "./types";
 import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./api";
 import { VISIBILITY } from "./constant";
 
@@ -25,14 +25,14 @@ export default function SendMemoFormCommand(): JSX.Element {
     }
   }
 
-  function computedCreatedUrl(data: MemoInfoResponse["data"]) {
+  function computedCreatedUrl(data: MemoInfoResponse) {
     const { id } = data;
     const url = getRequestUrl(`/m/${id}`);
 
     setCreatedUrl(url);
   }
 
-  function computedCreatedMarkdown(data: MemoInfoResponse["data"]) {
+  function computedCreatedMarkdown(data: MemoInfoResponse) {
     const { content, resourceList } = data;
     let markdown = content;
 
@@ -67,7 +67,7 @@ export default function SendMemoFormCommand(): JSX.Element {
         title: "Upload Files",
       });
 
-      const postFilesPromiseArr: Promise<PostFileResponse>[] = [];
+      const postFilesPromiseArr: Promise<ResponseData<PostFileResponse>>[] = [];
 
       files.forEach((file) => {
         postFilesPromiseArr.push(postFile(file));
