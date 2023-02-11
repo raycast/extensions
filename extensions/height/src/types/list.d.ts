@@ -15,31 +15,30 @@ export type ListObject = {
   description: string;
   visualization: ListVisualization;
   key: string;
+  userId?: string;
   type: ListType;
   reserved: boolean;
-  createdAt: string;
-  updatedAt: string;
-  defaultList: boolean;
-  url: string;
   appearance?: {
     icon: ListIcon;
     hue: number | null;
     iconUrl: string;
   };
+  createdAt: string;
+  updatedAt: string;
+  defaultList: boolean;
+  url: string;
+  topActiveUserIds: string[];
+  totalActiveUsersCount: number;
 };
 
-export type CreateListFormValues = {
-  name: string;
-  type: string;
-  description?: string;
-  hue: string;
-  icon: string;
-  visualization?: string;
+export type CreateListFormValues = Pick<ListObject, "name" | "type" | "description"> & {
+  hue: ListObject["appearance"]["hue"];
+  icon: ListObject["appearance"]["icon"];
 };
 
 export type CreateListPayload = Omit<CreateListFormValues, "hue", "icon"> & {
   appearance?: {
-    hue: number | null;
+    hue: ListObject["appearance"]["hue"];
     icon: ListIcon;
   };
 };
@@ -48,7 +47,7 @@ export type UpdateListFormValues = Omit<CreateListFormValues, "icon">;
 
 export type UpdateListPayload = Partial<Omit<UpdateListFormValues, "hue">> & {
   appearance?: {
-    hue?: number | null;
+    hue?: ListObject["appearance"]["hue"];
     icon?: ListIcon;
   };
 };
