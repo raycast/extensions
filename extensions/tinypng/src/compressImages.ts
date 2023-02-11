@@ -4,12 +4,10 @@ import { showToast, Toast, getSelectedFinderItems, getPreferenceValues, showHUD 
 import { statSync, createReadStream, createWriteStream } from "fs";
 import fetch from "node-fetch";
 import { dirname, basename, join } from "path";
+import { compressImageResponseScheme } from "./zodSchema";
+import { Preference } from "./types";
 
-type Preferences = {
-  apiKey: string;
-};
-
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preference>();
 
 export default async function main() {
   let filePaths: string[];
@@ -69,11 +67,7 @@ const _compressImage = async (
     body: readStream,
   });
 
-  const resJson = (await resPost.json()) as {
-    output: { size: number; url: string };
-    error: string;
-    message: string;
-  };
+  const resJson = compressImageResponseScheme.parse(await resPost.json());
 
   // Validate
   if ("error" in resJson) {
@@ -84,10 +78,15 @@ const _compressImage = async (
   const downloadUrl = resJson.output.url;
   const resGet = await fetch(downloadUrl);
 
-  const outputDir = join(dirname(filePath), "compressed-images");
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir);
+  // Save compressed image
+  let outputDir = dirname(filePath);
+  if (!preferences.overwrite) {
+    outputDir = join(dirname(filePath), "compressed-images");
+    if (!existsSync(outputDir)) {
+      mkdirSync(outputDir);
+    }
   }
+
   const outputPath = join(outputDir, basename(filePath));
   const outputFileStream = createWriteStream(outputPath);
 
