@@ -1,0 +1,44 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "mdn-docs",
+	"title": "MDN Docs",
+	"description": "Search the MDN docs from your keyboard",
+	"icon": "icon.png",
+	"author": "bobbymannino",
+	"owner": "bobbymannino",
+	"categories": [
+		"Developer Tools",
+		"Web",
+		"Documentation"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "search-mdn-docs",
+			"title": "Search MDN Docs",
+			"description": "Search MDN docs",
+			"mode": "view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.47.2",
+		"@raycast/utils": "^1.4.8"
+	},
+	"devDependencies": {
+		"@types/node": "18.8.3",
+		"@types/react": "18.0.9",
+		"@typescript-eslint/eslint-plugin": "^5.51.0",
+		"@typescript-eslint/parser": "^5.51.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.6.0",
+		"prettier": "^2.8.4",
+		"typescript": "^4.9.5"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"publish": "ray publish"
+	}
+}
