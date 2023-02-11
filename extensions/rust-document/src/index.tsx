@@ -51,20 +51,22 @@ export default function Command() {
 
   async function searchCrate(crate: string) {
     const data: any = await got
-      .get(`https://crates.io/api/v1/crates?page=1&per_page=10&q=${crate}`, {
+      .get(`https://crates.io/api/v1/crates?page=1&per_page=15&q=${crate}`, {
         parseJson: (text) => JSON.parse(text),
       })
       .json();
 
-    const crates: Array<CrateDesc> = data["crates"].map((crate: { [x: string]: any }) => {
-      return {
-        name: crate["name"],
-        version: crate["newest_version"],
-        desc: crate["description"],
-      };
-    });
+    const crates: Array<CrateDesc> = data["crates"]
+      .map((crate: { [x: string]: any }) => {
+        return {
+          name: crate["name"],
+          version: crate["newest_version"],
+          desc: crate["description"],
+        };
+      });
+    const activeCrates = crates.filter((crate: { [x: string]: any }) => crate.version !== "0.0.0")
 
-    setState({ crates: crates, symbol: state.symbol, curr_select: state.curr_select });
+    setState({ crates: activeCrates, symbol: state.symbol, curr_select: state.curr_select });
   }
 
   async function requestResourceSuffix(crate: string) {
