@@ -10,7 +10,8 @@
     "macbookandrew",
     "cy-98",
     "immint023",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "elijahs"
   ],
   "keywords": [
     "vscode"
@@ -23,6 +24,13 @@
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
       "mode": "view"
+    },
+    {
+      "name": "open-with-vscode",
+      "title": "Open With Visual Studio Code",
+      "subtitle": "Visual Studio Code",
+      "description": "Opens the currently selected Finder item with Visual Studio Code.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -41,6 +49,10 @@
         {
           "value": "Code - Insiders",
           "title": "Visual Studio Code - Insiders"
+        },
+        {
+          "value": "VSCodium",
+          "title": "VSCodium"
         }
       ]
     },
@@ -76,6 +88,7 @@
     "@raycast/api": "^1.35.0",
     "@raycast/utils": "^1.4.0",
     "lodash.get": "^4.4.2",
+    "prettier": "^2.8.1",
     "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },

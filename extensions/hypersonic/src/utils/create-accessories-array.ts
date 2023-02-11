@@ -9,10 +9,12 @@ export function createAccessoriesArray({
   todo,
   projectsById,
   filter,
+  showStatus = true,
 }: {
   todo: Partial<Todo>
   projectsById: Record<string, Project>
   filter?: Filter
+  showStatus?: boolean
 }) {
   const accessories = []
 
@@ -26,20 +28,11 @@ export function createAccessoriesArray({
             },
           }
         : {}
+
     accessories.push({
       ...icon,
-      text: format(todo.date, 'd MMM'),
+      date: todo.date,
       tooltip: format(todo.date, "EEEE d MMMM yyyy 'at' HH:mm"),
-    })
-  }
-
-  if (todo.tag && !filter?.tag) {
-    accessories.push({
-      text: todo.tag?.name,
-      icon: {
-        source: 'dot.png',
-        tintColor: todo.tag.color,
-      },
     })
   }
 
@@ -53,6 +46,22 @@ export function createAccessoriesArray({
         },
       })
     }
+  }
+
+  if (todo.tag && !filter?.tag) {
+    accessories.push({
+      tag: { value: todo.tag?.name, color: todo.tag.color },
+    })
+  }
+
+  if (todo.status && todo.status.icon && !filter?.status && showStatus) {
+    accessories.push({
+      icon: {
+        source: todo.status.icon,
+        tintColor: todo.status.color,
+      },
+      tooltip: todo.status.name,
+    })
   }
 
   if (todo.user && !filter?.user) {

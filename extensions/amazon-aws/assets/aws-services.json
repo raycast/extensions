@@ -2090,14 +2090,14 @@
       }
     },
     {
-      "uid": "es",
-      "title": "Elasticsearch Service",
-      "subtitle": "Run and Scale Elasticsearch Clusters",
-      "match": "es Elasticsearch Service",
-      "arg": "/es/home",
-      "autocomplete": "Elasticsearch Service",
+      "uid": "aos",
+      "title": "OpenSearch Service",
+      "subtitle": "Run and Scale OpenSearch Clusters",
+      "match": "aos OpenSearch Service",
+      "arg": "/aos/home",
+      "autocomplete": "OpenSearch Service",
       "icon": {
-        "path": "./aws-icons/es.png"
+        "path": "./aws-icons/aos.png"
       }
     },
     {

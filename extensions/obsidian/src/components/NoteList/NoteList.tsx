@@ -1,33 +1,52 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { List, getPreferenceValues, ActionPanel, Action, open } from "@raycast/api";
 import { useState, useMemo } from "react";
 
-import { SearchNotePreferences, NoteListProps } from "../../utils/interfaces";
+import { NoteListProps } from "../../utils/interfaces";
 import { MAX_RENDERED_NOTES } from "../../utils/constants";
 import { tagsForNotes } from "../../utils/yaml";
 import { NoteListItem } from "./NoteListItem";
 import { NoteListDropdown } from "./NoteListDropdown";
 import { filterNotes } from "../../utils/search";
+import { getObsidianTarget, ObsidianTargetType } from "../../utils/utils";
+import { SearchNotePreferences } from "../../utils/preferences";
+import { useNotesContext } from "../../utils/hooks";
 
 export function NoteList(props: NoteListProps) {
-  const { notes, allNotes, vault, isLoading, title, searchArguments, setNotes, action, onDelete, onSearchChange } =
-    props;
+  const { notes, vault, title, searchArguments, action } = props;
 
   const pref = getPreferenceValues<SearchNotePreferences>();
-
+  const allNotes = useNotesContext();
   const [searchText, setSearchText] = useState(searchArguments.searchArgument ?? "");
   const list = useMemo(() => filterNotes(notes ?? [], searchText, pref.searchContent), [notes, searchText]);
   const _notes = list.slice(0, MAX_RENDERED_NOTES);
 
-  const tags = tagsForNotes(allNotes ?? []);
+  const tags = tagsForNotes(allNotes);
 
-  let isNotesUndefined = notes === undefined;
-
-  if (notes !== undefined) {
-    isNotesUndefined = notes.length == 0;
+  function onNoteCreation() {
+    const target = getObsidianTarget({ type: ObsidianTargetType.NewNote, vault: vault, name: searchText });
+    open(target);
+    //TODO: maybe dispatch here. But what if the user cancels the creation in Obsidian or renames it there? Then the cache would be out of sync.
   }
 
-  if (isLoading !== undefined) {
-    isNotesUndefined = isLoading;
+  const isNotesUndefined = notes === undefined;
+  if (_notes.length == 0) {
+    return (
+      <List
+        navigationTitle={title}
+        onSearchTextChange={(value) => {
+          setSearchText(value);
+        }}
+      >
+        <List.Item
+          title={`🗒️ Create Note "${searchText}"`}
+          actions={
+            <ActionPanel>
+              <Action title="Create Note" onAction={onNoteCreation} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   return (
@@ -40,12 +59,10 @@ export function NoteList(props: NoteListProps) {
       }}
       navigationTitle={title}
       searchText={searchText}
-      searchBarAccessory={
-        <NoteListDropdown tags={tags} setNotes={setNotes} allNotes={allNotes} searchArguments={searchArguments} />
-      }
+      searchBarAccessory={<NoteListDropdown tags={tags} searchArguments={searchArguments} />}
     >
       {_notes?.map((note) => (
-        <NoteListItem note={note} vault={vault} key={note.path} pref={pref} onDelete={onDelete} action={action} />
+        <NoteListItem note={note} vault={vault} key={note.path} pref={pref} action={action} />
       ))}
     </List>
   );

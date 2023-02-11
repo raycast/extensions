@@ -45,6 +45,15 @@ You can set different parameters for the AI model:
 
 `Probability Penalty`: controls how novel responses can get. Increasing the parameter raises the chance for novel answers.
 
+### Supported AI Models
+
+1. `text-davinci-003`
+2. `text-davinci-002`
+3. `text-curie-001`
+4. `text-babbage-001`
+5. `text-ada-001`
+6. `code-davinci-002`
+
 ## Token Count
 
 OpenAI API charges based on the number of total tokens, i.e., the number of tokens you submit in the prompt plus the number of tokens you got in response. Current prices are listed on [Open AI Pricing page](https://openai.com/api/pricing/).

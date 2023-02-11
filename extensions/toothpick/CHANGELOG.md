@@ -1,5 +1,20 @@
 # Toothpick Changelog
 
+## [Partial Device Support Addition] - 2023-02-10
+
+- Added rudimentary mappings for the following devices:
+  - Google Pixel Buds Pro (custom icon)
+
+## [Partial Device Support Addition] - 2023-01-25
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM3 (battery level and custom icon)
+
+## [Partial Device Support Addition] - 2023-01-18
+
+- Added rudimentary mappings for the following devices:
+  - Sony WF-1000XM4 (battery level and custom icon)
+
 ## [Partial Device Support Additions] - 2022-12-13
 
 - Added rudimentary mappings for the following devices:

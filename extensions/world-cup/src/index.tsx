@@ -7,6 +7,7 @@ import FilterDropdown from "./FilterDropdown";
 import flags from "./flags";
 import { Goal, Match, Player, Team } from "./types";
 import { capitalizeFirstLetter } from "./utils";
+import fetch from "cross-fetch";
 
 const BASE_URL = `https://api.fifa.com/api/v3`;
 const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];

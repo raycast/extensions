@@ -101,6 +101,33 @@ export default async function Command() {
 
 A Promise that resolves when the clipboard is cleared.
 
+### Clipboard.read
+
+Reads the clipboard content as plain text, file name, or HTML.
+
+#### Signature
+
+```typescript
+async function read(): Promise<ReadContent>;
+```
+
+#### Example
+
+```typescript
+import { Clipboard } from "@raycast/api";
+
+export default async () => {
+  const { text, file, html } = await Clipboard.read();
+  console.log(text);
+  console.log(file);
+  console.log(html);
+};
+```
+
+#### Return
+
+A promise that resolves when the clipboard content was read as plain text, file name, or HTML.
+
 ### Clipboard.readText
 
 Reads the clipboard as plain text.
@@ -130,7 +157,7 @@ A promise that resolves when the clipboard content was read as plain text.
 
 ### Clipboard.Content
 
-Type of Content that is copied and pasted to and from the Clipboard
+Type of content that is copied and pasted to and from the Clipboard
 
 ```typescript
 type Content =
@@ -139,5 +166,22 @@ type Content =
     }
   | {
       file: PathLike;
+    };
+```
+
+### Clipboard.ReadContent
+
+Type of content that is read from the Clipboard
+
+```typescript
+type Content =
+  | {
+      text: string;
+    }
+  | {
+      file?: string;
+    }
+  | {
+      html?: string;
     };
 ```

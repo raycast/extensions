@@ -1,5 +1,5 @@
-import { Service } from "@aws-sdk/client-ecs";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { ECSClient, Service, UpdateServiceCommand } from "@aws-sdk/client-ecs";
+import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getServiceUrl } from "../../actions";
 import { getActionOpenInBrowser, getExportResponse, getFilterPlaceholder } from "../../util";
@@ -64,6 +64,7 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
                   icon={Icon.Eye}
                   target={<ECSClusterServiceTasks service={service}></ECSClusterServiceTasks>}
                 />
+                <Action icon={Icon.Repeat} title="Force New Deployment" onAction={() => forceNewDeployment(service)} />
                 {getActionOpenInBrowser(getServiceUrl(service))}
                 {getActionCopySection(service)}
               </ActionPanel>
@@ -79,6 +80,34 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
       )}
     </List>
   );
+}
+
+function forceNewDeployment(service: Service) {
+  confirmAlert({
+    title: "Are you sure you want to force deploy the service?",
+    message: "This action cannot be undone.",
+    primaryAction: {
+      title: "Force Deploy",
+      onAction: async () => {
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Force deploying..." });
+
+        try {
+          await new ECSClient({}).send(
+            new UpdateServiceCommand({
+              cluster: service.clusterArn,
+              service: service.serviceName,
+              forceNewDeployment: true,
+            })
+          );
+          toast.style = Toast.Style.Success;
+          toast.title = "Force Deployment done";
+        } catch (err) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to deploy";
+        }
+      },
+    },
+  });
 }
 
 function getActionCopySection(service: Service) {

@@ -5,6 +5,9 @@
   "description": "Search, open or edit your 1Password passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
+  "categories": [
+    "Security"
+  ],
   "contributors": [
     "thomas",
     "dteare",
@@ -13,7 +16,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list",
+      "name": "item-list",
       "title": "My Passwords",
       "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
@@ -24,51 +27,68 @@
         "password",
         "login"
       ]
+    },
+    {
+      "name": "reset-cache",
+      "title": "Reset Cache",
+      "subtitle": "1Password",
+      "description": "Manually reset all the cache.",
+      "mode": "no-view",
+      "keywords": [
+        "cache",
+        "reset cache",
+        "reload"
+      ]
     }
   ],
   "preferences": [
     {
-      "name": "appVersion",
+      "name": "version",
       "type": "dropdown",
       "title": "1Password App Version",
       "description": "Select the version of the 1Password app you want to use",
       "data": [
         {
-          "title": "Automatic (Default)",
-          "value": "automatic"
-        },
-        {
           "title": "1Password 8",
-          "value": "onepassword8"
+          "value": "v8"
         },
         {
           "title": "1Password 7",
-          "value": "onepassword7"
+          "value": "v7"
         }
       ],
-      "default": "automatic",
+      "required": true
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "title": "1Password CLI path",
+      "description": "Enter the CLI binary path",
+      "default": "/usr/local/bin/op",
+      "placeholder": "e.g., /usr/local/bin/op",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
-    "sha.js": "^2.4.11"
+    "@raycast/api": "^1.41.1",
+    "@raycast/utils": "^1.4.9",
+    "fast-glob": "^3.2.12"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@types/sha.js": "^2.4.0",
+    "@types/node": "16.10.3",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

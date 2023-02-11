@@ -1,7 +1,7 @@
 import { ActionPanel, Detail } from "@raycast/api";
-import { fetchLogs, getTaskCWLogsGroupUrl } from "../../actions";
+import { fetchLogs } from "../../actions";
 import { usePromise } from "@raycast/utils";
-import { getActionOpenInBrowser, getExportResponse } from "../../util";
+import { getActionOpenInBrowser, getExportResponse, resourceToConsoleLink } from "../../util";
 import { LogStartTimes } from "../../interfaces";
 
 function CloudwatchLogs({
@@ -32,7 +32,7 @@ function CloudwatchLogs({
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          {getActionOpenInBrowser(getTaskCWLogsGroupUrl(logGroupName))}
+          {getActionOpenInBrowser(resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup"))}
           <ActionPanel.Section title="Copy">{getExportResponse(logs)}</ActionPanel.Section>
         </ActionPanel>
       }
