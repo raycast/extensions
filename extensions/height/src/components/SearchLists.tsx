@@ -68,7 +68,7 @@ export default function SearchLists() {
                 />
                 <Action
                   title="Edit List"
-                  icon={Icon.NewDocument}
+                  icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                   onAction={() => push(<UpdateList list={item} mutateList={listsMutate} />)}
                 />
@@ -80,13 +80,13 @@ export default function SearchLists() {
                   icon={Icon.CopyClipboard}
                   content={item.name}
                 />
+                <Action.CopyToClipboard
+                  title="Copy List URL"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                  icon={Icon.CopyClipboard}
+                  content={item.url}
+                />
               </ActionPanel.Section>
-              <Action.CopyToClipboard
-                title="Copy List URL"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                icon={Icon.CopyClipboard}
-                content={item.url}
-              />
             </ActionPanel>
           }
         />

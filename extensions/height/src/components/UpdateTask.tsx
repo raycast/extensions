@@ -1,90 +1,67 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import { MutatePromise, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiList } from "../api/list";
-import { ListObject, UpdateListFormValues, UpdateListPayload } from "../types/list";
+import { ApiTask } from "../api/task";
+import { TaskObject, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
 import { ApiResponse } from "../types/utils";
 import { ListTypes, ListVisualizations } from "../utils/list";
 
 type Props = {
-  list: ListObject;
-  mutateList: MutatePromise<ApiResponse<ListObject> | undefined>;
+  task: TaskObject;
+  mutateTask: MutatePromise<ApiResponse<TaskObject> | undefined>;
 };
 
-export default function UpdateList({ list, mutateList }: Props) {
+export default function UpdateList({ task, mutateTask }: Props) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { handleSubmit, itemProps, reset } = useForm<UpdateListFormValues>({
+  const { handleSubmit, itemProps, reset } = useForm<UpdateTaskFormValues>({
     async onSubmit(values) {
       setIsLoading(true);
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Updating list" });
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
-      const payload: UpdateListPayload = {
-        type: values.type,
+      const payload: UpdateTaskPayload = {
         name: values.name,
         description: values.description,
-        visualization: values.visualization,
+        assigneesIds: values.assigneesIds,
+        status: values.status,
+        listIds: values.listIds,
+        parentTaskId: values.parentTaskId,
       };
 
-      if (values.hue && list.appearance?.icon) {
-        payload.appearance = {
-          hue: Number(values.hue),
-          icon: list.appearance?.icon,
-        };
-      }
-
       try {
-        await mutateList(ApiList.update(list.id, payload));
+        await mutateTask(ApiTask.update(task.id, payload));
 
         toast.style = Toast.Style.Success;
-        toast.title = "Successfully updated list 🎉";
+        toast.title = "Successfully updated task 🎉";
 
         reset({
-          type: "list",
           name: "",
           description: "",
-          visualization: "list",
-          hue: "",
+          assigneesIds: [],
+          status: "todo",
+          listIds: [],
+          parentTaskId: null,
         });
 
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create list";
+        toast.title = "Failed to update task";
         toast.message = error instanceof Error ? error.message : undefined;
       } finally {
         setIsLoading(false);
       }
     },
     initialValues: {
-      type: list.type || "list",
-      visualization: list.visualization || "list",
-      name: list.name || "",
-      description: list.description || "",
-      hue: list.appearance?.hue ? String(list.appearance?.hue) : "",
+      listIds: task.listIds ?? [],
+      status: task.status ?? "todo",
+      name: task.name ?? "",
+      description: task.description ?? "",
+      assigneesIds: task.assigneesIds ?? [],
+      parentTaskId: task.parentTaskId ?? null,
     },
-    validation: {
-      type: FormValidation.Required,
-      name: (value) => {
-        if (value && /^[^a-ząćęłńóśźż0-9]/.test(value)) {
-          return "Name must start with a lower letter or number";
-        } else if (value && /[^a-ząćęłńóśźż0-9-.]/.test(value)) {
-          return "Name must contain only lower letters, numbers, dashes and periods";
-        } else if (!value) {
-          return "Name is required";
-        }
-      },
-      hue: (value) => {
-        if (value && /(^[^0-9]+)/.test(value)) {
-          return "Hue must be a number";
-        } else if (value && Number(value) < 0) {
-          return "Hue must be greater than 0";
-        } else if (value && Number(value) > 360) {
-          return "Hue must be less than 360";
-        }
-      },
-    },
+    validation: {},
   });
 
   return (
@@ -92,11 +69,11 @@ export default function UpdateList({ list, mutateList }: Props) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Update list" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Update task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type" {...itemProps.type}>
+      <Form.Dropdown title="Type" {...itemProps.status}>
         {ListTypes.map((item) => (
           <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
         ))}

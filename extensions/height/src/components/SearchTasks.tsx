@@ -1,96 +1,202 @@
-import { Action, ActionPanel, environment, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  Clipboard,
+  ActionPanel,
+  environment,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
+import useFieldTemplates from "../hooks/useFieldTemplates";
+import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
+import useUsers from "../hooks/useUsers";
+import { StatusState, Option } from "../types/fieldTemplate";
+import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
-import { ListTypes } from "../utils/list";
+import { UserObject } from "../types/user";
 import UpdateTask from "./UpdateTask";
 
 export default function SearchTasks() {
   const { push } = useNavigation();
   const { theme } = environment;
   const [searchText, setSearchText] = useState<string>("");
-  const [listType, setListType] = useState("list");
-  const [filteredList, filterList] = useState<TaskObject[]>([]);
+  const [list, setList] = useState("all");
+  const [filteredTasks, filterTasks] = useState<TaskObject[]>([]);
 
-  const { tasksData, tasksIsLoading, tasksMutate } = useTasks();
+  const { fieldTemplatesStatuses, fieldTemplatesPriorities, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { lists, smartLists, listsIsLoading } = useLists();
+  const { usersData, usersIsLoading } = useUsers();
+  const { tasks, tasksIsLoading, tasksMutate } = useTasks();
 
   useEffect(() => {
-    if (!tasksData) return;
-    filterList(
-      tasksData.filter((item) => item.type === listType && item.archivedAt === null && item.name.includes(searchText))
+    if (!tasks) return;
+    filterTasks(
+      tasks.filter((item) => item.name.includes(searchText) && (list === "all" || item.listIds.includes(list)))
     );
-  }, [searchText, tasksData, listType]);
+  }, [searchText, tasks, list]);
 
   return (
     <List
-      isLoading={tasksIsLoading}
+      isLoading={fieldTemplatesIsLoading || listsIsLoading || usersIsLoading || tasksIsLoading}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Lists"
-      searchBarPlaceholder="Search your favorite list"
+      navigationTitle="Search Tasks"
+      searchBarPlaceholder="Search your tasks"
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Select List Type"
+          tooltip="Select List"
           storeValue={true}
           onChange={(newValue) => {
-            setListType(newValue);
+            setList(newValue);
           }}
         >
-          {ListTypes.map((item) => (
-            <List.Dropdown.Item key={item.value} title={item.name} value={item.value} />
-          ))}
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Section title="Lists">
+            {lists?.map((item) => listDropdownItem(item, theme))}
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Smart Lists">
+            {smartLists?.map((item) => listDropdownItem(item, theme))}
+          </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      {filteredList.map((item) => (
-        <List.Item
-          key={item.id}
-          icon={{
-            source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
-            tintColor: `hsl(${item.appearance?.hue ?? "0"}, 80%, ${
-              typeof item.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-            })`,
-          }}
-          title={item.name}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action title="Mark as completed" icon={Icon.List} onAction={() => console.log(`${item} completed`)} />
-                <Action.OpenInBrowser title="Open Task in Browser" url={item.url} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action
-                  title="Create Task"
-                  icon={Icon.NewDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={async () => {
-                    await launchCommand({ name: "create_task", type: LaunchType.UserInitiated });
-                  }}
-                />
-                <Action
-                  title="Edit Task"
-                  icon={Icon.NewDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  onAction={() => push(<UpdateTask task={item} mutateTask={tasksMutate} />)}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action.CopyToClipboard
-                  title="Copy Task Name"
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
-                  icon={Icon.CopyClipboard}
-                  content={item.name}
-                />
-              </ActionPanel.Section>
-              <Action.CopyToClipboard
-                title="Copy Task URL"
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                icon={Icon.CopyClipboard}
-                content={item.url}
+      {fieldTemplatesStatuses?.map((status) => (
+        <List.Section key={status.id} title={status.value}>
+          {filteredTasks
+            .filter((task) => task.status === status.id)
+            .map((item) => (
+              <List.Item
+                key={item.id}
+                title={item.name}
+                icon={{
+                  source: getIconByStatusState(item.status, fieldTemplatesStatuses),
+                  tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
+                    typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  })`,
+                }}
+                accessories={[...getTaskPriority(item.fields), ...getAssignedUsers(item.assigneesIds, usersData)]}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Mark as completed"
+                        icon={Icon.List}
+                        onAction={async () => await Clipboard.copy(JSON.stringify(item, null, 2))}
+                      />
+                      <Action.OpenInBrowser title="Open Task in Browser" url={item.url} />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action
+                        title="Create Task"
+                        icon={Icon.NewDocument}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        onAction={async () => {
+                          await launchCommand({ name: "create_task", type: LaunchType.UserInitiated });
+                        }}
+                      />
+                      <Action
+                        title="Edit Task"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        onAction={() => push(<UpdateTask task={item} mutateTask={tasksMutate} />)}
+                      />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <Action.CopyToClipboard
+                        title="Copy Task Name"
+                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        icon={Icon.CopyClipboard}
+                        content={item.name}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Task URL"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                        icon={Icon.CopyClipboard}
+                        content={item.url}
+                      />
+                    </ActionPanel.Section>
+                  </ActionPanel>
+                }
               />
-            </ActionPanel>
-          }
-        />
+            ))}
+        </List.Section>
       ))}
     </List>
+  );
+}
+
+function getIconByStatusState(statusId: string, statuses: Option[]) {
+  const status: StatusState = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";
+
+  switch (status) {
+    case "default":
+      return Icon.Circle;
+    case "blocked":
+      return Icon.MinusCircle;
+    case "started":
+      return Icon.CircleProgress50;
+    case "canceled":
+      return Icon.XMarkCircle;
+    case "completed":
+      return Icon.CheckCircle;
+    default:
+      return Icon.Window;
+  }
+}
+
+function getPriorityIcon(priority: string | undefined) {
+  switch (priority) {
+    case "High":
+      return Icon.Exclamationmark3;
+    case "Medium":
+      return Icon.Exclamationmark2;
+    case "Low":
+      return Icon.Exclamationmark;
+    default:
+      return undefined;
+  }
+}
+
+function getTaskPriority(fields: TaskObject["fields"]) {
+  const foundPriority = fields.find((field) => field.name === "Priority");
+  if (!foundPriority) return [];
+  return [
+    {
+      icon: {
+        source: getPriorityIcon(foundPriority?.selectValue?.value),
+        tintColor: `hsl(${foundPriority?.selectValue?.hue ?? "0"}, 80%, 50%)`,
+      },
+      tooltip: `Priority: ${foundPriority?.selectValue?.value}`,
+    },
+  ];
+}
+
+function getAssignedUsers(assigneesIds: string[], users: UserObject[] | undefined) {
+  return assigneesIds.map((userId) => {
+    const foundUser = users?.find((user) => user.id === userId);
+
+    return {
+      icon: foundUser?.pictureUrl ?? Icon.Person,
+      tooltip: `${foundUser?.firstname} ${foundUser?.lastname}`,
+    };
+  });
+}
+
+function listDropdownItem(item: ListObject, theme: string): JSX.Element {
+  return (
+    <List.Dropdown.Item
+      key={item.id}
+      title={item.name}
+      icon={{
+        source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
+        tintColor: `hsl(${item.appearance?.hue ?? "0"}, 80%, ${
+          typeof item.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+        })`,
+      }}
+      value={item.id}
+    />
   );
 }

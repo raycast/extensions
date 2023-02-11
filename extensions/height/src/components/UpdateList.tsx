@@ -51,7 +51,7 @@ export default function UpdateList({ list, mutateList }: Props) {
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create list";
+        toast.title = "Failed to update list";
         toast.message = error instanceof Error ? error.message : undefined;
       } finally {
         setIsLoading(false);
