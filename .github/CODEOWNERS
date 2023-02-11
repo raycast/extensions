@@ -505,6 +505,7 @@
 /extensions/open-in-visual-studio-code               @shubzkothekar @thomaspaulmann
 /extensions/open-link-in-specific-browser            @koinzhang
 /extensions/open-path                                @koinzhang
+/extensions/open-targets-raycast                     @ireneisdoomed
 /extensions/open-with-app                            @fturcheti @omarshahine @pernielsentikaer
 /extensions/openai-gpt3                              @simicvm
 /extensions/openfortivpn                             @rafalpetryka
@@ -773,6 +774,7 @@
 /extensions/weather                                  @tonka3000
 /extensions/web3-profile                             @peduarte
 /extensions/webflow-sites                            @vurhd @pernielsentikaer
+/extensions/websocket-debugging                      @RhysLees
 /extensions/wechat                                   @raffeyang
 /extensions/whatsapp                                 @vimtor
 /extensions/whosampled                               @ajtruex @pernielsentikaer
