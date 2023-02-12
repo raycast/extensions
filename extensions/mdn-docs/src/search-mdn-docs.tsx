@@ -1,54 +1,49 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { LocalStorage, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import type { MDNResult } from "./utils/types";
+import History from "./utils/history";
+import Results from "./utils/results";
 
-export default function Command() {
+const MAX_HISTORY = 5;
+
+export default function SearchMDNDocs() {
 	const [searchText, setSearchText] = useState("");
-	const { data, isLoading } = useFetch(`https://developer.mozilla.org/api/v1/search?q=${searchText}`, {
-		parseResponse,
-	});
+	const { data, isLoading } = useFetch(`https://developer.mozilla.org/api/v1/search?q=${searchText}`, { parseResponse });
 
 	return (
 		<List isLoading={isLoading} throttle onSearchTextChange={setSearchText} searchBarPlaceholder="Search MDN Docs">
-			<List.Section title="Results" subtitle={data?.length + ""}>
-				{data?.map((result) => (
-					<ListItem key={result.title} data={result} />
-				))}
-			</List.Section>
+			{searchText && data ? (
+				<List.Section title="Results" subtitle={data.length + ""}>
+					<Results results={data} />
+				</List.Section>
+			) : (
+				<History />
+			)}
 		</List>
 	);
 }
-
-function ListItem({ data }: { data: MDNResult }) {
-	return (
-		<List.Item
-			icon="mdn.png"
-			title={data.title}
-			subtitle={data.summary}
-			actions={
-				<ActionPanel>
-					<ActionPanel.Section>
-						<Action.OpenInBrowser title="Open in browser" url={`https://developer.mozilla.org${data.mdn_url}`} />
-					</ActionPanel.Section>
-				</ActionPanel>
-			}
-		/>
-	);
-}
-
-type MDNResult = {
-	mdn_url: string;
-	score: number;
-	title: string;
-	popularity: number;
-	summary: string;
-	highlight: { body: string[]; title: [] };
-};
 
 async function parseResponse(res: Response) {
 	const json = (await res.json()) as { documents: MDNResult[] } | { code: string; message: string };
 
 	if (!res.ok || "message" in json) throw new Error("message" in json ? json.message : "An error occurred");
+
+	if (!json.documents.length) return [];
+
+	const recentSearches = await LocalStorage.getItem<string>("recentSearches");
+	if (!recentSearches) await LocalStorage.setItem("recentSearches", JSON.stringify([json.documents[0]]));
+	else {
+		let r = JSON.parse(recentSearches) as MDNResult[];
+
+		r = r.filter((res) => res.mdn_url !== json.documents[0].mdn_url);
+
+		if (r.length >= 5) r = r.slice(0, MAX_HISTORY - 1);
+
+		r = [json.documents[0], ...r];
+
+		await LocalStorage.setItem("recentSearches", JSON.stringify(r));
+	}
 
 	return json.documents;
 }

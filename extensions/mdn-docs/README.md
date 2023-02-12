@@ -2,4 +2,4 @@
 
 ## Features
 
-[x] Search through MDN docs
+-   Search through MDN docs
