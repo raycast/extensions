@@ -4,6 +4,10 @@
   "title": "BeeRaycast",
   "description": "Manage your Beeminder goals from Raycast",
   "icon": "beelogo.png",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "author": "vivgui",
   "license": "MIT",
   "commands": [
@@ -20,7 +24,7 @@
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
+    "@types/node": "18.13.0",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
