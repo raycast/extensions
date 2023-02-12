@@ -2,7 +2,7 @@
 
 Opinionated glyph picker that allows you to paste pretty arrows (←→), special keys (⌃⌘⇧⌫) and other cool stuff (❖◇♡♥★☆) without opening [Character Viewer](https://support.apple.com/guide/mac-help/use-emoji-and-symbols-on-mac-mchlp1560/mac)
 
-![](metadata/glyph-search-1.png)
+![](readme-assets/hero.png)
 
 ## Why was this extension created?
 
