@@ -102,7 +102,7 @@ const EndOfInterval = () => {
   return (
     <Detail
       navigationTitle={`Interval completed`}
-      markdown={`![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)`}
+      markdown={`${preferences.completionImage}`}
       actions={
         <ActionPanel title="Start Next Interval">
           <Action

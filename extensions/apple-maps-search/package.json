@@ -93,7 +93,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.47.0",
     "open": "^8.4.0"
   },
   "devDependencies": {

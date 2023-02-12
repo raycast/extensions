@@ -1,5 +1,9 @@
 # Harvest Changelog
 
+## [Better Project Search] - 2023-01-31
+
+- Add user preference to show the client's name for the selected project in the time entry form
+
 ## [Better Project Search] - 2022-09-29
 
 - You can now search via client name in the project dropdown
