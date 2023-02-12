@@ -18,6 +18,9 @@ Raycast extension for [usememos/memos](https://github.com/usememos/memos).
 
 ![](metadata/SCR-20230210-x6a.png)
 
-# Search
+# List
 
-![](metadata/SCR-20230211-p36.png)
+![](metadata/SCR-20230212-oen.png)
+![](metadata/SCR-20230212-ofk.png)
+![](metadata/SCR-20230212-ofx.png)
+![](metadata/SCR-20230212-ogv.png)

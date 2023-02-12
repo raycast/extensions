@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { archiveMemo, getAllMemos, getRequestUrl } from "./api";
+import { archiveMemo, deleteMemo, getAllMemos, getRequestUrl, restoreMemo } from "./api";
 import { MemoInfoResponse, ROW_STATUS, ROW_STATUS_KEY } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
@@ -8,6 +8,13 @@ export default function MemosListCommand(): JSX.Element {
   const [rowStatus, setRowStatus] = useState<ROW_STATUS_KEY>(ROW_STATUS.NORMAL);
   const { isLoading, data, revalidate } = getAllMemos(rowStatus);
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
+
+  const rowStatusList: ROW_STATUS_KEY[] = [ROW_STATUS.NORMAL, ROW_STATUS.ARCHIVED];
+
+  const onRowStatusChange = (newValue: ROW_STATUS_KEY) => {
+    setRowStatus(newValue);
+    revalidate();
+  };
 
   useEffect(() => {
     setFilterList(data?.data?.filter((item) => item.content.includes(searchText)) || []);
@@ -40,6 +47,35 @@ export default function MemosListCommand(): JSX.Element {
     return markdown;
   }
 
+  async function onArchive(item: MemoInfoResponse) {
+    if (
+      await confirmAlert({
+        title: "Are you sure?",
+        icon: Icon.Store,
+        primaryAction: {
+          title: "Archive",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Archive...",
+      });
+      const res = await archiveMemo(item.id).catch(() => {
+        //
+      });
+
+      if (res) {
+        showToast(Toast.Style.Success, "Archive Success");
+
+        revalidate();
+      } else {
+        showToast(Toast.Style.Failure, "Archive Failed");
+      }
+    }
+  }
+
   async function onDelete(item: MemoInfoResponse) {
     if (
       await confirmAlert({
@@ -53,9 +89,9 @@ export default function MemosListCommand(): JSX.Element {
     ) {
       showToast({
         style: Toast.Style.Animated,
-        title: "delete...",
+        title: "Delete...",
       });
-      const res = await archiveMemo(item.id).catch(() => {
+      const res = await deleteMemo(item.id).catch(() => {
         //
       });
 
@@ -69,12 +105,46 @@ export default function MemosListCommand(): JSX.Element {
     }
   }
 
-  const rowStatusList: ROW_STATUS_KEY[] = [ROW_STATUS.NORMAL, ROW_STATUS.ARCHIVED];
+  async function onRestore(item: MemoInfoResponse) {
+    if (
+      await confirmAlert({
+        title: "Are you sure?",
+        icon: Icon.Redo,
+        primaryAction: {
+          title: "Restore",
+          style: Alert.ActionStyle.Default,
+        },
+      })
+    ) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Restore...",
+      });
+      const res = await restoreMemo(item.id).catch(() => {
+        //
+      });
 
-  const onRowStatusChange = (newValue: ROW_STATUS_KEY) => {
-    setRowStatus(newValue);
-    revalidate();
-  };
+      if (res) {
+        showToast(Toast.Style.Success, "Restore Success");
+
+        revalidate();
+      } else {
+        showToast(Toast.Style.Failure, "Restore Failed");
+      }
+    }
+  }
+
+  const archiveComponent = (item: MemoInfoResponse) => (
+    <Action title="Archive" icon={Icon.Store} style={Action.Style.Destructive} onAction={() => onArchive(item)} />
+  );
+
+  const deleteComponent = (item: MemoInfoResponse) => (
+    <Action title="Delete" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => onDelete(item)} />
+  );
+
+  const restoreComponent = (item: MemoInfoResponse) => (
+    <Action title="Restore" icon={Icon.Redo} style={Action.Style.Regular} onAction={() => onRestore(item)} />
+  );
 
   return (
     <List
@@ -107,12 +177,9 @@ export default function MemosListCommand(): JSX.Element {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={getItemUrl(item)} />
-              <Action
-                title="Delete"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => onDelete(item)}
-              />
+              {(item.rowStatus === ROW_STATUS.NORMAL && archiveComponent(item)) || null}
+              {(item.rowStatus === ROW_STATUS.ARCHIVED && restoreComponent(item)) || null}
+              {(item.rowStatus === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
             </ActionPanel>
           }
           detail={<List.Item.Detail markdown={getItemMarkdown(item)} />}

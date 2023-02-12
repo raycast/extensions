@@ -124,8 +124,7 @@ export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
   return getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {});
 };
 
-//
-export const archiveMemo = (memoId: number) => {
+export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
   const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
@@ -133,7 +132,28 @@ export const archiveMemo = (memoId: number) => {
     method: "PATCH",
     data: {
       id: memoId,
-      rowStatus: ROW_STATUS.ARCHIVED,
+      rowStatus,
     },
+  });
+};
+
+export const archiveMemo = (memoId: number) => {
+  return patchMemo(memoId, {
+    rowStatus: ROW_STATUS.ARCHIVED,
+  });
+};
+
+export const restoreMemo = (memoId: number) => {
+  return patchMemo(memoId, {
+    rowStatus: ROW_STATUS.NORMAL,
+  });
+};
+
+export const deleteMemo = (memoId: number) => {
+  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+
+  return getFetch<ResponseData<MemoInfoResponse>>({
+    url,
+    method: "DELETE",
   });
 };
