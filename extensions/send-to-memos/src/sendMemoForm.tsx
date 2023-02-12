@@ -113,7 +113,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       actions={
         createdUrl && (
           <ActionPanel>
-            <Action title="Open web" onAction={openWeb} />
+            <Action title="Open In Browser" onAction={openWeb} />
           </ActionPanel>
         )
       }

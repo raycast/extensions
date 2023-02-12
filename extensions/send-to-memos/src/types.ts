@@ -9,6 +9,11 @@ export enum ROLE {
   USER = "USER",
 }
 
+export enum ROW_STATUS {
+  NORMAL = "NORMAL",
+  ARCHIVED = "ARCHIVED",
+}
+
 export interface ResponseData<T> {
   data: T;
 }

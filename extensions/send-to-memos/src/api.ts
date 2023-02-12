@@ -1,13 +1,14 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import parse from "url-parse";
+import qs from "qs";
 import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData } from "./types";
+import { Preferences, ResponseData, ROW_STATUS } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -113,7 +114,26 @@ export const postFile = (filePath: string) => {
 };
 
 export const getAllMemos = () => {
-  const url = getRequestUrl(`/api/memo?openId=${getOpenId()}`);
+  const queryString = qs.stringify({
+    openId: getOpenId(),
+    rowStatus: ROW_STATUS.NORMAL,
+  });
+
+  const url = getRequestUrl(`/api/memo?${queryString}`);
 
   return getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {});
+};
+
+//
+export const archiveMemo = (memoId: number) => {
+  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+
+  return getFetch<ResponseData<MemoInfoResponse>>({
+    url,
+    method: "PATCH",
+    data: {
+      id: memoId,
+      rowStatus: ROW_STATUS.ARCHIVED,
+    },
+  });
 };
