@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -59,6 +59,7 @@ function VirtualMachineList() {
               <ActionPanel>
                 <Action
                   title={`${stopped ? "Start" : paused ? "Resume" : "Stop"}`}
+                  icon={stopped ? Icon.Play : paused ? Icon.Play : Icon.Stop}
                   onAction={async () => {
                     await execPromise(
                       `${CLI_PATH} ${stopped || paused ? "start" : "stop"} ${
@@ -77,6 +78,7 @@ function VirtualMachineList() {
                 {!(stopped || paused) && (
                   <Action
                     title="Suspend"
+                    icon={Icon.Pause}
                     onAction={async () => {
                       await execPromise(
                         `${CLI_PATH} suspend ${virtualMachine.uuid}`
