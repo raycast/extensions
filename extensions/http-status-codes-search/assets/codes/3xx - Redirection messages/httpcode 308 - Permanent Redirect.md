@@ -1,0 +1,2 @@
+## [308 Permanent Redirect](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/308)
+This means that the resource is now permanently located at another URI, specified by the Location: HTTP Response header. This has the same semantics as the __301 Moved Permanently__ HTTP response code, with the exception that the user agent must not change the HTTP method used: If a POST was used in the first request, a POST must be used in the second request.
