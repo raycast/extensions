@@ -47,7 +47,7 @@ Content Demo:
 }
 ```
 
-![](metadata/scr-2.png)
+![](metadata/SCR-20230212-p6z.png)
 
 ### Command
 
