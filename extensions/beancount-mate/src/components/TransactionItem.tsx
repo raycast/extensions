@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import { Action, ActionPanel, Color, List, Icon } from "@raycast/api";
 import { NParseResult } from "costflow/lib/interface";
-import { appendDirectivesToJournalFile, isJournalFileExists } from "../utils/journalFile";
+import { appendDirectivesToJournalFile } from "../utils/journalFile";
 
 const TransactionItem: React.FC<{
   parseResult: { json: NParseResult.TransactionResult; data: NParseResult.Result };
-}> = ({ parseResult }) => {
+  onSaveSuccess: () => void;
+  isJournalFileExists?: boolean;
+}> = ({ parseResult, onSaveSuccess, isJournalFileExists }) => {
   const icon = useMemo(
     () =>
       parseResult.json.directive === "transaction"
@@ -70,14 +72,14 @@ const TransactionItem: React.FC<{
       }
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Parsed Directives" content={parseResult.data.output ?? ""} />
-          {isJournalFileExists() && (
+          {isJournalFileExists && (
             <Action
               title="Save to Journal File"
               icon={Icon.Receipt}
-              onAction={() => appendDirectivesToJournalFile(parseResult.data.output ?? "")}
+              onAction={() => appendDirectivesToJournalFile(parseResult.data.output ?? "").then(onSaveSuccess)}
             />
           )}
+          <Action.CopyToClipboard title="Copy Parsed Directives" content={parseResult.data.output ?? ""} />
         </ActionPanel>
       }
     />

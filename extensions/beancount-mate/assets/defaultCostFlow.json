@@ -1,20 +1,3 @@
-# Beancount Mate
-
-Beancount Mate is the best teammate for double-entry bookkeeping.
-
-With Beancount Meta, you can:
-
-1. Quick generate transaction record. (use costflow syntax)
-2. Save record to your beancount journal file.
-
-To get started, you need to create a costflow config file firstly.
-
-```bash
-mkdir ~/.costflow
-touch ~/.constflow/config.json
-```
-
-```json
 {
   "mode": "beancount",
   "currency": "CNY",
@@ -45,12 +28,3 @@ touch ~/.constflow/config.json
     "spotify": "@Spotify 15.98 USD visa > subscription"
   }
 }
-```
-
-Then after open "Bookkeep" command in Raycast,
-Now enjoy bookkeeping!
-
-# Attribution
-
-1. This extension is written in [Neovim](https://neovim.io).
-2. This extension used emoji icon made by [justicon](https://www.flaticon.com/authors/justicon) from [www.flaticon.com](https://www.flaticon.com).

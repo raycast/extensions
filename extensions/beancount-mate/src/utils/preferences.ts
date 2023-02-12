@@ -6,3 +6,6 @@ export interface Preferences {
 }
 
 export const preferences = getPreferenceValues<Preferences>();
+
+const home: string = process.env.HOME ?? process.env.USERPROFILE ?? "";
+export const costflowConfigFilePath = preferences.costflowConfigFilePath.replace(/^~/, home);
