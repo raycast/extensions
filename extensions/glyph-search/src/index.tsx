@@ -1,21 +1,21 @@
 import { ActionPanel, Action, Grid, Color } from "@raycast/api";
-import { arrows, circledAndSquared, keys, others, pictograms } from "./data";
+import { arrows, circledAndSquared, Glyph, keys, others, pictograms } from "./data";
 
-function GlyphSection({ title, glyphs }) {
+function GlyphSection({ title, glyphs }: { title: string; glyphs: Glyph[] }) {
   return (
     <Grid.Section title={title}>
-      {glyphs.map(({ glyph, glyphname, ucdescr, cp }) => (
+      {glyphs.map(({ glyph, name, unicodeDescription, codepoint }) => (
         <Grid.Item
-          key={glyphname}
-          content={{ tooltip: glyphname, value: { source: `svgs/svg-${glyphname}.svg`, tintColor: Color.PrimaryText } }}
-          keywords={[glyphname, ucdescr, ...ucdescr.split(" "), glyph, title]}
+          key={name}
+          content={{ tooltip: name, value: { source: `svgs/svg-${name}.svg`, tintColor: Color.PrimaryText } }}
+          keywords={[name, unicodeDescription, ...unicodeDescription.split(" "), glyph, title]}
           actions={
             <ActionPanel>
               <Action.Paste content={glyph} />
               <Action.CopyToClipboard content={glyph} />
-              <Action.CopyToClipboard content={glyphname} title="Copy Glyph Name" />
-              <Action.CopyToClipboard content={ucdescr} title="Copy Glyph Description" />
-              <Action.OpenInBrowser url={`https://codepoints.net/U+${cp}`} title="Open on Codepoints" />
+              <Action.CopyToClipboard content={name} title="Copy Glyph Name" />
+              <Action.CopyToClipboard content={unicodeDescription} title="Copy Glyph Description" />
+              <Action.OpenInBrowser url={`https://codepoints.net/U+${codepoint}`} title="Open on Codepoints" />
             </ActionPanel>
           }
         />
