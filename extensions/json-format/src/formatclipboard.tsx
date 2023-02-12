@@ -36,7 +36,7 @@ export default async () => {
   } catch (err) {
     showToast({
       style: Toast.Style.Failure,
-      title: 'Please copy a valid JSON/JS Object',
+      title: 'Please copy a valid JSON data!',
     });
     popToRoot();
   }
