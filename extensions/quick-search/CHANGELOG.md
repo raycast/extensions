@@ -10,3 +10,7 @@
 ## [Update deps] - 2023-01-08
 
 - Update dependencies, use @raycast/api insteadof run-applescript
+
+## [Support fallback command] - 2023-02-12
+
+- Support add Quick Search as Raycast fallback command
