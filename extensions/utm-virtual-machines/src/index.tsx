@@ -39,6 +39,7 @@ function VirtualMachineList() {
         setVirtualMachines(virtualMachines);
       } catch (error) {
         showToast(Toast.Style.Failure, "Couldn't find virtual machines.");
+        setVirtualMachines([]);
       }
     }
     fetch();
