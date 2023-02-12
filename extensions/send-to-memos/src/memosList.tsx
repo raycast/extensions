@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import { archiveMemo, getAllMemos, getRequestUrl } from "./api";
-import { MemoInfoResponse } from "./types";
+import { MemoInfoResponse, ROW_STATUS, ROW_STATUS_KEY } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data, revalidate } = getAllMemos();
+  const [rowStatus, setRowStatus] = useState<ROW_STATUS_KEY>(ROW_STATUS.NORMAL);
+  const { isLoading, data, revalidate } = getAllMemos(rowStatus);
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
@@ -68,6 +69,13 @@ export default function MemosListCommand(): JSX.Element {
     }
   }
 
+  const rowStatusList: ROW_STATUS_KEY[] = [ROW_STATUS.NORMAL, ROW_STATUS.ARCHIVED];
+
+  const onRowStatusChange = (newValue: ROW_STATUS_KEY) => {
+    setRowStatus(newValue);
+    revalidate();
+  };
+
   return (
     <List
       isLoading={isLoading}
@@ -76,6 +84,21 @@ export default function MemosListCommand(): JSX.Element {
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Row Status"
+          storeValue={true}
+          onChange={(newValue) => {
+            onRowStatusChange(newValue as ROW_STATUS_KEY);
+          }}
+        >
+          <List.Dropdown.Section title="Row Status">
+            {rowStatusList.map((status) => (
+              <List.Dropdown.Item key={status} title={status} value={status} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
     >
       {filterList.map((item) => (
         <List.Item

@@ -8,7 +8,7 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS } from "./types";
+import { Preferences, ResponseData, ROW_STATUS, ROW_STATUS_KEY } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -113,10 +113,10 @@ export const postFile = (filePath: string) => {
   });
 };
 
-export const getAllMemos = () => {
+export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
   const queryString = qs.stringify({
     openId: getOpenId(),
-    rowStatus: ROW_STATUS.NORMAL,
+    rowStatus,
   });
 
   const url = getRequestUrl(`/api/memo?${queryString}`);

@@ -14,6 +14,8 @@ export enum ROW_STATUS {
   ARCHIVED = "ARCHIVED",
 }
 
+export type ROW_STATUS_KEY = keyof typeof ROW_STATUS;
+
 export interface ResponseData<T> {
   data: T;
 }
