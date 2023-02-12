@@ -1,13 +1,12 @@
-import { LocalStorage, List } from "@raycast/api";
+import { LocalStorage, List, getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import type { MDNResult } from "./utils/types";
+import type { MDNResult, Preferences } from "./utils/types";
 import History from "./utils/history";
 import Results from "./utils/results";
 
-const MAX_HISTORY = 5;
-
 export default function SearchMDNDocs() {
+	const preferences = getPreferenceValues<Preferences>();
 	const [searchText, setSearchText] = useState("");
 	const { data, isLoading } = useFetch(`https://developer.mozilla.org/api/v1/search?q=${searchText}`, { parseResponse });
 
@@ -17,9 +16,9 @@ export default function SearchMDNDocs() {
 				<List.Section title="Results" subtitle={data.length + ""}>
 					<Results results={data} />
 				</List.Section>
-			) : (
+			) : preferences.rememberSearchHistory ? (
 				<History />
-			)}
+			) : null}
 		</List>
 	);
 }
@@ -31,6 +30,12 @@ async function parseResponse(res: Response) {
 
 	if (!json.documents.length) return [];
 
+	const preferences = getPreferenceValues<Preferences>();
+
+	if (!preferences.rememberSearchHistory) return json.documents;
+
+	const MAX_HISTORY = Number(preferences.maxSearchHistory) || 5;
+
 	const recentSearches = await LocalStorage.getItem<string>("recentSearches");
 	if (!recentSearches) await LocalStorage.setItem("recentSearches", JSON.stringify([json.documents[0]]));
 	else {
@@ -38,7 +43,7 @@ async function parseResponse(res: Response) {
 
 		r = r.filter((res) => res.mdn_url !== json.documents[0].mdn_url);
 
-		if (r.length >= 5) r = r.slice(0, MAX_HISTORY - 1);
+		if (r.length >= MAX_HISTORY) r = r.slice(0, MAX_HISTORY - 1);
 
 		r = [json.documents[0], ...r];
 

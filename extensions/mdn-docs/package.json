@@ -19,6 +19,25 @@
 			"mode": "view"
 		}
 	],
+	"preferences": [
+		{
+			"name": "rememberSearchHistory",
+			"type": "checkbox",
+			"required": false,
+			"default": true,
+			"label": "Remember search history",
+			"description": "Remember your search history locally"
+		},
+		{
+			"name": "maxSearchHistory",
+			"type": "textfield",
+			"default": "5",
+			"description": "How many items to remember",
+			"placeholder": "5",
+			"required": true,
+			"title": "How many items to remember"
+		}
+	],
 	"dependencies": {
 		"@raycast/api": "^1.47.2",
 		"@raycast/utils": "^1.4.8"

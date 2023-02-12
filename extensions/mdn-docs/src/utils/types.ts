@@ -7,3 +7,8 @@ export type MDNResult = {
 	summary: string;
 	highlight: { body: string[]; title: [] };
 };
+
+export type Preferences = {
+	rememberSearchHistory: boolean;
+	maxSearchHistory: string;
+};

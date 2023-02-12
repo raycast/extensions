@@ -1,15 +1,16 @@
-import { List, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Results from "./results";
-import { MDNResult } from "./types";
+import { MDNResult, Preferences } from "./types";
 
 export default function History() {
 	const [history, setHistory] = useState<MDNResult[]>([]);
+	const preferences = getPreferenceValues<Preferences>();
 
 	useEffect(() => {
 		async function getHistory() {
 			const ls = await LocalStorage.getItem<string>("recentSearches");
-			if (ls) setHistory(JSON.parse(ls));
+			if (ls) setHistory(JSON.parse(ls).slice(0, Number(preferences.maxSearchHistory) || 5));
 		}
 
 		getHistory();
