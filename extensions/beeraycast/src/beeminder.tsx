@@ -1,122 +1,78 @@
 import { List, ActionPanel, Action, popToRoot, showToast, Toast, Form } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise, useForm } from "@raycast/utils";
 import { fromUnixTime, differenceInDays } from "date-fns";
+import { Goal, GoalResponse, DataPointFormValues } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
-import { Goal, GoalResponse } from "./types";
 
-export default function Beeminder() {
-  const [goals, setGoals] = useState<GoalResponse>();
-  const [loading, setLoading] = useState<boolean>(true);
+export default function Command() {
+  const { isLoading, data: goals, revalidate: fetchData } = usePromise(fetchGoals);
 
-  async function fetchData() {
-    setLoading(true);
-    try {
-      const goalsData = await fetchGoals();
-      setLoading(false);
-
-      if (!Array.isArray(goalsData) && goalsData?.errors) {
-        if (goalsData.errors.auth_token === "bad_token") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Bad Auth Token",
-            message: "Please check your auth token in the extension preferences.",
-          });
-          popToRoot();
-        }
-
-        if (goalsData.errors.token === "no_token") {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "No Auth Token",
-            message: "Please set your auth token in the extension preferences.",
-          });
-          popToRoot();
-        }
-      } else {
-        // Happy path
-        setGoals(goalsData);
-      }
-    } catch (error) {
-      setLoading(false);
-      await showToast({
+  // error handling
+  if (!Array.isArray(goals) && goals?.errors) {
+    if (goals.errors.auth_token === "bad_token") {
+      showToast({
         style: Toast.Style.Failure,
-        title: "Something went wrong",
-        message: "Failed to load your goals",
+        title: "Bad Auth Token",
+        message: "Please check your auth token in the extension preferences.",
       });
+      popToRoot();
+    }
+
+    if (goals.errors.token === "no_token") {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "No Auth Token",
+        message: "Please set your auth token in the extension preferences.",
+      });
+      popToRoot();
     }
   }
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  function ValueForm({ goalSlug }: { goalSlug: string }) {
-    const [dataPointError, setDataPointError] = useState<string | undefined>();
-
-    function dropDataPointErrorIfNeeded() {
-      if (dataPointError && dataPointError.length > 0) {
-        setDataPointError(undefined);
-      }
-    }
-
-    function validateDataPoint(event: Form.Event<string[] | string>) {
-      if (event.target.value?.length == 0) {
-        setDataPointError("The field should't be empty!");
-      } else {
-        dropDataPointErrorIfNeeded();
-      }
-    }
-
-    function handleDataPointInputChange(event: string) {
-      const eventToNumber = Number(event);
-      if (eventToNumber > 0) {
-        dropDataPointErrorIfNeeded();
-      } else {
-        setDataPointError("This field should't be empty!");
-      }
-
-      if (isNaN(eventToNumber)) {
-        setDataPointError("This field should be a number!");
-      }
-    }
+  function DataPointForm({ goalSlug }: { goalSlug: string }) {
+    const { handleSubmit, itemProps } = useForm<DataPointFormValues>({
+      async onSubmit(values) {
+        try {
+          await sendDatapoint(goalSlug, values.dataPoint, values.comment);
+          popToRoot();
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Datapoint submitted",
+            message: "Your datapoint was submitted successfully",
+          });
+        } catch (error) {
+          popToRoot();
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Something went wrong",
+            message: "Failed to send your datapoint",
+          });
+        }
+      },
+      validation: {
+        dataPoint: (value) => {
+          if (value && isNaN(Number(value))) {
+            return "This field should be a number";
+          } else if (!value) {
+            return "The field is required";
+          }
+        },
+      },
+    });
 
     return (
       <Form
         navigationTitle={`Add a datapoint for goal "${goalSlug}"`}
         actions={
           <ActionPanel>
-            <Action.SubmitForm
-              onSubmit={async (values) => {
-                try {
-                  await sendDatapoint(goalSlug, values.datapoint, values.comment);
-                  popToRoot();
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Datapoint submitted",
-                    message: "Your datapoint was submitted successfully",
-                  });
-                } catch (error) {
-                  popToRoot();
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Something went wrong",
-                    message: "Failed to send your datapoint",
-                  });
-                }
-              }}
-            />
+            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           </ActionPanel>
         }
       >
         <Form.TextField
-          id="datapoint"
           title="Datapoint"
           autoFocus
           placeholder={`Enter datapoint for ${goalSlug}`}
-          error={dataPointError}
-          onChange={(event) => handleDataPointInputChange(event)}
-          onFocus={(event) => validateDataPoint(event)}
-          onBlur={(event) => validateDataPoint(event)}
+          {...itemProps.dataPoint}
         />
 
         <Form.TextField id="comment" title="Comment" defaultValue="Sent from Raycast 🐝" />
@@ -127,7 +83,7 @@ export default function Beeminder() {
   function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
     return (
-      <List isLoading={loading}>
+      <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
           const [beforeIn, afterIn] = goal.limsum.split("+")?.[1].split(" (")?.[0].split(" in ");
           let goalIcon;
@@ -155,7 +111,7 @@ export default function Beeminder() {
                 <ActionPanel>
                   <Action.Push
                     title="Enter datapoint"
-                    target={<ValueForm goalSlug={goal.slug} />}
+                    target={<DataPointForm goalSlug={goal.slug} />}
                   />
                   <Action title="Refresh data" onAction={async () => await fetchData()} />
                 </ActionPanel>

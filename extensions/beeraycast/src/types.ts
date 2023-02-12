@@ -3,6 +3,11 @@ export interface Preferences {
   beeminderUsername: string;
 }
 
+export interface DataPointFormValues {
+  dataPoint: string;
+  comment: string;
+}
+
 export interface DataPointResponse {
   timestamp: number;
   value: number;
