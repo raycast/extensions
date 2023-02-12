@@ -923,7 +923,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
     "@types/debounce": "^1.2.1",
     "@vitalets/google-translate-api": "^7.0.0",
     "debounce": "^1.2.1"
@@ -935,7 +936,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -2,6 +2,7 @@ import { getPreferenceValues } from '@raycast/api';
 
 interface Preferences {
   indent: IndentType;
+  autopaste: boolean;
 }
 
 type IndentType = 'tab' | '2' | '4' | '8';
@@ -11,4 +12,9 @@ function getIndentation(): IndentType {
   return indent;
 }
 
-export { getIndentation };
+function autoPasteEnabled(): boolean {
+  const { autopaste } = getPreferenceValues<Preferences>();
+  return autopaste;
+}
+
+export { getIndentation, autoPasteEnabled };

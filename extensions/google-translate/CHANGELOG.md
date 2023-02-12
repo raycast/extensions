@@ -1,5 +1,14 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2023-02-10
+
+- Add Languages Set manager to be able to configure multiple language presets and easy switch between them
+
+## [Enhancements] - 2023-02-09
+
+- Retuned back LangTo -> LangFrom translation
+- Improved auto-detect translation in Translate Form
+
 ## [Add auto-detect option] - 2023-02-07
 
 Add auto-detect to the language option.
