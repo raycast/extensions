@@ -30,6 +30,7 @@ export default async () => {
     } else {
       await Clipboard.copy(output);
       showHUD('Copied succesfully!');
+    }
     closeMainWindow();
     popToRoot();
   } catch (err) {
