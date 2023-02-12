@@ -8,7 +8,9 @@ import {
   LaunchType,
   List,
   useNavigation,
+  Color,
 } from "@raycast/api";
+import { differenceInCalendarDays, format } from "date-fns";
 import { useEffect, useState } from "react";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
@@ -81,8 +83,8 @@ export default function SearchTasks() {
                   })`,
                 }}
                 accessories={[
-                  getTaskDueDate(item.fields),
-                  getTaskPriority(item.fields),
+                  getTaskDueDate(item),
+                  getTaskPriority(item),
                   ...getAssignedUsers(item.assigneesIds, usersData),
                 ]}
                 actions={
@@ -154,11 +156,23 @@ function getIconByStatusState(statusId: string, statuses: Option[]) {
   }
 }
 
-function getTaskDueDate(fields: TaskObject["fields"]) {
-  const foundDueDate = fields.find((field) => field.name.toLowerCase() === "due date");
+function getTaskDueDate(task: TaskObject) {
+  if (task.completed) return {};
+  const foundDueDate = task.fields.find((field) => field.name.toLowerCase() === "due date");
   if (!foundDueDate || !foundDueDate.date) return {};
+  const dueDate = new Date(foundDueDate.date);
+  const today = new Date();
+
   return {
-    date: new Date(foundDueDate.date),
+    text: {
+      color:
+        differenceInCalendarDays(dueDate, today) <= 0
+          ? Color.Red
+          : differenceInCalendarDays(dueDate, today) <= 2
+          ? Color.Yellow
+          : Color.PrimaryText,
+      value: format(new Date(foundDueDate.date), "MMM dd"),
+    },
   };
 }
 
@@ -175,8 +189,9 @@ function getPriorityIcon(priority: string | undefined) {
   }
 }
 
-function getTaskPriority(fields: TaskObject["fields"]) {
-  const foundPriority = fields.find((field) => field.name.toLowerCase() === "priority");
+function getTaskPriority(task: TaskObject) {
+  if (task.completed) return {};
+  const foundPriority = task.fields.find((field) => field.name.toLowerCase() === "priority");
   if (!foundPriority) return {};
   return {
     icon: {

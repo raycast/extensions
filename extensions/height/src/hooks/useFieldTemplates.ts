@@ -9,22 +9,28 @@ export default function useFieldTemplates() {
     headers: ApiHeaders,
   });
 
-  const { statuses, priorities } = useMemo(() => {
+  const { statuses, priorities, startDate, dueDate } = useMemo(() => {
     const statuses = data?.list
-      ?.find((fieldTemplate) => fieldTemplate.standardType === "status")
+      ?.find((fieldTemplate) => fieldTemplate.standardType.toLowerCase() === "status")
       ?.metadata?.options?.filter((option) => !option.deleted && !option.archived);
 
     const priorities = data?.list
-      ?.find((fieldTemplate) => fieldTemplate.standardType === "priority")
+      ?.find((fieldTemplate) => fieldTemplate.standardType.toLowerCase() === "priority")
       ?.metadata?.options?.filter((option) => !option.deleted && !option.archived);
 
-    return { statuses, priorities };
+    const startDate = data?.list?.find((fieldTemplate) => fieldTemplate.standardType === "startDate");
+
+    const dueDate = data?.list?.find((fieldTemplate) => fieldTemplate.standardType === "dueDate");
+
+    return { statuses, priorities, startDate, dueDate };
   }, [data]);
 
   return {
     fieldTemplatesData: data,
     fieldTemplatesStatuses: statuses,
     fieldTemplatesPriorities: priorities,
+    fieldTemplatesStartDate: startDate,
+    fieldTemplatesDueDate: dueDate,
     fieldTemplatesError: error,
     fieldTemplatesIsLoading: isLoading,
     fieldTemplatesMutate: mutate,
