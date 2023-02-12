@@ -27,7 +27,7 @@ export default function SearchTasks() {
   const [list, setList] = useState("all");
   const [filteredTasks, filterTasks] = useState<TaskObject[]>([]);
 
-  const { fieldTemplatesStatuses, fieldTemplatesPriorities, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
   const { lists, smartLists, listsIsLoading } = useLists();
   const { usersData, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading, tasksMutate } = useTasks();
@@ -35,7 +35,10 @@ export default function SearchTasks() {
   useEffect(() => {
     if (!tasks) return;
     filterTasks(
-      tasks.filter((item) => item.name.includes(searchText) && (list === "all" || item.listIds.includes(list)))
+      tasks.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchText.toLowerCase()) && (list === "all" || item.listIds.includes(list))
+      )
     );
   }, [searchText, tasks, list]);
 
@@ -77,7 +80,11 @@ export default function SearchTasks() {
                     typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
                   })`,
                 }}
-                accessories={[...getTaskPriority(item.fields), ...getAssignedUsers(item.assigneesIds, usersData)]}
+                accessories={[
+                  getTaskDueDate(item.fields),
+                  getTaskPriority(item.fields),
+                  ...getAssignedUsers(item.assigneesIds, usersData),
+                ]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
@@ -147,6 +154,14 @@ function getIconByStatusState(statusId: string, statuses: Option[]) {
   }
 }
 
+function getTaskDueDate(fields: TaskObject["fields"]) {
+  const foundDueDate = fields.find((field) => field.name.toLowerCase() === "due date");
+  if (!foundDueDate || !foundDueDate.date) return {};
+  return {
+    date: new Date(foundDueDate.date),
+  };
+}
+
 function getPriorityIcon(priority: string | undefined) {
   switch (priority) {
     case "High":
@@ -156,22 +171,20 @@ function getPriorityIcon(priority: string | undefined) {
     case "Low":
       return Icon.Exclamationmark;
     default:
-      return undefined;
+      return Icon.ExclamationMark;
   }
 }
 
 function getTaskPriority(fields: TaskObject["fields"]) {
-  const foundPriority = fields.find((field) => field.name === "Priority");
-  if (!foundPriority) return [];
-  return [
-    {
-      icon: {
-        source: getPriorityIcon(foundPriority?.selectValue?.value),
-        tintColor: `hsl(${foundPriority?.selectValue?.hue ?? "0"}, 80%, 50%)`,
-      },
-      tooltip: `Priority: ${foundPriority?.selectValue?.value}`,
+  const foundPriority = fields.find((field) => field.name.toLowerCase() === "priority");
+  if (!foundPriority) return {};
+  return {
+    icon: {
+      source: getPriorityIcon(foundPriority.selectValue?.value),
+      tintColor: `hsl(${foundPriority.selectValue?.hue ?? "0"}, 80%, 50%)`,
     },
-  ];
+    tooltip: `Priority: ${foundPriority.selectValue?.value}`,
+  };
 }
 
 function getAssignedUsers(assigneesIds: string[], users: UserObject[] | undefined) {
