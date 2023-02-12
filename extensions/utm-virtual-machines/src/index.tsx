@@ -1,4 +1,11 @@
-import { ActionPanel, List, Action, showToast, Toast, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  showToast,
+  Toast,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exec } from "child_process";
 import { promisify } from "util";
