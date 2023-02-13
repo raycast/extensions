@@ -1,3 +1,3 @@
 # HIIT Changelog
 
-## [Initial Version] - 2023-01-25
+## [Initial Version] - 2023-02-13
