@@ -30,6 +30,7 @@ type Props = {
 export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
   const { push } = useNavigation();
   const { theme } = environment;
+
   const [searchText, setSearchText] = useState<string>("");
   const [list, setList] = useState("all");
   const [assigneeId, setAssigneeId] = useState(assignedTasks ? "all" : undefined);
@@ -40,6 +41,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
       execute: !listId,
     },
   });
+
   const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading, tasksMutate } = useTasks({ listId, assigneeId });
@@ -58,7 +60,13 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     <List
       isLoading={fieldTemplatesIsLoading || (!listId && listsIsLoading) || usersIsLoading || tasksIsLoading}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search Tasks"
+      navigationTitle={
+        listId
+          ? `${getListById(listId, lists, smartLists)?.name} – Tasks`
+          : assignedTasks
+          ? `${getAssigneeFullNameById(assigneeId, users)} – Tasks`
+          : "Search Tasks"
+      }
       searchBarPlaceholder="Search your tasks"
       searchBarAccessory={
         listId
@@ -76,6 +84,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
               <List.Item
                 key={item.id}
                 title={item.name}
+                subtitle={item.url.split("/").at(-1)}
                 icon={{
                   source: getIconByStatusState(item.status, fieldTemplatesStatuses),
                   tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
@@ -287,4 +296,14 @@ function listDropdownItem(item: ListObject, theme: string): JSX.Element {
       value={item.id}
     />
   );
+}
+
+function getListById(listId: string, lists: ListObject[] | undefined, smartLists: ListObject[] | undefined) {
+  return lists?.find((list) => list.id === listId) ?? smartLists?.find((list) => list.id === listId);
+}
+
+function getAssigneeFullNameById(assigneeId: string | undefined, users: UserObject[] | undefined) {
+  if (assigneeId === "all") return "All";
+  const foundUser = users?.find((user) => user.id === assigneeId);
+  return `${foundUser?.firstname} ${foundUser?.lastname}`;
 }
