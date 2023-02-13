@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { AccountDetail } from "./accountDetail";
-import { ErrorDetail } from "./errorDetail";
+import { AccountDetail, UnknownError, CommandNotFoundError } from "./components";
 import { lastPass } from "./utils/cli";
 
 interface Preferences {
@@ -9,12 +9,23 @@ interface Preferences {
   password: string;
 }
 
-const faviconForDomain = (url: string) => {
-  try {
-    const domain = new URL(url).hostname;
-    return `https://icons.bitwarden.net/${domain}/icon.png`;
-  } catch (err) {
-    return Icon.Key;
+const faviconForDomain = (url: string) => getFavicon(url, { fallback: Icon.Key });
+
+const ErrorDetails = (args: { error: Error }) => {
+  if (args.error.message.includes("command not found")) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "LastPass CLI not found",
+      message: args.error.message,
+    });
+    return <CommandNotFoundError />;
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: args.error.message,
+    });
+    return <UnknownError error={args.error} />;
   }
 };
 
@@ -39,18 +50,13 @@ export default function Command() {
       } catch (error) {
         if (error instanceof Error) {
           setError(error);
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Something went wrong",
-            message: error.message,
-          });
         }
       }
     })();
   }, []);
 
   return error ? (
-    <ErrorDetail error={error} />
+    <ErrorDetails error={error} />
   ) : (
     <List
       isLoading={accounts.length === 0}
@@ -79,30 +85,30 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.Paste
                   icon={Icon.Clipboard}
-                  title={"Paste Password"}
+                  title="Paste Password"
                   shortcut={{ modifiers: [], key: "enter" }}
                   content={password}
                 />
                 <Action.CopyToClipboard
                   icon={Icon.Clipboard}
-                  title={"Paste Username"}
+                  title="Paste Username"
                   shortcut={{ modifiers: ["shift"], key: "enter" }}
                   content={username}
                 />
                 <Action.CopyToClipboard
                   icon={Icon.Clipboard}
-                  title={"Copy Password"}
+                  title="Copy Password"
                   shortcut={{ modifiers: ["cmd"], key: "p" }}
                   content={password}
                 />
                 <Action.CopyToClipboard
                   icon={Icon.Clipboard}
-                  title={"Copy Username"}
+                  title="Copy Username"
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
                   content={username}
                 />
                 <Action.Push
-                  title="Show details"
+                  title="Show Details"
                   shortcut={{ modifiers: ["cmd"], key: "i" }}
                   target={<AccountDetail getData={() => api.show(id)} />}
                 />

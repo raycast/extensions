@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ErrorDetail } from "./errorDetail";
-import { Account } from "./utils/cli";
+import { UnknownError } from "./unknownError";
+import { Account } from "../utils/cli";
 
 const toMarkdown = (args: { username?: string; url?: string; password?: string; note?: string }): string =>
   [
@@ -22,7 +22,7 @@ export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
   }, []);
 
   return error ? (
-    <ErrorDetail error={error} />
+    <UnknownError error={error} />
   ) : (
     <Detail
       isLoading={!data}
@@ -30,16 +30,16 @@ export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
       metadata={
         data && (
           <Detail.Metadata>
-            <Detail.Metadata.Label title={"ID"} text={data?.id} />
-            <Detail.Metadata.Label title={"Name"} text={data.name} />
-            <Detail.Metadata.Label title={"Group"} text={data.group} />
-            <Detail.Metadata.Label title={"Fullname"} text={data.fullname} />
+            <Detail.Metadata.Label title="ID" text={data?.id} />
+            <Detail.Metadata.Label title="Name" text={data.name} />
+            <Detail.Metadata.Label title="Group" text={data.group} />
+            <Detail.Metadata.Label title="Full Name" text={data.fullname} />
             <Detail.Metadata.Label
-              title={"Last modified"}
+              title="Last modified"
               text={`${data.lastModified.toLocaleTimeString()} - ${data.lastModified.toLocaleDateString()}`}
             />
             <Detail.Metadata.Label
-              title={"Last touched"}
+              title="Last touched"
               text={`${data.lastTouch.toLocaleTimeString()} - ${data.lastTouch.toLocaleDateString()}`}
             />
           </Detail.Metadata>
