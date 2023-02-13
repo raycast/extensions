@@ -47,12 +47,14 @@ export type TaskObject = {
   trashedByUserId: string | null;
 };
 
-export type CreateTaskFormValues = Pick<
-  TaskObject,
-  "name" | "listIds" | "description" | "status" | "assigneesIds" | "parentTaskId"
->;
+export type CreateTaskFormValues = Pick<TaskObject, "name" | "listIds" | "description" | "status" | "assigneesIds"> & {
+  parentTaskId?: string;
+  dueDate?: Date | null;
+};
 
-export type CreateTaskPayload = CreateTaskFormValues;
+export type CreateTaskPayload = Omit<CreateTaskFormValues, "dueDate"> & {
+  fields?: Partial<Field>[];
+};
 
 export type UpdateTaskFormValues = CreateTaskFormValues;
 
