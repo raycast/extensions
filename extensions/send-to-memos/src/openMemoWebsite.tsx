@@ -1,12 +1,8 @@
-import { getPreferenceValues, open } from "@raycast/api";
-import { Preferences } from "./types";
-import parse from "url-parse";
+import { open } from "@raycast/api";
+import { getOriginUrl } from "./api";
 
 export default async function Main() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { openApi } = preferences;
+  const url = getOriginUrl();
 
-  const { protocol, host } = parse(openApi);
-  const url = `${protocol}//${host}`;
   open(url);
 }

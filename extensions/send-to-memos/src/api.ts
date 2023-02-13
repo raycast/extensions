@@ -27,6 +27,7 @@ const getOpenApi = () => {
   const preferences = getPreferenceValues<Preferences>();
 
   const { openApi } = preferences;
+
   return openApi;
 };
 

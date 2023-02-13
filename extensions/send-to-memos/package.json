@@ -78,7 +78,8 @@
   "preferences": [
     {
       "name": "openApi",
-      "description": "OpenApi Url",
+      "description": "Your OpenApi can be found in memo settings.",
+      "placeholder": "https://demo.usememos.com/api/memo?openId=",
       "type": "textfield",
       "required": true,
       "title": "Open Api"
