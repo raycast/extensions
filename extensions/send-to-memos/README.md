@@ -24,3 +24,6 @@ Raycast extension for [usememos/memos](https://github.com/usememos/memos).
 ![](metadata/SCR-20230212-ofk.png)
 ![](metadata/SCR-20230212-ofx.png)
 ![](metadata/SCR-20230212-ogv.png)
+
+# License
+MIT © [JakeLaoyu](https://github.com/JakeLaoyu)
