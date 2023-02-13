@@ -3,7 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { getDevices, getCategories } from "./utils/tuyaConnector";
 import { DeviceCategory, Device } from "./utils/interfaces";
 import { DeviceList } from "./components/list";
-import { getCategory, isPinned } from "./utils/functions";
+import { getCategory, getDeviceFunctions, isPinned } from "./utils/functions";
 import { DeviceOnlineFilterDropdown, DeviceOnlineFilterType, placeholder } from "./components/filter";
 
 export default function Command() {
@@ -26,10 +26,22 @@ export default function Command() {
 
   useEffect(() => {
     const getAllDevices = async () => {
-      const devices = await getDevices();
+      const newDevicesinfo = await getDevices();
+
+      const populateDevicesPromises = newDevicesinfo.map(async (device) => {
+        const oldDeviceInfo = devices.find((deviceInfo) => deviceInfo.id === device.id);
+        const functions = await getDeviceFunctions(device, oldDeviceInfo);
+
+        return {
+          ...device,
+          status: functions,
+        };
+      });
+
+      const devicesPopulated = await Promise.all(populateDevicesPromises);
 
       setDevices((prev) => {
-        const formatedDevices = devices.map((device) => {
+        const formatedDevices = devicesPopulated.map((device) => {
           return {
             ...device,
             pinned: isPinned(device, prev),

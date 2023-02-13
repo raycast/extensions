@@ -1,6 +1,15 @@
 import { TuyaContext } from "@tuya/tuya-connector-nodejs";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, DevicesReponse, DeviceCategory, Device, Status, CommandResponse } from "./interfaces";
+import {
+  Preferences,
+  DevicesReponse,
+  DeviceCategory,
+  Device,
+  Function,
+  CommandResponse,
+  DeviceFunctionsResult,
+  Status,
+} from "./interfaces";
 
 const getPreference = () => {
   const { accessId, accessSecret, region } = getPreferenceValues<Preferences>();
@@ -51,6 +60,15 @@ export const sendCommand = async (props: { device_id: string; commands: Status[]
   });
 
   return result.success;
+};
+
+export const getDeviceFunctionsInfo = async (device_id: string) => {
+  const result = await context.request<DeviceFunctionsResult>({
+    path: `/v1.0/devices/${device_id}/functions`,
+    method: "GET",
+  });
+
+  return result.result?.functions ?? [];
 };
 
 export default context;

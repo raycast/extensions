@@ -1,14 +1,14 @@
-import { Device, Status } from "../utils/interfaces";
+import { Device, Function } from "../utils/interfaces";
 import { CommandList } from "./list";
 
-export function DeviceCommands(props: { device: Device }): JSX.Element {
+export function DeviceCommands(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const device = props.device;
-  let commands: Status[];
+  let commands: Function[];
   switch (device.category) {
     case "Switch":
     case "kg":
     case "Socket": {
-      commands = device.status.filter((status) => status.code.includes("switch"));
+      commands = device.status.filter((status) => status.type === "Boolean");
       break;
     }
     case "cl":
@@ -29,8 +29,8 @@ export function DeviceCommands(props: { device: Device }): JSX.Element {
     <CommandList
       commands={commands}
       device={device}
-      onAction={() => {
-        console.info("Action not defined yet");
+      onAction={(device) => {
+        props.onAction(device);
       }}
     />
   );

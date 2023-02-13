@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { Device, Status } from "../utils/interfaces";
+import { Device, Function } from "../utils/interfaces";
 
 import { DeviceCommands } from "./deviceCommands";
 
 import * as Actions from "./actions";
+import RenameFunctionForm from "./renameFunction";
 
 export function DeviceActionPanel(props: {
   device: Device;
@@ -16,7 +17,11 @@ export function DeviceActionPanel(props: {
     <ActionPanel>
       <ActionPanel.Section>
         {props.showDetails && (
-          <Action.Push title="Show Details" icon={Icon.Document} target={<DeviceCommands device={device} />} />
+          <Action.Push
+            title="Show Details"
+            icon={Icon.Document}
+            target={<DeviceCommands device={device} onAction={props.onAction} />}
+          />
         )}
         <Actions.DevicePinAction device={device} onAction={props.onAction} />
       </ActionPanel.Section>
@@ -26,8 +31,9 @@ export function DeviceActionPanel(props: {
 
 export function CommandActionPanel(props: {
   device: Device;
-  command: Status;
-  onAction: (props: { result: boolean; newValue: string | boolean }) => void;
+  command: Function;
+  newName?: string;
+  onAction: (props: { result: boolean; command: Function }) => void;
 }): JSX.Element {
   const deviceId = props.device.id;
   const commandValue = props.command.value;
@@ -45,6 +51,11 @@ export function CommandActionPanel(props: {
             onAction={props.onAction}
           />
         )}
+        <Action.Push
+          title="Rename"
+          icon={Icon.Pencil}
+          target={<RenameFunctionForm deviceId={deviceId} command={props.command} onAction={props.onAction} />}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

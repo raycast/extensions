@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { Device, Status } from "../utils/interfaces";
+import { Device, Function } from "../utils/interfaces";
 import { CommandActionPanel, DeviceActionPanel } from "./actionPanels";
 
 export interface DeviceListProps {
@@ -14,8 +14,8 @@ export interface DeviceListProps {
 
 export interface CommandListProps {
   device: Device;
-  commands: Status[];
-  onAction: () => void;
+  commands: Function[];
+  onAction: (device: Device) => void;
 }
 
 export function DeviceList(props: DeviceListProps): JSX.Element {
@@ -67,7 +67,7 @@ export function DeviceListItem(props: { device: Device; onAction: (device: Devic
 }
 
 export function CommandList(props: CommandListProps): JSX.Element {
-  const [commands] = useState<Status[]>(props.commands);
+  const [commands] = useState<Function[]>(props.commands);
   const [device] = useState<Device>(props.device);
   return (
     <List>
@@ -83,8 +83,12 @@ export function CommandList(props: CommandListProps): JSX.Element {
   );
 }
 
-export function CommandListItem(props: { command: Status; device: Device; onAction: () => void }): JSX.Element {
-  const [command, setCommand] = useState<Status>(props.command);
+export function CommandListItem(props: {
+  command: Function;
+  device: Device;
+  onAction: (device: Device) => void;
+}): JSX.Element {
+  const [command, setCommand] = useState<Function>(props.command);
   return (
     <List.Item
       title={command.name ?? command.code}
@@ -93,14 +97,17 @@ export function CommandListItem(props: { command: Status; device: Device; onActi
         <CommandActionPanel
           command={command}
           device={props.device}
-          onAction={({ newValue }) => {
+          onAction={({ command }) => {
             setCommand((prev) => {
-              return {
-                ...prev,
-                value: newValue,
-              };
+              return { ...command };
             });
-            props.onAction();
+
+            const statusIndex = props.device.status.findIndex((status) => status.code === command.code);
+            props.device.status[statusIndex] = command;
+
+            props.onAction({
+              ...props.device,
+            });
           }}
         />
       }

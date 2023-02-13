@@ -15,7 +15,7 @@ export interface Device {
   owner_id: string;
   product_id: string;
   product_name: string;
-  status: Status[];
+  status: Function[];
   sub: boolean;
   time_zone: string;
   uid: string;
@@ -26,7 +26,7 @@ export interface Device {
 
 export interface Status {
   code: string;
-  value: boolean | number | string;
+  value?: boolean | number | string;
   name?: string;
 }
 
@@ -51,6 +51,20 @@ export interface CommandResponse {
   success: boolean;
   result: boolean;
   t: number;
+}
+
+export interface DeviceFunctionsResult {
+  category: string;
+  functions: Function[];
+}
+
+export interface Function {
+  code: string;
+  desc?: string;
+  name: string;
+  type?: string;
+  value?: boolean | number | string;
+  values?: string;
 }
 
 export type DeviceCategories =
