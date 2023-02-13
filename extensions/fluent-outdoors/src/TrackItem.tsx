@@ -35,7 +35,7 @@ export function TrackItem({
 
   // Favourite
   if (favourite) {
-    trackActionText = "Remove From favourites";
+    trackActionText = "Remove from favourites";
     trackActionIcon = Icon.StarDisabled;
     // Remove from favourites
     trackAction = async () => {
