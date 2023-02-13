@@ -1,7 +1,7 @@
 import { Clipboard, Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 
 export default async function Command() {
-  let epoch = Number(await Clipboard.readText())
+  const epoch = Number(await Clipboard.readText())
   if (Number.isNaN(epoch)) {
     showToast({
         style: Toast.Style.Failure,
