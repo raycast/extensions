@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import useLists from "../hooks/useLists";
 import { ListObject } from "../types/list";
 import { ListTypes } from "../utils/list";
+import SearchTasks from "./SearchTasks";
 import UpdateList from "./UpdateList";
 
 export default function SearchLists() {
@@ -59,7 +60,7 @@ export default function SearchLists() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action title="Show Tasks" icon={Icon.List} onAction={() => console.log(`${item} selected`)} />
+                <Action title="Show Tasks" icon={Icon.List} onAction={() => push(<SearchTasks listId={item.id} />)} />
                 <Action.OpenInBrowser title="Open List in Browser" url={item.url} />
               </ActionPanel.Section>
               <ActionPanel.Section>
