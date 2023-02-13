@@ -22,17 +22,27 @@ import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
 import UpdateTask from "./UpdateTask";
 
-export default function SearchTasks() {
+type Props = {
+  listId?: string;
+  assignedTasks?: boolean;
+};
+
+export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
   const { push } = useNavigation();
   const { theme } = environment;
   const [searchText, setSearchText] = useState<string>("");
   const [list, setList] = useState("all");
+  const [assigneeId, setAssigneeId] = useState(assignedTasks ? "all" : undefined);
   const [filteredTasks, filterTasks] = useState<TaskObject[]>([]);
 
+  const { lists, smartLists, listsIsLoading } = useLists({
+    options: {
+      execute: !listId,
+    },
+  });
   const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
-  const { lists, smartLists, listsIsLoading } = useLists();
-  const { usersData, usersIsLoading } = useUsers();
-  const { tasks, tasksIsLoading, tasksMutate } = useTasks();
+  const { users, usersIsLoading } = useUsers();
+  const { tasks, tasksIsLoading, tasksMutate } = useTasks({ listId, assigneeId });
 
   useEffect(() => {
     if (!tasks) return;
@@ -46,26 +56,16 @@ export default function SearchTasks() {
 
   return (
     <List
-      isLoading={fieldTemplatesIsLoading || listsIsLoading || usersIsLoading || tasksIsLoading}
+      isLoading={fieldTemplatesIsLoading || (!listId && listsIsLoading) || usersIsLoading || tasksIsLoading}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Tasks"
       searchBarPlaceholder="Search your tasks"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select List"
-          storeValue={true}
-          onChange={(newValue) => {
-            setList(newValue);
-          }}
-        >
-          <List.Dropdown.Item title="All" value="all" />
-          <List.Dropdown.Section title="Lists">
-            {lists?.map((item) => listDropdownItem(item, theme))}
-          </List.Dropdown.Section>
-          <List.Dropdown.Section title="Smart Lists">
-            {smartLists?.map((item) => listDropdownItem(item, theme))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        listId
+          ? undefined
+          : assignedTasks
+          ? assignedDropdownAccessory(users, setAssigneeId, theme)
+          : listDropdownAccessory(lists, smartLists, setList, theme)
       }
     >
       {fieldTemplatesStatuses?.map((status) => (
@@ -85,7 +85,7 @@ export default function SearchTasks() {
                 accessories={[
                   getTaskDueDate(item),
                   getTaskPriority(item),
-                  ...getAssignedUsers(item.assigneesIds, usersData),
+                  ...getAssignedUsers(item.assigneesIds, users),
                 ]}
                 actions={
                   <ActionPanel>
@@ -211,6 +211,66 @@ function getAssignedUsers(assigneesIds: string[], users: UserObject[] | undefine
       tooltip: `${foundUser?.firstname} ${foundUser?.lastname}`,
     };
   });
+}
+
+function assignedDropdownAccessory(
+  users: UserObject[] | undefined,
+  setAssigneeId: React.Dispatch<React.SetStateAction<string | undefined>>,
+  theme: string
+) {
+  return (
+    <List.Dropdown
+      tooltip="Select User"
+      storeValue={true}
+      onChange={(newValue) => {
+        setAssigneeId(newValue);
+      }}
+    >
+      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Section title="Users">
+        {users?.map((user) => assignedDropdownItem(user, theme))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+}
+
+function assignedDropdownItem(user: UserObject, theme: string): JSX.Element {
+  return (
+    <List.Dropdown.Item
+      key={user.id}
+      title={`${user.firstname} ${user.lastname}`}
+      icon={{
+        source: user?.pictureUrl ?? Icon.Person,
+        tintColor: user?.pictureUrl
+          ? undefined
+          : `hsl(${user?.hue ?? "0"}, 80%, ${typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"})`,
+      }}
+      value={user.id}
+    />
+  );
+}
+
+function listDropdownAccessory(
+  lists: ListObject[] | undefined,
+  smartLists: ListObject[] | undefined,
+  setList: React.Dispatch<React.SetStateAction<string>>,
+  theme: string
+) {
+  return (
+    <List.Dropdown
+      tooltip="Select List"
+      storeValue={true}
+      onChange={(newValue) => {
+        setList(newValue);
+      }}
+    >
+      <List.Dropdown.Item title="All" value="all" />
+      <List.Dropdown.Section title="Lists">{lists?.map((item) => listDropdownItem(item, theme))}</List.Dropdown.Section>
+      <List.Dropdown.Section title="Smart Lists">
+        {smartLists?.map((item) => listDropdownItem(item, theme))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
 }
 
 function listDropdownItem(item: ListObject, theme: string): JSX.Element {
