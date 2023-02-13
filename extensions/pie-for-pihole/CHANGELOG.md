@@ -2,7 +2,8 @@
 
 ## [Fix] - 2023-02-14
 
-Fixed both Get Summary and Toggle Pi-hole commands which broke due to auth changes to the API.
+1. Fixed both Get Summary and Toggle Pi-hole commands which broke due to auth changes to the API.
+2. Added ability to copy domain address to clipboard.
 
 ## [Fix] - 2022-09-19
 
