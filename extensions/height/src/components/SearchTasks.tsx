@@ -1,6 +1,7 @@
 import {
   Action,
   Clipboard,
+  showHUD,
   ActionPanel,
   environment,
   Icon,
@@ -121,17 +122,67 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
                         onAction={() => push(<UpdateTask task={item} mutateTask={tasksMutate} />)}
                       />
+                      <Action
+                        title="Assign To"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                        onAction={async () => await showHUD("Assign To Action")}
+                      />
+                      <Action
+                        title="Set Status"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                        onAction={async () => await showHUD("Set Status Action")}
+                      />
+                      <Action
+                        title="Set Priority"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                        onAction={async () => await showHUD("Set Priority Action")}
+                      />
+
+                      <Action
+                        title="Set Due Date"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                        onAction={async () => await showHUD("Set Due Date Action")}
+                      />
+                      <Action
+                        title="Set Parent Task"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
+                        onAction={async () => await showHUD("Set Parent Task Action")}
+                      />
+                      <Action
+                        title="Move To List"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                        onAction={async () => await showHUD("Move To List Action")}
+                      />
+                      <Action
+                        title="Delete Task"
+                        icon={Icon.Pencil}
+                        style={Action.Style.Destructive}
+                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        onAction={async () => await showHUD("Delete Task Action")}
+                      />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action.CopyToClipboard
-                        title="Copy Task Name"
+                        title="Copy Task ID"
                         shortcut={{ modifiers: ["cmd"], key: "." }}
+                        icon={Icon.CopyClipboard}
+                        content={item.url.split("/").at(-1) ?? ""}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Task Name"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                         icon={Icon.CopyClipboard}
                         content={item.name}
                       />
                       <Action.CopyToClipboard
                         title="Copy Task URL"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                         icon={Icon.CopyClipboard}
                         content={item.url}
                       />
