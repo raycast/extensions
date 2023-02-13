@@ -40,7 +40,7 @@ export async function openNote(item: OneNoteItem) {
   let cmd = await getUrl(item);
   cmd = "open " + cmd?.replaceAll(" ", "%20").replaceAll("&", "%26").replaceAll("{", "%7B").replaceAll("}", "%7D");
   console.log(cmd);
-  exec(cmd, (err, sdtout, stderr) => {
+  exec(cmd, (_err, _sdtout, _stderr) => {
     closeMainWindow();
   });
 }

@@ -3,92 +3,29 @@ import { statSync, writeFileSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
-import { useRef, useState, useEffect } from "react";
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
-import { NotInstalledError, PermissionError } from "./errors";
 
 let SQL: SqlJsStatic;
-
-const loadDatabase = async (path: string) => {
-  if (!SQL) {
-    SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
-  }
-  await create_or_update_db();
-  const fileContents = await readFile(path);
-  return new SQL.Database(fileContents);
-};
-
-const useSql = <Result>(path: string, query: string) => {
-  const databaseRef = useRef<Database>();
-
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [results, setResults] = useState<Result[]>();
-  const [error, setError] = useState<Error>();
-
-  useEffect(() => {
-    (async () => {
-      if (!databaseRef.current) {
-        try {
-          databaseRef.current = await loadDatabase(path);
-        } catch (e) {
-          if (e instanceof Error && e.message.includes("operation not permitted")) {
-            setError(new PermissionError("You do not have permission to access the database."));
-          } else {
-            if (e instanceof Error && e.message.includes("no such file"))
-              setError(new NotInstalledError("Microsoft OneNote is not installed."));
-            else setError(e as Error);
-          }
-          return;
-        }
-      }
-
-      try {
-        const newResults = new Array<Result>();
-        const statement = databaseRef.current.prepare(query);
-        while (statement.step()) {
-          newResults.push(statement.getAsObject() as unknown as Result);
-        }
-
-        setResults(newResults);
-
-        statement.free();
-      } catch (e) {
-        console.error(e);
-        if (error instanceof Error && error.message.includes("operation not permitted")) {
-          setError(new PermissionError("You do not have permission to access the database."));
-        } else {
-          setError(e as Error);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [path, query]);
-
-  useEffect(() => {
-    return () => {
-      databaseRef.current?.close();
-    };
-  }, []);
-
-  return { results, error, isLoading };
-};
 
 const ONENOTE_FULL_SEARCH_PATH = resolve(
   homedir(),
   "Library/Containers/com.microsoft.onenote.mac/Data/Library/Application Support/Microsoft User Data/OneNote/15.0/FullTextSearchIndex"
 );
-const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
-
-export const useSqlOneNote = <OneNoteItem>(query: string) => useSql<OneNoteItem>(ONENOTE_MERGED_DB, query);
+export const ONENOTE_MERGED_DB = resolve(environment.supportPath, "merged-onenote-data.db");
 
 let last_update_time = 0;
 
-const create_or_update_db = async (force_update = false) => {
+export const create_or_update_db = async (force_update = false) => {
   const now = Date.now();
 
+  if (!SQL) {
+    SQL = await initSqlJs({ locateFile: () => resolve(environment.assetsPath, "sql-wasm.wasm") });
+  }
+
   // to cope with successive calls
-  if (now - last_update_time < 300) return true;
+  if (now - last_update_time < 300) {
+    return true;
+  }
 
   last_update_time = Date.now();
   let lastOneNoteModification = (await LocalStorage.getItem<number>("onenote-db-time")) as number;
@@ -100,8 +37,8 @@ const create_or_update_db = async (force_update = false) => {
   const ALL_DB_NAMES: string[] = [];
 
   // Search for OneNote databases:
-  const db_files = await readdir(ONENOTE_FULL_SEARCH_PATH);
   let mostRecent = 0;
+  const db_files = await readdir(ONENOTE_FULL_SEARCH_PATH);
   for (const file of db_files) {
     if (file.indexOf(".db") != -1 && file.indexOf("journal") == -1) {
       const filepath = resolve(ONENOTE_FULL_SEARCH_PATH, file);

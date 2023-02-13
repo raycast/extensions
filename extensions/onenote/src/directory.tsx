@@ -1,30 +1,18 @@
-import { ActionPanel, Action, List, Detail, Icon, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
 import { useState } from "react";
-import { isNotInstalledError, isPermissionError, NotInstalledErrorScreen, PermissionErrorScreen } from "./errors";
 import { OneNoteItem, PAGE, types } from "./types";
-import { useSqlOneNote } from "./useSql";
+import { ONENOTE_MERGED_DB } from "./useSql";
 import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatetime } from "./utils";
 
 export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
-  const { results, error, isLoading } = useSqlOneNote<OneNoteItem>(query);
-
-  if (error) {
-    if (isPermissionError(error)) {
-      return <PermissionErrorScreen />;
-    } else {
-      if (isNotInstalledError(error)) {
-        return <NotInstalledErrorScreen />;
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Cannot search OneNote notes",
-          message: error.message,
-        });
-      }
-    }
-  }
-
   const [sort, setSort] = useState(0);
+  const { data, isLoading, permissionView } = useSQL<OneNoteItem>(ONENOTE_MERGED_DB, query);
+  const results = data;
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   const onSortChange = (newSort: string) => {
     setSort(Number(newSort));
@@ -146,6 +134,7 @@ export function Directory(props: { elt?: OneNoteItem }) {
       }
     }
   }
-  const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
+  // const query = `SELECT * FROM Entities WHERE ParentGOID is NULL ORDER BY RecentTime DESC;`;
+  const query = "SELECT * FROM Entities ORDER BY RecentTime DESC;";
   return getListItems(query);
 }
