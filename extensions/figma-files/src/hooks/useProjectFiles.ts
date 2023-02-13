@@ -39,6 +39,7 @@ export function useProjectFiles() {
         if ((error as Response)?.status >= 400) {
           setState((oldState) => ({
             ...oldState,
+            projectFiles: [],
             isLoading: false,
             hasError: true,
           }));
@@ -78,7 +79,7 @@ async function fetchTeamProjects(): Promise<TeamProjects> {
 async function fetchFiles(): Promise<ProjectFiles[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
   const teamProjects = await fetchTeamProjects();
-  const projects = teamProjects.projects.map(async (project) => {
+  const projects = (teamProjects.projects || []).map(async (project) => {
     try {
       const response = await fetch(`https://api.figma.com/v1/projects/${project.id}/files`, {
         method: "GET",
@@ -89,7 +90,7 @@ async function fetchFiles(): Promise<ProjectFiles[]> {
       });
 
       const json = (await response.json()) as ProjectFiles;
-      return { name: project.name, files: json.files as File[] };
+      return { name: project.name, files: (json.files || []) as File[] };
     } catch (error) {
       console.error(error);
       showToast(Toast.Style.Failure, "Could not load files");

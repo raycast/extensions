@@ -1,12 +1,17 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
+import { Action, ActionPanel, Application, Grid } from "@raycast/api";
 
 import type { File } from "../types";
 import DevelopmentActionSection from "./DevelopmentActionSection";
 import { OpenProjectFileAction } from "./OpenProjectFileAction";
 import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 
-export default function FileGridItem(props: { file: File; extraKey?: string; onVisit: (file: File) => void }) {
-  const { file, extraKey, onVisit } = props;
+export default function FileGridItem(props: {
+  file: File;
+  extraKey?: string;
+  desktopApp: Application | undefined;
+  onVisit: (file: File) => void;
+}) {
+  const { file, extraKey, desktopApp, onVisit } = props;
   const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
 
   return (
@@ -17,7 +22,7 @@ export default function FileGridItem(props: { file: File; extraKey?: string; onV
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenProjectFileAction file={props.file} onVisit={onVisit} />
+            <OpenProjectFileAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
             <Action.CopyToClipboard content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
           <ActionPanel.Section>

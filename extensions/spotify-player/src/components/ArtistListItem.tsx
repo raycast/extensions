@@ -3,8 +3,8 @@ import _ from "lodash";
 import { getArtistAlbums, play, startPlaySimilar } from "../spotify/client";
 import { AlbumsList } from "./artistAlbums";
 
-export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectFull; spotifyInstalled: boolean }) {
-  const { artist, spotifyInstalled } = props;
+export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectFull }) {
+  const { artist } = props;
   const icon: Image.ImageLike = {
     source: _(artist.images).last()?.url ?? "",
     mask: Image.Mask.RoundedRectangle,
@@ -16,13 +16,13 @@ export default function ArtistListItem(props: { artist: SpotifyApi.ArtistObjectF
       subtitle={artist.genres.join(", ")}
       icon={icon}
       detail={<ArtistDetail artist={artist} />}
-      actions={<ArtistsActionPanel title={title} artist={artist} spotifyInstalled={spotifyInstalled} />}
+      actions={<ArtistsActionPanel title={title} artist={artist} />}
     />
   );
 }
 
-function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObjectFull; spotifyInstalled: boolean }) {
-  const { title, artist, spotifyInstalled } = props;
+function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObjectFull }) {
+  const { title, artist } = props;
   const response = getArtistAlbums(artist.id);
   const albums = response.result?.items;
 
@@ -36,20 +36,14 @@ function ArtistsActionPanel(props: { title: string; artist: SpotifyApi.ArtistObj
           play(undefined, artist.uri);
         }}
       />
-      {albums && (
-        <Action.Push
-          title="Open Albums"
-          icon={Icon.ArrowRight}
-          target={<AlbumsList albums={albums} spotifyInstalled={spotifyInstalled} />}
-        />
-      )}
+      {albums && <Action.Push title="Open Albums" icon={Icon.ArrowRight} target={<AlbumsList albums={albums} />} />}
       <Action
         title="Start Radio"
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
         onAction={async () => {
           const artistId = artist.id.replace("spotify:artist:", "");
           await startPlaySimilar({ seed_artists: artistId });
-          showHUD(`♫ Playing Similar – ♫ ${artist.name}`);
+          showHUD(`♫ Playing Similar - ♫ ${artist.name}`);
         }}
       />
       <Action.OpenInBrowser

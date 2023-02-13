@@ -5,7 +5,7 @@ import { runAppleScript } from "run-applescript";
 
 import { getExportData } from "./export";
 import openTaskManager from "./openTaskManager";
-import { buildScriptEnsuringTimIsRunning } from "./utils";
+import { buildScriptEnsuringTimIsRunning, checkIfTimInstalled, showNotInstalledToast } from "./utils";
 
 async function existsData(): Promise<boolean> {
   const jsonString = await getExportData();
@@ -14,6 +14,9 @@ async function existsData(): Promise<boolean> {
 }
 
 export default async () => {
+  const timAvailable = await checkIfTimInstalled();
+  if (!timAvailable) return showNotInstalledToast();
+
   try {
     showToast({
       title: "Importing data…",

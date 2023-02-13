@@ -11,7 +11,7 @@
       "name": "index",
       "title": "My Portfolio",
       "subtitle": "Binance",
-      "description": "Show your Binance portfolio with current value in USDT for each currency",
+      "description": "Show your Binance portfolio with the current value in USDT for each currency",
       "mode": "view"
     }
   ],

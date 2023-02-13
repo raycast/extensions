@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Form, open, Toast, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Form, open, Toast, Clipboard, showToast } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { format } from "date-fns";
-import { useRef, useState } from "react";
 import { createScheduledMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
 
@@ -17,103 +17,91 @@ type MeetingFormProps = {
 };
 
 export default function MeetingForm({ enableDrafts = false, draftValues }: MeetingFormProps) {
-  const startTimeRef = useRef<Form.DatePicker>(null);
+  const { handleSubmit, itemProps, focus, reset } = useForm<MeetingFormValues>({
+    async onSubmit(values) {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Scheduling meeting" });
 
-  const [startTime, setStartTime] = useState(draftValues?.start_time);
-  const [duration, setDuration] = useState(draftValues?.duration);
-  const [topic, setTopic] = useState(draftValues?.topic);
-  const [agenda, setAgenda] = useState(draftValues?.agenda);
+      try {
+        const payload = {
+          topic: values.topic,
+          agenda: values.agenda,
+          start_time: format(values.start_time, "yyyy-MM-dd'T'HH:mm:ss"),
+          duration: values.duration ? parseInt(values.duration) : 60,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
 
-  async function scheduleMeeting() {
-    if (!startTime) {
-      return;
-    }
+        const meeting = await createScheduledMeeting(payload);
 
-    const toast = new Toast({ style: Toast.Style.Animated, title: "Scheduling meeting" });
-    await toast.show();
+        toast.style = Toast.Style.Success;
+        toast.title = "Scheduled meeting";
 
-    try {
-      const payload = {
-        topic,
-        agenda,
-        start_time: format(startTime, "yyyy-MM-dd'T'HH:mm:ss"),
-        duration: duration ? parseInt(duration) : 60,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      };
+        toast.primaryAction = {
+          title: "Open Meeting",
+          shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+          onAction: () => {
+            open(meeting.join_url);
+            return toast.hide();
+          },
+        };
 
-      const meeting = await createScheduledMeeting(payload);
+        toast.secondaryAction = {
+          title: "Copy Join URL",
+          shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+          onAction: () => {
+            Clipboard.copy(meeting.join_url);
+            toast.title = "Copied to clipboard";
+            toast.message = meeting.join_url;
+          },
+        };
 
-      toast.style = Toast.Style.Success;
-      toast.title = "Scheduled meeting";
+        reset({
+          start_time: undefined,
+          duration: "",
+          topic: "",
+          agenda: "",
+        });
 
-      toast.primaryAction = {
-        title: "Open Meeting",
-        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
-        onAction: () => {
-          open(meeting.join_url);
-          return toast.hide();
-        },
-      };
-
-      toast.secondaryAction = {
-        title: "Copy Join URL",
-        shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-        onAction: () => {
-          Clipboard.copy(meeting.join_url);
-          toast.title = "Copied to clipboard";
-          toast.message = meeting.join_url;
-        },
-      };
-
-      setStartTime(undefined);
-      setDuration("");
-      setTopic("");
-      setAgenda("");
-
-      startTimeRef.current?.focus();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to schedule meeting";
-      toast.message = getErrorMessage(error);
-    }
-  }
+        focus("start_time");
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to schedule meeting";
+        toast.message = getErrorMessage(error);
+      }
+    },
+    validation: {
+      start_time: FormValidation.Required,
+      duration: (value) => {
+        if (value && isNaN(parseInt(value ?? ""))) {
+          return "The duration must be a number";
+        }
+      },
+    },
+    initialValues: {
+      start_time: draftValues?.start_time,
+      duration: draftValues?.duration,
+      topic: draftValues?.topic,
+      agenda: draftValues?.agenda,
+    },
+  });
 
   return (
     <Form
       enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Schedule Meeting" onSubmit={scheduleMeeting} />
+          <Action.SubmitForm title="Schedule Meeting" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.DatePicker
-        id="start_time"
-        title="Start Time"
-        value={startTime}
-        onChange={setStartTime}
-        ref={startTimeRef}
-      />
+      <Form.DatePicker title="Start Time" {...itemProps.start_time} />
 
       <Form.Separator />
 
-      <Form.TextField
-        title="Duration"
-        id="duration"
-        placeholder="Meeting duration in minutes"
-        value={duration}
-        onChange={setDuration}
-      />
+      <Form.TextField title="Duration" placeholder="Meeting duration in minutes" {...itemProps.duration} />
 
-      <Form.TextField
-        title="Topic"
-        id="topic"
-        placeholder="Short topic for the meeting"
-        value={topic}
-        onChange={setTopic}
-      />
+      <Form.TextField title="Topic" placeholder="Short topic for the meeting" {...itemProps.topic} />
 
-      <Form.TextArea title="Agenda" id="agenda" placeholder="Meeting description" value={agenda} onChange={setAgenda} />
+      <Form.TextArea title="Agenda" placeholder="Meeting description" {...itemProps.agenda} />
     </Form>
   );
 }

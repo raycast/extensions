@@ -5,6 +5,10 @@
   "description": "Search and organize your downloads",
   "icon": "downloads.png",
   "author": "thomas",
+  "contributors": [
+    "ron-myers",
+    "Kimcha"
+  ],
   "categories": [
     "Productivity",
     "System"
@@ -22,13 +26,36 @@
       "title": "Open Latest Download",
       "description": "Opens the last downloaded file or folder",
       "mode": "no-view"
+    },
+    {
+      "name": "copy-latest-download",
+      "title": "Copy Latest Download",
+      "description": "Copies the last downloaded file or folder",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-latest-download",
+      "title": "Show Latest Download",
+      "description": "Show the last downloaded file or folder in Finder",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "downloadsFolder",
+      "title": "Downloads Folder",
+      "description": "The folder where your downloads are stored",
+      "default": "~/Downloads",
+      "required": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.0"
+    "@raycast/api": "^1.46.0",
+    "untildify": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.7.9",
+    "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

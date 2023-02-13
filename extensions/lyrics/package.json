@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lyrics",
+  "title": "Lyrics",
+  "description": "Search for lyrics to the current playing song",
+  "icon": "extension_icon.png",
+  "author": "andrewjazbec",
+  "categories": [
+    "Media",
+    "Web",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Lyrics",
+      "description": "Search for lyrics to the current playing song",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "player",
+      "type": "appPicker",
+      "title": "Media Player",
+      "description": "Choose which player to use to get the current track",
+      "required": true
+    },
+    {
+      "name": "lyricsProvider",
+      "type": "dropdown",
+      "title": "Lyrics Provider",
+      "description": "Choose your preferred lyrics provider",
+      "required": false,
+      "default": "genius",
+      "data": [
+        {
+          "title": "Genius",
+          "value": "https://genius.com/search?q=*"
+        },
+        {
+          "title": "Musixmatch",
+          "value": "https://www.musixmatch.com/search/*"
+        }
+      ]
+    },
+    {
+      "name": "customLyricsProvider",
+      "type": "textfield",
+      "title": "Custom Lyrics Provider",
+      "description": "Enter a custom lyrics provider search URL. Use * as a placeholder for the search term. (Overrides the lyrics provider setting)",
+      "required": false,
+      "placeholder": "https://www.google.com/search?q=*"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

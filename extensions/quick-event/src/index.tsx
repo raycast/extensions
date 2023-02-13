@@ -7,8 +7,20 @@ export default function Command() {
   const { isLoading, results, parse } = useCalendar();
 
   const calendars = String(preferences.calendars.value).split(',');
+  const focusOnComplete = preferences.focus.value;
 
   const createEvent = async (item: CalendarEvent, calendarName: string) => {
+    let script = `
+      var app = Application.currentApplication()
+      app.includeStandardAdditions = true
+      var Calendar = Application("Calendar")
+      var date = new Date(${item.startDate.getTime()})
+    `;
+
+    if (focusOnComplete) {
+      script += `Calendar.viewCalendar({at: date})`;
+    }
+
     executeJxa(`
       var app = Application.currentApplication()
       app.includeStandardAdditions = true
@@ -28,13 +40,7 @@ export default function Command() {
       projectCalendar.events.push(event)
     `);
 
-    executeJxa(`
-      var app = Application.currentApplication()
-      app.includeStandardAdditions = true
-      var Calendar = Application("Calendar")
-      var date = new Date(${item.startDate.getTime()})
-      Calendar.viewCalendar({at: date})
-    `);
+    executeJxa(script);
   };
 
   return (

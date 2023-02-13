@@ -168,13 +168,13 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 
 ```tsx
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useExec } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 const Demo = () => {
   const { isLoading, data, revalidate } = useExec("brew", ["info", "--json=v2", "--installed"]);
   const results = useMemo<{}[]>(() => JSON.parse(data || "[]"), [data]);
 
-  const InstallFoo = async () => {
+  const installFoo = async () => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Installing Foo" });
     try {
       await mutate(
@@ -208,7 +208,7 @@ const Demo = () => {
           title={item.name}
           actions={
             <ActionPanel>
-              <Action title="Append Foo" onAction={() => appendFoo()} />
+              <Action title="Install Foo" onAction={() => installFoo()} />
             </ActionPanel>
           }
         />

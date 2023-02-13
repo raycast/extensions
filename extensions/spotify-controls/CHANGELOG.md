@@ -1,8 +1,16 @@
 # Spotify Controls Changelog
 
+## [Enhancement] - 2023-02-09
+
+Select the steps for increasing and decreasing the volume.
+
+## [New command] - 2023-02-01
+
+Add Toggle Private Session command.
+
 ## [New commands] - 2022-05-02
 
-Add Decrease volume and Increase volume commands.
+Add Decrease Volume and Increase Volume commands.
 
 ## [Fix] - 2022-02-07
 

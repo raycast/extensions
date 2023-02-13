@@ -10,6 +10,7 @@ import {
   confirmAlert,
   Icon,
   LocalStorage,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
@@ -39,8 +40,7 @@ export default function Command({
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
   const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
-
-  // console.log(projectId);
+  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {
     if (error) {
@@ -227,6 +227,12 @@ export default function Command({
         </ActionPanel>
       }
     >
+      {showClient && (
+        <Form.Description
+          text={projects.find((o) => o.project.id === parseInt(projectId ?? "0"))?.client.name ?? ""}
+          title="Client"
+        />
+      )}
       <Form.Dropdown
         id="project_id"
         title="Project"
@@ -244,6 +250,7 @@ export default function Command({
                 const code = project.project.code;
                 return (
                   <Form.Dropdown.Item
+                    keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
@@ -283,7 +290,7 @@ export default function Command({
         title="Date"
         type={Form.DatePicker.Type.Date}
         value={spentDate}
-        onChange={setSpentDate}
+        onChange={(newValue) => newValue && setSpentDate(newValue)}
       />
     </Form>
   );

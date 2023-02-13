@@ -132,6 +132,12 @@ const maybeMoveResultToTrash = async (result: SpotlightSearchResult, resultWasTr
   await confirmAlert(options);
 };
 
+const lastUsedSort = (a: SpotlightSearchResult, b: SpotlightSearchResult) => {
+  const [safeA, safeB] = [a.kMDItemLastUsedDate || 0, b.kMDItemLastUsedDate || 0];
+
+  return new Date(safeB).getTime() - new Date(safeA).getTime();
+};
+
 export {
   loadPlugins,
   safeSearchScope,
@@ -140,4 +146,5 @@ export {
   showFolderInfoInFinder,
   copyFolderToClipboard,
   maybeMoveResultToTrash,
+  lastUsedSort,
 };

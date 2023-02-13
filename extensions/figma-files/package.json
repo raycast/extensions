@@ -5,6 +5,9 @@
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
   "author": "michaelschultz",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "version": "1.2.0",
   "license": "MIT",
   "commands": [

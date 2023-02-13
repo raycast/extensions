@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { WiFiNetwork } from "node-wifi";
 import { connectWifi } from "../utils/common-utils";
 import React, { Dispatch, SetStateAction } from "react";
@@ -13,7 +13,7 @@ export function PrimaryActions(props: {
   return (
     <ActionPanel.Section>
       <Action
-        icon={{ source: "wifi-icon.svg", tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.Wifi, tintColor: Color.PrimaryText }}
         title={"Connect Wi-Fi"}
         onAction={async () => {
           if (curWifi.length > 0) {

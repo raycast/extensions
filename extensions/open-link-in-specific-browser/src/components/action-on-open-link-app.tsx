@@ -12,7 +12,8 @@ import {
 import { ActionOpenPreferences } from "./action-open-preferences";
 import { ActionAddOpenLinkApp } from "./action-add-open-link-app";
 import { alertDialog } from "../hooks/hooks";
-import { ItemType, LocalStorageKey, OpenLinkApplication } from "../types/types";
+import { ItemType, OpenLinkApplication } from "../types/types";
+import { CacheKey } from "../utils/constants";
 
 export function ActionOnOpenLinkApp(props: {
   isCustom: boolean;
@@ -30,7 +31,7 @@ export function ActionOnOpenLinkApp(props: {
         title={actionTitle(itemInput, openLinkApplication.name)}
         icon={actionIcon(itemInput)}
         onAction={async () => {
-          await upBrowserRank(itemInput, openLinkApplication, openLinkApplications);
+          isCustom && (await upBrowserRank(itemInput, openLinkApplication, openLinkApplications));
           await actionOnApplicationItem(itemInput, openLinkApplication, setRefresh);
         }}
       />
@@ -38,7 +39,7 @@ export function ActionOnOpenLinkApp(props: {
         <Action
           title={"Detect Link"}
           shortcut={{ modifiers: ["cmd"], key: "d" }}
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.Repeat}
           onAction={() => {
             setRefresh(Date.now());
           }}
@@ -50,13 +51,13 @@ export function ActionOnOpenLinkApp(props: {
         {isCustom && (
           <>
             <Action
-              title={"Remove Application"}
-              icon={Icon.Trash}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              title="Remove from Preferred"
+              icon={Icon.StarDisabled}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
               onAction={async () => {
                 const _openLinkApplications = [...openLinkApplications];
                 _openLinkApplications.splice(index, 1);
-                await LocalStorage.setItem(LocalStorageKey.CUSTOM_APPS, JSON.stringify(_openLinkApplications));
+                await LocalStorage.setItem(CacheKey.PREFERRED_APP, JSON.stringify(_openLinkApplications));
                 setRefresh(Date.now());
               }}
             />

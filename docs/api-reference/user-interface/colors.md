@@ -22,46 +22,15 @@ import { Color, Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        title="Blue"
-        icon={{ source: Icon.Circle, tintColor: Color.Blue }}
-      />
-      <List.Item
-        title="Green"
-        icon={{ source: Icon.Circle, tintColor: Color.Green }}
-      />
-      <List.Item
-        title="Brown"
-        icon={{ source: Icon.Circle, tintColor: Color.Brown }}
-      />
-      <List.Item
-        title="Magenta"
-        icon={{ source: Icon.Circle, tintColor: Color.Magenta }}
-      />
-      <List.Item
-        title="Orange"
-        icon={{ source: Icon.Circle, tintColor: Color.Orange }}
-      />
-      <List.Item
-        title="Purple"
-        icon={{ source: Icon.Circle, tintColor: Color.Purple }}
-      />
-      <List.Item
-        title="Red"
-        icon={{ source: Icon.Circle, tintColor: Color.Red }}
-      />
-      <List.Item
-        title="Yellow"
-        icon={{ source: Icon.Circle, tintColor: Color.Yellow }}
-      />
-      <List.Item
-        title="PrimaryText"
-        icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }}
-      />
-      <List.Item
-        title="SecondaryText"
-        icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
-      />
+      <List.Item title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
+      <List.Item title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
+      <List.Item title="Magenta" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />
+      <List.Item title="Orange" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />
+      <List.Item title="Purple" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />
+      <List.Item title="Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      <List.Item title="Yellow" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />
+      <List.Item title="PrimaryText" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />
+      <List.Item title="SecondaryText" icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />
     </List>
   );
 }
@@ -72,7 +41,6 @@ export default function Command() {
 | Name          | Dark Theme                                               | Light Theme                                         |
 | :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
 | Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
-| Brown         | ![](../../.gitbook/assets/color-dark-brown.png)          | ![](../../.gitbook/assets/color-brown.png)          |
 | Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
 | Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
 | Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |
@@ -102,14 +70,8 @@ import { Color, Icon, List } from "@raycast/api";
 export default function Command() {
   return (
     <List>
-      <List.Item
-        title="Built-in color"
-        icon={{ source: Icon.Circle, tintColor: Color.Red }}
-      />
-      <List.Item
-        title="Raw color"
-        icon={{ source: Icon.Circle, tintColor: "#FF0000" }}
-      />
+      <List.Item title="Built-in color" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      <List.Item title="Raw color" icon={{ source: Icon.Circle, tintColor: "#FF0000" }} />
       <List.Item
         title="Dynamic color"
         icon={{
@@ -133,7 +95,7 @@ A dynamic color applies different colors depending on the active Raycast theme.
 #### Example
 
 ```typescript
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (

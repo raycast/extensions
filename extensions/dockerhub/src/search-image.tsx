@@ -1,5 +1,6 @@
-import SearchImages from "./components/SearchImages";
+import Search from "./components/Search";
+import { SearchTypeEnum } from "./lib/hub/types";
 
 export default function Command() {
-  return <SearchImages />;
+  return <Search searchType={SearchTypeEnum.IMAGE} />;
 }

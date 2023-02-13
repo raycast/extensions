@@ -1,5 +1,17 @@
 # Easy New File Changelog
 
+## [Fix text error] - 2023-02-07
+
+- Fix text error in preferences
+
+## [Fix bug] - 2022-11-01
+
+- Fix the bug that RTF files cannot be opened normally
+
+## [Update UI] - 2022-10-20
+
+- Update UI
+
 ## [Add text field validation] - 2022-07-04
 
 - Add text field validation

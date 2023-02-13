@@ -204,6 +204,30 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "zones",
+      "title": "Zones",
+      "description": "Get states about Zones",
+      "mode": "view",
+      "subtitle": "Home Assistant"
+    },
+    {
+      "name": "weathermenu",
+      "title": "Weather Menu Bar",
+      "description": "Display Weather entity in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Weather Entity ID which will be shown",
+          "type": "textfield",
+          "required": false,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -256,8 +280,9 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.1",
+    "@raycast/api": "^1.42.0",
     "home-assistant-js-websocket": "^5.11.1",
+    "javascript-time-ago": "^2.5.9",
     "lodash-es": "^4.17.21",
     "node-fetch": "^2.6.1",
     "open": "^8.3.0",
@@ -266,6 +291,7 @@
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.6",
+    "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
