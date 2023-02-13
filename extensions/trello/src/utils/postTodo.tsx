@@ -1,10 +1,9 @@
 import fetch from "node-fetch";
 import { getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
-import { Preferences } from "@raycast/api/types/core/preferences";
+import { postValues, preferences } from "./types";
 
-export const postTodo = async (values) => {
-  const { token }: Preferences = getPreferenceValues();
-  const { apitoken }: Preferences = getPreferenceValues();
+export const postTodo = async (values: postValues) => {
+  const { token, apitoken } = getPreferenceValues<preferences>();
 
   try {
     await fetch(
