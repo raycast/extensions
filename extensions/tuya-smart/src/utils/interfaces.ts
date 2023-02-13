@@ -15,7 +15,7 @@ export interface Device {
   owner_id: string;
   product_id: string;
   product_name: string;
-  status: Function[];
+  status: FunctionItem[];
   sub: boolean;
   time_zone: string;
   uid: string;
@@ -55,10 +55,10 @@ export interface CommandResponse {
 
 export interface DeviceFunctionsResult {
   category: string;
-  functions: Function[];
+  functions: FunctionItem[];
 }
 
-export interface Function {
+export interface FunctionItem {
   code: string;
   desc?: string;
   name: string;

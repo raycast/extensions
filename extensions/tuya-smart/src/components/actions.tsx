@@ -1,6 +1,6 @@
 import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { sendCommand } from "../utils/tuyaConnector";
-import { Device, Function } from "../utils/interfaces";
+import { Device, FunctionItem } from "../utils/interfaces";
 
 export function DevicePinAction(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const isPinned = props.device.pinned;
@@ -22,8 +22,8 @@ export function DevicePinAction(props: { device: Device; onAction: (device: Devi
 
 export function BooleanCommand(props: {
   deviceId: string;
-  command: Function;
-  onAction: (props: { result: boolean; command: Function }) => void;
+  command: FunctionItem;
+  onAction: (props: { result: boolean; command: FunctionItem }) => void;
 }): JSX.Element {
   const isOn = props.command.value;
   return (
@@ -44,9 +44,9 @@ export function BooleanCommand(props: {
 
 export function TextCommand(props: {
   deviceId: string;
-  command: Function;
+  command: FunctionItem;
   value: string;
-  onAction: (props: { result: boolean; command: Function }) => void;
+  onAction: (props: { result: boolean; command: FunctionItem }) => void;
 }): JSX.Element {
   return (
     <Action
@@ -60,7 +60,10 @@ export function TextCommand(props: {
   );
 }
 
-async function sendTextCommand(deviceId: string, command: Function): Promise<{ result: boolean; command: Function }> {
+async function sendTextCommand(
+  deviceId: string,
+  command: FunctionItem
+): Promise<{ result: boolean; command: FunctionItem }> {
   showToast(Toast.Style.Animated, `Turning ${command.code} ${command.value}`);
 
   try {
@@ -85,7 +88,7 @@ async function sendTextCommand(deviceId: string, command: Function): Promise<{ r
   }
 }
 
-async function onCommand(deviceId: string, command: Function): Promise<{ result: boolean; command: Function }> {
+async function onCommand(deviceId: string, command: FunctionItem): Promise<{ result: boolean; command: FunctionItem }> {
   showToast(Toast.Style.Animated, `Turning On ${command.code}`);
 
   try {
@@ -111,7 +114,10 @@ async function onCommand(deviceId: string, command: Function): Promise<{ result:
   }
 }
 
-async function offCommand(deviceId: string, command: Function): Promise<{ result: boolean; command: Function }> {
+async function offCommand(
+  deviceId: string,
+  command: FunctionItem
+): Promise<{ result: boolean; command: FunctionItem }> {
   showToast(Toast.Style.Animated, `Turning Off ${command.code}`);
 
   try {

@@ -1,9 +1,9 @@
-import { Device, Function } from "../utils/interfaces";
+import { Device, FunctionItem } from "../utils/interfaces";
 import { CommandList } from "./list";
 
 export function DeviceCommands(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const device = props.device;
-  let commands: Function[];
+  let commands: FunctionItem[];
   switch (device.category) {
     case "Switch":
     case "kg":

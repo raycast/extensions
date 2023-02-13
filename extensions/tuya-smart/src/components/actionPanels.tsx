@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { Device, Function } from "../utils/interfaces";
+import { Device, FunctionItem } from "../utils/interfaces";
 
 import { DeviceCommands } from "./deviceCommands";
 
@@ -31,9 +31,9 @@ export function DeviceActionPanel(props: {
 
 export function CommandActionPanel(props: {
   device: Device;
-  command: Function;
+  command: FunctionItem;
   newName?: string;
-  onAction: (props: { result: boolean; command: Function }) => void;
+  onAction: (props: { result: boolean; command: FunctionItem }) => void;
 }): JSX.Element {
   const deviceId = props.device.id;
   const commandValue = props.command.value;

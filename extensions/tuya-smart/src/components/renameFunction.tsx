@@ -1,11 +1,11 @@
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { Function } from "../utils/interfaces";
+import { FunctionItem } from "../utils/interfaces";
 
 interface Props {
   deviceId: string;
-  command: Function;
-  onAction: (props: { result: boolean; command: Function }) => void;
+  command: FunctionItem;
+  onAction: (props: { result: boolean; command: FunctionItem }) => void;
 }
 
 export default function RenameFunctionForm(props: Props) {

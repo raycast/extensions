@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { Device, Function } from "../utils/interfaces";
+import { Device, FunctionItem } from "../utils/interfaces";
 import { CommandActionPanel, DeviceActionPanel } from "./actionPanels";
 
 export interface DeviceListProps {
@@ -14,7 +14,7 @@ export interface DeviceListProps {
 
 export interface CommandListProps {
   device: Device;
-  commands: Function[];
+  commands: FunctionItem[];
   onAction: (device: Device) => void;
 }
 
@@ -67,7 +67,7 @@ export function DeviceListItem(props: { device: Device; onAction: (device: Devic
 }
 
 export function CommandList(props: CommandListProps): JSX.Element {
-  const [commands] = useState<Function[]>(props.commands);
+  const [commands] = useState<FunctionItem[]>(props.commands);
   const [device] = useState<Device>(props.device);
   return (
     <List>
@@ -84,11 +84,11 @@ export function CommandList(props: CommandListProps): JSX.Element {
 }
 
 export function CommandListItem(props: {
-  command: Function;
+  command: FunctionItem;
   device: Device;
   onAction: (device: Device) => void;
 }): JSX.Element {
-  const [command, setCommand] = useState<Function>(props.command);
+  const [command, setCommand] = useState<FunctionItem>(props.command);
   return (
     <List.Item
       title={command.name ?? command.code}

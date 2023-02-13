@@ -5,7 +5,7 @@ import {
   DevicesReponse,
   DeviceCategory,
   Device,
-  Function,
+  FunctionItem,
   CommandResponse,
   DeviceFunctionsResult,
   Status,
