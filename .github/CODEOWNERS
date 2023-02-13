@@ -518,6 +518,7 @@
 /extensions/ossinsight                               @k8scat @pernielsentikaer
 /extensions/pagerduty                                @horimislime
 /extensions/palette-colors                           @douglas-pires
+/extensions/palette-picker                           @juliusmarminge
 /extensions/papermatch                               @marlonjames71
 /extensions/paperspace                               @yuri-becker
 /extensions/parabol                                  @parabol @BartoszJarocki
