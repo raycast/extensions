@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Project Create New Issue] - 2023-02-03
+
+- Added command to cerate new issue on a project
+
 ## [New Preference] - 2023-01-03
 
 - Added preference to hide annoying bot created todos in the todo command

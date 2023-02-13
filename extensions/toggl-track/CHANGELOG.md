@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Update] - 2023-02-07
+
+- Upgrade to Toggle API v9
+
 ## [Enhancements] - 2023-01-27
 
 -  Sort time entries starting from latest

@@ -1,5 +1,13 @@
 # Xcode Changelog
 
+## [Open URLs in the iOS Simulator] - 2023-02-03
+
+- Added “Open URL in Simulator” command to open URLs such as deeplinks in the iOS Simulator.
+
+## [Bug Fix] - 2023-02-03
+
+- Fixed a bug where the URL to Apple's developer documentation wasn't created correctly.
+
 ## [Bug Fix] - 2023-02-01
 
 - Fixed a bug where the URL of a Swift package wasn't created correctly. 

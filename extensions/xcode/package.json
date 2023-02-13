@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xcode",
   "title": "Xcode",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "author": "SvenTiigi",
   "contributors": [
     "qeude",
-    "oliep"
+    "oliep",
+    "kiliankoe"
   ],
   "categories": [
     "Developer Tools",
@@ -238,6 +239,21 @@
       "subtitle": "Xcode",
       "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
       "mode": "no-view"
+    },
+    {
+      "name": "open-url-in-simulator.command",
+      "title": "Open URL in Simulator",
+      "subtitle": "Xcode",
+      "description": "Open the given URL in Simulator.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "maps://",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "clear-swift-package-manager-cache.command",

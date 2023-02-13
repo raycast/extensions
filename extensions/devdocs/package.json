@@ -8,20 +8,36 @@
   "author": "pomdtr",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Documentation",
+      "name": "search-docsets",
+      "title": "Search Docsets",
       "subtitle": "DevDocs",
       "description": "Search through DevDocs documentation sets from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "subtitle": "DevDocs",
+      "description": "Search through DevDocs documentation entries from Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "slug",
+          "description": "The slug of the documentation set",
+          "type": "text",
+          "placeholder": "slug",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.8",
     "fuse.js": "^6.4.6"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
+    "@types/node": "^18.8.3",
     "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",

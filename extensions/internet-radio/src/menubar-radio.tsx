@@ -8,10 +8,13 @@ import {
   LocalStorage,
   MenuBarExtra,
   openCommandPreferences,
+  showHUD,
 } from "@raycast/api";
 import { getFavicon, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { colorMap, getAllStations, loadDefaults, playStation } from "./utils";
+import { colorMap } from "./genres";
+import { StationData, StationListObject } from "./types";
+import { deleteStation, dummyStation, getAllStations, loadDefaults, modifyStation, playStation } from "./utils";
 
 interface Preferences {
   showColoredIcon: boolean;
@@ -22,7 +25,8 @@ export default function Command() {
   const [isPlaying, setIsPlaying] = useCachedState<string>("false");
   const [currentStationName, setCurrentStationName] = useCachedState<string>("radio-title");
   const [lastStationName, setLastStationName] = useCachedState<string>("");
-  const [stations, setStations] = useState<{ [stationName: string]: { [key: string]: string | string[] } }>();
+  const [stations, setStations] = useState<StationListObject>();
+  const [tempStationInfo, setTempStationInfo] = useState<{ [key: string]: StationData }>();
   const [cachedIconColor, setCachedIconColor] = useCachedState<string>(Color.SecondaryText);
 
   const preferences = getPreferenceValues<Preferences>();
@@ -37,9 +41,14 @@ export default function Command() {
   }, []);
 
   // Update state to reflect current play state
-  LocalStorage.getItem("-is-playing").then((playStatus) => setIsPlaying(playStatus as string));
-  LocalStorage.getItem("-current-station-name").then((stationName) => setCurrentStationName(stationName as string));
-  LocalStorage.getItem("-last-station-name").then((stationName) => setLastStationName(stationName as string));
+  useEffect(() => {
+    LocalStorage.getItem("-is-playing").then((playStatus) => setIsPlaying(playStatus as string));
+    LocalStorage.getItem("-current-station-name").then((stationName) => setCurrentStationName(stationName as string));
+    LocalStorage.getItem("-last-station-name").then((stationName) => setLastStationName(stationName as string));
+    LocalStorage.getItem("-temp-station-info").then((tempInfo) =>
+      tempInfo != undefined ? setTempStationInfo(JSON.parse(tempInfo as string)) : null
+    );
+  }, []);
 
   // Create a menu subitem for each station
   const stationList =
@@ -62,9 +71,11 @@ export default function Command() {
         title={stationName}
         subtitle={stationName == currentStationName ? "Currently Playing" : ""}
         onAction={async () => {
-          await playStation(stationName, stationData.stream as unknown as string);
-          setIsPlaying("true");
-          setCurrentStationName(stationName);
+          const status = await playStation(stationName, stationData.stream as unknown as string);
+          if (status != -1) {
+            setIsPlaying("true");
+            setCurrentStationName(stationName);
+          }
         }}
       />
     );
@@ -88,7 +99,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       isLoading={stationList == undefined || stationList.length == 0}
-      title={currentStationName}
+      title={currentStationName?.substring(0, 20)}
       icon={isPlaying == "true" ? { source: Icon.Livestream, tintColor: iconColor } : Icon.LivestreamDisabled}
       tooltip={`Currently playing station: ${currentStationName}`}
     >
@@ -97,7 +108,7 @@ export default function Command() {
           <MenuBarExtra.Item
             icon={Icon.Stop}
             title="Stop Playback"
-            onAction={async () => await launchCommand({ name: "stop-playback", type: LaunchType.Background })}
+            onAction={async () => launchCommand({ name: "stop-playback", type: LaunchType.Background })}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             tooltip="Stop playback of the currently playing station"
           />
@@ -120,9 +131,44 @@ export default function Command() {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           tooltip="Start playing a randomly selected station"
         />
+
+        {isPlaying && stations != undefined ? (
+          tempStationInfo == undefined || currentStationName != Object.keys(tempStationInfo)[0] ? (
+            <MenuBarExtra.Item
+              icon={Icon.Trash}
+              title="Delete Station"
+              onAction={async () => {
+                await deleteStation(currentStationName as string, (stations || {})[currentStationName as string]);
+                await showHUD(`Removed ${currentStationName} From Saved Stations`);
+
+                const stationInfo: StationListObject = {};
+                stationInfo[currentStationName as string] = stations[currentStationName as string];
+                await LocalStorage.setItem("-temp-station-info", JSON.stringify(stationInfo));
+              }}
+              tooltip="Remove the current station from your saved stations list"
+            />
+          ) : (
+            <MenuBarExtra.Item
+              icon={Icon.Download}
+              title="Save Station"
+              onAction={async () => {
+                await modifyStation(
+                  "",
+                  currentStationName,
+                  dummyStation,
+                  tempStationInfo[currentStationName],
+                  () => null
+                );
+                await showHUD(`Added ${currentStationName} To Saved Stations`);
+                await LocalStorage.removeItem("-temp-station-info");
+              }}
+              tooltip="Add the current station to your saved stations list"
+            />
+          )
+        ) : null}
       </MenuBarExtra.Section>
 
-      <MenuBarExtra.Section title="Stations">
+      <MenuBarExtra.Section title="Saved Stations">
         <MenuBarExtra.Submenu title="Select Station">{menuItems}</MenuBarExtra.Submenu>
       </MenuBarExtra.Section>
 
