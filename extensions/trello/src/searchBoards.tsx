@@ -35,26 +35,26 @@ export default function BoardsList() {
     >
       {boards?.length > 0
         ? boards.map((board) => {
-          return (
-            <List.Item
-              icon={board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[0].url : ""}
-              key={board.id}
-              title={board.name}
-              subtitle={board.organization?.displayName}
-              detail={
-                <List.Item.Detail
-                  markdown={`# [${board.name}](${board.shortUrl})
+            return (
+              <List.Item
+                icon={board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[0].url : ""}
+                key={board.id}
+                title={board.name}
+                subtitle={board.organization?.displayName}
+                detail={
+                  <List.Item.Detail
+                    markdown={`# [${board.name}](${board.shortUrl})
 ![Illustration](${board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[2].url : ""})`}
-                />
-              }
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser url={board.shortUrl} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={board.shortUrl} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
         : null}
     </List>
   );

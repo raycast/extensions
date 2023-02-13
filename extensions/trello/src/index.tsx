@@ -28,8 +28,8 @@ export default function PackageList() {
     <List isLoading={loading} searchBarPlaceholder={`Filter todos`} throttle>
       {results?.length
         ? results.map((result) => {
-          return <TodoListItem key={result.id} result={result} />;
-        })
+            return <TodoListItem key={result.id} result={result} />;
+          })
         : null}
     </List>
   );
