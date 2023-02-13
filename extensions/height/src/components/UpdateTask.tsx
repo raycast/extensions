@@ -8,7 +8,7 @@ import { ListTypes, ListVisualizations } from "../utils/list";
 
 type Props = {
   task: TaskObject;
-  mutateTask: MutatePromise<ApiResponse<TaskObject> | undefined>;
+  mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
 };
 
 export default function UpdateList({ task, mutateTask }: Props) {

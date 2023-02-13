@@ -1,7 +1,7 @@
 import { useFetch } from "@raycast/utils";
 
 export type ApiResponse<T> = {
-  list: T[];
+  list: T;
 };
 
 export type ApiErrorResponse = {

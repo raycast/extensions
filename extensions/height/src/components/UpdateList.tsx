@@ -8,7 +8,7 @@ import { ListTypes, ListVisualizations } from "../utils/list";
 
 type Props = {
   list: ListObject;
-  mutateList: MutatePromise<ApiResponse<ListObject> | undefined>;
+  mutateList: MutatePromise<ApiResponse<ListObject[]> | undefined>;
 };
 
 export default function UpdateList({ list, mutateList }: Props) {
