@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, Detail, Icon } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { useState } from "react";
 import { OneNoteItem, PAGE, types } from "./types";
-import { ONENOTE_MERGED_DB } from "./useSql";
+import { ONENOTE_MERGED_DB } from "./database";
 import { getAncestorsStr, getIcon, getParentTitle, newNote, openNote, parseDatetime } from "./utils";
 
 export function getListItems(query: string, elt: OneNoteItem | undefined = undefined) {
