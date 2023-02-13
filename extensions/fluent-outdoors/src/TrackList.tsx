@@ -53,7 +53,7 @@ export default function TrackList({ service, favouriteTracks, onFavouriteTracksU
   }, [tracks, announcements]);
 
   return (
-    <List isLoading={!ready}>
+    <List isLoading={!ready} navigationTitle={`${service.name}: Tracks`}>
       <List.Section title="Announcements">
         {ready &&
           announcements?.map((announcement) => {
