@@ -27,18 +27,6 @@
         "password",
         "login"
       ]
-    },
-    {
-      "name": "reset-cache",
-      "title": "Reset Cache",
-      "subtitle": "1Password",
-      "description": "Manually reset all the cache.",
-      "mode": "no-view",
-      "keywords": [
-        "cache",
-        "reset cache",
-        "reload"
-      ]
     }
   ],
   "preferences": [
