@@ -4,9 +4,14 @@ import { ApiHeaders, ApiUrls } from "../api/helpers";
 import { FieldTemplateObject } from "../types/fieldTemplate";
 import { ApiResponse } from "../types/utils";
 
-export default function useFieldTemplates() {
-  const { data, error, isLoading, mutate } = useFetch<ApiResponse<FieldTemplateObject>>(ApiUrls.fieldTemplates, {
+type Props = {
+  options?: Parameters<typeof useFetch<ApiResponse<FieldTemplateObject[]>>>[1];
+};
+
+export default function useFieldTemplates({ options }: Props = {}) {
+  const { data, error, isLoading, mutate } = useFetch<ApiResponse<FieldTemplateObject[]>>(ApiUrls.fieldTemplates, {
     headers: ApiHeaders,
+    ...options,
   });
 
   const { statuses, priorities, startDate, dueDate } = useMemo(() => {
