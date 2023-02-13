@@ -1,4 +1,4 @@
-import { Option } from "./fieldTemplate";
+import type { Option } from "./fieldTemplate";
 
 export type Field = {
   fieldTemplateId: string;
