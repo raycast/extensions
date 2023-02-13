@@ -17,10 +17,10 @@ import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
-import { StatusState, Option } from "../types/fieldTemplate";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
+import { getIconByStatusState } from "../utils/task";
 import UpdateTask from "./UpdateTask";
 
 type Props = {
@@ -140,7 +140,6 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                         onAction={async () => await showHUD("Set Priority Action")}
                       />
-
                       <Action
                         title="Set Due Date"
                         icon={Icon.Pencil}
@@ -195,25 +194,6 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
       ))}
     </List>
   );
-}
-
-function getIconByStatusState(statusId: string, statuses: Option[]) {
-  const status: StatusState = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";
-
-  switch (status) {
-    case "default":
-      return Icon.Circle;
-    case "blocked":
-      return Icon.MinusCircle;
-    case "started":
-      return Icon.CircleProgress50;
-    case "canceled":
-      return Icon.XMarkCircle;
-    case "completed":
-      return Icon.CheckCircle;
-    default:
-      return Icon.Window;
-  }
 }
 
 function getTaskDueDate(task: TaskObject) {
