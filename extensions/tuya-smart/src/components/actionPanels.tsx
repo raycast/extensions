@@ -8,7 +8,7 @@ import * as Actions from "./actions";
 export function DeviceActionPanel(props: {
   device: Device;
   showDetails: boolean;
-  onAction: (result: boolean) => void;
+  onAction: (device: Device) => void;
 }): JSX.Element {
   const device = props.device;
 

@@ -8,7 +8,7 @@ function millisToMinutesAndSeconds(millis: number) {
   return minutes + ":" + (+seconds < 10 ? "0" : "") + seconds;
 }
 
-export function DeviceInfo(props: { device: Device; onAction: (result: boolean) => void }): JSX.Element {
+export function DeviceInfo(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const { pop } = useNavigation();
   return (
     <Detail
@@ -23,9 +23,9 @@ export function DeviceInfo(props: { device: Device; onAction: (result: boolean) 
         <DeviceActionPanel
           device={props.device}
           showDetails={false}
-          onAction={(result) => {
+          onAction={(device) => {
             pop();
-            props.onAction(result);
+            props.onAction(device);
           }}
         />
       }

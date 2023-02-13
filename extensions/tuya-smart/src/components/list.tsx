@@ -9,7 +9,7 @@ export interface DeviceListProps {
   searchBarPlaceholder?: string;
   searchBarAccessory?: JSX.Element;
   onSearchTextChange?: (q: string) => void;
-  onAction: () => void;
+  onAction: (device: Device) => void;
 }
 
 export interface CommandListProps {
@@ -20,6 +20,12 @@ export interface CommandListProps {
 
 export function DeviceList(props: DeviceListProps): JSX.Element {
   const devices = props.devices;
+
+  const pinnedDevices = devices.filter((device) => {
+    return device.pinned;
+  });
+
+  const notPinneddevices = devices.filter((device) => !device.pinned);
   return (
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
@@ -27,14 +33,21 @@ export function DeviceList(props: DeviceListProps): JSX.Element {
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
     >
-      {devices.map((device) => (
-        <DeviceListItem key={`formula-${device.name}`} device={device} onAction={props.onAction} />
-      ))}
+      <List.Section title="Pinned">
+        {pinnedDevices.map((device) => (
+          <DeviceListItem key={`formula-${device.name}`} device={device} onAction={props.onAction} />
+        ))}
+      </List.Section>
+      <List.Section title="Devices">
+        {notPinneddevices.map((device) => (
+          <DeviceListItem key={`formula-${device.name}`} device={device} onAction={props.onAction} />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-export function DeviceListItem(props: { device: Device; onAction: () => void }): JSX.Element {
+export function DeviceListItem(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const device = props.device;
   const category = device.category;
   const online = device.online;

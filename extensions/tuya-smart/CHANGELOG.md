@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Fix Action] - 2023-02-12
+
+- Fixed Pin Device Action
+
 ## [Initial Version] - 2023-02-09
 
 - Added Tuya Smart Command

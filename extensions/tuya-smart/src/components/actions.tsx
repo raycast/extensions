@@ -2,7 +2,7 @@ import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { sendCommand } from "../utils/tuyaConnector";
 import { Device, Status } from "../utils/interfaces";
 
-export function DevicePinAction(props: { device: Device; onAction: (result: boolean) => void }): JSX.Element {
+export function DevicePinAction(props: { device: Device; onAction: (device: Device) => void }): JSX.Element {
   const isPinned = props.device.pinned;
   return (
     <Action
@@ -137,26 +137,26 @@ async function offCommand(deviceId: string, command: Status): Promise<{ result: 
   }
 }
 
-async function pin(device: Device): Promise<boolean> {
+async function pin(device: Device): Promise<Device> {
   showToast(Toast.Style.Animated, `Pinning ${device.name}`);
   try {
     device.pinned = true;
     showToast(Toast.Style.Success, `Pinned ${device.name}`);
-    return true;
+    return device;
   } catch (err) {
     showToast(Toast.Style.Failure, `Pin ${device.name} failed`);
-    return false;
+    return device;
   }
 }
 
-async function unpin(device: Device): Promise<boolean> {
+async function unpin(device: Device): Promise<Device> {
   showToast(Toast.Style.Animated, `Unpinning ${device.name}`);
   try {
     device.pinned = false;
     showToast(Toast.Style.Success, `Unpinned ${device.name}`);
-    return true;
+    return device;
   } catch (err) {
     showToast(Toast.Style.Failure, `Unpin ${device.name} failed`);
-    return false;
+    return device;
   }
 }

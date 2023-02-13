@@ -3,7 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { getDevices, getCategories } from "./utils/tuyaConnector";
 import { DeviceCategory, Device } from "./utils/interfaces";
 import { DeviceList } from "./components/list";
-import { getCategory } from "./utils/functions";
+import { getCategory, isPinned } from "./utils/functions";
 import { DeviceOnlineFilterDropdown, DeviceOnlineFilterType, placeholder } from "./components/filter";
 
 export default function Command() {
@@ -28,13 +28,17 @@ export default function Command() {
     const getAllDevices = async () => {
       const devices = await getDevices();
 
-      const formatedDevices = devices.map((device) => {
-        return {
-          ...device,
-          category: getCategory(categories, device.category),
-        };
+      setDevices((prev) => {
+        const formatedDevices = devices.map((device) => {
+          return {
+            ...device,
+            pinned: isPinned(device, prev),
+            category: getCategory(categories, device.category),
+          };
+        });
+
+        return formatedDevices;
       });
-      setDevices(formatedDevices);
       setIsLoading(false);
     };
 
@@ -56,8 +60,20 @@ export default function Command() {
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<DeviceOnlineFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
-      onAction={() => {
-        console.info("Action not defined yet");
+      onAction={(device) => {
+        setDevices((prev) => {
+          const formatedDevices = prev.map((oldDevice) => {
+            if (device.id === oldDevice.id) {
+              return device;
+            }
+
+            return {
+              ...oldDevice,
+            };
+          });
+
+          return formatedDevices;
+        });
       }}
     />
   );
