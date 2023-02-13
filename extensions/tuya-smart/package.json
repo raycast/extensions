@@ -39,7 +39,7 @@
       "title": "Region",
       "name": "region",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "placeholder": "Region",
       "description": "Region to manage devices",
       "data": [
