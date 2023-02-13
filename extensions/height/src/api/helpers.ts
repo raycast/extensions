@@ -9,6 +9,7 @@ export const ApiUrls = {
   taskforms: "https://api.height.app/taskforms",
   tasks: "https://api.height.app/tasks",
   users: "https://api.height.app/users",
+  me: "https://api.height.app/users/me",
   workspace: "https://api.height.app/workspace",
 };
 
