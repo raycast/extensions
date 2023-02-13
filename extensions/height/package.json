@@ -35,6 +35,12 @@
       "title": "Create Task",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "assigned_tasks",
+      "title": "Assigned Tasks",
+      "description": "",
+      "mode": "view"
     }
   ],
   "preferences": [
