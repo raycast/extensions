@@ -66,7 +66,7 @@ export function IntervalForm(props: { item?: Item; onSave: (item: Item) => void 
         </ActionPanel>
       }
     >
-      <Form.TextField title="Title" placeholder="My Awesome Interval" {...itemProps.title} />
+      <Form.TextField title="Title" placeholder="My awesome interval" {...itemProps.title} />
       <Form.TextField title="Subtitle" placeholder="The best ever!" {...itemProps.subtitle} />
       <Form.Description title="Info" text="All intervals are shown in seconds" />
       <Form.TextField title="Warmup" placeholder="0" info="Optional Warmup" {...itemProps.warmup} />
