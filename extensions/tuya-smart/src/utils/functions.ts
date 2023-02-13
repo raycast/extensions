@@ -1,4 +1,4 @@
-import { Device, DeviceCategories, DeviceCategory, Status } from "./interfaces";
+import { Device, DeviceCategories, DeviceCategory } from "./interfaces";
 import { getDeviceFunctionsInfo } from "./tuyaConnector";
 
 export const getCategory = (categories: DeviceCategory[], categoryCode: DeviceCategories): DeviceCategories => {
@@ -39,3 +39,17 @@ export const getDeviceFunctions = async (device: Device, oldDeviceInfo?: Device)
 
   return deviceFunctions;
 };
+
+export function timeConversion(duration: number) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+
+  const hours = Math.floor((duration / hour) % 24);
+  const minutes = Math.floor((duration / minute) % 60);
+  const seconds = Math.floor((duration / second) % 60);
+
+  return `${hours < 10 ? `0${hours}` : hours}h:${minutes < 10 ? `0${minutes}` : minutes}m:${
+    seconds < 10 ? `0${seconds}` : seconds
+  }s`;
+}

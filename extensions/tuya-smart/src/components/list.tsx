@@ -1,5 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
+import { timeConversion } from "../utils/functions";
 import { Device, FunctionItem } from "../utils/interfaces";
 import { CommandActionPanel, DeviceActionPanel } from "./actionPanels";
 
@@ -32,6 +33,7 @@ export function DeviceList(props: DeviceListProps): JSX.Element {
       searchBarAccessory={props.searchBarAccessory}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
+      isShowingDetail
     >
       <List.Section title="Pinned">
         {pinnedDevices.map((device) => (
@@ -61,6 +63,31 @@ export function DeviceListItem(props: { device: Device; onAction: (device: Devic
       title={device.name}
       accessories={[{ text: category }]}
       icon={tooltip ? { value: icon, tooltip } : icon}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="General Information" />
+              <List.Item.Detail.Metadata.Label title="Id" text={device.id} />
+              <List.Item.Detail.Metadata.Label title="Status" text={device.online ? "Online" : "Offline"} />
+              <List.Item.Detail.Metadata.Label title="Product Name" text={device.product_name} />
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Time Information" />
+              <List.Item.Detail.Metadata.Label title="Active Time" text={timeConversion(device.active_time)} />
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label title="Statuses" />
+              {device.status &&
+                device.status.map((status) => (
+                  <List.Item.Detail.Metadata.Label
+                    key={status.name ?? status.code}
+                    title={status.name ?? status.code}
+                    text={status.value?.toString()}
+                  />
+                ))}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={<DeviceActionPanel device={device} showDetails={true} onAction={props.onAction} />}
     />
   );
@@ -98,7 +125,7 @@ export function CommandListItem(props: {
           command={command}
           device={props.device}
           onAction={({ command }) => {
-            setCommand((prev) => {
+            setCommand(() => {
               return { ...command };
             });
 
