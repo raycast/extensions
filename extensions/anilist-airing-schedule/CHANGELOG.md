@@ -1,3 +1,3 @@
-# anilist-airing-schedule Changelog
+# Anilist Airing Schedule Changelog
 
-## [Initial Version] - 2023-02-11
+## [Initial Version] - 2023-02-14
