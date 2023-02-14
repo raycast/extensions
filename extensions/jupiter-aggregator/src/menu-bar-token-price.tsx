@@ -3,7 +3,7 @@ import { fetchPrice } from "./api";
 
 export default function Command() {
   const { data, isLoading } = fetchPrice("SOL");
-  const price = data ? parseFloat(data.data.SOL.price).toFixed(2) : "loading";
+  const price = data ? parseFloat(data.data.SOL.price).toFixed(2) : null;
 
   return (
     <MenuBarExtra
