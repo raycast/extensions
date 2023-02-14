@@ -3,7 +3,11 @@ export const secondsToTime = (secs: number) => {
 };
 
 export const setsToSeconds = (sets: number, high: number, low: number, warmup: number, cooldown: number) => {
-  return sets * high + (sets - 1) * low + warmup + cooldown;
+  if (!isNaN(sets) && !isNaN(high) && !isNaN(low) && !isNaN(warmup) && !isNaN(cooldown)) {
+    return sets * high + (sets - 1) * low + warmup + cooldown;
+  }
+
+  return 0;
 };
 
 export const calculateInterval = (sets: number, warmup: number, cooldown: number) => {
@@ -11,6 +15,12 @@ export const calculateInterval = (sets: number, warmup: number, cooldown: number
   if (warmup > 0) intervals++;
   if (cooldown > 0) intervals++;
   return intervals;
+};
+
+export const emptyOrNumber = (value: string | undefined) => {
+  if (value?.length && isNaN(parseInt(value))) {
+    return "Please enter a number";
+  }
 };
 
 export const requiresNumberGreaterThan = (value: string | undefined, minValue?: number) => {
