@@ -1,3 +1,3 @@
-# clash-subscription-update Changelog
+# Clash Subscription Update Changelog
 
-## [Initial Version] - 2023-02-01
+## [Initial Version] - 2023-02-14
