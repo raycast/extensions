@@ -1,4 +1,4 @@
-import { Color, Icon, getPreferenceValues, ActionPanel, List } from "@raycast/api";
+import { Color, Icon, getPreferenceValues, ActionPanel, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TopQueries, domainDetails } from "./interfaces";
 import { AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
@@ -63,6 +63,7 @@ export default function () {
                 actions={
                   <ActionPanel title="Actions">
                     <AddToListAction domain={item.domainURL} listType="black" />
+                    <Action.CopyToClipboard content={item.domainURL} />
                   </ActionPanel>
                 }
               />
@@ -78,6 +79,7 @@ export default function () {
                 actions={
                   <ActionPanel title="Actions">
                     <AddToListAction domain={item.domainURL} listType="white" />
+                    <Action.CopyToClipboard content={item.domainURL} />
                   </ActionPanel>
                 }
               />

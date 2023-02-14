@@ -1,4 +1,4 @@
-import { Color, Icon, getPreferenceValues, ActionPanel, List } from "@raycast/api";
+import { Color, Icon, getPreferenceValues, ActionPanel, List, Action } from "@raycast/api";
 import { QueryLogs, QueryLog, QueryBlockStatus } from "./interfaces";
 import { useEffect, useState } from "react";
 import { UNIXTimestampToTime, AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
@@ -82,6 +82,7 @@ export default function () {
                 domain={item.domain}
                 listType={item.blockStatus == QueryBlockStatus.Blocked ? "white" : "black"}
               />
+              <Action.CopyToClipboard content={item.domain} />
             </ActionPanel>
           }
         />
