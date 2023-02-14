@@ -3,7 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { getDevices, getCategories } from "./utils/tuyaConnector";
 import { DeviceCategory, Device } from "./utils/interfaces";
 import { DeviceList } from "./components/list";
-import { getCategory, getDeviceFunctions, isPinned } from "./utils/functions";
+import { getCategory, getDeviceFunctions, isPinned, ShowToastError } from "./utils/functions";
 import { DeviceOnlineFilterDropdown, DeviceOnlineFilterType, placeholder } from "./components/filter";
 
 export default function Command() {
@@ -16,12 +16,15 @@ export default function Command() {
   useEffect(() => {
     const getDeviceCategories = async () => {
       const categories = await getCategories();
+
       setCategories(() => {
         return categories.result;
       });
     };
 
-    getDeviceCategories().catch(console.error);
+    getDeviceCategories().catch((error) => {
+      ShowToastError(error);
+    });
   }, []);
 
   useEffect(() => {
@@ -55,7 +58,9 @@ export default function Command() {
     };
 
     if (categories) {
-      getAllDevices().catch(console.error);
+      getAllDevices().catch((error) => {
+        ShowToastError(error);
+      });
     }
   }, [categories]);
 

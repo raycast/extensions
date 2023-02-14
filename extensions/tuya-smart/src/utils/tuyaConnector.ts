@@ -32,13 +32,17 @@ export const getDevices = async (last_row_key?: string, allDevices: Device[] = [
     },
   });
 
-  allDevices.push(...devicesResult.result.devices);
+  if (devicesResult && devicesResult.result && devicesResult.result.devices) {
+    allDevices.push(...devicesResult.result.devices);
 
-  if (devicesResult.result.has_more) {
-    return getDevices(devicesResult.result.last_row_key, allDevices);
+    if (devicesResult.result.has_more) {
+      return getDevices(devicesResult.result.last_row_key, allDevices);
+    }
+
+    return allDevices;
   }
 
-  return allDevices;
+  return [];
 };
 
 export const getCategories = async () => {

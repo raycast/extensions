@@ -1,5 +1,6 @@
 import { Device, DeviceCategories, DeviceCategory } from "./interfaces";
 import { getDeviceFunctionsInfo } from "./tuyaConnector";
+import { showToast, Toast } from "@raycast/api";
 
 export const getCategory = (categories: DeviceCategory[], categoryCode: DeviceCategories): DeviceCategories => {
   const categoryInfo = categories.find((category) => category.code === categoryCode);
@@ -52,4 +53,16 @@ export function timeConversion(duration: number) {
   return `${hours < 10 ? `0${hours}` : hours}h:${minutes < 10 ? `0${minutes}` : minutes}m:${
     seconds < 10 ? `0${seconds}` : seconds
   }s`;
+}
+
+export function ShowToastError(error: Error) {
+  let ErrorMessage = error.message;
+
+  if (error.message.includes("1114") || error.message.includes("1004")) {
+    ErrorMessage = "Please verify your access & secret tokens";
+  } else if (error.message.includes("28841105") || error.message.includes("28841002")) {
+    ErrorMessage = "Your Project doesn't have access to API, please read trhoubleshooting";
+  }
+
+  showToast(Toast.Style.Failure, ErrorMessage);
 }

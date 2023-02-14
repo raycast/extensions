@@ -15,7 +15,7 @@
         <li><a href="#get-authorization-key">Get authorization key</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#Throubleshooting">Throubleshooting</a></li>
   </ol>
 </details>
 
@@ -54,6 +54,66 @@
 
 Click the created project to enter the `Project Overview` page and get the `Authorization Key`. You will need these for setting up the integration. in the next step.
 <img src="https://github.com/AndresMorelos/raycast-extensions/blob/tuya-smart-extension/extensions/tuya-smart/assets/auth_key.png?raw=true">
+
+## Throubleshooting
+
+### If no devices show up
+
+- First, make sure the devices show up in Tuya’s cloud portal under the devices tab.
+
+- In the Tuya IoT configuration cloud portal, you must NOT link your non-developer account under the “Users” tab. Doing so will work, and you can even still add the devices under the devices tab, but the API will send 0 devices down to Home Assistant. You must only link the account under the Devices->“Link Tuya App Account”. If it shows up on the users tab, be sure to delete it.
+
+- Your region may not be correctly set.
+
+- Make sure your cloud plan does not need to be renewed (see error #28841002 on this page).
+
+---
+
+### 1004: sign invalid
+
+Incorrect Access ID or Access Secret. Please refer to the Configuration part above.
+
+---
+
+### 1106: permission deny
+
+- App account not linked with cloud project: On the Tuya IoT Platform, you have linked devices by using Tuya Smart or Smart Life app in your cloud project. For more information, see Link devices by app account.
+
+- Incorrect username or password: Enter the correct account and password of the Tuya Smart or Smart Life app in the Account and Password fields (social login, which the Tuya Smart app allows, may not work, and thus should be avoided for use with the Home Assistant integration). Note that the app account depends on which app (Tuya Smart or Smart Life) you used to link devices on the Tuya IoT Platform.
+
+- Incorrect country. You must select the region of your account of the Tuya Smart app or Smart Life app.
+
+---
+
+### 1100: param is empty
+
+Empty parameter of username or app. Please fill the parameters refer to the Configuration part above.
+
+---
+
+### 2406: skill id invalid
+
+- Make sure you use the Tuya Smart or SmartLife app account to log in. Also, choose the right data center endpoint related to your country region. For more details, please check Country Regions and Data Center.
+- Your cloud project on the Tuya IoT Development Platform should be created after May 25, 2021. Otherwise, you need to create a new project.
+- This error can often be resolved by unlinking the app from the project (Devices tab > Link Tuya App Account > Unlink) and relinking it again.
+
+---
+
+### 28841105: No permissions. This project is not authorized to call this API
+
+Some APIs are not authorized, please Subscribe then Authorize. The following APIs must be subscribed for this tutorial:
+
+- Device Status Notification
+- Authorization
+- IoT Core
+- Smart Home Scene Linkage
+- IoT Data Analytics
+
+---
+
+### 28841002: No permissions. Your subscription to cloud development plan has expired
+
+Your subscription to Tuya cloud development IoT Core Service resources has expired, please extend it in `Cloud` > `Cloud Services` > `IoT Core` > `My Subscriptions tab` > `Subscribed Resources` > `IoT Core` > `Extend Trial Period`.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
