@@ -37,17 +37,21 @@ export default function Command() {
 
   const handleSave = async (values: SettingsValues) => {
     const {
-      supertag,
       author,
+      authorSupertag,
       category,
       coverImageUrl,
+      highlightColor,
+      highlightHighlightedAt,
+      highlightLocation,
       highlightNote,
       highlightSupertag,
-      highlightLocation,
+      highlightUpdatedAt,
       id,
-      source,
-      title,
       readwiseUrl,
+      source,
+      supertag,
+      title,
       url,
     } = values
     let t = '%%tana%%'
@@ -56,7 +60,11 @@ export default function Command() {
       ? `\n- {{title}} #${supertag.replaceAll('#', '')}`
       : '\n- {{title}}'
 
-    t += author ? `\n  - ${author}:: {{author}}` : ''
+    t += author
+      ? `\n  - ${author}:: {{author}}${
+          authorSupertag ? ` #${authorSupertag.replaceAll('#', '')}` : ''
+        }`
+      : ''
     t += id ? `\n  - ${id}:: {{id}}` : ''
     t += category ? `\n  - ${category}:: {{category}}` : ''
     t += source ? `\n  - ${source}:: {{source}}` : ''
@@ -78,6 +86,15 @@ export default function Command() {
     highlights += highlightNote
       ? `{{#if note}}\n    - ${highlightNote}:: {{note}}{{/if}}`
       : '{{#if note}}\n    - **Note:** {{note}}{{/if}}'
+    highlights += highlightUpdatedAt
+      ? `{{#if updated}}\n    - ${highlightUpdatedAt}:: [[{{updated}}]]{{/if}}`
+      : ''
+    highlights += highlightHighlightedAt
+      ? `{{#if highlighted_at}}\n    - ${highlightHighlightedAt}:: [[{{highlighted_at}}]]{{/if}}`
+      : ''
+    highlights += highlightColor
+      ? `{{#if color}}\n    - ${highlightColor}:: {{color}}{{/if}}`
+      : ''
 
     highlights += '\n{{/each}}'
 

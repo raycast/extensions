@@ -4,11 +4,15 @@ import { Book, Highlight } from './useApi'
 
 export type SettingsValues = {
   author: string
+  authorSupertag: string
   category: string
   coverImageUrl: string
+  highlightColor: string
+  highlightHighlightedAt: string
   highlightLocation: string
   highlightNote: string
   highlightSupertag: string
+  highlightUpdatedAt: string
   id: string
   readwiseUrl: string
   source: string
@@ -69,6 +73,12 @@ export default function Settings({ handleSave, template }: SettingsProps) {
       />
       <Form.TextField id="title" title="Title" storeValue />
       <Form.TextField id="author" title="Author" storeValue />
+      <Form.TextField
+        id="authorSupertag"
+        title="Author Supertag"
+        storeValue
+        info="This supertag is added to the author, i.e., #person. # can be omitted."
+      />
       <Form.TextField id="id" title="ID" storeValue />
       <Form.TextField id="category" title="Category" storeValue />
       <Form.TextField id="source" title="Source" storeValue />
@@ -103,6 +113,13 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         info="A child node with '**Note:** {{note}}' will be added if this is omitted"
         storeValue
       />
+      <Form.TextField id="highlightColor" title="Color" storeValue />
+      <Form.TextField
+        id="highlightHighlightedAt"
+        title="Highlighted At"
+        storeValue
+      />
+      <Form.TextField id="highlightUpdatedAt" title="Updated At" storeValue />
       <Form.Separator />
       <Form.TextArea
         info="This is the compiled template that will be used to generate the note."
