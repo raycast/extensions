@@ -1,5 +1,5 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import parse from "url-parse";
 import qs from "qs";
 import FormData from "form-data";
