@@ -44,10 +44,17 @@ export default function HighlightDetails({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Link
-            title="Link"
+            title="Readwise"
             text="Open in Readwise"
             target={`https://readwise.io/open/${highlight.id}`}
           />
+          {highlight.url ? (
+            <List.Item.Detail.Metadata.Link
+              target={highlight.url}
+              title="URL"
+              text="Open in Browser"
+            />
+          ) : null}
           <List.Item.Detail.Metadata.Label
             title="Updated"
             text={dateFormatter.format(new Date(highlight.updated))}
