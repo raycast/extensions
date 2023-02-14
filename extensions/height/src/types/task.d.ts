@@ -1,4 +1,5 @@
 import type { Option } from "./fieldTemplate";
+import type { ListObject } from "./list";
 
 export type Field = {
   fieldTemplateId: string;
@@ -30,6 +31,7 @@ export type TaskObject = {
   status: string;
   parentTaskId: string | null;
   listIds: string[];
+  lists?: ListObject[];
   commentsAggregateCount: number;
   lastActivityAt: string;
   completed: boolean;
@@ -58,4 +60,6 @@ export type CreateTaskPayload = Omit<CreateTaskFormValues, "dueDate"> & {
 
 export type UpdateTaskFormValues = CreateTaskFormValues;
 
-export type UpdateTaskPayload = Partial<UpdateTaskFormValues>;
+export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate"> & {
+  fields?: Partial<Field>[];
+};
