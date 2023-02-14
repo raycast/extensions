@@ -23,6 +23,13 @@ export default function Command() {
     };
 
     getDeviceCategories().catch((error) => {
+      setIsLoading(false);
+      setCategories(() => {
+        return [];
+      });
+      setDevices(() => {
+        return [];
+      });
       ShowToastError(error);
     });
   }, []);
@@ -57,7 +64,7 @@ export default function Command() {
       setIsLoading(false);
     };
 
-    if (categories) {
+    if (categories && categories.length > 0) {
       getAllDevices().catch((error) => {
         ShowToastError(error);
       });
