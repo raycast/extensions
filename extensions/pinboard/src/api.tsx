@@ -1,6 +1,6 @@
-import { getPreferenceValues, Cache } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { usePromise } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 
 const apiBasePath = "https://api.pinboard.in/v1";
 
@@ -44,56 +44,24 @@ export type LastUpdated = {
 
 export function useSearchBookmarks() {
   const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
-
   const allPostsEndpoint = `${apiBasePath}/posts/all`;
-  const lastUpdatedEndpoint = `${apiBasePath}/posts/update`;
 
-  const pinboardCache = new Cache({
-    namespace: "pinboard",
-  });
-
-  const cachedLastUpdated = pinboardCache.get("lastUpdated");
-
-  const { data, isLoading } = usePromise(async () => {
-    const serverLastUpdated = (await fetch(`${lastUpdatedEndpoint}?${params.toString()}`).then((res) => {
-      if (!res.ok) {
-        return { update_time: "na" };
-      } else {
-        return res.json();
+  return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
+    async parseResponse(response) {
+      console.log("Parsing response...")
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
-    })) as LastUpdated;
 
-    const shouldUpdateCache = Boolean(cachedLastUpdated !== serverLastUpdated?.update_time);
+      const data = (await response.json()) as PinboardBookmark[];
+      if (data !== undefined) {
+        const items = data.map((post) => transformBookmark(post)) as Bookmark[];
 
-    let bookmarks = [] as Bookmark[];
-    if (shouldUpdateCache) {
-      console.debug("Getting bookmarks from server");
-      const serverBookmarks = (await fetch(`${allPostsEndpoint}?${params.toString()}`).then((res) => {
-        if (!res.ok) {
-          return Promise.reject(res.statusText);
-        }
-        return res.json();
-      })) as PinboardBookmark[];
-
-      console.debug("Got bookmarks from server");
-      bookmarks = serverBookmarks.map((post) => transformBookmark(post)) as Bookmark[];
-      pinboardCache.set("lastUpdated", serverLastUpdated.update_time);
-      pinboardCache.set("bookmarks", JSON.stringify(bookmarks));
-    } else {
-      // Get the data from the cache
-      console.debug("Getting bookmarks from cache");
-      const cachedBookmarks = pinboardCache.get("bookmarks");
-      if (cachedBookmarks) {
-        bookmarks = JSON.parse(cachedBookmarks) as Bookmark[];
+        return { bookmarks: items };
       }
-    }
-    return bookmarks;
+      return { bookmarks: [] };
+    },
   });
-
-  return {
-    bookmarks: data,
-    isLoading,
-  };
 }
 
 export function transformBookmark(post: PinboardBookmark): Bookmark {
