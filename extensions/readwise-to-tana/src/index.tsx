@@ -46,6 +46,9 @@ export default function Command() {
       highlightLocation,
       id,
       source,
+      title,
+      readwiseUrl,
+      url,
     } = values
     let t = '%%tana%%'
 
@@ -58,6 +61,11 @@ export default function Command() {
     t += category ? `\n  - ${category}:: {{category}}` : ''
     t += source ? `\n  - ${source}:: {{source}}` : ''
     t += coverImageUrl ? `\n  - ${coverImageUrl}:: {{cover_image_url}}` : ''
+    t += readwiseUrl
+      ? `{{#if highlights_url}}\n  - ${readwiseUrl}:: {{highlights_url}}{{/if}}`
+      : ''
+    t += url ? `{{#if source_url}}\n  - ${url}:: {{source_url}}{{/if}}` : ''
+    t += title ? `\n  - ${title}:: {{title}}` : ''
 
     let highlights = '\n\n{{#each highlights}}'
 

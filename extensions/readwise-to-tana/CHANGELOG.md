@@ -3,6 +3,7 @@
 ## [Filtering and new fields] - 2023-02-14
 
 - Add filtering by category to library view
+- Add field mappings for Title, URL, and Readwise URL to template
 
 ## [Initial Version] - 2023-02-09
 

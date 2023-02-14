@@ -7,9 +7,11 @@ export type Book = {
   author: string
   category: string
   cover_image_url: string
+  highlights_url: string
   id: string
   num_highlights: number
   source: string
+  source_url: string | null
   title: string
 }
 
