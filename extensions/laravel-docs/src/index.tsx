@@ -75,7 +75,7 @@ export default function main() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<object[] | undefined>();
+  const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [version, setVersion] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
