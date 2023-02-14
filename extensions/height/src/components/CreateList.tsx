@@ -56,12 +56,12 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       }
     },
     initialValues: {
-      type: draftValues?.type || "list",
-      visualization: draftValues?.visualization || "list",
-      name: draftValues?.name || "",
-      description: draftValues?.description || "",
-      hue: draftValues?.hue || "",
-      icon: draftValues?.icon || "",
+      type: draftValues?.type ?? "list",
+      visualization: draftValues?.visualization ?? "list",
+      name: draftValues?.name ?? "",
+      description: draftValues?.description ?? "",
+      hue: draftValues?.hue ?? "",
+      icon: draftValues?.icon ?? "",
     },
     validation: {
       type: FormValidation.Required,

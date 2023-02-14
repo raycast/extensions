@@ -58,10 +58,10 @@ export default function UpdateList({ list, mutateList }: Props) {
       }
     },
     initialValues: {
-      type: list.type || "list",
-      visualization: list.visualization || "list",
-      name: list.name || "",
-      description: list.description || "",
+      type: list.type ?? "list",
+      visualization: list.visualization ?? "list",
+      name: list.name ?? "",
+      description: list.description ?? "",
       hue: list.appearance?.hue ? String(list.appearance?.hue) : "",
     },
     validation: {
