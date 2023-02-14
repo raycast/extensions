@@ -4,15 +4,15 @@ import { useSearchBookmarks, Bookmark } from "./api";
 import { BookmarkListItem } from "./components";
 
 export default function Command() {
-  const { isLoading, bookmarks } = useSearchBookmarks();
+  const { isLoading, data } = useSearchBookmarks();
   const [searchText, setSearchText] = useState("");
-  const [filteredBookmarks, setFilteredBookmarks] = useState(bookmarks);
+  const [filteredBookmarks, setFilteredBookmarks] = useState(data?.bookmarks);
 
   useEffect(() => {
-    if (bookmarks) {
-      setFilteredBookmarks(filterByTags(bookmarks, searchText));
+    if (data) {
+      setFilteredBookmarks(filterByTags(data.bookmarks, searchText));
     }
-  }, [searchText, bookmarks]);
+  }, [searchText, data]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by tags..." throttle>
