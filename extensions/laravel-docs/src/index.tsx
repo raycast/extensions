@@ -1,15 +1,14 @@
 import {
   ActionPanel,
-  getPreferenceValues,
   List,
-  CopyToClipboardAction,
-  OpenInBrowserAction,
+  Action,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
+import { VersionDropdown } from "./version_dropdown";
 
 type docList = {
   [key: string]: {
@@ -20,6 +19,7 @@ type docList = {
 
 const DOCS: { [key: string]: docList } = {
   master: require("./documentation/master.json"),
+  "10.x": require("./documentation/10.x.json"),
   "9.x": require("./documentation/9.x.json"),
   "8.x": require("./documentation/8.x.json"),
   "7.x": require("./documentation/7.x.json"),
@@ -68,8 +68,6 @@ type LaravelDocsHit = {
 };
 
 export default function main() {
-  const preferences = getPreferenceValues();
-
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
@@ -79,6 +77,7 @@ export default function main() {
   }, [algoliaClient, INDEX]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [version, setVersion] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
@@ -111,7 +110,7 @@ export default function main() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 11,
-        facetFilters: ["version:" + preferences.laravelVersion],
+        facetFilters: ["version:" + version],
       })
       .then((res) => {
         setIsLoading(false);
@@ -119,7 +118,7 @@ export default function main() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error searching Laravel Documentation", err.message);
+        showToast(Toast.Style.Failure, "Error searching Laravel Documentation", err.message);
         return [];
       });
   };
@@ -128,13 +127,27 @@ export default function main() {
     (async () => setSearchResults(await search()))();
   }, []);
 
-  const currentDocs = DOCS[preferences.laravelVersion];
+  if (!version) {
+    return (
+      <List
+        isLoading={isLoading}
+        searchBarAccessory={
+          <VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />
+        }
+      />
+    );
+  }
+
+  const currentDocs = DOCS[version];
 
   return (
     <List
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      searchBarAccessory={
+        <VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />
+      }
     >
       {searchResults?.map((hit: LaravelDocsHit) => {
         return (
@@ -145,8 +158,8 @@ export default function main() {
             icon="command-icon.png"
             actions={
               <ActionPanel title={hit.url}>
-                <OpenInBrowserAction url={hit.url} title="Open in Browser" />
-                <CopyToClipboardAction content={hit.url} title="Copy URL" />
+                <Action.OpenInBrowser url={hit.url} title="Open in Browser" />
+                <Action.CopyToClipboard content={hit.url} title="Copy URL" />
               </ActionPanel>
             }
           />
@@ -163,8 +176,8 @@ export default function main() {
                     icon="command-icon.png"
                     actions={
                       <ActionPanel title={item.url}>
-                        <OpenInBrowserAction url={item.url} title="Open in Browser" />
-                        <CopyToClipboardAction content={item.url} title="Copy URL" />
+                        <Action.OpenInBrowser url={item.url} title="Open in Browser" />
+                        <Action.CopyToClipboard content={item.url} title="Copy URL" />
                       </ActionPanel>
                     }
                   />
