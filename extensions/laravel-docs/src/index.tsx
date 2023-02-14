@@ -1,10 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  Action,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
@@ -131,9 +125,7 @@ export default function main() {
     return (
       <List
         isLoading={isLoading}
-        searchBarAccessory={
-          <VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />
-        }
+        searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
       />
     );
   }
@@ -145,9 +137,7 @@ export default function main() {
       throttle={true}
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
-      searchBarAccessory={
-        <VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />
-      }
+      searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
     >
       {searchResults?.map((hit: LaravelDocsHit) => {
         return (
