@@ -1,15 +1,15 @@
 import {
-  environment,
-  showToast,
-  Toast,
-  Form,
-  ActionPanel,
   Action,
+  ActionPanel,
+  environment,
+  Form,
+  Icon,
   launchCommand,
   LaunchType,
-  Icon,
+  showToast,
+  Toast,
 } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
@@ -24,11 +24,11 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { lists, listsIsLoading } = useLists();
-  const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { fieldTemplatesStatuses, fieldTemplatesDueDate, fieldTemplatesIsLoading } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading } = useTasks();
 
-  const { handleSubmit, itemProps, reset } = useForm<CreateTaskFormValues>({
+  const { handleSubmit, itemProps, reset, values } = useForm<CreateTaskFormValues>({
     async onSubmit(values) {
       setIsLoading(true);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Adding task" });
@@ -39,58 +39,52 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
         description: values.description,
         status: values.status,
         assigneesIds: values.assigneesIds,
+        parentTaskId: values.parentTaskId,
       };
 
-      if (values.parentTaskId) {
-        payload.parentTaskId = values.parentTaskId;
-      }
-
       if (values.dueDate) {
-        payload.fields = [{ fieldTemplateId: "", value: "" }];
+        payload.fields = [{ fieldTemplateId: fieldTemplatesDueDate?.id, date: values.dueDate }];
       }
 
-      console.log("payload:", payload);
-      return;
+      try {
+        const [data, error] = await ApiTask.create(payload);
 
-      // try {
-      //   const [data, error] = await ApiTask.create(payload);
+        if (data) {
+          toast.style = Toast.Style.Success;
+          toast.title = "Successfully created task 🎉";
 
-      //   if (data) {
-      //     toast.style = Toast.Style.Success;
-      //     toast.title = "Successfully created task 🎉";
+          reset({
+            name: "",
+            listIds: [],
+            description: "",
+            status: "",
+            assigneesIds: [],
+            parentTaskId: "",
+            dueDate: null,
+          });
 
-      //     reset({
-      //       name: "",
-      //       listIds: [],
-      //       description: "",
-      //       status: "",
-      //       assigneesIds: [],
-      //       parentTaskId: "",
-      //       dueDate: "",
-      //     });
+          await launchCommand({ name: "search_tasks", type: LaunchType.UserInitiated });
+        }
 
-      //     await launchCommand({ name: "search_tasks", type: LaunchType.UserInitiated });
-      //   }
-
-      //   if (error) {
-      //     throw new Error(error.message);
-      //   }
-      // } catch (error) {
-      //   toast.style = Toast.Style.Failure;
-      //   toast.title = "Failed to create task";
-      //   toast.message = error instanceof Error ? error.message : undefined;
-      // } finally {
-      //   setIsLoading(false);
-      // }
+        if (error) {
+          throw new Error(error.message);
+        }
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create task";
+        toast.message = error instanceof Error ? error.message : undefined;
+      } finally {
+        setIsLoading(false);
+      }
     },
     initialValues: {
-      name: draftValues?.name || "",
-      listIds: draftValues?.listIds || [],
-      description: draftValues?.description || "",
-      status: draftValues?.status || "",
-      assigneesIds: draftValues?.assigneesIds || [],
-      parentTaskId: draftValues?.parentTaskId || "",
-      dueDate: draftValues?.dueDate || undefined,
+      name: draftValues?.name ?? "",
+      listIds: draftValues?.listIds ?? [],
+      description: draftValues?.description ?? "",
+      status: draftValues?.status ?? "backLog",
+      assigneesIds: draftValues?.assigneesIds ?? [],
+      parentTaskId: draftValues?.parentTaskId ?? "",
+      dueDate: draftValues?.dueDate ?? undefined,
     },
     validation: {
       name: (value) => {
@@ -109,14 +103,30 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
   return (
     <Form
       enableDrafts
-      isLoading={isLoading || listsIsLoading || fieldTemplatesIsLoading || usersIsLoading}
+      isLoading={isLoading || listsIsLoading || fieldTemplatesIsLoading || usersIsLoading || tasksIsLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField autoFocus title="Name" placeholder="Enter name of task" {...itemProps.name} />
+      <Form.TagPicker autoFocus title="Lists" {...itemProps.listIds}>
+        {lists?.map((list) => (
+          <Form.TagPicker.Item
+            key={list.id}
+            value={list.id}
+            title={list.name}
+            icon={{
+              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              tintColor: `hsl(${list.appearance?.hue ?? "0"}, 80%, ${
+                typeof list.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+              })`,
+            }}
+          />
+        ))}
+      </Form.TagPicker>
+
+      <Form.TextField title="Name" placeholder="Enter name of task" {...itemProps.name} />
 
       <Form.TextArea title="Description" placeholder="Describe task" {...itemProps.description} />
 
@@ -124,7 +134,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
         {fieldTemplatesStatuses?.map((status) => (
           <Form.Dropdown.Item
             key={status.id}
-            value={status.value}
+            value={status.id}
             title={status.value}
             icon={{
               source: getIconByStatusState(status.id, fieldTemplatesStatuses),
@@ -156,29 +166,25 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
 
       <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
 
-      <Form.Separator />
-
-      <Form.TagPicker title="Lists" {...itemProps.listIds}>
-        {lists?.map((list) => (
-          <Form.TagPicker.Item
-            key={list.id}
-            value={list.id}
-            title={list.name}
-            icon={{
-              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
-              tintColor: `hsl(${list.appearance?.hue ?? "0"}, 80%, ${
-                typeof list.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-              })`,
-            }}
-          />
-        ))}
-      </Form.TagPicker>
-
       <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
-        <Form.Dropdown.Item value="" title="" />
-        {tasks?.map((task) => (
-          <Form.Dropdown.Item key={task.id} value={task.id} title={task.name} />
-        ))}
+        <Form.Dropdown.Item value="" title="No Task" />
+        {tasks
+          ?.filter((item) => item.listIds.some((id) => values.listIds.includes(id)))
+          ?.map((task) => {
+            return (
+              <Form.Dropdown.Item
+                key={task.id}
+                value={task.id}
+                title={task.name}
+                icon={{
+                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  tintColor: `hsl(${task.lists?.[0].appearance?.hue ?? "0"}, 80%, ${
+                    typeof task.lists?.[0].appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  })`,
+                }}
+              />
+            );
+          })}
       </Form.Dropdown>
     </Form>
   );
