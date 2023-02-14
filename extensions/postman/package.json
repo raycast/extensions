@@ -15,6 +15,7 @@
     {
       "name": "sendRequest",
       "title": "Send Request",
+      "subtitle": "Postman",
       "description": "Choose a GET request and get a response.",
       "mode": "view"
     }

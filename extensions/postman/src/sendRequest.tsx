@@ -40,6 +40,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Open Collection"
+                  icon={Icon.List}
                   onAction={() => push(<CollectionList id={collection.id} />)}
                 />
               </ActionPanel>

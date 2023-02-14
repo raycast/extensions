@@ -53,6 +53,7 @@ const Actions: React.FC<{
       <ActionPanel>
         <Action
           title="Send Request"
+          icon={Icon.Upload}
           onAction={() =>
             showToast({
               title: requestDetails.request.method + " not supported",
@@ -88,6 +89,7 @@ const Actions: React.FC<{
             )
           }
           title="Send Request"
+          icon={Icon.Upload}
         />
       </ActionPanel>
     )
@@ -96,6 +98,7 @@ const Actions: React.FC<{
     <ActionPanel>
       <Action
         title="Send Request"
+        icon={Icon.Upload}
         onAction={() =>
           showToast({
             title: "No URL for this response.",

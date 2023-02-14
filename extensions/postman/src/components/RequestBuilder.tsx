@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api"
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api"
 import {
   HeaderType,
   MethodsType,
@@ -33,6 +33,7 @@ export const RequestBuilder: React.FC<RequestBuilderProps> = ({
         <ActionPanel>
           <Action.SubmitForm
             title="Send Request"
+            icon={Icon.Upload}
             onSubmit={(e) => {
               push(<ResponseDetails payload={e} {...rest} />)
             }}
