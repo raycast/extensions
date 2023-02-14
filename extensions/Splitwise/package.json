@@ -22,6 +22,7 @@
     {
       "name": "personalAccessToken",
       "title": "Personal Access Token",
+      "placeholder: "Generate at https://secure.splitwise.com/apps",
       "description": "See the extension's README for instructions about how to create a token",
       "type": "password",
       "required": true
