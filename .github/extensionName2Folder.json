@@ -248,7 +248,7 @@
   "firebase-import-export": "firebase-import-export",
   "flaticon": "flaticon",
   "flow": "flow",
-  "luent-outdoors": "fluent-outdoors",
+  "fluent-outdoors": "fluent-outdoors",
   "flutter-documentation-search": "flutter-documentation-search",
   "pub-dev": "flutter-pub-dev-search",
   "flypy": "flypy-code-query",
