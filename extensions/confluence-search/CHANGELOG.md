@@ -1,5 +1,8 @@
 # Confluence Search Changelog
 
+ ## [Update] - 2023-02-14
+ - feat: show last modified date
+ 
  ## [Update] - 2023-02-09
  - feat: add confluence filter by type, support page, blog, attachment.
  - feat: default only search page, [#4340](https://github.com/raycast/extensions/issues/4340)

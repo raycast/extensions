@@ -131,6 +131,7 @@ async function searchConfluence(searchText: string, _type: string, signal: Abort
   if (_type) {
     query = `type=${_type} AND ${query}`;
   }
+  query = query + ` order by lastmodified desc`;
   // url encode query
   query = encodeURIComponent(query);
   const apiUrl = `${confluenceUrl}/rest/api/search?cql=${query}&expand=content.version`;
@@ -154,6 +155,7 @@ async function parseResponse(response: Response) {
         icon: jsonResult.content.version.by.profilePicture.path as string,
         subTitle: jsonResult.resultGlobalContainer.title as string,
         mediaType: jsonResult.content?.metadata?.mediaType as string,
+        lastModified: jsonResult.lastModified as string,
       };
     });
 }
@@ -197,6 +199,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           text: { value: searchResult.author },
           icon: { source: `https://${prefs.instance}${searchResult.icon}`, mask: Image.Mask.Circle },
         },
+        {
+          date: new Date(searchResult.lastModified),
+        },
       ]}
       icon={{ source: getConfluenceIcon(searchResult) }}
       actions={
@@ -216,6 +221,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 interface SearchResult {
+  [x: string]: string | number | Date;
   id: string;
   name: string;
   type: string;
@@ -224,6 +230,7 @@ interface SearchResult {
   icon: string;
   subTitle: string;
   mediaType: string;
+  lastmodified: string;
 }
 
 interface APIResponse {
