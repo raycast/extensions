@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 
