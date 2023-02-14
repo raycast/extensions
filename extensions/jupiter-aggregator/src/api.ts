@@ -44,9 +44,8 @@ export function fetchPrice(token) {
       showToast({
         style: Toast.Style.Failure,
         title: "Price Fetch Failed",
-        message: "Check network connection",
+        message: "Check network connection:" + error,
       });
-      console.log(error);
     },
   });
 }
@@ -57,9 +56,8 @@ export function fetchTokenList() {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch token list",
-        message: "Check network connection",
+        message: "Check network connection:" + error,
       });
-      console.log(error);
     },
   });
 }
@@ -70,11 +68,10 @@ export const compareTokens = async (token1: string, amount: any, token2: string)
     const result = amount * res.data.data[token1].price;
     return result;
   } catch (error) {
-    console.log(error);
     showToast({
       style: Toast.Style.Failure,
       title: "Failed to compare tokens",
-      message: "Check network connection",
+      message: "Check network connection:" + error,
     });
   }
 };
