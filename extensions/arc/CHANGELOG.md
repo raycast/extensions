@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Quicklinks] - 2023-02-14
+
+- Added a new action to quickly create a quicklink from a page.
+
 ## [Improvements] - 2023-01-31
 
 - Added preferences to configure the `Search Arc` command.

@@ -313,3 +313,11 @@ export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Ta
     </ActionPanel.Section>
   );
 }
+
+export function CreateQuickLinkActionSection(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action.CreateQuicklink quicklink={{ link: props.url, name: props.title, application: "Arc" }} />
+    </ActionPanel.Section>
+  );
+}
