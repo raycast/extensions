@@ -1,5 +1,9 @@
 # Readwise to Tana Changelog
 
+## [Filtering and new fields] - 2023-02-14
+
+- Add filtering by category to library view
+
 ## [Initial Version] - 2023-02-09
 
 - List books

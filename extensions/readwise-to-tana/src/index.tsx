@@ -14,8 +14,9 @@ import { useBooks } from './useApi'
 
 export default function Command() {
   const [template, setTemplate] = React.useState<string>('')
+  const [category, setCategory] = React.useState<string>('all')
 
-  const { data, isLoading } = useBooks()
+  const { data, isLoading } = useBooks({ category })
   const { pop } = useNavigation()
 
   React.useEffect(() => {
@@ -81,9 +82,34 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter Books">
+    <List
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Category"
+          onChange={setCategory}
+          value={category}
+        >
+          <List.Dropdown.Item value="all" title="All Categories" />
+          {['articles', 'books', 'podcasts', 'supplementals', 'tweets'].map(
+            (value) => (
+              <List.Dropdown.Item
+                key={value}
+                value={value}
+                title={value.charAt(0).toUpperCase() + value.substring(1)}
+              />
+            )
+          )}
+        </List.Dropdown>
+      }
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter Library"
+    >
       {data?.results.length === 0 ? (
-        <List.EmptyView title="No books found" />
+        <List.EmptyView
+          title={
+            category === 'all' ? 'No results found' : `No ${category} found`
+          }
+        />
       ) : (
         data?.results.map((book) => (
           <List.Item

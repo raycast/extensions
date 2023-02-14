@@ -39,8 +39,14 @@ const getHeaders = () => {
   }
 }
 
-export const useBooks = () => {
-  return useFetch<{ results: Book[] }>(`${baseUrl}/books/`, getHeaders())
+export const useBooks = ({ category }: { category: string }) => {
+  const url = new URL(`${baseUrl}/books/`)
+
+  if (category !== 'all') {
+    url.searchParams.set('category', category)
+  }
+
+  return useFetch<{ results: Book[] }>(url.toString(), getHeaders())
 }
 
 export const useBook = (id: string) => {
