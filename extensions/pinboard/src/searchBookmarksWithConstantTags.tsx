@@ -4,15 +4,15 @@ import { useSearchBookmarks, Bookmark } from "./api";
 import { BookmarkListItem } from "./components";
 
 export default function Command() {
-  const { isLoading, bookmarks } = useSearchBookmarks();
+  const { isLoading, data } = useSearchBookmarks();
   const [searchText, setSearchText] = useState("");
-  const [filteredBookmarks, setFilteredBookmarks] = useState(bookmarks);
+  const [filteredBookmarks, setFilteredBookmarks] = useState(data?.bookmarks);
 
   useEffect(() => {
-    if (bookmarks) {
-      setFilteredBookmarks(filterByTagsWithConstant(bookmarks, searchText));
+    if (data) {
+      setFilteredBookmarks(filterByTagsWithConstant(data.bookmarks, searchText));
     }
-  }, [searchText, bookmarks]);
+  }, [searchText, data]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by tags..." throttle>
@@ -24,9 +24,10 @@ export default function Command() {
 
 function filterByTagsWithConstant(bookmarks: Bookmark[], searchTerm: string) {
   const { constantTags } = getPreferenceValues();
-  console.log({ constantTags });
   const searchTags = searchTerm.split(" ");
-  const searchTagsWithConstant = [...searchTags, constantTags];
+  const searchTagsWithConstant = [...searchTags, constantTags]
+  // Filter out empty tags, which happens when there are no constant tags
+  .filter(tag => !!tag);
   return bookmarks.filter((bookmark) => {
     const bookmarkTags = bookmark.tags?.split(" ");
     return searchTagsWithConstant.every((searchTag) => {
