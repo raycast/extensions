@@ -4,6 +4,7 @@ import { Book, Highlight } from './useApi'
 
 export type SettingsValues = {
   author: string
+  authorSupertag: string
   category: string
   coverImageUrl: string
   highlightColor: string
@@ -72,6 +73,12 @@ export default function Settings({ handleSave, template }: SettingsProps) {
       />
       <Form.TextField id="title" title="Title" storeValue />
       <Form.TextField id="author" title="Author" storeValue />
+      <Form.TextField
+        id="authorSupertag"
+        title="Author Supertag"
+        storeValue
+        info="This supertag is added to the author, i.e., #person. # can be omitted."
+      />
       <Form.TextField id="id" title="ID" storeValue />
       <Form.TextField id="category" title="Category" storeValue />
       <Form.TextField id="source" title="Source" storeValue />

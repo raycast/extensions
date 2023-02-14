@@ -1,8 +1,9 @@
 # Readwise to Tana Changelog
 
-## [Add new highlight fields] - 2023-02-14
+## [Add new highlight fields and author supertag] - 2023-02-14
 
 - Add more field mappings for highlight tagging: Updated At, Highlighted At, and Color
+- Add ability to set supertag on author
 
 ## [Filtering and new fields] - 2023-02-14
 

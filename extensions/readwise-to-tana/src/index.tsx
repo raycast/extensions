@@ -38,6 +38,7 @@ export default function Command() {
   const handleSave = async (values: SettingsValues) => {
     const {
       author,
+      authorSupertag,
       category,
       coverImageUrl,
       highlightColor,
@@ -59,7 +60,11 @@ export default function Command() {
       ? `\n- {{title}} #${supertag.replaceAll('#', '')}`
       : '\n- {{title}}'
 
-    t += author ? `\n  - ${author}:: {{author}}` : ''
+    t += author
+      ? `\n  - ${author}:: {{author}}${
+          authorSupertag ? ` #${authorSupertag.replaceAll('#', '')}` : ''
+        }`
+      : ''
     t += id ? `\n  - ${id}:: {{id}}` : ''
     t += category ? `\n  - ${category}:: {{category}}` : ''
     t += source ? `\n  - ${source}:: {{source}}` : ''
