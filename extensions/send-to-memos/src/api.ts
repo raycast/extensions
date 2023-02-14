@@ -1,5 +1,5 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useCachedState } from "@raycast/utils";
 import parse from "url-parse";
 import qs from "qs";
 import FormData from "form-data";
@@ -50,7 +50,7 @@ const getOpenId = () => {
 };
 
 const getUseFetch = <T>(url: string, options: Record<string, any>) => {
-  return useFetch<T>(url, {
+  return useFetch<T, T>(url, {
     headers: {
       "Content-Type": "application/json",
       cookie: cache.get("cookie") || "",
@@ -94,7 +94,12 @@ export const sendMemo = (data: PostMemoParams) => {
 export const getTags = () => {
   const url = getRequestUrl(`/api/tag?openId=${getOpenId()}`);
 
-  return getUseFetch<ResponseData<TagResponse>>(url, {});
+  return getUseFetch<ResponseData<TagResponse>>(url, {
+    keepPreviousData: true,
+    initialData: {
+      data: [],
+    },
+  });
 };
 
 export const postFile = (filePath: string) => {
@@ -122,7 +127,14 @@ export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
 
   const url = getRequestUrl(`/api/memo?${queryString}`);
 
-  return getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {});
+  const { isLoading, data, revalidate } = getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {
+    keepPreviousData: true,
+    initialData: {
+      data: [],
+    },
+  });
+
+  return { isLoading, data, revalidate };
 };
 
 export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
