@@ -634,6 +634,8 @@ export type Mutation = {
   projectApiKeyUpdate: ProjectApiKeyUpdatePayload;
   /** Create a new project from a GitHub repository. */
   projectCreateFromRepository: ProjectCreateFromRepositoryPayload;
+  /** Create a new project from a GitHub repository. */
+  projectCreateFromSchema: ProjectCreateFromSchemaPayload;
   /** Create a new project from a template in a newly created GitHub repository. */
   projectCreateFromTemplate: ProjectCreateFromTemplatePayload;
   projectDelete: ProjectDeletePayload;
@@ -722,6 +724,10 @@ export type MutationProjectApiKeyUpdateArgs = {
 
 export type MutationProjectCreateFromRepositoryArgs = {
   input: ProjectCreateFromRepositoryInput;
+};
+
+export type MutationProjectCreateFromSchemaArgs = {
+  input: ProjectCreateFromSchemaInput;
 };
 
 export type MutationProjectCreateFromTemplateArgs = {
@@ -1133,6 +1139,30 @@ export type ProjectCreateFromRepositoryPayload =
 
 export type ProjectCreateFromRepositorySuccess = {
   __typename?: "ProjectCreateFromRepositorySuccess";
+  project: Project;
+  query: Query;
+};
+
+export type ProjectCreateFromSchemaInput = {
+  accountId: Scalars["ID"];
+  databaseRegions?: Array<Scalars["String"]>;
+  projectSlug: Scalars["String"];
+  schema: Scalars["String"];
+};
+
+export type ProjectCreateFromSchemaPayload =
+  | AccountDoesNotExistError
+  | CurrentPlanLimitReachedError
+  | DuplicateDatabaseRegionsError
+  | EmptyDatabaseRegionsError
+  | InvalidDatabaseRegionsError
+  | ProjectCreateFromSchemaSuccess
+  | SlugAlreadyExistsError
+  | SlugInvalidError
+  | SlugTooLongError;
+
+export type ProjectCreateFromSchemaSuccess = {
+  __typename?: "ProjectCreateFromSchemaSuccess";
   project: Project;
   query: Query;
 };
