@@ -49,7 +49,7 @@ const CreateConfig: React.FC<{ revalidate: () => Promise<boolean> }> = ({ revali
       }
     >
       <List.EmptyView
-        icon="sad.png"
+        icon="sad-face.png"
         title="Your costflow config file is not exists"
         description="You can use the default configuration to Create one ⬇️ "
       />
