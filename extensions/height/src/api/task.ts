@@ -17,9 +17,9 @@ export const ApiTask = {
       return [null, ((await response.json()) as ApiErrorResponse).error] as const;
     }
   },
-  update(id: string, values: UpdateTaskPayload) {
-    return fetch(`${ApiUrls.tasks}/${id}`, {
-      method: "PATCH",
+  update(taskId: string, values: UpdateTaskPayload) {
+    return fetch(`${ApiUrls.tasks}/${taskId}`, {
+      method: "PUT",
       headers: ApiHeaders,
       body: JSON.stringify(values),
     });

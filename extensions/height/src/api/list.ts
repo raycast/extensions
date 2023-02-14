@@ -17,8 +17,8 @@ export const ApiList = {
       return [null, ((await response.json()) as ApiErrorResponse).error] as const;
     }
   },
-  update(id: string, values: UpdateListPayload) {
-    return fetch(`${ApiUrls.lists}/${id}`, {
+  update(listId: string, values: UpdateListPayload) {
+    return fetch(`${ApiUrls.lists}/${listId}`, {
       method: "PATCH",
       headers: ApiHeaders,
       body: JSON.stringify(values),
