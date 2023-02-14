@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.47.3",
     "algoliasearch": "^4.11.0",
     "striptags": "^3.2.0"
   },
