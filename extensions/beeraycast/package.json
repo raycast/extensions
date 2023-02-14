@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "beeraycast",
-  "title": "BeeRaycast",
+  "name": "beeminder",
+  "title": "Beeminder",
   "description": "Manage your Beeminder goals from Raycast",
   "icon": "beelogo.png",
   "categories": [
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "beeminder",
-      "title": "BeeRaycast",
+      "title": "Manage Beeminder Goals",
       "description": "Manage your Beeminder goals from Raycast",
       "mode": "view"
     }

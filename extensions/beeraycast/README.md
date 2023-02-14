@@ -1,4 +1,4 @@
-# BeeRaycast
+# Beeminder
 
 This extensions allows you to manage your Beeminder goals with Raycast 🐝
 
