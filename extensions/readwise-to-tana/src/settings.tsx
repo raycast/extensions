@@ -6,9 +6,12 @@ export type SettingsValues = {
   author: string
   category: string
   coverImageUrl: string
+  highlightColor: string
+  highlightHighlightedAt: string
   highlightLocation: string
   highlightNote: string
   highlightSupertag: string
+  highlightUpdatedAt: string
   id: string
   readwiseUrl: string
   source: string
@@ -103,6 +106,13 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         info="A child node with '**Note:** {{note}}' will be added if this is omitted"
         storeValue
       />
+      <Form.TextField id="highlightColor" title="Color" storeValue />
+      <Form.TextField
+        id="highlightHighlightedAt"
+        title="Highlighted At"
+        storeValue
+      />
+      <Form.TextField id="highlightUpdatedAt" title="Updated At" storeValue />
       <Form.Separator />
       <Form.TextArea
         info="This is the compiled template that will be used to generate the note."

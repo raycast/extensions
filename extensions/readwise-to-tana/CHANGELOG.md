@@ -1,5 +1,9 @@
 # Readwise to Tana Changelog
 
+## [Add new highlight fields] - 2023-02-14
+
+- Add more field mappings for highlight tagging: Updated At, Highlighted At, and Color
+
 ## [Filtering and new fields] - 2023-02-14
 
 - Add filtering by category to library view
