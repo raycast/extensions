@@ -317,7 +317,10 @@ export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Ta
 export function CreateQuickLinkActionSection(props: { url: string; title?: string }) {
   return (
     <ActionPanel.Section>
-      <Action.CreateQuicklink quicklink={{ link: props.url, name: props.title, application: "Arc" }} />
+      <Action.CreateQuicklink
+        quicklink={{ link: props.url, name: props.title, application: "Arc" }}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
+      />
     </ActionPanel.Section>
   );
 }
