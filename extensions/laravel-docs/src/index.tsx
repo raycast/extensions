@@ -13,21 +13,22 @@ type docList = {
 };
 
 const DOCS: { [key: string]: docList } = Object.fromEntries(
-  glob.sync(__dirname + '/assets/documentation/*.json')
+  glob
+    .sync(__dirname + "/assets/documentation/*.json")
     // only keep the version from the path as key, result: [['master', {...}], ['10.x', {...}]]
     .map((path: string) => [/(?<version>[^\/]+)\.json/.exec(path)?.groups?.version, require(path)])
     // Sort these putting non-numeric "versions" first.
     .sort(function (a: [string], b: [string]) {
-      let aVersion: RegExpMatchArray|null = a[0].match(/\d+/);
-      let bVersion: RegExpMatchArray|null = b[0].match(/\d+/);
-      if(aVersion === null) {
+      let aVersion: RegExpMatchArray | null = a[0].match(/\d+/);
+      let bVersion: RegExpMatchArray | null = b[0].match(/\d+/);
+      if (aVersion === null) {
         return -1;
       }
 
-      if(bVersion === null) {
+      if (bVersion === null) {
         return 1;
       }
-      
+
       return (bVersion[0] as unknown as number) - (aVersion[0] as unknown as number);
     })
 );
