@@ -1,10 +1,14 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { MutatePromise, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiTask } from "../api/task";
+import useFieldTemplates from "../hooks/useFieldTemplates";
+import useLists from "../hooks/useLists";
+import useTasks from "../hooks/useTasks";
+import useUsers from "../hooks/useUsers";
 import { TaskObject, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
 import { ApiResponse } from "../types/utils";
-import { ListTypes, ListVisualizations } from "../utils/list";
+import { getIconByStatusState } from "../utils/task";
 
 type Props = {
   task: TaskObject;
@@ -12,22 +16,34 @@ type Props = {
 };
 
 export default function UpdateList({ task, mutateTask }: Props) {
+  const { theme } = environment;
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { handleSubmit, itemProps, reset } = useForm<UpdateTaskFormValues>({
+  const { lists, listsIsLoading } = useLists();
+  const { fieldTemplatesStatuses, fieldTemplatesDueDate, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { users, usersIsLoading } = useUsers();
+  const { tasks, tasksIsLoading } = useTasks();
+
+  const taskDueDate = task.fields.find((field) => field.fieldTemplateId === fieldTemplatesDueDate?.id);
+
+  const { handleSubmit, itemProps, reset, values } = useForm<UpdateTaskFormValues>({
     async onSubmit(values) {
       setIsLoading(true);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
       const payload: UpdateTaskPayload = {
         name: values.name,
-        description: values.description,
+        description: values.description || " ",
         assigneesIds: values.assigneesIds,
         status: values.status,
         listIds: values.listIds,
         parentTaskId: values.parentTaskId,
       };
+
+      if (values.dueDate) {
+        payload.fields = [{ fieldTemplateId: fieldTemplatesDueDate?.id, date: values.dueDate }];
+      }
 
       try {
         await mutateTask(ApiTask.update(task.id, payload));
@@ -37,11 +53,12 @@ export default function UpdateList({ task, mutateTask }: Props) {
 
         reset({
           name: "",
-          description: "",
-          assigneesIds: [],
-          status: "todo",
           listIds: [],
-          parentTaskId: null,
+          description: "",
+          status: "",
+          assigneesIds: [],
+          parentTaskId: "",
+          dueDate: null,
         });
 
         pop();
@@ -54,42 +71,113 @@ export default function UpdateList({ task, mutateTask }: Props) {
       }
     },
     initialValues: {
-      listIds: task.listIds ?? [],
-      status: task.status ?? "todo",
       name: task.name ?? "",
+      listIds: task.listIds ?? [],
       description: task.description ?? "",
+      status: task.status ?? "backLog",
       assigneesIds: task.assigneesIds ?? [],
-      parentTaskId: task.parentTaskId ?? null,
+      parentTaskId: task.parentTaskId ?? "",
+      dueDate: taskDueDate ? new Date(taskDueDate?.date || "") : null,
     },
-    validation: {},
+    validation: {
+      name: (value) => {
+        if (!value || value.length === 0) {
+          return "Name is required";
+        }
+      },
+      listIds: (value) => {
+        if (!value || value.length === 0) {
+          return "List is required";
+        }
+      },
+    },
   });
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || listsIsLoading || fieldTemplatesIsLoading || usersIsLoading || tasksIsLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type" {...itemProps.status}>
-        {ListTypes.map((item) => (
-          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+      <Form.TagPicker autoFocus title="Lists" {...itemProps.listIds}>
+        {lists?.map((list) => (
+          <Form.TagPicker.Item
+            key={list.id}
+            value={list.id}
+            title={list.name}
+            icon={{
+              source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+              tintColor: `hsl(${list.appearance?.hue ?? "0"}, 80%, ${
+                typeof list.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+              })`,
+            }}
+          />
+        ))}
+      </Form.TagPicker>
+
+      <Form.TextField title="Name" placeholder="Enter name of task" {...itemProps.name} />
+
+      <Form.TextArea title="Description" placeholder="Describe task" {...itemProps.description} />
+
+      <Form.Dropdown title="Status" {...itemProps.status}>
+        {fieldTemplatesStatuses?.map((status) => (
+          <Form.Dropdown.Item
+            key={status.id}
+            value={status.id}
+            title={status.value}
+            icon={{
+              source: getIconByStatusState(status.id, fieldTemplatesStatuses),
+              tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
+                typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+              })`,
+            }}
+          />
         ))}
       </Form.Dropdown>
 
-      <Form.Dropdown title="Visualization" {...itemProps.visualization}>
-        {ListVisualizations.map((item) => (
-          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+      <Form.TagPicker title="Assignees" {...itemProps.assigneesIds}>
+        {users?.map((user) => (
+          <Form.TagPicker.Item
+            key={user.id}
+            value={user.id}
+            title={`${user.firstname} ${user.lastname}`}
+            icon={{
+              source: user?.pictureUrl ?? Icon.Person,
+              tintColor: user?.pictureUrl
+                ? undefined
+                : `hsl(${user?.hue ?? "0"}, 80%, ${
+                    typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  })`,
+            }}
+          />
         ))}
+      </Form.TagPicker>
+
+      <Form.DatePicker title="Due Date" {...itemProps.dueDate} />
+
+      <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
+        <Form.Dropdown.Item value="" title="No Task" />
+        {tasks
+          ?.filter((item) => item.listIds.some((id) => values.listIds.includes(id)))
+          ?.map((task) => {
+            return (
+              <Form.Dropdown.Item
+                key={task.id}
+                value={task.id}
+                title={task.name}
+                icon={{
+                  source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                  tintColor: `hsl(${task.lists?.[0].appearance?.hue ?? "0"}, 80%, ${
+                    typeof task.lists?.[0].appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  })`,
+                }}
+              />
+            );
+          })}
       </Form.Dropdown>
-
-      <Form.TextField autoFocus title="Name" placeholder="Enter name of list" {...itemProps.name} />
-
-      <Form.TextArea title="Description" placeholder="Describe list" {...itemProps.description} />
-
-      <Form.TextField title="Hue" placeholder="Enter number from 0 to 360" {...itemProps.hue} />
     </Form>
   );
 }
