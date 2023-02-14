@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { AccountDetail, UnknownError, CommandNotFoundError } from "./components";
@@ -32,6 +32,7 @@ const ErrorDetails = (args: { error: Error }) => {
 export default function Command() {
   const { email, password } = getPreferenceValues<Preferences>();
   const api = lastPass(email, password);
+  const [isLoading, setIsLoading] = useState(true);
   const [accounts, setAccounts] = useState<
     { id: string; name: string; username: string; password: string; url: string }[]
   >([]);
@@ -45,8 +46,9 @@ export default function Command() {
           await api.login();
         }
 
-        const account = await api.list();
-        setAccounts(account);
+        const accounts = await api.list();
+        setAccounts(accounts);
+        setIsLoading(false);
       } catch (error) {
         if (error instanceof Error) {
           setError(error);
@@ -55,11 +57,15 @@ export default function Command() {
     })();
   }, []);
 
-  return error ? (
-    <ErrorDetails error={error} />
-  ) : (
+  if (error) {
+    return <ErrorDetails error={error} />;
+  }
+  if (!isLoading && accounts.length === 0) {
+    return <Detail markdown="### Sorry, you have no accounts in LastPass ¯\\_(ツ)_/¯" />;
+  }
+  return (
     <List
-      isLoading={accounts.length === 0}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

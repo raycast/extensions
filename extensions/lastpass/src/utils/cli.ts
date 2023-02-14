@@ -30,7 +30,8 @@ const execute = async (
   command: string,
   opts: { log: { stdout: boolean; stderr: boolean } } = { log: { stdout: false, stderr: false } }
 ) => {
-  const wrappedCommand = `zsh -l -c '${command}'`;
+  const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin";
+  const wrappedCommand = `zsh -l -c 'export PATH="$PATH:${PATH}" && ${command}'`;
   console.log(`Executing: ${wrappedCommand}`);
   return new Promise<string>((res, rej) =>
     exec(wrappedCommand, (error: ExecException | null, stdout: string, stderr: string) => {
