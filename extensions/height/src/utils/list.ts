@@ -1,3 +1,5 @@
+import { ListObject } from "../types/list";
+
 export const ListIcons = [
   {
     name: "List",
@@ -121,3 +123,7 @@ export const ListVisualizations = [
     icon: "list-icons/list-gantt",
   },
 ] as const;
+
+export function getListById(listId: string, lists: ListObject[] | undefined, smartLists: ListObject[] | undefined) {
+  return lists?.find((list) => list.id === listId) ?? smartLists?.find((list) => list.id === listId);
+}

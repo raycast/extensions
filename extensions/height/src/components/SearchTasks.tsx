@@ -1,15 +1,15 @@
 import {
   Action,
-  Clipboard,
-  showHUD,
   ActionPanel,
+  Clipboard,
+  Color,
   environment,
   Icon,
   launchCommand,
   LaunchType,
   List,
+  showHUD,
   useNavigation,
-  Color,
 } from "@raycast/api";
 import { differenceInCalendarDays, format } from "date-fns";
 import { useEffect, useState } from "react";
@@ -20,7 +20,8 @@ import useUsers from "../hooks/useUsers";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
-import { getIconByStatusState } from "../utils/task";
+import { getListById } from "../utils/list";
+import { getAssignedUsers, getAssigneeFullNameById, getIconByStatusState, getPriorityIcon } from "../utils/task";
 import UpdateTask from "./UpdateTask";
 
 type Props = {
@@ -216,19 +217,6 @@ function getTaskDueDateAccessory(task: TaskObject) {
   };
 }
 
-function getPriorityIcon(priority: string | undefined) {
-  switch (priority) {
-    case "High":
-      return Icon.Exclamationmark3;
-    case "Medium":
-      return Icon.Exclamationmark2;
-    case "Low":
-      return Icon.Exclamationmark;
-    default:
-      return Icon.ExclamationMark;
-  }
-}
-
 function getTaskPriorityAccessory(task: TaskObject) {
   if (task.completed) return {};
   const foundPriority = task.fields.find((field) => field.name.toLowerCase() === "priority");
@@ -240,17 +228,6 @@ function getTaskPriorityAccessory(task: TaskObject) {
     },
     tooltip: `Priority: ${foundPriority.selectValue?.value}`,
   };
-}
-
-function getAssignedUsers(assigneesIds: string[], users: UserObject[] | undefined) {
-  return assigneesIds.map((userId) => {
-    const foundUser = users?.find((user) => user.id === userId);
-
-    return {
-      icon: foundUser?.pictureUrl ?? Icon.Person,
-      tooltip: `${foundUser?.firstname} ${foundUser?.lastname}`,
-    };
-  });
 }
 
 function assignedDropdownAccessory(
@@ -327,14 +304,4 @@ function listDropdownItem(item: ListObject, theme: string): JSX.Element {
       value={item.id}
     />
   );
-}
-
-function getListById(listId: string, lists: ListObject[] | undefined, smartLists: ListObject[] | undefined) {
-  return lists?.find((list) => list.id === listId) ?? smartLists?.find((list) => list.id === listId);
-}
-
-function getAssigneeFullNameById(assigneeId: string | undefined, users: UserObject[] | undefined) {
-  if (assigneeId === "all") return "All";
-  const foundUser = users?.find((user) => user.id === assigneeId);
-  return `${foundUser?.firstname} ${foundUser?.lastname}`;
 }
