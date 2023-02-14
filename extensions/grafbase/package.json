@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "search-projects",
-      "title": "Search Projects",
+      "title": "Search Grafbase Projects",
       "description": "Explore your Grafbase projects, branches, deployments, and commit history.",
       "mode": "view"
     }
