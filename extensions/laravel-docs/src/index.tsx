@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 import { VersionDropdown } from "./version_dropdown";
-var glob = require("glob");
+/* eslint-disable @typescript-eslint/no-var-requires */
+const glob = require("glob"); // No ES version is provided.
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 type docList = {
   [key: string]: {
@@ -16,11 +18,11 @@ const DOCS: { [key: string]: docList } = Object.fromEntries(
   glob
     .sync(__dirname + "/assets/documentation/*.json")
     // only keep the version from the path as key, result: [['master', {...}], ['10.x', {...}]]
-    .map((path: string) => [/(?<version>[^\/]+)\.json/.exec(path)?.groups?.version, require(path)])
+    .map((path: string) => [/(?<version>[^/]+)\.json/.exec(path)?.groups?.version, require(path)])
     // Sort these putting non-numeric "versions" first.
     .sort(function (a: [string], b: [string]) {
-      let aVersion: RegExpMatchArray | null = a[0].match(/\d+/);
-      let bVersion: RegExpMatchArray | null = b[0].match(/\d+/);
+      const aVersion: RegExpMatchArray | null = a[0].match(/\d+/);
+      const bVersion: RegExpMatchArray | null = b[0].match(/\d+/);
       if (aVersion === null) {
         return -1;
       }
@@ -73,7 +75,7 @@ export default function main() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<object[] | undefined>();
   const [version, setVersion] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
