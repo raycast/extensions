@@ -47,6 +47,7 @@
       "name": "beeminderUsername",
       "title": "Beeminder Username",
       "description": "Your Beeminder Username",
+      "placeholder": "https://www.beeminder.com/settings/account",
       "type": "textfield",
       "default": "",
       "required": true
