@@ -48,7 +48,6 @@ export function useSearchBookmarks() {
 
   return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
     async parseResponse(response) {
-      console.log("Parsing response...")
       if (!response.ok) {
         throw new Error(response.statusText);
       }

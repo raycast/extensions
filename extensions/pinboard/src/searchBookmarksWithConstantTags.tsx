@@ -26,8 +26,8 @@ function filterByTagsWithConstant(bookmarks: Bookmark[], searchTerm: string) {
   const { constantTags } = getPreferenceValues();
   const searchTags = searchTerm.split(" ");
   const searchTagsWithConstant = [...searchTags, constantTags]
-  // Filter out empty tags, which happens when there are no constant tags
-  .filter(tag => !!tag);
+    // Filter out empty tags, which happens when there are no constant tags
+    .filter((tag) => !!tag);
   return bookmarks.filter((bookmark) => {
     const bookmarkTags = bookmark.tags?.split(" ");
     return searchTagsWithConstant.every((searchTag) => {
