@@ -21,12 +21,13 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
     Object.assign(filters, { assigneesIds: { values: [assigneeId] } });
   }
 
-  // const order = [{ column: "4daa1897-ee97-492a-aa21-f883a17aebdd", direction: "DESC" }];
-  const order = [{ column: "createdAt", direction: "DESC" }];
+  const stringifiedFilters = JSON.stringify(filters);
 
-  const endpoint = ApiUrls.tasks + "?" + "filters=" + JSON.stringify(filters) + "&" + "order=" + JSON.stringify(order);
+  const order = JSON.stringify([{ column: "createdAt", direction: "DESC" }]);
 
-  console.log("endpoint:", endpoint);
+  const include = JSON.stringify(["Lists"]);
+
+  const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
 
   const { data, error, isLoading, mutate } = useFetch<ApiResponse<TaskObject[]>>(endpoint, {
     headers: ApiHeaders,
