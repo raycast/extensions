@@ -17,6 +17,7 @@ import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
 import { CreateTaskFormValues, CreateTaskPayload } from "../types/task";
+import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState } from "../utils/task";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateTaskFormValues }) {
@@ -118,9 +119,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
             title={list.name}
             icon={{
               source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
-              tintColor: `hsl(${list.appearance?.hue ?? "0"}, 80%, ${
-                typeof list.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-              })`,
+              tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
             }}
           />
         ))}
@@ -178,9 +177,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
                 title={task.name}
                 icon={{
                   source: task.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
-                  tintColor: `hsl(${task.lists?.[0].appearance?.hue ?? "0"}, 80%, ${
-                    typeof task.lists?.[0].appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-                  })`,
+                  tintColor: getTintColorFromHue(task.lists?.[0]?.appearance?.hue, ListColors),
                 }}
               />
             );

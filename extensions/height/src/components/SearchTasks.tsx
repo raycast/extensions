@@ -20,7 +20,7 @@ import useUsers from "../hooks/useUsers";
 import { ListObject } from "../types/list";
 import { TaskObject } from "../types/task";
 import { UserObject } from "../types/user";
-import { getListById } from "../utils/list";
+import { getListById, getTintColorFromHue, ListColors } from "../utils/list";
 import { getAssignedUsers, getAssigneeFullNameById, getIconByStatusState, getPriorityIcon } from "../utils/task";
 import UpdateTask from "./UpdateTask";
 
@@ -290,16 +290,14 @@ function listDropdownAccessory(
   );
 }
 
-function listDropdownItem(item: ListObject, theme: string): JSX.Element {
+function listDropdownItem(item: ListObject): JSX.Element {
   return (
     <List.Dropdown.Item
       key={item.id}
       title={item.name}
       icon={{
         source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
-        tintColor: `hsl(${item.appearance?.hue ?? "0"}, 80%, ${
-          typeof item.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-        })`,
+        tintColor: getTintColorFromHue(item?.appearance?.hue, ListColors),
       }}
       value={item.id}
     />

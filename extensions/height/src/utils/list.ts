@@ -1,4 +1,4 @@
-import { ListObject } from "../types/list";
+import { ListColor, ListHue, ListObject } from "../types/list";
 
 export const ListIcons = [
   {
@@ -88,6 +88,93 @@ export const ListIcons = [
   },
 ] as const;
 
+export const ListColors = [
+  {
+    name: "White",
+    value: "",
+    icon: "list-color",
+    tintColor: "hsl(0, 0%, 100%)",
+  },
+  {
+    name: "Tomato",
+    value: "0",
+    icon: "list-color",
+    tintColor: "hsl(0, 100%, 68%)",
+  },
+  {
+    name: "Sandy Brown",
+    value: "18",
+    icon: "list-color",
+    tintColor: "hsl(18, 94%, 68%)",
+  },
+  {
+    name: "Gold",
+    value: "42",
+    icon: "list-color",
+    tintColor: "hsl(42, 82%, 57%)",
+  },
+  {
+    name: "Golden Rod",
+    value: "56",
+    icon: "list-color",
+    tintColor: "hsl(56, 73%, 45%)",
+  },
+  {
+    name: "Yellow Green",
+    value: "80",
+    icon: "list-color",
+    tintColor: "hsl(80, 79%, 43%)",
+  },
+  {
+    name: "Medium Sea Green",
+    value: "152",
+    icon: "list-color",
+    tintColor: "hsl(152, 96%, 38%)",
+  },
+  {
+    name: "Dark Turquoise",
+    value: "180",
+    icon: "list-color",
+    tintColor: "hsl(180, 100%, 39%)",
+  },
+  {
+    name: "Deep Sky Blue",
+    value: "198",
+    icon: "list-color",
+    tintColor: "hsl(198, 100%, 50%)",
+  },
+  {
+    name: "Corn Flower Blue",
+    value: "220",
+    icon: "list-color",
+    tintColor: "hsl(220, 100%, 64%)",
+  },
+  {
+    name: "Medium Slate Blue",
+    value: "252",
+    icon: "list-color",
+    tintColor: "hsl(252, 100%, 67%)",
+  },
+  {
+    name: "Blue Violet",
+    value: "270",
+    icon: "list-color",
+    tintColor: "hsl(270, 100%, 65%)",
+  },
+  {
+    name: "Medium Orchid",
+    value: "288",
+    icon: "list-color",
+    tintColor: "hsl(288, 100%, 62%)",
+  },
+  {
+    name: "Deep Pink",
+    value: "320",
+    icon: "list-color",
+    tintColor: "hsl(320, 100%, 59%)",
+  },
+] as const;
+
 export const ListTypes = [
   {
     name: "List",
@@ -126,4 +213,9 @@ export const ListVisualizations = [
 
 export function getListById(listId: string, lists: ListObject[] | undefined, smartLists: ListObject[] | undefined) {
   return lists?.find((list) => list.id === listId) ?? smartLists?.find((list) => list.id === listId);
+}
+
+export function getTintColorFromHue(hue: ListHue | number | null | undefined, colors: ListColor) {
+  const parsedHue = typeof hue === "number" ? String(hue) : typeof hue === "string" ? hue : "";
+  return colors.find((color) => color.value === parsedHue)?.tintColor;
 }

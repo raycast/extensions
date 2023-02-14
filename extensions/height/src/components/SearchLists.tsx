@@ -1,14 +1,13 @@
-import { Action, ActionPanel, environment, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useLists from "../hooks/useLists";
 import { ListObject } from "../types/list";
-import { ListTypes } from "../utils/list";
+import { getTintColorFromHue, ListColors, ListTypes } from "../utils/list";
 import SearchTasks from "./SearchTasks";
 import UpdateList from "./UpdateList";
 
 export default function SearchLists() {
   const { push } = useNavigation();
-  const { theme } = environment;
   const [searchText, setSearchText] = useState<string>("");
   const [listType, setListType] = useState("list");
   const [filteredList, filterList] = useState<ListObject[]>([]);
@@ -52,9 +51,7 @@ export default function SearchLists() {
           key={item.id}
           icon={{
             source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
-            tintColor: `hsl(${item.appearance?.hue ?? "0"}, 80%, ${
-              typeof item.appearance?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
-            })`,
+            tintColor: getTintColorFromHue(item?.appearance?.hue, ListColors),
           }}
           title={item.name}
           actions={

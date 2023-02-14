@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiList } from "../api/list";
 import { ListObject, UpdateListFormValues, UpdateListPayload } from "../types/list";
 import { ApiResponse } from "../types/utils";
-import { ListTypes, ListVisualizations } from "../utils/list";
+import { ListColors, ListTypes, ListVisualizations } from "../utils/list";
 
 type Props = {
   list: ListObject;
@@ -62,7 +62,7 @@ export default function UpdateList({ list, mutateList }: Props) {
       visualization: list.visualization ?? "list",
       name: list.name ?? "",
       description: list.description ?? "",
-      hue: list.appearance?.hue ? String(list.appearance?.hue) : "",
+      hue: typeof list.appearance?.hue === "number" ? String(list.appearance?.hue) : "",
     },
     validation: {
       type: FormValidation.Required,
@@ -112,7 +112,16 @@ export default function UpdateList({ list, mutateList }: Props) {
 
       <Form.TextArea title="Description" placeholder="Describe list" {...itemProps.description} />
 
-      <Form.TextField title="Hue" placeholder="Enter number from 0 to 360" {...itemProps.hue} />
+      <Form.Dropdown title="Hue" {...itemProps.hue}>
+        {ListColors.map((color) => (
+          <Form.Dropdown.Item
+            key={color.value}
+            value={color.value}
+            title={color.name}
+            icon={{ source: `${color.icon}.svg`, tintColor: color.tintColor }}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

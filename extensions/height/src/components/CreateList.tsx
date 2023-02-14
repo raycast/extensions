@@ -1,15 +1,14 @@
-import { environment, showToast, Toast, Form, ActionPanel, Action, launchCommand, LaunchType } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { Action, ActionPanel, Form, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiList } from "../api/list";
 import { CreateListFormValues, CreateListPayload } from "../types/list";
-import { ListTypes, ListVisualizations, ListIcons } from "../utils/list";
+import { getTintColorFromHue, ListColors, ListIcons, ListTypes, ListVisualizations } from "../utils/list";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateListFormValues }) {
-  const { theme } = environment;
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { handleSubmit, itemProps, reset } = useForm<CreateListFormValues>({
+  const { handleSubmit, itemProps, reset, values } = useForm<CreateListFormValues>({
     async onSubmit(values) {
       setIsLoading(true);
       const toast = await showToast({ style: Toast.Style.Animated, title: "Adding list" });
@@ -97,14 +96,14 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       }
     >
       <Form.Dropdown title="Type" {...itemProps.type}>
-        {ListTypes.map((item) => (
-          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+        {ListTypes.map((type) => (
+          <Form.Dropdown.Item key={type.value} value={type.value} title={type.name} />
         ))}
       </Form.Dropdown>
 
       <Form.Dropdown title="Visualization" {...itemProps.visualization}>
-        {ListVisualizations.map((item) => (
-          <Form.Dropdown.Item key={item.value} value={item.value} title={item.name} />
+        {ListVisualizations.map((visualization) => (
+          <Form.Dropdown.Item key={visualization.value} value={visualization.value} title={visualization.name} />
         ))}
       </Form.Dropdown>
 
@@ -112,15 +111,27 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
 
       <Form.TextArea title="Description" placeholder="Describe list" {...itemProps.description} />
 
-      <Form.TextField title="Hue" placeholder="Enter number from 0 to 360" {...itemProps.hue} />
+      <Form.Dropdown title="Hue" {...itemProps.hue}>
+        {ListColors.map((color) => (
+          <Form.Dropdown.Item
+            key={color.value}
+            value={color.value}
+            title={color.name}
+            icon={{ source: `${color.icon}.svg`, tintColor: color.tintColor }}
+          />
+        ))}
+      </Form.Dropdown>
 
       <Form.Dropdown title="Icon" {...itemProps.icon}>
-        {ListIcons.map((item) => (
+        {ListIcons.map((icon) => (
           <Form.Dropdown.Item
-            key={item.value}
-            value={item.value}
-            title={item.name}
-            icon={{ source: `${item.icon}.svg`, tintColor: theme === "dark" ? "#FFFFFF" : "#000000" }}
+            key={icon.value}
+            value={icon.value}
+            title={icon.name}
+            icon={{
+              source: `${icon.icon}.svg`,
+              tintColor: getTintColorFromHue(values.hue, ListColors),
+            }}
           />
         ))}
       </Form.Dropdown>
