@@ -1,3 +1,3 @@
 # OneNote Changelog
 
-## [Initial Version] - 2023-01-30
+## [Initial Version] - 2023-02-14
