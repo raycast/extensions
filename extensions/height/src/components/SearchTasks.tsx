@@ -93,8 +93,8 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                   })`,
                 }}
                 accessories={[
-                  getTaskDueDate(item),
-                  getTaskPriority(item),
+                  getTaskDueDateAccessory(item),
+                  getTaskPriorityAccessory(item),
                   ...getAssignedUsers(item.assigneesIds, users),
                 ]}
                 actions={
@@ -196,7 +196,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
   );
 }
 
-function getTaskDueDate(task: TaskObject) {
+function getTaskDueDateAccessory(task: TaskObject) {
   if (task.completed) return {};
   const foundDueDate = task.fields.find((field) => field.name.toLowerCase() === "due date");
   if (!foundDueDate || !foundDueDate.date) return {};
@@ -229,7 +229,7 @@ function getPriorityIcon(priority: string | undefined) {
   }
 }
 
-function getTaskPriority(task: TaskObject) {
+function getTaskPriorityAccessory(task: TaskObject) {
   if (task.completed) return {};
   const foundPriority = task.fields.find((field) => field.name.toLowerCase() === "priority");
   if (!foundPriority) return {};
