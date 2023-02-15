@@ -23,6 +23,7 @@
 /extensions/amphetamine                              @gstvds
 /extensions/android                                  @MohamedISoliman
 /extensions/android-adb-input                        @STAR-ZERO
+/extensions/anilist-airing-schedule                  @yeskunall
 /extensions/anonaddy                                 @httpjamesm @pernielsentikaer
 /extensions/ansible-documentation                    @Kcih4518
 /extensions/antd-open-browser                        @crazyair
@@ -32,7 +33,7 @@
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour
-/extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020
+/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020
 /extensions/archiver                                 @404J
 /extensions/asana                                    @thomaslombart
 /extensions/associated-press                         @Dammmien
@@ -50,6 +51,7 @@
 /extensions/bazinga-tools                            @luin
 /extensions/bear                                     @hmarr @lucaschultz @diokhan @ron-myers
 /extensions/beat-per-minute                          @pernielsentikaer
+/extensions/beeminder                                @vivgui
 /extensions/better-uptime                            @andreaselia
 /extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/betterzip                                @koinzhang
@@ -304,6 +306,7 @@
 /extensions/google-workspace                         @thomaslombart @mathieudutour
 /extensions/gopass                                   @bake
 /extensions/grafana                                  @Lp-Francois
+/extensions/grafbase                                 @notrab @notrab
 /extensions/graphcdn                                 @mathieudutour
 /extensions/greip                                    @gre-dev @pernielsentikaer
 /extensions/guitar-chords                            @GastroGeek
@@ -415,6 +418,7 @@
 /extensions/life-progress                            @koinzhang
 /extensions/lifx                                     @felixb1010
 /extensions/lightning-time                           @MatthewStanciu
+/extensions/ligue-1                                  @anhthang
 /extensions/linear                                   @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer
 /extensions/linguee                                  @geekdada
 /extensions/link-cleaner                             @MisakiCoca
@@ -561,6 +565,7 @@
 /extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp
 /extensions/port-manager                             @lucaschultz
 /extensions/portuguese-primeira-liga                 @danielsequeira
+/extensions/postman                                  @tarikyildizci
 /extensions/premier-league                           @anhthang
 /extensions/prettier                                 @aeither
 /extensions/productboard                             @honzatmn
@@ -745,6 +750,7 @@
 /extensions/truth-or-dare                            @tandpfun
 /extensions/tunnelblick                              @SamuelNitsche
 /extensions/tuple                                    @inxilpro
+/extensions/tuya-smart                               @AndresMorelos
 /extensions/tw-colorsearch                           @magicjaqk
 /extensions/twitch                                   @dieserRobin @Aayush9029 @suth @pernielsentikaer @MiracleXYZ
 /extensions/twitch-chat                              @Aayush9029

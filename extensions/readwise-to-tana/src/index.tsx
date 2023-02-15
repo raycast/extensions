@@ -14,8 +14,9 @@ import { useBooks } from './useApi'
 
 export default function Command() {
   const [template, setTemplate] = React.useState<string>('')
+  const [category, setCategory] = React.useState<string>('all')
 
-  const { data, isLoading } = useBooks()
+  const { data, isLoading } = useBooks({ category })
   const { pop } = useNavigation()
 
   React.useEffect(() => {
@@ -36,15 +37,22 @@ export default function Command() {
 
   const handleSave = async (values: SettingsValues) => {
     const {
-      supertag,
       author,
+      authorSupertag,
       category,
       coverImageUrl,
+      highlightColor,
+      highlightHighlightedAt,
+      highlightLocation,
       highlightNote,
       highlightSupertag,
-      highlightLocation,
+      highlightUpdatedAt,
       id,
+      readwiseUrl,
       source,
+      supertag,
+      title,
+      url,
     } = values
     let t = '%%tana%%'
 
@@ -52,11 +60,20 @@ export default function Command() {
       ? `\n- {{title}} #${supertag.replaceAll('#', '')}`
       : '\n- {{title}}'
 
-    t += author ? `\n  - ${author}:: {{author}}` : ''
+    t += author
+      ? `\n  - ${author}:: {{author}}${
+          authorSupertag ? ` #${authorSupertag.replaceAll('#', '')}` : ''
+        }`
+      : ''
     t += id ? `\n  - ${id}:: {{id}}` : ''
     t += category ? `\n  - ${category}:: {{category}}` : ''
     t += source ? `\n  - ${source}:: {{source}}` : ''
     t += coverImageUrl ? `\n  - ${coverImageUrl}:: {{cover_image_url}}` : ''
+    t += readwiseUrl
+      ? `{{#if highlights_url}}\n  - ${readwiseUrl}:: {{highlights_url}}{{/if}}`
+      : ''
+    t += url ? `{{#if source_url}}\n  - ${url}:: {{source_url}}{{/if}}` : ''
+    t += title ? `\n  - ${title}:: {{title}}` : ''
 
     let highlights = '\n\n{{#each highlights}}'
 
@@ -69,6 +86,15 @@ export default function Command() {
     highlights += highlightNote
       ? `{{#if note}}\n    - ${highlightNote}:: {{note}}{{/if}}`
       : '{{#if note}}\n    - **Note:** {{note}}{{/if}}'
+    highlights += highlightUpdatedAt
+      ? `{{#if updated}}\n    - ${highlightUpdatedAt}:: [[{{updated}}]]{{/if}}`
+      : ''
+    highlights += highlightHighlightedAt
+      ? `{{#if highlighted_at}}\n    - ${highlightHighlightedAt}:: [[{{highlighted_at}}]]{{/if}}`
+      : ''
+    highlights += highlightColor
+      ? `{{#if color}}\n    - ${highlightColor}:: {{color}}{{/if}}`
+      : ''
 
     highlights += '\n{{/each}}'
 
@@ -81,9 +107,34 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter Books">
+    <List
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Category"
+          onChange={setCategory}
+          value={category}
+        >
+          <List.Dropdown.Item value="all" title="All Categories" />
+          {['articles', 'books', 'podcasts', 'supplementals', 'tweets'].map(
+            (value) => (
+              <List.Dropdown.Item
+                key={value}
+                value={value}
+                title={value.charAt(0).toUpperCase() + value.substring(1)}
+              />
+            )
+          )}
+        </List.Dropdown>
+      }
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter Library"
+    >
       {data?.results.length === 0 ? (
-        <List.EmptyView title="No books found" />
+        <List.EmptyView
+          title={
+            category === 'all' ? 'No results found' : `No ${category} found`
+          }
+        />
       ) : (
         data?.results.map((book) => (
           <List.Item

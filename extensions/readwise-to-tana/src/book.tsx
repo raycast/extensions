@@ -3,6 +3,7 @@ import { useBook, useHighlights } from './useApi'
 import Highlight from './highlight'
 import React from 'react'
 import Handlebars from 'handlebars'
+import { formatDate } from './utils'
 
 type BookProps = {
   id: string
@@ -49,7 +50,11 @@ export default function Book({ id, template }: BookProps) {
   const h = Handlebars.compile(template)
   const allHighlights = h({
     ...book,
-    highlights,
+    highlights: highlights.map((highlight) => ({
+      ...highlight,
+      updated: formatDate(highlight.updated),
+      highlighted_at: formatDate(highlight.highlighted_at),
+    })),
   })
 
   const handleCopyAll = async () => {
