@@ -77,7 +77,7 @@ export default function main() {
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [version, setVersion] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
     return Object.values(hierarchy)
@@ -136,6 +136,10 @@ export default function main() {
   }
 
   const currentDocs = DOCS[version];
+
+  if (isLoading && Object.entries(currentDocs).length) {
+    setIsLoading(false);
+  }
 
   return (
     <List
