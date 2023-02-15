@@ -15,7 +15,6 @@ import { useAppleScriptNotes } from "./useAppleScript";
 import { isPermissionError, PermissionErrorScreen } from "./errors";
 import { NoteItem } from "./types";
 import { useState } from "react";
-import { Clipboard } from "@raycast/api";
 
 interface Preferences {
   accounts: boolean;

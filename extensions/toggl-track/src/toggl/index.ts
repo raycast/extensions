@@ -14,7 +14,7 @@ const TogglAPI = function (apiToken: string) {
       return api.get<Workspace[]>("/workspaces");
     },
     getWorkspaceProjects: async (workspaceId: number): Promise<Project[] | null> => {
-      const projects = (await api.get<Project[] | null>(`/workspaces/${workspaceId}/projects`)) || [];
+      const projects = (await api.get<Project[] | null>(`/workspaces/${workspaceId}/projects?per_page=500`)) || [];
       projects.push({
         id: -1,
         workspace_id: workspaceId,
