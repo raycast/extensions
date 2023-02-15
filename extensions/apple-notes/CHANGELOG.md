@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Fix] - 2023-2-15
+
+- Added error handling when Raycast doesn't have Accessibility permission.
+
 ## [Improvements] - 2023-1-30
 
 - Added fallback behaviour to create notes with the input text.
