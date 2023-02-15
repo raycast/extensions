@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitch-logs",
   "title": "Twitch Logs",
-  "description": "See what messages a user has sent on a paticular twitch channel.",
+  "description": "See what messages a user has sent on a paticular twitch channel on a paticular month.",
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Twitch Logs",
-      "description": "Template for showing typeahead search with network results.",
+      "description": "Messages a user has sent on a specfic channel.",
       "mode": "view",
       "arguments": [
         {
