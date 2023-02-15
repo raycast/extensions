@@ -319,7 +319,7 @@ export function CreateQuickLinkActionSection(props: { url: string; title?: strin
     <ActionPanel.Section>
       <Action.CreateQuicklink
         quicklink={{ link: props.url, name: props.title, application: "Arc" }}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
       />
     </ActionPanel.Section>
   );
