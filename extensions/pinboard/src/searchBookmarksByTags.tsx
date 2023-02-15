@@ -1,35 +1,40 @@
-import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { useSearchBookmarks, Bookmark } from "./api";
-import { BookmarkListItem } from "./components";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  getPreferenceValues,
+  openExtensionPreferences,
+  popToRoot,
+} from "@raycast/api";
+import { useSearchConstantsBookmarks } from "./api";
+import { BookmarkListItem, EmptyView } from "./components";
 
 export default function Command() {
-  const { isLoading, data } = useSearchBookmarks();
-  const [searchText, setSearchText] = useState("");
-  const [filteredBookmarks, setFilteredBookmarks] = useState(data?.bookmarks);
-
-  useEffect(() => {
-    if (data) {
-      setFilteredBookmarks(filterByTags(data.bookmarks, searchText));
-    }
-  }, [searchText, data]);
+  const { isLoading, data } = useSearchConstantsBookmarks();
+  const { constantTags } = getPreferenceValues();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search by tags..." throttle>
-      {filteredBookmarks &&
-        filteredBookmarks.map((bookmark) => <BookmarkListItem key={bookmark.id} bookmark={bookmark} />)}
+    <List isLoading={isLoading} searchBarPlaceholder="Search by name...">
+      <EmptyView
+        title={!constantTags ? "No Constant Tags Added" : undefined}
+        description={!constantTags ? "Press enter to add constant tags" : undefined}
+        actions={
+          !constantTags && (
+            <ActionPanel>
+              <Action
+                onAction={() => {
+                  openExtensionPreferences();
+                  popToRoot();
+                }}
+                title="Add Constant Tags"
+                icon={Icon.Gear}
+              />
+            </ActionPanel>
+          )
+        }
+      />
+      {data?.bookmarks && data.bookmarks.map((bookmark) => <BookmarkListItem key={bookmark.id} bookmark={bookmark} />)}
     </List>
   );
-}
-
-function filterByTags(bookmarks: Bookmark[], searchTerm: string) {
-  return bookmarks.filter((bookmark) => {
-    const searchTags = searchTerm.split(" ");
-    const bookmarkTags = bookmark.tags?.split(" ");
-    return searchTags.every((searchTag) => {
-      return bookmarkTags?.some((bookmarkTag) => {
-        return bookmarkTag.includes(searchTag);
-      });
-    });
-  });
 }

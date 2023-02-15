@@ -7,7 +7,8 @@
   "author": "fe9lix",
   "license": "MIT",
   "contributors": [
-    "kory-smith"
+    "kory-smith",
+    "pernielsentikaer"
   ],
   "categories": [
     "Media",
@@ -24,13 +25,6 @@
     {
       "name": "searchBookmarks",
       "title": "Search Bookmarks",
-      "subtitle": "Pinboard",
-      "description": "Searches your Pinboard bookmarks by tags.",
-      "mode": "view"
-    },
-    {
-      "name": "searchBookmarksByTags",
-      "title": "Search Bookmarks By Tags",
       "subtitle": "Pinboard",
       "description": "Searches your Pinboard bookmarks by tags.",
       "mode": "view"
@@ -57,8 +51,8 @@
       "type": "textfield",
       "required": false,
       "title": "Constant tags",
-      "description": "Enter the tags you want to add when searching with constant tags",
-      "placeholder": "bookmarks"
+      "description": "Enter the tags you want to add when searching with constant tags - sperated by spaces",
+      "placeholder": "web development hats"
     }
   ],
   "dependencies": {
@@ -80,6 +74,9 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

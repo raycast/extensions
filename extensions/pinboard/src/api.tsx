@@ -1,51 +1,40 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { useFetch } from "@raycast/utils";
+import { PinboardBookmark, Bookmark } from "./types";
+import { extractDocumentTitle } from "./utils";
 
+const { apiToken, constantTags } = getPreferenceValues();
 const apiBasePath = "https://api.pinboard.in/v1";
+const allPostsEndpoint = `${apiBasePath}/posts/all`;
+const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
 
-const { apiToken } = getPreferenceValues();
+export function useSearchConstantsBookmarks() {
+  return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
 
-export interface PinboardBookmark {
-  href: string;
-  description: string;
-  extended: string;
-  meta: string;
-  hash: string;
-  time: string;
-  shared: "yes" | "no";
-  toread: "yes" | "no";
-  tags: string;
+      const data = (await response.json()) as PinboardBookmark[];
+      if (data !== undefined) {
+        const constantTagsData = constantTags.split(" ");
+        if (constantTags.length) {
+          const items: Bookmark[] = data.map((post) => transformBookmark(post));
+          const filtered = items.filter((tag) => {
+            const tagBookmarks = tag.tags?.split(" ");
+            return tagBookmarks ? tagBookmarks.some((r) => constantTagsData.includes(r)) : false;
+          });
+
+          return { bookmarks: filtered };
+        }
+      }
+      return { bookmarks: [] };
+    },
+  });
 }
-
-export interface Bookmark {
-  id: string;
-  url: string;
-  title: string;
-  tags?: string;
-  private: boolean;
-  readLater: boolean;
-}
-
-export interface BookmarksState {
-  bookmarks: Bookmark[];
-  isLoading: boolean;
-  title: string;
-}
-
-export enum SearchKind {
-  Constant,
-  All,
-}
-
-export type LastUpdated = {
-  update_time: string;
-};
 
 export function useSearchBookmarks() {
-  const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
-  const allPostsEndpoint = `${apiBasePath}/posts/all`;
-
   return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
     async parseResponse(response) {
       if (!response.ok) {
@@ -98,4 +87,12 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   }
 
   return result;
+}
+
+export async function loadDocumentTitle(url: string): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    return Promise.reject(response.statusText);
+  }
+  return extractDocumentTitle(await response.text());
 }
