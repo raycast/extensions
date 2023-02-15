@@ -19,35 +19,7 @@
       "title": "Today Tasks",
       "subtitle": "Todoist",
       "description": "See your Todoist tasks due today.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "todayGroupBy",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Default",
-              "value": "default"
-            },
-            {
-              "title": "Project",
-              "value": "project"
-            },
-            {
-              "title": "Priority",
-              "value": "priority"
-            },
-            {
-              "title": "Label",
-              "value": "label"
-            }
-          ],
-          "default": "default",
-          "required": false,
-          "title": "Today's Group By Options",
-          "description": "Indicates how you want to group your tasks in the Today view."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "upcoming",
@@ -110,41 +82,20 @@
       "title": "Search Projects",
       "subtitle": "Todoist",
       "description": "See your Todoist projects and tasks by project.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "projectGroupBy",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Default",
-              "value": "default"
-            },
-            {
-              "title": "Date",
-              "value": "date"
-            },
-            {
-              "title": "Priority",
-              "value": "priority"
-            },
-            {
-              "title": "Label",
-              "value": "label"
-            }
-          ],
-          "default": "default",
-          "required": false,
-          "title": "Project's Group By Options",
-          "description": "Indicates how you want to group your tasks in the Project view."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "create-project",
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
+      "mode": "view"
+    },
+    {
+      "name": "completed-tasks",
+      "title": "Completed Tasks",
+      "subtitle": "Todoist",
+      "description": "See all your completed tasks",
       "mode": "view"
     },
     {
@@ -211,8 +162,8 @@
   ],
   "dependencies": {
     "@doist/todoist-api-typescript": "^2.1.2",
-    "@raycast/api": "^1.45.3",
-    "@raycast/utils": "^1.4.15",
+    "@raycast/api": "^1.46.0",
+    "@raycast/utils": "^1.4.16",
     "date-fns": "^2.29.3",
     "lodash": "^4.17.21",
     "remove-markdown": "0.5.0"
@@ -226,10 +177,12 @@
     "@typescript-eslint/parser": "^5.37.0",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.27.5",
     "typescript": "^4.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

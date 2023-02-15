@@ -6,7 +6,7 @@ export function notionColorToTintColor(
   const colorMapper = {
     default: Color.PrimaryText,
     gray: Color.PrimaryText,
-    brown: Color.Brown,
+    brown: Color.Orange,
     red: Color.Red,
     blue: Color.Blue,
     green: Color.Green,

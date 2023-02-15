@@ -27,6 +27,10 @@
       "url": "https://laravel.com/docs/master/structure"
     },
     {
+      "title": "Frontend",
+      "url": "https://laravel.com/docs/master/frontend"
+    },
+    {
       "title": "Starter Kits",
       "url": "https://laravel.com/docs/master/starter-kits"
     },
@@ -87,6 +91,10 @@
       "url": "https://laravel.com/docs/master/blade"
     },
     {
+      "title": "Asset Bundling",
+      "url": "https://laravel.com/docs/master/vite"
+    },
+    {
       "title": "URL Generation",
       "url": "https://laravel.com/docs/master/urls"
     },
@@ -125,10 +133,6 @@
       "url": "https://laravel.com/docs/master/collections"
     },
     {
-      "title": "Compiling Assets",
-      "url": "https://laravel.com/docs/master/mix"
-    },
-    {
       "title": "Contracts",
       "url": "https://laravel.com/docs/master/contracts"
     },
@@ -163,6 +167,10 @@
     {
       "title": "Package Development",
       "url": "https://laravel.com/docs/master/packages"
+    },
+    {
+      "title": "Processes",
+      "url": "https://laravel.com/docs/master/processes"
     },
     {
       "title": "Queues",
@@ -253,6 +261,10 @@
     {
       "title": "Serialization",
       "url": "https://laravel.com/docs/master/eloquent-serialization"
+    },
+    {
+      "title": "Factories",
+      "url": "https://laravel.com/docs/master/eloquent-factories"
     }
   ],
   "Testing": [
@@ -319,12 +331,24 @@
       "url": "https://jetstream.laravel.com/"
     },
     {
+      "title": "Mix",
+      "url": "https://laravel.com/docs/master/mix"
+    },
+    {
       "title": "Octane",
       "url": "https://laravel.com/docs/master/octane"
     },
     {
       "title": "Passport",
       "url": "https://laravel.com/docs/master/passport"
+    },
+    {
+      "title": "Pennant",
+      "url": "https://laravel.com/docs/master/pennant"
+    },
+    {
+      "title": "Pint",
+      "url": "https://laravel.com/docs/master/pint"
     },
     {
       "title": "Sail",

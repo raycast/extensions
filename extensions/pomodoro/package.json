@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "asubbotin",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "brodelp"
   ],
   "keywords": [
     "pomodoro",
@@ -231,6 +232,14 @@
           "title": "60:00"
         }
       ]
+    },
+    {
+      "name": "completionImage",
+      "type": "textfield",
+      "required": false,
+      "title": "Image Markdown Link",
+      "description": "Image on interval completion, URL",
+      "default": "![The Best Thank You GIF by SWR3](https://media0.giphy.com/media/ZBn3ZRvCbWz2PS3Rbg/200.gif)"
     }
   ],
   "dependencies": {

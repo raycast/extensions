@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, popToRoot } from "@raycast/api";
-import { Tab } from "../interfaces";
+import { closeMainWindow, LocalStorage, popToRoot } from "@raycast/api";
+import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
@@ -11,7 +11,8 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   await checkAppInstalled();
 
-  const openTabs = await runAppleScript(`
+  try {
+    const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Google Chrome"
         set _window_index to 1
@@ -31,47 +32,73 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       return _output
   `);
 
-  return openTabs
-    .split("\n")
-    .filter((line) => line.length !== 0)
-    .map((line) => Tab.parse(line));
+    return openTabs
+      .split("\n")
+      .filter((line) => line.length !== 0)
+      .map((line) => Tab.parse(line));
+  } catch (err) {
+    if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
+      LocalStorage.removeItem("is-installed");
+    }
+    await checkAppInstalled();
+    return [];
+  }
 }
 
-export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
+export async function openNewTab({
+  url,
+  query,
+  profileCurrent,
+  profileOriginal,
+  openTabInProfile,
+}: {
+  url?: string;
+  query?: string;
+  profileCurrent: string;
+  profileOriginal?: string;
+  openTabInProfile: SettingsProfileOpenBehaviour;
+}): Promise<boolean | string> {
+  setTimeout(() => {
+    popToRoot({ clearSearchBar: true });
+  }, 3000);
+  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
 
-  const script =
+  let script = "";
+
+  const getOpenInProfileCommand = (profile: string) =>
     `
+    set profile to quoted form of "${profile}"
+    set link to quoted form of "${url ? url : "about:blank"}"
+    do shell script "open -na 'Google Chrome' --args --profile-directory=" & profile & " " & link
+  `;
+
+  switch (openTabInProfile) {
+    case SettingsProfileOpenBehaviour.Default:
+      script =
+        `
     tell application "Google Chrome"
       activate
       tell window 1
           set newTab to make new tab ` +
-    (queryText ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}' : "") +
-    ` 
+        (url
+          ? `with properties {URL:"${url}"}`
+          : query
+          ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
+          : "") +
+        ` 
       end tell
     end tell
     return true
   `;
-
-  await checkAppInstalled();
-
-  return await runAppleScript(script);
-}
-
-export async function openNewHistoryTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script = `
-    tell application "Google Chrome"
-      activate
-      tell window 1
-          set newTab to make new tab with properties {URL:"${url}"}
-      end tell
-    end tell
-    return true
-  `;
+      break;
+    case SettingsProfileOpenBehaviour.ProfileCurrent:
+      script = getOpenInProfileCommand(profileCurrent);
+      break;
+    case SettingsProfileOpenBehaviour.ProfileOriginal:
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      script = getOpenInProfileCommand(profileOriginal!);
+      break;
+  }
 
   return await runAppleScript(script);
 }
@@ -87,6 +114,9 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   `);
 }
 const checkAppInstalled = async () => {
+  const installed = await LocalStorage.getItem("is-installed");
+  if (installed) return;
+
   const appInstalled = await runAppleScript(`
 set isInstalled to false
 try
@@ -98,4 +128,5 @@ return isInstalled`);
   if (appInstalled === "false") {
     throw new Error(NOT_INSTALLED_MESSAGE);
   }
+  LocalStorage.setItem("is-installed", true);
 };

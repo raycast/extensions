@@ -5,6 +5,7 @@ export type Preferences = {
   fetchFavicons: boolean;
   serverUrl: string;
   serverCertsPath: string;
+  repromptIgnoreDuration: string;
 };
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
@@ -20,7 +21,7 @@ export interface Item {
   organizationId: null | string;
   folderId: null;
   type: 1 | 2 | 3 | 4;
-  reprompt: number;
+  reprompt: Reprompt;
   name: string;
   notes: null | string;
   favorite: boolean;
@@ -136,3 +137,8 @@ export interface PasswordOptionField {
 }
 
 export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];
+
+export const enum Reprompt {
+  NO = 0,
+  REQUIRED = 1,
+}

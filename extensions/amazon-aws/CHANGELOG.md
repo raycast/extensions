@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Renamed command] - 2023-02-03
+
+- Renamed Elasticsearch Service to OpenSearch Service
+
 ## [ECS Command] - 2023-01-06
 
 - Added command for forcing a new deployment on a given service

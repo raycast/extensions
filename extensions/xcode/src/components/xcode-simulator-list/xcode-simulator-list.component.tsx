@@ -3,9 +3,6 @@ import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { List } from "@raycast/api";
 import { XcodeSimulatorListItem } from "./xcode-simulator-list-item.component";
 
-/**
- * Xcode Simulator List
- */
 export function XcodeSimulatorList(): JSX.Element {
   const xcodeSimulatorGroups = useCachedPromise(XcodeSimulatorService.xcodeSimulatorGroups);
   return (
