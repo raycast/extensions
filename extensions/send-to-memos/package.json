@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "sendMemo",
-      "title": "Send MEMO",
+      "title": "Send Memo",
       "description": "Send your thoughts to Memos",
       "mode": "no-view",
       "subtitle": "Memos",
@@ -24,7 +24,7 @@
     },
     {
       "name": "openMemoWebsite",
-      "title": "Open Memo Website",
+      "title": "Open Website",
       "description": "Open Memos Website",
       "mode": "no-view",
       "subtitle": "Memos",
