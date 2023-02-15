@@ -39,8 +39,11 @@ export default function UpdateList({ task, mutateTask }: Props) {
         assigneesIds: values.assigneesIds,
         status: values.status,
         listIds: values.listIds,
-        parentTaskId: values.parentTaskId,
       };
+
+      if (values.parentTaskId) {
+        payload.parentTaskId = values.parentTaskId;
+      }
 
       if (values.dueDate) {
         payload.fields = [{ fieldTemplateId: fieldTemplatesDueDate?.id, date: values.dueDate }];
@@ -65,7 +68,7 @@ export default function UpdateList({ task, mutateTask }: Props) {
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to update task";
+        toast.title = "Failed to update task 😥";
         toast.message = error instanceof Error ? error.message : undefined;
       } finally {
         setIsLoading(false);

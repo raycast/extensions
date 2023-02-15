@@ -48,7 +48,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create list";
+        toast.title = "Failed to create list 😥";
         toast.message = error instanceof Error ? error.message : undefined;
       } finally {
         setIsLoading(false);

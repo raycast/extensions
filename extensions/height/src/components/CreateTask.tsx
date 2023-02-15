@@ -40,8 +40,11 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
         description: values.description,
         status: values.status,
         assigneesIds: values.assigneesIds,
-        parentTaskId: values.parentTaskId,
       };
+
+      if (values.parentTaskId) {
+        payload.parentTaskId = values.parentTaskId;
+      }
 
       if (values.dueDate) {
         payload.fields = [{ fieldTemplateId: fieldTemplatesDueDate?.id, date: values.dueDate }];
@@ -72,7 +75,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to create task";
+        toast.title = "Failed to create task 😥";
         toast.message = error instanceof Error ? error.message : undefined;
       } finally {
         setIsLoading(false);
