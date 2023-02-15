@@ -1,18 +1,23 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
+  confirmAlert,
   environment,
   Icon,
   launchCommand,
   LaunchType,
   List,
   showHUD,
+  showToast,
+  Toast,
   useNavigation,
 } from "@raycast/api";
 import { differenceInCalendarDays, format } from "date-fns";
 import { useEffect, useState } from "react";
+import { ApiTask } from "../api/task";
 import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
@@ -44,7 +49,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     },
   });
 
-  const { fieldTemplatesStatuses, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { fieldTemplatesStatuses, fieldTemplatesPriorities, fieldTemplatesIsLoading } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading, tasksMutate } = useTasks({ listId, assigneeId });
 
@@ -52,8 +57,8 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     if (!tasks) return;
     filterTasks(
       tasks.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchText.toLowerCase()) && (list === "all" || item.listIds.includes(list))
+        (task) =>
+          task.name.toLowerCase().includes(searchText.toLowerCase()) && (list === "all" || task.listIds.includes(list))
       )
     );
   }, [searchText, tasks, list]);
@@ -81,32 +86,32 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
       {fieldTemplatesStatuses?.map((status) => (
         <List.Section key={status.id} title={status.value}>
           {filteredTasks
-            .filter((task) => task.status === status.id)
-            .map((item) => (
+            .filter((filteredTask) => filteredTask.status === status.id)
+            .map((task) => (
               <List.Item
-                key={item.id}
-                title={item.name}
-                subtitle={item.url.split("/").at(-1)}
+                key={task.id}
+                title={task.name}
+                subtitle={task.url.split("/").at(-1)}
                 icon={{
-                  source: getIconByStatusState(item.status, fieldTemplatesStatuses),
+                  source: getIconByStatusState(task.status, fieldTemplatesStatuses),
                   tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
                     typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
                   })`,
                 }}
                 accessories={[
-                  getTaskDueDateAccessory(item),
-                  getTaskPriorityAccessory(item),
-                  ...getAssignedUsers(item.assigneesIds, users),
+                  getTaskDueDateAccessory(task),
+                  getTaskPriorityAccessory(task, theme),
+                  ...getAssignedUsers(task.assigneesIds, users),
                 ]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
                       <Action
-                        title="Mark as completed"
-                        icon={Icon.List}
-                        onAction={async () => await Clipboard.copy(JSON.stringify(item, null, 2))}
+                        title="Show Details"
+                        icon={Icon.AppWindowSidebarRight}
+                        onAction={async () => await Clipboard.copy(JSON.stringify(task, null, 2))}
                       />
-                      <Action.OpenInBrowser title="Open Task in Browser" url={item.url} />
+                      <Action.OpenInBrowser title="Open Task in Browser" icon={Icon.Globe} url={task.url} />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                       <Action
@@ -121,50 +126,215 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         title="Edit Task"
                         icon={Icon.Pencil}
                         shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        onAction={() => push(<UpdateTask task={item} mutateTask={tasksMutate} />)}
+                        onAction={() => push(<UpdateTask task={task} mutateTask={tasksMutate} />)}
                       />
-                      <Action
+                      <ActionPanel.Submenu
                         title="Assign To"
-                        icon={Icon.Pencil}
+                        icon={Icon.AddPerson}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                        onAction={async () => await showHUD("Assign To Action")}
-                      />
-                      <Action
+                      >
+                        <Action
+                          title="Unassigned"
+                          icon={{
+                            source: Icon.Person,
+                            tintColor: Color.PrimaryText,
+                          }}
+                          onAction={async () => {
+                            const toast = await showToast({
+                              style: Toast.Style.Animated,
+                              title: "Setting assignee",
+                            });
+                            try {
+                              await tasksMutate(ApiTask.update(task.id, { assigneesIds: [] }));
+
+                              toast.style = Toast.Style.Success;
+                              toast.title = "Successfully set assignee 🎉";
+                            } catch (error) {
+                              toast.style = Toast.Style.Failure;
+                              toast.title = "Failed to set assignee 😥";
+                              toast.message = error instanceof Error ? error.message : undefined;
+                            }
+                          }}
+                        />
+                        {users?.map((user) => (
+                          <Action
+                            key={user.id}
+                            title={`${user.firstname} ${user.lastname}`}
+                            icon={{
+                              source: user?.pictureUrl ?? Icon.Person,
+                              tintColor: user?.pictureUrl
+                                ? undefined
+                                : `hsl(${user?.hue ?? "0"}, 80%, ${
+                                    typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                                  })`,
+                            }}
+                            onAction={async () => {
+                              const toast = await showToast({
+                                style: Toast.Style.Animated,
+                                title: "Setting assignee",
+                              });
+                              try {
+                                await tasksMutate(ApiTask.update(task.id, { assigneesIds: [user.id] }));
+
+                                toast.style = Toast.Style.Success;
+                                toast.title = "Successfully set assignee 🎉";
+                              } catch (error) {
+                                toast.style = Toast.Style.Failure;
+                                toast.title = "Failed to set assignee 😥";
+                                toast.message = error instanceof Error ? error.message : undefined;
+                              }
+                            }}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                      <ActionPanel.Submenu
                         title="Set Status"
-                        icon={Icon.Pencil}
+                        icon={Icon.Circle}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                        onAction={async () => await showHUD("Set Status Action")}
-                      />
-                      <Action
+                      >
+                        {fieldTemplatesStatuses?.map((status) => (
+                          <Action
+                            key={status.id}
+                            title={status.value}
+                            icon={{
+                              source: getIconByStatusState(status.id, fieldTemplatesStatuses),
+                              tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
+                                typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                              })`,
+                            }}
+                            onAction={async () => {
+                              const toast = await showToast({
+                                style: Toast.Style.Animated,
+                                title: "Setting status",
+                              });
+                              try {
+                                await tasksMutate(ApiTask.update(task.id, { status: status.id }));
+
+                                toast.style = Toast.Style.Success;
+                                toast.title = "Successfully set status 🎉";
+                              } catch (error) {
+                                toast.style = Toast.Style.Failure;
+                                toast.title = "Failed to set status 😥";
+                                toast.message = error instanceof Error ? error.message : undefined;
+                              }
+                            }}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                      <ActionPanel.Submenu
                         title="Set Priority"
-                        icon={Icon.Pencil}
+                        icon={Icon.Exclamationmark3}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                        onAction={async () => await showHUD("Set Priority Action")}
-                      />
-                      <Action
-                        title="Set Due Date"
-                        icon={Icon.Pencil}
+                      >
+                        {fieldTemplatesPriorities?.map((priority) => (
+                          <Action
+                            key={priority.id}
+                            title={priority.value}
+                            icon={{
+                              source: getPriorityIcon(priority.value),
+                              tintColor: `hsl(${priority?.hue ?? "0"}, 80%, ${
+                                typeof priority?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                              })`,
+                            }}
+                            onAction={async () => await showHUD(`Assigned to ${priority.value} – ${priority.id}`)}
+                          />
+                        ))}
+                      </ActionPanel.Submenu>
+                      <Action.PickDate
+                        title="Set Due Date..."
+                        icon={Icon.Calendar}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                        onAction={async () => await showHUD("Set Due Date Action")}
+                        onChange={async (date) => await showHUD(`Set Due Date to ${date?.toISOString()}`)}
                       />
-                      <Action
+                      <ActionPanel.Submenu
                         title="Set Parent Task"
                         icon={Icon.Pencil}
                         shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
-                        onAction={async () => await showHUD("Set Parent Task Action")}
-                      />
-                      <Action
+                      >
+                        {tasks
+                          ?.filter(
+                            (filteredParentTask) =>
+                              filteredParentTask.listIds.some((id) => task.listIds.includes(id)) &&
+                              filteredParentTask.id !== task.id
+                          )
+                          ?.map((parentTask) => (
+                            <Action
+                              key={parentTask.id}
+                              title={parentTask.name}
+                              icon={{
+                                source: parentTask.lists?.[0].appearance?.iconUrl ?? "list-icons/list-light.svg",
+                                tintColor: getTintColorFromHue(parentTask.lists?.[0]?.appearance?.hue, ListColors),
+                              }}
+                              onAction={async () => {
+                                const toast = await showToast({
+                                  style: Toast.Style.Animated,
+                                  title: "Setting parent task",
+                                });
+                                try {
+                                  await tasksMutate(ApiTask.update(task.id, { parentTaskId: parentTask.id }));
+
+                                  toast.style = Toast.Style.Success;
+                                  toast.title = "Successfully set parent task 🎉";
+                                } catch (error) {
+                                  toast.style = Toast.Style.Failure;
+                                  toast.title = "Failed to set parent task 😥";
+                                  toast.message = error instanceof Error ? error.message : undefined;
+                                }
+                              }}
+                            />
+                          ))}
+                      </ActionPanel.Submenu>
+                      <ActionPanel.Submenu
                         title="Move To List"
-                        icon={Icon.Pencil}
+                        icon={Icon.Folder}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
-                        onAction={async () => await showHUD("Move To List Action")}
-                      />
+                      >
+                        {lists
+                          ?.filter((filteredList) => !task.listIds.includes(filteredList.id))
+                          ?.map((list) => (
+                            <Action
+                              key={list.id}
+                              title={list.name}
+                              icon={{
+                                source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+                                tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
+                              }}
+                              onAction={async () => await showHUD(`Move to ${list.name}`)}
+                            />
+                          ))}
+                      </ActionPanel.Submenu>
                       <Action
                         title="Delete Task"
-                        icon={Icon.Pencil}
+                        icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                        onAction={async () => await showHUD("Delete Task Action")}
+                        onAction={async () => {
+                          await confirmAlert({
+                            title: "Delete Task",
+                            message: "Are you sure you want to delete this task?",
+                            icon: {
+                              source: Icon.Trash,
+                              tintColor: Color.Red,
+                            },
+                            primaryAction: {
+                              title: "Delete",
+                              style: Alert.ActionStyle.Destructive,
+                              onAction: async () => {
+                                const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
+                                try {
+                                  await tasksMutate(ApiTask.update(task.id, {}));
+
+                                  toast.style = Toast.Style.Success;
+                                  toast.title = "Successfully deleted task 🎉";
+                                } catch (error) {
+                                  toast.style = Toast.Style.Failure;
+                                  toast.title = "Failed to delete task 😥";
+                                  toast.message = error instanceof Error ? error.message : undefined;
+                                }
+                              },
+                            },
+                          });
+                        }}
                       />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
@@ -172,19 +342,19 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         title="Copy Task ID"
                         shortcut={{ modifiers: ["cmd"], key: "." }}
                         icon={Icon.CopyClipboard}
-                        content={item.url.split("/").at(-1) ?? ""}
+                        content={task.url.split("/").at(-1) ?? ""}
                       />
                       <Action.CopyToClipboard
                         title="Copy Task Name"
                         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                         icon={Icon.CopyClipboard}
-                        content={item.name}
+                        content={task.name}
                       />
                       <Action.CopyToClipboard
                         title="Copy Task URL"
                         shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                         icon={Icon.CopyClipboard}
-                        content={item.url}
+                        content={task.url}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
@@ -216,14 +386,16 @@ function getTaskDueDateAccessory(task: TaskObject) {
   };
 }
 
-function getTaskPriorityAccessory(task: TaskObject) {
+function getTaskPriorityAccessory(task: TaskObject, theme: string) {
   if (task.completed) return {};
   const foundPriority = task.fields.find((field) => field.name.toLowerCase() === "priority");
   if (!foundPriority) return {};
   return {
     icon: {
       source: getPriorityIcon(foundPriority.selectValue?.value),
-      tintColor: `hsl(${foundPriority.selectValue?.hue ?? "0"}, 80%, 50%)`,
+      tintColor: `hsl(${foundPriority.selectValue?.hue ?? "0"}, 80%, ${
+        typeof foundPriority.selectValue?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+      })`,
     },
     tooltip: `Priority: ${foundPriority.selectValue?.value}`,
   };
@@ -280,24 +452,24 @@ function listDropdownAccessory(
       }}
     >
       <List.Dropdown.Item title="All" value="all" />
-      <List.Dropdown.Section title="Lists">{lists?.map((item) => listDropdownItem(item))}</List.Dropdown.Section>
+      <List.Dropdown.Section title="Lists">{lists?.map((list) => listDropdownItem(list))}</List.Dropdown.Section>
       <List.Dropdown.Section title="Smart Lists">
-        {smartLists?.map((item) => listDropdownItem(item))}
+        {smartLists?.map((smartList) => listDropdownItem(smartList))}
       </List.Dropdown.Section>
     </List.Dropdown>
   );
 }
 
-function listDropdownItem(item: ListObject): JSX.Element {
+function listDropdownItem(list: ListObject): JSX.Element {
   return (
     <List.Dropdown.Item
-      key={item.id}
-      title={item.name}
+      key={list.id}
+      title={list.name}
       icon={{
-        source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
-        tintColor: getTintColorFromHue(item?.appearance?.hue, ListColors),
+        source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+        tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
       }}
-      value={item.id}
+      value={list.id}
     />
   );
 }
