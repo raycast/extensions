@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-pretty-links",
+  "title": "Jira Pretty Links",
+  "description": "Format Jira Issue links at ease",
+  "icon": "extension_icon.png",
+  "author": "vishes-shell",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rocket",
+      "title": "Copy Jira issue Rocket.Chat link",
+      "description": "Copy Jira issue formatted link for Rocket.Chat",
+      "mode": "no-view",
+      "icon": "rocket.png",
+      "arguments": [
+        {
+          "name": "key",
+          "placeholder": "Issue Key",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira URL",
+      "description": "URL of your Jira instance",
+      "placeholder": "URL of your Jira instance e.g. https://jira.company.com"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API token",
+      "description": "Your personal Jira API Token",
+      "link": "https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html",
+      "placeholder": "Your Jira Personal API Token"
+    },
+    {
+      "name": "linktextformat",
+      "type": "textfield",
+      "required": true,
+      "title": "Link text format",
+      "description": "Format of link text",
+      "placeholder": "Link text format, allowed values: `key`, `summary`",
+      "default": "${key}: ${summary}"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@types/jira-client": "^7.1.6",
+    "jira-client": "^8.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
