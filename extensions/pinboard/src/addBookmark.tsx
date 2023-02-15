@@ -1,6 +1,6 @@
-import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, showHUD, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, popToRoot } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Bookmark, BookmarkFormValues } from "./types";
 import { addBookmark, loadDocumentTitle } from "./api";
 import { isValidURL } from "./utils";
