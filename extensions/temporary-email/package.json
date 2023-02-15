@@ -5,6 +5,9 @@
   "description": "Quickly and easily create a temporary email.",
   "icon": "command-icon.png",
   "author": "natterstefan",
+  "contributors": [
+    "JoelKlint"
+  ],
   "categories": [
     "Web",
     "Productivity"
