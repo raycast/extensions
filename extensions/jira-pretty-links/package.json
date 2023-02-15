@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "rocket",
-      "title": "Copy Jira issue Rocket.Chat link",
+      "title": "Copy Jira Issue Rocket.Chat Link",
       "description": "Copy Jira issue formatted link for Rocket.Chat",
       "mode": "no-view",
       "icon": "rocket.png",
