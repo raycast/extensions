@@ -1,6 +1,6 @@
 # Update Clash Subscription
 
-> Raycast extension to update clash subscription & insert custom rules
+> raycast extension to update clash subscription & insert custom rules
 
 ## Usage
 
@@ -47,8 +47,8 @@ Content Demo:
 }
 ```
 
-![](metadata/SCR-20230212-p6z.png)
+![](metadata/update-clash-subscription-1.png)
 
 ### Command
 
-![](metadata/SCR-20230212-p15.png)
+![](metadata/update-clash-subscription-2.png)

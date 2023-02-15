@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "update-clash-subscription",
   "title": "Update Clash Subscription",
-  "description": "Update clash subscription & insert custom rules",
+  "description": "update clash subscription & insert custom rules",
   "icon": "logo.png",
   "author": "JakeYu",
   "categories": [
@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Update Clash Subscription",
+      "subtitle": "clash",
       "description": "Update clash subscription",
       "mode": "no-view"
     }
