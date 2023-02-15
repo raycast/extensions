@@ -14,7 +14,7 @@ export default function useLists({ options }: Props = {}) {
     ...options,
   });
 
-  const { all, lists, smartLists } = useMemo(() => {
+  const { all, lists, smartLists, trash } = useMemo(() => {
     const all = data?.list?.filter((list) => list.archivedAt === null).sort(sortByDate());
 
     const lists = data?.list?.filter((list) => list.type === "list" && list.archivedAt === null).sort(sortByDate());
@@ -23,13 +23,16 @@ export default function useLists({ options }: Props = {}) {
       ?.filter((list) => list.type === "smartlist" && list.archivedAt === null)
       .sort(sortByDate());
 
-    return { all, lists, smartLists };
+    const trash = data?.list?.find((list) => list.name === "trash");
+
+    return { all, lists, smartLists, trash };
   }, [data]);
 
   return {
     listsData: all,
     lists,
     smartLists,
+    trash,
     listsError: error,
     listsIsLoading: isLoading,
     listsMutate: mutate,
