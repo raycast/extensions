@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Quicklinks] - 2023-02-14
+## [Quicklinks] - 2023-02-15
 
 - Added a new action to quickly create a quicklink from a page.
 
