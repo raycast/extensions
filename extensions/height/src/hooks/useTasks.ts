@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ApiHeaders, ApiUrls } from "../api/helpers";
 import { TaskObject } from "../types/task";
 import { ApiResponse } from "../types/utils";
+import { orderBy } from "lodash-es";
 
 type Props = {
   listId?: string;
@@ -34,17 +35,24 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
     ...options,
   });
 
-  const { tasks } = useMemo(() => {
-    const tasks = data?.list?.filter(
+  const { unorderedTasks, orderedTasks } = useMemo(() => {
+    const unorderedTasks = data?.list?.filter(
       (task) => !task.deleted && (assigneeId === "all" ? task.assigneesIds.length > 0 : true)
     );
 
-    return { tasks };
+    const orderedTasks = orderBy(
+      unorderedTasks,
+      [(item) => item.fields.find((field) => field.name.toLowerCase() === "due date")?.date, "createdAt"],
+      ["asc", "desc"]
+    );
+
+    return { unorderedTasks, orderedTasks };
   }, [data, assigneeId]);
 
   return {
     tasksData: data?.list,
-    tasks,
+    tasks: orderedTasks,
+    unorderedTasks,
     tasksError: error,
     tasksIsLoading: isLoading,
     tasksMutate: mutate,

@@ -75,7 +75,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
           ? undefined
           : assignedTasks
           ? assignedDropdownAccessory(users, setAssigneeId, theme)
-          : listDropdownAccessory(lists, smartLists, setList, theme)
+          : listDropdownAccessory(lists, smartLists, setList)
       }
     >
       {fieldTemplatesStatuses?.map((status) => (
@@ -198,7 +198,6 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
 }
 
 function getTaskDueDateAccessory(task: TaskObject) {
-  if (task.completed) return {};
   const foundDueDate = task.fields.find((field) => field.name.toLowerCase() === "due date");
   if (!foundDueDate || !foundDueDate.date) return {};
   const dueDate = new Date(foundDueDate.date);
@@ -207,9 +206,9 @@ function getTaskDueDateAccessory(task: TaskObject) {
   return {
     text: {
       color:
-        differenceInCalendarDays(dueDate, today) <= 0
+        differenceInCalendarDays(dueDate, today) <= 0 && !task.completed
           ? Color.Red
-          : differenceInCalendarDays(dueDate, today) <= 2
+          : differenceInCalendarDays(dueDate, today) <= 2 && !task.completed
           ? Color.Yellow
           : Color.PrimaryText,
       value: format(new Date(foundDueDate.date), "MMM dd"),
@@ -270,8 +269,7 @@ function assignedDropdownItem(user: UserObject, theme: string): JSX.Element {
 function listDropdownAccessory(
   lists: ListObject[] | undefined,
   smartLists: ListObject[] | undefined,
-  setList: React.Dispatch<React.SetStateAction<string>>,
-  theme: string
+  setList: React.Dispatch<React.SetStateAction<string>>
 ) {
   return (
     <List.Dropdown
@@ -282,9 +280,9 @@ function listDropdownAccessory(
       }}
     >
       <List.Dropdown.Item title="All" value="all" />
-      <List.Dropdown.Section title="Lists">{lists?.map((item) => listDropdownItem(item, theme))}</List.Dropdown.Section>
+      <List.Dropdown.Section title="Lists">{lists?.map((item) => listDropdownItem(item))}</List.Dropdown.Section>
       <List.Dropdown.Section title="Smart Lists">
-        {smartLists?.map((item) => listDropdownItem(item, theme))}
+        {smartLists?.map((item) => listDropdownItem(item))}
       </List.Dropdown.Section>
     </List.Dropdown>
   );

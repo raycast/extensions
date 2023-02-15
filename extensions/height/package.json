@@ -57,9 +57,11 @@
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.16",
     "date-fns": "^2.29.3",
+    "lodash-es": "^4.17.21",
     "node-fetch": "^3.3.0"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
