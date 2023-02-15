@@ -64,10 +64,14 @@ export const lastPass = (email: string, password: string) => ({
     }),
 
   show: (id: string): Promise<Account> =>
-    execute(`lpass show --json ${id}`).then((stdout) => serializeFromJson(stdout)[0]),
+    execute(`echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass show --json ${id}`).then(
+      (stdout) => serializeFromJson(stdout)[0]
+    ),
 
   list: (args: { sync: "auto" | "now" | "no" } = { sync: "auto" }) =>
-    execute(`lpass export --sync=${args.sync} --fields=id,name,username,password,url`).then((stdout) => {
+    execute(
+      `echo "${password}" | LPASS_DISABLE_PINENTRY=1 lpass export --sync=${args.sync} --fields=id,name,username,password,url`
+    ).then((stdout) => {
       const items: { id: string; name: string; username: string; password: string; url: string }[] = stdout
         .split("\n")
         .filter((line) => line.trim() !== "")

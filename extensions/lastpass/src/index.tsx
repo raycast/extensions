@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Image, Icon, List, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { AccountDetail, UnknownError, CommandNotFoundError } from "./components";
@@ -60,9 +60,6 @@ export default function Command() {
   if (error) {
     return <ErrorDetails error={error} />;
   }
-  if (!isLoading && accounts.length === 0) {
-    return <Detail markdown="### Sorry, you have no accounts in LastPass ¯\\_(ツ)_/¯" />;
-  }
   return (
     <List
       isLoading={isLoading}
@@ -79,50 +76,55 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {accounts.map(({ id, name, username, password, url }) => (
-        <List.Item
-          id={id}
-          key={id}
-          icon={faviconForDomain(url)}
-          title={name}
-          subtitle={username}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action.Paste
-                  icon={Icon.Clipboard}
-                  title="Paste Password"
-                  shortcut={{ modifiers: [], key: "enter" }}
-                  content={password}
-                />
-                <Action.CopyToClipboard
-                  icon={Icon.Clipboard}
-                  title="Paste Username"
-                  shortcut={{ modifiers: ["shift"], key: "enter" }}
-                  content={username}
-                />
-                <Action.CopyToClipboard
-                  icon={Icon.Clipboard}
-                  title="Copy Password"
-                  shortcut={{ modifiers: ["cmd"], key: "p" }}
-                  content={password}
-                />
-                <Action.CopyToClipboard
-                  icon={Icon.Clipboard}
-                  title="Copy Username"
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
-                  content={username}
-                />
-                <Action.Push
-                  title="Show Details"
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  target={<AccountDetail getData={() => api.show(id)} />}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {!accounts.length ? (
+        <List.EmptyView icon={{ source: "pepe.png" }} title="Sorry, you have no accounts" />
+      ) : (
+        accounts.map(({ id, name, username, password, url }) => (
+          <List.Item
+            id={id}
+            key={id}
+            icon={faviconForDomain(url)}
+            title={name}
+            subtitle={username}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.Paste
+                    icon={Icon.Clipboard}
+                    title="Paste Password"
+                    shortcut={{ modifiers: [], key: "enter" }}
+                    content={password}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Paste Username"
+                    shortcut={{ modifiers: ["shift"], key: "enter" }}
+                    content={username}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Password"
+                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                    content={password}
+                  />
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Username"
+                    shortcut={{ modifiers: ["cmd"], key: "u" }}
+                    content={username}
+                  />
+                  <Action.Push
+                    icon={Icon.Info}
+                    title="Show Details"
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                    target={<AccountDetail getData={() => api.show(id)} />}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
