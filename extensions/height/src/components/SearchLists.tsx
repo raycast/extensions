@@ -1,5 +1,19 @@
-import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
+import { ApiList } from "../api/list";
 import useLists from "../hooks/useLists";
 import { ListObject } from "../types/list";
 import { getTintColorFromHue, ListColors, ListTypes } from "../utils/list";
@@ -40,25 +54,25 @@ export default function SearchLists() {
             setListType(newValue);
           }}
         >
-          {ListTypes.map((item) => (
-            <List.Dropdown.Item key={item.value} title={item.name} value={item.value} />
+          {ListTypes.map((listType) => (
+            <List.Dropdown.Item key={listType.value} title={listType.name} value={listType.value} />
           ))}
         </List.Dropdown>
       }
     >
-      {filteredList.map((item) => (
+      {filteredList.map((list) => (
         <List.Item
-          key={item.id}
+          key={list.id}
           icon={{
-            source: item.appearance?.iconUrl ?? "list-icons/list-light.svg",
-            tintColor: getTintColorFromHue(item?.appearance?.hue, ListColors),
+            source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
+            tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
           }}
-          title={item.name}
+          title={list.name}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action title="Show Tasks" icon={Icon.List} onAction={() => push(<SearchTasks listId={item.id} />)} />
-                <Action.OpenInBrowser title="Open List in Browser" url={item.url} />
+                <Action title="Show Tasks" icon={Icon.List} onAction={() => push(<SearchTasks listId={list.id} />)} />
+                <Action.OpenInBrowser title="Open List in Browser" url={list.url} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action
@@ -73,7 +87,40 @@ export default function SearchLists() {
                   title="Edit List"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  onAction={() => push(<UpdateList list={item} mutateList={listsMutate} />)}
+                  onAction={() => push(<UpdateList list={list} mutateList={listsMutate} />)}
+                />
+                <Action
+                  title="Archive List"
+                  icon={Icon.Tray}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={async () => {
+                    await confirmAlert({
+                      title: "Archive List",
+                      message: "Are you sure you want to archive this list?",
+                      icon: {
+                        source: Icon.Tray,
+                        tintColor: Color.Red,
+                      },
+                      primaryAction: {
+                        title: "Archive",
+                        style: Alert.ActionStyle.Destructive,
+                        onAction: async () => {
+                          const toast = await showToast({ style: Toast.Style.Animated, title: "Archiving list" });
+                          try {
+                            await listsMutate(ApiList.update(list.id, { archivedAt: new Date().toISOString() }));
+
+                            toast.style = Toast.Style.Success;
+                            toast.title = "Successfully archived list 🎉";
+                          } catch (error) {
+                            toast.style = Toast.Style.Failure;
+                            toast.title = "Failed to archive list 😥";
+                            toast.message = error instanceof Error ? error.message : undefined;
+                          }
+                        },
+                      },
+                    });
+                  }}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -81,13 +128,13 @@ export default function SearchLists() {
                   title="Copy List Name"
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                   icon={Icon.CopyClipboard}
-                  content={item.name}
+                  content={list.name}
                 />
                 <Action.CopyToClipboard
                   title="Copy List URL"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                   icon={Icon.CopyClipboard}
-                  content={item.url}
+                  content={list.url}
                 />
               </ActionPanel.Section>
             </ActionPanel>
