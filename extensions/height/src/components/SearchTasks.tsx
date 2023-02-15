@@ -299,7 +299,22 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                                 source: list.appearance?.iconUrl ?? "list-icons/list-light.svg",
                                 tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
                               }}
-                              onAction={async () => await showHUD(`Move to ${list.name}`)}
+                              onAction={async () => {
+                                const toast = await showToast({
+                                  style: Toast.Style.Animated,
+                                  title: "Moving task to list",
+                                });
+                                try {
+                                  await tasksMutate(ApiTask.update(task.id, { listIds: [list.id] }));
+
+                                  toast.style = Toast.Style.Success;
+                                  toast.title = "Successfully moved task 🎉";
+                                } catch (error) {
+                                  toast.style = Toast.Style.Failure;
+                                  toast.title = "Failed to move task 😥";
+                                  toast.message = error instanceof Error ? error.message : undefined;
+                                }
+                              }}
                             />
                           ))}
                       </ActionPanel.Submenu>
@@ -322,7 +337,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                               onAction: async () => {
                                 const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
                                 try {
-                                  await tasksMutate(ApiTask.update(task.id, {}));
+                                  await tasksMutate(ApiTask.update(task.id, { deleted: true }));
 
                                   toast.style = Toast.Style.Success;
                                   toast.title = "Successfully deleted task 🎉";

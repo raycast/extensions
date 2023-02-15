@@ -62,4 +62,5 @@ export type UpdateTaskFormValues = CreateTaskFormValues;
 
 export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate"> & {
   fields?: Partial<Field>[];
+  deleted?: boolean;
 };
