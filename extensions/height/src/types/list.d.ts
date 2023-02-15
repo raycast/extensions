@@ -56,4 +56,5 @@ export type UpdateListPayload = Partial<Omit<UpdateListFormValues, "hue">> & {
     hue?: ListObject["appearance"]["hue"];
     icon?: ListIcon;
   };
+  archivedAt?: string;
 };
