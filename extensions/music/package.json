@@ -130,6 +130,16 @@
       "mode": "no-view"
     },
     {
+      "name": "add-to-playlist",
+      "title": "Add to Playlist",
+      "subtitle": "Apple Music",
+      "description": "Add currently playing track to a playlist",
+      "keywords": [
+        "playlist"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "start-playlist",
       "title": "Start Playlist",
       "subtitle": "Apple Music",
@@ -215,7 +225,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.34.1",
+    "@raycast/api": "^1.47.2",
     "fp-ts": "^2.12.1",
     "io-ts": "^2.2.19",
     "run-applescript": "^6.0.0"

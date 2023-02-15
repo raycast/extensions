@@ -176,12 +176,12 @@ function executeCodeCommand(
 
     switch (actionType) {
       case ActionType.Copy:
-        Clipboard.copy(stdout);
+        Clipboard.copy(stdout.trim());
         showHUD("Copied to clipboard");
         popToRoot({ clearSearchBar: true });
         break;
       case ActionType.Paste:
-        Clipboard.paste(stdout);
+        Clipboard.paste(stdout.trim());
         closeMainWindow();
         popToRoot({ clearSearchBar: true });
         break;
