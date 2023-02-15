@@ -194,8 +194,6 @@ export const getSquad = async (clubId: string): Promise<Player[]> => {
     url: `https://www.ligue1.com/clubs/squad?id=${clubId}`,
   };
 
-  console.log(config.url);
-
   try {
     const { data } = await axios(config);
 
@@ -237,9 +235,8 @@ export const getSquad = async (clubId: string): Promise<Player[]> => {
       };
     });
   } catch (e) {
-    console.log(e);
-
     showFailureToast();
+
     return [];
   }
 };
