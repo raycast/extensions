@@ -10,8 +10,8 @@ import { ListOrGridSection } from "./components/ListOrGridSection";
 
 const filters = {
   all: "All",
-  albums: "Albums",
   artists: "Artists",
+  albums: "Albums",
   tracks: "Songs",
   playlists: "Playlists",
 };
@@ -32,6 +32,7 @@ function Search() {
     onSearchTextChange: setSearchText,
     isLoading: response.isLoading,
     throttle: true,
+    searchText,
   };
 
   if (searchFilter === "all" || searchFilter === "tracks") {

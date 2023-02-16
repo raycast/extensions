@@ -45,7 +45,7 @@ export function ArtistsActionPanel({ title, artist }: { title: string; artist: S
         icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
         onAction={async () => {
           const artistId = artist.id.replace("spotify:artist:", "");
-          await startPlaySimilar({ seed_artists: artistId });
+          await startPlaySimilar([], [artistId]);
           showHUD(`♫ Playing Similar - ♫ ${artist.name}`);
         }}
       />

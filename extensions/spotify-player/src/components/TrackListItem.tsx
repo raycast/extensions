@@ -35,7 +35,7 @@ export default function TrackListItem({
             <Action
               title="Play Similar"
               icon={{ source: "radio.png", tintColor: Color.PrimaryText }}
-              onAction={() => startPlaySimilar({ seed_tracks: track.id })}
+              onAction={() => startPlaySimilar([track.id])}
             />
           )}
           {installed && track.uri && (

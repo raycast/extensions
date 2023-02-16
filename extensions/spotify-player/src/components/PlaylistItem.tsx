@@ -17,7 +17,6 @@ export default function PlaylistItem({
   const imageURL = playlist.images[playlist.images.length - 1]?.url;
   const icon: Image.ImageLike = {
     source: imageURL ?? Icon.BlankDocument,
-    mask: type === "list" ? Image.Mask.Circle : undefined,
   };
 
   const actions = (

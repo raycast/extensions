@@ -1,4 +1,4 @@
-import { getApplications, showHUD, showToast, Toast } from "@raycast/api";
+import { getApplications, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { SpotifyPlayingState, SpotifyState, TrackInfo } from "../spotify/types";
 
 export interface Preferences {
@@ -17,6 +17,21 @@ export function isTrack(result: any): result is { item: SpotifyApi.TrackObjectFu
 export function trackTitle(track: SpotifyApi.TrackObjectSimplified): string {
   return `${track.artists[0].name} - ${track.name}`;
 }
+
+export const optimizeTitle = (title: string | undefined) => {
+  if (title === undefined) {
+    return title;
+  }
+  const prefs = getPreferenceValues();
+  const max = Number(prefs.maxtitlelength);
+  const showEllipsis = Boolean(prefs.showEllipsis);
+
+  if (Number.isNaN(max) || max <= 0 || title.length <= max) {
+    return title;
+  }
+
+  return title.substring(0, max).trim() + (showEllipsis ? "…" : "");
+};
 
 export async function spotifyApplicationName(): Promise<string> {
   const installedApplications = await getApplications();

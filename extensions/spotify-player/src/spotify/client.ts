@@ -179,6 +179,7 @@ export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
 
   useEffect(() => {
     async function fetchData() {
+      console.log("fetching now playing");
       await authorizeIfNeeded();
 
       if (cancel) {
@@ -188,6 +189,7 @@ export function useNowPlaying(): Response<SpotifyApi.CurrentlyPlayingResponse> {
       setResponse((oldState) => ({ ...oldState, isLoading: true }));
 
       try {
+        console.log("trying fetching now playing");
         const response =
           (await spotifyApi
             .getMyCurrentPlayingTrack()
@@ -360,6 +362,24 @@ export async function removeFromSavedTracks(
       })) as SpotifyApi.AddToQueueResponse | undefined;
     return { result: response };
   } catch (e: any) {
+    return { error: (e as unknown as SpotifyApi.ErrorObject).message };
+  }
+}
+
+export async function nowPlaying(): Promise<Response<SpotifyApi.CurrentlyPlayingResponse>> {
+  await authorizeIfNeeded();
+
+  try {
+    console.log("try");
+    const response = (await spotifyApi
+      .getMyCurrentPlayingTrack()
+      .then((response: { body: any }) => response.body as SpotifyApi.CurrentlyPlayingResponse)
+      .catch((error) => {
+        return { error: (error as unknown as SpotifyApi.ErrorObject).message };
+      })) as SpotifyApi.CurrentlyPlayingResponse | undefined;
+    return { result: response };
+  } catch (e: any) {
+    console.log("error");
     return { error: (e as unknown as SpotifyApi.ErrorObject).message };
   }
 }
