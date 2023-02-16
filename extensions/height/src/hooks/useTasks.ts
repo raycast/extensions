@@ -1,9 +1,9 @@
 import { useFetch } from "@raycast/utils";
+import { orderBy } from "lodash-es";
 import { useMemo } from "react";
 import { ApiHeaders, ApiUrls } from "../api/helpers";
 import { TaskObject } from "../types/task";
 import { ApiResponse } from "../types/utils";
-import { orderBy } from "lodash-es";
 
 type Props = {
   listId?: string;
@@ -26,7 +26,7 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
 
   const order = JSON.stringify([{ column: "createdAt", direction: "DESC" }]);
 
-  const include = JSON.stringify(["Lists"]);
+  const include = JSON.stringify(["Lists", "ParentTasks"]);
 
   const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
 

@@ -14,9 +14,11 @@ import { getIconByStatusState } from "../utils/task";
 type Props = {
   task: TaskObject;
   mutateTask: MutatePromise<ApiResponse<TaskObject[]> | undefined>;
+  detailsTaskRevalidate?: () => void;
+  detailsPage?: boolean;
 };
 
-export default function UpdateList({ task, mutateTask }: Props) {
+export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskRevalidate }: Props) {
   const { theme } = environment;
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -76,6 +78,7 @@ export default function UpdateList({ task, mutateTask }: Props) {
       try {
         await mutateTask(ApiTask.update(task.id, payload));
         await mutateTask(ApiTask.batchUpdate(batchPayload));
+        if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
 
         toast.style = Toast.Style.Success;
         toast.title = "Successfully updated task 🎉";

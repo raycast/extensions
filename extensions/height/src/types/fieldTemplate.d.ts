@@ -28,7 +28,6 @@ export type FieldTemplateObject = {
   type: string;
   metadata: Metadata;
   reverseFieldTemplateId: string;
-  // TODO: Add labelSets type
   labelSets: unknown[];
   labels: Option[];
   defaultValue: string;

@@ -1,9 +1,8 @@
 import { Icon } from "@raycast/api";
-import type { StatusState } from "../types/fieldTemplate";
-import type { Option } from "../types/fieldTemplate";
+import type { Option, StatusState } from "../types/fieldTemplate";
 import { UserObject } from "../types/user";
 
-export function getIconByStatusState(statusId: string | undefined, statuses: Option[]) {
+export function getIconByStatusState(statusId: string | undefined, statuses: Option[] | undefined) {
   const status: StatusState = statuses?.find((item) => item.id === statusId)?.statusState ?? "default";
 
   switch (status) {
@@ -20,6 +19,10 @@ export function getIconByStatusState(statusId: string | undefined, statuses: Opt
     default:
       return Icon.Window;
   }
+}
+
+export function getStatusById(status: string | undefined, statuses: Option[] | undefined) {
+  return statuses?.find((item) => item.id === status);
 }
 
 export function getPriorityIcon(priority: string | undefined) {
@@ -46,8 +49,12 @@ export function getAssignedUsers(assigneesIds: string[], users: UserObject[] | u
   });
 }
 
+export function getAssigneeById(assigneeId: string | undefined, users: UserObject[] | undefined) {
+  return users?.find((user) => user.id === assigneeId);
+}
+
 export function getAssigneeFullNameById(assigneeId: string | undefined, users: UserObject[] | undefined) {
   if (assigneeId === "all") return "All";
-  const foundUser = users?.find((user) => user.id === assigneeId);
+  const foundUser = getAssigneeById(assigneeId, users);
   return `${foundUser?.firstname} ${foundUser?.lastname}`;
 }

@@ -40,10 +40,9 @@ export type TaskObject = {
   orderIndex: number;
   subtasksIds: string[];
   fields: Field[];
-  parentTasks: string[];
+  parentTasks: TaskObject[];
   subscribersIds: string[];
-  // TODO: Dodaj obiekt link
-  links: any[];
+  links: unknown[];
   url: string;
   trashedAt: string | null;
   trashedByUserId: string | null;
