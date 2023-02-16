@@ -81,11 +81,6 @@ export default function Command() {
                     url={`https://i.hints.so/integrations/output/${log.destination}/${log.integrationId}`}
                     shortcut={{ modifiers: ["cmd"], key: "enter" }}
                   />
-                  <Action.OpenInBrowser
-                    title="Open Created Item"
-                    url="hints.so"
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
-                  />
                 </ActionPanel>
               }
             />
