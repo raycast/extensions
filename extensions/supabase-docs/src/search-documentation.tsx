@@ -1,16 +1,16 @@
-import { ActionPanel, List, Action } from "@raycast/api"
-import docs from "./docs.json"
-import { groupBy, capitalize } from "lodash"
+import { ActionPanel, List, Action } from "@raycast/api";
+import docs from "./docs.json";
+import { groupBy, capitalize } from "lodash";
 
-const uppercaseList = ["ui", "faq", "api", "cli", "db"]
+const uppercaseList = ["ui", "faq", "api", "cli", "db"];
 
 const FormatTitle = (title: string) => {
   return title
     .replace(/-/g, " ")
     .split(" ")
     .map((word: string) => (uppercaseList.includes(word) ? word.toUpperCase() : capitalize(word)))
-    .join(" ")
-}
+    .join(" ");
+};
 
 const entries = groupBy(
   docs.urlset.url
@@ -22,7 +22,7 @@ const entries = groupBy(
       url: doc.loc,
     })),
   (x) => x.section
-)
+);
 
 const SearchDocumentation = () => {
   return (
@@ -46,7 +46,7 @@ const SearchDocumentation = () => {
         </List.Section>
       ))}
     </List>
-  )
-}
+  );
+};
 
-export default SearchDocumentation
+export default SearchDocumentation;
