@@ -41,3 +41,7 @@ export type BookmarkFormValues = {
   private: boolean;
   readLater: boolean;
 };
+
+export interface BookmarksResponse {
+  bookmarks: Bookmark[];
+}

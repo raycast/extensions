@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { useFetch } from "@raycast/utils";
-import { PinboardBookmark, Bookmark } from "./types";
+import { PinboardBookmark, Bookmark, BookmarksResponse } from "./types";
 import { extractDocumentTitle } from "./utils";
 
 const { apiToken, constantTags } = getPreferenceValues();
@@ -10,7 +10,7 @@ const allPostsEndpoint = `${apiBasePath}/posts/all`;
 const params = new URLSearchParams({ auth_token: apiToken, format: "json" });
 
 export function useSearchConstantsBookmarks() {
-  return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
+  return useFetch<BookmarksResponse>(`${allPostsEndpoint}?${params.toString()}`, {
     async parseResponse(response) {
       if (!response.ok) {
         throw new Error(response.statusText);
@@ -35,7 +35,7 @@ export function useSearchConstantsBookmarks() {
 }
 
 export function useSearchBookmarks() {
-  return useFetch(`${allPostsEndpoint}?${params.toString()}`, {
+  return useFetch<BookmarksResponse>(`${allPostsEndpoint}?${params.toString()}`, {
     async parseResponse(response) {
       if (!response.ok) {
         throw new Error(response.statusText);
@@ -61,6 +61,16 @@ export function transformBookmark(post: PinboardBookmark): Bookmark {
     private: (post.shared as string) === "no",
     readLater: (post.toread as string) === "yes",
   };
+}
+
+export async function deleteBookmark(bookmark: Bookmark) {
+  const params = new URLSearchParams();
+  params.append("auth_token", apiToken);
+  params.append("url", bookmark.url);
+
+  return await fetch(apiBasePath + "/posts/delete?" + params.toString(), {
+    method: "post",
+  });
 }
 
 export async function addBookmark(bookmark: Bookmark): Promise<unknown> {

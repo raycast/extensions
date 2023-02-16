@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Color } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon, confirmAlert } from "@raycast/api";
 import { Bookmark } from "./types";
 
 export function EmptyView(props: { title?: string; description?: string; actions?: false | JSX.Element }) {
@@ -14,8 +14,8 @@ export function EmptyView(props: { title?: string; description?: string; actions
   );
 }
 
-export function BookmarkListItem(props: { bookmark: Bookmark }) {
-  const { bookmark } = props;
+export function BookmarkListItem(props: { bookmark: Bookmark; onDelete: (bookmark: Bookmark) => Promise<void> }) {
+  const { bookmark, onDelete } = props;
 
   const keywords: string[] = [];
   const tags: List.Item.Accessory[] = [];
@@ -37,12 +37,27 @@ export function BookmarkListItem(props: { bookmark: Bookmark }) {
       icon="list-icon.png"
       accessories={tags}
       keywords={keywords}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={bookmark.url} />
-          <Action.CopyToClipboard title="Copy URL" content={bookmark.url} />
-        </ActionPanel>
-      }
+      actions={<Actions bookmark={bookmark} onDelete={onDelete} />}
     />
   );
+
+  function Actions({ bookmark, onDelete }: { bookmark: Bookmark; onDelete: (bookmark: Bookmark) => Promise<void> }) {
+    return (
+      <ActionPanel>
+        <Action.OpenInBrowser url={bookmark.url} />
+        <Action.CopyToClipboard title="Copy URL" content={bookmark.url} />
+        <Action
+          title="Delete bookmark"
+          style={Action.Style.Destructive}
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
+            if (await confirmAlert({ title: `Are you sure you want to delete the bookmark?` })) {
+              await onDelete(bookmark);
+            }
+          }}
+        />
+      </ActionPanel>
+    );
+  }
 }
