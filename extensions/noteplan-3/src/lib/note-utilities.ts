@@ -1,14 +1,22 @@
 import { getPreferences } from "./preferences";
-import { parse as parsePath } from "path";
+import { parse as parsePath, join as joinPath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { sync as find } from "fast-glob";
 import { enGB } from "date-fns/locale";
 import { capitalize } from "lodash";
 import { Icon } from "@raycast/api";
 
-const NOTE_PLAN_URI = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
+function getNotePlan3URI() {
+  const appstoreFlavorPath: string = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
+  const setappFlavorPath: string = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
+  
+  let useSetappVer: boolean = existsSync(joinPath(setappFlavorPath));
+
+  return useSetappVer ? setappFlavorPath : appstoreFlavorPath;
+}
+const NOTE_PLAN_URI = getNotePlan3URI();
 
 export enum NoteType {
   Calendar = "calendar",
