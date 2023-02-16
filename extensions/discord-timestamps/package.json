@@ -21,7 +21,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Default Action",
-      "placeholder": "mooo",
+      "default": "copy",
       "data": [
         {
           "title": "Copy",
