@@ -65,25 +65,31 @@ export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate"> &
   deleted?: boolean;
 };
 
+type Effect = {
+  type: string;
+  name?: string;
+  description?: {
+    message: string;
+  };
+  status?: string;
+  completedAat?: Date;
+  deleted?: boolean;
+  parentTaskId?: string | null;
+  // OR {add?: string[]; remove?: string[]}
+  assigneeIds?: string[];
+  // OR {add?: string[]; remove?: string[]}
+  listIds?: string[];
+  trashState?: "trash" | "active";
+  trashStateEffectAt?: Date;
+  fieldTemplateId?: string;
+  field?: {
+    [key: string]: Date | string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown> | null;
+  };
+};
+
 export type UpdateBatchTaskPayload = {
   patches: {
     taskIds: string[] | number[];
-    effects: {
-      type: string;
-      name?: string;
-      fieldTemplateId?: string;
-      field: {
-        [key: string]:
-          | Date
-          | string
-          | number
-          | boolean
-          | string[]
-          | number[]
-          | boolean[]
-          | Record<string, unknown>
-          | null;
-      };
-    }[];
+    effects: Effect[];
   }[];
 };

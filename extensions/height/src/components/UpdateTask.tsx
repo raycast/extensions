@@ -6,7 +6,7 @@ import useFieldTemplates from "../hooks/useFieldTemplates";
 import useLists from "../hooks/useLists";
 import useTasks from "../hooks/useTasks";
 import useUsers from "../hooks/useUsers";
-import { TaskObject, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
+import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
 import { ApiResponse } from "../types/utils";
 import { getTintColorFromHue, ListColors } from "../utils/list";
 import { getIconByStatusState } from "../utils/task";
@@ -34,23 +34,48 @@ export default function UpdateList({ task, mutateTask }: Props) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
       const payload: UpdateTaskPayload = {
-        name: values.name,
-        description: values.description || " ",
         assigneesIds: values.assigneesIds,
-        status: values.status,
         listIds: values.listIds,
       };
 
-      if (values.parentTaskId) {
-        payload.parentTaskId = values.parentTaskId;
-      }
-
-      if (values.dueDate) {
-        payload.fields = [{ fieldTemplateId: fieldTemplatesDueDate?.id, date: values.dueDate }];
-      }
+      const batchPayload: UpdateBatchTaskPayload = {
+        patches: [
+          {
+            taskIds: [task.id],
+            effects: [
+              {
+                type: "name",
+                name: values.name,
+              },
+              {
+                type: "description",
+                description: {
+                  message: values.description,
+                },
+              },
+              {
+                type: "status",
+                status: values.status,
+              },
+              {
+                type: "parentTask",
+                parentTaskId: values.parentTaskId || null,
+              },
+              {
+                type: "fields",
+                fieldTemplateId: fieldTemplatesDueDate?.id,
+                field: {
+                  date: values.dueDate || null,
+                },
+              },
+            ],
+          },
+        ],
+      };
 
       try {
         await mutateTask(ApiTask.update(task.id, payload));
+        await mutateTask(ApiTask.batchUpdate(batchPayload));
 
         toast.style = Toast.Style.Success;
         toast.title = "Successfully updated task 🎉";
@@ -163,7 +188,10 @@ export default function UpdateList({ task, mutateTask }: Props) {
       <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
         <Form.Dropdown.Item value="" title="No Task" />
         {tasks
-          ?.filter((item) => item.listIds.some((id) => values.listIds.includes(id)))
+          ?.filter(
+            (filteredParentTask) =>
+              filteredParentTask.listIds.some((id) => values.listIds.includes(id)) && filteredParentTask.id !== task.id
+          )
           ?.map((task) => {
             return (
               <Form.Dropdown.Item

@@ -171,7 +171,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
       <Form.Dropdown title="Parent Task" {...itemProps.parentTaskId}>
         <Form.Dropdown.Item value="" title="No Task" />
         {tasks
-          ?.filter((item) => item.listIds.some((id) => values.listIds.includes(id)))
+          ?.filter((filteredParentTask) => filteredParentTask.listIds.some((id) => values.listIds.includes(id)))
           ?.map((task) => {
             return (
               <Form.Dropdown.Item

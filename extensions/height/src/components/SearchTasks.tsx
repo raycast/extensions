@@ -476,13 +476,19 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                       />
                       <Action.CopyToClipboard
                         title="Copy Task Name"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                         icon={Icon.CopyClipboard}
                         content={task.name}
                       />
                       <Action.CopyToClipboard
+                        title="Copy Task ID With Name"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                        icon={Icon.CopyClipboard}
+                        content={`${task.url.split("/").at(-1) ?? ""} ${task.name}`}
+                      />
+                      <Action.CopyToClipboard
                         title="Copy Task URL"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                        shortcut={{ modifiers: ["opt", "shift"], key: "." }}
                         icon={Icon.CopyClipboard}
                         content={task.url}
                       />
