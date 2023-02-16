@@ -68,6 +68,7 @@ export default function SearchLists() {
             tintColor: getTintColorFromHue(list?.appearance?.hue, ListColors),
           }}
           title={list.name}
+          subtitle={list.description}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
