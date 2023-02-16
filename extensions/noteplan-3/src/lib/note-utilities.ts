@@ -90,4 +90,4 @@ export const getNoteTitle = (note: NoteEntry) => {
 
 export const getNoteCategory = (note: NoteEntry) => capitalize(note.type);
 
-export const getNoteIcon = (note: NoteEntry) => (note.type == NoteType.Project ? Icon.BlankDocument : Icon.Calendar);
+export const getNoteIcon = (note: NoteEntry) => (note.type == NoteType.Project ? Icon.TextDocument : Icon.Calendar);
