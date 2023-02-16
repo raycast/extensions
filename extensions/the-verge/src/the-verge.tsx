@@ -4,19 +4,33 @@ import Parser from "rss-parser";
 
 const parser = new Parser();
 
+interface Article {
+  title: string;
+  link: string;
+  pubDate: string;
+  author: string;
+  content: string;
+  id: string;
+}
+
 interface State {
-  items?: Parser.Item[];
+  items?: Article[];
   error?: Error;
 }
 
 export default function Command() {
   const [state, setState] = useState<State>({});
+  const [rssLink, setRssLink] = useState<string>("https://www.theverge.com/rss/index.xml");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsLoading(true);
     async function fetchStories() {
       try {
-        const feed = await parser.parseURL("https://www.theverge.com/rss/index.xml");
-        setState({ items: feed.items });
+        const feed = await parser.parseURL(rssLink);
+
+        setState({ items: feed.items.map((item) => item as Article) });
+        setIsLoading(false);
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("Something went wrong"),
@@ -27,6 +41,24 @@ export default function Command() {
     fetchStories();
   }, []);
 
+  useEffect(() => {
+    setIsLoading(true);
+    async function fetchStories() {
+      try {
+        const feed = await parser.parseURL(rssLink);
+
+        setState({ items: feed.items.map((item) => item as Article) });
+        setIsLoading(false);
+      } catch (error) {
+        setState({
+          error: error instanceof Error ? error : new Error("Something went wrong"),
+        });
+      }
+    }
+
+    fetchStories();
+  }, [rssLink]);
+
   if (state.error) {
     showToast({
       style: Toast.Style.Failure,
@@ -36,7 +68,33 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={!state.items && !state.error}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Category"
+          defaultValue={"Top"}
+          storeValue
+          onChange={(newValue) => setRssLink(newValue as string)}
+        >
+          <List.Dropdown.Item title={"Top"} value={"https://www.theverge.com/rss/full.xml"} />
+          <List.Dropdown.Item title={"Tech"} value={"https://www.theverge.com/tech/rss/index.xml"} />
+          <List.Dropdown.Item title={"Science"} value={"https://www.theverge.com/science/rss/index.xml"} />
+          <List.Dropdown.Item title={"Health"} value={"https://www.theverge.com/rss/health/index.xml"} />
+          <List.Dropdown.Item title={"Environment"} value={"https://www.theverge.com/rss/environment/index.xml"} />
+          <List.Dropdown.Item title={"Creators"} value={"https://www.theverge.com/rss/creators/index.xml"} />
+          <List.Dropdown.Item title={"Entertainment"} value={"https://www.theverge.com/rss/entertainment/index.xml"} />
+          <List.Dropdown.Item title={"Culture"} value={"https://www.theverge.com/culture/rss/index.xml"} />
+          <List.Dropdown.Item
+            title={"Transportation"}
+            value={"https://www.theverge.com/transportation/rss/index.xml"}
+          />
+          <List.Dropdown.Item title={"Reviews"} value={"https://www.theverge.com/reviews/rss/index.xml"} />
+          <List.Dropdown.Item title={"Features"} value={"https://www.theverge.com/rss/features/index.xml"} />
+          <List.Dropdown.Item title={"Exclusive"} value={"https://www.theverge.com/rss/exclusive/index.xml"} />
+        </List.Dropdown>
+      }
+    >
       {state.items?.map((item, index) => (
         <StoryListItem key={item.id} item={item} index={index} />
       ))}
@@ -44,10 +102,8 @@ export default function Command() {
   );
 }
 
-function StoryListItem(props: { item: Parser.Item; index: number }) {
+function StoryListItem(props: { item: Article; index: number }) {
   const icon = getIcon(props.index + 1);
-  const points = getPoints(props.item);
-  const comments = getComments(props.item);
 
   return (
     <List.Item
@@ -81,16 +137,6 @@ function getIcon(index: number): Image.ImageLike {
   return {
     source: `data:image/svg+xml,${svg}`,
   };
-}
-
-function getPoints(item: Parser.Item) {
-  const matches = item.contentSnippet?.match(/(?<=Points:\s*)(\d+)/g);
-  return matches?.[0];
-}
-
-function getComments(item: Parser.Item) {
-  const matches = item.contentSnippet?.match(/(?<=Comments:\s*)(\d+)/g);
-  return matches?.[0];
 }
 
 function Actions(props: { item: Parser.Item }) {
