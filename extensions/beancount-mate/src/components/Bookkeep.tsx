@@ -10,26 +10,20 @@ import SuccessView from "./SuccessView";
 import TransactionItem from "./TransactionItem";
 import { costflowConfigFilePath } from "../utils/preferences";
 import { isJournalFileExists, parsedJournalFilePath } from "../utils/journalFile";
-import { wrapToast } from "../utils/wrapToast";
 
-const parseSearchText = wrapToast(
-  async (searchText: string, costflowConfig: UserConfig) => {
-    const jsonParseResult = await costflow.parse(searchText, costflowConfig, { mode: "json" });
-    const beancountParseResult = await costflow.parse(searchText, costflowConfig, { mode: "beancount" });
+const parseSearchText = async (searchText: string, costflowConfig: UserConfig) => {
+  const jsonParseResult = await costflow.parse(searchText, costflowConfig, { mode: "json" });
+  const beancountParseResult = await costflow.parse(searchText, costflowConfig, { mode: "beancount" });
 
-    if ((jsonParseResult as NParseResult.Error).error) {
-      throw new Error((jsonParseResult as NParseResult.Error).error);
-    }
+  if ((jsonParseResult as NParseResult.Error).error) {
+    throw new Error((jsonParseResult as NParseResult.Error).error);
+  }
 
-    return {
-      json: jsonParseResult as NParseResult.TransactionResult,
-      data: beancountParseResult as NParseResult.Result,
-    };
-  },
-  "Parsing...",
-  "Costflow Parse Success",
-  "Costflow Parse Failed"
-);
+  return {
+    json: jsonParseResult as NParseResult.TransactionResult,
+    data: beancountParseResult as NParseResult.Result,
+  };
+};
 
 export default function Bookkeep() {
   const { isLoading: isCFLoading, data: costflowConfig } = usePromise(() => fs.readJson(costflowConfigFilePath));

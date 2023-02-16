@@ -47,8 +47,12 @@ touch ~/.constflow/config.json
 }
 ```
 
-Then after open "Bookkeep" command in Raycast,
-Now enjoy bookkeeping!
+Then after open "Bookkeep" command in Raycast, start bookkeeping!
+
+When you finished typing, you can choose "Copy Parsed Directives" Or "Save to Journal File".
+
+- Copy Parsed Directives will copy result to your clipboard.
+- Save to Journal File will append result to your Journal File.
 
 # Attribution
 
