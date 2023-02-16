@@ -9,10 +9,10 @@ import { capitalize } from "lodash";
 import { Icon } from "@raycast/api";
 
 function getNotePlan3URI() {
-  const appstoreFlavorPath: string = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
-  const setappFlavorPath: string = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
-  
-  let useSetappVer: boolean = existsSync(joinPath(setappFlavorPath));
+  const appstoreFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
+  const setappFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
+
+  const useSetappVer: boolean = existsSync(joinPath(setappFlavorPath));
 
   return useSetappVer ? setappFlavorPath : appstoreFlavorPath;
 }
@@ -90,4 +90,4 @@ export const getNoteTitle = (note: NoteEntry) => {
 
 export const getNoteCategory = (note: NoteEntry) => capitalize(note.type);
 
-export const getNoteIcon = (note: NoteEntry) => (note.type == NoteType.Project ? Icon.TextDocument : Icon.Calendar);
+export const getNoteIcon = (note: NoteEntry) => (note.type == NoteType.Project ? Icon.BlankDocument : Icon.Calendar);
