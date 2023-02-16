@@ -49,7 +49,8 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     },
   });
 
-  const { fieldTemplatesStatuses, fieldTemplatesPriorities, fieldTemplatesIsLoading } = useFieldTemplates();
+  const { fieldTemplatesStatuses, fieldTemplatesPrioritiesObj, fieldTemplatesPriorities, fieldTemplatesIsLoading } =
+    useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading, tasksMutate } = useTasks({ listId, assigneeId });
 
@@ -142,16 +143,16 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                           onAction={async () => {
                             const toast = await showToast({
                               style: Toast.Style.Animated,
-                              title: "Setting assignee",
+                              title: "Unsetting assignee",
                             });
                             try {
                               await tasksMutate(ApiTask.update(task.id, { assigneesIds: [] }));
 
                               toast.style = Toast.Style.Success;
-                              toast.title = "Successfully set assignee 🎉";
+                              toast.title = "Successfully unset assignee 🎉";
                             } catch (error) {
                               toast.style = Toast.Style.Failure;
-                              toast.title = "Failed to set assignee 😥";
+                              toast.title = "Failed to unset assignee 😥";
                               toast.message = error instanceof Error ? error.message : undefined;
                             }
                           }}
@@ -226,6 +227,47 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         icon={Icon.Exclamationmark3}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                       >
+                        <Action
+                          title="No Priority"
+                          icon={{
+                            source: Icon.ExclamationMark,
+                            tintColor: Color.PrimaryText,
+                          }}
+                          onAction={async () => {
+                            const toast = await showToast({
+                              style: Toast.Style.Animated,
+                              title: "Unsetting priority",
+                            });
+                            console.log(task.fields[0]);
+                            try {
+                              await tasksMutate(
+                                ApiTask.batchUpdate({
+                                  patches: [
+                                    {
+                                      taskIds: [task.id],
+                                      effects: [
+                                        {
+                                          type: "fields",
+                                          fieldTemplateId: fieldTemplatesPrioritiesObj?.id,
+                                          field: {
+                                            label: null,
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                })
+                              );
+
+                              toast.style = Toast.Style.Success;
+                              toast.title = "Successfully unset priority 🎉";
+                            } catch (error) {
+                              toast.style = Toast.Style.Failure;
+                              toast.title = "Failed to unset priority 😥";
+                              toast.message = error instanceof Error ? error.message : undefined;
+                            }
+                          }}
+                        />
                         {fieldTemplatesPriorities?.map((priority) => (
                           <Action
                             key={priority.id}
@@ -236,7 +278,42 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                                 typeof priority?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
                               })`,
                             }}
-                            onAction={async () => await showHUD(`Assigned to ${priority.value} – ${priority.id}`)}
+                            onAction={async () => {
+                              const toast = await showToast({
+                                style: Toast.Style.Animated,
+                                title: "Setting priority",
+                              });
+                              console.log("task:", task.fields[0]);
+                              try {
+                                await tasksMutate(
+                                  ApiTask.batchUpdate({
+                                    patches: [
+                                      {
+                                        taskIds: [task.id],
+                                        effects: [
+                                          {
+                                            type: "fields",
+                                            fieldTemplateId: fieldTemplatesPrioritiesObj?.id,
+                                            field: {
+                                              label: {
+                                                optionId: priority.id,
+                                              },
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  })
+                                );
+
+                                toast.style = Toast.Style.Success;
+                                toast.title = "Successfully set priority 🎉";
+                              } catch (error) {
+                                toast.style = Toast.Style.Failure;
+                                toast.title = "Failed to set priority 😥";
+                                toast.message = error instanceof Error ? error.message : undefined;
+                              }
+                            }}
                           />
                         ))}
                       </ActionPanel.Submenu>

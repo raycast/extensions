@@ -64,3 +64,17 @@ export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate"> &
   fields?: Partial<Field>[];
   deleted?: boolean;
 };
+
+export type UpdateBatchTaskPayload = {
+  patches: {
+    taskIds: string[] | number[];
+    effects: {
+      type: string;
+      name?: string;
+      fieldTemplateId?: string;
+      field: {
+        [key: string]: string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown> | null;
+      };
+    }[];
+  }[];
+};

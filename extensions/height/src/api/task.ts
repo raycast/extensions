@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { CreateTaskPayload, TaskObject, UpdateTaskPayload } from "../types/task";
+import { CreateTaskPayload, TaskObject, UpdateBatchTaskPayload, UpdateTaskPayload } from "../types/task";
 import { ApiErrorResponse } from "../types/utils";
 import { ApiHeaders, ApiUrls } from "./helpers";
 
@@ -16,6 +16,13 @@ export const ApiTask = {
     } else {
       return [null, ((await response.json()) as ApiErrorResponse).error] as const;
     }
+  },
+  batchUpdate(payload: UpdateBatchTaskPayload) {
+    return fetch(ApiUrls.tasks, {
+      method: "PATCH",
+      headers: ApiHeaders,
+      body: JSON.stringify(payload),
+    });
   },
   update(taskId: string, values: UpdateTaskPayload) {
     return fetch(`${ApiUrls.tasks}/${taskId}`, {
