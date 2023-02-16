@@ -68,8 +68,8 @@ function Timezones() {
         markdown={markdown(time, isCustom)}
         actions={
           <ActionPanel>
-            <ActionPanel.Submenu title="Add Timezones">
-              <ActionPanel.Section title="Selecteds">
+            <ActionPanel.Submenu title="Add Timezones" icon={Icon.Globe}>
+              <ActionPanel.Section title="Selected">
                 {selectedTimezones?.map((tz) => (
                   <Action
                     key={tz}
@@ -104,10 +104,7 @@ function Timezones() {
             <Action
               title={isCustom ? `Clear Custom Time` : `Set Custom Time`}
               onAction={isCustom ? resetCustomTime : setCustomTime}
-            />
-            <Action
-              title={isCustom ? `Clear Custom Time` : `Set Custom Time`}
-              onAction={isCustom ? resetCustomTime : setCustomTime}
+              icon={Icon.Clock}
             />
           </ActionPanel>
         }
@@ -115,7 +112,7 @@ function Timezones() {
           <Detail.Metadata>
             {!selectedTimezones?.length && (
               <>
-                <Detail.Metadata.Label title={`No timezones added`} text={`Add timezones to appear here`} />
+                <Detail.Metadata.Label title={`No Timezones Added`} text={`Added timezones appear here`} />
               </>
             )}
             {selectedTimezones?.map((zoneName, index) => {
