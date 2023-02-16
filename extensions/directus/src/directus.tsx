@@ -46,8 +46,9 @@ export default function SearchDocumentation() {
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const search = async (query = "install") => {
+  const search = async (query = "api") => {
     setIsLoading(true);
+    !query && (query = "api");
 
     return await algoliaIndex
       .search(query, {
@@ -109,10 +110,7 @@ export default function SearchDocumentation() {
             ))}
         </List.Section>
       ))}
-      <List.EmptyView
-        icon="directus-logo-128.png"
-        title="Whoops! We did not find any matches on the Directus Docs for your search."
-      />
+      <List.EmptyView icon="directus-logo-128.png" title="Whoops! We did not find any matches." />
     </List>
   );
 }
