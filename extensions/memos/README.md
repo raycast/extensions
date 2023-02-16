@@ -1,6 +1,6 @@
 # Send To Memos
 
-Raycast extension for [usememos/memos](https://github.com/usememos/memos).
+[Raycast](https://www.raycast.com) extension for [usememos/memos](https://github.com/usememos/memos).
 
 # Usage
 
