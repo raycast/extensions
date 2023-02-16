@@ -1,4 +1,4 @@
-type TimestampType = "t" | "T" | "d" | "D" | "f" | "F" | "R" | "E";
+export type TimestampType = "t" | "T" | "d" | "D" | "f" | "F" | "R" | "E";
 
 export const generateTimestamp = (timestamp: Date, type: TimestampType): string => {
   switch (type) {

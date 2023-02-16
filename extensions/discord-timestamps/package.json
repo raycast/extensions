@@ -14,6 +14,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "description": "Set the default action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "placeholder": "mooo",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
   "categories": [
     "Communication",
     "Developer Tools"
