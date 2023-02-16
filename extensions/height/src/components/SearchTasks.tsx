@@ -49,8 +49,13 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
     },
   });
 
-  const { fieldTemplatesStatuses, fieldTemplatesPrioritiesObj, fieldTemplatesPriorities, fieldTemplatesIsLoading } =
-    useFieldTemplates();
+  const {
+    fieldTemplatesStatuses,
+    fieldTemplatesPrioritiesObj,
+    fieldTemplatesPriorities,
+    fieldTemplatesDueDate,
+    fieldTemplatesIsLoading,
+  } = useFieldTemplates();
   const { users, usersIsLoading } = useUsers();
   const { tasks, tasksIsLoading, tasksMutate } = useTasks({ listId, assigneeId });
 
@@ -238,7 +243,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                               style: Toast.Style.Animated,
                               title: "Unsetting priority",
                             });
-                            console.log(task.fields[0]);
+
                             try {
                               await tasksMutate(
                                 ApiTask.batchUpdate({
@@ -283,7 +288,7 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                                 style: Toast.Style.Animated,
                                 title: "Setting priority",
                               });
-                              console.log("task:", task.fields[0]);
+
                               try {
                                 await tasksMutate(
                                   ApiTask.batchUpdate({
@@ -321,7 +326,40 @@ export default function SearchTasks({ listId, assignedTasks }: Props = {}) {
                         title="Set Due Date..."
                         icon={Icon.Calendar}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                        onChange={async (date) => await showHUD(`Set Due Date to ${date?.toISOString()}`)}
+                        onChange={async (date) => {
+                          const toast = await showToast({
+                            style: Toast.Style.Animated,
+                            title: "Setting priority",
+                          });
+
+                          try {
+                            await tasksMutate(
+                              ApiTask.batchUpdate({
+                                patches: [
+                                  {
+                                    taskIds: [task.id],
+                                    effects: [
+                                      {
+                                        type: "fields",
+                                        fieldTemplateId: fieldTemplatesDueDate?.id,
+                                        field: {
+                                          date,
+                                        },
+                                      },
+                                    ],
+                                  },
+                                ],
+                              })
+                            );
+
+                            toast.style = Toast.Style.Success;
+                            toast.title = "Successfully set priority 🎉";
+                          } catch (error) {
+                            toast.style = Toast.Style.Failure;
+                            toast.title = "Failed to set priority 😥";
+                            toast.message = error instanceof Error ? error.message : undefined;
+                          }
+                        }}
                       />
                       <ActionPanel.Submenu
                         title="Set Parent Task"

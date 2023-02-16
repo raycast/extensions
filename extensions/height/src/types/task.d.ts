@@ -73,7 +73,16 @@ export type UpdateBatchTaskPayload = {
       name?: string;
       fieldTemplateId?: string;
       field: {
-        [key: string]: string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown> | null;
+        [key: string]:
+          | Date
+          | string
+          | number
+          | boolean
+          | string[]
+          | number[]
+          | boolean[]
+          | Record<string, unknown>
+          | null;
       };
     }[];
   }[];
