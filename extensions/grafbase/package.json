@@ -6,6 +6,8 @@
   "icon": "logo.png",
   "license": "MIT",
   "author": "mlafeldt",
+  "owner": "grafbase",
+  "access": "public",
   "contributors": [
     "notrab"
   ],
