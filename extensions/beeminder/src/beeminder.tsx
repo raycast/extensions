@@ -85,12 +85,13 @@ export default function Command() {
     return (
       <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
-          const timeDiff = moment.unix(goal.losedate).diff(new Date());
-          const timeDiffDuration = moment.duration(timeDiff);
+          const diff = moment.unix(goal.losedate).diff(new Date());
+          const timeDiffDuration = moment.duration(diff);
           const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
+          const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
 
           let goalIcon;
-          let dueText = `${goal.gunits} ${goal.gunits} due in ${
+          let dueText = `${goalRate} ${goal.gunits} due in ${
             dayDifference > 1
               ? dayDifference + " days"
               : dayDifference == 1
@@ -100,7 +101,7 @@ export default function Command() {
 
           if (dayDifference < 1) {
             goalIcon = "🔴";
-            dueText = `${goal.gunits} ${goal.gunits} due in${
+            dueText = `${goalRate} ${goal.gunits} due in${
               timeDiffDuration.hours() > 1
                 ? " " + timeDiffDuration.hours() + " hours"
                 : timeDiffDuration.hours() == 1
