@@ -7,7 +7,7 @@ export default function useProjects(teamId?: string, config?: { execute?: boolea
   });
 
   return {
-    upcomingProjects: data,
+    projects: data,
     isLoadingProjects: (!data && !error) || isLoading,
     projectsError: error,
     mutateProjects: mutate,

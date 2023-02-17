@@ -16,7 +16,7 @@ export default function ProjectList() {
   const [selectedTeam, setSelectedTeam] = useState<string>(
     teamsWithProjects && teamsWithProjects.length === 1 ? teamsWithProjects[0].id : ""
   );
-  const { upcomingProjects, isLoadingProjects, mutateProjects } = useProjects(selectedTeam);
+  const { projects, isLoadingProjects, mutateProjects } = useProjects(selectedTeam);
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
@@ -43,7 +43,7 @@ export default function ProjectList() {
       filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Upcoming">
-        {upcomingProjects?.map((project) => (
+        {projects?.map((project) => (
           <Project
             project={project}
             key={project.id}
