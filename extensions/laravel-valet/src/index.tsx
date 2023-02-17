@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { handleError } from "./utils";
 import { List } from "@raycast/api";
 import { SiteListItem } from "./components/SiteListItem";
@@ -7,6 +7,8 @@ import { getParked, getUniqueId } from "./helpers/sites";
 import { Site } from "./types/entities";
 
 export default function Command() {
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
+
   const {
     data: sites,
     isLoading: isLoadingSites,
@@ -23,9 +25,15 @@ export default function Command() {
   }, [sites]);
 
   return (
-    <List isLoading={isLoadingSites} searchBarPlaceholder="Search sites..." throttle={false}>
+    <List isLoading={isLoadingSites} searchBarPlaceholder="Search sites..." isShowingDetail={isShowingDetail}>
       {filteredSites.map((site: Site) => (
-        <SiteListItem key={getUniqueId(site)} site={site} mutateSites={mutateSites} />
+        <SiteListItem
+          key={getUniqueId(site)}
+          site={site}
+          mutateSites={mutateSites}
+          isShowingDetail={isShowingDetail}
+          setIsShowingDetail={setIsShowingDetail}
+        />
       ))}
     </List>
   );

@@ -1,50 +1,33 @@
-import { ActionPanel, Detail, Icon } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
-import { handleError } from "../utils";
-import { getReadmeContents, getSite, getSecuredIcon, isSecured } from "../helpers/sites";
-import SiteActions from "./SiteActions";
+import { List } from "@raycast/api";
+import { getReadmeContents, getSecuredIcon, isSecured } from "../helpers/sites";
 import { Site } from "../types/entities";
 
 interface SiteDetailProps {
-  siteId: string;
-  mutateSites?: MutatePromise<Site[] | undefined>;
+  site: Site;
 }
 
-export default function SiteDetail({ siteId, mutateSites }: SiteDetailProps): JSX.Element {
-  const {
-    data: site,
-    isLoading: isLoadingSite,
-    error: getSiteError,
-    mutate: mutateSiteDetail,
-  } = useCachedPromise((siteId) => getSite(siteId), [siteId]);
-
-  if (getSiteError) {
-    handleError({ error: getSiteError, title: "Unable to get site detail" });
-  }
-
+export default function SiteDetail({ site }: SiteDetailProps): JSX.Element {
   return (
-    <Detail
-      isLoading={isLoadingSite}
-      navigationTitle={site?.name}
+    <List.Item.Detail
       {...(site
         ? {
             markdown: getReadmeContents(site),
             metadata: (
-              <Detail.Metadata>
-                <Detail.Metadata.Link title="URL" text={site.url} target={site.url} />
-                <Detail.Metadata.Label title="Folder path" text={site.prettyPath} icon={Icon.Folder} />
-                <Detail.Metadata.Label
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title="Name" text={site.name} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="URL" text={site.url} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="Folder path" text={site.prettyPath} />
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label
                   title="Secured"
                   text={isSecured(site) ? "Yes" : "No"}
                   icon={getSecuredIcon(site)}
                 />
-                <Detail.Metadata.Label title="PHP version" text={site.prettyPath} icon={Icon.Document} />
-              </Detail.Metadata>
-            ),
-            actions: (
-              <ActionPanel>
-                <SiteActions site={site} mutateSites={mutateSites} mutateSiteDetail={mutateSiteDetail} />
-              </ActionPanel>
+                <List.Item.Detail.Metadata.Separator />
+                <List.Item.Detail.Metadata.Label title="PHP version" text={site.prettyPath} />
+              </List.Item.Detail.Metadata>
             ),
           }
         : {})}

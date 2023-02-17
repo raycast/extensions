@@ -6,17 +6,12 @@ import { Site } from "../types/entities";
 interface SiteActionsProps {
   site: Site;
   mutateSites?: MutatePromise<Site[] | undefined>;
-  mutateSiteDetail?: MutatePromise<Site | undefined>;
 }
 
-export default function SiteActions({ site, mutateSites, mutateSiteDetail }: SiteActionsProps): JSX.Element {
+export default function SiteActions({ site, mutateSites }: SiteActionsProps): JSX.Element {
   async function mutate() {
     if (mutateSites) {
       await mutateSites();
-    }
-
-    if (mutateSiteDetail) {
-      await mutateSiteDetail();
     }
   }
 
