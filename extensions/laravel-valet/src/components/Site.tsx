@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { site } from "../utils";
+import { secureSite, site, unsecureSite } from "../utils";
 
 interface SiteProps {
   site: site;
@@ -21,13 +21,29 @@ export function Site({ site: site }: SiteProps): JSX.Element {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={site.url} icon={Icon.Globe} />
-          <Action.ShowInFinder path={site.path} />
-          <Action.OpenWith path={site.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-          <Action.CopyToClipboard
-            title="Copy Site Path"
-            content={site.path}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-          />
+          <ActionPanel.Section title={"Valet actions"}>
+            <Action
+              title="Secure Site"
+              icon={{ source: Icon.Lock, tintColor: Color.Green }}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={() => secureSite(site)}
+            />
+            <Action
+              title="Unsecure Site"
+              icon={{ source: Icon.LockUnlocked, tintColor: Color.Red }}
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+              onAction={() => unsecureSite(site)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title={"Default actions"}>
+            <Action.ShowInFinder path={site.path} />
+            <Action.OpenWith path={site.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.CopyToClipboard
+              title="Copy Site Path"
+              content={site.path}
+              shortcut={{ modifiers: ["cmd"], key: "p" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

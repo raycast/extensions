@@ -1,6 +1,7 @@
 import fs, { Dirent } from "fs";
 import { homedir } from "os";
 import { showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
 
 export interface config {
   paths: string[];
@@ -165,5 +166,56 @@ export async function searchSites(query: string): Promise<site[]> {
         site.url.toLowerCase().includes(term.toLowerCase())
       );
     });
+  });
+}
+
+export async function secureSite(site: site) {
+  await showToast({ style: Toast.Style.Animated, title: `Securing site [${site.name}.${getConfig().tld}]` });
+
+  try {
+    await executeCommand(`valet secure ${site.name}`);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `The [${site.name}.${getConfig().tld}] site has been secured`,
+    });
+  } catch (error) {
+    await handleError({ error, title: "Unable to secure site" });
+  }
+}
+
+export async function unsecureSite(site: site) {
+  await showToast({ style: Toast.Style.Animated, title: `Unsecure site [${site.name}.${getConfig().tld}]` });
+
+  try {
+    await executeCommand(`valet unsecure ${site.name}`);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `The [${site.name}.${getConfig().tld}] site will now serve traffic over HTTP`,
+    });
+  } catch (error) {
+    await handleError({ error, title: "Unable to unsecure site" });
+  }
+}
+
+export async function executeCommand(command: string): Promise<Buffer> {
+  try {
+    const homeDir = execSync("echo $HOME").toString().trim();
+
+    return await execSync(command, {
+      env: {
+        HOME: homeDir,
+        PATH: `/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin:${homeDir}/.composer/vendor/bin`,
+      },
+    });
+  } catch (error) {
+    throw new Error(`Could not execute command ${command}.`);
+  }
+}
+
+export function handleError({ error, title }: HandleErrorArgs) {
+  return showToast({
+    style: Toast.Style.Failure,
+    title: title,
+    message: error instanceof Error ? error.message : "",
   });
 }
