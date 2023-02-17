@@ -6,7 +6,7 @@ Now you don't have to. Just use this Directus Raycast extension to quickly searc
 
 ## Demo
 
-![Raycast Directus Docs Search](media/directus-docs-search.gif)
+![Raycast Directus Docs Search](https://cdn.directus.io/marketing/raycast-directus-docs-search.gif)
 
 ---
 
