@@ -150,7 +150,11 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
 
       <Form.TextField title="Name" placeholder="Enter name of task" {...itemProps.name} />
 
-      <Form.TextArea title="Description" placeholder="Describe task" {...itemProps.description} />
+      <Form.TextArea
+        title="Description"
+        placeholder="Describe task (supports Markdown e.g. **bold**)"
+        {...itemProps.description}
+      />
 
       <Form.Dropdown title="Status" {...itemProps.status}>
         {fieldTemplatesStatuses?.map((status) => (
