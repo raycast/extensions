@@ -23,7 +23,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
     } catch (e) {
       console.error("Menu bar command failed to launch.");
     }
-    await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+
     if (props.launchContext?.source === "organize-colors") {
       await launchCommand({ name: "organize-colors", type: LaunchType.UserInitiated });
     }
