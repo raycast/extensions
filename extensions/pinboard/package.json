@@ -51,7 +51,7 @@
       "type": "textfield",
       "required": false,
       "title": "Constant tags",
-      "description": "Enter the tags you want to add when searching with constant tags - sperated by spaces",
+      "description": "Enter the tags you want to add when searching with constant tags - separated by spaces",
       "placeholder": "web development hats"
     }
   ],
