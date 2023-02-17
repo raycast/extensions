@@ -1,4 +1,5 @@
 import got from "got";
+import wiki from "wikijs";
 
 export interface PageSummary {
   title: string;
@@ -55,4 +56,20 @@ export async function getPageData(title: string, language: string) {
     .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`)
     .json<PageSummary>();
   return response;
+}
+
+export async function getPageContent(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+  })
+    .page(title)
+    .then((page) => page.content());
+}
+
+export async function getPageMetadata(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+  })
+    .page(title)
+    .then((page) => page.fullInfo());
 }

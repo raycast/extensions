@@ -64,11 +64,13 @@
   "dependencies": {
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.18",
-    "got": "^12.5.3"
+    "got": "^12.5.3",
+    "wikijs": "^6.4.1"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",
     "@types/react": "^18.0.28",
+    "@types/jsdom": "^21.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
