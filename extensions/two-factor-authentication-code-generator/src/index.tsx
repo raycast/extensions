@@ -14,6 +14,7 @@ import {
   SubmitFormAction,
   ToastStyle,
   useNavigation,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
@@ -34,6 +35,7 @@ export default function AppsView() {
       code: string;
     }[]
   >([]);
+  const { defaultAction } = getPreferenceValues();
 
   useEffect(() => {
     allLocalStorageItems().then((_apps) => {
@@ -79,8 +81,17 @@ export default function AppsView() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.Paste content={a.code} title="Paste Code" />
-                <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                {defaultAction == "copy" ? (
+                  <>
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                    <Action.Paste content={a.code} title="Paste Code" />
+                  </>
+                ) : (
+                  <>
+                    <Action.Paste content={a.code} title="Paste Code" />
+                    <Action.CopyToClipboard content={a.code} title="Copy Code" />
+                  </>
+                )}
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.Push
