@@ -4,9 +4,9 @@
   "title": "Toothpick",
   "description": "Manage Bluetooth connections in Raycast.",
   "icon": "icon.png",
-  "author": "briankosw",
+  "author": "VladCuciureanu",
   "contributors": [
-    "VladCuciureanu"
+    "briankosw"
   ],
   "categories": [
     "Productivity",

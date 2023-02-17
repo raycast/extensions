@@ -8,6 +8,7 @@ import mapSonyDevice from "src/mappers/sony";
 import mapBoseDevice from "src/mappers/bose";
 import mapSamsungDevice from "src/mappers/samsung";
 import mapUgreenDevice from "src/mappers/ugreen";
+import mapGoogleDevice from "src/mappers/google";
 
 export function getDevices(): Device[] {
   const devicesData = _fetchRawDevicesData();
@@ -144,6 +145,9 @@ function _mapDevice(deviceData: RawDeviceData): Device {
       break;
     case "0x009E":
       device = mapBoseDevice(device);
+      break;
+    case "0x00E0":
+      device = mapGoogleDevice(device);
       break;
     case "0x0075":
       device = mapSamsungDevice(device);

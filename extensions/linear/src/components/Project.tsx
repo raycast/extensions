@@ -33,8 +33,6 @@ export default function Project({ project, teamId, priorities, users, me, mutate
     keywords.push(project.lead.displayName, project.lead?.email);
   }
 
-  keywords.push(project.milestone ? project.milestone.name : "Upcoming");
-
   async function deleteProject() {
     if (
       await confirmAlert({

@@ -9,16 +9,6 @@
             "disco"
         ]
     },
-    "The Zone - Dublin": {
-        "website": "https://www.thezonedublin.org",
-        "stream": "https://uk1.internet-radio.com/stream/thezone/stream.pls",
-        "genres": [
-            "alternative",
-            "indie",
-            "pop",
-            "classic rock"
-        ]
-    },
     "Radio Bloodstream": {
         "website": "http://www.radiobloodstream.com/",
         "stream": "https://www.internet-radio.com/servers/tools/playlistgenerator/?u=http://s8.myradiostream.com:58238/listen.pls?sid=1&t=.pls",
@@ -27,14 +17,6 @@
             "metal",
             "heavy metal",
             "punk"
-        ]
-    },
-    "Sleep Radio Stream": {
-        "website": "https://www.sleepradio.co.nz",
-        "stream": "http://149.56.234.138:8169/stream/1/",
-        "genres": [
-            "ambient",
-            "new age"
         ]
     },
     "Psyndora Chillout": {
@@ -51,59 +33,6 @@
         "stream": "http://51.81.46.118:1190/stream/1/",
         "genres": [
             "soundtracks"
-        ]
-    },
-    "Beethoven Channel": {
-        "website": "https://beethovenchannel.com/",
-        "stream": "https://classicalconnected.com:8012/stream",
-        "genres": [
-            "classical",
-            "symphony",
-            "romantic",
-            "piano"
-        ]
-    },
-    "Classical Radio Stream": {
-        "website": "https://classicalradiostream.com/",
-        "stream": "http://classicalconnected.com:8020/stream",
-        "genres": [
-            "classical",
-            "symphony",
-            "romantic",
-            "piano"
-        ]
-    },
-    "Radio X-MAS": {
-        "website": "http://www.radio-xmas.at",
-        "stream": "http://77.75.16.229:443/stream/1/",
-        "genres": [
-            "holiday"
-        ]
-    },
-    "J-Pop Sakura": {
-        "website": "https://asiadreamradio.com",
-        "stream": "https://igor.torontocast.com:1710/stream/1/",
-        "genres": [
-            "jpop"
-        ]
-    },
-    "Joy Hits": {
-        "website": " https://joyhits.online",
-        "stream": "http://stream.joyhits.online:8880/joyhits.aac",
-        "genres": [
-            "top 40",
-            "pop"
-        ]
-    },
-    "Magic 80s Florida": {
-        "website": "http://www.magicoldiesflorida.com",
-        "stream": "http://airspectrum.cdnstream1.com:8018/1606_192",
-        "genres": [
-            "80s",
-            "oldies",
-            "top 40",
-            "pop",
-            "rock"
         ]
     },
     "Pink Noise Radio": {
@@ -133,13 +62,6 @@
             "chillout"
         ]
     },
-    "NoLife Radio": {
-        "website": "https://nolife-radio.com",
-        "stream": "http://listen.nolife-radio.com/stream",
-        "genres": [
-            "video game music"
-        ]
-    },
     "Radio Summernight": {
         "website": "http://radiosummernight.ch",
         "stream": "https://stream.laut.fm/radiosummernight",
@@ -147,15 +69,6 @@
             "pop",
             "alternative",
             "rock"
-        ]
-    },
-    "Metal Rock Radio": {
-        "website": "http://metalrockradio.com",
-        "stream": "https://kathy.torontocast.com:2800/stream/1/",
-        "genres": [
-            "metal",
-            "hard rock",
-            "classic rock"
         ]
     },
     "Frontier Country": {
@@ -180,22 +93,6 @@
             "blues"
         ]
     },
-    "Majestic Jukebox Radio": {
-        "website": "https://www.majesticjukeboxradio.com/",
-        "stream": "https://uk3.internet-radio.com/proxy/majesticjukebox?mp=/live",
-        "genres": [
-            "rock",
-            "jazz",
-            "blues",
-            "country",
-            "soul",
-            "40s",
-            "50s",
-            "60s",
-            "70s",
-            "80s"
-        ]
-    },
     "BBC Radio 1": {
         "website": "https://tunein.com/radio/BBC-Radio-1-988-s24939/",
         "stream": "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
@@ -211,34 +108,11 @@
             "talk"
         ]
     },
-    "Bloomberg Radio": {
-        "website": "https://tunein.com/radio/Bloomberg-Radio-s165740/",
-        "stream": "https://playerservices.streamtheworld.com/api/livestream-redirect/WBBRAMAAC.aac",
-        "genres": [
-            "news",
-            "talk"
-        ]
-    },
-    "Associated Press": {
-        "website": "https://tunein.com/radio/Associated-Press-s249264/",
-        "stream": "http://apnews.streamguys1.com/apnews",
-        "genres": [
-            "news",
-            "talk"
-        ]
-    },
     "KPOP Radio": {
         "website": "https://zeno.fm/radio/kpop-radio",
         "stream": "https://stream-55.zeno.fm/382yfn6u498uv?zs=mvrPGxDnTw-zWW4K1sLI2A",
         "genres": [
             "kpop"
-        ]
-    },
-    "WRCW Crime Story": {
-        "website": "https://live365.com/station/WRCW-Crime-Story----a60381",
-        "stream": "https://streaming.live365.com/a60381",
-        "genres": [
-            "talk"
         ]
     },
     "NPR": {
@@ -257,44 +131,12 @@
             "pop"
         ]
     },
-    "Fox News": {
-        "website": "https://radio.foxnews.com/player-files/radio.php",
-        "stream": "https://live.wostreaming.net/direct/foxnewsradio-foxnewsradioaac-imc",
-        "genres": [
-            "news",
-            "talk"
-        ]
-    },
-    "NBC News": {
-        "website": "https://tunein.com/radio/NBC-News-NOW-s310584/",
-        "stream": "https://stream.revma.ihrhls.com/zc6043",
-        "genres": [
-            "news",
-            "talk"
-        ]
-    },
-    "Newsmax": {
-        "website": "https://www.iheart.com/live/newsmax-8856/",
-        "stream": "https://playerservices.streamtheworld.com/api/livestream-redirect/NEWSMAX_FM.aac",
-        "genres": [
-            "news",
-            "talk"
-        ]
-    },
     "ESPN": {
         "website": "https://www.iheart.com/live/espn-radio-7903/",
         "stream": "https://live.wostreaming.net/direct/espn-network-48",
         "genres": [
             "sports",
             "talk"
-        ]
-    },
-    "AmbientRadio": {
-        "website": "http://www.ambientradio.net",
-        "stream": "https://stream.rcast.net/13551.mp3",
-        "genres": [
-            "ambient",
-            "chillout"
         ]
     },
     "Greatest Hits Radio USA": {
@@ -312,26 +154,12 @@
             "classical"
         ]
     },
-    "Streaming Soundtracks": {
-        "website": "http://www.streamingsoundtracks.com",
-        "stream": "http://hi5.streamingsoundtracks.com/;",
-        "genres": [
-            "soundtracks"
-        ]
-    },
     "Ambient Sleeping Pill": {
         "website": "https://ambientsleepingpill.com",
         "stream": "http://radio.stereoscenic.com/asp-h",
         "genres": [
             "ambient",
             "chillout"
-        ]
-    },
-    "Exclusively Ocean": {
-        "website": "https://www.getmeradio.com/stations/exclusivelyocean-3235/",
-        "stream": "https://streaming.exclusive.radio/er/ocean/icecast.audio",
-        "genres": [
-            "ambient"
         ]
     },
     "Exclusively Birdsong": {
@@ -341,47 +169,36 @@
             "ambient"
         ]
     },
-    "Calm Piano": {
-        "website": "https://www.getmeradio.com/stations/calmpiano-4057/",
-        "stream": "https://drive.uber.radio/uber/calmpiano/icecast.audio",
+    "Latin Hits": {
+        "website": "https://tunein.com/radio/Latin-Hits-s249995/",
+        "stream": "https://rfcmedia.streamguys1.com/latinhits.mp3",
         "genres": [
-            "piano"
+            "latin",
+            "world"
         ]
     },
-    "ASMR Mix": {
-        "website": "https://www.getmeradio.com/stations/asmrmix-7014/",
-        "stream": "https://drive.uber.radio/uber/asmrmix/icecast.audio",
+    "HI95 Kauai": {
+        "website": "http://www.hi95kauai.com/",
+        "stream": "https://pacificmedia.cdnstream1.com/2789_64.aac",
         "genres": [
-            "ambient",
-            "ASMR"
+            "hawaiian",
+            "tropical"
         ]
     },
-    "SCIFI.radio": {
-        "website": "https://scifi.radio",
-        "stream": "https://station.kryptonradio.com:8080/stream",
+    "talkSPORT": {
+        "website": "https://talksport.com",
+        "stream": "https://radio.talksport.com/stream",
         "genres": [
-            "soundtracks"
+            "sports",
+            "talk"
         ]
     },
-    "Horror and Halloween Radio": {
-        "website": "http://horrorandhalloweenradio.com/",
-        "stream": "http://s2.voscast.com:11034/;stream1674643361109/1",
+    "Irish Pub Radio": {
+        "website": "http://www.irishpubradio.com/",
+        "stream": "https://solid24.streamupsolutions.com/proxy/vbkiacud?mp=/live",
         "genres": [
-            "holiday"
-        ]
-    },
-    "Park Magic Radio": {
-        "website": "http://parkmagicradio.ca/",
-        "stream": "http://www.parkmagicradio.ca:8000/stream/1/;",
-        "genres": [
-            "soundtracks"
-        ]
-    },
-    "Musical Theater Radio": {
-        "website": "https://www.musicaltheatreradio.com",
-        "stream": "https://streaming.live365.com/a99840",
-        "genres": [
-            "soundtracks"
+            "irish",
+            "world"
         ]
     }
 }

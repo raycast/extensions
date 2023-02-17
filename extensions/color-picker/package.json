@@ -5,6 +5,11 @@
   "description": "Pick and organize colors, everywhere on your Mac",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "otakustay",
+    "EmersonEmerson",
+    "pernielsentikaer"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -18,7 +23,7 @@
     },
     {
       "name": "menu-bar",
-      "title": "Colors Menu",
+      "title": "Menu Bar Color Picker",
       "description": "Access your colors from the menu bar",
       "mode": "menu-bar"
     },
@@ -63,12 +68,20 @@
           "value": "hex"
         },
         {
+          "title": "HEX Lower Case - #ff6363",
+          "value": "hex-lower-case"
+        },
+        {
           "title": "RGBA - rgba(255, 99, 99, 1)",
           "value": "rgba"
         },
         {
           "title": "RGBA % - rgba(100%, 39%, 39%, 1)",
           "value": "rgba-percentage"
+        },
+        {
+          "title": "HSLA - hsla(0, 100%, 69%, 1)",
+          "value": "hsla"
         }
       ]
     }

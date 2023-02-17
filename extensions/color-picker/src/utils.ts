@@ -27,6 +27,9 @@ export function getFormattedColor(color: Color) {
     case "hex": {
       return getHex(color);
     }
+    case "hex-lower-case": {
+      return getHex(color).toLowerCase();
+    }
     case "rgba": {
       const alpha = Math.round(color.alpha / 255);
       return `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`;
@@ -37,6 +40,11 @@ export function getFormattedColor(color: Color) {
       const blue = Math.round((color.blue / 255) * 100);
       const alpha = Math.round(color.alpha / 255);
       return `rgba(${red}%, ${green}%, ${blue}%, ${alpha})`;
+    }
+    case "hsla": {
+      const hsl = convert.rgb.hsl(color.red, color.green, color.blue);
+      const alpha = Math.round(color.alpha / 255);
+      return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha})`;
     }
   }
 }
