@@ -1,13 +1,44 @@
 import { Action, ActionPanel, Color, Detail, Form, Icon, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { DateTime } from "luxon";
+import { DateTime, IANAZone } from "luxon";
 import { Fragment, createContext, useCallback, useContext, useMemo, useState } from "react";
+
+const ALL_TIMEZONES = (Intl as any).supportedValuesOf("timeZone");
 
 function formatZoneName(zoneName: string) {
   return zoneName.replaceAll("/", " - ").replaceAll("_", " ");
 }
 
-const ALL_TIMEZONES = (Intl as any).supportedValuesOf("timeZone");
+function hoursDiffBetween(date1: DateTime, date2: DateTime) {
+  if (!date1 || !date2) return "+0hrs";
+  const now = Date.now();
+  let date1Offset = IANAZone.create(date1.zoneName).offset(now) / 60;
+  let date2Offset = IANAZone.create(date2.zoneName).offset(now) / 60;
+
+  if (date1Offset < 0) {
+    date1Offset *= -1;
+  }
+
+  if (date2Offset < 0) {
+    date2Offset *= 1;
+  }
+
+  const result = date1Offset + date2Offset;
+  const isNegative = result < 0;
+
+  return isNegative ? `${result}hrs` : `+${result}hrs`;
+}
+
+function getTimezoneOffsetString(zone?: string) {
+  if (!zone) return;
+  try {
+    const offset = IANAZone.create(zone).offset(Date.now()) / 60;
+    const isNegative = offset < 0;
+    return isNegative ? `GMT${offset}` : `GMT+${offset}`;
+  } catch (err) {
+    return ``;
+  }
+}
 
 const markdownFn = (now: DateTime, isCustom?: boolean) => {
   const offset = now.offset / 60;
@@ -28,12 +59,12 @@ const defaultContextValue: { customTime?: DateTime } = {
 const TimezoneCotext = createContext({ ...defaultContextValue });
 
 function Timezones() {
-  const { push } = useNavigation();
   const [isCustom, setIsCustom] = useState(false);
   const [time, setTime] = useState<DateTime>(DateTime.now());
   const [selectedTimezones, setSelectedTimezones] = useCachedState<string[]>("selected-timezones", []);
   const allTimezones = useMemo(() => ALL_TIMEZONES, []);
   const markdown = useCallback(markdownFn, []);
+  const { push } = useNavigation();
 
   function setCustomTime() {
     push(
@@ -53,11 +84,13 @@ function Timezones() {
     setTime(now);
   }
 
-  function toggleTimezone(tz: string) {
-    if (selectedTimezones?.includes(tz)) {
-      selectedTimezones.splice(selectedTimezones.indexOf(tz), 1);
+  function toggleTimezone(tz?: string) {
+    if (!tz) return;
+    const tzName = tz.replace(/ (\(.*\))/gim, "");
+    if (selectedTimezones?.includes(tzName)) {
+      selectedTimezones.splice(selectedTimezones.indexOf(tzName), 1);
     } else {
-      selectedTimezones.push(tz);
+      selectedTimezones.push(tzName);
     }
     setSelectedTimezones(selectedTimezones);
   }
@@ -77,7 +110,7 @@ function Timezones() {
                       source: Icon.CheckCircle,
                       tintColor: Color.Green,
                     }}
-                    title={formatZoneName(tz)}
+                    title={`${formatZoneName(tz)} (${getTimezoneOffsetString(tz)})`}
                     onAction={() => toggleTimezone(tz)}
                   />
                 ))}
@@ -94,7 +127,7 @@ function Timezones() {
                           source: isSelected ? Icon.CheckCircle : Icon.Circle,
                           tintColor: isSelected ? Color.Green : Color.SecondaryText,
                         }}
-                        title={formatZoneName(tz)}
+                        title={`${formatZoneName(tz)} (${getTimezoneOffsetString(tz)})`}
                         onAction={() => toggleTimezone(tz)}
                       />
                     );
@@ -106,6 +139,7 @@ function Timezones() {
               onAction={isCustom ? resetCustomTime : setCustomTime}
               icon={Icon.Clock}
             />
+            <Action title={`Clear Selected Timezones`} onAction={() => setSelectedTimezones([])} icon={Icon.Eraser} />
           </ActionPanel>
         }
         metadata={
@@ -119,10 +153,13 @@ function Timezones() {
               const date = DateTime.fromJSDate(time.toJSDate()).setZone(zoneName);
               return (
                 <Fragment key={index}>
-                  <Detail.Metadata.Label
-                    title={`${formatZoneName(zoneName)} (${date.toFormat("ZZZZ")})`}
-                    text={date.toFormat("ff")}
-                  />
+                  <Detail.Metadata.TagList title={`${formatZoneName(zoneName)} (${date.toFormat("ZZZZ")})`}>
+                    <Detail.Metadata.TagList.Item text={date.toFormat("ff")} />
+                    <Detail.Metadata.TagList.Item
+                      color={Color.SecondaryText}
+                      text={hoursDiffBetween(time, date)?.toString()}
+                    />
+                  </Detail.Metadata.TagList>
                   <Detail.Metadata.Separator />
                 </Fragment>
               );
