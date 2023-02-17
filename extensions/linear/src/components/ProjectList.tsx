@@ -39,7 +39,7 @@ export default function ProjectList() {
             ),
           }
         : {})}
-      searchBarPlaceholder="Filter by project title, lead or status"
+      searchBarPlaceholder="Filter by project title, lead, or status"
       filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Upcoming">
