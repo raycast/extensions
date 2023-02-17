@@ -27,7 +27,11 @@ jobs:
         run: |
           configJson=`cat ./docs/.config.json`
           version=`echo $(jq -r '.version' <<< "$configJson")`
-          curl -o types.d.ts "https://unpkg.com/@raycast/api@$version/types/index.d.ts"
+          http_response=$(curl -s -o types.d.ts -w "%{http_code}" "https://unpkg.com/@raycast/api@$version/types/index.d.ts")
+          if [ $http_response != "200" ]; then
+            echo "Couldn't fetch the types"
+            exit 1
+          fi
 
       - name: Generate the docs
         run: |
