@@ -1,39 +1,34 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import ShowDetailsPage from "./show-details-page";
-import { findPagesByTitle, getPageData } from "./wikipedia";
+import { findPagesByTitle, getPageData } from "./utils/api";
+import { languages } from "./utils/constants";
 
 const preferences = getPreferenceValues();
 
-export default function SearchPage() {
-  const [search, setSearch] = useState("");
-  const [language, setLanguage] = useState("en");
+export default function SearchPage(props: { arguments: { title: string } }) {
+  const [language, setLanguage] = useCachedState("language", "en");
+  const [search, setSearch] = useState(props.arguments.title);
   const { data, isLoading } = usePromise(findPagesByTitle, [search, language]);
 
   return (
     <List
       throttle
       isLoading={isLoading}
+      searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
       searchBarAccessory={
-        <List.Dropdown tooltip="Language" storeValue onChange={setLanguage}>
-          <List.Dropdown.Item icon="🇺🇸" title="English" value="en" />
-          <List.Dropdown.Item icon="🇩🇪" title="German" value="de" />
-          <List.Dropdown.Item icon="🇫🇷" title="French" value="fr" />
-          <List.Dropdown.Item icon="🇯🇵" title="Japanese" value="ja" />
-          <List.Dropdown.Item icon="🇪🇸" title="Spanish" value="es" />
-          <List.Dropdown.Item icon="🇷🇺" title="Russian" value="ru" />
-          <List.Dropdown.Item icon="🇵🇹" title="Portuguese" value="pt" />
-          <List.Dropdown.Item icon="🇮🇹" title="Italian" value="it" />
-          <List.Dropdown.Item icon="🇨🇳" title="Chinese" value="zh" />
-          <List.Dropdown.Item icon="🇮🇷" title="Persian" value="fa" />
-          <List.Dropdown.Item icon="🇦🇪" title="Arabic" value="ar" />
-          <List.Dropdown.Item icon="🇵🇱" title="Polish" value="pl" />
-          <List.Dropdown.Item icon="🇸🇽" title="Dutch" value="nl" />
-          <List.Dropdown.Item icon="🇹🇷" title="Turkish" value="tr" />
-          <List.Dropdown.Item icon="🇬🇷" title="Greek" value="el" />
+        <List.Dropdown tooltip="Language" value={language} onChange={setLanguage}>
+          {languages.map((language) => (
+            <List.Dropdown.Item
+              key={language.value}
+              icon={language.icon}
+              title={language.title}
+              value={language.value}
+            />
+          ))}
         </List.Dropdown>
       }
     >
@@ -57,19 +52,11 @@ function PageItem({ title, language }: { title: string; language: string }) {
           {preferences.defaultAction === "browser" ? (
             <>
               <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
-              <Action.Push
-                icon={Icon.Window}
-                title="Show Details"
-                target={<ShowDetailsPage title={title} language={language} />}
-              />
+              <Action.Push icon={Icon.Window} title="Show Details" target={<ShowDetailsPage title={title} />} />
             </>
           ) : (
             <>
-              <Action.Push
-                icon={Icon.Window}
-                title="Show Details"
-                target={<ShowDetailsPage title={title} language={language} />}
-              />
+              <Action.Push icon={Icon.Window} title="Show Details" target={<ShowDetailsPage title={title} />} />
               <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
             </>
           )}

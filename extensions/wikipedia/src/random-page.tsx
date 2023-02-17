@@ -1,5 +1,5 @@
 import { closeMainWindow, open } from "@raycast/api";
-import { getRandomPageUrl } from "./wikipedia";
+import { getRandomPageUrl } from "./utils/api";
 
 export default async function () {
   const randomPageUrl = await getRandomPageUrl();

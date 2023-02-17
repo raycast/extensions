@@ -21,6 +21,14 @@
       "subtitle": "Wikipedia",
       "description": "Search Wikipedia pages by title",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "defaultAction",
@@ -39,6 +47,21 @@
           ],
           "default": "browser",
           "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-page",
+      "title": "Open Page",
+      "subtitle": "Wikipedia",
+      "description": "Open Wikipedia page in Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Title",
+          "type": "text",
+          "required": true
         }
       ]
     },

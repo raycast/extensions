@@ -52,10 +52,7 @@ export async function findPagesByTitle(search: string, language: string) {
 }
 
 export async function getPageData(title: string, language: string) {
-  const response = await got
-    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`)
-    .json<PageSummary>();
-  return response;
+  return got.get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`).json<PageSummary>();
 }
 
 export async function getPageContent(title: string, language: string) {
@@ -67,9 +64,31 @@ export async function getPageContent(title: string, language: string) {
 }
 
 export async function getPageMetadata(title: string, language: string) {
+  return (
+    wiki({
+      apiUrl: `${getApiUrl(language)}w/api.php`,
+    })
+      .page(title)
+      .then((page) => page.fullInfo())
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      .then((page) => page.general)
+  );
+}
+
+export async function getPageLinks(title: string, language: string) {
   return wiki({
     apiUrl: `${getApiUrl(language)}w/api.php`,
   })
     .page(title)
-    .then((page) => page.fullInfo());
+    .then((page) => page.links());
+}
+
+export async function getAvailableLanguages(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+  })
+    .page(title)
+    .then((page) => page.langlinks())
+    .then((items) => items.flatMap((item) => item.lang));
 }
