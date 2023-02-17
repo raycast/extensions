@@ -1,5 +1,6 @@
-import { Action, ActionPanel, List, showToast, Toast, Image } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, List, Image } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 import Parser from "rss-parser";
 
 const parser = new Parser();
@@ -13,59 +14,23 @@ interface Article {
   id: string;
 }
 
-interface State {
-  items?: Article[];
-  error?: Error;
-}
-
 export default function Command() {
-  const [state, setState] = useState<State>({});
-  const [rssLink, setRssLink] = useState<string>("https://www.theverge.com/rss/index.xml");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsLoading(true);
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL(rssLink);
-
-        setState({ items: feed.items.map((item) => item as Article) });
-        setIsLoading(false);
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
+  const [rssLink, setRssLink] = useState("https://www.theverge.com/rss/index.xml");
+  const { isLoading, data } = useFetch(rssLink, {
+    async parseResponse(response) {
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
-    }
 
-    fetchStories();
-  }, []);
+      const data = await response.text();
+      if (data !== undefined) {
+        const feed = await parser.parseString(data as string);
 
-  useEffect(() => {
-    setIsLoading(true);
-    async function fetchStories() {
-      try {
-        const feed = await parser.parseURL(rssLink);
-
-        setState({ items: feed.items.map((item) => item as Article) });
-        setIsLoading(false);
-      } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
+        return { items: feed.items as Article[] };
       }
-    }
-
-    fetchStories();
-  }, [rssLink]);
-
-  if (state.error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed loading stories",
-      message: state.error.message,
-    });
-  }
+      return { items: [] };
+    },
+  });
 
   return (
     <List
@@ -95,15 +60,14 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {state.items?.map((item, index) => (
-        <StoryListItem key={item.id} item={item} index={index} />
-      ))}
+      {data && data.items?.map((item, index) => <StoryListItem key={item.id} item={item} index={index} />)}
     </List>
   );
 }
 
 function StoryListItem(props: { item: Article; index: number }) {
   const icon = getIcon(props.index + 1);
+  const date = new Date(props.item.pubDate);
 
   return (
     <List.Item
@@ -113,7 +77,7 @@ function StoryListItem(props: { item: Article; index: number }) {
         "No title"
       }
       subtitle={props.item.author}
-      accessories={[{ text: `${props.item.pubDate && new Date(props.item.pubDate).toLocaleDateString()}` }]}
+      accessories={[{ date: date, tooltip: date.toLocaleString() }]}
       actions={<Actions item={props.item} />}
     />
   );
@@ -144,16 +108,8 @@ function Actions(props: { item: Parser.Item }) {
     <ActionPanel
       title={`${props.item.title?.slice(0, 50)}${props.item.title && props.item.title.length > 50 ? "..." : ""}`}
     >
-      <ActionPanel.Section>{props.item.link && <Action.OpenInBrowser url={props.item.link} />}</ActionPanel.Section>
-      <ActionPanel.Section>
-        {props.item.link && (
-          <Action.CopyToClipboard
-            content={props.item.link}
-            title="Copy Link"
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-        )}
-      </ActionPanel.Section>
+      {props.item.link && <Action.OpenInBrowser url={props.item.link} />}
+      {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy Link" />}
     </ActionPanel>
   );
 }
