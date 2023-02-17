@@ -81,6 +81,7 @@ export default function Command() {
         onChange={handleTitleChange}
       />
       <Form.Separator />
+      <Form.TextField id="description" title = "Descripyion" placeholder="Enter bookmark description"/>
       <Form.TextField id="tags" title="Tags" placeholder="Enter tags (comma-separated)" />
       <Form.Checkbox id="private" title="" label="Private" storeValue />
       <Form.Checkbox id="readLater" title="" label="Read Later" storeValue />

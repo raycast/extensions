@@ -117,6 +117,7 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   const params = new URLSearchParams();
   params.append("url", bookmark.url);
   params.append("description", bookmark.title ?? "New Bookmark");
+  params.append("extended", bookmark.description ?? "");
   params.append("tags", bookmark.tags ?? "");
   params.append("shared", bookmark.private ? "no" : "yes");
   params.append("toread", bookmark.readLater ? "yes" : "no");
