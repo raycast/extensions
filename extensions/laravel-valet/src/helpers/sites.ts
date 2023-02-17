@@ -112,7 +112,7 @@ export function getSecuredTooltip(site: Site): string {
   return isSecured(site) ? "Site is secured using the `valet secure` command" : "Site is not secured";
 }
 
-export function getReadmeContents(site: Site): string {
+export function getReadmeContents(site: Site): string | null {
   const files = ["README.md", "readme.md", "Readme.md"];
 
   for (const file of files) {
@@ -123,7 +123,7 @@ export function getReadmeContents(site: Site): string {
     }
   }
 
-  return `_No README.md found_`;
+  return null;
 }
 
 export function removeProtocolFromUrl(url: string) {

@@ -26,6 +26,8 @@ export default function Command() {
 
   return (
     <List isLoading={isLoadingSites} searchBarPlaceholder="Search sites..." isShowingDetail={isShowingDetail}>
+      (filteredSites.length === 0 &&
+      <List.EmptyView title="No Sites Found" icon="no-view.png" description="Try searching for something else" />)
       {filteredSites.map((site: Site) => (
         <SiteListItem
           key={getUniqueId(site)}

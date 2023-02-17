@@ -11,7 +11,7 @@ export default function SiteDetail({ site }: SiteDetailProps): JSX.Element {
     <List.Item.Detail
       {...(site
         ? {
-            markdown: getReadmeContents(site),
+            markdown: getReadmeContents(site) ?? undefined,
             metadata: (
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Name" text={site.name} />
@@ -25,8 +25,6 @@ export default function SiteDetail({ site }: SiteDetailProps): JSX.Element {
                   text={isSecured(site) ? "Yes" : "No"}
                   icon={getSecuredIcon(site)}
                 />
-                <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="PHP version" text={site.prettyPath} />
               </List.Item.Detail.Metadata>
             ),
           }
