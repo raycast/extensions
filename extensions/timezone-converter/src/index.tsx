@@ -144,20 +144,17 @@ function Timezones() {
                 title={`Clear Selected Timezones`}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 style={Action.Style.Destructive}
-                onAction={async () => {
-                  if (
-                    await confirmAlert({
-                      primaryAction: {
-                        title: "Clear All",
-                        style: Alert.ActionStyle.Destructive,
-                        onAction: () => {
-                          setSelectedTimezones([]);
-                        },
+                onAction={() => {
+                  confirmAlert({
+                    primaryAction: {
+                      title: "Clear All",
+                      style: Alert.ActionStyle.Destructive,
+                      onAction: () => {
+                        setSelectedTimezones([]);
                       },
-                      title: `Are you sure you want remove all timezones?`,
-                    })
-                  ) {
-                  }
+                    },
+                    title: `Are you sure you want remove all timezones?`,
+                  });
                 }}
                 icon={Icon.Eraser}
               />
@@ -177,10 +174,10 @@ function Timezones() {
 
               return (
                 <Fragment key={index}>
-                  <Detail.Metadata.TagList title={`KRAM`}>
+                  <Detail.Metadata.TagList title={`${formatZoneName(zoneName)} (${date.toFormat("ZZZZ")})`}>
                     <Detail.Metadata.TagList.Item text={date.toFormat("ff")} />
                     <Detail.Metadata.TagList.Item
-                      color={hoursDiff[1] ? Color.Red : Color.Green}
+                      color={hoursDiff[1] ? Color.Orange : Color.Green}
                       text={`${hoursDiff[0]}`}
                     />
                   </Detail.Metadata.TagList>
