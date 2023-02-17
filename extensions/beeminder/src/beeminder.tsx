@@ -130,6 +130,8 @@ export default function Command() {
               accessories={[
                 {
                   text: dueText,
+                },
+                {
                   icon: goalIcon,
                 },
               ]}
