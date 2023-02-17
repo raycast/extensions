@@ -17,20 +17,26 @@ export interface PageSummary {
 
 const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
 
-export async function getRandomPageUrl() {
-  const response = await got.get(`${getApiUrl()}api/rest_v1/page/random/summary`).json<PageSummary>();
-  return response.content_urls.desktop.page;
+export async function getRandomPageUrl(language: string) {
+  const response = await got.get(`${getApiUrl(language)}api/rest_v1/page/random/summary`).json<PageSummary>();
+  return {
+    url: response.content_urls.desktop.page,
+    title: response.title,
+  };
 }
 
-export async function getTodayFeaturedPageUrl() {
+export async function getTodayFeaturedPageUrl(language: string) {
   const today = new Date();
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
   const response = await got
-    .get(`${getApiUrl()}api/rest_v1/feed/featured/${year}/${month}/${day}`)
+    .get(`${getApiUrl(language)}api/rest_v1/feed/featured/${year}/${month}/${day}`)
     .json<{ tfa: PageSummary }>();
-  return response.tfa.content_urls.desktop.page;
+  return {
+    url: response.tfa.content_urls.desktop.page,
+    title: response.tfa.title,
+  };
 }
 
 export async function findPagesByTitle(search: string, language: string) {
@@ -82,6 +88,14 @@ export async function getPageLinks(title: string, language: string) {
   })
     .page(title)
     .then((page) => page.links());
+}
+
+export async function getPageReferences(title: string, language: string) {
+  return wiki({
+    apiUrl: `${getApiUrl(language)}w/api.php`,
+  })
+    .page(title)
+    .then((page) => page.references());
 }
 
 export async function getAvailableLanguages(title: string, language: string) {

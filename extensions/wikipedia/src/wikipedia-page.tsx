@@ -1,9 +1,13 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
 import { getPageData, getPageContent, getPageMetadata, getPageLinks, getAvailableLanguages } from "./utils/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { useState } from "react";
-import { toTitleCase } from "./utils/string";
-import { excludedMetatadataLabels, excludedMetatadataValues, excludedTitles, languages } from "./utils/constants";
+import { escapeRegExp, toSentenceCase, toTitleCase } from "./utils/string";
+import { excludedMetatadataLabels, excludedMetatadataValues, languages } from "./utils/constants";
+
+const preferences = getPreferenceValues();
+
+const openInBrowser = preferences.openIn === "browser";
 
 interface Node {
   title: string;
@@ -11,26 +15,29 @@ interface Node {
   items?: Node[];
 }
 
+function replaceLinks(text: string, language: string, links: string[] = []) {
+  const regex = new RegExp(`\\b(${links.map(escapeRegExp).join("|")})\\b`, "g");
+  return text.replaceAll(regex, (link) => {
+    const url = openInBrowser
+      ? `https://${language}.wikipedia.org/wiki/${encodeURI(link)}`
+      : `raycast://extensions/vimtor/wikipedia/open-page?arguments=${encodeURI(JSON.stringify({ title: link }))}`;
+    return `[${link}](${url})`;
+  });
+}
+
 function renderContent(nodes: Node[], level: number, links: string[] = [], language = "en"): string {
   return nodes
     .filter((node) => node.content || node.content.length > 0)
-    .filter((node) => !excludedTitles.includes(node.title))
     .map((node) => {
       const title = `${"#".repeat(level)} ${node.title}`;
-
-      let content = node.content;
-      links.forEach((link) => {
-        const regex = new RegExp(`\\b${link}\\b`, "g");
-        content = content.replaceAll(regex, `[${link}](https://${language}.wikipedia.org/wiki/${encodeURI(link)})`);
-      });
-
+      const content = replaceLinks(node.content, language, links);
       const items = node.items ? renderContent(node.items, level + 1, links, language) : "";
       return `${title}\n\n${content}\n\n${items}`;
     })
     .join("\n\n");
 }
 
-function ShowDetailsPage({ title }: { title: string }) {
+export default function WikipediaPage({ title }: { title: string }) {
   const [language, setLanguage] = useCachedState("language", "en");
   const [showMetadata, setShowMetadata] = useState(false);
   const { data: page, isLoading: isLoadingPage } = useCachedPromise(getPageData, [title, language]);
@@ -42,19 +49,21 @@ function ShowDetailsPage({ title }: { title: string }) {
     language,
   ]);
 
+  const body = content ? renderContent(content, 2, links, language) : "";
+
   const markdown = page
     ? `
   # ${page.title}
-  ${page.description ? `>${page.description}\n\n` : ""}
   
-  ${page.extract}
+  ${page.description ? `>${toSentenceCase(page.description)}\n\n` : ""}
+  
+  ${replaceLinks(page.extract, language, links)}
 
-  ![](${page.thumbnail?.source})
+  ${page.thumbnail?.source ? `![](${page.thumbnail?.source})` : ""}
   
-  ---
+  ${body ? "---" : ""}
   
-  ${content ? renderContent(content, 2, links, language) : ""}
-  `
+  ${body}`
     : "";
 
   return (
@@ -121,12 +130,17 @@ function ShowDetailsPage({ title }: { title: string }) {
             <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              title="Copy Description"
+              title="Copy Subtitle"
               content={page?.description}
             />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
               title="Copy Summary"
+              content={page?.extract}
+            />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+              title="Copy Contents"
               content={page?.extract}
             />
             <ActionPanel.Submenu title="Copy Metadata" icon={Icon.CopyClipboard} isLoading={isLoadingMetadata}>
@@ -141,10 +155,29 @@ function ShowDetailsPage({ title }: { title: string }) {
                 : null}
             </ActionPanel.Submenu>
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ActionPanel.Submenu
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              title="Open Link"
+              icon={Icon.Window}
+              isLoading={isLoadingLinks}
+            >
+              {links?.map((link: string) => {
+                if (openInBrowser) {
+                  return (
+                    <Action.OpenInBrowser
+                      key={link}
+                      title={link}
+                      url={`https://${language}.wikipedia.org/wiki/${link}`}
+                    />
+                  );
+                }
+                return <Action.Push title={link} key={link} target={<WikipediaPage title={link} />} />;
+              })}
+            </ActionPanel.Submenu>
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
-
-export default ShowDetailsPage;

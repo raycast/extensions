@@ -1,7 +1,3 @@
-import { List } from "@raycast/api";
-
-export const excludedTitles = ["See also", "References", "External links", "Further reading"];
-
 export const excludedMetatadataLabels = [
   "image",
   "cat",

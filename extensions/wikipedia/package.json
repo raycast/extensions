@@ -14,6 +14,26 @@
     "igor9silva"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the Wikipedia page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-page",
@@ -31,21 +51,21 @@
       ],
       "preferences": [
         {
-          "name": "defaultAction",
-          "title": "Default Action",
-          "description": "Default action to perform when opening a Wikipedia page",
+          "name": "viewType",
+          "title": "View Type",
+          "description": "View type to use when searching for a Wikipedia page",
           "type": "dropdown",
           "data": [
             {
-              "title": "Open in Browser",
-              "value": "browser"
+              "title": "List",
+              "value": "list"
             },
             {
-              "title": "Show Details",
-              "value": "details"
+              "title": "Grid",
+              "value": "grid"
             }
           ],
-          "default": "browser",
+          "default": "list",
           "required": false
         }
       ]
@@ -67,14 +87,14 @@
     },
     {
       "name": "random-page",
-      "title": "Open Random Page",
+      "title": "Random Page",
       "subtitle": "Wikipedia",
       "description": "Open a random Wikipedia page in browser",
       "mode": "no-view"
     },
     {
       "name": "featured-page",
-      "title": "Open Featured Page",
+      "title": "Featured Page",
       "subtitle": "Wikipedia",
       "description": "Open today's featured Wikipedia page in browser",
       "mode": "no-view"
