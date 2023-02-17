@@ -18,7 +18,11 @@ export default async function command(props: PickColorCommandLaunchProps) {
     await Clipboard.copy(hex);
 
     await showHUD("Copied color to clipboard");
-
+    try {
+      await launchCommand({ name: "menu-bar", type: LaunchType.Background });
+    } catch (e) {
+      console.error("Menu bar command failed to launch.");
+    }
     await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     if (props.launchContext?.source === "organize-colors") {
       await launchCommand({ name: "organize-colors", type: LaunchType.UserInitiated });
