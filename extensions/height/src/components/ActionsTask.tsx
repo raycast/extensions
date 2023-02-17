@@ -176,7 +176,7 @@ export default function ActionsTask({ task, mutateTask, detailsPage, detailsTask
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
         >
           <Action
-            title="No Priority"
+            title="No priority"
             icon={{
               source: Icon.ExclamationMark,
               tintColor: Color.PrimaryText,
@@ -309,9 +309,33 @@ export default function ActionsTask({ task, mutateTask, detailsPage, detailsTask
         />
         <ActionPanel.Submenu
           title="Set Parent Task"
-          icon={Icon.Pencil}
+          icon={Icon.Paperclip}
           shortcut={{ modifiers: ["opt", "shift"], key: "p" }}
         >
+          <Action
+            title="No parent task"
+            icon={{
+              source: Icon.Paperclip,
+              tintColor: Color.PrimaryText,
+            }}
+            onAction={async () => {
+              const toast = await showToast({
+                style: Toast.Style.Animated,
+                title: "Unsetting parent task",
+              });
+              try {
+                await mutateTask(ApiTask.update(task.id, { parentTaskId: null }));
+                if (detailsPage && detailsTaskRevalidate) detailsTaskRevalidate();
+
+                toast.style = Toast.Style.Success;
+                toast.title = "Successfully unset parent task 🎉";
+              } catch (error) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Failed to unset parent task 😥";
+                toast.message = error instanceof Error ? error.message : undefined;
+              }
+            }}
+          />
           {tasks
             ?.filter(
               (filteredParentTask) =>

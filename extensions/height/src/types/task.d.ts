@@ -59,9 +59,10 @@ export type CreateTaskPayload = Omit<CreateTaskFormValues, "dueDate"> & {
 
 export type UpdateTaskFormValues = CreateTaskFormValues;
 
-export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate"> & {
+export type UpdateTaskPayload = Omit<Partial<UpdateTaskFormValues>, "dueDate", "parentTaskId"> & {
   fields?: Partial<Field>[];
   deleted?: boolean;
+  parentTaskId?: string | null;
 };
 
 type Effect = {
