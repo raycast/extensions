@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Detail, Form, Icon, confirmAlert, useNavigation } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { DateTime, IANAZone } from "luxon";
 import { Fragment, createContext, useCallback, useContext, useMemo, useState } from "react";
@@ -26,7 +26,7 @@ function hoursDiffBetween(date1: DateTime, date2: DateTime) {
   const result = date1Offset + date2Offset;
   const isNegative = result < 0;
 
-  return isNegative ? `${result}hrs` : `+${result}hrs`;
+  return [isNegative ? `${result}hrs` : `+${result}hrs`, isNegative];
 }
 
 function getTimezoneOffsetString(zone?: string) {
@@ -139,7 +139,29 @@ function Timezones() {
               onAction={isCustom ? resetCustomTime : setCustomTime}
               icon={Icon.Clock}
             />
-            <Action title={`Clear Selected Timezones`} onAction={() => setSelectedTimezones([])} icon={Icon.Eraser} />
+            {selectedTimezones?.length > 0 && (
+              <Action
+                title={`Clear Selected Timezones`}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                style={Action.Style.Destructive}
+                onAction={async () => {
+                  if (
+                    await confirmAlert({
+                      primaryAction: {
+                        title: "Clear All",
+                        style: Alert.ActionStyle.Destructive,
+                        onAction: () => {
+                          setSelectedTimezones([]);
+                        },
+                      },
+                      title: `Are you sure you want remove all timezones?`,
+                    })
+                  ) {
+                  }
+                }}
+                icon={Icon.Eraser}
+              />
+            )}
           </ActionPanel>
         }
         metadata={
@@ -151,13 +173,15 @@ function Timezones() {
             )}
             {selectedTimezones?.map((zoneName, index) => {
               const date = DateTime.fromJSDate(time.toJSDate()).setZone(zoneName);
+              const hoursDiff = hoursDiffBetween(time, date);
+
               return (
                 <Fragment key={index}>
-                  <Detail.Metadata.TagList title={`${formatZoneName(zoneName)} (${date.toFormat("ZZZZ")})`}>
+                  <Detail.Metadata.TagList title={`KRAM`}>
                     <Detail.Metadata.TagList.Item text={date.toFormat("ff")} />
                     <Detail.Metadata.TagList.Item
-                      color={Color.SecondaryText}
-                      text={hoursDiffBetween(time, date)?.toString()}
+                      color={hoursDiff[1] ? Color.Red : Color.Green}
+                      text={`${hoursDiff[0]}`}
                     />
                   </Detail.Metadata.TagList>
                   <Detail.Metadata.Separator />
