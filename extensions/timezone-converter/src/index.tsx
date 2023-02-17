@@ -9,25 +9,25 @@ function formatZoneName(zoneName: string) {
   return zoneName.replaceAll("/", " - ").replaceAll("_", " ");
 }
 
-function hoursDiffBetween(date1: DateTime, date2: DateTime) {
-  if (!date1 || !date2) return "+0hrs";
-  const now = Date.now();
-  let date1Offset = IANAZone.create(date1.zoneName).offset(now) / 60;
-  let date2Offset = IANAZone.create(date2.zoneName).offset(now) / 60;
+// function hoursDiffBetween(date1: DateTime, date2: DateTime) {
+//   if (!date1 || !date2) return "+0hrs";
+//   const now = Date.now();
+//   let date1Offset = IANAZone.create(date1.zoneName).offset(now) / 60;
+//   let date2Offset = IANAZone.create(date2.zoneName).offset(now) / 60;
 
-  if (date1Offset < 0) {
-    date1Offset *= -1;
-  }
+//   if (date1Offset < 0) {
+//     date1Offset *= -1;
+//   }
 
-  if (date2Offset < 0) {
-    date2Offset *= 1;
-  }
+//   if (date2Offset < 0) {
+//     date2Offset *= 1;
+//   }
 
-  const result = date1Offset + date2Offset;
-  const isNegative = result < 0;
+//   const result = date1Offset + date2Offset;
+//   const isNegative = result < 0;
 
-  return [isNegative ? `${result}hrs` : `+${result}hrs`, isNegative];
-}
+//   return [isNegative ? `${result}hrs` : `+${result}hrs`, isNegative];
+// }
 
 function getTimezoneOffsetString(zone?: string) {
   if (!zone) return;
@@ -170,16 +170,15 @@ function Timezones() {
             )}
             {selectedTimezones?.map((zoneName, index) => {
               const date = DateTime.fromJSDate(time.toJSDate()).setZone(zoneName);
-              const hoursDiff = hoursDiffBetween(time, date);
-
+              // const hoursDiff = hoursDiffBetween(time, date);
               return (
                 <Fragment key={index}>
                   <Detail.Metadata.TagList title={`${formatZoneName(zoneName)} (${date.toFormat("ZZZZ")})`}>
                     <Detail.Metadata.TagList.Item text={date.toFormat("ff")} />
-                    <Detail.Metadata.TagList.Item
+                    {/* <Detail.Metadata.TagList.Item
                       color={hoursDiff[1] ? Color.Orange : Color.Green}
                       text={`${hoursDiff[0]}`}
-                    />
+                    /> */}
                   </Detail.Metadata.TagList>
                   <Detail.Metadata.Separator />
                 </Fragment>
