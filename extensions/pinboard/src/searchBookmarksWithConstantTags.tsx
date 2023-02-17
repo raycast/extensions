@@ -7,29 +7,17 @@ import {
   openExtensionPreferences,
   popToRoot,
 } from "@raycast/api";
-import { deleteBookmark, useSearchConstantsBookmarks } from "./api";
+import { useSearchConstantsBookmarks } from "./api";
 import { BookmarkListItem, EmptyView } from "./components";
-import { Bookmark, BookmarksResponse } from "./types";
+import { Bookmark } from "./types";
+import { deleteItem } from "./utils";
 
 export default function Command() {
   const { isLoading, data, mutate } = useSearchConstantsBookmarks();
   const { constantTags } = getPreferenceValues();
 
-  async function deleteItem(bookmark: Bookmark) {
-    try {
-      await mutate(deleteBookmark(bookmark), {
-        optimisticUpdate(data?: BookmarksResponse) {
-          if (data) {
-            return {
-              ...data,
-              bookmarks: data.bookmarks.filter((bookmarkItem) => bookmarkItem.url !== bookmark.url),
-            };
-          }
-        },
-      });
-    } catch (error) {
-      console.error("deleteItem error", error);
-    }
+  async function deleteBookmark(bookmark: Bookmark) {
+    await deleteItem({ bookmark, mutate });
   }
 
   return (
@@ -54,7 +42,7 @@ export default function Command() {
       />
       {data?.bookmarks &&
         data.bookmarks.map((bookmark) => (
-          <BookmarkListItem key={bookmark.id} bookmark={bookmark} onDelete={deleteItem} />
+          <BookmarkListItem key={bookmark.id} bookmark={bookmark} onDelete={deleteBookmark} />
         ))}
     </List>
   );

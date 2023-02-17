@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Color, Icon, confirmAlert } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon, confirmAlert, Alert } from "@raycast/api";
 import { Bookmark } from "./types";
 
 export function EmptyView(props: { title?: string; description?: string; actions?: false | JSX.Element }) {
@@ -22,12 +22,19 @@ export function BookmarkListItem(props: { bookmark: Bookmark; onDelete: (bookmar
 
   if (bookmark.tags?.length) {
     const bookmarks = bookmark.tags.split(" ");
-    if (bookmarks) {
+    if (bookmarks.length) {
       bookmarks.forEach((bookmark) => {
         keywords.push(`#${bookmark}`);
         tags.push({ tag: { value: bookmark, color: Color.Orange } });
       });
     }
+  }
+
+  const title = bookmark.title.split(" ");
+  if (title.length) {
+    title.forEach((title) => {
+      keywords.push(title);
+    });
   }
 
   return (
@@ -52,7 +59,15 @@ export function BookmarkListItem(props: { bookmark: Bookmark; onDelete: (bookmar
           icon={Icon.Trash}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
-            if (await confirmAlert({ title: `Are you sure you want to delete the bookmark?` })) {
+            const options: Alert.Options = {
+              title: "Delete Bookmark",
+              message: "Are you sure you want to delete the bookmark?",
+              primaryAction: {
+                title: "Delete Bookmark",
+                style: Alert.ActionStyle.Destructive,
+              },
+            };
+            if (await confirmAlert(options)) {
               await onDelete(bookmark);
             }
           }}
