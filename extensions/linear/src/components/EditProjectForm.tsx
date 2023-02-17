@@ -38,7 +38,6 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
           state: values.state,
           memberIds: values.memberIds,
           ...(values.leadId ? { leadId: values.leadId } : {}),
-          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
           ...(values.startDate ? { startDate: values.startDate } : {}),
           ...(values.targetDate ? { targetDate: values.targetDate } : {}),
         });
@@ -68,7 +67,6 @@ export default function EditProjectForm({ project, mutateProjects }: EditProject
       state: project.state,
       leadId: project.lead?.id,
       memberIds: project.members.nodes.map((p) => p.id) || [],
-      milestoneId: project.milestone?.id,
       startDate: project.startDate ? new Date(project.startDate) : null,
       targetDate: project.targetDate ? new Date(project.targetDate) : null,
     },
