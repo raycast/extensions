@@ -16,16 +16,18 @@ export default function useFieldTemplates({ options }: Props = {}) {
 
   const { statuses, prioritiesObj, priorities, startDate, dueDate } = useMemo(() => {
     const statuses = data?.list
-      ?.find((fieldTemplate) => fieldTemplate.standardType.toLowerCase() === "status")
-      ?.metadata?.options?.filter((option) => !option.deleted && !option.archived);
+      ?.find((fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "status")
+      ?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
 
-    const prioritiesObj = data?.list?.find((fieldTemplate) => fieldTemplate.standardType.toLowerCase() === "priority");
+    const prioritiesObj = data?.list?.find(
+      (fieldTemplate) => fieldTemplate?.standardType?.toLowerCase() === "priority"
+    );
 
-    const priorities = prioritiesObj?.metadata?.options?.filter((option) => !option.deleted && !option.archived);
+    const priorities = prioritiesObj?.metadata?.options?.filter((option) => !option?.deleted && !option?.archived);
 
-    const startDate = data?.list?.find((fieldTemplate) => fieldTemplate.standardType === "startDate");
+    const startDate = data?.list?.find((fieldTemplate) => fieldTemplate?.standardType === "startDate");
 
-    const dueDate = data?.list?.find((fieldTemplate) => fieldTemplate.standardType === "dueDate");
+    const dueDate = data?.list?.find((fieldTemplate) => fieldTemplate?.standardType === "dueDate");
 
     return { statuses, prioritiesObj, priorities, startDate, dueDate };
   }, [data]);

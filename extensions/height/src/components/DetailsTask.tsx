@@ -31,10 +31,10 @@ export default function DetailsTask({ taskId, mutateTask }: Props) {
 
   const status = getStatusById(task?.status, fieldTemplatesStatuses);
 
-  const priority = task?.fields.find((field) => field.name.toLowerCase() === "priority");
+  const priority = task?.fields.find((field) => field?.name?.toLowerCase() === "priority");
 
   const today = new Date();
-  const dueDate = task?.fields.find((field) => field.name.toLowerCase() === "due date");
+  const dueDate = task?.fields.find((field) => field?.name?.toLowerCase() === "due date");
 
   if (!task) return <Detail />;
 
