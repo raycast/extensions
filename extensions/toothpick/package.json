@@ -3,16 +3,38 @@
   "name": "toothpick",
   "title": "Toothpick",
   "description": "Manage Bluetooth connections in Raycast.",
-  "icon": "icon.png",
   "author": "VladCuciureanu",
   "contributors": [
     "briankosw"
   ],
-  "categories": [
-    "Productivity",
-    "System"
-  ],
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VladCuciureanu/Toothpick.git"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "build": "ray build -e dist",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "fuzzball": "^2.1.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
   "commands": [
     {
       "name": "manage-bluetooth-connections",
@@ -107,28 +129,10 @@
       "description": "If checked, Raycast will close after successfully connecting to a device."
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.38.2",
-    "fuzzball": "^2.1.2",
-    "run-applescript": "^6.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "dev": "ray develop",
-    "lint": "ray lint",
-    "fix-lint": "ray lint --fix",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "build": "ray build -e dist",
-    "publish": "ray publish"
-  }
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "icon": "icon.png"
 }
