@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "height",
   "title": "Height",
-  "description": "Search, create and manage tasks and lists in Height",
+  "description": "Search, create and manage tasks and lists in Height directly from Raycast.",
   "icon": "height-app.png",
   "author": "teziovsky",
   "categories": [
