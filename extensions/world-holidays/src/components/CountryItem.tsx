@@ -9,6 +9,7 @@ interface CountryItemProps {
 
 export const CountryItem = (props: CountryItemProps) => {
   const { country, pinned = false, onAction } = props;
+  if (!country || !country.code) return null;
   return (
     <List.Item
       title={country.name}

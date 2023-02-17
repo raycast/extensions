@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
-import { getCountriesLists, pinCountry, unpinCountry } from '../utils/countries';
+import {
+  getCountriesLists,
+  pinCountry,
+  unpinCountry,
+} from '../utils/countries';
 
 interface UseCountriesHookReturnType {
   pinnedCountries: Array<Country>;
