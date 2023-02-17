@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { site, getParked, pathExists, configPath, searchSites } from "./utils";
+import {site, getParked, pathExists, configPath, searchSites} from "./utils";
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { Site } from "./components/Site";
 
@@ -59,9 +59,13 @@ export default function Command() {
       {pathExists(configPath) && (sites ?? []).length === 0 && (
         <List.EmptyView title="No Sites Found" icon="no-view.png" description="Try searching for something else" />
       )}
-      {(sites ?? []).map((site: site) => (
-        <Site site={site} key={site.name} />
-      ))}
+      {(sites ?? []).map(function (site: site) {
+        const uniqueIndex = (site.url + site.path)
+            .replace(/[^a-z0-9]/gi, "-").toLowerCase()
+            .replace(/-+/g, "-");
+
+        return <Site site={site} key={uniqueIndex}/>;
+      })}
     </List>
   );
 }
