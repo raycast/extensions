@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "View upcoming holidays",
+      "title": "View Upcoming Holidays",
       "description": "View the list of upcoming holidays for the selected country",
       "mode": "view"
     }
