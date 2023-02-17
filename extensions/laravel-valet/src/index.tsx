@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {site, getParked, pathExists, configPath, searchSites} from "./utils";
+import { site, getParked, pathExists, configPath, searchSites } from "./utils";
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { Site } from "./components/Site";
 
@@ -61,10 +61,11 @@ export default function Command() {
       )}
       {(sites ?? []).map(function (site: site) {
         const uniqueIndex = (site.url + site.path)
-            .replace(/[^a-z0-9]/gi, "-").toLowerCase()
-            .replace(/-+/g, "-");
+          .replace(/[^a-z0-9]/gi, "-")
+          .toLowerCase()
+          .replace(/-+/g, "-");
 
-        return <Site site={site} key={uniqueIndex}/>;
+        return <Site site={site} key={uniqueIndex} />;
       })}
     </List>
   );
