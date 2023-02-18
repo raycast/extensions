@@ -6,8 +6,7 @@ import { getErrorMessage, showErrorToast } from "../utils";
 import { IssueDetail } from "./issues";
 import { MRDetail } from "./mr";
 
-export function ShowTodoDetailsAction(props: { todo: Todo }): JSX.Element | null {
-  const todo = props.todo;
+export function ShowTodoDetailsAction(todo: Todo): JSX.Element | null {
   const icon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
   if (todo.target_type === "MergeRequest") {
     const mr = jsonDataToMergeRequest(todo.target);
