@@ -2,7 +2,7 @@ import fs, { Dirent } from "fs";
 import { homedir } from "os";
 import { showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import { Config } from "./types/entities";
+import { Config } from "../types/entities";
 
 export const configPath = `${homedir()}/.config/valet/config.json`;
 export const sitesPath = `${homedir()}/.config/valet/Sites`;

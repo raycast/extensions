@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { handleError } from "./utils";
+import { handleError } from "./helpers/general";
 import { List } from "@raycast/api";
 import { SiteListItem } from "./components/SiteListItem";
 import { useCachedPromise } from "@raycast/utils";

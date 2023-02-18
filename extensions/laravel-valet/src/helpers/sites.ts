@@ -1,5 +1,5 @@
 import { Color, Icon, showToast, Toast } from "@raycast/api";
-import { getCertificates, getConfig, pathExists, sitesPath } from "../utils";
+import { getCertificates, getConfig, pathExists, sitesPath } from "./general";
 import fs, { Dirent } from "fs";
 import { homedir } from "os";
 import { Site } from "../types/entities";

@@ -1,5 +1,5 @@
 import { MutatePromise } from "@raycast/utils";
-import { executeCommand, getConfig, handleError } from "../utils";
+import { executeCommand, getConfig, handleError } from "../helpers/general";
 import { Action, ActionPanel, Color, Icon, showToast, Toast } from "@raycast/api";
 import { Site } from "../types/entities";
 
