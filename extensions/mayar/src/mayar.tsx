@@ -51,23 +51,23 @@ export default function Command() {
   return (
     <List isLoading={loading}>
       <List.Item
-        icon={{ source: "wallet.png" }}
-        key="balance"
-        title="Balance"
-        accessories={[{ text: loading ? "Loading..." : formatRp(data?.data.balance) }]}
-      />
-      <List.Item
-        icon={{ source: "active.png" }}
-        key="balance-active"
-        title="Balance Active"
-        accessories={[{ text: loading ? "Loading..." : formatRp(data?.data.balanceActive) }]}
-      />
-      <List.Item
-        icon={{ source: "pending.png" }}
-        key="balance-pending"
-        title="Balance Pending"
-        accessories={[{ text: loading ? "Loading..." : formatRp(data?.data.balancePending) }]}
-      />
+          icon={{ source: "wallet.png" }}
+          key="balance"
+          title="Balance"
+          accessories={[{ text: loading? "Loading..." : formatRp(data?.data.balance) }]}
+        />
+        <List.Item
+          icon={{ source: "active.png" }}
+          key="balance-active"
+          title="Balance Active"
+          accessories={[{ text: loading? "Loading..." : formatRp(data?.data.balanceActive) }]}
+        />
+        <List.Item
+          icon={{ source: "pending.png" }}
+          key="balance-pending"
+          title="Balance Pending"
+          accessories={[{ text: loading? "Loading..." : formatRp(data?.data.balancePending) }]}
+        />
     </List>
   );
 }

@@ -26,12 +26,32 @@
           "placeholder": "Enter your api key here"
         }
       ]
+    },
+    {
+      "name": "mayar-balance-recent-transaction",
+      "title": "Mayar Balance and Recent Transactions",
+      "subtitle": "Mayar",
+      "description": "See your Mayar balance and recent transactions at a glance",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "required-password",
+          "type": "password",
+          "required": true,
+          "title": "Mayar API Key",
+          "description": "Your api key",
+          "placeholder": "Enter your api key here"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.38.0",
+    "@raycast/api": "1.38.1",
     "@raycast/utils": "1.0.3",
-    "axios": "1.3.3"
+    "axios": "1.3.3",
+    "javascript-time-ago": "2.5.9",
+    "moment": "2.29.4"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
