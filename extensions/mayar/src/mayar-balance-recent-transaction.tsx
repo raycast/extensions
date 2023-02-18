@@ -91,7 +91,7 @@ export default function Command() {
             key={trx.id}
             title={timeAgo.format(trx.createdAt) + " - " + formatRp(trx.credit) + " - " + trx?.customer?.email}
             onAction={() => {
-              console.log("transaction clicked");
+              console.log("transaction list clicked");
             }}
           />
         )
