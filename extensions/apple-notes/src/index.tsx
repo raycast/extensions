@@ -12,7 +12,7 @@ import {
 import { runAppleScript } from "run-applescript";
 import { useSqlNotes } from "./useSql";
 import { useAppleScriptNotes } from "./useAppleScript";
-import { isPermissionError, PermissionErrorScreen } from "./errors";
+import { isAccessibilityPermissionError, isFullDiskAccessPermissionError, PermissionErrorScreen } from "./errors";
 import { NoteItem } from "./types";
 import { useState } from "react";
 
@@ -32,19 +32,27 @@ export default function Command() {
   const escapeStringForAppleScript = (str: string) => str.replace('"', '\\"');
 
   async function openNote(note: NoteItem) {
-    runAppleScript(`tell application "Notes" \nshow note "${escapeStringForAppleScript(note.title)}" \nend tell`).then(
-      async () => {
-        await closeMainWindow();
-      },
-      async (message) => {
-        setFailedToOpenMessage(message?.toString());
+    try {
+      runAppleScript(
+        `tell application "Notes" \nshow note "${escapeStringForAppleScript(note.title)}" \nend tell`
+      ).then(
+        async () => {
+          await closeMainWindow();
+        },
+        async (message) => {
+          setFailedToOpenMessage(message?.toString());
+        }
+      );
+    } catch (error) {
+      if (isAccessibilityPermissionError(error)) {
+        return <PermissionErrorScreen errorType={"accessibility"} />;
       }
-    );
+    }
   }
 
   if (sqlState.error) {
-    if (isPermissionError(sqlState.error)) {
-      return <PermissionErrorScreen />;
+    if (isFullDiskAccessPermissionError(sqlState.error)) {
+      return <PermissionErrorScreen errorType={"fullDiskAccess"} />;
     } else {
       showToast({
         style: Toast.Style.Failure,

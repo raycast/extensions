@@ -1,6 +1,7 @@
-import { Clipboard, closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
+import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
 import { setTimeout } from "timers/promises";
+import { isAccessibilityPermissionError, showPermissionErrorHUD } from "./errors";
 
 export default async (props: LaunchProps) => {
   const fallingBack = !!props.fallbackText && props.fallbackText.length > 0;
@@ -28,15 +29,14 @@ export default async (props: LaunchProps) => {
       runAppleScriptSync(`
       tell application "System Events" to keystroke "v" using command down
     `);
-      // Simply give it a break before restoring the clipboard
-      await setTimeout(200);
-      Clipboard.copy(currentClipboardContent ?? "");
     }
   } catch (error) {
-    if ((error as Error).message.includes("1002")) {
-      showHUD("Please grant Raycast Accessibility permission");
-      return;
+    if (isAccessibilityPermissionError(error)) {
+      showPermissionErrorHUD("accessibility");
     }
-    throw error;
   }
+
+  // Simply give it a break before restoring the clipboard
+  await setTimeout(200);
+  Clipboard.copy(currentClipboardContent ?? "");
 };
