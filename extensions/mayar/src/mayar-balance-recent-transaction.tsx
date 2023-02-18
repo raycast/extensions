@@ -21,14 +21,14 @@ function formatRp(value: number): string {
   return formatter.format(value);
 }
 
-const fetchData = async (token: string): Promise<Data[][]> => {
+const fetchData = async (token: string): Promise<Data[]> => {
   const [response1, response2] = await axios.all([
-    axios.get<Data[]>("https://api.mayar.id/hl/v1/balance", {
+    axios.get<Data>("https://api.mayar.id/hl/v1/balance", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }),
-    axios.get<Data[]>("https://api.mayar.id/hl/v1/transactions?pageSize=10&page=1", {
+    axios.get<Data>("https://api.mayar.id/hl/v1/transactions?pageSize=10&page=1", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
