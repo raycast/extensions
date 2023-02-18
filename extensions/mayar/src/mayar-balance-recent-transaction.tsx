@@ -1,11 +1,11 @@
 import { MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { Key, useEffect, useState } from "react";
 import axios from "axios";
-import TimeAgo from 'javascript-time-ago'
-import id from 'javascript-time-ago/locale/id'
+import TimeAgo from "javascript-time-ago";
+import id from "javascript-time-ago/locale/id";
 
-TimeAgo.addDefaultLocale(id)
-const timeAgo = new TimeAgo("id-ID")
+TimeAgo.addDefaultLocale(id);
+const timeAgo = new TimeAgo("id-ID");
 
 interface Data {
   statusCode: number;
@@ -32,8 +32,8 @@ const fetchData = async (token: string): Promise<Data[][]> => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    })
-  ])
+    }),
+  ]);
   return [response1.data, response2.data];
 };
 
@@ -57,7 +57,11 @@ export default function Command() {
   }, []);
 
   return (
-    <MenuBarExtra isLoading={loading} icon="https://pub-e4d31eae5d834409a04a5f020a42923e.r2.dev/mayar-favicon-black.png" tooltip="Mayar Balance and Recent Transaction">
+    <MenuBarExtra
+      isLoading={loading}
+      icon="https://pub-e4d31eae5d834409a04a5f020a42923e.r2.dev/mayar-favicon-black.png"
+      tooltip="Mayar Balance and Recent Transaction"
+    >
       <MenuBarExtra.Item title="Mayar Balance" />
       <MenuBarExtra.Item
         icon={{ source: "wallet.png" }}
@@ -81,8 +85,8 @@ export default function Command() {
         }}
       />
       <MenuBarExtra.Item title="10 Most Recent Transactions" />
-      {
-        (dataTrx || []).map((trx: { id: Key | null | undefined; createdAt: number; credit: number; customer: { email: string; }; }) =>(
+      {(dataTrx || []).map(
+        (trx: { id: Key | null | undefined; createdAt: number; credit: number; customer: { email: string } }) => (
           <MenuBarExtra.Item
             key={trx.id}
             title={timeAgo.format(trx.createdAt) + " - " + formatRp(trx.credit) + " - " + trx?.customer?.email}
@@ -90,8 +94,8 @@ export default function Command() {
               console.log("transaction clicked");
             }}
           />
-        ))
-      }
+        )
+      )}
     </MenuBarExtra>
   );
 }
