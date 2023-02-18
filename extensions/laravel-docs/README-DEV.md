@@ -1,8 +1,6 @@
 # Laravel version updates
 
-When a new laravel version comes out you should add this new version to the dropdown in the package.json
-
-Then execute the following script on the documentation page of that version E.g. https://laravel.com/docs/8.x:
+When a new laravel version comes out you should execute the following script on the documentation page of that version E.g. https://laravel.com/docs/8.x:
 
 ```js
 let list = {};
@@ -22,8 +20,8 @@ document
 console.log(JSON.stringify(list, null, 2));
 ```
 
-This will build you the file you should save in `src/documentation`
+This will build you the file you should save in `assets/documentation`
 
-After creating the file add it to the list of documentation in index.tsx
+Ensure you match the version format like in the https://laravel.com/docs/8.x url. 8.x.json
 
-It is also good practice to bring documentation/master.json up-to-date with https://laravel.com/docs/master
+It is also good practice to bring assets/documentation/master.json up-to-date with https://laravel.com/docs/master

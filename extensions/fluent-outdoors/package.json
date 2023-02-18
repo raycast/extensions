@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "luent-outdoors",
+  "name": "fluent-outdoors",
   "title": "Fluent Outdoors",
   "description": "Show maintenance status for outdoors activity tracks like skiing or skating. Backend system Fluent.",
   "icon": "fluent-outdoors.png",
