@@ -1,33 +1,26 @@
-import { useState } from "react";
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
+
+import { Action, ActionPanel, Icon, List, showToast, Clipboard } from "@raycast/api";
 
 import translate, { Languages, Translations } from "dictcc";
+import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "../utils";
 
-import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "./utils";
+import { ListWithEmptyView } from "./ListWithEmptyView";
 
-interface IListWithEmptyViewProps {
-  loading: boolean;
-  showNoResultsFound: boolean;
+interface ITranslationsListProps {
+  isSearchFromClipboard?: boolean;
 }
 
-export const ListWithEmptyView = ({ loading, showNoResultsFound }: IListWithEmptyViewProps) => {
-  if (loading) {
-    return <List.EmptyView title={"Loading..."} icon={{ source: "icon-small.png" }} />;
-  }
-
-  return (
-    <List.EmptyView title={!showNoResultsFound ? "Type to search" : "No Results"} icon={{ source: "icon-small.png" }} />
-  );
-};
-
-export default function Command() {
+export function TranslationsList({ isSearchFromClipboard }: ITranslationsListProps) {
   const [translations, setTranslations] = useState<Translations[] | undefined>();
   const [url, setUrl] = useState<string | undefined>();
   const [languages, setLanguages] = useState<[/* source */ Languages, /* target */ Languages] | undefined>();
   const [loading, setLoading] = useState(false);
+
   const [searchText, setSearchText] = useState("");
 
-  const onSearchTextChange = async (searchTerm: string) => {
+  const fetchTranslations = async (searchTerm: string) => {
+    setSearchText(searchTerm);
     setLoading(true);
 
     try {
@@ -41,7 +34,6 @@ export default function Command() {
       setTranslations(data);
       setUrl(url);
       setLanguages([input.sourceLanguage, input.targetLanguage]);
-      setSearchText(searchTerm);
     } catch (error) {
       if (error instanceof Error) {
         showToast({
@@ -50,14 +42,28 @@ export default function Command() {
         });
       }
     }
+
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (isSearchFromClipboard) {
+      (async () => {
+        const clipboardText = await Clipboard.readText();
+
+        if (clipboardText && clipboardText !== searchText) {
+          fetchTranslations(clipboardText);
+        }
+      })();
+    }
+  }, []);
 
   return (
     <List
       isLoading={loading}
+      searchText={searchText}
+      onSearchTextChange={(text) => fetchTranslations(text)}
       navigationTitle="Search dict.cc"
-      onSearchTextChange={onSearchTextChange}
       searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
       throttle
     >
