@@ -1,8 +1,8 @@
 import { showHUD, Clipboard } from "@raycast/api";
 
 export default async function main() {
-  const { text } = await Clipboard.read();  
-  
+  const { text } = await Clipboard.read();
+
   if (text) {
     // copy some text
     await Clipboard.copy(text.trim());
