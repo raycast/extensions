@@ -18,7 +18,7 @@ export function useSearchConstantsBookmarks() {
 
       const data = (await response.json()) as PinboardBookmark[];
       if (data !== undefined) {
-        const constantTagsData = constantTags.split(" ");
+        const constantTagsData = constantTags?.split(" ");
         if (constantTags.length) {
           const items: Bookmark[] = data.map((post) => transformBookmark(post));
           const filtered = items.filter((tag) => {
