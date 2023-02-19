@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { UnknownError } from "./unknownError";
 import { Account } from "../utils/cli";
 
+const isValidUrl = (urlLike: string | undefined) => urlLike && urlLike !== "http://sn";
+
 const toMarkdown = (args: { username?: string; url?: string; password?: string; note?: string }): string =>
   [
-    !!args.url && `### 🔗 **Url**\n${args.url}`,
+    isValidUrl(args.url) && `### 🔗 **Url**\n${args.url}`,
     !!args.username && `### 💻 **Username**\n${args.username}`,
     !!args.password && `### 🗝 **Password**\n${args.password}`,
     !!args.note && `### 🗒 **Note**\n${args.note.split("\n").join("  \n")}`,

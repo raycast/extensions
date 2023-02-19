@@ -77,7 +77,7 @@ export default function Command() {
       }
     >
       {!accounts.length ? (
-        <List.EmptyView icon={{ source: "pepe.png" }} title="Sorry, you have no accounts" />
+        <List.EmptyView title="Sorry, you have no accounts" />
       ) : (
         accounts.map(({ id, name, username, password, url }) => (
           <List.Item
