@@ -12,8 +12,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={strLength} title="Copy length to Clipboard"
-                                  shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action.CopyToClipboard
+            content={strLength}
+            title="Copy length to Clipboard"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
         </ActionPanel>
       }
     >
