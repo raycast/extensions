@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, Detail, Icon, Cache } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useState, useEffect } from "react";
+import { ActionPanel, Action, List, Detail, Icon, Cache, Color } from "@raycast/api";
 import { parseEDNString } from "edn-data";
+import fetch from "node-fetch";
 
 interface DocInfo {
   added: string;
@@ -34,34 +35,30 @@ function getDocList(data: Doc): DocInfo[] {
 export default function Command() {
   const cache = new Cache();
   const cached = cache.get("items");
-  let res: DocInfo[] | undefined | void, loading: boolean;
+  const [result, setResult] = useState({ data: [] as DocInfo[], isLoading: true });
 
   if (cached) {
-    res = JSON.parse(cached);
-    loading = false;
+    useEffect(() => {
+      setResult({ data: JSON.parse(cached), isLoading: false });
+    }, [result.isLoading]);
   } else {
-    const { isLoading, data } = useFetch(
-      "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.edn",
-      {
-        keepPreviousData: true,
-        parseResponse: async (response) => {
-          cache.set(
-            "items",
-            JSON.stringify(
-              getDocList(parseEDNString(await response.text(), { mapAs: "object", keywordAs: "string" }) as Doc)
-            )
-          );
-        },
-      }
-    );
-
-    res = data;
-    loading = isLoading;
+    useEffect(() => {
+      const fetchData = async () => {
+        const data = await fetch(
+          "https://github.com/clojure-emacs/clojuredocs-export-edn/raw/master/exports/export.compact.min.edn"
+        );
+        const text = await data.text();
+        const res = getDocList(parseEDNString(text, { mapAs: "object", keywordAs: "string" }) as Doc);
+        cache.set("items", JSON.stringify(res));
+        setResult({ data: res, isLoading: false });
+      };
+      fetchData().catch(console.error);
+    }, [result.isLoading]);
   }
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search..." throttle>
-      {(res || []).map((result, index) => (
+    <List searchBarPlaceholder="Search..." isLoading={result.isLoading} throttle>
+      {(result.data || []).map((result, index) => (
         <SearchListItem key={index} searchResult={result} />
       ))}
     </List>
@@ -115,7 +112,9 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
     <List.Item
       title={searchResult.ns + "/" + searchResult.name}
       subtitle={searchResult.doc}
-      accessoryTitle={searchResult.type}
+      accessories={[
+        { tag: { value: searchResult.type, color: colorType(searchResult.type) }, tooltip: "Tag with tooltip" },
+      ]}
       actions={
         <ActionPanel>
           <Action.Push
@@ -130,4 +129,17 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       }
     />
   );
+}
+
+function colorType(type: string) {
+  switch (type) {
+    case "function":
+      return Color.PrimaryText;
+    case "macro":
+      return Color.Green;
+    case "var":
+      return Color.Blue;
+    default:
+      return Color.Red;
+  }
 }
