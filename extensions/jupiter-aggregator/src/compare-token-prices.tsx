@@ -2,10 +2,10 @@ import { Detail, useNavigation, Clipboard, Action, ActionPanel, Form, showToast,
 import { fetchTokenList, compareTokens } from "./api";
 import { useState } from "react";
 
-function Result({ price }) {
+function Result({ price, token2 }) {
   const markdown = `
 # Result:
-# ${price}
+# ${price} ${token2}
 `;
   return (
     <Detail
@@ -28,7 +28,7 @@ export default function Command() {
 
   const submitHander = async () => {
     const price = await compareTokens(token1, amount, token2);
-    push(<Result price={price} />);
+    push(<Result price={price} token2={token2} />);
   };
 
   return (
