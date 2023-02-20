@@ -141,13 +141,13 @@ function Timezones() {
             />
             {selectedTimezones?.length > 0 && (
               <Action
-                title={`Clear Selected Timezones`}
+                title={`Remove Added Timezones`}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 style={Action.Style.Destructive}
                 onAction={() => {
                   confirmAlert({
                     primaryAction: {
-                      title: "Clear All",
+                      title: "Remove All",
                       style: Alert.ActionStyle.Destructive,
                       onAction: () => {
                         setSelectedTimezones([]);
