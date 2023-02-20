@@ -1,7 +1,5 @@
-import { Milestone, Project, User } from "@linear/sdk";
+import { Project, User } from "@linear/sdk";
 import { getLinearClient } from "../helpers/withLinearClient";
-
-export type MilestoneResult = Pick<Milestone, "id" | "name" | "sortOrder">;
 
 export type ProjectResult = Pick<
   Project,
@@ -11,8 +9,6 @@ export type ProjectResult = Pick<
   startDate?: string;
 } & {
   lead: Pick<User, "id" | "displayName" | "avatarUrl" | "email"> | null;
-} & {
-  milestone: MilestoneResult | null;
 } & {
   members: { nodes: { id: string }[] };
 } & {
@@ -33,11 +29,6 @@ const projectFragment = `
     displayName
     avatarUrl
     email
-  }
-  milestone {
-    id
-    name
-    sortOrder
   }
   startDate
   targetDate

@@ -10,7 +10,7 @@ All published extensions are open source and can be found in [this repository](h
 
 First, you need to find the source code of the extension. The easiest way to do this, is to open the store, search for the extension you want, and perform the "View Source Code" action to show the code in your browser.
 
-![View source code of an extension](https://user-images.githubusercontent.com/17166544/159994970-ec6d8265-4195-4a4f-86fd-237424fff6d2.png)
+![View source code of an extension](../.gitbook/assets/hn-source-code.png)
 
 Then, you need to [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo) to have the source code locally.
 
