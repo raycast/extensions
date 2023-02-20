@@ -1,0 +1,24 @@
+[
+  {
+    "category": "中国传统色",
+    "description": "以诗为韵，以色为形",
+    "detial":[
+      {"name": "缙云", "hex": "#EE7959"},
+      {"name": "桃夭", "hex": "#F6BEC8"},
+      {"name": "青鸾", "hex": "#9AA7B1"},
+      {"name": "水龙吟", "hex": "#84A729"},
+      {"name": "官绿", "hex": "#2A6E3F"},
+      {"name": "青玉案", "hex": "#A9A773"},
+      {"name": "如梦令", "hex": "#DDBB99"},
+      {"name": "群青", "hex": "#2E59A7"},
+      {"name": "丁香", "hex": "#CE93BF"},
+      {"name": "凝脂", "hex": "#F5F2E9"},
+      {"name": "苍烟落照", "hex": "#C8B5B3"},
+      {"name": "栾华", "hex": "#C0AD5E"},
+      {"name": "孔雀蓝", "hex": "#4994C4"},
+      {"name": "逍遥游", "hex": "#B2BFC3"},
+      {"name": "东方既白", "hex": "#8BA3C7"},
+      {"name": "月白", "hex": "#D4E5EF"}
+    ]
+  }
+]

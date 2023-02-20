@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="26px" viewBox="0 0 26 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>AdobeSpectrum</title>
+    <g id="Icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="AdobeSpectrum" fill="#FA0F00" fill-rule="nonzero">
+            <polygon id="路径" points="15 0 26 0 26 26"></polygon>
+            <polygon id="路径" points="11.1 0 0 0 0 26"></polygon>
+            <polygon id="路径" points="13 9.6 20.1 26 15.5 26 13.4 20.8 8.2 20.8"></polygon>
+        </g>
+    </g>
+</svg>

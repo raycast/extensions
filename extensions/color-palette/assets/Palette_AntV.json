@@ -1,0 +1,559 @@
+[
+  {
+    "category": "分类色板_基础10色",
+    "description": "基础10色色版",
+    "detial":[
+      {"name": "GeekBlue", "hex": "#5B8FF9"},
+      {"name": "Cyan", "hex": "#61DDAA"},
+      {"name": "Grey", "hex": "#65789B"},
+      {"name": "SunriseYellow", "hex": "#F6BD16"},
+      {"name": "DeepPurple", "hex": "#7262fd"},
+      {"name": "DaybreakBlue", "hex": "#78D3F8"},
+      {"name": "GoldenPurple", "hex": "#9661BC"},
+      {"name": "SunsetOrange", "hex": "#F6903D"},
+      {"name": "DarkGreen", "hex": "#008685"},
+      {"name": "Magenta", "hex": "#F08BB4"}
+    ]
+  },
+  {
+    "category": "分类色板_扩展20色",
+    "description": "扩展20色色版",
+    "detial":[
+      {"name": "GB", "hex": "#5B8FF9"},
+      {"name": "Cyan", "hex": "#61DDAA"},
+      {"name": "Grey", "hex": "#65789B"},
+      {"name": "SY", "hex": "#F6BD16"},
+      {"name": "DP", "hex": "#7262fd"},
+      {"name": "DB", "hex": "#78D3F8"},
+      {"name": "GP", "hex": "#9661BC"},
+      {"name": "SO", "hex": "#F6903D"},
+      {"name": "DG", "hex": "#008685"},
+      {"name": "Magenta", "hex": "#F08BB4"},
+      {"name": "GB2", "hex": "#BDD2FD"},
+      {"name": "Cyan2", "hex": "#BDEFDB"},
+      {"name": "Grey2", "hex": "#C2C8D5"},
+      {"name": "SY2", "hex": "#FBE5A2"},
+      {"name": "DP2", "hex": "#D3CEFD"},
+      {"name": "DB2", "hex": "#B6E3F5"},
+      {"name": "GP2", "hex": "#D3C6EA"},
+      {"name": "SO2", "hex": "#FFD8B8"},
+      {"name": "DG2", "hex": "#AAD8D8"},
+      {"name": "Magenta2", "hex": "#FFD6E7"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_GeekBlue",
+    "description": "极客蓝色板",
+    "detial":[
+      {"name": "GB0", "hex": "#B8E1FF"},
+      {"name": "GB1", "hex": "#9AC5FF"},
+      {"name": "GB2", "hex": "#7DAAFF"},
+      {"name": "GB3", "hex": "#5B8FF9"},
+      {"name": "GB4", "hex": "#3D76DD"},
+      {"name": "GB5", "hex": "#085EC0"},
+      {"name": "GB6", "hex": "#0047A5"},
+      {"name": "GB7", "hex": "#00318A"},
+      {"name": "GB8", "hex": "#001D70"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_Cyan",
+    "description": "青绿色板",
+    "detial":[
+      {"name": "C0", "hex": "#9DF5CA"},
+      {"name": "C1", "hex": "#61DDAA"},
+      {"name": "C2", "hex": "#42C090"},
+      {"name": "C3", "hex": "#19A576"},
+      {"name": "C4", "hex": "#008A5D"},
+      {"name": "C5", "hex": "#006F45"},
+      {"name": "C6", "hex": "#00562F"},
+      {"name": "C7", "hex": "#003E19"},
+      {"name": "C8", "hex": "#002800"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_Grey" ,
+    "description": "蓝灰色板",
+    "detial":[
+      {"name": "G0", "hex": "#D0E4FF"},
+      {"name": "G1", "hex": "#B4C8ED"},
+      {"name": "G2", "hex": "#99ADD1"},
+      {"name": "G3", "hex": "#7E92B5"},
+      {"name": "G4", "hex": "#65789B"},
+      {"name": "G5", "hex": "#4C6080"},
+      {"name": "G6", "hex": "#334867"},
+      {"name": "G7", "hex": "#1B324F"},
+      {"name": "G8", "hex": "#021D38"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_SunriseYellow" ,
+    "description": "日出黄色板",
+    "detial":[
+      {"name": "SY0", "hex": "#FFD83B"},
+      {"name": "SY1", "hex": "#F6BD16"},
+      {"name": "SY2", "hex": "#D7A100"},
+      {"name": "SY3", "hex": "#B98700"},
+      {"name": "SY4", "hex": "#9C6E00"},
+      {"name": "SY5", "hex": "#7F5600"},
+      {"name": "SY6", "hex": "#633F00"},
+      {"name": "SY7", "hex": "#482900"},
+      {"name": "SY8", "hex": "#2F1400"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_DeepPurple",
+    "description": "深紫色板",
+    "detial":[
+      {"name": "DP0", "hex": "#EBCCFF"},
+      {"name": "DP1", "hex": "#CCB0FF"},
+      {"name": "DP2", "hex": "#AE95FF"},
+      {"name": "DP3", "hex": "#907BFF"},
+      {"name": "DP4", "hex": "#7262FD"},
+      {"name": "DP5", "hex": "#5349E0"},
+      {"name": "DP6", "hex": "#2F32C3"},
+      {"name": "DP7", "hex": "#001BA7"},
+      {"name": "DP8", "hex": "#00068C"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_DaybreakBlue",
+    "description": "拂晓蓝色板",
+    "detial":[
+      {"name": "DB0", "hex": "#95F0FF"},
+      {"name": "DB1", "hex": "#78D3F8"},
+      {"name": "DB2", "hex": "#5AB8DB"},
+      {"name": "DB3", "hex": "#3A9DBF"},
+      {"name": "DB4", "hex": "#0A82A4"},
+      {"name": "DB5", "hex": "#00698A"},
+      {"name": "DB6", "hex": "#005170"},
+      {"name": "DB7", "hex": "#003958"},
+      {"name": "DB8", "hex": "#002440"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_GoldenPurple",
+    "description": "金紫色板",
+    "detial":[
+      {"name": "GP0", "hex": "#FFCCFF"},
+      {"name": "GP1", "hex": "#EBB0FF"},
+      {"name": "GP2", "hex": "#CE95F5"},
+      {"name": "GP3", "hex": "#B27AD8"},
+      {"name": "GP4", "hex": "#9661BC"},
+      {"name": "GP5", "hex": "#7B48A1"},
+      {"name": "GP6", "hex": "#613086"},
+      {"name": "GP7", "hex": "#48186C"},
+      {"name": "GP8", "hex": "#2E0054"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_SunsetOrange",
+    "description": "日暮橙色板",
+    "detial":[
+      {"name": "SO0", "hex": "#FFC771"},
+      {"name": "SO1", "hex": "#FFAB57"},
+      {"name": "SO2", "hex": "#F6903D"},
+      {"name": "SO3", "hex": "#D77622"},
+      {"name": "SO4", "hex": "#B85C00"},
+      {"name": "SO5", "hex": "#9B4300"},
+      {"name": "SO6", "hex": "#7D2A00"},
+      {"name": "SO7", "hex": "#601000"},
+      {"name": "SO8", "hex": "#450000"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_DarkGreen",
+    "description": "深绿色板",
+    "detial":[
+      {"name": "DG0", "hex": "#8CF4F2"},
+      {"name": "DG1", "hex": "#6FD8D6"},
+      {"name": "DG2", "hex": "#52BCBA"},
+      {"name": "DG3", "hex": "#31A09F"},
+      {"name": "DG4", "hex": "#008685"},
+      {"name": "DG5", "hex": "#006C6C"},
+      {"name": "DG6", "hex": "#005354"},
+      {"name": "DG7", "hex": "#003B3D"},
+      {"name": "DG8", "hex": "#002627"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_Magenta",
+    "description": "品红色板",
+    "detial":[
+      {"name": "M0", "hex": "#FFC2EC"},
+      {"name": "M1", "hex": "#FFA6D0"},
+      {"name": "M2", "hex": "#F08BB4"},
+      {"name": "M3", "hex": "#D37099"},
+      {"name": "M4", "hex": "#B65680"},
+      {"name": "M5", "hex": "#9A3C67"},
+      {"name": "M6", "hex": "#7E214F"},
+      {"name": "M7", "hex": "#630038"},
+      {"name": "M8", "hex": "#490022"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_DustRed",
+    "description": "薄暮红色板",
+    "detial":[
+      {"name": "DR0", "hex": "#FFBB95"},
+      {"name": "DR1", "hex": "#FF9E7B"},
+      {"name": "DR2", "hex": "#FF8362"},
+      {"name": "DR3", "hex": "#E8684A"},
+      {"name": "DR4", "hex": "#C84D32"},
+      {"name": "DR5", "hex": "#AA311C"},
+      {"name": "DR6", "hex": "#8C1104"},
+      {"name": "DR7", "hex": "#6F0000"},
+      {"name": "DR8", "hex": "#510000"}
+    ]
+  },
+  {
+    "category": "顺序色板_单色_Dark",
+    "description": "中性灰色板",
+    "detial":[
+      {"name": "D0", "hex": "#E2E2E2"},
+      {"name": "D1", "hex": "#C6C6C6"},
+      {"name": "D2", "hex": "#ABABAB"},
+      {"name": "D3", "hex": "#919191"},
+      {"name": "D4", "hex": "#777777"},
+      {"name": "D5", "hex": "#5E5E5E"},
+      {"name": "D6", "hex": "#474747"},
+      {"name": "D7", "hex": "#303030"},
+      {"name": "D8", "hex": "#1B1B1B"}
+    ]
+  },
+  {
+    "category": "顺序色板_邻近色_SunsetOrange（推荐）",
+    "description": "日暮橙邻近色色板",
+    "detial":[
+      {"name": "SO0", "hex": "#FDEDBE"},
+      {"name": "SO1", "hex": "#FFDF80"},
+      {"name": "SO2", "hex": "#FFCB33"},
+      {"name": "SO3", "hex": "#FFB200"},
+      {"name": "SO4", "hex": "#FF8C00"},
+      {"name": "SO5", "hex": "#FF6500"},
+      {"name": "SO6", "hex": "#E6450F"},
+      {"name": "SO7", "hex": "#B22C00"},
+      {"name": "SO8", "hex": "#661900"}
+    ]
+  },
+  {
+    "category": "顺序色板_邻近色_LeafYellow",
+    "description": "叶黄邻近色色板",
+    "detial":[
+      {"name": "LY0", "hex": "#FFEBB0"},
+      {"name": "LY1", "hex": "#FFDF80"},
+      {"name": "LY2", "hex": "#FACA3E"},
+      {"name": "LY3", "hex": "#E6B80B"},
+      {"name": "LY4", "hex": "#B5AC23"},
+      {"name": "LY5", "hex": "#6A9A48"},
+      {"name": "LY6", "hex": "#20876B"},
+      {"name": "LY7", "hex": "#06746B"},
+      {"name": "LY8", "hex": "#044E48"}
+    ]
+  },
+  {
+    "category": "顺序色板_邻近色_GeekBlue（推荐）",
+    "description": "极客蓝邻近色色板",
+    "detial":[
+      {"name": "GB0", "hex": "#D2EDC8"},
+      {"name": "GB1", "hex": "#A9DACC"},
+      {"name": "GB2", "hex": "#75C6D1"},
+      {"name": "GB3", "hex": "#42B3D5"},
+      {"name": "GB4", "hex": "#3993C2"},
+      {"name": "GB5", "hex": "#3073AE"},
+      {"name": "GB6", "hex": "#27539B"},
+      {"name": "GB7", "hex": "#1E3388"},
+      {"name": "GB8", "hex": "#171E6D"}
+    ]
+  },
+  {
+    "category": "顺序色板_邻近色_GoldenPurple",
+    "description": "金紫邻近色色板",
+    "detial":[
+      {"name": "GP0", "hex": "#FACDAA"},
+      {"name": "GP1", "hex": "#F4A49E"},
+      {"name": "GP2", "hex": "#EE7B91"},
+      {"name": "GP3", "hex": "#E85285"},
+      {"name": "GP4", "hex": "#BE408C"},
+      {"name": "GP5", "hex": "#942D93"},
+      {"name": "GP6", "hex": "#6A1B9A"},
+      {"name": "GP7", "hex": "#56167D"},
+      {"name": "GP8", "hex": "#42105F"}
+    ]
+  },
+  {
+    "category": "发散色板_Cyan/Yellow（推荐）",
+    "description": "青色和黄色的渐变色板",
+    "detial":[
+      {"name": "C8", "hex": "#215B77"},
+      {"name": "C7", "hex": "#227BA2"},
+      {"name": "C6", "hex": "#1B9CD0"},
+      {"name": "C5", "hex": "#22BAED"},
+      {"name": "C4", "hex": "#61C9FF"},
+      {"name": "C3", "hex": "#8AD4FF"},
+      {"name": "C2", "hex": "#ABDFFF"},
+      {"name": "C1", "hex": "#C9E9FF"},
+      {"name": "Y1", "hex": "#FFE9B8"},
+      {"name": "Y2", "hex": "#FFDE94"},
+      {"name": "Y3", "hex": "#FFD470"},
+      {"name": "Y4", "hex": "#FFC741"},
+      {"name": "Y5", "hex": "#EDB40A"},
+      {"name": "Y6", "hex": "#D09C10"},
+      {"name": "Y7", "hex": "#A37B16"},
+      {"name": "Y8", "hex": "#795B16"},
+      {"name": "CY", "hex": "#EFF3DE"}
+    ]
+  },
+  {
+    "category": "发散色板_Green/Red",
+    "description": "绿色和红色的渐变色板",
+    "detial":[
+      {"name": "G8", "hex": "#014C63"},
+      {"name": "G7", "hex": "#10686C"},
+      {"name": "G6", "hex": "#168575"},
+      {"name": "G5", "hex": "#16A37E"},
+      {"name": "G4", "hex": "#0BC286"},
+      {"name": "G3", "hex": "#65CF9B"},
+      {"name": "G2", "hex": "#96DCB0"},
+      {"name": "G1", "hex": "#C1E8C5"},
+      {"name": "R1", "hex": "#FFC5AC"},
+      {"name": "R2", "hex": "#FFA884"},
+      {"name": "R3", "hex": "#FF895D"},
+      {"name": "R4", "hex": "#FF6836"},
+      {"name": "R5", "hex": "#F3470D"},
+      {"name": "R6", "hex": "#D13808"},
+      {"name": "R7", "hex": "#A4300C"},
+      {"name": "R8", "hex": "#7A270E"},
+      {"name": "GR", "hex": "#F2EAEA"}
+    ]
+  },
+  {
+    "category": "发散色板_Blue/Orange（推荐）",
+    "description": "蓝色和橙色的渐变色板",
+    "detial":[
+      {"name": "B8", "hex": "#003F7F"},
+      {"name": "B7", "hex": "#004C99"},
+      {"name": "B6", "hex": "#0059B2"},
+      {"name": "B5", "hex": "#0072E5"},
+      {"name": "B4", "hex": "#1A8CFF"},
+      {"name": "B3", "hex": "#4DA6FF"},
+      {"name": "B2", "hex": "#80BFFF"},
+      {"name": "B1", "hex": "#B3D9FF"},
+      {"name": "O1", "hex": "#FFD5B1"},
+      {"name": "O2", "hex": "#FFC08C"},
+      {"name": "O3", "hex": "#FFAB66"},
+      {"name": "O4", "hex": "#FF963E"},
+      {"name": "O5", "hex": "#F17F0B"},
+      {"name": "O6", "hex": "#D16A0C"},
+      {"name": "O7", "hex": "#A45411"},
+      {"name": "O8", "hex": "#794012"},
+      {"name": "BO", "hex": "#EAE9EB"}
+    ]
+  },
+  {
+    "category": "发散色板_Grow",
+    "description": "绿色和橙色的渐变色板",
+    "detial":[
+      {"name": "G8", "hex": "#014C63"},
+      {"name": "G7", "hex": "#10686C"},
+      {"name": "G6", "hex": "#168575"},
+      {"name": "G5", "hex": "#16A37E"},
+      {"name": "G4", "hex": "#0BC286"},
+      {"name": "G3", "hex": "#65CF9B"},
+      {"name": "G2", "hex": "#96DCB0"},
+      {"name": "G1", "hex": "#C1E8C5"},
+      {"name": "O1", "hex": "#F1E3AF"},
+      {"name": "O2", "hex": "#F3D282"},
+      {"name": "O3", "hex": "#F2C354"},
+      {"name": "O4", "hex": "#EEB311"},
+      {"name": "O5", "hex": "#DE9111"},
+      {"name": "O6", "hex": "#CD6E10"},
+      {"name": "O7", "hex": "#BB490F"},
+      {"name": "O8", "hex": "#A8190D"},
+      {"name": "GO", "hex": "#EAF3DB"}
+    ]
+  },
+  {
+    "category": "发散色板_Magic",
+    "description": "红橙和紫蓝的渐变色版",
+    "detial":[
+      {"name": "R8", "hex": "#661900"},
+      {"name": "R7", "hex": "#B22C00"},
+      {"name": "R6", "hex": "#E6450F"},
+      {"name": "R5", "hex": "#FF6500"},
+      {"name": "R4", "hex": "#FF8C00"},
+      {"name": "R3", "hex": "#FFB200"},
+      {"name": "R2", "hex": "#FFCB33"},
+      {"name": "R1", "hex": "#FFDF80"},
+      {"name": "P1", "hex": "#EAACFF"},
+      {"name": "P2", "hex": "#DD78FF"},
+      {"name": "P3", "hex": "#C53FFF"},
+      {"name": "P4", "hex": "#A700FF"},
+      {"name": "P5", "hex": "#8500FF"},
+      {"name": "P6", "hex": "#620BE1"},
+      {"name": "P7", "hex": "#3607C2"},
+      {"name": "P8", "hex": "#27029A"},
+      {"name": "RP", "hex": "#FFE2DC"}
+    ]
+  },
+  {
+    "category": "发散色板_Classic（推荐）",
+    "description": "红橙和蓝色的渐变色版",
+    "detial":[
+      {"name": "R8", "hex": "#661900"},
+      {"name": "R7", "hex": "#B22C00"},
+      {"name": "R6", "hex": "#E6450F"},
+      {"name": "R5", "hex": "#FF6500"},
+      {"name": "R4", "hex": "#FF8C00"},
+      {"name": "R3", "hex": "#FFB200"},
+      {"name": "R2", "hex": "#FFCB33"},
+      {"name": "R1", "hex": "#FFDF80"},
+      {"name": "B1", "hex": "#66D8FF"},
+      {"name": "B2", "hex": "#1AC5FF"},
+      {"name": "B3", "hex": "#00A5FF"},
+      {"name": "B4", "hex": "#007FFF"},
+      {"name": "B5", "hex": "#0059FF"},
+      {"name": "B6", "hex": "#0040FF"},
+      {"name": "B7", "hex": "#002CB2"},
+      {"name": "B8", "hex": "#001F7F"},
+      {"name": "RB", "hex": "#E0F2EB"}
+    ]
+  },
+  {
+    "category": "叠加色板_MYG",
+    "description": "Multiple Yellow Green",
+    "detial":[
+      {"name": "1-1", "hex": "#DFE9C1"},
+      {"name": "1-2", "hex": "#DFCA62"},
+      {"name": "1-3", "hex": "#B5950E"},
+      {"name": "2-3", "hex": "#637E08"},
+      {"name": "3-3", "hex": "#115A04"},
+      {"name": "2-1", "hex": "#7AC675"},
+      {"name": "3-1", "hex": "#168D38"},
+      {"name": "3-2", "hex": "#167B1C"},
+      {"name": "2-2", "hex": "#7AAC3C"}
+    ]
+  },
+  {
+    "category": "叠加色板_MPC",
+    "description": "Multiple Purple Cyan",
+    "detial":[
+      {"name": "1-1", "hex": "#D7D1FF"},
+      {"name": "1-2", "hex": "#B78DFF"},
+      {"name": "1-3", "hex": "#8B59FF"},
+      {"name": "2-3", "hex": "#6752FF"},
+      {"name": "3-3", "hex": "#1444ED"},
+      {"name": "2-1", "hex": "#A0BFFF"},
+      {"name": "3-1", "hex": "#209FED"},
+      {"name": "3-2", "hex": "#1B6BED"},
+      {"name": "2-2", "hex": "#8881FF"}
+    ]
+  },
+  {
+    "category": "叠加色板_MBG",
+    "description": "Multiple Blue Green",
+    "detial":[
+      {"name": "1-1", "hex": "#BBDFE1"},
+      {"name": "1-2", "hex": "#6FB6E1"},
+      {"name": "1-3", "hex": "#1685E1"},
+      {"name": "2-3", "hex": "#0C7189"},
+      {"name": "3-3", "hex": "#025142"},
+      {"name": "2-1", "hex": "#66BD89"},
+      {"name": "3-1", "hex": "#128742"},
+      {"name": "3-2", "hex": "#0B6E42"},
+      {"name": "2-2", "hex": "#3D9B89"}
+    ]
+  },
+  {
+    "category": "叠加色板_MOB（推荐）",
+    "description": "Multiple Orange Blue",
+    "detial":[
+      {"name": "1-1", "hex": "#D6D6D8"},
+      {"name": "1-2", "hex": "#D6B08C"},
+      {"name": "1-3", "hex": "#D6893E"},
+      {"name": "2-3", "hex": "#80703E"},
+      {"name": "3-3", "hex": "#1A523E"},
+      {"name": "2-1", "hex": "#80AFD8"},
+      {"name": "3-1", "hex": "#1A80D8"},
+      {"name": "3-2", "hex": "#1A698C"},
+      {"name": "2-2", "hex": "#808F8C"}
+    ]
+  },
+  {
+    "category": "强调色板_9色",
+    "description": "4个强调色和5个基本色",
+    "detial":[
+      {"name": "M1", "hex": "#5B8FF9"},
+      {"name": "M2", "hex": "#E8684A"},
+      {"name": "M3", "hex": "#9270CA"},
+      {"name": "M4", "hex": "#269A99"},
+      {"name": "N1", "hex": "#BEDED1"},
+      {"name": "N2", "hex": "#EFE0B5"},
+      {"name": "N3", "hex": "#B5D7E5"},
+      {"name": "N4", "hex": "#F4DBC6"},
+      {"name": "N5", "hex": "#F2CADA"}
+    ]
+  },
+  {
+    "category": "强调色板_19色",
+    "description": "9个强调色10个基本色",
+    "detial":[
+      {"name": "M1", "hex": "#5B8FF9"},
+      {"name": "M2", "hex": "#E8684A"},
+      {"name": "M3", "hex": "#9270CA"},
+      {"name": "M4", "hex": "#269A99"},
+      {"name": "M5", "hex": "#5AD8A6"},
+      {"name": "M6", "hex": "#F6BD16"},
+      {"name": "M7", "hex": "#6DC8EC"},
+      {"name": "M8", "hex": "#FF9D4D"},
+      {"name": "M9", "hex": "#FF99C3"},
+      {"name": "N1", "hex": "#BEDED1"},
+      {"name": "N2", "hex": "#EFE0B5"},
+      {"name": "N3", "hex": "#B5D7E5"},
+      {"name": "N4", "hex": "#F4DBC6"},
+      {"name": "N5", "hex": "#F2CADA"},
+      {"name": "N6", "hex": "#BDD2FD"},
+      {"name": "N7", "hex": "#C2C8D5"},
+      {"name": "N8", "hex": "#F6C3B7"},
+      {"name": "N9", "hex": "#D3C6EA"},
+      {"name": "N10", "hex": "#AAD8D8"}
+    ]
+  },
+  {
+    "category": "语义色板_通用",
+    "description": "通用语意常用色：红色代表负面&不可行&失败；绿色代表正面&可行&成功；黄色代表警告&注意",
+    "detial":[
+      {"name": "Red", "hex": "#F4664A"},
+      {"name": "Green", "hex": "#30BF78"},
+      {"name": "Yellow", "hex": "#FAAD14"}
+    ]
+  },
+  {
+    "category": "语义色板_气象",
+    "description": "气象预警常用色",
+    "detial":[
+      {"name": "红色预警", "hex": "#E8684A"},
+      {"name": "橙色预警", "hex": "#FF9D4D"},
+      {"name": "黄色预警", "hex": "#F6BD16"},
+      {"name": "蓝色预警", "hex": "#5B8FF9"}
+    ]
+  },
+  {
+    "category": "语义色板_地图",
+    "description": "地图层常用色",
+    "detial":[
+      {"name": "水体", "hex": "#BDD2FD"},
+      {"name": "陆地", "hex": "#FFFFFF"},
+      {"name": "绿色", "hex": "#BEDED1"},
+      {"name": "高速", "hex": "#F6C3B7"}
+    ]
+  },
+  {
+    "category": "语义色板_有无",
+    "description": "有无常用色",
+    "detial":[
+      {"name": "有", "hex": "#5B8FF9"},
+      {"name": "无", "hex": "#ABABAB"}
+    ]
+  }
+]

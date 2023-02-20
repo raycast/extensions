@@ -1,0 +1,794 @@
+[
+  {
+    "category": "Light｜Gray",
+    "description": "灰色（浅色主题）",
+    "detial":[
+      {"name": "Gray50", "hex": "#FFFFFF"},
+      {"name": "Gray75", "hex": "#FDFDFD"},
+      {"name": "Gray100", "hex": "#F8F8F8"},
+      {"name": "Gray200", "hex": "#E6E6E6"},
+      {"name": "Gray300", "hex": "#D5D5D5"},
+      {"name": "Gray400", "hex": "#B1B1B1"},
+      {"name": "Gray500", "hex": "#909090"},
+      {"name": "Gray600", "hex": "#6D6D6D"},
+      {"name": "Gray700", "hex": "#464646"},
+      {"name": "Gray800", "hex": "#222222"},
+      {"name": "Gray900", "hex": "#000000"}
+    ]
+  },
+  {
+    "category": "Light｜Red",
+    "description": "红色（浅色主题）",
+    "detial":[
+      {"name": "Red100", "hex": "#FFEBE7"},
+      {"name": "Red200", "hex": "#FFDDD6"},
+      {"name": "Red300", "hex": "#FFCDC3"},
+      {"name": "Red400", "hex": "#FFB7A9"},
+      {"name": "Red500", "hex": "#FF9B88"},
+      {"name": "Red600", "hex": "#FF7C65"},
+      {"name": "Red700", "hex": "#F75C46"},
+      {"name": "Red800", "hex": "#EA3829"},
+      {"name": "Red900", "hex": "#D31510"},
+      {"name": "Red1000", "hex": "#B40000"},
+      {"name": "Red1100", "hex": "#930000"},
+      {"name": "Red1200", "hex": "#740000"},
+      {"name": "Red1300", "hex": "#590000"}
+    ]
+  },
+  {
+    "category": "Light｜Orange",
+    "description": "橙色（浅色主题）",
+    "detial":[
+      {"name": "Orange100", "hex": "#FFECCC"},
+      {"name": "Orange200", "hex": "#FFDFAD"},
+      {"name": "Orange300", "hex": "#FDD291"},
+      {"name": "Orange400", "hex": "#FFBB63"},
+      {"name": "Orange500", "hex": "#FFA037"},
+      {"name": "Orange600", "hex": "#F68511"},
+      {"name": "Orange700", "hex": "#E46F00"},
+      {"name": "Orange800", "hex": "#CB5D00"},
+      {"name": "Orange900", "hex": "#B14C00"},
+      {"name": "Orange1000", "hex": "#953D00"},
+      {"name": "Orange1100", "hex": "#7A2F00"},
+      {"name": "Orange1200", "hex": "#612300"},
+      {"name": "Orange1300", "hex": "#491901"}
+    ]
+  },
+  {
+    "category": "Light｜Yellow",
+    "description": "黄色（浅色主题）",
+    "detial":[
+      {"name": "Yellow100", "hex": "#FBF198"},
+      {"name": "Yellow200", "hex": "#F8E750"},
+      {"name": "Yellow300", "hex": "#F8D904"},
+      {"name": "Yellow400", "hex": "#E8C600"},
+      {"name": "Yellow500", "hex": "#D7B300"},
+      {"name": "Yellow600", "hex": "#C49F00"},
+      {"name": "Yellow700", "hex": "#B08C00"},
+      {"name": "Yellow800", "hex": "#9B7800"},
+      {"name": "Yellow900", "hex": "#856600"},
+      {"name": "Yellow1000", "hex": "#705300"},
+      {"name": "Yellow1100", "hex": "#5B4300"},
+      {"name": "Yellow1200", "hex": "#483300"},
+      {"name": "Yellow1300", "hex": "#362500"}
+    ]
+  },
+  {
+    "category": "Light｜Chartreuse",
+    "description": "黄绿（浅色主题）",
+    "detial":[
+      {"name": "Chartreuse100", "hex": "#DBFC6E"},
+      {"name": "Chartreuse200", "hex": "#CBF443"},
+      {"name": "Chartreuse300", "hex": "#BCE92A"},
+      {"name": "Chartreuse400", "hex": "#AAD816"},
+      {"name": "Chartreuse500", "hex": "#98C50A"},
+      {"name": "Chartreuse600", "hex": "#87B103"},
+      {"name": "Chartreuse700", "hex": "#769C00"},
+      {"name": "Chartreuse800", "hex": "#678800"},
+      {"name": "Chartreuse900", "hex": "#577400"},
+      {"name": "Chartreuse1000", "hex": "#486000"},
+      {"name": "Chartreuse1100", "hex": "#3A4D00"},
+      {"name": "Chartreuse1200", "hex": "#2C3B00"},
+      {"name": "Chartreuse1300", "hex": "#212C00"}
+    ]
+  },
+  {
+    "category": "Light｜Celery",
+    "description": "菜绿（浅色主题）",
+    "detial":[
+      {"name": "Celery100", "hex": "#CDFCBF"},
+      {"name": "Celery200", "hex": "#AEF69D"},
+      {"name": "Celery300", "hex": "#96EE85"},
+      {"name": "Celery400", "hex": "#72E06A"},
+      {"name": "Celery500", "hex": "#4ECF50"},
+      {"name": "Celery600", "hex": "#27BB36"},
+      {"name": "Celery700", "hex": "#07A721"},
+      {"name": "Celery800", "hex": "#009112"},
+      {"name": "Celery900", "hex": "#007C0F"},
+      {"name": "Celery1000", "hex": "#00670F"},
+      {"name": "Celery1100", "hex": "#00530D"},
+      {"name": "Celery1200", "hex": "#00400A"},
+      {"name": "Celery1300", "hex": "#003007"}
+    ]
+  },
+  {
+    "category": "Light｜Green",
+    "description": "绿色（浅色主题）",
+    "detial":[
+      {"name": "Green100", "hex": "#CEF8E0"},
+      {"name": "Green200", "hex": "#ADF4CE"},
+      {"name": "Green300", "hex": "#89ECBC"},
+      {"name": "Green400", "hex": "#67DEA8"},
+      {"name": "Green500", "hex": "#49CC93"},
+      {"name": "Green600", "hex": "#2FB880"},
+      {"name": "Green700", "hex": "#15A46E"},
+      {"name": "Green800", "hex": "#008F5D"},
+      {"name": "Green900", "hex": "#007A4D"},
+      {"name": "Green1000", "hex": "#00653E"},
+      {"name": "Green1100", "hex": "#005132"},
+      {"name": "Green1200", "hex": "#053F27"},
+      {"name": "Green1300", "hex": "#0A2E1D"}
+    ]
+  },
+  {
+    "category": "Light｜Seafoam",
+    "description": "水蓝（浅色主题）",
+    "detial":[
+      {"name": "Seafoam100", "hex": "#CEF7F3"},
+      {"name": "Seafoam200", "hex": "#AAF1EA"},
+      {"name": "Seafoam300", "hex": "#8CE9E2"},
+      {"name": "Seafoam400", "hex": "#65DAD2"},
+      {"name": "Seafoam500", "hex": "#3FC9C1"},
+      {"name": "Seafoam600", "hex": "#0FB5AE"},
+      {"name": "Seafoam700", "hex": "#00A19A"},
+      {"name": "Seafoam800", "hex": "#008C87"},
+      {"name": "Seafoam900", "hex": "#007772"},
+      {"name": "Seafoam1000", "hex": "#00635F"},
+      {"name": "Seafoam1100", "hex": "#0C4F4C"},
+      {"name": "Seafoam1200", "hex": "#123C3A"},
+      {"name": "Seafoam1300", "hex": "#122C2B"}
+    ]
+  },
+  {
+    "category": "Light｜Cyan",
+    "description": "青色（浅色主题）",
+    "detial":[
+      {"name": "Cyan100", "hex": "#C5F8FF"},
+      {"name": "Cyan200", "hex": "#A4F0FF"},
+      {"name": "Cyan300", "hex": "#88E7FA"},
+      {"name": "Cyan400", "hex": "#60D8F3"},
+      {"name": "Cyan500", "hex": "#33C5E8"},
+      {"name": "Cyan600", "hex": "#12B0DA"},
+      {"name": "Cyan700", "hex": "#019CC8"},
+      {"name": "Cyan800", "hex": "#0086B4"},
+      {"name": "Cyan900", "hex": "#00719F"},
+      {"name": "Cyan1000", "hex": "#005D89"},
+      {"name": "Cyan1100", "hex": "#004A73"},
+      {"name": "Cyan1200", "hex": "#00395D"},
+      {"name": "Cyan1300", "hex": "#002A46"}
+    ]
+  },
+  {
+    "category": "Light｜Blue",
+    "description": "蓝色（浅色主题）",
+    "detial":[
+      {"name": "Blue100", "hex": "#E0F2FF"},
+      {"name": "Blue200", "hex": "#CAE8FF"},
+      {"name": "Blue300", "hex": "#B5DEFF"},
+      {"name": "Blue400", "hex": "#96CEFD"},
+      {"name": "Blue500", "hex": "#78BBFA"},
+      {"name": "Blue600", "hex": "#59A7F6"},
+      {"name": "Blue700", "hex": "#3892F3"},
+      {"name": "Blue800", "hex": "#147AF3"},
+      {"name": "Blue900", "hex": "#0265DC"},
+      {"name": "Blue1000", "hex": "#0054B6"},
+      {"name": "Blue1100", "hex": "#004491"},
+      {"name": "Blue1200", "hex": "#003571"},
+      {"name": "Blue1300", "hex": "#002754"}
+    ]
+  },
+  {
+    "category": "Light｜Indigo",
+    "description": "靛色（浅色主题）",
+    "detial":[
+      {"name": "Indigo100", "hex": "#EDEEFF"},
+      {"name": "Indigo200", "hex": "#E0E2FF"},
+      {"name": "Indigo300", "hex": "#D3D5FF"},
+      {"name": "Indigo400", "hex": "#C1C4FF"},
+      {"name": "Indigo500", "hex": "#ACAFFF"},
+      {"name": "Indigo600", "hex": "#9599FF"},
+      {"name": "Indigo700", "hex": "#7E84FC"},
+      {"name": "Indigo800", "hex": "#686DF4"},
+      {"name": "Indigo900", "hex": "#5258E4"},
+      {"name": "Indigo1000", "hex": "#4046CA"},
+      {"name": "Indigo1100", "hex": "#3236A8"},
+      {"name": "Indigo1200", "hex": "#262986"},
+      {"name": "Indigo1300", "hex": "#1B1E64"}
+    ]
+  },
+  {
+    "category": "Light｜Purple",
+    "description": "紫色（浅色主题）",
+    "detial":[
+      {"name": "Purple100", "hex": "#F6EBFF"},
+      {"name": "Purple200", "hex": "#EEDDFF"},
+      {"name": "Purple300", "hex": "#E6D0FF"},
+      {"name": "Purple400", "hex": "#DBBBFE"},
+      {"name": "Purple500", "hex": "#CCA4FD"},
+      {"name": "Purple600", "hex": "#BD8BFC"},
+      {"name": "Purple700", "hex": "#AE72F9"},
+      {"name": "Purple800", "hex": "#9D57F4"},
+      {"name": "Purple900", "hex": "#893DE7"},
+      {"name": "Purple1000", "hex": "#7326D3"},
+      {"name": "Purple1100", "hex": "#5D13B7"},
+      {"name": "Purple1200", "hex": "#470C94"},
+      {"name": "Purple1300", "hex": "#33106A"}
+    ]
+  },
+  {
+    "category": "Light｜Fuchsia",
+    "description": "紫红（浅色主题）",
+    "detial":[
+      {"name": "Fuchsia100", "hex": "#FFE9FC"},
+      {"name": "Fuchsia200", "hex": "#FFDAFA"},
+      {"name": "Fuchsia300", "hex": "#FEC7F8"},
+      {"name": "Fuchsia400", "hex": "#FBAEF6"},
+      {"name": "Fuchsia500", "hex": "#F592F3"},
+      {"name": "Fuchsia600", "hex": "#ED74ED"},
+      {"name": "Fuchsia700", "hex": "#E055E2"},
+      {"name": "Fuchsia800", "hex": "#CD3ACE"},
+      {"name": "Fuchsia900", "hex": "#B622B7"},
+      {"name": "Fuchsia1000", "hex": "#9D039E"},
+      {"name": "Fuchsia1100", "hex": "#800081"},
+      {"name": "Fuchsia1200", "hex": "#640664"},
+      {"name": "Fuchsia1300", "hex": "#470E46"}
+    ]
+  },
+  {
+    "category": "Light｜Magenta",
+    "description": "品红（浅色主题）",
+    "detial":[
+      {"name": "Magenta100", "hex": "#FFEAF1"},
+      {"name": "Magenta200", "hex": "#FFDCE8"},
+      {"name": "Magenta300", "hex": "#FFCADD"},
+      {"name": "Magenta400", "hex": "#FFB2CE"},
+      {"name": "Magenta500", "hex": "#FF95BD"},
+      {"name": "Magenta600", "hex": "#FA77AA"},
+      {"name": "Magenta700", "hex": "#EF5A98"},
+      {"name": "Magenta800", "hex": "#DE3D82"},
+      {"name": "Magenta900", "hex": "#C82269"},
+      {"name": "Magenta1000", "hex": "#AD0955"},
+      {"name": "Magenta1100", "hex": "#8E0045"},
+      {"name": "Magenta1200", "hex": "#700037"},
+      {"name": "Magenta1300", "hex": "#54032A"}
+    ]
+  },
+  {
+    "category": "Dark｜Gray",
+    "description": "灰色（深色主题）",
+    "detial":[
+      {"name": "Gray50", "hex": "#1D1D1D"},
+      {"name": "Gray75", "hex": "#262626"},
+      {"name": "Gray100", "hex": "#323232"},
+      {"name": "Gray200", "hex": "#3F3F3F"},
+      {"name": "Gray300", "hex": "#545454"},
+      {"name": "Gray400", "hex": "#707070"},
+      {"name": "Gray500", "hex": "#909090"},
+      {"name": "Gray600", "hex": "#B2B2B2"},
+      {"name": "Gray700", "hex": "#D1D1D1"},
+      {"name": "Gray800", "hex": "#EBEBEB"},
+      {"name": "Gray900", "hex": "#FFFFFF"}
+    ]
+  },
+  {
+    "category": "Dark｜Red",
+    "description": "红色（深色主题）",
+    "detial":[
+      {"name": "Red100", "hex": "#7B0000"},
+      {"name": "Red200", "hex": "#8D0000"},
+      {"name": "Red300", "hex": "#A50000"},
+      {"name": "Red400", "hex": "#BE0403"},
+      {"name": "Red500", "hex": "#D71913"},
+      {"name": "Red600", "hex": "#EA3829"},
+      {"name": "Red700", "hex": "#F65843"},
+      {"name": "Red800", "hex": "#FF755E"},
+      {"name": "Red900", "hex": "#FF9581"},
+      {"name": "Red1000", "hex": "#FFB0A1"},
+      {"name": "Red1100", "hex": "#FFC9BD"},
+      {"name": "Red1200", "hex": "#FFDED8"},
+      {"name": "Red1300", "hex": "#FFF1EE"}
+    ]
+  },
+  {
+    "category": "Dark｜Orange",
+    "description": "橙色（深色主题）",
+    "detial":[
+      {"name": "Orange100", "hex": "#662500"},
+      {"name": "Orange200", "hex": "#752D00"},
+      {"name": "Orange300", "hex": "#893700"},
+      {"name": "Orange400", "hex": "#9E4200"},
+      {"name": "Orange500", "hex": "#B44E00"},
+      {"name": "Orange600", "hex": "#CA5D00"},
+      {"name": "Orange700", "hex": "#E16D00"},
+      {"name": "Orange800", "hex": "#F4810C"},
+      {"name": "Orange900", "hex": "#FE9A2E"},
+      {"name": "Orange1000", "hex": "#FFB558"},
+      {"name": "Orange1100", "hex": "#FDCE88"},
+      {"name": "Orange1200", "hex": "#FFE1B3"},
+      {"name": "Orange1300", "hex": "#FFF2DD"}
+    ]
+  },
+  {
+    "category": "Dark｜Yellow",
+    "description": "黄色（深色主题）",
+    "detial":[
+      {"name": "Yellow100", "hex": "#4C3600"},
+      {"name": "Yellow200", "hex": "#584000"},
+      {"name": "Yellow300", "hex": "#674C00"},
+      {"name": "Yellow400", "hex": "#775900"},
+      {"name": "Yellow500", "hex": "#886800"},
+      {"name": "Yellow600", "hex": "#9B7800"},
+      {"name": "Yellow700", "hex": "#AE8900"},
+      {"name": "Yellow800", "hex": "#C09C00"},
+      {"name": "Yellow900", "hex": "#D3AE00"},
+      {"name": "Yellow1000", "hex": "#E4C200"},
+      {"name": "Yellow1100", "hex": "#F4D500"},
+      {"name": "Yellow1200", "hex": "#F9E85C"},
+      {"name": "Yellow1300", "hex": "#FCF6BB"}
+    ]
+  },
+  {
+    "category": "Dark｜Chartreuse",
+    "description": "黄绿（深色主题）",
+    "detial":[
+      {"name": "Chartreuse100", "hex": "#304000"},
+      {"name": "Chartreuse200", "hex": "#374A00"},
+      {"name": "Chartreuse300", "hex": "#415700"},
+      {"name": "Chartreuse400", "hex": "#4C6600"},
+      {"name": "Chartreuse500", "hex": "#597600"},
+      {"name": "Chartreuse600", "hex": "#668800"},
+      {"name": "Chartreuse700", "hex": "#759A00"},
+      {"name": "Chartreuse800", "hex": "#84AD01"},
+      {"name": "Chartreuse900", "hex": "#94C008"},
+      {"name": "Chartreuse1000", "hex": "#A6D312"},
+      {"name": "Chartreuse1100", "hex": "#B8E525"},
+      {"name": "Chartreuse1200", "hex": "#CDF547"},
+      {"name": "Chartreuse1300", "hex": "#E7FE9A"}
+    ]
+  },
+  {
+    "category": "Dark｜Celery",
+    "description": "菜绿（深色主题）",
+    "detial":[
+      {"name": "Celery100", "hex": "#00450A"},
+      {"name": "Celery200", "hex": "#00500C"},
+      {"name": "Celery300", "hex": "#005E0E"},
+      {"name": "Celery400", "hex": "#006D0F"},
+      {"name": "Celery500", "hex": "#007F0F"},
+      {"name": "Celery600", "hex": "#009112"},
+      {"name": "Celery700", "hex": "#04A51E"},
+      {"name": "Celery800", "hex": "#22B833"},
+      {"name": "Celery900", "hex": "#44CA49"},
+      {"name": "Celery1000", "hex": "#69DC63"},
+      {"name": "Celery1100", "hex": "#8EEB7F"},
+      {"name": "Celery1200", "hex": "#B4F7A2"},
+      {"name": "Celery1300", "hex": "#DDFDD3"}
+    ]
+  },
+  {
+    "category": "Dark｜Green",
+    "description": "绿色（深色主题）",
+    "detial":[
+      {"name": "Green100", "hex": "#044329"},
+      {"name": "Green200", "hex": "#004E2F"},
+      {"name": "Green300", "hex": "#005C38"},
+      {"name": "Green400", "hex": "#006C43"},
+      {"name": "Green500", "hex": "#007D4E"},
+      {"name": "Green600", "hex": "#008F5D"},
+      {"name": "Green700", "hex": "#12A26C"},
+      {"name": "Green800", "hex": "#2BB47D"},
+      {"name": "Green900", "hex": "#43C78F"},
+      {"name": "Green1000", "hex": "#5ED9A2"},
+      {"name": "Green1100", "hex": "#81E9B8"},
+      {"name": "Green1200", "hex": "#B1F4D1"},
+      {"name": "Green1300", "hex": "#DFFAEA"}
+    ]
+  },
+  {
+    "category": "Dark｜Seafoam",
+    "description": "水蓝（深色主题）",
+    "detial":[
+      {"name": "Seafoam100", "hex": "#12413F"},
+      {"name": "Seafoam200", "hex": "#0E4C49"},
+      {"name": "Seafoam300", "hex": "#045A57"},
+      {"name": "Seafoam400", "hex": "#006965"},
+      {"name": "Seafoam500", "hex": "#007A75"},
+      {"name": "Seafoam600", "hex": "#008C87"},
+      {"name": "Seafoam700", "hex": "#009E98"},
+      {"name": "Seafoam800", "hex": "#03B2AB"},
+      {"name": "Seafoam900", "hex": "#36C5BD"},
+      {"name": "Seafoam1000", "hex": "#5DD6CF"},
+      {"name": "Seafoam1100", "hex": "#84E6DF"},
+      {"name": "Seafoam1200", "hex": "#B0F2EC"},
+      {"name": "Seafoam1300", "hex": "#DFF9F6"}
+    ]
+  },
+  {
+    "category": "Dark｜Cyan",
+    "description": "青色（深色主题）",
+    "detial":[
+      {"name": "Cyan100", "hex": "#003D62"},
+      {"name": "Cyan200", "hex": "#00476F"},
+      {"name": "Cyan300", "hex": "#00557F"},
+      {"name": "Cyan400", "hex": "#006491"},
+      {"name": "Cyan500", "hex": "#0074A2"},
+      {"name": "Cyan600", "hex": "#0086B4"},
+      {"name": "Cyan700", "hex": "#0099C6"},
+      {"name": "Cyan800", "hex": "#0EADD7"},
+      {"name": "Cyan900", "hex": "#2CC1E6"},
+      {"name": "Cyan1000", "hex": "#54D3F1"},
+      {"name": "Cyan1100", "hex": "#7FE4F9"},
+      {"name": "Cyan1200", "hex": "#A7F1FF"},
+      {"name": "Cyan1300", "hex": "#D7FAFF"}
+    ]
+  },
+  {
+    "category": "Dark｜Blue",
+    "description": "蓝色（深色主题）",
+    "detial":[
+      {"name": "Blue100", "hex": "#003877"},
+      {"name": "Blue200", "hex": "#00418A"},
+      {"name": "Blue300", "hex": "#004DA3"},
+      {"name": "Blue400", "hex": "#0059C2"},
+      {"name": "Blue500", "hex": "#0367E0"},
+      {"name": "Blue600", "hex": "#1379F3"},
+      {"name": "Blue700", "hex": "#348FF4"},
+      {"name": "Blue800", "hex": "#54A3F6"},
+      {"name": "Blue900", "hex": "#72B7F9"},
+      {"name": "Blue1000", "hex": "#8FCAFC"},
+      {"name": "Blue1100", "hex": "#AEDBFE"},
+      {"name": "Blue1200", "hex": "#CCE9FF"},
+      {"name": "Blue1300", "hex": "#E8F6FF"}
+    ]
+  },
+  {
+    "category": "Dark｜Indigo",
+    "description": "靛色（深色主题）",
+    "detial":[
+      {"name": "Indigo100", "hex": "#282C8C"},
+      {"name": "Indigo200", "hex": "#2F34A3"},
+      {"name": "Indigo300", "hex": "#393FBB"},
+      {"name": "Indigo400", "hex": "#464BD3"},
+      {"name": "Indigo500", "hex": "#555BE7"},
+      {"name": "Indigo600", "hex": "#686DF4"},
+      {"name": "Indigo700", "hex": "#7C81FB"},
+      {"name": "Indigo800", "hex": "#9195FF"},
+      {"name": "Indigo900", "hex": "#A7AAFF"},
+      {"name": "Indigo1000", "hex": "#BCBEFF"},
+      {"name": "Indigo1100", "hex": "#D0D2FF"},
+      {"name": "Indigo1200", "hex": "#E2E4FF"},
+      {"name": "Indigo1300", "hex": "#F3F3FE"}
+    ]
+  },
+  {
+    "category": "Dark｜Purple",
+    "description": "紫色（深色主题）",
+    "detial":[
+      {"name": "Purple100", "hex": "#4C0D9D"},
+      {"name": "Purple200", "hex": "#5911B1"},
+      {"name": "Purple300", "hex": "#691CC8"},
+      {"name": "Purple400", "hex": "#7A2DDA"},
+      {"name": "Purple500", "hex": "#8C41E9"},
+      {"name": "Purple600", "hex": "#9D57F3"},
+      {"name": "Purple700", "hex": "#AC6FF9"},
+      {"name": "Purple800", "hex": "#BB87FB"},
+      {"name": "Purple900", "hex": "#CA9FFC"},
+      {"name": "Purple1000", "hex": "#D7B6FE"},
+      {"name": "Purple1100", "hex": "#E4CCFE"},
+      {"name": "Purple1200", "hex": "#EFDFFF"},
+      {"name": "Purple1300", "hex": "#F9F0FF"}
+    ]
+  },
+  {
+    "category": "Dark｜Fuchsia",
+    "description": "紫红（深色主题）",
+    "detial":[
+      {"name": "Fuchsia100", "hex": "#6B036A"},
+      {"name": "Fuchsia200", "hex": "#7B007B"},
+      {"name": "Fuchsia300", "hex": "#900091"},
+      {"name": "Fuchsia400", "hex": "#A50DA6"},
+      {"name": "Fuchsia500", "hex": "#B925B9"},
+      {"name": "Fuchsia600", "hex": "#CD39CE"},
+      {"name": "Fuchsia700", "hex": "#DF51E0"},
+      {"name": "Fuchsia800", "hex": "#EB6EEC"},
+      {"name": "Fuchsia900", "hex": "#F48CF2"},
+      {"name": "Fuchsia1000", "hex": "#FAA8F5"},
+      {"name": "Fuchsia1100", "hex": "#FEC2F8"},
+      {"name": "Fuchsia1200", "hex": "#FFDBFA"},
+      {"name": "Fuchsia1300", "hex": "#FFEFFC"}
+    ]
+  },
+  {
+    "category": "Dark｜Magenta",
+    "description": "品红（深色主题）",
+    "detial":[
+      {"name": "Magenta100", "hex": "#76003A"},
+      {"name": "Magenta200", "hex": "#890042"},
+      {"name": "Magenta300", "hex": "#A0004D"},
+      {"name": "Magenta400", "hex": "#B6125A"},
+      {"name": "Magenta500", "hex": "#CB266D"},
+      {"name": "Magenta600", "hex": "#DE3D82"},
+      {"name": "Magenta700", "hex": "#ED5795"},
+      {"name": "Magenta800", "hex": "#F972A7"},
+      {"name": "Magenta900", "hex": "#FF8FB9"},
+      {"name": "Magenta1000", "hex": "#FFACCA"},
+      {"name": "Magenta1100", "hex": "#FFC6DA"},
+      {"name": "Magenta1200", "hex": "#FFDDE9"},
+      {"name": "Magenta1300", "hex": "#FFF0F5"}
+    ]
+  },
+  {
+    "category": "Darkest｜Gray",
+    "description": "灰色（暗色主题）",
+    "detial":[
+      {"name": "Gray50", "hex": "#000000"},
+      {"name": "Gray75", "hex": "#0E0E0E"},
+      {"name": "Gray100", "hex": "#1D1D1D"},
+      {"name": "Gray200", "hex": "#303030"},
+      {"name": "Gray300", "hex": "#4B4B4B"},
+      {"name": "Gray400", "hex": "#6A6A6A"},
+      {"name": "Gray500", "hex": "#8D8D8D"},
+      {"name": "Gray600", "hex": "#B0B0B0"},
+      {"name": "Gray700", "hex": "#D0D0D0"},
+      {"name": "Gray800", "hex": "#EBEBEB"},
+      {"name": "Gray900", "hex": "#FFFFFF"}
+    ]
+  },
+  {
+    "category": "Darkest｜Red",
+    "description": "红色（暗色主题）",
+    "detial":[
+      {"name": "Red100", "hex": "#570000"},
+      {"name": "Red200", "hex": "#6E0000"},
+      {"name": "Red300", "hex": "#8A0000"},
+      {"name": "Red400", "hex": "#A70000"},
+      {"name": "Red500", "hex": "#C40706"},
+      {"name": "Red600", "hex": "#DD2118"},
+      {"name": "Red700", "hex": "#EE4331"},
+      {"name": "Red800", "hex": "#F9634C"},
+      {"name": "Red900", "hex": "#FF816B"},
+      {"name": "Red1000", "hex": "#FF9E8C"},
+      {"name": "Red1100", "hex": "#FFB7A9"},
+      {"name": "Red1200", "hex": "#FFCDC3"},
+      {"name": "Red1300", "hex": "#FFDFD9"}
+    ]
+  },
+  {
+    "category": "Darkest｜Orange",
+    "description": "橙色（暗色主题）",
+    "detial":[
+      {"name": "Orange100", "hex": "#481801"},
+      {"name": "Orange200", "hex": "#5C2000"},
+      {"name": "Orange300", "hex": "#732B00"},
+      {"name": "Orange400", "hex": "#8A3700"},
+      {"name": "Orange500", "hex": "#A24400"},
+      {"name": "Orange600", "hex": "#BA5200"},
+      {"name": "Orange700", "hex": "#D26200"},
+      {"name": "Orange800", "hex": "#E87400"},
+      {"name": "Orange900", "hex": "#F98917"},
+      {"name": "Orange1000", "hex": "#FFA23B"},
+      {"name": "Orange1100", "hex": "#FFBC66"},
+      {"name": "Orange1200", "hex": "#FDD291"},
+      {"name": "Orange1300", "hex": "#FFE2B5"}
+    ]
+  },
+  {
+    "category": "Darkest｜Yellow",
+    "description": "黄色（暗色主题）",
+    "detial":[
+      {"name": "Yellow100", "hex": "#352400"},
+      {"name": "Yellow200", "hex": "#442F00"},
+      {"name": "Yellow300", "hex": "#563E00"},
+      {"name": "Yellow400", "hex": "#674D00"},
+      {"name": "Yellow500", "hex": "#7A5C00"},
+      {"name": "Yellow600", "hex": "#8D6C00"},
+      {"name": "Yellow700", "hex": "#A17E00"},
+      {"name": "Yellow800", "hex": "#B49000"},
+      {"name": "Yellow900", "hex": "#C7A200"},
+      {"name": "Yellow1000", "hex": "#D8B500"},
+      {"name": "Yellow1100", "hex": "#E9C700"},
+      {"name": "Yellow1200", "hex": "#F7D804"},
+      {"name": "Yellow1300", "hex": "#F9E961"}
+    ]
+  },
+  {
+    "category": "Darkest｜Chartreuse",
+    "description": "黄绿（暗色主题）",
+    "detial":[
+      {"name": "Chartreuse100", "hex": "#202B00"},
+      {"name": "Chartreuse200", "hex": "#2A3800"},
+      {"name": "Chartreuse300", "hex": "#364800"},
+      {"name": "Chartreuse400", "hex": "#425800"},
+      {"name": "Chartreuse500", "hex": "#4F6900"},
+      {"name": "Chartreuse600", "hex": "#5D7B00"},
+      {"name": "Chartreuse700", "hex": "#6B8E00"},
+      {"name": "Chartreuse800", "hex": "#7AA100"},
+      {"name": "Chartreuse900", "hex": "#8AB403"},
+      {"name": "Chartreuse1000", "hex": "#9AC60B"},
+      {"name": "Chartreuse1100", "hex": "#AAD816"},
+      {"name": "Chartreuse1200", "hex": "#BBE829"},
+      {"name": "Chartreuse1300", "hex": "#CDF648"}
+    ]
+  },
+  {
+    "category": "Darkest｜Celery",
+    "description": "菜绿（暗色主题）",
+    "detial":[
+      {"name": "Celery100", "hex": "#002F07"},
+      {"name": "Celery200", "hex": "#003D09"},
+      {"name": "Celery300", "hex": "#004D0C"},
+      {"name": "Celery400", "hex": "#005F0F"},
+      {"name": "Celery500", "hex": "#00710F"},
+      {"name": "Celery600", "hex": "#00840F"},
+      {"name": "Celery700", "hex": "#009714"},
+      {"name": "Celery800", "hex": "#0DAB25"},
+      {"name": "Celery900", "hex": "#2DBF3A"},
+      {"name": "Celery1000", "hex": "#50D052"},
+      {"name": "Celery1100", "hex": "#73E06B"},
+      {"name": "Celery1200", "hex": "#93ED83"},
+      {"name": "Celery1300", "hex": "#B4F7A2"}
+    ]
+  },
+  {
+    "category": "Darkest｜Green",
+    "description": "绿色（暗色主题）",
+    "detial":[
+      {"name": "Green100", "hex": "#0A2C1C"},
+      {"name": "Green200", "hex": "#073B24"},
+      {"name": "Green300", "hex": "#004C2E"},
+      {"name": "Green400", "hex": "#005D39"},
+      {"name": "Green500", "hex": "#006F45"},
+      {"name": "Green600", "hex": "#008252"},
+      {"name": "Green700", "hex": "#009562"},
+      {"name": "Green800", "hex": "#1CA872"},
+      {"name": "Green900", "hex": "#34BB84"},
+      {"name": "Green1000", "hex": "#4BCD95"},
+      {"name": "Green1100", "hex": "#67DEA8"},
+      {"name": "Green1200", "hex": "#89ECBC"},
+      {"name": "Green1300", "hex": "#B1F4D1"}
+    ]
+  },
+  {
+    "category": "Darkest｜Seafoam",
+    "description": "水蓝（暗色主题）",
+    "detial":[
+      {"name": "Seafoam100", "hex": "#122B2A"},
+      {"name": "Seafoam200", "hex": "#133937"},
+      {"name": "Seafoam300", "hex": "#104946"},
+      {"name": "Seafoam400", "hex": "#035B58"},
+      {"name": "Seafoam500", "hex": "#006C68"},
+      {"name": "Seafoam600", "hex": "#007F79"},
+      {"name": "Seafoam700", "hex": "#00928C"},
+      {"name": "Seafoam800", "hex": "#00A59F"},
+      {"name": "Seafoam900", "hex": "#1AB9B2"},
+      {"name": "Seafoam1000", "hex": "#42CAC3"},
+      {"name": "Seafoam1100", "hex": "#66DAD3"},
+      {"name": "Seafoam1200", "hex": "#8BE8E1"},
+      {"name": "Seafoam1300", "hex": "#B3F2ED"}
+    ]
+  },
+  {
+    "category": "Darkest｜Cyan",
+    "description": "青色（暗色主题）",
+    "detial":[
+      {"name": "Cyan100", "hex": "#002944"},
+      {"name": "Cyan200", "hex": "#003658"},
+      {"name": "Cyan300", "hex": "#00456C"},
+      {"name": "Cyan400", "hex": "#005680"},
+      {"name": "Cyan500", "hex": "#006793"},
+      {"name": "Cyan600", "hex": "#0079A7"},
+      {"name": "Cyan700", "hex": "#008CBA"},
+      {"name": "Cyan800", "hex": "#04A0CD"},
+      {"name": "Cyan900", "hex": "#17B4DD"},
+      {"name": "Cyan1000", "hex": "#39C7EA"},
+      {"name": "Cyan1100", "hex": "#60D8F3"},
+      {"name": "Cyan1200", "hex": "#86E6FA"},
+      {"name": "Cyan1300", "hex": "#AAF2FF"}
+    ]
+  },
+  {
+    "category": "Darkest｜Blue",
+    "description": "蓝色（暗色主题）",
+    "detial":[
+      {"name": "Blue100", "hex": "#002651"},
+      {"name": "Blue200", "hex": "#00326A"},
+      {"name": "Blue300", "hex": "#004087"},
+      {"name": "Blue400", "hex": "#004EA6"},
+      {"name": "Blue500", "hex": "#005CC8"},
+      {"name": "Blue600", "hex": "#066CE7"},
+      {"name": "Blue700", "hex": "#1D80F5"},
+      {"name": "Blue800", "hex": "#4096F3"},
+      {"name": "Blue900", "hex": "#5EAAF7"},
+      {"name": "Blue1000", "hex": "#7CBDFA"},
+      {"name": "Blue1100", "hex": "#98CEFD"},
+      {"name": "Blue1200", "hex": "#B3DEFE"},
+      {"name": "Blue1300", "hex": "#CEEAFF"}
+    ]
+  },
+  {
+    "category": "Darkest｜Indigo",
+    "description": "靛色（暗色主题）",
+    "detial":[
+      {"name": "Indigo100", "hex": "#1A1D61"},
+      {"name": "Indigo200", "hex": "#23277D"},
+      {"name": "Indigo300", "hex": "#2E329E"},
+      {"name": "Indigo400", "hex": "#3A3FBD"},
+      {"name": "Indigo500", "hex": "#494ED8"},
+      {"name": "Indigo600", "hex": "#5A60EB"},
+      {"name": "Indigo700", "hex": "#6E73F6"},
+      {"name": "Indigo800", "hex": "#8488FD"},
+      {"name": "Indigo900", "hex": "#999DFF"},
+      {"name": "Indigo1000", "hex": "#AEB1FF"},
+      {"name": "Indigo1100", "hex": "#C2C4FF"},
+      {"name": "Indigo1200", "hex": "#D4D5FF"},
+      {"name": "Indigo1300", "hex": "#E3E4FF"}
+    ]
+  },
+  {
+    "category": "Darkest｜Purple",
+    "description": "紫色（暗色主题）",
+    "detial":[
+      {"name": "Purple100", "hex": "#321068"},
+      {"name": "Purple200", "hex": "#430D8C"},
+      {"name": "Purple300", "hex": "#5610AD"},
+      {"name": "Purple400", "hex": "#6A1DC8"},
+      {"name": "Purple500", "hex": "#7E31DE"},
+      {"name": "Purple600", "hex": "#9146EC"},
+      {"name": "Purple700", "hex": "#A25EF6"},
+      {"name": "Purple800", "hex": "#B277FA"},
+      {"name": "Purple900", "hex": "#C08FFC"},
+      {"name": "Purple1000", "hex": "#CEA6FD"},
+      {"name": "Purple1100", "hex": "#DBBCFE"},
+      {"name": "Purple1200", "hex": "#E6CFFF"},
+      {"name": "Purple1300", "hex": "#F0E0FF"}
+    ]
+  },
+  {
+    "category": "Darkest｜Fuchsia",
+    "description": "紫红（暗色主题）",
+    "detial":[
+      {"name": "Fuchsia100", "hex": "#460E44"},
+      {"name": "Fuchsia200", "hex": "#5D095C"},
+      {"name": "Fuchsia300", "hex": "#780078"},
+      {"name": "Fuchsia400", "hex": "#920093"},
+      {"name": "Fuchsia500", "hex": "#A913AA"},
+      {"name": "Fuchsia600", "hex": "#BF2BBF"},
+      {"name": "Fuchsia700", "hex": "#D341D5"},
+      {"name": "Fuchsia800", "hex": "#E45BE5"},
+      {"name": "Fuchsia900", "hex": "#EF78EE"},
+      {"name": "Fuchsia1000", "hex": "#F695F3"},
+      {"name": "Fuchsia1100", "hex": "#FBAFF6"},
+      {"name": "Fuchsia1200", "hex": "#FEC7F8"},
+      {"name": "Fuchsia1300", "hex": "#FFDCFA"}
+    ]
+  },
+  {
+    "category": "Darkest｜Magenta",
+    "description": "品红（暗色主题）",
+    "detial":[
+      {"name": "Magenta100", "hex": "#530329"},
+      {"name": "Magenta200", "hex": "#6A0034"},
+      {"name": "Magenta300", "hex": "#850041"},
+      {"name": "Magenta400", "hex": "#A1004E"},
+      {"name": "Magenta500", "hex": "#BA165D"},
+      {"name": "Magenta600", "hex": "#D12B72"},
+      {"name": "Magenta700", "hex": "#E34589"},
+      {"name": "Magenta800", "hex": "#F1619C"},
+      {"name": "Magenta900", "hex": "#FC7CAD"},
+      {"name": "Magenta1000", "hex": "#FF98BF"},
+      {"name": "Magenta1100", "hex": "#FFB3CF"},
+      {"name": "Magenta1200", "hex": "#FFCADD"},
+      {"name": "Magenta1300", "hex": "#FFDDE9"}
+    ]
+  }
+]

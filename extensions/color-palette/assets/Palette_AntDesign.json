@@ -1,0 +1,213 @@
+[
+  {
+    "category": "Dust Red（薄暮）",
+    "description": "斗志、奔放",
+    "detial":[
+      {"name": "Red1", "hex": "#FFF1F0"},
+      {"name": "Red2", "hex": "#FFCCC7"},
+      {"name": "Red3", "hex": "#FFA39E"},
+      {"name": "Red4", "hex": "#FF7875"},
+      {"name": "Red5", "hex": "#FF4D4F"},
+      {"name": "Red6", "hex": "#F5222D"},
+      {"name": "Red7", "hex": "#CF1322"},
+      {"name": "Red8", "hex": "#A8071A"},
+      {"name": "Red9", "hex": "#820014"},
+      {"name": "Red10", "hex": "#5C0011"}
+    ]
+  },
+  {
+    "category": "Volcano（火山）",
+    "description": "醒目、澎湃",
+    "detial":[
+      {"name": "Volcano1", "hex": "#FFF2E8"},
+      {"name": "Volcano2", "hex": "#FFD8BF"},
+      {"name": "Volcano3", "hex": "#FFBB96"},
+      {"name": "Volcano4", "hex": "#FF9C6E"},
+      {"name": "Volcano5", "hex": "#FF7A45"},
+      {"name": "Volcano6", "hex": "#FA541C"},
+      {"name": "Volcano7", "hex": "#D4380D"},
+      {"name": "Volcano8", "hex": "#AD2102"},
+      {"name": "Volcano9", "hex": "#871400"},
+      {"name": "Volcano10", "hex": "#610B00"}
+    ]
+  },
+  {
+    "category": "Sunset Orange（日暮）",
+    "description": "温暖、欢快",
+    "detial":[
+      {"name": "Orange1", "hex": "#FFF7E6"},
+      {"name": "Orange2", "hex": "#FFE7BA"},
+      {"name": "Orange3", "hex": "#FFD591"},
+      {"name": "Orange4", "hex": "#FFC069"},
+      {"name": "Orange5", "hex": "#FFA940"},
+      {"name": "Orange6", "hex": "#FA8C16"},
+      {"name": "Orange7", "hex": "#D46B08"},
+      {"name": "Orange8", "hex": "#AD4E00"},
+      {"name": "Orange9", "hex": "#873800"},
+      {"name": "Orange10", "hex": "#612500"}
+    ]
+  },
+  {
+    "category": "Calendula Gold（金盏花）",
+    "description": "活力、积极",
+    "detial":[
+      {"name": "Gold1", "hex": "#FFFBE6"},
+      {"name": "Gold2", "hex": "#FFF1B8"},
+      {"name": "Gold3", "hex": "#FFE58F"},
+      {"name": "Gold4", "hex": "#FFD666"},
+      {"name": "Gold5", "hex": "#FFC53D"},
+      {"name": "Gold6", "hex": "#FAAD14"},
+      {"name": "Gold7", "hex": "#D48806"},
+      {"name": "Gold8", "hex": "#AD6800"},
+      {"name": "Gold9", "hex": "#874D00"},
+      {"name": "Gold10", "hex": "#613400"}
+    ]
+  },
+  {
+    "category": "Sunrise Yellow（日出）",
+    "description": "出生、阳光",
+    "detial":[
+      {"name": "Yellow1", "hex": "#FEFFE6"},
+      {"name": "Yellow2", "hex": "#FFFFB8"},
+      {"name": "Yellow3", "hex": "#FFFB8F"},
+      {"name": "Yellow4", "hex": "#FFF566"},
+      {"name": "Yellow5", "hex": "#FFEC3D"},
+      {"name": "Yellow6", "hex": "#FADB14"},
+      {"name": "Yellow7", "hex": "#D4B106"},
+      {"name": "Yellow8", "hex": "#AD8B00"},
+      {"name": "Yellow9", "hex": "#876800"},
+      {"name": "Yellow10", "hex": "#614700"}
+    ]
+  },
+  {
+    "category": "Lime（青柠）",
+    "description": "自然、生机",
+    "detial":[
+      {"name": "Lime1", "hex": "#FCFFE6"},
+      {"name": "Lime2", "hex": "#F4FFB8"},
+      {"name": "Lime3", "hex": "#EAFF8F"},
+      {"name": "Lime4", "hex": "#D3F261"},
+      {"name": "Lime5", "hex": "#BAE637"},
+      {"name": "Lime6", "hex": "#A0D911"},
+      {"name": "Lime7", "hex": "#7CB305"},
+      {"name": "Lime8", "hex": "#5B8C00"},
+      {"name": "Lime9", "hex": "#3F6600"},
+      {"name": "Lime10", "hex": "#254000"}
+    ]
+  },
+  {
+    "category": "Polar Green（极光绿）",
+    "description": "健康、创新",
+    "detial":[
+      {"name": "Green1", "hex": "#F6FFED"},
+      {"name": "Green2", "hex": "#D9F7BE"},
+      {"name": "Green3", "hex": "#B7EB8F"},
+      {"name": "Green4", "hex": "#95DE64"},
+      {"name": "Green5", "hex": "#73D13D"},
+      {"name": "Green6", "hex": "#52C41A"},
+      {"name": "Green7", "hex": "#389E0D"},
+      {"name": "Green8", "hex": "#237804"},
+      {"name": "Green9", "hex": "#135200"},
+      {"name": "Green10", "hex": "#092B00"}
+    ]
+  },
+  {
+    "category": "Cyan（明青）",
+    "description": "希望、坚强",
+    "detial":[
+      {"name": "Cyan1", "hex": "#E6FFFB"},
+      {"name": "Cyan2", "hex": "#B5F5EC"},
+      {"name": "Cyan3", "hex": "#87E8DE"},
+      {"name": "Cyan4", "hex": "#5CDBD3"},
+      {"name": "Cyan5", "hex": "#36CFC9"},
+      {"name": "Cyan6", "hex": "#13C2C2"},
+      {"name": "Cyan7", "hex": "#08979C"},
+      {"name": "Cyan8", "hex": "#006D75"},
+      {"name": "Cyan9", "hex": "#00474F"},
+      {"name": "Cyan10", "hex": "#002329"}
+    ]
+  },
+  {
+    "category": "Daybreak Blue（拂晓蓝）",
+    "description": "包容、科技、普惠",
+    "detial":[
+      {"name": "Blue1", "hex": "#E6F4FF"},
+      {"name": "Blue2", "hex": "#BAE0FF"},
+      {"name": "Blue3", "hex": "#91CAFF"},
+      {"name": "Blue4", "hex": "#69B1FF"},
+      {"name": "Blue5", "hex": "#4096FF"},
+      {"name": "Blue6", "hex": "#1677FF"},
+      {"name": "Blue7", "hex": "#0958D9"},
+      {"name": "Blue8", "hex": "#003EB3"},
+      {"name": "Blue9", "hex": "#002C8C"},
+      {"name": "Blue10", "hex": "#001D66"}
+    ]
+  },
+  {
+    "category": "Geek Blue（极客蓝）",
+    "description": "探索、钻研",
+    "detial":[
+      {"name": "GeekBlue1", "hex": "#F0F5FF"},
+      {"name": "GeekBlue2", "hex": "#D6E4FF"},
+      {"name": "GeekBlue3", "hex": "#ADC6FF"},
+      {"name": "GeekBlue4", "hex": "#85A5FF"},
+      {"name": "GeekBlue5", "hex": "#597EF7"},
+      {"name": "GeekBlue6", "hex": "#2F54EB"},
+      {"name": "GeekBlue7", "hex": "#1D39C4"},
+      {"name": "GeekBlue8", "hex": "#10239E"},
+      {"name": "GeekBlue9", "hex": "#061178"},
+      {"name": "GeekBlue10", "hex": "#030852"}
+    ]
+  },
+  {
+    "category": "Golden Purple（酱紫）",
+    "description": "优雅、浪漫",
+    "detial":[
+      {"name": "Purple1", "hex": "#F9F0FF"},
+      {"name": "Purple2", "hex": "#EFDBFF"},
+      {"name": "Purple3", "hex": "#D3ADF7"},
+      {"name": "Purple4", "hex": "#B37FEB"},
+      {"name": "Purple5", "hex": "#9254DE"},
+      {"name": "Purple6", "hex": "#722ED1"},
+      {"name": "Purple7", "hex": "#531DAB"},
+      {"name": "Purple8", "hex": "#391085"},
+      {"name": "Purple9", "hex": "#22075E"},
+      {"name": "Purple10", "hex": "#120338"}
+    ]
+  },
+  {
+    "category": "Magenta（法式洋红）",
+    "description": "明快、感性",
+    "detial":[
+      {"name": "Magenta1", "hex": "#FFF0F6"},
+      {"name": "Magenta2", "hex": "#FFD6E7"},
+      {"name": "Magenta3", "hex": "#FFADD2"},
+      {"name": "Magenta4", "hex": "#FF85C0"},
+      {"name": "Magenta5", "hex": "#F759AB"},
+      {"name": "Magenta6", "hex": "#EB2F96"},
+      {"name": "Magenta7", "hex": "#C41D7F"},
+      {"name": "Magenta8", "hex": "#9E1068"},
+      {"name": "Magenta9", "hex": "#780650"},
+      {"name": "Magenta10", "hex": "#520339"}
+    ]
+  },
+  {
+    "category": "Gray（中性灰）",
+    "description": "中性色能够令页面信息具备良好的主次关系，助力阅读体验",
+    "detial":[
+      {"name": "Gray1", "hex": "#FFFFFF"},
+      {"name": "Gray2", "hex": "#FAFAFA"},
+      {"name": "Gray3", "hex": "#F5F5F5"},
+      {"name": "Gray4", "hex": "#F0F0F0"},
+      {"name": "Gray5", "hex": "#D9D9D9"},
+      {"name": "Gray6", "hex": "#BFBFBF"},
+      {"name": "Gray7", "hex": "#8C8C8C"},
+      {"name": "Gray8", "hex": "#595959"},
+      {"name": "Gray9", "hex": "#434343"},
+      {"name": "Gray10", "hex": "#262626"},
+      {"name": "Gray11", "hex": "#1F1F1F"},
+      {"name": "Gray12", "hex": "#141414"},
+      {"name": "Gray13", "hex": "#000000"}
+    ]
+  }
+]
