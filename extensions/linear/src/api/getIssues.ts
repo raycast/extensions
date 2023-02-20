@@ -10,6 +10,7 @@ export const IssueFragment = `
   priority
   priorityLabel
   estimate
+  dueDate
   updatedAt
   url
   number
@@ -65,6 +66,8 @@ export const IssueFragment = `
   }
 `;
 
+export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
+
 export type IssueResult = Pick<
   Issue,
   | "id"
@@ -76,11 +79,12 @@ export type IssueResult = Pick<
   | "priorityLabel"
   | "updatedAt"
   | "estimate"
+  | "dueDate"
   | "number"
 > & {
   assignee?: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 } & {
-  state: Pick<WorkflowState, "id" | "name" | "type" | "color">;
+  state: IssueState;
 } & {
   labels: {
     nodes: LabelResult[];
@@ -317,7 +321,6 @@ export async function getIssueDetail(issueId: string) {
         issue(id: $issueId) {
           ${IssueFragment}
           description
-          dueDate
         }
       }
     `,

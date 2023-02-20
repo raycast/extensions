@@ -43,16 +43,19 @@ function getVolumesFromLsCommandMac(raw: string): Volume[] {
   const replacementChars = "~~~~~~~~~";
   const updatedRaw = raw.replace(/\n/g, replacementChars);
   const prefs = getPreferenceValues<Preferences>();
-  const volumesToIgnore = prefs.ignoredVolumes.split(",");
+  const volumesToIgnore = prefs?.ignoredVolumes?.split(",");
 
   const parts = updatedRaw.split(replacementChars);
-  const volumes: Volume[] = parts
+  let volumes: Volume[] = parts
     .map((p) => ({
       name: p,
     }))
     .filter((v) => v.name !== "")
-    .filter((v) => !v.name.includes("TimeMachine.localsnapshots"))
-    .filter((v) => volumesToIgnore.findIndex((vol) => vol === v.name) < 0);
+    .filter((v) => !v.name.includes("TimeMachine.localsnapshots"));
+
+  if (volumesToIgnore != null) {
+    volumes = volumes.filter((v) => volumesToIgnore.findIndex((vol) => vol === v.name) < 0);
+  }
 
   return volumes;
 }

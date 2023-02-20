@@ -5,7 +5,6 @@ import { getActiveCycleIssues } from "./api/getIssues";
 
 import useIssues from "./hooks/useIssues";
 import useTeams from "./hooks/useTeams";
-import useStates from "./hooks/useStates";
 import usePriorities from "./hooks/usePriorities";
 import useMe from "./hooks/useMe";
 import useUsers from "./hooks/useUsers";
@@ -22,7 +21,6 @@ function ActiveCycle() {
     teamsWithCycles && teamsWithCycles.length === 1 ? teamsWithCycles[0].id : undefined
   );
 
-  const { allStates, isLoadingAllStates } = useStates();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
@@ -61,10 +59,9 @@ function ActiveCycle() {
             ),
           }
         : {})}
-      isLoading={
-        isLoadingIssues || isLoadingTeams || isLoadingAllStates || isLoadingPriorities || isLoadingMe || isLoadingUsers
-      }
-      searchBarPlaceholder="Filter by key, title, status, assignee or priority"
+      isLoading={isLoadingIssues || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
+      filtering={{ keepSectionOrder: true }}
     >
       <List.EmptyView
         title="No issues"
@@ -86,14 +83,7 @@ function ActiveCycle() {
           </ActionPanel>
         }
       />
-      <StateIssueList
-        issues={issues}
-        mutateList={mutateList}
-        states={allStates}
-        priorities={priorities}
-        users={users}
-        me={me}
-      />
+      <StateIssueList issues={issues} mutateList={mutateList} priorities={priorities} users={users} me={me} />
     </List>
   );
 }

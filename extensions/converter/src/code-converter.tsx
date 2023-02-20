@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { commonPreferences, isEmpty } from "./utils/common-utils";
 import { buildUnicode, chineseUtf8ToNative, unicodesToNative } from "./utils/code-converter-utils";
 import { getInputItem } from "./hooks/get-input-item";
+import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 export default function CodeConverter() {
   const { autoDetect, priorityDetection } = commonPreferences();
@@ -90,6 +91,7 @@ export default function CodeConverter() {
               }}
             />
           </ActionPanel.Section>
+          <ActionOpenPreferences showCommandPreferences={false} showExtensionPreferences={true} />
         </ActionPanel>
       }
     >

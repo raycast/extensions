@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
-import { useActivityChange, useUser } from "./hooks";
-import { ProjectsStatsList, RangeStatsList } from "./components";
+import { useUser } from "./hooks";
+import { ActivityChange, ProjectsStatsList, RangeStatsList } from "./components";
 
-export default function Command() {
-  const change = useActivityChange();
-  const { data, isLoading } = useUser();
+export default function SummaryCommand() {
+  const { data: { data } = {}, isLoading } = useUser();
   const [showDetail, setShowDetail] = useState(false);
 
   return (
@@ -16,22 +15,22 @@ export default function Command() {
           <List.Item
             subtitle={data.username}
             title={data.display_name}
-            accessories={[{ icon: Icon.Envelope, tooltip: data.public_email }]}
+            accessories={
+              showDetail
+                ? null
+                : [{ icon: Icon.Globe, tooltip: "Timezone", text: data.timezone ?? "Timezone is missing" }]
+            }
             icon={data.photo_public ? { source: data.photo, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={data.profile_url} title="Open in Browser" />
+                <Action.OpenInBrowser title="Official WakaTime Insights" url="https://wakatime.com/insights" />
               </ActionPanel>
             }
           />
         </List.Section>
       )}
-      {!!change.data.duration && (
-        <List.Item
-          title={change.data.duration}
-          accessories={[{ text: `${change.data.percent}%  ${change.data.emoji}` }]}
-        />
-      )}
+      <ActivityChange {...{ showDetail, setShowDetail }} />
       <RangeStatsList {...{ showDetail, setShowDetail }} />
       <ProjectsStatsList />
     </List>

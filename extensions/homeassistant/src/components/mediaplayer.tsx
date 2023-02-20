@@ -30,7 +30,7 @@ export function SelectSourceAction(props: { state: State }): JSX.Element | null 
     return (
       <ActionPanel.Submenu
         title={title}
-        icon={{ source: Icon.TextDocument, tintColor: Color.PrimaryText }}
+        icon={{ source: Icon.BlankDocument, tintColor: Color.PrimaryText }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       >
         {sl.map((s) => (

@@ -35,6 +35,13 @@ See the [Raycast version history guide](https://developers.raycast.com/basics/pr
 
 Screenshots for the Raycast store are in the [`metadata/` directory](./metadata/). See the [Raycast extension screenshots guide](https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots).
 
+The current screenshot samples are:
+
+1. Search `context:cncf store (type:file OR type:symbol)`
+2. Search `r:^github\.com/etcd\-io/etcd$ f:etcdutl/etcdutl/snapshot_command\.go type:symbol store` -> select first result
+3. Notebooks `actor propagation` -> preview
+4. Batch Changes -> find random batch change with mix of merged and unmerged changesets
+
 ## Publishing to the Raycast store
 
 The latest release of this extension is published to [`extensions/sourcegraph` in `raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/sourcegraph).

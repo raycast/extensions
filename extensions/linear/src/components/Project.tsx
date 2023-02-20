@@ -6,7 +6,7 @@ import { ProjectResult } from "../api/getProjects";
 
 import { getLinearClient } from "../helpers/withLinearClient";
 import { isLinearInstalled } from "../helpers/isLinearInstalled";
-import { projectStatusIcon, projectStatusText } from "../helpers/projects";
+import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getUserIcon } from "../helpers/users";
 import { getErrorMessage } from "../helpers/errors";
 
@@ -33,8 +33,6 @@ export default function Project({ project, teamId, priorities, users, me, mutate
     keywords.push(project.lead.displayName, project.lead?.email);
   }
 
-  keywords.push(project.milestone ? project.milestone.name : "Upcoming");
-
   async function deleteProject() {
     if (
       await confirmAlert({
@@ -46,7 +44,7 @@ export default function Project({ project, teamId, priorities, users, me, mutate
       try {
         await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
-        await mutateProjects(linearClient.projectArchive(project.id), {
+        await mutateProjects(linearClient.archiveProject(project.id), {
           optimisticUpdate(data) {
             if (!data) {
               return data;
@@ -77,14 +75,7 @@ export default function Project({ project, teamId, priorities, users, me, mutate
       title={project.name}
       subtitle={project.description}
       keywords={keywords}
-      icon={
-        project
-          ? {
-              source: project.icon || { light: "light/project.svg", dark: "dark/project.svg" },
-              tintColor: { light: project.color, dark: project.color, adjustContrast: true },
-            }
-          : { source: { light: "light/no-project.svg", dark: "dark/no-project.svg" } }
-      }
+      icon={getProjectIcon(project)}
       accessories={[
         { text: progress, tooltip: `Progress: ${progress}` },
         {

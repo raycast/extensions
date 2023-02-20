@@ -7,9 +7,14 @@ import { createQueryString, parseQueryString, runScript, tell } from "../apple-s
 import { STAR_VALUE } from "../costants";
 import { ScriptError, Track } from "../models";
 
+export const reveal = tell("Music", "reveal current track");
 export const love = tell("Music", "set loved of current track to true");
 export const dislike = tell("Music", "set disliked of current track to true");
-export const addToLibrary = tell("Music", 'duplicate current track to library playlist "Library"');
+export const addToLibrary = pipe(
+  tell("Music", 'duplicate current track to source "Library"'),
+  // added a fallback script
+  TE.orElse(() => tell("Music", 'duplicate current track to library playlist "Library"'))
+);
 
 export const setCurrentTrackRating: RTE.ReaderTaskEither<number, ScriptError, string> = pipe(
   R.ask<number>(),
@@ -21,6 +26,34 @@ export const getCurrentTrackRating = pipe(
   TE.map((rating) => parseInt(rating)),
   TE.map((rating) => Math.round(rating / STAR_VALUE))
 );
+
+/**
+ *
+ * Add a track to a playlist
+ * @param playlist - The name of the target playlist
+ */
+export const addToPlaylist = (playlist: string) =>
+  runScript(
+    `
+tell application "Music"
+	set theName to name of current track
+	set theArtist to artist of current track
+	set theAlbum to album of the current track
+	set existingTracks to get tracks of source "Library" whose name is theName and artist is theArtist and album is theAlbum
+	
+	if (count of existingTracks) = 0 then
+		set theCount to count of tracks of source "Library"
+		duplicate current track to source "Library"
+		repeat while theCount = (count of tracks of source "Library")
+			delay 1
+		end repeat
+	end if
+	
+	set theTrack to first track of source "Library" whose name is theName and artist is theArtist and album is theAlbum
+	duplicate theTrack to playlist "${playlist}"
+end tell
+`
+  );
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
   const querystring = createQueryString({

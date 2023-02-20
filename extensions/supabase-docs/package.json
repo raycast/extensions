@@ -5,6 +5,8 @@
   "description": "Quickly search Supabase documentation and open it in the browser",
   "icon": "supabase-logo.png",
   "author": "Isaiah-Hamilton",
+  "owner": "supabase",
+  "access": "public",
   "categories": [
     "Documentation",
     "Developer Tools"
@@ -20,11 +22,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.2"
+    "@raycast/api": "^1.42.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.8.3",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

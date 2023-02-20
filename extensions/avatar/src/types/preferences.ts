@@ -1,4 +1,4 @@
 export interface Preferences {
   layout: string;
-  itemSize: string;
+  columns: string;
 }

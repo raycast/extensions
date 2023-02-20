@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Icon } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { Repository } from "./types";
 
 export const WebIdes = [
@@ -44,7 +45,7 @@ export function OpenInWebIDEAction(props: { repository: Repository; onOpen: () =
       {WebIdes.map((ide) => (
         <Action.OpenInBrowser
           title={ide.title}
-          icon={ide.icon || { source: `https://www.google.com/s2/favicons?domain=${ide.baseUrl}&sz=${64}` }}
+          icon={ide.icon || getFavicon(ide.baseUrl)}
           key={ide.title}
           url={ide.baseUrl + repository.nameWithOwner}
           onOpen={onOpen}

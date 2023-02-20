@@ -3,138 +3,95 @@ import React, { useEffect, useState } from "react";
 import { getPinnedIcons, getRecentIcons, getPinnedMovement } from "./utils/storage";
 import { getStoredOptions, setStoredOptions } from "./utils/options";
 import { EmptyView, InvalidAPIKey } from "./components/empty-view";
-import { getGridSize, numRecent } from "./utils/grid";
+import { allStylesImage, gridSize } from "./utils/utils";
 import { getIcons, getStyles } from "./hooks/api";
 import { Icon8Item } from "./components/icon";
-import { Icon8, Style } from "./types/types";
+import { Icon8, Options, Style } from "./types/types";
 import { defaultStyles } from "./utils/utils";
 
 export default function SearchIcons() {
-  const gridSize: Grid.ItemSize = getGridSize();
-
   const [searchText, setSearchText] = useState("");
-  const [icons, setIcons] = useState<Icon8[] | null>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [style, setStyle] = useState<string | undefined>(undefined);
-  const [styles, setStyles] = useState<Style[] | null>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [style, setStyle] = useState<string | undefined>();
+  const [styles, setStyles] = useState<Style[] | undefined>([]);
+  const [options, setOptions] = useState<Options>(getStoredOptions());
 
-  useEffect(() => {
-    const fetchStyles = async () => {
-      setStyles(await getStyles());
-      setIsLoading(false);
-    };
-    fetchStyles();
-  }, []);
-
-  const [pinnedIcons, setPinnedIcons] = useState<Icon8[]>();
-  const [recentIcons, setRecentIcons] = useState<Icon8[]>();
-
-  const getStoredIcons = async () => {
-    let pinned = await getPinnedIcons();
-    if (style) {
-      pinned = pinned.filter((icon) => icon.platform === style);
-    }
-    setPinnedIcons(pinned);
-    let recent = await getRecentIcons();
-    if (style) {
-      recent = recent.filter((icon) => icon.platform === style);
-    }
-    recent = recent.slice(0, numRecent);
-    setRecentIcons(recent);
-  };
+  const [icons, setIcons] = useState<Icon8[] | undefined>(undefined);
+  const [pinnedIcons, setPinnedIcons] = useState<Icon8[]>(getPinnedIcons());
+  const [recentIcons, setRecentIcons] = useState<Icon8[]>(getRecentIcons());
 
   const [refresh, setRefresh] = useState(false);
   const refreshIcons = () => setRefresh(!refresh);
 
   useEffect(() => {
-    if (styles && styles.length > 0) {
-      getStoredIcons();
-    }
-  }, [refresh, style, styles]);
-
-  useEffect(() => {
-    const fetchIcons = async () => {
-      if (searchText) {
-        setIcons(null);
-        const icons = await getIcons(searchText, style);
-        setIcons(icons);
-      } else {
-        setIcons([]);
-      }
-    };
-    fetchIcons();
-  }, [searchText, style]);
-
-  const [imageOptions, setImageOptions] = useState(undefined);
-
-  const getImageOptions = async () => {
-    setImageOptions(await getStoredOptions());
-  };
-
-  const storeImageOptions = async () => {
-    if (imageOptions) {
-      await setStoredOptions(imageOptions);
-    }
-  };
-
-  useEffect(() => {
-    getImageOptions();
+    (async () => {
+      setStyles(await getStyles());
+    })();
   }, []);
 
   useEffect(() => {
-    storeImageOptions();
-  }, [imageOptions]);
+    setPinnedIcons(getPinnedIcons(style));
+    setRecentIcons(getRecentIcons(style));
+  }, [refresh, style]);
 
-  return styles ? (
+  useEffect(() => {
+    (async () => {
+      if (searchText) {
+        setIsLoading(true);
+        setIcons(await getIcons(searchText, style));
+        setIsLoading(false);
+      } else {
+        setIcons(undefined);
+      }
+    })();
+  }, [searchText, style]);
+
+  useEffect(() => {
+    setStoredOptions(options);
+  }, [options]);
+
+  if (styles === undefined) {
+    return <InvalidAPIKey />;
+  }
+  return (
     <Grid
-      isLoading={isLoading || icons === null}
+      isLoading={isLoading}
       itemSize={gridSize}
       inset={Grid.Inset.Small}
       onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Search Icons"
       throttle={true}
       searchBarAccessory={
-        styles?.length > 0 ? (
-          <Grid.Dropdown
-            tooltip="Styles"
-            defaultValue={style}
-            onChange={(value: string) => {
-              if (value) setStyle(value);
-              else setStyle(undefined);
-            }}
-          >
-            <Grid.Dropdown.Section>
+        <Grid.Dropdown
+          tooltip="Icon Styles"
+          defaultValue={style}
+          onChange={(value: string) => setStyle(value ? value : undefined)}
+        >
+          <Grid.Dropdown.Item title="All Styles" value={""} icon={{ source: allStylesImage }} />
+          <Grid.Dropdown.Section>
+            {styles.map((style) => (
               <Grid.Dropdown.Item
-                title="All Styles"
-                value={""}
-                icon={{ source: "https://maxst.icons8.com/vue-static/icon/all-styles.png" }}
+                key={style.code}
+                title={style.title}
+                value={style.code}
+                icon={{
+                  source: style.url,
+                  tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
+                }}
               />
-            </Grid.Dropdown.Section>
-            <Grid.Dropdown.Section>
-              {styles &&
-                styles.map((style) => (
-                  <Grid.Dropdown.Item
-                    key={style.code}
-                    title={style.title}
-                    value={style.code}
-                    icon={{
-                      source: style.url,
-                      tintColor: defaultStyles[style.title] ? Color.PrimaryText : null,
-                    }}
-                  />
-                ))}
-            </Grid.Dropdown.Section>
-          </Grid.Dropdown>
-        ) : null
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
-      {(icons === null || icons.length === 0) &&
-        (pinnedIcons?.length === 0 && recentIcons?.length === 0 ? (
-          <EmptyView />
+      {icons === undefined ? (
+        pinnedIcons.length === 0 && recentIcons.length === 0 ? (
+          <EmptyView message="No Pinned or Recent Icons" />
         ) : (
           <React.Fragment>
             <Grid.Section title="Pinned Icons">
-              {pinnedIcons?.map((icon: Icon8, index: number) => {
+              {pinnedIcons.map((icon: Icon8, index: number) => {
                 const movement = getPinnedMovement(pinnedIcons, icon.id);
                 return (
                   <Icon8Item
@@ -144,8 +101,8 @@ export default function SearchIcons() {
                     refresh={refreshIcons}
                     pinned={true}
                     movement={movement}
-                    options={imageOptions}
-                    setOptions={setImageOptions}
+                    options={options}
+                    setOptions={setOptions}
                   />
                 );
               })}
@@ -158,25 +115,27 @@ export default function SearchIcons() {
                   platform={style}
                   refresh={refreshIcons}
                   recent={true}
-                  options={imageOptions}
-                  setOptions={setImageOptions}
+                  options={options}
+                  setOptions={setOptions}
                 />
               ))}
             </Grid.Section>
           </React.Fragment>
-        ))}
-      {icons?.map((icon: Icon8, index: number) => (
-        <Icon8Item
-          key={index}
-          icon={icon}
-          platform={style}
-          refresh={refreshIcons}
-          options={imageOptions}
-          setOptions={setImageOptions}
-        />
-      ))}
+        )
+      ) : icons.length === 0 ? (
+        <EmptyView message={`No Results for "${searchText}"`} />
+      ) : (
+        icons.map((icon: Icon8, index: number) => (
+          <Icon8Item
+            key={index}
+            icon={icon}
+            platform={style}
+            refresh={refreshIcons}
+            options={options}
+            setOptions={setOptions}
+          />
+        ))
+      )}
     </Grid>
-  ) : (
-    <InvalidAPIKey />
   );
 }

@@ -1,19 +1,21 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { startPlaySimilar } from "./client/client";
-import { currentPlayingTrack } from "./controls/spotify-applescript";
+import { getTrack } from "./spotify/applescript";
+import { startPlaySimilar } from "./spotify/client";
 
-export default async function main() {
-  const response = await currentPlayingTrack();
+export default async function Command() {
+  try {
+    const track = await getTrack();
 
-  if (response?.result) {
-    const currentlyPlayingTrack = response.result;
-    const trackTitle = `${currentlyPlayingTrack.artist} – ${currentlyPlayingTrack.name}`;
-    if (currentlyPlayingTrack.id) {
-      const trackId = currentlyPlayingTrack.id.replace("spotify:track:", "");
-      await startPlaySimilar(trackId);
-      showHUD(`♫ Playing Similar – ♫ ${trackTitle}`);
+    if (!track || !track.id) {
+      showToast(Toast.Style.Failure, "No track playing");
+      return;
     }
-  } else if (response?.error) {
-    showToast(Toast.Style.Failure, response.error);
+
+    const trackTitle = `${track.artist} - ${track.name}`;
+    const trackId = track.id.replace("spotify:track:", "");
+    await startPlaySimilar({ seed_tracks: trackId });
+    await showHUD(`♫ Playing Similar - ♫ ${trackTitle}`);
+  } catch (error) {
+    showToast(Toast.Style.Failure, (error as Error).message ?? "");
   }
 }

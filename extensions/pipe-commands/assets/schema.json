@@ -17,15 +17,6 @@
                 "type"
             ],
             "type": "object"
-        },
-        "ScriptMode": {
-            "enum": [
-                "copy",
-                "fullOutput",
-                "replace",
-                "silent"
-            ],
-            "type": "string"
         }
     },
     "properties": {
@@ -35,22 +26,41 @@
         "currentDirectoryPath": {
             "type": "string"
         },
+        "description": {
+            "type": "string"
+        },
         "icon": {
             "type": "string"
         },
+        "iconDark": {
+            "type": "string"
+        },
         "mode": {
-            "$ref": "#/definitions/ScriptMode"
+            "enum": [
+                "pipe",
+                "silent"
+            ],
+            "type": "string"
+        },
+        "needsConfirmation": {
+            "type": "boolean"
         },
         "packageName": {
             "type": "string"
+        },
+        "schemaVersion": {
+            "enum": [
+                1
+            ],
+            "type": "number"
         },
         "title": {
             "type": "string"
         }
     },
     "required": [
-        "argument1",
         "mode",
+        "schemaVersion",
         "title"
     ],
     "type": "object"

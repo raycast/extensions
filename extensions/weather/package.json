@@ -13,6 +13,32 @@
       "title": "Weather",
       "description": "Weather forecast via wttr.in",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Weather Menu Bar",
+      "description": "Show weather in menu bar",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "showmenuicon",
+          "description": "Show Icon",
+          "type": "checkbox",
+          "required": false,
+          "title": "Appearance",
+          "label": "Show Icon",
+          "default": true
+        },
+        {
+          "name": "showmenutext",
+          "description": "Show Text",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Text",
+          "default": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -45,16 +71,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.33.0",
+    "@raycast/api": "^1.42.0",
     "moment": "^2.29.1",
     "node-fetch": "^2.6.5",
     "raycast": "^1.0.8"
   },
   "devDependencies": {
     "@types/moment": "^2.13.0",
-    "@types/node": "^16.4.3",
+    "@types/node": "^18.8.3",
     "@types/node-fetch": "^2.5.12",
-    "@types/react": "^17.0.15",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",

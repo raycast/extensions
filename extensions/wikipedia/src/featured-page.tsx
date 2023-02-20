@@ -1,8 +1,8 @@
-import { encodeTitle, getTodayFeaturedPageTitle } from "./wikipedia";
 import { closeMainWindow, open } from "@raycast/api";
+import { getTodayFeaturedPageUrl } from "./wikipedia";
 
 export default async function () {
-  const pageTitle = await getTodayFeaturedPageTitle();
-  await open(`https://wikipedia.org/wiki/${encodeTitle(pageTitle)}`);
+  const featurePageUrl = await getTodayFeaturedPageUrl();
+  await open(featurePageUrl);
   await closeMainWindow({ clearRootSearch: true });
 }

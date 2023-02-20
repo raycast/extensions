@@ -19,9 +19,9 @@ Spotify's macOS app supports AppleScript. This is great to control the app witho
 ```typescript
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
 ## Close Raycast main window
@@ -34,10 +34,10 @@ Here is how you can close the main window:
 import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export default async () => {
+export default async function Command() {
   await closeMainWindow();
   await runAppleScript('tell application "Spotify" to playpause');
-};
+}
 ```
 
 Notice that we call the `closeMainWindow` function before running the AppleScript. This makes the command feel snappier.

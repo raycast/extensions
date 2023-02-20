@@ -3,7 +3,7 @@ export const formats = [
     info: {
       name: "Format JSON",
       id: "build_in_1647572245584",
-      icon: "calendar-16",
+      icon: "app-window-grid-3x3-16",
       source: "Build-in",
       visibility: true,
       tag: ["Format"],

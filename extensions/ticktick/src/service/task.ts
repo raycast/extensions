@@ -84,3 +84,14 @@ export const getTaskDetailMarkdownContent = (task: Task) => {
   const title = `# ${task.title || ""}`;
   return `${title}\n\n${getFilePrettyContent(content)}`;
 };
+
+export const getTaskCopyContent = (task: Task) => {
+  let content = "";
+  if (isChecklistModeTask(task)) {
+    content = task.desc || "";
+  } else {
+    content = task.content || "";
+  }
+  const title = `${task.title || ""}`;
+  return `${title}\n\n${content}`;
+};

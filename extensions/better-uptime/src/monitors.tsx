@@ -1,48 +1,14 @@
-import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { statusMap } from "./constants";
+import { MonitorItem, Preferences, MonitorsState } from "./interface";
 import { ucfirst } from "./utils";
-
-interface Preferences {
-  apiKey: string;
-}
-
-interface MonitorItem {
-  id: string;
-  type: string;
-  attributes: MonitorItemAttributes;
-}
-
-interface MonitorItemAttributes {
-  url: string;
-  pronounceable_name: string;
-  monitor_type: string;
-  last_checked_at: string;
-  status: string;
-  check_frequency: number;
-  call: boolean;
-  sms: boolean;
-  email: boolean;
-  push: boolean;
-}
-
-interface State {
-  isLoading: boolean;
-  items: MonitorItem[];
-  error?: any;
-}
+import { ActionCopyUrl, ActionDeleteMonitor } from "./actions";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [state, setState] = useState<State>({ items: [], isLoading: true });
-  const statusMap = {
-    paused: "⏸",
-    pending: "🔍",
-    maintenance: "🚧",
-    up: "✅",
-    validating: "🤔",
-    down: "❌",
-  } as { [key: string]: string };
+  const [state, setState] = useState<MonitorsState>({ items: [], isLoading: true });
 
   useEffect(() => {
     async function fetchMonitors() {
@@ -122,16 +88,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser title="Open URL in Browser" url={item.attributes.url} />
-              <Action
-                title="Copy URL"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await Clipboard.copy(item.attributes.url);
-
-                  showToast({
-                    title: "Copied",
-                    message: "URL copied to clipboard",
-                  });
+              <ActionCopyUrl url={item.attributes.url} />
+              <ActionDeleteMonitor
+                item={item}
+                onDeleted={() => {
+                  setState((previous) => ({
+                    ...previous,
+                    items: previous.items.filter((_item) => _item.id !== item.id),
+                  }));
                 }}
               />
             </ActionPanel>

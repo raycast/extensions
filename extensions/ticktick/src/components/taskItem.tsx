@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
 import { addSpaceBetweenEmojiAndText } from "../utils/text";
@@ -12,8 +12,9 @@ const TaskItem: React.FC<{
   tags: Task["tags"];
   actionType: "today" | "week" | "project";
   detailMarkdown: string;
+  copyContent: string;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, detailMarkdown, tags } = props;
+  const { id, title, priority, projectId, actionType, detailMarkdown, tags, copyContent } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -61,9 +62,8 @@ const TaskItem: React.FC<{
       icon={{ source: Icon.Circle, tintColor: checkboxColor }}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Open">
-            <Action.Open title="Open in TickTick" target={target} icon={Icon.Window} />
-          </ActionPanel.Section>
+          <Action.Open title="View" target={target} icon={Icon.Eye} />
+          <Action.CopyToClipboard title="Copy" content={copyContent} icon={Icon.Clipboard} />
         </ActionPanel>
       }
       accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}

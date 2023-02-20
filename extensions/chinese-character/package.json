@@ -30,7 +30,31 @@
       "title": "Chinese to Pinyin",
       "icon": "zh2pinyin.png",
       "description": "Convert Chinese to pinyin from selection or clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "tones",
+          "type": "dropdown",
+          "required": false,
+          "title": "Tones",
+          "description": "Pinyin tones symbol display form.",
+          "default": "",
+          "data": [
+            {
+              "title": "No Tones",
+              "value": "none"
+            },
+            {
+              "title": "Symbol Tones",
+              "value": "sym"
+            },
+            {
+              "title": "Number Tones",
+              "value": "num"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -54,9 +78,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
-    "cjk-conv": "^1.2.139",
-    "pinyin-pro": "^3.10.1"
+    "@raycast/api": "^1.44.0",
+    "cjk-conv": "^1.2.142",
+    "pinyin-pro": "^3.13.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

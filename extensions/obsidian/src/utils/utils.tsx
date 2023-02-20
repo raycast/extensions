@@ -1,45 +1,40 @@
-import {
-  getPreferenceValues,
-  Clipboard,
-  Icon,
-  Toast,
-  confirmAlert,
-  showToast,
-  getSelectedText,
-  environment,
-} from "@raycast/api";
+import { getPreferenceValues, Clipboard, Toast, showToast, getSelectedText } from "@raycast/api";
 
 import fs from "fs";
 import fsPath from "path";
-import YAML from "yaml";
+import path from "path";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 
-import {
-  Note,
-  ObsidianJSON,
-  ObsidianVaultsState,
-  GlobalPreferences,
-  SearchNotePreferences,
-  Vault,
-  QuickLookPreferences,
-} from "../utils/interfaces";
+import { Note, ObsidianJSON, ObsidianVaultsState, Vault, MediaState, Media, CodeBlock } from "../utils/interfaces";
 
 import {
   BYTES_PER_KILOBYTE,
+  CODE_BLOCK_REGEX,
   DAY_NUMBER_TO_STRING,
-  INLINE_TAGS_REGEX,
   LATEX_INLINE_REGEX,
   LATEX_REGEX,
   MONTH_NUMBER_TO_STRING,
-  YAML_FRONTMATTER_REGEX,
 } from "./constants";
-import { isNotePinned, unpinNote } from "./pinNoteUtils";
-import NoteLoader from "./NoteLoader";
+
+import { MediaLoader } from "./data/loader";
+
+import { NoteReducerAction } from "./data/reducers";
+import { GlobalPreferences, SearchNotePreferences } from "./preferences";
+
+export function getCodeBlocks(content: string): CodeBlock[] {
+  const codeBlockMatches = content.matchAll(CODE_BLOCK_REGEX);
+  const codeBlocks = [];
+  for (const codeBlockMatch of codeBlockMatches) {
+    const [, language, code] = codeBlockMatch;
+    codeBlocks.push({ language, code });
+  }
+  return codeBlocks;
+}
 
 export function filterContent(content: string) {
-  const pref: QuickLookPreferences = getPreferenceValues();
+  const pref: GlobalPreferences = getPreferenceValues();
 
   if (pref.removeYAML) {
     const yamlHeader = content.match(/---(.|\n)*?---/gm);
@@ -65,7 +60,7 @@ export function filterContent(content: string) {
   return content;
 }
 
-export function getNoteFileContent(path: string, filter = true) {
+export function getNoteFileContent(path: string, filter = false) {
   let content = "";
   content = fs.readFileSync(path, "utf8") as string;
   return filter ? filterContent(content) : content;
@@ -88,6 +83,55 @@ export function vaultPluginCheck(vaults: Vault[], plugin: string) {
     }
   });
   return [vaults, vaultsWithoutPlugin];
+}
+
+export function getUserIgnoreFilters(vault: Vault) {
+  const appJSONPath = vault.path + "/.obsidian/app.json";
+  if (!fs.existsSync(appJSONPath)) {
+    return [];
+  } else {
+    const appJSON = JSON.parse(fs.readFileSync(appJSONPath, "utf-8"));
+    return appJSON["userIgnoreFilters"] || [];
+  }
+}
+
+export function getStarredJSON(vault: Vault) {
+  const starredNotesPath = vault.path + "/.obsidian/starred.json";
+  if (!fs.existsSync(starredNotesPath)) {
+    return [];
+  } else {
+    return JSON.parse(fs.readFileSync(starredNotesPath, "utf-8"))["items"] || [];
+  }
+}
+
+export function writeToStarredJSON(vault: Vault, starredNotes: Note[]) {
+  const starredNotesPath = vault.path + "/.obsidian/starred.json";
+  fs.writeFileSync(starredNotesPath, JSON.stringify({ items: starredNotes }));
+}
+
+export function getStarredNotePaths(vault: Vault) {
+  const starredNotes = getStarredJSON(vault);
+  return starredNotes.map((note: { type: string; title: string; path: string }) => note.path);
+}
+
+export function starNote(vault: Vault, note: Note) {
+  const starredNotes = getStarredJSON(vault);
+  const starredNote = {
+    type: "file",
+    title: note.title,
+    path: note.path.split(vault.path)[1].slice(1),
+  };
+  starredNotes.push(starredNote);
+  writeToStarredJSON(vault, starredNotes);
+}
+
+export function unstarNote(vault: Vault, note: Note) {
+  const starredNotes = getStarredJSON(vault);
+  const index = starredNotes.findIndex(
+    (starred: { type: string; title: string; path: string }) => starred.path === note.path.split(vault.path)[1].slice(1)
+  );
+  starredNotes.splice(index, 1);
+  writeToStarredJSON(vault, starredNotes);
 }
 
 function getVaultNameFromPath(vaultPath: string): string {
@@ -153,26 +197,10 @@ export function useObsidianVaults(): ObsidianVaultsState {
   return state;
 }
 
-export async function deleteNote(note: Note, vault: Vault) {
-  const options = {
-    title: "Delete Note",
-    message: 'Are you sure you want to delete the note: "' + note.title + '"?',
-    icon: Icon.ExclamationMark,
-  };
-  if (await confirmAlert(options)) {
-    try {
-      fs.unlinkSync(note.path);
-      if (isNotePinned(note, vault)) {
-        unpinNote(note, vault);
-      }
-      showToast({ title: "Deleted Note", style: Toast.Style.Success });
-      return true;
-    } catch (error) {
-      return false;
-    }
-  } else {
-    return false;
-  }
+export function deleteNote(note: Note) {
+  fs.unlinkSync(note.path);
+  showToast({ title: "Deleted Note", style: Toast.Style.Success });
+  return true;
 }
 
 export function sortByAlphabet(a: string, b: string) {
@@ -189,24 +217,6 @@ export function sortByAlphabet(a: string, b: string) {
 
 export function sortNoteByAlphabet(a: Note, b: Note) {
   return sortByAlphabet(a.title, b.title);
-}
-
-export function filterNotes(notes: Note[], input: string, byContent: boolean) {
-  if (input.length === 0) {
-    return notes;
-  }
-  return notes
-    .filter((note) => {
-      if (byContent) {
-        return (
-          note.title.toLowerCase().includes(input.toLowerCase()) ||
-          note.content.toLowerCase().includes(input.toLowerCase())
-        );
-      } else {
-        return note.title.toLowerCase().includes(input.toLowerCase());
-      }
-    })
-    .sort(sortNoteByAlphabet);
 }
 
 export function wordCount(str: string) {
@@ -299,125 +309,175 @@ export async function appendSelectedTextTo(note: Note) {
   }
 }
 
-export const getOpenVaultTarget = (vault: Vault) => {
-  return "obsidian://open?vault=" + encodeURIComponent(vault.name);
-};
+export enum ObsidianTargetType {
+  OpenVault = "obsidian://open?vault=",
+  OpenPath = "obsidian://open?path=",
+  DailyNote = "obsidian://advanced-uri?daily=true&vault=",
+  DailyNoteAppend = "obsidian://advanced-uri?daily=true&mode=append",
+  NewNote = "obsidian://new?vault=",
+}
 
-export const getDailyNoteTarget = (vault: Vault) => {
-  return "obsidian://advanced-uri?vault=" + encodeURIComponent(vault.name) + "&daily=true";
-};
+export type ObsidianTarget =
+  | { type: ObsidianTargetType.OpenVault; vault: Vault }
+  | { type: ObsidianTargetType.OpenPath; path: string }
+  | { type: ObsidianTargetType.DailyNote; vault: Vault }
+  | { type: ObsidianTargetType.DailyNoteAppend; vault: Vault; text: string; heading?: string; silent?: boolean }
+  | { type: ObsidianTargetType.NewNote; vault: Vault; name: string; content?: string };
 
-function getListOfInlineTags(notes: Note[]) {
-  const foundTags: string[] = [];
-  for (const note of notes) {
-    const tags = [...note.content.matchAll(INLINE_TAGS_REGEX)];
-    for (const tag of tags) {
-      if (!foundTags.includes(tag[1])) {
-        foundTags.push(tag[1]);
-      }
+export function getObsidianTarget(target: ObsidianTarget) {
+  switch (target.type) {
+    case ObsidianTargetType.OpenVault: {
+      return ObsidianTargetType.OpenVault + encodeURIComponent(target.vault.name);
+    }
+    case ObsidianTargetType.OpenPath: {
+      return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
+    }
+    case ObsidianTargetType.DailyNote: {
+      return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
+    }
+    case ObsidianTargetType.DailyNoteAppend: {
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      return (
+        ObsidianTargetType.DailyNoteAppend +
+        "&data=" +
+        encodeURIComponent(target.text) +
+        "&vault=" +
+        encodeURIComponent(target.vault.name) +
+        headingParam +
+        (target.silent ? "&openmode=silent" : "")
+      );
+    }
+    case ObsidianTargetType.NewNote: {
+      return (
+        ObsidianTargetType.NewNote +
+        encodeURIComponent(target.vault.name) +
+        "&name=" +
+        encodeURIComponent(target.name) +
+        "&content=" +
+        encodeURIComponent(target.content || "")
+      );
+    }
+    default: {
+      return "";
     }
   }
-  return foundTags;
 }
 
-export function inlineTagsFor(content: string) {
-  const foundTags: string[] = [];
-  const tags = [...content.matchAll(INLINE_TAGS_REGEX)];
-  for (const tag of tags) {
-    if (!foundTags.includes(tag[1])) {
-      foundTags.push(tag[1]);
+export function getListOfExtensions(media: Media[]) {
+  const foundExtensions: string[] = [];
+  for (const mediaItem of media) {
+    const extension = path.extname(mediaItem.path);
+    if (!foundExtensions.includes(extension) && extension != "") {
+      foundExtensions.push(extension);
     }
   }
-  return foundTags;
-}
-
-export function YAMLTagsFor(content: string) {
-  let foundTags: string[] = [];
-  const frontmatter = content.match(YAML_FRONTMATTER_REGEX);
-  if (frontmatter) {
-    try {
-      const parsedYAML = YAML.parse(frontmatter[0].replaceAll("---", ""));
-
-      if (Object.prototype.hasOwnProperty.call(parsedYAML, "tag")) {
-        foundTags = [...parsedYAML.tag.split(",").map((tag: string) => tag.trim())];
-      } else if (Object.prototype.hasOwnProperty.call(parsedYAML, "tags")) {
-        foundTags = [...parsedYAML.tags.split(",").map((tag: string) => tag.trim())];
-      }
-    } catch {
-      //console.log("Error parsing file: " + note.title);
-    }
-  }
-  foundTags = foundTags.filter((tag: string) => tag != "");
-  return foundTags.map((tag) => "#" + tag);
-}
-
-export function tagsFor(content: string) {
-  const foundTags = inlineTagsFor(content);
-  const foundYAMLTags = YAMLTagsFor(content);
-  for (const tag of foundYAMLTags) {
-    if (!foundTags.includes(tag)) {
-      foundTags.push(tag);
-    }
-  }
-
-  return foundTags.sort(sortByAlphabet);
-}
-
-function getListOfYAMLTags(notes: Note[]) {
-  const foundTags: string[] = [];
-  for (const note of notes) {
-    const tags = YAMLTagsFor(note.content);
-    for (const tag of tags) {
-      if (!foundTags.includes(tag)) {
-        foundTags.push(tag);
-      }
-    }
-  }
-  return foundTags;
-}
-
-export function getListOfTags(notes: Note[]) {
-  const foundTags = getListOfInlineTags(notes);
-  const foundYAMLTags = getListOfYAMLTags(notes);
-  for (const tag of foundYAMLTags) {
-    if (!foundTags.includes(tag)) {
-      foundTags.push(tag);
-    }
-  }
-
-  return foundTags.sort(sortByAlphabet);
-}
-
-function setExtensionVersion(version: string) {
-  fs.writeFileSync(environment.supportPath + "/version.txt", version);
-}
-
-export function getCurrentPinnedVersion() {
-  if (!fs.existsSync(environment.supportPath + "/version.txt")) {
-    setExtensionVersion("");
-    return undefined;
-  } else {
-    const version = fs.readFileSync(environment.supportPath + "/version.txt", "utf8");
-    return version;
-  }
+  return foundExtensions;
 }
 
 export function isNote(note: Note | undefined): note is Note {
   return (note as Note) !== undefined;
 }
 
-export function getRandomNote(vault: Vault | Vault[]) {
-  let notes: Note[] = [];
-  if (Array.isArray(vault)) {
-    for (const v of vault) {
-      const nl = new NoteLoader(v);
-      notes = [...notes, ...nl.loadNotes()];
+function validFile(file: string, includes: string[]) {
+  for (const include of includes) {
+    if (file.includes(include)) {
+      return false;
     }
-  } else {
-    const nl = new NoteLoader(vault);
-    notes = nl.loadNotes();
+  }
+  return true;
+}
+
+export function walkFilesHelper(dirPath: string, exFolders: string[], fileEndings: string[], arrayOfFiles: string[]) {
+  const files = fs.readdirSync(dirPath);
+
+  arrayOfFiles = arrayOfFiles || [];
+
+  for (const file of files) {
+    const next = fs.statSync(dirPath + "/" + file);
+    if (next.isDirectory() && validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile"])) {
+      arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
+    } else {
+      if (
+        validFileEnding(file, fileEndings) &&
+        file !== ".md" &&
+        !file.includes(".excalidraw") &&
+        !dirPath.includes(".obsidian") &&
+        validFolder(dirPath, exFolders)
+      ) {
+        arrayOfFiles.push(path.join(dirPath, "/", file));
+      }
+    }
   }
 
-  const randomNote = notes[Math.floor(Math.random() * notes.length)];
-  return randomNote;
+  return arrayOfFiles;
 }
+
+export function validFolder(folder: string, exFolders: string[]) {
+  for (let f of exFolders) {
+    if (f.endsWith("/")) {
+      f = f.slice(0, -1);
+    }
+    if (folder.includes(f)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function validFileEnding(file: string, fileEndings: string[]) {
+  for (const ending of fileEndings) {
+    if (file.endsWith(ending)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function prefExcludedFolders() {
+  const pref: SearchNotePreferences = getPreferenceValues();
+  const foldersString = pref.excludedFolders;
+  if (foldersString) {
+    const folders = foldersString.split(",");
+    for (let i = 0; i < folders.length; i++) {
+      folders[i] = folders[i].trim();
+    }
+    return folders;
+  } else {
+    return [];
+  }
+}
+
+export function useMedia(vault: Vault) {
+  const [media, setMedia] = useState<MediaState>({
+    ready: false,
+    media: [],
+  });
+
+  useEffect(() => {
+    async function fetch() {
+      if (!media.ready) {
+        try {
+          await fs.promises.access(vault.path + "/.");
+
+          const ml = new MediaLoader(vault);
+          const media = ml.loadMedia().sort((m1, m2) => sortByAlphabet(m1.title, m2.title));
+
+          setMedia({ ready: true, media });
+        } catch (error) {
+          showToast({
+            title: "The path set in preferences doesn't exist",
+            message: "Please set a valid path in preferences",
+            style: Toast.Style.Failure,
+          });
+        }
+      }
+    }
+    fetch();
+  }, []);
+
+  return media;
+}
+
+export const NotesContext = createContext([] as Note[]);
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const NotesDispatchContext = createContext((() => {}) as (action: NoteReducerAction) => void);

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, Clipboard, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Form, Clipboard, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
 import { postAndCloseMainWindow, fetchCollections } from "./utilities/fetch";
 import { useState, useEffect } from "react";
 
@@ -10,13 +10,11 @@ interface CollectionProp {
 
 interface Preferences {
   autoFill: boolean;
-  starred: boolean;
 }
 
 function NoteForm() {
   const preferences = getPreferenceValues<Preferences>();
   const [note, setNote] = useState<string>();
-  const [starred] = useState<boolean>(preferences.starred);
   const [collections, setCollections] = useState<CollectionProp[]>([]);
   const { pop } = useNavigation();
 
@@ -48,6 +46,7 @@ function NoteForm() {
         <ActionPanel>
           <Action.SubmitForm
             title="Save to Anybox"
+            icon={Icon.SaveDocument}
             onSubmit={(values) => {
               const note = values.note;
               if (note.length > 0) {
@@ -70,7 +69,7 @@ function NoteForm() {
           return <Form.TagPicker.Item value={val.id} title={collectionTitle(val)} key={val.id} />;
         })}
       </Form.TagPicker>
-      <Form.Checkbox id="starred" label="Starred" defaultValue={starred} />
+      <Form.Checkbox id="starred" label="Starred" defaultValue={false} />
     </Form>
   );
 }

@@ -6,7 +6,8 @@
   "icon": "Icons8.png",
   "author": "yug2005",
   "categories": [
-    "Design Tools"
+    "Design Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -14,7 +15,7 @@
       "name": "search-icons",
       "title": "Search Icons",
       "subtitle": "Icons8",
-      "description": "Search and preview icons.",
+      "description": "Search, preview, and download icons.",
       "mode": "view"
     }
   ],
@@ -23,14 +24,14 @@
       "name": "apiKey",
       "title": "API Key",
       "description": "API Key for Icons8.",
-      "type": "password",
+      "type": "textfield",
       "default": "",
       "required": true
     },
     {
       "name": "gridSize",
       "title": "Grid Size",
-      "description": "Grid size for displaying Icons8.",
+      "description": "Grid item size for displaying icons.",
       "type": "dropdown",
       "default": "small",
       "required": false,
@@ -48,68 +49,70 @@
     {
       "name": "numResults",
       "title": "Number of Results",
-      "description": "Number of results to show.",
+      "description": "Maximum number of results to show.",
       "type": "dropdown",
-      "default": "50",
+      "default": "512",
       "required": false,
       "data": [
         {
-          "value": "80",
-          "title": "80"
+          "value": "256",
+          "title": "256"
         },
         {
-          "value": "160",
-          "title": "160"
+          "value": "512",
+          "title": "512"
         },
         {
-          "value": "240",
-          "title": "240"
+          "value": "1024",
+          "title": "1024"
         },
         {
-          "value": "320",
-          "title": "320"
+          "value": "2048",
+          "title": "2048"
         }
       ]
     },
     {
-      "name": "numRecent",
-      "title": "Number of Recent Icons",
-      "description": "Number of recent icons to show.",
+      "name": "numRecentRows",
+      "title": "Number of Recent Icon Rows",
+      "description": "How many rows of recent icons to show.",
       "type": "dropdown",
-      "default": "32",
+      "default": "2",
       "required": false,
       "data": [
         {
-          "value": "8",
-          "title": "8"
+          "value": "0",
+          "title": "0"
         },
         {
-          "value": "16",
-          "title": "16"
+          "value": "1",
+          "title": "1"
         },
         {
-          "value": "24",
-          "title": "24"
+          "value": "2",
+          "title": "2"
         },
         {
-          "value": "32",
-          "title": "32"
+          "value": "3",
+          "title": "3"
         },
         {
-          "value": "40",
-          "title": "40"
+          "value": "4",
+          "title": "4"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.45.1",
     "d3-color": "^3.1.0",
     "javascript-time-ago": "^2.5.6",
+    "json2md": "^1.12.0",
     "node-fetch": "^3.2.9"
   },
   "devDependencies": {
     "@types/d3-color": "^3.1.0",
+    "@types/json2md": "^1.5.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

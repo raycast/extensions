@@ -1,5 +1,15 @@
 # Docker Changelog
 
+## [Added screenshots] - 2022-12-22
+
+## [Fix] - 2022-08-25
+
+- Fixed issue where default empty setting caused docker client to connect to incorrect address
+
+## [Improcement] - 2022-08-24
+
+- Added option to configure the Docker socket path
+
 ## [Improvement] - 2022-06-09
 
  - Added ability to Copy Container ID

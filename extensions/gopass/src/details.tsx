@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
-import { humanize } from "./utils";
-import { copyPassword, pastePassword } from "./index";
+import { humanize, isValidUrl } from "./utils";
+import { copyPassword, pastePassword, copyOTP, pasteOTP } from "./index";
 
 async function copy(key: string, value: string): Promise<void> {
   await Clipboard.copy(value);
@@ -15,13 +15,6 @@ async function paste(key: string, value: string): Promise<void> {
   await Clipboard.paste(value);
   await closeMainWindow();
 }
-
-const Actions = ({ copy, paste }: { copy: () => void; paste: () => void }): JSX.Element => (
-  <ActionPanel>
-    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={copy} />
-    <Action title="Paste to Active App" icon={Icon.Document} onAction={paste} />
-  </ActionPanel>
-);
 
 export default function ({ entry }: { entry: string }): JSX.Element {
   const [details, setDetails] = useState<string[]>([]);
@@ -45,23 +38,54 @@ export default function ({ entry }: { entry: string }): JSX.Element {
           <List.Item
             title="Password"
             subtitle="*****************"
-            actions={<Actions copy={() => copyPassword(entry)} paste={() => pastePassword(entry)}></Actions>}
+            actions={
+              <ActionPanel>
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
+                <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
+              </ActionPanel>
+            }
           />
         )}
 
-        {details.map((item, index) => {
-          const [key, ...values] = item.split(": ");
-          const value = values.join(": ");
+        {details
+          .filter((item) => item.startsWith("otpauth:"))
+          .map((item, index) => {
+            return (
+              <List.Item
+                key={index}
+                title="OTP code"
+                subtitle="XXXXXX"
+                actions={
+                  <ActionPanel>
+                    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyOTP(entry)} />
+                    <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pasteOTP(entry)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
 
-          return (
-            <List.Item
-              key={index}
-              title={humanize(key)}
-              subtitle={value}
-              actions={<Actions copy={() => copy(key, value)} paste={() => paste(key, value)}></Actions>}
-            />
-          );
-        })}
+        {details
+          .filter((item) => !item.startsWith("otpauth:"))
+          .map((item, index) => {
+            const [key, ...values] = item.split(": ");
+            const value = values.join(": ");
+
+            return (
+              <List.Item
+                key={index}
+                title={humanize(key)}
+                subtitle={value}
+                actions={
+                  <ActionPanel>
+                    {isValidUrl(value) && <Action.OpenInBrowser url={value} />}
+                    <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copy(key, value)} />
+                    <Action title="Paste to Active App" icon={Icon.Document} onAction={() => paste(key, value)} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
       </List.Section>
     </List>
   );
