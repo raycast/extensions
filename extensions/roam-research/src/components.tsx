@@ -60,7 +60,7 @@ export const AllBlocks = ({
         return;
       }
       const keywords = text.split(" ");
-      console.log(keywords, '---')
+      console.log(keywords, "---");
       filterList(
         blocks.filter((item) => {
           const s = item[":block/string"] || item[":node/title"] || "";
@@ -95,7 +95,6 @@ export const AllBlocks = ({
                     push(<BlockDetail block={block} graph={graph} />);
                   }}
                 />
-              
               </ActionPanel>
             }
           />
