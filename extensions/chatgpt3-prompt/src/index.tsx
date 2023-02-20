@@ -14,10 +14,12 @@ type Data = {
 
 export default function Command() {
   const [data, setData] = useState<Data[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const preferences: CommandPreferences = getPreferenceValues();
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get(
           "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv"
@@ -27,13 +29,15 @@ export default function Command() {
         });
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {data.map((item, index) => {
         return (
           <List.Item
