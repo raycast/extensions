@@ -1,3 +1,3 @@
 # Beancount Mate Changelog
 
-## [Initial Version] - 2023-01-08
+## [Initial Version] - 2023-02-20
