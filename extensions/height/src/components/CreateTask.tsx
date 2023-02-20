@@ -8,6 +8,7 @@ import {
   LaunchType,
   showToast,
   Toast,
+  List
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
@@ -110,7 +111,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
       isLoading={isLoading || listsIsLoading || fieldTemplatesIsLoading || usersIsLoading || tasksIsLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create task" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.List} />
         </ActionPanel>
       }
     >
