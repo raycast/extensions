@@ -55,6 +55,13 @@
       "mode": "view"
     },
     {
+      "name": "tasks",
+      "title": "Tasks",
+      "subtitle": "Tim",
+      "description": "Show all tasks.",
+      "mode": "view"
+    },
+    {
       "name": "import",
       "title": "Import",
       "subtitle": "Tim",
