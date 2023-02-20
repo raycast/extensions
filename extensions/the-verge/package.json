@@ -5,6 +5,9 @@
   "description": "Check top articles on The Verge",
   "icon": "extension_icon.png",
   "author": "klkvsky",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "News"
   ],
