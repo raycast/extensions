@@ -1,4 +1,4 @@
-export type TimExport = {
+export type Data = {
   tags: Record<UUID, Tag>;
   tasks: Record<UUID, Task>;
   groups: Record<UUID, Group>;
@@ -28,7 +28,7 @@ export type Group = {
 
 export type Node = {
   id: UUID;
-  parent?: UUID;
+  parent?: UUID | "ARCHIVE";
 };
 
 export type Task = {
@@ -44,4 +44,5 @@ export type Task = {
 export type TaskRecord = {
   start: Timestamp;
   end: Timestamp;
+  note?: string;
 };

@@ -1,4 +1,4 @@
-import { runAppleScript, runAppleScriptSync } from "run-applescript";
+import { runAppleScript } from "run-applescript";
 import { closeMainWindow } from "@raycast/api";
 
 /**

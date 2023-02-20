@@ -1,8 +1,9 @@
-import { runAppleScript } from "run-applescript";
-import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./apple-script";
 import { getApplications, showToast, Toast } from "@raycast/api";
+import { exec } from "child_process";
+import { runAppleScript } from "run-applescript";
 
-import { TimExport, UUID } from "../types/tim";
+import { Data, UUID } from "../types/tim";
+import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./apple-script";
 
 export async function installedWrapper<T extends () => void>(cb: T) {
   const timAvailable = await checkIfTimInstalled();
@@ -16,19 +17,30 @@ export async function installedWrapper<T extends () => void>(cb: T) {
   return cb();
 }
 
-export async function getTask(id: UUID) {
-  //
+export async function getTask(title: number): Promise<UUID | undefined> {
+  const script = buildScriptEnsuringTimIsRunning(`getTask "${title}"`);
+  return runAppleScript(script);
 }
 
-export async function createTask() {
-  //
+export async function createTask(title: string): Promise<UUID> {
+  const script = buildScriptEnsuringTimIsRunning(`createTask title "${title}"`);
+  return runAppleScript(script);
 }
 
 export async function startTask(id: UUID) {
-  //
+  const script = buildScriptEnsuringTimIsRunning(`startTask "${id}"`);
+  runAppleScript(script);
 }
 
-export async function toggleTimer(): Promise<UUID> {
+/**
+ * Open an entity with a deeplink in the application
+ * @param id Id of a group or task
+ */
+export async function openInTim(id: UUID) {
+  exec(`open tim://${id}`);
+}
+
+export async function toggleTimer(): Promise<UUID | undefined> {
   const script = buildScriptEnsuringTimIsRunning(`toggletimer`);
   return runAppleScript(script);
 }
@@ -61,7 +73,7 @@ export async function exportData() {
   return await runAppleScript(script);
 }
 
-export async function getData(): Promise<TimExport> {
+export async function getData(): Promise<Data> {
   const jsonString = await exportData();
   return JSON.parse(jsonString);
 }
