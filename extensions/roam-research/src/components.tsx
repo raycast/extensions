@@ -60,6 +60,7 @@ export const AllBlocks = ({
         return;
       }
       const keywords = text.split(" ");
+      console.log(keywords, '---')
       filterList(
         blocks.filter((item) => {
           const s = item[":block/string"] || item[":node/title"] || "";
@@ -94,9 +95,7 @@ export const AllBlocks = ({
                     push(<BlockDetail block={block} graph={graph} />);
                   }}
                 />
-                <Action.OpenInBrowser
-                  url={`https://roamresearch.com/#/app/${graph.nameField}/page/${block[":block/uid"]}`}
-                />
+              
               </ActionPanel>
             }
           />
