@@ -1,21 +1,34 @@
-import { Clipboard, Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Detail, useNavigation, Clipboard, Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { fetchTokenList, compareTokens } from "./api";
 import { useState } from "react";
+
+function Result({ price }) {
+  const markdown = `
+# Result:
+# ${price}
+`;
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard content={price} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Command() {
   const { data, isLoading } = fetchTokenList();
   const [token1, setToken1] = useState("SOL");
   const [token2, setToken2] = useState("USDC");
   const [amount, setAmount] = useState("1");
+  const { push } = useNavigation();
 
   const submitHander = async () => {
     const price = await compareTokens(token1, amount, token2);
-    await showToast({
-      style: Toast.Style.Success,
-      title: `${price}`,
-      message: "Copied to Clipboard",
-    });
-    await Clipboard.copy(price);
+    push(<Result price={price} />);
   };
 
   return (
