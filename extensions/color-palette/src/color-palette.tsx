@@ -1,16 +1,15 @@
-import { Action, ActionPanel, Grid} from "@raycast/api";
+import { Action, ActionPanel, Grid } from "@raycast/api";
 import { useState } from "react";
-import cp_ChineseColor from "../assets/Palette_ChineseColor.json"
+import cp_ChineseColor from "../assets/Palette_ChineseColor.json";
 import cp_OpenColor from "../assets/Plaette_OpenColor.json";
 import cp_AntDesign from "../assets/Palette_AntDesign.json";
-import cp_ArcoDesign from "../assets/Palette_ArcoDesign.json"
-import cp_SemiDesign from "../assets/Palette_SemiDesign.json"
-import cp_Tdesign from "../assets/Palette_TDesign.json"
-import cp_Spectrum from "../assets/Palette_AdobeSpectrum.json"
-import cp_AppleDesign from "../assets/Palette_AppleDesign.json"
+import cp_ArcoDesign from "../assets/Palette_ArcoDesign.json";
+import cp_SemiDesign from "../assets/Palette_SemiDesign.json";
+import cp_Tdesign from "../assets/Palette_TDesign.json";
+import cp_Spectrum from "../assets/Palette_AdobeSpectrum.json";
+import cp_AppleDesign from "../assets/Palette_AppleDesign.json";
 import cp_AntV from "../assets/Palette_AntV.json";
-import cp_SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json"
-
+import cp_SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
 
 type Palette = {
   category: string;
@@ -39,72 +38,77 @@ const cp_asv: Palette[] = cp_SpectrumDV;
 const cp_cc: Palette[] = cp_ChineseColor;
 const cp_oc: Palette[] = cp_OpenColor;
 
-
 export default function Command() {
   const [palette, setPalette] = useState<Palette[]>(cp_cc);
 
   return (
-    <Grid 
+    <Grid
       columns={2}
       aspectRatio="3/2"
       fit={Grid.Fit.Fill}
-      searchBarPlaceholder = "Search Colors"
+      searchBarPlaceholder="Search Colors"
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Built-in Palettes"
-          placeholder = "Choose Palette" 
-          storeValue = {true}
-          onChange={(value) => setPalette(
-            value === 'chinacolor' ? cp_cc
-            : value === 'opencolor' ? cp_oc
-            : value === 'antdesign' ? cp_antd
-            : value === 'arcodesign' ? cp_bad
-            : value === 'semidesign' ? cp_bsd
-            : value === 'tdesign' ? cp_td
-            : value === 'spectrum' ? cp_as
-            : value === 'appledesign' ? cp_ad
-            : value === 'antv' ? cp_antv
-            : value === 'spectrumv' ? cp_asv
-            : cp_cc)}
+          placeholder="Choose Palette"
+          storeValue={true}
+          onChange={(value) =>
+            setPalette(
+              value === "chinacolor"
+                ? cp_cc
+                : value === "opencolor"
+                ? cp_oc
+                : value === "antdesign"
+                ? cp_antd
+                : value === "arcodesign"
+                ? cp_bad
+                : value === "semidesign"
+                ? cp_bsd
+                : value === "tdesign"
+                ? cp_td
+                : value === "spectrum"
+                ? cp_as
+                : value === "appledesign"
+                ? cp_ad
+                : value === "antv"
+                ? cp_antv
+                : value === "spectrumv"
+                ? cp_asv
+                : cp_cc
+            )
+          }
         >
           <Grid.Dropdown.Section title="Design">
-            <Grid.Dropdown.Item title="AntDesign" value="antdesign" icon="Icon_AntDesign.svg"/>
-            <Grid.Dropdown.Item title="ArcoDesign" value="arcodesign" icon="Icon_Arco.svg"/>
-            <Grid.Dropdown.Item title="SemiDesign" value="semidesign" icon="Icon_Semi.svg"/>
-            <Grid.Dropdown.Item title="TDesign" value="tdesign" icon="Icon_TDesign.svg"/>
-            <Grid.Dropdown.Item title="Spectrum" value="spectrum" icon="Icon_AdobeSpectrum.svg"/>
-            <Grid.Dropdown.Item title="AppleDesign" value="appledesign" icon="Icon_AppleDesign.svg"/>
+            <Grid.Dropdown.Item title="AntDesign" value="antdesign" icon="Icon_AntDesign.svg" />
+            <Grid.Dropdown.Item title="ArcoDesign" value="arcodesign" icon="Icon_Arco.svg" />
+            <Grid.Dropdown.Item title="SemiDesign" value="semidesign" icon="Icon_Semi.svg" />
+            <Grid.Dropdown.Item title="TDesign" value="tdesign" icon="Icon_TDesign.svg" />
+            <Grid.Dropdown.Item title="Spectrum" value="spectrum" icon="Icon_AdobeSpectrum.svg" />
+            <Grid.Dropdown.Item title="AppleDesign" value="appledesign" icon="Icon_AppleDesign.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="DataVisualization">
-            <Grid.Dropdown.Item title="AntV" value="antv" icon="Icon_AntV.svg"/>
-            <Grid.Dropdown.Item title="SpectrumV" value="spectrumv" icon="Icon_AdobeSpectrum.svg"/>
+            <Grid.Dropdown.Item title="AntV" value="antv" icon="Icon_AntV.svg" />
+            <Grid.Dropdown.Item title="SpectrumV" value="spectrumv" icon="Icon_AdobeSpectrum.svg" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Other">
-            <Grid.Dropdown.Item title="中国传统色" value="chinacolor" icon="Icon_Default.svg"/>
-            <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg"/>
-            </Grid.Dropdown.Section>
+            <Grid.Dropdown.Item title="中国传统色" value="chinacolor" icon="Icon_Default.svg" />
+            <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg" />
+          </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
     >
       {palette.map((section) => {
         return (
-          <Grid.Section
-            columns={8}  
-            key={section.category}
-            title={section.category}
-            subtitle={section.description}
-          >
+          <Grid.Section columns={8} key={section.category} title={section.category} subtitle={section.description}>
             {section.detial.map((color) => (
               <ColorItem key={color.name} color={color} />
-              ))
-            }
+            ))}
           </Grid.Section>
-          )
-        })}
+        );
+      })}
     </Grid>
   );
 }
-
 
 //  #FFFFFF 格式的颜色值转换为 HSL 格式的颜色值
 function HexToHSL(hex: string): string {
@@ -131,7 +135,7 @@ function HexToHSL(hex: string): string {
 
   if (max === min) {
     // Achromatic
-    return "0,0," + (l*100).toFixed(0) + "%";
+    return "0,0," + (l * 100).toFixed(0) + "%";
   }
 
   const d = max - min;
@@ -155,9 +159,8 @@ function HexToHSL(hex: string): string {
   l = Math.round(l);
   h = Math.round(360 * h);
 
-  return h + "," + s + "%," + l +"%";
+  return h + "," + s + "%," + l + "%";
 }
-
 
 // 将 #FFFFFF 格式的颜色值转换为 RGB 格式的颜色值
 function HexToRGB(hex: string): string {
@@ -190,8 +193,16 @@ function ColorItem(props: { color: Color }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Hex" content={props.color.hex} />
-          <Action.CopyToClipboard title="Copy RGB" content={HexToRGB(props.color.hex)} shortcut= {{ modifiers: ["cmd"], key: "return" }}/>
-          <Action.CopyToClipboard title="Copy HSL" content={HexToHSL(props.color.hex)} shortcut= {{ modifiers: ["opt"], key: "return" }} />
+          <Action.CopyToClipboard
+            title="Copy RGB"
+            content={HexToRGB(props.color.hex)}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy HSL"
+            content={HexToHSL(props.color.hex)}
+            shortcut={{ modifiers: ["opt"], key: "return" }}
+          />
         </ActionPanel>
       }
     />
