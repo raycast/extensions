@@ -25,12 +25,17 @@ export default function Command() {
   const [token2, setToken2] = useState("USDC");
   const [amount, setAmount] = useState("1");
   const { push } = useNavigation();
-  const { data: tokenData, isLoading: tokenDataLoading, revalidate } = compareTokens(token1, amount, token2);
+  const { data: tokenData, isLoading: tokenDataLoading, revalidate } = compareTokens(token1, token2);
 
-  const submitHander = async () => {
-    revalidate();
-    push(<Result price={tokenData.data.SOL.price} token2={token2} />);
-  };
+  const submitHander = async (amount: any) => {
+    revalidate()
+      console.log(tokenData.data[token1].price)
+
+      const total = Number(tokenData.data[token1].price) * Number(amount)
+      console.log(total)
+
+      push(<Result price={tokenData.data[token1].price} token2={token2} />);
+};
 
   return (
     <Form

@@ -9,14 +9,10 @@ interface Preferences {
 const preferences = getPreferenceValues<Preferences>();
 const list = preferences.TOKEN_LIST;
 
-export interface PriceResponse {
-  data: Sol;
+export interface PriceResponse<T extends string> {
+  data: Record<T, SolItem>;
   timeTaken: number;
   contextSlot: number;
-}
-
-interface Sol {
-  SOL: SolItem;
 }
 
 interface SolItem {
@@ -38,8 +34,8 @@ export interface TokenListResponse {
   tags: string;
 }
 
-export function fetchPrice(token) {
-  return useFetch<PriceResponse>(`https://price.jup.ag/v4/price?ids=${token}`, {
+export function fetchPrice <T extends string>(token: T) {
+  return useFetch<PriceResponse<T>>(`https://price.jup.ag/v4/price?ids=${token}`, {
     onError: (error: Error) => {
       showToast({
         style: Toast.Style.Failure,
@@ -76,9 +72,8 @@ export function fetchTokenList() {
   }
 }; */
 
-export function compareTokens(token1: string, amount: any, token2: string) {
-  return useFetch<PriceResponse>(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`, {
-    execute: false,
+export function compareTokens <T extends string>(token1: T, token2: string) {
+  return useFetch<PriceResponse<T>>(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`, {
     onError: (error: Error) => {
       showToast({
         style: Toast.Style.Failure,
