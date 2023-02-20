@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-timezone-converter",
-  "title": "Date & Time",
+  "title": "Timezone Converter",
   "version": "1.0.3",
   "description": "Converts any time to any timezone",
   "icon": "command-icon.png",
