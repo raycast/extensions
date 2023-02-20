@@ -1,7 +1,7 @@
 import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
 import { setTimeout } from "timers/promises";
-import { isAccessibilityPermissionError, showPermissionErrorHUD } from "./errors";
+import { testPermissionErrorType, showPermissionErrorHUD } from "./errors";
 
 export default async (props: LaunchProps) => {
   const fallingBack = !!props.fallbackText && props.fallbackText.length > 0;
@@ -31,9 +31,7 @@ export default async (props: LaunchProps) => {
     `);
     }
   } catch (error) {
-    if (isAccessibilityPermissionError(error)) {
-      showPermissionErrorHUD("accessibility");
-    }
+    showPermissionErrorHUD(testPermissionErrorType(error));
   }
 
   // Simply give it a break before restoring the clipboard

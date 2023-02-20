@@ -12,7 +12,7 @@ import {
 import { runAppleScript } from "run-applescript";
 import { useSqlNotes } from "./useSql";
 import { useAppleScriptNotes } from "./useAppleScript";
-import { isAccessibilityPermissionError, isFullDiskAccessPermissionError, PermissionErrorScreen } from "./errors";
+import { testPermissionErrorType, PermissionErrorScreen } from "./errors";
 import { NoteItem } from "./types";
 import { useState } from "react";
 
@@ -44,14 +44,17 @@ export default function Command() {
         }
       );
     } catch (error) {
-      if (isAccessibilityPermissionError(error)) {
-        return <PermissionErrorScreen errorType={"accessibility"} />;
+      const parsedError = testPermissionErrorType(error);
+      if (parsedError !== "unknown") {
+        return <PermissionErrorScreen errorType={parsedError} />;
+      } else {
+        throw error;
       }
     }
   }
 
   if (sqlState.error) {
-    if (isFullDiskAccessPermissionError(sqlState.error)) {
+    if (testPermissionErrorType(sqlState.error) === "fullDiskAccess") {
       return <PermissionErrorScreen errorType={"fullDiskAccess"} />;
     } else {
       showToast({
@@ -60,6 +63,10 @@ export default function Command() {
         message: sqlState.error.message,
       });
     }
+  }
+
+  if (appleScriptState.error) {
+    return <PermissionErrorScreen errorType={appleScriptState.error} />;
   }
 
   const alreadyFound: { [key: string]: boolean } = {};
@@ -130,7 +137,7 @@ export default function Command() {
                 )}
               actions={
                 <ActionPanel title="Actions">
-                  <Action title="Open in Notes" icon={Icon.TextDocument} onAction={() => openNote(note)} />
+                  <Action title="Open in Notes" icon={Icon.Document} onAction={() => openNote(note)} />
                 </ActionPanel>
               }
             />

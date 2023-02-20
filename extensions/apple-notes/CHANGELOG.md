@@ -1,8 +1,8 @@
 # Apple Notes Changelog
 
-## [Fix] - 2023-2-15
+## [Fix] - 2023-2-20
 
-- Added error handling when Raycast doesn't have Accessibility permission.
+- Added error handling when Raycast doesn't have Accessibility/Automation permission.
 
 ## [Improvements] - 2023-1-30
 

@@ -2,7 +2,9 @@ import { ActionPanel, Detail, Icon, Action, environment, showHUD } from "@raycas
 import path from "path";
 import fileUrl from "file-url";
 
-type PermissionErrorTypes = "fullDiskAccess" | "accessibility" | "unknown";
+// @TODO: This function should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
+
+export type PermissionErrorTypes = "fullDiskAccess" | "accessibility" | "automation" | "unknown";
 
 export class PermissionError extends Error {
   type: PermissionErrorTypes;
@@ -14,12 +16,22 @@ export class PermissionError extends Error {
   }
 }
 
-export const isFullDiskAccessPermissionError = (error: unknown) => {
-  return error instanceof Error && error.name === "PermissionError";
-};
+export const testPermissionErrorType = (error: unknown): PermissionErrorTypes => {
+  if (!(error instanceof Error)) {
+    return "unknown";
+  }
 
-export const isAccessibilityPermissionError = (error: unknown) => {
-  return error instanceof Error && error.message.includes("1002");
+  if (error instanceof PermissionError && error.type === "fullDiskAccess") {
+    return "fullDiskAccess";
+  }
+  if (error.message.includes("1002")) {
+    return "accessibility";
+  }
+  if (error.message.includes("1743")) {
+    return "automation";
+  }
+
+  return "unknown";
 };
 
 type PreferenceTarget = {
@@ -32,15 +44,22 @@ type SpecificDescription = {
 const permissionName: SpecificDescription = {
   fullDiskAccess: "Full Disk Access",
   accessibility: "Accessibility",
+  automation: "Automation",
   unknown: "Corresponding",
 };
 const permissionAsset: SpecificDescription = {
   fullDiskAccess: "full-disk-access.png",
   accessibility: "accessibility.png",
+  automation: "automation.png",
   unknown: "unknown-privacy.png",
 };
+const preferencePaneTargets: PreferenceTarget = {
+  fullDiskAccess: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
+  accessibility: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+  automation: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation",
+  unknown: "x-apple.systempreferences:com.apple.preference.security",
+};
 
-// @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 const fullDiskAccessErrorMarkdown = (errorType: PermissionErrorTypes) => {
   return `## Raycast needs ${permissionName[errorType]} permission in order to display your Apple Notes.
 
@@ -50,12 +69,6 @@ const fullDiskAccessErrorMarkdown = (errorType: PermissionErrorTypes) => {
 2. Select **${permissionName[errorType]}** from the sidebar
 3. Toggle on **Raycast** in the list. If Raycast is not in the list, Drag and Drop the icon for the **Raycast** application into it 
 4. Enter your macOS administrator password`;
-};
-
-const preferencePaneTargets: PreferenceTarget = {
-  fullDiskAccess: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles",
-  accessibility: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
-  unknown: "x-apple.systempreferences:com.apple.preference.security",
 };
 
 const OpenPrivacyPreferencePaneAction = (props: { target: string }) => (
