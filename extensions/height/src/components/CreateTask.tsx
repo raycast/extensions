@@ -111,7 +111,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateTaskFo
       isLoading={isLoading || listsIsLoading || fieldTemplatesIsLoading || usersIsLoading || tasksIsLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.List} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} icon={Icon.NewDocument} />
         </ActionPanel>
       }
     >
