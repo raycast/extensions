@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues, Grid } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import WikipediaPage from "./wikipedia-page";
+import WikipediaPage from "./components/wikipedia-page";
 import { findPagesByTitle, getPageData } from "./utils/api";
 import { languages } from "./utils/constants";
 import { toSentenceCase } from "./utils/string";
+import AskQuestionPage from "./components/ask-question-page";
+import { useLanguage } from "./utils/hooks";
 
 const preferences = getPreferenceValues();
 
@@ -12,7 +14,7 @@ const View = preferences.viewType === "list" ? List : Grid;
 const openInBrowser = preferences.openIn === "browser";
 
 export default function SearchPage(props: { arguments: { title: string } }) {
-  const [language, setLanguage] = useCachedState("language", "en");
+  const [language, setLanguage] = useLanguage();
   const [search, setSearch] = useState(props.arguments.title);
   const { data, isLoading } = useCachedPromise(findPagesByTitle, [search, language]);
 
@@ -72,6 +74,12 @@ function PageItem({ title, language }: { title: string; language: string }) {
               <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
             </>
           )}
+          <Action.Push
+            title="Ask Question"
+            icon={Icon.QuestionMarkCircle}
+            target={<AskQuestionPage title={title} />}
+            shortcut={{ modifiers: ["cmd"], key: "j" }}
+          />
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd"], key: "." }}

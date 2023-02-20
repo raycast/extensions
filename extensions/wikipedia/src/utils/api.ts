@@ -90,14 +90,6 @@ export async function getPageLinks(title: string, language: string) {
     .then((page) => page.links());
 }
 
-export async function getPageReferences(title: string, language: string) {
-  return wiki({
-    apiUrl: `${getApiUrl(language)}w/api.php`,
-  })
-    .page(title)
-    .then((page) => page.references());
-}
-
 export async function getAvailableLanguages(title: string, language: string) {
   return wiki({
     apiUrl: `${getApiUrl(language)}w/api.php`,

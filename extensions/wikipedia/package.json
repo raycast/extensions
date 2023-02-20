@@ -32,6 +32,13 @@
       ],
       "default": "raycast",
       "required": false
+    },
+    {
+      "name": "openAIKey",
+      "title": "OpenAI Key",
+      "description": "OpenAI API key for using AI assisted commands",
+      "type": "password",
+      "required": false
     }
   ],
   "commands": [
@@ -108,7 +115,8 @@
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.18",
     "got": "^12.5.3",
-    "wikijs": "^6.4.1"
+    "wikijs": "^6.4.1",
+    "openai": "^3.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",
