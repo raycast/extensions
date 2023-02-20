@@ -43,7 +43,8 @@ function getTimezoneOffsetString(zone?: string) {
 const markdownFn = (now: DateTime, isCustom?: boolean) => {
   const offset = now.offset / 60;
   const isNegative = offset < 0;
-  const offsetString = isNegative ? offset : `+${offset}`;
+  const isZero = offset === 0;
+  const offsetString = isNegative ? offset : isZero ? `` : `+${offset}`;
   return `
 # ${isCustom ? "Custom time" : "Local time"}
 ## ${now.toFormat("ff")}
