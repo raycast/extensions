@@ -62,7 +62,7 @@ export function fetchTokenList() {
   });
 }
 
-export const compareTokens = async (token1: string, amount: any, token2: string) => {
+/* export const compareTokens = async (token1: string, amount: any, token2: string) => {
   try {
     const res = await axios.get(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`);
     const result = amount * res.data.data[token1].price;
@@ -74,4 +74,17 @@ export const compareTokens = async (token1: string, amount: any, token2: string)
       message: "Check network connection:" + error,
     });
   }
-};
+}; */
+
+export function compareTokens(token1: string, amount: any, token2: string) {
+  return useFetch<PriceResponse>(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`, {
+    execute: false,
+    onError: (error: Error) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to compare tokens",
+        message: "Check network connection:" + error,
+      });
+    },
+  });
+}

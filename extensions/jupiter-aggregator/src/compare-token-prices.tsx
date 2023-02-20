@@ -25,10 +25,11 @@ export default function Command() {
   const [token2, setToken2] = useState("USDC");
   const [amount, setAmount] = useState("1");
   const { push } = useNavigation();
+  const { data: tokenData, isLoading: tokenDataLoading, revalidate } = compareTokens(token1, amount, token2);
 
   const submitHander = async () => {
-    const price = await compareTokens(token1, amount, token2);
-    push(<Result price={price} token2={token2} />);
+    revalidate();
+    push(<Result price={tokenData.data.SOL.price} token2={token2} />);
   };
 
   return (
