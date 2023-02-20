@@ -6,6 +6,9 @@
   "description": "Converts any time to any timezone",
   "icon": "command-icon.png",
   "author": "joao.mainka",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
