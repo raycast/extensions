@@ -1,10 +1,10 @@
 import { showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
-import { openConnection, closeConnection } from "src/services/devices";
+import { Device } from "src/types/device";
 
-export async function connectDevice(deviceMacAddress: string) {
+export async function connectDevice(device: Device) {
   await showToast({ style: Toast.Style.Animated, title: "Connecting..." });
   try {
-    openConnection(deviceMacAddress);
+    device.openConnection();
   } catch (error) {
     await showToast({ style: Toast.Style.Failure, title: "Failed to connect." });
     return;
@@ -16,10 +16,10 @@ export async function connectDevice(deviceMacAddress: string) {
   }
 }
 
-export async function disconnectDevice(deviceMacAddress: string) {
+export async function disconnectDevice(device: Device) {
   await showToast({ style: Toast.Style.Animated, title: "Disconnecting..." });
   try {
-    closeConnection(deviceMacAddress);
+    device.closeConnection();
   } catch {
     await showToast({ style: Toast.Style.Failure, title: "Failed to disconnect." });
     return;
