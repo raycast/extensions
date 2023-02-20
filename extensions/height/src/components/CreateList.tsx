@@ -91,7 +91,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create List" icon={Icon.List} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create List" icon={Icon.NewDocument} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
