@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dollar-blue",
   "title": "Dollar Blue",
-  "description": "This command gives you the exchange rate of the \"Parallel\" US Dollar against Argentine Peso",
+  "description": "Gives you the exchange rate of the \"Parallel\" US Dollar against Argentine Peso",
   "icon": "command-icon.png",
   "author": "agus",
   "categories": [
