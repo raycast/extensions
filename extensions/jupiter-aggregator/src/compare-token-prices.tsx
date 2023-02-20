@@ -28,14 +28,14 @@ export default function Command() {
   const { data: tokenData, isLoading: tokenDataLoading, revalidate } = compareTokens(token1, token2);
 
   const submitHander = async (amount: any) => {
-    revalidate()
-      console.log(tokenData.data[token1].price)
+    revalidate();
+    console.log(tokenData.data[token1].price);
 
-      const total = Number(tokenData.data[token1].price) * Number(amount)
-      console.log(total)
+    const total = Number(tokenData.data[token1].price) * Number(amount);
+    console.log(total);
 
-      push(<Result price={tokenData.data[token1].price} token2={token2} />);
-};
+    push(<Result price={tokenData.data[token1].price} token2={token2} />);
+  };
 
   return (
     <Form

@@ -34,7 +34,7 @@ export interface TokenListResponse {
   tags: string;
 }
 
-export function fetchPrice <T extends string>(token: T) {
+export function fetchPrice<T extends string>(token: T) {
   return useFetch<PriceResponse<T>>(`https://price.jup.ag/v4/price?ids=${token}`, {
     onError: (error: Error) => {
       showToast({
@@ -72,7 +72,7 @@ export function fetchTokenList() {
   }
 }; */
 
-export function compareTokens <T extends string>(token1: T, token2: string) {
+export function compareTokens<T extends string>(token1: T, token2: string) {
   return useFetch<PriceResponse<T>>(`https://price.jup.ag/v4/price?ids=${token1}&vsToken=${token2}`, {
     onError: (error: Error) => {
       showToast({
