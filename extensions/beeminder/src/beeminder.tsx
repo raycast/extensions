@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, popToRoot, showToast, Toast, Form } from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
-import { fromUnixTime, differenceInDays } from "date-fns";
+import moment from "moment";
 import { Goal, GoalResponse, DataPointFormValues } from "./types";
 import { fetchGoals, sendDatapoint } from "./api";
 
@@ -85,14 +85,38 @@ export default function Command() {
     return (
       <List isLoading={isLoading}>
         {goals?.map((goal: Goal) => {
-          const [beforeIn, afterIn] = goal.limsum.split("+")?.[1].split(" (")?.[0].split(" in ");
-          let goalIcon;
+          const diff = moment.unix(goal.losedate).diff(new Date());
+          const timeDiffDuration = moment.duration(diff);
+          const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
+          const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
 
-          if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 1) {
+          let goalIcon;
+          let dueText = `${goalRate} ${goal.gunits} due in ${
+            dayDifference > 1
+              ? dayDifference + " days"
+              : dayDifference == 1
+              ? dayDifference + " day"
+              : ""
+          }`;
+
+          if (dayDifference < 1) {
             goalIcon = "🔴";
-          } else if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 2) {
+            dueText = `${goalRate} ${goal.gunits} due in${
+              timeDiffDuration.hours() > 1
+                ? " " + timeDiffDuration.hours() + " hours"
+                : timeDiffDuration.hours() == 1
+                ? " " + timeDiffDuration.hours() + " hour"
+                : ""
+            }${
+              timeDiffDuration.minutes() > 1
+                ? " " + timeDiffDuration.minutes() + " minutes"
+                : timeDiffDuration.minutes() == 1
+                ? " " + timeDiffDuration.minutes() + " minute"
+                : ""
+            }`;
+          } else if (dayDifference < 2) {
             goalIcon = "🟠";
-          } else if (differenceInDays(fromUnixTime(goal.losedate), new Date()) < 3) {
+          } else if (dayDifference < 3) {
             goalIcon = "🔵";
           } else {
             goalIcon = "🟢";
@@ -104,7 +128,12 @@ export default function Command() {
               title={goal.slug}
               subtitle={`Pledged $${goal.pledge}`}
               accessories={[
-                { text: `Due ${beforeIn} ${goal.gunits} in ${afterIn}`, icon: goalIcon },
+                {
+                  text: dueText,
+                },
+                {
+                  icon: goalIcon,
+                },
               ]}
               keywords={[goal.slug, goal.title]}
               actions={
