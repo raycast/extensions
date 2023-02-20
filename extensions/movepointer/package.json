@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "movepointer",
+  "title": "movePointer",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "okumura_kosuke",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "move-1",
+      "title": "Move Pointer-1",
+      "description": "ポインター設定1にポインターを移動させます",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-2",
+      "title": "Move Pointer-2",
+      "description": "ポインター設定2にポインターを移動させます",
+      "mode": "no-view"
+    },
+    {
+      "name": "move-3",
+      "title": "Move Pointer-3",
+      "description": "ポインター設定3にポインターを移動させます",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-1",
+      "title": "Record Pointer-1",
+      "description": "現在のポインター座標をポインター１に設定します",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-2",
+      "title": "Record Pointer-2",
+      "description": "現在のポインター座標をポインター２に設定します",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-3",
+      "title": "Record Pointer-3",
+      "description": "現在のポインター座標をポインター３に設定します",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear",
+      "title": "Clear Point",
+      "description": "全てのポインター設定を削除します",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "run-applescript": "^6.1.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
