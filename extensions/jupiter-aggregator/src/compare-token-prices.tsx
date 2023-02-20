@@ -1,4 +1,4 @@
-import { Detail, useNavigation, Action, ActionPanel, Form } from "@raycast/api";
+import { Detail, useNavigation, Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
 import { fetchTokenList, compareTokens } from "./api";
 import { useState } from "react";
 
@@ -27,8 +27,16 @@ export default function Command() {
   const { push } = useNavigation();
 
   const submitHander = async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Loading...",
+    });
     const price = await compareTokens(token1, amount, token2);
     push(<Result price={price} token2={token2} />);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Success!",
+    });
   };
 
   return (
