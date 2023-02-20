@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, getPreferenceValues, Icon } from "@raycast/api";
 import { parse } from "csv-parse";
 import { useEffect, useState } from "react";
 import axios from "axios";
