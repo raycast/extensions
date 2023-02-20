@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, launchCommand, LaunchType, showToast, Toast, Icon } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { ApiList } from "../api/list";
@@ -91,7 +91,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create list" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create List" icon={Icon.List} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
