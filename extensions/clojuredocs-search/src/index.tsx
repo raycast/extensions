@@ -118,8 +118,8 @@ function SearchListItem({ searchResult }: { searchResult: DocInfo }) {
       actions={
         <ActionPanel>
           <Action.Push
-            title="Go to Detail"
-            icon={Icon.AppWindowSidebarRight}
+            title="Show Details"
+            icon={Icon.AppWindow}
             target={<CljDetail res={searchResult} />}
           />
           <ActionPanel.Section>
