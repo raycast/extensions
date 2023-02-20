@@ -6,8 +6,15 @@ import { getFullName, getJobRole } from "./utils";
 import { Person } from "./types";
 
 export default function Command() {
-  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, true);
-  const { data: jobRoles = [], isLoading: isJobRolesLoading } = useHumaansApi(ENDPOINTS.JOB_ROLES, true);
+  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, {
+    isList: true,
+    shouldShowToast: true,
+  });
+
+  const { data: jobRoles = [], isLoading: isJobRolesLoading } = useHumaansApi(ENDPOINTS.JOB_ROLES, {
+    isList: true,
+    shouldShowToast: false,
+  });
 
   const filteredPeople = people.filter(({ status }: Person) => status === "active");
 
@@ -29,7 +36,7 @@ export default function Command() {
             accessories={[
               {
                 text: department ?? "",
-              }
+              },
             ]}
             actions={
               <ActionPanel>

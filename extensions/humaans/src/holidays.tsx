@@ -15,8 +15,14 @@ const formatDate = (date: string) => {
 };
 
 export default function Command() {
-  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, true);
-  const { data: timeAway = [], isLoading: isTimeAwayLoading } = useHumaansApi(ENDPOINTS.TIME_AWAY, true);
+  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, {
+    isList: true,
+    shouldShowToast: false,
+  });
+  const { data: timeAway = [], isLoading: isTimeAwayLoading } = useHumaansApi(ENDPOINTS.TIME_AWAY, {
+    isList: true,
+    shouldShowToast: true,
+  });
 
   const filteredTimeAway = timeAway
     ?.filter(({ startDate, endDate }: Holiday) => {
@@ -53,9 +59,7 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`https://app.humaans.io/away?q=${encodeURIComponent(fullName)}`}
-                />
+                <Action.OpenInBrowser url={`https://app.humaans.io/away?q=${encodeURIComponent(fullName)}`} />;
               </ActionPanel>
             }
           />

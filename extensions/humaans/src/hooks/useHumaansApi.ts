@@ -75,7 +75,7 @@ const resolveData = (data: any, error: any, isList: boolean) => {
 
   return data;
 };
-export const useHumaansApi = (endpoint: string, isList = false) => {
+export const useHumaansApi = (endpoint: string, { isList = false, shouldShowToast = true }) => {
   const { apiKey } = getPreferenceValues();
 
   const fetch = useFetch(BASE_URL + endpoint, {
@@ -98,10 +98,13 @@ export const useHumaansApi = (endpoint: string, isList = false) => {
       endpoint,
       apiKey,
     });
-    showToast(options);
+
+    if (shouldShowToast) {
+      showToast(options);
+    }
 
     return () => {
-      if (isLoading) {
+      if (isLoading && shouldShowToast) {
         showToast({
           style: Toast.Style.Failure,
           title: `Fetch cancelled`,
