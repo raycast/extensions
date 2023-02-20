@@ -27,11 +27,11 @@
       "mode": "no-view"
     },
     {
-      "name": "openNewTask",
+      "name": "newTask",
       "title": "New Task",
       "subtitle": "Tim",
-      "description": "Open new Task prompt.",
-      "mode": "no-view"
+      "description": "Create a new task.",
+      "mode": "view"
     },
     {
       "name": "openNavigator",
