@@ -105,9 +105,7 @@ function getIcon(index: number): Image.ImageLike {
 
 function Actions(props: { item: Parser.Item }) {
   return (
-    <ActionPanel
-      title={`${props.item.title?.slice(0, 50)}${props.item.title && props.item.title.length > 50 ? "..." : ""}`}
-    >
+    <ActionPanel>
       {props.item.link && <Action.OpenInBrowser url={props.item.link} />}
       {props.item.link && <Action.CopyToClipboard content={props.item.link} title="Copy Link" />}
     </ActionPanel>
