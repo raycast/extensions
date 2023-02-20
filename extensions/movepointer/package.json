@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "movepointer",
   "title": "movePointer",
-  "description": "",
+  "description": "マウスのポインターを瞬時に移動させます",
   "icon": "command-icon.png",
   "author": "okumura_kosuke",
   "categories": [
