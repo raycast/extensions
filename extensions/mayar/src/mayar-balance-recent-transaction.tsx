@@ -62,40 +62,43 @@ export default function Command() {
       icon="https://pub-e4d31eae5d834409a04a5f020a42923e.r2.dev/mayar-favicon-black.png"
       tooltip="Mayar Balance and Recent Transaction"
     >
-      <MenuBarExtra.Item title="Mayar Balance" />
-      <MenuBarExtra.Item
-        icon={{ source: "wallet.png" }}
-        title={"Total: " + formatRp(data?.data.balance)}
-        onAction={() => {
-          console.log("balance clicked");
-        }}
-      />
-      <MenuBarExtra.Item
-        icon={{ source: "active.png" }}
-        title={"Active: " + formatRp(data?.data.balanceActive)}
-        onAction={() => {
-          console.log("balance active clicked");
-        }}
-      />
-      <MenuBarExtra.Item
-        icon={{ source: "pending.png" }}
-        title={"Pending: " + formatRp(data?.data.balancePending)}
-        onAction={() => {
-          console.log("balance pending clicked");
-        }}
-      />
-      <MenuBarExtra.Item title="10 Most Recent Transactions" />
-      {(dataTrx?.data || []).map(
-        (trx: { id: Key | null | undefined; createdAt: number; credit: number; customer: { email: string } }) => (
-          <MenuBarExtra.Item
-            key={trx.id}
-            title={timeAgo.format(trx.createdAt) + " - " + formatRp(trx.credit) + " - " + trx?.customer?.email}
-            onAction={() => {
-              console.log("transaction list clicked");
-            }}
-          />
-        )
-      )}
+      <MenuBarExtra.Section title="Mayar Balance">
+        <MenuBarExtra.Item
+          icon={{ source: "wallet.png" }}
+          title={"Total: " + formatRp(data?.data.balance)}
+          onAction={() => {
+            console.log("balance clicked");
+          }}
+        />
+        <MenuBarExtra.Item
+          icon={{ source: "active.png" }}
+          title={"Active: " + formatRp(data?.data.balanceActive)}
+          onAction={() => {
+            console.log("balance active clicked");
+          }}
+        />
+        <MenuBarExtra.Item
+          icon={{ source: "pending.png" }}
+          title={"Pending: " + formatRp(data?.data.balancePending)}
+          onAction={() => {
+            console.log("balance pending clicked");
+          }}
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Recent Transactions">
+        {(dataTrx?.data || []).map(
+          (trx: { id: Key | null | undefined; createdAt: number; credit: number; customer: { email: string } }) => (
+            <MenuBarExtra.Item
+              key={trx.id}
+              title={timeAgo.format(trx.createdAt) + " - " + formatRp(trx.credit) + " - " + trx?.customer?.email}
+              onAction={() => {
+                console.log("transaction list clicked");
+              }}
+            />
+          )
+        )}
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
