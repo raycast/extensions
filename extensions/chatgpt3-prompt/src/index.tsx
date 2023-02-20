@@ -59,6 +59,7 @@ export default function Command() {
                 )}
                 <Action.Push
                   title="Show Prompt"
+                  icon={Icon.Terminal}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   target={
                     <Detail
