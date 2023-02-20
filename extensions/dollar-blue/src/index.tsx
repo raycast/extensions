@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import prettyBuilder from "./pretty-builder";
 
@@ -18,7 +18,7 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action title="Reload" onAction={() => revalidate()} />
+          <Action title="Reload" icon={Icon.Repeat} onAction={revalidate} />
         </ActionPanel>
       }
     />
