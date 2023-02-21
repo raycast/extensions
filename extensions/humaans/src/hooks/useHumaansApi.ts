@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import get from "lodash/get";
-import { startCase } from "lodash";
+import startCase from "lodash/startCase";
 
 const BASE_URL = "https://app.humaans.io/api/";
 
