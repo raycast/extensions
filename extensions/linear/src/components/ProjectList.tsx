@@ -47,7 +47,7 @@ export default function ProjectList() {
   return (
     <List
       isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      {...(roadmaps && roadmaps.length > 1
+      {...(roadmaps && roadmaps.length > 0
         ? {
             searchBarAccessory: (
               <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} storeValue>
@@ -62,7 +62,7 @@ export default function ProjectList() {
             ),
           }
         : {})}
-      searchBarPlaceholder="Filter by project title, lead, or status"
+      searchBarPlaceholder="Filter by project title, lead, status, or team keys"
       filtering={{ keepSectionOrder: true }}
     >
       {filteredProjects?.map((project) => (

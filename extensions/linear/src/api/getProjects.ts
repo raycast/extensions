@@ -45,11 +45,12 @@ const projectFragment = `
   }
 `;
 
-export async function getProjects() {
+export async function getProjects(teamId?: string) {
   const { graphQLClient } = getLinearClient();
 
-  const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
-    `
+  if (!teamId) {
+    const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
+      `
         query {
           projects {
             nodes {
@@ -58,9 +59,30 @@ export async function getProjects() {
           }
         }
       `
-  );
+    );
 
-  return data?.projects.nodes;
+    return data?.projects.nodes;
+  } else {
+    const { data } = await graphQLClient.rawRequest<
+      { team: { projects: { nodes: ProjectResult[] } } },
+      Record<string, unknown>
+    >(
+      `
+        query($teamId: String!) {
+          team(id: $teamId) {
+            projects {
+              nodes {
+                ${projectFragment}
+              }
+            }
+          }
+        }
+      `,
+      { teamId }
+    );
+
+    return data?.team.projects.nodes;
+  }
 }
 
 type Roadmap = {
