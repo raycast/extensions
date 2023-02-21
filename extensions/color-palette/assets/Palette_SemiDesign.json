@@ -1,514 +1,514 @@
 [
   {
-    "category": "Light_Red",
+    "category": "Light｜Red",
     "description": "红色（浅色主题）",
-    "detial":[
-      {"name": "Red0", "hex": "#FEF2ED"},
-      {"name": "Red1", "hex": "#FEDDD2"},
-      {"name": "Red2", "hex": "#FDB7A5"},
-      {"name": "Red3", "hex": "#FB9078"},
-      {"name": "Red4", "hex": "#FA664C"},
-      {"name": "Red5", "hex": "#F93920"},
-      {"name": "Red6", "hex": "#D52515"},
-      {"name": "Red7", "hex": "#B2140C"},
-      {"name": "Red8", "hex": "#8E0805"},
-      {"name": "Red9", "hex": "#6A0103"}
+    "detial": [
+      { "name": "Red0", "hex": "#FEF2ED" },
+      { "name": "Red1", "hex": "#FEDDD2" },
+      { "name": "Red2", "hex": "#FDB7A5" },
+      { "name": "Red3", "hex": "#FB9078" },
+      { "name": "Red4", "hex": "#FA664C" },
+      { "name": "Red5", "hex": "#F93920" },
+      { "name": "Red6", "hex": "#D52515" },
+      { "name": "Red7", "hex": "#B2140C" },
+      { "name": "Red8", "hex": "#8E0805" },
+      { "name": "Red9", "hex": "#6A0103" }
     ]
   },
   {
-    "category": "Light_Pink",
+    "category": "Light｜Pink",
     "description": "粉色（浅色主题）",
-    "detial":[
-      {"name": "Pink0", "hex": "#FDECEF"},
-      {"name": "Pink1", "hex": "#FBCFD8"},
-      {"name": "Pink2", "hex": "#F6A0B5"},
-      {"name": "Pink3", "hex": "#F27396"},
-      {"name": "Pink4", "hex": "#ED487B"},
-      {"name": "Pink5", "hex": "#E91E63"},
-      {"name": "Pink6", "hex": "#C51356"},
-      {"name": "Pink7", "hex": "#A20B48"},
-      {"name": "Pink8", "hex": "#7E053A"},
-      {"name": "Pink9", "hex": "#5A012B"}
+    "detial": [
+      { "name": "Pink0", "hex": "#FDECEF" },
+      { "name": "Pink1", "hex": "#FBCFD8" },
+      { "name": "Pink2", "hex": "#F6A0B5" },
+      { "name": "Pink3", "hex": "#F27396" },
+      { "name": "Pink4", "hex": "#ED487B" },
+      { "name": "Pink5", "hex": "#E91E63" },
+      { "name": "Pink6", "hex": "#C51356" },
+      { "name": "Pink7", "hex": "#A20B48" },
+      { "name": "Pink8", "hex": "#7E053A" },
+      { "name": "Pink9", "hex": "#5A012B" }
     ]
   },
   {
-    "category": "Light_Purple",
+    "category": "Light｜Purple",
     "description": "紫色（浅色主题）",
-    "detial":[
-      {"name": "Purple0", "hex": "#F7E9F7"},
-      {"name": "Purple1", "hex": "#EFCAF0"},
-      {"name": "Purple2", "hex": "#DD9BE0"},
-      {"name": "Purple3", "hex": "#C96FD1"},
-      {"name": "Purple4", "hex": "#B449C2"},
-      {"name": "Purple5", "hex": "#9E28B3"},
-      {"name": "Purple6", "hex": "#871E9E"},
-      {"name": "Purple7", "hex": "#71168A"},
-      {"name": "Purple8", "hex": "#5C0F75"},
-      {"name": "Purple9", "hex": "#490A61"}
+    "detial": [
+      { "name": "Purple0", "hex": "#F7E9F7" },
+      { "name": "Purple1", "hex": "#EFCAF0" },
+      { "name": "Purple2", "hex": "#DD9BE0" },
+      { "name": "Purple3", "hex": "#C96FD1" },
+      { "name": "Purple4", "hex": "#B449C2" },
+      { "name": "Purple5", "hex": "#9E28B3" },
+      { "name": "Purple6", "hex": "#871E9E" },
+      { "name": "Purple7", "hex": "#71168A" },
+      { "name": "Purple8", "hex": "#5C0F75" },
+      { "name": "Purple9", "hex": "#490A61" }
     ]
   },
   {
-    "category": "Light_Violet",
+    "category": "Light｜Violet",
     "description": "蓝紫（浅色主题）",
-    "detial":[
-      {"name": "Violet0", "hex": "#F3EDF9"},
-      {"name": "Violet1", "hex": "#E2D1F4"},
-      {"name": "Violet2", "hex": "#C4A7E9"},
-      {"name": "Violet3", "hex": "#A67FDD"},
-      {"name": "Violet4", "hex": "#885BD2"},
-      {"name": "Violet5", "hex": "#6A3AC7"},
-      {"name": "Violet6", "hex": "#572FB3"},
-      {"name": "Violet7", "hex": "#46259E"},
-      {"name": "Violet8", "hex": "#361C8A"},
-      {"name": "Violet9", "hex": "#281475"}
+    "detial": [
+      { "name": "Violet0", "hex": "#F3EDF9" },
+      { "name": "Violet1", "hex": "#E2D1F4" },
+      { "name": "Violet2", "hex": "#C4A7E9" },
+      { "name": "Violet3", "hex": "#A67FDD" },
+      { "name": "Violet4", "hex": "#885BD2" },
+      { "name": "Violet5", "hex": "#6A3AC7" },
+      { "name": "Violet6", "hex": "#572FB3" },
+      { "name": "Violet7", "hex": "#46259E" },
+      { "name": "Violet8", "hex": "#361C8A" },
+      { "name": "Violet9", "hex": "#281475" }
     ]
   },
   {
-    "category": "Light_Indigo",
+    "category": "Light｜Indigo",
     "description": "靛色（浅色主题）",
-    "detial":[
-      {"name": "Indigo0", "hex": "#ECEFF8"},
-      {"name": "Indigo1", "hex": "#D1D8F0"},
-      {"name": "Indigo2", "hex": "#A7B3E1"},
-      {"name": "Indigo3", "hex": "#8090D3"},
-      {"name": "Indigo4", "hex": "#5E6FC4"},
-      {"name": "Indigo5", "hex": "#3F51B5"},
-      {"name": "Indigo6", "hex": "#3342A1"},
-      {"name": "Indigo7", "hex": "#28348C"},
-      {"name": "Indigo8", "hex": "#1F2878"},
-      {"name": "Indigo9", "hex": "#171D63"}
+    "detial": [
+      { "name": "Indigo0", "hex": "#ECEFF8" },
+      { "name": "Indigo1", "hex": "#D1D8F0" },
+      { "name": "Indigo2", "hex": "#A7B3E1" },
+      { "name": "Indigo3", "hex": "#8090D3" },
+      { "name": "Indigo4", "hex": "#5E6FC4" },
+      { "name": "Indigo5", "hex": "#3F51B5" },
+      { "name": "Indigo6", "hex": "#3342A1" },
+      { "name": "Indigo7", "hex": "#28348C" },
+      { "name": "Indigo8", "hex": "#1F2878" },
+      { "name": "Indigo9", "hex": "#171D63" }
     ]
   },
   {
-    "category": "Light_Blue",
+    "category": "Light｜Blue",
     "description": "蓝色（浅色主题）",
-    "detial":[
-      {"name": "Blue0", "hex": "#EAF5FF"},
-      {"name": "Blue1", "hex": "#CBE7FE"},
-      {"name": "Blue2", "hex": "#98CDFD"},
-      {"name": "Blue3", "hex": "#65B2FC"},
-      {"name": "Blue4", "hex": "#3295FB"},
-      {"name": "Blue5", "hex": "#0077FA"},
-      {"name": "Blue6", "hex": "#0062D6"},
-      {"name": "Blue7", "hex": "#004FB3"},
-      {"name": "Blue8", "hex": "#003D8F"},
-      {"name": "Blue9", "hex": "#002C6B"}
+    "detial": [
+      { "name": "Blue0", "hex": "#EAF5FF" },
+      { "name": "Blue1", "hex": "#CBE7FE" },
+      { "name": "Blue2", "hex": "#98CDFD" },
+      { "name": "Blue3", "hex": "#65B2FC" },
+      { "name": "Blue4", "hex": "#3295FB" },
+      { "name": "Blue5", "hex": "#0077FA" },
+      { "name": "Blue6", "hex": "#0062D6" },
+      { "name": "Blue7", "hex": "#004FB3" },
+      { "name": "Blue8", "hex": "#003D8F" },
+      { "name": "Blue9", "hex": "#002C6B" }
     ]
   },
   {
-    "category": "Light_LightBlue",
+    "category": "Light｜LightBlue",
     "description": "浅蓝（浅色主题）",
-    "detial":[
-      {"name": "LB0", "hex": "#E9F7FD"},
-      {"name": "LB1", "hex": "#C9ECFC"},
-      {"name": "LB2", "hex": "#95D8F8"},
-      {"name": "LB3", "hex": "#62C3F5"},
-      {"name": "LB4", "hex": "#30ACF1"},
-      {"name": "LB5", "hex": "#0095EE"},
-      {"name": "LB6", "hex": "#007BCA"},
-      {"name": "LB7", "hex": "#0063A7"},
-      {"name": "LB8", "hex": "#004B83"},
-      {"name": "LB9", "hex": "#00355F"}
+    "detial": [
+      { "name": "LB0", "hex": "#E9F7FD" },
+      { "name": "LB1", "hex": "#C9ECFC" },
+      { "name": "LB2", "hex": "#95D8F8" },
+      { "name": "LB3", "hex": "#62C3F5" },
+      { "name": "LB4", "hex": "#30ACF1" },
+      { "name": "LB5", "hex": "#0095EE" },
+      { "name": "LB6", "hex": "#007BCA" },
+      { "name": "LB7", "hex": "#0063A7" },
+      { "name": "LB8", "hex": "#004B83" },
+      { "name": "LB9", "hex": "#00355F" }
     ]
   },
   {
-    "category": "Light_Cyan",
+    "category": "Light｜Cyan",
     "description": "青色（浅色主题）",
-    "detial":[
-      {"name": "Cyan0", "hex": "#E5F7F8"},
-      {"name": "Cyan1", "hex": "#C2EFF0"},
-      {"name": "Cyan2", "hex": "#8ADDE2"},
-      {"name": "Cyan3", "hex": "#58CBD3"},
-      {"name": "Cyan4", "hex": "#2CB8C5"},
-      {"name": "Cyan5", "hex": "#05A4B6"},
-      {"name": "Cyan6", "hex": "#038698"},
-      {"name": "Cyan7", "hex": "#016979"},
-      {"name": "Cyan8", "hex": "#004D5B"},
-      {"name": "Cyan9", "hex": "#00323D"}
+    "detial": [
+      { "name": "Cyan0", "hex": "#E5F7F8" },
+      { "name": "Cyan1", "hex": "#C2EFF0" },
+      { "name": "Cyan2", "hex": "#8ADDE2" },
+      { "name": "Cyan3", "hex": "#58CBD3" },
+      { "name": "Cyan4", "hex": "#2CB8C5" },
+      { "name": "Cyan5", "hex": "#05A4B6" },
+      { "name": "Cyan6", "hex": "#038698" },
+      { "name": "Cyan7", "hex": "#016979" },
+      { "name": "Cyan8", "hex": "#004D5B" },
+      { "name": "Cyan9", "hex": "#00323D" }
     ]
   },
   {
-    "category": "Light_Teal",
+    "category": "Light｜Teal",
     "description": "水鸭绿（浅色主题）",
-    "detial":[
-      {"name": "Teal0", "hex": "#E4F7F4"},
-      {"name": "Teal1", "hex": "#C0F0E8"},
-      {"name": "Teal2", "hex": "#87E0D3"},
-      {"name": "Teal3", "hex": "#54D1C1"},
-      {"name": "Teal4", "hex": "#27C2B0"},
-      {"name": "Teal5", "hex": "#00B3A1"},
-      {"name": "Teal6", "hex": "#009589"},
-      {"name": "Teal7", "hex": "#00776F"},
-      {"name": "Teal8", "hex": "#005955"},
-      {"name": "Teal9", "hex": "#003C3A"}
+    "detial": [
+      { "name": "Teal0", "hex": "#E4F7F4" },
+      { "name": "Teal1", "hex": "#C0F0E8" },
+      { "name": "Teal2", "hex": "#87E0D3" },
+      { "name": "Teal3", "hex": "#54D1C1" },
+      { "name": "Teal4", "hex": "#27C2B0" },
+      { "name": "Teal5", "hex": "#00B3A1" },
+      { "name": "Teal6", "hex": "#009589" },
+      { "name": "Teal7", "hex": "#00776F" },
+      { "name": "Teal8", "hex": "#005955" },
+      { "name": "Teal9", "hex": "#003C3A" }
     ]
   },
   {
-    "category": "Light_Green",
+    "category": "Light｜Green",
     "description": "绿色（浅色主题）",
-    "detial":[
-      {"name": "Green0", "hex": "#ECF7EC"},
-      {"name": "Green1", "hex": "#D0F0D1"},
-      {"name": "Green2", "hex": "#A4E0A7"},
-      {"name": "Green3", "hex": "#7DD182"},
-      {"name": "Green4", "hex": "#5AC262"},
-      {"name": "Green5", "hex": "#3BB346"},
-      {"name": "Green6", "hex": "#30953B"},
-      {"name": "Green7", "hex": "#25772F"},
-      {"name": "Green8", "hex": "#1B5924"},
-      {"name": "Green9", "hex": "#113C18"}
+    "detial": [
+      { "name": "Green0", "hex": "#ECF7EC" },
+      { "name": "Green1", "hex": "#D0F0D1" },
+      { "name": "Green2", "hex": "#A4E0A7" },
+      { "name": "Green3", "hex": "#7DD182" },
+      { "name": "Green4", "hex": "#5AC262" },
+      { "name": "Green5", "hex": "#3BB346" },
+      { "name": "Green6", "hex": "#30953B" },
+      { "name": "Green7", "hex": "#25772F" },
+      { "name": "Green8", "hex": "#1B5924" },
+      { "name": "Green9", "hex": "#113C18" }
     ]
   },
   {
-    "category": "Light_LightGreen",
+    "category": "Light｜LightGreen",
     "description": "浅绿（浅色主题）",
-    "detial":[
-      {"name": "LB0", "hex": "#F3F8EC"},
-      {"name": "LB1", "hex": "#E3F0D0"},
-      {"name": "LB2", "hex": "#C8E2A5"},
-      {"name": "LB3", "hex": "#ADD37E"},
-      {"name": "LB4", "hex": "#93C55B"},
-      {"name": "LB5", "hex": "#7BB63C"},
-      {"name": "LB6", "hex": "#649830"},
-      {"name": "LB7", "hex": "#4E7926"},
-      {"name": "LB8", "hex": "#395B1B"},
-      {"name": "LB9", "hex": "#253D12"}
+    "detial": [
+      { "name": "LB0", "hex": "#F3F8EC" },
+      { "name": "LB1", "hex": "#E3F0D0" },
+      { "name": "LB2", "hex": "#C8E2A5" },
+      { "name": "LB3", "hex": "#ADD37E" },
+      { "name": "LB4", "hex": "#93C55B" },
+      { "name": "LB5", "hex": "#7BB63C" },
+      { "name": "LB6", "hex": "#649830" },
+      { "name": "LB7", "hex": "#4E7926" },
+      { "name": "LB8", "hex": "#395B1B" },
+      { "name": "LB9", "hex": "#253D12" }
     ]
   },
   {
-    "category": "Light_Lime",
+    "category": "Light｜Lime",
     "description": "柠檬绿（浅色主题）",
-    "detial":[
-      {"name": "Lime0", "hex": "#F2FAE6"},
-      {"name": "Lime1", "hex": "#E3F6C5"},
-      {"name": "Lime2", "hex": "#CBED8E"},
-      {"name": "Lime3", "hex": "#B7E35B"},
-      {"name": "Lime4", "hex": "#A7DA2C"},
-      {"name": "Lime5", "hex": "#9BD100"},
-      {"name": "Lime6", "hex": "#7EAE00"},
-      {"name": "Lime7", "hex": "#638B00"},
-      {"name": "Lime8", "hex": "#486800"},
-      {"name": "Lime9", "hex": "#2F4600"}
+    "detial": [
+      { "name": "Lime0", "hex": "#F2FAE6" },
+      { "name": "Lime1", "hex": "#E3F6C5" },
+      { "name": "Lime2", "hex": "#CBED8E" },
+      { "name": "Lime3", "hex": "#B7E35B" },
+      { "name": "Lime4", "hex": "#A7DA2C" },
+      { "name": "Lime5", "hex": "#9BD100" },
+      { "name": "Lime6", "hex": "#7EAE00" },
+      { "name": "Lime7", "hex": "#638B00" },
+      { "name": "Lime8", "hex": "#486800" },
+      { "name": "Lime9", "hex": "#2F4600" }
     ]
   },
   {
-    "category": "Light_Yellow",
+    "category": "Light｜Yellow",
     "description": "黄色（浅色主题）",
-    "detial":[
-      {"name": "Yellow0", "hex": "#FFFDEA"},
-      {"name": "Yellow1", "hex": "#FEFBCB"},
-      {"name": "Yellow2", "hex": "#FDF398"},
-      {"name": "Yellow3", "hex": "#FCE865"},
-      {"name": "Yellow4", "hex": "#FBDA32"},
-      {"name": "Yellow5", "hex": "#FAC800"},
-      {"name": "Yellow6", "hex": "#D0AA00"},
-      {"name": "Yellow7", "hex": "#A78B00"},
-      {"name": "Yellow8", "hex": "#7D6A00"},
-      {"name": "Yellow9", "hex": "#534800"}
+    "detial": [
+      { "name": "Yellow0", "hex": "#FFFDEA" },
+      { "name": "Yellow1", "hex": "#FEFBCB" },
+      { "name": "Yellow2", "hex": "#FDF398" },
+      { "name": "Yellow3", "hex": "#FCE865" },
+      { "name": "Yellow4", "hex": "#FBDA32" },
+      { "name": "Yellow5", "hex": "#FAC800" },
+      { "name": "Yellow6", "hex": "#D0AA00" },
+      { "name": "Yellow7", "hex": "#A78B00" },
+      { "name": "Yellow8", "hex": "#7D6A00" },
+      { "name": "Yellow9", "hex": "#534800" }
     ]
   },
   {
-    "category": "Light_Amber",
+    "category": "Light｜Amber",
     "description": "琥珀色（浅色主题）",
-    "detial":[
-      {"name": "Amber0", "hex": "#FEFBEB"},
-      {"name": "Amber1", "hex": "#FCF5CE"},
-      {"name": "Amber2", "hex": "#F9E89E"},
-      {"name": "Amber3", "hex": "#F6D86F"},
-      {"name": "Amber4", "hex": "#F3C641"},
-      {"name": "Amber5", "hex": "#F0B114"},
-      {"name": "Amber6", "hex": "#C88A0F"},
-      {"name": "Amber7", "hex": "#A0660A"},
-      {"name": "Amber8", "hex": "#784606"},
-      {"name": "Amber9", "hex": "#502B03"}
+    "detial": [
+      { "name": "Amber0", "hex": "#FEFBEB" },
+      { "name": "Amber1", "hex": "#FCF5CE" },
+      { "name": "Amber2", "hex": "#F9E89E" },
+      { "name": "Amber3", "hex": "#F6D86F" },
+      { "name": "Amber4", "hex": "#F3C641" },
+      { "name": "Amber5", "hex": "#F0B114" },
+      { "name": "Amber6", "hex": "#C88A0F" },
+      { "name": "Amber7", "hex": "#A0660A" },
+      { "name": "Amber8", "hex": "#784606" },
+      { "name": "Amber9", "hex": "#502B03" }
     ]
   },
   {
-    "category": "Light_Orange",
+    "category": "Light｜Orange",
     "description": "橙色（浅色主题）",
-    "detial":[
-      {"name": "Orange0", "hex": "#FFF8EA"},
-      {"name": "Orange1", "hex": "#FEEECC"},
-      {"name": "Orange2", "hex": "#FED998"},
-      {"name": "Orange3", "hex": "#FDC165"},
-      {"name": "Orange4", "hex": "#FDA633"},
-      {"name": "Orange5", "hex": "#FC8800"},
-      {"name": "Orange6", "hex": "#D26700"},
-      {"name": "Orange7", "hex": "#A84A00"},
-      {"name": "Orange8", "hex": "#7E3100"},
-      {"name": "Orange9", "hex": "#541D00"}
+    "detial": [
+      { "name": "Orange0", "hex": "#FFF8EA" },
+      { "name": "Orange1", "hex": "#FEEECC" },
+      { "name": "Orange2", "hex": "#FED998" },
+      { "name": "Orange3", "hex": "#FDC165" },
+      { "name": "Orange4", "hex": "#FDA633" },
+      { "name": "Orange5", "hex": "#FC8800" },
+      { "name": "Orange6", "hex": "#D26700" },
+      { "name": "Orange7", "hex": "#A84A00" },
+      { "name": "Orange8", "hex": "#7E3100" },
+      { "name": "Orange9", "hex": "#541D00" }
     ]
   },
   {
-    "category": "Light_Gery",
+    "category": "Light｜Gery",
     "description": "灰色（浅色主题）",
-    "detial":[
-      {"name": "Gray0", "hex": "#F9F9F9"},
-      {"name": "Gray1", "hex": "#E6E8EA"},
-      {"name": "Gray2", "hex": "#C6CACD"},
-      {"name": "Gray3", "hex": "#A7ABB0"},
-      {"name": "Gray4", "hex": "#888D92"},
-      {"name": "Gray5", "hex": "#6B7075"},
-      {"name": "Gray6", "hex": "#555B61"},
-      {"name": "Gray7", "hex": "#41464C"},
-      {"name": "Gray8", "hex": "#2E3238"},
-      {"name": "Gray9", "hex": "#1C1F23"}
+    "detial": [
+      { "name": "Gray0", "hex": "#F9F9F9" },
+      { "name": "Gray1", "hex": "#E6E8EA" },
+      { "name": "Gray2", "hex": "#C6CACD" },
+      { "name": "Gray3", "hex": "#A7ABB0" },
+      { "name": "Gray4", "hex": "#888D92" },
+      { "name": "Gray5", "hex": "#6B7075" },
+      { "name": "Gray6", "hex": "#555B61" },
+      { "name": "Gray7", "hex": "#41464C" },
+      { "name": "Gray8", "hex": "#2E3238" },
+      { "name": "Gray9", "hex": "#1C1F23" }
     ]
   },
   {
-    "category": "Dark_Red",
+    "category": "Dark｜Red",
     "description": "红色（深色主题）",
-    "detial":[
-      {"name": "Red0", "hex": "#6C090B"},
-      {"name": "Red1", "hex": "#901110"},
-      {"name": "Red2", "hex": "#B42019"},
-      {"name": "Red3", "hex": "#D73324"},
-      {"name": "Red4", "hex": "#FB4932"},
-      {"name": "Red5", "hex": "#FC725A"},
-      {"name": "Red6", "hex": "#FD9983"},
-      {"name": "Red7", "hex": "#FDBEAC"},
-      {"name": "Red8", "hex": "#FEE0D5"},
-      {"name": "Red9", "hex": "#FFF3EF"}
+    "detial": [
+      { "name": "Red0", "hex": "#6C090B" },
+      { "name": "Red1", "hex": "#901110" },
+      { "name": "Red2", "hex": "#B42019" },
+      { "name": "Red3", "hex": "#D73324" },
+      { "name": "Red4", "hex": "#FB4932" },
+      { "name": "Red5", "hex": "#FC725A" },
+      { "name": "Red6", "hex": "#FD9983" },
+      { "name": "Red7", "hex": "#FDBEAC" },
+      { "name": "Red8", "hex": "#FEE0D5" },
+      { "name": "Red9", "hex": "#FFF3EF" }
     ]
   },
   {
-    "category": "Dark_Pink",
+    "category": "Dark｜Pink",
     "description": "粉色（深色主题）",
-    "detial":[
-      {"name": "Pink0", "hex": "#5C0730"},
-      {"name": "Pink1", "hex": "#800E41"},
-      {"name": "Pink2", "hex": "#A41751"},
-      {"name": "Pink3", "hex": "#C72261"},
-      {"name": "Pink4", "hex": "#EB2F71"},
-      {"name": "Pink5", "hex": "#EF5686"},
-      {"name": "Pink6", "hex": "#F37E9F"},
-      {"name": "Pink7", "hex": "#F7A8BC"},
-      {"name": "Pink8", "hex": "#FBD3DC"},
-      {"name": "Pink9", "hex": "#FDEEF1"}
+    "detial": [
+      { "name": "Pink0", "hex": "#5C0730" },
+      { "name": "Pink1", "hex": "#800E41" },
+      { "name": "Pink2", "hex": "#A41751" },
+      { "name": "Pink3", "hex": "#C72261" },
+      { "name": "Pink4", "hex": "#EB2F71" },
+      { "name": "Pink5", "hex": "#EF5686" },
+      { "name": "Pink6", "hex": "#F37E9F" },
+      { "name": "Pink7", "hex": "#F7A8BC" },
+      { "name": "Pink8", "hex": "#FBD3DC" },
+      { "name": "Pink9", "hex": "#FDEEF1" }
     ]
   },
   {
-    "category": "Dark_Purple",
+    "category": "Dark｜Purple",
     "description": "紫色（深色主题）",
-    "detial":[
-      {"name": "Purple0", "hex": "#4A1061"},
-      {"name": "Purple1", "hex": "#5E1776"},
-      {"name": "Purple2", "hex": "#731F8A"},
-      {"name": "Purple3", "hex": "#89289F"},
-      {"name": "Purple4", "hex": "#A033B3"},
-      {"name": "Purple5", "hex": "#B553C2"},
-      {"name": "Purple6", "hex": "#CA78D1"},
-      {"name": "Purple7", "hex": "#DDA0E1"},
-      {"name": "Purple8", "hex": "#EFCEF0"},
-      {"name": "Purple9", "hex": "#F7EBF7"}
+    "detial": [
+      { "name": "Purple0", "hex": "#4A1061" },
+      { "name": "Purple1", "hex": "#5E1776" },
+      { "name": "Purple2", "hex": "#731F8A" },
+      { "name": "Purple3", "hex": "#89289F" },
+      { "name": "Purple4", "hex": "#A033B3" },
+      { "name": "Purple5", "hex": "#B553C2" },
+      { "name": "Purple6", "hex": "#CA78D1" },
+      { "name": "Purple7", "hex": "#DDA0E1" },
+      { "name": "Purple8", "hex": "#EFCEF0" },
+      { "name": "Purple9", "hex": "#F7EBF7" }
     ]
   },
   {
-    "category": "Dark_Violet",
+    "category": "Dark｜Violet",
     "description": "蓝紫（深色主题）",
-    "detial":[
-      {"name": "Violet0", "hex": "#401B77"},
-      {"name": "Violet1", "hex": "#4C248C"},
-      {"name": "Violet2", "hex": "#582EA0"},
-      {"name": "Violet3", "hex": "#6439B5"},
-      {"name": "Violet4", "hex": "#7246C9"},
-      {"name": "Violet5", "hex": "#8865D4"},
-      {"name": "Violet6", "hex": "#A288DF"},
-      {"name": "Violet7", "hex": "#BEADE9"},
-      {"name": "Violet8", "hex": "#DDD4F4"},
-      {"name": "Violet9", "hex": "#F1EEFA"}
+    "detial": [
+      { "name": "Violet0", "hex": "#401B77" },
+      { "name": "Violet1", "hex": "#4C248C" },
+      { "name": "Violet2", "hex": "#582EA0" },
+      { "name": "Violet3", "hex": "#6439B5" },
+      { "name": "Violet4", "hex": "#7246C9" },
+      { "name": "Violet5", "hex": "#8865D4" },
+      { "name": "Violet6", "hex": "#A288DF" },
+      { "name": "Violet7", "hex": "#BEADE9" },
+      { "name": "Violet8", "hex": "#DDD4F4" },
+      { "name": "Violet9", "hex": "#F1EEFA" }
     ]
   },
   {
-    "category": "Dark_Indigo",
+    "category": "Dark｜Indigo",
     "description": "靛色（深色主题）",
-    "detial":[
-      {"name": "Indigo0", "hex": "#171E65"},
-      {"name": "Indigo1", "hex": "#20297A"},
-      {"name": "Indigo2", "hex": "#29368E"},
-      {"name": "Indigo3", "hex": "#3444A3"},
-      {"name": "Indigo4", "hex": "#4053B7"},
-      {"name": "Indigo5", "hex": "#5F71C5"},
-      {"name": "Indigo6", "hex": "#8191D4"},
-      {"name": "Indigo7", "hex": "#A7B4E2"},
-      {"name": "Indigo8", "hex": "#D1D8F1"},
-      {"name": "Indigo9", "hex": "#EDEFF8"}
+    "detial": [
+      { "name": "Indigo0", "hex": "#171E65" },
+      { "name": "Indigo1", "hex": "#20297A" },
+      { "name": "Indigo2", "hex": "#29368E" },
+      { "name": "Indigo3", "hex": "#3444A3" },
+      { "name": "Indigo4", "hex": "#4053B7" },
+      { "name": "Indigo5", "hex": "#5F71C5" },
+      { "name": "Indigo6", "hex": "#8191D4" },
+      { "name": "Indigo7", "hex": "#A7B4E2" },
+      { "name": "Indigo8", "hex": "#D1D8F1" },
+      { "name": "Indigo9", "hex": "#EDEFF8" }
     ]
   },
   {
-    "category": "Dark_Blue",
+    "category": "Dark｜Blue",
     "description": "蓝色（深色主题）",
-    "detial":[
-      {"name": "Blue0", "hex": "#053170"},
-      {"name": "Blue1", "hex": "#0A4694"},
-      {"name": "Blue2", "hex": "#135CB8"},
-      {"name": "Blue3", "hex": "#1D75DB"},
-      {"name": "Blue4", "hex": "#2990FF"},
-      {"name": "Blue5", "hex": "#54A9FF"},
-      {"name": "Blue6", "hex": "#7FC1FF"},
-      {"name": "Blue7", "hex": "#A9D7FF"},
-      {"name": "Blue8", "hex": "#D4ECFF"},
-      {"name": "Blue9", "hex": "#EFF8FF"}
+    "detial": [
+      { "name": "Blue0", "hex": "#053170" },
+      { "name": "Blue1", "hex": "#0A4694" },
+      { "name": "Blue2", "hex": "#135CB8" },
+      { "name": "Blue3", "hex": "#1D75DB" },
+      { "name": "Blue4", "hex": "#2990FF" },
+      { "name": "Blue5", "hex": "#54A9FF" },
+      { "name": "Blue6", "hex": "#7FC1FF" },
+      { "name": "Blue7", "hex": "#A9D7FF" },
+      { "name": "Blue8", "hex": "#D4ECFF" },
+      { "name": "Blue9", "hex": "#EFF8FF" }
     ]
   },
   {
-    "category": "Dark_DarkBlue",
+    "category": "Dark｜DarkBlue",
     "description": "浅蓝（深色主题）",
-    "detial":[
-      {"name": "LB0", "hex": "#003761"},
-      {"name": "LB1", "hex": "#004D85"},
-      {"name": "LB2", "hex": "#0366A9"},
-      {"name": "LB3", "hex": "#0A81CC"},
-      {"name": "LB4", "hex": "#139FF0"},
-      {"name": "LB5", "hex": "#40B4F3"},
-      {"name": "LB6", "hex": "#6EC8F6"},
-      {"name": "LB7", "hex": "#9DDCF9"},
-      {"name": "LB8", "hex": "#CEEEFC"},
-      {"name": "LB9", "hex": "#EBF8FE"}
+    "detial": [
+      { "name": "LB0", "hex": "#003761" },
+      { "name": "LB1", "hex": "#004D85" },
+      { "name": "LB2", "hex": "#0366A9" },
+      { "name": "LB3", "hex": "#0A81CC" },
+      { "name": "LB4", "hex": "#139FF0" },
+      { "name": "LB5", "hex": "#40B4F3" },
+      { "name": "LB6", "hex": "#6EC8F6" },
+      { "name": "LB7", "hex": "#9DDCF9" },
+      { "name": "LB8", "hex": "#CEEEFC" },
+      { "name": "LB9", "hex": "#EBF8FE" }
     ]
   },
   {
-    "category": "Dark_Cyan",
+    "category": "Dark｜Cyan",
     "description": "青色（深色主题）",
-    "detial":[
-      {"name": "Cyan0", "hex": "#04343D"},
-      {"name": "Cyan1", "hex": "#074F5C"},
-      {"name": "Cyan2", "hex": "#0A6C7B"},
-      {"name": "Cyan3", "hex": "#0E8999"},
-      {"name": "Cyan4", "hex": "#13A8B8"},
-      {"name": "Cyan5", "hex": "#38BBC6"},
-      {"name": "Cyan6", "hex": "#62CDD4"},
-      {"name": "Cyan7", "hex": "#91DFE3"},
-      {"name": "Cyan8", "hex": "#C6EFF1"},
-      {"name": "Cyan9", "hex": "#E7F7F8"}
+    "detial": [
+      { "name": "Cyan0", "hex": "#04343D" },
+      { "name": "Cyan1", "hex": "#074F5C" },
+      { "name": "Cyan2", "hex": "#0A6C7B" },
+      { "name": "Cyan3", "hex": "#0E8999" },
+      { "name": "Cyan4", "hex": "#13A8B8" },
+      { "name": "Cyan5", "hex": "#38BBC6" },
+      { "name": "Cyan6", "hex": "#62CDD4" },
+      { "name": "Cyan7", "hex": "#91DFE3" },
+      { "name": "Cyan8", "hex": "#C6EFF1" },
+      { "name": "Cyan9", "hex": "#E7F7F8" }
     ]
   },
   {
-    "category": "Dark_Teal",
+    "category": "Dark｜Teal",
     "description": "水鸭绿（深色主题）",
-    "detial":[
-      {"name": "Teal0", "hex": "#023C39"},
-      {"name": "Teal1", "hex": "#045A55"},
-      {"name": "Teal2", "hex": "#07776F"},
-      {"name": "Teal3", "hex": "#0A9588"},
-      {"name": "Teal4", "hex": "#0EB3A1"},
-      {"name": "Teal5", "hex": "#33C2B0"},
-      {"name": "Teal6", "hex": "#5ED1C1"},
-      {"name": "Teal7", "hex": "#8EE1D3"},
-      {"name": "Teal8", "hex": "#C4F0E8"},
-      {"name": "Teal9", "hex": "#E6F7F4"}
+    "detial": [
+      { "name": "Teal0", "hex": "#023C39" },
+      { "name": "Teal1", "hex": "#045A55" },
+      { "name": "Teal2", "hex": "#07776F" },
+      { "name": "Teal3", "hex": "#0A9588" },
+      { "name": "Teal4", "hex": "#0EB3A1" },
+      { "name": "Teal5", "hex": "#33C2B0" },
+      { "name": "Teal6", "hex": "#5ED1C1" },
+      { "name": "Teal7", "hex": "#8EE1D3" },
+      { "name": "Teal8", "hex": "#C4F0E8" },
+      { "name": "Teal9", "hex": "#E6F7F4" }
     ]
   },
   {
-    "category": "Dark_Green",
+    "category": "Dark｜Green",
     "description": "绿色（深色主题）",
-    "detial":[
-      {"name": "Green0", "hex": "#123C19"},
-      {"name": "Green1", "hex": "#1C5A25"},
-      {"name": "Green2", "hex": "#277731"},
-      {"name": "Green3", "hex": "#32953D"},
-      {"name": "Green4", "hex": "#3EB349"},
-      {"name": "Green5", "hex": "#5DC264"},
-      {"name": "Green6", "hex": "#7FD184"},
-      {"name": "Green7", "hex": "#A6E1A8"},
-      {"name": "Green8", "hex": "#D0F0D1"},
-      {"name": "Green9", "hex": "#ECF7EC"}
+    "detial": [
+      { "name": "Green0", "hex": "#123C19" },
+      { "name": "Green1", "hex": "#1C5A25" },
+      { "name": "Green2", "hex": "#277731" },
+      { "name": "Green3", "hex": "#32953D" },
+      { "name": "Green4", "hex": "#3EB349" },
+      { "name": "Green5", "hex": "#5DC264" },
+      { "name": "Green6", "hex": "#7FD184" },
+      { "name": "Green7", "hex": "#A6E1A8" },
+      { "name": "Green8", "hex": "#D0F0D1" },
+      { "name": "Green9", "hex": "#ECF7EC" }
     ]
   },
   {
-    "category": "Dark_DarkGreen",
+    "category": "Dark｜DarkGreen",
     "description": "浅绿（深色主题）",
-    "detial":[
-      {"name": "LB0", "hex": "#263D13"},
-      {"name": "LB1", "hex": "#3B5C1D"},
-      {"name": "LB2", "hex": "#517B28"},
-      {"name": "LB3", "hex": "#679934"},
-      {"name": "LB4", "hex": "#7FB840"},
-      {"name": "LB5", "hex": "#97C65F"},
-      {"name": "LB6", "hex": "#B0D481"},
-      {"name": "LB7", "hex": "#C9E3A7"},
-      {"name": "LB8", "hex": "#E4F1D1"},
-      {"name": "LB9", "hex": "#F3F8ED"}
+    "detial": [
+      { "name": "LB0", "hex": "#263D13" },
+      { "name": "LB1", "hex": "#3B5C1D" },
+      { "name": "LB2", "hex": "#517B28" },
+      { "name": "LB3", "hex": "#679934" },
+      { "name": "LB4", "hex": "#7FB840" },
+      { "name": "LB5", "hex": "#97C65F" },
+      { "name": "LB6", "hex": "#B0D481" },
+      { "name": "LB7", "hex": "#C9E3A7" },
+      { "name": "LB8", "hex": "#E4F1D1" },
+      { "name": "LB9", "hex": "#F3F8ED" }
     ]
   },
   {
-    "category": "Dark_Lime",
+    "category": "Dark｜Lime",
     "description": "柠檬绿（深色主题）",
-    "detial":[
-      {"name": "Lime0", "hex": "#314603"},
-      {"name": "Lime1", "hex": "#4B6905"},
-      {"name": "Lime2", "hex": "#678D09"},
-      {"name": "Lime3", "hex": "#84B00C"},
-      {"name": "Lime4", "hex": "#A2D311"},
-      {"name": "Lime5", "hex": "#AEDC3A"},
-      {"name": "Lime6", "hex": "#BDE566"},
-      {"name": "Lime7", "hex": "#CFED96"},
-      {"name": "Lime8", "hex": "#E5F6C9"},
-      {"name": "Lime9", "hex": "#F3FBE9"}
+    "detial": [
+      { "name": "Lime0", "hex": "#314603" },
+      { "name": "Lime1", "hex": "#4B6905" },
+      { "name": "Lime2", "hex": "#678D09" },
+      { "name": "Lime3", "hex": "#84B00C" },
+      { "name": "Lime4", "hex": "#A2D311" },
+      { "name": "Lime5", "hex": "#AEDC3A" },
+      { "name": "Lime6", "hex": "#BDE566" },
+      { "name": "Lime7", "hex": "#CFED96" },
+      { "name": "Lime8", "hex": "#E5F6C9" },
+      { "name": "Lime9", "hex": "#F3FBE9" }
     ]
   },
   {
-    "category": "Dark_Yellow",
+    "category": "Dark｜Yellow",
     "description": "黄色（深色主题）",
-    "detial":[
-      {"name": "Yellow0", "hex": "#544903"},
-      {"name": "Yellow1", "hex": "#7E6C06"},
-      {"name": "Yellow2", "hex": "#A88E0A"},
-      {"name": "Yellow3", "hex": "#D2AF0F"},
-      {"name": "Yellow4", "hex": "#FCCE14"},
-      {"name": "Yellow5", "hex": "#FDDE43"},
-      {"name": "Yellow6", "hex": "#FDEB71"},
-      {"name": "Yellow7", "hex": "#FEF5A0"},
-      {"name": "Yellow8", "hex": "#FEFBD0"},
-      {"name": "Yellow9", "hex": "#FFFEEC"}
+    "detial": [
+      { "name": "Yellow0", "hex": "#544903" },
+      { "name": "Yellow1", "hex": "#7E6C06" },
+      { "name": "Yellow2", "hex": "#A88E0A" },
+      { "name": "Yellow3", "hex": "#D2AF0F" },
+      { "name": "Yellow4", "hex": "#FCCE14" },
+      { "name": "Yellow5", "hex": "#FDDE43" },
+      { "name": "Yellow6", "hex": "#FDEB71" },
+      { "name": "Yellow7", "hex": "#FEF5A0" },
+      { "name": "Yellow8", "hex": "#FEFBD0" },
+      { "name": "Yellow9", "hex": "#FFFEEC" }
     ]
   },
   {
-    "category": "Dark_Amber",
+    "category": "Dark｜Amber",
     "description": "琥珀色（深色主题）",
-    "detial":[
-      {"name": "Amber0", "hex": "#512E09"},
-      {"name": "Amber1", "hex": "#794B0F"},
-      {"name": "Amber2", "hex": "#A16B16"},
-      {"name": "Amber3", "hex": "#CA8F1E"},
-      {"name": "Amber4", "hex": "#F2B726"},
-      {"name": "Amber5", "hex": "#F5CA50"},
-      {"name": "Amber6", "hex": "#F7DB7A"},
-      {"name": "Amber7", "hex": "#FAEAA6"},
-      {"name": "Amber8", "hex": "#FCF6D2"},
-      {"name": "Amber9", "hex": "#FEFBED"}
+    "detial": [
+      { "name": "Amber0", "hex": "#512E09" },
+      { "name": "Amber1", "hex": "#794B0F" },
+      { "name": "Amber2", "hex": "#A16B16" },
+      { "name": "Amber3", "hex": "#CA8F1E" },
+      { "name": "Amber4", "hex": "#F2B726" },
+      { "name": "Amber5", "hex": "#F5CA50" },
+      { "name": "Amber6", "hex": "#F7DB7A" },
+      { "name": "Amber7", "hex": "#FAEAA6" },
+      { "name": "Amber8", "hex": "#FCF6D2" },
+      { "name": "Amber9", "hex": "#FEFBED" }
     ]
   },
   {
-    "category": "Dark_Orange",
+    "category": "Dark｜Orange",
     "description": "橙色（深色主题）",
-    "detial":[
-      {"name": "Orange0", "hex": "#551F03"},
-      {"name": "Orange1", "hex": "#803506"},
-      {"name": "Orange2", "hex": "#AA500A"},
-      {"name": "Orange3", "hex": "#D56F0F"},
-      {"name": "Orange4", "hex": "#FF9214"},
-      {"name": "Orange5", "hex": "#FFAE43"},
-      {"name": "Orange6", "hex": "#FFC772"},
-      {"name": "Orange7", "hex": "#FFDDA1"},
-      {"name": "Orange8", "hex": "#FFEFD0"},
-      {"name": "Orange9", "hex": "#FFF9ED"}
+    "detial": [
+      { "name": "Orange0", "hex": "#551F03" },
+      { "name": "Orange1", "hex": "#803506" },
+      { "name": "Orange2", "hex": "#AA500A" },
+      { "name": "Orange3", "hex": "#D56F0F" },
+      { "name": "Orange4", "hex": "#FF9214" },
+      { "name": "Orange5", "hex": "#FFAE43" },
+      { "name": "Orange6", "hex": "#FFC772" },
+      { "name": "Orange7", "hex": "#FFDDA1" },
+      { "name": "Orange8", "hex": "#FFEFD0" },
+      { "name": "Orange9", "hex": "#FFF9ED" }
     ]
   },
   {
-    "category": "Dark_Gery",
+    "category": "Dark｜Gery",
     "description": "灰色（深色主题）",
-    "detial":[
-      {"name": "Gray0", "hex": "#1C1F23"},
-      {"name": "Gray1", "hex": "#2E3238"},
-      {"name": "Gray2", "hex": "#41464C"},
-      {"name": "Gray3", "hex": "#555B61"},
-      {"name": "Gray4", "hex": "#6B7075"},
-      {"name": "Gray5", "hex": "#888D92"},
-      {"name": "Gray6", "hex": "#A7ABB0"},
-      {"name": "Gray7", "hex": "#C6CACD"},
-      {"name": "Gray8", "hex": "#E6E8EA"},
-      {"name": "Gray9", "hex": "#F9F9F9"}
+    "detial": [
+      { "name": "Gray0", "hex": "#1C1F23" },
+      { "name": "Gray1", "hex": "#2E3238" },
+      { "name": "Gray2", "hex": "#41464C" },
+      { "name": "Gray3", "hex": "#555B61" },
+      { "name": "Gray4", "hex": "#6B7075" },
+      { "name": "Gray5", "hex": "#888D92" },
+      { "name": "Gray6", "hex": "#A7ABB0" },
+      { "name": "Gray7", "hex": "#C6CACD" },
+      { "name": "Gray8", "hex": "#E6E8EA" },
+      { "name": "Gray9", "hex": "#F9F9F9" }
     ]
   }
 ]

@@ -2,449 +2,449 @@
   {
     "category": "Light｜Red",
     "description": "红色（浅色主题）",
-    "detial":[
-      {"name": "R1", "hex": "#FFECE8", "hsl" : "HSL(10,100%,96%)"},
-      {"name": "R2", "hex": "#FDCDC5", "hsl" : "HSL(8,93%,88%)"},
-      {"name": "R3", "hex": "#FBACA3", "hsl" : "HSL(6,92%,81%)"},
-      {"name": "R4", "hex": "#F98981", "hsl" : "HSL(4,91%,74%)"},
-      {"name": "R5", "hex": "#F76560", "hsl" : "HSL(2,90%,67%)"},
-      {"name": "R6", "hex": "#F53F3F", "hsl" : "HSL(0,90%,60%)"},
-      {"name": "R7", "hex": "#CB272D", "hsl" : "HSL(358,68%,47%)"},
-      {"name": "R8", "hex": "#A1151E", "hsl" : "HSL(356,77%,36%)"},
-      {"name": "R9", "hex": "#770813", "hsl" : "HSL(354,88%,25%)"},
-      {"name": "R10", "hex": "#4D000A", "hsl" : "HSL(352,100%,15%)"}
+    "detial": [
+      { "name": "R1", "hex": "#FFECE8", "hsl": "HSL(10,100%,96%)" },
+      { "name": "R2", "hex": "#FDCDC5", "hsl": "HSL(8,93%,88%)" },
+      { "name": "R3", "hex": "#FBACA3", "hsl": "HSL(6,92%,81%)" },
+      { "name": "R4", "hex": "#F98981", "hsl": "HSL(4,91%,74%)" },
+      { "name": "R5", "hex": "#F76560", "hsl": "HSL(2,90%,67%)" },
+      { "name": "R6", "hex": "#F53F3F", "hsl": "HSL(0,90%,60%)" },
+      { "name": "R7", "hex": "#CB272D", "hsl": "HSL(358,68%,47%)" },
+      { "name": "R8", "hex": "#A1151E", "hsl": "HSL(356,77%,36%)" },
+      { "name": "R9", "hex": "#770813", "hsl": "HSL(354,88%,25%)" },
+      { "name": "R10", "hex": "#4D000A", "hsl": "HSL(352,100%,15%)" }
     ]
   },
   {
     "category": "Light｜OrangeRed",
     "description": "橙红色（浅色主题）",
-    "detial":[
-      {"name": "OR1", "hex": "#FFF3E8", "hsl" : "HSL(29,100%,96%)"},
-      {"name": "OR2", "hex": "#FDDDC3", "hsl" : "HSL(27,95%,88%)"},
-      {"name": "OR3", "hex": "#FCC59F", "hsl" : "HSL(25,94%,80%)"},
-      {"name": "OR4", "hex": "#FAAC7B", "hsl" : "HSL(23,93%,73%)"},
-      {"name": "OR5", "hex": "#F99057", "hsl" : "HSL(21,93%,66%)"},
-      {"name": "OR6", "hex": "#F77234", "hsl" : "HSL(19,92%,59%)"},
-      {"name": "OR7", "hex": "#CC5120", "hsl" : "HSL(17,73%,46%)"},
-      {"name": "OR8", "hex": "#A23511", "hsl" : "HSL(15,81%,35%)"},
-      {"name": "OR9", "hex": "#771F06", "hsl" : "HSL(13,90%,25%)"},
-      {"name": "OR10", "hex": "#4D0E00", "hsl" : "HSL(11,100%,15%)"}
+    "detial": [
+      { "name": "OR1", "hex": "#FFF3E8", "hsl": "HSL(29,100%,96%)" },
+      { "name": "OR2", "hex": "#FDDDC3", "hsl": "HSL(27,95%,88%)" },
+      { "name": "OR3", "hex": "#FCC59F", "hsl": "HSL(25,94%,80%)" },
+      { "name": "OR4", "hex": "#FAAC7B", "hsl": "HSL(23,93%,73%)" },
+      { "name": "OR5", "hex": "#F99057", "hsl": "HSL(21,93%,66%)" },
+      { "name": "OR6", "hex": "#F77234", "hsl": "HSL(19,92%,59%)" },
+      { "name": "OR7", "hex": "#CC5120", "hsl": "HSL(17,73%,46%)" },
+      { "name": "OR8", "hex": "#A23511", "hsl": "HSL(15,81%,35%)" },
+      { "name": "OR9", "hex": "#771F06", "hsl": "HSL(13,90%,25%)" },
+      { "name": "OR10", "hex": "#4D0E00", "hsl": "HSL(11,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Orange",
     "description": "橙色（浅色主题）",
-    "detial":[
-      {"name": "O1", "hex": "#FFF7E8", "hsl" : "HSL(39,100%,96%)"},
-      {"name": "O2", "hex": "#FFE4BA", "hsl" : "HSL(37,100%,86%)"},
-      {"name": "O3", "hex": "#FFCF8B", "hsl" : "HSL(35,100%,77%)"},
-      {"name": "O4", "hex": "#FFB65D", "hsl" : "HSL(33,100%,68%)"},
-      {"name": "O5", "hex": "#FF9A2E", "hsl" : "HSL(31,100%,59%)"},
-      {"name": "O6", "hex": "#FF7D00", "hsl" : "HSL(29,100%,50%)"},
-      {"name": "O7", "hex": "#D25F00", "hsl" : "HSL(27,100%,41%)"},
-      {"name": "O8", "hex": "#A64500", "hsl" : "HSL(25,100%,33%)"},
-      {"name": "O9", "hex": "#792E00", "hsl" : "HSL(23,100%,24%)"},
-      {"name": "O10", "hex": "#4D1B00", "hsl" : "HSL(21,100%,15%)"}
+    "detial": [
+      { "name": "O1", "hex": "#FFF7E8", "hsl": "HSL(39,100%,96%)" },
+      { "name": "O2", "hex": "#FFE4BA", "hsl": "HSL(37,100%,86%)" },
+      { "name": "O3", "hex": "#FFCF8B", "hsl": "HSL(35,100%,77%)" },
+      { "name": "O4", "hex": "#FFB65D", "hsl": "HSL(33,100%,68%)" },
+      { "name": "O5", "hex": "#FF9A2E", "hsl": "HSL(31,100%,59%)" },
+      { "name": "O6", "hex": "#FF7D00", "hsl": "HSL(29,100%,50%)" },
+      { "name": "O7", "hex": "#D25F00", "hsl": "HSL(27,100%,41%)" },
+      { "name": "O8", "hex": "#A64500", "hsl": "HSL(25,100%,33%)" },
+      { "name": "O9", "hex": "#792E00", "hsl": "HSL(23,100%,24%)" },
+      { "name": "O10", "hex": "#4D1B00", "hsl": "HSL(21,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Gold",
     "description": "金色（浅色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#FFFCE8", "hsl" : "HSL(53,100%,96%)"},
-      {"name": "G2", "hex": "#FDF4BF", "hsl" : "HSL(51,95%,87%)"},
-      {"name": "G3", "hex": "#FCE996", "hsl" : "HSL(49,94%,79%)"},
-      {"name": "G4", "hex": "#FADC6D", "hsl" : "HSL(47,94%,70%)"},
-      {"name": "G5", "hex": "#F9CC45", "hsl" : "HSL(45,93%,62%)"},
-      {"name": "G6", "hex": "#F7BA1E", "hsl" : "HSL(43,93%,54%)"},
-      {"name": "G7", "hex": "#CC9213", "hsl" : "HSL(41,83%,44%)"},
-      {"name": "G8", "hex": "#A26D0A", "hsl" : "HSL(39,89%,34%)"},
-      {"name": "G9", "hex": "#774B04", "hsl" : "HSL(37,94%,24%)"},
-      {"name": "G10", "hex": "#4D2D00", "hsl" : "HSL(35,100%,15%)"}
+    "detial": [
+      { "name": "G1", "hex": "#FFFCE8", "hsl": "HSL(53,100%,96%)" },
+      { "name": "G2", "hex": "#FDF4BF", "hsl": "HSL(51,95%,87%)" },
+      { "name": "G3", "hex": "#FCE996", "hsl": "HSL(49,94%,79%)" },
+      { "name": "G4", "hex": "#FADC6D", "hsl": "HSL(47,94%,70%)" },
+      { "name": "G5", "hex": "#F9CC45", "hsl": "HSL(45,93%,62%)" },
+      { "name": "G6", "hex": "#F7BA1E", "hsl": "HSL(43,93%,54%)" },
+      { "name": "G7", "hex": "#CC9213", "hsl": "HSL(41,83%,44%)" },
+      { "name": "G8", "hex": "#A26D0A", "hsl": "HSL(39,89%,34%)" },
+      { "name": "G9", "hex": "#774B04", "hsl": "HSL(37,94%,24%)" },
+      { "name": "G10", "hex": "#4D2D00", "hsl": "HSL(35,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Yellow",
     "description": "黄色（浅色主题）",
-    "detial":[
-      {"name": "Y1", "hex": "#FEFFE8", "hsl" : "HSL(62,100%,96%)"},
-      {"name": "Y2", "hex": "#FEFEBE", "hsl" : "HSL(60,97%,87%)"},
-      {"name": "Y3", "hex": "#FDFA94", "hsl" : "HSL(58,96%,79%)"},
-      {"name": "Y4", "hex": "#FCF26B", "hsl" : "HSL(56,96%,70%)"},
-      {"name": "Y5", "hex": "#FBE842", "hsl" : "HSL(54,96%,62%)"},
-      {"name": "Y6", "hex": "#FADC19", "hsl" : "HSL(52,96%,54%)"},
-      {"name": "Y7", "hex": "#CFAF0F", "hsl" : "HSL(50,86%,44%)"},
-      {"name": "Y8", "hex": "#A38408", "hsl" : "HSL(48,90%,34%)"},
-      {"name": "Y9", "hex": "#785D03", "hsl" : "HSL(46,95%,24%)"},
-      {"name": "Y10", "hex": "#4D3800", "hsl" : "HSL(44,100%,15%)"}
+    "detial": [
+      { "name": "Y1", "hex": "#FEFFE8", "hsl": "HSL(62,100%,96%)" },
+      { "name": "Y2", "hex": "#FEFEBE", "hsl": "HSL(60,97%,87%)" },
+      { "name": "Y3", "hex": "#FDFA94", "hsl": "HSL(58,96%,79%)" },
+      { "name": "Y4", "hex": "#FCF26B", "hsl": "HSL(56,96%,70%)" },
+      { "name": "Y5", "hex": "#FBE842", "hsl": "HSL(54,96%,62%)" },
+      { "name": "Y6", "hex": "#FADC19", "hsl": "HSL(52,96%,54%)" },
+      { "name": "Y7", "hex": "#CFAF0F", "hsl": "HSL(50,86%,44%)" },
+      { "name": "Y8", "hex": "#A38408", "hsl": "HSL(48,90%,34%)" },
+      { "name": "Y9", "hex": "#785D03", "hsl": "HSL(46,95%,24%)" },
+      { "name": "Y10", "hex": "#4D3800", "hsl": "HSL(44,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Lime",
     "description": "新生绿（浅色主题）",
-    "detial":[
-      {"name": "L1", "hex": "#FCFFE8", "hsl" : "HSL(69,100%,96%)"},
-      {"name": "L2", "hex": "#EDF8BB", "hsl" : "HSL(71,81%,85%)"},
-      {"name": "L3", "hex": "#DCF190", "hsl" : "HSL(73,77%,75%)"},
-      {"name": "L4", "hex": "#C9E968", "hsl" : "HSL(75,75%,66%)"},
-      {"name": "L5", "hex": "#B5E241", "hsl" : "HSL(77,74%,57%)"},
-      {"name": "L6", "hex": "#9FDB1D", "hsl" : "HSL(79,77%,49%)"},
-      {"name": "L7", "hex": "#7EB712", "hsl" : "HSL(81,82%,40%)"},
-      {"name": "L8", "hex": "#5F940A", "hsl" : "HSL(83,88%,31%)"},
-      {"name": "L9", "hex": "#437004", "hsl" : "HSL(85,94%,23%)"},
-      {"name": "L10", "hex": "#2A4D00", "hsl" : "HSL(87,100%,15%)"}
+    "detial": [
+      { "name": "L1", "hex": "#FCFFE8", "hsl": "HSL(69,100%,96%)" },
+      { "name": "L2", "hex": "#EDF8BB", "hsl": "HSL(71,81%,85%)" },
+      { "name": "L3", "hex": "#DCF190", "hsl": "HSL(73,77%,75%)" },
+      { "name": "L4", "hex": "#C9E968", "hsl": "HSL(75,75%,66%)" },
+      { "name": "L5", "hex": "#B5E241", "hsl": "HSL(77,74%,57%)" },
+      { "name": "L6", "hex": "#9FDB1D", "hsl": "HSL(79,77%,49%)" },
+      { "name": "L7", "hex": "#7EB712", "hsl": "HSL(81,82%,40%)" },
+      { "name": "L8", "hex": "#5F940A", "hsl": "HSL(83,88%,31%)" },
+      { "name": "L9", "hex": "#437004", "hsl": "HSL(85,94%,23%)" },
+      { "name": "L10", "hex": "#2A4D00", "hsl": "HSL(87,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Green",
     "description": "仙野绿（浅色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#E8FFEA", "hsl" : "HSL(124,100%,96%)"},
-      {"name": "G2", "hex": "#AFF0B5", "hsl" : "HSL(126,69%,81%)"},
-      {"name": "G3", "hex": "#7BE188", "hsl" : "HSL(128,63%,68%)"},
-      {"name": "G4", "hex": "#4CD263", "hsl" : "HSL(130,60%,56%)"},
-      {"name": "G5", "hex": "#23C343", "hsl" : "HSL(132,69%,45%)"},
-      {"name": "G6", "hex": "#00B42A", "hsl" : "HSL(134,100%,35%)"},
-      {"name": "G7", "hex": "#009A29", "hsl" : "HSL(136,100%,30%)"},
-      {"name": "G8", "hex": "#008026", "hsl" : "HSL(138,100%,25%)"},
-      {"name": "G9", "hex": "#006622", "hsl" : "HSL(140,100%,20%)"},
-      {"name": "G10", "hex": "#004D1C", "hsl" : "HSL(142,100%,15%)"}
+    "detial": [
+      { "name": "G1", "hex": "#E8FFEA", "hsl": "HSL(124,100%,96%)" },
+      { "name": "G2", "hex": "#AFF0B5", "hsl": "HSL(126,69%,81%)" },
+      { "name": "G3", "hex": "#7BE188", "hsl": "HSL(128,63%,68%)" },
+      { "name": "G4", "hex": "#4CD263", "hsl": "HSL(130,60%,56%)" },
+      { "name": "G5", "hex": "#23C343", "hsl": "HSL(132,69%,45%)" },
+      { "name": "G6", "hex": "#00B42A", "hsl": "HSL(134,100%,35%)" },
+      { "name": "G7", "hex": "#009A29", "hsl": "HSL(136,100%,30%)" },
+      { "name": "G8", "hex": "#008026", "hsl": "HSL(138,100%,25%)" },
+      { "name": "G9", "hex": "#006622", "hsl": "HSL(140,100%,20%)" },
+      { "name": "G10", "hex": "#004D1C", "hsl": "HSL(142,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Cyan",
     "description": "碧涛青（浅色主题）",
-    "detial":[
-      {"name": "C1", "hex": "#E8FFFB", "hsl" : "HSL(170,100%,96%)"},
-      {"name": "C2", "hex": "#B7F4EC", "hsl" : "HSL(172,74%,84%)"},
-      {"name": "C3", "hex": "#89E9E0", "hsl" : "HSL(174,69%,73%)"},
-      {"name": "C4", "hex": "#5EDFD6", "hsl" : "HSL(176,66%,62%)"},
-      {"name": "C5", "hex": "#37D4CF", "hsl" : "HSL(178,64%,52%)"},
-      {"name": "C6", "hex": "#14C9C9", "hsl" : "HSL(180,82%,43%)"},
-      {"name": "C7", "hex": "#0DA5AA", "hsl" : "HSL(182,86%,36%)"},
-      {"name": "C8", "hex": "#07828B", "hsl" : "HSL(184,91%,29%)"},
-      {"name": "C9", "hex": "#03616C", "hsl" : "HSL(186,95%,22%)"},
-      {"name": "C10", "hex": "#00424D", "hsl" : "HSL(188,100%,15%)"}
+    "detial": [
+      { "name": "C1", "hex": "#E8FFFB", "hsl": "HSL(170,100%,96%)" },
+      { "name": "C2", "hex": "#B7F4EC", "hsl": "HSL(172,74%,84%)" },
+      { "name": "C3", "hex": "#89E9E0", "hsl": "HSL(174,69%,73%)" },
+      { "name": "C4", "hex": "#5EDFD6", "hsl": "HSL(176,66%,62%)" },
+      { "name": "C5", "hex": "#37D4CF", "hsl": "HSL(178,64%,52%)" },
+      { "name": "C6", "hex": "#14C9C9", "hsl": "HSL(180,82%,43%)" },
+      { "name": "C7", "hex": "#0DA5AA", "hsl": "HSL(182,86%,36%)" },
+      { "name": "C8", "hex": "#07828B", "hsl": "HSL(184,91%,29%)" },
+      { "name": "C9", "hex": "#03616C", "hsl": "HSL(186,95%,22%)" },
+      { "name": "C10", "hex": "#00424D", "hsl": "HSL(188,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Blue",
     "description": "海蔚蓝（浅色主题）",
-    "detial":[
-      {"name": "B1", "hex": "#E8F7FF", "hsl" : "HSL(202,100%,96%)"},
-      {"name": "B2", "hex": "#C3E7FE", "hsl" : "HSL(204,97%,88%)"},
-      {"name": "B3", "hex": "#9FD4FD", "hsl" : "HSL(206,96%,81%)"},
-      {"name": "B4", "hex": "#7BC0FC", "hsl" : "HSL(208,96%,74%)"},
-      {"name": "B5", "hex": "#57A9FB", "hsl" : "HSL(210,95%,66%)"},
-      {"name": "B6", "hex": "#3491FA", "hsl" : "HSL(212,95%,59%)"},
-      {"name": "B7", "hex": "#206CCF", "hsl" : "HSL(214,73%,47%)"},
-      {"name": "B8", "hex": "#114BA3", "hsl" : "HSL(216,81%,35%)"},
-      {"name": "B9", "hex": "#063078", "hsl" : "HSL(218,90%,25%)"},
-      {"name": "B10", "hex": "#001A4D", "hsl" : "HSL(220,100%,15%)"}
+    "detial": [
+      { "name": "B1", "hex": "#E8F7FF", "hsl": "HSL(202,100%,96%)" },
+      { "name": "B2", "hex": "#C3E7FE", "hsl": "HSL(204,97%,88%)" },
+      { "name": "B3", "hex": "#9FD4FD", "hsl": "HSL(206,96%,81%)" },
+      { "name": "B4", "hex": "#7BC0FC", "hsl": "HSL(208,96%,74%)" },
+      { "name": "B5", "hex": "#57A9FB", "hsl": "HSL(210,95%,66%)" },
+      { "name": "B6", "hex": "#3491FA", "hsl": "HSL(212,95%,59%)" },
+      { "name": "B7", "hex": "#206CCF", "hsl": "HSL(214,73%,47%)" },
+      { "name": "B8", "hex": "#114BA3", "hsl": "HSL(216,81%,35%)" },
+      { "name": "B9", "hex": "#063078", "hsl": "HSL(218,90%,25%)" },
+      { "name": "B10", "hex": "#001A4D", "hsl": "HSL(220,100%,15%)" }
     ]
   },
   {
     "category": "Light｜ArcoBlue",
     "description": "极致蓝（浅色主题）",
-    "detial":[
-      {"name": "AB1", "hex": "#E8F3FF", "hsl" : "HSL(212,100%,96%)"},
-      {"name": "AB2", "hex": "#BEDAFF", "hsl" : "HSL(214,100%,87%)"},
-      {"name": "AB3", "hex": "#94BFFF", "hsl" : "HSL(216,100%,79%)"},
-      {"name": "AB4", "hex": "#6AA1FF", "hsl" : "HSL(218,100%,71%)"},
-      {"name": "AB5", "hex": "#4080FF", "hsl" : "HSL(220,100%,63%)"},
-      {"name": "AB6", "hex": "#165DFF", "hsl" : "HSL(222,100%,54%)"},
-      {"name": "AB7", "hex": "#0E42D2", "hsl" : "HSL(224,88%,44%)"},
-      {"name": "AB8", "hex": "#072CA6", "hsl" : "HSL(226,92%,34%)"},
-      {"name": "AB9", "hex": "#031A79", "hsl" : "HSL(228,96%,24%)"},
-      {"name": "AB10", "hex": "#000D4D", "hsl" : "HSL(230,100%,15%)"}
+    "detial": [
+      { "name": "AB1", "hex": "#E8F3FF", "hsl": "HSL(212,100%,96%)" },
+      { "name": "AB2", "hex": "#BEDAFF", "hsl": "HSL(214,100%,87%)" },
+      { "name": "AB3", "hex": "#94BFFF", "hsl": "HSL(216,100%,79%)" },
+      { "name": "AB4", "hex": "#6AA1FF", "hsl": "HSL(218,100%,71%)" },
+      { "name": "AB5", "hex": "#4080FF", "hsl": "HSL(220,100%,63%)" },
+      { "name": "AB6", "hex": "#165DFF", "hsl": "HSL(222,100%,54%)" },
+      { "name": "AB7", "hex": "#0E42D2", "hsl": "HSL(224,88%,44%)" },
+      { "name": "AB8", "hex": "#072CA6", "hsl": "HSL(226,92%,34%)" },
+      { "name": "AB9", "hex": "#031A79", "hsl": "HSL(228,96%,24%)" },
+      { "name": "AB10", "hex": "#000D4D", "hsl": "HSL(230,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Purple",
     "description": "暗夜紫（浅色主题）",
-    "detial":[
-      {"name": "P1", "hex": "#F5E8FF", "hsl" : "HSL(275,100%,96%)"},
-      {"name": "P2", "hex": "#DDBEF6", "hsl" : "HSL(273,75%,85%)"},
-      {"name": "P3", "hex": "#C396ED", "hsl" : "HSL(271,70%,76%)"},
-      {"name": "P4", "hex": "#A871E3", "hsl" : "HSL(269,67%,67%)"},
-      {"name": "P5", "hex": "#8D4EDA", "hsl" : "HSL(267,66%,58%)"},
-      {"name": "P6", "hex": "#722ED1", "hsl" : "HSL(265,64%,50%)"},
-      {"name": "P7", "hex": "#551DB0", "hsl" : "HSL(263,72%,40%)"},
-      {"name": "P8", "hex": "#3C108F", "hsl" : "HSL(261,80%,31%)"},
-      {"name": "P9", "hex": "#27066E", "hsl" : "HSL(259,90%,23%)"},
-      {"name": "P10", "hex": "#16004D", "hsl" : "HSL(257,100%,15%)"}
+    "detial": [
+      { "name": "P1", "hex": "#F5E8FF", "hsl": "HSL(275,100%,96%)" },
+      { "name": "P2", "hex": "#DDBEF6", "hsl": "HSL(273,75%,85%)" },
+      { "name": "P3", "hex": "#C396ED", "hsl": "HSL(271,70%,76%)" },
+      { "name": "P4", "hex": "#A871E3", "hsl": "HSL(269,67%,67%)" },
+      { "name": "P5", "hex": "#8D4EDA", "hsl": "HSL(267,66%,58%)" },
+      { "name": "P6", "hex": "#722ED1", "hsl": "HSL(265,64%,50%)" },
+      { "name": "P7", "hex": "#551DB0", "hsl": "HSL(263,72%,40%)" },
+      { "name": "P8", "hex": "#3C108F", "hsl": "HSL(261,80%,31%)" },
+      { "name": "P9", "hex": "#27066E", "hsl": "HSL(259,90%,23%)" },
+      { "name": "P10", "hex": "#16004D", "hsl": "HSL(257,100%,15%)" }
     ]
   },
   {
     "category": "Light｜PinkPurple",
     "description": "青春紫（浅色主题）",
-    "detial":[
-      {"name": "PP1", "hex": "#FFE8FB", "hsl" : "HSL(310,100%,96%)"},
-      {"name": "PP2", "hex": "#F7BAEF", "hsl" : "HSL(308,80%,85%)"},
-      {"name": "PP3", "hex": "#F08EE6", "hsl" : "HSL(306,76%,75%)"},
-      {"name": "PP4", "hex": "#E865DF", "hsl" : "HSL(304,74%,65%)"},
-      {"name": "PP5", "hex": "#E13EDB", "hsl" : "HSL(302,73%,56%)"},
-      {"name": "PP6", "hex": "#D91AD9", "hsl" : "HSL(300,79%,48%)"},
-      {"name": "PP7", "hex": "#B010B6", "hsl" : "HSL(298,84%,39%)"},
-      {"name": "PP8", "hex": "#8A0993", "hsl" : "HSL(296,89%,30%)"},
-      {"name": "PP9", "hex": "#650370", "hsl" : "HSL(294,94%,23%)"},
-      {"name": "PP10", "hex": "#42004D", "hsl" : "HSL(292,100%,15%)"}
+    "detial": [
+      { "name": "PP1", "hex": "#FFE8FB", "hsl": "HSL(310,100%,96%)" },
+      { "name": "PP2", "hex": "#F7BAEF", "hsl": "HSL(308,80%,85%)" },
+      { "name": "PP3", "hex": "#F08EE6", "hsl": "HSL(306,76%,75%)" },
+      { "name": "PP4", "hex": "#E865DF", "hsl": "HSL(304,74%,65%)" },
+      { "name": "PP5", "hex": "#E13EDB", "hsl": "HSL(302,73%,56%)" },
+      { "name": "PP6", "hex": "#D91AD9", "hsl": "HSL(300,79%,48%)" },
+      { "name": "PP7", "hex": "#B010B6", "hsl": "HSL(298,84%,39%)" },
+      { "name": "PP8", "hex": "#8A0993", "hsl": "HSL(296,89%,30%)" },
+      { "name": "PP9", "hex": "#650370", "hsl": "HSL(294,94%,23%)" },
+      { "name": "PP10", "hex": "#42004D", "hsl": "HSL(292,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Magenta",
     "description": "品红（浅色主题）",
-    "detial":[
-      {"name": "M1", "hex": "#FFE8F1", "hsl" : "HSL(337,100%,96%)"},
-      {"name": "M2", "hex": "#FDC2DB", "hsl" : "HSL(335,94%,88%)"},
-      {"name": "M3", "hex": "#FB9DC7", "hsl" : "HSL(333,92%,80%)"},
-      {"name": "M4", "hex": "#F979B7", "hsl" : "HSL(331,91%,72%)"},
-      {"name": "M5", "hex": "#F754A8", "hsl" : "HSL(329,91%,65%)"},
-      {"name": "M6", "hex": "#F5319D", "hsl" : "HSL(327,91%,58%)"},
-      {"name": "M7", "hex": "#CB1E83", "hsl" : "HSL(325,74%,46%)"},
-      {"name": "M8", "hex": "#A11069", "hsl" : "HSL(323,82%,35%)"},
-      {"name": "M9", "hex": "#77064F", "hsl" : "HSL(321,90%,24%)"},
-      {"name": "M10", "hex": "#4D0034", "hsl" : "HSL(319,100%,15%)"}
+    "detial": [
+      { "name": "M1", "hex": "#FFE8F1", "hsl": "HSL(337,100%,96%)" },
+      { "name": "M2", "hex": "#FDC2DB", "hsl": "HSL(335,94%,88%)" },
+      { "name": "M3", "hex": "#FB9DC7", "hsl": "HSL(333,92%,80%)" },
+      { "name": "M4", "hex": "#F979B7", "hsl": "HSL(331,91%,72%)" },
+      { "name": "M5", "hex": "#F754A8", "hsl": "HSL(329,91%,65%)" },
+      { "name": "M6", "hex": "#F5319D", "hsl": "HSL(327,91%,58%)" },
+      { "name": "M7", "hex": "#CB1E83", "hsl": "HSL(325,74%,46%)" },
+      { "name": "M8", "hex": "#A11069", "hsl": "HSL(323,82%,35%)" },
+      { "name": "M9", "hex": "#77064F", "hsl": "HSL(321,90%,24%)" },
+      { "name": "M10", "hex": "#4D0034", "hsl": "HSL(319,100%,15%)" }
     ]
   },
   {
     "category": "Light｜Grey",
     "description": "中性灰（浅色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#F7F8FA", "hsl" : "HSL(220,20%,98%)"},
-      {"name": "G2", "hex": "#F2F3F5", "hsl" : "HSL(220,13%,95%)"},
-      {"name": "G3", "hex": "#E5E6EB", "hsl" : "HSL(230,13%,91%)"},
-      {"name": "G4", "hex": "#C9CDD4", "hsl" : "HSL(218,11%,81%)"},
-      {"name": "G5", "hex": "#A9AEB8", "hsl" : "HSL(220,10%,69%)"},
-      {"name": "G6", "hex": "#86909C", "hsl" : "HSL(213,10%,57%)"},
-      {"name": "G7", "hex": "#6B7785", "hsl" : "HSL(212,11%,47%)"},
-      {"name": "G8", "hex": "#4E5969", "hsl" : "HSL(216,15%,36%)"},
-      {"name": "G9", "hex": "#272E3B", "hsl" : "HSL(219,20%,19%)"},
-      {"name": "G10", "hex": "#1D2129", "hsl" : "HSL(220,17%,14%)"}
+    "detial": [
+      { "name": "G1", "hex": "#F7F8FA", "hsl": "HSL(220,20%,98%)" },
+      { "name": "G2", "hex": "#F2F3F5", "hsl": "HSL(220,13%,95%)" },
+      { "name": "G3", "hex": "#E5E6EB", "hsl": "HSL(230,13%,91%)" },
+      { "name": "G4", "hex": "#C9CDD4", "hsl": "HSL(218,11%,81%)" },
+      { "name": "G5", "hex": "#A9AEB8", "hsl": "HSL(220,10%,69%)" },
+      { "name": "G6", "hex": "#86909C", "hsl": "HSL(213,10%,57%)" },
+      { "name": "G7", "hex": "#6B7785", "hsl": "HSL(212,11%,47%)" },
+      { "name": "G8", "hex": "#4E5969", "hsl": "HSL(216,15%,36%)" },
+      { "name": "G9", "hex": "#272E3B", "hsl": "HSL(219,20%,19%)" },
+      { "name": "G10", "hex": "#1D2129", "hsl": "HSL(220,17%,14%)" }
     ]
   },
   {
     "category": "Dark｜Red",
     "description": "红色（深色主题）",
-    "detial":[
-      {"name": "R1", "hex": "#4D000A", "hsl" : "HSL(352,100%,15%)"},
-      {"name": "R2", "hex": "#770611", "hsl" : "HSL(354,91%,24%)"},
-      {"name": "R3", "hex": "#A1161F", "hsl" : "HSL(356,76%,36%)"},
-      {"name": "R4", "hex": "#CB2E34", "hsl" : "HSL(358,63%,49%)"},
-      {"name": "R5", "hex": "#F54E4E", "hsl" : "HSL(0,89%,63%)"},
-      {"name": "R6", "hex": "#F76965", "hsl" : "HSL(2,90%,68%)"},
-      {"name": "R7", "hex": "#F98D86", "hsl" : "HSL(4,91%,75%)"},
-      {"name": "R8", "hex": "#FBB0A7", "hsl" : "HSL(6,91%,82%)"},
-      {"name": "R9", "hex": "#FDD1CA", "hsl" : "HSL(9,93%,89%)"},
-      {"name": "R10", "hex": "#FFF0EC", "hsl" : "HSL(10,100%,96%)"}
+    "detial": [
+      { "name": "R1", "hex": "#4D000A", "hsl": "HSL(352,100%,15%)" },
+      { "name": "R2", "hex": "#770611", "hsl": "HSL(354,91%,24%)" },
+      { "name": "R3", "hex": "#A1161F", "hsl": "HSL(356,76%,36%)" },
+      { "name": "R4", "hex": "#CB2E34", "hsl": "HSL(358,63%,49%)" },
+      { "name": "R5", "hex": "#F54E4E", "hsl": "HSL(0,89%,63%)" },
+      { "name": "R6", "hex": "#F76965", "hsl": "HSL(2,90%,68%)" },
+      { "name": "R7", "hex": "#F98D86", "hsl": "HSL(4,91%,75%)" },
+      { "name": "R8", "hex": "#FBB0A7", "hsl": "HSL(6,91%,82%)" },
+      { "name": "R9", "hex": "#FDD1CA", "hsl": "HSL(9,93%,89%)" },
+      { "name": "R10", "hex": "#FFF0EC", "hsl": "HSL(10,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜OrangeRed",
     "description": "橙红色（深色主题）",
-    "detial":[
-      {"name": "OR1", "hex": "#4D0E00", "hsl" : "HSL(11,100%,15%)"},
-      {"name": "OR2", "hex": "#771E05", "hsl" : "HSL(13,92%,24%)"},
-      {"name": "OR3", "hex": "#A23714", "hsl" : "HSL(15,78%,36%)"},
-      {"name": "OR4", "hex": "#CC5729", "hsl" : "HSL(17,67%,48%)"},
-      {"name": "OR5", "hex": "#F77E45", "hsl" : "HSL(19,92%,62%)"},
-      {"name": "OR6", "hex": "#F9925A", "hsl" : "HSL(21,93%,66%)"},
-      {"name": "OR7", "hex": "#FAAD7D", "hsl" : "HSL(23,93%,74%)"},
-      {"name": "OR8", "hex": "#FCC6A1", "hsl" : "HSL(25,94%,81%)"},
-      {"name": "OR9", "hex": "#FDDEC5", "hsl" : "HSL(27,93%,88%)"},
-      {"name": "OR10", "hex": "#FFF4EB", "hsl" : "HSL(29,100%,96%)"}
+    "detial": [
+      { "name": "OR1", "hex": "#4D0E00", "hsl": "HSL(11,100%,15%)" },
+      { "name": "OR2", "hex": "#771E05", "hsl": "HSL(13,92%,24%)" },
+      { "name": "OR3", "hex": "#A23714", "hsl": "HSL(15,78%,36%)" },
+      { "name": "OR4", "hex": "#CC5729", "hsl": "HSL(17,67%,48%)" },
+      { "name": "OR5", "hex": "#F77E45", "hsl": "HSL(19,92%,62%)" },
+      { "name": "OR6", "hex": "#F9925A", "hsl": "HSL(21,93%,66%)" },
+      { "name": "OR7", "hex": "#FAAD7D", "hsl": "HSL(23,93%,74%)" },
+      { "name": "OR8", "hex": "#FCC6A1", "hsl": "HSL(25,94%,81%)" },
+      { "name": "OR9", "hex": "#FDDEC5", "hsl": "HSL(27,93%,88%)" },
+      { "name": "OR10", "hex": "#FFF4EB", "hsl": "HSL(29,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Orange",
     "description": "橙色（深色主题）",
-    "detial":[
-      {"name": "O1", "hex": "#4D1B00", "hsl" : "HSL(21,100%,15%)"},
-      {"name": "O2", "hex": "#793004", "hsl" : "HSL(23,94%,24%)"},
-      {"name": "O3", "hex": "#A64B0A", "hsl" : "HSL(25,89%,35%)"},
-      {"name": "O4", "hex": "#D26913", "hsl" : "HSL(27,83%,45%)"},
-      {"name": "O5", "hex": "#FF8D1F", "hsl" : "HSL(29,100%,56%)"},
-      {"name": "O6", "hex": "#FF9626", "hsl" : "HSL(31,100%,57%)"},
-      {"name": "O7", "hex": "#FFB357", "hsl" : "HSL(33,100%,67%)"},
-      {"name": "O8", "hex": "#FFCD87", "hsl" : "HSL(35,100%,77%)"},
-      {"name": "O9", "hex": "#FFE3B8", "hsl" : "HSL(37,100%,86%)"},
-      {"name": "O10", "hex": "#FFF7E8", "hsl" : "HSL(39,100%,96%)"}
+    "detial": [
+      { "name": "O1", "hex": "#4D1B00", "hsl": "HSL(21,100%,15%)" },
+      { "name": "O2", "hex": "#793004", "hsl": "HSL(23,94%,24%)" },
+      { "name": "O3", "hex": "#A64B0A", "hsl": "HSL(25,89%,35%)" },
+      { "name": "O4", "hex": "#D26913", "hsl": "HSL(27,83%,45%)" },
+      { "name": "O5", "hex": "#FF8D1F", "hsl": "HSL(29,100%,56%)" },
+      { "name": "O6", "hex": "#FF9626", "hsl": "HSL(31,100%,57%)" },
+      { "name": "O7", "hex": "#FFB357", "hsl": "HSL(33,100%,67%)" },
+      { "name": "O8", "hex": "#FFCD87", "hsl": "HSL(35,100%,77%)" },
+      { "name": "O9", "hex": "#FFE3B8", "hsl": "HSL(37,100%,86%)" },
+      { "name": "O10", "hex": "#FFF7E8", "hsl": "HSL(39,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Gold",
     "description": "金色（深色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#4D2D00", "hsl" : "HSL(35,100%,15%)"},
-      {"name": "G2", "hex": "#774B04", "hsl" : "HSL(37,94%,24%)"},
-      {"name": "G3", "hex": "#A26F0F", "hsl" : "HSL(39,83%,35%)"},
-      {"name": "G4", "hex": "#CC961F", "hsl" : "HSL(41,74%,46%)"},
-      {"name": "G5", "hex": "#F7C034", "hsl" : "HSL(43,92%,59%)"},
-      {"name": "G6", "hex": "#F9CC44", "hsl" : "HSL(45,94%,62%)"},
-      {"name": "G7", "hex": "#FADC6C", "hsl" : "HSL(47,93%,70%)"},
-      {"name": "G8", "hex": "#FCE995", "hsl" : "HSL(49,94%,79%)"},
-      {"name": "G9", "hex": "#FDF4BE", "hsl" : "HSL(51,94%,87%)"},
-      {"name": "G10", "hex": "#FFFCE8", "hsl" : "HSL(52,100%,96%)"}
+    "detial": [
+      { "name": "G1", "hex": "#4D2D00", "hsl": "HSL(35,100%,15%)" },
+      { "name": "G2", "hex": "#774B04", "hsl": "HSL(37,94%,24%)" },
+      { "name": "G3", "hex": "#A26F0F", "hsl": "HSL(39,83%,35%)" },
+      { "name": "G4", "hex": "#CC961F", "hsl": "HSL(41,74%,46%)" },
+      { "name": "G5", "hex": "#F7C034", "hsl": "HSL(43,92%,59%)" },
+      { "name": "G6", "hex": "#F9CC44", "hsl": "HSL(45,94%,62%)" },
+      { "name": "G7", "hex": "#FADC6C", "hsl": "HSL(47,93%,70%)" },
+      { "name": "G8", "hex": "#FCE995", "hsl": "HSL(49,94%,79%)" },
+      { "name": "G9", "hex": "#FDF4BE", "hsl": "HSL(51,94%,87%)" },
+      { "name": "G10", "hex": "#FFFCE8", "hsl": "HSL(52,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Yellow",
     "description": "黄色（深色主题）",
-    "detial":[
-      {"name": "Y1", "hex": "#4D3800", "hsl" : "HSL(44,100%,15%)"},
-      {"name": "Y2", "hex": "#785E07", "hsl" : "HSL(46,89%,25%)"},
-      {"name": "Y3", "hex": "#A38614", "hsl" : "HSL(48,79%,36%)"},
-      {"name": "Y4", "hex": "#CFB325", "hsl" : "HSL(50,69%,48%)"},
-      {"name": "Y5", "hex": "#FAE13C", "hsl" : "HSL(52,95%,61%)"},
-      {"name": "Y6", "hex": "#FBE94B", "hsl" : "HSL(54,96%,64%)"},
-      {"name": "Y7", "hex": "#FCF374", "hsl" : "HSL(56,96%,72%)"},
-      {"name": "Y8", "hex": "#FDFA9D", "hsl" : "HSL(58,96%,80%)"},
-      {"name": "Y9", "hex": "#FEFEC6", "hsl" : "HSL(60,97%,89%)"},
-      {"name": "Y10", "hex": "#FEFFF0", "hsl" : "HSL(63,100%,97%)"}
+    "detial": [
+      { "name": "Y1", "hex": "#4D3800", "hsl": "HSL(44,100%,15%)" },
+      { "name": "Y2", "hex": "#785E07", "hsl": "HSL(46,89%,25%)" },
+      { "name": "Y3", "hex": "#A38614", "hsl": "HSL(48,79%,36%)" },
+      { "name": "Y4", "hex": "#CFB325", "hsl": "HSL(50,69%,48%)" },
+      { "name": "Y5", "hex": "#FAE13C", "hsl": "HSL(52,95%,61%)" },
+      { "name": "Y6", "hex": "#FBE94B", "hsl": "HSL(54,96%,64%)" },
+      { "name": "Y7", "hex": "#FCF374", "hsl": "HSL(56,96%,72%)" },
+      { "name": "Y8", "hex": "#FDFA9D", "hsl": "HSL(58,96%,80%)" },
+      { "name": "Y9", "hex": "#FEFEC6", "hsl": "HSL(60,97%,89%)" },
+      { "name": "Y10", "hex": "#FEFFF0", "hsl": "HSL(63,100%,97%)" }
     ]
   },
   {
     "category": "Dark｜Lime",
     "description": "新生绿（深色主题）",
-    "detial":[
-      {"name": "L1", "hex": "#2A4D00", "hsl" : "HSL(87,100%,15%)"},
-      {"name": "L2", "hex": "#447006", "hsl" : "HSL(85,90%,23%)"},
-      {"name": "L3", "hex": "#629412", "hsl" : "HSL(83,78%,33%)"},
-      {"name": "L4", "hex": "#84B723", "hsl" : "HSL(81,68%,43%)"},
-      {"name": "L5", "hex": "#A8DB39", "hsl" : "HSL(79,69%,54%)"},
-      {"name": "L6", "hex": "#B8E24B", "hsl" : "HSL(77,72%,59%)"},
-      {"name": "L7", "hex": "#CBE970", "hsl" : "HSL(75,73%,68%)"},
-      {"name": "L8", "hex": "#DEF198", "hsl" : "HSL(73,76%,77%)"},
-      {"name": "L9", "hex": "#EEF8C2", "hsl" : "HSL(71,79%,87%)"},
-      {"name": "L10", "hex": "#FDFFEE", "hsl" : "HSL(68,100%,97%)"}
+    "detial": [
+      { "name": "L1", "hex": "#2A4D00", "hsl": "HSL(87,100%,15%)" },
+      { "name": "L2", "hex": "#447006", "hsl": "HSL(85,90%,23%)" },
+      { "name": "L3", "hex": "#629412", "hsl": "HSL(83,78%,33%)" },
+      { "name": "L4", "hex": "#84B723", "hsl": "HSL(81,68%,43%)" },
+      { "name": "L5", "hex": "#A8DB39", "hsl": "HSL(79,69%,54%)" },
+      { "name": "L6", "hex": "#B8E24B", "hsl": "HSL(77,72%,59%)" },
+      { "name": "L7", "hex": "#CBE970", "hsl": "HSL(75,73%,68%)" },
+      { "name": "L8", "hex": "#DEF198", "hsl": "HSL(73,76%,77%)" },
+      { "name": "L9", "hex": "#EEF8C2", "hsl": "HSL(71,79%,87%)" },
+      { "name": "L10", "hex": "#FDFFEE", "hsl": "HSL(68,100%,97%)" }
     ]
   },
   {
     "category": "Dark｜Green",
     "description": "仙野绿（深色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#004D1C", "hsl" : "HSL(142,100%,15%)"},
-      {"name": "G2", "hex": "#046625", "hsl" : "HSL(140,92%,21%)"},
-      {"name": "G3", "hex": "#0A802D", "hsl" : "HSL(138,85%,27%)"},
-      {"name": "G4", "hex": "#129A37", "hsl" : "HSL(136,79%,34%)"},
-      {"name": "G5", "hex": "#1DB440", "hsl" : "HSL(134,72%,41%)"},
-      {"name": "G6", "hex": "#27C346", "hsl" : "HSL(132,67%,46%)"},
-      {"name": "G7", "hex": "#50D266", "hsl" : "HSL(130,59%,57%)"},
-      {"name": "G8", "hex": "#7EE18B", "hsl" : "HSL(128,62%,69%)"},
-      {"name": "G9", "hex": "#B2F0B7", "hsl" : "HSL(126,68%,82%)"},
-      {"name": "G10", "hex": "#EBFFEC", "hsl" : "HSL(125,100%,96%)"}
+    "detial": [
+      { "name": "G1", "hex": "#004D1C", "hsl": "HSL(142,100%,15%)" },
+      { "name": "G2", "hex": "#046625", "hsl": "HSL(140,92%,21%)" },
+      { "name": "G3", "hex": "#0A802D", "hsl": "HSL(138,85%,27%)" },
+      { "name": "G4", "hex": "#129A37", "hsl": "HSL(136,79%,34%)" },
+      { "name": "G5", "hex": "#1DB440", "hsl": "HSL(134,72%,41%)" },
+      { "name": "G6", "hex": "#27C346", "hsl": "HSL(132,67%,46%)" },
+      { "name": "G7", "hex": "#50D266", "hsl": "HSL(130,59%,57%)" },
+      { "name": "G8", "hex": "#7EE18B", "hsl": "HSL(128,62%,69%)" },
+      { "name": "G9", "hex": "#B2F0B7", "hsl": "HSL(126,68%,82%)" },
+      { "name": "G10", "hex": "#EBFFEC", "hsl": "HSL(125,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Cyan",
     "description": "碧涛青（深色主题）",
-    "detial":[
-      {"name": "C1", "hex": "#00424D", "hsl" : "HSL(189,100%,15%)"},
-      {"name": "C2", "hex": "#06616C", "hsl" : "HSL(186,89%,22%)"},
-      {"name": "C3", "hex": "#11838B", "hsl" : "HSL(184,79%,31%)"},
-      {"name": "C4", "hex": "#1FA6AA", "hsl" : "HSL(182,70%,39%)"},
-      {"name": "C5", "hex": "#30C9C9", "hsl" : "HSL(180,61%,49%)"},
-      {"name": "C6", "hex": "#3FD4CF", "hsl" : "HSL(178,63%,54%)"},
-      {"name": "C7", "hex": "#66DFD7", "hsl" : "HSL(176,65%,64%)"},
-      {"name": "C8", "hex": "#90E9E1", "hsl" : "HSL(174,67%,74%)"},
-      {"name": "C9", "hex": "#BEF4ED", "hsl" : "HSL(172,71%,85%)"},
-      {"name": "C10", "hex": "#F0FFFC", "hsl" : "HSL(170,100%,97%)"}
+    "detial": [
+      { "name": "C1", "hex": "#00424D", "hsl": "HSL(189,100%,15%)" },
+      { "name": "C2", "hex": "#06616C", "hsl": "HSL(186,89%,22%)" },
+      { "name": "C3", "hex": "#11838B", "hsl": "HSL(184,79%,31%)" },
+      { "name": "C4", "hex": "#1FA6AA", "hsl": "HSL(182,70%,39%)" },
+      { "name": "C5", "hex": "#30C9C9", "hsl": "HSL(180,61%,49%)" },
+      { "name": "C6", "hex": "#3FD4CF", "hsl": "HSL(178,63%,54%)" },
+      { "name": "C7", "hex": "#66DFD7", "hsl": "HSL(176,65%,64%)" },
+      { "name": "C8", "hex": "#90E9E1", "hsl": "HSL(174,67%,74%)" },
+      { "name": "C9", "hex": "#BEF4ED", "hsl": "HSL(172,71%,85%)" },
+      { "name": "C10", "hex": "#F0FFFC", "hsl": "HSL(170,100%,97%)" }
     ]
   },
   {
     "category": "Dark｜Blue",
     "description": "海蔚蓝（深色主题）",
-    "detial":[
-      {"name": "B1", "hex": "#001A4D", "hsl" : "HSL(220,100%,15%)"},
-      {"name": "B2", "hex": "#052F78", "hsl" : "HSL(218,93%,24%)"},
-      {"name": "B3", "hex": "#134CA3", "hsl" : "HSL(216,79%,36%)"},
-      {"name": "B4", "hex": "#2971CF", "hsl" : "HSL(214,67%,49%)"},
-      {"name": "B5", "hex": "#469AFA", "hsl" : "HSL(212,95%,63%)"},
-      {"name": "B6", "hex": "#5AAAFB", "hsl" : "HSL(210,95%,67%)"},
-      {"name": "B7", "hex": "#7DC1FC", "hsl" : "HSL(208,95%,74%)"},
-      {"name": "B8", "hex": "#A1D5FD", "hsl" : "HSL(206,96%,81%)"},
-      {"name": "B9", "hex": "#C6E8FE", "hsl" : "HSL(203,97%,89%)"},
-      {"name": "B10", "hex": "#EAF8FF", "hsl" : "HSL(201,100%,96%)"}
+    "detial": [
+      { "name": "B1", "hex": "#001A4D", "hsl": "HSL(220,100%,15%)" },
+      { "name": "B2", "hex": "#052F78", "hsl": "HSL(218,93%,24%)" },
+      { "name": "B3", "hex": "#134CA3", "hsl": "HSL(216,79%,36%)" },
+      { "name": "B4", "hex": "#2971CF", "hsl": "HSL(214,67%,49%)" },
+      { "name": "B5", "hex": "#469AFA", "hsl": "HSL(212,95%,63%)" },
+      { "name": "B6", "hex": "#5AAAFB", "hsl": "HSL(210,95%,67%)" },
+      { "name": "B7", "hex": "#7DC1FC", "hsl": "HSL(208,95%,74%)" },
+      { "name": "B8", "hex": "#A1D5FD", "hsl": "HSL(206,96%,81%)" },
+      { "name": "B9", "hex": "#C6E8FE", "hsl": "HSL(203,97%,89%)" },
+      { "name": "B10", "hex": "#EAF8FF", "hsl": "HSL(201,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜ArcoBlue",
     "description": "极致蓝（深色主题）",
-    "detial":[
-      {"name": "AB1", "hex": "#000D4D", "hsl" : "HSL(230,100%,15%)"},
-      {"name": "AB2", "hex": "#041B79", "hsl" : "HSL(228,93%,25%)"},
-      {"name": "AB3", "hex": "#0E32A6", "hsl" : "HSL(226,84%,35%)"},
-      {"name": "AB4", "hex": "#1D4DD2", "hsl" : "HSL(224,76%,47%)"},
-      {"name": "AB5", "hex": "#306FFF", "hsl" : "HSL(222,100%,59%)"},
-      {"name": "AB6", "hex": "#3C7EFF", "hsl" : "HSL(220,100%,62%)"},
-      {"name": "AB7", "hex": "#689FFF", "hsl" : "HSL(218,100%,70%)"},
-      {"name": "AB8", "hex": "#93BEFF", "hsl" : "HSL(216,100%,79%)"},
-      {"name": "AB9", "hex": "#BEDAFF", "hsl" : "HSL(214,100%,87%)"},
-      {"name": "AB10", "hex": "#EAF4FF", "hsl" : "HSL(211,100%,96%)"}
+    "detial": [
+      { "name": "AB1", "hex": "#000D4D", "hsl": "HSL(230,100%,15%)" },
+      { "name": "AB2", "hex": "#041B79", "hsl": "HSL(228,93%,25%)" },
+      { "name": "AB3", "hex": "#0E32A6", "hsl": "HSL(226,84%,35%)" },
+      { "name": "AB4", "hex": "#1D4DD2", "hsl": "HSL(224,76%,47%)" },
+      { "name": "AB5", "hex": "#306FFF", "hsl": "HSL(222,100%,59%)" },
+      { "name": "AB6", "hex": "#3C7EFF", "hsl": "HSL(220,100%,62%)" },
+      { "name": "AB7", "hex": "#689FFF", "hsl": "HSL(218,100%,70%)" },
+      { "name": "AB8", "hex": "#93BEFF", "hsl": "HSL(216,100%,79%)" },
+      { "name": "AB9", "hex": "#BEDAFF", "hsl": "HSL(214,100%,87%)" },
+      { "name": "AB10", "hex": "#EAF4FF", "hsl": "HSL(211,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Purple",
     "description": "暗夜紫（深色主题）",
-    "detial":[
-      {"name": "P1", "hex": "#16004D", "hsl" : "HSL(257,100%,15%)"},
-      {"name": "P2", "hex": "#27066E", "hsl" : "HSL(259,90%,23%)"},
-      {"name": "P3", "hex": "#3E138F", "hsl" : "HSL(261,77%,32%)"},
-      {"name": "P4", "hex": "#5A25B0", "hsl" : "HSL(263,65%,42%)"},
-      {"name": "P5", "hex": "#7B3DD1", "hsl" : "HSL(265,62%,53%)"},
-      {"name": "P6", "hex": "#8E51DA", "hsl" : "HSL(267,65%,59%)"},
-      {"name": "P7", "hex": "#A974E3", "hsl" : "HSL(269,67%,67%)"},
-      {"name": "P8", "hex": "#C59AED", "hsl" : "HSL(271,70%,77%)"},
-      {"name": "P9", "hex": "#DFC2F6", "hsl" : "HSL(273,74%,86%)"},
-      {"name": "P10", "hex": "#F7EDFF", "hsl" : "HSL(274,100%,97%)"}
+    "detial": [
+      { "name": "P1", "hex": "#16004D", "hsl": "HSL(257,100%,15%)" },
+      { "name": "P2", "hex": "#27066E", "hsl": "HSL(259,90%,23%)" },
+      { "name": "P3", "hex": "#3E138F", "hsl": "HSL(261,77%,32%)" },
+      { "name": "P4", "hex": "#5A25B0", "hsl": "HSL(263,65%,42%)" },
+      { "name": "P5", "hex": "#7B3DD1", "hsl": "HSL(265,62%,53%)" },
+      { "name": "P6", "hex": "#8E51DA", "hsl": "HSL(267,65%,59%)" },
+      { "name": "P7", "hex": "#A974E3", "hsl": "HSL(269,67%,67%)" },
+      { "name": "P8", "hex": "#C59AED", "hsl": "HSL(271,70%,77%)" },
+      { "name": "P9", "hex": "#DFC2F6", "hsl": "HSL(273,74%,86%)" },
+      { "name": "P10", "hex": "#F7EDFF", "hsl": "HSL(274,100%,97%)" }
     ]
   },
   {
     "category": "Dark｜PinkPurple",
     "description": "青春紫（深色主题）",
-    "detial":[
-      {"name": "PP1", "hex": "#FFE8FB", "hsl" : "HSL(291,100%,15%)"},
-      {"name": "PP2", "hex": "#F7BAEF", "hsl" : "HSL(294,94%,23%)"},
-      {"name": "PP3", "hex": "#F08EE6", "hsl" : "HSL(296,84%,31%)"},
-      {"name": "PP4", "hex": "#E865DF", "hsl" : "HSL(298,74%,41%)"},
-      {"name": "PP5", "hex": "#E13EDB", "hsl" : "HSL(300,69%,51%)"},
-      {"name": "PP6", "hex": "#D91AD9", "hsl" : "HSL(302,73%,56%)"},
-      {"name": "PP7", "hex": "#B010B6", "hsl" : "HSL(304,74%,65%)"},
-      {"name": "PP8", "hex": "#8A0993", "hsl" : "HSL(306,76%,76%)"},
-      {"name": "PP9", "hex": "#650370", "hsl" : "HSL(308,77%,86%)"},
-      {"name": "PP10", "hex": "#42004D", "hsl" : "HSL(310,100%,97%)"}
+    "detial": [
+      { "name": "PP1", "hex": "#FFE8FB", "hsl": "HSL(291,100%,15%)" },
+      { "name": "PP2", "hex": "#F7BAEF", "hsl": "HSL(294,94%,23%)" },
+      { "name": "PP3", "hex": "#F08EE6", "hsl": "HSL(296,84%,31%)" },
+      { "name": "PP4", "hex": "#E865DF", "hsl": "HSL(298,74%,41%)" },
+      { "name": "PP5", "hex": "#E13EDB", "hsl": "HSL(300,69%,51%)" },
+      { "name": "PP6", "hex": "#D91AD9", "hsl": "HSL(302,73%,56%)" },
+      { "name": "PP7", "hex": "#B010B6", "hsl": "HSL(304,74%,65%)" },
+      { "name": "PP8", "hex": "#8A0993", "hsl": "HSL(306,76%,76%)" },
+      { "name": "PP9", "hex": "#650370", "hsl": "HSL(308,77%,86%)" },
+      { "name": "PP10", "hex": "#42004D", "hsl": "HSL(310,100%,97%)" }
     ]
   },
   {
     "category": "Dark｜Magenta",
     "description": "品红（深色主题）",
-    "detial":[
-      {"name": "M1", "hex": "#4D0034", "hsl" : "HSL(319,100%,15%)"},
-      {"name": "M2", "hex": "#770850", "hsl" : "HSL(321,87%,25%)"},
-      {"name": "M3", "hex": "#A1176C", "hsl" : "HSL(323,75%,36%)"},
-      {"name": "M4", "hex": "#CB2B88", "hsl" : "HSL(325,65%,48%)"},
-      {"name": "M5", "hex": "#F545A6", "hsl" : "HSL(327,90%,61%)"},
-      {"name": "M6", "hex": "#F756A9", "hsl" : "HSL(329,91%,65%)"},
-      {"name": "M7", "hex": "#F97AB8", "hsl" : "HSL(331,91%,73%)"},
-      {"name": "M8", "hex": "#FB9EC8", "hsl" : "HSL(333,92%,80%)"},
-      {"name": "M9", "hex": "#FDC3DB", "hsl" : "HSL(335,94%,88%)"},
-      {"name": "M10", "hex": "#FFE8F1", "hsl" : "HSL(337,100%,96%)"}
+    "detial": [
+      { "name": "M1", "hex": "#4D0034", "hsl": "HSL(319,100%,15%)" },
+      { "name": "M2", "hex": "#770850", "hsl": "HSL(321,87%,25%)" },
+      { "name": "M3", "hex": "#A1176C", "hsl": "HSL(323,75%,36%)" },
+      { "name": "M4", "hex": "#CB2B88", "hsl": "HSL(325,65%,48%)" },
+      { "name": "M5", "hex": "#F545A6", "hsl": "HSL(327,90%,61%)" },
+      { "name": "M6", "hex": "#F756A9", "hsl": "HSL(329,91%,65%)" },
+      { "name": "M7", "hex": "#F97AB8", "hsl": "HSL(331,91%,73%)" },
+      { "name": "M8", "hex": "#FB9EC8", "hsl": "HSL(333,92%,80%)" },
+      { "name": "M9", "hex": "#FDC3DB", "hsl": "HSL(335,94%,88%)" },
+      { "name": "M10", "hex": "#FFE8F1", "hsl": "HSL(337,100%,96%)" }
     ]
   },
   {
     "category": "Dark｜Grey",
     "description": "中性灰（深色主题）",
-    "detial":[
-      {"name": "G1", "hex": "#17171A", "hsl" : "HSL(240,6%,10%)"},
-      {"name": "G2", "hex": "#2E2E30", "hsl" : "HSL(240,2%,18%)"},
-      {"name": "G3", "hex": "#484849", "hsl" : "HSL(240,1%,28%)"},
-      {"name": "G4", "hex": "#5F5F60", "hsl" : "HSL(240,1%,37%)"},
-      {"name": "G5", "hex": "#78787A", "hsl" : "HSL(240,1%,47%)"},
-      {"name": "G6", "hex": "#929293", "hsl" : "HSL(240,0%,57%)"},
-      {"name": "G7", "hex": "#ABABAC", "hsl" : "HSL(240,1%,67%)"},
-      {"name": "G8", "hex": "#C5C5C5", "hsl" : "HSL(0,0%,77%)"},
-      {"name": "G9", "hex": "#DFDFDF", "hsl" : "HSL(0,0%,87%)"},
-      {"name": "G10", "hex": "#F6F6F6", "hsl" : "HSL(0,0%,96%)"}
+    "detial": [
+      { "name": "G1", "hex": "#17171A", "hsl": "HSL(240,6%,10%)" },
+      { "name": "G2", "hex": "#2E2E30", "hsl": "HSL(240,2%,18%)" },
+      { "name": "G3", "hex": "#484849", "hsl": "HSL(240,1%,28%)" },
+      { "name": "G4", "hex": "#5F5F60", "hsl": "HSL(240,1%,37%)" },
+      { "name": "G5", "hex": "#78787A", "hsl": "HSL(240,1%,47%)" },
+      { "name": "G6", "hex": "#929293", "hsl": "HSL(240,0%,57%)" },
+      { "name": "G7", "hex": "#ABABAC", "hsl": "HSL(240,1%,67%)" },
+      { "name": "G8", "hex": "#C5C5C5", "hsl": "HSL(0,0%,77%)" },
+      { "name": "G9", "hex": "#DFDFDF", "hsl": "HSL(0,0%,87%)" },
+      { "name": "G10", "hex": "#F6F6F6", "hsl": "HSL(0,0%,96%)" }
     ]
   }
 ]
