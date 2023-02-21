@@ -1,19 +1,8 @@
-import { Detail } from "@raycast/api";
+import { Detail, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { UnknownError } from "./unknownError";
-import { Account } from "../utils/cli";
-
-const isValidUrl = (urlLike: string | undefined) => urlLike && urlLike !== "http://sn";
-
-const toMarkdown = (args: { username?: string; url?: string; password?: string; note?: string }): string =>
-  [
-    isValidUrl(args.url) && `### 🔗 **Url**\n${args.url}`,
-    !!args.username && `### 💻 **Username**\n${args.username}`,
-    !!args.password && `### 🗝 **Password**\n${args.password}`,
-    !!args.note && `### 🗒 **Note**\n${args.note.split("\n").join("  \n")}`,
-  ]
-    .filter((it) => it)
-    .join("\n");
+import { Account } from "../cli";
+import { isValidUrl } from "../utils";
 
 export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
   const [data, setData] = useState<Account>();
@@ -26,16 +15,18 @@ export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
   return error ? (
     <UnknownError error={error} />
   ) : (
-    <Detail
+    <List.Item.Detail
       isLoading={!data}
-      markdown={data ? toMarkdown(data) : ""}
+      markdown={data?.note && data.note.split("\n").join("\n")}
       metadata={
         data && (
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="ID" text={data?.id} />
-            <Detail.Metadata.Label title="Name" text={data.name} />
-            <Detail.Metadata.Label title="Group" text={data.group} />
-            <Detail.Metadata.Label title="Full Name" text={data.fullname} />
+          <List.Item.Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={data.id} />
+            {isValidUrl(data.url) && <Detail.Metadata.Label title="Url" text={data.url} />}
+            {data.username && <Detail.Metadata.Label title="Username" text={data.username} />}
+            {data.password && <Detail.Metadata.Label title="Password" text={data.password} />}
+            {data.group && <Detail.Metadata.Label title="Group" text={data.group} />}
+            {data.fullname && <Detail.Metadata.Label title="Full Name" text={data.fullname} />}
             <Detail.Metadata.Label
               title="Last modified"
               text={`${data.lastModified.toLocaleTimeString()} - ${data.lastModified.toLocaleDateString()}`}
@@ -44,7 +35,7 @@ export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
               title="Last touched"
               text={`${data.lastTouch.toLocaleTimeString()} - ${data.lastTouch.toLocaleDateString()}`}
             />
-          </Detail.Metadata>
+          </List.Item.Detail.Metadata>
         )
       }
     />

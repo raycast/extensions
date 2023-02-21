@@ -1,15 +1,13 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Image, Icon, List, showToast, Toast } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AccountDetail, UnknownError, CommandNotFoundError } from "./components";
-import { lastPass } from "./utils/cli";
+import { lastPass } from "./cli";
+import { getDomainFavicon } from "./utils";
 
 interface Preferences {
   email: string;
   password: string;
 }
-
-const faviconForDomain = (url: string) => getFavicon(url, { fallback: Icon.Key });
 
 const ErrorDetails = (args: { error: Error }) => {
   if (args.error.message.includes("command not found")) {
@@ -63,6 +61,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -83,9 +82,9 @@ export default function Command() {
           <List.Item
             id={id}
             key={id}
-            icon={faviconForDomain(url)}
+            icon={getDomainFavicon(url)}
             title={name}
-            subtitle={username}
+            detail={<AccountDetail getData={() => api.show(id)} />}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -113,11 +112,11 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "u" }}
                     content={username}
                   />
-                  <Action.Push
-                    icon={Icon.Info}
-                    title="Show Details"
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                    target={<AccountDetail getData={() => api.show(id)} />}
+                  <Action.CopyToClipboard
+                    icon={Icon.Clipboard}
+                    title="Copy Url"
+                    shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    content={username}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
