@@ -33,9 +33,7 @@ export default function Matchday(props: PropsType) {
           },
         ];
 
-        const title = match.time
-          ? format(new Date(match.date), props.format || "eee dd.MM.yyyy HH:mm")
-          : "TBC";
+        const title = match.time ? format(new Date(match.date), props.format || "eee dd.MM.yyyy HH:mm") : "TBC";
 
         return (
           <List.Item
@@ -50,9 +48,7 @@ export default function Matchday(props: PropsType) {
             accessories={accessories}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`https://www.laliga.com/en-GB/match/${match.slug}`}
-                />
+                <Action.OpenInBrowser url={`https://www.laliga.com/en-GB/match/${match.slug}`} />
                 {props.action}
               </ActionPanel>
             }

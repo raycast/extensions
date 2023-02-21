@@ -15,11 +15,7 @@ import {
 } from "../types";
 
 function showFailureToast() {
-  showToast(
-    Toast.Style.Failure,
-    "Something went wrong",
-    "Please try again later"
-  );
+  showToast(Toast.Style.Failure, "Something went wrong", "Please try again later");
 }
 
 const { apikey } = getPreferenceValues();
@@ -90,9 +86,7 @@ export const getTeam = async (team: string) => {
   }
 };
 
-export const getStandings = async (
-  competition: string
-): Promise<Standing[]> => {
+export const getStandings = async (competition: string): Promise<Standing[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/standing`,
@@ -110,10 +104,7 @@ export const getStandings = async (
   }
 };
 
-export const getMatches = async (
-  subscriptionSlug: string,
-  week: number
-): Promise<Match[]> => {
+export const getMatches = async (subscriptionSlug: string, week: number): Promise<Match[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/matches`,
@@ -166,9 +157,7 @@ export const getSquad = async (team: string): Promise<Squad[]> => {
   }
 };
 
-export const getSubscriptionRounds = async (
-  competition: string
-): Promise<Round[]> => {
+export const getSubscriptionRounds = async (competition: string): Promise<Round[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
     url: `${endpoint}/subscriptions/${competition}/rounds`,
@@ -176,9 +165,7 @@ export const getSubscriptionRounds = async (
   };
 
   try {
-    const { data }: AxiosResponse<LaLigaSubscriptionRounds> = await axios(
-      config
-    );
+    const { data }: AxiosResponse<LaLigaSubscriptionRounds> = await axios(config);
 
     return data.rounds;
   } catch (e) {

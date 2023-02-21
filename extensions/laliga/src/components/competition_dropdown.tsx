@@ -33,15 +33,10 @@ export default function CompetitionDropdown(props: {
   selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const DropdownComponent =
-    props.type === "grid" ? Grid.Dropdown : List.Dropdown;
+  const DropdownComponent = props.type === "grid" ? Grid.Dropdown : List.Dropdown;
 
   return (
-    <DropdownComponent
-      tooltip="Filter by Competition"
-      value={props.selected}
-      onChange={props.onSelect}
-    >
+    <DropdownComponent tooltip="Filter by Competition" value={props.selected} onChange={props.onSelect}>
       {Object.entries(seasons)
         .sort((a, b) => Number(b[0]) - Number(a[0]))
         .map(([year, season]) => {

@@ -22,9 +22,7 @@ export default function GetTables() {
     <List
       throttle
       isLoading={!standing}
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
       isShowingDetail={showStats}
     >
       {standing?.map((team) => {
@@ -88,34 +86,13 @@ export default function GetTables() {
                       title="Previous Position"
                       text={team.previous_position.toString()}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Played"
-                      text={team.played.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Won"
-                      text={team.won.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Drawn"
-                      text={team.drawn.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Lost"
-                      text={team.lost.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals For"
-                      text={team.goals_for.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goals Against"
-                      text={team.goals_against.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Goal Difference"
-                      text={team.goal_difference.toString()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Played" text={team.played.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Won" text={team.won.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Drawn" text={team.drawn.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Lost" text={team.lost.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goals For" text={team.goals_for.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goals Against" text={team.goals_against.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Goal Difference" text={team.goal_difference.toString()} />
                   </List.Item.Detail.Metadata>
                 }
               />

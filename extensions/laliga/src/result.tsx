@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import groupBy from "lodash.groupby";
@@ -77,25 +70,11 @@ export default function Fixture() {
     <List
       throttle
       isLoading={!fixtures}
-      navigationTitle={
-        fixtures
-          ? `Matchday ${matchday} | Fixtures & Results`
-          : "Fixtures & Results"
-      }
-      searchBarAccessory={
-        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
-      }
+      navigationTitle={fixtures ? `Matchday ${matchday} | Fixtures & Results` : "Fixtures & Results"}
+      searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
       {Object.entries(days).map(([day, matches]) => {
-        return (
-          <Matchday
-            key={day}
-            name={day}
-            matches={matches}
-            format="HH:mm"
-            action={action}
-          />
-        );
+        return <Matchday key={day} name={day} matches={matches} format="HH:mm" action={action} />;
       })}
     </List>
   );
