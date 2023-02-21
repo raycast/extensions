@@ -15,13 +15,13 @@ const formatDate = (date: string) => {
 };
 
 export default function Command() {
-  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, {
-    isList: true,
-    shouldShowToast: false,
-  });
   const { data: timeAway = [], isLoading: isTimeAwayLoading } = useHumaansApi(ENDPOINTS.TIME_AWAY, {
     isList: true,
     shouldShowToast: true,
+  });
+  const { data: people = [], isLoading: isPeopleLoading } = useHumaansApi(ENDPOINTS.PEOPLE, {
+    isList: true,
+    shouldShowToast: false,
   });
 
   const filteredTimeAway = timeAway
@@ -40,31 +40,35 @@ export default function Command() {
 
   return (
     <List isLoading={isPeopleLoading || isTimeAwayLoading}>
-      {sortedTimeAway.map(({ startDate, endDate, personId, id, days }: Holiday) => {
-        const { firstName, lastName, preferredName, profilePhoto } = getPerson(people, personId);
+      {sortedTimeAway.length ? (
+        sortedTimeAway.map(({ startDate, endDate, personId, id, days }: Holiday) => {
+          const { firstName, lastName, preferredName, profilePhoto } = getPerson(people, personId);
 
-        const fullName = getFullName(preferredName ?? firstName, lastName);
+          const fullName = getFullName(preferredName ?? firstName, lastName);
 
-        return (
-          <List.Item
-            key={id}
-            icon={profilePhoto?.variants["96"] || Icon.Person}
-            title={fullName || "Unknown"}
-            subtitle={formatDate(startDate) + " - " + formatDate(endDate)}
-            accessories={[
-              {
-                text: `${days} ${days === 1 ? "day" : "days"}`,
-                icon: Icon.Calendar,
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`https://app.humaans.io/away?q=${encodeURIComponent(fullName)}`} />;
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          return (
+            <List.Item
+              key={id}
+              icon={profilePhoto?.variants["96"] || Icon.Person}
+              title={fullName || "Unknown"}
+              subtitle={formatDate(startDate) + " - " + formatDate(endDate)}
+              accessories={[
+                {
+                  text: `${days} ${days === 1 ? "day" : "days"}`,
+                  icon: Icon.Calendar,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`https://app.humaans.io/away?q=${encodeURIComponent(fullName)}`} />;
+                </ActionPanel>
+              }
+            />
+          );
+        })
+      ) : (
+        <List.EmptyView icon={Icon.AirplaneTakeoff} title="No Holidays" />
+      )}
     </List>
   );
 }
