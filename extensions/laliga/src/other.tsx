@@ -54,9 +54,7 @@ export default function Fixture() {
         title: "Loading...",
         style: Toast.Style.Animated,
       });
-      const gameweeks = round.gameweeks
-        .sort((a, b) => a.week - b.week)
-        .map((gw) => getMatches(competition, gw.week));
+      const gameweeks = round.gameweeks.sort((a, b) => a.week - b.week).map((gw) => getMatches(competition, gw.week));
 
       Promise.all(gameweeks).then((data) => {
         let matches: Match[] = [];
@@ -98,38 +96,17 @@ export default function Fixture() {
     <List
       throttle
       isLoading={!fixtures}
-      navigationTitle={
-        round
-          ? `${round.name} | ${selectedCompetition?.title}`
-          : "Fixtures & Results"
-      }
+      navigationTitle={round ? `${round.name} | ${selectedCompetition?.title}` : "Fixtures & Results"}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Competition"
-          value={competition}
-          onChange={setCompetition}
-        >
+        <List.Dropdown tooltip="Filter by Competition" value={competition} onChange={setCompetition}>
           {competitions.map((c) => {
-            return (
-              <List.Dropdown.Item
-                key={c.value}
-                value={c.value}
-                title={c.title}
-              />
-            );
+            return <List.Dropdown.Item key={c.value} value={c.value} title={c.title} />;
           })}
         </List.Dropdown>
       }
     >
       {Object.entries(matchday).map(([roundname, matches]) => {
-        return (
-          <Matchday
-            key={roundname}
-            name={roundname}
-            matches={matches}
-            action={action}
-          />
-        );
+        return <Matchday key={roundname} name={roundname} matches={matches} action={action} />;
       })}
     </List>
   );
