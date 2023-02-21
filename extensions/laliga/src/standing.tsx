@@ -35,12 +35,12 @@ export default function GetTables() {
 
         if (team.position < team.previous_position) {
           icon = {
-            source: Icon.ChevronUp,
+            source: Icon.ChevronUpSmall,
             tintColor: Color.Green,
           };
         } else if (team.position > team.previous_position) {
           icon = {
-            source: Icon.ChevronDown,
+            source: Icon.ChevronDownSmall,
             tintColor: Color.Red,
           };
         }
@@ -51,6 +51,7 @@ export default function GetTables() {
               color: Color.PrimaryText,
               value: team.points.toString(),
             },
+            icon,
             tooltip: "Points",
           },
         ];
@@ -73,7 +74,7 @@ export default function GetTables() {
         return (
           <List.Item
             key={team.team.id}
-            icon={icon}
+            icon={team.team.shield.url}
             title={team.position.toString()}
             subtitle={team.team.nickname}
             keywords={[team.team.nickname, team.team.shortname]}

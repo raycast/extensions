@@ -10,7 +10,7 @@ const competitions = [
     value: "laliga-smartbank",
   },
   {
-    title: "Women's First Division",
+    title: "Liga F",
     value: "primera-division-femenina",
   },
 ];
@@ -53,7 +53,6 @@ export default function CompetitionDropdown(props: {
                     key={`${competition.value}-${year}`}
                     value={`${competition.value}-${year}`}
                     title={`${competition.title} ${season}`}
-                    // title={competition.title}
                   />
                 );
               })}
