@@ -98,7 +98,7 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
             <Action title="Run Trigger with BTT" onAction={handleRun} />
             <Action title="Run Trigger with BTT via URL" onAction={handleTrigger} />
             <Action.CopyToClipboard
-              title="Copy trigger url"
+              title="Copy Trigger URL"
               content={url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
               onCopy={() => console.log(triggerResult)}
