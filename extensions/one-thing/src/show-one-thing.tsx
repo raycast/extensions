@@ -1,6 +1,16 @@
-import { MenuBarExtra, Cache, updateCommandMetadata, launchCommand, LaunchType, environment } from "@raycast/api";
+import {
+  MenuBarExtra,
+  Cache,
+  updateCommandMetadata,
+  launchCommand,
+  LaunchType,
+  environment,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useMemo } from "react";
 
 const cache = new Cache();
+const { prefix, suffix } = getPreferenceValues<{ prefix: string; suffix: string }>();
 
 export default function Command() {
   const oneThing = cache.get("onething");
@@ -12,8 +22,22 @@ export default function Command() {
 
   updateCommandMetadata({ subtitle: oneThing });
 
+  const title = useMemo(() => {
+    let title = oneThing;
+
+    if (prefix) {
+      title = `${prefix} ${title}`;
+    }
+
+    if (suffix) {
+      title = `${title} ${suffix}`;
+    }
+
+    return title;
+  }, [oneThing]);
+
   return (
-    <MenuBarExtra title={oneThing}>
+    <MenuBarExtra title={title}>
       <MenuItem />
     </MenuBarExtra>
   );

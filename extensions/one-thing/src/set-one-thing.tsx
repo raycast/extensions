@@ -8,6 +8,7 @@ import {
   launchCommand,
   LaunchType,
   Icon,
+  getPreferenceValues,
 } from "@raycast/api";
 
 const cache = new Cache();
@@ -24,10 +25,15 @@ const placeholders = [
 
 const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
 
+const { shouldCloseMainWindow } = getPreferenceValues<{ shouldCloseMainWindow: boolean }>();
+
 function closeAndUpdate() {
   launchCommand({ name: "show-one-thing", type: LaunchType.Background });
   popToRoot();
-  closeMainWindow();
+
+  if (shouldCloseMainWindow) {
+    closeMainWindow();
+  }
 }
 
 export default function Command(props: { arguments?: { oneThing: string } }) {
@@ -64,7 +70,7 @@ export default function Command(props: { arguments?: { oneThing: string } }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="text" placeholder={placeholder} title="One Thing" />
+      <Form.TextField id="text" placeholder={placeholder} defaultValue={oneThing} title="One Thing" />
     </Form>
   );
 }

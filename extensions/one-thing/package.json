@@ -5,7 +5,10 @@
   "description": "Put a single task or goal in your menu bar",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
-  "contributors": ["mathieudutour"],
+  "contributors": [
+    "mathieudutour",
+    "thomaslombart"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,7 +16,23 @@
       "title": "One Thing",
       "description": "Put a single task or goal in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "prefix",
+          "title": "Prefix",
+          "description": "This will be prepended to the one thing",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "suffix",
+          "title": "Suffix",
+          "description": "This will be appended to the one thing",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     },
     {
       "name": "set-one-thing",
@@ -25,6 +44,17 @@
           "type": "text",
           "placeholder": "thing",
           "name": "oneThing"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
         }
       ]
     }
