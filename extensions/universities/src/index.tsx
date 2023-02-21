@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { GeoPos, University } from "./types";
@@ -31,7 +31,8 @@ export default function Command() {
       <List searchText={searchText} onSearchTextChange={setSearchText} throttle={true}>
         <List.EmptyView
           icon={{ source: { light: "graduationcap.fill_black.png", dark: "graduationcap.fill_white.png" } }}
-          title={"Empty search"}
+          title={"Empty Search"}
+          description="Please enter a search term."
         />
       </List>
     );
@@ -66,7 +67,11 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser title="Open Website" url={correctURL(item.web_pages[0])} />
-                      <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
+                      <Action
+                        title="Toggle Details"
+                        icon={Icon.AppWindowSidebarLeft}
+                        onAction={() => setShowingDetail(!showingDetail)}
+                      />
                     </ActionPanel>
                   }
                 />
@@ -76,7 +81,8 @@ export default function Command() {
       ))}
       <List.EmptyView
         icon={{ source: { light: "graduationcap.fill_black.png", dark: "graduationcap.fill_white.png" } }}
-        title={"No results"}
+        title={isLoading ? "Searching" : "No results"}
+        description={isLoading ? "Please wait..." : "Try another search term."}
       />
     </List>
   );
