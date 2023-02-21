@@ -12,7 +12,7 @@ export type ProjectResult = Pick<
 } & {
   members: { nodes: { id: string }[] };
 } & {
-  teams: { nodes: { id: string }[] };
+  teams: { nodes: { id: string; key: string }[] };
 };
 
 const projectFragment = `
@@ -39,17 +39,17 @@ const projectFragment = `
   }
   teams {
     nodes {
+      key
       id
     }
   }
 `;
 
-export async function getProjects(teamId?: string) {
+export async function getProjects() {
   const { graphQLClient } = getLinearClient();
 
-  if (!teamId) {
-    const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
-      `
+  const { data } = await graphQLClient.rawRequest<{ projects: { nodes: ProjectResult[] } }, Record<string, unknown>>(
+    `
         query {
           projects {
             nodes {
@@ -58,28 +58,37 @@ export async function getProjects(teamId?: string) {
           }
         }
       `
-    );
+  );
 
-    return data?.projects.nodes;
-  } else {
-    const { data } = await graphQLClient.rawRequest<
-      { team: { projects: { nodes: ProjectResult[] } } },
-      Record<string, unknown>
-    >(
-      `
-        query($teamId: String!) {
-          team(id: $teamId) {
+  return data?.projects.nodes;
+}
+
+type Roadmap = {
+  id: string;
+  name: string;
+  projects: { nodes: { id: string }[] };
+};
+
+export async function getRoadmaps() {
+  const { graphQLClient } = getLinearClient();
+
+  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
+    `
+      query {
+        roadmaps {
+          nodes {
+            id
+            name
             projects {
               nodes {
-                ${projectFragment}
+                id
               }
             }
           }
         }
-      `,
-      { teamId }
-    );
+      }
+    `
+  );
 
-    return data?.team.projects.nodes;
-  }
+  return data?.roadmaps.nodes;
 }

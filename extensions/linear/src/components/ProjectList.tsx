@@ -1,38 +1,61 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { List } from "@raycast/api";
 
-import useTeams from "../hooks/useTeams";
 import useProjects from "../hooks/useProjects";
 import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
 import useUsers from "../hooks/useUsers";
-
-import { getTeamIcon } from "../helpers/teams";
+import useRoadmaps from "../hooks/useRoadmaps";
 
 import Project from "./Project";
+import { ProjectResult } from "../api/getProjects";
 
 export default function ProjectList() {
-  const { teamsWithProjects, isLoadingTeams } = useTeams();
-  const [selectedTeam, setSelectedTeam] = useState<string>(
-    teamsWithProjects && teamsWithProjects.length === 1 ? teamsWithProjects[0].id : ""
-  );
-  const { projects, isLoadingProjects, mutateProjects } = useProjects(selectedTeam);
+  const [roadmap, setRoadmap] = useState("");
+
+  const { projects, isLoadingProjects, mutateProjects } = useProjects();
+  const { roadmaps, isLoadingRoadmaps } = useRoadmaps();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
 
+  const filteredProjects = useMemo(() => {
+    if (!projects) {
+      return [];
+    }
+
+    if (roadmap === "") {
+      return projects;
+    }
+
+    const projectsNormalizedById = projects.reduce((acc, project) => {
+      return {
+        ...acc,
+        [project.id]: project,
+      };
+    }, {} as Record<string, ProjectResult>);
+
+    const currentRoadmap = roadmaps?.find((r) => r.id === roadmap);
+
+    return (
+      currentRoadmap?.projects.nodes.map((project) => {
+        return projectsNormalizedById[project.id];
+      }) || []
+    );
+  }, [roadmap]);
+
   return (
     <List
-      isLoading={isLoadingProjects || isLoadingTeams || isLoadingPriorities || isLoadingMe || isLoadingUsers}
-      {...(teamsWithProjects && teamsWithProjects.length > 1
+      isLoading={isLoadingProjects || isLoadingRoadmaps || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      {...(roadmaps && roadmaps.length > 1
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Team" onChange={setSelectedTeam} storeValue>
-                <List.Dropdown.Item value="" title="All teams" />
+              <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} storeValue>
+                <List.Dropdown.Item value="" title="All Projects" />
 
                 <List.Dropdown.Section>
-                  {teamsWithProjects?.map((team) => (
-                    <List.Dropdown.Item key={team.id} value={team.id} title={team.name} icon={getTeamIcon(team)} />
+                  {roadmaps?.map((roadmap) => (
+                    <List.Dropdown.Item key={roadmap.id} value={roadmap.id} title={roadmap.name} />
                   ))}
                 </List.Dropdown.Section>
               </List.Dropdown>
@@ -42,19 +65,16 @@ export default function ProjectList() {
       searchBarPlaceholder="Filter by project title, lead, or status"
       filtering={{ keepSectionOrder: true }}
     >
-      <List.Section title="Upcoming">
-        {projects?.map((project) => (
-          <Project
-            project={project}
-            key={project.id}
-            teamId={selectedTeam}
-            priorities={priorities}
-            users={users}
-            me={me}
-            mutateProjects={mutateProjects}
-          />
-        ))}
-      </List.Section>
+      {filteredProjects?.map((project) => (
+        <Project
+          project={project}
+          key={project.id}
+          priorities={priorities}
+          users={users}
+          me={me}
+          mutateProjects={mutateProjects}
+        />
+      ))}
     </List>
   );
 }
