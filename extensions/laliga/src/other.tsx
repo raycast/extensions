@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Match, Round } from "./types";
 import { getMatches, getSubscriptionRounds } from "./api";
@@ -81,6 +81,7 @@ export default function Fixture() {
         return (
           <Action
             key={round.id}
+            icon={Icon.SoccerBall}
             title={round.name}
             onAction={() => {
               setRound(round);
