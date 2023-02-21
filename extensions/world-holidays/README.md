@@ -1,6 +1,6 @@
 # World Holidays
 
-View upcoming holidays for many countries worldwide
+View current year's holidays for many countries worldwide
 
 Extension created as a companion for my project [World Holidays](https://world-holidays.info/)
 
