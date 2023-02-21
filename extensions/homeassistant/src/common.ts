@@ -17,7 +17,8 @@ export function createHomeAssistantClient(): HomeAssistant {
   const instance = getInstance();
   const preferences = getPreferenceValues();
   const token = preferences.token as string;
-  const hac = new HomeAssistant(instance, token);
+  const ignoreCerts = preferences.ignorecerts as boolean;
+  const hac = new HomeAssistant(instance, token, ignoreCerts);
   return hac;
 }
 
