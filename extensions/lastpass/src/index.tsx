@@ -116,7 +116,7 @@ export default function Command() {
                     icon={Icon.Clipboard}
                     title="Copy Url"
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
-                    content={username}
+                    content={url}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
