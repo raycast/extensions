@@ -10,17 +10,22 @@ import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
 import { getGitHubClient } from "./helpers/withGithubClient";
 
+type SearchRepositoriesPrefs = { 
+  includeForks: boolean;
+  includeArchived: boolean;
+}
+
 function SearchRepositories() {
   const { github } = getGitHubClient();
 
-  const preferences = getPreferenceValues<{ includeForks: boolean }>();
+  const preferences = getPreferenceValues<SearchRepositoriesPrefs>();
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
-    () => `${searchFilter} ${searchText} fork:${preferences.includeForks}`,
+    () => `${searchFilter} ${searchText} fork:${preferences.includeForks} archived:${preferences.includeArchived}`,
     [searchText, searchFilter]
   );
 
@@ -30,6 +35,7 @@ function SearchRepositories() {
     mutate: mutateList,
   } = useCachedPromise(
     async (query) => {
+      console.log(query)
       const result = await github.searchRepositories({ query, numberOfItems: 20 });
 
       return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
