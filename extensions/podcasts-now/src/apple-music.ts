@@ -1,4 +1,5 @@
-import { Icon, updateCommandMetadata } from "@raycast/api";
+import { Icon } from "@raycast/api";
+import fetch from "cross-fetch";
 import { map, parseInt, replace, split } from "lodash";
 import { runAppleScript } from "run-applescript";
 
@@ -45,12 +46,18 @@ export const statusEmojiMapping = {
   [PlayerState.paused]: "⏸️",
 };
 
-export const play = (name: string, input: string) => {
+const getFinalLocation = async (url: string) => {
+  const res = await fetch(url);
+  return res.url;
+};
+
+export const play = async (name: string, input: string) => {
+  const finalLocation = await getFinalLocation(input);
   const script = `tell application "Music"
-  open location "${input}"
+  open location "${finalLocation}"
   set name of current track to "${replace(name, /"/g, "")}"
 end tell`;
-  return runAppleScript(script);
+  return await runAppleScript(script);
 };
 
 export const togglePause = () => {
