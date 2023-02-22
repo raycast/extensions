@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import useProjects from "../hooks/useProjects";
 import usePriorities from "../hooks/usePriorities";
@@ -11,7 +12,7 @@ import Project from "./Project";
 import { ProjectResult } from "../api/getProjects";
 
 export default function ProjectList() {
-  const [roadmap, setRoadmap] = useState("");
+  const [roadmap, setRoadmap] = useCachedState<string>("");
 
   const { projects, isLoadingProjects, mutateProjects } = useProjects();
   const { roadmaps, isLoadingRoadmaps } = useRoadmaps();
@@ -50,7 +51,7 @@ export default function ProjectList() {
       {...(roadmaps && roadmaps.length > 0
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} storeValue>
+              <List.Dropdown tooltip="Change Roadmap" onChange={setRoadmap} value={roadmap}>
                 <List.Dropdown.Item value="" title="All Projects" />
 
                 <List.Dropdown.Section>
