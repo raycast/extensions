@@ -53,7 +53,7 @@ export function UpdateBalanceForm(props: { account: BankAccount; mutate: MutateP
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Update current bank account balance"
+            title="Update Current Bank Account Balance"
             onSubmit={() => {
               submit(props.account.id, { balance: balance || "" });
             }}
