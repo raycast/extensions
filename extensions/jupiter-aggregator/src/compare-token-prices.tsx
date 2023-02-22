@@ -1,4 +1,4 @@
-import { Detail, useNavigation, Clipboard, Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { Detail, useNavigation, Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
 import { fetchTokenList, compareTokens } from "./api";
 import { useState } from "react";
 
@@ -25,16 +25,18 @@ export default function Command() {
   const [token2, setToken2] = useState("USDC");
   const [amount, setAmount] = useState("1");
   const { push } = useNavigation();
-  const { data: tokenData, isLoading: tokenDataLoading, revalidate } = compareTokens(token1, token2);
 
-  const submitHander = async (amount: any) => {
-    revalidate();
-    console.log(tokenData.data[token1].price);
-
-    const total = Number(tokenData.data[token1].price) * Number(amount);
-    console.log(total);
-
-    push(<Result price={tokenData.data[token1].price} token2={token2} />);
+  const submitHander = async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Loading...",
+    });
+    const price = await compareTokens(token1, amount, token2);
+    push(<Result price={price} token2={token2} />);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Success!",
+    });
   };
 
   return (
