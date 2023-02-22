@@ -5,6 +5,9 @@
   "description": "Changes between the two scroll directions „natural“ and „mouse-friendly“. Useful when switching between trackpad and mouse.",
   "icon": "command-icon.png",
   "author": "gregoralbrecht",
+  "contributors": [
+    "emilsharier"
+  ],
   "license": "MIT",
   "commands": [
     {
