@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ohmyzsh-plugins-docs",
+  "title": "Oh My Zsh Plugins Documentation",
+  "description": "The documentation for Oh My Zsh plugins",
+  "icon": "ohmyzsh-plugins-docs-icon.png",
+  "author": "lazarjov",
+  "categories": [
+    "Documentation",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Plugins",
+      "description": "Search Oh My Zsh plugins documentation",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.0",
+    "@types/html2json": "^1.0.1",
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
+    "html2json": "^1.0.2",
+    "htmlparser2": "^8.0.1",
+    "octokit": "^2.0.7",
+    "rehype-parse": "^8.0.4",
+    "rehype-remark": "^9.1.2",
+    "rehype-stringify": "^9.0.3",
+    "remark-gfm": "^3.0.1",
+    "remark-parse": "^10.0.1",
+    "remark-rehype": "^10.1.0",
+    "remark-stringify": "^10.0.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
