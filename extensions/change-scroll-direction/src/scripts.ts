@@ -37,8 +37,8 @@ export const scriptForOtherVersions = `
  */
 export function fetchAppleScript(): string {
   try {
-    // Output of `os.version()` would look like `22.3.0` (Depends on your macOS version)
-    const version = Number(os.version().split(".")[0]);
+    // Output of `os.release()` would look like `22.3.0` (Depends on your macOS version)
+    const version = Number(os.release().split(".")[0]);
     // 22 or above refers to MacOS Ventura.
     if (version < 22) {
       return scriptForOtherVersions;
