@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Fix] - 2023-02-22
+
+- Fixed that some commands didn't fully support ignore certs preference.
+
 ## [Weather Menu Bar] - 2022-11-28
 - Add weather entity menubar command
 
