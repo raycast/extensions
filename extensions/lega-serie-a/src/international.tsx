@@ -37,7 +37,7 @@ export default function Fixture() {
     }
   }, [championship]);
 
-  const categories = groupBy(matches, (m) =>
+  const matchday = groupBy(matches, (m) =>
     format(new Date(m.date_time), "eeee, dd MMM yyyy")
   );
 
@@ -63,7 +63,7 @@ export default function Fixture() {
         </List.Dropdown>
       }
     >
-      {Object.entries(categories).map(([date, fixtures]) => {
+      {Object.entries(matchday).map(([date, fixtures]) => {
         return <Matchday date={date} fixtures={fixtures} key={date} />;
       })}
     </List>
