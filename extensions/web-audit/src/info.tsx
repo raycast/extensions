@@ -144,11 +144,11 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
             ` Website OG Image: \n` +
             (ogImage ? `![${website}](${ogImage})` : "No OG Image found") +
             `\n\n## Website Info \n` +
-            (result.hTags ? (`* **h-Tags:** ${result.hTags} \n`) : (`\n`)) +
-            (result.pTags ? (`* **p-Tags:** ${result.pTags} \n`) : (`\n`)) +
-            (result.aTags ? (`* **a-Tags:** ${result.aTags} \n`) : (`\n`)) +
-            (result.imgTags ? (`* **img-Tags:** ${result.imgTags} \n`) : (`\n`)) +
-            (result.scriptTags ? (`* **script-Tags:** ${result.scriptTags} \n`) : (`\n`))
+            (result.hTags ? `* **h-Tags:** ${result.hTags} \n` : `\n`) +
+            (result.pTags ? `* **p-Tags:** ${result.pTags} \n` : `\n`) +
+            (result.aTags ? `* **a-Tags:** ${result.aTags} \n` : `\n`) +
+            (result.imgTags ? `* **img-Tags:** ${result.imgTags} \n` : `\n`) +
+            (result.scriptTags ? `* **script-Tags:** ${result.scriptTags} \n` : `\n`)
           }
           metadata={
             <Detail.Metadata>
