@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "omni-news",
   "title": "Omni News",
-  "description": "Fetch news from omni.se",
+  "description": "Fetching news from omni.se",
   "icon": "omni_icon.png",
   "author": "MacRayCast",
   "categories": [
