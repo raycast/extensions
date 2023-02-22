@@ -78,6 +78,7 @@ export default function Command() {
 | icon | A optional icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Clipboard](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
 | title | An optional title for the Action. | <code>string</code> | `"Copy to Clipboard"` |
+| transient | Indicates whether the content should be copied to the clipboard temporarily or not. | <code>boolean</code> | false |
 | onCopy | Callback when the content was copied to clipboard. | <code>(content: string \| number \| [Clipboard.Content](../clipboard.md#clipboard.content)) => void</code> | - |
 
 ### Action.Open
@@ -505,6 +506,7 @@ export default function Command() {
 | onChange<mark style="color:red;">*</mark> | Callback when the Date was picked | <code>(date: Date) => void</code> | - |
 | icon | A optional icon displayed for the Action. | <code>[Image.ImageLike](icons-and-images.md#image.imagelike)</code> | [Icon.Calendar](icons-and-images.md#icon) |
 | shortcut | The keyboard shortcut for the Action. | <code>[Keyboard.Shortcut](../keyboard.md#keyboard.shortcut)</code> | - |
+| type | Indicates what types of date components can be picked | <code>[Action.PickDate.Type](actions.md#action.pickdate.type)</code> | - |
 
 ## Types
 
@@ -535,3 +537,14 @@ Defines the visual style of the Action.
 Use [Action.Style.Regular](#action.style) for displaying a regular actions.
 Use [Action.Style.Destructive](#action.style) when your action has something that user should be careful about.
 Use the confirmation [Alert](../feedback/alert.md) if the action is doing something that user cannot revert.
+
+### Action.PickDate.Type
+
+The types of date components the user can pick with an `Action.PickDate`.
+
+#### Enumeration members
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |
