@@ -21,6 +21,7 @@ export type Scalars = {
 
 export type AccessToken = {
   __typename?: "AccessToken";
+  accountId?: Maybe<Scalars["ID"]>;
   createdAt: Scalars["DateTime"];
   id: Scalars["ID"];
   name: Scalars["String"];
@@ -37,10 +38,11 @@ export type AccessTokenConnection = {
 };
 
 export type AccessTokenCreateInput = {
+  accountId?: InputMaybe<Scalars["ID"]>;
   name: Scalars["String"];
 };
 
-export type AccessTokenCreatePayload = AccessTokenCreateSuccess | TokenLimitExceededError;
+export type AccessTokenCreatePayload = AccessTokenCreateSuccess | InvalidAccountError | TokenLimitExceededError;
 
 export type AccessTokenCreateSuccess = {
   __typename?: "AccessTokenCreateSuccess";
@@ -170,6 +172,7 @@ export type DatabaseUsage = {
   dbReads: Distribution;
   dbSize: Distribution;
   dbWrites: Distribution;
+  granularity: DatabaseUsageGranularity;
   requestCount: Distribution;
 };
 
@@ -178,6 +181,13 @@ export type DatabaseUsageFilter = {
   environment?: InputMaybe<BranchEnvironment>;
   startDate?: InputMaybe<Scalars["DateTime"]>;
 };
+
+export enum DatabaseUsageGranularity {
+  Daily = "DAILY",
+  Hourly = "HOURLY",
+  Monthly = "MONTHLY",
+  Weekly = "WEEKLY",
+}
 
 /** Deployment */
 export type Deployment = {
@@ -407,6 +417,11 @@ export type GitRepository = {
   slug: Scalars["String"];
   updatedAt: Scalars["DateTime"];
   url: Scalars["String"];
+};
+
+export type InvalidAccountError = {
+  __typename?: "InvalidAccountError";
+  query: Query;
 };
 
 export type InvalidDatabaseRegionsError = {
@@ -1422,7 +1437,7 @@ export type User = {
   name: Scalars["String"];
   organizationMemberships: Array<Member>;
   organizations: OrganizationConnection;
-  personalAccount: PersonalAccount;
+  personalAccount?: Maybe<PersonalAccount>;
 };
 
 export type UserOrganizationsArgs = {
@@ -1564,7 +1579,7 @@ export type GetScopesQuery = {
     id: string;
     name: string;
     avatarUrl?: string | null;
-    personalAccount: { __typename?: "PersonalAccount"; id: string; name: string; slug: string };
+    personalAccount?: { __typename?: "PersonalAccount"; id: string; name: string; slug: string } | null;
     organizationMemberships: Array<{
       __typename?: "Member";
       account:
