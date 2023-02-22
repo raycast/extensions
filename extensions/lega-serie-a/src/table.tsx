@@ -1,4 +1,4 @@
-import { List, Icon, Image, Color, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import SeasonDropdown, { seasons } from "./components/season_dropdown";
 import { getStandings } from "./api";
@@ -28,23 +28,6 @@ export default function GetTables() {
       isShowingDetail={showStats}
     >
       {standing?.map((team) => {
-        // let icon: Image.ImageLike = {
-        //   source: Icon.Dot,
-        //   tintColor: Color.SecondaryText,
-        // };
-
-        // if (team.PosCls < team.Perse) {
-        //   icon = {
-        //     source: Icon.ChevronUp,
-        //     tintColor: Color.Green,
-        //   };
-        // } else if (team.PosCls > team.Perse) {
-        //   icon = {
-        //     source: Icon.ChevronDown,
-        //     tintColor: Color.Red,
-        //   };
-        // }
-
         const accessories: List.Item.Accessory[] = [
           {
             text: {
