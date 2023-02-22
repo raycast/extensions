@@ -51,10 +51,8 @@ function SearchListItem({ hit }: { hit: Hit }) {
       accessories={[{ tag: `${hit.totalPackages} ${hit.totalPackages === 1 ? "package" : "packages"}` }]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title="Actions">
             <Action.OpenInBrowser title="Open in Browser" url={`${BASE_PACKAGE}/${hit.slug}`} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Profile URL"
               content={`${BASE_PACKAGE}/${hit.slug}`}
