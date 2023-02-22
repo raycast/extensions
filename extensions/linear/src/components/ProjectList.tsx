@@ -43,7 +43,7 @@ export default function ProjectList() {
         return projectsNormalizedById[project.id];
       }) || []
     );
-  }, [roadmap]);
+  }, [roadmap, projects, roadmaps]);
 
   return (
     <List
