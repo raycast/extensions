@@ -4,8 +4,9 @@ import { useState } from "react";
 import axios from "axios";
 import { preferences } from "./utils/preferences";
 import { to_amount_string, to_cents } from "./utils/numbers";
+import { MutatePromise } from "@raycast/utils";
 
-export function UpdateBalanceForm(props: { account: BankAccount; refresh: () => void }): JSX.Element {
+export function UpdateBalanceForm(props: { account: BankAccount; mutate: MutatePromise<BankAccount[]> }): JSX.Element {
   const [balance, setBalance] = useState<string>();
   const { pop } = useNavigation();
 
@@ -19,13 +20,22 @@ export function UpdateBalanceForm(props: { account: BankAccount; refresh: () => 
       .post(`https://monse.app/v1/bank-accounts/${id}/balance`, postData, {
         headers: { Authorization: `Bearer ${preferences.token}` },
       })
-      .then(async () => {
-        await showToast({
+      .then(() => {
+        showToast({
           style: Toast.Style.Success,
           title: "Current balance updated",
         });
 
-        props.refresh();
+        props.mutate(undefined, {
+          optimisticUpdate: (data) => {
+            const account = data.find((a) => a.id === id);
+            if (account) {
+              account.balance = balance;
+            }
+            return data;
+          },
+          shouldRevalidateAfter: false,
+        });
 
         pop();
       })
