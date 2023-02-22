@@ -1,0 +1,57 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "bartender",
+    "title": "Bartender",
+    "description": "Use and Control Bartender",
+    "icon": "bartender-icon.png",
+    "author": "KuangyeChen",
+    "categories": [
+        "Applications",
+        "Productivity"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "toggle",
+            "title": "Toggle Bartender",
+            "subtitle": "Bartender",
+            "description": "Toggles Bartender, like clicking the Bartender menu bar item, or hot key.",
+            "mode": "no-view"
+        },
+        {
+            "name": "toggleLeftMenu",
+            "title": "Toggle Left Menu",
+            "subtitle": "Bartender",
+            "description": "Toggles the left menu, allowing maximum menu bar space to see menu bar items.",
+            "mode": "no-view"
+        },
+        {
+            "name": "menuBarItems",
+            "title": "Menu Bar Items",
+            "subtitle": "Bartender",
+            "description": "Lists, searches and clicks on menu items.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.47.3",
+        "run-applescript": "^6.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "ray publish"
+    }
+}
