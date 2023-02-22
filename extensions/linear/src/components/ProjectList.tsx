@@ -33,7 +33,7 @@ export default function ProjectList() {
         ...acc,
         [project.id]: project,
       };
-    }, {} as Record<string, ProjectResult>);
+    }, {} as Record<string, ProjectResult | undefined>);
 
     const currentRoadmap = roadmaps?.find((r) => r.id === roadmap);
 
@@ -65,16 +65,24 @@ export default function ProjectList() {
       searchBarPlaceholder="Filter by project title, lead, status, or team keys"
       filtering={{ keepSectionOrder: true }}
     >
-      {filteredProjects?.map((project) => (
-        <Project
-          project={project}
-          key={project.id}
-          priorities={priorities}
-          users={users}
-          me={me}
-          mutateProjects={mutateProjects}
-        />
-      ))}
+      {filteredProjects?.map((project) => {
+        if (!project) {
+          return null;
+        }
+
+        return (
+          <Project
+            project={project}
+            key={project.id}
+            priorities={priorities}
+            users={users}
+            me={me}
+            mutateProjects={mutateProjects}
+          />
+        );
+      })}
+
+      <List.EmptyView title="There are no projects in the roadmap yet." />
     </List>
   );
 }
