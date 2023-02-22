@@ -66,7 +66,8 @@ export async function getPageContent(title: string, language: string) {
     apiUrl: `${getApiUrl(language)}w/api.php`,
   })
     .page(title)
-    .then((page) => page.content());
+    .then((page) => page.content())
+    .catch(() => []);
 }
 
 export async function getPageMetadata(title: string, language: string) {
@@ -79,6 +80,7 @@ export async function getPageMetadata(title: string, language: string) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       .then((page) => page.general)
+      .catch(() => ({}))
   );
 }
 
@@ -87,7 +89,8 @@ export async function getPageLinks(title: string, language: string) {
     apiUrl: `${getApiUrl(language)}w/api.php`,
   })
     .page(title)
-    .then((page) => page.links());
+    .then((page) => page.links())
+    .catch(() => []);
 }
 
 export async function getAvailableLanguages(title: string, language: string) {
@@ -96,5 +99,6 @@ export async function getAvailableLanguages(title: string, language: string) {
   })
     .page(title)
     .then((page) => page.langlinks())
-    .then((items) => items.flatMap((item) => item.lang));
+    .then((items) => items.flatMap((item) => item.lang))
+    .catch(() => [language]);
 }

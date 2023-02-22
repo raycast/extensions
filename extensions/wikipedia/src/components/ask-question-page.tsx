@@ -26,7 +26,7 @@ const openai = new OpenAIApi(configuration);
 export default function AskQuestionPage({ title }: { title: string }) {
   const [language] = useCachedState("language", "en");
   const { data: content, isLoading: isLoadingContent } = usePromise(getPageContent, [title, language]);
-  const [generating, setGenerating] = useState(false);
+  const [isAnswering, setIsAnswering] = useState(false);
   const [answer, setAnswer] = useState("");
   const [placeholder, setPlaceholder] = useState("Ask a question...");
   const [prompt, setPrompt] = useState("");
@@ -55,12 +55,12 @@ export default function AskQuestionPage({ title }: { title: string }) {
         return;
       }
 
-      if (generating) {
+      if (isAnswering) {
         setAnswer("");
       }
 
       setValue("question", "");
-      setGenerating(true);
+      setIsAnswering(true);
       setImmediate(() => setPlaceholder(question));
 
       const newPrompt = `${prompt.slice(0, 3800)}\n\nQ: ${question}\nA:`;
@@ -94,7 +94,7 @@ export default function AskQuestionPage({ title }: { title: string }) {
         for (const line of lines) {
           const message = line.replace(/^data: /, "");
           if (message === "[DONE]") {
-            setGenerating(false);
+            setIsAnswering(false);
             setPrompt(newPrompt + answer);
             return;
           }
@@ -116,7 +116,7 @@ export default function AskQuestionPage({ title }: { title: string }) {
   return (
     <Form
       navigationTitle={title}
-      isLoading={generating || isLoadingContent}
+      isLoading={isAnswering || isLoadingContent}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Ask Question" icon={Icon.QuestionMarkCircle} onSubmit={handleSubmit} />
