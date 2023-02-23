@@ -66,7 +66,7 @@ export const useGrafbase = () => {
   // TODO memo
 
   // TODO create a single client
-  useFetch<{ data: GetScopesQuery }>(apiUrl, {
+  useFetch<{ data: GetScopesQuery; errors: any }>(apiUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -76,16 +76,23 @@ export const useGrafbase = () => {
       query: GetScopesDocument,
     }),
     onError(error) {
+      console.error(error);
       showToast({
         title: "Oops",
         message: error?.message ?? "Something went wrong. Try again later.",
         style: Toast.Style.Failure,
       });
     },
-    async onData(data) {
-      const {
-        data: { viewer },
-      } = data;
+    async onData({ data: { viewer }, errors }) {
+      if (errors) {
+        console.error(errors);
+        showToast({
+          title: "Oops",
+          message: errors[0]?.message ?? "Something went wrong. Try again later.",
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
 
       setAvatarUrl(viewer?.avatarUrl);
       setPersonalAccount(viewer?.personalAccount);
