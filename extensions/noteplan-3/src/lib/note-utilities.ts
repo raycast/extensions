@@ -2,7 +2,7 @@ import { getPreferences } from "./preferences";
 import { parse as parsePath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync } from "fs";
 import { sync as find } from "fast-glob";
 import { enGB } from "date-fns/locale";
 import { capitalize } from "lodash";
@@ -12,9 +12,10 @@ function getNotePlan3URI() {
   const appstoreFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
   const setappFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
 
-  const useSetappVer: boolean = existsSync(setappFlavorPath);
-
-  return useSetappVer ? setappFlavorPath : appstoreFlavorPath;
+  if (getPreferences().noteplanFlavour == "setapp") {
+    return setappFlavorPath;
+  }
+  return appstoreFlavorPath;
 }
 const NOTE_PLAN_URI = getNotePlan3URI();
 

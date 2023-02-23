@@ -37,6 +37,24 @@
       "title": "File Extension",
       "default": "txt",
       "description": "The file extension you use for notes"
+    },
+    {
+      "name": "noteplanFlavour",
+      "type": "dropdown",
+      "required": true,
+      "description": "NotePlan flavour configuration",
+      "title": "NotePlan Flavour",
+      "default": "appstore",
+      "data": [
+        {
+          "title": "Mac AppStore version",
+          "value": "appstore"
+        },
+        {
+          "title": "SetApp version",
+          "value": "setapp"
+        }
+      ]
     }
   ],
   "dependencies": {
