@@ -1,5 +1,5 @@
 import { pbkdf2 } from "crypto";
-import { REPROMPT_HASH_SALT } from "~/constants/general";
+import { REPROMPT_HASH_SALT } from "~/constants/passwords";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {

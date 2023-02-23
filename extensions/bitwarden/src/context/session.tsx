@@ -3,7 +3,8 @@ import { createContext, PropsWithChildren, useContext, useEffect, useState } fro
 import { Bitwarden } from "~/api/bitwarden";
 import { Session } from "~/api/session";
 import UnlockForm from "~/components/UnlockForm";
-import { REPROMPT_HASH_KEY, REPROMPT_PASSWORD_ENTERED_KEY, SESSION_KEY } from "~/constants/general";
+import { SESSION_KEY } from "~/constants";
+import { REPROMPT_HASH_KEY, REPROMPT_PASSWORD_ENTERED_KEY } from "~/constants/passwords";
 import { SessionState } from "~/types/session";
 
 export const SessionContext = createContext<Session | null>(null);
