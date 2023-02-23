@@ -1,12 +1,14 @@
 import {
   Action,
   ActionPanel,
+  closeMainWindow,
   Color,
   getPreferenceValues,
   Icon,
   Image,
   List,
   LocalStorage,
+  open,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -86,7 +88,16 @@ function ProjectDetails({ project: _project }: { project: Project }) {
   );
 
   useEffect(() => {
-    getProject();
+    async function fetchProject() {
+      setLoading(true);
+      const project = await getProject();
+      if (project) {
+        setProject(project);
+      }
+      setLoading(false);
+    }
+
+    fetchProject();
   }, []);
 
   useEffect(() => {
@@ -98,8 +109,7 @@ function ProjectDetails({ project: _project }: { project: Project }) {
     return () => clearInterval(interval);
   }, [project.deployment_started_at]);
 
-  async function getProject() {
-    setLoading(true);
+  async function getProject(): Promise<Project | undefined> {
     const response = await fetch(`https://envoyer.io/api/projects/${project.id}`, {
       headers: {
         Authorization: `Bearer ${getPreferenceValues().envoyer_api_key}`,
@@ -108,12 +118,10 @@ function ProjectDetails({ project: _project }: { project: Project }) {
 
     try {
       const data = (await response.json()) as { project: Project };
-      setProject(data.project);
+      return data.project;
     } catch (e) {
       console.error(e);
     }
-
-    setLoading(false);
   }
 
   return (
@@ -178,6 +186,7 @@ function ProjectDetails({ project: _project }: { project: Project }) {
                     style: Toast.Style.Animated,
                     title: "Deploying...",
                   });
+
                   await fetch(`https://envoyer.io/api/projects/${project.id}/deployments`, {
                     method: "POST",
                     headers: {
@@ -188,8 +197,21 @@ function ProjectDetails({ project: _project }: { project: Project }) {
                   toast.style = Toast.Style.Success;
                   toast.title = "New deployment started!";
 
-                  await getProject();
-                  setProject({ ...project, status: "deploying", deployment_started_at: new Date().toISOString() });
+                  if (getPreferenceValues().open_on_deploy) {
+                    await open(`https://envoyer.io/projects/${project.id}`);
+                    await closeMainWindow();
+                  } else {
+                    setLoading(true);
+                    for (let i = 0; i < 10; i++) {
+                      await new Promise((resolve) => setTimeout(resolve, 1000));
+                      const newProject = await getProject();
+                      if (newProject !== undefined && project.last_deployment_id !== newProject.last_deployment_id) {
+                        setProject(newProject);
+                        break;
+                      }
+                    }
+                    setLoading(false);
+                  }
                 }}
               />
             </ActionPanel>
