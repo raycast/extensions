@@ -1,3 +1,0 @@
-# Eagle
-
-Eagle Extension

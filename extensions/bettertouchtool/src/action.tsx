@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import actions from "./actions.json";
 import { exec } from "child_process";
 
@@ -35,7 +35,7 @@ function ActionItem({ actionResult }: { actionResult: ActionResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Run Action with BTT" onAction={handleRun} />
+            <Action title="Run Action with BTT" onAction={handleRun} icon={Icon.Play} />
           </ActionPanel.Section>
         </ActionPanel>
       }

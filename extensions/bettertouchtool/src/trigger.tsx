@@ -28,10 +28,8 @@ export default function Command() {
   const TriggerDropdown = ({ onTriggerTypeChange }: { onTriggerTypeChange: (value: string) => void }) => {
     return (
       <List.Dropdown tooltip="Determine if disabled triggers should be shown" onChange={onTriggerTypeChange}>
-        <List.Dropdown.Section title="Show disabled triggers?">
-          <List.Dropdown.Item key="true" title={"Show all triggers"} value={"true"} />
-          <List.Dropdown.Item key="false" title={"Only show enabled triggers"} value={""} />
-        </List.Dropdown.Section>
+        <List.Dropdown.Item key="true" title={"Show all triggers"} value={"true"} icon={Icon.Eye} />
+        <List.Dropdown.Item key="false" title={"Only show enabled triggers"} value={""}icon={Icon.EyeDisabled} />
       </List.Dropdown>
     );
   };
@@ -44,7 +42,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Refresh" onAction={revalidate} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+            <Action title="Refresh" onAction={revalidate} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.RotateClockwise} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -60,7 +58,7 @@ export default function Command() {
 
 function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
   const { BTTTriggerName: triggerName } = triggerResult;
-  const url = `btt://trigger_named/?trigger_name=${triggerResult}`;
+  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}`;
   const handleTrigger = async () => {
     await open(url);
   };
@@ -95,8 +93,8 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Run Trigger with BTT" onAction={handleRun} />
-            <Action title="Run Trigger with BTT via URL" onAction={handleTrigger} />
+            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.Play} />
+            <Action title="Run Trigger with BTT via URL" onAction={handleTrigger} icon={Icon.Link} />
             <Action.CopyToClipboard
               title="Copy Trigger URL"
               content={url}
