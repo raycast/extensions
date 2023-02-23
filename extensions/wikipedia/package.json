@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wikipedia",
   "title": "Wikipedia",
-  "description": "Search Wikipedia articles and view them",
+  "description": "Search Wikipedia from Raycast",
   "icon": "wikipedia.png",
   "author": "vimtor",
   "contributors": [
@@ -108,8 +108,7 @@
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.18",
     "got": "^12.5.3",
-    "wikijs": "^6.4.1",
-    "openai": "^3.1.0"
+    "wikijs": "^6.4.1"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",
