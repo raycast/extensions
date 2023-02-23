@@ -1,5 +1,21 @@
 # `Easydict` Changelog
 
+## [v2.7.2] - 2023-01-17
+
+### 🐞 Fixes
+
+- Fixed Bing translation failed.
+
+## [v2.7.1] - 2023-01-08
+
+### 💎 Improvement
+
+- Improved the way to get the system proxy.
+
+### 🐞 Fixes
+
+- Fixed some known issues.
+
 ## [v2.7.0] - 2022-12-16
 
 ### 💎 Improvement

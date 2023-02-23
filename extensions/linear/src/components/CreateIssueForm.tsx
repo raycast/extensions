@@ -15,6 +15,7 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 
 import { getLastCreatedIssues, IssueResult } from "../api/getIssues";
 import { createIssue, CreateIssuePayload } from "../api/createIssue";
+import { createAttachment } from "../api/attachments";
 
 import useLabels from "../hooks/useLabels";
 import useStates from "../hooks/useStates";
@@ -24,7 +25,7 @@ import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
 
 import { getEstimateScale } from "../helpers/estimates";
-import { getOrderedStates, statusIcons } from "../helpers/states";
+import { getOrderedStates, getStatusIcon } from "../helpers/states";
 import { getErrorMessage } from "../helpers/errors";
 import { priorityIcons } from "../helpers/priorities";
 import { getUserIcon } from "../helpers/users";
@@ -61,12 +62,13 @@ export type CreateIssueValues = {
   cycleId: string;
   projectId: string;
   parentId: string;
+  attachments: string[];
 };
 
 type Preferences = {
   signature: boolean;
   autofocusField: "teamId" | "title";
-  copyToastAction: "key" | "url" | "title";
+  copyToastAction: "id" | "url" | "title";
 };
 
 function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], issue: IssueResult) {
@@ -78,7 +80,7 @@ function getCopyToastAction(copyToastAction: Preferences["copyToastAction"], iss
     return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
   }
 
-  return { title: "Copy Issue Key", onAction: () => Clipboard.copy(issue.identifier) };
+  return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };
 }
 
 export default function CreateIssueForm(props: CreateIssueFormProps) {
@@ -144,6 +146,19 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             shortcut: { modifiers: ["cmd", "shift"], key: "c" },
             ...getCopyToastAction(copyToastAction, issue),
           };
+
+          if (values.attachments[0]) {
+            try {
+              await createAttachment({
+                issueId: issue.id,
+                url: values.attachments[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Failure;
+              toast.title = "Failed to create attachment";
+              toast.message = "The issue was still created, but the attachment could not be added.";
+            }
+          }
 
           reset({
             title: "",
@@ -259,12 +274,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         {hasStates
           ? orderedStates.map((state) => {
               return (
-                <Form.Dropdown.Item
-                  title={state.name}
-                  value={state.id}
-                  key={state.id}
-                  icon={{ source: statusIcons[state.type], tintColor: state.color }}
-                />
+                <Form.Dropdown.Item title={state.name} value={state.id} key={state.id} icon={getStatusIcon(state)} />
               );
             })
           : null}
@@ -379,12 +389,16 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 title={`${issue.identifier} - ${issue.title}`}
                 value={issue.id}
                 key={issue.id}
-                icon={{ source: statusIcons[issue.state.type], tintColor: issue.state.color }}
+                icon={getStatusIcon(issue.state)}
               />
             );
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.Separator />
+
+      <Form.FilePicker title="Attachment" {...itemProps.attachments} allowMultipleSelection={false} />
     </Form>
   );
 }

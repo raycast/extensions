@@ -1,12 +1,9 @@
-import { readFile } from "fs";
-import { promisify } from "util";
+import { promises, existsSync } from "fs";
 import { BookmarkDirectory, HistoryEntry, RawBookmarks, SearchResult } from "../interfaces";
 import { getBookmarksFilePath } from "../util";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NO_BOOKMARKS_MESSAGE, NOT_INSTALLED_MESSAGE } from "../constants";
 import { NoBookmarksError, NotInstalledError, UnknownError } from "../components";
-import fs from "fs";
-const fsReadFileAsync = promisify(readFile);
 
 function extractBookmarkFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): HistoryEntry[] {
   const bookmarks: HistoryEntry[] = [];
@@ -36,23 +33,31 @@ const extractBookmarks = (rawBookmarks: RawBookmarks): HistoryEntry[] => {
   return bookmarks;
 };
 
-const getBookmarks = async (): Promise<HistoryEntry[]> => {
-  const bookmarksFilePath = getBookmarksFilePath();
-  if (!fs.existsSync(bookmarksFilePath)) {
+const getBookmarks = async (profile?: string): Promise<HistoryEntry[]> => {
+  const bookmarksFilePath = getBookmarksFilePath(profile);
+  if (!existsSync(bookmarksFilePath)) {
     throw new Error(NO_BOOKMARKS_MESSAGE);
   }
 
-  const fileBuffer = await fsReadFileAsync(bookmarksFilePath, { encoding: "utf-8" });
+  const fileBuffer = await promises.readFile(bookmarksFilePath, { encoding: "utf-8" });
   return extractBookmarks(JSON.parse(fileBuffer));
 };
 
 export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
   const [data, setData] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<string>();
   const [errorView, setErrorView] = useState<ReactNode>();
 
+  const revalidate = useCallback(
+    (profileId: string) => {
+      setProfile(profileId);
+    },
+    [profile]
+  );
+
   useEffect(() => {
-    getBookmarks()
+    getBookmarks(profile)
       .then((bookmarks) => {
         setData(bookmarks.filter((bookmark) => bookmark.title.toLowerCase().includes(query?.toLowerCase() || "")));
         setIsLoading(false);
@@ -67,7 +72,7 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
         }
         setIsLoading(false);
       });
-  }, [query]);
+  }, [profile, query]);
 
-  return { errorView, isLoading, data };
+  return { errorView, isLoading, data, revalidate };
 }

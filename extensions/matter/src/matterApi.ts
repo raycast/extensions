@@ -21,6 +21,7 @@ async function getQueue() {
   }
 }
 
+<<<<<<< HEAD
 async function getFavorites() {
   const url = "https://web.getmatter.com/api/library_items/favorites_feed?page=1";
   const token = getPreferenceValues<Preferences>().matterToken;
@@ -40,6 +41,8 @@ async function getFavorites() {
   }
 }
 
+=======
+>>>>>>> e93d31126e229bfd44e5e53582e258fb98b71893
 async function setFavorite(contentId: string, isFavorited: boolean) {
   const url = "https://web.getmatter.com/api/library_entries";
   const token = getPreferenceValues<Preferences>().matterToken;
@@ -61,8 +64,16 @@ async function setFavorite(contentId: string, isFavorited: boolean) {
     const response = await fetch(url, options);
     return await response.json();
   } catch (error) {
+<<<<<<< HEAD
     console.error(error);
   }
 }
 
 export { getQueue, getFavorites, setFavorite };
+=======
+    console.log(error);
+  }
+}
+
+export { getQueue, setFavorite };
+>>>>>>> e93d31126e229bfd44e5e53582e258fb98b71893

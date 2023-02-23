@@ -1,59 +1,47 @@
+import { Action, ActionPanel, closeMainWindow, getApplications, Icon, open, showToast, Toast } from "@raycast/api";
+import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { useCallback, useState } from "react";
 import {
-  Action,
-  ActionPanel,
-  closeMainWindow,
-  getApplications,
-  Icon,
-  open,
-  showToast,
-  Toast,
-  showHUD,
-} from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { execSync } from "child_process";
-import { useCallback, useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
-import { promisify } from "util";
-import { Tab } from "./types";
-import { getOpenTabs, setActiveTab, createNewArcWindow } from "./utils";
+  closeTab,
+  findTab,
+  getSpaces,
+  makeNewLittleArcWindow,
+  makeNewTabWithinSpace,
+  makeNewWindow,
+  reloadTab,
+  selectSpace,
+  selectTab,
+} from "./arc";
+import { Space, Tab } from "./types";
+import { getSpaceTitle, showFailureToast } from "./utils";
 
-const execAsync = promisify(execSync);
-
-export function OpenInArcAction(props: { url: string }) {
-  const [openTabs, setOpenTabs] = useState<Tab[]>();
-
-  console.log("Open tabs", openTabs);
-
+function OpenInArcAction(props: { url: string }) {
   async function handleAction() {
-    const openTab = openTabs?.find((tab) => tab.url === props.url);
+    try {
+      const openTab = await findTab(props.url);
 
-    console.log("Open Tab", openTab);
-
-    if (openTab) {
-      await setActiveTab(openTab);
-    } else {
-      await open(props.url, "Arc");
+      if (openTab) {
+        await closeMainWindow();
+        await selectTab(openTab);
+      } else {
+        await open(props.url, "company.thebrowser.Browser");
+      }
+    } catch (e) {
+      console.error(e);
+      await open(props.url, "company.thebrowser.Browser");
     }
   }
 
-  useEffect(() => {
-    getOpenTabs().then(setOpenTabs);
-  }, []);
-
   return <Action icon={Icon.Globe} title="Open in Arc" onAction={handleAction} />;
 }
-export function OpenInNewWindow(props: { url: string }) {
+
+function OpenInNewWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      await createNewArcWindow();
-      await execAsync(`open -a Arc "${props.url}"`);
+      await makeNewWindow({ url: props.url });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in new window",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in new window" });
     }
   }
 
@@ -61,27 +49,84 @@ export function OpenInNewWindow(props: { url: string }) {
     <Action
       icon={Icon.Globe}
       title="Open in New Window"
-      onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      onAction={handleAction}
     />
   );
 }
 
-export function OpenInLittleArc(props: { url: string }) {
+function OpenInNewIncognitoWindowAction(props: { url: string }) {
   async function handleAction() {
     try {
       await closeMainWindow();
-      await execAsync(`open -na "Arc" --args --new-window "${props.url}"`);
+      await makeNewWindow({ incognito: true, url: props.url });
     } catch (e) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed opening link in Little Arc",
-        message: e instanceof Error ? e.message : String(e),
-      });
+      await showFailureToast(e, { title: "Failed opening link in new incognito window" });
     }
   }
 
-  return <Action icon={Icon.Globe} title="Open in Little Arc" onAction={handleAction} />;
+  return (
+    <Action
+      icon={Icon.Globe}
+      title="Open in Incognito Window"
+      shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "enter" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+function OpenInLittleArc(props: { url: string }) {
+  async function handleAction() {
+    try {
+      await closeMainWindow();
+      await makeNewLittleArcWindow(props.url);
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed opening link in Little Arc window" });
+    }
+  }
+
+  return <Action icon={Icon.Globe} title="Open in Little Arc Window" onAction={handleAction} />;
+}
+
+function OpenInSpaceAction(props: { url: string }) {
+  const [open, setOpen] = useState(false);
+  const { data, isLoading } = useCachedPromise(getSpaces, [], { execute: open });
+
+  async function openSpace(space: Space) {
+    try {
+      await closeMainWindow();
+      await makeNewTabWithinSpace(props.url, space);
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed opening link in space" });
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu
+      icon={Icon.Sidebar}
+      title="Open in Space"
+      isLoading={isLoading}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "enter" }}
+      onOpen={() => setOpen(true)}
+    >
+      {data?.map((space) => (
+        <Action key={space.id} title={getSpaceTitle(space)} onAction={() => openSpace(space)} />
+      ))}
+    </ActionPanel.Submenu>
+  );
+}
+
+export function OpenSpaceAction(props: { space: Space }) {
+  async function handleAction() {
+    try {
+      await closeMainWindow();
+      await selectSpace(props.space);
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed opening Space" });
+    }
+  }
+
+  return <Action icon={Icon.Sidebar} title="Open Space" onAction={handleAction} />;
 }
 
 const browserBundleIds = new Set([
@@ -99,7 +144,7 @@ const browserBundleIds = new Set([
   "com.kagi.kagimacos", // Orion
 ]);
 
-export function OpenInOtherBrowserAction(props: { url: string }) {
+function OpenInOtherBrowserAction(props: { url: string }) {
   const [open, setOpen] = useState<boolean>();
   const { data } = useBrowsers({ execute: open });
 
@@ -133,25 +178,149 @@ function useBrowsers(options?: { execute?: boolean }) {
   return useCachedPromise(fetchBrowsers, [], { execute: options?.execute });
 }
 
-// Unfortunately the AppleScript crashes Arc 😥
-// Waiting for a fix to add this to the empty view
-export function SearchWithGoogleAction(props: { searchText?: string }) {
+export function SearchWithGoogleAction(props: { searchText: string }) {
   async function handleAction() {
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText ?? "")}`;
-    await runAppleScript(`
-      tell application "Arc"
-        activate
-        tell front window to make new tab at after (get active tab) with properties {URL:"${searchUrl}"}
-      end tell
-    `);
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(props.searchText)}`;
+
+    try {
+      const openTab = await findTab(searchUrl);
+      if (openTab) {
+        await closeMainWindow();
+        await selectTab(openTab);
+      } else {
+        await open(searchUrl, "company.thebrowser.Browser");
+      }
+    } catch (e) {
+      console.error(e);
+      await open(searchUrl, "company.thebrowser.Browser");
+    }
   }
 
   return props.searchText ? (
     <Action
       icon={Icon.MagnifyingGlass}
       title="Search with Google"
-      shortcut={{ modifiers: ["cmd"], key: "f" }}
+      shortcut={{ modifiers: ["ctrl"], key: "return" }}
       onAction={handleAction}
     />
   ) : null;
+}
+
+function ReloadTabAction(props: { tab: Tab }) {
+  async function handleAction() {
+    await showToast({ style: Toast.Style.Animated, title: "Reloading tab" });
+
+    try {
+      await reloadTab(props.tab);
+      await showToast({ style: Toast.Style.Success, title: "Reloaded tab" });
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed reloading tab" });
+    }
+  }
+
+  return (
+    <Action
+      icon={Icon.ArrowClockwise}
+      title="Reload Tab"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+function CloseTabAction(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+  async function handleAction() {
+    await showToast({ style: Toast.Style.Animated, title: "Closing tab" });
+
+    try {
+      await props.mutate(closeTab(props.tab), {
+        optimisticUpdate(data) {
+          if (!data) {
+            return;
+          }
+
+          return data.filter((t) => !(t.windowId === props.tab.windowId && t.tabId === props.tab.tabId));
+        },
+      });
+
+      await showToast({ style: Toast.Style.Success, title: "Closed tab" });
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed closing tab" });
+    }
+  }
+
+  return (
+    <Action
+      icon={Icon.XMarkCircle}
+      title="Close Tab"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+      onAction={handleAction}
+    />
+  );
+}
+
+// Sections
+
+export function OpenLinkActionSections(props: { url: string; searchText: string }) {
+  return (
+    <>
+      <ActionPanel.Section>
+        <OpenInArcAction url={props.url} />
+        <OpenInLittleArc url={props.url} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <OpenInNewWindowAction url={props.url} />
+        <OpenInNewIncognitoWindowAction url={props.url} />
+        <OpenInSpaceAction url={props.url} />
+        <OpenInOtherBrowserAction url={props.url} />
+        <SearchWithGoogleAction searchText={props.searchText} />
+      </ActionPanel.Section>
+    </>
+  );
+}
+
+export function CopyLinkActionSection(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action.CopyToClipboard
+        title="Copy URL"
+        content={props.url}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+      {props.title && (
+        <Action.CopyToClipboard
+          title="Copy Title"
+          content={props.title}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
+      )}
+      {props.title && (
+        <Action.CopyToClipboard
+          title="Copy URL as Markdown"
+          content={`[${props.title}](${props.url})`}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
+}
+
+export function EditTabActionSection(props: { tab: Tab; mutate: MutatePromise<Tab[] | undefined> }) {
+  return (
+    <ActionPanel.Section>
+      <ReloadTabAction tab={props.tab} />
+      <CloseTabAction tab={props.tab} mutate={props.mutate} />
+    </ActionPanel.Section>
+  );
+}
+
+export function CreateQuickLinkActionSection(props: { url: string; title?: string }) {
+  return (
+    <ActionPanel.Section>
+      <Action.CreateQuicklink
+        quicklink={{ link: props.url, name: props.title, application: "Arc" }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
+    </ActionPanel.Section>
+  );
 }

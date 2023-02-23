@@ -4,7 +4,7 @@
 
 Obsidian Bookmarks lets you use Raycast and Obsidian as a place to manage your bookmarks.
 
-Putting your bookmraks in Obsidian means that you can add your own metadata, including any notes or context about why you might be saving a link.
+Putting your bookmarks in Obsidian means that you can add your own metadata, including any notes or context about why you might be saving a link.
 
 ## Configuration
 

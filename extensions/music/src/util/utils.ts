@@ -1,7 +1,6 @@
 import { showToast, showHUD, Toast, Clipboard, open } from "@raycast/api";
 import { environment } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
-import { Errors } from "io-ts";
 
 import * as TE from "./fp/task-either";
 
@@ -56,20 +55,11 @@ export function displayError(error: Error | ScriptError) {
   });
 }
 
-// Function overload to accept multiple params types.
-function handleTaskEitherError<E extends Error | Errors, T>(
-  onError?: VoidFn<E>,
-  onSuccess?: VoidFn<T>
-): (te: TE.TaskEither<E, T>) => TE.TaskEither<void, T>;
 /**
  *
- * @param errorMessage Used only in menu-bar {String}
- * @param successMessage Argument for `showHUD` {String}
+ * @param error - Function or error message
+ * @param success - Function or success message
  */
-function handleTaskEitherError<E extends Error | Errors, T>(
-  errorMessage?: string,
-  successMessage?: string
-): (te: TE.TaskEither<E, T>) => TE.TaskEither<void, T>;
 function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, success?: string | VoidFn<T>) {
   const onSuccess = typeof success === "string" ? () => showHUD(success) : success;
   const onError = typeof error === "string" ? () => undefined : error;
@@ -79,3 +69,5 @@ function handleTaskEitherError<E extends Error, T>(error?: string | VoidFn<E>, s
 }
 
 export { handleTaskEitherError };
+
+export const minMax = (min: number, max: number) => (value: number) => Math.max(Math.min(value, max), min);

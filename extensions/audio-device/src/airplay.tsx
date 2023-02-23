@@ -37,7 +37,6 @@ export function AirPlaySelector() {
           }}
           title={item.name}
           subtitle={item.type}
-          accessoryIcon={active === item.name ? Icon.Checkmark : undefined}
           actions={
             <ActionPanel>
               <Action
@@ -62,6 +61,11 @@ export function AirPlaySelector() {
               />
             </ActionPanel>
           }
+          accessories={[
+            {
+              icon: active === item.name ? Icon.Checkmark : undefined,
+            },
+          ]}
         />
       ))}
     </List>
