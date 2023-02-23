@@ -1,3 +1,5 @@
+/* Put types that you feel like they still don't deserve a file of their own here */
+
 export type Preferences = {
   cliPath: string;
   clientId: string;
