@@ -1,7 +1,6 @@
 import { List } from "@raycast/api";
 
 export function FavoritesDropdown(props: any) {
-
     const listOfFilterOptions: any[] = [
         { id: "1", name: "All" },
         { id: "2", name: "Favorites" },
@@ -12,7 +11,7 @@ export function FavoritesDropdown(props: any) {
             tooltip="Filter articles"
             storeValue={false}
             onChange={(newValue) => {
-                props.filterSelection(newValue)
+                props.filterSelection(newValue);
             }}
         >
             <List.Dropdown.Section>
