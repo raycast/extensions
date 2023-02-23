@@ -1,4 +1,4 @@
-import { getPreferences, NoteplanFlavour } from "./preferences";
+import { getPreferences, InstallationSource } from "./preferences";
 import { parse as parsePath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
@@ -9,13 +9,13 @@ import { capitalize } from "lodash";
 import { Icon } from "@raycast/api";
 
 function getNotePlan3URI() {
-  const appstoreFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
-  const setappFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
+  const appstorePath = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
+  const setappPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
 
-  if (getPreferences().noteplanFlavour == NoteplanFlavour.SetApp) {
-    return setappFlavorPath;
+  if (getPreferences().installationSource == InstallationSource.SetApp) {
+    return setappPath;
   }
-  return appstoreFlavorPath;
+  return appstorePath;
 }
 const NOTE_PLAN_URI = getNotePlan3URI();
 

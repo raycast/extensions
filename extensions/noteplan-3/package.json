@@ -39,19 +39,19 @@
       "description": "The file extension you use for notes"
     },
     {
-      "name": "noteplanFlavour",
+      "name": "installationSource",
       "type": "dropdown",
       "required": true,
-      "description": "NotePlan flavour configuration",
-      "title": "NotePlan Flavour",
+      "description": "NotePlan installation source - App Store or SetApp",
+      "title": "Installation Source",
       "default": "appstore",
       "data": [
         {
-          "title": "Mac AppStore version",
+          "title": "Mac AppStore",
           "value": "appstore"
         },
         {
-          "title": "SetApp version",
+          "title": "SetApp",
           "value": "setapp"
         }
       ]

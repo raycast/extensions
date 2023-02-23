@@ -1,13 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export enum NoteplanFlavour {
+export enum InstallationSource {
   AppStore = "appstore",
   SetApp = "setapp",
 }
 
 interface Preferences {
   fileExtension: string;
-  noteplanFlavour: NoteplanFlavour;
+  installationSource: InstallationSource;
 }
 
 export const getPreferences = (): Preferences => {
