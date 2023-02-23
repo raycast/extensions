@@ -1,4 +1,4 @@
-import { getPreferences } from "./preferences";
+import { getPreferences, NoteplanFlavour } from "./preferences";
 import { parse as parsePath } from "path";
 import { homedir } from "os";
 import { formatRelative, parse as parseDate } from "date-fns";
@@ -12,7 +12,7 @@ function getNotePlan3URI() {
   const appstoreFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan3/Data/Library/Application Support/co.noteplan.NotePlan3`;
   const setappFlavorPath = `${homedir()}/Library/Containers/co.noteplan.NotePlan-setapp/Data/Library/Application Support/co.noteplan.NotePlan-setapp`;
 
-  if (getPreferences().noteplanFlavour == "setapp") {
+  if (getPreferences().noteplanFlavour == NoteplanFlavour.SetApp) {
     return setappFlavorPath;
   }
   return appstoreFlavorPath;
