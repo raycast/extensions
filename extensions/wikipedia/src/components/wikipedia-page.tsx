@@ -1,20 +1,33 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
 import { getPageContent, getPageData, getPageLinks, getPageMetadata } from "../utils/api";
-import { useCachedPromise, usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { renderContent, replaceLinks, toSentenceCase, toTitleCase } from "../utils/string";
-import { excludedMetatadataLabels, excludedMetatadataValues } from "../utils/constants";
-import AskQuestion from "./ask-question-page";
-import { useLanguage } from "../utils/hooks";
+import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
+import { Fragment } from "react";
+import { processMetadata, renderContent, replaceLinks, toSentenceCase, toTitleCase } from "../utils/formatting";
 import { ChangeLanguageSubmenu } from "./change-language-submenu";
+import { useLanguage } from "../utils/language";
 
 const preferences = getPreferenceValues();
 
 const openInBrowser = preferences.openIn === "browser";
 
+function formatMetadataValue(label: string, value?: Date | null | string) {
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+  if (!value) {
+    return "N/A";
+  }
+
+  if (label === "coordinates") {
+    return value.toString().split("|").slice(0, 2).join(", ");
+  }
+
+  return value.toString();
+}
+
 export default function WikipediaPage({ title }: { title: string }) {
   const [language] = useLanguage();
-  const [showMetadata, setShowMetadata] = useState(false);
+  const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
   const { data: page, isLoading: isLoadingPage } = useCachedPromise(getPageData, [title, language]);
   const { data: content, isLoading: isLoadingContent } = usePromise(getPageContent, [title, language]);
   const { data: metadata, isLoading: isLoadingMetadata } = usePromise(getPageMetadata, [title, language]);
@@ -43,26 +56,60 @@ export default function WikipediaPage({ title }: { title: string }) {
       isLoading={isLoadingPage || isLoadingContent || isLoadingMetadata || isLoadingLinks}
       markdown={markdown}
       metadata={
-        showMetadata && metadata ? (
+        showMetadata ? (
           <Detail.Metadata>
-            {Object.entries(metadata)
-              .filter(([label]) => !excludedMetatadataLabels.includes((label as any).toString()))
-              .filter(([, value]) => !excludedMetatadataValues.includes((value as any).toString()))
-              .map(([label, value]) => {
-                const title = toTitleCase(label);
+            {processMetadata(metadata).map(({ key, title, value }) => {
+              if (Array.isArray(value)) {
+                if (value.length === 0) return null;
 
-                if (Array.isArray(value)) {
+                if (value[0]?.date) {
                   return (
-                    <Detail.Metadata.TagList key={label} title={title}>
-                      {value.map((item) => (
-                        <Detail.Metadata.TagList.Item key={item} text={(item as any).toString()} />
-                      ))}
-                    </Detail.Metadata.TagList>
+                    <Fragment key={key}>
+                      <Detail.Metadata.TagList title={`${title} (Date)`}>
+                        {value.filter(Boolean).map((item) => (
+                          <Detail.Metadata.TagList.Item key={item.date} text={item.date?.toLocaleDateString()} />
+                        ))}
+                      </Detail.Metadata.TagList>
+                      {value[0].location && (
+                        <Detail.Metadata.TagList title={`${title} (Location)`}>
+                          {value.filter(Boolean).map((item) => (
+                            <Detail.Metadata.TagList.Item key={item.location} text={item?.location} />
+                          ))}
+                        </Detail.Metadata.TagList>
+                      )}
+                    </Fragment>
                   );
                 }
 
-                return <Detail.Metadata.Label key={label} title={title} text={(value as any).toString()} />;
-              })}
+                return (
+                  <Detail.Metadata.TagList key={key} title={title}>
+                    {value.map((item) => (
+                      <Detail.Metadata.TagList.Item key={item} text={formatMetadataValue(key, item)} />
+                    ))}
+                  </Detail.Metadata.TagList>
+                );
+              }
+
+              if (value instanceof Object) {
+                return (
+                  <Fragment key={key}>
+                    {Object.entries(value).map(([key, value]) => (
+                      <Detail.Metadata.Label
+                        key={key}
+                        title={`${title} (${toTitleCase(key)})`}
+                        text={formatMetadataValue(key, value)}
+                      />
+                    ))}
+                  </Fragment>
+                );
+              }
+
+              if (typeof value !== "string") {
+                return null;
+              }
+
+              return <Detail.Metadata.Label key={key} title={title} text={formatMetadataValue(key, value)} />;
+            })}
           </Detail.Metadata>
         ) : null
       }
@@ -73,12 +120,6 @@ export default function WikipediaPage({ title }: { title: string }) {
             icon={Icon.AppWindowSidebarRight}
             title="Toggle Metadata"
             onAction={() => setShowMetadata(!showMetadata)}
-          />
-          <Action.Push
-            title="Ask Question"
-            icon={Icon.QuestionMarkCircle}
-            target={<AskQuestion title={title} />}
-            shortcut={{ modifiers: ["cmd"], key: "j" }}
           />
           <ChangeLanguageSubmenu title={title} />
           <ActionPanel.Section>
@@ -103,17 +144,6 @@ export default function WikipediaPage({ title }: { title: string }) {
               title="Copy Contents"
               content={body}
             />
-            <ActionPanel.Submenu title="Copy Metadata" icon={Icon.CopyClipboard} isLoading={isLoadingMetadata}>
-              {metadata
-                ? Object.entries(metadata)
-                    .filter(([label]) => !excludedMetatadataLabels.includes((label as any).toString()))
-                    .filter(([, value]) => !excludedMetatadataValues.includes((value as any).toString()))
-                    .map(([label, value]) => {
-                      const title = toTitleCase(label);
-                      return <Action.CopyToClipboard key={label} title={title} content={(value as any).toString()} />;
-                    })
-                : null}
-            </ActionPanel.Submenu>
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ActionPanel.Submenu

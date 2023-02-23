@@ -1,13 +1,11 @@
-import { closeMainWindow, Cache, getPreferenceValues, open } from "@raycast/api";
+import { closeMainWindow, open } from "@raycast/api";
 import { getRandomPageUrl } from "./utils/api";
-
-const preferences = getPreferenceValues();
-const openInBrowser = preferences.openIn === "browser";
-const cache = new Cache();
+import { getStoredLanguage } from "./utils/language";
+import { openInBrowser } from "./utils/preferences";
 
 export default async function randomPage() {
-  const language = await cache.get("language");
-  const { title, url } = await getRandomPageUrl(language ? JSON.parse(language) : "en");
+  const language = await getStoredLanguage();
+  const { title, url } = await getRandomPageUrl(language);
 
   if (openInBrowser) {
     await open(url);

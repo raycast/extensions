@@ -1,8 +1,7 @@
 import { Action, ActionPanel } from "@raycast/api";
-import { languages } from "../utils/constants";
-import { useLanguage } from "../utils/hooks";
 import { usePromise } from "@raycast/utils";
 import { getAvailableLanguages } from "../utils/api";
+import { languages, useLanguage } from "../utils/language";
 
 export function ChangeLanguageSubmenu({ title }: { title: string }) {
   const [language, setLanguage] = useLanguage();

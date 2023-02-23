@@ -1,13 +1,11 @@
 import { getTodayFeaturedPageUrl } from "./utils/api";
-import { closeMainWindow, open, getPreferenceValues, Cache } from "@raycast/api";
-
-const preferences = getPreferenceValues();
-const openInBrowser = preferences.openIn === "browser";
-const cache = new Cache();
+import { closeMainWindow, open } from "@raycast/api";
+import { getStoredLanguage } from "./utils/language";
+import { openInBrowser } from "./utils/preferences";
 
 export default async function featuredPage() {
-  const language = await cache.get("language");
-  const { title, url } = await getTodayFeaturedPageUrl(language ? JSON.parse(language) : "en");
+  const language = await getStoredLanguage();
+  const { title, url } = await getTodayFeaturedPageUrl(language);
 
   if (openInBrowser) {
     await open(url);

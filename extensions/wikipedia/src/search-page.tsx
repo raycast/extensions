@@ -1,17 +1,13 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, Grid } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Grid } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import WikipediaPage from "./components/wikipedia-page";
 import { findPagesByTitle, getPageData } from "./utils/api";
-import { languages } from "./utils/constants";
-import { toSentenceCase } from "./utils/string";
-import AskQuestionPage from "./components/ask-question-page";
-import { useLanguage } from "./utils/hooks";
+import { toSentenceCase } from "./utils/formatting";
+import { languages, Locale, useLanguage } from "./utils/language";
+import { openInBrowser, prefersListView } from "./utils/preferences";
 
-const preferences = getPreferenceValues();
-
-const View = preferences.viewType === "list" ? List : Grid;
-const openInBrowser = preferences.openIn === "browser";
+const View = prefersListView ? List : Grid;
 
 export default function SearchPage(props: { arguments: { title: string } }) {
   const [language, setLanguage] = useLanguage();
@@ -29,7 +25,7 @@ export default function SearchPage(props: { arguments: { title: string } }) {
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
       searchBarAccessory={
-        <View.Dropdown tooltip="Language" value={language} onChange={setLanguage}>
+        <View.Dropdown tooltip="Language" value={language} onChange={(value) => setLanguage(value as Locale)}>
           {languages.map((language) => (
             <View.Dropdown.Item
               key={language.value}
@@ -74,12 +70,6 @@ function PageItem({ title, language }: { title: string; language: string }) {
               <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
             </>
           )}
-          <Action.Push
-            title="Ask Question"
-            icon={Icon.QuestionMarkCircle}
-            target={<AskQuestionPage title={title} />}
-            shortcut={{ modifiers: ["cmd"], key: "j" }}
-          />
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd"], key: "." }}

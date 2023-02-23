@@ -32,13 +32,6 @@
       ],
       "default": "raycast",
       "required": false
-    },
-    {
-      "name": "openAIKey",
-      "title": "OpenAI Key",
-      "description": "OpenAI API key for using AI assisted commands",
-      "type": "password",
-      "required": false
     }
   ],
   "commands": [
