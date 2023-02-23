@@ -66,7 +66,9 @@ export default function ProjectsList() {
       navigationTitle="Projects"
       searchBarPlaceholder="Search Projects..."
       isLoading={isLoading}
-      searchBarAccessory={(personalAccount || organizationMemberships) && <ScopeDropdown onChange={() => revalidate()} />}
+      searchBarAccessory={
+        (personalAccount || organizationMemberships) && <ScopeDropdown onChange={() => revalidate()} />
+      }
     >
       {!projects || projects?.length === 0 ? (
         <List.EmptyView
