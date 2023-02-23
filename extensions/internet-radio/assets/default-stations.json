@@ -3,11 +3,15 @@
         "website": "https://www.top80radio.com",
         "stream": "https://securestreams6.autopo.st:2321/stream.mp3",
         "genres": [
+            "70s",
             "80s",
             "rock",
             "pop",
-            "disco"
-        ]
+            "disco",
+            "new wave"
+        ],
+        "description": "Top 80 radio only plays hits from the 70's and 80's. Pop, New Wave, Rock, Disco. For more pleasure, most of the titles broadcast are in long version.",
+        "logo": "https://www.top80radio.com/wp-content/uploads/2023/01/banner-218-x-68.jpg"
     },
     "Radio Bloodstream": {
         "website": "http://www.radiobloodstream.com/",
@@ -17,7 +21,9 @@
             "metal",
             "heavy metal",
             "punk"
-        ]
+        ],
+        "description": "Experimental internet radio focusing on new talents, regional news from Liverpool.",
+        "logo": "https://4b4e3af124.clvaw-cdnwnd.com/d649b01a86c22783e19ed6a77a3369ce/200000362-1b6c41b6c8/RADIO%20BLOODSTREAM-8.jpg?ph=4b4e3af124"
     },
     "Psyndora Chillout": {
         "website": "https://www.psyndora.com/chill.html",
@@ -26,14 +32,18 @@
             "downtempo",
             "chillout",
             "psychill"
-        ]
+        ],
+        "description": "Psyndora Radio has been created for psychedelic music lovers.",
+        "logo": "https://cdn-profiles.tunein.com/s248971/images/logod.jpg?t=636311645042370000"
     },
     "CINEMIX": {
         "website": "http://www.cinemix.radio",
         "stream": "http://51.81.46.118:1190/stream/1/",
         "genres": [
             "soundtracks"
-        ]
+        ],
+        "description": "Soundtracks and cinema scores ONLY!",
+        "logo": "https://www.radio.net/images/broadcasts/73/f9/5344/1/c300.png"
     },
     "Pink Noise Radio": {
         "website": "https://www.internet-radio.com/station/pinknoise/",
@@ -42,7 +52,8 @@
             "noise",
             "ambient",
             "chillout"
-        ]
+        ],
+        "description": "Nonstop pink noise."
     },
     "Brown Noise Radio": {
         "website": "https://www.internet-radio.com/station/brownnoise/",
@@ -51,7 +62,8 @@
             "noise",
             "ambient",
             "chillout"
-        ]
+        ],
+        "description": "Nonstop brown noise."
     },
     "White Noise Radio": {
         "website": "https://www.internet-radio.com/station/whitenoise/",
@@ -60,7 +72,8 @@
             "noise",
             "ambient",
             "chillout"
-        ]
+        ],
+        "description": "Nonstop white noise."
     },
     "Radio Summernight": {
         "website": "http://radiosummernight.ch",
@@ -68,52 +81,71 @@
         "genres": [
             "pop",
             "alternative",
-            "rock"
-        ]
+            "dance",
+            "hip hop"
+        ],
+        "description": "Radio Summernight is a youth radio station that offers a varied music program around the clock via the Internet, with songs that fit the summer. Everything is played there that reminds of warm summer nights by the sea, in the garden or wherever.",
+        "logo": "https://radiomixer.net/crops/617478/160x160/1/0/2021/12/09/1XjN5RFUShZUbYujyZQx1ft9IE6CyHDy.png.webp"
     },
     "Frontier Country": {
         "website": "http://www.frontiercountryonline.com",
         "stream": "http://192.111.140.11:8205/stream/1/",
         "genres": [
             "country"
-        ]
+        ],
+        "description": "Frontier Country is an online country music radio station, broadcasting from Louisville, Kentucky!",
+        "logo": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.30808-6/305288144_506272071499316_7133789304553989076_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=p4tGhpLmRFwAX9ZdiSM&_nc_ht=scontent-bos5-1.xx&oh=00_AfCcS6h5qVFRr8vde4BiDm5slBKv-q0QGzOn_NH-gVK54A&oe=63FBBD69"
     },
     "Dubstep.fm": {
         "website": "https://www.dubstep.fm",
         "stream": "http://50.117.1.60/stream/1/",
         "genres": [
             "dubstep",
-            "electronic"
-        ]
+            "electronic",
+            "dance"
+        ],
+        "description": "Dubstep Internet Radio Dance.",
+        "logo": "https://us0-cdn.onlineradiobox.com/img/l/9/11329.v1.png"
     },
     "Blues Radio": {
         "website": "http://www.bluesradio.gr",
         "stream": "http://i4.streams.ovh:8352/stream/1/",
         "genres": [
-            "blues"
-        ]
+            "blues",
+            "rock"
+        ],
+        "description": "Welcome to Blues Rock Radio Relax and enjoy here BEST MUSIC ON NET. Enjoy quality music for the body and soul.",
+        "logo": "https://scontent-bos5-1.xx.fbcdn.net/v/t39.30808-6/269760986_4685366718176205_9196893996796199706_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=vL14EM4RAKIAX_zyTpg&_nc_ht=scontent-bos5-1.xx&oh=00_AfAkLQZdsVTIZBEOA4oDRRYFAbSnCvhcKvf4rhhwO5Q1BA&oe=63FB5A1C"
     },
     "BBC Radio 1": {
-        "website": "https://tunein.com/radio/BBC-Radio-1-988-s24939/",
+        "website": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_one",
         "stream": "http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
         "genres": [
-            "pop"
-        ]
+            "pop",
+            "dance",
+            "rock"
+        ],
+        "description": "You-orientated music, dance, and rock.",
+        "logo": "https://cdn-profiles.tunein.com/s24939/images/logod.png?t=637908709370000000"
     },
     "BBC World Service": {
-        "website": "https://tunein.com/radio/BBC-World-Service-News-s24948/",
+        "website": "https://www.bbc.co.uk/sounds/play/live:bbc_world_service",
         "stream": "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
         "genres": [
             "news",
             "talk"
-        ]
+        ],
+        "description": "Global news coverage.",
+        "logo": "https://cdn-profiles.tunein.com/s24948/images/logod.jpg?t=637224031720000000"
     },
     "KPOP Radio": {
         "website": "https://zeno.fm/radio/kpop-radio",
         "stream": "https://stream-55.zeno.fm/382yfn6u498uv?zs=mvrPGxDnTw-zWW4K1sLI2A",
         "genres": [
             "kpop"
-        ]
+        ],
+        "description": "We are the first Digital Radio in Ecuador with music, news and much more about Korean culture.",
+        "logo": "https://zeno.fm/_next/image/?url=https%3A%2F%2Fimages.zeno.fm%2FeV_iwSetjS3bKgM4T3Q7RZaxb9PJGND7iiF59j9VfDU%2Frs%3Afit%3A240%3A240%2Fg%3Ace%3A0%3A0%2FaHR0cHM6Ly9zdHJlYW0tdG9vbHMuemVub21lZGlhLmNvbS9jb250ZW50L3N0YXRpb25zL2FneHpmbnBsYm04dGMzUmhkSE55TWdzU0NrRjFkR2hEYkdsbGJuUVlnSUN3NTUzUTRRc01DeElPVTNSaGRHbHZibEJ5YjJacGJHVVlnSUR3OHIyZjV3a01vZ0VFZW1WdWJ3L2ltYWdlLz91cGRhdGVkPTE2NjAxMTc0NTcwMDA.webp&w=3840&q=100"
     },
     "NPR": {
         "website": "https://www.npr.org",
@@ -121,7 +153,9 @@
         "genres": [
             "news",
             "talk"
-        ]
+        ],
+        "description": "National Public Radio (NPR) is a nonprofit media organization that represents a network of 900 public radio stations in the United States. Its mission is to provide unbiased and independent educational and informative content to its listeners through an in-depth analysis of the latest news and political developments.",
+        "logo": "https://media.npr.org/chrome_svg/npr-logo.svg"
     },
     "Hot Hitz": {
         "website": "http://player.100hitz.com",
@@ -129,7 +163,9 @@
         "genres": [
             "hits",
             "pop"
-        ]
+        ],
+        "description": "100hitz.com is an online radio network of free Internet radio stations, featuring multiple genres from Country to Top40.",
+        "logo": "https://us0-cdn.onlineradiobox.com/img/l/1/10191.v4.png"
     },
     "ESPN": {
         "website": "https://www.iheart.com/live/espn-radio-7903/",
@@ -137,7 +173,9 @@
         "genres": [
             "sports",
             "talk"
-        ]
+        ],
+        "description": "24/7 Sports Coverage",
+        "logo": "https://i.iheart.com/v3/re/new_assets/b895d646-147e-4615-9852-9d6b1bc84f28?ops=fit(960%2C960)%2Cresize(0%2C390)"
     },
     "Greatest Hits Radio USA": {
         "website": "https://www.greatesthitsradiousa.com/",
@@ -145,14 +183,17 @@
         "genres": [
             "hits",
             "oldies"
-        ]
+        ],
+        "description": "The Greatest Hits of All Time!"
     },
     "Adagio.FM": {
         "website": "http://adagio.fm",
         "stream": "http://hi5.adagio.fm/;",
         "genres": [
             "classical"
-        ]
+        ],
+        "description": "Internet radio with timeless, classic music on the menu.",
+        "logo": "https://www.radio.net/images/broadcasts/ae/5e/5656/c300.png"
     },
     "Ambient Sleeping Pill": {
         "website": "https://ambientsleepingpill.com",
@@ -160,14 +201,16 @@
         "genres": [
             "ambient",
             "chillout"
-        ]
+        ],
+        "description": "Music for Sleeping, taking Naps, and other more wakeful Moments; Tranquil, Deep, Serene; no ads, no beats, no breaks, no cheese."
     },
     "Exclusively Birdsong": {
         "website": "https://www.getmeradio.com/stations/exclusivelybirdsong-3243/",
         "stream": "https://streaming.exclusive.radio/er/birdsong/icecast.audio",
         "genres": [
             "ambient"
-        ]
+        ],
+        "description": "Natural calm with the soothing, relaxing sound of birdsong."
     },
     "Latin Hits": {
         "website": "https://tunein.com/radio/Latin-Hits-s249995/",
@@ -175,7 +218,9 @@
         "genres": [
             "latin",
             "world"
-        ]
+        ],
+        "description": "Latin Hits is your source for the hottest chart-topping hits of the moment from artists like Bad Bunny, J Balvin, KAROL G, Shakira, and more! Whether you're hosting a high-energy party, or you just want to stay in-the-know on who's making their mark in Latin music, enjoy all your favorites and discover the freshest sounds of Latin's bright future right here.",
+        "logo": "https://cdn-profiles.tunein.com/s249995/images/logod.png?t=638015641140000000"
     },
     "HI95 Kauai": {
         "website": "http://www.hi95kauai.com/",
@@ -183,7 +228,9 @@
         "genres": [
             "hawaiian",
             "tropical"
-        ]
+        ],
+        "description": "Today's Island Hits",
+        "logo": "https://hi95kauai.com/wp-content/uploads/sites/16/hi95-black-border-1.png"
     },
     "talkSPORT": {
         "website": "https://talksport.com",
@@ -191,7 +238,9 @@
         "genres": [
             "sports",
             "talk"
-        ]
+        ],
+        "description": "The world's biggest sports radio station.",
+        "logo": "https://talksport.com/wp-content/themes/talksport/images/sunmasthead.svg"
     },
     "Irish Pub Radio": {
         "website": "http://www.irishpubradio.com/",
@@ -199,6 +248,8 @@
         "genres": [
             "irish",
             "world"
-        ]
+        ],
+        "description": "Irish Pub Radio plays nothing but the best Irish Music. Broadcasting Irish Music digitally via the internet , 24 hours a day to Irish Pubs all over the world. Irish Pub Radio has a huge extensive collection of these songs that we mix with other popular all time Irish favourites. We go to great efforts to play not just any Irish music....., but great Irish Music that you can play in your pub.",
+        "logo": "https://www.irishpubradio.com/images/logo.png"
     }
 }
