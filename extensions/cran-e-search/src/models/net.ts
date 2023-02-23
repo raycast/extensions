@@ -1,5 +1,5 @@
-export /** Parse the response from the fetch query into something we can display */
-async function parseFetchResponse<Hit>(response: Response): Promise<Hit[]> {
+/** Parse the response from the fetch query into something we can display */
+export async function parseFetchSearchResponse<Hit>(response: Response): Promise<Hit[]> {
   type ResultBody = {
     hits: Hit[];
     total: number;
@@ -17,6 +17,18 @@ async function parseFetchResponse<Hit>(response: Response): Promise<Hit[]> {
   // We ignore the pagination data and just return the hits
   // since we're not using it right now.
   return json.hits;
+}
+
+export async function parseFetchTrendsResponse<Hit>(response: Response): Promise<Hit[]> {
+  type ResultBody = Hit[];
+
+  const json = (await response.json()) as ResultBody | { code: string; message: string };
+
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
+  }
+
+  return json;
 }
 
 export function composeSearchParams(searchText: string) {

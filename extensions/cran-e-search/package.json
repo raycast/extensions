@@ -14,42 +14,69 @@
     {
       "name": "package",
       "title": "Search CRAN/E packages",
-      "subtitle": "R Code Package",
+      "subtitle": "CRAN/E",
       "description": "Search for R-code packages hosted on CRAN via the CRAN/E search engine.",
       "mode": "view",
       "icon": "cmd-package.png",
       "keywords": [
-        "cran",
+        "crane",
         "packages"
       ]
     },
     {
       "name": "author",
       "title": "Search CRAN/E authors",
-      "subtitle": "R Code Author",
+      "subtitle": "CRAN/E",
       "description": "Search for authors that contribute OSS written in R, via the CRAN/E search engine.",
       "mode": "view",
       "icon": "cmd-author.png",
       "keywords": [
-        "cran",
+        "crane",
         "authors"
+      ]
+    },
+    {
+      "name": "trends-github-repos-by-stars",
+      "title": "Trends: GitHub Repos by Stars",
+      "subtitle": "CRAN/E",
+      "description": "See the latest trends for R-code in GitHub repos by stars",
+      "mode": "view",
+      "icon": "cmd-trend.png",
+      "keywords": [
+        "crane",
+        "trend",
+        "repos"
+      ]
+    },
+    {
+      "name": "trends-github-users-by-followers",
+      "title": "Trends: GitHub Users by Followers",
+      "subtitle": "CRAN/E",
+      "description": "See the latest trends for R-code in GitHub users by followers",
+      "mode": "view",
+      "icon": "cmd-trend.png",
+      "keywords": [
+        "crane",
+        "trend",
+        "followers"
       ]
     }
   ],
   "keywords": [
-    "CRAN/E",
-    "R code packages",
-    "R code authors",
+    "crane",
+    "r code packages",
+    "r code authors",
     "cran package search",
-    "cran author search"
+    "cran author search",
+    "r code trends"
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/api": "^1.48.3",
+    "@raycast/utils": "^1.4.18"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

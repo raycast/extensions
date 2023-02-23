@@ -2,7 +2,7 @@ import { ActionPanel, Action, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
-import { composeSearchParams, parseFetchResponse } from "./models/net";
+import { composeSearchParams, parseFetchSearchResponse } from "./models/net";
 
 const BASE_PACKAGE = "https://www.cran-e.com/package";
 const BASE_API = "https://www.cran-e.com/api/package/overview";
@@ -18,7 +18,7 @@ type Hit = {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch(`${BASE_API}?` + new URLSearchParams(composeSearchParams(searchText)), {
-    parseResponse: (res) => parseFetchResponse<Hit>(res),
+    parseResponse: (res) => parseFetchSearchResponse<Hit>(res),
   });
 
   return (
@@ -53,8 +53,10 @@ function SearchListItem({ hit }: { hit: Hit }) {
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Actions">
+          <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${BASE_PACKAGE}/${hit.slug}`} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Install Command"
               content={`install.packages('${hit.name}')`}
