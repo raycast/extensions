@@ -14,7 +14,7 @@ import { getUserIcon } from "../helpers/users";
 
 import IssueActions from "./IssueActions";
 import { format } from "date-fns";
-import { getDueDateIcon } from "../helpers/dates";
+import { getDateIcon } from "../helpers/dates";
 import { getProjectIcon } from "../helpers/projects";
 
 type IssueDetailProps = {
@@ -83,7 +83,7 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   <Detail.Metadata.Label
                     title="Due Date"
                     text={format(new Date(issue.dueDate), "MM/dd/yyyy")}
-                    icon={getDueDateIcon(new Date(issue.dueDate))}
+                    icon={getDateIcon(new Date(issue.dueDate))}
                   />
                 ) : null}
 

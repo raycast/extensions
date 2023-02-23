@@ -12,7 +12,7 @@ export type ProjectResult = Pick<
 } & {
   members: { nodes: { id: string }[] };
 } & {
-  teams: { nodes: { id: string }[] };
+  teams: { nodes: { id: string; key: string }[] };
 };
 
 const projectFragment = `
@@ -39,6 +39,7 @@ const projectFragment = `
   }
   teams {
     nodes {
+      key
       id
     }
   }
@@ -82,4 +83,34 @@ export async function getProjects(teamId?: string) {
 
     return data?.team.projects.nodes;
   }
+}
+
+type Roadmap = {
+  id: string;
+  name: string;
+  projects: { nodes: { id: string }[] };
+};
+
+export async function getRoadmaps() {
+  const { graphQLClient } = getLinearClient();
+
+  const { data } = await graphQLClient.rawRequest<{ roadmaps: { nodes: Roadmap[] } }, Record<string, unknown>>(
+    `
+      query {
+        roadmaps {
+          nodes {
+            id
+            name
+            projects {
+              nodes {
+                id
+              }
+            }
+          }
+        }
+      }
+    `
+  );
+
+  return data?.roadmaps.nodes;
 }

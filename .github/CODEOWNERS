@@ -145,7 +145,9 @@
 /extensions/country-lookup                           @pernielsentikaer
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/craftdocs                                @kudrykv @mafredri @0x77dev
+/extensions/cran-e-search                            @flaming-codes
 /extensions/cratecast                                @gleich
+/extensions/create-t3-app                            @mozzius
 /extensions/cricketcast                              @sampoder
 /extensions/cron-description                         @niall-maloney
 /extensions/crossbell                                @Songkeys
@@ -345,6 +347,7 @@
 /extensions/hubspot                                  @harisvsulaiman @pernielsentikaer
 /extensions/hue                                      @pindab0ter @thomaspaulmann @robertvanhoesel
 /extensions/huggingcast                              @ragnorc
+/extensions/humaans                                  @farisaziz12
 /extensions/hyper-focus                              @iloveitaly @pernielsentikaer
 /extensions/hypersonic                               @prrrcl
 /extensions/iata-code-decoder                        @timrogers
@@ -514,6 +517,7 @@
 /extensions/ohdear                                   @andreaselia @pernielsentikaer @Hodglim
 /extensions/ohmyzsh-git-alias                        @yufeikang
 /extensions/ohmyzsh-plugins                          @k8scat
+/extensions/omni-news                                @danielkastberg
 /extensions/one-tab-group                            @xiaoluoboding
 /extensions/one-thing                                @pernielsentikaer @mathieudutour
 /extensions/onenote                                  @alewandows
@@ -568,6 +572,7 @@
 /extensions/ploi                                     @ploi-deploy
 /extensions/pocket                                   @vimtor
 /extensions/podcasts                                 @ron-myers
+/extensions/podcasts-now                             @cloudy9101
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp
@@ -776,6 +781,7 @@
 /extensions/typographer                              @mikeozornin
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer
+/extensions/universities                             @alewandows
 /extensions/unix-timestamp                           @Destiner
 /extensions/unogs                                    @mohitkyadav
 /extensions/unsplash                                 @eggsy @kkange

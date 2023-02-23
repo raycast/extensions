@@ -1,5 +1,14 @@
 import { Currency, Locale } from "./types";
 
+export function to_cents(amount: string): number {
+  const number = parseFloat(amount.toString().replace(",", "."));
+  return Math.round(100 * number);
+}
+
+export function to_amount_string(amount: number): string {
+  return parseFloat((amount / 100).toString()).toFixed(2);
+}
+
 export function format_currency(n: number, currency: Currency): string {
   const locale = locale_for_currency(currency);
   const formatter = new Intl.NumberFormat(locale, { style: "currency", currency });

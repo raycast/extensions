@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Add support for roadmaps] - 2023-02-23
+
+- Add roadmaps dropdown in `Search Projects` command
+- Add target date and teams accessories in `Search Projects` command
+
 ## [Adjust colors contrast in light mode] - 2023-02-08
 
 - Adjust color contrast on icons so that they're more visible in light mode

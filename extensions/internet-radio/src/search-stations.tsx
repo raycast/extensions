@@ -64,15 +64,13 @@ export default function Command() {
           return;
         }
       });
-      return !alreadySaved && !stationData.discontinued;
+
+      const matchesGenreSelection = genreSelection == "All Genres" || stationData.genres.includes(genreSelection);
+      return !alreadySaved && !stationData.discontinued && matchesGenreSelection;
     });
 
   const listItems = filteredStations.map(([stationName, stationData]) => {
     if (stationName === "default") {
-      return;
-    }
-
-    if (genreSelection != "All Genres" && !stationData.genres.includes(genreSelection)) {
       return;
     }
 
@@ -150,7 +148,9 @@ export default function Command() {
   return (
     <List
       isLoading={waitingForAction}
-      searchBarPlaceholder={`Search ${filteredStations.length || ""} radio stations...`}
+      searchBarPlaceholder={
+        filteredStations.length > 1 ? `Search ${filteredStations.length} radio stations...` : "Search..."
+      }
       searchBarAccessory={<GenreDropdown onGenreSelection={setGenreSelection} />}
       isShowingDetail={true}
     >
