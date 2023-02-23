@@ -1,6 +1,6 @@
 # Internet Radio Changelog
 
-## [] - 2023-02-22
+## [Additional Station Metadata] - 2023-02-22
 
 - Add station logos to detail view
 - Add support for several additional station detail fields
@@ -14,6 +14,7 @@
     - Contacts
     - Policies
 - Add additional genres
+- Fix filtering by genre not updating station count in search field
 - Fix error on play/pause while Menubar Radio command is disabled
 
 ## [Search Stations Database, Import/Export, and More] - 2023-02-08

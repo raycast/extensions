@@ -219,7 +219,7 @@ export async function playStation(stationName: string, stationURL: string): Prom
     try {
       await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
     } catch (error) {
-      console.log("Menubar Radio command is disabled.")
+      console.log("Menubar Radio command is disabled.");
     }
   }
 
@@ -268,7 +268,7 @@ export async function pausePlayback() {
     try {
       await launchCommand({ name: "menubar-radio", type: LaunchType.Background });
     } catch (error) {
-      console.log("Menubar Radio command is disabled.")
+      console.log("Menubar Radio command is disabled.");
     }
   }
 }

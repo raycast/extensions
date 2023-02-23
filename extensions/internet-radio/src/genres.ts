@@ -287,5 +287,5 @@ export const colorMap: { [key: string]: Color } = {
   togolese: Color.Green,
   "new-wave": Color.Green,
   steampunk: Color.Orange,
-  boogie: Color.Green
+  boogie: Color.Green,
 };
