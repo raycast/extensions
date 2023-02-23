@@ -1,16 +1,19 @@
 import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
-import { useOneTimePasswordHistoryWarning, usePasswordGenerator } from "./hooks";
-import { Bitwarden } from "./api";
-import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
-import { capitalise } from "./utils";
+import { TroubleshootingGuide } from "./components/TroubleshootingGuide";
+import { useState } from "react";
+import { capitalize } from "./utils/strings";
+import useOneTimePasswordHistoryWarning from "./utils/hooks/useOneTimePasswordHistoryWarning";
+import { usePasswordGenerator } from "./utils/hooks/usePasswordGenerator";
 import {
   PasswordGeneratorOptions as PassGenOptions,
   PasswordOptionField,
   PasswordOptionsToFieldEntries,
   PasswordType,
-} from "./types";
-import { TroubleshootingGuide } from "./components";
-import { useState } from "react";
+} from "./types/passwords";
+import { PASSWORD_OPTIONS_MAP } from "./constants/passwords";
+import { LOCAL_STORAGE_KEY } from "./constants/storage";
+import { Bitwarden } from "./api/bitwarden";
+import { objectEntries } from "./utils/objects";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -78,10 +81,10 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
       <Form.Separator />
       <Form.Dropdown id="type" title="Type" value={passwordType} onChange={handlePasswordTypeChange} autoFocus>
         {Object.keys(PASSWORD_OPTIONS_MAP).map((key) => (
-          <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
+          <Form.Dropdown.Item key={key} value={key} title={capitalize(key)} />
         ))}
       </Form.Dropdown>
-      {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
+      {objectEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
         ([optionType, optionField]: PasswordOptionsToFieldEntries) => (
           <OptionField
             key={optionType}

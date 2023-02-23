@@ -11,13 +11,15 @@ import {
   Clipboard,
   Action,
 } from "@raycast/api";
-import { Item, Folder, Reprompt } from "./types";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
-import { Bitwarden } from "./api";
-import { TroubleshootingGuide } from "./components";
-import { SessionProvider, useSession } from "./session";
-import { CopyPasswordAction, PastePasswordAction } from "./actions";
+import { Bitwarden } from "./api/bitwarden";
+import { CopyPasswordAction } from "./components/CopyPasswordAction";
+import { PastePasswordAction } from "./components/PastePasswordAction";
+import { TroubleshootingGuide } from "./components/TroubleshootingGuide";
+import { SessionProvider, useSession } from "./context/session";
+import { Folder, Item, Reprompt } from "./types/search";
+import { extractKeywords, faviconUrl } from "./utils/search";
+import { capitalize, codeBlock } from "./utils/strings";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
@@ -235,7 +237,7 @@ function BitwardenItem(props: {
               content ? (
                 <Action.CopyToClipboard
                   key={index}
-                  title={`Copy ${titleCase(title)}`}
+                  title={`Copy ${capitalize(title)}`}
                   content={content as string | number}
                 />
               ) : null

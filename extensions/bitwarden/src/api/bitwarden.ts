@@ -2,9 +2,12 @@ import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { DEFAULT_SERVER_URL } from "./const";
-import { Item, PasswordGeneratorOptions, Preferences, VaultState } from "./types";
-import { getPasswordGeneratingArgs, getServerUrlPreference } from "./utils";
+import { DEFAULT_SERVER_URL } from "../constants/general";
+import { Preferences, VaultState } from "../types";
+import { PasswordGeneratorOptions } from "../types/passwords";
+import { Item } from "../types/search";
+import { getPasswordGeneratingArgs } from "../utils/passwords";
+import { getServerUrlPreference } from "../utils/preferences";
 
 export class Bitwarden {
   private env: Record<string, string>;
