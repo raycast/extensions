@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Add support for roadmaps] - 2023-02-21
+## [Add support for roadmaps] - 2023-02-23
 
 - Add roadmaps dropdown in `Search Projects` command
 - Add target date and teams accessories in `Search Projects` command
