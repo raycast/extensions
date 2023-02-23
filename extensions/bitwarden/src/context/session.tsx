@@ -1,10 +1,10 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-import { Bitwarden } from "../api/bitwarden";
-import { Session } from "../api/session";
-import UnlockForm from "../components/UnlockForm";
-import { REPROMPT_HASH_KEY, REPROMPT_PASSWORD_ENTERED_KEY, SESSION_KEY } from "../constants/general";
-import { SessionState } from "../types/session";
+import { Bitwarden } from "~/api/bitwarden";
+import { Session } from "~/api/session";
+import UnlockForm from "~/components/UnlockForm";
+import { REPROMPT_HASH_KEY, REPROMPT_PASSWORD_ENTERED_KEY, SESSION_KEY } from "~/constants/general";
+import { SessionState } from "~/types/session";
 
 export const SessionContext = createContext<Session | null>(null);
 

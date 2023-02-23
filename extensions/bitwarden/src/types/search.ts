@@ -1,4 +1,4 @@
-import { PasswordHistory } from "./passwords";
+import { PasswordHistory } from "~/types/passwords";
 
 export interface Item {
   object: "item";

@@ -1,7 +1,7 @@
 import { useNavigation } from "@raycast/api";
-import { Session } from "../../api/session";
-import { RepromptForm } from "../../components/RepromptForm";
-import { Item } from "../../types/search";
+import { Session } from "~/api/session";
+import { RepromptForm } from "~/components/RepromptForm";
+import { Item } from "~/types/search";
 
 /**
  * Returns a function for an {@link Action} that will navigate to a master password confirmation form.

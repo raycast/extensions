@@ -1,5 +1,5 @@
 import { Icon } from "@raycast/api";
-import { Item } from "../types/search";
+import { Item } from "~/types/search";
 
 export function extractKeywords(item: Item): string[] {
   const keywords: (string | null | undefined)[] = [item.name];

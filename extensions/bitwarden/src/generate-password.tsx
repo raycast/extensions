@@ -1,19 +1,19 @@
 import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
-import { TroubleshootingGuide } from "./components/TroubleshootingGuide";
+import { TroubleshootingGuide } from "~/components/TroubleshootingGuide";
 import { useState } from "react";
-import { capitalize } from "./utils/strings";
-import useOneTimePasswordHistoryWarning from "./utils/hooks/useOneTimePasswordHistoryWarning";
-import { usePasswordGenerator } from "./utils/hooks/usePasswordGenerator";
+import { capitalize } from "~/utils/strings";
+import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
+import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
 import {
   PasswordGeneratorOptions as PassGenOptions,
   PasswordOptionField,
   PasswordOptionsToFieldEntries,
   PasswordType,
-} from "./types/passwords";
-import { PASSWORD_OPTIONS_MAP } from "./constants/passwords";
-import { LOCAL_STORAGE_KEY } from "./constants/storage";
-import { Bitwarden } from "./api/bitwarden";
-import { objectEntries } from "./utils/objects";
+} from "~/types/passwords";
+import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
+import { Bitwarden } from "~/api/bitwarden";
+import { objectEntries } from "~/utils/objects";
 
 const FormSpace = () => <Form.Description text="" />;
 

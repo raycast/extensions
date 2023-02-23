@@ -1,8 +1,8 @@
 import { Action, Icon, showHUD } from "@raycast/api";
-import { Session } from "../api/session";
-import { Item } from "../types/search";
-import { copyPassword } from "../utils/clipboard";
-import useReprompt from "../utils/hooks/useReprompt";
+import { Session } from "~/api/session";
+import { Item } from "~/types/search";
+import { copyPassword } from "~/utils/clipboard";
+import useReprompt from "~/utils/hooks/useReprompt";
 
 /**
  * Raycast {@link Action} for copying a password to the clipboard.

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
-import { Session } from "../api/session";
+import { Session } from "~/api/session";
 
 /**
  * Form for confirming the master password.

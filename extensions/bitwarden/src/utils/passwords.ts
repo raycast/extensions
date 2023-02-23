@@ -1,6 +1,6 @@
 import { pbkdf2 } from "crypto";
-import { REPROMPT_HASH_SALT } from "../constants/general";
-import { PasswordGeneratorOptions } from "../types/passwords";
+import { REPROMPT_HASH_SALT } from "~/constants/general";
+import { PasswordGeneratorOptions } from "~/types/passwords";
 
 export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));

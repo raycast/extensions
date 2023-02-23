@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { Session } from "../api/session";
-import useVaultMessages from "../utils/hooks/useVaultMessages";
-import { hashMasterPasswordForReprompting } from "../utils/passwords";
+import { Session } from "~/api/session";
+import useVaultMessages from "~/utils/hooks/useVaultMessages";
+import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 /**
  * Form for unlocking or logging in to the Bitwarden vault.

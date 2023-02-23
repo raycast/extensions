@@ -1,4 +1,4 @@
-import { PassphraseOptions, PasswordGeneratorOptions, PasswordOptionField, PasswordOptions } from "../types/passwords";
+import { PassphraseOptions, PasswordGeneratorOptions, PasswordOptionField, PasswordOptions } from "~/types/passwords";
 
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
   lowercase: true,

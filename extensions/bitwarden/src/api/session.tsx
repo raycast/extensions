@@ -1,10 +1,10 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
-import { Bitwarden } from "./bitwarden";
-import { Preferences } from "../types";
-import { REPROMPT_PASSWORD_ENTERED_KEY } from "../constants/general";
-import { hashMasterPasswordForReprompting } from "../utils/passwords";
-import { SessionState } from "../types/session";
+import { Bitwarden } from "~/api/bitwarden";
+import { Preferences } from "~/types";
+import { REPROMPT_PASSWORD_ENTERED_KEY } from "~/constants/general";
+import { hashMasterPasswordForReprompting } from "~/utils/passwords";
+import { SessionState } from "~/types/session";
 
 /**
  * A Bitwarden login session.

@@ -1,7 +1,7 @@
 import { Action, Clipboard, Icon } from "@raycast/api";
-import { Session } from "../api/session";
-import { Item } from "../types/search";
-import useReprompt from "../utils/hooks/useReprompt";
+import { Session } from "~/api/session";
+import { Item } from "~/types/search";
+import useReprompt from "~/utils/hooks/useReprompt";
 
 /**
  * Raycast {@link Action} for pasting a password to the foreground application.

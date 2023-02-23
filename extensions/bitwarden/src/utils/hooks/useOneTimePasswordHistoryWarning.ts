@@ -1,6 +1,6 @@
 import { confirmAlert, Icon, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect } from "react";
-import { LOCAL_STORAGE_KEY } from "../../constants/storage";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 
 const useOneTimePasswordHistoryWarning = async () => {
   const handleDismissAction = () => popToRoot({ clearSearchBar: false });

@@ -1,8 +1,8 @@
 import { Alert, closeMainWindow, confirmAlert, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Bitwarden } from "../../api";
-import { VaultState } from "../../types";
-import { getServerUrlPreference } from "../preferences";
+import { Bitwarden } from "~/api/bitwarden";
+import { VaultState } from "~/types";
+import { getServerUrlPreference } from "~/utils/preferences";
 
 function useVaultMessages(bitwardenApi: Bitwarden): {
   userMessage: string;

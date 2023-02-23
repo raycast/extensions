@@ -1,10 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer } from "react";
-import { Bitwarden } from "../../api";
-import { DEFAULT_PASSWORD_OPTIONS } from "../../constants/passwords";
-import { LOCAL_STORAGE_KEY } from "../../constants/storage";
-import { PasswordGeneratorOptions } from "../../types/passwords";
-import useAbortController from "./useAbortController";
+import { Bitwarden } from "~/api/bitwarden";
+import { DEFAULT_PASSWORD_OPTIONS } from "~/constants/passwords";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
+import { PasswordGeneratorOptions } from "~/types/passwords";
+import useAbortController from "~/utils/hooks/useAbortController";
 
 const initialPasswordGeneratorState = {
   options: undefined as PasswordGeneratorOptions | undefined,

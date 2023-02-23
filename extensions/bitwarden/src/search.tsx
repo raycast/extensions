@@ -12,14 +12,14 @@ import {
   Action,
 } from "@raycast/api";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { Bitwarden } from "./api/bitwarden";
-import { CopyPasswordAction } from "./components/CopyPasswordAction";
-import { PastePasswordAction } from "./components/PastePasswordAction";
-import { TroubleshootingGuide } from "./components/TroubleshootingGuide";
-import { SessionProvider, useSession } from "./context/session";
-import { Folder, Item, Reprompt } from "./types/search";
-import { extractKeywords, faviconUrl } from "./utils/search";
-import { capitalize, codeBlock } from "./utils/strings";
+import { Bitwarden } from "~/api/bitwarden";
+import { CopyPasswordAction } from "~/components/CopyPasswordAction";
+import { PastePasswordAction } from "~/components/PastePasswordAction";
+import { TroubleshootingGuide } from "~/components/TroubleshootingGuide";
+import { SessionProvider, useSession } from "~/context/session";
+import { Folder, Item, Reprompt } from "~/types/search";
+import { extractKeywords, faviconUrl } from "~/utils/search";
+import { capitalize, codeBlock } from "~/utils/strings";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
