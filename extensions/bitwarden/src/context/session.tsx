@@ -3,8 +3,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useState } fro
 import { Bitwarden } from "~/api/bitwarden";
 import { Session } from "~/api/session";
 import UnlockForm from "~/components/UnlockForm";
-import { SESSION_KEY } from "~/constants";
-import { REPROMPT_HASH_KEY, REPROMPT_PASSWORD_ENTERED_KEY } from "~/constants/passwords";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 import { SessionState } from "~/types/session";
 
 export const SessionContext = createContext<Session | null>(null);
@@ -88,9 +87,9 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
   async function setToken(token: string, passwordHash: string): Promise<void> {
     const now = new Date();
     await Promise.all([
-      LocalStorage.setItem(SESSION_KEY, token),
-      LocalStorage.setItem(REPROMPT_HASH_KEY, passwordHash),
-      LocalStorage.setItem(REPROMPT_PASSWORD_ENTERED_KEY, now.toString()),
+      LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token),
+      LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_HASH, passwordHash),
+      LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString()),
     ]);
 
     await update({ token, repromptHash: passwordHash, passwordEnteredDate: now });
@@ -100,7 +99,10 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
    * Delete the saved session token.
    */
   async function deleteToken(): Promise<void> {
-    await Promise.all([LocalStorage.removeItem(SESSION_KEY), LocalStorage.removeItem(REPROMPT_HASH_KEY)]);
+    await Promise.all([
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+      LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
+    ]);
     await update({ token: undefined });
   }
 
@@ -127,9 +129,9 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
   useEffect(() => {
     (async () => {
       const [token, passwordHash, passwordEnteredDate] = await Promise.all([
-        LocalStorage.getItem<string>(SESSION_KEY),
-        LocalStorage.getItem<string>(REPROMPT_HASH_KEY),
-        LocalStorage.getItem<string>(REPROMPT_PASSWORD_ENTERED_KEY),
+        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_HASH),
+        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED),
       ]);
 
       // UPGRADE: We can't use the "reprompt" confirmations without a hash of the master password.

@@ -4,7 +4,7 @@ import { Bitwarden } from "~/api/bitwarden";
 import { Preferences } from "~/types";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 import { SessionState } from "~/types/session";
-import { REPROMPT_PASSWORD_ENTERED_KEY } from "~/constants/passwords";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 
 /**
  * A Bitwarden login session.
@@ -68,7 +68,7 @@ export class Session {
     }
 
     const now = new Date();
-    await LocalStorage.setItem(REPROMPT_PASSWORD_ENTERED_KEY, now.toString());
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString());
     this.setState((old) => ({ ...old, passwordEnteredDate: now }));
     return true;
   }

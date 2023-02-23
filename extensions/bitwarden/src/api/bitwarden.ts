@@ -3,6 +3,7 @@ import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { DEFAULT_SERVER_URL } from "~/constants";
+import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 import { Preferences, VaultState } from "~/types";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Item } from "~/types/search";
@@ -38,7 +39,7 @@ export class Bitwarden {
   }
 
   async checkServerUrl(serverUrl: string): Promise<void> {
-    const cliServer = (await LocalStorage.getItem<string>("cliServer")) || "";
+    const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
     if (cliServer === serverUrl) {
       return;
     }
@@ -56,7 +57,7 @@ export class Bitwarden {
       }
       // If URL is empty, set it to the default
       await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { waitForInit: false });
-      await LocalStorage.setItem("cliServer", serverUrl);
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
 
       toast.style = Toast.Style.Success;
       toast.title = "Success!";

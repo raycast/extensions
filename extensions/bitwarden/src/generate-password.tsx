@@ -1,12 +1,10 @@
 import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
 import { TroubleshootingGuide } from "~/components/TroubleshootingGuide";
-import { useState } from "react";
 import { capitalize } from "~/utils/strings";
 import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
 import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
 import {
   PasswordGeneratorOptions as PassGenOptions,
-  PasswordOptionField,
   PasswordOptionsToFieldEntries,
   PasswordType,
 } from "~/types/passwords";
@@ -14,6 +12,7 @@ import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
 import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 import { Bitwarden } from "~/api/bitwarden";
 import { objectEntries } from "~/utils/objects";
+import OptionField from "~/components/GeneratePassword/OptionField";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -100,64 +99,10 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   );
 }
 
-type OptionFieldProps = {
-  field: PasswordOptionField;
-  option: keyof PassGenOptions;
-  defaultValue: PassGenOptions[keyof PassGenOptions];
-  onChange: (value: PassGenOptions[keyof PassGenOptions]) => void;
-  errorMessage?: string;
-};
-
-function OptionField({ option, defaultValue = "", onChange: handleChange, errorMessage, field }: OptionFieldProps) {
-  const { hint = "", label, type } = field;
-  const [error, setError] = useState<string>();
-
-  const handleTextFieldChange = (value: string) => {
-    if (isValidFieldValue(option, value)) {
-      handleChange(value);
-      setError(undefined);
-    } else {
-      setError(errorMessage);
-    }
-  };
-
-  if (type === "boolean") {
-    return (
-      <Form.Checkbox
-        key={option}
-        id={option}
-        title={label}
-        label={hint}
-        defaultValue={Boolean(defaultValue)}
-        onChange={handleChange}
-      />
-    );
-  }
-
-  return (
-    <Form.TextField
-      key={option}
-      id={option}
-      title={label}
-      placeholder={hint}
-      defaultValue={String(defaultValue)}
-      onChange={handleTextFieldChange}
-      error={error}
-    />
-  );
-}
-
 async function clearStorage() {
   for (const key of Object.values(LOCAL_STORAGE_KEY)) {
     await LocalStorage.removeItem(key);
   }
-}
-
-function isValidFieldValue<O extends keyof PassGenOptions>(field: O, value: PassGenOptions[O]) {
-  if (field === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
-  if (field === "separator") return (value as string).length === 1;
-  if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
-  return true;
 }
 
 export default GeneratePassword;

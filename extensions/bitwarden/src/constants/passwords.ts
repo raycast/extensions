@@ -1,7 +1,5 @@
 import { PassphraseOptions, PasswordGeneratorOptions, PasswordOptionField, PasswordOptions } from "~/types/passwords";
 
-export const REPROMPT_HASH_KEY = "sessionRepromptHash";
-export const REPROMPT_PASSWORD_ENTERED_KEY = "sessionRepromptAfter";
 export const REPROMPT_HASH_SALT = "foobarbazzybaz";
 
 export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
