@@ -54,7 +54,7 @@ export function getCIJobStatusIcon(status: string, allowFailure: boolean): Image
     }
     case "failed": {
       return allowFailure
-        ? { source: GitLabIcons.status_failed, tintColor: Color.Orange }
+        ? { source: Icon.ExclamationMark, tintColor: Color.Orange }
         : { source: GitLabIcons.status_failed, tintColor: Color.Red };
     }
     case "canceled": {
