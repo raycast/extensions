@@ -84,7 +84,7 @@ function SearchListItem({ hit }: { hit: Hit }) {
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title="Actions">
             <Action.OpenInBrowser title="Show on Github" url={original.html_url} />
           </ActionPanel.Section>
           {crane.packageSlug && (

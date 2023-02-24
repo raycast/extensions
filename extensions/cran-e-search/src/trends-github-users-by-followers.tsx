@@ -86,7 +86,7 @@ function SearchListItem({ hit }: { hit: Hit }) {
       ]}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title="Actions">
             <Action.OpenInBrowser title="Open in Browser" url={original.html_url} />
           </ActionPanel.Section>
         </ActionPanel>
