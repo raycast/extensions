@@ -1,6 +1,6 @@
 # CRAN/E Packages Changelog
 
-## [Feature: Github Trends] - 2023-02-23
+## [Feature: Github Trends] - 2023-02-24
 
 - New: Github Trends: repos by stars
 - New: Github Trends: authors by followers
