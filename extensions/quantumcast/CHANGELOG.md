@@ -5,11 +5,3 @@
 ✨ New
 
 - Initial release 🥳
-
-💎 Improvements
-
-- Nothing improved here
-
-🐞 Fixes
-
-- Nothing fixed here
