@@ -15,6 +15,12 @@ export interface PageSummary {
   };
 }
 
+export interface WikiNode {
+  title: string;
+  content: string;
+  items?: WikiNode[];
+}
+
 const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
 
 export async function getRandomPageUrl(language: string) {
@@ -61,16 +67,19 @@ export async function getPageData(title: string, language: string) {
   return got.get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`).json<PageSummary>();
 }
 
-export async function getPageContent(title: string, language: string) {
-  return wiki({
-    apiUrl: `${getApiUrl(language)}w/api.php`,
-  })
-    .page(title)
-    .then((page) => page.content())
-    .catch(() => []);
+export async function getPageContent(title: string, language: string): Promise<WikiNode[]> {
+  return (
+    wiki({
+      apiUrl: `${getApiUrl(language)}w/api.php`,
+    })
+      .page(title)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((page) => page.content() as any as WikiNode[])
+      .catch(() => [])
+  );
 }
 
-export async function getPageMetadata(title: string, language: string) {
+export async function getPageMetadata(title: string, language: string): Promise<Record<string, any>> {
   return (
     wiki({
       apiUrl: `${getApiUrl(language)}w/api.php`,
@@ -79,7 +88,7 @@ export async function getPageMetadata(title: string, language: string) {
       .then((page) => page.fullInfo())
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      .then((page) => page.general)
+      .then((page) => page?.general ?? {})
       .catch(() => ({}))
   );
 }

@@ -60,6 +60,10 @@ export default function WikipediaPage({ title }: { title: string }) {
   ${body}`
     : "";
 
+  if (!page) {
+    return null;
+  }
+
   return (
     <Detail
       navigationTitle={title}
@@ -125,7 +129,7 @@ export default function WikipediaPage({ title }: { title: string }) {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={page?.content_urls?.desktop.page} />
+          <Action.OpenInBrowser url={page.content_urls.desktop.page} />
           <Action
             icon={Icon.AppWindowSidebarRight}
             title="Toggle Metadata"
@@ -136,18 +140,18 @@ export default function WikipediaPage({ title }: { title: string }) {
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd"], key: "." }}
               title="Copy URL"
-              content={page?.content_urls?.desktop.page}
+              content={page.content_urls.desktop.page}
             />
             <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"
-              content={page?.description}
+              content={page.description}
             />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
               title="Copy Summary"
-              content={page?.extract}
+              content={page.extract}
             />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}

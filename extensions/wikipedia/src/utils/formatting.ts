@@ -1,4 +1,5 @@
 import { openInBrowser } from "./preferences";
+import { WikiNode } from "./api";
 
 export function toTitleCase(str: string) {
   const result = str.replace(/([A-Z])/g, " $1");
@@ -13,12 +14,6 @@ export function escapeRegExp(str: string) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-interface Node {
-  title: string;
-  content: string;
-  items?: Node[];
-}
-
 export function replaceLinks(text: string, language: string, links: string[] = []) {
   const regex = new RegExp(`\\b(${links.map(escapeRegExp).join("|")})\\b`, "g");
   return text.replaceAll(regex, (link) => {
@@ -29,7 +24,7 @@ export function replaceLinks(text: string, language: string, links: string[] = [
   });
 }
 
-export function renderContent(nodes: Node[], level: number, links: string[] = [], language = "en"): string {
+export function renderContent(nodes: WikiNode[], level: number, links: string[] = [], language = "en"): string {
   return nodes
     .filter((node) => node.content || node.content.length > 0)
     .filter((node) => !excludedSections.includes(node.title))

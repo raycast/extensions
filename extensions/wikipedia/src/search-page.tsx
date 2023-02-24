@@ -80,7 +80,7 @@ function PageItem({ title, language }: { title: string; language: string }) {
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"
-              content={page?.description}
+              content={page?.description ?? ""}
             />
           </ActionPanel.Section>
         </ActionPanel>
