@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { getPageContent, getPageData, getPageLinks, getPageMetadata } from "../utils/api";
 import { useCachedPromise, useCachedState, usePromise } from "@raycast/utils";
 import { Fragment } from "react";
 import { processMetadata, renderContent, replaceLinks, toSentenceCase, toTitleCase } from "../utils/formatting";
 import { ChangeLanguageSubmenu } from "./change-language-submenu";
 import { useLanguage } from "../utils/language";
+import Style = Toast.Style;
 
 const preferences = getPreferenceValues();
 
@@ -28,10 +29,19 @@ function formatMetadataValue(label: string, value?: Date | null | string) {
 export default function WikipediaPage({ title }: { title: string }) {
   const [language] = useLanguage();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
-  const { data: page, isLoading: isLoadingPage } = useCachedPromise(getPageData, [title, language]);
   const { data: content, isLoading: isLoadingContent } = usePromise(getPageContent, [title, language]);
   const { data: metadata, isLoading: isLoadingMetadata } = usePromise(getPageMetadata, [title, language]);
   const { data: links, isLoading: isLoadingLinks } = usePromise(getPageLinks, [title, language]);
+  const { data: page, isLoading: isLoadingPage } = useCachedPromise(getPageData, [title, language], {
+    onError: () => {
+      showToast({
+        title: "Page not found",
+        message: title,
+        style: Style.Failure,
+      });
+      popToRoot();
+    },
+  });
 
   const body = content ? renderContent(content, 2, links, language) : "";
 
