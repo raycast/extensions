@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search",
+      "title": "Search Vault",
       "subtitle": "LastPass",
       "description": "Search LastPass credentials",
       "mode": "view"
