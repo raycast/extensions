@@ -3,7 +3,7 @@
   "name": "buddy",
   "title": "Buddy",
   "description": "Control Buddy with your keyboard.",
-  "icon": "buddy-icon.png",
+  "icon": "command-icon.png",
   "author": "lamalamaMark",
   "categories": [
     "Developer Tools"
