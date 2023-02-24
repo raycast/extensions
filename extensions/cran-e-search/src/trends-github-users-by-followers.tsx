@@ -77,7 +77,6 @@ function SearchListItem({ hit }: { hit: Hit }) {
       icon={{
         source: original.avatar_url,
         mask: Image.Mask.Circle,
-        tooltip: original.bio,
       }}
       accessories={[
         {
