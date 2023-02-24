@@ -70,7 +70,7 @@ export function getCIJobStatusIcon(status: string, allowFailure: boolean): Image
       return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
   }
   /*
-  missing 
+  missing
   * WAITING_FOR_RESOURCE
   * PREPARING
   * MANUAL
@@ -111,7 +111,7 @@ export function getCIJobStatusEmoji(status: string): string {
       return "💼";
   }
   /*
-  missing 
+  missing
   * WAITING_FOR_RESOURCE
   * PREPARING
   */
