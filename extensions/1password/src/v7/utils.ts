@@ -9,6 +9,7 @@ import { readFileSync } from "fs";
 const cache = new Cache();
 
 const ITEMS_CACHE_NAME = "@items";
+export const SORTING_METHOD = getPreferenceValues<Preferences>().sortingMethod || "title";
 
 export function getV7Items(): { [key: string]: V7Category } | undefined {
   if (cache.has(ITEMS_CACHE_NAME)) {

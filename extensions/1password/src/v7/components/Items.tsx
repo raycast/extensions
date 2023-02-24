@@ -22,6 +22,12 @@ export function Items() {
     category !== newCategory && setCategory(newCategory);
   };
 
+  if(SORTING_METHOD === "updatedAt" ){
+    categories?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  } else {
+    categories?.sort((a, b) => a.title.localeCompare(b.title))
+  }
+
   return (
     <List searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}>
       {categories?.length ? (

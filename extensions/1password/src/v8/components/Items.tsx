@@ -4,9 +4,10 @@ import { useCachedState } from "@raycast/utils";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Item, Url, User } from "../types";
-import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp } from "../utils";
+import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, SORTING_METHOD } from "../utils";
 import { Guide } from "./Guide";
 import resetCache from "../../reset-cache";
+
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
@@ -22,13 +23,20 @@ export function Items() {
     isLoading: itemsIsLoading,
   } = useOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
 
+   
   const categoryItems =
     category === DEFAULT_CATEGORY
       ? items
       : items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
   const onCategoryChange = (newCategory: string) => {
     category !== newCategory && setCategory(newCategory);
-  };
+  }; 
+
+  if(SORTING_METHOD === "updatedAt" ){
+    categoryItems?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  } else {
+    categoryItems?.sort((a, b) => a.title.localeCompare(b.title))
+  }
 
   if (itemsError || accountError) return <Guide />;
   return (
@@ -43,9 +51,7 @@ export function Items() {
       />
       <List.Section title="Items" subtitle={`${categoryItems?.length}`}>
         {categoryItems?.length &&
-          categoryItems
-            .sort((a, b) => a.title.localeCompare(b.title))
-            .map((item) => (
+          categoryItems.map((item) => (
               <List.Item
                 key={item.id}
                 id={item.id}

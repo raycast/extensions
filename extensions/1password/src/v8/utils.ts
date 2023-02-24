@@ -6,11 +6,6 @@ import { useEffect, useState } from "react";
 
 import { CategoryName } from "./types";
 
-export type Preferences = {
-  cliPath: string;
-  version: "v7" | "v8";
-};
-
 export const cache = new Cache();
 
 export const CLI_PATH =
@@ -19,6 +14,8 @@ export const CLI_PATH =
 export const CATEGORIES_CACHE_NAME = "@categories";
 export const ITEMS_CACHE_NAME = "@items";
 export const ACCOUNT_CACHE_NAME = "@account";
+export const SORTING_METHOD = getPreferenceValues<Preferences>().sortingMethod || "title";
+
 
 export function op(args: string[]) {
   if (CLI_PATH) {
