@@ -69,7 +69,7 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
               icon={
                 activity.timer_started_at === null
                   ? { source: Icon.Play, tintColor: Color.Green }
-                  : { source: Icon.Pause, tintColor: Color.Yellow }
+                  : { source: Icon.Stop, tintColor: Color.Red }
               }
               title={`${activity.timer_started_at === null ? "Start" : "Stop"} timer`}
               onAction={() =>

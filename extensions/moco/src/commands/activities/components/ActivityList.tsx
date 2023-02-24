@@ -18,17 +18,19 @@ export const ActivityList = ({ projectID = null }: { projectID?: number | null }
   const lookbackDays = projectID ? 7 : 0;
 
   const refreshUser = async () => {
-    setUser(await fetchUser());
+    const user = await fetchUser();
+    setUser(user);
+    return user;
   };
 
-  const refreshItems = async () => {
+  const refreshItems = async (user: User) => {
     setIsLoading(true);
-    setActivities(await fetchActivities(projectID, lookbackDays, user?.id));
+    setActivities(await fetchActivities(projectID, lookbackDays, user.id));
     setIsLoading(false);
   };
 
   useEffect(() => {
-    refreshUser().then(() => refreshItems());
+    refreshUser().then((user) => refreshItems(user));
   }, []);
 
   function modifyActivity(index: number, newValue: Activity, action: Actions): void {
@@ -40,7 +42,7 @@ export const ActivityList = ({ projectID = null }: { projectID?: number | null }
         deleteActivity(index);
         break;
     }
-    refreshUser().then(() => refreshItems());
+    refreshUser().then((user) => refreshItems(user));
   }
 
   function updateActivity(index: number, newValue: Activity): void {

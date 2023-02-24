@@ -58,7 +58,9 @@ export const fetchActivities = async (
   userID?: number
 ): Promise<Activity[]> => {
   const today = new Date().toISOString().split("T")[0];
+
   const from_date = new Date(new Date().getTime() - lookbackDays * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
   const { data } = await axios.get(`/activities`, {
     params: {
       project_id: projectID,
