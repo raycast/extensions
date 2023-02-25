@@ -2,6 +2,16 @@
 
 ## [Added screenshots] - 2022-11-17
 
+## [Features] - 2023-02-22
+
+- Added: Action to copy title to Clipboard, with keyboard shortcut `⌘.`
+- Added: Action to copy authors to Clipboard, with keyboard shortcut `⌘⇧.`
+- Added: Action to copy DOI to Clipboard (when available), with keyboard shortcut `⌘⇧D`
+- Added: Action to copy Zotero URL to Clipboard, with keyboard shortcut `⌘⇧C`
+- Changed: _Open Original Link_ Action shortcut to `⌘⇧O`
+- Fixed: Corrected publication date format
+- Fixed: Not showing both URL and DOI when DOI is available
+
 ## [Features] - 2022-06-08
 
 - Add additional CSL formats

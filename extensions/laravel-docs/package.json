@@ -16,84 +16,13 @@
       "title": "Search Documentation",
       "subtitle": "Laravel Docs",
       "description": "Search through the Laravel docs directly from Raycast.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "laravelVersion",
-          "type": "dropdown",
-          "required": true,
-          "title": "Laravel Version",
-          "description": "Specify the Laravel version it will search the docs for.",
-          "default": "master",
-          "data": [
-            {
-              "title": "Master",
-              "value": "master"
-            },
-            {
-              "title": "9",
-              "value": "9.x"
-            },
-            {
-              "title": "8",
-              "value": "8.x"
-            },
-            {
-              "title": "7",
-              "value": "7.x"
-            },
-            {
-              "title": "6",
-              "value": "6.x"
-            },
-            {
-              "title": "5.8",
-              "value": "5.8"
-            },
-            {
-              "title": "5.7",
-              "value": "5.7"
-            },
-            {
-              "title": "5.6",
-              "value": "5.6"
-            },
-            {
-              "title": "5.5",
-              "value": "5.5"
-            },
-            {
-              "title": "5.4",
-              "value": "5.4"
-            },
-            {
-              "title": "5.3",
-              "value": "5.3"
-            },
-            {
-              "title": "5.2",
-              "value": "5.2"
-            },
-            {
-              "title": "5.1",
-              "value": "5.1"
-            },
-            {
-              "title": "5.0",
-              "value": "5.0"
-            },
-            {
-              "title": "4.2",
-              "value": "4.2"
-            }
-          ]
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.47.3",
     "algoliasearch": "^4.11.0",
+    "glob": "^8.1.0",
     "striptags": "^3.2.0"
   },
   "devDependencies": {

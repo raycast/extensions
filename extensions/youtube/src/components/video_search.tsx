@@ -6,8 +6,8 @@ import { VideoItem } from "./video";
 import { ListOrGrid, getViewLayout, getGridItemSize } from "./listgrid";
 import { RecentVideos, PinVideo } from "./recent_videos";
 
-export function SearchVideoList(props: { channedId?: string | undefined }) {
-  const [searchText, setSearchText] = useState<string>("");
+export function SearchVideoList(props: { channedId?: string | undefined; searchQuery?: string | undefined }) {
+  const [searchText, setSearchText] = useState<string>(props.searchQuery || "");
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     if (searchText) {
       return await searchVideos(searchText, props.channedId);
@@ -19,13 +19,14 @@ export function SearchVideoList(props: { channedId?: string | undefined }) {
   }
   const layout = getViewLayout();
   const itemSize = getGridItemSize();
-  if (data) {
+  if (props.searchQuery || data) {
     return (
       <ListOrGrid
         layout={layout}
         itemSize={itemSize}
         isLoading={isLoading}
         onSearchTextChange={setSearchText}
+        searchText={searchText}
         throttle={true}
       >
         {data?.map((v) => (

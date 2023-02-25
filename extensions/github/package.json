@@ -81,6 +81,14 @@
           "default": true,
           "label": "Include Forks",
           "description": "Includes forked repositories in search results"
+        },
+        {
+          "name": "includeArchived",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Include Archived",
+          "description": "Includes archived repositories in search results"
         }
       ]
     },

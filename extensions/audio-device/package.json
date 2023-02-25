@@ -31,6 +31,13 @@
       "subtitle": "Audio Device",
       "description": "Sets the active audio output device to the favourite specified in the preferences",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-favourites",
+      "title": "Toggle Favourites",
+      "subtitle": "Audio Device",
+      "description": "Toggle the active audio output device between the favourites specified in the preferences",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -47,13 +54,21 @@
       "name": "favourite",
       "required": false,
       "title": "Favourite Output Device",
-      "description": "The name, as found in the output device list, of the output device to use as the favourite one",
+      "description": "The name, as found in the output device list, of the output device to use as the first favourite",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "favourite2",
+      "required": false,
+      "title": "Favourite Output Device 2",
+      "description": "The name, as found in the output device list, of the output device to use as the second favourite",
       "type": "textfield",
       "default": ""
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.29.1",
+    "@raycast/api": "^1.46.0",
     "execa": "^6.0.0",
     "macos-audio-devices": "^1.4.0",
     "react-use": "^17.3.2",

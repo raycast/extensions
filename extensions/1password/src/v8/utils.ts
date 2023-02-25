@@ -22,7 +22,7 @@ export const ACCOUNT_CACHE_NAME = "@account";
 
 export function op(args: string[]) {
   if (CLI_PATH) {
-    const stdout = execFileSync(CLI_PATH, args);
+    const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
     return stdout.toString();
   }
   throw Error("1Password CLI is not found!");
