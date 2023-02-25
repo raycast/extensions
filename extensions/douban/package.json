@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "douban",
-  "title": "douban",
+  "title": "Douban",
   "description": "Search music, books, movies, TV series on Douban.",
   "icon": "douban.png",
   "author": "l2015",
@@ -14,7 +14,7 @@
     {
       "name": "douban",
       "title": "Serach Media",
-      "description": "douban",
+      "description": "Search on douban",
       "mode": "view"
     }
   ],
