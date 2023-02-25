@@ -11,9 +11,9 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
   const { data: configs } = useCachedPromise(loadSharedConfigFiles);
 
-  const { configFile, credentialsFile } = configs || {};
+  const { configFile, credentialsFile = {} } = configs || {};
 
-  const profileOptions = configFile ? Object.keys(configFile) : credentialsFile ? Object.keys(credentialsFile) : [];
+  const profileOptions = Object.keys(configFile ?? {}) ?? []
 
   useEffect(() => {
     if (!selectedProfile && profileOptions) {
@@ -23,8 +23,10 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
 
   useEffect(() => {
     if (selectedProfile) {
-      process.env.AWS_PROFILE = selectedProfile;
-      process.env.AWS_REGION = configFile?.[selectedProfile]?.region || credentialsFile?.[selectedProfile]?.region;
+      const isDefaultProfile = 'default' in credentialsFile;
+
+      process.env.AWS_REGION = configFile?.[selectedProfile]?.region || credentialsFile?.default?.region;
+      process.env.AWS_PROFILE = isDefaultProfile ? 'default' : selectedProfile
 
       onProfileSelected?.(selectedProfile);
     }
