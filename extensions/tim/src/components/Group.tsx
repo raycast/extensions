@@ -3,8 +3,8 @@ import { useGroup } from "../hooks/useGroup";
 import { UUID } from "../types/tim";
 import Task from "./Task";
 
-const Group: React.FC<{ id: UUID }> = ({ id }) => {
-  const { group, tasks } = useGroup(id);
+const Group: React.FC<{ id: UUID; tagFilter?: UUID }> = ({ id, tagFilter }) => {
+  const { group, tasks } = useGroup(id, tagFilter);
 
   return (
     <List.Section title={group?.title ?? ""}>
