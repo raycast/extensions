@@ -12,7 +12,6 @@ type Movie = {
   cover: string; // 新增属性
 };
 
-
 type SearchResults = Movie[];
 
 export default function DoubanSearch() {
@@ -24,15 +23,12 @@ export default function DoubanSearch() {
     async function searchMovies(query: string) {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://www.douban.com/search?q=${query}&cat=1002`,
-          {
-            headers: {
-              "User-Agent":
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-            }
-          }
-        );
+        const response = await axios.get(`https://www.douban.com/search?q=${query}&cat=1002`, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+          },
+        });
         const html = response.data;
         const $ = cheerio.load(html);
         const items = $("div.result");
@@ -54,11 +50,7 @@ export default function DoubanSearch() {
           console.log(url);
           const title = titleEl?.text()?.trim() || "Unknown Title";
           const rating = ratingEl?.text()?.trim() || "N/A";
-          const year = yearEl
-            ?.text()
-            ?.trim()
-            .split("/")
-            .pop() || "Unknown Year";
+          const year = yearEl?.text()?.trim().split("/").pop() || "Unknown Year";
           const actors = actorsEl
             ?.text()
             ?.trim()
@@ -73,7 +65,7 @@ export default function DoubanSearch() {
             year,
             actors,
             url, // 将链接添加到对象中
-            cover
+            cover,
           };
 
           movies.push(movie);
@@ -100,22 +92,20 @@ export default function DoubanSearch() {
   //   console.log(`Selected movie: ${movie.title}`);
   // };
 
-
   return (
-    <List isShowingDetail isLoading={loading} searchBarPlaceholder="Search movies on Douban"
-          onSearchTextChange={handleSearchTextChange}>
+    <List
+      isShowingDetail
+      isLoading={loading}
+      searchBarPlaceholder="Search movies on Douban"
+      onSearchTextChange={handleSearchTextChange}
+    >
       {results.map((movie) => (
         <List.Item
           key={movie.title}
           title={movie.title}
           subtitle={`年代: ${movie.year} | 评分: ${movie.rating} |  ${movie.actors.join(", ")}`}
           // icon={{ source: movie.cover }}
-          detail={
-            <List.Item.Detail
-              markdown={`![Illustration](${movie.cover})`}
-            />
-
-          }
+          detail={<List.Item.Detail markdown={`![Illustration](${movie.cover})`} />}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={movie.url} />
