@@ -271,8 +271,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.48.4",
+    "@raycast/utils": "^1.4.18",
     "dedent": "^0.7.0",
     "node-fetch": "^3.2.10",
     "plist": "^3.0.6",
