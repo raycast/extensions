@@ -550,7 +550,7 @@ async function getAllUserPlaylists(
 ): Promise<SpotifyApi.PlaylistObjectSimplified[]> {
   const step = 50;
   const resp = await getUserPlaylistsPage(offset, step);
-  if (resp.offset >= resp.total || resp.offset > 500) {
+  if (resp.offset >= resp.total || resp.offset >= 500) {
     // Cap the total number of playlists for performance reasons
     return (
       items
