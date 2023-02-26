@@ -1,31 +1,27 @@
-import { ActionPanel, Icon, Action, Form, LocalStorage, Detail } from "@raycast/api";
-import { TroubleshootingGuide } from "~/components/TroubleshootingGuide";
+import { Form, Detail } from "@raycast/api";
+import TroubleshootingGuide from "~/components/TroubleshootingGuide";
 import { capitalize } from "~/utils/strings";
 import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
 import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
-import {
-  PasswordGeneratorOptions as PassGenOptions,
-  PasswordOptionsToFieldEntries,
-  PasswordType,
-} from "~/types/passwords";
+import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "~/types/passwords";
 import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
-import { LOCAL_STORAGE_KEY } from "~/constants/storage";
 import { Bitwarden } from "~/api/bitwarden";
 import { objectEntries } from "~/utils/objects";
-import OptionField from "~/components/GeneratePassword/OptionField";
+import OptionField from "~/components/generatePassword/OptionField";
+import FormActionPanel from "~/components/generatePassword/ActionPanel";
 
 const FormSpace = () => <Form.Description text="" />;
 
-function GeneratePassword() {
+function GeneratePasswordCommand() {
   try {
     const bitwardenApi = new Bitwarden();
-    return <PasswordGenerator bitwardenApi={bitwardenApi} />;
+    return <GeneratePassword bitwardenApi={bitwardenApi} />;
   } catch {
     return <TroubleshootingGuide />;
   }
 }
 
-function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
+function GeneratePassword({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator(bitwardenApi);
 
   useOneTimePasswordHistoryWarning();
@@ -34,8 +30,8 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
 
   const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
 
-  const handleFieldChange = <O extends keyof PassGenOptions>(field: O) => {
-    return (value: PassGenOptions[O]) => {
+  const handleFieldChange = <O extends keyof PasswordGeneratorOptions>(field: O) => {
+    return (value: PasswordGeneratorOptions[O]) => {
       setOption(field, value);
     };
   };
@@ -45,35 +41,7 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   return (
     <Form
       isLoading={isGenerating}
-      actions={
-        <ActionPanel>
-          {!!password && (
-            <>
-              <Action.CopyToClipboard
-                title="Copy password"
-                icon={Icon.Clipboard}
-                content={password}
-                shortcut={{ key: "enter", modifiers: ["cmd"] }}
-              />
-              <Action.Paste
-                title="Paste password to active app"
-                icon={Icon.Text}
-                content={password}
-                shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
-              />
-            </>
-          )}
-          <Action
-            title="Regenerate password"
-            icon={Icon.ArrowClockwise}
-            onAction={regeneratePassword}
-            shortcut={{ key: "backspace", modifiers: ["cmd"] }}
-          />
-          {process.env.NODE_ENV === "development" && (
-            <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
-          )}
-        </ActionPanel>
-      }
+      actions={<FormActionPanel password={password} regeneratePassword={regeneratePassword} />}
     >
       <Form.Description title="🔑  Password" text={password ?? "Generating..."} />
       <FormSpace />
@@ -99,10 +67,4 @@ function PasswordGenerator({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
   );
 }
 
-async function clearStorage() {
-  for (const key of Object.values(LOCAL_STORAGE_KEY)) {
-    await LocalStorage.removeItem(key);
-  }
-}
-
-export default GeneratePassword;
+export default GeneratePasswordCommand;

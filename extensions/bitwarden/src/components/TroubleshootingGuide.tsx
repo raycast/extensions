@@ -7,7 +7,7 @@ const CONTENT = `# The Bitwarden CLI was not found
 1. If you did not install bitwarden using brew, please check that path of the installation matches the \`Bitwarden CLI Installation Path\` extension setting
 `;
 
-export function TroubleshootingGuide(): JSX.Element {
+const TroubleshootingGuide = () => {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
 
   return (
@@ -21,4 +21,6 @@ export function TroubleshootingGuide(): JSX.Element {
       }
     />
   );
-}
+};
+
+export default TroubleshootingGuide;

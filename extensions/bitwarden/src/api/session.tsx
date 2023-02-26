@@ -4,7 +4,7 @@ import { Bitwarden } from "~/api/bitwarden";
 import { Preferences } from "~/types";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 import { SessionState } from "~/types/session";
-import { LOCAL_STORAGE_KEY } from "~/constants/storage";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 
 /**
  * A Bitwarden login session.

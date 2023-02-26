@@ -1,6 +1,6 @@
 import { useNavigation } from "@raycast/api";
 import { Session } from "~/api/session";
-import { RepromptForm } from "~/components/RepromptForm";
+import RepromptForm from "~/components/RepromptForm";
 import { Item } from "~/types/search";
 
 /**

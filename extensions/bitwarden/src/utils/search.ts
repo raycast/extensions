@@ -1,4 +1,5 @@
 import { Icon } from "@raycast/api";
+import { URL } from "url";
 import { Item } from "~/types/search";
 
 export function extractKeywords(item: Item): string[] {

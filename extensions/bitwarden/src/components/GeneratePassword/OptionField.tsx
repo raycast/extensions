@@ -2,7 +2,7 @@ import { Form } from "@raycast/api";
 import { useState } from "react";
 import { PasswordGeneratorOptions, PasswordOptionField } from "~/types/passwords";
 
-type OptionFieldProps = {
+export type GeneratePasswordOptionFieldProps = {
   field: PasswordOptionField;
   option: keyof PasswordGeneratorOptions;
   defaultValue: PasswordGeneratorOptions[keyof PasswordGeneratorOptions];
@@ -10,7 +10,13 @@ type OptionFieldProps = {
   errorMessage?: string;
 };
 
-function OptionField({ option, defaultValue = "", onChange: handleChange, errorMessage, field }: OptionFieldProps) {
+function GeneratePasswordOptionField({
+  option,
+  defaultValue = "",
+  onChange: handleChange,
+  errorMessage,
+  field,
+}: GeneratePasswordOptionFieldProps) {
   const { hint = "", label, type } = field;
   const [error, setError] = useState<string>();
 
@@ -56,4 +62,4 @@ function isValidFieldValue<O extends keyof PasswordGeneratorOptions>(field: O, v
   return true;
 }
 
-export default OptionField;
+export default GeneratePasswordOptionField;

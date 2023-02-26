@@ -4,13 +4,18 @@ import { Session } from "~/api/session";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
+export type UnlockFormProps = {
+  onUnlock: (token: string, hash: string) => void;
+  session: Session;
+};
+
 /**
  * Form for unlocking or logging in to the Bitwarden vault.
  */
-function UnlockForm(props: { onUnlock: (token: string, hash: string) => void; session: Session }): JSX.Element {
+const UnlockForm = (props: UnlockFormProps) => {
   const { session, onUnlock } = props;
   const { api } = session;
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState(false);
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages(api);
 
   async function onSubmit(values: { password: string }) {
@@ -60,6 +65,6 @@ function UnlockForm(props: { onUnlock: (token: string, hash: string) => void; se
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
-}
+};
 
 export default UnlockForm;

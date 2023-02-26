@@ -3,6 +3,14 @@ import { Session } from "~/api/session";
 import { Item } from "~/types/search";
 import useReprompt from "~/utils/hooks/useReprompt";
 
+export type PastePasswordActionProps = {
+  session: Session;
+  content: string;
+  reprompt: boolean;
+  title?: string;
+  item?: Item;
+};
+
 /**
  * Raycast {@link Action} for pasting a password to the foreground application.
  *
@@ -11,13 +19,7 @@ import useReprompt from "~/utils/hooks/useReprompt";
  * @param props.reprompt If true, requires the master password to be entered again.
  * @param props.item The login item. Used for the prompt form.
  */
-export function PastePasswordAction(props: {
-  session: Session;
-  content: string;
-  reprompt: boolean;
-  title?: string;
-  item?: Item;
-}): JSX.Element {
+const PastePasswordAction = (props: PastePasswordActionProps) => {
   async function doPaste() {
     Clipboard.paste(props.content);
   }
@@ -26,4 +28,6 @@ export function PastePasswordAction(props: {
   const action = props.reprompt ? reprompt : doPaste;
 
   return <Action title={props.title ?? "Paste Password"} icon={Icon.CopyClipboard} onAction={action}></Action>;
-}
+};
+
+export default PastePasswordAction;

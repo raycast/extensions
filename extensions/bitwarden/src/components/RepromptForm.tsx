@@ -1,6 +1,12 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { Session } from "~/api/session";
 
+export type RepromptFormProps = {
+  session: Session;
+  description: string;
+  onConfirm: () => void;
+};
+
 /**
  * Form for confirming the master password.
  * This compares with the hashed master password.
@@ -9,7 +15,7 @@ import { Session } from "~/api/session";
  * @param props.description A description explaining why reprompting is required.
  * @param props.onConfirm Callback if confirmation is successful.
  */
-export function RepromptForm(props: { session: Session; description: string; onConfirm: () => void }) {
+const RepromptForm = (props: RepromptFormProps) => {
   const { session, description, onConfirm } = props;
 
   async function onSubmit(values: { password: string }) {
@@ -35,4 +41,6 @@ export function RepromptForm(props: { session: Session; description: string; onC
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
-}
+};
+
+export default RepromptForm;

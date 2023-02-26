@@ -2,8 +2,7 @@ import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { DEFAULT_SERVER_URL } from "~/constants";
-import { LOCAL_STORAGE_KEY } from "~/constants/storage";
+import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
 import { Preferences, VaultState } from "~/types";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import { Item } from "~/types/search";

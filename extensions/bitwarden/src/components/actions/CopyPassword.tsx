@@ -4,6 +4,14 @@ import { Item } from "~/types/search";
 import { copyPassword } from "~/utils/clipboard";
 import useReprompt from "~/utils/hooks/useReprompt";
 
+export type CopyPasswordActionProps = {
+  session: Session;
+  content: string;
+  reprompt: boolean;
+  title?: string;
+  item?: Item;
+};
+
 /**
  * Raycast {@link Action} for copying a password to the clipboard.
  * This uses the {@link copyPassword} function to prevent clipboard managers from saving it.
@@ -13,13 +21,7 @@ import useReprompt from "~/utils/hooks/useReprompt";
  * @param props.reprompt If true, requires the master password to be entered again.
  * @param props.item The login item. Used for the prompt form.
  */
-export function CopyPasswordAction(props: {
-  session: Session;
-  content: string;
-  reprompt: boolean;
-  title?: string;
-  item?: Item;
-}): JSX.Element {
+const CopyPasswordAction = (props: CopyPasswordActionProps) => {
   async function doCopy() {
     const { copiedSecurely } = await copyPassword(props.content);
     await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
@@ -29,4 +31,6 @@ export function CopyPasswordAction(props: {
   const action = props.reprompt ? reprompt : doCopy;
 
   return <Action title={props.title ?? "Copy Password"} icon={Icon.CopyClipboard} onAction={action}></Action>;
-}
+};
+
+export default CopyPasswordAction;
