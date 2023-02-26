@@ -10,7 +10,7 @@ A Raycast extension to search the [Material-UI documentation](https://mui.com/) 
 - Get quick access to the components you need
 - Launch the search with a single Raycast command
 
-![Metadata-Demo](metadata/mui-1.png)
+![Metadata-Demo](assets/mui-1.png)
 
 
 ## Usage
