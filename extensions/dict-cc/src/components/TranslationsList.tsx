@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { Action, ActionPanel, Icon, List, showToast, Clipboard } from "@raycast/api";
 
@@ -19,32 +19,35 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
 
   const [searchText, setSearchText] = useState("");
 
-  const fetchTranslations = useCallback(async (searchTerm: string) => {
-    setSearchText(searchTerm);
-    setLoading(true);
+  const fetchTranslations = useCallback(
+    async (searchTerm: string) => {
+      setSearchText(searchTerm);
+      setLoading(true);
 
-    try {
-      const input = createInputFromSearchTerm(searchTerm);
-      const { data, error, url } = await translate(input);
+      try {
+        const input = createInputFromSearchTerm(searchTerm);
+        const { data, error, url } = await translate(input);
 
-      if (error) {
-        throw error;
+        if (error) {
+          throw error;
+        }
+
+        setTranslations(data);
+        setUrl(url);
+        setLanguages([input.sourceLanguage, input.targetLanguage]);
+      } catch (error) {
+        if (error instanceof Error) {
+          showToast({
+            title: "Error",
+            message: error.message,
+          });
+        }
       }
 
-      setTranslations(data);
-      setUrl(url);
-      setLanguages([input.sourceLanguage, input.targetLanguage]);
-    } catch (error) {
-      if (error instanceof Error) {
-        showToast({
-          title: "Error",
-          message: error.message,
-        });
-      }
-    }
-
-    setLoading(false);
-  };
+      setLoading(false);
+    },
+    [setTranslations, setUrl, setLanguages, setLoading]
+  );
 
   useEffect(() => {
     if (isSearchFromClipboard) {
@@ -56,7 +59,7 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
         }
       })();
     }
-  }, [isSearchFromClipboard , fetchTranslations, searchText]);
+  }, [isSearchFromClipboard, fetchTranslations, searchText]);
 
   return (
     <List
