@@ -19,7 +19,7 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
 
   const [searchText, setSearchText] = useState("");
 
-  const fetchTranslations = async (searchTerm: string) => {
+  const fetchTranslations = useCallback(async (searchTerm: string) => {
     setSearchText(searchTerm);
     setLoading(true);
 
