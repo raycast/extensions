@@ -1,5 +1,10 @@
 # Quit Applications Changelog
 
+## [Add icons] - 2023-02-26
+
+- Add icons to each application you are about to quit
+- Add "Quit" work in front of every app
+
 ## [Restart application] - 2023-01-24
 
 - Add the option to restart the application
