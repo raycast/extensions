@@ -564,9 +564,7 @@ async function getAllUserPlaylists(
 }
 
 export function useGetUserPlaylists(): Response<SpotifyApi.PlaylistObjectSimplified[]> {
-  const [response, setResponse] = useState<Response<
-    SpotifyApi.ListOfUsersPlaylistsResponse
-  >>({ isLoading: true });
+  const [response, setResponse] = useState<Response<SpotifyApi.PlaylistObjectSimplified[]>>({ isLoading: true });
 
   let cancel = false;
 
