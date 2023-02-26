@@ -56,7 +56,7 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
         }
       })();
     }
-  }, []);
+  }, [isSearchFromClipboard , fetchTranslations, searchText]);
 
   return (
     <List
