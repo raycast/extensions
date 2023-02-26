@@ -41,8 +41,8 @@ export default function Post({
     initialValues: {
       ...draftValues,
       message: launchContext?.replyTo && `@${launchContext.replyTo.account.acct}`,
-      visibility: launchContext?.replyTo?.visibility
-    }
+      visibility: launchContext?.replyTo?.visibility,
+    },
   });
 
   return (

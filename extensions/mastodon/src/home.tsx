@@ -6,10 +6,13 @@ import { mastodon } from "masto";
 
 export default function Home() {
   const masto = useMasto();
-  const { data, isLoading } = usePromise(async (masto?: mastodon.Client) => {
-    if (!masto) return;
-    return await masto?.v1.timelines.listHome();
-  }, [masto]);
+  const { data, isLoading } = usePromise(
+    async (masto?: mastodon.Client) => {
+      if (!masto) return;
+      return await masto?.v1.timelines.listHome();
+    },
+    [masto]
+  );
 
   return (
     <List isLoading={!masto || isLoading}>
