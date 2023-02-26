@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mastodon",
+  "title": "Mastodon",
+  "description": "A Mastodon extension designed to cover most of the use-cases.",
+  "icon": "extension_icon.png",
+  "author": "basix",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "post",
+      "title": "Post",
+      "description": "Post a status on Mastodon.",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search users, hashtags, or statuses on Mastodon.",
+      "mode": "view"
+    },
+    {
+      "name": "home",
+      "title": "Home",
+      "description": "See statuses of users you're following.",
+      "mode": "view"
+    },
+    {
+      "name": "mentions",
+      "title": "Mentions",
+      "description": "See the latest mentions.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "URL of instance",
+      "description": "The URL of your instance.",
+      "placeholder": "https://mastodon.social/"
+    },
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "description": "A access token.",
+      "title": "Access Token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.4",
+    "@raycast/utils": "^1.4.18",
+    "@tanstack/react-query": "^4.24.10",
+    "masto": "^5.10.0",
+    "string-strip-html": "^13.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
