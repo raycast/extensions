@@ -18,10 +18,10 @@ export const ResultList = ({ languagePairKey }: ResultListProps): JSX.Element =>
   const {
     data: text,
     error,
-    isLoading
+    isLoading,
   } = useData({
     word,
-    languagePair
+    languagePair,
   });
   const parsedHTML = text ? parseHTML(text) : undefined;
   const parsedData = parsedHTML ? parseDOMResult(parsedHTML) : undefined;

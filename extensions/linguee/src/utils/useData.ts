@@ -15,7 +15,7 @@ export default function useData({ word, languagePair }: { word: string | null; l
           : raw.toString("utf-8");
 
         return text;
-      }
+      },
     }
   );
 }
