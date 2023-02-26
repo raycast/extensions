@@ -98,6 +98,13 @@
       "mode": "view"
     },
     {
+      "name": "myPlaylists",
+      "title": "My Playlists",
+      "subtitle": "Spotify",
+      "description": "View my playlists in Spotify",
+      "mode": "view"
+    },
+    {
       "name": "featuredPlaylists",
       "title": "Featured Playlists",
       "subtitle": "Spotify",

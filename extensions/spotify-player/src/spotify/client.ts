@@ -534,6 +534,81 @@ export function usePlaylistSearch(query: string | undefined): Response<SpotifyAp
   return response;
 }
 
+
+async function getUserPlaylistsPage(
+  offset: number, limit: number
+) {
+  return await spotifyApi
+      .getUserPlaylists({ offset: offset, limit: limit })
+      .then(
+        (response: { body: any }) => response.body as SpotifyApi.ListOfUsersPlaylistsResponse
+      )
+}
+
+async function getAllUserPlaylists(
+  offset:number, items: SpotifyApi.PlaylistObjectSimplified[]
+): Promise<SpotifyApi.PlaylistObjectSimplified[]> {
+  const step = 50;
+  const resp = await getUserPlaylistsPage(offset, step);
+  if (resp.offset < resp.total) {
+    items.push(...resp.items);
+    return await getAllUserPlaylists(resp.offset+step, items);
+  } else {
+    return (
+      items
+      .map(value => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value)
+    )
+  }
+}
+
+export function useGetUserPlaylists(): Response<SpotifyApi.PlaylistObjectSimplified[]> {
+  const [response, setResponse] = useState<Response<
+    SpotifyApi.ListOfUsersPlaylistsResponse
+  >>({ isLoading: true });
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      await authorizeIfNeeded();
+
+      if (cancel) {
+        return;
+      }
+      setResponse((oldState) => ({ ...oldState, isLoading: true }));
+
+
+      try {
+        const result = await getAllUserPlaylists(0, []).catch((error) => {
+            setResponse((oldState) => ({ ...oldState, error: (error as unknown as SpotifyApi.ErrorObject).message }));
+        }) ?? undefined;
+
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, result: result }));
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, error: (e as unknown as SpotifyApi.ErrorObject).message }));
+        }
+      } finally {
+        if (!cancel) {
+          setResponse((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return response;
+}
+
 export function useGetFeaturedPlaylists(): Response<SpotifyApi.ListOfFeaturedPlaylistsResponse> {
   const [response, setResponse] = useState<Response<SpotifyApi.ListOfFeaturedPlaylistsResponse>>({ isLoading: true });
 
