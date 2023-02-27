@@ -16,7 +16,6 @@ export const ITEMS_CACHE_NAME = "@items";
 export const ACCOUNT_CACHE_NAME = "@account";
 export const SORTING_METHOD = getPreferenceValues<Preferences>().sortingMethod || "title";
 
-
 export function op(args: string[]) {
   if (CLI_PATH) {
     const stdout = execFileSync(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
