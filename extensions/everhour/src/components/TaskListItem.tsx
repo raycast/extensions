@@ -46,30 +46,35 @@ export function TaskListItem({
     }
   };
 
+  const formatMinutes = (minutes: number): string => {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const min = minutes % 60;
+      return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
+    }
+    return `${minutes} min`;
+  };
+
   const resolveTaskTime = (): string => {
     const taskTimeToday = timeRecords.find((timeRecord) => timeRecord.id === task.id);
-
-    if (!taskTimeToday) {
-      return "0 min";
+    if (taskTimeToday) {
+      const { timeInMin } = taskTimeToday;
+      return `${formatMinutes(timeInMin)} today, ${formatMinutes(total)} total`;
     }
-
-    const { timeInMin } = taskTimeToday;
-    if (timeInMin >= 60) {
-      const hours = Math.floor(timeInMin / 60);
-      const min = timeInMin % 60;
-      return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
-    } else {
-      return `${timeInMin} min`;
+    if (task.time.recent) {
+      const total = Math.floor(task.time.recent / 60);
+      return `${formatMinutes(total)} in last 7 days`;
     }
+    return "";
   };
 
   return (
     <List.Item
       id={task.id}
       key={task.id}
-      title={`${task.name} - ${resolveTaskTime()} today`}
-      subtitle={hasActiveTimer ? "Timer Active" : ""}
-      icon={{ source: Icon.Dot, tintColor: Color.Green }}
+      title={task.name}
+      subtitle={resolveTaskTime()}
+      icon={{ source: Icon.Dot, tintColor: hasActiveTimer ? Color.Green : Color.Gray }}
       actions={
         <ActionPanel>
           <PushAction

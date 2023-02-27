@@ -10,6 +10,12 @@ const headers = {
   "Content-Type": "application/json",
 };
 
+const daysAgo = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+};
+
 export const getCurrentUser = async () => {
   const response = await fetch("https://api.everhour.com/users/me", {
     headers,
@@ -19,7 +25,7 @@ export const getCurrentUser = async () => {
 };
 
 export const getTimeRecords = async (userId: string | null) => {
-  const [currentDate] = new Date().toISOString().split("T");
+  const [currentDate] = daysAgo(7).toISOString().split("T");
   const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
     headers,
   });
@@ -41,7 +47,7 @@ export const getTimeRecords = async (userId: string | null) => {
 };
 
 export const getProjects = async (): Promise<Project[]> => {
-  const response = await fetch("https://api.everhour.com/projects?limit=100&query=", {
+  const response = await fetch("https://api.everhour.com/projects?limit=1000&query=", {
     headers,
   });
   const projects = (await response.json()) as any;
@@ -74,6 +80,30 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
     name,
     timeInMin: time ? Math.round(time.total / 60) : 0,
   }));
+};
+
+export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => {
+  const [currentDate] = daysAgo(7).toISOString().split("T");
+  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
+    headers,
+  });
+
+  const timeRecords = (await response.json()) as any;
+
+  if (timeRecords.code || timeRecords.length == 0) {
+    throw new Error("No recent tasks.");
+  }
+
+  return Object.values(
+    timeRecords.reduce((agg, { time, task }: TaskResp) => {
+      if (!agg.hasOwnProperty(task.id)) {
+        agg[task.id] = task;
+        agg[task.id].time.recent = 0;
+      }
+      agg[task.id].time.recent += time;
+      return agg;
+    }, {})
+  );
 };
 
 export const getCurrentTimer = async (): Promise<string | null> => {
