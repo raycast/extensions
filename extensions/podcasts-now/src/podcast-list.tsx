@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { useStatus } from "./hooks/useStatus";
 import { PlayerState, statusMapping, togglePause, forward, rewind, play } from "./apple-music";
 import { formatProgress } from "./utils";
-import AddPodcast from "./add-podcast";
+import ManagePodcast from "./manage-podcast";
 import PodcastItem from "./podcast-item";
 import { usePodcastFeeds } from "./hooks/usePodcasts";
+import { SearchFeeds } from "./search-feeds";
 
 export default function Command() {
   const { push } = useNavigation();
@@ -53,9 +54,14 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
+                icon={Icon.PlusCircle}
+                title="Add Podcast"
+                onAction={() => push(<SearchFeeds onSubmitted={revalidateFeeds} />)}
+              />
+              <Action
                 icon={Icon.Cog}
                 title="Manage Podcasts"
-                onAction={() => push(<AddPodcast onSubmitted={revalidateFeeds} />)}
+                onAction={() => push(<ManagePodcast onSubmitted={revalidateFeeds} />)}
               />
             </ActionPanel>
           }
@@ -96,10 +102,16 @@ export default function Command() {
                   onAction={controlActionWithRevalidateStatus(rewind)}
                 />
                 <Action
+                  icon={Icon.PlusCircle}
+                  title="Add Podcast"
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  onAction={() => push(<SearchFeeds onSubmitted={revalidateFeeds} />)}
+                />
+                <Action
                   icon={Icon.Cog}
                   title="Manage Podcasts"
                   shortcut={{ modifiers: ["cmd"], key: "," }}
-                  onAction={() => push(<AddPodcast onSubmitted={revalidateFeeds} />)}
+                  onAction={() => push(<ManagePodcast onSubmitted={revalidateFeeds} />)}
                 />
               </ActionPanel>
             )

@@ -1,18 +1,14 @@
-import { LocalStorage } from "@raycast/api";
-
-import { PODCASTS_FEEDS_KEY } from "../constants";
-import { getFeed } from "../feed-parser";
 import { useCachedPromise } from "@raycast/utils";
+import { reverse } from "lodash";
+
+import { getFeed } from "../feed-parser";
+import { getFeeds } from "../utils";
 
 export const usePodcastFeeds = () => {
   return useCachedPromise<() => Promise<string[]>>(async () => {
-    const podcastsFeeds = await LocalStorage.getItem(PODCASTS_FEEDS_KEY);
+    const feeds = await getFeeds();
 
-    if (typeof podcastsFeeds !== "string") {
-      return;
-    }
-
-    return JSON.parse(podcastsFeeds);
+    return reverse(feeds);
   });
 };
 
