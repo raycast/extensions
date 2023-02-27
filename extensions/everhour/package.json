@@ -5,6 +5,9 @@
   "description": "Track time against projects",
   "icon": "everhour-logo.png",
   "author": "farisaziz12",
+  "contributors": [
+    "ahoereth"
+  ],
   "license": "MIT",
   "keywords": [
     "everhour"
