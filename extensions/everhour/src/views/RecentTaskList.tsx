@@ -50,16 +50,12 @@ export function RecentTaskList() {
     if (tasks[0]) {
       return (
         tasks
-          // Active timer first, other descending by time tracked.
-          .sort((t1, t2) =>
-            t1.id === activeTimerTaskId
-              ? -1
-              : t2.id === activeTimerTaskId
-              ? 1
-              : t1.time.recent > t2.time.recent
-              ? -1
-              : 1
-          )
+          // Active timer first, others descending by time tracked.
+          .sort((t1, t2) => {
+            if (t1.id === activeTimerTaskId) return -1;
+            if (t2.id === activeTimerTaskId) return 1;
+            return t1.time.recent > t2.time.recent ? -1 : 1;
+          })
           .map((task) => (
             <TaskListItem
               key={task.id}
