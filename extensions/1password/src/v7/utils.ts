@@ -1,4 +1,4 @@
-import { Cache, Icon } from "@raycast/api";
+import { Cache, Icon, getPreferenceValues } from "@raycast/api";
 
 import fg from "fast-glob";
 import { homedir } from "os";
