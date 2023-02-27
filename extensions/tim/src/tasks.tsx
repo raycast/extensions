@@ -58,7 +58,7 @@ type Props = {
 function TagDropdown({ onTagChange, tags }: Props) {
   return (
     <List.Dropdown tooltip="Tag" onChange={onTagChange} storeValue>
-      <List.Dropdown.Item title="Default" value="" />
+      <List.Dropdown.Item title="No active filter" value="" />
       <List.Dropdown.Section title="Tags">
         {tags.map((tag) => (
           <List.Dropdown.Item key={tag.id} title={tag.title} value={tag.id} />

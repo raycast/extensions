@@ -1,8 +1,9 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { useCurrencyFormatter } from "../hooks/useCurrencyFormatter";
 import { useDurationFormatter } from "../hooks/useDurationFormatter";
 import { useTask } from "../hooks/useTask";
+import { useActiveTask } from "../state/active-task";
 
 import { UUID } from "../types/tim";
 
@@ -13,6 +14,7 @@ import { StartTaskAction } from "./actions/StartTaskAction";
 
 const Task: React.FC<{ id: UUID }> = ({ id }) => {
   const { task, tags, activeDays, value, totalTime, averagePerDay } = useTask(id);
+  const [activeTask] = useActiveTask();
   const currencyFormatter = useCurrencyFormatter();
   const durationFormatter = useDurationFormatter();
 
@@ -24,6 +26,7 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
     <List.Item
       title={task.title}
       id={id}
+      icon={activeTask === task.id ? Icon.CircleFilled : Icon.Circle}
       actions={
         <ActionPanel title={task.title}>
           <ActionPanel.Section>

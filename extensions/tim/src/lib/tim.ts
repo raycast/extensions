@@ -22,6 +22,15 @@ export async function getTask(title: number): Promise<UUID | undefined> {
   return runAppleScript(script);
 }
 
+export async function getActiveTask(): Promise<UUID | undefined> {
+  try {
+    const script = buildScriptEnsuringTimIsRunning("getActiveTask");
+    return await runAppleScript(script);
+  } catch (error) {
+    return undefined;
+  }
+}
+
 export async function createTask(title: string): Promise<UUID> {
   const script = buildScriptEnsuringTimIsRunning(`createTask title "${title}"`);
   return runAppleScript(script);
