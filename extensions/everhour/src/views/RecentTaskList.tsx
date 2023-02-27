@@ -48,24 +48,32 @@ export function RecentTaskList() {
 
   const renderTasks = () => {
     if (tasks[0]) {
-      return tasks
-      // Active timer first, other descending by time tracked.
-        .sort((t1, t2) =>
-          t1.id === activeTimerTaskId ? -1 : t2.id === activeTimerTaskId ? 1 : t1.time.recent > t2.time.recent ? -1 : 1
-        )
-        .map((task) => (
-          <TaskListItem
-            key={task.id}
-            todaysTimeRecords={[]}
-            refreshRecords={() => {
-              fetchTasks();
-              return refreshRecords();
-            }}
-            refreshActiveTimer={refreshActiveTimer}
-            task={task}
-            hasActiveTimer={task.id === activeTimerTaskId}
-          />
-        ));
+      return (
+        tasks
+          // Active timer first, other descending by time tracked.
+          .sort((t1, t2) =>
+            t1.id === activeTimerTaskId
+              ? -1
+              : t2.id === activeTimerTaskId
+              ? 1
+              : t1.time.recent > t2.time.recent
+              ? -1
+              : 1
+          )
+          .map((task) => (
+            <TaskListItem
+              key={task.id}
+              recentTimeRecords={[]}
+              refreshRecords={() => {
+                fetchTasks();
+                return refreshRecords();
+              }}
+              refreshActiveTimer={refreshActiveTimer}
+              task={task}
+              hasActiveTimer={task.id === activeTimerTaskId}
+            />
+          ))
+      );
     }
 
     if (!isLoading && tasks[0]) {

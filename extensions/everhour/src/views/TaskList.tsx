@@ -5,7 +5,7 @@ import { getCurrentTimer, getTasks } from "../api";
 import { createResolvedToast } from "../utils";
 
 const filterTasks = (records: Array<any>, projectId: string) => {
-  return records.filter((record: any) => record.projectId === projectId);
+  return records.filter((record: any) => record.projects[0] === projectId);
 };
 
 export function TaskList({
@@ -58,14 +58,14 @@ export function TaskList({
     refreshActiveTimer();
   }, [activeTimerTaskId]);
 
-  const todaysTimeRecords = filterTasks(timeRecords, projectId);
+  const recentTimeRecords = filterTasks(timeRecords, projectId);
 
   const renderTasks = () => {
     if (tasks[0]) {
       return tasks.map((task) => (
         <TaskListItem
           key={task.id}
-          todaysTimeRecords={todaysTimeRecords}
+          recentTimeRecords={recentTimeRecords}
           refreshRecords={() => {
             fetchTasks();
             return refreshRecords();

@@ -24,26 +24,28 @@ export const getCurrentUser = async () => {
   return (await response.json()) as any;
 };
 
-export const getTimeRecords = async (userId: string | null) => {
+export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => {
   const [currentDate] = daysAgo(7).toISOString().split("T");
-  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
+  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=1000&from=${currentDate}`, {
     headers,
   });
 
-  const recordsJson = (await response.json()) as any;
+  const timeRecords = (await response.json()) as any;
 
-  return recordsJson
-    .map(({ task, time }: { task: any; time: number }) => {
-      if (task) {
-        return {
-          id: task.id,
-          name: task.name,
-          timeInMin: time ? Math.round(time / 60) : 0,
-          projectId: task.projects[0],
-        };
+  if (timeRecords.code || timeRecords.length == 0) {
+    throw new Error("No recent tasks.");
+  }
+
+  return Object.values(
+    timeRecords.reduce((agg, { time, task }: TaskResp) => {
+      if (!agg.hasOwnProperty(task.id)) {
+        agg[task.id] = task;
+        agg[task.id].time.recent = 0;
       }
-    })
-    .filter(Boolean);
+      agg[task.id].time.recent += time;
+      return agg;
+    }, {})
+  );
 };
 
 export const getProjects = async (): Promise<Project[]> => {
@@ -78,32 +80,7 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
   return tasks.map(({ id, name, time }: TaskResp) => ({
     id,
     name,
-    timeInMin: time ? Math.round(time.total / 60) : 0,
   }));
-};
-
-export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => {
-  const [currentDate] = daysAgo(7).toISOString().split("T");
-  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
-    headers,
-  });
-
-  const timeRecords = (await response.json()) as any;
-
-  if (timeRecords.code || timeRecords.length == 0) {
-    throw new Error("No recent tasks.");
-  }
-
-  return Object.values(
-    timeRecords.reduce((agg, { time, task }: TaskResp) => {
-      if (!agg.hasOwnProperty(task.id)) {
-        agg[task.id] = task;
-        agg[task.id].time.recent = 0;
-      }
-      agg[task.id].time.recent += time;
-      return agg;
-    }, {})
-  );
 };
 
 export const getCurrentTimer = async (): Promise<string | null> => {

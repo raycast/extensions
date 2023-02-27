@@ -5,20 +5,30 @@ import { Task } from "../types";
 import { startTaskTimer, stopCurrentTaskTimer } from "../api";
 import { createResolvedToast } from "../utils";
 
+const formatSeconds = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const min = minutes % 60;
+    return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
+  }
+  return `${minutes} min`;
+};
+
 export function TaskListItem({
   task,
   hasActiveTimer,
   refreshActiveTimer,
   refreshRecords,
-  todaysTimeRecords,
+  recentTimeRecords,
 }: {
   task: Task;
   hasActiveTimer: boolean;
   refreshActiveTimer: () => Promise<void>;
   refreshRecords: () => Promise<any>;
-  todaysTimeRecords: Array<Array<Task>>;
+  recentTimeRecords: Array<Array<Task>>;
 }) {
-  const [timeRecords, setTimeRecords] = useState<Array<any>>(todaysTimeRecords);
+  const [timeRecords, setTimeRecords] = useState<Array<any>>(recentTimeRecords);
 
   const enableTaskTimer = async () => {
     const toast = await showToast(ToastStyle.Animated, "Starting timer");
@@ -46,24 +56,16 @@ export function TaskListItem({
     }
   };
 
-  const formatMinutes = (minutes: number): string => {
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const min = minutes % 60;
-      return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
-    }
-    return `${minutes} min`;
-  };
-
   const resolveTaskTime = (): string => {
-    const taskTimeToday = timeRecords.find((timeRecord) => timeRecord.id === task.id);
-    if (taskTimeToday) {
-      const { timeInMin } = taskTimeToday;
-      return `${formatMinutes(timeInMin)} today, ${formatMinutes(total)} total`;
+    let seconds = task.time?.recent;
+    if (!seconds) {
+      const record = timeRecords.find((timeRecord) => timeRecord.id === task.id);
+      if (record) {
+        seconds = record.time.recent;
+      }
     }
-    if (task.time.recent) {
-      const total = Math.floor(task.time.recent / 60);
-      return `${formatMinutes(total)} in last 7 days`;
+    if (seconds > 0) {
+      return `${formatSeconds(seconds)} in last 7 days`;
     }
     return "";
   };
