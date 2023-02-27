@@ -152,10 +152,14 @@ export default function CreateMaskedEmail() {
       await showHUD(
         "Masked email created successfully " + data.alias.alias + "@" + domain.display + " and copied to clipboard"
       );
-      await showToast(Toast.Style.Success, "Masked email created successfully", data.alias.alias + "@" + domain.display);
+      await showToast(
+        Toast.Style.Success,
+        "Masked email created successfully",
+        data.alias.alias + "@" + domain.display
+      );
       await popToRoot({
         clearSearchBar: true,
-      })
+      });
     } catch (error) {
       console.log(error);
     }
@@ -173,7 +177,11 @@ export default function CreateMaskedEmail() {
       if (domain) {
         await handleMaskedEmail(domain);
       } else {
-        showToast(Toast.Style.Failure, "Invalid Domain",  "Your default domain is invalid. Please update it from this command preferences");
+        showToast(
+          Toast.Style.Failure,
+          "Invalid Domain",
+          "Your default domain is invalid. Please update it from this command preferences"
+        );
       }
     }
   };

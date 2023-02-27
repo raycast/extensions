@@ -78,7 +78,7 @@ export default function AddDomain(props: LaunchProps<{ draftValues: State }>) {
           if (apiErrors.errors) {
             const errorToShow = Object.values(apiErrors.errors).flat();
 
-            await showToast(Toast.Style.Failure, 'ImprovMX Error', errorToShow[0]);
+            await showToast(Toast.Style.Failure, "ImprovMX Error", errorToShow[0]);
 
             if (errorToShow[0].startsWith("Your account is limited to")) {
               setState((prevState) => {
@@ -104,7 +104,7 @@ export default function AddDomain(props: LaunchProps<{ draftValues: State }>) {
       });
       await showToast(Toast.Style.Success, "Domain Added", "Domain added successfully to your ImprovMX account.");
       setDomain("");
-        popToRoot({ clearSearchBar: true });
+      popToRoot({ clearSearchBar: true });
     }
   };
 

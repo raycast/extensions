@@ -20,7 +20,7 @@ const fetchAccountAPI = async (auth: string, API_URL: string) => {
 
     if (apiResponseJSON.success === false) {
       const errorMessage = apiResponseJSON.error ?? "ImprovMX API Error";
-      await showToast(Toast.Style.Failure, 'ImprovMX Error', errorMessage);
+      await showToast(Toast.Style.Failure, "ImprovMX Error", errorMessage);
       return;
     }
 
@@ -33,7 +33,7 @@ const fetchAccountAPI = async (auth: string, API_URL: string) => {
       return email;
     } else {
       const errorMessage = "Failed to parse ImprovMX API response";
-      await showToast(Toast.Style.Failure,'ImprovMX Error', errorMessage);
+      await showToast(Toast.Style.Failure, "ImprovMX Error", errorMessage);
       return;
     }
   } catch (error) {

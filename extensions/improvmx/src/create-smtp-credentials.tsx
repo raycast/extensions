@@ -59,8 +59,6 @@ export default function createSMTPCredentials() {
     API_TOKEN = getPreferenceValues<Preferences>().api_token,
     API_URL = "https://api.improvmx.com/v3/";
 
-
-
   const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
 
   useEffect(() => {
@@ -98,22 +96,19 @@ export default function createSMTPCredentials() {
     }
 
     async function getPlanName() {
-
-      const plan_name = await LocalStorage.getItem<string>("improvmx_plan_name") as string;
+      const plan_name = (await LocalStorage.getItem<string>("improvmx_plan_name")) as string;
 
       if (plan_name === null) {
         setState((prevState) => {
           return { ...prevState, error: "Failed to fetch plan name. Please try again later." };
         });
         return;
-      }
-      else {
+      } else {
         setState((prevState) => {
           return { ...prevState, planName: plan_name };
         });
       }
     }
-
 
     getDomains();
     getPlanName();
@@ -271,8 +266,7 @@ export default function createSMTPCredentials() {
         </ActionPanel>
       }
     />
-  ) : 
-  state.planName === "Free" ? (
+  ) : state.planName === "Free" ? (
     <Detail
       markdown={"⚠️ You are currently on the free plan. Please upgrade to create SMTP credentials."}
       actions={upgradeAction}
