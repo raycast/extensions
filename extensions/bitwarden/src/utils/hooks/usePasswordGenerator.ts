@@ -1,10 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer } from "react";
-import { Bitwarden } from "~/api/bitwarden";
 import { DEFAULT_PASSWORD_OPTIONS } from "~/constants/passwords";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
 import useAbortController from "~/utils/hooks/useAbortController";
+import { useBitwarden } from "~/context/bitwarden";
 
 const initialPasswordGeneratorState = {
   options: undefined as PasswordGeneratorOptions | undefined,
@@ -36,7 +36,8 @@ const passwordReducer = (state: GeneratorState, action: GeneratorActions): Gener
   }
 };
 
-export function usePasswordGenerator(bitwardenApi: Bitwarden) {
+export function usePasswordGenerator() {
+  const bitwarden = useBitwarden();
   const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
   const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
 
@@ -44,7 +45,7 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
     try {
       renewAbortController();
       dispatch({ type: "generate" });
-      const password = await bitwardenApi.generatePassword(passwordOptions, abortControllerRef?.current);
+      const password = await bitwarden.generatePassword(passwordOptions, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
     } catch (error) {
       // generate password was likely aborted
@@ -78,7 +79,10 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
 
   const restoreStoredOptions = async () => {
     const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
+    const newOptions: PasswordGeneratorOptions = {
+      ...DEFAULT_PASSWORD_OPTIONS,
+      ...(storedOptions ? JSON.parse(storedOptions) : {}),
+    };
     dispatch({ type: "setOptions", options: newOptions });
     await generatePassword(newOptions);
   };

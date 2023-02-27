@@ -1,11 +1,9 @@
 import { Action, Icon, showHUD } from "@raycast/api";
-import { Session } from "~/api/session";
 import { Item } from "~/types/search";
 import { copyPassword } from "~/utils/clipboard";
 import useReprompt from "~/utils/hooks/useReprompt";
 
 export type CopyPasswordActionProps = {
-  session: Session;
   content: string;
   reprompt: boolean;
   title?: string;
@@ -27,7 +25,7 @@ const CopyPasswordAction = (props: CopyPasswordActionProps) => {
     await showHUD(copiedSecurely ? "Copied password to clipboard" : "Copied to clipboard");
   }
 
-  const reprompt = useReprompt(props.session, doCopy, { item: props.item, what: "copy the password" });
+  const reprompt = useReprompt(doCopy, { item: props.item, what: "copy the password" });
   const action = props.reprompt ? reprompt : doCopy;
 
   return <Action title={props.title ?? "Copy Password"} icon={Icon.CopyClipboard} onAction={action}></Action>;

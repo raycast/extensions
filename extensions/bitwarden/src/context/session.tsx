@@ -4,9 +4,14 @@ import { Bitwarden } from "~/api/bitwarden";
 import { Session } from "~/api/session";
 import UnlockForm from "~/components/UnlockForm";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
+import { useBitwarden } from "~/context/bitwarden";
 import { SessionState } from "~/types/session";
 
 export const SessionContext = createContext<Session | null>(null);
+
+export type SessionProviderProps = PropsWithChildren<{
+  unlock?: boolean;
+}>;
 
 /**
  * Component which provides a session via the {@link useSession} hook.
@@ -14,8 +19,9 @@ export const SessionContext = createContext<Session | null>(null);
  * @param props.api The Bitwarden API.
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
  */
-export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unlock?: boolean }>): JSX.Element {
-  const { api, children } = props;
+export function SessionProvider(props: SessionProviderProps): JSX.Element {
+  const { unlock, children } = props;
+  const bitwarden = useBitwarden();
   const [state, setState] = useState<SessionState>({
     token: undefined,
     isLoading: true,
@@ -62,7 +68,7 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
    */
   async function update(newState: Partial<SessionState>): Promise<void> {
     if ("token" in newState) {
-      const status = await getSessionStatus(api, newState.token);
+      const status = await getSessionStatus(bitwarden, newState.token);
 
       newState = {
         ...newState,
@@ -113,14 +119,14 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
 
   async function lockVault() {
     const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
-    await api.lock();
+    await bitwarden.lock();
     await deleteToken();
     await toast.hide();
   }
 
   async function logoutVault() {
     const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
-    await api.logout();
+    await bitwarden.logout();
     await deleteToken();
     await toast.hide();
   }
@@ -137,7 +143,7 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
       // UPGRADE: We can't use the "reprompt" confirmations without a hash of the master password.
       //          The old session needs to be invalidated so we can get that.
       if (token != null && passwordHash == null) {
-        await api.lock();
+        await bitwarden.lock();
         await deleteToken();
         return;
       }
@@ -148,14 +154,14 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
         passwordEnteredDate: passwordEnteredDate === undefined ? undefined : new Date(passwordEnteredDate),
       });
     })();
-  }, [api]);
+  }, [bitwarden]);
 
   // Create the Session object that will be provided to downstream components.
   // This provides an API view over the internal state of the provider.
   const session = new Session({
     setState,
     state,
-    api,
+    api: bitwarden,
     actions: {
       lock: lockVault,
       logout: logoutVault,
@@ -166,7 +172,7 @@ export function SessionProvider(props: PropsWithChildren<{ api: Bitwarden; unloc
   const needsUnlockForm = !state.isLoading && (state.isLocked || !state.isAuthenticated);
   return (
     <SessionContext.Provider value={session}>
-      {needsUnlockForm && props.unlock ? <UnlockForm session={session} onUnlock={setToken} /> : children}
+      {needsUnlockForm && unlock ? <UnlockForm session={session} onUnlock={setToken} /> : children}
     </SessionContext.Provider>
   );
 }
@@ -182,3 +188,5 @@ export function useSession(): Session {
 
   return session;
 }
+
+export default SessionProvider;

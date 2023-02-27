@@ -3,7 +3,6 @@ import CopyPasswordAction from "~/components/actions/CopyPassword";
 import PastePasswordAction from "~/components/actions/PastePassword";
 import ComponentReverser from "~/components/ComponentReverser";
 import SearchCommonActions from "~/components/search/CommonActions";
-import { useSession } from "~/context/session";
 import { Item, Reprompt } from "~/types/search";
 import { capitalize, codeBlock } from "~/utils/strings";
 
@@ -22,8 +21,6 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
   const { login, notes, card, identity, fields } = item;
   const { password, totp, username } = login ?? {};
 
-  const session = useSession();
-
   const handleCopyTotp = () => copyTotp(item.id);
 
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
@@ -40,14 +37,12 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
               <PastePasswordAction
                 key="paste"
                 item={item}
-                session={session}
                 content={password}
                 reprompt={item.reprompt === Reprompt.REQUIRED}
               />
               <CopyPasswordAction
                 key="copy"
                 item={item}
-                session={session}
                 content={password}
                 reprompt={item.reprompt === Reprompt.REQUIRED}
               />

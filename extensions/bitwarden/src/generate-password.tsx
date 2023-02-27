@@ -5,24 +5,27 @@ import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHi
 import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
 import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "~/types/passwords";
 import { PASSWORD_OPTIONS_MAP } from "~/constants/passwords";
-import { Bitwarden } from "~/api/bitwarden";
 import { objectEntries } from "~/utils/objects";
 import OptionField from "~/components/generatePassword/OptionField";
 import FormActionPanel from "~/components/generatePassword/ActionPanel";
+import { BitwardenProvider } from "~/context/bitwarden";
 
 const FormSpace = () => <Form.Description text="" />;
 
 function GeneratePasswordCommand() {
   try {
-    const bitwardenApi = new Bitwarden();
-    return <GeneratePassword bitwardenApi={bitwardenApi} />;
+    return (
+      <BitwardenProvider>
+        <GeneratePassword />
+      </BitwardenProvider>
+    );
   } catch {
     return <TroubleshootingGuide />;
   }
 }
 
-function GeneratePassword({ bitwardenApi }: { bitwardenApi: Bitwarden }) {
-  const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator(bitwardenApi);
+function GeneratePassword() {
+  const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator();
 
   useOneTimePasswordHistoryWarning();
 

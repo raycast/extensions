@@ -86,14 +86,14 @@ export class Bitwarden {
 
   async listItems(sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", "items", "--session", sessionToken]);
-    const items = JSON.parse(stdout);
+    const items = JSON.parse<Item[]>(stdout);
     // Filter out items without a name property (they are not displayed in the bitwarden app)
     return items.filter((item: Item) => !!item.name);
   }
 
   async listFolders(sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", "folders", "--session", sessionToken]);
-    const folders = JSON.parse(stdout);
+    const folders = JSON.parse<Item[]>(stdout);
     return folders;
   }
 

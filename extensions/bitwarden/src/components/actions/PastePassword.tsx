@@ -1,10 +1,8 @@
 import { Action, Clipboard, Icon } from "@raycast/api";
-import { Session } from "~/api/session";
 import { Item } from "~/types/search";
 import useReprompt from "~/utils/hooks/useReprompt";
 
 export type PastePasswordActionProps = {
-  session: Session;
   content: string;
   reprompt: boolean;
   title?: string;
@@ -24,7 +22,7 @@ const PastePasswordAction = (props: PastePasswordActionProps) => {
     Clipboard.paste(props.content);
   }
 
-  const reprompt = useReprompt(props.session, doPaste, { item: props.item, what: "paste the password" });
+  const reprompt = useReprompt(doPaste, { item: props.item, what: "paste the password" });
   const action = props.reprompt ? reprompt : doPaste;
 
   return <Action title={props.title ?? "Paste Password"} icon={Icon.CopyClipboard} onAction={action}></Action>;

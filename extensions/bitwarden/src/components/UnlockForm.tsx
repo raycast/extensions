@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { Session } from "~/api/session";
+import { useBitwarden } from "~/context/bitwarden";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
@@ -9,14 +10,12 @@ export type UnlockFormProps = {
   session: Session;
 };
 
-/**
- * Form for unlocking or logging in to the Bitwarden vault.
- */
+/** Form for unlocking or logging in to the Bitwarden vault. */
 const UnlockForm = (props: UnlockFormProps) => {
-  const { session, onUnlock } = props;
-  const { api } = session;
+  const { onUnlock } = props;
+  const bitwarden = useBitwarden();
   const [isLoading, setLoading] = useState(false);
-  const { userMessage, serverMessage, shouldShowServer } = useVaultMessages(api);
+  const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
 
   async function onSubmit(values: { password: string }) {
     if (values.password.length == 0) {
@@ -26,10 +25,10 @@ const UnlockForm = (props: UnlockFormProps) => {
     try {
       setLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
-      const state = await api.status();
+      const state = await bitwarden.status();
       if (state.status == "unauthenticated") {
         try {
-          await api.login();
+          await bitwarden.login();
         } catch (error) {
           showToast(
             Toast.Style.Failure,
@@ -39,7 +38,7 @@ const UnlockForm = (props: UnlockFormProps) => {
           return;
         }
       }
-      const sessionToken = await api.unlock(values.password);
+      const sessionToken = await bitwarden.unlock(values.password);
       const passwordHash = await hashMasterPasswordForReprompting(values.password);
 
       toast.hide();

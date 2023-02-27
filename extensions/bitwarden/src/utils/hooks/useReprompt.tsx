@@ -1,7 +1,12 @@
 import { useNavigation } from "@raycast/api";
-import { Session } from "~/api/session";
 import RepromptForm from "~/components/RepromptForm";
+import { useSession } from "~/context/session";
 import { Item } from "~/types/search";
+
+type UseRepromptOptions = {
+  item?: Item;
+  what?: string;
+};
 
 /**
  * Returns a function for an {@link Action} that will navigate to a master password confirmation form.
@@ -11,14 +16,8 @@ import { Item } from "~/types/search";
  * @param action The action to perform upon confirmation.
  * @param options Options for the form.
  */
-function useReprompt(
-  session: Session,
-  action: () => void,
-  options: {
-    item?: Item;
-    what?: string;
-  }
-): () => void {
+function useReprompt(action: () => void, options: UseRepromptOptions) {
+  const session = useSession();
   const { push, pop } = useNavigation();
   const { item, what } = options ?? {};
 
@@ -34,7 +33,6 @@ function useReprompt(
 
     push(
       <RepromptForm
-        session={session}
         description={description}
         onConfirm={() => {
           pop();

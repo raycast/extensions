@@ -1,18 +1,15 @@
 import { Alert, closeMainWindow, confirmAlert, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Bitwarden } from "~/api/bitwarden";
+import { useBitwarden } from "~/context/bitwarden";
 import { VaultState } from "~/types";
 import { getServerUrlPreference } from "~/utils/preferences";
 
-function useVaultMessages(bitwardenApi: Bitwarden): {
-  userMessage: string;
-  serverMessage: string;
-  shouldShowServer: boolean;
-} {
+function useVaultMessages() {
+  const bitwarden = useBitwarden();
   const [vaultState, setVaultState] = useState<VaultState | null>(null);
 
   useEffect(() => {
-    bitwardenApi.status().then((vaultState) => {
+    bitwarden.status().then((vaultState) => {
       setVaultState(vaultState);
     });
   }, []);

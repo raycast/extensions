@@ -1,19 +1,20 @@
 import { List, Icon, showToast, closeMainWindow, Toast, Clipboard, ActionPanel } from "@raycast/api";
 import { useEffect, useReducer } from "react";
-import { Bitwarden } from "~/api/bitwarden";
 import SearchCommonActions from "~/components/search/CommonActions";
 import SearchItem from "~/components/search/Item";
 import TroubleshootingGuide from "~/components/TroubleshootingGuide";
+import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider, useSession } from "~/context/session";
 import { Folder, Item } from "~/types/search";
 
 function SearchCommand() {
   try {
-    const api = new Bitwarden();
     return (
-      <SessionProvider api={api} unlock>
-        <Search api={api} />
-      </SessionProvider>
+      <BitwardenProvider>
+        <SessionProvider unlock>
+          <Search />
+        </SessionProvider>
+      </BitwardenProvider>
     );
   } catch (e) {
     return <TroubleshootingGuide />;
@@ -29,8 +30,9 @@ type State = {
 
 const initialState: State = { items: [], folders: [], isLoading: true, isLocked: false };
 
-function Search({ api: bitwardenApi }: { api: Bitwarden }) {
+function Search() {
   const session = useSession();
+  const bitwarden = useBitwarden();
   const [state, setState] = useReducer(
     (previous: State, next: Partial<State>) => ({ ...previous, ...next }),
     initialState
@@ -51,8 +53,8 @@ function Search({ api: bitwardenApi }: { api: Bitwarden }) {
   async function loadItems(sessionToken: string) {
     try {
       const [folders, items] = await Promise.all([
-        bitwardenApi.listFolders(sessionToken),
-        bitwardenApi.listItems(sessionToken),
+        bitwarden.listFolders(sessionToken),
+        bitwarden.listItems(sessionToken),
       ]);
 
       items.sort(favoriteItemsFirstSorter);
@@ -65,7 +67,7 @@ function Search({ api: bitwardenApi }: { api: Bitwarden }) {
   async function copyTotp(id: string) {
     if (session.token) {
       const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
-      const totp = await bitwardenApi.getTotp(id, session.token);
+      const totp = await bitwarden.getTotp(id, session.token);
       await Clipboard.copy(totp);
       await toast.hide();
       await closeMainWindow({ clearRootSearch: true });
@@ -78,7 +80,7 @@ function Search({ api: bitwardenApi }: { api: Bitwarden }) {
     if (session.token) {
       const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
       try {
-        await bitwardenApi.sync(session.token);
+        await bitwarden.sync(session.token);
         await loadItems(session.token);
         await toast.hide();
       } catch (error) {
