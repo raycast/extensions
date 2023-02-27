@@ -25,10 +25,10 @@ export function TaskListItem({
   task: Task;
   hasActiveTimer: boolean;
   refreshActiveTimer: () => Promise<void>;
-  refreshRecords: () => Promise<any>;
-  recentTimeRecords: Array<Array<Task>>;
+  refreshRecords: () => Promise<Array<Task>>;
+  recentTimeRecords: Array<Task>;
 }) {
-  const [timeRecords, setTimeRecords] = useState<Array<any>>(recentTimeRecords);
+  const [timeRecords, setTimeRecords] = useState<Array<Task>>(recentTimeRecords);
 
   const enableTaskTimer = async () => {
     const toast = await showToast(ToastStyle.Animated, "Starting timer");
@@ -57,7 +57,7 @@ export function TaskListItem({
   };
 
   const resolveTaskTime = (): string => {
-    if (task.time.recent > 0) {
+    if (task.time?.recent > 0) {
       return `${formatSeconds(task.time.recent)} in last 7 days`;
     }
     const record = timeRecords.find((timeRecord) => timeRecord.id === task.id);

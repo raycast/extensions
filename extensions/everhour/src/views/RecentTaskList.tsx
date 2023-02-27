@@ -64,9 +64,7 @@ export function RecentTaskList() {
             <TaskListItem
               key={task.id}
               recentTimeRecords={[]}
-              refreshRecords={() => {
-                return fetchTasks();
-              }}
+              refreshRecords={getRecentTasks}
               refreshActiveTimer={refreshActiveTimer}
               task={task}
               hasActiveTimer={task.id === activeTimerTaskId}
