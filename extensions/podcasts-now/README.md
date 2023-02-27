@@ -6,8 +6,9 @@ Manage, explore and listen podcasts all in one place through Raycast.
 
 # Manage Podcasts
 
-When using Podcasts Now for the first time, it will ask to manage podcasts, meaning the user must fill in podcast feed URLs manually or import them from a file.
-Then the user could add or remove podcasts at any time through the "manage podcasts" action in the actions panel.
+When using Podcasts Now for the first time, it will ask to add a podcast or manage podcasts. The user will be able to search for podcasts and subscribe to some of them.
+The user can also manage podcasts by filling in podcast feed URLs manually or importing them from a file through the manage podcasts action.
+Then the user could add or remove podcasts at any time through the "add podcast" and "manage podcasts" action in the actions panel.
 
 # Play a Podcast
 
