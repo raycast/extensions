@@ -26,13 +26,11 @@ export type TimeRecordResp = {
 export type TaskTimerResp = {
   status: string;
   task: { name: string };
-  timeInMin: number;
 };
 
 export type TaskStopTimerResp = {
   status: string;
   taskTime: { task: { name: string } };
-  timeInMin: number;
 };
 
 export type CurrentTimerResp = {

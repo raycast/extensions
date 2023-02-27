@@ -77,10 +77,7 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
     throw new Error(tasks.message);
   }
 
-  return tasks.map(({ id, name, time }: TaskResp) => ({
-    id,
-    name,
-  }));
+  return tasks.map(({ id, name }: TaskResp) => ({ id, name }));
 };
 
 export const getCurrentTimer = async (): Promise<string | null> => {
