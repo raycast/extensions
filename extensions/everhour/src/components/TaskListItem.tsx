@@ -77,6 +77,11 @@ export function TaskListItem({
       icon={{ source: Icon.Dot, tintColor: hasActiveTimer ? Color.Green : Color.Gray }}
       actions={
         <ActionPanel>
+          {hasActiveTimer ? (
+            <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
+          ) : (
+            <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
+          )}
           <PushAction
             title="Submit Custom Time"
             target={
@@ -89,8 +94,6 @@ export function TaskListItem({
               />
             }
           />
-          <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
-          <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
         </ActionPanel>
       }
     />
