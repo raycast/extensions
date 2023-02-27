@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fetch from "node-fetch";
 import { preferences } from "@raycast/api";
-import { Project, Task, TaskTimerResp, TaskStopTimerResp, TaskResp, CurrentTimerResp } from "../types";
+import { Project, Task, TaskTimerResp, TaskStopTimerResp, TaskResp, CurrentTimerResp, TimeRecordResp } from "../types";
 
 const API_KEY = preferences.token.value as string;
 
@@ -37,12 +37,12 @@ export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => 
   }
 
   return Object.values(
-    timeRecords.reduce((agg, { time, task }: TaskResp) => {
+    timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
       if (!agg.hasOwnProperty(task.id)) {
-        agg[task.id] = task;
-        agg[task.id].time.recent = 0;
+        agg[task.id] = { ...task, time: { ...task.time, recent: time } };
+      } else {
+        agg[task.id].time.recent += time;
       }
-      agg[task.id].time.recent += time;
       return agg;
     }, {})
   );

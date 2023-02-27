@@ -76,7 +76,7 @@ export function TaskListItem({
       key={task.id}
       title={task.name}
       subtitle={resolveTaskTime()}
-      icon={{ source: Icon.Dot, tintColor: hasActiveTimer ? Color.Green : Color.Gray }}
+      icon={{ source: Icon.Dot, tintColor: hasActiveTimer ? Color.Green : Color.SecondaryText }}
       actions={
         <ActionPanel>
           {hasActiveTimer ? (

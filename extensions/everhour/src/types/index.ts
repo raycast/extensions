@@ -6,13 +6,21 @@ export type Project = {
 export type Task = {
   id: string;
   name: string;
-  timeInMin: number;
+  time: { total: number; recent: number };
 };
 
 export type TaskResp = {
   id: string;
   name: string;
   time: { total: number };
+};
+
+export type TimeRecordResp = {
+  id: number;
+  time: number;
+  user: number;
+  date: string;
+  task: TaskResp;
 };
 
 export type TaskTimerResp = {

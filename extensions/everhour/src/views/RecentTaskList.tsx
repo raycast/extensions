@@ -65,8 +65,7 @@ export function RecentTaskList() {
               key={task.id}
               recentTimeRecords={[]}
               refreshRecords={() => {
-                fetchTasks();
-                return refreshRecords();
+                return fetchTasks();
               }}
               refreshActiveTimer={refreshActiveTimer}
               task={task}
