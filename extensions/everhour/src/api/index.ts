@@ -24,7 +24,7 @@ export const getCurrentUser = async () => {
   return (await response.json()) as any;
 };
 
-export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => {
+export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
   const [currentDate] = daysAgo(7).toISOString().split("T");
   const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=1000&from=${currentDate}`, {
     headers,
@@ -38,7 +38,7 @@ export const getRecentTasks = async (userId: string = "me"): Promise<Task[]> => 
 
   return Object.values(
     timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
-      if (!agg.hasOwnProperty(task.id)) {
+      if (agg[task.id] === undefined) {
         agg[task.id] = { ...task, time: { ...task.time, recent: time } };
       } else {
         agg[task.id].time.recent += time;

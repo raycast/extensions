@@ -1,5 +1,5 @@
 import { List, ActionPanel, PushAction, Icon } from "@raycast/api";
-import { Project, Task, TimeRecordResp } from "../types";
+import { Project, Task } from "../types";
 import { TaskList } from "../views";
 
 export function ProjectListItem({

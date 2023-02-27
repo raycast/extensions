@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { TaskListItem } from "../components";
-import { getCurrentUser, getRecentTasks, getCurrentTimer } from "../api";
+import { getRecentTasks, getCurrentTimer } from "../api";
 import { Task } from "../types";
 import { createResolvedToast } from "../utils";
 
