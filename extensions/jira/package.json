@@ -15,6 +15,7 @@
     {
       "name": "create-issue",
       "title": "Create Issue",
+      "subtitle": "Jira",
       "description": "Create and assign new issues.",
       "mode": "view",
       "preferences": [
@@ -32,42 +33,49 @@
     {
       "name": "open-issues",
       "title": "Open Issues",
+      "subtitle": "Jira",
       "description": "View and modify open issues that are assigned to you.",
       "mode": "view"
     },
     {
       "name": "reported-issues",
       "title": "Reported Issues",
+      "subtitle": "Jira",
       "description": "View and modify issues that were reported by you.",
       "mode": "view"
     },
     {
       "name": "watched-issues",
       "title": "Watched Issues",
+      "subtitle": "Jira",
       "description": "View and modify issues that you are watching.",
       "mode": "view"
     },
     {
       "name": "active-sprints",
       "title": "Active Sprints",
+      "subtitle": "Jira",
       "description": "View and modify issues of active sprints.",
       "mode": "view"
     },
     {
       "name": "my-filters",
       "title": "My Filters",
+      "subtitle": "Jira",
       "description": "View and modify issues of your saved filters.",
       "mode": "view"
     },
     {
       "name": "recently-updated-issues",
       "title": "Recently Updated Issues",
+      "subtitle": "Jira",
       "description": "View and modify issues that have recently been updated.",
       "mode": "view"
     },
     {
       "name": "search-issues",
       "title": "Search Issues",
+      "subtitle": "Jira",
       "description": "Search issues globally in all projects.",
       "mode": "view"
     }
