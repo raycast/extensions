@@ -1,10 +1,10 @@
 import { getPreferenceValues, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
-import { differenceInDays } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 
 export default function Command() {
   const preferences = getPreferenceValues();
   const demoDay = new Date(preferences.demoDay);
-  const countdown = differenceInDays(demoDay, new Date());
+  const countdown = differenceInCalendarDays(demoDay, new Date());
   return countdown > 0 ? (
     <MenuBarExtra icon="icon.png" title={`${countdown} days`}>
       <MenuBarExtra.Section>
