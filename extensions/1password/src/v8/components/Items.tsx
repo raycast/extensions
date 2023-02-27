@@ -8,7 +8,6 @@ import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, SORTING_M
 import { Guide } from "./Guide";
 import resetCache from "../../reset-cache";
 
-
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
 
@@ -23,19 +22,18 @@ export function Items() {
     isLoading: itemsIsLoading,
   } = useOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
 
-   
   const categoryItems =
     category === DEFAULT_CATEGORY
       ? items
       : items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
   const onCategoryChange = (newCategory: string) => {
     category !== newCategory && setCategory(newCategory);
-  }; 
+  };
 
-  if(SORTING_METHOD === "updatedAt" ){
-    categoryItems?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  if (SORTING_METHOD === "updatedAt") {
+    categoryItems?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } else {
-    categoryItems?.sort((a, b) => a.title.localeCompare(b.title))
+    categoryItems?.sort((a, b) => a.title.localeCompare(b.title));
   }
 
   if (itemsError || accountError) return <Guide />;
@@ -52,59 +50,59 @@ export function Items() {
       <List.Section title="Items" subtitle={`${categoryItems?.length}`}>
         {categoryItems?.length &&
           categoryItems.map((item) => (
-              <List.Item
-                key={item.id}
-                id={item.id}
-                icon={{
-                  value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
-                  tooltip: item.category,
-                }}
-                title={item.title}
-                subtitle={item.additional_information}
-                accessories={[
-                  item?.favorite
-                    ? { icon: { source: Icon.Stars, tintColor: Color.Yellow }, tooltip: "Favorite item" }
-                    : {},
-                  { text: item.vault?.name },
-                ]}
-                actions={
-                  <ActionPanel>
-                    <Action.Open
-                      title="Open In 1Password"
-                      target={`onepassword://view-item/?a=${account?.account_uuid}&v=${item.vault.id}&i=${item.id}`}
-                      application="com.1password.1password"
-                    />
-                    {item.category === "LOGIN" && (
-                      <>
-                        {item?.urls?.filter((url) => url.primary).length ? (
-                          <Action.OpenInBrowser
-                            title="Open In Browser"
-                            url={(item.urls.find((url) => url.primary) as Url).href}
-                          />
-                        ) : null}
-                        <ActionPanel.Section>
-                          <CopyToClipboard
-                            id={item.id}
-                            vault_id={item.vault.id}
-                            field="username"
-                            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                          />
-                          <CopyToClipboard
-                            id={item.id}
-                            vault_id={item.vault.id}
-                            field="password"
-                            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
-                          />
-                        </ActionPanel.Section>
-                      </>
-                    )}
-                    <ActionPanel.Section>
-                      <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ))}
+            <List.Item
+              key={item.id}
+              id={item.id}
+              icon={{
+                value: { source: getCategoryIcon(item.category), tintColor: Color.Blue },
+                tooltip: item.category,
+              }}
+              title={item.title}
+              subtitle={item.additional_information}
+              accessories={[
+                item?.favorite
+                  ? { icon: { source: Icon.Stars, tintColor: Color.Yellow }, tooltip: "Favorite item" }
+                  : {},
+                { text: item.vault?.name },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    title="Open In 1Password"
+                    target={`onepassword://view-item/?a=${account?.account_uuid}&v=${item.vault.id}&i=${item.id}`}
+                    application="com.1password.1password"
+                  />
+                  {item.category === "LOGIN" && (
+                    <>
+                      {item?.urls?.filter((url) => url.primary).length ? (
+                        <Action.OpenInBrowser
+                          title="Open In Browser"
+                          url={(item.urls.find((url) => url.primary) as Url).href}
+                        />
+                      ) : null}
+                      <ActionPanel.Section>
+                        <CopyToClipboard
+                          id={item.id}
+                          vault_id={item.vault.id}
+                          field="username"
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        />
+                        <CopyToClipboard
+                          id={item.id}
+                          vault_id={item.vault.id}
+                          field="password"
+                          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                        />
+                      </ActionPanel.Section>
+                    </>
+                  )}
+                  <ActionPanel.Section>
+                    <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
     </List>
   );
