@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Allow Failure Jobs] - 2023-02-24
+
+- Added indicators for jobs that are allowed to fail
+
 ## [Project Create New Issue] - 2023-02-03
 
 - Added command to cerate new issue on a project
