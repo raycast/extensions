@@ -57,15 +57,12 @@ export function TaskListItem({
   };
 
   const resolveTaskTime = (): string => {
-    let seconds = task.time?.recent;
-    if (!seconds) {
-      const record = timeRecords.find((timeRecord) => timeRecord.id === task.id);
-      if (record) {
-        seconds = record.time.recent;
-      }
+    if (task.time.recent > 0) {
+      return `${formatSeconds(task.time.recent)} in last 7 days`;
     }
-    if (seconds > 0) {
-      return `${formatSeconds(seconds)} in last 7 days`;
+    const record = timeRecords.find((timeRecord) => timeRecord.id === task.id);
+    if (record && record.time.recent > 0) {
+      return `${formatSeconds(record.time.recent)} in last 7 days`;
     }
     return "";
   };
