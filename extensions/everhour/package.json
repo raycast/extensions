@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Track Projects",
+      "title": "Active projects",
       "subtitle": "Everhour",
       "description": "List active projects that you can track time against",
       "mode": "view"
