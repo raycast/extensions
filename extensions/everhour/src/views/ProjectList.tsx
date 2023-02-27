@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { ProjectListItem } from "../components";
 import { getProjects, getRecentTasks } from "../api";
-import { Project } from "../types";
+import { Project, Task } from "../types";
 import { createResolvedToast } from "../utils";
 
 export function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timeRecords, setTimeRecords] = useState<Array<any>>([]);
+  const [timeRecords, setTimeRecords] = useState<Array<Task>>([]);
 
   useEffect(() => {
     async function fetch() {

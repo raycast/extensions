@@ -7,12 +7,14 @@ export type Task = {
   id: string;
   name: string;
   time: { total: number; recent: number };
+  projects: Array<string>;
 };
 
 export type TaskResp = {
   id: string;
   name: string;
   time: { total: number };
+  projects: Array<string>;
 };
 
 export type TimeRecordResp = {

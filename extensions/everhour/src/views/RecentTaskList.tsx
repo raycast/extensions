@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { TaskListItem } from "../components";
 import { getCurrentUser, getRecentTasks, getCurrentTimer } from "../api";
-import { Project } from "../types";
+import { Task } from "../types";
 import { createResolvedToast } from "../utils";
 
 export function RecentTaskList() {
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<null | string>(null);
-  const [tasks, setTasks] = useState<Array<any>>([]);
+  const [tasks, setTasks] = useState<Array<Task>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const refreshActiveTimer = async () => {
