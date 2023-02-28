@@ -36,7 +36,7 @@ export function ProjectList() {
       return projects.map((project) => (
         <ProjectListItem
           timeRecords={timeRecords}
-          refreshRecords={() => getRecentTasks()}
+          refreshRecords={getRecentTasks}
           key={project.id}
           project={project}
         />
