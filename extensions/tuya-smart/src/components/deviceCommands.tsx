@@ -25,7 +25,7 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
       commands = [
         {
           code: "switch_led",
-          value: !device.status.filter((status) => status.code === "switch_led"),
+          value: device.status.find((status) => status.code === "switch_led")?.value,
           name: "Toggle On/Off",
         },
         { code: "work_mode", value: "white", name: "Workmode: White" },
