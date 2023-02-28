@@ -27,7 +27,11 @@ export enum SearchKind {
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
-  const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
+  const [state, setState] = useState<BookmarksState>({
+    bookmarks: [],
+    isLoading: true,
+    title: "",
+  });
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
@@ -42,10 +46,18 @@ export function useSearchBookmarks(searchKind: SearchKind) {
         let bookmarks: Bookmark[];
         switch (searchKind) {
           case SearchKind.All:
-            bookmarks = await searchBookmarks(searchText, searchKind, cancelRef.current.signal);
+            bookmarks = await searchBookmarks(
+              searchText,
+              searchKind,
+              cancelRef.current.signal
+            );
             break;
           case SearchKind.Constant:
-            bookmarks = await searchBookmarks(searchText + " " + constantTags, searchKind, cancelRef.current.signal);
+            bookmarks = await searchBookmarks(
+              searchText + " " + constantTags,
+              searchKind,
+              cancelRef.current.signal
+            );
             break;
         }
 
@@ -53,14 +65,21 @@ export function useSearchBookmarks(searchKind: SearchKind) {
           ...oldState,
           bookmarks: bookmarks,
           isLoading: false,
-          title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
+          title:
+            searchKind === SearchKind.All && searchText.length === 0
+              ? "Recent Bookmarks"
+              : "Found Bookmarks",
         }));
       } catch (error) {
         if (error instanceof AbortError) {
           return;
         }
         console.error("searchBookmarks error", error);
-        showToast({ title: "Could not search bookmarks", message: String(error), style: Toast.Style.Failure });
+        showToast({
+          title: "Could not search bookmarks",
+          message: String(error),
+          style: Toast.Style.Failure,
+        });
       }
     },
     [searchKind]
@@ -79,8 +98,15 @@ export function useSearchBookmarks(searchKind: SearchKind) {
   };
 }
 
-async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
-  const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
+async function searchBookmarks(
+  searchText: string,
+  kind: SearchKind,
+  signal: AbortSignal
+): Promise<Bookmark[]> {
+  const path =
+    kind == SearchKind.All && searchText.length === 0
+      ? "/posts/recent"
+      : "/posts/all";
 
   const params = new URLSearchParams();
   if (searchText.length > 0) {
@@ -124,9 +150,12 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   params.append("format", "json");
   params.append("auth_token", apiToken);
 
-  const response = await fetch(apiBasePath + "/posts/add?" + params.toString(), {
-    method: "post",
-  });
+  const response = await fetch(
+    apiBasePath + "/posts/add?" + params.toString(),
+    {
+      method: "post",
+    }
+  );
 
   if (!response.ok) {
     return Promise.reject(response.statusText);
