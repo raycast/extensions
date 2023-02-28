@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Add Copy Clone Url] - 2023-02-24
+
+- Added command to copy clone url of a project to clipboard
+
 ## [Allow Failure Jobs] - 2023-02-24
 
 - Added indicators for jobs that are allowed to fail
