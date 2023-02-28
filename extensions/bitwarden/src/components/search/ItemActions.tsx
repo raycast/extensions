@@ -1,8 +1,20 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import CopyPasswordAction from "~/components/actions/CopyPassword";
 import PastePasswordAction from "~/components/actions/PastePassword";
 import ComponentReverser from "~/components/ComponentReverser";
 import SearchCommonActions from "~/components/search/CommonActions";
+import { useBitwarden } from "~/context/bitwarden";
+import { useSession } from "~/context/session";
 import { Item, Reprompt } from "~/types/search";
 import { capitalize, codeBlock } from "~/utils/strings";
 
@@ -10,16 +22,15 @@ const { primaryAction } = getPreferenceValues();
 
 export type SearchItemActionsProps = {
   item: Item;
-  copyTotp: (id: string) => void;
-  syncItems: () => void;
-  lockVault: () => void;
-  logoutVault: () => void;
 };
 
 const SearchItemActions = (props: SearchItemActionsProps) => {
-  const { item, copyTotp, syncItems, lockVault, logoutVault } = props;
+  const { item } = props;
   const { login, notes, card, identity, fields } = item;
   const { password, totp, username } = login ?? {};
+
+  const session = useSession();
+  const bitwarden = useBitwarden();
 
   const handleCopyTotp = () => copyTotp(item.id);
 
@@ -27,6 +38,18 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
   );
+
+  async function copyTotp(id: string) {
+    if (session.token) {
+      const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
+      const totp = await bitwarden.getTotp(id, session.token);
+      await Clipboard.copy(totp);
+      await toast.hide();
+      await closeMainWindow({ clearRootSearch: true });
+    } else {
+      showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
+    }
+  }
 
   return (
     <>
@@ -92,7 +115,7 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
         )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        <SearchCommonActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
+        <SearchCommonActions />
       </ActionPanel.Section>
     </>
   );

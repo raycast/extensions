@@ -1,27 +1,26 @@
 import { Action, Color, Icon } from "@raycast/api";
+import { useSession } from "~/context/session";
+import { useVault } from "~/context/vault";
 
-export type SearchCommonActionsProps = {
-  syncItems: () => void;
-  lockVault: () => void;
-  logoutVault: () => void;
-};
+const SearchCommonActions = () => {
+  const vault = useVault();
+  const session = useSession();
 
-const SearchCommonActions = (props: SearchCommonActionsProps) => {
   return (
     <>
       <Action
         title="Sync Vault"
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         icon={Icon.ArrowClockwise}
-        onAction={props.syncItems}
+        onAction={vault.syncItems}
       />
       <Action
         icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
         title="Lock Vault"
         shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-        onAction={props.lockVault}
+        onAction={session.lock}
       />
-      <Action title="Logout" icon={Icon.XMarkCircle} onAction={props.logoutVault} />
+      <Action title="Logout" icon={Icon.XMarkCircle} onAction={session.logout} />
     </>
   );
 };

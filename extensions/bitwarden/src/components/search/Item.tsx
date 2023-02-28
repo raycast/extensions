@@ -9,14 +9,10 @@ const { fetchFavicons } = getPreferenceValues();
 export type SearchItemProps = {
   item: Item;
   folder: Folder | undefined;
-  syncItems: () => void;
-  lockVault: () => void;
-  logoutVault: () => void;
-  copyTotp: (id: string) => void;
 };
 
 const SearchItem = (props: SearchItemProps) => {
-  const { item, folder, syncItems, lockVault, logoutVault, copyTotp } = props;
+  const { item, folder } = props;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
 
@@ -30,7 +26,7 @@ const SearchItem = (props: SearchItemProps) => {
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          <SearchItemActions {...{ item, copyTotp, syncItems, lockVault, logoutVault }} />
+          <SearchItemActions item={item} />
         </ActionPanel>
       }
     />

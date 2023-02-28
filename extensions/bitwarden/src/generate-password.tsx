@@ -15,12 +15,12 @@ const FormSpace = () => <Form.Description text="" />;
 const GeneratePasswordCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider>
-      <GeneratePassword />
+      <GeneratePasswordComponent />
     </BitwardenProvider>
   </RootErrorBoundary>
 );
 
-function GeneratePassword() {
+function GeneratePasswordComponent() {
   const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator();
 
   useOneTimePasswordHistoryWarning();
