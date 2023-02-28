@@ -53,6 +53,7 @@ You can set different parameters for the AI model:
 4. `text-babbage-001`
 5. `text-ada-001`
 6. `code-davinci-002`
+7. `code-cushman-001`
 
 ## Token Count
 
