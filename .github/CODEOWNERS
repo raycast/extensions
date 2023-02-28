@@ -503,7 +503,7 @@
 /extensions/nixpkgs-search                           @aiotter
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
-/extensions/noteplan-3                               @shakedlokits @lukerandall
+/extensions/noteplan-3                               @shakedlokits @lukerandall @pr1mal
 /extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
 /extensions/nouns                                    @peduarte
 /extensions/novu                                     @djabarovgeorge
