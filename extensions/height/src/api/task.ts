@@ -1,13 +1,17 @@
 import fetch from "node-fetch";
+import { getOAuthToken } from "../components/withHeightAuth";
 import { CreateTaskPayload, TaskObject, UpdateBatchTaskPayload, UpdateTaskPayload } from "../types/task";
 import { ApiErrorResponse } from "../types/utils";
-import { ApiHeaders, ApiUrls } from "./helpers";
+import { ApiUrls } from "./helpers";
 
 export const ApiTask = {
   async create(values: CreateTaskPayload) {
     const response = await fetch(ApiUrls.tasks, {
       method: "POST",
-      headers: ApiHeaders,
+      headers: {
+        Authorization: `api-key ${getOAuthToken()}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(values),
     });
 
@@ -20,14 +24,20 @@ export const ApiTask = {
   batchUpdate(payload: UpdateBatchTaskPayload) {
     return fetch(ApiUrls.tasks, {
       method: "PATCH",
-      headers: ApiHeaders,
+      headers: {
+        Authorization: `api-key ${getOAuthToken()}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(payload),
     });
   },
   update(taskId: string, values: UpdateTaskPayload) {
     return fetch(`${ApiUrls.tasks}/${taskId}`, {
       method: "PUT",
-      headers: ApiHeaders,
+      headers: {
+        Authorization: `api-key ${getOAuthToken()}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(values),
     });
   },

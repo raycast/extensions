@@ -1,7 +1,8 @@
 import { useFetch } from "@raycast/utils";
 import { orderBy } from "lodash-es";
 import { useMemo } from "react";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
+import { ApiUrls } from "../api/helpers";
+import { getOAuthToken } from "../components/withHeightAuth";
 import { TaskObject } from "../types/task";
 import { ApiResponse } from "../types/utils";
 
@@ -31,7 +32,10 @@ export default function useTasks({ listId, assigneeId, options }: Props = {}) {
   const endpoint = `${ApiUrls.tasks}?filters=${stringifiedFilters}&order=${order}&include=${include}`;
 
   const { data, error, isLoading, mutate } = useFetch<ApiResponse<TaskObject[]>>(endpoint, {
-    headers: ApiHeaders,
+    headers: {
+      Authorization: `api-key ${getOAuthToken()}`,
+      "Content-Type": "application/json",
+    },
     ...options,
   });
 

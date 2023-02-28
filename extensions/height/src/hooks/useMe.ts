@@ -1,5 +1,6 @@
 import { useFetch } from "@raycast/utils";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
+import { ApiUrls } from "../api/helpers";
+import { getOAuthToken } from "../components/withHeightAuth";
 import { UserObject } from "../types/user";
 
 type Props = {
@@ -8,7 +9,10 @@ type Props = {
 
 export default function useMe({ options }: Props = {}) {
   const { data, error, isLoading, mutate } = useFetch<UserObject>(ApiUrls.me, {
-    headers: ApiHeaders,
+    headers: {
+      Authorization: `api-key ${getOAuthToken()}`,
+      "Content-Type": "application/json",
+    },
     ...options,
   });
 

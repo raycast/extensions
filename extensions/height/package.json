@@ -47,16 +47,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Secret Key",
-      "description": "Secret Key",
-      "placeholder": "Your secret key"
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
     "@raycast/utils": "^1.4.18",

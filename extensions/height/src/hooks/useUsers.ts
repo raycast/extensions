@@ -1,6 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
-import { ApiHeaders, ApiUrls } from "../api/helpers";
+import { ApiUrls } from "../api/helpers";
+import { getOAuthToken } from "../components/withHeightAuth";
 import { UserObject } from "../types/user";
 import { ApiResponse } from "../types/utils";
 
@@ -10,7 +11,10 @@ type Props = {
 
 export default function useUsers({ options }: Props = {}) {
   const { data, error, isLoading, mutate } = useFetch<ApiResponse<UserObject[]>>(ApiUrls.users, {
-    headers: ApiHeaders,
+    headers: {
+      Authorization: `api-key ${getOAuthToken()}`,
+      "Content-Type": "application/json",
+    },
     ...options,
   });
 
