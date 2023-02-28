@@ -1,11 +1,24 @@
-import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, showHUD, popToRoot } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Icon,
+  getSelectedText,
+  Toast,
+  showHUD,
+  popToRoot,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Bookmark, addBookmark } from "./api";
 import he from "he";
 
 export default function Command() {
-  const [state, setState] = useState<{ url: string; title: string }>({ url: "", title: "" });
+  const [state, setState] = useState<{ url: string; title: string }>({
+    url: "",
+    title: "",
+  });
 
   useEffect(() => {
     (async () => {
@@ -18,7 +31,11 @@ export default function Command() {
         }
         try {
           const documentTitle = await loadDocumentTitle(selectedText);
-          setState((oldState) => ({ ...oldState, url: selectedText, title: documentTitle }));
+          setState((oldState) => ({
+            ...oldState,
+            url: selectedText,
+            title: documentTitle,
+          }));
         } catch (error) {
           console.error("Could not load document title", error);
           setState((oldState) => ({ ...oldState, url: selectedText }));
@@ -34,10 +51,16 @@ export default function Command() {
     const url = values.url.trim();
     const title = values.title.trim();
     if (!isValidURL(url) || title.length === 0) {
-      showToast({ title: "Enter a valid URL and title for the bookmark", style: Toast.Style.Failure });
+      showToast({
+        title: "Enter a valid URL and title for the bookmark",
+        style: Toast.Style.Failure,
+      });
       return;
     }
-    const toast = await showToast({ title: "Pinning bookmark...", style: Toast.Style.Animated });
+    const toast = await showToast({
+      title: "Pinning bookmark...",
+      style: Toast.Style.Animated,
+    });
     try {
       await addBookmark(values);
       toast.hide();
@@ -45,7 +68,11 @@ export default function Command() {
       popToRoot();
     } catch (error) {
       console.error("addBookmark error", error);
-      showToast({ title: "Could not pin bookmark", message: String(error), style: Toast.Style.Failure });
+      showToast({
+        title: "Could not pin bookmark",
+        message: String(error),
+        style: Toast.Style.Failure,
+      });
     }
   }
 
@@ -61,8 +88,15 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Bookmark" icon={{ source: Icon.Plus }} onSubmit={handleSubmit} />
-          <Action.OpenInBrowser title="Open Pinboard" url="https://pinboard.in" />
+          <Action.SubmitForm
+            title="Add Bookmark"
+            icon={{ source: Icon.Plus }}
+            onSubmit={handleSubmit}
+          />
+          <Action.OpenInBrowser
+            title="Open Pinboard"
+            url="https://pinboard.in"
+          />
         </ActionPanel>
       }
     >
@@ -81,8 +115,16 @@ export default function Command() {
         onChange={handleTitleChange}
       />
       <Form.Separator />
-      <Form.TextArea id="description" title = "Description" placeholder="Enter bookmark description"/>
-      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (comma-separated)" />
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter bookmark description"
+      />
+      <Form.TextField
+        id="tags"
+        title="Tags"
+        placeholder="Enter tags (comma-separated)"
+      />
       <Form.Checkbox id="private" title="" label="Private" storeValue />
       <Form.Checkbox id="readLater" title="" label="Read Later" storeValue />
     </Form>
