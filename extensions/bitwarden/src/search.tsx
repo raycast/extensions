@@ -1,25 +1,21 @@
 import { List, Icon, showToast, closeMainWindow, Toast, Clipboard, ActionPanel } from "@raycast/api";
 import { useEffect, useReducer } from "react";
+import RootErrorBoundary from "~/components/RootErrorBoundary";
 import SearchCommonActions from "~/components/search/CommonActions";
 import SearchItem from "~/components/search/Item";
-import TroubleshootingGuide from "~/components/TroubleshootingGuide";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider, useSession } from "~/context/session";
 import { Folder, Item } from "~/types/search";
 
-function SearchCommand() {
-  try {
-    return (
-      <BitwardenProvider>
-        <SessionProvider unlock>
-          <Search />
-        </SessionProvider>
-      </BitwardenProvider>
-    );
-  } catch (e) {
-    return <TroubleshootingGuide />;
-  }
-}
+const SearchCommand = () => (
+  <RootErrorBoundary>
+    <BitwardenProvider>
+      <SessionProvider unlock>
+        <Search />
+      </SessionProvider>
+    </BitwardenProvider>
+  </RootErrorBoundary>
+);
 
 type State = {
   items: Item[];

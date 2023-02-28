@@ -1,7 +1,7 @@
 import { Alert, closeMainWindow, confirmAlert, Icon, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
-import { VaultState } from "~/types";
+import { VaultState } from "~/types/general";
 import { getServerUrlPreference } from "~/utils/preferences";
 
 function useVaultMessages() {

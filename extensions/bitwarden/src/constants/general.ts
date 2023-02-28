@@ -10,3 +10,7 @@ export const LOCAL_STORAGE_KEY = {
   REPROMPT_PASSWORD_ENTERED: "sessionRepromptAfter",
   SERVER_URL: "cliServer",
 };
+
+export const ERRORS = {
+  CLINotFound: "CLINotFound",
+} as const;

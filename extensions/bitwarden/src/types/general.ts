@@ -1,5 +1,7 @@
 /* Put types that you feel like they still don't deserve a file of their own here */
 
+import { ERRORS } from "~/constants/general";
+
 export type Preferences = {
   cliPath: string;
   clientId: string;
@@ -20,3 +22,5 @@ export type VaultState = {
 export enum Object {
   Item = "item",
 }
+
+export type ErrorType = (typeof ERRORS)[keyof typeof ERRORS];

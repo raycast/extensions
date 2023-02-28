@@ -183,7 +183,7 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
 export function useSession(): Session {
   const session = useContext(SessionContext);
   if (session == null) {
-    throw new Error("useSession without SessionProvider in tree");
+    throw new Error("useSession must be used within a SessionProvider");
   }
 
   return session;

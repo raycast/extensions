@@ -1,26 +1,32 @@
-import { showToast, ActionPanel, Toast, Action, Detail } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 
-const CONTENT = `# The Bitwarden CLI was not found
-## Please check that:
+const CODE_BACKTICKS = "```";
+const BW_CLI_INSTALLATION_DOCS_URL = "https://bitwarden.com/help/cli/#download-and-install";
+const BW_CLI_HOMEBREW_DOCS_URL = "https://formulae.brew.sh/formula/bitwarden-cli";
 
-1. The Bitwarden CLI is [correctly installed](https://bitwarden.com/help/article/cli/#download-and-install)
-1. If you did not install bitwarden using brew, please check that path of the installation matches the \`Bitwarden CLI Installation Path\` extension setting
+const getContent = (errorInfo?: string) => `# An error has occurred
+${errorInfo ? `${CODE_BACKTICKS}\n${errorInfo}\n${CODE_BACKTICKS}` : "\n"}
+## Troubleshooting Guide:
+
+1. The [Bitwarden CLI](${BW_CLI_INSTALLATION_DOCS_URL}) is correctly installed
+2. If you did not install the Bitwarden CLI [using Homebrew](${BW_CLI_HOMEBREW_DOCS_URL}), please check that the path of the installation matches the \`Bitwarden CLI Installation Path\` extension setting. 
+    - 💡 Run the \`which bw\` command to check the CLI installation path.
 `;
 
-const TroubleshootingGuide = () => {
-  showToast(Toast.Style.Failure, "Bitwarden CLI not found");
-
-  return (
-    <Detail
-      markdown={CONTENT}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title={"Copy Homebrew Installation Command"} content="brew install bitwarden-cli" />
-          <Action.OpenInBrowser url="https://bitwarden.com/help/article/cli/#download-and-install" />
-        </ActionPanel>
-      }
-    />
-  );
+export type TroubleshootingGuideProps = {
+  errorInfo?: string;
 };
+
+const TroubleshootingGuide = (props: TroubleshootingGuideProps) => (
+  <Detail
+    markdown={getContent(props.errorInfo)}
+    actions={
+      <ActionPanel>
+        <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
+        <Action.OpenInBrowser title="Open Installation Guide" url={BW_CLI_INSTALLATION_DOCS_URL} />
+      </ActionPanel>
+    }
+  />
+);
 
 export default TroubleshootingGuide;

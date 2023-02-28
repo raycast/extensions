@@ -1,5 +1,4 @@
 import { Form, Detail } from "@raycast/api";
-import TroubleshootingGuide from "~/components/TroubleshootingGuide";
 import { capitalize } from "~/utils/strings";
 import useOneTimePasswordHistoryWarning from "~/utils/hooks/useOneTimePasswordHistoryWarning";
 import { usePasswordGenerator } from "~/utils/hooks/usePasswordGenerator";
@@ -9,20 +8,17 @@ import { objectEntries } from "~/utils/objects";
 import OptionField from "~/components/generatePassword/OptionField";
 import FormActionPanel from "~/components/generatePassword/ActionPanel";
 import { BitwardenProvider } from "~/context/bitwarden";
+import RootErrorBoundary from "~/components/RootErrorBoundary";
 
 const FormSpace = () => <Form.Description text="" />;
 
-function GeneratePasswordCommand() {
-  try {
-    return (
-      <BitwardenProvider>
-        <GeneratePassword />
-      </BitwardenProvider>
-    );
-  } catch {
-    return <TroubleshootingGuide />;
-  }
-}
+const GeneratePasswordCommand = () => (
+  <RootErrorBoundary>
+    <BitwardenProvider>
+      <GeneratePassword />
+    </BitwardenProvider>
+  </RootErrorBoundary>
+);
 
 function GeneratePassword() {
   const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator();
