@@ -39,15 +39,15 @@ function SubmitInsight() {
       <Form.Separator />
       <Form.TextField id="email" title="E-mail" placeholder="Enter the submitter email" defaultValue={"raycast@email.com"} />
       <Form.Dropdown id="painLevel" title="Pain Level" defaultValue={"UNKNOWN"}>
-        <Form.Dropdown.Item value="dropdown-item" title="UNKNOWN" />
-        <Form.Dropdown.Item value="dropdown-item" title="LOW" />
-        <Form.Dropdown.Item value="dropdown-item" title="MEDIUM" />
-        <Form.Dropdown.Item value="dropdown-item" title="HIGH" />
+        <Form.Dropdown.Item value="UNKNOWN" title="Unknown" />
+        <Form.Dropdown.Item value="LOW" title="Low" />
+        <Form.Dropdown.Item value="MEDIUM" title="Medium" />
+        <Form.Dropdown.Item value="HIGH" title="High" />
       </Form.Dropdown>
       <Form.Dropdown id="state" title="State" defaultValue={"NEW"}>
-        <Form.Dropdown.Item value="dropdown-item" title="NEW" />
-        <Form.Dropdown.Item value="dropdown-item" title="PROCESSED" />
-        <Form.Dropdown.Item value="dropdown-item" title="COMPLETED" />
+        <Form.Dropdown.Item value="NEW" title="New" />
+        <Form.Dropdown.Item value="PROCESSED" title="Processed" />
+        <Form.Dropdown.Item value="COMPLETED" title="Completed" />
       </Form.Dropdown>
     </Form>
   );
