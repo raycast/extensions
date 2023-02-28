@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "get-ssh-key",
   "title": "Get SSH Key",
-  "description": "get your local SSH key",
+  "description": "Get your local SSH key in a split of a second.",
   "icon": "command-icon.png",
   "author": "Tang",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Get SSH Key",
-      "description": "get your local SSH key",
+      "description": "Get your local SSH key",
       "mode": "no-view"
     }
   ],
