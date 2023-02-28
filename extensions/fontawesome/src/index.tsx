@@ -128,7 +128,7 @@ export default function Command() {
           key={icon.id}
           title={icon.label}
           content={{
-            source: { light: getSvgUrl(icon, 'regular'), dark: getSvgUrl(icon, 'regular') },
+            source: getSvgUrl(icon, 'regular'),
             tintColor: Color.PrimaryText,
           }}
           actions={
