@@ -313,7 +313,7 @@ export default function createSMTPCredentials() {
       />
       <Form.Dropdown
         id="onlyFromAlias"
-        title="Only from alias"
+        title="Send from any alias"
         placeholder="Select an option"
         value={state.onlyFromAlias ? "true" : "false"}
         onChange={(value) => {
@@ -321,8 +321,8 @@ export default function createSMTPCredentials() {
         }}
         error={state.onlyFromAliasError}
       >
-        <Form.Dropdown.Item value="true" title="Just from this alias" />
-        <Form.Dropdown.Item value="false" title="Any alias" />
+        <Form.Dropdown.Item value="true" title="Only from this alias" />
+        <Form.Dropdown.Item value="false" title="From any alias on that domain" />
       </Form.Dropdown>
     </Form>
   );
