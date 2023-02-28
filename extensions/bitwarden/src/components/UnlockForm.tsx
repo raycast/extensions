@@ -44,7 +44,8 @@ const UnlockForm = (props: UnlockFormProps) => {
       toast.hide();
       onUnlock(sessionToken, passwordHash);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
+      showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
+    } finally {
       setLoading(false);
     }
   }

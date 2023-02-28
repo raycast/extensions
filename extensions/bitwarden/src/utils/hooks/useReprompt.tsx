@@ -3,7 +3,7 @@ import RepromptForm from "~/components/RepromptForm";
 import { useSession } from "~/context/session";
 import { Item } from "~/types/search";
 
-type UseRepromptOptions = {
+export type UseRepromptOptions = {
   item?: Item;
   what?: string;
 };

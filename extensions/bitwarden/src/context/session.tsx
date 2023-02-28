@@ -32,8 +32,6 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
     passwordEnteredDate: undefined,
   });
 
-  // Internal functions.
-
   /**
    * Determines the current status of the session.
    *
