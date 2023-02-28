@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.extend(localizedFormat);
 
-import { formatToReadablePrice, getFlagColor } from '@lib/utils';
+import { easyGetColorFromId, formatToReadablePrice, getFlagColor } from '@lib/utils';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { OpenInYnabAction } from '@components/actions';
 
@@ -35,14 +35,32 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
           <Detail.Metadata.Label title="Date" text={dayjs(transaction.date).format('LL')} />
           <Detail.Metadata.TagList title={hasSubtransactions ? 'Categories' : 'Category'}>
             {hasSubtransactions ? (
-              transaction.subtransactions.map((transaction) => (
-                <Detail.Metadata.TagList.Item
-                  key={transaction.id}
-                  text={transaction.category_name ?? 'Not Specified'}
-                />
-              ))
+              [...transaction.subtransactions]
+                .sort((a, b) => {
+                  /* 
+                    This might look a bit odd
+                    But we're showing the highest income if the main
+                    transaction is an inflow
+                    And the highest spend if it is an outflow
+                  */
+                  if (transaction.amount > 0) {
+                    return b.amount - a.amount;
+                  } else {
+                    return a.amount - b.amount;
+                  }
+                })
+                .map((transaction, idx) => (
+                  <Detail.Metadata.TagList.Item
+                    key={transaction.id}
+                    text={transaction.category_name ?? 'Not Specified'}
+                    color={transaction.category_name ? easyGetColorFromId(idx) : Color.Red}
+                  />
+                ))
             ) : (
-              <Detail.Metadata.TagList.Item text={transaction.category_name ?? 'Not Specified'} color={Color.Green} />
+              <Detail.Metadata.TagList.Item
+                text={transaction.category_name ?? 'Not Specified'}
+                color={transaction.category_name ? Color.Green : Color.Red}
+              />
             )}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
