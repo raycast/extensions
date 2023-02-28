@@ -5,7 +5,10 @@
   "description": "Allows you to see your daily plan, search notes and launch straight into NotePlan.",
   "icon": "command-icon.png",
   "author": "shakedlokits",
-  "contributors": ["lukerandall", "pr1mal"],
+  "contributors": [
+    "lukerandall",
+    "pr1mal"
+  ],
   "categories": [
     "Productivity",
     "Applications",
