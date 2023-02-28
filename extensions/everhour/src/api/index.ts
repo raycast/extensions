@@ -39,7 +39,12 @@ export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
   return Object.values(
     timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
       if (agg[task.id] === undefined) {
-        agg[task.id] = { ...task, time: { ...task.time, recent: time } };
+        agg[task.id] = {
+          id: task.id,
+          name: task.name,
+          projects: task.projects,
+          time: { total: task.time.total || 0, recent: time },
+        };
       } else {
         agg[task.id].time.recent += time;
       }
