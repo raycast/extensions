@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lastpass",
+  "title": "LastPass Credentials Search",
+  "description": "Search, view, and copy credentials from LastPass",
+  "icon": "lastpass.png",
+  "author": "alex-popov-tech",
+  "categories": [
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Vault",
+      "subtitle": "LastPass",
+      "description": "Search LastPass credentials",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "type": "textfield",
+      "description": "Email address from LastPass account",
+      "required": true,
+      "title": "Email",
+      "placeholder": "biggest@cheburek.com"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "description": "Password from LastPass account",
+      "title": "Password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.1",
+    "@raycast/utils": "^1.4.16"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

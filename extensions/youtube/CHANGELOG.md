@@ -1,5 +1,8 @@
 # YouTube Changelog
 
+## [Search From Root] - 2023-02-08
+- Add query parameter to Search Videos and Search Channels commands
+
 ## [README update] - 2023-01-17
 - Fixed path to API
 

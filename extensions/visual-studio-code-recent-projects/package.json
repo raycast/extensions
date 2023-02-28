@@ -24,6 +24,13 @@
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
       "mode": "view"
+    },
+    {
+      "name": "open-with-vscode",
+      "title": "Open With Visual Studio Code",
+      "subtitle": "Visual Studio Code",
+      "description": "Opens the currently selected Finder item with Visual Studio Code.",
+      "mode": "no-view"
     }
   ],
   "preferences": [

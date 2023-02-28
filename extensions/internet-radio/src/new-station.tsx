@@ -1,11 +1,6 @@
-import { EditStationForm } from "./utils";
+import { dummyStation, EditStationForm } from "./utils";
 
 export default function Command() {
-  const dummyStation = {
-    website: "",
-    stream: "",
-    genres: [],
-  };
   return (
     <EditStationForm
       stationName={""}

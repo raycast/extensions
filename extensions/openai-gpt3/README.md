@@ -13,7 +13,7 @@ Warning: Please comply with the [OpenAI Content policy](https://beta.openai.com/
 
 To use this extension, you must have an OpenAI API account, obtain your API key, and add it during the extension configuration screen.
 
-You can find your API key in "View API keys" under your profile settings.
+You can find your API key in ["View API keys"](https://platform.openai.com/account/api-keys) under your profile settings.
 
 The interface of the extension follows the interface of the OpenAI Playground.
 
@@ -53,6 +53,7 @@ You can set different parameters for the AI model:
 4. `text-babbage-001`
 5. `text-ada-001`
 6. `code-davinci-002`
+7. `code-cushman-001`
 
 ## Token Count
 

@@ -1,11 +1,41 @@
-import { List, getPreferenceValues, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
-import translate from "@vitalets/google-translate-api";
+import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
+import { useSelectedLanguagesSet } from "./hooks";
 import { supportedLanguagesByCode, LanguageCode } from "./languages";
+import { LanguageManagerListDropdown } from "./LanguagesManager";
+import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 
 let count = 0;
 
+async function translateText(langFrom: LanguageCode, langTo: LanguageCode, text: string) {
+  if (langFrom === AUTO_DETECT) {
+    const translated1 = await simpleTranslate(text, {
+      langFrom: langFrom,
+      langTo: langTo,
+    });
+
+    if (translated1.langFrom) {
+      const translated2 = await simpleTranslate(text, { langFrom: langTo, langTo: translated1.langFrom });
+      return [translated1, translated2];
+    }
+
+    return [];
+  } else {
+    return await Promise.all([
+      simpleTranslate(text, {
+        langFrom: langFrom,
+        langTo: langTo,
+      }),
+      simpleTranslate(text, {
+        langFrom: langTo,
+        langTo: langFrom,
+      }),
+    ]);
+  }
+}
+
 export default function Command(): ReactElement {
+  const [selectedLanguageSet] = useSelectedLanguagesSet();
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
   const [results, setResults] = useState<
@@ -24,41 +54,30 @@ export default function Command(): ReactElement {
     setIsLoading(true);
     setResults([]);
 
-    const preferences = getPreferenceValues<{
-      lang1: LanguageCode;
-      lang2: LanguageCode;
-    }>();
-
-    const promises = Promise.all([
-      translate(toTranslate, {
-        from: preferences.lang1 === "auto" ? undefined : preferences.lang1,
-        to: preferences.lang2,
-      }),
-    ]);
-
-    promises
-      .then((res) => {
+    translateText(selectedLanguageSet.langFrom, selectedLanguageSet.langTo, toTranslate)
+      .then((translations) => {
         if (localCount === count) {
-          let lang1Code = preferences.lang1;
-          if (preferences.lang1 === "auto") {
-            if (res[0].from.language.iso !== undefined) {
-              lang1Code = res[0].from.language.iso as LanguageCode;
-            } else {
-              showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
-            }
+          if (selectedLanguageSet.langFrom === AUTO_DETECT && !translations.length) {
+            showToast(Toast.Style.Failure, "Could not translate", "Could not detect language");
+            setResults([]);
+            return;
           }
-          const lang1Rep = supportedLanguagesByCode[lang1Code].flag ?? supportedLanguagesByCode[lang1Code].code;
-          const lang2Rep =
-            supportedLanguagesByCode[preferences.lang2].flag ?? supportedLanguagesByCode[preferences.lang2].code;
 
-          setResults([
-            {
-              text: res[0].text,
-              languages: `${lang1Rep} -> ${lang2Rep}`,
-              source_language: supportedLanguagesByCode[lang1Code].code,
-              target_language: supportedLanguagesByCode[preferences.lang2].code,
-            },
-          ]);
+          const result = translations.map((t) => {
+            const langFrom = supportedLanguagesByCode[t.langFrom];
+            const langFromRep = langFrom.flag ?? langFrom.code;
+            const langTo = supportedLanguagesByCode[t.langTo];
+            const langToRep = langTo.flag ?? langTo.code;
+
+            return {
+              text: t.translatedText,
+              languages: `${langFromRep} -> ${langToRep}`,
+              source_language: supportedLanguagesByCode[t.langFrom]?.code,
+              target_language: supportedLanguagesByCode[t.langTo]?.code,
+            };
+          });
+
+          setResults(result);
         }
       })
       .catch((errors) => {
@@ -67,7 +86,7 @@ export default function Command(): ReactElement {
       .then(() => {
         setIsLoading(false);
       });
-  }, [toTranslate]);
+  }, [toTranslate, selectedLanguageSet.langFrom, selectedLanguageSet.langTo]);
 
   return (
     <List
@@ -76,12 +95,13 @@ export default function Command(): ReactElement {
       isLoading={isLoading}
       isShowingDetail={isShowingDetail}
       throttle
+      searchBarAccessory={<LanguageManagerListDropdown />}
     >
       {results.map((r, index) => (
         <List.Item
           key={index}
           title={r.text}
-          accessoryTitle={r.languages}
+          accessories={[{ text: r.languages }]}
           detail={<List.Item.Detail markdown={r.text} />}
           actions={
             <ActionPanel>

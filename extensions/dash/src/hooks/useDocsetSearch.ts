@@ -48,13 +48,17 @@ async function searchDash(dashApp: Application, query: string, signal: AbortSign
       signal,
     });
     const jsonData = parse(data, { ignoreAttributes: false });
-    if (!jsonData || typeof jsonData.output === "undefined") {
+
+    if (!jsonData || (typeof jsonData.output === "undefined" && typeof jsonData.items === "undefined")) {
       return [];
     }
-    if (Array.isArray(jsonData.output.items.item)) {
-      return jsonData.output.items.item;
+
+    const items = jsonData.output?.items.item ?? jsonData.items.item;
+
+    if (Array.isArray(items)) {
+      return items;
     }
-    return [jsonData.output.items.item];
+    return [items];
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       return [];
