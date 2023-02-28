@@ -21,17 +21,20 @@ export function DeviceCommands(props: { device: Device; onAction: (device: Devic
       break;
     }
     case "dj":
-    case "Light Source":
-      {
-        commands = [
-          { code: "switch_led", value: !device.status.filter(status=> status.code === 'switch_led'), name: "Toggle On/Off" },
-          { code: "work_mode", value: "white", name: "Workmode: White" },
-          { code: "work_mode", value: "colour", name: "Workmode: Colour" },
-          { code: "work_mode", value: "scene", name: "Workmode: Scene" },
-          { code: "work_mode", value: "music", name: "Workmode: Music" },
-        ];
-        break;
-      }
+    case "Light Source": {
+      commands = [
+        {
+          code: "switch_led",
+          value: !device.status.filter((status) => status.code === "switch_led"),
+          name: "Toggle On/Off",
+        },
+        { code: "work_mode", value: "white", name: "Workmode: White" },
+        { code: "work_mode", value: "colour", name: "Workmode: Colour" },
+        { code: "work_mode", value: "scene", name: "Workmode: Scene" },
+        { code: "work_mode", value: "music", name: "Workmode: Music" },
+      ];
+      break;
+    }
     default:
       return <></>;
   }
