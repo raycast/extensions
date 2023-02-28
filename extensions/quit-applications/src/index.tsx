@@ -157,7 +157,7 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
       <List isLoading={this.state.isLoading}>
         {this.state.apps.map((app) => (
           <List.Item
-            title={"Quit " + app.name}
+            title={app.name}
             key={app.name}
             icon={app.iconPath}
             actions={
