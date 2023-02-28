@@ -3,86 +3,48 @@ import {
   ActionPanel,
   Action,
   showToast,
-  getPreferenceValues,
-  copyTextToClipboard,
   Clipboard
 } from '@raycast/api';
 import { authorize } from './oauth';
-import axios from 'axios';
 import View from './view';
 import copy = Clipboard.copy;
+import { submitInsight } from './productlane.api';
 
 type Values = {
-  textfield: string;
-  textarea: string;
-  datepicker: Date;
-  checkbox: boolean;
-  dropdown: string;
-  tokeneditor: string[];
+  email: string;
+  text: string;
+  state: string;
+  painLevel: string;
 };
 
 function SubmitInsight() {
   async function handleSubmit(values: Values) {
-    const token = await authorize();
-    const preferences = getPreferenceValues<{ apiKey: string }>();
+    await authorize();
 
-    const laneKey = preferences.apiKey;
+    const insight = await submitInsight(values);
 
-    const params = {
-      params: {
-        key: laneKey,
-        linearToken: token
-      }
-    };
-
-    const tokenData = await axios.post(`https://productlane.io/api/rpc/createAccessToken`, params, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const bearerToken = tokenData.data.result;
-    const urlCreate = `https://productlane.io/api/rpc/createFeedback`;
-
-    const paramsCreate = {
-      params: {
-        text: values.textfield,
-        painLevel: 'UNKNOWN',
-        state: 'NEW',
-        email: 'notion@novu.co'
-      }
-    };
-
-    const insight = await axios.post(urlCreate, paramsCreate, {
-      headers: {
-        'Authorization': `Bearer ${bearerToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    copy(`https://productlane.io/feedback/${insight.data.id}`);
+    copy(`https://productlane.io/feedback/${insight.id}`);
     showToast({ title: "Submitted insight", message: "Copied insight URL to Clipboard" });
   }
 
   return (
-    <Form
+    <Form navigationTitle={"Submit Insight"}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text="This form showcases all available form elements." />
-      <Form.TextArea id="textarea" title="Feedback" placeholder="Enter multi-line text" />
+      <Form.TextArea autoFocus={true} id="text" title="Feedback" placeholder="Enter multi-line text" />
       <Form.Separator />
-      <Form.TextField id="textfield" title="E-mail" placeholder="Enter multi-line text" />
-      <Form.Dropdown id="dropdown" title="Pain Level">
+      <Form.TextField id="email" title="E-mail" placeholder="Enter the submitter email" defaultValue={"raycast@email.com"} />
+      <Form.Dropdown id="painLevel" title="Pain Level" defaultValue={"UNKNOWN"}>
         <Form.Dropdown.Item value="dropdown-item" title="UNKNOWN" />
         <Form.Dropdown.Item value="dropdown-item" title="LOW" />
         <Form.Dropdown.Item value="dropdown-item" title="MEDIUM" />
         <Form.Dropdown.Item value="dropdown-item" title="HIGH" />
       </Form.Dropdown>
-      <Form.Dropdown id="dropdownState" title="State">
+      <Form.Dropdown id="state" title="State" defaultValue={"NEW"}>
         <Form.Dropdown.Item value="dropdown-item" title="NEW" />
         <Form.Dropdown.Item value="dropdown-item" title="PROCESSED" />
         <Form.Dropdown.Item value="dropdown-item" title="COMPLETED" />
