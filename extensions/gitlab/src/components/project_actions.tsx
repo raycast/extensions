@@ -145,7 +145,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
     <List navigationTitle="Copy Clone URL">
       <List.Item
         title={props.project.http_url_to_repo || ""}
-        icon={{ source: Icon.Link, tintColor: Color.PrimaryText}}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
             <Action.CopyToClipboard title="HTTP" content={props.project.http_url_to_repo || ""} />
@@ -154,7 +154,7 @@ function CloneUrlList(props: { project: Project }): JSX.Element {
       />
       <List.Item
         title={props.project.ssh_url_to_repo || ""}
-        icon={{ source: Icon.Link, tintColor: Color.PrimaryText}}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         actions={
           <ActionPanel>
             <Action.CopyToClipboard title="SSH" content={props.project.ssh_url_to_repo || ""} />
@@ -175,7 +175,7 @@ export function CopyCloneUrlToClipboardAction(props: {
       <Action.Push
         title="Copy Clone URL"
         shortcut={props.shortcut}
-        icon={{ source: Icon.Link, tintColor: Color.PrimaryText}}
+        icon={{ source: Icon.Link, tintColor: Color.PrimaryText }}
         target={<CloneUrlList project={pro} />}
       />
     );
