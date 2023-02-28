@@ -1,0 +1,18 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "//#build": {
+      "inputs": ["src"],
+      "outputs": ["dist"]
+    },
+    "build": {
+      "inputs": ["src"],
+      "outputs": [".build"]
+    },
+    "lint": {}
+  }
+}

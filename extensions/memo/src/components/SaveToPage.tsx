@@ -4,6 +4,7 @@ import { Saver } from "../core/saver"
 import { useEffect, useState } from "react"
 import { DONATION_URL } from "../config"
 import { RaycastAdapter } from "../adapters/raycast/adapter"
+import { MetaActionSection } from "./MetaActionSection"
 
 export type HomeProps = {
     copiedText: string
@@ -56,9 +57,7 @@ export function SaveToPage(props: HomeProps) {
                 />
             </ActionPanel.Section>
 
-            <ActionPanel.Section>
-                <Action.OpenInBrowser url={DONATION_URL} title={"Buy Us a Coffee"} icon="bmcbrand/bmc-logo.svg" />
-            </ActionPanel.Section>
+            <MetaActionSection />
         </ActionPanel>
     )
 

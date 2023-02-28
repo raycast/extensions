@@ -1,6 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { ratio } from "fuzzball";
-import { connectDevice } from "./helpers/device-actions";
+import { connectDevice } from "./helpers/devices";
 import { getDevices } from "./services/devices";
 
 export default async (props: { arguments: { nameOrMacAddress: string } }) => {
@@ -20,6 +20,6 @@ export default async (props: { arguments: { nameOrMacAddress: string } }) => {
   if (device === undefined) {
     await showToast({ style: Toast.Style.Failure, title: "Device not found." });
   } else {
-    connectDevice(device.macAddress);
+    connectDevice(device);
   }
 };

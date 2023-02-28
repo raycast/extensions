@@ -6,17 +6,51 @@
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "jonasmerlin"
   ],
   "categories": [
     "Media"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "audioApplication",
+      "title": "Audio Application",
+      "type": "dropdown",
+      "required": false,
+      "description": "The application to stream audio with",
+      "data": [
+        {"title": "Music", "value": "music"},
+        {"title": "QuickTime Player", "value": "quicktime"},
+        {"title": "VLC", "value": "vlc"},
+        {"title": "Vox", "value": "vox"}
+      ],
+      "default": "music"
+    }
+  ],
   "commands": [
     {
-      "name": "browse-stations",
-      "title": "Browse Stations",
+      "name": "browse-saved-stations",
+      "title": "Browse Saved Stations",
       "description": "Browse all currently configured radio stations",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStationIcons",
+          "type": "checkbox",
+          "default": true,
+          "title": "Appearance",
+          "label": "Station Icons",
+          "description": "Whether to show station website favicons",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-stations",
+      "title": "Search Stations",
+      "description": "Search a library of internet radio streams and save the ones you like",
       "mode": "view",
       "preferences": [
         {
@@ -40,6 +74,12 @@
       "name": "play-last-station",
       "title": "Play Last Station",
       "description": "Resumes playback of the last played station",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggle play or pause of current radio station in Music.",
       "mode": "no-view"
     },
     {
@@ -85,6 +125,18 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "export-saved-stations",
+      "title": "Export Saved Stations",
+      "description": "Export saved station data to a JSON file",
+      "mode": "view"
+    },
+    {
+      "name": "import-station-data",
+      "title": "Import Station Data",
+      "description": "Import stations from a JSON file",
+      "mode": "view"
     }
   ],
   "dependencies": {

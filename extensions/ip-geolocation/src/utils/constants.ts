@@ -14,7 +14,9 @@ export const listIcons = [
 ];
 export const myIpListIcons = [
   Icon.Info,
+  Icon.Cd,
   Icon.Globe,
+  Icon.BullsEye,
   Icon.ChessPiece,
   Icon.EditShape,
   Icon.CircleProgress50,

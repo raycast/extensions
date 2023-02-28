@@ -1,10 +1,11 @@
 import { Icon, Image } from "@raycast/api";
 import emojis from "node-emoji";
 import { NotificationResult } from "../api/getNotifications";
-import { StateType, statusIcons } from "./states";
+import { getStatusIcon, StateType } from "./states";
 
 enum IssueNotificationType {
   issueAssignedToYou = "issueAssignedToYou",
+  issueUnassignedFromYou = "issueUnassignedFromYou",
   issueCreated = "issueCreated",
   issuePriorityUrgent = "issuePriorityUrgent",
   issueStatusChanged = "issueStatusChanged",
@@ -45,9 +46,7 @@ const notificationIcons: Record<string, Image.ImageLike> = {
 export function getNotificationIcon(notification: NotificationResult) {
   if (notification.issue) {
     if (notification.type === IssueNotificationType.issueStatusChanged) {
-      return (
-        { source: statusIcons[notification.issue.state.type], tintColor: notification.issue.state.color } || Icon.Pencil
-      );
+      return getStatusIcon(notification.issue.state) || Icon.Pencil;
     }
 
     if (notification.type === IssueNotificationType.issueCommentReaction && notification.reactionEmoji) {
@@ -60,6 +59,7 @@ export function getNotificationIcon(notification: NotificationResult) {
 
 const notificationTitles: Record<string, string> = {
   [IssueNotificationType.issueAssignedToYou]: "Assigned",
+  [IssueNotificationType.issueUnassignedFromYou]: "Unassigned",
   [IssueNotificationType.issueCreated]: "New issue created",
   [IssueNotificationType.issuePriorityUrgent]: "Marked as urgent",
   [IssueNotificationType.issueBlocking]: "Marked as blocking",

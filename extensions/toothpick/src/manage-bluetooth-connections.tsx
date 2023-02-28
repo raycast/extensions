@@ -1,7 +1,7 @@
 import { ActionPanel, List } from "@raycast/api";
 import { getDevices } from "./services/devices";
 import { useState, useEffect } from "react";
-import { Device } from "./types";
+import { Device } from "./types/device";
 
 export default function ManageBluetoothConnectionsView() {
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export default function ManageBluetoothConnectionsView() {
           title={device.name ? device.name : device.macAddress}
           key={device.macAddress}
           accessories={device.accessories}
-          subtitle={device.model}
+          subtitle={device.type}
           actions={
             <ActionPanel title={`Actions for ${device.name ? device.name : device.macAddress}`}>
               <>{device.actions}</>
