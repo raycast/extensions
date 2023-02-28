@@ -37,15 +37,17 @@ function applicationIconFromPath(path: string): string {
   const json = JSON.parse(stdout);
   let iconFileName = json.CFBundleIconFile;
 
+  if (!iconFileName) {
+    // no icon found. fallback to empty string (no icon)
+    return "";
+  }
+
   // if icon doesn't end with .icns, add it
   if (!iconFileName.endsWith(".icns")) {
     iconFileName = `${iconFileName}.icns`;
   }
 
   const iconPath = `${path}/Contents/Resources/${iconFileName}`;
-
-  console.log(iconPath);
-
   return iconPath;
 }
 
