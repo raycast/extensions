@@ -1,14 +1,8 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Clipboard
-} from '@raycast/api';
-import { authorize } from './oauth';
-import View from './view';
+import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
+import { authorize } from "./oauth";
+import View from "./view";
 import copy = Clipboard.copy;
-import { submitInsight } from './productlane.api';
+import { submitInsight } from "./productlane.api";
 
 type Values = {
   email: string;
@@ -28,7 +22,8 @@ function SubmitInsight() {
   }
 
   return (
-    <Form navigationTitle={"Submit Insight"}
+    <Form
+      navigationTitle={"Submit Insight"}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -37,7 +32,12 @@ function SubmitInsight() {
     >
       <Form.TextArea autoFocus={true} id="text" title="Feedback" placeholder="Enter multi-line text" />
       <Form.Separator />
-      <Form.TextField id="email" title="E-mail" placeholder="Enter the submitter email" defaultValue={"raycast@email.com"} />
+      <Form.TextField
+        id="email"
+        title="E-mail"
+        placeholder="Enter the submitter email"
+        defaultValue={"raycast@email.com"}
+      />
       <Form.Dropdown id="painLevel" title="Pain Level" defaultValue={"UNKNOWN"}>
         <Form.Dropdown.Item value="UNKNOWN" title="Unknown" />
         <Form.Dropdown.Item value="LOW" title="Low" />
@@ -55,8 +55,8 @@ function SubmitInsight() {
 
 export default function Command() {
   return (
-      <View>
-        <SubmitInsight />
-      </View>
-  )
+    <View>
+      <SubmitInsight />
+    </View>
+  );
 }
