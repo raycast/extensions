@@ -1,3 +1,3 @@
 # Productlane
 
-Quickly add insights to productlane
+Quickly add insights to Productlane

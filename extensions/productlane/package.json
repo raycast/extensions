@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "productlane",
+  "name": "Productlane",
   "title": "Productlane",
-  "description": "Quickly add insights to productlane",
+  "description": "Quickly add insights to Productlane",
   "icon": "command-icon.png",
   "author": "dimagrossman",
   "categories": [
