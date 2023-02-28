@@ -6,3 +6,5 @@ export type RambdaFunction = {
   codeExample: string;
   seeAlso?: string;
 };
+
+export type RambdaFunctionList = Record<string, RambdaFunction>;

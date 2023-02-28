@@ -6,7 +6,7 @@
     "lib": ["ESNext", "DOM"],
     "module": "commonjs",
     "target": "ESNext",
-    "strict": true,
+    "strict": false,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
