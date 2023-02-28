@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 
 interface FormWebsiteUpsertInterface {
@@ -43,7 +43,8 @@ export const FormWebsiteUpsert = ({ defaultUrl, onCreate, onEdit }: FormWebsiteU
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={onCreate ? "Edit Website" : "Add Website"} onSubmit={handleSubmit} />
+          {onCreate && <Action.SubmitForm title="Add Website" icon={Icon.PlusCircle} onSubmit={handleSubmit} />}
+          {onEdit && <Action.SubmitForm title="Edit Website" icon={Icon.Pencil} onSubmit={handleSubmit} />}
         </ActionPanel>
       }
     >
