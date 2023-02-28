@@ -157,7 +157,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             attachments: [],
           });
 
-          hasMoreThanOneTeam ? focus(autofocusField) : focus("teamId");
+          hasMoreThanOneTeam ? focus(autofocusField) : focus("title");
 
           if (values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
