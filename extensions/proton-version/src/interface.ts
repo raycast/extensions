@@ -6,4 +6,6 @@ export type Version = {
   mode: string;
 };
 
-export type ProtonProduct = "Proton Mail" | "Proton Drive" | "Proton Calendar" | "Proton Account";
+export type ProtonProduct = "proton-mail" | "proton-drive" | "proton-calendar" | "proton-account";
+
+export type ProtonEnv = "default" | "beta";

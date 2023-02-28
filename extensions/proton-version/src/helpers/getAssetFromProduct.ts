@@ -3,13 +3,13 @@ import { ProtonProduct } from "../interface";
 
 export const getAssetFromProduct = (product: ProtonProduct) => {
   switch (product) {
-    case "Proton Mail":
+    case "proton-mail":
       return `${protonProductsPath}/ProtonMail.png`;
-    case "Proton Drive":
+    case "proton-drive":
       return `${protonProductsPath}/ProtonDrive.png`;
-    case "Proton Calendar":
+    case "proton-calendar":
       return `${protonProductsPath}/ProtonCalendar.png`;
-    case "Proton Account":
+    case "proton-account":
       return `${protonProductsPath}/Proton.png`;
   }
 };

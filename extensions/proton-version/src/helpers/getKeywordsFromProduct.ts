@@ -2,13 +2,13 @@ import { ProtonProduct } from "../interface";
 
 export const getKeywordsFromProduct = (product: ProtonProduct) => {
   switch (product) {
-    case "Proton Mail":
+    case "proton-mail":
       return ["Mail", "ProtonMail", "Proton Mail"];
-    case "Proton Drive":
+    case "proton-drive":
       return ["Drive", "Proton Drive"];
-    case "Proton Calendar":
+    case "proton-calendar":
       return ["Calendar", "Proton Calendar"];
-    case "Proton Account":
+    case "proton-account":
       return ["Account", "Settings", "Proton Account"];
   }
 };

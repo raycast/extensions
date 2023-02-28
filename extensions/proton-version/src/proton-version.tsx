@@ -14,10 +14,10 @@ const ProtonVersion = () => {
 
   return (
     <List isLoading={isLoading}>
-      <ProtonVersionList product="Proton Mail" data={mailFetch.data} />
-      <ProtonVersionList product="Proton Calendar" data={calendarFetch.data} />
-      <ProtonVersionList product="Proton Drive" data={driveFetch.data} />
-      <ProtonVersionList product="Proton Account" data={accountFetch.data} />
+      <ProtonVersionList environment="default" product="proton-mail" data={mailFetch.data} />
+      <ProtonVersionList environment="default" product="proton-calendar" data={calendarFetch.data} />
+      <ProtonVersionList environment="default" product="proton-drive" data={driveFetch.data} />
+      <ProtonVersionList environment="default" product="proton-account" data={accountFetch.data} />
     </List>
   );
 };

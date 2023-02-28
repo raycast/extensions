@@ -16,6 +16,12 @@
       "title": "Proton Version",
       "description": "Get Proton web products version number",
       "mode": "view"
+    },
+    {
+      "name": "proton-version-beta",
+      "title": "Proton Version Beta",
+      "description": "Get beta Proton web products version number",
+      "mode": "view"
     }
   ],
   "dependencies": {
