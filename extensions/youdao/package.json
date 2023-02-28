@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "youdao",
+  "title": "Youdao",
+  "description": "Simple translation using Youdao Translate.",
+  "author": "Hongbusi",
+  "license": "MIT",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "youdao-translate",
+      "title": "Translate",
+      "subtitle": "Youdao Translate",
+      "description": "Simple translation using Youdao Translate.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "app_key",
+      "type": "textfield",
+      "required": true,
+      "title": "APP Key",
+      "description": "You can get Youdao Translate APP code at https://ai.youdao.com/console/",
+      "placeholder": "Youdao Translate APP code"
+    },
+    {
+      "name": "app_secret",
+      "type": "password",
+      "required": true,
+      "title": "APP Secret",
+      "description": "You can get Youdao Translate APP secret at https://ai.youdao.com/console/",
+      "placeholder": "Youdao Translate APP Secret"
+    },
+    {
+      "name": "handle_annotation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Handle Annotation",
+      "description": "You can decide whether you want to remove comments from the input text",
+      "placeholder": "Handle Annotation",
+      "label": "Allow Handle Annotation"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "publish": "ray publish",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.38.2",
+    "node-fetch": "^3.2.9"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config-react": "^0.35.3",
+    "@types/node": "^18.6.1",
+    "@types/react": "^18.0.15",
+    "eslint": "^8.35.0",
+    "react-devtools": "^4.25.0",
+    "typescript": "^4.9.5"
+  }
+}
