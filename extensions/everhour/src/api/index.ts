@@ -36,21 +36,18 @@ export const getRecentTasks = async (userId = "me"): Promise<Task[]> => {
     throw new Error("No recent tasks.");
   }
 
-  return Object.values(
-    timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
-      if (agg[task.id] === undefined) {
-        agg[task.id] = {
-          id: task.id,
-          name: task.name,
-          projects: task.projects,
-          time: { total: task.time.total || 0, recent: time },
-        };
-      } else {
-        agg[task.id].time.recent += time;
-      }
-      return agg;
-    }, {})
-  );
+  const aggregatedTasks = timeRecords.reduce((agg: { [key: string]: Task }, { time, task }: TimeRecordResp) => {
+    const { id, name, projects, time: taskTime } = task;
+    const { total = 0 } = taskTime;
+    if (!agg[id]) {
+      agg[id] = { id, name, projects, time: { total, recent: time } };
+    } else {
+      agg[id].time.recent += time;
+    }
+    return agg;
+  }, {});
+
+  return Object.values(aggregatedTasks);
 };
 
 export const getProjects = async (): Promise<Project[]> => {
