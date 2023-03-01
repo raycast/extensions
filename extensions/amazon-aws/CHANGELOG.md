@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Fix] - 2023-03-01
+
+- Handles default named profile correctly
+
 ## [Renamed command] - 2023-02-03
 
 - Renamed Elasticsearch Service to OpenSearch Service
