@@ -2,7 +2,7 @@ import TurndownService from 'turndown';
 import { parse, HTMLElement } from 'node-html-parser';
 import { CONSTANTS } from './constants';
 
-import type { RambdaFunctionList } from '../../@types';
+import type { RamdaFunctionList } from '../../@types';
 
 const turndown = new TurndownService();
 
@@ -13,9 +13,9 @@ const turndown = new TurndownService();
 const updateAnchorElemHrefs = (parentNode: HTMLElement | null) =>
   parentNode
     ?.querySelectorAll('a')
-    .forEach((elem) => elem.setAttribute('href', CONSTANTS.RAMBDA_URL + elem.getAttribute('href')));
+    .forEach((elem) => elem.setAttribute('href', CONSTANTS.RAMDA_URL + elem.getAttribute('href')));
 
-export const getHref = (card: HTMLElement) => CONSTANTS.RAMBDA_URL + card.querySelector('a.name').getAttribute('href');
+export const getHref = (card: HTMLElement) => CONSTANTS.RAMDA_URL + card.querySelector('a.name').getAttribute('href');
 
 export const getFunctionName = (card: HTMLElement) => card.querySelector('a.name')?.textContent;
 
@@ -42,7 +42,7 @@ export const getSeeAlso = (card: HTMLElement) => {
   return seeAlso ? turndown.turndown(seeAlso?.outerHTML) : undefined;
 };
 
-export const reduceRambdaHTMLFunctionCards = (page: HTMLElement): RambdaFunctionList => {
+export const reduceRamdaHTMLFunctionCards = (page: HTMLElement): RamdaFunctionList => {
   const cards = [...page.querySelectorAll('.card')] as HTMLElement[];
 
   return cards.reduce((documentation, currCard) => {

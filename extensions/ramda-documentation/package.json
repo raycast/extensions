@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "rambda-documentation",
-  "title": "Rambda Documentation",
-  "description": "Offers quick and filterable Rambda documentation results.",
+  "name": "ramda-documentation",
+  "title": "Ramda Documentation",
+  "description": "Offers quick and filterable Ramda documentation results.",
   "icon": "command-icon.png",
   "author": "jbroomer",
   "categories": [
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Rambda Documentation",
-      "description": "Shows any Rambda functions matching the input",
+      "title": "Ramda Documentation",
+      "description": "Shows any Ramda functions matching the input",
       "mode": "view"
     }
   ],

@@ -1,4 +1,4 @@
-export type RambdaFunction = {
+export type RamdaFunction = {
   href: string;
   addedInVersion: string;
   functionName: string;
@@ -7,4 +7,4 @@ export type RambdaFunction = {
   seeAlso?: string;
 };
 
-export type RambdaFunctionList = Record<string, RambdaFunction>;
+export type RamdaFunctionList = Record<string, RamdaFunction>;

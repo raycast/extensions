@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api';
 
-import type { RambdaFunction } from '../@types';
+import type { RamdaFunction } from '../@types';
 
 type CommonActionPanelProps = {
-  data: RambdaFunction;
+  data: RamdaFunction;
 };
 
 export const CommonActionPanel = ({ data, children }: React.PropsWithChildren<CommonActionPanelProps>) => (

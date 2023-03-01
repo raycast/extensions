@@ -1,10 +1,10 @@
 import { Detail } from '@raycast/api';
 
-import type { RambdaFunction } from '../@types';
+import type { RamdaFunction } from '../@types';
 import { CommonActionPanel } from './CommonActionPanel';
 
 type DocumentationDetailProps = {
-  data: RambdaFunction;
+  data: RamdaFunction;
 };
 
 export const DocumentationDetail = ({ data }: DocumentationDetailProps) => {

@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { List } from '@raycast/api';
 import { SearchListItem } from './SearchListItem';
-import { useRambdaDocumentation } from './hooks/useRambdaDocumentation';
+import { useRamdaDocumentation } from './hooks/useRamdaDocumentation';
 
-import type { RambdaFunction } from '../@types';
+import type { RamdaFunction } from '../@types';
 
 export const SearchList = () => {
   const [searchText, setSearchText] = useState('');
-  const { data, isLoading } = useRambdaDocumentation();
+  const { data, isLoading } = useRamdaDocumentation();
 
-  const searchResults: RambdaFunction[] = data
+  const searchResults: RamdaFunction[] = data
     ? Object.values(data).filter(({ functionName }) => new RegExp(searchText, 'ig').test(functionName))
     : [];
 
@@ -17,7 +17,7 @@ export const SearchList = () => {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Rambda Functions"
+      searchBarPlaceholder="Search Ramda Functions"
       throttle
     >
       <List.Section title="Results" subtitle={searchResults?.length + ''}>
