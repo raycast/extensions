@@ -75,6 +75,7 @@ export default function Command() {
 
   return (
     <List
+      searchBarPlaceholder="Search for a tunnel location..."
       isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
