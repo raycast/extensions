@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "confluence",
+  "title": "Confluence",
+  "description": "Quickly navigate, create and search Confluence through Raycast.",
+  "icon": "command-icon.png",
+  "author": "tbrown",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Confluence",
+      "description": "Search for pages and blogs across Confluence.",
+      "mode": "view"
+    },
+    {
+      "name": "people",
+      "title": "People",
+      "subtitle": "Confluence",
+      "description": "Search for people in Confluence.",
+      "mode": "view"
+    },
+    {
+      "name": "recent",
+      "title": "Recent",
+      "subtitle": "Confluence",
+      "description": "See your recently viewed pages.",
+      "mode": "view"
+    },
+    {
+      "name": "popular",
+      "title": "Popular",
+      "subtitle": "Confluence",
+      "description": "See what's popular in Confluence.",
+      "mode": "view"
+    },
+    {
+      "name": "go",
+      "title": "Go",
+      "subtitle": "Confluence",
+      "description": "Quickly jump to useful places in Confluence.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-site",
+      "title": "Switch Site",
+      "subtitle": "Confluence",
+      "description": "Switch your active Confluence site.",
+      "mode": "view"
+    },
+    {
+      "name": "new-page",
+      "title": "Create Page",
+      "subtitle": "Confluence",
+      "description": "Create a new page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-blog",
+      "title": "Create Blog",
+      "subtitle": "Confluence",
+      "description": "Create a new blog.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@apollo/client": "^3.6.8",
+    "@raycast/api": "^1.48.5",
+    "apollo-link-rest": "^0.9.0",
+    "apollo3-cache-persist": "^0.14.0",
+    "async-mutex": "^0.3.2",
+    "graphql": "^15.0.0",
+    "node-fetch": "^3.2.10",
+    "qs": "^6.11.0",
+    "use-async-effect": "^2.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.27",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.24.6",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
