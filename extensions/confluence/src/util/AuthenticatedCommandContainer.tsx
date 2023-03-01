@@ -9,9 +9,7 @@ function AuthenticatedCommandContainer({ Command, checkScopes }: AuthenticatedCo
 
   if (!site || !client) {
     // Known issue - the search placeholder if custom flickers
-    return (
-      <List isLoading={true}></List>
-    );
+    return <List isLoading={true}></List>;
   }
 
   return (
@@ -24,9 +22,11 @@ function AuthenticatedCommandContainer({ Command, checkScopes }: AuthenticatedCo
 }
 
 interface AuthenticatedCommandContainerProps {
-  Command: Function
-  checkScopes?: boolean
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  Command: Function;
+  checkScopes?: boolean;
 }
 
 // Helper to keep the code a bit cleaner
-export const buildAuthenticatedCommand = (props: AuthenticatedCommandContainerProps) => () => AuthenticatedCommandContainer(props);
+export const buildAuthenticatedCommand = (props: AuthenticatedCommandContainerProps) => () =>
+  AuthenticatedCommandContainer(props);

@@ -38,9 +38,9 @@ function useRecentsQuery(site: Site) {
       cloudId: site.id,
       cql: `id in recentlyViewedContent(${RECENTS_COUNT})`,
       expand: SEARCH_EXPAND,
-      limit: RECENTS_COUNT
+      limit: RECENTS_COUNT,
     },
-    fetchPolicy: "cache-and-network"
+    fetchPolicy: "cache-and-network",
   });
 
   // TODO: Improve error handling experience
@@ -49,12 +49,12 @@ function useRecentsQuery(site: Site) {
     showToast({ style: Toast.Style.Failure, title: "Could not retrieve recent", message: String(error) });
   }
 
-  const items: SearchResult[] = data?.search?.results
-    .map((item: any) => mapToSearchResult(item, data.search._links));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const items: SearchResult[] = data?.search?.results.map((item: any) => mapToSearchResult(item, data.search._links));
   const sortedItems = items && sortByLastViewed(items);
 
   return {
     loading,
-    recentItems: sortedItems
+    recentItems: sortedItems,
   };
 }

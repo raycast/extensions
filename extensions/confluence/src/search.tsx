@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAsyncEffect } from "use-async-effect";
@@ -23,14 +24,14 @@ export default function Command() {
   const [spaces, setSpaces] = useState([]) as any[];
 
   useAsyncEffect(async () => {
-    if (!site) { return; }
+    if (!site) {
+      return;
+    }
     const spaces = await fetchFavouriteSpaces(site);
     setSpaces(spaces);
   }, [site]);
 
-  const titleText = (state.isRecentResults)
-    ? "Recently Viewed"
-    : "Search Results";
+  const titleText = state.isRecentResults ? "Recently Viewed" : "Search Results";
 
   const spacesDropdown = (
     <List.Dropdown
@@ -38,18 +39,10 @@ export default function Command() {
       storeValue={true}
       onChange={(value) => state.spaceFilter !== value && search(state.searchText, value)}
     >
-      <List.Dropdown.Item
-        key="all"
-        title="All spaces"
-        value=""
-      />
+      <List.Dropdown.Item key="all" title="All spaces" value="" />
       <List.Dropdown.Section title="Favourite Spaces">
         {spaces?.results?.map((space: any) => (
-          <List.Dropdown.Item
-            key={space.key}
-            title={space.name}
-            value={space.key}
-          />
+          <List.Dropdown.Item key={space.key} title={space.name} value={space.key} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
@@ -71,9 +64,7 @@ export default function Command() {
           <SearchListItem
             key={searchResult.url}
             searchResult={searchResult}
-            actions={
-              <SearchActions globalActions={globalActions} searchResult={searchResult} />
-            }
+            actions={<SearchActions globalActions={globalActions} searchResult={searchResult} />}
           />
         ))}
       </List.Section>
@@ -81,12 +72,10 @@ export default function Command() {
   );
 }
 
-function GlobalSearchActionPanel({searchState}: {searchState: SearchState}) {
-  if(!searchState.browserSearchUrl) return null;
+function GlobalSearchActionPanel({ searchState }: { searchState: SearchState }) {
+  if (!searchState.browserSearchUrl) return null;
 
-  const actionTitle = (searchState.isRecentResults)
-  ? "recently viewed"
-  : "search";
+  const actionTitle = searchState.isRecentResults ? "recently viewed" : "search";
 
   return (
     <ActionPanel.Section title={capitalize(actionTitle)}>
@@ -97,17 +86,17 @@ function GlobalSearchActionPanel({searchState}: {searchState: SearchState}) {
       />
     </ActionPanel.Section>
   );
-
 }
 
-function useSearch(site?: any) { // TODO: fix type hack
+function useSearch(site?: any) {
+  // TODO: fix type hack
   const [state, setState] = useState<SearchState>({
     searchText: "",
     results: [],
     isLoading: true,
     isRecentResults: true,
     spaceFilter: "",
-    browserSearchUrl: undefined
+    browserSearchUrl: undefined,
   });
   const cancelRef = useRef<AbortController | null>(null);
 
@@ -129,7 +118,7 @@ function useSearch(site?: any) { // TODO: fix type hack
           isLoading: false,
           isRecentResults: !searchText,
           spaceFilter,
-          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter)
+          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter),
         }));
       } catch (error) {
         setState((oldState) => ({
@@ -137,7 +126,7 @@ function useSearch(site?: any) { // TODO: fix type hack
           searchText,
           isLoading: false,
           spaceFilter,
-          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter)
+          browserSearchUrl: generateBrowserUrl(site, searchText, spaceFilter),
         }));
 
         if (error instanceof AbortError) {
@@ -164,16 +153,20 @@ function useSearch(site?: any) { // TODO: fix type hack
   };
 }
 
-
-async function performSearch(site: Site, searchText: string, spaceFilter: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const spaceKey = (spaceFilter === "") ? undefined : spaceFilter;
+async function performSearch(
+  site: Site,
+  searchText: string,
+  spaceFilter: string,
+  signal: AbortSignal
+): Promise<SearchResult[]> {
+  const spaceKey = spaceFilter === "" ? undefined : spaceFilter;
 
   if (searchText) {
-    const searchResults = await fetchSearchByText(site, searchText, spaceKey, signal) as any;
+    const searchResults = (await fetchSearchByText(site, searchText, spaceKey, signal)) as any;
     return searchResults.results.map((item: any) => mapToSearchResult(item, searchResults._links));
   } else {
-    const recentResults = await fetchRecentlyViewed(site, spaceKey, signal) as any;
-    return sortByLastViewed(recentResults.results.map((item: any) => mapToSearchResult(item, recentResults._links)))
+    const recentResults = (await fetchRecentlyViewed(site, spaceKey, signal)) as any;
+    return sortByLastViewed(recentResults.results.map((item: any) => mapToSearchResult(item, recentResults._links)));
   }
 }
 
@@ -185,5 +178,3 @@ interface SearchState {
   spaceFilter: string;
   browserSearchUrl: undefined | string;
 }
-
-

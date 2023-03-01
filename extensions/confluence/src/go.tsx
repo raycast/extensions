@@ -14,45 +14,45 @@ function useLocations(site?: Site) {
       {
         title: "Home",
         url: site.url + "/wiki/home",
-        icon: "home.svg"
+        icon: "home.svg",
       },
       {
         title: "Recent",
         subtitle: "Home",
         url: site.url + "/wiki/home/recent",
-        icon: "recent.svg"
+        icon: "recent.svg",
       },
       {
         title: "Starred",
         subtitle: "Home",
         url: site.url + "/wiki/home/starred",
-        icon: "starred.svg"
+        icon: "starred.svg",
       },
       {
         title: "Drafts",
         subtitle: "Home",
         url: site.url + "/wiki/home/drafts",
-        icon: "drafts.svg"
+        icon: "drafts.svg",
       },
       {
         title: "Spaces",
         url: site.url + "/wiki/spaces",
-        icon: "folder.svg"
+        icon: "folder.svg",
       },
       {
         title: "People",
         url: site.url + "/wiki/people/search",
-        icon: "people.svg"
+        icon: "people.svg",
       },
       {
         title: "Templates",
         url: site.url + "/wiki/templates",
-        icon: "documents.svg"
+        icon: "documents.svg",
       },
       {
         title: "Search",
         url: site.url + "/wiki/search",
-        icon: "search.svg"
+        icon: "search.svg",
       },
       // Others to eventually add:
       // Personal Space (need to look up the space id/key for it)
@@ -69,7 +69,7 @@ export default function Command() {
 
   return (
     <List isLoading={!locations}>
-      {locations?.map((l) =>
+      {locations?.map((l) => (
         <List.Item
           key={l.title}
           title={l.title}
@@ -77,14 +77,14 @@ export default function Command() {
           icon={{ source: l.icon, tintColor: Color.Blue }}
           actions={<StandardUrlActionPanel url={l.url} />}
         />
-      )}
+      ))}
     </List>
   );
 }
 
 interface Location {
-  title: string
-  subtitle?: string
-  url: string
-  icon: string
+  title: string;
+  subtitle?: string;
+  url: string;
+  icon: string;
 }

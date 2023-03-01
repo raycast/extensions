@@ -8,19 +8,19 @@ import { apiAuthorize } from "../auth";
 import { client } from "../oauth";
 
 // Bump the version for any query/schema change and client caches will reset
-const SCHEMA_VERSION = '1';
-const SCHEMA_VERSION_KEY = 'apollo-schema-version';
+const SCHEMA_VERSION = "1";
+const SCHEMA_VERSION_KEY = "apollo-schema-version";
 
 let gqlClient: ApolloClient<NormalizedCacheObject>;
 
 // Helpful for debugging queries in development
 const responseLogger = new ApolloLink((operation, forward) => {
   console.time(operation.operationName);
-  return forward(operation).map(result => {
+  return forward(operation).map((result) => {
     // console.info(operation.getContext().restResponses);
     console.timeEnd(operation.operationName);
     return result;
-  })
+  });
 });
 
 const confluenceRestLink = new RestLink({
@@ -43,8 +43,8 @@ const authLink = setContext(async (_, { headers }) => {
     headers: {
       ...headers,
       authorization: `Bearer ${tokenSet?.accessToken}`,
-    }
-  }
+    },
+  };
 });
 
 async function setupCache() {
@@ -53,7 +53,8 @@ async function setupCache() {
   const persistor = new CachePersistor({
     cache,
     // Raycast's LocalStorage API practically matches `AsyncStorageInterface`
-    storage: new AsyncStorageWrapper(LocalStorage as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    storage: new AsyncStorageWrapper(LocalStorage as any),
   });
 
   // Read the current schema version from AsyncStorage.
@@ -76,22 +77,14 @@ async function setupCache() {
 export async function getGqlClient() {
   if (!gqlClient) {
     const cache = await setupCache();
-    const links = (environment.isDevelopment)
-      ? [
-        authLink,
-        responseLogger,
-        confluenceRestLink,
-        httpLink
-      ] : [
-        authLink,
-        confluenceRestLink,
-        httpLink
-      ];
+    const links = environment.isDevelopment
+      ? [authLink, responseLogger, confluenceRestLink, httpLink]
+      : [authLink, confluenceRestLink, httpLink];
 
-      gqlClient = new ApolloClient({
-        link: ApolloLink.from(links),
-        cache
-      });
+    gqlClient = new ApolloClient({
+      link: ApolloLink.from(links),
+      cache,
+    });
   }
 
   return gqlClient;

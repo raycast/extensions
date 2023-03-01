@@ -10,7 +10,9 @@ export default function Command() {
   const [popular, setPopular] = useState<Content[]>();
 
   useAsyncEffect(async () => {
-    if (!site) { return; }
+    if (!site) {
+      return;
+    }
     const popularContent = await fetchHydratedPopularFeed(site);
     setPopular(popularContent);
   }, [site]);
@@ -25,17 +27,20 @@ export default function Command() {
 }
 
 function PopularListItem({ content }: { content: Content }) {
-  const accessories = (content.lastSeenAt)
+  const accessories = content.lastSeenAt
     ? [
-      { icon: Icon.ChevronUp, text: String(content.likesCount), tooltip: `${content.likesCount} reactions` },
-      { icon: Icon.Message, text: String(content.commentCount), tooltip: `${content.commentCount} comments` },
-      { icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: `Last viewed ${content.lastSeenAtFriendly}` }
-    ]
+        { icon: Icon.ChevronUp, text: String(content.likesCount), tooltip: `${content.likesCount} reactions` },
+        { icon: Icon.Message, text: String(content.commentCount), tooltip: `${content.commentCount} comments` },
+        {
+          icon: { source: Icon.Checkmark, tintColor: Color.Green },
+          tooltip: `Last viewed ${content.lastSeenAtFriendly}`,
+        },
+      ]
     : [
-      { icon: Icon.ChevronUp, text: String(content.likesCount), tooltip: `${content.likesCount} reactions` },
-      { icon: Icon.Message, text: String(content.commentCount), tooltip: `${content.commentCount} comments` },
-      { icon: Icon.Circle, tooltip: "Haven't seen this yet" }
-    ];
+        { icon: Icon.ChevronUp, text: String(content.likesCount), tooltip: `${content.likesCount} reactions` },
+        { icon: Icon.Message, text: String(content.commentCount), tooltip: `${content.commentCount} comments` },
+        { icon: Icon.Circle, tooltip: "Haven't seen this yet" },
+      ];
 
   return (
     <List.Item

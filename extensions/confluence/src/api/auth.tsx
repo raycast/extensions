@@ -4,13 +4,15 @@ import { getOrSetDefaultSite, hasSiteGotRequiredScopes, Site } from "./site";
 
 export class SiteMissingScopesError extends Error {
   constructor(msg: string) {
-      super(msg);
-      Object.setPrototypeOf(this, SiteMissingScopesError.prototype);
+    super(msg);
+    Object.setPrototypeOf(this, SiteMissingScopesError.prototype);
   }
 }
 
 async function checkSiteHasRequiredScopes(activeSite: Site) {
-  if (hasSiteGotRequiredScopes(activeSite, scopes)) { return true; }
+  if (hasSiteGotRequiredScopes(activeSite, scopes)) {
+    return true;
+  }
 
   console.warn(`Required scopes are missing for site ${activeSite.url}`);
   const reauth = await confirmAlert({
@@ -18,11 +20,11 @@ async function checkSiteHasRequiredScopes(activeSite: Site) {
     message: "Updates to this extension require you to re-authorize access.",
     icon: Icon.TwoArrowsClockwise,
     primaryAction: {
-      title: "Re-authorize"
+      title: "Re-authorize",
     },
     dismissAction: {
-      title: "Not now"
-    }
+      title: "Not now",
+    },
   });
 
   if (reauth) {
@@ -38,7 +40,7 @@ async function checkSiteHasRequiredScopes(activeSite: Site) {
 export async function authorizeSite(checkScopes = true) {
   const didANewAuthFlow = await oauthAuthorize();
   const activeSite = await getOrSetDefaultSite(didANewAuthFlow);
-  
+
   if (checkScopes) {
     const hasRequiredScopes = await checkSiteHasRequiredScopes(activeSite);
     if (!hasRequiredScopes) throw new SiteMissingScopesError("Site doesn't have required scopes.");

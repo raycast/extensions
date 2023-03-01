@@ -10,7 +10,7 @@ export const scopes = [
   "read:confluence-props",
   "read:confluence-space.summary",
   "read:confluence-user",
-  "search:confluence"
+  "search:confluence",
 ];
 const scopesString = Array.from(scopes).join(" ") + " offline_access";
 const authMutex = new Mutex();
@@ -37,7 +37,9 @@ export async function refreshTokenIfRequired() {
 export async function authorize(forceReauth = false) {
   return await authMutex.runExclusive(async () => {
     const tokenSet = await client.getTokens();
-    if (!forceReauth && tokenSet?.accessToken) { return false; }
+    if (!forceReauth && tokenSet?.accessToken) {
+      return false;
+    }
 
     // kickoff UI OAuth flow
     const authRequest = await client.authorizationRequest({
@@ -46,8 +48,8 @@ export async function authorize(forceReauth = false) {
       scope: scopesString,
       extraParameters: {
         audience: "api.atlassian.com",
-        prompt: "consent"
-      }
+        prompt: "consent",
+      },
     });
     const { authorizationCode } = await client.authorize(authRequest);
     await client.setTokens(await fetchTokens(authRequest, authorizationCode));

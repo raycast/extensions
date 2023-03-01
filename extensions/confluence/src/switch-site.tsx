@@ -39,10 +39,13 @@ export default function Command() {
             title={site.url}
             actions={
               <ActionPanel>
-                <Action title="Select" onAction={async () => {
-                  await setActiveSite(site);
-                  pop();
-                }} />
+                <Action
+                  title="Select"
+                  onAction={async () => {
+                    await setActiveSite(site);
+                    pop();
+                  }}
+                />
                 <Action.OpenInBrowser title="Open in Browser" url={site.url} />
               </ActionPanel>
             }

@@ -1,23 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getContentIcon } from "../util/icons";
 import { apiAuthorize } from "./auth";
 import { Site } from "./site";
 import { get } from "./util";
 
-const escCql = (s: string) => s.replace(`\\`, `\\\\`).replace(/\"/g, `\\"`);
+const escCql = (s: string) => s.replace(`\\`, `\\\\`).replace(/"/g, `\\"`);
 
 function parseDate(date?: string) {
-  return (date)
-    ? new Date(date)
-    : undefined;
+  return date ? new Date(date) : undefined;
 }
 
 export async function fetchHydratedPopularFeed(site: Site): Promise<Content[]> {
-  const popularContent = await fetchPopularFeed(site) as PopularResponse;
+  const popularContent = (await fetchPopularFeed(site)) as PopularResponse;
   const contentIds = popularContent.nodes.map((i: any) => i.id);
   const cql = `content in (${contentIds.join(",")})`;
   const expand = "content.metadata.currentuser.viewed,content.metadata.likes,content.children.comment,content.history";
   const response = await fetchSearchByCql(site, cql, undefined, expand);
-  return contentIds.map(id => {
+  return contentIds.map((id) => {
     const item = response.results.find((item) => item.content.id === id);
 
     return {
@@ -34,8 +33,8 @@ export async function fetchHydratedPopularFeed(site: Site): Promise<Content[]> {
       commentCount: item.content.children.comment.size,
       createdBy: {
         name: item.content.history.createdBy.displayName,
-        profilePicture: site.url + item.content.history.createdBy.profilePicture.path
-      }
+        profilePicture: site.url + item.content.history.createdBy.profilePicture.path,
+      },
     };
   });
 }
@@ -57,15 +56,17 @@ export async function fetchSearchByCql(site: Site, cql: string, signal?: AbortSi
 }
 
 interface CqlResponse {
-  results: any[],
-  _links: any
+  results: any[];
+  _links: any;
 }
 
 // TODO - note that this API isn't publicly doc'd,but should be. Add to list of things to 'make this possible without 1p'
 // Also scopes are weird, and API response sucks
 export async function fetchPopularFeed(site: Site, limit = 25) {
   await apiAuthorize();
-  return get(`https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`);
+  return get(
+    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`
+  );
 }
 
 export async function fetchSpaces(site: Site, text: string, signal?: AbortSignal) {
@@ -76,7 +77,7 @@ export async function fetchSpaces(site: Site, text: string, signal?: AbortSignal
 export async function fetchUsers(site: Site, text: string, signal?: AbortSignal) {
   let cql = `type = user`;
 
-  if(text?.length > 0) {
+  if (text?.length > 0) {
     cql = `${cql} and user.fullname~"${escCql(text)}"`;
   }
   return fetchSearchByCql(site, cql, signal, undefined, 500);
@@ -98,7 +99,7 @@ export const SEARCH_EXPAND = [
 ].join(",");
 
 function withCQLSpace(search: string, spaceKey?: string): string {
-  if(spaceKey) {
+  if (spaceKey) {
     return search + ` and space.key = "${escCql(spaceKey)}"`;
   }
   return search;
@@ -110,8 +111,7 @@ export async function fetchSearchByText(site: Site, text: string, spaceKey?: str
 }
 
 export function sortByLastViewed(recentItems: SearchResult[]) {
-  return [...recentItems]
-    .sort((a: SearchResult, b: SearchResult) => b.lastSeenAt.valueOf() - a.lastSeenAt.valueOf());
+  return [...recentItems].sort((a: SearchResult, b: SearchResult) => b.lastSeenAt.valueOf() - a.lastSeenAt.valueOf());
 }
 
 export async function fetchRecentlyViewed(site: Site, spaceKey?: string, signal?: AbortSignal) {
@@ -128,7 +128,8 @@ export function mapToSearchResult(item: any, links: any): SearchResult {
     icon: getContentIcon(item.content.type),
     modifiedAt: new Date(item.lastModified),
     modifiedAtFriendly: item.friendlyLastModified,
-    lastSeenAt: item.content.metadata?.currentuser?.viewed && new Date(item.content.metadata?.currentuser?.viewed?.lastSeen),
+    lastSeenAt:
+      item.content.metadata?.currentuser?.viewed && new Date(item.content.metadata?.currentuser?.viewed?.lastSeen),
     lastSeenAtFriendly: item.content.metadata?.currentuser?.viewed?.friendlyLastSeen,
     url: links.base + item.url,
   };
@@ -137,61 +138,60 @@ export function mapToSearchResult(item: any, links: any): SearchResult {
     result.likes = {
       currentUser: item.content.metadata?.likes?.currentUser || false,
       count: item.content.metadata?.likes?.count,
-    }
+    };
   }
-  if (item.content.metadata?.currentuser?.favourited ) {
+  if (item.content.metadata?.currentuser?.favourited) {
     result.favourite = {
       isFavourite: item.content.metadata?.currentuser?.favourited.isFavourite || false,
-      favouritedDate: new Date(item.content.metadata?.currentuser?.favourited.favouritedDate)
-    }
+      favouritedDate: new Date(item.content.metadata?.currentuser?.favourited.favouritedDate),
+    };
   }
   return result;
 }
 
-
 export function generateBrowserUrl(site: Site, searchText: string, spaceFilter: string): string | undefined {
-  if(!site.url) return
-  if(!searchText) return generateBrowserRecentUrl(site);
-  return generateBrowserSearchUrl(site, searchText, spaceFilter)
+  if (!site.url) return;
+  if (!searchText) return generateBrowserRecentUrl(site);
+  return generateBrowserSearchUrl(site, searchText, spaceFilter);
 }
 
 export function generateBrowserRecentUrl(site: Site): string {
-  const directUrl = new URL('/wiki/home/recent', site.url)
+  const directUrl = new URL("/wiki/home/recent", site.url);
   return directUrl.toString();
 }
 
 export function generateBrowserSearchUrl(site: Site, searchText: string, spaceFilter: string): string {
-  const directUrl = new URL('/wiki/search', site.url)
+  const directUrl = new URL("/wiki/search", site.url);
   directUrl.searchParams.set("text", searchText);
-  if(spaceFilter) directUrl.searchParams.set("spaces", spaceFilter)
+  if (spaceFilter) directUrl.searchParams.set("spaces", spaceFilter);
   return directUrl.toString();
 }
 
 export interface Content {
-  id: string,
-  title: string,
-  spaceTitle: string,
-  type: string,
-  lastModifiedAt: Date,
-  lastModifiedAtFriendly: string,
-  lastSeenAt?: Date,
-  lastSeenAtFriendly?: string,
-  url: string,
-  likesCount: number,
-  commentCount: number,
+  id: string;
+  title: string;
+  spaceTitle: string;
+  type: string;
+  lastModifiedAt: Date;
+  lastModifiedAtFriendly: string;
+  lastSeenAt?: Date;
+  lastSeenAtFriendly?: string;
+  url: string;
+  likesCount: number;
+  commentCount: number;
   createdBy: {
-    name: string,
-    profilePicture: string
-  }
+    name: string;
+    profilePicture: string;
+  };
 }
 
 export interface PopularResponse {
-  nodes: { id: string }[],
-  pageInfo: any
+  nodes: { id: string }[];
+  pageInfo: any;
 }
 
 export interface SearchResult {
-  id: string,
+  id: string;
   title: string;
   space?: string;
   type: string;
@@ -202,11 +202,11 @@ export interface SearchResult {
   lastSeenAtFriendly: string;
   url: string;
   likes?: {
-    currentUser: boolean,
-    count: number,
-  },
+    currentUser: boolean;
+    count: number;
+  };
   favourite?: {
-    isFavourite: boolean,
-    favouritedDate: Date,
-  }
+    isFavourite: boolean;
+    favouritedDate: Date;
+  };
 }

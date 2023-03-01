@@ -12,7 +12,7 @@ export async function get(url: RequestInfo, signal?: AbortSignal) {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${tokenSet?.accessToken}`,
-    }
+    },
   });
 
   if (!response.ok) {
