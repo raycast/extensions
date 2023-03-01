@@ -503,7 +503,7 @@
 /extensions/nixpkgs-search                           @aiotter
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
-/extensions/noteplan-3                               @shakedlokits @lukerandall
+/extensions/noteplan-3                               @shakedlokits @lukerandall @pr1mal
 /extensions/notion                                   @HenriChabrand @mathieudutour @metakirby5
 /extensions/nouns                                    @peduarte
 /extensions/novu                                     @djabarovgeorge
@@ -832,6 +832,7 @@
 /extensions/xid                                      @rosszurowski
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/xqc                                      @Aayush9029
+/extensions/y-combinator                             @thomaspaulmann
 /extensions/yandex-music                             @AlexStrNik
 /extensions/year-in-progress                         @thomaspaulmann
 /extensions/yopass                                   @ricoberger

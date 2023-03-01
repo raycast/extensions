@@ -1,63 +1,72 @@
-import { useState } from "react";
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { useEffect, useState, useCallback } from "react";
+
+import { Action, ActionPanel, Icon, List, showToast, Clipboard } from "@raycast/api";
 
 import translate, { Languages, Translations } from "dictcc";
+import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "../utils";
 
-import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "./utils";
+import { ListWithEmptyView } from "./ListWithEmptyView";
 
-interface IListWithEmptyViewProps {
-  loading: boolean;
-  showNoResultsFound: boolean;
+interface ITranslationsListProps {
+  isSearchFromClipboard?: boolean;
 }
 
-export const ListWithEmptyView = ({ loading, showNoResultsFound }: IListWithEmptyViewProps) => {
-  if (loading) {
-    return <List.EmptyView title={"Loading..."} icon={{ source: "icon-small.png" }} />;
-  }
-
-  return (
-    <List.EmptyView title={!showNoResultsFound ? "Type to search" : "No Results"} icon={{ source: "icon-small.png" }} />
-  );
-};
-
-export default function Command() {
+export function TranslationsList({ isSearchFromClipboard }: ITranslationsListProps) {
   const [translations, setTranslations] = useState<Translations[] | undefined>();
   const [url, setUrl] = useState<string | undefined>();
   const [languages, setLanguages] = useState<[/* source */ Languages, /* target */ Languages] | undefined>();
   const [loading, setLoading] = useState(false);
+
   const [searchText, setSearchText] = useState("");
 
-  const onSearchTextChange = async (searchTerm: string) => {
-    setLoading(true);
-
-    try {
-      const input = createInputFromSearchTerm(searchTerm);
-      const { data, error, url } = await translate(input);
-
-      if (error) {
-        throw error;
-      }
-
-      setTranslations(data);
-      setUrl(url);
-      setLanguages([input.sourceLanguage, input.targetLanguage]);
+  const fetchTranslations = useCallback(
+    async (searchTerm: string) => {
       setSearchText(searchTerm);
-    } catch (error) {
-      if (error instanceof Error) {
-        showToast({
-          title: "Error",
-          message: error.message,
-        });
+      setLoading(true);
+
+      try {
+        const input = createInputFromSearchTerm(searchTerm);
+        const { data, error, url } = await translate(input);
+
+        if (error) {
+          throw error;
+        }
+
+        setTranslations(data);
+        setUrl(url);
+        setLanguages([input.sourceLanguage, input.targetLanguage]);
+      } catch (error) {
+        if (error instanceof Error) {
+          showToast({
+            title: "Error",
+            message: error.message,
+          });
+        }
       }
+
+      setLoading(false);
+    },
+    [setTranslations, setUrl, setLanguages, setLoading]
+  );
+
+  useEffect(() => {
+    if (isSearchFromClipboard) {
+      (async () => {
+        const clipboardText = await Clipboard.readText();
+
+        if (clipboardText && clipboardText !== searchText) {
+          fetchTranslations(clipboardText);
+        }
+      })();
     }
-    setLoading(false);
-  };
+  }, [isSearchFromClipboard, fetchTranslations, searchText]);
 
   return (
     <List
       isLoading={loading}
+      searchText={searchText}
+      onSearchTextChange={(text) => fetchTranslations(text)}
       navigationTitle="Search dict.cc"
-      onSearchTextChange={onSearchTextChange}
       searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
       throttle
     >
