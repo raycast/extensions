@@ -13,7 +13,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
 
   const { configFile, credentialsFile = {} } = configs || {};
 
-  const profileOptions = Object.keys(configFile ?? {}) ?? []
+  const profileOptions = Object.keys(configFile ?? {}) ?? [];
 
   useEffect(() => {
     if (!selectedProfile && profileOptions) {
@@ -23,10 +23,10 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
 
   useEffect(() => {
     if (selectedProfile) {
-      const isDefaultProfile = 'default' in credentialsFile;
+      const isDefaultProfile = "default" in credentialsFile;
 
       process.env.AWS_REGION = configFile?.[selectedProfile]?.region || credentialsFile?.default?.region;
-      process.env.AWS_PROFILE = isDefaultProfile ? 'default' : selectedProfile
+      process.env.AWS_PROFILE = isDefaultProfile ? "default" : selectedProfile;
 
       onProfileSelected?.(selectedProfile);
     }
