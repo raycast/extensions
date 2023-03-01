@@ -62,8 +62,8 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={`Connect VPN tunnel via ${country.name}, ${city.name}`}
-                  onAction={() => connectToTunnel(`${country.name}, ${city.name}`, `${country.id} ${city.id}`)}
+                  title={`Connect VPN tunnel via ${city.name}, ${country.name}`}
+                  onAction={() => connectToTunnel(`${city.name}, ${country.name}`, `${country.id} ${city.id}`)}
                 />
               </ActionPanel>
             }
