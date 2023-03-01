@@ -105,6 +105,7 @@ Drafts are a mechanism to preserve filled-in inputs (but not yet submitted) when
 - Drafts won't preserve the [`Form.Password`](form.md#form.passwordfield)'s values.
 - Drafts will be dropped once [`Action.SubmitForm`](./actions.md#action.submitform) is triggered.
 - If you call [`popToRoot()`](../window-and-search-bar.md#poptoroot), drafts won't be preserved or updated.
+- Drafts are only saved if the field contains more than 3 characters
 
 {% endhint %}
 
