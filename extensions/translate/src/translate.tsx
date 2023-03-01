@@ -18,9 +18,8 @@ interface translateResult {
   errorCode: string;
 }
 
-
-function getTranslateUrl(params: { q: string, appKey: string, from: string, to: string, salt: string, sign: string }) {
-  return `https://openapi.youdao.com/api?${new URLSearchParams(params).toString()}`
+function getTranslateUrl(params: { q: string; appKey: string; from: string; to: string; salt: string; sign: string }) {
+  return `https://openapi.youdao.com/api?${new URLSearchParams(params).toString()}`;
 }
 
 function generateSign(content: string, salt: number, app_key: string, app_secret: string) {
@@ -61,8 +60,8 @@ function translateAPI(content: string, from_language: string, to_language: strin
     from: from_language,
     to: to_language,
     salt: String(salt),
-    sign
-  })
+    sign,
+  });
 
   return fetch(url, {
     method: "GET",
@@ -88,7 +87,7 @@ const defaultTranslateResult: translateResult = {
   web: undefined,
   webdict: { url: "" },
   errorCode: "",
-}
+};
 
 export default function Command() {
   const [isLoading, setLoadingStatus] = useState(false);
@@ -102,14 +101,14 @@ export default function Command() {
 
     (async () => {
       const response = await translateAPI(toTranslate, "auto", "auto");
-      setTranslateResult((await response.json()) as translateResult || {});
+      setTranslateResult(((await response.json()) as translateResult) || {});
       setLoadingStatus(false);
     })();
   }, [toTranslate]);
 
   const actionPanelUrl = useMemo(() => {
-    return webdict?.url || ""
-  }, [webdict?.url])
+    return webdict?.url || "";
+  }, [webdict?.url]);
 
   return (
     <List
@@ -123,45 +122,26 @@ export default function Command() {
           key={index}
           title={item}
           icon={{ source: Icon.Dot, tintColor: Color.Red }}
-          actions={
-            <TranslateResultActionPanel
-              copyContent={item}
-              url={actionPanelUrl}
-            />
-          }
+          actions={<TranslateResultActionPanel copyContent={item} url={actionPanelUrl} />}
         />
-      ))
-      }
+      ))}
       {basic?.explains?.map((item, index) => (
         <List.Item
           key={index}
           title={item}
           icon={{ source: Icon.Dot, tintColor: Color.Blue }}
-          actions={
-            <TranslateResultActionPanel
-              copyContent={item}
-              url={actionPanelUrl}
-            />
-          }
+          actions={<TranslateResultActionPanel copyContent={item} url={actionPanelUrl} />}
         />
-      ))
-      }
+      ))}
       {web?.map((item, index) => (
         <List.Item
           key={index}
           title={item.value.join(", ")}
           icon={{ source: Icon.Dot, tintColor: Color.Yellow }}
           subtitle={item.key}
-          actions={
-            <TranslateResultActionPanel
-              copyContent={item.value.join(", ")}
-              url={actionPanelUrl}
-            />
-          }
+          actions={<TranslateResultActionPanel copyContent={item.value.join(", ")} url={actionPanelUrl} />}
         />
-      ))
-      }
-
+      ))}
     </List>
   );
 }
