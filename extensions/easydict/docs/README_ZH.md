@@ -42,7 +42,17 @@
 
 我的另一个项目，[Easydict](https://github.com/tisfeng/Easydict) 是一个原生的 macOS 翻译词典 App，一个免费开源版本的 [Bob](https://apps.apple.com/cn/app/id1630034110#?platform=mac)，欢迎尝试。
 
-![iShot_2023-01-07_19.33.01的副本-1673091295](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-07_19.33.01的副本-1673091295.png)
+**查单词**
+![iShot_2023-01-28_17.40.28-1674901716](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.40.28-1674901716.png)
+
+**翻译文本**
+![iShot_2023-01-28_17.49.53-1674901731](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-28_17.49.53-1674901731.png)
+
+**自动划词查询**
+![iShot_2023-01-20_11.01.35-1674183779](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.01.35-1674183779.gif)
+
+**OCR 截图翻译**
+![iShot_2023-01-20_11.26.25-1674185209](https://raw.githubusercontent.com/tisfeng/ImageBed/main/uPic/iShot_2023-01-20_11.26.25-1674185209.gif)
 
 ---
 
