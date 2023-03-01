@@ -21,7 +21,7 @@
       "mode": "view"
     },
     {
-      "name": "recent_tasks",
+      "name": "recentTasks",
       "title": "Recent Tasks",
       "subtitle": "Everhour",
       "description": "List your recent tasks from the last seven days",
