@@ -12,20 +12,22 @@
   "commands": [
     {
       "name": "moco",
-      "title": "MOCO",
+      "title": "Manage Time Bookings",
+      "subtitle": "MOCO",
       "description": "Manage all your time bookings",
       "mode": "view"
     },
     {
       "name": "moco_today",
       "title": "Todays Activities",
+      "subtitle": "MOCO",
       "description": "Show todays activities",
       "mode": "view",
       "subtitle": "moco"
     },
     {
       "name": "moco_menu_bar",
-      "title": "MOCO Menu Bar",
+      "title": "Menu Bar",
       "subtitle": "MOCO",
       "description": "See if a timer is running with a glance",
       "mode": "menu-bar",
