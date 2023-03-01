@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`parse mullvad relay list output correctly 1`] = `
+[
+  {
+    "children": [
+      {
+        "id": "akl",
+        "name": "Auckland",
+      },
+    ],
+    "id": "nz",
+    "name": "New Zealand",
+  },
+  {
+    "children": [
+      {
+        "id": "lon",
+        "name": "London",
+      },
+      {
+        "id": "mnc",
+        "name": "Manchester",
+      },
+    ],
+    "id": "gb",
+    "name": "UK",
+  },
+]
+`;
