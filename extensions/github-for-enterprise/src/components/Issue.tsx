@@ -1,14 +1,5 @@
-import {
-  ActionPanel,
-  Color,
-  copyTextToClipboard,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, Color, List, Action, Clipboard, Image } from "@raycast/api";
 import { format } from "timeago.js";
-import React from "react";
 import CloseIssue from "./CloseIssue";
 import ReopenIssue from "./ReopenIssue";
 import IssueDetail from "./IssueDetail";
@@ -41,15 +32,10 @@ export default function Issue(props: IssueOwnProps) {
         source: state === "OPEN" ? "issue-open.png" : "issue-closed.png",
         tintColor: state === "OPEN" ? Color.Green : Color.Red,
       }}
-      accessoryTitle={format(createdAt)}
-      accessoryIcon={{
-        source: author.avatarUrl,
-        mask: ImageMask.Circle,
-      }}
       actions={
         <ActionPanel title={`#${number} in ${repository.nameWithOwner}`}>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Details"
               target={<IssueDetail {...props} />}
               icon={{
@@ -57,24 +43,24 @@ export default function Issue(props: IssueOwnProps) {
                 tintColor: Color.PrimaryText,
               }}
             />
-            <OpenInBrowserAction url={url} />
+            <Action.OpenInBrowser url={url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title="Copy Issue Number"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(`${number}`)}
+              onAction={() => Clipboard.copy(`${number}`)}
             />
-            <ActionPanel.Item
+            <Action
               title="Copy Issue URL"
               icon={{
                 source: "doc-on-clipboard-16",
                 tintColor: Color.PrimaryText,
               }}
-              onAction={() => copyTextToClipboard(url)}
+              onAction={() => Clipboard.copy(url)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -82,6 +68,16 @@ export default function Issue(props: IssueOwnProps) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: format(createdAt),
+
+          icon: {
+            source: author.avatarUrl,
+            mask: Image.Mask.Circle,
+          },
+        },
+      ]}
     />
   );
 }
