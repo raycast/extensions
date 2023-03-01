@@ -1,23 +1,11 @@
 import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { TaskListItem } from "../components";
-import { getCurrentTimer, getTasks } from "../api";
-import { createResolvedToast } from "../utils";
+import { getRecentTasks, getCurrentTimer } from "../api";
 import { Task } from "../types";
+import { createResolvedToast } from "../utils";
 
-const filterTasks = (records: Array<Task>, projectId: string) => {
-  return records.filter((record: Task) => record.projects[0] === projectId);
-};
-
-export function TaskList({
-  projectId,
-  timeRecords,
-  refreshRecords,
-}: {
-  projectId: string;
-  timeRecords: Array<Task>;
-  refreshRecords: () => Promise<Array<Task>>;
-}) {
+export function RecentTaskList() {
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<null | string>(null);
   const [tasks, setTasks] = useState<Array<Task>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -34,8 +22,7 @@ export function TaskList({
   };
 
   const fetchTasks = async () => {
-    const tasksResp = await getTasks(projectId);
-
+    const tasksResp = await getRecentTasks();
     setTasks(tasksResp);
   };
 
@@ -59,23 +46,27 @@ export function TaskList({
     refreshActiveTimer();
   }, [activeTimerTaskId]);
 
-  const recentTimeRecords = filterTasks(timeRecords, projectId);
-
   const renderTasks = () => {
     if (tasks[0]) {
-      return tasks.map((task) => (
-        <TaskListItem
-          key={task.id}
-          recentTimeRecords={recentTimeRecords}
-          refreshRecords={() => {
-            fetchTasks();
-            return refreshRecords();
-          }}
-          refreshActiveTimer={refreshActiveTimer}
-          task={task}
-          hasActiveTimer={task.id === activeTimerTaskId}
-        />
-      ));
+      return tasks
+        .sort((t1, t2) => {
+          // Active timer first.
+          if (t1.id === activeTimerTaskId) return -1;
+          if (t2.id === activeTimerTaskId) return 1;
+          // Keep order otherwise.
+          return 0;
+          // Sort times descending by time.
+          // return t1.time.recent > t2.time.recent ? -1 : 1;
+        })
+        .map((task) => (
+          <TaskListItem
+            key={task.id}
+            refreshRecords={getRecentTasks}
+            refreshActiveTimer={refreshActiveTimer}
+            task={task}
+            hasActiveTimer={task.id === activeTimerTaskId}
+          />
+        ));
     }
 
     if (!isLoading && tasks[0]) {
