@@ -23,6 +23,7 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
     if (reportIsLoading) {
       return;
     }
+    const ms = Date.now() - new Date(tracking?.startedAt + "Z").getTime();
 
     const markStart = Date.now();
 
@@ -42,17 +43,17 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
 
     Promise.resolve(tracking && activity ? entries.concat([mockEntry(tracking, activity)]) : entries)
       .then(entries => entries.reduce(groupByActivity, [] as TimeEntry[][]))
-      .then(groupped => groupped.map(arr => arr.reduce(groupIntoReport, blankReport(arr[0].activity))))
+      .then(grouped => grouped.map(arr => arr.reduce(groupIntoReport, blankReport(arr[0].activity))))
       .then(entries => entries.sort((l, r) => (l.duration > r.duration ? -1 : 1)))
       .then(entries => entries.map(entry => `* ${entry.activity.name} for ${humanizeDuration(entry.duration)}`))
-      .then(entries => [
-        ...entries,
-        `# Total Booked Time (not incl. current task): ${humanizeDuration(totalBookedTime)}`,
-      ])
       .then(list => list.join("\n\n"))
       .then(markdown =>
         markdown
-          ? setReportMarkdown("Time entries you have tracked today:\n" + markdown)
+          ? setReportMarkdown(
+              `Time entries you have tracked today (including current)[**${humanizeDuration(
+                totalBookedTime + (ms || 0)
+              )}**]:\n` + markdown
+            )
           : setReportMarkdown("You didn't track anything today yet.")
       )
       .finally(() => console.debug(`building today report took ${Date.now() - markStart}ms`));
