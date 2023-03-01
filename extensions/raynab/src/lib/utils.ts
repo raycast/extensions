@@ -37,7 +37,7 @@ export function formatToYnabPrice(price: string | number) {
 }
 
 export function getCurrentMonth() {
-  return new Intl.DateTimeFormat('en-us', { month: 'long' }).format(new Date(utils.getCurrentDateInISOFormat()));
+  return new Intl.DateTimeFormat('en-us', { month: 'long', timeZone: 'UTC' }).format(new Date());
 }
 
 const IS_NUMBER_REGEX = /^[+-]?\d+(\.\d+)?$/g;
