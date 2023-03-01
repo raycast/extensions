@@ -61,7 +61,6 @@ export function RecentTaskList() {
         .map((task) => (
           <TaskListItem
             key={task.id}
-            recentTimeRecords={[]}
             refreshRecords={getRecentTasks}
             refreshActiveTimer={refreshActiveTimer}
             task={task}

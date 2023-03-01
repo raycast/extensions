@@ -34,12 +34,7 @@ export function ProjectList() {
   const renderProjects = () => {
     if (!isLoading && projects[0]) {
       return projects.map((project) => (
-        <ProjectListItem
-          timeRecords={timeRecords}
-          refreshRecords={getRecentTasks}
-          key={project.id}
-          project={project}
-        />
+        <ProjectListItem timeRecords={timeRecords} refreshRecords={getRecentTasks} key={project.id} project={project} />
       ));
     }
 

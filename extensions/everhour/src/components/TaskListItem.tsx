@@ -20,13 +20,13 @@ export function TaskListItem({
   hasActiveTimer,
   refreshActiveTimer,
   refreshRecords,
-  recentTimeRecords,
+  recentTimeRecords = [],
 }: {
   task: Task;
   hasActiveTimer: boolean;
   refreshActiveTimer: () => Promise<void>;
   refreshRecords: () => Promise<Array<Task>>;
-  recentTimeRecords: Array<Task>;
+  recentTimeRecords?: Array<Task>;
 }) {
   const [timeRecords, setTimeRecords] = useState<Array<Task>>(recentTimeRecords);
 
