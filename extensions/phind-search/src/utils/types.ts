@@ -6,6 +6,7 @@ export interface SearchResult {
   query: string;
   url: string;
   isHistory?: boolean;
+  isNavigation: boolean;
 }
 
 export interface Preferences {
