@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "List Projects",
+      "subtitle": "Buddy",
       "description": "Quickly find a Buddy project",
       "mode": "view"
     }
