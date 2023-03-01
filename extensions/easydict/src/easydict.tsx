@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-02-22 10:24
+ * @lastEditTime: 2023-03-01 11:19
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -18,11 +18,6 @@ import { LanguageItem } from "./language/type";
 import { myPreferences, preferredLanguage1 } from "./preferences";
 import { DisplaySection } from "./types";
 import { checkIfInstalledEudic, checkIfNeedShowReleasePrompt, trimTextLength } from "./utils";
-
-// ???: Raycast will delay ~30ms to invoke onInputChange if user input text when using Easydict as Fallback Command, so we need to use timer to delay query text.
-const kDelayGetSelectedTextTime = 30;
-
-let hasUserInputText = false;
 
 const disableConsoleLog = true;
 
@@ -48,7 +43,7 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   }
 
   const { queryText } = props.arguments;
-  const trimQueryText = queryText ? trimTextLength(queryText) : undefined;
+  const trimQueryText = queryText ? trimTextLength(queryText) : props.fallbackText;
 
   const [isLoadingState, setLoadingState] = useState<boolean>(false);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -72,8 +67,6 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   const [searchText, setSearchText] = useState<string>("");
 
   const [displayResult, setDisplayResult] = useState<DisplaySection[]>([]);
-
-  let timer: NodeJS.Timeout | undefined;
 
   /**
    * the language type of text, depending on the language type of the current input text.
@@ -108,10 +101,6 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
       setup();
     }
 
-    if (inputText?.length && timer) {
-      clearTimeout(timer);
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
@@ -129,48 +118,46 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
 
     const userInputText = trimQueryText;
 
-    timer = setTimeout(() => {
-      // If enabled system proxy, we need to wait for the system proxy to be ready.
-      if (myPreferences.enableSystemProxy) {
-        // If has arguments, use arguments text as input text first.
-        if (userInputText?.length) {
-          configAxiosProxy().then(() => {
-            console.log(`after config proxy`);
-            updateInputTextAndQueryText(userInputText as string, false);
-          });
-        } else if (myPreferences.enableAutomaticQuerySelectedText && !hasUserInputText) {
-          Promise.all([getSelectedText(), configAxiosProxy()])
-            .then(([selectedText]) => {
-              console.log(`after config proxy, getSelectedText: ${selectedText}`);
-              console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
-              updateInputTextAndQueryText(trimTextLength(selectedText), false);
-            })
-            .catch((error) => {
-              console.error(`set up, config proxy error: ${error}`);
-              querySelecedtText().then(() => {
-                console.log(`after query selected text`);
-                delayGetSystemProxy();
-              });
+    // If enabled system proxy, we need to wait for the system proxy to be ready.
+    if (myPreferences.enableSystemProxy) {
+      // If has arguments, use arguments text as input text first.
+      if (userInputText?.length) {
+        configAxiosProxy().then(() => {
+          console.log(`after config proxy`);
+          updateInputTextAndQueryText(userInputText as string, false);
+        });
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        Promise.all([getSelectedText(), configAxiosProxy()])
+          .then(([selectedText]) => {
+            console.log(`after config proxy, getSelectedText: ${selectedText}`);
+            console.log(`config proxy and get text cost time: ${Date.now() - startTime} ms`);
+            updateInputTextAndQueryText(trimTextLength(selectedText), false);
+          })
+          .catch((error) => {
+            console.error(`set up, config proxy error: ${error}`);
+            querySelecedtText().then(() => {
+              console.log(`after query selected text`);
+              delayGetSystemProxy();
             });
-        } else {
-          configAxiosProxy();
-        }
-      } else {
-        if (userInputText?.length) {
-          updateInputTextAndQueryText(userInputText, false);
-        } else if (myPreferences.enableAutomaticQuerySelectedText && !hasUserInputText) {
-          querySelecedtText().then(() => {
-            console.log(`after query selected text`);
           });
-        }
+      } else {
+        configAxiosProxy();
       }
+    } else {
+      if (userInputText?.length) {
+        updateInputTextAndQueryText(userInputText, false);
+      } else if (myPreferences.enableAutomaticQuerySelectedText) {
+        querySelecedtText().then(() => {
+          console.log(`after query selected text`);
+        });
+      }
+    }
 
-      delayGetSystemProxy();
+    delayGetSystemProxy();
 
-      checkIfInstalledEudic().then((isInstalled) => {
-        setIsInstalledEudic(isInstalled);
-      });
-    }, kDelayGetSelectedTextTime);
+    checkIfInstalledEudic().then((isInstalled) => {
+      setIsInstalledEudic(isInstalled);
+    });
   }
 
   /**
@@ -246,8 +233,6 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
   }
 
   function onInputChange(text: string) {
-    // ???: Raycast will delay ~30ms to invoke onInputChange if user input text when using Easydict as Fallback Command, so we need to use timer to delay query text.
-    hasUserInputText = true;
     // console.warn(`onInputChange: ${text}`);
     updateInputTextAndQueryText(text, true);
   }
