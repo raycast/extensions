@@ -84,15 +84,15 @@ export class Bitwarden {
   }
 
   async sync(sessionToken: string): Promise<void> {
-    this.exec(["sync", "--session", sessionToken]);
+    await this.exec(["sync", "--session", sessionToken]);
   }
 
   async login(): Promise<void> {
-    this.exec(["login", "--apikey"]);
+    await this.exec(["login", "--apikey"]);
   }
 
   async logout(): Promise<void> {
-    this.exec(["logout"]);
+    await this.exec(["logout"]);
   }
 
   async listItems(sessionToken: string): Promise<Item[]> {
@@ -120,7 +120,7 @@ export class Bitwarden {
   }
 
   async lock(): Promise<void> {
-    this.exec(["lock"]);
+    await this.exec(["lock"]);
   }
 
   async status(sessionToken?: string): Promise<VaultState> {
