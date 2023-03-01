@@ -34,7 +34,7 @@ export default function Command() {
                 <ActionPanel.Section title="History">
                   {item.isHistory && (
                     <Action
-                      title="Remove From History"
+                      title="Remove from History"
                       onAction={async () => {
                         await deleteHistoryItem(item);
                       }}
