@@ -46,9 +46,10 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
-  const maxTokensDavinci = 4096;
+  const maxTokensDavinci = 4000;
   const maxTokensAdaBabbageCurie = 2048;
   const maxTokensCodex = 8000;
+  const maxTokensCushman = 2048;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +70,7 @@ export default function Command() {
   modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
   modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
   modelLimit["code-davinci-002"] = maxTokensCodex;
+  modelLimit["code-cushman-001"] = maxTokensCushman;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -231,6 +233,7 @@ export default function Command() {
         <Form.Dropdown.Item value="text-babbage-001" title="text-babbage-001" />
         <Form.Dropdown.Item value="text-ada-001" title="text-ada-001" />
         <Form.Dropdown.Item value="code-davinci-002" title="code-davinci-002" />
+        <Form.Dropdown.Item value="code-cushman-001" title="code-cushman-001" />
       </Form.Dropdown>
       <Form.TextField
         id="temperature"
