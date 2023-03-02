@@ -13,6 +13,7 @@
     {
       "name": "view-wallets",
       "title": "View Wallets",
+      "subtitle": "MoneyLover",
       "description": "View your wallets",
       "mode": "view"
     }
