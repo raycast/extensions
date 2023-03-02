@@ -79,7 +79,13 @@ export const HostItem = ({ host, onSwitch, onDelete }: HostItemProps) => {
   const browser = useBrowser();
   const switchHost = useCallback(() => onSwitch(host), [host]);
   const deleteAction = useCallback(() => onDelete && onDelete(host), [host]);
-  const openInNewTab = useCallback(() => browser.openUrl(host.host), [host]);
+  const openInNewTab = useCallback(async () => {
+    browser.openUrl(host.host);
+    await closeMainWindow({
+      popToRootType: PopToRootType.Immediate,
+      clearRootSearch: true,
+    });
+  }, [host]);
 
   return (
     <List.Item
