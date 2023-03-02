@@ -20,7 +20,7 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title="Copied SSH Key"
+                    title="Copy SSH Key"
                     content={fs.readFileSync(path.join(sshKeyRootDir, publicKeys[index]), "utf8")}
                   />
                 </ActionPanel>
