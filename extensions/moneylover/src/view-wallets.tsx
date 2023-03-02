@@ -80,7 +80,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   icon={{ source: Icon.Pencil, tintColor: Color.Green }}
-                  title="Adjust balance"
+                  title="Adjust Balance"
                   target={<AdjustBalanceScreen wallet={wallet} onCompleted={onBalanceChange} />}
                 />
               </ActionPanel>
