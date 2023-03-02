@@ -13,6 +13,7 @@ import { getGitHubClient } from "./helpers/withGithubClient";
 type SearchRepositoriesPrefs = {
   includeForks: boolean;
   includeArchived: boolean;
+  includeOwnerName: boolean;
 };
 
 function SearchRepositories() {
