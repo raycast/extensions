@@ -147,7 +147,7 @@ function AdjustBalanceScreen({ wallet, onCompleted }: { wallet: Wallet; onComple
         <ActionPanel>
           <Action.SubmitForm
             icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-            title="Adjust balance"
+            title="Adjust Balance"
             onSubmit={handleSubmit}
           />
         </ActionPanel>
