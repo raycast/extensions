@@ -8,12 +8,21 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Get SSH Key",
+      "title": "Copy SSH Key",
       "description": "Get your local SSH key",
+      "mode": "no-view"
+    },
+    {
+      "name": "list",
+      "title": "List SSH Key",
+      "description": "Get a list of your local SSH key",
       "mode": "view"
     }
   ],
