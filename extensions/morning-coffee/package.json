@@ -19,7 +19,7 @@
     {
       "name": "index",
       "title": "Open Websites",
-      "description": "Open the websites in your dafault browser.",
+      "description": "Open the websites in your default browser.",
       "mode": "no-view"
     }
   ],
