@@ -6,6 +6,7 @@ export type BrowserNames = "Safari" | "Arc" | "Chrome";
 export interface IBrowser {
   getCurrentTabUrl(): Promise<string | undefined>;
   setCurrentTabUrl(url: string): Promise<void>;
+  openUrl(url: string): Promise<void>;
 }
 
 export class Browser implements IBrowser {
@@ -15,6 +16,11 @@ export class Browser implements IBrowser {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setCurrentTabUrl(url: string) {
+    return Promise.resolve();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  openUrl(url: string) {
     return Promise.resolve();
   }
 
@@ -53,6 +59,14 @@ export class Arc extends Browser {
       end tell
     `);
   }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "Arc"
+        open location "${url}"
+      end tell
+    `);
+  }
 }
 
 export class Safari extends Browser {
@@ -73,6 +87,14 @@ export class Safari extends Browser {
       end tell
     `);
   }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "Safari"
+        open location "${url}"
+      end tell
+    `);
+  }
 }
 
 export class Chrome extends Browser {
@@ -90,6 +112,14 @@ export class Chrome extends Browser {
     await runAppleScript(`
       tell application "Google Chrome"
         set URL of active tab of front window to "${url}"
+      end tell
+    `);
+  }
+
+  async openUrl(url: string) {
+    await runAppleScript(`
+      tell application "Chrome"
+        open location "${url}"
       end tell
     `);
   }
