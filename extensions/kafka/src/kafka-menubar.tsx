@@ -123,26 +123,36 @@ export default function KafkaLag() {
   }, [env, load, setIsLoading]);
 
   return (
-    <MenuBarExtra icon="kafka-dark.png" tooltip="Kafka lag" isLoading={isLoading}>
-      <MenuBarExtra.Item
-        title={`--- Kafka Lag ---${
-          cache.has(cacheKeyLastUpdate) ? "  (last update : " + cache.get(cacheKeyLastUpdate) + ")" : ""
+    <MenuBarExtra
+      icon={{
+        source: {
+          light: "kafka-menu-light.png",
+          dark: "kafka-menu-dark.png",
+        },
+      }}
+      tooltip="Kafka lag"
+      isLoading={isLoading}
+    >
+      <MenuBarExtra.Section
+        title={`Kafka Lag ${
+          cache.has(cacheKeyLastUpdate) ? " (last update : " + cache.get(cacheKeyLastUpdate) + ")" : ""
         }`}
-      />
-      <MenuBarExtra.Submenu title={"Environment (current : " + env + ")"} icon={Icon.Gauge}>
-        {getEnvs().map((e) => (
-          <MenuBarExtra.Item
-            key={e}
-            title={`${e}${e === env ? " ✓" : ""}`}
-            onAction={() => {
-              setConsumers([]);
-              cache.remove(cacheKeyLag);
-              setState("NotLoaded");
-              setEnv(e);
-            }}
-          />
-        ))}
-      </MenuBarExtra.Submenu>
+      >
+        <MenuBarExtra.Submenu title={"Environment : " + env} icon={Icon.Gauge}>
+          {getEnvs().map((e) => (
+            <MenuBarExtra.Item
+              key={e}
+              title={`${e}${e === env ? " ✓" : ""}`}
+              onAction={() => {
+                setConsumers([]);
+                cache.remove(cacheKeyLag);
+                setState("NotLoaded");
+                setEnv(e);
+              }}
+            />
+          ))}
+        </MenuBarExtra.Submenu>
+      </MenuBarExtra.Section>
       <MenuBarExtra.Item title={"Configuration"} icon={Icon.Gear} onAction={openCommandPreferences} />
       {state !== "Loading" && (
         <MenuBarExtra.Item
@@ -157,29 +167,29 @@ export default function KafkaLag() {
       {state === "Loading" && <MenuBarExtra.Item title={"Loading..."} icon={Icon.Clock} />}
       {consumers.length > 0 && (
         <>
-          <MenuBarExtra.Item title={"--- Group ids with lag ---"} />
-          {consumers.filter((consumer) => consumer.overall > 0).length === 0 && (
-            <MenuBarExtra.Item
-              title={"No consumers with lag"}
-              onAction={() => {
-                console.info("No consumers with lag");
-              }}
-            />
-          )}
-          {consumers
-            .filter((consumer) => consumer.overall > 0)
-            .map((consumer) => (
-              <MenuConsumer key={consumer.groupId} consumer={consumer} />
-            ))}
+          <MenuBarExtra.Section title={"Group ids with lag"}>
+            {consumers.filter((consumer) => consumer.overall > 0).length === 0 && (
+              <MenuBarExtra.Item
+                title={"No consumers with lag"}
+                onAction={() => {
+                  console.info("No consumers with lag");
+                }}
+              />
+            )}
+            {consumers
+              .filter((consumer) => consumer.overall > 0)
+              .map((consumer) => (
+                <MenuConsumer key={consumer.groupId} consumer={consumer} />
+              ))}
+          </MenuBarExtra.Section>
           {!preferences.hideWithoutLag && (
-            <>
-              <MenuBarExtra.Item title="--- Group ids up to date ---" />
+            <MenuBarExtra.Section title="Group ids up to date">
               {consumers
                 .filter((consumer) => consumer.overall === 0)
                 .map((consumer) => (
                   <MenuConsumer key={consumer.groupId} consumer={consumer} />
                 ))}
-            </>
+            </MenuBarExtra.Section>
           )}
         </>
       )}

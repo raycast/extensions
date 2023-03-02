@@ -16,7 +16,37 @@
       "title": "Kafka",
       "subtitle": "Kafka - topics and consumers",
       "description": "Overview of kafka topics and consumers by environment",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "extractRegex",
+          "title": "Extract regex",
+          "description": "Regex to extract information from topic name",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "extractTitleGroup",
+          "title": "Extract title group",
+          "description": "Group to get from regex to display title",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "extractSubTitleGroup",
+          "title": "Extract sub title group",
+          "description": "Group to get from regex to display sub title",
+          "type": "textfield",
+          "required": false
+        },
+        {
+          "name": "extractMetadataNameAndGroup",
+          "title": "Extract metadata name and group",
+          "description": "Extract metadata from regex. Ex: (Owner=2,Application=4)",
+          "type": "textfield",
+          "required": false
+        }
+      ]
     },
     {
       "name": "kafka-menubar",
@@ -78,7 +108,7 @@
   "dependencies": {
     "@raycast/api": "1.48.5",
     "@raycast/utils": "1.5.0",
-    "kafkajs": "2.2.3",
+    "kafkajs": "2.2.4",
     "moment": "2.29.4"
   },
   "devDependencies": {
