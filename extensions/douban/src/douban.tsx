@@ -88,10 +88,6 @@ export default function DoubanSearch() {
     setSearch(searchText);
   };
 
-  // const handleSelectMovie = (movie: Movie) => {
-  //   console.log(`Selected movie: ${movie.title}`);
-  // };
-
   return (
     <List
       isShowingDetail
@@ -103,7 +99,7 @@ export default function DoubanSearch() {
         <List.Item
           key={movie.title}
           title={movie.title}
-          subtitle={`年代: ${movie.year} | 评分: ${movie.rating} |  ${movie.actors.join(", ")}`}
+          subtitle={`Date: ${movie.year} | Rating: ${movie.rating} |  ${movie.actors.join(", ")}`}
           // icon={{ source: movie.cover }}
           detail={<List.Item.Detail markdown={`![Illustration](${movie.cover})`} />}
           actions={
