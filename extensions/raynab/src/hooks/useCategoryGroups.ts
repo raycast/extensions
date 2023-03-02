@@ -2,5 +2,5 @@ import useSWR from 'swr';
 import { fetchCategoryGroups } from '@lib/api';
 
 export function useCategoryGroups(budgetId = 'last-used') {
-  return useSWR([budgetId, 'categoryGroups'], fetchCategoryGroups);
+  return useSWR([budgetId, 'categoryGroups'], ([budgetId]) => fetchCategoryGroups(budgetId));
 }

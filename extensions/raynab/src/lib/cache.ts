@@ -15,9 +15,10 @@ const location = resolve(environment.supportPath, 'local-storage');
 const localStorage = new LocalStorage(location);
 
 const cache = localStorage.getItem(SWR_CACHE_KEY);
-const cacheProvider = new Map<string, string>(cache ? JSON.parse(cache) : []);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const cacheProvider = new Map<any, any>(cache ? JSON.parse(cache) : []);
 
-const persistCacheMiddleware: Middleware = (useSWRNext) => {
+export const persistCacheMiddleware: Middleware = (useSWRNext) => {
   return (key, fetcher, config) => {
     const swr = useSWRNext(key, fetcher, config);
 

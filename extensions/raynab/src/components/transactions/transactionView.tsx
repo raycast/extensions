@@ -1,7 +1,6 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { List, showToast, Toast } from '@raycast/api';
 
-import { useSharedState } from 'hooks/useSharedState';
 import { TransactionItem } from './transactionItem';
 import { initView, transactionViewReducer } from './viewReducer';
 import { TransactionProvider } from './transactionContext';
@@ -11,7 +10,7 @@ import { useLocalStorage } from '@hooks/useLocalStorage';
 
 export function TransactionView() {
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
-  const [timeline, setTimeline] = useSharedState<Period>('timeline', 'month');
+  const [timeline, setTimeline] = useState<Period>('month');
   const { data: transactions = [], isValidating } = useTransactions(activeBudgetId, timeline ?? 'month');
 
   const [state, dispatch] = useReducer(
