@@ -33,7 +33,7 @@ export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, mod
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save changes"
+            title="Save Changes"
             onSubmit={(values) =>
               editActivity({ ...values, date: values.date.toISOString().split("T")[0] }, activity.id)
                 .then(() =>
@@ -69,10 +69,10 @@ export const ActivityEdit: React.FC<ActivityEditProps> = ({ index, activity, mod
           }
         }}
       />
-      <Form.DatePicker id="date" title="For which day is the booking?" defaultValue={new Date(activity.date)} />
+      <Form.DatePicker id="date" title="Booking Date" defaultValue={new Date(activity.date)} />
       <Form.TextField
         id="hours"
-        title="How many hours did you work?"
+        title="Hours Worked"
         defaultValue={`${activity.hours}`}
         error={hoursError}
         onChange={dropHoursErrorIfNeeded}

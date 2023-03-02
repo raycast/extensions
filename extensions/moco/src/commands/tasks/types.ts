@@ -1,3 +1,5 @@
+import { StatusType } from "../utils/storage";
+
 export type Task = {
   id: number;
   name: string;
@@ -5,4 +7,5 @@ export type Task = {
   projectID: number;
   projectName?: string;
   billable: boolean;
+  status?: StatusType;
 };

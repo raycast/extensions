@@ -4,6 +4,7 @@ import { List } from "@raycast/api";
 import { Project } from "../types";
 import { ProjectListItem } from "./ProjectListItem";
 import { fetchProjects } from "../api";
+import { getStatus } from "../../utils/storage";
 
 export const ProjectList = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -19,10 +20,16 @@ export const ProjectList = () => {
     refreshItems();
   }, []);
 
+  function updateProject(index: number, newValue: Project): void {
+    const updatedProjects = [...projects];
+    updatedProjects[index] = newValue;
+    setProjects(updatedProjects);
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter projects by name..." isShowingDetail={false}>
       {projects.map((project, index) => (
-        <ProjectListItem key={index} project={project} />
+        <ProjectListItem key={index} index={index} project={project} updateProject={updateProject} />
       ))}
     </List>
   );

@@ -9,7 +9,7 @@ export const TaskListItem = ({ task }: { task: Task }) => {
       title={task.name}
       actions={
         <ActionPanel>
-          <Action.Push title={"Start an activity for this task"} target={<ActivityStart task={task} />} />
+          <Action.Push title={"New activity"} target={<ActivityStart task={task} />} />
         </ActionPanel>
       }
     />

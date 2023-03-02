@@ -45,12 +45,7 @@ export const ActivityStart = ({ task }: { task: Task }) => {
           }
         }}
       />
-      <Form.DatePicker
-        id="date"
-        type={Form.DatePicker.Type.Date}
-        title="For which day is the booking?"
-        defaultValue={new Date()}
-      />
+      <Form.DatePicker id="date" type={Form.DatePicker.Type.Date} title="Booking Date" defaultValue={new Date()} />
       <Form.TextField
         id="hours"
         onChange={(event) => {
@@ -60,7 +55,7 @@ export const ActivityStart = ({ task }: { task: Task }) => {
             setStartTimer(false);
           }
         }}
-        title="How many hours did you work?"
+        title="Hours Worked"
         placeholder="Leaving this field empty will start a timer"
       />
     </Form>

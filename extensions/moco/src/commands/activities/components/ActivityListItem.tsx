@@ -27,7 +27,7 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
   useEffect(() => {
     const interval = setInterval(() => {
       refreshTime();
-    }, 500);
+    }, 1000);
     return () => clearInterval(interval);
   }, [time]);
 
@@ -36,6 +36,8 @@ export const ActivityListItem: React.FC<Props> = ({ index, activity, modifyActiv
       {...(activity.timer_started_at != null ? { icon: { source: Icon.Play, tintColor: Color.Green } } : {})}
       key={activity.id}
       title={activity.task.name}
+      subtitle={activity.project.name}
+      accessories={[{ text: parsedTime.slice(0, parsedTime.lastIndexOf(":")) }]}
       detail={
         <List.Item.Detail
           metadata={
