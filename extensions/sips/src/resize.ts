@@ -44,7 +44,10 @@ export default async function Command(props: { arguments: { width: string; heigh
       await showToast({ title: `Resized ${selectedImages.length.toString()} ${pluralized}` });
     } catch (error) {
       console.log(error);
-      await showToast({ title: `Failed to resize ${selectedImages.length.toString()} ${pluralized}` });
+      await showToast({
+        title: `Failed to resize ${selectedImages.length.toString()} ${pluralized}`,
+        style: Toast.Style.Failure,
+      });
     }
   }
 }

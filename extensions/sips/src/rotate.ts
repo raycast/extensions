@@ -18,7 +18,10 @@ export default async function Command(props: { arguments: { degrees: string } })
       execSync(`sips --rotate ${degrees} ${pathStrings}`);
       await showToast({ title: `Rotated ${selectedImages.length.toString()} ${pluralized} by ${degrees} degrees` });
     } catch {
-      await showToast({ title: `Failed to rotate ${selectedImages.length.toString()} ${pluralized}` });
+      await showToast({
+        title: `Failed to rotate ${selectedImages.length.toString()} ${pluralized}`,
+        style: Toast.Style.Failure,
+      });
     }
   }
 }

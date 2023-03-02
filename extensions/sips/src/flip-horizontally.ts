@@ -17,7 +17,10 @@ export default async function Command() {
       execSync(`sips --flip horizontal ${pathStrings}`);
       await showToast({ title: `Flipped ${selectedImages.length.toString()} ${pluralized} horizontally` });
     } catch {
-      await showToast({ title: `Failed to flip ${selectedImages.length.toString()} ${pluralized}` });
+      await showToast({
+        title: `Failed to flip ${selectedImages.length.toString()} ${pluralized}`,
+        style: Toast.Style.Failure,
+      });
     }
   }
 }

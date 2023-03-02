@@ -42,7 +42,10 @@ const convert = async (desiredType: string) => {
     await showToast({ title: `Converted ${selectedImages.length.toString()} ${pluralized} to ${desiredType}` });
   } catch (error) {
     console.log(error);
-    await showToast({ title: `Failed to convert ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`, style: Toast.Style.Failure });
+    await showToast({
+      title: `Failed to convert ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`,
+      style: Toast.Style.Failure,
+    });
   }
 };
 

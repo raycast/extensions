@@ -34,7 +34,10 @@ export default async function Command(props: { arguments: { scaleFactor: string 
       await showToast({ title: `Scaled ${selectedImages.length.toString()} ${pluralized}` });
     } catch (error) {
       console.log(error);
-      await showToast({ title: `Failed to scale ${selectedImages.length.toString()} ${pluralized}` });
+      await showToast({
+        title: `Failed to scale ${selectedImages.length.toString()} ${pluralized}`,
+        style: Toast.Style.Failure,
+      });
     }
   }
 }
