@@ -26,7 +26,7 @@ const createAction = (action: () => void) => () => {
   action();
   const cache = new Cache();
   cache.set("pomodoro_on", "true");
-  
+
   launchCommand({
     name: "pomodoro-menu-bar",
     type: LaunchType.UserInitiated,
