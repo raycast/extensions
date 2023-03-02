@@ -3,7 +3,7 @@
   "name": "web-audit",
   "title": "Web Audit",
   "description": "Find SEO related data of any given webpage.",
-  "icon": "web-audit-icon.png",
+  "icon": "web-audit_icon.png",
   "author": "floriandwt",
   "categories": [
     "Developer Tools",
@@ -29,8 +29,8 @@
           "placeholder": "https://raycast.com",
           "type": "text",
           "identifier": "url",
-          "required": false
-        }
+          "required": true
+        } 
       ]
     },
     {
@@ -44,7 +44,7 @@
           "placeholder": "https://raycast.com",
           "type": "text",
           "identifier": "url",
-          "required": false
+          "required": true
         }
       ]
     }

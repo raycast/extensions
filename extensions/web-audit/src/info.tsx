@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Detail, popToRoot, confirmAlert, Icon, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
@@ -76,6 +76,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
         "(\\#[-a-z\\d_]*)?$",
       "i"
     );
+
     return !!pattern.test(url);
   };
 
@@ -96,12 +97,33 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
         setWebsite(values.url);
         setLoading(false);
       } else {
+        confirmAlert({
+          icon: Icon.ExclamationMark,
+          title: "URL is not valid",
+          message: "Please enter a valid URL including the protocol (http:// or https://).",
+          primaryAction: {
+            title: "Try another",
+            onAction: () => {
+              dropUrlErrorIfNeeded();
+              popToRoot({
+                clearSearchBar: false,
+              });
+            },
+          },
+          dismissAction: {
+            title: "Cancel",
+            onAction: () => {
+              dropUrlErrorIfNeeded();
+              popToRoot({
+                clearSearchBar: true,
+              });
+            },
+          },
+        });
+
         setUrlError("Invalid URL");
         setLoading(false);
       }
-    } else {
-      setUrlError("URL is required");
-      setLoading(false);
     }
   };
 
@@ -111,34 +133,9 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
   return (
     <>
-      {!result && !loading && (
-        <Form
-          navigationTitle={loading ? "Analyzing..." : "Web Audit"}
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm
-                onSubmit={(values) => {
-                  if (!loading) submitForm(values);
-                  else return;
-                }}
-                title="Get Info"
-              />
-            </ActionPanel>
-          }
-        >
-          <Form.TextField
-            id="url"
-            title="URL (with https)"
-            placeholder="https://www.raycast.com"
-            error={urlError}
-            onChange={() => dropUrlErrorIfNeeded()}
-            defaultValue={url}
-          />
-        </Form>
-      )}
       {result && !loading && (
         <Detail
-          navigationTitle={`Analyzed ${website}`}
+          navigationTitle={`Scraped ${website}`}
           markdown={
             ((favicon && `# ![${website}](${favicon}) `) || "#") +
             ` Website OG Image: \n` +
@@ -176,15 +173,19 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
               <ActionPanel>
                 <Action.OpenInBrowser url={website} title="Open Site" />
                 <Action
-                  title="Analyze another site"
+                  title="Scrape Another Site"
                   onAction={() => {
                     setResult(null as unknown as Record<string, string>);
                     setWebsite("");
                     setSidebar(null as unknown as Record<string, string>);
                     setOgImage("");
+
+                    popToRoot({
+                      clearSearchBar: false,
+                    });
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
-                  icon={Icon.ArrowLeft}
+                  icon={Icon.Repeat}
                 />
               </ActionPanel>
             )

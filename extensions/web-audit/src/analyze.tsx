@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Detail, confirmAlert, Icon, LaunchProps, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 
@@ -26,9 +26,9 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
     if (h1 < h2 && h2 < h3 && h3 < h4 && h4 < h5 && h5 < h6) {
       setScore((score) => score + 1);
-      setResult((result) => ({ ...result, hTags: "Headings are in order" }));
+      setResult((result) => ({ ...result, hTags: `Headings are in order ![](${Icon.CheckCircle}) ` }));
     } else {
-      setResult((result) => ({ ...result, hTags: "Headings are not in order" }));
+      setResult((result) => ({ ...result, hTags: `Headings are not in order ![](${Icon.XMarkCircle})` }));
     }
   };
 
@@ -38,9 +38,9 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
     if (images === altImages) {
       setScore((score) => score + 1);
-      setResult((result) => ({ ...result, imageAlt: "All images have alt tags" }));
+      setResult((result) => ({ ...result, imageAlt: `All images have alt tags ![](${Icon.CheckCircle})` }));
     } else {
-      setResult((result) => ({ ...result, imageAlt: "Not all images have alt tags" }));
+      setResult((result) => ({ ...result, imageAlt: `Not all images have alt tags ![](${Icon.XMarkCircle})` }));
     }
   };
 
@@ -49,9 +49,9 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
     if (meta > 5) {
       setScore((score) => score + 1);
-      setResult((result) => ({ ...result, meta: "Meta tags are correct" }));
+      setResult((result) => ({ ...result, meta: `Meta tags are correct ![](${Icon.CheckCircle})` }));
     } else {
-      setResult((result) => ({ ...result, meta: "Some meta tags are not correct" }));
+      setResult((result) => ({ ...result, meta: `Some meta tags are not correct ![](${Icon.XMarkCircle})` }));
     }
   };
 
@@ -77,21 +77,58 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
     if (author) setSidebar((sidebar) => ({ ...sidebar, author: author }));
   };
 
+  const checkIndexed = (data: string) => {
+    // look for meta robots tag
+    const metaRobots = data.match(/<meta name="robots" content="(.*?)"\/>/)?.[1];
+    if (metaRobots) {
+      if (metaRobots.includes("noindex")) {
+        setResult((result) => ({ ...result, indexed: `The website is not indexed ![](${Icon.XMarkCircle})` }));
+      } else {
+        setScore((score) => score + 1);
+        setResult((result) => ({ ...result, indexed: `The website is indexed ![](${Icon.CheckCircle})` }));
+      }
+    } else {
+      setScore((score) => score + 1);
+      setResult((result) => ({ ...result, indexed: `The website is indexed ![](${Icon.CheckCircle})` }));
+    }
+  };
+
   const websiteCheck = async (url: string) => {
     const start = Date.now();
     const response = await fetch(url);
     const data = await response.text();
     const end = Date.now();
 
+    const robots = await fetch(`${url}/robots.txt`);
+    if (robots.status === 404) {
+      setResult((result) => ({ ...result, robots: `Robots.txt was not found ![](${Icon.XMarkCircle})` }));
+    } else {
+      const robotsData = await robots.text();
+      if (robotsData.includes("Disallow: /")) {
+        setResult((result) => ({ ...result, robots: `Robots.txt is not correct ![](${Icon.XMarkCircle})` }));
+      } else {
+        setScore((score) => score + 1);
+        setResult((result) => ({ ...result, robots: `Robots.txt is correct ![](${Icon.CheckCircle})` }));
+      }
+    }
+
     getFavicon(url);
     checkHTags(data);
     checkImageAlt(data);
     checkMeta(data);
-    if (end - start > 1000) {
-      setResult((result) => ({ ...result, pageSpeed: `The website is slow (${end - start}ms)` }));
+    checkIndexed(data);
+
+    if (end - start > 700) {
+      setResult((result) => ({
+        ...result,
+        pageSpeed: `The website is slow (${end - start}ms) ![](${Icon.XMarkCircle})`,
+      }));
     } else {
       setScore((score) => score + 1);
-      setResult((result) => ({ ...result, pageSpeed: `The website is fast (${end - start}ms)` }));
+      setResult((result) => ({
+        ...result,
+        pageSpeed: `The website is fast (${end - start}ms) ![](${Icon.CheckCircle})`,
+      }));
     }
     getWebsiteInfo(data);
   };
@@ -110,6 +147,7 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
         "(\\#[-a-z\\d_]*)?$",
       "i"
     );
+
     return !!pattern.test(url);
   };
 
@@ -130,12 +168,33 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
         setWebsite(values.url);
         setLoading(false);
       } else {
+        confirmAlert({
+          icon: Icon.ExclamationMark,
+          title: "URL is not valid",
+          message: "Please enter a valid URL including the protocol (http:// or https://).",
+          primaryAction: {
+            title: "Try another",
+            onAction: () => {
+              dropUrlErrorIfNeeded();
+              popToRoot({
+                clearSearchBar: false,
+              });
+            },
+          },
+          dismissAction: {
+            title: "Cancel",
+            onAction: () => {
+              dropUrlErrorIfNeeded();
+              popToRoot({
+                clearSearchBar: true,
+              });
+            },
+          },
+        });
+
         setUrlError("Invalid URL");
         setLoading(false);
       }
-    } else {
-      setUrlError("URL is required");
-      setLoading(false);
     }
   };
 
@@ -145,42 +204,19 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
 
   return (
     <>
-      {!result && !loading && (
-        <Form
-          navigationTitle={loading ? "Analyzing..." : "Web Audit"}
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm
-                onSubmit={(values) => {
-                  if (!loading) submitForm(values);
-                  else return;
-                }}
-                title="Analyze"
-              />
-            </ActionPanel>
-          }
-        >
-          <Form.TextField
-            id="url"
-            title="URL (with https)"
-            placeholder="https://www.raycast.com"
-            error={urlError}
-            onChange={() => dropUrlErrorIfNeeded()}
-            defaultValue={url}
-          />
-        </Form>
-      )}
       {result && !loading && (
         <Detail
           navigationTitle={`Analyzed ${website}`}
           markdown={
             ((favicon && `# ![${website}](${favicon}) `) || "#") +
-            ` SEO Score: ${score * 25}% \n` +
+            ` SEO Score: ${Math.round((score / 6) * 100)}% \n` +
             `## Results in detail: \n` +
-            ` - ${result.hTags} \n` +
-            ` - ${result.imageAlt} \n` +
-            ` - ${result.meta} \n` +
-            ` - ${result.pageSpeed} \n`
+            `1. ${result.hTags} \n ` +
+            `2. ${result.imageAlt} \n` +
+            `3. ${result.meta} \n` +
+            `4. ${result.pageSpeed} \n` +
+            `5. ${result.robots} \n` +
+            `6. ${result.indexed} \n`
           }
           metadata={
             <Detail.Metadata>
@@ -208,15 +244,19 @@ export default function Command(props: LaunchProps<{ arguments: Website }>) {
               <ActionPanel>
                 <Action.OpenInBrowser url={website} title="Open Site" />
                 <Action
-                  title="Analyze another site"
+                  title="Analyze Another Site"
                   onAction={() => {
                     setResult(null as unknown as Record<string, string>);
                     setScore(0);
                     setWebsite("");
                     setSidebar(null as unknown as Record<string, string>);
+
+                    popToRoot({
+                      clearSearchBar: false,
+                    });
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
-                  icon={Icon.ArrowLeft}
+                  icon={Icon.Repeat}
                 />
               </ActionPanel>
             )

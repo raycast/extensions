@@ -1,4 +1,5 @@
-<img width="96" src="./assets/web-audit-icon.png" />
+<img width="96" src="./assets/web-audit_icon.png" />
+
 
 # Web Audit Raycast Extension
 
@@ -11,13 +12,10 @@ If the Extension gets approved you will find it in the Raycast Store.
 You can install the extension via the `import extension` command directly in Raycast.
 
 ### 2. Use the command
-The command for starting the Extension is `Analyze Website [https://raycast.com/]`.
+The command for starting the Extension is `Analyze Website [https://raycast.com/]`. You can use any URL you want, if it is not reachable or you don't type the URL in including a protocol, the extension will throw an error.
 
-### 3. Type in the Website URL
-You now can type in the website url of your choice into the input field. Please note that you have to give the full adress inclusive `https://`.
-
-### 4. Wait and look at the results
-After a few milliseconds you should see your results and some information about the website on the right side.
+### 3. Wait and look at the results
+After a few seconds you should see your results and some information about the website on the right side.
 
 ## Bugs
 
