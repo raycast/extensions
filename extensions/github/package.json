@@ -89,6 +89,14 @@
           "default": false,
           "label": "Include Archived",
           "description": "Includes archived repositories in search results"
+        },
+        {
+          "name": "includeOwnerName",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Include Owner Names",
+          "description": "Include owner name alongside repository name in search results"
         }
       ]
     },
