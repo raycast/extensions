@@ -48,15 +48,15 @@
     "budget"
   ],
   "dependencies": {
-    "@raycast/api": "^1.42.0",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.48.5",
+    "@raycast/utils": "^1.4.18",
     "dayjs": "^1.10.7",
     "fuse.js": "^6.5.3",
     "nanoid": "^3.2.0",
     "node-fetch": "^3.0.0",
     "node-localstorage": "^2.2.1",
     "random-hex-color-generator": "^1.0.12",
-    "swr": "^1.1.2-beta.0",
+    "swr": "^2.0.4",
     "ynab": "^1.32.0"
   },
   "devDependencies": {
