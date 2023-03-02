@@ -26,7 +26,7 @@ export const ResultList = ({ languagePairKey }: ResultListProps): JSX.Element =>
   const parsedHTML = text ? parseHTML(text) : undefined;
   const parsedData = parsedHTML ? parseDOMResult(parsedHTML) : undefined;
 
-  const onSearchTextChange = useCallback((text = "") => {
+  const onSearchTextChange = useCallback((text: string) => {
     const word = text.trim();
 
     if (word) {
@@ -46,7 +46,7 @@ export const ResultList = ({ languagePairKey }: ResultListProps): JSX.Element =>
   return (
     <List
       throttle
-      isLoading={isLoading}
+      isLoading={!!word && isLoading}
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Input a word..."
       onSearchTextChange={onSearchTextChange}
