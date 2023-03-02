@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Get SSH Key",
       "description": "Get your local SSH key",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "dependencies": {
