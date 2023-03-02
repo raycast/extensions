@@ -9,7 +9,7 @@ export type UseRepromptOptions = {
 };
 
 /**
- * Returns a function for an {@link Action} that will navigate to a master password confirmation form.
+ * Returns a function for an Action that will navigate to a master password confirmation form.
  * If the confirmation is successful, the provided action will be performed.
  *
  * @param session The session instance.

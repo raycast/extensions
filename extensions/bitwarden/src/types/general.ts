@@ -19,8 +19,4 @@ export type VaultState = {
   serverUrl: string | null;
 };
 
-export enum Object {
-  Item = "item",
-}
-
 export type ErrorType = (typeof ERRORS)[keyof typeof ERRORS];

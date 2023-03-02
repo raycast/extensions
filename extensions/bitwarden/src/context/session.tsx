@@ -1,13 +1,35 @@
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useReducer } from "react";
 import { Bitwarden } from "~/api/bitwarden";
-import { Session } from "~/api/session";
 import UnlockForm from "~/components/UnlockForm";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
+import { Preferences, VaultStatus } from "~/types/general";
 import { SessionState } from "~/types/session";
+import { hashMasterPasswordForReprompting } from "~/utils/passwords";
+
+export type Session = {
+  active: boolean;
+  token: string | undefined;
+  isLoading: boolean;
+  isLocked: boolean;
+  isAuthenticated: boolean;
+  canRepromptBeSkipped: () => boolean;
+  confirmMasterPassword: (password: string) => Promise<boolean>;
+  lock: () => Promise<void>;
+  logout: () => Promise<void>;
+};
 
 export const SessionContext = createContext<Session | null>(null);
+
+const initialState: SessionState = {
+  token: undefined,
+  isLoading: true,
+  isLocked: false,
+  isAuthenticated: false,
+  repromptHash: undefined,
+  passwordEnteredDate: undefined,
+};
 
 export type SessionProviderProps = PropsWithChildren<{
   unlock?: boolean;
@@ -15,22 +37,22 @@ export type SessionProviderProps = PropsWithChildren<{
 
 /**
  * Component which provides a session via the {@link useSession} hook.
- *
- * @param props.api The Bitwarden API.
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
  */
-export function SessionProvider(props: SessionProviderProps): JSX.Element {
+export function SessionProvider(props: SessionProviderProps) {
   const { unlock, children } = props;
   const bitwarden = useBitwarden();
-  const [state, setState] = useState<SessionState>({
-    token: undefined,
-    isLoading: true,
-    isLocked: false,
-    isAuthenticated: false,
+  const [state, setState] = useReducer(
+    (old: SessionState, update: Partial<SessionState>) => ({ ...old, ...update }),
+    initialState
+  );
 
-    repromptHash: undefined,
-    passwordEnteredDate: undefined,
-  });
+  const active = !state.isLoading && state.isAuthenticated && !state.isLocked;
+
+  useEffect(() => {
+    // Load the saved session token from LocalStorage.
+    loadSavedSession();
+  }, [bitwarden]);
 
   /**
    * Determines the current status of the session.
@@ -41,18 +63,13 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
    * @see https://github.com/bitwarden/clients/issues/2729
    * @see https://github.com/raycast/extensions/pull/3413#discussion_r1014624155
    */
-  async function getSessionStatus(
-    api: Bitwarden,
-    token: string | undefined
-  ): Promise<"unlocked" | "locked" | "unauthenticated"> {
-    if (token == null) {
-      return "unauthenticated";
-    }
+  async function getSessionStatus(api: Bitwarden, token: string | undefined): Promise<VaultStatus> {
+    if (token == null) return "unauthenticated";
 
     try {
       await api.listItems(token ?? "");
       return "unlocked";
-    } catch (ex) {
+    } catch {
       // Failed. Probably locked.
       return "locked";
     }
@@ -65,10 +82,11 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
    * @param newState The state to update.
    */
   async function update(newState: Partial<SessionState>): Promise<void> {
+    let updatedState = { ...newState };
     if ("token" in newState) {
       const status = await getSessionStatus(bitwarden, newState.token);
 
-      newState = {
+      updatedState = {
         ...newState,
         isLoading: false,
         isLocked: status === "locked" || status === "unauthenticated",
@@ -76,10 +94,7 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
       };
     }
 
-    setState((old) => ({
-      ...old,
-      ...newState,
-    }));
+    setState(updatedState);
   }
 
   /**
@@ -110,11 +125,6 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
     await update({ token: undefined });
   }
 
-  // Functions provided to the Session object as actions.
-  //
-  // These require updating the SessionProvider's state, and must indirectly have access to setState.
-  // As such, they are created here and provided to the Session object in its constructor.
-
   async function lockVault() {
     const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
     await bitwarden.lock();
@@ -129,55 +139,75 @@ export function SessionProvider(props: SessionProviderProps): JSX.Element {
     await toast.hide();
   }
 
-  // Load the saved session token from LocalStorage.
-  useEffect(() => {
-    (async () => {
-      const [token, passwordHash, passwordEnteredDate] = await Promise.all([
-        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
-        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_HASH),
-        LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED),
-      ]);
+  async function loadSavedSession() {
+    const [token, passwordHash, passwordEnteredDate] = await Promise.all([
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_HASH),
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED),
+    ]);
 
-      // UPGRADE: We can't use the "reprompt" confirmations without a hash of the master password.
-      //          The old session needs to be invalidated so we can get that.
-      if (token != null && passwordHash == null) {
-        await bitwarden.lock();
-        await deleteToken();
-        return;
-      }
+    /* TODO:: We can't use the "reprompt" confirmations without a hash of the master password. 
+    The old session needs to be invalidated so we can get that. */
+    if (token != null && passwordHash == null) {
+      await bitwarden.lock();
+      await deleteToken();
+      return;
+    }
 
-      await update({
-        token,
-        repromptHash: passwordHash,
-        passwordEnteredDate: passwordEnteredDate === undefined ? undefined : new Date(passwordEnteredDate),
-      });
-    })();
-  }, [bitwarden]);
+    await update({
+      token,
+      repromptHash: passwordHash,
+      passwordEnteredDate: passwordEnteredDate === undefined ? undefined : new Date(passwordEnteredDate),
+    });
+  }
 
-  // Create the Session object that will be provided to downstream components.
-  // This provides an API view over the internal state of the provider.
-  const session = new Session({
-    setState,
-    state,
-    api: bitwarden,
-    actions: {
+  async function confirmMasterPassword(password: string): Promise<boolean> {
+    const hash = await hashMasterPasswordForReprompting(password);
+    if (hash !== state.repromptHash) {
+      return false;
+    }
+
+    const now = new Date();
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString());
+    setState({ passwordEnteredDate: now });
+    return true;
+  }
+
+  function canRepromptBeSkipped(): boolean {
+    const { repromptIgnoreDuration } = getPreferenceValues<Preferences>();
+    if (state.passwordEnteredDate == null) {
+      return false;
+    }
+
+    const skipDuration = parseInt(repromptIgnoreDuration, 10);
+    const skipUntil = state.passwordEnteredDate.getTime() + skipDuration;
+    return Date.now() <= skipUntil;
+  }
+
+  const value: Session = useMemo(
+    () => ({
+      token: state.token,
+      isLoading: state.isLoading,
+      isAuthenticated: state.isAuthenticated,
+      isLocked: state.isLocked,
+      active,
       lock: lockVault,
       logout: logoutVault,
-    },
-  });
+      canRepromptBeSkipped,
+      confirmMasterPassword,
+    }),
+    [state, active, lockVault, logoutVault, canRepromptBeSkipped, confirmMasterPassword]
+  );
 
-  // Return the provider.
   const needsUnlockForm = !state.isLoading && (state.isLocked || !state.isAuthenticated);
+
   return (
-    <SessionContext.Provider value={session}>
-      {needsUnlockForm && unlock ? <UnlockForm session={session} onUnlock={setToken} /> : children}
+    <SessionContext.Provider value={value}>
+      {needsUnlockForm && unlock ? <UnlockForm onUnlock={setToken} /> : children}
     </SessionContext.Provider>
   );
 }
 
-/**
- * React hook for accessing the Bitwarden login session.
- */
 export function useSession(): Session {
   const session = useContext(SessionContext);
   if (session == null) {

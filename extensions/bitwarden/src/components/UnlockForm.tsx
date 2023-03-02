@@ -1,13 +1,11 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { Session } from "~/api/session";
 import { useBitwarden } from "~/context/bitwarden";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 export type UnlockFormProps = {
   onUnlock: (token: string, hash: string) => void;
-  session: Session;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
