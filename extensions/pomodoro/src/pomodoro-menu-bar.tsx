@@ -1,23 +1,26 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
-import { useState } from "react";
+import { Icon, launchCommand, LaunchType, LocalStorage, MenuBarExtra } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 import {
-  createInterval,
-  getCurrentInterval,
-  resetInterval,
-  pauseInterval,
+  CACHE_KEY,
   continueInterval,
-  IntervalType,
-  Interval,
-  isPaused,
+  createInterval,
   duration,
+  getCurrentInterval,
+  Interval,
+  IntervalType,
+  isPaused,
+  pauseInterval,
   preferences,
   progress,
+  resetInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 
 export default function TogglePomodoroTimer() {
-  const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
+  const [currentInterval, setCurrentInterval] = useCachedState<Interval | undefined>(CACHE_KEY, undefined);
+  const [running, setRunning] = useCachedState<boolean | undefined>("pomodoro_on", true);
 
   if (currentInterval && progress(currentInterval) >= 100) {
     launchCommand({
@@ -45,6 +48,11 @@ export default function TogglePomodoroTimer() {
     setCurrentInterval(undefined);
   }
 
+  async function onQuit() {
+    onReset();
+    setRunning(false);
+  }
+
   let icon;
   icon = { source: { light: "tomato-light.png", dark: "tomato-dark.png" } };
   if (currentInterval) {
@@ -55,56 +63,74 @@ export default function TogglePomodoroTimer() {
   const title = currentInterval ? secondsToTime(currentInterval.length - duration(currentInterval)) : "--:--";
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
-      {currentInterval ? (
-        <>
-          {isPaused(currentInterval) ? (
-            <MenuBarExtra.Item
-              title="Continue"
-              icon={Icon.Play}
-              onAction={onContinue}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          ) : (
-            <MenuBarExtra.Item
-              title="Pause"
-              icon={Icon.Pause}
-              onAction={onPause}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-            />
-          )}
-          <MenuBarExtra.Item
-            title="Reset"
-            icon={Icon.Stop}
-            onAction={onReset}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-        </>
+    <>
+      {!running ? (
+        <></>
       ) : (
-        <>
-          <MenuBarExtra.Item
-            title={`Focus`}
-            subtitle={`${preferences.focusIntervalDuration}:00`}
-            icon={`🎯`}
-            onAction={() => onStart("focus")}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
-          />
-          <MenuBarExtra.Item
-            title={`Short Break`}
-            subtitle={`${preferences.shortBreakIntervalDuration}:00`}
-            icon={`🧘‍♂️`}
-            onAction={() => onStart("short-break")}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-          />
-          <MenuBarExtra.Item
-            title={`Long Break`}
-            subtitle={`${preferences.longBreakIntervalDuration}:00`}
-            icon={`🚶`}
-            onAction={() => onStart("long-break")}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-        </>
+        <MenuBarExtra icon={icon} title={title} tooltip={"Pomodoro"}>
+          {currentInterval ? (
+            <>
+              {isPaused(currentInterval) ? (
+                <MenuBarExtra.Item
+                  title="Continue"
+                  icon={Icon.Play}
+                  onAction={onContinue}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+              ) : (
+                <MenuBarExtra.Item
+                  title="Pause"
+                  icon={Icon.Pause}
+                  onAction={onPause}
+                  shortcut={{ modifiers: ["cmd"], key: "p" }}
+                />
+              )}
+              <MenuBarExtra.Item
+                title="Reset"
+                icon={Icon.Stop}
+                onAction={onReset}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+              <MenuBarExtra.Item
+                title={`Quit`}
+                icon={`💤`}
+                onAction={() => onQuit()}
+                shortcut={{ modifiers: ["cmd"], key: "q" }}
+              />
+            </>
+          ) : (
+            <>
+              <MenuBarExtra.Item
+                title={`Focus`}
+                subtitle={`${preferences.focusIntervalDuration}:00`}
+                icon={`🎯`}
+                onAction={() => onStart("focus")}
+                shortcut={{ modifiers: ["cmd"], key: "f" }}
+              />
+              <MenuBarExtra.Item
+                title={`Short Break`}
+                subtitle={`${preferences.shortBreakIntervalDuration}:00`}
+                icon={`🧘‍♂️`}
+                onAction={() => onStart("short-break")}
+                shortcut={{ modifiers: ["cmd"], key: "s" }}
+              />
+              <MenuBarExtra.Item
+                title={`Long Break`}
+                subtitle={`${preferences.longBreakIntervalDuration}:00`}
+                icon={`🚶`}
+                onAction={() => onStart("long-break")}
+                shortcut={{ modifiers: ["cmd"], key: "l" }}
+              />
+              <MenuBarExtra.Item
+                title={`Quit`}
+                icon={`💤`}
+                onAction={() => onQuit()}
+                shortcut={{ modifiers: ["cmd"], key: "q" }}
+              />
+            </>
+          )}
+        </MenuBarExtra>
       )}
-    </MenuBarExtra>
+    </>
   );
 }

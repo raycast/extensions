@@ -1,6 +1,16 @@
-import { Detail, launchCommand, environment, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
+import {
+  Cache,
+  closeMainWindow,
+  Detail,
+  environment,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  popToRoot,
+} from "@raycast/api";
 
-import { ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel } from "@raycast/api";
 
 import {
   continueInterval,
@@ -14,6 +24,9 @@ import {
 
 const createAction = (action: () => void) => () => {
   action();
+  const cache = new Cache();
+  cache.set("pomodoro_on", "true");
+  
   launchCommand({
     name: "pomodoro-menu-bar",
     type: LaunchType.UserInitiated,

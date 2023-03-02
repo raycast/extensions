@@ -22,7 +22,7 @@ export type Interval = {
 
 const cache = new Cache();
 
-const CACHE_KEY = "pomodoro-interval/1.1";
+export const CACHE_KEY = "pomodoro-interval/1.1";
 
 const currentTimestamp = () => Math.round(new Date().valueOf() / 1000);
 
@@ -91,7 +91,11 @@ export function resetInterval() {
 export function getCurrentInterval(): Interval | undefined {
   const result = cache.get(CACHE_KEY);
   if (result) {
-    return JSON.parse(result);
+    try {
+      return JSON.parse(result);
+    } catch (error) {
+      return undefined;
+    }
   }
 }
 
