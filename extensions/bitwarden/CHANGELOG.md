@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Codebase refactor] - 2023-03-03
+
+- Cleanup and reorganization of the whole codebase
+
 ## [Enhancements] - 2023-01-17
 
 - Added master password re-prompt feature.
