@@ -34,10 +34,8 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
         return acc;
       }
 
-      const [startedAt, stoppedAt] = [
-        new Date(val.duration.startedAt + "Z").getTime(),
-        new Date(val.duration.stoppedAt + "Z").getTime(),
-      ];
+      const startedAt = new Date(val.duration.startedAt + "Z").getTime()
+      const stoppedAt = new Date(val.duration.stoppedAt + "Z").getTime()
 
       return (acc += stoppedAt - startedAt);
     }, 0);
