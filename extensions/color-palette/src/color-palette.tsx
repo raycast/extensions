@@ -56,7 +56,9 @@ export default function Command() {
     if (cachedPalette) {
       try {
         return JSON.parse(cachedPalette);
-      } catch (_error) {}
+      } catch (error) {
+        console.error("Failed to parse cached palette:", error);
+      }
     }
 
     return generatePalettes();
