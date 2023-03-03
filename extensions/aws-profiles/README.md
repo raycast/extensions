@@ -9,14 +9,14 @@ You will probably need to write a script or prepare a command that you will like
 
 Examples :
 
-- Open AWS console using https://granted.dev/ _assume_ command (default)
+### Open AWS console using https://granted.dev/ _assume_ command (default)
 
-     /bin/zsh -l -c "assume -c <profile>"
+    /bin/zsh -l -c "assume -c <profile>"
 
-- Open Terminal and login using sso
+### Open Terminal and login using sso
 
-     osascript -e 'tell app "Terminal" to do script "aws sso login --profile <profile>"'
+    osascript -e 'tell app "Terminal" to do script "aws sso login --profile <profile>"'
 
-- Run custom script to do custom stuff
+### Run custom script to do custom stuff
 
-     /usr/local/bin/my-profile-script -p <profile>
+    /usr/local/bin/my-profile-script -p <profile>
