@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiGetTimeTrackingEntries } from "./api-timeular";
 import { Activity, ActivityReport, TimeEntry, Tracking } from "./types";
 import { humanizeDuration } from "./useCurrenTrackingStatus";
@@ -18,6 +18,14 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
       .catch(showError)
       .finally(() => setReportIsLoading(false));
   }, [tracking]);
+
+  const buildHeadlineWithTotal = useCallback((totalBookedTime, ms, markdown) => {
+    return setReportMarkdown(
+      `Time entries you have tracked today (including current) sums to ${humanizeDuration(
+        totalBookedTime + (ms || 0)
+      )}:\n` + markdown
+    )
+  },[humanizeDuration])
 
   useEffect(() => {
     if (reportIsLoading) {
@@ -48,11 +56,7 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
       .then(list => list.join("\n\n"))
       .then(markdown =>
         markdown
-          ? setReportMarkdown(
-              `Time entries you have tracked today (including current)[**${humanizeDuration(
-                totalBookedTime + (ms || 0)
-              )}**]:\n` + markdown
-            )
+          ? buildHeadlineWithTotal(totalBookedTime, ms, markdown)
           : setReportMarkdown("You didn't track anything today yet.")
       )
       .finally(() => console.debug(`building today report took ${Date.now() - markStart}ms`));
