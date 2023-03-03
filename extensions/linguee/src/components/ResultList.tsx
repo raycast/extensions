@@ -46,7 +46,7 @@ export const ResultList = ({ languagePairKey }: ResultListProps): JSX.Element =>
   return (
     <List
       throttle
-      isLoading={!!word && isLoading}
+      isLoading={isLoading}
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Input a word..."
       onSearchTextChange={onSearchTextChange}
