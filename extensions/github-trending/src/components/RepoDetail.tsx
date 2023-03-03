@@ -1,11 +1,10 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from '@raycast/api'
+import { Action, ActionPanel, Detail, Icon } from '@raycast/api'
 import { useFetch } from '@raycast/utils'
 import { PROGRAMMING_LANGUAGES_COLORS } from '../constants'
 import { RepoType } from '../type'
 import { formatNumber } from '../utils'
 
 export const RepoDetail = ({ repo }: { repo: RepoType }) => {
-  const { pop } = useNavigation()
   const READMEUrl = `https://raw.githubusercontent.com/${repo.author}/${repo.name}/master/README.md`
   const authorUrl = `https://github.com/${repo.author}`
   const languageColor =
@@ -32,13 +31,9 @@ export const RepoDetail = ({ repo }: { repo: RepoType }) => {
       }
       actions={
         <ActionPanel>
-          <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
-
-          <ActionPanel.Section title="Open in Browser">
-            <Action.OpenInBrowser url={repo.href} title="Open Repository in Browser" />
-            <Action.OpenInBrowser url={authorUrl} title="Open Author in Browser" />
-            <Action.OpenInBrowser icon="github-dev.png" url={githubDevUrl} title="Open in GitHub.dev" />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser url={repo.href} title="Open in Browser" />
+          <Action.OpenInBrowser url={authorUrl} title="Open Author in Browser" />
+          <Action.OpenInBrowser icon="github-dev.png" url={githubDevUrl} title="Open in GitHub.dev" />
         </ActionPanel>
       }
     />

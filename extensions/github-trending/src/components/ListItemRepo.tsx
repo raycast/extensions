@@ -17,7 +17,7 @@ export const ListItemRepo = ({ repo, onRangeChange }: ListItemProps) => {
     <List.Item
       title={repo.author + '/' + repo.name}
       subtitle={{
-        value: `  ☆ ${formatNumber(repo.stars)}`,
+        value: `  ☆ ${formatNumber(repo.stars)} - ${repo.description}`,
         tooltip: repo.description,
       }}
       accessories={[{ tag: { value: repo.language || 'Unknown', color: languageColor } }]}

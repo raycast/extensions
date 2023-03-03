@@ -10,14 +10,14 @@ export const ActionLanguage = ({ repo, onChangeRange }: { repo: RepoType; onChan
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser url={repo.href} />
         <Action
-          title="Quick Look"
+          title="Show Details"
           icon={Icon.Book}
           onAction={() => {
             push(<RepoDetail repo={repo} />)
           }}
         />
+        <Action.OpenInBrowser url={repo.href} />
         <Action.OpenInBrowser
           shortcut={{
             modifiers: ['cmd', 'shift'],

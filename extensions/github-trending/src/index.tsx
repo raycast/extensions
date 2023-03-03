@@ -11,6 +11,7 @@ import { commandReducer } from './reducer'
 import { RepoType } from './type'
 
 const cache = new Cache()
+cache.set('date', new Date().getDate().toString())
 
 const parseCache = (key: string) => {
   const data = cache.get(key)
@@ -33,14 +34,18 @@ export default function Command() {
     async function fetchRepos() {
       try {
         dispatch({ type: 'SET_IS_LOADING', payload: true })
-
+        const cacheDate = cache.get('date')
+        const currentDate = new Date().getDate().toString()
+        const isCacheExpired = cacheDate !== currentDate
         const key = `${state.selectedLanguage}-${state.range}`
+
         let result
-        if (cache.has(key)) {
+        if (!isCacheExpired && cache.has(key)) {
           result = parseCache(key)
         } else {
           result = await trending(state.range, state.selectedLanguage)
           cache.set(key, JSON.stringify(result))
+          cache.set('date', currentDate)
         }
 
         dispatch({ type: 'SET_REPOS', payload: result as RepoType[] })
