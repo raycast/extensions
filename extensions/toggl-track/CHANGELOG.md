@@ -1,8 +1,12 @@
 # Toggl Track Changelog
 
+## [Fix] - 2023-03-03
+
+- Fixed todays total tracked time calculation also taking the negative duration of the running time entry into account.
+
 ## [New Feature] - 2023-02-28
 
-- Display the total time tracking in the current today in the main windows navigation title.
+- Display the total time tracking of the current day in the main windows navigation title.
 
 ## [Update] - 2023-02-13
 

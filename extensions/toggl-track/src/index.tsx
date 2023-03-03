@@ -27,7 +27,7 @@ function ListView() {
 
   const totalDurationToday =
     timeEntries
-      .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
+      .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day") && timeEntry.duration > 0)
       .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
     (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
 
