@@ -1,7 +1,7 @@
 [
   {
     "category": "White&Gray&Black",
-    "description": "白灰黑色板",
+    "description": "Neutral Colors Palette",
     "detial": [
       { "name": "White", "hex": "#FFFFFF" },
       { "name": "Gray0", "hex": "#F8F9FA" },
@@ -19,7 +19,7 @@
   },
   {
     "category": "Red",
-    "description": "红色色板",
+    "description": "Red Palette",
     "detial": [
       { "name": "Red0", "hex": "#FFF5F5" },
       { "name": "Red1", "hex": "#FFE3E3" },
@@ -35,7 +35,7 @@
   },
   {
     "category": "Orange",
-    "description": "橙色色板",
+    "description": "Orange Palette",
     "detial": [
       { "name": "Orange0", "hex": "#FFF4E6" },
       { "name": "Orange1", "hex": "#FFE8CC" },
@@ -51,7 +51,7 @@
   },
   {
     "category": "Yellow",
-    "description": "黄色色板",
+    "description": "Yellow Palette",
     "detial": [
       { "name": "Yellow0", "hex": "#FFF9DB" },
       { "name": "Yellow1", "hex": "#FFF3BF" },
@@ -67,7 +67,7 @@
   },
   {
     "category": "Lime",
-    "description": "青绿色板",
+    "description": "Lime Palette",
     "detial": [
       { "name": "Lime0", "hex": "#F4FCE3" },
       { "name": "Lime1", "hex": "#E9FAC8" },
@@ -83,7 +83,7 @@
   },
   {
     "category": "Green",
-    "description": "绿色色板",
+    "description": "Green Palette",
     "detial": [
       { "name": "Green0", "hex": "#EBFBEE" },
       { "name": "Green1", "hex": "#D3F9D8" },
@@ -99,7 +99,7 @@
   },
   {
     "category": "Teal",
-    "description": "水鸭蓝色板",
+    "description": "Teal Palette",
     "detial": [
       { "name": "Teal0", "hex": "#E6FCF5" },
       { "name": "Teal1", "hex": "#C3FAE8" },
@@ -115,7 +115,7 @@
   },
   {
     "category": "Cyan",
-    "description": "青色色板",
+    "description": "Cyan Palette",
     "detial": [
       { "name": "Cyan0", "hex": "#E3FAFC" },
       { "name": "Cyan1", "hex": "#C5F6FA" },
@@ -131,7 +131,7 @@
   },
   {
     "category": "Blue",
-    "description": "蓝色色板",
+    "description": "Blue Palette",
     "detial": [
       { "name": "Blue0", "hex": "#E7F5FF" },
       { "name": "Blue1", "hex": "#D0EBFF" },
@@ -147,7 +147,7 @@
   },
   {
     "category": "Indigo",
-    "description": "靛色色板",
+    "description": "Indigo Palette",
     "detial": [
       { "name": "Indigo0", "hex": "#EDF2FF" },
       { "name": "Indigo1", "hex": "#DBE4FF" },
@@ -163,7 +163,7 @@
   },
   {
     "category": "Violet",
-    "description": "蓝紫色板",
+    "description": "Violet Palette",
     "detial": [
       { "name": "Violet0", "hex": "#F3F0FF" },
       { "name": "Violet1", "hex": "#E5DBFF" },
@@ -179,7 +179,7 @@
   },
   {
     "category": "Grape",
-    "description": "葡萄紫色板",
+    "description": "Grape Palette",
     "detial": [
       { "name": "Grape0", "hex": "#F8F0FC" },
       { "name": "Grape1", "hex": "#F3D9FA" },
@@ -195,7 +195,7 @@
   },
   {
     "category": "Pink",
-    "description": "粉色色板",
+    "description": "Pink Palette",
     "detial": [
       { "name": "Pink0", "hex": "#FFF0F6" },
       { "name": "Pink1", "hex": "#FFDEEB" },

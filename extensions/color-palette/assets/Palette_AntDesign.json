@@ -1,7 +1,7 @@
 [
   {
     "category": "Light｜DustRed（薄暮）",
-    "description": "斗志、奔放",
+    "description": "Fighting Spirit、Bold And Unrestrained｜斗志、奔放",
     "detial": [
       { "name": "Red1", "hex": "#FFF1F0" },
       { "name": "Red2", "hex": "#FFCCC7" },
@@ -17,7 +17,7 @@
   },
   {
     "category": "Light｜Volcano（火山）",
-    "description": "醒目、澎湃",
+    "description": "Eye-Catching、Surging｜醒目、澎湃",
     "detial": [
       { "name": "Volcano1", "hex": "#FFF2E8" },
       { "name": "Volcano2", "hex": "#FFD8BF" },
@@ -33,7 +33,7 @@
   },
   {
     "category": "Light｜SunsetOrange（日暮）",
-    "description": "温暖、欢快",
+    "description": "Warm、Cheerful｜温暖、欢快",
     "detial": [
       { "name": "Orange1", "hex": "#FFF7E6" },
       { "name": "Orange2", "hex": "#FFE7BA" },
@@ -49,7 +49,7 @@
   },
   {
     "category": "Light｜CalendulaGold（金盏花）",
-    "description": "活力、积极",
+    "description": "Vitality、Positive｜活力、积极",
     "detial": [
       { "name": "Gold1", "hex": "#FFFBE6" },
       { "name": "Gold2", "hex": "#FFF1B8" },
@@ -65,7 +65,7 @@
   },
   {
     "category": "Light｜SunriseYellow（日出）",
-    "description": "出生、阳光",
+    "description": "Birth、Sunshine｜出生、阳光",
     "detial": [
       { "name": "Yellow1", "hex": "#FEFFE6" },
       { "name": "Yellow2", "hex": "#FFFFB8" },
@@ -81,7 +81,7 @@
   },
   {
     "category": "Light｜Lime（青柠）",
-    "description": "自然、生机",
+    "description": "Natural、Vitality｜自然、生机",
     "detial": [
       { "name": "Lime1", "hex": "#FCFFE6" },
       { "name": "Lime2", "hex": "#F4FFB8" },
@@ -97,7 +97,7 @@
   },
   {
     "category": "Light｜PolarGreen（极光绿）",
-    "description": "健康、创新",
+    "description": "Health、Innovation｜健康、创新",
     "detial": [
       { "name": "Green1", "hex": "#F6FFED" },
       { "name": "Green2", "hex": "#D9F7BE" },
@@ -113,7 +113,7 @@
   },
   {
     "category": "Light｜Cyan（明青）",
-    "description": "希望、坚强",
+    "description": "Hope、Strong｜希望、坚强",
     "detial": [
       { "name": "Cyan1", "hex": "#E6FFFB" },
       { "name": "Cyan2", "hex": "#B5F5EC" },
@@ -129,7 +129,7 @@
   },
   {
     "category": "Light｜DaybreakBlue（拂晓蓝）",
-    "description": "包容、科技、普惠",
+    "description": "Inclusiveness、Technology、Inclusiveness｜包容、科技、普惠",
     "detial": [
       { "name": "Blue1", "hex": "#E6F4FF" },
       { "name": "Blue2", "hex": "#BAE0FF" },
@@ -145,7 +145,7 @@
   },
   {
     "category": "Light｜GeekBlue（极客蓝）",
-    "description": "探索、钻研",
+    "description": "Explore、Research｜探索、钻研",
     "detial": [
       { "name": "GeekBlue1", "hex": "#F0F5FF" },
       { "name": "GeekBlue2", "hex": "#D6E4FF" },
@@ -161,7 +161,7 @@
   },
   {
     "category": "Light｜GoldenPurple（酱紫）",
-    "description": "优雅、浪漫",
+    "description": "Elegant、Romantic｜优雅、浪漫",
     "detial": [
       { "name": "Purple1", "hex": "#F9F0FF" },
       { "name": "Purple2", "hex": "#EFDBFF" },
@@ -177,7 +177,7 @@
   },
   {
     "category": "Light｜Magenta（法式洋红）",
-    "description": "明快、感性",
+    "description": "Bright、Emotional｜明快、感性",
     "detial": [
       { "name": "Magenta1", "hex": "#FFF0F6" },
       { "name": "Magenta2", "hex": "#FFD6E7" },
@@ -193,7 +193,7 @@
   },
   {
     "category": "Light｜Gray（中性灰）",
-    "description": "中性色能够令页面信息具备良好的主次关系，助力阅读体验",
+    "description": "Neutral｜中性",
     "detial": [
       { "name": "Gray1", "hex": "#FFFFFF" },
       { "name": "Gray2", "hex": "#FAFAFA" },
@@ -212,7 +212,7 @@
   },
   {
     "category": "Dark｜DustRed（薄暮）",
-    "description": "斗志、奔放",
+    "description": "Fighting Spirit、Bold And Unrestrained｜斗志、奔放",
     "detial": [
       { "name": "Red1", "hex": "#2A1215" },
       { "name": "Red2", "hex": "#431418" },
@@ -228,7 +228,7 @@
   },
   {
     "category": "Dark｜Volcano（火山）",
-    "description": "醒目、澎湃",
+    "description": "Eye-Catching、Surging｜醒目、澎湃",
     "detial": [
       { "name": "Volcano1", "hex": "#2B1611" },
       { "name": "Volcano2", "hex": "#441D12" },
@@ -244,7 +244,7 @@
   },
   {
     "category": "Dark｜SunsetOrange（日暮）",
-    "description": "温暖、欢快",
+    "description": "Warm、Cheerful｜温暖、欢快",
     "detial": [
       { "name": "Orange1", "hex": "#2B1D11" },
       { "name": "Orange2", "hex": "#442A11" },
@@ -260,7 +260,7 @@
   },
   {
     "category": "Dark｜CalendulaGold（金盏花）",
-    "description": "活力、积极",
+    "description": "Vitality、Positive｜活力、积极",
     "detial": [
       { "name": "Gold1", "hex": "#2B2111" },
       { "name": "Gold2", "hex": "#443111" },
@@ -276,7 +276,7 @@
   },
   {
     "category": "Dark｜SunriseYellow（日出）",
-    "description": "出生、阳光",
+    "description": "Birth、Sunshine｜出生、阳光",
     "detial": [
       { "name": "Yellow1", "hex": "#2B2611" },
       { "name": "Yellow2", "hex": "#443B11" },
@@ -292,7 +292,7 @@
   },
   {
     "category": "Dark｜Lime（青柠）",
-    "description": "自然、生机",
+    "description": "Natural、Vitality｜自然、生机",
     "detial": [
       { "name": "Lime1", "hex": "#1F2611" },
       { "name": "Lime2", "hex": "#2E3C10" },
@@ -308,7 +308,7 @@
   },
   {
     "category": "Dark｜PolarGreen（极光绿）",
-    "description": "健康、创新",
+    "description": "Health、Innovation｜健康、创新",
     "detial": [
       { "name": "Green1", "hex": "#162312" },
       { "name": "Green2", "hex": "#1D3712" },
@@ -324,7 +324,7 @@
   },
   {
     "category": "Dark｜Cyan（明青）",
-    "description": "希望、坚强",
+    "description": "Hope、Strong｜希望、坚强",
     "detial": [
       { "name": "Cyan1", "hex": "#112123" },
       { "name": "Cyan2", "hex": "#113536" },
@@ -340,7 +340,7 @@
   },
   {
     "category": "Dark｜DaybreakBlue（拂晓蓝）",
-    "description": "包容、科技、普惠",
+    "description": "Inclusiveness、Technology、Inclusiveness｜包容、科技、普惠",
     "detial": [
       { "name": "Blue1", "hex": "#111A2C" },
       { "name": "Blue2", "hex": "#112545" },
@@ -356,7 +356,7 @@
   },
   {
     "category": "Dark｜GeekBlue（极客蓝）",
-    "description": "探索、钻研",
+    "description": "Explore、Research｜探索、钻研",
     "detial": [
       { "name": "GeekBlue1", "hex": "#131629" },
       { "name": "GeekBlue2", "hex": "#161D40" },
@@ -372,7 +372,7 @@
   },
   {
     "category": "Dark｜GoldenPurple（酱紫）",
-    "description": "优雅、浪漫",
+    "description": "Elegant、Romantic｜优雅、浪漫",
     "detial": [
       { "name": "Purple1", "hex": "#1A1325" },
       { "name": "Purple2", "hex": "#24163A" },
@@ -388,7 +388,7 @@
   },
   {
     "category": "Dark｜Magenta（法式洋红）",
-    "description": "明快、感性",
+    "description": "Bright、Emotional｜明快、感性",
     "detial": [
       { "name": "Magenta1", "hex": "#291321" },
       { "name": "Magenta2", "hex": "#40162F" },

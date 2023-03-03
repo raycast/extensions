@@ -1,7 +1,7 @@
 [
   {
     "category": "Light｜Blue",
-    "description": "品牌色",
+    "description": "Brand Color Palette in Light Theme",
     "detial": [
       { "name": "Blue1", "hex": "#F2F3FF" },
       { "name": "Blue2", "hex": "#D9E1FF" },
@@ -17,7 +17,7 @@
   },
   {
     "category": "Light｜Red",
-    "description": "错误色",
+    "description": "Error Color Palette in Light Theme",
     "detial": [
       { "name": "Red1", "hex": "#FFF0ED" },
       { "name": "Red2", "hex": "#FFD8D2" },
@@ -33,7 +33,7 @@
   },
   {
     "category": "Light｜Orange",
-    "description": "警告色",
+    "description": "Warning Color Palette in Light Theme",
     "detial": [
       { "name": "Orange1", "hex": "#FFF1E9" },
       { "name": "Orange2", "hex": "#FFD9C2" },
@@ -49,7 +49,7 @@
   },
   {
     "category": "Light｜Green",
-    "description": "成功色",
+    "description": "Success Color Palette in Light Theme",
     "detial": [
       { "name": "Green1", "hex": "#E3F9E9" },
       { "name": "Green2", "hex": "#C6F3D7" },
@@ -65,7 +65,7 @@
   },
   {
     "category": "Light｜Cyan",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Light Theme",
     "detial": [
       { "name": "Cyan1", "hex": "#E8F5FF" },
       { "name": "Cyan2", "hex": "#C4E8FF" },
@@ -81,7 +81,7 @@
   },
   {
     "category": "Light｜Purple",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Light Theme",
     "detial": [
       { "name": "Purple1", "hex": "#FBF0FF" },
       { "name": "Purple2", "hex": "#EEDCFF" },
@@ -97,7 +97,7 @@
   },
   {
     "category": "Light｜Yellow",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Light Theme",
     "detial": [
       { "name": "Yellow1", "hex": "#FFF5E4" },
       { "name": "Yellow2", "hex": "#FFE7B5" },
@@ -113,7 +113,7 @@
   },
   {
     "category": "Light｜Pink",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Light Theme",
     "detial": [
       { "name": "Pink1", "hex": "#FFF0F6" },
       { "name": "Pink2", "hex": "#FFD8EB" },
@@ -129,7 +129,7 @@
   },
   {
     "category": "Light｜Gray",
-    "description": "中性灰",
+    "description": "Gray Palette in Light Theme",
     "detial": [
       { "name": "Gray1 L96", "hex": "#F3F3F3" },
       { "name": "Gray2 L94", "hex": "#EEEEEE" },
@@ -149,7 +149,7 @@
   },
   {
     "category": "Light｜BlueGray",
-    "description": "蓝灰",
+    "description": "BlueGray Palette in Light Theme",
     "detial": [
       { "name": "BG1 L96", "hex": "#F3F3F4" },
       { "name": "BG2 L94", "hex": "#EEEEF0" },
@@ -169,7 +169,7 @@
   },
   {
     "category": "Dark｜Blue",
-    "description": "品牌色",
+    "description": "Brand Color Palette in Dark Theme",
     "detial": [
       { "name": "Blue1", "hex": "#1E2C60" },
       { "name": "Blue2", "hex": "#062E9A" },
@@ -185,7 +185,7 @@
   },
   {
     "category": "Dark｜Red",
-    "description": "错误色",
+    "description": "Error Color Palette in Dark Theme",
     "detial": [
       { "name": "Red1", "hex": "#730524" },
       { "name": "Red2", "hex": "#960627" },
@@ -201,7 +201,7 @@
   },
   {
     "category": "Dark｜Orange",
-    "description": "警告色",
+    "description": "Warning Color Palette in Dark Theme",
     "detial": [
       { "name": "Orange1", "hex": "#692204" },
       { "name": "Orange2", "hex": "#873105" },
@@ -217,7 +217,7 @@
   },
   {
     "category": "Dark｜Green",
-    "description": "成功色",
+    "description": "Success Color Palette in Dark Theme",
     "detial": [
       { "name": "Green1", "hex": "#034116" },
       { "name": "Green2", "hex": "#035428" },
@@ -233,7 +233,7 @@
   },
   {
     "category": "Dark｜Cyan",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Dark Theme",
     "detial": [
       { "name": "Cyan1", "hex": "#05437D" },
       { "name": "Cyan2", "hex": "#06579E" },
@@ -249,7 +249,7 @@
   },
   {
     "category": "Dark｜Purple",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Dark Theme",
     "detial": [
       { "name": "Purple1", "hex": "#451981" },
       { "name": "Purple2", "hex": "#5A2D96" },
@@ -265,7 +265,7 @@
   },
   {
     "category": "Dark｜Yellow",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Dark Theme",
     "detial": [
       { "name": "Yellow1", "hex": "#5E3B04" },
       { "name": "Yellow2", "hex": "#754E05" },
@@ -281,7 +281,7 @@
   },
   {
     "category": "Dark｜Pink",
-    "description": "扩展色",
+    "description": "Extended Color Palette in Dark Theme",
     "detial": [
       { "name": "Pink1", "hex": "#7B0554" },
       { "name": "Pink2", "hex": "#9B066D" },

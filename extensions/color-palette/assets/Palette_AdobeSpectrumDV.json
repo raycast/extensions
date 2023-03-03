@@ -1,7 +1,7 @@
 [
   {
     "category": "Categorical",
-    "description": "C1-6组成6色色板｜C1-12组成12色色板",
+    "description": "6-color Palette contains C1-6｜12-color Palette contains C1-12",
     "detial": [
       { "name": "C1", "hex": "#0FB5AE" },
       { "name": "C2", "hex": "#4046CA" },
@@ -19,7 +19,7 @@
   },
   {
     "category": "Sequential｜Viridis",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成16色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜16-color Palette contains P+S+T",
     "detial": [
       { "name": "V1(P)", "hex": "#FDE725" },
       { "name": "V2(S)", "hex": "#D2E21B" },
@@ -41,7 +41,7 @@
   },
   {
     "category": "Sequential｜Magma",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成16色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜16-color Palette contains P+S+T",
     "detial": [
       { "name": "M1(P)", "hex": "#FCFDBF" },
       { "name": "M2(S)", "hex": "#FDDEA0" },
@@ -63,7 +63,7 @@
   },
   {
     "category": "Sequential｜Rose",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成16色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜16-color Palette contains P+S+T",
     "detial": [
       { "name": "R1(P)", "hex": "#FFF4DE" },
       { "name": "R2(S)", "hex": "#FFDDD8" },
@@ -85,7 +85,7 @@
   },
   {
     "category": "Sequential｜Cerulean",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成16色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜16-color Palette contains P+S+T",
     "detial": [
       { "name": "C1(P)", "hex": "#EAFFF1" },
       { "name": "C2(S)", "hex": "#C9F1E4" },
@@ -107,7 +107,7 @@
   },
   {
     "category": "Sequential｜Foerst",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成16色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜16-color Palette contains P+S+T",
     "detial": [
       { "name": "F1(P)", "hex": "#FFFFE0" },
       { "name": "F2(S)", "hex": "#E2F5BD" },
@@ -129,7 +129,7 @@
   },
   {
     "category": "Divering｜Orange-Yellow-Seafoam",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成15色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜15-color Palette contains P+S+T",
     "detial": [
       { "name": "-7(P)", "hex": "#580000" },
       { "name": "-6(T)", "hex": "#79260B" },
@@ -150,7 +150,7 @@
   },
   {
     "category": "Divering｜Red-Yellow-Blue",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成15色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜15-color Palette contains P+S+T",
     "detial": [
       { "name": "-7(P)", "hex": "#4A001E" },
       { "name": "-6(T)", "hex": "#751232" },
@@ -171,7 +171,7 @@
   },
   {
     "category": "Divering｜Red-Blue",
-    "description": "P组成5色色板｜P+S组成9色色板｜P+S+T组成15色色板",
+    "description": "5-color Palette contains P｜9-color Palette contains P+S｜15-color Palette contains P+S+T",
     "detial": [
       { "name": "-7(P)", "hex": "#4A001E" },
       { "name": "-6(T)", "hex": "#731331" },

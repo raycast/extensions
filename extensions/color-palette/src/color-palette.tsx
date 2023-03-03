@@ -1,45 +1,70 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
-import { useState } from "react";
-import cp_ChineseColor from "../assets/Palette_ChineseColor.json";
-import cp_OpenColor from "../assets/Plaette_OpenColor.json";
-import cp_AntDesign from "../assets/Palette_AntDesign.json";
-import cp_ArcoDesign from "../assets/Palette_ArcoDesign.json";
-import cp_SemiDesign from "../assets/Palette_SemiDesign.json";
-import cp_Tdesign from "../assets/Palette_TDesign.json";
-import cp_Spectrum from "../assets/Palette_AdobeSpectrum.json";
-import cp_AppleDesign from "../assets/Palette_AppleDesign.json";
-import cp_AntV from "../assets/Palette_AntV.json";
-import cp_SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
+import { Action, ActionPanel, Grid, Cache, Icon } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { generatePalettes } from "./ColorSchemeVariants";
+import ChineseTraditionalColor from "../assets/Palette_ChineseTraditionalColor.json";
+import OpenColor from "../assets/Plaette_OpenColor.json";
+import AntDesign from "../assets/Palette_AntDesign.json";
+import ArcoDesign from "../assets/Palette_ArcoDesign.json";
+import SemiDesign from "../assets/Palette_SemiDesign.json";
+import Tdesign from "../assets/Palette_TDesign.json";
+import Spectrum from "../assets/Palette_AdobeSpectrum.json";
+import AppleDesign from "../assets/Palette_AppleDesign.json";
+import AntV from "../assets/Palette_AntV.json";
+import SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
 
+// Define Palette Formate
 type Palette = {
   category: string;
   description: string;
   detial: Color[];
 };
 
+// Define Color Fromate
 type Color = {
   name: string;
   hex: string;
 };
 
-//设计色板
-const cp_antd: Palette[] = cp_AntDesign;
-const cp_bad: Palette[] = cp_ArcoDesign;
-const cp_bsd: Palette[] = cp_SemiDesign;
-const cp_td: Palette[] = cp_Tdesign;
-const cp_as: Palette[] = cp_Spectrum;
-const cp_ad: Palette[] = cp_AppleDesign;
+// Define Cache of Dynamic Palette
+const paletteKey = "generatedPalette";
+const paletteCache = new Cache();
 
-//数据可视化色板
-const cp_antv: Palette[] = cp_AntV;
-const cp_asv: Palette[] = cp_SpectrumDV;
+// Design System Palettes
+const cp_ant: Palette[] = AntDesign;
+const cp_arco: Palette[] = ArcoDesign;
+const cp_semi: Palette[] = SemiDesign;
+const cp_t: Palette[] = Tdesign;
+const cp_spe: Palette[] = Spectrum;
+const cp_apple: Palette[] = AppleDesign;
 
-//其它色板
-const cp_cc: Palette[] = cp_ChineseColor;
-const cp_oc: Palette[] = cp_OpenColor;
+// Data Visualization Palettes
+const cp_antv: Palette[] = AntV;
+const cp_spev: Palette[] = SpectrumDV;
 
+// Other Palettes
+const cp_cc: Palette[] = ChineseTraditionalColor;
+const cp_oc: Palette[] = OpenColor;
+
+// Main Command
 export default function Command() {
-  const [palette, setPalette] = useState<Palette[]>(cp_cc);
+  const [palette, setpalette] = useState<Palette[]>(cp_cc);
+
+  // Load Dynamic Palette(cp_dg) from Cache, or generate a new Palette
+  const [cp_dg, setcp_dg] = useState(() => {
+    const cachedPalette = paletteCache.get(paletteKey);
+
+    if (cachedPalette) {
+      try {
+        return JSON.parse(cachedPalette);
+      } catch (_error) {}
+    }
+
+    return generatePalettes();
+  });
+  // When cp_dg change, set current Palette to Cache
+  useEffect(() => {
+    paletteCache.set(paletteKey, JSON.stringify(cp_dg));
+  }, [cp_dg]);
 
   return (
     <Grid
@@ -53,32 +78,34 @@ export default function Command() {
           placeholder="Choose Palette"
           storeValue={true}
           onChange={(value) =>
-            setPalette(
-              value === "chinacolor"
+            setpalette(
+              value === "chinesetraditionalcolor"
                 ? cp_cc
                 : value === "opencolor"
                 ? cp_oc
                 : value === "antdesign"
-                ? cp_antd
+                ? cp_ant
                 : value === "arcodesign"
-                ? cp_bad
+                ? cp_arco
                 : value === "semidesign"
-                ? cp_bsd
+                ? cp_semi
                 : value === "tdesign"
-                ? cp_td
+                ? cp_t
                 : value === "spectrum"
-                ? cp_as
+                ? cp_spe
                 : value === "appledesign"
-                ? cp_ad
+                ? cp_apple
                 : value === "antv"
                 ? cp_antv
                 : value === "spectrumv"
-                ? cp_asv
+                ? cp_spev
+                : value === "variants"
+                ? cp_dg
                 : cp_cc
             )
           }
         >
-          <Grid.Dropdown.Section title="Design">
+          <Grid.Dropdown.Section title="Design System Palettes">
             <Grid.Dropdown.Item title="AntDesign" value="antdesign" icon="Icon_AntDesign.svg" />
             <Grid.Dropdown.Item title="ArcoDesign" value="arcodesign" icon="Icon_Arco.svg" />
             <Grid.Dropdown.Item title="SemiDesign" value="semidesign" icon="Icon_Semi.svg" />
@@ -86,13 +113,20 @@ export default function Command() {
             <Grid.Dropdown.Item title="Spectrum" value="spectrum" icon="Icon_AdobeSpectrum.svg" />
             <Grid.Dropdown.Item title="AppleDesign" value="appledesign" icon="Icon_AppleDesign.svg" />
           </Grid.Dropdown.Section>
-          <Grid.Dropdown.Section title="DataVisualization">
+          <Grid.Dropdown.Section title="Data Visualization Palettes">
             <Grid.Dropdown.Item title="AntV" value="antv" icon="Icon_AntV.svg" />
             <Grid.Dropdown.Item title="SpectrumV" value="spectrumv" icon="Icon_AdobeSpectrum.svg" />
           </Grid.Dropdown.Section>
-          <Grid.Dropdown.Section title="Other">
-            <Grid.Dropdown.Item title="中国传统色" value="chinacolor" icon="Icon_Default.svg" />
+          <Grid.Dropdown.Section title="Other Palettes">
+            <Grid.Dropdown.Item
+              title="Chinese Traditional Color"
+              value="chinesetraditionalcolor"
+              icon="Icon_Default.svg"
+            />
             <Grid.Dropdown.Item title="OpenColor" value="opencolor" icon="Icon_OpenColor.svg" />
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Dynamic Palettes">
+            <Grid.Dropdown.Item title="Color Scheme Variants" value="variants" icon="Icon_Variants.png" />
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
@@ -101,7 +135,47 @@ export default function Command() {
         return (
           <Grid.Section columns={8} key={section.category} title={section.category} subtitle={section.description}>
             {section.detial.map((color) => (
-              <ColorItem key={color.name} color={color} />
+              <Grid.Item
+                key={color.name}
+                title={color.name}
+                subtitle={HexToHSL(color.hex)}
+                content={{
+                  color: {
+                    light: color.hex,
+                    dark: color.hex,
+                    adjustContrast: false,
+                  },
+                }}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard title="Copy Hex Value" content={color.hex} />
+                    <Action.CopyToClipboard
+                      title="Copy RGB Value"
+                      content={HexToRGB(color.hex)}
+                      shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy HSL Value"
+                      content={HexToHSL(color.hex)}
+                      shortcut={{ modifiers: ["opt"], key: "return" }}
+                    />
+                    {palette === cp_dg && (
+                      <Action
+                        title="Regenerate Palette"
+                        icon={Icon.Repeat}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                        // Clear cache, Generate a new Palette as cp_dg, Rerender the Palette
+                        onAction={() => {
+                          paletteCache.remove(paletteKey);
+                          const newcp_dg = generatePalettes();
+                          setcp_dg(newcp_dg);
+                          setpalette(newcp_dg);
+                        }}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
             ))}
           </Grid.Section>
         );
@@ -110,7 +184,7 @@ export default function Command() {
   );
 }
 
-//  #FFFFFF 格式的颜色值转换为 HSL 格式的颜色值
+// Hex To HSL
 function HexToHSL(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
@@ -162,7 +236,7 @@ function HexToHSL(hex: string): string {
   return h + "," + s + "%," + l + "%";
 }
 
-// 将 #FFFFFF 格式的颜色值转换为 RGB 格式的颜色值
+// Hex To RGB
 function HexToRGB(hex: string): string {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
@@ -175,36 +249,4 @@ function HexToRGB(hex: string): string {
   const b = parseInt(result[3], 16);
 
   return r + "," + g + "," + b;
-}
-
-// 显示 ColorItem 并提供 Copy 不同格式颜色值的动作
-function ColorItem(props: { color: Color }) {
-  return (
-    <Grid.Item
-      title={props.color.name}
-      subtitle={HexToHSL(props.color.hex)}
-      content={{
-        color: {
-          light: props.color.hex,
-          dark: props.color.hex,
-          adjustContrast: false,
-        },
-      }}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Hex" content={props.color.hex} />
-          <Action.CopyToClipboard
-            title="Copy RGB"
-            content={HexToRGB(props.color.hex)}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy HSL"
-            content={HexToHSL(props.color.hex)}
-            shortcut={{ modifiers: ["opt"], key: "return" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
 }

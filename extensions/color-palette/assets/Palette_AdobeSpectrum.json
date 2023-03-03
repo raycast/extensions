@@ -1,7 +1,7 @@
 [
   {
     "category": "Light｜Gray",
-    "description": "灰色（浅色主题）",
+    "description": "Gray Palette in Light Theme",
     "detial": [
       { "name": "Gray50", "hex": "#FFFFFF" },
       { "name": "Gray75", "hex": "#FDFDFD" },
@@ -18,7 +18,7 @@
   },
   {
     "category": "Light｜Red",
-    "description": "红色（浅色主题）",
+    "description": "Red Palette in Light Theme",
     "detial": [
       { "name": "Red100", "hex": "#FFEBE7" },
       { "name": "Red200", "hex": "#FFDDD6" },
@@ -37,7 +37,7 @@
   },
   {
     "category": "Light｜Orange",
-    "description": "橙色（浅色主题）",
+    "description": "Orange Palette in Light Theme",
     "detial": [
       { "name": "Orange100", "hex": "#FFECCC" },
       { "name": "Orange200", "hex": "#FFDFAD" },
@@ -56,7 +56,7 @@
   },
   {
     "category": "Light｜Yellow",
-    "description": "黄色（浅色主题）",
+    "description": "Yellow Palette in Light Theme",
     "detial": [
       { "name": "Yellow100", "hex": "#FBF198" },
       { "name": "Yellow200", "hex": "#F8E750" },
@@ -75,7 +75,7 @@
   },
   {
     "category": "Light｜Chartreuse",
-    "description": "黄绿（浅色主题）",
+    "description": "Chartreuse Palette in Light Theme",
     "detial": [
       { "name": "Chartreuse100", "hex": "#DBFC6E" },
       { "name": "Chartreuse200", "hex": "#CBF443" },
@@ -94,7 +94,7 @@
   },
   {
     "category": "Light｜Celery",
-    "description": "菜绿（浅色主题）",
+    "description": "Celery Palette in Light Theme",
     "detial": [
       { "name": "Celery100", "hex": "#CDFCBF" },
       { "name": "Celery200", "hex": "#AEF69D" },
@@ -113,7 +113,7 @@
   },
   {
     "category": "Light｜Green",
-    "description": "绿色（浅色主题）",
+    "description": "Green Palette in Light Theme",
     "detial": [
       { "name": "Green100", "hex": "#CEF8E0" },
       { "name": "Green200", "hex": "#ADF4CE" },
@@ -132,7 +132,7 @@
   },
   {
     "category": "Light｜Seafoam",
-    "description": "水蓝（浅色主题）",
+    "description": "Seafoam Palette in Light Theme",
     "detial": [
       { "name": "Seafoam100", "hex": "#CEF7F3" },
       { "name": "Seafoam200", "hex": "#AAF1EA" },
@@ -151,7 +151,7 @@
   },
   {
     "category": "Light｜Cyan",
-    "description": "青色（浅色主题）",
+    "description": "Cyan Palette in Light Theme",
     "detial": [
       { "name": "Cyan100", "hex": "#C5F8FF" },
       { "name": "Cyan200", "hex": "#A4F0FF" },
@@ -170,7 +170,7 @@
   },
   {
     "category": "Light｜Blue",
-    "description": "蓝色（浅色主题）",
+    "description": "Blue Palette in Light Theme",
     "detial": [
       { "name": "Blue100", "hex": "#E0F2FF" },
       { "name": "Blue200", "hex": "#CAE8FF" },
@@ -189,7 +189,7 @@
   },
   {
     "category": "Light｜Indigo",
-    "description": "靛色（浅色主题）",
+    "description": "Indigo Palette in Light Theme",
     "detial": [
       { "name": "Indigo100", "hex": "#EDEEFF" },
       { "name": "Indigo200", "hex": "#E0E2FF" },
@@ -208,7 +208,7 @@
   },
   {
     "category": "Light｜Purple",
-    "description": "紫色（浅色主题）",
+    "description": "Purple Palette in Light Theme",
     "detial": [
       { "name": "Purple100", "hex": "#F6EBFF" },
       { "name": "Purple200", "hex": "#EEDDFF" },
@@ -227,7 +227,7 @@
   },
   {
     "category": "Light｜Fuchsia",
-    "description": "紫红（浅色主题）",
+    "description": "Fuchsia Palette in Light Theme",
     "detial": [
       { "name": "Fuchsia100", "hex": "#FFE9FC" },
       { "name": "Fuchsia200", "hex": "#FFDAFA" },
@@ -246,7 +246,7 @@
   },
   {
     "category": "Light｜Magenta",
-    "description": "品红（浅色主题）",
+    "description": "Magenta Palette in Light Theme",
     "detial": [
       { "name": "Magenta100", "hex": "#FFEAF1" },
       { "name": "Magenta200", "hex": "#FFDCE8" },
@@ -265,7 +265,7 @@
   },
   {
     "category": "Dark｜Gray",
-    "description": "灰色（深色主题）",
+    "description": "Gray Palette in Dark Theme",
     "detial": [
       { "name": "Gray50", "hex": "#1D1D1D" },
       { "name": "Gray75", "hex": "#262626" },
@@ -282,7 +282,7 @@
   },
   {
     "category": "Dark｜Red",
-    "description": "红色（深色主题）",
+    "description": "Red Palette in Dark Theme",
     "detial": [
       { "name": "Red100", "hex": "#7B0000" },
       { "name": "Red200", "hex": "#8D0000" },
@@ -301,7 +301,7 @@
   },
   {
     "category": "Dark｜Orange",
-    "description": "橙色（深色主题）",
+    "description": "Orange Palette in Dark Theme",
     "detial": [
       { "name": "Orange100", "hex": "#662500" },
       { "name": "Orange200", "hex": "#752D00" },
@@ -320,7 +320,7 @@
   },
   {
     "category": "Dark｜Yellow",
-    "description": "黄色（深色主题）",
+    "description": "Yellow Palette in Dark Theme",
     "detial": [
       { "name": "Yellow100", "hex": "#4C3600" },
       { "name": "Yellow200", "hex": "#584000" },
@@ -339,7 +339,7 @@
   },
   {
     "category": "Dark｜Chartreuse",
-    "description": "黄绿（深色主题）",
+    "description": "Chartreuse Palette in Dark Theme",
     "detial": [
       { "name": "Chartreuse100", "hex": "#304000" },
       { "name": "Chartreuse200", "hex": "#374A00" },
@@ -358,7 +358,7 @@
   },
   {
     "category": "Dark｜Celery",
-    "description": "菜绿（深色主题）",
+    "description": "Celery Palette in Dark Theme",
     "detial": [
       { "name": "Celery100", "hex": "#00450A" },
       { "name": "Celery200", "hex": "#00500C" },
@@ -377,7 +377,7 @@
   },
   {
     "category": "Dark｜Green",
-    "description": "绿色（深色主题）",
+    "description": "Green Palette in Dark Theme",
     "detial": [
       { "name": "Green100", "hex": "#044329" },
       { "name": "Green200", "hex": "#004E2F" },
@@ -396,7 +396,7 @@
   },
   {
     "category": "Dark｜Seafoam",
-    "description": "水蓝（深色主题）",
+    "description": "Seafoam Palette in Dark Theme",
     "detial": [
       { "name": "Seafoam100", "hex": "#12413F" },
       { "name": "Seafoam200", "hex": "#0E4C49" },
@@ -415,7 +415,7 @@
   },
   {
     "category": "Dark｜Cyan",
-    "description": "青色（深色主题）",
+    "description": "Cyan Palette in Dark Theme",
     "detial": [
       { "name": "Cyan100", "hex": "#003D62" },
       { "name": "Cyan200", "hex": "#00476F" },
@@ -434,7 +434,7 @@
   },
   {
     "category": "Dark｜Blue",
-    "description": "蓝色（深色主题）",
+    "description": "Blue Palette in Dark Theme",
     "detial": [
       { "name": "Blue100", "hex": "#003877" },
       { "name": "Blue200", "hex": "#00418A" },
@@ -453,7 +453,7 @@
   },
   {
     "category": "Dark｜Indigo",
-    "description": "靛色（深色主题）",
+    "description": "Indigo Palette in Dark Theme",
     "detial": [
       { "name": "Indigo100", "hex": "#282C8C" },
       { "name": "Indigo200", "hex": "#2F34A3" },
@@ -472,7 +472,7 @@
   },
   {
     "category": "Dark｜Purple",
-    "description": "紫色（深色主题）",
+    "description": "Purple Palette in Dark Theme",
     "detial": [
       { "name": "Purple100", "hex": "#4C0D9D" },
       { "name": "Purple200", "hex": "#5911B1" },
@@ -491,7 +491,7 @@
   },
   {
     "category": "Dark｜Fuchsia",
-    "description": "紫红（深色主题）",
+    "description": "Fuchsia Palette in Dark Theme",
     "detial": [
       { "name": "Fuchsia100", "hex": "#6B036A" },
       { "name": "Fuchsia200", "hex": "#7B007B" },
@@ -510,7 +510,7 @@
   },
   {
     "category": "Dark｜Magenta",
-    "description": "品红（深色主题）",
+    "description": "Magenta Palette in Dark Theme",
     "detial": [
       { "name": "Magenta100", "hex": "#76003A" },
       { "name": "Magenta200", "hex": "#890042" },
@@ -529,7 +529,7 @@
   },
   {
     "category": "Darkest｜Gray",
-    "description": "灰色（暗色主题）",
+    "description": "Gray Palette in Darkest Theme",
     "detial": [
       { "name": "Gray50", "hex": "#000000" },
       { "name": "Gray75", "hex": "#0E0E0E" },
@@ -546,7 +546,7 @@
   },
   {
     "category": "Darkest｜Red",
-    "description": "红色（暗色主题）",
+    "description": "Red Palette in Darkest Theme",
     "detial": [
       { "name": "Red100", "hex": "#570000" },
       { "name": "Red200", "hex": "#6E0000" },
@@ -565,7 +565,7 @@
   },
   {
     "category": "Darkest｜Orange",
-    "description": "橙色（暗色主题）",
+    "description": "Orange Palette in Darkest Theme",
     "detial": [
       { "name": "Orange100", "hex": "#481801" },
       { "name": "Orange200", "hex": "#5C2000" },
@@ -584,7 +584,7 @@
   },
   {
     "category": "Darkest｜Yellow",
-    "description": "黄色（暗色主题）",
+    "description": "Yellow Palette in Darkest Theme",
     "detial": [
       { "name": "Yellow100", "hex": "#352400" },
       { "name": "Yellow200", "hex": "#442F00" },
@@ -603,7 +603,7 @@
   },
   {
     "category": "Darkest｜Chartreuse",
-    "description": "黄绿（暗色主题）",
+    "description": "Chartreuse Palette in Darkest Theme",
     "detial": [
       { "name": "Chartreuse100", "hex": "#202B00" },
       { "name": "Chartreuse200", "hex": "#2A3800" },
@@ -622,7 +622,7 @@
   },
   {
     "category": "Darkest｜Celery",
-    "description": "菜绿（暗色主题）",
+    "description": "Celery Palette in Darkest Theme",
     "detial": [
       { "name": "Celery100", "hex": "#002F07" },
       { "name": "Celery200", "hex": "#003D09" },
@@ -641,7 +641,7 @@
   },
   {
     "category": "Darkest｜Green",
-    "description": "绿色（暗色主题）",
+    "description": "Green Palette in Darkest Theme",
     "detial": [
       { "name": "Green100", "hex": "#0A2C1C" },
       { "name": "Green200", "hex": "#073B24" },
@@ -660,7 +660,7 @@
   },
   {
     "category": "Darkest｜Seafoam",
-    "description": "水蓝（暗色主题）",
+    "description": "Seafoam Palette in Darkest Theme",
     "detial": [
       { "name": "Seafoam100", "hex": "#122B2A" },
       { "name": "Seafoam200", "hex": "#133937" },
@@ -679,7 +679,7 @@
   },
   {
     "category": "Darkest｜Cyan",
-    "description": "青色（暗色主题）",
+    "description": "Cyan Palette in Darkest Theme",
     "detial": [
       { "name": "Cyan100", "hex": "#002944" },
       { "name": "Cyan200", "hex": "#003658" },
@@ -698,7 +698,7 @@
   },
   {
     "category": "Darkest｜Blue",
-    "description": "蓝色（暗色主题）",
+    "description": "Blue Palette in Darkest Theme",
     "detial": [
       { "name": "Blue100", "hex": "#002651" },
       { "name": "Blue200", "hex": "#00326A" },
@@ -717,7 +717,7 @@
   },
   {
     "category": "Darkest｜Indigo",
-    "description": "靛色（暗色主题）",
+    "description": "Indigo Palette in Darkest Theme",
     "detial": [
       { "name": "Indigo100", "hex": "#1A1D61" },
       { "name": "Indigo200", "hex": "#23277D" },
@@ -736,7 +736,7 @@
   },
   {
     "category": "Darkest｜Purple",
-    "description": "紫色（暗色主题）",
+    "description": "Purple Palette in Darkest Theme",
     "detial": [
       { "name": "Purple100", "hex": "#321068" },
       { "name": "Purple200", "hex": "#430D8C" },
@@ -755,7 +755,7 @@
   },
   {
     "category": "Darkest｜Fuchsia",
-    "description": "紫红（暗色主题）",
+    "description": "Fuchsia Palette in Darkest Theme",
     "detial": [
       { "name": "Fuchsia100", "hex": "#460E44" },
       { "name": "Fuchsia200", "hex": "#5D095C" },
@@ -774,7 +774,7 @@
   },
   {
     "category": "Darkest｜Magenta",
-    "description": "品红（暗色主题）",
+    "description": "Magenta Palette in Darkest Theme",
     "detial": [
       { "name": "Magenta100", "hex": "#530329" },
       { "name": "Magenta200", "hex": "#6A0034" },

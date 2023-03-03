@@ -1,7 +1,7 @@
 [
   {
     "category": "Light｜Red",
-    "description": "红色（浅色主题）",
+    "description": "Red Palette in Light Theme",
     "detial": [
       { "name": "R1", "hex": "#FFECE8", "hsl": "HSL(10,100%,96%)" },
       { "name": "R2", "hex": "#FDCDC5", "hsl": "HSL(8,93%,88%)" },
@@ -17,7 +17,7 @@
   },
   {
     "category": "Light｜OrangeRed",
-    "description": "橙红色（浅色主题）",
+    "description": "OrangeRed Palette in Light Theme",
     "detial": [
       { "name": "OR1", "hex": "#FFF3E8", "hsl": "HSL(29,100%,96%)" },
       { "name": "OR2", "hex": "#FDDDC3", "hsl": "HSL(27,95%,88%)" },
@@ -33,7 +33,7 @@
   },
   {
     "category": "Light｜Orange",
-    "description": "橙色（浅色主题）",
+    "description": "Orange Palette in Light Theme",
     "detial": [
       { "name": "O1", "hex": "#FFF7E8", "hsl": "HSL(39,100%,96%)" },
       { "name": "O2", "hex": "#FFE4BA", "hsl": "HSL(37,100%,86%)" },
@@ -49,7 +49,7 @@
   },
   {
     "category": "Light｜Gold",
-    "description": "金色（浅色主题）",
+    "description": "Gold Palette in Light Theme",
     "detial": [
       { "name": "G1", "hex": "#FFFCE8", "hsl": "HSL(53,100%,96%)" },
       { "name": "G2", "hex": "#FDF4BF", "hsl": "HSL(51,95%,87%)" },
@@ -65,7 +65,7 @@
   },
   {
     "category": "Light｜Yellow",
-    "description": "黄色（浅色主题）",
+    "description": "Yellow Palette in Light Theme",
     "detial": [
       { "name": "Y1", "hex": "#FEFFE8", "hsl": "HSL(62,100%,96%)" },
       { "name": "Y2", "hex": "#FEFEBE", "hsl": "HSL(60,97%,87%)" },
@@ -81,7 +81,7 @@
   },
   {
     "category": "Light｜Lime",
-    "description": "新生绿（浅色主题）",
+    "description": "Lime Palette in Light Theme",
     "detial": [
       { "name": "L1", "hex": "#FCFFE8", "hsl": "HSL(69,100%,96%)" },
       { "name": "L2", "hex": "#EDF8BB", "hsl": "HSL(71,81%,85%)" },
@@ -97,7 +97,7 @@
   },
   {
     "category": "Light｜Green",
-    "description": "仙野绿（浅色主题）",
+    "description": "Green Palette in Light Theme",
     "detial": [
       { "name": "G1", "hex": "#E8FFEA", "hsl": "HSL(124,100%,96%)" },
       { "name": "G2", "hex": "#AFF0B5", "hsl": "HSL(126,69%,81%)" },
@@ -113,7 +113,7 @@
   },
   {
     "category": "Light｜Cyan",
-    "description": "碧涛青（浅色主题）",
+    "description": "Cyan Palette in Light Theme",
     "detial": [
       { "name": "C1", "hex": "#E8FFFB", "hsl": "HSL(170,100%,96%)" },
       { "name": "C2", "hex": "#B7F4EC", "hsl": "HSL(172,74%,84%)" },
@@ -129,7 +129,7 @@
   },
   {
     "category": "Light｜Blue",
-    "description": "海蔚蓝（浅色主题）",
+    "description": "Blue Palette in Light Theme",
     "detial": [
       { "name": "B1", "hex": "#E8F7FF", "hsl": "HSL(202,100%,96%)" },
       { "name": "B2", "hex": "#C3E7FE", "hsl": "HSL(204,97%,88%)" },
@@ -145,7 +145,7 @@
   },
   {
     "category": "Light｜ArcoBlue",
-    "description": "极致蓝（浅色主题）",
+    "description": "ArcoBlue Palette in Light Theme",
     "detial": [
       { "name": "AB1", "hex": "#E8F3FF", "hsl": "HSL(212,100%,96%)" },
       { "name": "AB2", "hex": "#BEDAFF", "hsl": "HSL(214,100%,87%)" },
@@ -161,7 +161,7 @@
   },
   {
     "category": "Light｜Purple",
-    "description": "暗夜紫（浅色主题）",
+    "description": "Purple Palette in Light Theme",
     "detial": [
       { "name": "P1", "hex": "#F5E8FF", "hsl": "HSL(275,100%,96%)" },
       { "name": "P2", "hex": "#DDBEF6", "hsl": "HSL(273,75%,85%)" },
@@ -177,7 +177,7 @@
   },
   {
     "category": "Light｜PinkPurple",
-    "description": "青春紫（浅色主题）",
+    "description": "PinkPurple Palette in Light Theme",
     "detial": [
       { "name": "PP1", "hex": "#FFE8FB", "hsl": "HSL(310,100%,96%)" },
       { "name": "PP2", "hex": "#F7BAEF", "hsl": "HSL(308,80%,85%)" },
@@ -193,7 +193,7 @@
   },
   {
     "category": "Light｜Magenta",
-    "description": "品红（浅色主题）",
+    "description": "Magenta Palette in Light Theme",
     "detial": [
       { "name": "M1", "hex": "#FFE8F1", "hsl": "HSL(337,100%,96%)" },
       { "name": "M2", "hex": "#FDC2DB", "hsl": "HSL(335,94%,88%)" },
@@ -209,7 +209,7 @@
   },
   {
     "category": "Light｜Grey",
-    "description": "中性灰（浅色主题）",
+    "description": "Grey Palette in Light Theme",
     "detial": [
       { "name": "G1", "hex": "#F7F8FA", "hsl": "HSL(220,20%,98%)" },
       { "name": "G2", "hex": "#F2F3F5", "hsl": "HSL(220,13%,95%)" },
@@ -225,7 +225,7 @@
   },
   {
     "category": "Dark｜Red",
-    "description": "红色（深色主题）",
+    "description": "Red Palette in Dark Theme",
     "detial": [
       { "name": "R1", "hex": "#4D000A", "hsl": "HSL(352,100%,15%)" },
       { "name": "R2", "hex": "#770611", "hsl": "HSL(354,91%,24%)" },
@@ -241,7 +241,7 @@
   },
   {
     "category": "Dark｜OrangeRed",
-    "description": "橙红色（深色主题）",
+    "description": "OrangeRed Palette in Dark Theme",
     "detial": [
       { "name": "OR1", "hex": "#4D0E00", "hsl": "HSL(11,100%,15%)" },
       { "name": "OR2", "hex": "#771E05", "hsl": "HSL(13,92%,24%)" },
@@ -257,7 +257,7 @@
   },
   {
     "category": "Dark｜Orange",
-    "description": "橙色（深色主题）",
+    "description": "Orange Palette in Dark Theme",
     "detial": [
       { "name": "O1", "hex": "#4D1B00", "hsl": "HSL(21,100%,15%)" },
       { "name": "O2", "hex": "#793004", "hsl": "HSL(23,94%,24%)" },
@@ -273,7 +273,7 @@
   },
   {
     "category": "Dark｜Gold",
-    "description": "金色（深色主题）",
+    "description": "Gold Palette in Dark Theme",
     "detial": [
       { "name": "G1", "hex": "#4D2D00", "hsl": "HSL(35,100%,15%)" },
       { "name": "G2", "hex": "#774B04", "hsl": "HSL(37,94%,24%)" },
@@ -289,7 +289,7 @@
   },
   {
     "category": "Dark｜Yellow",
-    "description": "黄色（深色主题）",
+    "description": "Yellow Palette in Dark Theme",
     "detial": [
       { "name": "Y1", "hex": "#4D3800", "hsl": "HSL(44,100%,15%)" },
       { "name": "Y2", "hex": "#785E07", "hsl": "HSL(46,89%,25%)" },
@@ -305,7 +305,7 @@
   },
   {
     "category": "Dark｜Lime",
-    "description": "新生绿（深色主题）",
+    "description": "Lime Palette in Dark Theme",
     "detial": [
       { "name": "L1", "hex": "#2A4D00", "hsl": "HSL(87,100%,15%)" },
       { "name": "L2", "hex": "#447006", "hsl": "HSL(85,90%,23%)" },
@@ -321,7 +321,7 @@
   },
   {
     "category": "Dark｜Green",
-    "description": "仙野绿（深色主题）",
+    "description": "Green Palette in Dark Theme",
     "detial": [
       { "name": "G1", "hex": "#004D1C", "hsl": "HSL(142,100%,15%)" },
       { "name": "G2", "hex": "#046625", "hsl": "HSL(140,92%,21%)" },
@@ -337,7 +337,7 @@
   },
   {
     "category": "Dark｜Cyan",
-    "description": "碧涛青（深色主题）",
+    "description": "Cyan Palette in Dark Theme",
     "detial": [
       { "name": "C1", "hex": "#00424D", "hsl": "HSL(189,100%,15%)" },
       { "name": "C2", "hex": "#06616C", "hsl": "HSL(186,89%,22%)" },
@@ -353,7 +353,7 @@
   },
   {
     "category": "Dark｜Blue",
-    "description": "海蔚蓝（深色主题）",
+    "description": "Blue Palette in Dark Theme",
     "detial": [
       { "name": "B1", "hex": "#001A4D", "hsl": "HSL(220,100%,15%)" },
       { "name": "B2", "hex": "#052F78", "hsl": "HSL(218,93%,24%)" },
@@ -369,7 +369,7 @@
   },
   {
     "category": "Dark｜ArcoBlue",
-    "description": "极致蓝（深色主题）",
+    "description": "ArcoBlue Palette in Dark Theme",
     "detial": [
       { "name": "AB1", "hex": "#000D4D", "hsl": "HSL(230,100%,15%)" },
       { "name": "AB2", "hex": "#041B79", "hsl": "HSL(228,93%,25%)" },
@@ -385,7 +385,7 @@
   },
   {
     "category": "Dark｜Purple",
-    "description": "暗夜紫（深色主题）",
+    "description": "Purple Palette in Dark Theme",
     "detial": [
       { "name": "P1", "hex": "#16004D", "hsl": "HSL(257,100%,15%)" },
       { "name": "P2", "hex": "#27066E", "hsl": "HSL(259,90%,23%)" },
@@ -401,7 +401,7 @@
   },
   {
     "category": "Dark｜PinkPurple",
-    "description": "青春紫（深色主题）",
+    "description": "PinkPurple Palette in Dark Theme",
     "detial": [
       { "name": "PP1", "hex": "#FFE8FB", "hsl": "HSL(291,100%,15%)" },
       { "name": "PP2", "hex": "#F7BAEF", "hsl": "HSL(294,94%,23%)" },
@@ -417,7 +417,7 @@
   },
   {
     "category": "Dark｜Magenta",
-    "description": "品红（深色主题）",
+    "description": "Magenta Palette in Dark Theme",
     "detial": [
       { "name": "M1", "hex": "#4D0034", "hsl": "HSL(319,100%,15%)" },
       { "name": "M2", "hex": "#770850", "hsl": "HSL(321,87%,25%)" },
@@ -433,7 +433,7 @@
   },
   {
     "category": "Dark｜Grey",
-    "description": "中性灰（深色主题）",
+    "description": "Grey Palette in Dark Theme",
     "detial": [
       { "name": "G1", "hex": "#17171A", "hsl": "HSL(240,6%,10%)" },
       { "name": "G2", "hex": "#2E2E30", "hsl": "HSL(240,2%,18%)" },

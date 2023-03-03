@@ -1,7 +1,7 @@
 [
   {
     "category": "Light｜Red",
-    "description": "红色（浅色主题）",
+    "description": "Red Palette in Light Theme",
     "detial": [
       { "name": "Red0", "hex": "#FEF2ED" },
       { "name": "Red1", "hex": "#FEDDD2" },
@@ -17,7 +17,7 @@
   },
   {
     "category": "Light｜Pink",
-    "description": "粉色（浅色主题）",
+    "description": "Pink Palette in Light Theme",
     "detial": [
       { "name": "Pink0", "hex": "#FDECEF" },
       { "name": "Pink1", "hex": "#FBCFD8" },
@@ -33,7 +33,7 @@
   },
   {
     "category": "Light｜Purple",
-    "description": "紫色（浅色主题）",
+    "description": "Purplr Palette in Light Theme",
     "detial": [
       { "name": "Purple0", "hex": "#F7E9F7" },
       { "name": "Purple1", "hex": "#EFCAF0" },
@@ -49,7 +49,7 @@
   },
   {
     "category": "Light｜Violet",
-    "description": "蓝紫（浅色主题）",
+    "description": "Violet Palette in Light Theme",
     "detial": [
       { "name": "Violet0", "hex": "#F3EDF9" },
       { "name": "Violet1", "hex": "#E2D1F4" },
@@ -65,7 +65,7 @@
   },
   {
     "category": "Light｜Indigo",
-    "description": "靛色（浅色主题）",
+    "description": "Indigo Palette in Light Theme",
     "detial": [
       { "name": "Indigo0", "hex": "#ECEFF8" },
       { "name": "Indigo1", "hex": "#D1D8F0" },
@@ -81,7 +81,7 @@
   },
   {
     "category": "Light｜Blue",
-    "description": "蓝色（浅色主题）",
+    "description": "Blue Palette in Light Theme",
     "detial": [
       { "name": "Blue0", "hex": "#EAF5FF" },
       { "name": "Blue1", "hex": "#CBE7FE" },
@@ -97,7 +97,7 @@
   },
   {
     "category": "Light｜LightBlue",
-    "description": "浅蓝（浅色主题）",
+    "description": "LightBlue Palette in Light Theme",
     "detial": [
       { "name": "LB0", "hex": "#E9F7FD" },
       { "name": "LB1", "hex": "#C9ECFC" },
@@ -113,7 +113,7 @@
   },
   {
     "category": "Light｜Cyan",
-    "description": "青色（浅色主题）",
+    "description": "Cyan Palette in Light Theme",
     "detial": [
       { "name": "Cyan0", "hex": "#E5F7F8" },
       { "name": "Cyan1", "hex": "#C2EFF0" },
@@ -129,7 +129,7 @@
   },
   {
     "category": "Light｜Teal",
-    "description": "水鸭绿（浅色主题）",
+    "description": "Teal Palette in Light Theme",
     "detial": [
       { "name": "Teal0", "hex": "#E4F7F4" },
       { "name": "Teal1", "hex": "#C0F0E8" },
@@ -145,7 +145,7 @@
   },
   {
     "category": "Light｜Green",
-    "description": "绿色（浅色主题）",
+    "description": "Green Palette in Light Theme",
     "detial": [
       { "name": "Green0", "hex": "#ECF7EC" },
       { "name": "Green1", "hex": "#D0F0D1" },
@@ -161,7 +161,7 @@
   },
   {
     "category": "Light｜LightGreen",
-    "description": "浅绿（浅色主题）",
+    "description": "LightGreen Palette in Light Theme",
     "detial": [
       { "name": "LB0", "hex": "#F3F8EC" },
       { "name": "LB1", "hex": "#E3F0D0" },
@@ -177,7 +177,7 @@
   },
   {
     "category": "Light｜Lime",
-    "description": "柠檬绿（浅色主题）",
+    "description": "Lime Palette in Light Theme",
     "detial": [
       { "name": "Lime0", "hex": "#F2FAE6" },
       { "name": "Lime1", "hex": "#E3F6C5" },
@@ -193,7 +193,7 @@
   },
   {
     "category": "Light｜Yellow",
-    "description": "黄色（浅色主题）",
+    "description": "Yellow Palette in Light Theme",
     "detial": [
       { "name": "Yellow0", "hex": "#FFFDEA" },
       { "name": "Yellow1", "hex": "#FEFBCB" },
@@ -209,7 +209,7 @@
   },
   {
     "category": "Light｜Amber",
-    "description": "琥珀色（浅色主题）",
+    "description": "Amber Palette in Light Theme",
     "detial": [
       { "name": "Amber0", "hex": "#FEFBEB" },
       { "name": "Amber1", "hex": "#FCF5CE" },
@@ -225,7 +225,7 @@
   },
   {
     "category": "Light｜Orange",
-    "description": "橙色（浅色主题）",
+    "description": "Orange Palette in Light Theme",
     "detial": [
       { "name": "Orange0", "hex": "#FFF8EA" },
       { "name": "Orange1", "hex": "#FEEECC" },
@@ -240,24 +240,24 @@
     ]
   },
   {
-    "category": "Light｜Gery",
-    "description": "灰色（浅色主题）",
+    "category": "Light｜Grey",
+    "description": "Grey Palette in Light Theme",
     "detial": [
-      { "name": "Gray0", "hex": "#F9F9F9" },
-      { "name": "Gray1", "hex": "#E6E8EA" },
-      { "name": "Gray2", "hex": "#C6CACD" },
-      { "name": "Gray3", "hex": "#A7ABB0" },
-      { "name": "Gray4", "hex": "#888D92" },
-      { "name": "Gray5", "hex": "#6B7075" },
-      { "name": "Gray6", "hex": "#555B61" },
-      { "name": "Gray7", "hex": "#41464C" },
-      { "name": "Gray8", "hex": "#2E3238" },
-      { "name": "Gray9", "hex": "#1C1F23" }
+      { "name": "Grey0", "hex": "#F9F9F9" },
+      { "name": "Grey1", "hex": "#E6E8EA" },
+      { "name": "Grey2", "hex": "#C6CACD" },
+      { "name": "Grey3", "hex": "#A7ABB0" },
+      { "name": "Grey4", "hex": "#888D92" },
+      { "name": "Grey5", "hex": "#6B7075" },
+      { "name": "Grey6", "hex": "#555B61" },
+      { "name": "Grey7", "hex": "#41464C" },
+      { "name": "Grey8", "hex": "#2E3238" },
+      { "name": "Grey9", "hex": "#1C1F23" }
     ]
   },
   {
     "category": "Dark｜Red",
-    "description": "红色（深色主题）",
+    "description": "Red Palette in Dark Theme",
     "detial": [
       { "name": "Red0", "hex": "#6C090B" },
       { "name": "Red1", "hex": "#901110" },
@@ -273,7 +273,7 @@
   },
   {
     "category": "Dark｜Pink",
-    "description": "粉色（深色主题）",
+    "description": "Pink Palette in Dark Theme",
     "detial": [
       { "name": "Pink0", "hex": "#5C0730" },
       { "name": "Pink1", "hex": "#800E41" },
@@ -289,7 +289,7 @@
   },
   {
     "category": "Dark｜Purple",
-    "description": "紫色（深色主题）",
+    "description": "Purple Palette in Dark Theme",
     "detial": [
       { "name": "Purple0", "hex": "#4A1061" },
       { "name": "Purple1", "hex": "#5E1776" },
@@ -305,7 +305,7 @@
   },
   {
     "category": "Dark｜Violet",
-    "description": "蓝紫（深色主题）",
+    "description": "Violet Palette in Dark Theme",
     "detial": [
       { "name": "Violet0", "hex": "#401B77" },
       { "name": "Violet1", "hex": "#4C248C" },
@@ -321,7 +321,7 @@
   },
   {
     "category": "Dark｜Indigo",
-    "description": "靛色（深色主题）",
+    "description": "Indigo Palette in Dark Theme",
     "detial": [
       { "name": "Indigo0", "hex": "#171E65" },
       { "name": "Indigo1", "hex": "#20297A" },
@@ -337,7 +337,7 @@
   },
   {
     "category": "Dark｜Blue",
-    "description": "蓝色（深色主题）",
+    "description": "Blue Palette in Dark Theme",
     "detial": [
       { "name": "Blue0", "hex": "#053170" },
       { "name": "Blue1", "hex": "#0A4694" },
@@ -353,7 +353,7 @@
   },
   {
     "category": "Dark｜DarkBlue",
-    "description": "浅蓝（深色主题）",
+    "description": "DarkBlue Palette in Dark Theme",
     "detial": [
       { "name": "LB0", "hex": "#003761" },
       { "name": "LB1", "hex": "#004D85" },
@@ -369,7 +369,7 @@
   },
   {
     "category": "Dark｜Cyan",
-    "description": "青色（深色主题）",
+    "description": "Cyan Palette in Dark Theme",
     "detial": [
       { "name": "Cyan0", "hex": "#04343D" },
       { "name": "Cyan1", "hex": "#074F5C" },
@@ -385,7 +385,7 @@
   },
   {
     "category": "Dark｜Teal",
-    "description": "水鸭绿（深色主题）",
+    "description": "Teal Palette in Dark Theme",
     "detial": [
       { "name": "Teal0", "hex": "#023C39" },
       { "name": "Teal1", "hex": "#045A55" },
@@ -401,7 +401,7 @@
   },
   {
     "category": "Dark｜Green",
-    "description": "绿色（深色主题）",
+    "description": "Green Palette in Dark Theme",
     "detial": [
       { "name": "Green0", "hex": "#123C19" },
       { "name": "Green1", "hex": "#1C5A25" },
@@ -417,7 +417,7 @@
   },
   {
     "category": "Dark｜DarkGreen",
-    "description": "浅绿（深色主题）",
+    "description": "DarkGreen Palette in Dark Theme",
     "detial": [
       { "name": "LB0", "hex": "#263D13" },
       { "name": "LB1", "hex": "#3B5C1D" },
@@ -433,7 +433,7 @@
   },
   {
     "category": "Dark｜Lime",
-    "description": "柠檬绿（深色主题）",
+    "description": "Lime Palette in Dark Theme",
     "detial": [
       { "name": "Lime0", "hex": "#314603" },
       { "name": "Lime1", "hex": "#4B6905" },
@@ -449,7 +449,7 @@
   },
   {
     "category": "Dark｜Yellow",
-    "description": "黄色（深色主题）",
+    "description": "Yellow Palette in Dark Theme",
     "detial": [
       { "name": "Yellow0", "hex": "#544903" },
       { "name": "Yellow1", "hex": "#7E6C06" },
@@ -465,7 +465,7 @@
   },
   {
     "category": "Dark｜Amber",
-    "description": "琥珀色（深色主题）",
+    "description": "Amber Palette in Dark Theme",
     "detial": [
       { "name": "Amber0", "hex": "#512E09" },
       { "name": "Amber1", "hex": "#794B0F" },
@@ -481,7 +481,7 @@
   },
   {
     "category": "Dark｜Orange",
-    "description": "橙色（深色主题）",
+    "description": "Orange Palette in Dark Theme",
     "detial": [
       { "name": "Orange0", "hex": "#551F03" },
       { "name": "Orange1", "hex": "#803506" },
@@ -496,19 +496,19 @@
     ]
   },
   {
-    "category": "Dark｜Gery",
-    "description": "灰色（深色主题）",
+    "category": "Dark｜Grey",
+    "description": "Grey Palette in Dark Theme",
     "detial": [
-      { "name": "Gray0", "hex": "#1C1F23" },
-      { "name": "Gray1", "hex": "#2E3238" },
-      { "name": "Gray2", "hex": "#41464C" },
-      { "name": "Gray3", "hex": "#555B61" },
-      { "name": "Gray4", "hex": "#6B7075" },
-      { "name": "Gray5", "hex": "#888D92" },
-      { "name": "Gray6", "hex": "#A7ABB0" },
-      { "name": "Gray7", "hex": "#C6CACD" },
-      { "name": "Gray8", "hex": "#E6E8EA" },
-      { "name": "Gray9", "hex": "#F9F9F9" }
+      { "name": "Grey0", "hex": "#1C1F23" },
+      { "name": "Grey1", "hex": "#2E3238" },
+      { "name": "Grey2", "hex": "#41464C" },
+      { "name": "Grey3", "hex": "#555B61" },
+      { "name": "Grey4", "hex": "#6B7075" },
+      { "name": "Grey5", "hex": "#888D92" },
+      { "name": "Grey6", "hex": "#A7ABB0" },
+      { "name": "Grey7", "hex": "#C6CACD" },
+      { "name": "Grey8", "hex": "#E6E8EA" },
+      { "name": "Grey9", "hex": "#F9F9F9" }
     ]
   }
 ]

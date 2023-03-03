@@ -1,7 +1,7 @@
 [
   {
     "category": "iOS｜Default｜Light",
-    "description": "iOS 默认浅色主题的系统颜色",
+    "description": "iOS Default Light Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF3B30" },
       { "name": "Orange", "hex": "#FF9500" },
@@ -25,7 +25,7 @@
   },
   {
     "category": "iOS｜Default｜Dark",
-    "description": "iOS 默认深色主题的系统颜色",
+    "description": "iOS Default Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF453A" },
       { "name": "Orange", "hex": "#FF9F0A" },
@@ -49,7 +49,7 @@
   },
   {
     "category": "iOS｜Accessible｜Light",
-    "description": "iOS 无障碍浅色主题的系统颜色",
+    "description": "iOS Accessible Light Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#D70015" },
       { "name": "Orange", "hex": "#C93400" },
@@ -73,7 +73,7 @@
   },
   {
     "category": "iOS｜Accessible｜Dark",
-    "description": "iOS 无障碍深色主题的系统颜色",
+    "description": "iOS Accessible Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF6961" },
       { "name": "Orange", "hex": "#FFB340" },
@@ -97,7 +97,7 @@
   },
   {
     "category": "macOS｜Default｜Aqua",
-    "description": "macOS 默认浅色主题的系统颜色",
+    "description": "macOS Default Aqua Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF3B30" },
       { "name": "Orange", "hex": "#FF9500" },
@@ -116,7 +116,7 @@
   },
   {
     "category": "macOS｜Default｜Dark",
-    "description": "macOS 默认深色主题的系统颜色",
+    "description": "macOS Default Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF453A" },
       { "name": "Orange", "hex": "#FF9F0A" },
@@ -135,7 +135,7 @@
   },
   {
     "category": "macOS｜Vibrant｜Aqua",
-    "description": "macOS 活力浅色主题的系统颜色",
+    "description": "macOS Vibrant Aqua Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF3126" },
       { "name": "Orange", "hex": "#F58B00" },
@@ -154,7 +154,7 @@
   },
   {
     "category": "macOS｜Vibrant｜Dark",
-    "description": "macOS 活力深色主题的系统颜色",
+    "description": "macOS Vibrant Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF4F44" },
       { "name": "Orange", "hex": "#FFA914" },
@@ -173,7 +173,7 @@
   },
   {
     "category": "macOS｜Accessible｜Aqua",
-    "description": "macOS 无障碍浅色主题的系统颜色",
+    "description": "macOS Accessible Aqua Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#D70015" },
       { "name": "Orange", "hex": "#C93400" },
@@ -192,7 +192,7 @@
   },
   {
     "category": "macOS｜Accessible｜Dark",
-    "description": "macOS 无障碍深色主题的系统颜色",
+    "description": "macOS Accessible Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF6961" },
       { "name": "Orange", "hex": "#FFB340" },
@@ -210,8 +210,8 @@
     ]
   },
   {
-    "category": "macOS｜Accessible&Vibrant｜Light",
-    "description": "macOS 活力&无障碍浅色主题的系统颜色",
+    "category": "macOS｜Accessible&Vibrant｜Aqua",
+    "description": "macOS Accessible&Vibrant Aqua Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#C20618" },
       { "name": "Orange", "hex": "#AD3A00" },
@@ -230,7 +230,7 @@
   },
   {
     "category": "macOS｜Accessible&Vibrant｜Dark",
-    "description": "macOS 活力&无障碍深色主题的系统颜色",
+    "description": "macOS Accessible&Vibrant Dark Theme Palette",
     "detial": [
       { "name": "Red", "hex": "#FF4136" },
       { "name": "Orange", "hex": "#FFB340" },
@@ -249,7 +249,7 @@
   },
   {
     "category": "watchOS",
-    "description": "watchOS 的系统颜色",
+    "description": "watchOS Palette",
     "detial": [
       { "name": "Red", "hex": "#FF3B3A" },
       { "name": "Orange", "hex": "#FF9500" },
