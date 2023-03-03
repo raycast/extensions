@@ -17,6 +17,18 @@ export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
             ## ${status.account.displayName} \`${status.account.acct}\`
 
             ${content}
+
+            ${status.mediaAttachments.map((media) => {
+              switch (media.type) {
+                case "image":
+                case "gifv":
+                  return `![${media.description ?? ""}](${media.previewUrl})`;
+                default:
+                  return "";
+              }
+            })}
+
+            ${status.card ? `[${status.card.title}](${status.card.url})` : ""}
           `}
           metadata={
             <List.Item.Detail.Metadata>
@@ -27,13 +39,21 @@ export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
                 icon={Icon.Star}
               />
               <List.Item.Detail.Metadata.Label title="Replies" text={String(status.repliesCount)} icon={Icon.Reply} />
+              {status.application && [
+                <List.Item.Detail.Metadata.Separator />,
+                <List.Item.Detail.Metadata.Label
+                  title="Application"
+                  text={status.application?.name}
+                  icon={Icon.AppWindow}
+                />,
+              ]}
             </List.Item.Detail.Metadata>
           }
         />
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={status.url ?? status.uri} />
+          {status.url && <Action.OpenInBrowser url={status.url} />}
           <Action
             title="Reply"
             icon={Icon.Reply}

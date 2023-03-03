@@ -61,6 +61,7 @@
     "string-strip-html": "^13.2.0"
   },
   "devDependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
