@@ -10,7 +10,7 @@ export default function Command() {
     const zalgodText = zalgo(values.textfield);
 
     Clipboard.copy(zalgodText);
-    await showToast({ title: "Copied", message: zalgodText });
+    await showToast({ title: "Copied to clipboard", message: zalgodText });
   }
 
   return (
