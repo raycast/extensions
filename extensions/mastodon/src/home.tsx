@@ -15,7 +15,7 @@ export default function Home() {
   );
 
   return (
-    <List isLoading={!masto || isLoading}>
+    <List isLoading={!masto || isLoading} isShowingDetail>
       {data?.map((status) => (
         <StatusItem key={status.id} status={status} />
       ))}

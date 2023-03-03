@@ -2,13 +2,35 @@ import { Action, ActionPanel, Icon, LaunchType, List, launchCommand, showToast }
 import { mastodon } from "masto";
 import { stripHtml } from "string-strip-html";
 import { useMasto } from "../hooks/masto";
+import dedent from "dedent";
 
 export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
   const masto = useMasto();
+  const content = status.spoilerText || status.text || stripHtml(status.content).result;
   return (
     <List.Item
-      title={status.spoilerText || status.text || stripHtml(status.content).result}
+      title={content}
       accessories={[{ icon: status.account.avatar, text: status.account.acct }]}
+      detail={
+        <List.Item.Detail
+          markdown={dedent`
+            ## ${status.account.displayName} \`${status.account.acct}\`
+
+            ${content}
+          `}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Reblogs" text={String(status.reblogsCount)} icon={Icon.Repeat} />
+              <List.Item.Detail.Metadata.Label
+                title="Favorites"
+                text={String(status.favouritesCount)}
+                icon={Icon.Star}
+              />
+              <List.Item.Detail.Metadata.Label title="Replies" text={String(status.repliesCount)} icon={Icon.Reply} />
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={status.url ?? status.uri} />

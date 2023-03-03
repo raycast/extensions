@@ -15,7 +15,7 @@ export default function Mentions() {
   );
 
   return (
-    <List isLoading={!masto || isLoading}>
+    <List isLoading={!masto || isLoading} isShowingDetail>
       {data?.map(({ status, id }) => status && <StatusItem key={id} status={status} />)}
     </List>
   );

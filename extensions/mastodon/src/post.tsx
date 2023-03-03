@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Form, LaunchProps, popToRoot, showToast } from "@raycast/api";
-import { useMasto } from "./hooks/masto";
-import { FormValidation, useForm } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast } from "@raycast/api";
+import { useInstance, useMasto } from "./hooks/masto";
+import { useForm } from "@raycast/utils";
 import { mastodon } from "masto";
 
 interface Status {
@@ -19,6 +19,7 @@ export default function Post({
   launchContext,
 }: LaunchProps<{ draftValues: Status; launchContext: LaunchContext }>) {
   const masto = useMasto();
+  const { data: instance, isLoading } = useInstance(masto);
 
   const { handleSubmit, itemProps, values } = useForm<Status>({
     async onSubmit({ message, visibility, cw, date }) {
@@ -36,7 +37,13 @@ export default function Post({
       visibility(value) {
         return ["public", "unlisted", "private", "direct"].includes(value ?? "") ? undefined : "Panic";
       },
-      message: FormValidation.Required,
+      message(value) {
+        if (!value) return "A message is required.";
+
+        // FIXME: Should account for characters_reserved_per_url
+        const maxLen = instance?.configuration.statuses.maxCharacters ?? 500;
+        if (value.length > maxLen) return `A message should be shorter than ${maxLen} characters.`;
+      },
     },
     initialValues: {
       ...draftValues,
@@ -47,11 +54,11 @@ export default function Post({
 
   return (
     <Form
-      isLoading={!masto}
+      isLoading={!masto || isLoading}
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Post" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Post" icon={Icon.Bubble} onSubmit={handleSubmit} />
           <Action.PickDate
             title="Schedule Post"
             onChange={(date) => {

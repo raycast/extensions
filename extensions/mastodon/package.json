@@ -56,6 +56,7 @@
     "@raycast/api": "^1.48.4",
     "@raycast/utils": "^1.4.18",
     "@tanstack/react-query": "^4.24.10",
+    "dedent": "^0.7.0",
     "masto": "^5.10.0",
     "string-strip-html": "^13.2.0"
   },
