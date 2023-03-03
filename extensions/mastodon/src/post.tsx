@@ -71,13 +71,13 @@ export default function Post({
     >
       {!!launchContext?.replyTo && <Form.Description title="Replying to" text={launchContext.replyTo.account.acct} />}
       <Form.TextField title="CW" {...itemProps.cw} />
-      <Form.TextArea title="Message" {...itemProps.message} />
+      <Form.TextArea title="Message" autoFocus {...itemProps.message} />
       {/* @ts-expect-error - The type safety is covered by validator and fixed items. */}
       <Form.Dropdown title="Visibility" {...itemProps.visibility}>
-        <Form.Dropdown.Item key="public" value="public" title="Public" />
-        <Form.Dropdown.Item key="unlisted" value="unlisted" title="Unlisted" />
-        <Form.Dropdown.Item key="private" value="private" title="Private" />
-        <Form.Dropdown.Item key="direct" value="direct" title="Mentioned Only" />
+        <Form.Dropdown.Item key="public" value="public" title="Public" icon={Icon.Globe} />
+        <Form.Dropdown.Item key="unlisted" value="unlisted" title="Unlisted" icon={Icon.LockUnlocked} />
+        <Form.Dropdown.Item key="private" value="private" title="Private" icon={Icon.Lock} />
+        <Form.Dropdown.Item key="direct" value="direct" title="Mentioned Only" icon={Icon.AtSymbol} />
       </Form.Dropdown>
     </Form>
   );

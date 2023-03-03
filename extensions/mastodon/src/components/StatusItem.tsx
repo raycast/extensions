@@ -3,14 +3,24 @@ import { mastodon } from "masto";
 import { stripHtml } from "string-strip-html";
 import { useMasto } from "../hooks/masto";
 import dedent from "dedent";
+import FavoriteAction from "./status/FavoriteAction";
+import ReblogAction from "./status/ReblogAction";
+import { getIconForVisibility, getNameForVisibility, isVisiblityPrivate } from "../utils/visiblity";
+import BookmarkAction from "./status/BookmarkAction";
 
-export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
+export default function StatusItem({ status: originalStatus }: { status: mastodon.v1.Status }) {
   const masto = useMasto();
+  const status = originalStatus.reblog ?? originalStatus;
   const content = status.spoilerText || status.text || stripHtml(status.content).result;
+  const visibilityIcon = getIconForVisibility(status.visibility);
+
   return (
     <List.Item
       title={content}
-      accessories={[{ icon: status.account.avatar, text: status.account.acct }]}
+      accessories={[
+        { icon: status.account.avatar, text: status.account.acct },
+        isVisiblityPrivate(status.visibility) && { icon: visibilityIcon },
+      ].filter(Boolean)}
       detail={
         <List.Item.Detail
           markdown={dedent`
@@ -39,12 +49,26 @@ export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
                 icon={Icon.Star}
               />
               <List.Item.Detail.Metadata.Label title="Replies" text={String(status.repliesCount)} icon={Icon.Reply} />
-              {status.application && [
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Label
+                title="Visibility"
+                text={getNameForVisibility(status.visibility)}
+                icon={visibilityIcon}
+              />
+              {status.application?.website && [
+                <List.Item.Detail.Metadata.Separator />,
+                <List.Item.Detail.Metadata.Link
+                  title="Application"
+                  text={status.application.name}
+                  target={status.application.website}
+                />,
+              ]}
+              {originalStatus.reblog && [
                 <List.Item.Detail.Metadata.Separator />,
                 <List.Item.Detail.Metadata.Label
-                  title="Application"
-                  text={status.application?.name}
-                  icon={Icon.AppWindow}
+                  title="Reblogged by"
+                  text={originalStatus.account.displayName}
+                  icon={originalStatus.account.avatar}
                 />,
               ]}
             </List.Item.Detail.Metadata>
@@ -61,24 +85,9 @@ export default function StatusItem({ status }: { status: mastodon.v1.Status }) {
               launchCommand({ name: "post", type: LaunchType.UserInitiated, context: { replyTo: status } });
             }}
           />
-          <Action
-            title="Reblog"
-            icon={Icon.Repeat}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={async () => {
-              masto?.v1.statuses.reblog(status.id);
-              showToast({ title: "Successfully rebloged!" });
-            }}
-          />
-          <Action
-            title="Favorite"
-            icon={Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={async () => {
-              masto?.v1.statuses.favourite(status.id);
-              showToast({ title: "Successfully added to your favorites!" });
-            }}
-          />
+          <ReblogAction id={status.id} reblogged={status.reblogged ?? false} masto={masto} />
+          <FavoriteAction id={status.id} favorited={status.favourited ?? false} masto={masto} />
+          <BookmarkAction id={status.id} bookmarked={status.bookmarked ?? false} masto={masto} />
         </ActionPanel>
       }
     />
