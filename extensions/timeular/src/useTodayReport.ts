@@ -28,7 +28,8 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
     const markStart = Date.now();
 
     const totalBookedTime = entries.reduce((acc, val) => {
-      if (!val.duration.stoppedAt || !val.duration.startedAt) {
+      console.log(val.duration.startedAt)
+      if (!val.duration.startedAt) {
         // Skip entries that are still running (no stoppedAt)
         return acc;
       }
