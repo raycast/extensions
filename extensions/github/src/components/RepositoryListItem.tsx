@@ -16,7 +16,7 @@ type RepositoryListItemProps = {
 type SearchRepositoriesPrefs = {
   includeForks: boolean;
   includeArchived: boolean;
-  includeOwnerName: boolean;
+  displayOwnerName: boolean;
 };
 
 export default function RepositoryListItem({ repository, mutateList, onVisit }: RepositoryListItemProps) {
@@ -50,7 +50,7 @@ export default function RepositoryListItem({ repository, mutateList, onVisit }: 
   return (
     <List.Item
       icon={owner.icon}
-      title={`${preferences.includeOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
+      title={`${preferences.displayOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
       {...(numberOfStars > 0
         ? {
             subtitle: {
