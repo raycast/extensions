@@ -7,19 +7,19 @@ import { SessionProvider } from "~/context/session";
 import { useVault, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/search";
 
-const SearchCommand = () => (
+const SearchVaultCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider>
       <SessionProvider unlock>
         <VaultProvider>
-          <SearchComponent />
+          <SearchVaultComponent />
         </VaultProvider>
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
 );
 
-function SearchComponent() {
+function SearchVaultComponent() {
   const { items, folders, isLoading, isEmpty } = useVault();
 
   return (
@@ -55,4 +55,4 @@ function getItemFolder(folderList: Folder[], item: Item) {
   return folderList.find((folder) => folder.id === item.folderId);
 }
 
-export default SearchCommand;
+export default SearchVaultCommand;
