@@ -30,10 +30,8 @@ end run
  * @return true If copied securely.
  */
 export async function copyPassword(password: string): Promise<{ copiedSecurely: boolean }> {
-  const result = runAppleScript(APPLESCRIPT_COPY_PASSWORD, [password]);
-
   try {
-    await result;
+    await runAppleScript(APPLESCRIPT_COPY_PASSWORD, [password]);
     return { copiedSecurely: true };
   } catch (ex) {
     await Clipboard.copy(password);

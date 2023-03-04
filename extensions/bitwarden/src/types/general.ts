@@ -10,6 +10,7 @@ export type Preferences = {
   serverUrl: string;
   serverCertsPath: string;
   repromptIgnoreDuration: string;
+  generatePasswordQuickAction: "paste" | "copy" | "copyAndPaste";
 };
 
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
