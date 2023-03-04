@@ -7,14 +7,14 @@ import { View } from "./components/View";
 
 import { useCachedState } from "@raycast/utils";
 import { useData } from "./state/data";
-import { Data, Tag } from "./types/tim";
+import { Data, Tag, Node } from "./types/tim";
 
 const Tasks: React.FC = () => {
   const { data, isLoading } = useData();
   const [tagFilter, setTagFilter] = useCachedState<string | undefined>("tagFilter", "");
 
   const tags = Object.values(data?.tags ?? {});
-  const firstLevel = getFirstLevel(data, tagFilter);
+  const { groups, tasks } = getFirstLevel(data, tagFilter);
 
   return (
     <List
@@ -32,13 +32,20 @@ const Tasks: React.FC = () => {
         }
       />
 
-      {firstLevel?.map((node) =>
-        data?.tasks[node.id] ? (
-          <Task id={node.id} key={node.id} />
+      {groups.map((group) => (
+        <Group id={group.id} tagFilter={tagFilter} key={group.id} />
+      ))}
+
+      {tasks.length > 0 &&
+        (groups.length > 0 ? (
+          <List.Section title="No Group">
+            {tasks.map((task) => (
+              <Task id={task.id} key={task.id} />
+            ))}
+          </List.Section>
         ) : (
-          <Group id={node.id} tagFilter={tagFilter} key={node.id} />
-        )
-      )}
+          tasks.map((task) => <Task id={task.id} key={task.id} />)
+        ))}
     </List>
   );
 };
@@ -69,18 +76,26 @@ function TagDropdown({ onTagChange, tags }: Props) {
 }
 
 function getFirstLevel(data?: Data, tagFilter = "") {
-  if (!data) return [];
+  if (!data) return { groups: [], tasks: [] };
 
-  return data.nodes.filter((node) => {
+  const groups: Node[] = [];
+  const tasks: Node[] = [];
+  for (const node of data.nodes) {
     const isFirstLevel = node.parent === undefined;
-    if (!isFirstLevel) return false;
+    if (!isFirstLevel) continue;
 
     const task = data.tasks[node.id];
     if (task) {
-      return tagFilter ? task.tags.includes(tagFilter) : true;
+      if (tagFilter && !task.tags.includes(tagFilter)) {
+        continue;
+      }
+      tasks.push(node);
     }
 
-    const group = data.groups[node.id];
-    return group !== undefined;
-  });
+    if (data.groups[node.id]) {
+      groups.push(node);
+    }
+  }
+
+  return { groups, tasks };
 }
