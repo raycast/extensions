@@ -12,3 +12,5 @@ Easily access your Lightshot gallery
 - Go in the Application or Storage tab of thre developer tools
 - Click on the cookies and search for a cookie named "__auth"
 #### 🎉 This is your Auth Key! You can enter this in the extension preferences.
+
+Note: logging out of [prnt.sc](https://prnt.sc) in the browser you used to retrieve the auth key will also log you out in this extension

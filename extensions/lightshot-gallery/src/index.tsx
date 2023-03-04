@@ -185,7 +185,7 @@ export default function Command() {
             subtitle={screen.description || "No Title"}
             keywords={screen.description ? [screen.description, screen.id36] : [screen.id36]}
             actions={
-              <ActionPanel title={screen.description ? screen.description : "What to do with it, now?"}>
+              <ActionPanel>
                 <ActionPanel.Section title={"Direct URL"}>
                   <Action.CopyToClipboard content={screen.url} />
                   <Action.Paste
@@ -217,13 +217,15 @@ export default function Command() {
   ) : (
     <Detail
       markdown='## Something went wrong. Your auth key must be the problem. Follow these instructions to get your auth key:
-- Open [prnt.sc]("https://prnt.sc")
+- Open [prnt.sc](https://prnt.sc)
 - Make sure to be logged into your account
-- Open the developer tools of your browser (mostly Cmd + Option/Alt + I)
+- Open the developer tools of your browser (mostly `Cmd + Option + I`)
 - Go in the Application or Storage tab of thre developer tools
-- Click on the cookies and search for a cookie named "__auth"
+- Click on the cookies and search for a cookie named `__auth`
 #### 🎉 This is your Auth Key! You can enter this in the extension preferences.
-📌 Start by pressing `↩︎ Enter` to open the preferences.'
+📌 Start by pressing `↩︎ Enter` to open the preferences.
+
+Note: logging out of [prnt.sc](https://prnt.sc) in the browser you used to retrieve the auth key will also log you out in this extension'
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
