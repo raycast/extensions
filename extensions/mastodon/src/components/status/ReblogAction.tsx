@@ -20,7 +20,7 @@ export default function ReblogAction({ reblogged: providedReblogged, id, masto }
         if (reblogged) await masto?.v1.statuses.unreblog(id);
         else await masto?.v1.statuses.reblog(id);
         showToast({ title: `Successfully ${reblogged ? "reblogged" : "unreblogged"}!` });
-				setReblogged(v => !v)
+        setReblogged((v) => !v);
       }}
     />
   );

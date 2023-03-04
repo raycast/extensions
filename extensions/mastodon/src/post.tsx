@@ -2,34 +2,49 @@ import { Action, ActionPanel, Form, Icon, LaunchProps, popToRoot, showToast } fr
 import { useInstance, useMasto } from "./hooks/masto";
 import { useForm } from "@raycast/utils";
 import { mastodon } from "masto";
+import { stripHtml } from "string-strip-html";
 
-interface Status {
+interface Draft {
   cw?: string;
   message: string;
   visibility: "public" | "unlisted" | "private" | "direct";
   date?: Date;
 }
 
+type Status = mastodon.v1.Status;
+
 interface LaunchContext {
-  replyTo?: mastodon.v1.Status;
+  status?: Status;
+  replyTo?: Status;
+  action?: "post" | "edit";
 }
 
 export default function Post({
   draftValues,
   launchContext,
-}: LaunchProps<{ draftValues: Status; launchContext: LaunchContext }>) {
+}: LaunchProps<{ draftValues: Draft; launchContext: LaunchContext }>) {
   const masto = useMasto();
   const { data: instance, isLoading } = useInstance(masto);
+  const isEdit = launchContext?.action === "edit";
+  const contextStatus = launchContext?.replyTo ?? launchContext?.status;
 
-  const { handleSubmit, itemProps, values } = useForm<Status>({
+  const { handleSubmit, itemProps, values } = useForm<Draft>({
     async onSubmit({ message, visibility, cw, date }) {
-      await masto?.v1.statuses.create({
-        inReplyToId: launchContext?.replyTo?.id,
-        status: message,
-        visibility,
-        spoilerText: cw,
-        scheduledAt: date?.toISOString(),
-      });
+      if (launchContext?.action === "edit" && launchContext.status)
+        await masto?.v1.statuses.update(launchContext.status.id, {
+          inReplyToId: launchContext.status.inReplyToId,
+          status: message,
+          visibility,
+          spoilerText: cw,
+        });
+      else
+        await masto?.v1.statuses.create({
+          inReplyToId: launchContext?.replyTo?.id,
+          status: message,
+          visibility,
+          spoilerText: cw,
+          scheduledAt: date?.toISOString(),
+        });
       showToast({ title: date ? "Successfully scheduled." : "Successfully posted!" });
       popToRoot({ clearSearchBar: true });
     },
@@ -47,18 +62,25 @@ export default function Post({
     },
     initialValues: {
       ...draftValues,
-      message: launchContext?.replyTo && `@${launchContext.replyTo.account.acct}`,
-      visibility: launchContext?.replyTo?.visibility,
+      message: launchContext?.replyTo
+        ? `@${launchContext.replyTo.account.acct}`
+        : launchContext?.status?.text ?? undefined,
+      cw: contextStatus?.spoilerText,
+      visibility: contextStatus?.visibility,
     },
   });
 
   return (
     <Form
       isLoading={!masto || isLoading}
-      enableDrafts
+      enableDrafts={!launchContext?.replyTo || isEdit}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Post" icon={Icon.Bubble} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={isEdit ? "Edit" : "Post"}
+            icon={isEdit ? Icon.Pencil : Icon.Bubble}
+            onSubmit={handleSubmit}
+          />
           <Action.PickDate
             title="Schedule Post"
             onChange={(date) => {

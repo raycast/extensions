@@ -1,25 +1,30 @@
-import { Action, ActionPanel, Icon, LaunchType, List, launchCommand, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, List, confirmAlert, launchCommand, showToast } from "@raycast/api";
 import { mastodon } from "masto";
 import { stripHtml } from "string-strip-html";
-import { useMasto } from "../hooks/masto";
+import { useMasto, useMe } from "../hooks/masto";
 import dedent from "dedent";
 import FavoriteAction from "./status/FavoriteAction";
 import ReblogAction from "./status/ReblogAction";
 import { getIconForVisibility, getNameForVisibility, isVisiblityPrivate } from "../utils/visiblity";
 import BookmarkAction from "./status/BookmarkAction";
 
-export default function StatusItem({ status: originalStatus }: { status: mastodon.v1.Status }) {
+interface Props {
+  status: mastodon.v1.Status;
+  revalidate?: () => Promise<unknown>;
+}
+
+export default function StatusItem({ status: originalStatus, revalidate }: Props) {
   const masto = useMasto();
+  const { data: me, isLoading } = useMe(masto);
   const status = originalStatus.reblog ?? originalStatus;
   const content = status.spoilerText || status.text || stripHtml(status.content).result;
-  const visibilityIcon = getIconForVisibility(status.visibility);
 
   return (
     <List.Item
       title={content}
       accessories={[
         { icon: status.account.avatar, text: status.account.acct },
-        isVisiblityPrivate(status.visibility) && { icon: visibilityIcon },
+        isVisiblityPrivate(status.visibility) && { icon: getIconForVisibility(status.visibility) },
       ].filter(Boolean)}
       detail={
         <List.Item.Detail
@@ -53,7 +58,7 @@ export default function StatusItem({ status: originalStatus }: { status: mastodo
               <List.Item.Detail.Metadata.Label
                 title="Visibility"
                 text={getNameForVisibility(status.visibility)}
-                icon={visibilityIcon}
+                icon={getIconForVisibility(status.visibility)}
               />
               {status.application?.website && [
                 <List.Item.Detail.Metadata.Separator />,
@@ -88,6 +93,42 @@ export default function StatusItem({ status: originalStatus }: { status: mastodo
           <ReblogAction id={status.id} reblogged={status.reblogged ?? false} masto={masto} />
           <FavoriteAction id={status.id} favorited={status.favourited ?? false} masto={masto} />
           <BookmarkAction id={status.id} bookmarked={status.bookmarked ?? false} masto={masto} />
+          {status.account.id === me?.id && (
+            <ActionPanel.Section title="Manage my status">
+              <Action
+                title="Delete"
+                icon={Icon.MinusCircle}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                onAction={async () => {
+                  if (!(await confirmAlert({ title: "Are you sure?" }))) return;
+                  await masto?.v1.statuses.remove(status.id);
+                  await revalidate?.();
+                  showToast({ title: "Successfully deleted!" });
+                }}
+              />
+              <Action
+                title="Edit"
+                icon={Icon.Pencil}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                onAction={async () => {
+                  const source = await masto?.v1.statuses.fetchSource(status.id);
+                  launchCommand({
+                    name: "post",
+                    type: LaunchType.UserInitiated,
+                    context: {
+                      action: "edit",
+                      status: {
+                        ...status,
+                        text: source?.text,
+                        spoilerText: source?.spoilerText,
+                      },
+                    },
+                  });
+                }}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
