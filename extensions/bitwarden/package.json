@@ -23,7 +23,7 @@
   ],
   "commands": [
     {
-      "name": "search",
+      "name": "searchVault",
       "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
@@ -50,7 +50,7 @@
       ]
     },
     {
-      "name": "generate-password",
+      "name": "generatePassword",
       "title": "Generate Password",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
