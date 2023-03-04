@@ -4,6 +4,6 @@
 
 - Optimized the listing / filtering of h-Tags
 - Added tips how to fix the issues using `⌘t`
-- Made an unorded list of the issues
+- Made an unordered list of the issues
 
 ## [Initial Release] - 2023-02-22
