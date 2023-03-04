@@ -216,7 +216,7 @@ export default function Command() {
     </Grid>
   ) : (
     <Detail
-      markdown='## Something went wrong. Your auth key must be the problem. Follow these instructions to get your auth key:
+      markdown="## Something went wrong. Your auth key must be the problem. Follow these instructions to get your auth key:
 - Open [prnt.sc](https://prnt.sc)
 - Make sure to be logged into your account
 - Open the developer tools of your browser (mostly `Cmd + Option + I`)
@@ -225,7 +225,7 @@ export default function Command() {
 #### 🎉 This is your Auth Key! You can enter this in the extension preferences.
 📌 Start by pressing `↩︎ Enter` to open the preferences.
 
-Note: logging out of [prnt.sc](https://prnt.sc) in the browser you used to retrieve the auth key will also log you out in this extension'
+Note: logging out of [prnt.sc](https://prnt.sc) in the browser you used to retrieve the auth key will also log you out in this extension"
       actions={
         <ActionPanel>
           <Action icon={Icon.Gear} title="Open Command Preferences" onAction={openCommandPreferences} />
