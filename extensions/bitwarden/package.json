@@ -55,6 +55,13 @@
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden.",
       "mode": "view"
+    },
+    {
+      "name": "generate-password-and-paste",
+      "title": "Generate Password And Paste",
+      "subtitle": "Bitwarden",
+      "description": "Generate a password using Bitwarden and paste it into the active app.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
