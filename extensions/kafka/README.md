@@ -41,9 +41,6 @@ Following [kafkaJS](https://kafka.js.org/) configuration is used by default :
 const defaultConfiguration = {
   connectionTimeout: 10000,
   requestTimeout: 30000,
-  ssl: {
-    rejectUnauthorized: false
-  },
   logLevel: logLevel.ERROR
 };
 ````

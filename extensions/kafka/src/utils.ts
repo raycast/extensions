@@ -62,11 +62,6 @@ export function getConfig(env: string): KafkaEnv {
   if (!conf.kafkaJs.requestTimeout) {
     conf.kafkaJs.requestTimeout = 30000;
   }
-  if (!conf.kafkaJs.ssl) {
-    conf.kafkaJs.ssl = {
-      rejectUnauthorized: false,
-    };
-  }
   conf.kafkaJs.logLevel = logLevel.ERROR;
   return conf;
 }
