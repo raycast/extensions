@@ -57,7 +57,7 @@
       "mode": "view"
     },
     {
-      "name": "generate-password-quick",
+      "name": "generatePasswordQuick",
       "title": "Generate Password (Quick)",
       "subtitle": "Bitwarden",
       "description": "Generate a password using Bitwarden and copy and/or paste it into the active app right away.",

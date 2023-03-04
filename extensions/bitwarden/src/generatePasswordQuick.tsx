@@ -22,7 +22,7 @@ const actions: Record<Preferences["generatePasswordQuickAction"], (password: str
   },
 };
 
-async function generatePasswordAndPasteCommand() {
+async function generatePasswordQuickCommand() {
   const toast = await showToast(Toast.Style.Animated, "Generating password…");
   try {
     const bitwarden = await new Bitwarden().initialize();
@@ -35,4 +35,4 @@ async function generatePasswordAndPasteCommand() {
   }
 }
 
-export default generatePasswordAndPasteCommand;
+export default generatePasswordQuickCommand;
