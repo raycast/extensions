@@ -189,7 +189,7 @@ export default function Command() {
                 <ActionPanel.Section title={"Direct URL"}>
                   <Action.CopyToClipboard content={screen.url} />
                   <Action.Paste
-                    title={`Paste Direct URL to ${frontmostApp?.name || "Active App"}`}
+                    title={`Paste to ${frontmostApp?.name || "Active App"}`}
                     icon={{ fileIcon: frontmostApp.path }}
                     content={screen.url}
                   />
