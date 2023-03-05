@@ -41,7 +41,6 @@ export class AbletonLiveProjectService {
       // Filter out Ableton Live Templates according to the user preferences
       .filter((filePath) => {
         const pathParts = filePath.split("/");
-        // Filter out backup files
         if (showAbletonLiveTemplates) {
           return true;
         } else {
