@@ -11,7 +11,7 @@ const path = getBrewExecutablePath("kubectx");
 const kubeConfig = getKubeConfig();
 
 if (kubeConfig) {
-  process.env.KUBECONFIG = kubeConfig
+  process.env.KUBECONFIG = kubeConfig;
 }
 
 export const getCurrentContext = async () => {
