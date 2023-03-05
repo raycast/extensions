@@ -8,7 +8,6 @@ export interface Conversation {
 
 export type MessageWithId = ChatCompletionRequestMessage & { id: string };
 
-
 export class Conversation extends EventEmitter {
   private static instance: Conversation;
 
