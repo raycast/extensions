@@ -44,7 +44,7 @@ export default function Command() {
                     markdown={site.notes || "No notes available."}
                     actions={
                       <ActionPanel>
-                        <Action.OpenInBrowser title="Go to site" url={site.url} />
+                        <Action.OpenInBrowser title="Go to Site" url={site.url} />
                       </ActionPanel>
                     }
                   />
