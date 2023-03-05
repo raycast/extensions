@@ -27,7 +27,7 @@ export type SearchItemActionsProps = {
 const SearchItemActions = (props: SearchItemActionsProps) => {
   const { item } = props;
   const { login, notes, card, identity, fields } = item;
-  const { password, totp, username } = login ?? {};
+  const { password, totp, username, uris } = login ?? {};
 
   const session = useSession();
   const bitwarden = useBitwarden();
@@ -50,6 +50,8 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
       showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
   }
+
+  const mainUri = uris?.[0]?.uri;
 
   return (
     <>
@@ -85,6 +87,14 @@ const SearchItemActions = (props: SearchItemActionsProps) => {
               content={username}
               icon={Icon.Person}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
+            />
+          )}
+          {!!mainUri && (
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={mainUri}
+              icon={Icon.Globe}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
           )}
         </ActionPanel.Section>
