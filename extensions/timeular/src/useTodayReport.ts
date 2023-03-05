@@ -19,13 +19,16 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
       .finally(() => setReportIsLoading(false));
   }, [tracking]);
 
-  const buildHeadlineWithTotal = useCallback((totalBookedTime, ms, markdown) => {
-    return setReportMarkdown(
-      `Time entries you have tracked today (including current) sums to ${humanizeDuration(
-        totalBookedTime + (ms || 0)
-      )}:\n` + markdown
-    )
-  },[humanizeDuration])
+  const buildHeadlineWithTotal = useCallback(
+    (totalBookedTime, ms, markdown) => {
+      return setReportMarkdown(
+        `Time entries you have tracked today (including current) sums to ${humanizeDuration(
+          totalBookedTime + (ms || 0)
+        )}:\n` + markdown
+      );
+    },
+    [humanizeDuration]
+  );
 
   useEffect(() => {
     if (reportIsLoading) {
@@ -36,14 +39,14 @@ export const useTodayReport = (tracking: Tracking | null, activity?: Activity) =
     const markStart = Date.now();
 
     const totalBookedTime = entries.reduce((acc, val) => {
-      console.log(val.duration.startedAt)
+      console.log(val.duration.startedAt);
       if (!val.duration.startedAt) {
         // Skip entries that are still running (no stoppedAt)
         return acc;
       }
 
-      const startedAt = new Date(val.duration.startedAt + "Z").getTime()
-      const stoppedAt = new Date(val.duration.stoppedAt + "Z").getTime()
+      const startedAt = new Date(val.duration.startedAt + "Z").getTime();
+      const stoppedAt = new Date(val.duration.stoppedAt + "Z").getTime();
 
       return (acc += stoppedAt - startedAt);
     }, 0);
