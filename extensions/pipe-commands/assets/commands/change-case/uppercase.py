@@ -4,6 +4,7 @@
 # @raycast.title Switch to Uppercase
 # @raycast.packageName Text Actions
 # @raycast.mode pipe
+# @raycast.input { "type": "text" }
 
 import sys
 

@@ -6,7 +6,7 @@ import { Validator } from "jsonschema";
 import { globbySync } from "globby";
 import { environment, getPreferenceValues } from "@raycast/api";
 import untildify from "untildify";
-import { readFileSync } from "fs";
+import { runAppleScript } from "run-applescript";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
 
@@ -15,7 +15,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    metadatas[metadataTitle] = ["argument1", "needsConfirmation", "schemaVersion"].includes(metadataTitle)
+    metadatas[metadataTitle] = ["argument1", "input", "needsConfirmation", "schemaVersion"].includes(metadataTitle)
       ? JSON.parse(match[2])
       : match[2];
   }
@@ -50,7 +50,7 @@ export async function parseScriptCommands(): Promise<{
   );
   commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
 
-  const schema = JSON.parse(readFileSync(resolve(environment.assetsPath, "schema.json"), "utf-8"));
+  const schema = JSON.parse(await readFile(resolve(environment.assetsPath, "schema.json"), "utf-8"));
   const validator = new Validator();
 
   const valids = [] as ScriptCommand[];
@@ -75,4 +75,12 @@ export async function sortByAccessTime(commands: ScriptCommand[]): Promise<Scrip
     })
   );
   return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
+}
+
+export async function getActiveTabUrl(): Promise<string> {
+  const getActiveTabURLScript = await readFile(
+    resolve(environment.assetsPath, "get-active-tab-url.applescript"),
+    "utf8"
+  );
+  return runAppleScript(getActiveTabURLScript, { humanReadableOutput: true });
 }

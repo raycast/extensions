@@ -5,5 +5,6 @@
 # @raycast.packageName Developer Utils
 # @raycast.icon 🛠️
 # @raycast.mode pipe
+# @raycast.input { "type": "text" }
 
 python3 -m json.tool --indent 2
