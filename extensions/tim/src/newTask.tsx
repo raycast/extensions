@@ -31,7 +31,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="Create new task"
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />

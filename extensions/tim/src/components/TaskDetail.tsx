@@ -19,7 +19,7 @@ const TaskDetail: React.FC<{ id: UUID }> = ({ id }) => {
   const currencyFormatter = useCurrencyFormatter();
 
   return (
-    <List isLoading={isLoading} isShowingDetail>
+    <List isLoading={isLoading} isShowingDetail navigationTitle="Records">
       <List.EmptyView
         title="No records"
         description="There are no records created by you."
