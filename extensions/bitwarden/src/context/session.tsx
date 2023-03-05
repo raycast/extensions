@@ -29,6 +29,7 @@ const initialState: SessionState = {
   isAuthenticated: false,
   repromptHash: undefined,
   passwordEnteredDate: undefined,
+  lastActivityTime: undefined,
 };
 
 export type SessionProviderProps = PropsWithChildren<{
@@ -53,6 +54,35 @@ export function SessionProvider(props: SessionProviderProps) {
     // Load the saved session token from LocalStorage.
     loadSavedSession();
   }, [bitwarden]);
+
+  async function loadSavedSession() {
+    const repromptIgnoreDuration = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
+    const [token, lastActivityTimeString] = await Promise.all([
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME),
+    ]);
+
+    let lastActivityTime: Date | undefined;
+    const currentTime = new Date();
+
+    if (lastActivityTimeString) {
+      lastActivityTime = new Date(lastActivityTimeString);
+      const timeElapseSinceLastPasswordEnter = lastActivityTime
+        ? currentTime.getTime() - lastActivityTime.getTime()
+        : 0;
+      const shouldLock = lastActivityTime != null && timeElapseSinceLastPasswordEnter >= repromptIgnoreDuration;
+
+      /* TODO:: We can't use the "reprompt" confirmations without a hash of the master password. 
+      The old session needs to be invalidated so we can get that. */
+      if (token && shouldLock) {
+        await bitwarden.lock();
+        await deleteToken();
+        return;
+      }
+    }
+
+    await update({ token, lastActivityTime });
+  }
 
   /**
    * Determines the current status of the session.
@@ -103,20 +133,17 @@ export function SessionProvider(props: SessionProviderProps) {
    * @param token The new session token.
    * @param passwordHash A hash of the user's master password.
    */
-  async function setToken(token: string, passwordHash: string): Promise<void> {
+  async function setToken(token: string): Promise<void> {
     const now = new Date();
     await Promise.all([
       LocalStorage.setItem(LOCAL_STORAGE_KEY.SESSION_TOKEN, token),
-      LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_HASH, passwordHash),
       LocalStorage.setItem(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED, now.toString()),
     ]);
 
-    await update({ token, repromptHash: passwordHash, passwordEnteredDate: now });
+    await update({ token, passwordEnteredDate: now });
   }
 
-  /**
-   * Delete the saved session token.
-   */
+  /** Delete the saved session token. */
   async function deleteToken(): Promise<void> {
     await Promise.all([
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
@@ -137,28 +164,6 @@ export function SessionProvider(props: SessionProviderProps) {
     await bitwarden.logout();
     await deleteToken();
     await toast.hide();
-  }
-
-  async function loadSavedSession() {
-    const [token, passwordHash, passwordEnteredDate] = await Promise.all([
-      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
-      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_HASH),
-      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_PASSWORD_ENTERED),
-    ]);
-
-    /* TODO:: We can't use the "reprompt" confirmations without a hash of the master password. 
-    The old session needs to be invalidated so we can get that. */
-    if (token != null && passwordHash == null) {
-      await bitwarden.lock();
-      await deleteToken();
-      return;
-    }
-
-    await update({
-      token,
-      repromptHash: passwordHash,
-      passwordEnteredDate: passwordEnteredDate === undefined ? undefined : new Date(passwordEnteredDate),
-    });
   }
 
   async function confirmMasterPassword(password: string): Promise<boolean> {

@@ -2,10 +2,9 @@ import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
-import { hashMasterPasswordForReprompting } from "~/utils/passwords";
 
 export type UnlockFormProps = {
-  onUnlock: (token: string, hash: string) => void;
+  onUnlock: (token: string) => void;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
@@ -37,10 +36,9 @@ const UnlockForm = (props: UnlockFormProps) => {
         }
       }
       const sessionToken = await bitwarden.unlock(values.password);
-      const passwordHash = await hashMasterPasswordForReprompting(values.password);
 
       toast.hide();
-      onUnlock(sessionToken, passwordHash);
+      onUnlock(sessionToken);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to unlock vault", "Check your credentials");
     } finally {

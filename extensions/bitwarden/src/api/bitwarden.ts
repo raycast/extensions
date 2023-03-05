@@ -56,8 +56,8 @@ export class Bitwarden {
     });
     try {
       try {
-        await this.exec(["logout"]);
-      } catch (error) {
+        await this.logout();
+      } catch {
         // It doesn't matter if we weren't logged in.
       }
       // If URL is empty, set it to the default
@@ -78,9 +78,13 @@ export class Bitwarden {
     }
   }
 
-  private async exec(args: string[], options: { abortController?: AbortController } = {}): Promise<ExecaChildProcess> {
-    const { abortController } = options;
-    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
+  private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
+    const { abortController, skipLastActivityUpdate = false } = options ?? {};
+    const result = await execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
+    if (!skipLastActivityUpdate) {
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME, new Date().toISOString());
+    }
+    return result;
   }
 
   async sync(sessionToken: string): Promise<void> {
@@ -134,3 +138,8 @@ export class Bitwarden {
     return stdout;
   }
 }
+
+type ExecProps = {
+  abortController?: AbortController;
+  skipLastActivityUpdate?: boolean;
+};
