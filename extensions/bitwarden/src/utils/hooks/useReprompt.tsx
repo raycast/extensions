@@ -25,21 +25,13 @@ function useReprompt(action: () => void, options: UseRepromptOptions) {
     item == null ? "." : ` for ${item.name}.`
   }`;
 
-  return () => {
-    if (session.canRepromptBeSkipped()) {
-      action();
-      return;
-    }
+  const handleConfirm = () => {
+    pop();
+    action();
+  };
 
-    push(
-      <RepromptForm
-        description={description}
-        onConfirm={() => {
-          pop();
-          action();
-        }}
-      />
-    );
+  return () => {
+    push(<RepromptForm session={session} description={description} onConfirm={handleConfirm} />);
   };
 }
 
