@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 
 import { useData } from "../state/data";
-import { TaskRecord } from "../types/tim";
+import { TaskRecord, UUID } from "../types/tim";
 
 export const MS_PER_HOUR = 1000 * 60 * 60;
 
-export function useTask(id: string) {
+export function useTask(id: UUID) {
   const { data, isLoading, error } = useData();
 
   if (!data) {
@@ -14,6 +14,12 @@ export function useTask(id: string) {
 
   const task = data.tasks[id];
   const tags = task.tags.map((id) => data?.tags[id]);
+
+  const { parent } = data.nodes.find((node) => node.id === id && node.parent) ?? {};
+  if (parent) {
+    const { rate } = data.groups[parent];
+    task.rate ??= rate;
+  }
 
   const recordsPerDay = groupRecordsPerDay(task.records, task.rate);
   const activeDays = recordsPerDay.length;

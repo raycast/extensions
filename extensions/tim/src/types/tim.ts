@@ -24,6 +24,7 @@ export type Group = {
   title: string;
   updatedAt: Timestamp;
   createdAt: Timestamp;
+  rate?: number;
 };
 
 export type Node = {
