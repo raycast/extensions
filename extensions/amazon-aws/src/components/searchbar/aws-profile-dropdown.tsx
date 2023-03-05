@@ -9,14 +9,15 @@ interface Props {
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
-  const { data: configs } = useCachedPromise(loadSharedConfigFiles);
+  const { data: configs = { configFile: {}, credentialsFile: {} } } = useCachedPromise(loadSharedConfigFiles);
+  const { configFile, credentialsFile } = configs;
 
-  const { configFile, credentialsFile } = configs || {};
-
-  const profileOptions = configFile ? Object.keys(configFile) : credentialsFile ? Object.keys(credentialsFile) : [];
+  const profileOptions = Object.keys(configFile).length > 0 ? Object.keys(configFile) : Object.keys(credentialsFile);
 
   useEffect(() => {
-    if (!selectedProfile && profileOptions) {
+    const isSelectedProfileInvalid = selectedProfile && !profileOptions.includes(selectedProfile);
+
+    if (!selectedProfile || isSelectedProfileInvalid) {
       setSelectedProfile(profileOptions[0]);
     }
   }, [profileOptions]);
