@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-chatgpt",
+  "title": "ChatGPT",
+  "description": "Use ChatGPT directly from Raycast.",
+  "icon": "chatgpt-logo.png",
+  "author": "erodactyl",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Fun",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Start ChatGPT Chat Session.",
+      "description": "Start a chat session with ChatGPT.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API Key",
+      "required": true
+    }
+  ]
+}
