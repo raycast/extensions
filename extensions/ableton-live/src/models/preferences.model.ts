@@ -1,5 +1,4 @@
 export interface Preferences {
-    excludedAbletonLiveProjectPaths?: string;
-    showAbletonLiveTemplates?: boolean;
-  }
-  
+  excludedAbletonLiveProjectPaths?: string;
+  showAbletonLiveTemplates?: boolean;
+}
