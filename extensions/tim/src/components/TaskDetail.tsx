@@ -39,19 +39,19 @@ const TaskDetail: React.FC<{ id: UUID }> = ({ id }) => {
                     <StartTaskAction task={task} />
                     <OpenInTimAction id={task.id} />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="Copy">
+                  <ActionPanel.Section>
                     <Action.CopyToClipboard
-                      title="Copy total time"
+                      title="Copy Total Time"
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                       content={durationFormatter.format(totalTime)}
                     />
                     <Action.CopyToClipboard
-                      title="Copy notes"
+                      title="Copy Notes"
                       content={notes}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                     />
                     <Action.CopyToClipboard
-                      title="Copy value"
+                      title="Copy Value"
                       content={currencyFormatter.format(value)}
                       shortcut={{ modifiers: ["cmd"], key: "v" }}
                     />

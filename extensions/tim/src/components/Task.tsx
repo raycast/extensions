@@ -34,7 +34,7 @@ const Task: React.FC<{ id: UUID }> = ({ id }) => {
             <StartTaskAction task={task} />
             <OpenInTimAction id={id} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Copy">
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Name"
               shortcut={{ modifiers: ["cmd"], key: "n" }}
