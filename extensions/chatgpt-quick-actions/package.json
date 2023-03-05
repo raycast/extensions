@@ -1,0 +1,93 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgpt-quick-actions",
+  "title": "ChatGPT Quick Actions",
+  "description": "Performs one-shot actions with ChatGPT",
+  "icon": "openai-logo.png",
+  "author": "alanzchen",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text and copy to pasteboard",
+      "mode": "view"
+    },
+    {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite selected text and copy to pasteboard",
+      "mode": "view"
+    },
+    {
+      "name": "execute",
+      "title": "Execute",
+      "description": "Replace selected text with ChatGPT output",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview",
+      "title": "Preview",
+      "description": "Use selected text as ChatGPT output and preview output",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.5",
+    "openai": "^3.2.1",
+    "run-applescript": "^6.1.0"
+  },
+  "preferences": [
+    {
+      "name": "apikey",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "required": true,
+      "title": "OpenAI API Key"
+    },
+    {
+      "name": "prompt_summarize",
+      "title": "Summarize Prompt",
+      "description": "The prompt for the summarize command",
+      "type": "textfield",
+      "default": "Summarize the following text as concise as possible: \n\n",
+      "required": false
+    },
+    {
+      "name": "prompt_rewrite",
+      "title": "Rewrite Prompt",
+      "description": "The prompt for the rewrite command",
+      "type": "textfield",
+      "default": "Rewrite this using an academic tone: \n\n",
+      "required": false
+    },
+    {
+      "name": "sidenote",
+      "title": "SideNote Integration",
+      "description": "Enable SideNote integration (requires SideNote). Allows you to send the results to SideNote as a new note.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
