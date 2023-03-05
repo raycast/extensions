@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type Site = {
@@ -18,6 +18,12 @@ export default function Command() {
     "https://raw.githubusercontent.com/jdm-contrib/jdm/master/_data/sites.json"
   );
   const sites: Array<Site> = data === undefined ? [] : JSON.parse(data);
+  const difficultyColors = {
+    easy: "#00FF00",
+    medium: "#FFFF00",
+    hard: "#FFA500",
+    impossible: "#FF0000",
+  } as { [key: string]: string };
 
   return (
     <List isLoading={isLoading} throttle>
@@ -26,6 +32,7 @@ export default function Command() {
           key={index}
           title={site.name}
           subtitle={ucfirst(site.difficulty)}
+          icon={{ source: Icon.Info, tintColor: difficultyColors[site.difficulty] }}
           keywords={site.domains}
           accessories={[{ text: site.domains[0] }]}
           actions={
