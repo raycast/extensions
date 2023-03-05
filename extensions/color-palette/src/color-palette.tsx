@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Cache, Icon } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generatePalettes } from "./ColorSchemeVariants";
 import ChineseTraditionalColor from "../assets/Palette_ChineseTraditionalColor.json";
 import OpenColor from "../assets/Plaette_OpenColor.json";
@@ -11,6 +11,7 @@ import Spectrum from "../assets/Palette_AdobeSpectrum.json";
 import AppleDesign from "../assets/Palette_AppleDesign.json";
 import AntV from "../assets/Palette_AntV.json";
 import SpectrumDV from "../assets/Palette_AdobeSpectrumDV.json";
+import { useCachedState } from "@raycast/utils";
 
 // Define Palette Formate
 type Palette = {
@@ -47,7 +48,9 @@ const cp_oc: Palette[] = OpenColor;
 
 // Main Command
 export default function Command() {
-  const [palette, setpalette] = useState<Palette[]>(cp_cc);
+  const [palette, setpalette] = useCachedState<Palette[]>("palette", cp_cc);
+  const [paletteName, setpaletteName] = useCachedState<string>("paletteName", "chinesetraditionalcolor");
+  const paletteRef = useRef(paletteName);
 
   // Load Dynamic Palette(cp_dg) from Cache, or generate a new Palette
   const [cp_dg, setcp_dg] = useState(() => {
@@ -68,6 +71,8 @@ export default function Command() {
     paletteCache.set(paletteKey, JSON.stringify(cp_dg));
   }, [cp_dg]);
 
+  console.log(paletteRef);
+
   return (
     <Grid
       columns={2}
@@ -79,7 +84,7 @@ export default function Command() {
           tooltip="Built-in Palettes"
           placeholder="Choose Palette"
           storeValue={true}
-          onChange={(value) =>
+          onChange={(value) => {
             setpalette(
               value === "chinesetraditionalcolor"
                 ? cp_cc
@@ -104,8 +109,10 @@ export default function Command() {
                 : value === "variants"
                 ? cp_dg
                 : cp_cc
-            )
-          }
+            );
+            paletteRef.current = value;
+            setpaletteName(value);
+          }}
         >
           <Grid.Dropdown.Section title="Design System Palettes">
             <Grid.Dropdown.Item title="AntDesign" value="antdesign" icon="Icon_AntDesign.svg" />
@@ -157,11 +164,11 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "return" }}
                     />
                     <Action.CopyToClipboard
-                      title="Copy HSL Value"
+                      title={"Copy HSL Value"}
                       content={HexToHSL(color.hex)}
                       shortcut={{ modifiers: ["opt"], key: "return" }}
                     />
-                    {palette === cp_dg && (
+                    {paletteRef.current === "variants" && (
                       <Action
                         title="Regenerate Palette"
                         icon={Icon.Repeat}
