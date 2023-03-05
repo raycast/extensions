@@ -1,4 +1,4 @@
-import { Card } from "~/types/search";
+import { Card } from "~/types/vault";
 
 const MONTH_NUMBER_TO_LABEL_MAP = {
   1: "01 - January",
