@@ -54,6 +54,11 @@ export default function Book({ id, template }: BookProps) {
       ...highlight,
       updated: formatDate(highlight.updated),
       highlighted_at: formatDate(highlight.highlighted_at),
+      note: (highlight.note ?? '')
+        .split('\n')
+        .filter((note) => note)
+        .map((note) => `\n      - ${note}`)
+        .join('\n'),
     })),
   })
 
