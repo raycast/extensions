@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chatgpt",
+  "title": "ChatGPT",
+  "description": "Interact with OpenAI's ChatGPT API directly from your command bar",
+  "icon": "icon.png",
+  "author": "abielzulio",
+  "contributors": [
+    "timolins",
+    "shichongrui",
+    "pomdtr"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Fun",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "result",
+      "title": "Ask Question",
+      "subtitle": "Powered by ChatGPT",
+      "description": "Ask ChatGPT via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answer",
+      "subtitle": "Powered by ChatGPT",
+      "description": "Collection of your saved answer",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Powered by ChatGPT",
+      "description": "History generated answer",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api",
+      "description": "Enter your personal Open AI API",
+      "type": "password",
+      "title": "API",
+      "required": true
+    },
+    {
+      "label": "Enable detailed view",
+      "name": "isDetailedView",
+      "description": "See the live response date, ID, and the conversation ID",
+      "type": "checkbox",
+      "title": "Detailed View",
+      "required": false
+    },
+    {
+      "label": "Enable text-to-speech for every response",
+      "name": "isAutoTTS",
+      "description": "Enable auto TTS everytime you get a generated answer",
+      "type": "checkbox",
+      "title": "Text-to-Speech",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.0",
+    "@types/uuid": "^9.0.0",
+    "openai": "^3.2.1",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
