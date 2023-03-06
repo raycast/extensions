@@ -27,7 +27,10 @@ export interface Message {
   content: string;
 }
 
-export async function ask(messages: ChatCompletionRequestMessage[], onNewChunk: (message: Message) => void) {
+export async function ask(
+  messages: ChatCompletionRequestMessage[],
+  onNewChunk: (message: Message) => void
+): Promise<Message> {
   const openai = getOpenAIApi();
 
   const completion = await openai.createChatCompletion(
@@ -41,22 +44,25 @@ export async function ask(messages: ChatCompletionRequestMessage[], onNewChunk: 
 
   const message: Message = { role: "assistant", id: randomUUID(), content: "" };
 
-  (completion.data as unknown as Stream).on("data", (data) => {
-    const lines = data
-      .toString()
-      .split("\n")
-      .filter((line: string) => line.trim() !== "");
-    for (const line of lines) {
-      const _message = line.replace("data: ", "");
-      if (_message === "[DONE]") {
-        return;
+  return new Promise<Message>((res) => {
+    (completion.data as unknown as Stream).on("data", (data) => {
+      const lines = data
+        .toString()
+        .split("\n")
+        .filter((line: string) => line.trim() !== "");
+      for (const line of lines) {
+        const _message = line.replace("data: ", "");
+        if (_message === "[DONE]") {
+          res(message);
+          return;
+        }
+        const parsed = JSON.parse(_message);
+        const delta = parsed.choices[0].delta;
+        if (delta.content) {
+          message.content += delta.content;
+        }
+        onNewChunk(message);
       }
-      const parsed = JSON.parse(_message);
-      const delta = parsed.choices[0].delta;
-      if (delta.content) {
-        message.content += delta.content;
-      }
-      onNewChunk(message);
-    }
+    });
   });
 }
