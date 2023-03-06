@@ -1,3 +1,8 @@
+// @scaleway/sdk extends Request
+// https://github.com/scaleway/scaleway-sdk-js/blob/397fc3edf40583f31a89ecb5db401f36ddd5844b/packages/clients/src/scw/fetch/http-interceptors.ts#L21
+// it's only available on browser or node 18 without remove experimental feature.
+// it's was remove inside raycast https://developers.raycast.com/changelog#1.46.0-2023-01-18
+import 'cross-fetch/polyfill'
 import {
   Account,
   AppleSilicon,
