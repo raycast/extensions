@@ -61,5 +61,5 @@ export const useHighlights = (bookId: string) => {
     getHeaders()
   )
 
-  return { highlights: data?.results ?? [], isLoading }
+  return { highlights: data?.results.slice().reverse() ?? [], isLoading }
 }
